@@ -38,6 +38,10 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   log.info(`Remote initialized: ${caps.get('browserName')} ${browserVersion}`);
 
+  if (browserType === 'chrome') {
+    log.info(`Chromedriver version: ${caps.get('chrome').chromedriverVersion}`);
+  }
+
   lifecycle.on('beforeTests', async () => {
     // hard coded default, can be overridden per suite using `browser.setWindowSize()`
     // and will be automatically reverted after each suite

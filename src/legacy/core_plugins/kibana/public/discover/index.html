@@ -134,7 +134,7 @@
                   <span
                     tooltip="{{::'kbn.discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the clock icon in the navigation bar'} }}"
                   >
-                    {{timeRange.from | moment}} - {{timeRange.to | moment}}
+                    {{toMoment(timeRange.from)}} - {{toMoment(timeRange.to)}}
                   </span>
 
                   &mdash;
