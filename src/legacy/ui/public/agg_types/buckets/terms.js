@@ -30,6 +30,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -47,28 +48,6 @@ const orderAggSchema = (new Schemas([
     aggFilter: aggFilter
   }
 ])).all[0];
-
-function isNotType(type) {
-  return function (agg) {
-    const field = agg.params.field;
-    return !field || field.type !== type;
-  };
-}
-
-const migrateIncludeExcludeFormat = {
-  serialize: function (value) {
-    if (!value || _.isString(value)) return value;
-    else return value.pattern;
-  },
-  write: function (aggConfig, output) {
-    const value = aggConfig.params[this.name];
-    if (_.isObject(value)) {
-      output.params[this.name] = value.pattern;
-    } else if (value) {
-      output.params[this.name] = value;
-    }
-  }
-};
 
 export const termsBucketAgg = new BucketAggType({
   name: 'terms',

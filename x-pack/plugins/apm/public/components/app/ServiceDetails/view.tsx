@@ -7,9 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Location } from 'history';
 import React from 'react';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceDetails } from '../../../services/rest/apm/services';
+import { IUrlParams } from '../../../store/urlParams';
 // @ts-ignore
 import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
@@ -42,7 +42,6 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
         <EuiFlexItem grow={false}>
           <ServiceIntegrations
             transactionTypes={serviceDetailsData.types}
-            location={location}
             urlParams={urlParams}
           />
         </EuiFlexItem>

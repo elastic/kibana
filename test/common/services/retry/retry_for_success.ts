@@ -50,12 +50,13 @@ interface Options<T> {
   timeout: number;
   methodName: string;
   block: () => Promise<T>;
+  onFailureBlock?: () => Promise<T>;
   onFailure?: ReturnType<typeof defaultOnFailure>;
   accept?: (v: T) => boolean;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
-  const { timeout, methodName, block, accept = returnTrue } = options;
+  const { timeout, methodName, block, onFailureBlock, accept = returnTrue } = options;
   const { onFailure = defaultOnFailure(methodName) } = options;
 
   const start = Date.now();
@@ -66,6 +67,11 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     if (lastError && Date.now() - start > timeout) {
       await onFailure(lastError);
       throw new Error('expected onFailure() option to throw an error');
+    } else if (lastError && onFailureBlock) {
+      const before = await runAttempt(onFailureBlock);
+      if ('error' in before) {
+        log.debug(`--- onRetryBlock error: ${before.error.message}`);
+      }
     }
 
     const attempt = await runAttempt(block);

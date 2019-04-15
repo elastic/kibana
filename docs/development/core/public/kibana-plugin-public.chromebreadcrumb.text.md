@@ -1,0 +1,9 @@
+[Home](./index) &gt; [kibana-plugin-public](./kibana-plugin-public.md) &gt; [ChromeBreadcrumb](./kibana-plugin-public.chromebreadcrumb.md) &gt; [text](./kibana-plugin-public.chromebreadcrumb.text.md)
+
+## ChromeBreadcrumb.text property
+
+<b>Signature:</b>
+
+```typescript
+text: string;
+```

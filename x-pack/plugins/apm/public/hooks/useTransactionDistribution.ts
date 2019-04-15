@@ -8,7 +8,12 @@ import { loadTransactionDistribution } from '../services/rest/apm/transaction_gr
 import { IUrlParams } from '../store/urlParams';
 import { useFetcher } from './useFetcher';
 
-const INITIAL_DATA = { buckets: [], totalHits: 0, bucketSize: 0 };
+const INITIAL_DATA = {
+  buckets: [],
+  totalHits: 0,
+  bucketSize: 0,
+  defaultSample: undefined
+};
 
 export function useTransactionDistribution(urlParams: IUrlParams) {
   const {

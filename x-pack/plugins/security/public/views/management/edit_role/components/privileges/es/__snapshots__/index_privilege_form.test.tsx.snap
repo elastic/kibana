@@ -17,7 +17,7 @@ exports[`it renders without crashing 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Indices"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.indicesFormRowLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
                 values={Object {}}
               />
             }
@@ -45,7 +45,7 @@ exports[`it renders without crashing 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Privileges"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.privilegesFormRowLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
                 values={Object {}}
               />
             }
@@ -61,63 +61,48 @@ exports[`it renders without crashing 1`] = `
               options={
                 Array [
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "all",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "monitor",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "read",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "create",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "delete",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "write",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "delete_index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "create_index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "view_index_metadata",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "read_cross_cluster",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage_follow_index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage_ilm",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage_leader_index",
                   },
                 ]
@@ -160,7 +145,7 @@ exports[`it renders without crashing 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Grant read privileges to specific documents"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
                 values={Object {}}
               />
             }
