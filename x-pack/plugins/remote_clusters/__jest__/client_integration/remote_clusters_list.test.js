@@ -12,8 +12,18 @@ import { registerRouter, getRouter } from '../../public/services';
 import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
 
 jest.mock('ui/chrome', () => ({
-  addBasePath: () => 'api/remote_clusters',
+  addBasePath: (path) => path || '/api/remote_clusters',
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
 }));
 
 const testBedOptions = {
@@ -37,6 +47,9 @@ describe('<RemoteClusterList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
+    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
+    // and we can mock them all with a 200 instead of mocking each one individually.
+    server.respondWith([200, {}, '']);
 
     // Register helpers to mock Http Requests
     ({ setLoadRemoteClustersResponse, setDeleteRemoteClusterResponse } = registerHttpRequestMockHelpers(server));

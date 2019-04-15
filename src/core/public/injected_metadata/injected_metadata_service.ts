@@ -20,7 +20,7 @@
 import { get } from 'lodash';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import { UiSettingsState } from '../ui_settings';
-import { deepFreeze } from './deep_freeze';
+import { deepFreeze } from '../utils/deep_freeze';
 
 /** @internal */
 export interface InjectedMetadataParams {
