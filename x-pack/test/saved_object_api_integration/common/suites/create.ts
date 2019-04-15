@@ -67,6 +67,9 @@ export function createTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     expect(resp.body).to.eql({
       id: resp.body.id,
+      migrationVersion: {
+        visualization: '6.7.2',
+      },
       type: spaceAwareType,
       updated_at: resp.body.updated_at,
       version: resp.body.version,
