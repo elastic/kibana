@@ -4,12 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-
-import { initTestBed, registerHttpRequestMockHelpers, nextTick, findTestSubject, getRandomString } from './test_helpers';
-import { AutoFollowPatternAdd } from '../../public/app/sections/auto_follow_pattern_add';
+import { setupEnvironment, pageHelpers, nextTick, findTestSubject, getRandomString } from './helpers';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
-import routing from '../../public/app/services/routing';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path || 'api/cross_cluster_replication',
@@ -33,41 +29,30 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
-const testBedOptions = {
-  memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router
-  }
-};
+const { setup } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Auto-follow pattern', () => {
   let server;
-  let find;
-  let exists;
-  let component;
-  let getUserActions;
-  let form;
-  let clickSaveForm;
-  let setLoadRemoteClustersResponse;
+  let httpRequestsMockHelpers;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-
-    // Register helpers to mock Http Requests
-    ({
-      setLoadRemoteClustersResponse
-    } = registerHttpRequestMockHelpers(server));
-
-    // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClustersResponse();
-
-    // Mock all HTTP Requests that have not been handled previously
-    server.respondWith([200, {}, '']);
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
   });
 
   describe('on component mount', () => {
+    let find;
+    let exists;
+
     beforeEach(() => {
-      ({ find, exists } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+      ({ find, exists } = setup());
     });
 
     test('should display a "loading remote clusters" indicator', () => {
@@ -81,10 +66,14 @@ describe('Create Auto-follow pattern', () => {
   });
 
   describe('when remote clusters are loaded', () => {
-    beforeEach(async () => {
-      ({ find, exists, component, getUserActions, form } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+    let find;
+    let exists;
+    let component;
+    let actions;
+    let form;
 
-      ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
+    beforeEach(async () => {
+      ({ find, exists, component, actions, form } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
@@ -98,7 +87,7 @@ describe('Create Auto-follow pattern', () => {
       expect(exists('autoFollowPatternFormError')).toBe(false);
       expect(find('ccrAutoFollowPatternFormSubmitButton').props().disabled).toBe(false);
 
-      clickSaveForm();
+      actions.clickSaveForm();
 
       expect(exists('autoFollowPatternFormError')).toBe(true);
       expect(form.getErrorsMessages()).toEqual([
@@ -110,10 +99,15 @@ describe('Create Auto-follow pattern', () => {
   });
 
   describe('form validation', () => {
+    let find;
+    let exists;
+    let component;
+    let actions;
+    let form;
+
     describe('auto-follow pattern name', () => {
       beforeEach(async () => {
-        ({ component, form, getUserActions } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
-        ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
+        ({ component, form, actions } = setup());
 
         await nextTick();
         component.update();
@@ -121,19 +115,19 @@ describe('Create Auto-follow pattern', () => {
 
       test('should not allow spaces', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with space');
-        clickSaveForm();
+        actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should not allow a "_" (underscore) as first character', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', '_withUnderscore');
-        clickSaveForm();
+        actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain(`Name can't begin with an underscore.`);
       });
 
       test('should not allow a "," (comma)', () => {
         form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with,coma');
-        clickSaveForm();
+        actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain(`Commas are not allowed in the name.`);
       });
     });
@@ -141,9 +135,8 @@ describe('Create Auto-follow pattern', () => {
     describe('remote clusters', () => {
       describe('when no remote clusters were found', () => {
         test('should indicate it and have a button to add one', async () => {
-          setLoadRemoteClustersResponse([]);
+          ({ find, component } = setup());
 
-          ({ find, component } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
           await nextTick();
           component.update();
           const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
@@ -155,9 +148,9 @@ describe('Create Auto-follow pattern', () => {
 
       describe('when there was an error loading the remote clusters', () => {
         test('should indicate no clusters found and have a button to add one', async () => {
-          setLoadRemoteClustersResponse(undefined, { body: 'Houston we got a problem' });
+          httpRequestsMockHelpers.setLoadRemoteClustersResponse(undefined, { body: 'Houston we got a problem' });
 
-          ({ find, component } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+          ({ find, component } = setup());
           await nextTick();
           component.update();
           const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
@@ -176,9 +169,9 @@ describe('Create Auto-follow pattern', () => {
         }];
 
         beforeEach(async () => {
-          setLoadRemoteClustersResponse(remoteClusters);
+          httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
-          ({ find, exists, component } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
+          ({ find, exists, component } = setup());
           await nextTick();
           component.update();
         });
@@ -204,8 +197,7 @@ describe('Create Auto-follow pattern', () => {
 
     describe('index patterns', () => {
       beforeEach(async () => {
-        ({ component, form, getUserActions } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
-        ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
+        ({ component, form } = setup());
 
         await nextTick();
         component.update();
@@ -233,9 +225,13 @@ describe('Create Auto-follow pattern', () => {
   });
 
   describe('generated indices preview', () => {
+    let find;
+    let exists;
+    let component;
+    let form;
+
     beforeEach(async () => {
-      ({ exists, find, component, form, getUserActions } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions));
-      ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
+      ({ exists, find, component, form } = setup());
 
       await nextTick();
       component.update();

@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { findTestSubject as findTestSubjectHelper } from '../find_test_subject';
+import { findTestSubject } from '../find_test_subject';
 import { mountComponent } from './mount_component';
 import { RegisterTestBed, TestBed } from './types';
 
@@ -37,14 +37,14 @@ export const registerTestBed: RegisterTestBed = (
    * @param count The number of times the subject needs to appear
    */
   const exists: TestBed['exists'] = (testSubject, count = 1) =>
-    findTestSubjectHelper(component, testSubject).length === count;
+    findTestSubject(component, testSubject).length === count;
 
   /**
    * Look for a data test subject in the component and return it
    *
    * @param testSubject The data test subject to look for
    */
-  const find: TestBed['find'] = testSubject => findTestSubjectHelper(component, testSubject);
+  const find: TestBed['find'] = testSubject => findTestSubject(component, testSubject);
 
   /**
    * Update the props of the mounted component
@@ -120,7 +120,7 @@ export const registerTestBed: RegisterTestBed = (
    */
   const setComboBoxValue: TestBed['form']['setComboBoxValue'] = (comboBoxTestSubject, value) => {
     const comboBox = find(comboBoxTestSubject);
-    const formInput = findTestSubjectHelper(comboBox, 'comboBoxSearchInput');
+    const formInput = findTestSubject(comboBox, 'comboBoxSearchInput');
     setInputValue(formInput, value);
 
     // keyCode 13 === ENTER
