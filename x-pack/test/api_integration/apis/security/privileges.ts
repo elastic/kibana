@@ -1337,7 +1337,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
                 logs: ['all', 'read'],
                 uptime: ['all', 'read'],
                 apm: ['all', 'read'],
-                code: ['all', 'read'],
               },
               global: ['all', 'read'],
               space: ['all', 'read'],
