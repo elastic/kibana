@@ -18,7 +18,7 @@ export const DataFrameJobList: SFC = () => {
 
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ItemIdToExpandedRowMap>({});
 
-  // use this pattern so we don't return a promise
+  // use this pattern so we don't return a promise, useEffects doesn't like that
   useEffect(() => {
     getJobs();
   }, []);
@@ -37,6 +37,7 @@ export const DataFrameJobList: SFC = () => {
   };
 
   return (
+    // @ts-ignore
     <EuiInMemoryTable
       columns={columns}
       hasActions={false}

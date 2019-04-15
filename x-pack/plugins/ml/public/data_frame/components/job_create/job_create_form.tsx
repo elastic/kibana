@@ -8,7 +8,16 @@ import React, { Fragment, SFC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import { EuiButton, EuiCard, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  // Module '"@elastic/eui"' has no exported member 'EuiCard'.
+  // @ts-ignore
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
