@@ -13,7 +13,7 @@ const defaultSnapshot = {
   uuid: undefined,
   versionId: undefined,
   version: undefined,
-  indices: undefined,
+  indices: [],
   includeGlobalState: 0,
   state: undefined,
   startTime: undefined,
