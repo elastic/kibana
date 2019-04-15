@@ -17,11 +17,17 @@
  * under the License.
  */
 
+import { SavedObject } from '../service';
+
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
   isImportableAndExportable?: boolean;
   titleSearchField?: string;
+  icon?: string;
+  getTitle?: (savedObject: SavedObject) => string;
+  getEditUrl?: (savedObject: SavedObject) => string;
+  getInAppUrl?: (savedObject: SavedObject) => string;
 }
 
 export interface SavedObjectsSchemaDefinition {
@@ -68,6 +74,42 @@ export class SavedObjectsSchema {
   public getTitleSearchField(type: string) {
     if (this.definition && this.definition.hasOwnProperty(type)) {
       return this.definition[type].titleSearchField;
+    }
+  }
+
+  public getIcon(type: string) {
+    if (this.definition && this.definition.hasOwnProperty(type)) {
+      return this.definition[type].icon;
+    }
+  }
+
+  public getTitle(savedObject: SavedObject) {
+    const { type } = savedObject;
+    if (this.definition && this.definition.hasOwnProperty(type) && this.definition[type].getTitle) {
+      const { getTitle } = this.definition[type];
+      if (getTitle) {
+        return getTitle(savedObject);
+      }
+    }
+  }
+
+  public getEditUrl(savedObject: SavedObject) {
+    const { type } = savedObject;
+    if (this.definition && this.definition.hasOwnProperty(type)) {
+      const { getEditUrl } = this.definition[type];
+      if (getEditUrl) {
+        return getEditUrl(savedObject);
+      }
+    }
+  }
+
+  public getInAppUrl(savedObject: SavedObject) {
+    const { type } = savedObject;
+    if (this.definition && this.definition.hasOwnProperty(type)) {
+      const { getInAppUrl } = this.definition[type];
+      if (getInAppUrl) {
+        return getInAppUrl(savedObject);
+      }
     }
   }
 }

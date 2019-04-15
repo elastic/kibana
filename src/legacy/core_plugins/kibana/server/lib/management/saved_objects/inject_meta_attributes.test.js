@@ -19,10 +19,45 @@
 
 import { injectMetaAttributes } from './inject_meta_attributes';
 
+function getSchemaMock(savedObjectSchemas) {
+  return {
+    isImportAndExportable(type) {
+      return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
+    },
+    getTitleSearchField(type) {
+      return savedObjectSchemas[type] && savedObjectSchemas[type].titleSearchField;
+    },
+    getIcon(type) {
+      return savedObjectSchemas[type] && savedObjectSchemas[type].icon;
+    },
+    getTitle(savedObject) {
+      const { type } = savedObject;
+      const getTitle = savedObjectSchemas[type] && savedObjectSchemas[type].getTitle;
+      if (getTitle) {
+        return getTitle(savedObject);
+      }
+    },
+    getEditUrl(savedObject) {
+      const { type } = savedObject;
+      const getEditUrl = savedObjectSchemas[type] && savedObjectSchemas[type].getEditUrl;
+      if (getEditUrl) {
+        return getEditUrl(savedObject);
+      }
+    },
+    getInAppUrl(savedObject) {
+      const { type } = savedObject;
+      const getInAppUrl = savedObjectSchemas[type] && savedObjectSchemas[type].getInAppUrl;
+      if (getInAppUrl) {
+        return getInAppUrl(savedObject);
+      }
+    },
+  };
+}
+
 test('works when no schema is defined for the type', () => {
   const savedObject = { type: 'a' };
-  const savedObjectSchemas = {};
-  const result = injectMetaAttributes(savedObject, savedObjectSchemas);
+  const savedObjectsSchema = getSchemaMock({});
+  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
   expect(result).toEqual({ type: 'a', meta: {} });
 });
 
@@ -30,12 +65,12 @@ test('inject icon into meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectSchemas = {
+  const savedObjectsSchema = getSchemaMock({
     a: {
       icon: 'my-icon',
     },
-  };
-  const result = injectMetaAttributes(savedObject, savedObjectSchemas);
+  });
+  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
   expect(result).toEqual({
     type: 'a',
     meta: {
@@ -48,14 +83,14 @@ test('injects title into meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectSchemas = {
+  const savedObjectsSchema = getSchemaMock({
     a: {
       getTitle() {
         return 'my-title';
       },
     },
-  };
-  const result = injectMetaAttributes(savedObject, savedObjectSchemas);
+  });
+  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
   expect(result).toEqual({
     type: 'a',
     meta: {
@@ -68,14 +103,14 @@ test('injects editUrl into meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectSchemas = {
+  const savedObjectsSchema = getSchemaMock({
     a: {
       getEditUrl() {
         return 'my-edit-url';
       },
     },
-  };
-  const result = injectMetaAttributes(savedObject, savedObjectSchemas);
+  });
+  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
   expect(result).toEqual({
     type: 'a',
     meta: {
@@ -88,14 +123,14 @@ test('injects inAppUrl meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectSchemas = {
+  const savedObjectsSchema = getSchemaMock({
     a: {
       getInAppUrl() {
         return 'my-in-app-url';
       },
     },
-  };
-  const result = injectMetaAttributes(savedObject, savedObjectSchemas);
+  });
+  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
   expect(result).toEqual({
     type: 'a',
     meta: {

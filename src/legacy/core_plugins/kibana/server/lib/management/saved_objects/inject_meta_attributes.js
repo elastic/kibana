@@ -18,22 +18,16 @@
  */
 
 export function injectMetaAttributes(savedObject, savedObjectsSchema) {
-  const schema = savedObjectsSchema.isImportAndExportable[savedObject.type];
   const result = {
     ...savedObject,
     meta: savedObject.meta || {},
   };
 
-  // If no schema is defined, there's no extra meta attributes we can add
-  if (!schema) {
-    return result;
-  }
-
   // Add extra meta information
-  result.meta.icon = schema.icon;
-  result.meta.title = schema.getTitle ? schema.getTitle(savedObject) : undefined;
-  result.meta.editUrl = schema.getEditUrl ? schema.getEditUrl(savedObject) : undefined;
-  result.meta.inAppUrl = schema.getInAppUrl ? schema.getInAppUrl(savedObject) : undefined;
+  result.meta.icon = savedObjectsSchema.getIcon(savedObject.type);
+  result.meta.title = savedObjectsSchema.getTitle(savedObject);
+  result.meta.editUrl = savedObjectsSchema.getEditUrl(savedObject);
+  result.meta.inAppUrl = savedObjectsSchema.getInAppUrl(savedObject);
 
   return result;
 }

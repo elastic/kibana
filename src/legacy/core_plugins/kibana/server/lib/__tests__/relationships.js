@@ -20,7 +20,42 @@
 import expect from '@kbn/expect';
 import { findRelationships } from '../management/saved_objects/relationships';
 
-const savedObjectSchemas = {
+function getSchemaMock(savedObjectSchemas) {
+  return {
+    isImportAndExportable(type) {
+      return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
+    },
+    getTitleSearchField(type) {
+      return savedObjectSchemas[type] && savedObjectSchemas[type].titleSearchField;
+    },
+    getIcon(type) {
+      return savedObjectSchemas[type] && savedObjectSchemas[type].icon;
+    },
+    getTitle(savedObject) {
+      const { type } = savedObject;
+      const getTitle = savedObjectSchemas[type] && savedObjectSchemas[type].getTitle;
+      if (getTitle) {
+        return getTitle(savedObject);
+      }
+    },
+    getEditUrl(savedObject) {
+      const { type } = savedObject;
+      const getEditUrl = savedObjectSchemas[type] && savedObjectSchemas[type].getEditUrl;
+      if (getEditUrl) {
+        return getEditUrl(savedObject);
+      }
+    },
+    getInAppUrl(savedObject) {
+      const { type } = savedObject;
+      const getInAppUrl = savedObjectSchemas[type] && savedObjectSchemas[type].getInAppUrl;
+      if (getInAppUrl) {
+        return getInAppUrl(savedObject);
+      }
+    },
+  };
+}
+
+const savedObjectsSchema = getSchemaMock({
   'index-pattern': {
     icon: 'indexPatternApp',
     titleSearchField: 'title',
@@ -73,7 +108,7 @@ const savedObjectSchemas = {
       return `/app/kibana#/dashboard/${obj.id}`;
     },
   },
-};
+});
 
 describe('findRelationships', () => {
   it('should find relationships for dashboards', async () => {
@@ -133,7 +168,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectSchemas,
+        savedObjectsSchema,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -251,7 +286,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectSchemas,
+        savedObjectsSchema,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -361,7 +396,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectSchemas,
+        savedObjectsSchema,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -485,7 +520,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectSchemas,
+        savedObjectsSchema,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -564,7 +599,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectSchemas,
+        savedObjectsSchema,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
