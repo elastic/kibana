@@ -40,7 +40,7 @@ module.exports = {
       // strip them off for babel on x-pack infra plugin
       //
       // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
-      test: /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
+      test: /x-pack[\/\\]legacy[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
       plugins: [
         [
           require.resolve('babel-plugin-typescript-strip-namespaces'),
