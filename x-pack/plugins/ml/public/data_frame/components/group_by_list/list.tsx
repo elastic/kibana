@@ -31,9 +31,10 @@ export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
               }) ||
               undefined
             }
+            style={{ padding: 0 }}
           />
         </EuiPanel>
-        <EuiSpacer size="s" />
+        {list.length > 0 && <EuiSpacer size="s" />}
       </Fragment>
     ))}
   </EuiListGroup>
