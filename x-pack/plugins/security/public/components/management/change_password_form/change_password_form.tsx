@@ -173,15 +173,14 @@ export class ChangePasswordForm extends Component<Props, State> {
   };
 
   private onChangePasswordClick = async () => {
-    const { isInvalid } = this.validateForm();
+    this.setState({ shouldValidate: true, currentPasswordError: false }, () => {
+      const { isInvalid } = this.validateForm();
+      if (isInvalid) {
+        return;
+      }
 
-    this.setState({ shouldValidate: true, currentPasswordError: false });
-
-    if (isInvalid) {
-      return;
-    }
-
-    this.setState({ changeInProgress: true }, () => this.performPasswordChange());
+      this.setState({ changeInProgress: true }, () => this.performPasswordChange());
+    });
   };
 
   private validateCurrentPassword = (shouldValidate = this.state.shouldValidate) => {
