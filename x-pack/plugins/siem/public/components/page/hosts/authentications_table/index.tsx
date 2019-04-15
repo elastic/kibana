@@ -227,8 +227,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null | undefined = get('lastFailure.host.name', node);
-      const hostId: string | null | undefined = get('lastFailure.host.id', node);
+      const hostName: string | null | undefined = get('lastFailure.host.name[0]', node);
+      const hostId: string | null | undefined = get('lastFailure.host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostId}`);
         return (
@@ -332,8 +332,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null | undefined = get('lastSuccess.host.name', node);
-      const hostId: string | null | undefined = get('lastSuccess.host.id', node);
+      const hostName: string | null | undefined = get('lastSuccess.host.name[0]', node);
+      const hostId: string | null | undefined = get('lastSuccess.host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostId}`);
         return (

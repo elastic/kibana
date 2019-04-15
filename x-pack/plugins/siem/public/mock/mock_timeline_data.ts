@@ -735,7 +735,7 @@ export const mockTimelineData: TimelineItem[] = [
       network: null,
       http: null,
       url: null,
-      user: { name: ['johnson'] },
+      user: { name: ['alice'] },
       process: {
         pid: ['5402'],
         name: ['gpgconf'],

@@ -129,7 +129,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
   ({ data, contextId, text, fileIcon = 'document' }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
-    const hostName: string | null | undefined = get('host.name[0]', data); // TODO: Array host.name[0]
+    const hostName: string | null | undefined = get('host.name[0]', data);
     const userName: string | null | undefined = get('user.name[0]', data);
     const result: string | null | undefined = get('auditd.result[0]', data);
     const processPid: string | null | undefined = get('process.pid[0]', data);
@@ -137,7 +137,7 @@ export const AuditdGenericFileDetails = pure<GenericDetailsProps>(
     const processExecutable: string | null | undefined = get('process.executable[0]', data);
     const processTitle: string | null | undefined = get('process.title[0]', data);
     const workingDirectory: string | null | undefined = get('process.working_directory[0]', data);
-    const filePath: string | null | undefined = get('file.path', data); // TODO: Array file.path[0]
+    const filePath: string | null | undefined = get('file.path[0]', data);
     const primary: string | null | undefined = get('auditd.summary.actor.primary[0]', data);
     const secondary: string | null | undefined = get('auditd.summary.actor.secondary[0]', data);
     const rawArgs: string[] | null | undefined = get('process.args', data);

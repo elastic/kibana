@@ -174,7 +174,7 @@ export const constructDroppedValue = (dropped: boolean | null | undefined): stri
 export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
   const id = data._id;
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
-  const dataSet: string | null | undefined = get('event.dataset[0]', data); // TODO: Array: event.dataset[0]
+  const dataSet: string | null | undefined = get('event.dataset[0]', data);
   const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);
   const cipher: string | null | undefined = get('zeek.ssl.cipher[0]', data);
   const state: string | null | undefined = get('zeek.connection.state[0]', data);
@@ -186,9 +186,12 @@ export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
   );
   const dnsQuery: string | null | undefined = get('zeek.dns.query[0]', data);
   const qClassName: string | null | undefined = get('zeek.dns.qclass_name[0]', data);
-  const httpMethod: string | null | undefined = get('http.request.method', data); // TODO: Array: http.request.method[0]
-  const httpResponseStatusCode: string | null | undefined = get('http.response.status_code', data); // TODO: Array: http.request.method[0]
-  const urlOriginal: string | null | undefined = get('url.original', data); // TODO: Array: url.original[0]
+  const httpMethod: string | null | undefined = get('http.request.method[0]', data);
+  const httpResponseStatusCode: string | null | undefined = get(
+    'http.response.status_code[0]',
+    data
+  );
+  const urlOriginal: string | null | undefined = get('url.original[0]', data);
   const fileSha1: string | null | undefined = get('zeek.files.sha1[0]', data);
   const filemd5: string | null | undefined = get('zeek.files.md5[0]', data);
   const stateLink: string | null | undefined = extractStateLink(state);

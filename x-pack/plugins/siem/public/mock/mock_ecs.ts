@@ -772,7 +772,7 @@ export const mockEcsData: Ecs[] = [
     http: null,
     url: null,
     user: {
-      name: ['johnson'],
+      name: ['alice'],
     },
     process: {
       pid: ['5402'],

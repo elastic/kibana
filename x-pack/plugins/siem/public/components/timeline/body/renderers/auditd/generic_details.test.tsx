@@ -43,7 +43,7 @@ describe('GenericDetails', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toEqual(
-        'Sessionjohnson@zeek-sanfranin/generic-text-123gpgconf--list-dirs agent-socket'
+        'Sessionalice@zeek-sanfranin/generic-text-123gpgconf--list-dirs agent-socket'
       );
     });
 
