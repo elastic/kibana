@@ -40,7 +40,6 @@ export interface Options {
     string?: string[];
     default?: { [key: string]: any };
   };
-  onExit?: () => void;
 }
 
 export async function run(fn: RunFn, options: Options = {}) {
