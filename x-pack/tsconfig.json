@@ -2,9 +2,9 @@
   "extends": "../tsconfig.json",
   "include": [
     "typings/**/*",
-    "legacy/common/**/*",
-    "legacy/server/**/*",
-    "legacy/plugins/**/*",
+    "common/**/*",
+    "server/**/*",
+    "plugins/**/*",
     "test_utils/**/*"
   ],
   "exclude": [
