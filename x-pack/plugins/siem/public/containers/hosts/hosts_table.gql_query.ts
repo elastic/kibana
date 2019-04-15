@@ -11,15 +11,22 @@ export const HostsTableQuery = gql`
     $sourceId: ID!
     $timerange: TimerangeInput!
     $pagination: PaginationInput!
+    $sort: HostsSortField!
     $filterQuery: String
   ) {
     source(id: $sourceId) {
       id
-      Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      Hosts(
+        timerange: $timerange
+        pagination: $pagination
+        sort: $sort
+        filterQuery: $filterQuery
+      ) {
         totalCount
         edges {
           node {
             _id
+            lastSeen
             host {
               id
               name

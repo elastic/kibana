@@ -824,7 +824,39 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
-  host?: HostEcsFields | null;
+  lastSeen?: Date | null;
+
+  host?: HostFields | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
+}
+
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
 }
 
 export interface FirstLastSeenHost {
@@ -1098,6 +1130,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface HostsSortField {
+  field: HostsFields;
+
+  direction: Direction;
+}
+
 export interface DomainsSortField {
   field: DomainsFields;
 
@@ -1162,6 +1200,8 @@ export interface HostsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
+
+  sort: HostsSortField;
 
   filterQuery?: string | null;
 }
@@ -1285,6 +1325,11 @@ export enum IndexType {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum HostsFields {
+  hostName = 'hostName',
+  lastSeen = 'lastSeen',
 }
 
 export enum DomainsFields {
@@ -1799,7 +1844,7 @@ export namespace GetHostDetailsQuery {
   };
 
   export type Host = {
-    __typename?: 'HostEcsFields';
+    __typename?: 'HostFields';
 
     architecture?: ToStringArray | null;
 
@@ -1817,7 +1862,7 @@ export namespace GetHostDetailsQuery {
   };
 
   export type Os = {
-    __typename?: 'OsEcsFields';
+    __typename?: 'OsFields';
 
     family?: ToStringArray | null;
 
@@ -1863,6 +1908,7 @@ export namespace GetHostsTableQuery {
     sourceId: string;
     timerange: TimerangeInput;
     pagination: PaginationInput;
+    sort: HostsSortField;
     filterQuery?: string | null;
   };
 
@@ -1903,11 +1949,13 @@ export namespace GetHostsTableQuery {
 
     _id?: string | null;
 
+    lastSeen?: Date | null;
+
     host?: Host | null;
   };
 
   export type Host = {
-    __typename?: 'HostEcsFields';
+    __typename?: 'HostFields';
 
     id?: ToStringArray | null;
 
@@ -1917,7 +1965,7 @@ export namespace GetHostsTableQuery {
   };
 
   export type Os = {
-    __typename?: 'OsEcsFields';
+    __typename?: 'OsFields';
 
     name?: ToStringArray | null;
 

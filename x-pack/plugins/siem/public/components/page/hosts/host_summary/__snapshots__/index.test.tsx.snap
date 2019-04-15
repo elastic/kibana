@@ -493,11 +493,15 @@ exports[`Host Summary Component #getEuiDescriptionList if it creates a descripti
       First Seen
     </dt>
     <div>
-      <span
-        class="euiToolTipAnchor"
+      <div
+        class="euiText euiText--small"
       >
-        Apr 8, 2019 @ 16:09:40.692
-      </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          Apr 8, 2019 @ 16:09:40.692
+        </span>
+      </div>
     </div>
     <dt
       class="euiDescriptionList__title"
@@ -505,11 +509,15 @@ exports[`Host Summary Component #getEuiDescriptionList if it creates a descripti
       Last Seen
     </dt>
     <div>
-      <span
-        class="euiToolTipAnchor"
+      <div
+        class="euiText euiText--small"
       >
-        Apr 8, 2019 @ 18:35:45.064
-      </span>
+        <span
+          class="euiToolTipAnchor"
+        >
+          Apr 8, 2019 @ 18:35:45.064
+        </span>
+      </div>
     </div>
     <dt
       class="euiDescriptionList__title"

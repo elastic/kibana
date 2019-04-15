@@ -35,7 +35,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .find('button.euiQuickSelect__applyButton')
           .first()
           .simulate('click');
         wrapper.update();
@@ -45,8 +45,14 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.kind).toBe('relative');
       });
 
-      test('Make Sure it is today date', () => {
-        expect(store.getState().inputs.global.timerange.option).toBe('now/d');
+      test('Make Sure it is last 15 minutes date', () => {
+        expect(store.getState().inputs.global.timerange.option).toBe('now-15m');
+      });
+
+      test('Make Sure to (end date) is superior than from (start date)', () => {
+        expect(store.getState().inputs.global.timerange.to).toBeGreaterThan(
+          store.getState().inputs.global.timerange.from
+        );
       });
     });
 

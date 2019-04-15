@@ -81,7 +81,7 @@ describe('Host Summary Component', () => {
       );
       await wait();
       expect(container.innerHTML).toBe(
-        '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+        '<div class="euiText euiText--small"><span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span></div>'
       );
     });
     test('if it returns an empty value', () => {

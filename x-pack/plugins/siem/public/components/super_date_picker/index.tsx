@@ -101,8 +101,8 @@ export const SuperDatePickerComponent = class extends Component<
 
   public render() {
     const { end, start, kind, option, isLoading } = this.props;
-    const endDate = kind === 'relative' ? option : new Date(end).toISOString();
-    const startDate = kind === 'relative' ? 'now' : new Date(start).toISOString();
+    const endDate = kind === 'relative' ? 'now' : new Date(end).toISOString();
+    const startDate = kind === 'relative' ? option : new Date(start).toISOString();
 
     return (
       <MyEuiSuperDatePicker
