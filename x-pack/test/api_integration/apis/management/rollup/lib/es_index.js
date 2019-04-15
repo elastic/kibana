@@ -15,6 +15,7 @@ export const initElasticsearchIndicesHelpers = (es) => {
 
   const createIndex = (index = getRandomString(), body = {}) => {
     indicesCreated.push(index);
+
     return es.indices.create({
       index,
       body,
@@ -22,18 +23,21 @@ export const initElasticsearchIndicesHelpers = (es) => {
   };
 
   const deleteIndex = (index) => {
-    indicesCreated = indicesCreated.filter(i => i !== index);
-    return es.indices.delete({ index })
+    const indices = Array.isArray(index) ? index : [index];
+    indices.forEach((_index) => {
+      indicesCreated = indicesCreated.filter(i => i !== _index);
+    });
+    return es.indices.delete({ index: indices })
       .catch((err) => {
-        // silently fail if an index could not be deleted
+        // silently fail if an index could not be deleted (unless we got a 404 which means the index has already been deleted)
         if (err && err.statusCode !== 404) {
-          throw new Error(`[WARNING] index "${index}" could not be deleted`);
+          throw err;
         }
       });
   };
 
   const deleteAllIndices = () => (
-    Promise.all(indicesCreated.map(deleteIndex)).then(() => indicesCreated = [])
+    deleteIndex(indicesCreated).then(() => indicesCreated = [])
   );
 
   return ({

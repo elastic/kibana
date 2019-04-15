@@ -11,7 +11,7 @@ const jobsCreated = [];
 const jobsStarted = [];
 
 export const registerHelpers = ({ supertest, es }) => {
-  const { createIndex, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
+  const { createIndex, deleteIndex, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
 
   const createIndexWithMappings = (indexName = undefined, mappings = INDEX_TO_ROLLUP_MAPPINGS) => {
     return createIndex(indexName, { mappings });
@@ -114,21 +114,16 @@ export const registerHelpers = ({ supertest, es }) => {
         if (!index.length) {
           return;
         }
-        return es.indices.delete({ index })
-          .catch((err) => {
-            // silently fail if an index could not be deleted
-            if (err && err.statusCode !== 404) {
-              throw new Error(`[WARNING] index "${index}" could not be deleted`);
-            }
-          });
+
+        return deleteIndex(index);
       })
   );
 
   const cleanUp = () => (
     Promise.all([
-      deleteAllIndices(),
       stopAllJobs().then(deleteJob),
       deleteIndicesGeneratedByJobs(),
+      deleteAllIndices(),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
       throw err;
