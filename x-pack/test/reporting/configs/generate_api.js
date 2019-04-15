@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getApiIntegrationConfig } from '../../api_integration/config';
+import getApiIntegrationConfig from '../../api_integration/config';
 import { getReportingApiConfig } from './api';
 
 export default async function ({ readConfigFile }) {
