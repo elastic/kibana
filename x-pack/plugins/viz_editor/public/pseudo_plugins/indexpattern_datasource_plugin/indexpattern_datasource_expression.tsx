@@ -43,7 +43,7 @@ function columnTypesFunction() {
 
       return {
         ...context,
-        columns: columns.map((column: any, index: number) => ({
+        columns: columns.slice(0, types.length).map((column: any, index: number) => ({
           ...column,
           type: types[index],
         })),

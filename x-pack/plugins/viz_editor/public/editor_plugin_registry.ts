@@ -11,6 +11,7 @@ import { UnknownVisModel, VisModel } from '../public';
 import { config as metricChartConfig } from './pseudo_plugins/metric_chart_plugin';
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
 import { config as scatterChartConfig } from './pseudo_plugins/scatter_chart_plugin';
+import { config as tableChartConfig } from './pseudo_plugins/table_chart_plugin';
 import { config as vegaChartConfig } from './pseudo_plugins/vega_chart_plugin';
 import { config as xyChartConfig } from './pseudo_plugins/xy_chart_plugin';
 
@@ -64,6 +65,7 @@ const pluginMap: { [key: string]: EditorPlugin<any> } = {
   pie_chart: pieChartConfig,
   vega_chart: vegaChartConfig,
   scatter_chart: scatterChartConfig,
+  table_chart: tableChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected

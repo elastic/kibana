@@ -20,6 +20,7 @@ import {
 import {
   EditorPlugin,
   getOperatorsForField,
+  isApplicableForCardinality,
   operationToName,
   Suggestion,
   UnknownVisModel,
@@ -171,7 +172,13 @@ function getSuggestion(
 ): Suggestion[] {
   const firstQuery = Object.values(visModel.queries)[0];
 
-  if (firstQuery && firstQuery.select.length < 2) {
+  if (!firstQuery || (firstQuery && firstQuery.select.length < 2)) {
+    return [];
+  }
+  const containsSingleValueMetric = firstQuery.select.some(({ operator }) =>
+    isApplicableForCardinality(operator, 'single')
+  );
+  if (!containsSingleValueMetric) {
     return [];
   }
   const prefilledVisModel = prefillPrivateState(

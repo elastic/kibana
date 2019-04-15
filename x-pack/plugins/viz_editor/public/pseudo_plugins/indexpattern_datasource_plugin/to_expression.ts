@@ -79,14 +79,14 @@ function queryToEsAggsConfigs(query: Query): any {
 }
 
 function fixBucketAggsWithoutMetricColumn(aggs: any[]) {
-  if (aggs.length !== 1) {
-    return aggs;
+  const onlySegments = aggs.every(agg => agg.schema === 'segment');
+  if (onlySegments) {
+    return [
+      ...aggs,
+      { enabled: true, id: String(aggs.length), params: {}, schema: 'metric', type: 'count' },
+    ];
   }
-  const agg = aggs[0];
-  if (agg.schema !== 'segment') {
-    return aggs;
-  }
-  return [...aggs, { enabled: true, id: '1', params: {}, schema: 'metric', type: 'count' }];
+  return aggs;
 }
 
 function whereClauseToFilter(where?: WhereOperation) {
