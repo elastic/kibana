@@ -6,9 +6,10 @@
 
 import chrome from 'ui/chrome';
 
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../pages/hosts/host_details';
-import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../pages/network/ip_details';
-import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../../link_to';
+import { APP_NAME } from '../../../..';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
+import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
+import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
 import * as i18n from '../translations';
 
 export const setBreadcrumbs = (pathname: string) => {
@@ -25,7 +26,7 @@ export interface BreadcrumbItem {
 
 export const siemRootBreadcrumb: BreadcrumbItem[] = [
   {
-    text: 'SIEM',
+    text: APP_NAME,
     href: getOverviewUrl(),
   },
 ];

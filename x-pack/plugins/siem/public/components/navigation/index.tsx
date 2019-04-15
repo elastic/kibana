@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  // @ts-ignore: EuiBreadcrumbs has no exported member
-  EuiBreadcrumbs,
-  EuiFlexItem,
-} from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 
-export class HeaderBreadcrumbsComponent extends React.Component<RouteComponentProps> {
-  public shouldComponentUpdate(
-    nextProps: Readonly<RouteComponentProps>,
-    nextState: Readonly<{}>
-  ): boolean {
+export class SiemNavigationComponent extends React.Component<RouteComponentProps> {
+  public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
     if (this.props.location.pathname === nextProps.location.pathname) {
       return false;
     }
     return true;
   }
+  public componentWillMount(): void {
+    const { location } = this.props;
+    if (location.pathname) {
+      setBreadcrumbs(location.pathname);
+    }
+  }
+
   public componentWillReceiveProps(nextProps: Readonly<RouteComponentProps>): void {
     if (this.props.location.pathname !== nextProps.location.pathname) {
       setBreadcrumbs(nextProps.location.pathname);
@@ -33,12 +32,8 @@ export class HeaderBreadcrumbsComponent extends React.Component<RouteComponentPr
 
   public render() {
     const { location } = this.props;
-    return (
-      <EuiFlexItem grow={false} data-test-subj="datePickerContainer">
-        <TabNavigation location={location.pathname} />
-      </EuiFlexItem>
-    );
+    return <TabNavigation location={location.pathname} />;
   }
 }
 
-export const HeaderBreadcrumbs = withRouter(HeaderBreadcrumbsComponent);
+export const SiemNavigation = withRouter(SiemNavigationComponent);

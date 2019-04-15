@@ -14,8 +14,8 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { manageQuery } from '../../components/page/manage_query';
-import { BreadcrumbItem } from '../../components/page/navigation/breadcrumbs';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { DomainsQuery } from '../../containers/domains';

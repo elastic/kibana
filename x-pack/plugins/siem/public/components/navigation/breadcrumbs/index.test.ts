@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { encodeIpv6 } from '../../../../lib/helpers';
-import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../../pages/hosts/host_details';
-import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../../pages/network/ip_details';
+import { encodeIpv6 } from '../../../lib/helpers';
+import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
+import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
 
 import { getBreadcrumbsForRoute, siemRootBreadcrumb } from '.';
 
