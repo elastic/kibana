@@ -18,7 +18,8 @@
   },
   "kibana": {
     "build": {
-      "intermediateBuildDirectory": "build/plugin/kibana/x-pack"
+      "intermediateBuildDirectory": "build/plugin/kibana/x-pack",
+      "oss": false
     }
   },
   "resolutions": {
@@ -29,6 +30,7 @@
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
     "@kbn/plugin-helpers": "9.0.2",
+    "@kbn/pm": "1.0.0",
     "@kbn/test": "1.0.0",
     "@storybook/addon-actions": "^5.0.5",
     "@storybook/addon-console": "^1.1.0",
@@ -88,6 +90,7 @@
     "chalk": "^2.4.1",
     "chance": "1.0.10",
     "checksum": "0.1.1",
+    "cheerio": "0.22.0",
     "commander": "2.12.2",
     "copy-webpack-plugin": "^4.5.2",
     "del": "^3.0.0",
@@ -147,7 +150,7 @@
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.3.4",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.8.0",
+    "@elastic/eui": "9.9.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",

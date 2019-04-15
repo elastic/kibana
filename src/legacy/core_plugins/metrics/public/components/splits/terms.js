@@ -20,18 +20,26 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { get, find } from 'lodash';
-import GroupBySelect from './group_by_select';
+import { GroupBySelect } from './group_by_select';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import FieldSelect from '../aggs/field_select';
 import MetricSelect from '../aggs/metric_select';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldNumber, EuiComboBox, EuiFieldText } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiFieldNumber,
+  EuiComboBox,
+  EuiFieldText
+} from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { FIELD_TYPES } from '../../../common/field_types';
 
 const DEFAULTS = { terms_direction: 'desc', terms_size: 10, terms_order_by: '_count' };
 
-export const SplitByTermsUI = ({ onChange, indexPattern, intl, model: seriesModel, fields }) => {
+export const SplitByTermsUI = ({ onChange, indexPattern, intl, model: seriesModel, fields, uiRestrictions }) => {
   const htmlId = htmlIdGenerator();
   const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
@@ -76,6 +84,7 @@ export const SplitByTermsUI = ({ onChange, indexPattern, intl, model: seriesMode
             <GroupBySelect
               value={model.split_mode}
               onChange={handleSelectChange('split_mode')}
+              uiRestrictions={uiRestrictions}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -93,6 +102,8 @@ export const SplitByTermsUI = ({ onChange, indexPattern, intl, model: seriesMode
               onChange={handleSelectChange('terms_field')}
               value={model.terms_field}
               fields={fields}
+              uiRestrictions={uiRestrictions}
+              type={'terms'}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -186,7 +197,8 @@ SplitByTermsUI.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   indexPattern: PropTypes.string,
-  fields: PropTypes.object
+  fields: PropTypes.object,
+  uiRestrictions: PropTypes.object,
 };
 
 export const SplitByTerms = injectI18n(SplitByTermsUI);

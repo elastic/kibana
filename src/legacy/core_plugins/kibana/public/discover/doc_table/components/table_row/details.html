@@ -30,7 +30,7 @@
           <a
             class="euiLink"
             data-test-subj="docTableRowAction"
-            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{row._id | uriescape}}"
+            ng-href="#/doc/{{indexPattern.id}}/{{row._index}}/{{row._type}}/?id={{uriEncodedId}}"
             i18n-id="kbn.docTable.tableRow.viewSingleDocumentLinkText"
             i18n-default-message="View single document"
           ></a>

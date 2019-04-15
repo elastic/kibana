@@ -18,7 +18,7 @@
  */
 import { uniq } from 'lodash';
 
-export function extractIndexPatterns(params, fetchedFields) {
+export function extractIndexPatterns(params, fetchedFields = {}) {
   const patternsToFetch = [];
 
   if (!fetchedFields[params.index_pattern]) {
