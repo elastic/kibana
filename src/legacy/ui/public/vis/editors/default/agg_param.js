@@ -82,7 +82,10 @@ uiModules
           $scope.$bind('editorComponent', attr.editorComponent);
           $scope.$bind('editorConfig', attr.editorConfig);
           $scope.$bind('indexedFields', attr.indexedFields);
-          $scope.$bind('vis', attr.vis);
+
+          if (attr.editorComponent) {
+            $scope.$bind('vis', attr.vis);
+          }
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           let _isInvalid = false;
