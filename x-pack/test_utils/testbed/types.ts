@@ -4,19 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ComponentType } from 'react';
-import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 
-export type RegisterTestBed = (
-  component: ComponentType,
-  defaultProps?: any,
-  options?: TestBedOptions,
-  store?: Store | null
-) => SetupFunc;
-
-export type SetupFunc = (props?: any) => TestBed;
+export type SetupFunc<T> = (props?: any) => TestBed<T>;
 
 export interface EuiTableMetaData {
   /** Array of rows of the table. Each row exposes its reactWrapper and its columns */
@@ -32,25 +23,25 @@ export interface EuiTableMetaData {
   tableCellsValues: string[][];
 }
 
-export interface TestBed {
+export interface TestBed<T> {
   /** The comonent under test */
   component: ReactWrapper;
-  exists: (testSubject: string, count: number) => boolean;
-  find: (testSubject: string) => ReactWrapper;
+  exists: (testSubject: T, count?: number) => boolean;
+  find: (testSubject: T) => ReactWrapper;
   setProps: (updatedProps: any) => void;
   form: {
     setInputValue: (
-      input: string | ReactWrapper,
+      input: T | ReactWrapper,
       value: string,
       isAsync?: boolean
     ) => Promise<{}> | undefined;
-    selectCheckBox: (checkboxTestSubject: string, isChecked?: boolean) => void;
-    toggleEuiSwitch: (switchTestSubject: string) => void;
-    setComboBoxValue: (comboBoxTestSubject: string, value: string) => void;
+    selectCheckBox: (checkboxTestSubject: T, isChecked?: boolean) => void;
+    toggleEuiSwitch: (switchTestSubject: T) => void;
+    setComboBoxValue: (comboBoxTestSubject: T, value: string) => void;
     getErrorsMessages: () => string[];
   };
   table: {
-    getMetaData: (tableTestSubject: string) => EuiTableMetaData;
+    getMetaData: (tableTestSubject: T) => EuiTableMetaData;
   };
 }
 

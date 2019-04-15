@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { Store } from 'redux';
 
+import { ComponentType, ReactWrapper } from 'enzyme';
 import { findTestSubject } from '../find_test_subject';
-import { mountComponent } from './mount_component';
-import { RegisterTestBed, TestBed } from './types';
+import { mountComponent, getJSXComponentWithProps } from './mount_component';
+import { TestBedOptions, TestBed, SetupFunc } from './types';
 
 const defaultOptions = {
   memoryRouter: {
@@ -16,12 +17,12 @@ const defaultOptions = {
   },
 };
 
-export const registerTestBed: RegisterTestBed = (
-  Component,
-  defaultProps = {},
-  options = defaultOptions,
-  store = null
-) => props => {
+export const registerTestBed = <T = string>(
+  Component: ComponentType<any>,
+  defaultProps: any = {},
+  options: TestBedOptions = defaultOptions,
+  store: Store | null = null
+): SetupFunc<T> => props => {
   const component = mountComponent(Component, options, store, { ...defaultProps, ...props });
 
   /**
@@ -36,7 +37,7 @@ export const registerTestBed: RegisterTestBed = (
    * @param testSubject The data test subject to look for
    * @param count The number of times the subject needs to appear
    */
-  const exists: TestBed['exists'] = (testSubject, count = 1) =>
+  const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
     findTestSubject(component, testSubject).length === count;
 
   /**
@@ -44,14 +45,14 @@ export const registerTestBed: RegisterTestBed = (
    *
    * @param testSubject The data test subject to look for
    */
-  const find: TestBed['find'] = testSubject => findTestSubject(component, testSubject);
+  const find: TestBed<T>['find'] = (testSubject: T) => findTestSubject<T>(component, testSubject);
 
   /**
    * Update the props of the mounted component
    *
    * @param updatedProps The updated prop object
    */
-  const setProps: TestBed['setProps'] = updatedProps => {
+  const setProps: TestBed<T>['setProps'] = updatedProps => {
     if (options.memoryRouter.wrapComponent !== false) {
       throw new Error(
         'setProps() can only be called on a component **not** wrapped by a router route.'
@@ -62,7 +63,7 @@ export const registerTestBed: RegisterTestBed = (
     }
     // Update the props on the Redux Provider children
     return component.setProps({
-      children: <Component {...defaultProps} {...updatedProps} />,
+      children: getJSXComponentWithProps(Component, { ...defaultProps, ...updatedProps }),
     });
   };
 
@@ -84,8 +85,8 @@ export const registerTestBed: RegisterTestBed = (
    * @param value The value to set
    * @param isAsync If set to true will return a Promise that resolves on the next "tick"
    */
-  const setInputValue: TestBed['form']['setInputValue'] = (input, value, isAsync = false) => {
-    const formInput = typeof input === 'string' ? find(input) : input;
+  const setInputValue: TestBed<T>['form']['setInputValue'] = (input, value, isAsync = false) => {
+    const formInput = typeof input === 'string' ? find(input) : (input as ReactWrapper);
 
     formInput.simulate('change', { target: { value } });
     component.update();
@@ -102,14 +103,17 @@ export const registerTestBed: RegisterTestBed = (
    * @param dataTestSubject The test subject of the checkbox
    * @param isChecked Defines if the checkobx is active or not
    */
-  const selectCheckBox: TestBed['form']['selectCheckBox'] = (dataTestSubject, isChecked = true) => {
+  const selectCheckBox: TestBed<T>['form']['selectCheckBox'] = (
+    dataTestSubject,
+    isChecked = true
+  ) => {
     find(dataTestSubject).simulate('change', { target: { checked: isChecked } });
   };
 
   /**
    * Toggle the EuiSwitch
    */
-  const toggleEuiSwitch: TestBed['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
+  const toggleEuiSwitch: TestBed<T>['form']['toggleEuiSwitch'] = selectCheckBox; // Same API as "selectCheckBox"
 
   /**
    * The EUI ComboBox is a special input as it needs the ENTER key to be pressed
@@ -118,7 +122,7 @@ export const registerTestBed: RegisterTestBed = (
    * @param comboBoxTestSubject The data test subject of the EuiComboBox
    * @param value The value to set
    */
-  const setComboBoxValue: TestBed['form']['setComboBoxValue'] = (comboBoxTestSubject, value) => {
+  const setComboBoxValue: TestBed<T>['form']['setComboBoxValue'] = (comboBoxTestSubject, value) => {
     const comboBox = find(comboBoxTestSubject);
     const formInput = findTestSubject(comboBox, 'comboBoxSearchInput');
     setInputValue(formInput, value);
@@ -131,7 +135,7 @@ export const registerTestBed: RegisterTestBed = (
   /**
    * Get a list of the form error messages that are visible in the DOM of the component
    */
-  const getErrorsMessages: TestBed['form']['getErrorsMessages'] = () => {
+  const getErrorsMessages: TestBed<T>['form']['getErrorsMessages'] = () => {
     const errorMessagesWrappers = component.find('.euiFormErrorText');
     return errorMessagesWrappers.map(err => err.text());
   };
@@ -147,7 +151,7 @@ export const registerTestBed: RegisterTestBed = (
    *
    * @param tableTestSubject The data test subject of the EUI table
    */
-  const getMetaData: TestBed['table']['getMetaData'] = (tableTestSubject: string) => {
+  const getMetaData: TestBed<T>['table']['getMetaData'] = tableTestSubject => {
     const table = find(tableTestSubject);
 
     if (!table.length) {

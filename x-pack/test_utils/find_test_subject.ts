@@ -30,9 +30,9 @@ const MATCHERS: Matcher[] = [
  * @param testSubjectSelector The data test subject selector
  * @param matcher optional matcher
  */
-export const findTestSubject = (
+export const findTestSubject = <T = string>(
   reactWrapper: ReactWrapper,
-  testSubjectSelector: string,
+  testSubjectSelector: T,
   matcher: Matcher = '~='
 ) => {
   if (!MATCHERS.includes(matcher)) {

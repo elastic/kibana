@@ -41,3 +41,7 @@ export const mountComponent = (
 
   return mountWithIntl(<Comp {...props} />);
 };
+
+export const getJSXComponentWithProps = (Component: ComponentType, props: any) => (
+  <Component {...props} />
+);
