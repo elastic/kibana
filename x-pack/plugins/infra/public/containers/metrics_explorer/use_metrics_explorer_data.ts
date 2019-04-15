@@ -49,7 +49,7 @@ export function useMetricsExplorerData(
             throw new Error('Unalble to parse timerange');
           }
           const response = await fetch.post<MetricsExplorerResponse>(
-            '/api/infra/metrics_explorer',
+            '../api/infra/metrics_explorer',
             {
               metrics:
                 options.aggregation === MetricsExplorerAggregation.count
