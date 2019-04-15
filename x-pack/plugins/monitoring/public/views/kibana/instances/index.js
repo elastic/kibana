@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import uiRoutes from'ui/routes';
 import { routeInitProvider } from 'plugins/monitoring/lib/route_init';
 import { MonitoringViewBaseEuiTableController } from '../../';
@@ -42,16 +42,21 @@ uiRoutes.when('/kibana/instances', {
           <SetupModeRenderer
             scope={$scope}
             injector={$injector}
-            render={({ setupMode }) => (
-              <KibanaInstances
-                instances={this.data.kibanas}
-                setupMode={setupMode}
-                clusterStatus={this.data.clusterStatus}
-                angular={{
-                  $scope,
-                  kbnUrl,
-                }}
-              />
+            productName="kibana"
+            render={({ setupMode, flyoutComponent }) => (
+              <Fragment>
+                {flyoutComponent}
+                <KibanaInstances
+                  instances={this.data.kibanas}
+                  setupMode={setupMode}
+                  productUuidField="kibana.uuid"
+                  clusterStatus={this.data.clusterStatus}
+                  angular={{
+                    $scope,
+                    kbnUrl,
+                  }}
+                />
+              </Fragment>
             )}
           />
         );

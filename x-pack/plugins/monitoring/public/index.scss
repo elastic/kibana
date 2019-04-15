@@ -21,3 +21,7 @@
 @import 'components/logstash/pipeline_viewer/views/index';
 @import 'directives/chart/index';
 @import 'components/elasticsearch/shard_allocation/index';
+
+.monSetupModeActive {
+  border: dotted 2px #000;
+}

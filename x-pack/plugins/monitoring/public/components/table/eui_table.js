@@ -5,8 +5,11 @@
  */
 
 import React from 'react';
+import { get } from 'lodash';
 import {
-  EuiInMemoryTable
+  EuiInMemoryTable,
+  EuiButton,
+  EuiBadge
 } from '@elastic/eui';
 
 export class EuiMonitoringTable extends React.PureComponent {
@@ -15,6 +18,8 @@ export class EuiMonitoringTable extends React.PureComponent {
       rows: items,
       search = {},
       columns: _columns,
+      setupMode,
+      productUuidField,
       ...props
     } = this.props;
 
@@ -32,6 +37,35 @@ export class EuiMonitoringTable extends React.PureComponent {
       }
       return column;
     });
+
+    if (setupMode && setupMode.enabled) {
+      columns.push({
+        name: 'Migration Status',
+        field: productUuidField,
+        render: (uuid) => {
+          const list = get(setupMode, 'data.byUuid', {});
+          const status = list[uuid] || {};
+
+          if (status.isInternalCollector || status.isPartiallyMigrated) {
+            return (
+              <EuiButton color="danger" onClick={() => setupMode.openFlyout(uuid)}>
+                Migrate
+              </EuiButton>
+            );
+          }
+
+          if (status.isFullyMigrated) {
+            return (
+              <EuiBadge color="secondary" iconType="check">
+                Migrated
+              </EuiBadge>
+            );
+          }
+
+          return null;
+        }
+      });
+    }
 
     return (
       <div data-test-subj={`${this.props.className}Container`}>

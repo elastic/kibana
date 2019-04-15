@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink, EuiButton, EuiBadge } from '@elastic/eui';
-import { get, capitalize } from 'lodash';
+import React, { PureComponent } from 'react';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiPanel, EuiSpacer, EuiLink } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { KibanaStatusIcon } from '../status_icon';
@@ -14,10 +14,8 @@ import { formatMetric, formatNumber } from '../../../lib/format_number';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { I18nContext } from 'ui/i18n';
-// import { Flyout } from '../../metricbeat_migration/flyout';
 
-const Flyout = () => '';
-const getColumns = (kbnUrl, scope, setupMode, openFlyout) => {
+const getColumns = (kbnUrl, scope) => {
   const columns = [
     {
       name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
@@ -115,55 +113,17 @@ const getColumns = (kbnUrl, scope, setupMode, openFlyout) => {
     }
   ];
 
-  if (setupMode.enabled) {
-    columns.push({
-      name: 'Migration Status',
-      field: 'kibana.uuid',
-      render: (uuid) => {
-        const list = get(setupMode, 'data.kibana.byUuid', {});
-        const status = list[uuid] || {};
-
-        if (status.isInternalCollector || status.isPartiallyMigrated) {
-          return (
-            <EuiButton color="danger" onClick={() => openFlyout(uuid)}>
-              Migrate
-            </EuiButton>
-          );
-        }
-
-        if (status.isFullyMigrated) {
-          return (
-            <EuiBadge color="secondary" iconType="check">
-              Migrated
-            </EuiBadge>
-          );
-        }
-
-        return null;
-      }
-    });
-  }
-
   return columns;
 };
 
-export class KibanaInstances extends Component {
-  state = { isFlyoutOpen: false, activeInstanceUuid: null }
-
-  openFlyout = (activeInstanceUuid) => {
-    this.setState({ isFlyoutOpen: true, activeInstanceUuid });
-  }
-
-  closeFlyout = () => {
-    this.setState({ isFlyoutOpen: false, activeInstanceUuid: null });
-  }
-
+export class KibanaInstances extends PureComponent {
   render() {
     const {
       instances,
       clusterStatus,
       angular,
-      setupMode
+      setupMode,
+      productUuidField,
     } = this.props;
 
     const dataFlattened = instances.map(item => ({
@@ -171,9 +131,6 @@ export class KibanaInstances extends Component {
       name: item.kibana.name,
       status: item.kibana.status,
     }));
-
-    const productListByUuid = get(setupMode, 'data.kibana.byUuid', {});
-    const product = productListByUuid[this.state.activeInstanceUuid];
 
     return (
       <I18nContext>
@@ -187,9 +144,11 @@ export class KibanaInstances extends Component {
               <EuiMonitoringTable
                 className="kibanaInstancesTable"
                 rows={dataFlattened}
-                columns={getColumns(angular.kbnUrl, angular.$scope, setupMode, this.openFlyout)}
+                columns={getColumns(angular.kbnUrl, angular.$scope)}
                 sorting={this.sorting}
                 pagination={this.pagination}
+                setupMode={setupMode}
+                productUuidField={productUuidField}
                 search={{
                   box: {
                     incremental: true,
@@ -203,17 +162,6 @@ export class KibanaInstances extends Component {
                   defaultFields: ['name']
                 }}
               />
-              { this.state.isFlyoutOpen ?
-                <Flyout
-                  onClose={() => this.closeFlyout()}
-                  productName="kibana"
-                  product={product}
-                  updateProduct={setupMode.updateSetupModeData}
-                // products={capabilities}
-                // updateCapabilities={() => this.updateCapabilities()}
-                />
-                : null
-              }
             </EuiPageContent>
           </EuiPageBody>
         </EuiPage>

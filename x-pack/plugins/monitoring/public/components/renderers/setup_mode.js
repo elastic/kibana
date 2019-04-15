@@ -3,29 +3,50 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { useEffect, useState } from 'react';
+import React from 'react';
 import { setAngularState, getSetupModeState, initSetupModeState, updateSetupModeData } from '../../lib/setup_mode';
+import { Flyout } from '../metricbeat_migration/flyout';
 
-export const SetupModeRenderer = ({ render, scope, injector }) => {
-  const [renderState, forceRender] = useState(false);
+export class SetupModeRenderer extends React.Component {
+  state = { renderState: false, isFlyoutOpen: false, instanceUuid: null }
 
-  let count = 0;
-  useEffect(() => {
-    console.log('useEffect', { count });
-    if (++count >= 10) {
-      return;
-    }
+  componentWillMount() {
+    const { scope, injector } = this.props;
     setAngularState(scope, injector);
-    initSetupModeState(() => forceRender(!renderState));
-  }, [null]); // eslint-disable-line
+    initSetupModeState(() => this.setState({ renderState: false }));
+  }
 
-  const setupModeState = getSetupModeState();
-  return render({
-    setupMode: {
-      data: setupModeState.data,
-      enabled: setupModeState.enabled,
-      updateSetupModeData,
+  getFlyout(data) {
+    const { productName } = this.props;
+    const { isFlyoutOpen, instanceUuid } = this.state;
+    if (!data || !isFlyoutOpen) {
+      return null;
     }
-  });
-};
+
+    const product = data.byUuid[instanceUuid];
+    return (
+      <Flyout
+        onClose={() => this.setState({ isFlyoutOpen: false })}
+        productName={productName}
+        product={product}
+      />
+    );
+  }
+
+  render() {
+    const { render, productName } = this.props;
+    const setupModeState = getSetupModeState();
+    const data = setupModeState.data ? setupModeState.data[productName] : null;
+
+    return render({
+      setupMode: {
+        data,
+        enabled: setupModeState.enabled,
+        updateSetupModeData,
+        openFlyout: (instanceUuid) => this.setState({ isFlyoutOpen: true, instanceUuid }),
+        closeFlyout: () => this.setState({ isFlyoutOpen: false }),
+      },
+      flyoutComponent: this.getFlyout(data),
+    });
+  }
+}

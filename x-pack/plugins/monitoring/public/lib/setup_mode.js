@@ -45,7 +45,7 @@ export const fetchCollectionData = async () => {
 
   try {
     const response = await http.post(url, { ccs });
-    setupModeState.data = response.data;
+    return response.data;
   }
   catch (err) {
     const Private = angularState.injector.get('Private');
@@ -69,9 +69,10 @@ export const toggleSetupMode = inSetupMode => {
   const globalState = angularState.injector.get('globalState');
   angularState.scope.$evalAsync(async () => {
     setupModeState.enabled = inSetupMode;
+    angularState.scope.setupModeEnabled = inSetupMode;
     globalState.inSetupMode = inSetupMode;
     globalState.save();
-    setSetupModeMenuItem(); // eslint-disable-line no-use-before-define
+    setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
     notifySetupModeDataChange();
 
     if (inSetupMode) {
