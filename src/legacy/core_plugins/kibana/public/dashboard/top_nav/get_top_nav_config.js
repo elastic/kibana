@@ -35,7 +35,8 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
       return (
         hideWriteControls ?
           [
-            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN])
+            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            getShareConfig(actions[TopNavIds.SHARE]),
           ]
           : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
