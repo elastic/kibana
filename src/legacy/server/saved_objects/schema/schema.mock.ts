@@ -24,6 +24,12 @@ const createSchemaMock = () => {
   const mocked: jest.Mocked<Schema> = {
     isHiddenType: jest.fn().mockReturnValue(false),
     isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
+    isImportAndExportable: jest.fn().mockReturnValue(true),
+    getTitleSearchField: jest.fn(),
+    getIcon: jest.fn(),
+    getTitle: jest.fn(),
+    getEditUrl: jest.fn(),
+    getInAppUrl: jest.fn(),
   };
   return mocked;
 };

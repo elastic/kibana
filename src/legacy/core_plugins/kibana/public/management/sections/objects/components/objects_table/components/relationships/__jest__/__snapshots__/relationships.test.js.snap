@@ -33,18 +33,15 @@ exports[`Relationships should render dashboards normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiTitle
-        size="s"
-        textTransform="none"
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <h3>
-          <FormattedMessage
-            defaultMessage="Related objects"
-            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
+        <p>
+          Here are the saved objects related to MyDashboard. Deleting this dashboard affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
@@ -243,18 +240,15 @@ exports[`Relationships should render index patterns normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiTitle
-        size="s"
-        textTransform="none"
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <h3>
-          <FormattedMessage
-            defaultMessage="Related objects"
-            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
+        <p>
+          Here are the saved objects related to MyIndexPattern*. Deleting this index-pattern affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
@@ -409,18 +403,15 @@ exports[`Relationships should render searches normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiTitle
-        size="s"
-        textTransform="none"
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <h3>
-          <FormattedMessage
-            defaultMessage="Related objects"
-            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
+        <p>
+          Here are the saved objects related to MySearch. Deleting this search affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [
@@ -575,18 +566,15 @@ exports[`Relationships should render visualizations normally 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <div>
-      <EuiTitle
-        size="s"
-        textTransform="none"
+      <EuiCallOut
+        color="primary"
+        size="m"
       >
-        <h3>
-          <FormattedMessage
-            defaultMessage="Related objects"
-            id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
-            values={Object {}}
-          />
-        </h3>
-      </EuiTitle>
+        <p>
+          Here are the saved objects related to MyViz. Deleting this visualization affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
       <EuiInMemoryTable
         columns={
           Array [

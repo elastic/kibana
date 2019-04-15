@@ -32,6 +32,7 @@ import {
   EuiInMemoryTable,
   EuiToolTip,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import chrome from 'ui/chrome';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -98,7 +99,7 @@ class RelationshipsUI extends Component {
   }
 
   renderRelationships() {
-    const { intl, goEditObject } = this.props;
+    const { intl, goEditObject, savedObject } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -274,14 +275,19 @@ class RelationshipsUI extends Component {
 
     return (
       <div>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              id="kbn.management.objects.objectsTable.relationships.relationshipsTitle"
-              defaultMessage="Related objects"
-            />
-          </h3>
-        </EuiTitle>
+        <EuiCallOut>
+          <p>
+            {intl.formatMessage({
+              id: 'kbn.management.objects.objectsTable.relationships.relationshipsTitle',
+              defaultMessage: 'Here are the saved objects related to {title}. ' +
+                'Deleting this {type} affects its parent objects, but not its children.',
+            }, {
+              type: savedObject.type,
+              title: savedObject.meta.title || getDefaultTitle(savedObject)
+            })}
+          </p>
+        </EuiCallOut>
+        <EuiSpacer />
         <EuiInMemoryTable
           items={relationships}
           columns={columns}
