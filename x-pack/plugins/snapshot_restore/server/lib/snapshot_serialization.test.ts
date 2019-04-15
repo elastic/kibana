@@ -7,14 +7,14 @@
 import { deserializeSnapshotDetails } from './snapshot_serialization';
 
 describe('deserializeSnapshotDetails', () => {
-  test('groups multiple failures by their index and sorts them by their shard', () => {
+  test('deserializes a snapshot', () => {
     expect(
       deserializeSnapshotDetails('repositoryName', {
         snapshot: 'snapshot name',
         uuid: 'UUID',
         version_id: 5,
         version: 'version',
-        indices: ['index1'],
+        indices: ['index2', 'index3', 'index1'],
         include_global_state: false,
         state: 'SUCCESS',
         start_time: '0',
@@ -28,6 +28,10 @@ describe('deserializeSnapshotDetails', () => {
           successful: 2,
         },
         failures: [
+          {
+            index: 'z',
+            shard: 1,
+          },
           {
             index: 'a',
             shard: 3,
@@ -48,8 +52,11 @@ describe('deserializeSnapshotDetails', () => {
       uuid: 'UUID',
       versionId: 5,
       version: 'version',
-      indices: ['index1'],
+      // Indices are sorted.
+      indices: ['index1', 'index2', 'index3'],
+      // Converted from a boolean into 0 or 1.
       includeGlobalState: 0,
+      // Failures are grouped and sorted by index, and the failures themselves are sorted by shard.
       indexFailures: [
         {
           index: 'a',
@@ -62,6 +69,14 @@ describe('deserializeSnapshotDetails', () => {
             },
             {
               shard: 3,
+            },
+          ],
+        },
+        {
+          index: 'z',
+          failures: [
+            {
+              shard: 1,
             },
           ],
         },

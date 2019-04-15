@@ -56,13 +56,16 @@ export function deserializeSnapshotDetails(
     );
   });
 
+  // Sort by index name.
+  const indexFailures = sortBy(Object.values(indexToFailuresMap), ({ index }) => index);
+
   return {
     repository,
     snapshot,
     uuid,
     versionId,
     version,
-    indices,
+    indices: [...indices].sort(),
     includeGlobalState: Boolean(includeGlobalState) ? 1 : 0,
     state,
     startTime,
@@ -70,7 +73,7 @@ export function deserializeSnapshotDetails(
     endTime,
     endTimeInMillis,
     durationInMillis,
-    indexFailures: Object.values(indexToFailuresMap),
+    indexFailures,
     shards,
   };
 }
