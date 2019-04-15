@@ -85,3 +85,7 @@ export const currentTreeSelector = (state: RootState) => {
   const path = state.file.currentPath;
   return find(tree, path.split('/'));
 };
+
+export const currentRepoSelector = (state: RootState) => state.repository.currentRepository;
+
+export const repoScopeSelector = (state: RootState) => state.search.searchOptions.repoScope;

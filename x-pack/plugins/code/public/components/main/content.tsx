@@ -17,9 +17,20 @@ import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
-import { FileTree, FileTreeItemType, SearchScope, WorkerReservedProgress } from '../../../model';
+import {
+  FileTree,
+  FileTreeItemType,
+  SearchScope,
+  WorkerReservedProgress,
+  Repository,
+} from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import { changeSearchScope, FetchFileResponse, fetchMoreCommits } from '../../actions';
+import {
+  changeSearchScope,
+  FetchFileResponse,
+  fetchMoreCommits,
+  SearchOptions,
+} from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
@@ -85,8 +96,9 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
-  repoScope: string[];
+  searchOptions: SearchOptions;
   fetchMoreCommits(repoUri: string): void;
+  currentRepository?: Repository;
 }
 const LANG_MD = 'markdown';
 
@@ -258,10 +270,11 @@ class CodeContent extends React.PureComponent<Props> {
     return (
       <Root>
         <TopBar
+          defaultSearchScope={this.props.currentRepository}
           routeParams={this.props.match.params}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
           buttons={this.renderButtons()}
-          repoScope={this.props.repoScope}
+          searchOptions={this.props.searchOptions}
           branches={this.props.branches}
         />
         {this.renderContent()}
@@ -423,7 +436,8 @@ const mapStateToProps = (state: RootState) => ({
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
   repoStatus: statusSelector(state, repoUriSelector(state)),
-  repoScope: state.search.searchOptions.repoScope.map(r => r.uri),
+  searchOptions: state.search.searchOptions,
+  currentRepository: state.repository.currentRepository,
 });
 
 const mapDispatchToProps = {

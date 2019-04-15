@@ -16,6 +16,7 @@ exports[`render correctly with empty query string 1`] = `
   searchLoading={false}
   searchOptions={
     Object {
+      "defaultRepoScopeOn": false,
       "repoScope": Array [],
     }
   }
@@ -630,6 +631,7 @@ exports[`render correctly with empty query string 1`] = `
                       searchLoading={false}
                       searchOptions={
                         Object {
+                          "defaultRepoScopeOn": false,
                           "repoScope": Array [],
                         }
                       }
@@ -656,7 +658,26 @@ exports[`render correctly with empty query string 1`] = `
                                 <span
                                   className="euiButtonEmpty__text"
                                 >
-                                  Options
+                                  <EuiNotificationBadge
+                                    className="code-notification-badge"
+                                    size="m"
+                                  >
+                                    <span
+                                      className="euiNotificationBadge euiNotificationBadge--medium code-notification-badge"
+                                    >
+                                      0
+                                    </span>
+                                  </EuiNotificationBadge>
+                                  <EuiTextColor
+                                    color="secondary"
+                                    component="span"
+                                  >
+                                    <span
+                                      className="euiTextColor euiTextColor--secondary"
+                                    >
+                                       Search Filters 
+                                    </span>
+                                  </EuiTextColor>
                                 </span>
                               </span>
                             </button>
@@ -744,6 +765,7 @@ exports[`render correctly with input query string changed 1`] = `
       searchLoading={false}
       searchOptions={
         Object {
+          "defaultRepoScopeOn": false,
           "repoScope": Array [],
         }
       }
@@ -1370,6 +1392,7 @@ exports[`render correctly with input query string changed 1`] = `
                           searchLoading={false}
                           searchOptions={
                             Object {
+                              "defaultRepoScopeOn": false,
                               "repoScope": Array [],
                             }
                           }
@@ -1396,7 +1419,26 @@ exports[`render correctly with input query string changed 1`] = `
                                     <span
                                       className="euiButtonEmpty__text"
                                     >
-                                      Options
+                                      <EuiNotificationBadge
+                                        className="code-notification-badge"
+                                        size="m"
+                                      >
+                                        <span
+                                          className="euiNotificationBadge euiNotificationBadge--medium code-notification-badge"
+                                        >
+                                          0
+                                        </span>
+                                      </EuiNotificationBadge>
+                                      <EuiTextColor
+                                        color="secondary"
+                                        component="span"
+                                      >
+                                        <span
+                                          className="euiTextColor euiTextColor--secondary"
+                                        >
+                                           Search Filters 
+                                        </span>
+                                      </EuiTextColor>
                                     </span>
                                   </span>
                                 </button>
