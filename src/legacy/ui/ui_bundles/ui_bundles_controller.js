@@ -26,6 +26,8 @@ import del from 'del';
 import { makeRe } from 'minimatch';
 import mkdirp from 'mkdirp';
 
+import { IS_KIBANA_DISTRIBUTABLE } from '../../utils';
+
 import { UiBundle } from './ui_bundle';
 import { appEntryTemplate } from './app_entry_template';
 
@@ -168,7 +170,8 @@ export class UiBundlesController {
   }
 
   getCacheDirectory(...subPath) {
-    return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
+    const hashBundleEntries = IS_KIBANA_DISTRIBUTABLE ? this.hashBundleEntries() : '';
+    return this.resolvePath('../.cache', hashBundleEntries, ...subPath);
   }
 
   getDescription() {

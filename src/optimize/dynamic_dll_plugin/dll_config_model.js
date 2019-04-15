@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { fromRoot, /*IS_KIBANA_DISTRIBUTABLE*/ } from '../../legacy/utils';
+import { fromRoot } from '../../legacy/utils';
 import webpack from 'webpack';
 import webpackMerge from 'webpack-merge';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
@@ -35,7 +35,7 @@ function generateDLL(config) {
     dllBundleFilename,
     dllStyleFilename,
     dllManifestPath,
-    babelLoaderCacheDir,
+    babelCacheLoaderConfig,
     threadLoaderPoolConfig
   } = config;
 
@@ -85,26 +85,15 @@ function generateDLL(config) {
           ],
           // Self calling function with the equivalent logic
           // from maybeAddCacheLoader one from base optimizer
-          use: ((babelLoaderCacheDirPath, loaders) => {
-            // Only deactivate cache-loader and thread-loader on
-            // distributable. It is valid when running from source
-            // both with dev or prod bundles or even when running
-            // kibana for dev only.
-            // if (IS_KIBANA_DISTRIBUTABLE) {
-            //   return loaders;
-            // }
-
+          use: ((cacheLoaderConfig, loaders) => {
             return [
               {
                 loader: 'cache-loader',
-                options: {
-                  cacheContext: fromRoot('.'),
-                  cacheDirectory: babelLoaderCacheDirPath
-                }
+                options: cacheLoaderConfig
               },
               ...loaders
             ];
-          })(babelLoaderCacheDir, [
+          })(babelCacheLoaderConfig, [
             {
               loader: 'thread-loader',
               options: threadLoaderPoolConfig

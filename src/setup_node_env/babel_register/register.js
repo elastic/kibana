@@ -19,16 +19,6 @@
 
 var resolve = require('path').resolve;
 
-// this must happen before `require('@babel/register')` and can't be changed
-// once the module has been loaded
-if (!process.env.BABEL_CACHE_PATH) {
-  // process.env.BABEL_CACHE_PATH = resolve(__dirname, '../../../optimize/.babelcache.json');
-}
-
-if (!process.env.BABEL_DISABLE_CACHE) {
-  // process.env.BABEL_DISABLE_CACHE = 1;
-}
-
 // paths that @babel/register should ignore
 var ignore = [
   /[\/\\]bower_components[\/\\]/,
