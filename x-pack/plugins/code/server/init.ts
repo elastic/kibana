@@ -77,6 +77,28 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 export function init(server: Server, options: any) {
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
+  const xpackMainPlugin = server.plugins.xpack_main;
+
+  xpackMainPlugin.registerFeature({
+    id: 'code',
+    name: 'Code',
+    icon: 'codeApp',
+    navLinkId: 'code',
+    app: ['code', 'kibana'],
+    catalogue: ['code'],
+    privileges: {},
+    reserved: {
+      privilege: {
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: [],
+      },
+      description: 'Code Browsing & Search',
+    },
+  });
+
   // @ts-ignore
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
