@@ -29,6 +29,10 @@
       {
         "url_name": "Raw data",
         "url_value": "kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:d3d7af60-4c81-11e8-b3d7-01146121b73d)" 
+	},	
+      {
+        "url_name": "Investigate data",
+        "url_value": "kibana#/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:''))" 
 	}
     ]
   }
