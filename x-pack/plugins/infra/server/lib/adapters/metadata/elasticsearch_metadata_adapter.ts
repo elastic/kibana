@@ -12,6 +12,7 @@ import {
   InfraMetadataAggregationResponse,
 } from '../framework';
 import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
+import { NAME_FIELDS } from '../../constants';
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
@@ -40,7 +41,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         aggs: {
           nodeName: {
             terms: {
-              field: sourceConfiguration.fields[nodeType],
+              field: NAME_FIELDS[nodeType],
               size: 1,
             },
           },
@@ -92,7 +93,7 @@ export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
         aggs: {
           nodeName: {
             terms: {
-              field: sourceConfiguration.fields[nodeType],
+              field: NAME_FIELDS[nodeType],
               size: 1,
             },
           },
