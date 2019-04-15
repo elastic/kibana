@@ -82,14 +82,17 @@ export class LeadfootElementWrapper {
    */
   async clearValueWithKeyboard(options = { charByChar: false }) {
     if (options.charByChar === true) {
-      const value = await this.getAttribute('value');
+      const value = await this.getProperty('value');
       for (let i = 1; i <= value.length; i++) {
         await this._leadfoot.pressKeys(Keys.BACKSPACE);
         await delay(100);
       }
     } else {
-      const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
-      await this._leadfoot.pressKeys([selectionKey, 'a']);
+      if (process.platform === 'darwin') {
+        await this._leadfoot.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
+      } else {
+        await this._leadfoot.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
+      }
       await this._leadfoot.pressKeys(Keys.NULL); // Release modifier keys
       await this._leadfoot.pressKeys(Keys.BACKSPACE); // Delete all content
     }
