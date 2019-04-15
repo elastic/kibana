@@ -54,7 +54,7 @@ export const DropdownFilter: FunctionComponent<Props> = ({
     );
   });
 
-  /* tslint:disable:react-a11y-no-onchange */
+  // eslint-disable-next-line jsx-a11y/no-onchange
   return (
     <div className="canvasDropdownFilter">
       <select className="canvasDropdownFilter__select" value={value} onChange={changeHandler}>
