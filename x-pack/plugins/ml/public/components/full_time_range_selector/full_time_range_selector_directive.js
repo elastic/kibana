@@ -11,7 +11,7 @@ import ReactDOM from 'react-dom';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 import { FullTimeRangeSelector } from './index';
 
@@ -35,9 +35,9 @@ module.directive('mlFullTimeRangeSelector', function () {
         };
 
         ReactDOM.render(
-          <I18nProvider>
+          <I18nContext>
             {React.createElement(FullTimeRangeSelector, props)}
-          </I18nProvider>,
+          </I18nContext>,
           element[0]
         );
       }
