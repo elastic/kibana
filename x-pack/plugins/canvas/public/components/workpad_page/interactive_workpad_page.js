@@ -75,7 +75,7 @@ export class InteractiveWorkpadPage extends PureComponent {
           }
         }}
         data-test-subj="canvasWorkpadPage"
-        className={`canvasPage ${className} canvasPage--isEditable`}
+        className={`canvasPage kbn-resetFocusState ${className} canvasPage--isEditable`}
         data-shared-items-container
         style={{ ...pageStyle, ...animationStyle, height, width, cursor }}
         onKeyDown={onKeyDown}
