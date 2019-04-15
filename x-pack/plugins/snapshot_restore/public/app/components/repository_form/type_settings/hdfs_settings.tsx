@@ -10,9 +10,12 @@ import {
   EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
   EuiSwitch,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
@@ -82,17 +85,27 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
-          describedByIds={['hdfsRepositoryUriDescription']}
         >
-          <EuiFieldText
-            defaultValue={uri || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                uri: e.target.value,
-              });
-            }}
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" id="hdfsRepositoryUriProtocolDescription">
+                hdfs://
+              </EuiText>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiFieldText
+                defaultValue={uri ? uri.split('hdfs://')[1] : ''}
+                fullWidth
+                onChange={e => {
+                  updateRepositorySettings({
+                    uri: e.target.value ? `hdfs://${e.target.value}` : '',
+                  });
+                }}
+                aria-describedby="hdfsRepositoryUriDescription hdfsRepositoryUriProtocolDescription"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
