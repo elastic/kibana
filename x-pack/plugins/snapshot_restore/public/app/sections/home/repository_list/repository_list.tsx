@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
@@ -23,39 +23,30 @@ interface MatchParams {
 
 export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
-    params: { repositoryName: name },
+    params: { repositoryName },
   },
   history,
 }) => {
-  const section = 'repositories' as Section;
   const {
     core: {
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
   const {
     error,
     loading,
     data: { repositories, verification },
     request: reload,
   } = loadRepositories();
-  const [currentRepository, setCurrentRepository] = useState<Repository['name'] | undefined>(
-    undefined
-  );
+
   const openRepositoryDetails = (repositoryName: Repository['name']) => {
-    setCurrentRepository(repositoryName);
-    history.push(`${BASE_PATH}/${section}/${repositoryName}`);
+    history.push(`${BASE_PATH}/repositories/${repositoryName}`);
   };
+
   const closeRepositoryDetails = () => {
-    setCurrentRepository(undefined);
-    history.push(`${BASE_PATH}/${section}`);
+    history.push(`${BASE_PATH}/repositories`);
   };
-  useEffect(
-    () => {
-      setCurrentRepository(name);
-    },
-    [name]
-  );
 
   if (loading) {
     return (
@@ -124,7 +115,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   }
 
   const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
-    if (currentRepository && repositoriesDeleted.includes(currentRepository)) {
+    if (repositoryName && repositoriesDeleted.includes(repositoryName)) {
       closeRepositoryDetails();
     }
     if (repositoriesDeleted.length) {
@@ -134,9 +125,9 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
 
   return (
     <Fragment>
-      {currentRepository ? (
+      {repositoryName ? (
         <RepositoryDetails
-          repositoryName={currentRepository}
+          repositoryName={repositoryName}
           onClose={closeRepositoryDetails}
           onRepositoryDeleted={onRepositoryDeleted}
         />
