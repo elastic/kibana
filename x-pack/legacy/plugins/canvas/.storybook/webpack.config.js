@@ -40,7 +40,7 @@ module.exports = async ({ config, _mode }) => {
       {
         loader: 'postcss-loader',
         options: {
-          config: { path: path.resolve(__dirname, './../../../../src/optimize/postcss.config.js') },
+          config: { path: path.resolve(__dirname, './../../../../../src/optimize/postcss.config.js') },
         },
       },
       { loader: 'less-loader' },
