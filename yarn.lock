@@ -1393,34 +1393,6 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@^9.9.1":
-  version "9.9.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.9.1.tgz#3c64aeded0f2297ae720694be08ecdaa6a09efd4"
-  integrity sha512-d5/OcaPtkbFBQYEqEedjdWEZEefDs2l1UswIo7sASHHnCAjmRUPG7k/gHFcxlgWjrT93WQEPXbZL8VofeJdUug==
-  dependencies:
-    "@types/lodash" "^4.14.116"
-    "@types/numeral" "^0.0.25"
-    "@types/react-beautiful-dnd" "^10.1.0"
-    classnames "^2.2.5"
-    core-js "^2.5.1"
-    highlight.js "^9.12.0"
-    html "^1.0.0"
-    keymirror "^0.1.1"
-    lodash "^4.17.11"
-    numeral "^2.0.6"
-    prop-types "^15.6.0"
-    react-ace "^5.5.0"
-    react-beautiful-dnd "^10.1.0"
-    react-color "^2.13.8"
-    react-focus-lock "^1.17.7"
-    react-input-autosize "^2.2.1"
-    react-is "~16.3.0"
-    react-virtualized "^9.18.5"
-    react-vis "1.10.2"
-    resize-observer-polyfill "^1.5.0"
-    tabbable "^1.1.0"
-    uuid "^3.1.0"
-
 "@elastic/filesaver@1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
@@ -17731,11 +17703,6 @@ moment@^2.10.6:
   version "2.21.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
   integrity sha512-TCZ36BjURTeFTM/CwRcViQlfkMvL1/vFISuNLO5GkcVm1+QHfbSiNqZuWeMFjj1/3+uAjXswgRk30j1kkLYJBQ==
-
-moment@^2.24.0:
-  version "2.24.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
-  integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
 
 monocle-ts@^1.0.0:
   version "1.7.1"
