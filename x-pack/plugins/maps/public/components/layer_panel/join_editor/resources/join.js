@@ -92,10 +92,7 @@ export class Join extends Component {
     }
 
     this.setState({
-      rightFields: indexPattern.fields.filter(field => {
-        // Only show fields that can be used in terms aggregation
-        return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
-      })
+      rightFields: indexPattern.fields
     });
   }
 

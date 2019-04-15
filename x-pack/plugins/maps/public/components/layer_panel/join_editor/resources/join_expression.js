@@ -141,6 +141,10 @@ export class JoinExpression extends Component {
       return field.type === 'string' || field.type === 'number';
     };
 
+    const termFields = this.props.rightFields.filter(field => {
+      return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+    });
+
     return (
       <EuiFormRow
         label={
@@ -154,7 +158,7 @@ export class JoinExpression extends Component {
           value={this.props.rightValue}
           onChange={this.props.onRightFieldChange}
           filterField={filterStringOrNumberFields}
-          fields={this.props.rightFields}
+          fields={termFields}
           isClearable={false}
         />
       </EuiFormRow>
@@ -246,7 +250,7 @@ JoinExpression.propTypes = {
 
   // Right field props
   rightValue: PropTypes.string,
-  rightFields: PropTypes.array, // array of indexPattern.fields
+  rightFields: PropTypes.object, // indexPattern.fields IndexedArray object
   onRightFieldChange: PropTypes.func.isRequired,
 };
 
