@@ -1,5 +1,5 @@
-<div class="app-container">
-  <kbn-top-nav name="{{ monitoringMain.name }}-nav">
+<div class="app-container" ng-class="{ 'monSetupModeActive': setupModeEnabled }">
+  <kbn-top-nav name="{{ monitoringMain.name }}-nav" config="topNavMenu">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
       <!-- Tabs -->
@@ -204,10 +204,10 @@
             i18n-default-message="Advanced"
           >
           </a>
-          <div 
-            class="kuiLocalTab" 
-            ng-if="monitoringMain.pipelineVersions.length" 
-            id="dropdown-elm" 
+          <div
+            class="kuiLocalTab"
+            ng-if="monitoringMain.pipelineVersions.length"
+            id="dropdown-elm"
             ng-init="monitoringMain.dropdownLoadedHandler()">
           </div>
         </div>
