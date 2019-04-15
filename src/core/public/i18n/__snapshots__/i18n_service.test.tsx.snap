@@ -35,7 +35,7 @@ exports[`#setup() returns \`Context\` component 1`] = `
           "euiPagination.nextPage": "Next page",
           "euiPagination.pageOfTotal": [Function],
           "euiPagination.previousPage": "Previous page",
-          "euiPopover.screenReaderAnnouncement": "You are in a popup. To exit this popup, hit escape.",
+          "euiPopover.screenReaderAnnouncement": "You are in a popup. To exit this popup, hit Escape.",
           "euiStep.completeStep": "Step",
           "euiStep.incompleteStep": "Incomplete Step",
           "euiStepHorizontal.buttonTitle": [Function],
