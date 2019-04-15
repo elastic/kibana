@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EmptyState component doesn't render child components when count is falsey 1`] = `
-<EmptyState
+<EmptyStateComponent
   basePath=""
   intl={
     Object {
@@ -105,6 +105,7 @@ exports[`EmptyState component doesn't render child components when count is fals
       "timeZone": null,
     }
   }
+  loading={false}
 >
   <EmptyStateLoading>
     <EuiEmptyPrompt
@@ -172,7 +173,7 @@ exports[`EmptyState component doesn't render child components when count is fals
       </div>
     </EuiEmptyPrompt>
   </EmptyStateLoading>
-</EmptyState>
+</EmptyStateComponent>
 `;
 
 exports[`EmptyState component renders child components when count is truthy 1`] = `
@@ -189,124 +190,16 @@ exports[`EmptyState component renders child components when count is truthy 1`] 
 </Fragment>
 `;
 
-exports[`EmptyState component renders children while loading 1`] = `
-<EmptyState
-  basePath=""
-  count={1}
-  intl={
+exports[`EmptyState component renders empty state with appropriate base path 1`] = `
+<EmptyStateComponent
+  basePath="foo"
+  data={
     Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
+      "getDocCount": Object {
+        "count": 0,
       },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
     }
   }
-  loading={true}
->
-  <div>
-    Should appear even while loading...
-  </div>
-</EmptyState>
-`;
-
-exports[`EmptyState component renders empty state with appropriate base path 1`] = `
-<EmptyState
-  basePath="foo"
-  count={0}
   intl={
     Object {
       "defaultFormats": Object {},
@@ -629,15 +522,27 @@ exports[`EmptyState component renders empty state with appropriate base path 1`]
       </div>
     </EuiFlexGroup>
   </EmptyIndex>
-</EmptyState>
+</EmptyStateComponent>
 `;
 
-
-exports[`EmptyState component renders the message when an error occurs 1`] = `
-<EmptyState
+exports[`EmptyState component renders error message when an error occurs 1`] = `
+<EmptyStateComponent
   basePath=""
-  count={1}
-  error="An error occurred"
+  errors={
+    Array [
+      Object {
+        "extensions": undefined,
+        "locations": undefined,
+        "message": "An error occurred",
+        "name": "foo",
+        "nodes": undefined,
+        "originalError": undefined,
+        "path": undefined,
+        "positions": undefined,
+        "source": undefined,
+      },
+    ]
+  }
   intl={
     Object {
       "defaultFormats": Object {},
@@ -740,9 +645,11 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
       "timeZone": null,
     }
   }
+  loading={false}
 >
   <EmptyStateError
-    errorMessage="An error occurred"
+    errorMessage="Error: An error occurred
+"
   >
     <EuiPanel
       grow={true}
@@ -755,7 +662,8 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
         <EuiEmptyPrompt
           body={
             <p>
-              An error occurred
+              Error: An error occurred
+
             </p>
           }
           iconColor="subdued"
@@ -811,7 +719,8 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
                     className="euiText euiText--medium"
                   >
                     <p>
-                      An error occurred
+                      Error: An error occurred
+
                     </p>
                   </div>
                 </EuiText>
@@ -822,5 +731,181 @@ exports[`EmptyState component renders the message when an error occurs 1`] = `
       </div>
     </EuiPanel>
   </EmptyStateError>
-</EmptyState>
+</EmptyStateComponent>
+`;
+
+exports[`EmptyState component renders loading state if no errors or doc count 1`] = `
+<EmptyStateComponent
+  basePath=""
+  intl={
+    Object {
+      "defaultFormats": Object {},
+      "defaultLocale": "en",
+      "formatDate": [Function],
+      "formatHTMLMessage": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatPlural": [Function],
+      "formatRelative": [Function],
+      "formatTime": [Function],
+      "formats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "units": "day",
+          },
+          "hours": Object {
+            "units": "hour",
+          },
+          "minutes": Object {
+            "units": "minute",
+          },
+          "months": Object {
+            "units": "month",
+          },
+          "seconds": Object {
+            "units": "second",
+          },
+          "years": Object {
+            "units": "year",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralFormat": [Function],
+        "getRelativeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "now": [Function],
+      "onError": [Function],
+      "textComponent": Symbol(react.fragment),
+      "timeZone": null,
+    }
+  }
+  loading={true}
+>
+  <EmptyStateLoading>
+    <EuiEmptyPrompt
+      body={
+        <React.Fragment>
+          <EuiLoadingSpinner
+            size="xl"
+          />
+          <EuiSpacer />
+          <EuiTitle
+            size="l"
+            textTransform="none"
+          >
+            <h2>
+              Loading…
+            </h2>
+          </EuiTitle>
+        </React.Fragment>
+      }
+      iconColor="subdued"
+    >
+      <div
+        className="euiEmptyPrompt"
+      >
+        <EuiTextColor
+          color="subdued"
+          component="span"
+        >
+          <span
+            className="euiTextColor euiTextColor--subdued"
+          >
+            <EuiText
+              grow={true}
+              size="m"
+            >
+              <div
+                className="euiText euiText--medium"
+              >
+                <EuiLoadingSpinner
+                  size="xl"
+                >
+                  <div
+                    className="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                  />
+                </EuiLoadingSpinner>
+                <EuiSpacer>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                </EuiSpacer>
+                <EuiTitle
+                  size="l"
+                  textTransform="none"
+                >
+                  <h2
+                    className="euiTitle euiTitle--large"
+                  >
+                    Loading…
+                  </h2>
+                </EuiTitle>
+              </div>
+            </EuiText>
+          </span>
+        </EuiTextColor>
+      </div>
+    </EuiEmptyPrompt>
+  </EmptyStateLoading>
+</EmptyStateComponent>
 `;

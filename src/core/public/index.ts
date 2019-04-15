@@ -18,6 +18,7 @@
  */
 
 import { BasePathSetup } from './base_path';
+import { Capabilities, CapabilitiesSetup } from './capabilities';
 import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
@@ -42,6 +43,7 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   http: HttpSetup;
   basePath: BasePathSetup;
+  capabilities: CapabilitiesSetup;
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
   overlays: OverlaySetup;
@@ -52,6 +54,8 @@ export {
   HttpSetup,
   FatalErrorsSetup,
   I18nSetup,
+  CapabilitiesSetup,
+  Capabilities,
   ChromeSetup,
   ChromeBreadcrumb,
   ChromeBrand,
