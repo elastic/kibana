@@ -15,20 +15,21 @@ export function AccountSettingProvider({ getService }) {
     async verifyAccountSettings(expectedEmail, expectedUserName) {
       await userMenu.clickProvileLink();
 
-      const usernameField = await testSubjects.find('username');
+      const usernameField = await testSubjects.find('usernameField');
       const userName = await usernameField.getVisibleText();
       expect(userName).to.be(expectedUserName);
 
-      const emailIdField = await testSubjects.find('email');
+      const emailIdField = await testSubjects.find('emailIdField');
       const emailField = await emailIdField.getVisibleText();
       expect(emailField).to.be(expectedEmail);
     }
 
     async changePassword(currentPassword, newPassword) {
-      await testSubjects.setValue('currentPassword', currentPassword);
-      await testSubjects.setValue('newPassword', newPassword);
-      await testSubjects.setValue('confirmNewPassword', newPassword);
-      await testSubjects.click('changePasswordButton');
+      await testSubjects.click('changePasswordLink');
+      await testSubjects.setValue('newPasswordInput', newPassword);
+      await testSubjects.setValue('currentPasswordInput', currentPassword);
+      await testSubjects.setValue('confirmPasswordInput', newPassword);
+      await testSubjects.click('saveChangesButton');
       await testSubjects.existOrFail('passwordUpdateSuccess');
     }
   }

@@ -31,8 +31,6 @@ import { toastNotifications } from 'ui/notify';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { UserAPIClient } from '../../../lib/api';
-import { ChangePasswordForm } from '../change_password_form';
 
 const validEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line max-len
 const validUsernameRegex = /[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
@@ -57,35 +55,36 @@ class EditUserUI extends Component {
     };
   }
   async componentDidMount() {
-    const { username } = this.props;
+    const { apiClient, username } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
-        user = await UserAPIClient.getUser(username);
-        currentUser = await UserAPIClient.getCurrentUser();
+        user = await apiClient.getUser(username);
+        currentUser = await apiClient.getCurrentUser();
       } catch (err) {
         toastNotifications.addDanger({
           title: this.props.intl.formatMessage({
             id: 'xpack.security.management.users.editUser.errorLoadingUserTitle',
             defaultMessage: 'Error loading user'
           }),
-          text: get(err, 'body.message') || err.message,
+          text: get(err, 'data.message') || err.message,
         });
         return;
       }
     }
 
-    let roles = [];
+    let roles;
     try {
-      roles = await UserAPIClient.getRoles();
+      roles = await apiClient.getRoles();
     } catch (err) {
       toastNotifications.addDanger({
         title: this.props.intl.formatMessage({
           id: 'xpack.security.management.users.editUser.errorLoadingRolesTitle',
           defaultMessage: 'Error loading roles'
         }),
-        text: get(err, 'body.message') || err.message,
+        text: get(err, 'data.message') || err.message,
       });
+      return;
     }
 
     this.setState({
@@ -154,9 +153,10 @@ class EditUserUI extends Component {
     }
   };
   changePassword = async () => {
+    const { apiClient } = this.props;
     const { user, password, currentPassword } = this.state;
     try {
-      await UserAPIClient.changePassword(user.username, password, currentPassword);
+      await apiClient.changePassword(user.username, password, currentPassword);
       toastNotifications.addSuccess(
         this.props.intl.formatMessage({
           id: 'xpack.security.management.users.editUser.passwordSuccessfullyChangedNotificationMessage',
@@ -164,21 +164,21 @@ class EditUserUI extends Component {
         })
       );
     } catch (e) {
-      if (e.body.statusCode === 401) {
+      if (e.status === 401) {
         return this.setState({ currentPasswordError: true });
       } else {
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
             id: 'xpack.security.management.users.editUser.settingPasswordErrorMessage',
             defaultMessage: 'Error setting password: {message}'
-          }, { message: get(e, 'body.message', 'Unknown error') })
+          }, { message: e.data.message })
         );
       }
     }
     this.clearPasswordForm();
   };
   saveUser = async () => {
-    const { changeUrl } = this.props;
+    const { apiClient, changeUrl } = this.props;
     const { user, password, selectedRoles } = this.state;
     const userToSave = { ...user };
     userToSave.roles = selectedRoles.map(selectedRole => {
@@ -188,7 +188,7 @@ class EditUserUI extends Component {
       userToSave.password = password;
     }
     try {
-      await UserAPIClient.saveUser(userToSave);
+      await apiClient.saveUser(userToSave);
       toastNotifications.addSuccess(
         this.props.intl.formatMessage({
           id: 'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
@@ -201,7 +201,7 @@ class EditUserUI extends Component {
         this.props.intl.formatMessage({
           id: 'xpack.security.management.users.editUser.savingUserErrorMessage',
           defaultMessage: 'Error saving user: {message}'
-        }, { message: get(e, 'body.message', 'Unknown error') })
+        }, { message: e.data.message })
       );
     }
   };
@@ -213,11 +213,32 @@ class EditUserUI extends Component {
     });
   };
   passwordFields = () => {
+    const { user, currentUser } = this.state;
+    const userIsLoggedInUser = user.username && user.username === currentUser.username;
     return (
       <Fragment>
+        {userIsLoggedInUser ? (
+          <EuiFormRow
+            label={this.props.intl.formatMessage({
+              id: 'xpack.security.management.users.editUser.currentPasswordFormRowLabel',
+              defaultMessage: 'Current password'
+            })}
+            isInvalid={!!this.currentPasswordError()}
+            error={this.currentPasswordError()}
+          >
+            <EuiFieldText
+              name="currentPassword"
+              type="password"
+              onChange={event => this.setState({ currentPassword: event.target.value })}
+            />
+          </EuiFormRow>
+        ) : null}
         <EuiFormRow
           label={
-            this.props.intl.formatMessage({
+            userIsLoggedInUser ? this.props.intl.formatMessage({
+              id: 'xpack.security.management.users.editUser.newPasswordFormRowLabel',
+              defaultMessage: 'New password'
+            }) : this.props.intl.formatMessage({
               id: 'xpack.security.management.users.editUser.passwordFormRowLabel',
               defaultMessage: 'Password'
             })
@@ -255,19 +276,18 @@ class EditUserUI extends Component {
   changePasswordForm = () => {
     const {
       showChangePasswordForm,
-      user,
-      currentUser,
+      password,
+      confirmPassword,
+      user: { username },
     } = this.state;
-
-    const userIsLoggedInUser = user.username && user.username === currentUser.username;
-
     if (!showChangePasswordForm) {
       return null;
     }
     return (
       <Fragment>
         <EuiHorizontalRule />
-        {user.username === 'kibana' ? (
+        {this.passwordFields()}
+        {username === 'kibana' ? (
           <Fragment>
             <EuiCallOut
               title={this.props.intl.formatMessage({
@@ -289,11 +309,38 @@ class EditUserUI extends Component {
             <EuiSpacer />
           </Fragment>
         ) : null}
-        <ChangePasswordForm
-          user={this.state.user}
-          isUserChangingOwnPassword={userIsLoggedInUser}
-          onChangePassword={this.toggleChangePasswordForm}
-        />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              fill
+              disabled={
+                !password || !confirmPassword || this.passwordError() || this.confirmPasswordError()
+              }
+              onClick={() => {
+                this.changePassword(password);
+              }}
+            >
+              <FormattedMessage
+                id="xpack.security.management.users.editUser.savePasswordButtonLabel"
+                defaultMessage="Save password"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              onClick={() => {
+                this.clearPasswordForm();
+              }}
+            >
+              <FormattedMessage
+                id="xpack.security.management.users.editUser.savePasswordCancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </Fragment>
     );
   };
@@ -318,7 +365,7 @@ class EditUserUI extends Component {
     this.setState({ showDeleteConfirmation: false });
   };
   render() {
-    const { changeUrl, intl } = this.props;
+    const { changeUrl, apiClient, intl } = this.props;
     const {
       user,
       roles,
@@ -380,6 +427,7 @@ class EditUserUI extends Component {
             {showDeleteConfirmation ? (
               <ConfirmDelete
                 onCancel={this.onCancelDelete}
+                apiClient={apiClient}
                 usersToDelete={[user.username]}
                 callback={this.handleDelete}
               />
