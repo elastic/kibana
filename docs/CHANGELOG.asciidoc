@@ -53,7 +53,6 @@ Monitoring::
 Management::
 * Adds `configPrefix` to Index Management, License Management, Rollup Jobs, and 
 Upgrade Assistant {pull}30149[#30149]
-* Removes nested table splits from table visualization {pull}26057[#26057]
 * Standardizes use of `index_pattern` in UI code and URLs, replacing `indices` 
 and `index`  {pull}29151[#29151] and {pull}29481[#29481]
 * Removes app-specific dark mode options and replaces with a global dark mode uiSetting {pull}29017[#29017]
@@ -74,6 +73,7 @@ Security::
 * Removes legacy fallback {pull}29107[#29107]
 Visualizations::
 * Removes Timelion from the app switcher by default {pull}30131[#30131]
+* Removes nested table splits from table visualization {pull}26057[#26057]
 
 
 [float]
