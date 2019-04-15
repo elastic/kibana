@@ -14,7 +14,6 @@ import 'ui/angular_ui_select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
-import 'plugins/security/services/shield_privileges';
 import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
