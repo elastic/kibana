@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiIconTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,6 +22,7 @@ import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
+import { CountBadge } from '../../index';
 import { FirstLastSeenHost } from '../first_last_seen_host';
 
 import * as i18n from './translations';
@@ -69,10 +70,6 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 50,
   },
 ];
-
-const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
 
 const Sup = styled.sup`
   vertical-align: super;

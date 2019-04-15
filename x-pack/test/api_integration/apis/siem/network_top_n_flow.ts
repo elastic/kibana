@@ -8,10 +8,10 @@ import expect from '@kbn/expect';
 import { networkTopNFlowQuery } from '../../../../plugins/siem/public/containers/network_top_n_flow/index.gql_query';
 import {
   Direction,
+  FlowDirection,
+  FlowTarget,
   GetNetworkTopNFlowQuery,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
-  NetworkTopNFlowType,
 } from '../../../../plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
@@ -39,9 +39,9 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              type: NetworkTopNFlowType.source,
+              flowTarget: FlowTarget.source,
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              direction: NetworkTopNFlowDirection.uniDirectional,
+              flowDirection: FlowDirection.uniDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -71,9 +71,9 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 to: TO,
                 from: FROM,
               },
-              type: NetworkTopNFlowType.source,
+              flowTarget: FlowTarget.source,
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.asc },
-              direction: NetworkTopNFlowDirection.uniDirectional,
+              flowDirection: FlowDirection.uniDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -104,8 +104,8 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              type: NetworkTopNFlowType.source,
-              direction: NetworkTopNFlowDirection.biDirectional,
+              flowTarget: FlowTarget.source,
+              flowDirection: FlowDirection.biDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -133,8 +133,8 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              type: NetworkTopNFlowType.destination,
-              direction: NetworkTopNFlowDirection.uniDirectional,
+              flowTarget: FlowTarget.destination,
+              flowDirection: FlowDirection.uniDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -162,8 +162,8 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              type: NetworkTopNFlowType.destination,
-              direction: NetworkTopNFlowDirection.biDirectional,
+              flowTarget: FlowTarget.destination,
+              flowDirection: FlowDirection.biDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -191,8 +191,8 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              type: NetworkTopNFlowType.source,
-              direction: NetworkTopNFlowDirection.uniDirectional,
+              flowTarget: FlowTarget.source,
+              flowDirection: FlowDirection.uniDirectional,
               pagination: {
                 limit: 20,
                 cursor: 10,
@@ -228,8 +228,8 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              type: NetworkTopNFlowType.client,
-              direction: NetworkTopNFlowDirection.biDirectional,
+              flowTarget: FlowTarget.client,
+              flowDirection: FlowDirection.biDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,
@@ -257,8 +257,8 @@ const networkTopNFlowTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-              type: NetworkTopNFlowType.server,
-              direction: NetworkTopNFlowDirection.biDirectional,
+              flowTarget: FlowTarget.server,
+              flowDirection: FlowDirection.biDirectional,
               pagination: {
                 limit: 10,
                 cursor: null,

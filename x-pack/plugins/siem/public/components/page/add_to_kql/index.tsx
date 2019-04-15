@@ -14,6 +14,7 @@ import { HostsFilter } from '../../../containers/hosts';
 import { NetworkFilter } from '../../../containers/network';
 import { WithSource } from '../../../containers/source';
 import { IndexType } from '../../../graphql/types';
+import { assertUnreachable } from '../../../lib/helpers';
 import { hostsModel, KueryFilterQuery, networkModel } from '../../../store';
 import { WithHoverActions } from '../../with_hover_actions';
 
@@ -107,12 +108,8 @@ export const AddToKql = pure<AddToKqlProps>(
               </NetworkFilter>
             );
         }
-        assertUnreachable(componentFilterType);
+        assertUnreachable(componentFilterType, 'Unknown Filter Type in switch statement');
       }}
     </WithSource>
   )
 );
-
-const assertUnreachable = (x: never): never => {
-  throw new Error(`Unknown Filter Type in switch statement ${x}`);
-};

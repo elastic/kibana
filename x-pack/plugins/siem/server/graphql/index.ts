@@ -14,7 +14,7 @@ import { authenticationsSchema } from './authentications';
 import { ecsSchema } from './ecs';
 import { eventsSchema } from './events';
 import { hostsSchema } from './hosts';
-import { ipOverviewSchema } from './ip_overview';
+import { ipDetailsSchemas } from './ip_details';
 import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
 import { overviewSchema } from './overview';
@@ -30,7 +30,7 @@ export const schemas = [
   eventsSchema,
   dateSchema,
   hostsSchema,
-  ipOverviewSchema,
+  ...ipDetailsSchemas,
   kpiNetworkSchema,
   networkSchema,
   overviewSchema,

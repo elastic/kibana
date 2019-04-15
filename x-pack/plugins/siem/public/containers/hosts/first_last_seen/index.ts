@@ -7,9 +7,11 @@
 import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import uuid from 'uuid';
 
 import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
-import { inputsModel } from '../../../store';
+import { appActions, inputsModel, store } from '../../../store';
+import * as i18n from '../../errors/translations';
 import { QueryTemplateProps } from '../../query_template';
 
 import { HostFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
@@ -52,8 +54,13 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           return result;
         },
         error => {
-          updateFirstSeen(error.message);
-          updateLastSeen(error.message);
+          store.dispatch(
+            appActions.addError({
+              id: uuid.v4(),
+              title: i18n.NETWORK_FAILURE,
+              message: error.message,
+            })
+          );
           updateLoading(false);
           return null;
         }

@@ -63,18 +63,6 @@ export const networkSchema = gql`
     pageInfo: PageInfo!
   }
 
-  enum NetworkTopNFlowType {
-    client
-    destination
-    server
-    source
-  }
-
-  enum NetworkTopNFlowDirection {
-    uniDirectional
-    biDirectional
-  }
-
   enum NetworkDnsFields {
     dnsName
     queryCount
@@ -112,12 +100,12 @@ export const networkSchema = gql`
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     NetworkTopNFlow(
-      direction: NetworkTopNFlowDirection!
-      filterQuery: String
       id: String
+      filterQuery: String
+      flowDirection: FlowDirection!
+      flowTarget: FlowTarget!
       pagination: PaginationInput!
       sort: NetworkTopNFlowSortField!
-      type: NetworkTopNFlowType!
       timerange: TimerangeInput!
     ): NetworkTopNFlowData!
     NetworkDns(

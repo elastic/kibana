@@ -54,6 +54,10 @@ export interface Source {
 
   IpOverview?: IpOverviewData | null;
 
+  Domains: DomainsData;
+
+  DomainFirstLastSeen: FirstLastSeenDomain;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -818,9 +822,13 @@ export interface FirstLastSeenHost {
 }
 
 export interface IpOverviewData {
-  source?: Overview | null;
+  client?: Overview | null;
 
   destination?: Overview | null;
+
+  server?: Overview | null;
+
+  source?: Overview | null;
 }
 
 export interface Overview {
@@ -841,6 +849,62 @@ export interface AutonomousSystem {
   asn?: string | null;
 
   ip?: string | null;
+}
+
+export interface DomainsData {
+  edges: DomainsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface DomainsEdges {
+  node: DomainsNode;
+
+  cursor: CursorType;
+}
+
+export interface DomainsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  source?: DomainsItem | null;
+
+  destination?: DomainsItem | null;
+
+  client?: DomainsItem | null;
+
+  server?: DomainsItem | null;
+
+  network?: DomainsNetworkField | null;
+}
+
+export interface DomainsItem {
+  uniqueIpCount?: number | null;
+
+  domainName?: string | null;
+
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
+}
+
+export interface DomainsNetworkField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
+}
+
+export interface FirstLastSeenDomain {
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
 }
 
 export interface KpiNetworkData {
@@ -1028,6 +1092,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface DomainsSortField {
+  field: DomainsFields;
+
+  direction: Direction;
+}
+
 export interface NetworkTopNFlowSortField {
   field: NetworkTopNFlowFields;
 
@@ -1108,6 +1178,32 @@ export interface IpOverviewSourceArgs {
 
   ip: string;
 }
+export interface DomainsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: DomainsSortField;
+
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
+}
+export interface DomainFirstLastSeenSourceArgs {
+  id?: string | null;
+
+  ip: string;
+
+  domainName: string;
+
+  flowTarget: FlowTarget;
+}
 export interface KpiNetworkSourceArgs {
   id?: string | null;
 
@@ -1116,17 +1212,17 @@ export interface KpiNetworkSourceArgs {
   filterQuery?: string | null;
 }
 export interface NetworkTopNFlowSourceArgs {
-  direction: NetworkTopNFlowDirection;
+  id?: string | null;
 
   filterQuery?: string | null;
 
-  id?: string | null;
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
 
   pagination: PaginationInput;
 
   sort: NetworkTopNFlowSortField;
-
-  type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
 }
@@ -1185,18 +1281,20 @@ export enum Direction {
   desc = 'desc',
 }
 
-export enum NetworkTopNFlowDirection {
+export enum DomainsFields {
+  domainName = 'domainName',
+  direction = 'direction',
+  bytes = 'bytes',
+  packets = 'packets',
+  uniqueIpCount = 'uniqueIpCount',
+}
+
+export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
 
-export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
-}
-
-export enum NetworkTopNFlowType {
+export enum FlowTarget {
   client = 'client',
   destination = 'destination',
   server = 'server',
@@ -1214,17 +1312,18 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum NetworkTopNFlowFields {
+  bytes = 'bytes',
+  packets = 'packets',
+  ipCount = 'ipCount',
+}
+
 export enum NetworkDnsFields {
   dnsName = 'dnsName',
   queryCount = 'queryCount',
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
-}
-
-export enum IpOverviewType {
-  destination = 'destination',
-  source = 'source',
 }
 
 // ====================================================
@@ -1343,6 +1442,146 @@ export namespace GetAuthenticationsQuery {
     id?: string | null;
 
     name?: string | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
+export namespace GetDomainFirstLastSeenQuery {
+  export type Variables = {
+    sourceId: string;
+    ip: string;
+    domainName: string;
+    flowTarget: FlowTarget;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    DomainFirstLastSeen: DomainFirstLastSeen;
+  };
+
+  export type DomainFirstLastSeen = {
+    __typename?: 'FirstLastSeenDomain';
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+  };
+}
+
+export namespace GetDomainsQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: string | null;
+    flowDirection: FlowDirection;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInput;
+    sort: DomainsSortField;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Domains: Domains;
+  };
+
+  export type Domains = {
+    __typename?: 'DomainsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'DomainsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'DomainsNode';
+
+    source?: _Source | null;
+
+    destination?: Destination | null;
+
+    network?: Network | null;
+  };
+
+  export type _Source = {
+    __typename?: 'DomainsItem';
+
+    uniqueIpCount?: number | null;
+
+    domainName?: string | null;
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+  };
+
+  export type Destination = {
+    __typename?: 'DomainsItem';
+
+    uniqueIpCount?: number | null;
+
+    domainName?: string | null;
+
+    firstSeen?: Date | null;
+
+    lastSeen?: Date | null;
+  };
+
+  export type Network = {
+    __typename?: 'DomainsNetworkField';
+
+    bytes?: number | null;
+
+    direction?: NetworkDirectionEcs[] | null;
+
+    packets?: number | null;
   };
 
   export type Cursor = {
@@ -2050,11 +2289,11 @@ export namespace GetNetworkDnsQuery {
 export namespace GetNetworkTopNFlowQuery {
   export type Variables = {
     sourceId: string;
-    direction: NetworkTopNFlowDirection;
+    flowDirection: FlowDirection;
     filterQuery?: string | null;
     pagination: PaginationInput;
     sort: NetworkTopNFlowSortField;
-    type: NetworkTopNFlowType;
+    flowTarget: FlowTarget;
     timerange: TimerangeInput;
   };
 
