@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
 import expect from '@kbn/expect';
-import { ML_JOB_FIELD_TYPES, KBN_FIELD_TYPES } from 'plugins/ml/../common/constants/field_types';
-import { kbnTypeToMLJobType } from 'plugins/ml/util/field_types_utils';
+import { KBN_FIELD_TYPES, ML_JOB_FIELD_TYPES } from './../../../common/constants/field_types';
+import {
+  kbnTypeToMLJobType,
+  getMLJobTypeAriaLabel,
+  mlJobTypeAriaLabels
+} from './../field_types_utils';
 
 describe('ML - field type utils', () => {
 
@@ -61,4 +63,22 @@ describe('ML - field type utils', () => {
 
   });
 
+  describe('getMLJobTypeAriaLabel: Getting a field type aria label by passing what it is stored in constants', () => {
+    it('should returns all ML_JOB_FIELD_TYPES labels exactly as it is for each correct value', () => {
+
+      const mlKeys = Object.keys(ML_JOB_FIELD_TYPES);
+      const receivedMlLabels = {};
+      const testStorage = mlJobTypeAriaLabels;
+      mlKeys.forEach(constant => {
+        receivedMlLabels[constant] = getMLJobTypeAriaLabel(ML_JOB_FIELD_TYPES[constant]);
+      });
+
+      expect(receivedMlLabels).to.eql(testStorage);
+    });
+    it('should returns NULL as ML_JOB_FIELD_TYPES does not contain such a keyword', () => {
+      expect(
+        getMLJobTypeAriaLabel('ML_JOB_FIELD_TYPES', 'asd')
+      ).to.be.null;
+    });
+  });
 });
