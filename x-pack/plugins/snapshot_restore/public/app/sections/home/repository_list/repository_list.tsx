@@ -48,8 +48,10 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     history.push(`${BASE_PATH}/repositories`);
   };
 
+  let content;
+
   if (loading) {
-    return (
+    content = (
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.loadingRepositories"
@@ -57,10 +59,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         />
       </SectionLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <SectionError
         title={
           <FormattedMessage
@@ -71,10 +71,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         error={error}
       />
     );
-  }
-
-  if (repositories && repositories.length === 0) {
-    return (
+  } else if (repositories && repositories.length === 0) {
+    content (
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
@@ -112,6 +110,16 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         }
       />
     );
+  } else {
+    content = (
+      <RepositoryTable
+        repositories={repositories || []}
+        verification={verification || {}}
+        reload={reload}
+        openRepositoryDetails={openRepositoryDetails}
+        onRepositoryDeleted={onRepositoryDeleted}
+      />
+    );
   }
 
   const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
@@ -132,13 +140,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           onRepositoryDeleted={onRepositoryDeleted}
         />
       ) : null}
-      <RepositoryTable
-        repositories={repositories || []}
-        verification={verification || {}}
-        reload={reload}
-        openRepositoryDetails={openRepositoryDetails}
-        onRepositoryDeleted={onRepositoryDeleted}
-      />
+      {content}
     </Fragment>
   );
 };

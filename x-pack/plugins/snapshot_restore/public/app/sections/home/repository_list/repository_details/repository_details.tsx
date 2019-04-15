@@ -69,7 +69,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     if (error) {
       return renderError();
     }
-    renderLoading();
+   return renderLoading();
   };
 
   const renderLoading = () => {
