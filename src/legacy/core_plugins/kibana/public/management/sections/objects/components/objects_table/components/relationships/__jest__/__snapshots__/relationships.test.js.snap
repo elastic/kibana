@@ -93,10 +93,24 @@ exports[`Relationships should render dashboards normally 1`] = `
           Array [
             Object {
               "id": "1",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/1",
+                "icon": "visualizeApp",
+                "inAppUrl": "/app/kibana#/visualize/edit/1",
+                "title": "My Visualization Title 1",
+              },
+              "relationship": "child",
               "type": "visualization",
             },
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/2",
+                "icon": "visualizeApp",
+                "inAppUrl": "/app/kibana#/visualize/edit/2",
+                "title": "My Visualization Title 2",
+              },
+              "relationship": "child",
               "type": "visualization",
             },
           ]
@@ -289,10 +303,24 @@ exports[`Relationships should render index patterns normally 1`] = `
           Array [
             Object {
               "id": "1",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedSearches/1",
+                "icon": "search",
+                "inAppUrl": "/app/kibana#/discover/1",
+                "title": "My Search Title",
+              },
+              "relationship": "parent",
               "type": "search",
             },
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/2",
+                "icon": "visualizeApp",
+                "inAppUrl": "/app/kibana#/visualize/edit/2",
+                "title": "My Visualization Title",
+              },
+              "relationship": "parent",
               "type": "visualization",
             },
           ]
@@ -441,10 +469,24 @@ exports[`Relationships should render searches normally 1`] = `
           Array [
             Object {
               "id": "1",
+              "meta": Object {
+                "editUrl": "/management/kibana/index_patterns/1",
+                "icon": "indexPatternApp",
+                "inAppUrl": "/app/kibana#/management/kibana/index_patterns/1",
+                "title": "My Index Pattern",
+              },
+              "relationship": "child",
               "type": "index-pattern",
             },
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedVisualizations/2",
+                "icon": "visualizeApp",
+                "inAppUrl": "/app/kibana#/visualize/edit/2",
+                "title": "My Visualization Title",
+              },
+              "relationship": "parent",
               "type": "visualization",
             },
           ]
@@ -593,10 +635,24 @@ exports[`Relationships should render visualizations normally 1`] = `
           Array [
             Object {
               "id": "1",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedDashboards/1",
+                "icon": "dashboardApp",
+                "inAppUrl": "/app/kibana#/dashboard/1",
+                "title": "My Dashboard 1",
+              },
+              "relationship": "parent",
               "type": "dashboard",
             },
             Object {
               "id": "2",
+              "meta": Object {
+                "editUrl": "/management/kibana/objects/savedDashboards/2",
+                "icon": "dashboardApp",
+                "inAppUrl": "/app/kibana#/dashboard/2",
+                "title": "My Dashboard 2",
+              },
+              "relationship": "parent",
               "type": "dashboard",
             },
           ]

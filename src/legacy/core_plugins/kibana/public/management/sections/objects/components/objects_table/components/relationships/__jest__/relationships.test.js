@@ -57,10 +57,24 @@ describe('Relationships', () => {
         {
           type: 'search',
           id: '1',
+          relationship: 'parent',
+          meta: {
+            editUrl: '/management/kibana/objects/savedSearches/1',
+            icon: 'search',
+            inAppUrl: '/app/kibana#/discover/1',
+            title: 'My Search Title',
+          },
         },
         {
           type: 'visualization',
           id: '2',
+          relationship: 'parent',
+          meta: {
+            editUrl: '/management/kibana/objects/savedVisualizations/2',
+            icon: 'visualizeApp',
+            inAppUrl: '/app/kibana#/visualize/edit/2',
+            title: 'My Visualization Title',
+          },
         },
       ])),
       savedObject: {
@@ -101,10 +115,24 @@ describe('Relationships', () => {
         {
           type: 'index-pattern',
           id: '1',
+          relationship: 'child',
+          meta: {
+            editUrl: '/management/kibana/index_patterns/1',
+            icon: 'indexPatternApp',
+            inAppUrl: '/app/kibana#/management/kibana/index_patterns/1',
+            title: 'My Index Pattern',
+          },
         },
         {
           type: 'visualization',
           id: '2',
+          relationship: 'parent',
+          meta: {
+            editUrl: '/management/kibana/objects/savedVisualizations/2',
+            icon: 'visualizeApp',
+            inAppUrl: '/app/kibana#/visualize/edit/2',
+            title: 'My Visualization Title',
+          },
         },
       ])),
       savedObject: {
@@ -145,10 +173,24 @@ describe('Relationships', () => {
         {
           type: 'dashboard',
           id: '1',
+          relationship: 'parent',
+          meta: {
+            editUrl: '/management/kibana/objects/savedDashboards/1',
+            icon: 'dashboardApp',
+            inAppUrl: '/app/kibana#/dashboard/1',
+            title: 'My Dashboard 1',
+          },
         },
         {
           type: 'dashboard',
           id: '2',
+          relationship: 'parent',
+          meta: {
+            editUrl: '/management/kibana/objects/savedDashboards/2',
+            icon: 'dashboardApp',
+            inAppUrl: '/app/kibana#/dashboard/2',
+            title: 'My Dashboard 2',
+          },
         },
       ])),
       savedObject: {
@@ -189,10 +231,24 @@ describe('Relationships', () => {
         {
           type: 'visualization',
           id: '1',
+          relationship: 'child',
+          meta: {
+            editUrl: '/management/kibana/objects/savedVisualizations/1',
+            icon: 'visualizeApp',
+            inAppUrl: '/app/kibana#/visualize/edit/1',
+            title: 'My Visualization Title 1',
+          },
         },
         {
           type: 'visualization',
           id: '2',
+          relationship: 'child',
+          meta: {
+            editUrl: '/management/kibana/objects/savedVisualizations/2',
+            icon: 'visualizeApp',
+            inAppUrl: '/app/kibana#/visualize/edit/2',
+            title: 'My Visualization Title 2',
+          },
         },
       ])),
       savedObject: {

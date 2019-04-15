@@ -69,7 +69,7 @@ export function registerFind(server) {
     async handler(request) {
       const searchFields = new Set();
       const savedObjectsClient = request.getSavedObjectsClient();
-      const { savedObjectSchemas } = request.server.kibanaMigrator.kbnServer.uiExports;
+      const { savedObjectSchemas = {} } = request.server.kibanaMigrator.kbnServer.uiExports;
 
       // Accumulate "titleSearchField" attributes from savedObjectSchemas. Unfortunately
       // search fields apply to all types of saved objects, the sum of these fields will

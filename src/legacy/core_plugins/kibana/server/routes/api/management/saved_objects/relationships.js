@@ -41,7 +41,7 @@ export function registerRelationships(server) {
       const id = req.params.id;
       const size = req.query.size;
       const savedObjectsClient = req.getSavedObjectsClient();
-      const { savedObjectSchemas } = req.server.kibanaMigrator.kbnServer.uiExports;
+      const { savedObjectSchemas = {} } = req.server.kibanaMigrator.kbnServer.uiExports;
 
       return await findRelationships(type, id, {
         size,
