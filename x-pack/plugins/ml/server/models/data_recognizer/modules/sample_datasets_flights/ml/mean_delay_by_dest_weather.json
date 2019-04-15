@@ -28,11 +28,11 @@
     "custom_urls": [
       {
         "url_name": "Raw data",
-        "url_value": "kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:d3d7af60-4c81-11e8-b3d7-01146121b73d)" 
+        "url_value": "kibana#/discover?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(index:d3d7af60-4c81-11e8-b3d7-01146121b73d)" 
 	},	
       {
-        "url_name": "Investigate data",
-        "url_value": "kibana#/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:''))" 
+        "url_name": "Data dashboard",
+        "url_value": "kibana#/dashboard/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:\u0027$earliest$\u0027,mode:absolute,to:\u0027$latest$\u0027))&_a=(filters:!(),query:(language:kuery,query:\u0027\u0027))" 
 	}
     ]
   }
