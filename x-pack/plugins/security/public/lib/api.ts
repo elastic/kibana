@@ -21,17 +21,17 @@ export class UserAPIClient {
   }
 
   public static async getUser(username: string): Promise<User> {
-    const url = `${usersUrl}/${username}`;
+    const url = `${usersUrl}/${encodeURIComponent(username)}`;
     return await kfetch({ pathname: url });
   }
 
   public static async deleteUser(username: string) {
-    const url = `${usersUrl}/${username}`;
+    const url = `${usersUrl}/${encodeURIComponent(username)}`;
     await kfetch({ pathname: url, method: 'DELETE' }, {});
   }
 
   public static async saveUser(user: User) {
-    const url = `${usersUrl}/${user.username}`;
+    const url = `${usersUrl}/${encodeURIComponent(user.username)}`;
     await kfetch({ pathname: url, body: JSON.stringify(user), method: 'POST' });
   }
 
@@ -40,7 +40,7 @@ export class UserAPIClient {
   }
 
   public static async getRole(name: string): Promise<Role> {
-    const url = `${rolesUrl}/${name}`;
+    const url = `${rolesUrl}/${encodeURIComponent(name)}`;
     return await kfetch({ pathname: url });
   }
 
@@ -52,7 +52,7 @@ export class UserAPIClient {
       data.password = currentPassword;
     }
     await kfetch({
-      pathname: `${usersUrl}/${username}/password`,
+      pathname: `${usersUrl}/${encodeURIComponent(username)}/password`,
       method: 'POST',
       body: JSON.stringify(data),
     });
