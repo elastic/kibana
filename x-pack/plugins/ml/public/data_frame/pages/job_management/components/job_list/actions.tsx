@@ -34,11 +34,15 @@ const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => 
 
   return (
     <Fragment>
-      <EuiButtonEmpty color="danger" disabled={disabled} iconType="trash" onClick={openModal}>
-        {i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
+      <EuiButtonEmpty
+        color="danger"
+        disabled={disabled}
+        iconType="trash"
+        onClick={openModal}
+        aria-label={i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
           defaultMessage: 'Delete',
         })}
-      </EuiButtonEmpty>
+      />
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -86,20 +90,25 @@ export const getActions = (getJobs: () => void) => {
       render: (item: DataFrameJobListRow) => {
         if (item.state.transform_state !== 'started') {
           return (
-            <EuiButtonEmpty iconType="play" onClick={() => startJob(item)}>
-              {i18n.translate('xpack.ml.dataframe.jobsList.startActionName', {
+            <EuiButtonEmpty
+              iconType="play"
+              onClick={() => startJob(item)}
+              aria-label={i18n.translate('xpack.ml.dataframe.jobsList.startActionName', {
                 defaultMessage: 'Start',
               })}
-            </EuiButtonEmpty>
+            />
           );
         }
 
         return (
-          <EuiButtonEmpty color="danger" iconType="stop" onClick={() => stopJob(item)}>
-            {i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
+          <EuiButtonEmpty
+            color="danger"
+            iconType="stop"
+            onClick={() => stopJob(item)}
+            aria-label={i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
               defaultMessage: 'Stop',
             })}
-          </EuiButtonEmpty>
+          />
         );
       },
     },
