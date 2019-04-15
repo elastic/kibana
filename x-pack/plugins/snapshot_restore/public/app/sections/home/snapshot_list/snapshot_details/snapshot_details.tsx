@@ -63,7 +63,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
   let content;
 
   if (snapshotDetails) {
-    const { indexFailures, state } = snapshotDetails;
+    const { indexFailures, state: snapshotState } = snapshotDetails;
     const tabOptions = [
       {
         id: TAB_SUMMARY,
@@ -109,7 +109,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     if (activeTab === TAB_SUMMARY) {
       content = <TabSummary snapshotDetails={snapshotDetails} />;
     } else if (activeTab === TAB_FAILURES) {
-      content = <TabFailures state={state} indexFailures={indexFailures} />;
+      content = <TabFailures snapshotState={snapshotState} indexFailures={indexFailures} />;
     }
   } else if (error) {
     const notFound = error.status === 404;

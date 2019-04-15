@@ -187,7 +187,6 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             className="eui-textBreakWord"
             data-test-subj="srSnapshotDetailStartTimeDescription"
           >
-            {startTimeInMillis ? formatDate(startTimeInMillis) : '-'}
             <DataPlaceholder data={startTimeInMillis}>
               {formatDate(startTimeInMillis)}
             </DataPlaceholder>

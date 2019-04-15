@@ -13,10 +13,10 @@ import { useAppDependencies } from '../../../../../index';
 
 interface Props {
   indexFailures: any;
-  state: string;
+  snapshotState: string;
 }
 
-export const TabFailures: React.SFC<Props> = ({ indexFailures, state }) => {
+export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) => {
   const {
     core: {
       i18n: { FormattedMessage },
@@ -25,7 +25,7 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, state }) => {
 
   if (!indexFailures.length) {
     // If the snapshot is in progress then we still might encounter errors later.
-    if (state === SNAPSHOT_STATE.IN_PROGRESS) {
+    if (snapshotState === SNAPSHOT_STATE.IN_PROGRESS) {
       return (
         <FormattedMessage
           id="xpack.snapshotRestore.snapshotDetails.snapshotIsBeingCreatedMessage"

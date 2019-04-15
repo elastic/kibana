@@ -10,7 +10,7 @@ import { useAppDependencies } from '../index';
 
 interface Props {
   data: any;
-  children: any;
+  children: React.ReactNode;
 }
 
 export const DataPlaceholder: React.SFC<Props> = ({ data, children }) => {
