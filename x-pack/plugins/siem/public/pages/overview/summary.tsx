@@ -19,7 +19,7 @@ export const Summary = pure(() => (
       <p>
         <FormattedMessage
           id="xpack.siem.overview.startedText"
-          defaultMessage="Welcome to Elastic's Security &amp; Information Management (SIEM) application. Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {blog} and {videos}."
+          defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {blog} and {videos}."
           values={{
             docs: <EuiLink href="#">documentation</EuiLink>,
             data: <EuiLink href="kibana#home/tutorial_directory/security">ingesting data</EuiLink>,
