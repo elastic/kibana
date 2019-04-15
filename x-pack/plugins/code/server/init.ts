@@ -27,7 +27,7 @@ import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from '.
 import { setupRoute } from './routes/setup';
 import { workspaceRoute } from './routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './scheduler';
-import { enableSecurity } from './security';
+import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 
@@ -88,7 +88,7 @@ export function init(server: Server, options: any) {
     icon: 'codeApp',
     navLinkId: 'code',
     app: ['code', 'kibana'],
-    catalogue: [],
+    catalogue: [], // TODO add catalogue here
     privileges: {
       all: {
         api: ['code_user', 'code_admin'],
@@ -114,7 +114,6 @@ export function init(server: Server, options: any) {
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
     // enable security check in routes
-    enableSecurity(server);
     const codeNodeUrl = serverOptions.codeNodeUrl;
     if (codeNodeUrl) {
       const codeNodeUuid = (await retryUntilAvailable(
@@ -232,9 +231,11 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   }
   // check code node repos on disk
   await checkRepos(cloneWorker, esClient, serverOptions, log);
+
+  const codeServerRouter = new CodeServerRouter(server);
   // Add server routes and initialize the plugin here
   repositoryRoute(
-    server,
+    codeServerRouter,
     cloneWorker,
     deleteWorker,
     indexWorker,
@@ -242,13 +243,13 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController,
     serverOptions
   );
-  repositorySearchRoute(server, log);
-  documentSearchRoute(server, log);
-  symbolSearchRoute(server, log);
-  fileRoute(server, serverOptions);
-  workspaceRoute(server, serverOptions);
-  symbolByQnameRoute(server, log);
-  installRoute(server, lspService, installManager);
-  lspRoute(server, lspService, serverOptions);
-  setupRoute(server);
+  repositorySearchRoute(codeServerRouter, log);
+  documentSearchRoute(codeServerRouter, log);
+  symbolSearchRoute(codeServerRouter, log);
+  fileRoute(codeServerRouter, serverOptions);
+  workspaceRoute(codeServerRouter, serverOptions);
+  symbolByQnameRoute(codeServerRouter, log);
+  installRoute(codeServerRouter, lspService, installManager);
+  lspRoute(codeServerRouter, lspService, serverOptions);
+  setupRoute(codeServerRouter);
 }

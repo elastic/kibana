@@ -11,7 +11,6 @@ export * from './search';
 export * from './file';
 export * from './structure';
 export * from './editor';
-export * from './user';
 export * from './commit';
 export * from './status';
 export * from './project_config';

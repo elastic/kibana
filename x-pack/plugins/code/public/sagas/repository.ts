@@ -25,7 +25,6 @@ import {
   indexRepoFailed,
   indexRepoSuccess,
   initRepoCommand,
-  loadUserProfile,
   updateCloneProgress,
   updateDeleteProgress,
   updateIndexProgress,
@@ -171,7 +170,6 @@ export function* watchGotoRepo() {
 }
 
 function* handleAdminRouteChange() {
-  yield put(loadUserProfile());
   yield put(fetchRepos());
   yield put(fetchRepoConfigs());
   yield put(loadLanguageServers());

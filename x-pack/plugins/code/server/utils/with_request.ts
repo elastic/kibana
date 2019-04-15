@@ -11,8 +11,17 @@ export class WithRequest {
   public readonly callWithRequest: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
   constructor(readonly req: Request) {
-    // FIXME: I swapped out `callWithRequest` for `callWithInternalUser` to test and verify functionality, but you'll want to refactor this since
-    // the names no longer make sense.
-    this.callWithRequest = req.server.plugins.elasticsearch.getCluster('data').callWithInternalUser;
+    const cluster = req.server.plugins.elasticsearch.getCluster('data');
+
+    // @ts-ignore
+    const securityPlugin = req.server.plugins.security;
+    if (securityPlugin) {
+      const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
+      if (useRbac) {
+        this.callWithRequest = cluster.callWithInternalUser;
+        return;
+      }
+    }
+    this.callWithRequest = cluster.callWithRequest.bind(null, req);
   }
 }

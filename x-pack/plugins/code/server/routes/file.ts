@@ -19,11 +19,12 @@ import {
 import { ServerOptions } from '../server_options';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
+import { CodeServerRouter } from '../security';
 
 const TEXT_FILE_LIMIT = 1024 * 1024; // 1mb
 
-export function fileRoute(server: hapi.Server, options: ServerOptions) {
-  server.securedRoute({
+export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
+  server.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
     async handler(req: hapi.Request) {
@@ -58,7 +59,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}/blob/{ref}/{path*}',
     method: 'GET',
     async handler(req: hapi.Request, h: hapi.ResponseToolkit) {
@@ -108,7 +109,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/app/code/repo/{uri*3}/raw/{ref}/{path*}',
     method: 'GET',
     async handler(req, h: hapi.ResponseToolkit) {
@@ -131,16 +132,18 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}/history/{ref}',
     method: 'GET',
     handler: historyHandler,
   });
+
   server.route({
     path: '/api/code/repo/{uri*3}/history/{ref}/{path*}',
     method: 'GET',
     handler: historyHandler,
   });
+
   async function historyHandler(req: hapi.Request) {
     const gitOperations = new GitOperations(options.repoPath);
     const { uri, ref, path } = req.params;
@@ -176,7 +179,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
       }
     }
   }
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}/references',
     method: 'GET',
     async handler(req, reply) {
@@ -197,7 +200,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}/diff/{revision}',
     method: 'GET',
     async handler(req) {
@@ -216,7 +219,7 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}/blame/{revision}/{path*}',
     method: 'GET',
     async handler(req) {

@@ -6,42 +6,25 @@
 
 import { Server, ServerRoute, RouteOptions } from 'hapi';
 
-export interface SecuredRoute extends ServerRoute {
-  requireAdmin?: boolean;
-}
-
-declare module 'hapi' {
-  interface Server {
-    securedRoute(route: SecuredRoute): void;
-  }
-}
-
-export class SecureRoute {
+export class CodeServerRouter {
   constructor(readonly server: Server) {}
 
-  public install() {
-    const self = this;
-    function securedRoute(route: SecuredRoute) {
-      const routeOptions: RouteOptions = (route.options || {}) as RouteOptions;
-      routeOptions.tags = [
-        ...(routeOptions.tags || []),
-        `access:code_${route.requireAdmin ? 'admin' : 'user'}`,
-      ];
+  route(route: CodeRoute) {
+    const routeOptions: RouteOptions = (route.options || {}) as RouteOptions;
+    routeOptions.tags = [
+      ...(routeOptions.tags || []),
+      `access:code_${route.requireAdmin ? 'admin' : 'user'}`,
+    ];
 
-      self.server.route({
-        handler: route.handler,
-        method: route.method,
-        options: routeOptions,
-        path: route.path,
-      });
-    }
-
-    // FIXME: don't attach to the server this way. Use server.decorate or similar.
-    this.server.securedRoute = securedRoute;
+    this.server.route({
+      handler: route.handler,
+      method: route.method,
+      options: routeOptions,
+      path: route.path,
+    });
   }
 }
 
-export function enableSecurity(server: Server) {
-  const secureRoute = new SecureRoute(server);
-  secureRoute.install();
+export interface CodeRoute extends ServerRoute {
+  requireAdmin?: boolean;
 }
