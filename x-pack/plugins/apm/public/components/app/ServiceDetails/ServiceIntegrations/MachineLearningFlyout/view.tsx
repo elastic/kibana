@@ -20,19 +20,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Location } from 'history';
 import React from 'react';
 import { getMlJobId } from '../../../../../../common/ml_job_constants';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
 import { getMLJob } from '../../../../../services/rest/ml';
 import { KibanaLink } from '../../../../shared/Links/KibanaLink';
-import { MLJobLink } from '../../../../shared/Links/MLJobLink';
+import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
+import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
 
 interface Props {
   hasIndexPattern: boolean;
   isCreatingJob: boolean;
-  location: Location;
   onChangeTransaction: (value: string) => void;
   onClickCreate: () => void;
   onClose: () => void;
@@ -46,7 +45,6 @@ const INITIAL_DATA = { count: 0, jobs: [] };
 export function MachineLearningFlyoutView({
   hasIndexPattern,
   isCreatingJob,
-  location,
   onChangeTransaction,
   onClickCreate,
   onClose,
@@ -111,7 +109,6 @@ export function MachineLearningFlyoutView({
                 <MLJobLink
                   serviceName={serviceName}
                   transactionType={transactionType}
-                  location={location}
                 >
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
@@ -136,10 +133,7 @@ export function MachineLearningFlyoutView({
                     defaultMessage="No APM index pattern available. To create a job, please import the APM index pattern via the {setupInstructionLink}"
                     values={{
                       setupInstructionLink: (
-                        <KibanaLink
-                          pathname={'/app/kibana'}
-                          hash={`/home/tutorial/apm`}
-                        >
+                        <KibanaLink path={`/home/tutorial/apm`}>
                           {i18n.translate(
                             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText',
                             {
@@ -188,14 +182,14 @@ export function MachineLearningFlyoutView({
                     Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
               values={{
                 mlJobsPageLink: (
-                  <KibanaLink pathname={'/app/ml'}>
+                  <MLLink>
                     {i18n.translate(
                       'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
                       {
                         defaultMessage: 'Machine Learning jobs management page'
                       }
                     )}
-                  </KibanaLink>
+                  </MLLink>
                 )
               }}
             />{' '}

@@ -8,6 +8,7 @@ import {
   EuiHealth,
   // @ts-ignore missing type definition
   EuiHistogramSeries,
+  EuiIcon,
   // @ts-ignore missing type definition
   EuiInMemoryTable,
   EuiLink,
@@ -16,22 +17,33 @@ import {
   EuiSeriesChart,
   // @ts-ignore missing type definition
   EuiSeriesChartUtils,
+  EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { get } from 'lodash';
 import moment from 'moment';
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { LatestMonitor } from '../../../common/graphql/types';
-import { formatSparklineCounts } from './format_sparkline_counts';
+import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { monitorListQuery } from '../../queries';
+import { MonitorSparkline } from './monitor_sparkline';
+
+interface MonitorListQueryResult {
+  // TODO: clean up this ugly result data shape, there should be no nesting
+  monitorStatus?: {
+    monitors: LatestMonitor[];
+  };
+}
 
 interface MonitorListProps {
-  primaryColor: string;
   dangerColor: string;
-  loading: boolean;
-  monitors: LatestMonitor[];
 }
+
+type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
 
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 
@@ -40,8 +52,8 @@ const monitorListPagination = {
   pageSizeOptions: [5, 10, 20, 50],
 };
 
-export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: MonitorListProps) => (
-  <Fragment>
+export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
+  <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
         <FormattedMessage
@@ -50,16 +62,21 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
         />
       </h5>
     </EuiTitle>
-    <EuiPanel paddingSize="l">
-      <EuiInMemoryTable
-        columns={[
-          {
-            field: 'ping.monitor.status',
-            name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
-              defaultMessage: 'Status',
-            }),
-            render: (status: string) => (
-              <EuiHealth color={status === 'up' ? 'success' : 'danger'}>
+    <EuiSpacer size="s" />
+    <EuiInMemoryTable
+      columns={[
+        {
+          field: 'ping.monitor.status',
+          width: '150px',
+          name: i18n.translate('xpack.uptime.monitorList.statusColumnLabel', {
+            defaultMessage: 'Status',
+          }),
+          render: (status: string, monitor: LatestMonitor) => (
+            <div>
+              <EuiHealth
+                color={status === 'up' ? 'success' : 'danger'}
+                style={{ display: 'block' }}
+              >
                 {status === 'up'
                   ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
                       defaultMessage: 'Up',
@@ -68,87 +85,65 @@ export const MonitorList = ({ dangerColor, loading, monitors, primaryColor }: Mo
                       defaultMessage: 'Down',
                     })}
               </EuiHealth>
-            ),
-          },
-          {
-            field: 'ping.timestamp',
-            name: i18n.translate('xpack.uptime.monitorList.lastUpdatedColumnLabel', {
-              defaultMessage: 'Last updated',
-            }),
-            render: (timestamp: string) => moment(timestamp).fromNow(),
-          },
-          {
-            field: 'ping.monitor.id',
-            name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
-              defaultMessage: 'ID',
-            }),
-            render: (id: string, monitor: LatestMonitor) => (
+              <EuiText size="xs" color="subdued">
+                {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
+              </EuiText>
+            </div>
+          ),
+        },
+        {
+          field: 'ping.monitor.id',
+          name: i18n.translate('xpack.uptime.monitorList.idColumnLabel', {
+            defaultMessage: 'ID',
+          }),
+          render: (id: string, monitor: LatestMonitor) => (
+            <EuiLink>
               <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
                 {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
                   ? monitor.ping.monitor.name
                   : id}
               </Link>
-            ),
-          },
-          {
-            field: 'ping.url.full',
-            name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
-              defaultMessage: 'URL',
-            }),
-            render: (url: string) => (
-              <EuiLink href={url} target="_blank">
-                {url}
+            </EuiLink>
+          ),
+        },
+        {
+          field: 'ping.url.full',
+          name: i18n.translate('xpack.uptime.monitorList.urlColumnLabel', {
+            defaultMessage: 'URL',
+          }),
+          render: (url: string, monitor: LatestMonitor) => (
+            <div>
+              <EuiLink href={url} target="_blank" color="text">
+                {url} <EuiIcon size="s" type="popout" color="subdued" />
               </EuiLink>
-            ),
-          },
-          {
-            field: 'ping.monitor.ip',
-            name: i18n.translate('xpack.uptime.monitorList.ipColumnLabel', {
-              defaultMessage: 'IP',
-            }),
-          },
-          {
-            field: 'upSeries',
-            name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
-              defaultMessage: 'Monitor History',
-            }),
-            // @ts-ignore TODO fix typing
-            render: (upSeries, monitor) => {
-              const { downSeries } = monitor;
-              return (
-                <EuiSeriesChart
-                  showDefaultAxis={false}
-                  width={180}
-                  height={70}
-                  stackBy="y"
-                  // TODO: style hack
-                  style={{ marginBottom: '-20px' }}
-                  xType={EuiSeriesChartUtils.SCALE.TIME}
-                  xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-                >
-                  <EuiHistogramSeries
-                    data={formatSparklineCounts(downSeries)}
-                    name={i18n.translate('xpack.uptime.monitorList.downLineSeries.downLabel', {
-                      defaultMessage: 'Down',
-                    })}
-                    color={dangerColor}
-                  />
-                  <EuiHistogramSeries
-                    data={formatSparklineCounts(upSeries)}
-                    name={i18n.translate('xpack.uptime.monitorList.upLineSeries.upLabel', {
-                      defaultMessage: 'Up',
-                    })}
-                    color={primaryColor}
-                  />
-                </EuiSeriesChart>
-              );
-            },
-          },
-        ]}
-        loading={loading}
-        items={monitors}
-        pagination={monitorListPagination}
-      />
-    </EuiPanel>
-  </Fragment>
+              {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.ip ? (
+                <EuiText size="xs" color="subdued">
+                  {monitor.ping.monitor.ip}
+                </EuiText>
+              ) : null}
+            </div>
+          ),
+        },
+        {
+          field: 'upSeries',
+          width: '180px',
+          align: 'right',
+          name: i18n.translate('xpack.uptime.monitorList.monitorHistoryColumnLabel', {
+            defaultMessage: 'Downtime history',
+          }),
+          render: (downSeries: MonitorSeriesPoint, monitor: LatestMonitor) => (
+            <MonitorSparkline dangerColor={dangerColor} monitor={monitor} />
+          ),
+        },
+      ]}
+      loading={loading}
+      items={(data && data.monitorStatus && data.monitorStatus.monitors) || undefined}
+      pagination={monitorListPagination}
+    />
+  </EuiPanel>
+);
+
+export const MonitorList = withUptimeGraphQL<MonitorListQueryResult, MonitorListProps>(
+  MonitorListComponent,
+  monitorListQuery
 );

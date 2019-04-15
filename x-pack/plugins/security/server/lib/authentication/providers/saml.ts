@@ -124,7 +124,7 @@ export class SAMLAuthenticationProvider {
 
     let {
       authenticationResult,
-      // tslint:disable-next-line prefer-const
+      // eslint-disable-next-line prefer-const
       headerNotRecognized,
     } = await this.authenticateViaHeader(request);
     if (headerNotRecognized) {

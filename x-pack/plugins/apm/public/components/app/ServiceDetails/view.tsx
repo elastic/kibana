@@ -42,7 +42,6 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
         <EuiFlexItem grow={false}>
           <ServiceIntegrations
             transactionTypes={serviceDetailsData.types}
-            location={location}
             urlParams={urlParams}
           />
         </EuiFlexItem>

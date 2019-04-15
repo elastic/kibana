@@ -6,6 +6,7 @@
   "license": "Elastic-License",
   "scripts": {
     "kbn": "node ../scripts/kbn",
+    "kbn:bootstrap": "rm -rf ../built_assets/canvasStorybookDLL",
     "start": "gulp dev",
     "build": "gulp build",
     "testonly": "gulp testonly",
@@ -18,7 +19,8 @@
   },
   "kibana": {
     "build": {
-      "intermediateBuildDirectory": "build/plugin/kibana/x-pack"
+      "intermediateBuildDirectory": "build/plugin/kibana/x-pack",
+      "oss": false
     }
   },
   "resolutions": {
@@ -29,6 +31,7 @@
     "@kbn/es": "1.0.0",
     "@kbn/expect": "1.0.0",
     "@kbn/plugin-helpers": "9.0.2",
+    "@kbn/pm": "1.0.0",
     "@kbn/test": "1.0.0",
     "@storybook/addon-actions": "^5.0.5",
     "@storybook/addon-console": "^1.1.0",
@@ -39,6 +42,7 @@
     "@storybook/react": "^5.0.5",
     "@storybook/theming": "^5.0.5",
     "@types/angular": "1.6.50",
+    "@types/base64-js": "^1.2.5",
     "@types/cheerio": "^0.22.10",
     "@types/chroma-js": "^1.4.1",
     "@types/color": "^3.0.0",
@@ -48,6 +52,7 @@
     "@types/d3-time-format": "^2.1.0",
     "@types/d3-time": "^1.0.7",
     "@types/elasticsearch": "^5.0.30",
+    "@types/file-saver": "^2.0.0",
     "@types/graphql": "^0.13.1",
     "@types/history": "^4.6.2",
     "@types/jest": "^24.0.9",
@@ -55,6 +60,7 @@
     "@types/json-stable-stringify": "^1.0.32",
     "@types/jsonwebtoken": "^7.2.7",
     "@types/lodash": "^3.10.1",
+    "@types/mime": "^2.0.1",
     "@types/mocha": "^5.2.6",
     "@types/object-hash": "^1.2.0",
     "@types/pngjs": "^3.3.1",
@@ -85,6 +91,7 @@
     "chalk": "^2.4.1",
     "chance": "1.0.10",
     "checksum": "0.1.1",
+    "cheerio": "0.22.0",
     "commander": "2.12.2",
     "copy-webpack-plugin": "^4.5.2",
     "del": "^3.0.0",
@@ -116,8 +123,7 @@
     "pdfjs-dist": "^2.0.943",
     "pixelmatch": "4.0.2",
     "proxyquire": "1.7.11",
-    "react-docgen-typescript-loader": "^3.0.0",
-    "react-docgen-typescript-webpack-plugin": "^1.1.0",
+    "react-docgen-typescript-loader": "^3.1.0",
     "react-hooks-testing-library": "^0.3.8",
     "react-test-renderer": "^16.8.0",
     "react-testing-library": "^6.0.0",
@@ -144,7 +150,7 @@
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.3.4",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.8.0",
+    "@elastic/eui": "9.9.0",
     "@elastic/node-crypto": "0.1.2",
     "@elastic/numeral": "2.3.2",
     "@kbn/babel-preset": "1.0.0",

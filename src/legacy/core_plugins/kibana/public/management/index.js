@@ -22,7 +22,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './sections';
-import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
@@ -141,7 +140,7 @@ uiModules
       link: function ($scope) {
         timefilter.disableAutoRefreshSelector();
         timefilter.disableTimeRangeSelector();
-        $scope.sections = management.items.inOrder;
+        $scope.sections = management.visibleItems;
         $scope.section = management.getSection($scope.sectionName) || management;
 
         if ($scope.section) {
@@ -152,7 +151,7 @@ uiModules
 
         updateSidebar($scope.sections, $scope.section.id);
         $scope.$on('$destroy', () => destroyReact(SIDENAV_ID));
-        management.addListener(() => updateSidebar(management.items.inOrder, $scope.section.id));
+        management.addListener(() => updateSidebar(management.visibleItems, $scope.section.id));
 
         updateLandingPage($scope.$root.chrome.getKibanaVersion());
         $scope.$on('$destroy', () => destroyReact(LANDING_ID));
@@ -166,7 +165,7 @@ uiModules
     return {
       restrict: 'E',
       link: function ($scope) {
-        $scope.sections = management.items.inOrder;
+        $scope.sections = management.visibleItems;
         $scope.kbnVersion = kbnVersion;
       }
     };

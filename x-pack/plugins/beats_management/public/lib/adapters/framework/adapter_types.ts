@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import * as t from 'io-ts';
 import { LICENSES } from './../../../../common/constants/security';
 
