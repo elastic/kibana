@@ -54,9 +54,9 @@ export const DropdownFilter: FunctionComponent<Props> = ({
     );
   });
 
-  // eslint-disable-next-line jsx-a11y/no-onchange
   return (
     <div className="canvasDropdownFilter">
+      {/* eslint-disable-next-line jsx-a11y/no-onchange */}
       <select className="canvasDropdownFilter__select" value={value} onChange={changeHandler}>
         {dropdownOptions}
       </select>
