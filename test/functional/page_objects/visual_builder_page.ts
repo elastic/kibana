@@ -91,7 +91,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      await input.clearWithKeyboard();
+      await input.clearValueWithKeyboard();
     }
 
     public async getMarkdownText() {

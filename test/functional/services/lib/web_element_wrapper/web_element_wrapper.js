@@ -116,16 +116,28 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async clearValue() {
-    await this._webElement.clear();
+    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+    // await this._webElement.clear();
+    await this._driver.executeScript(`arguments[0].value=''`, this._webElement);
   }
 
-  async clearWithKeyboard() {
-    const controlKey = process.platform === 'darwin' ? this._Keys.COMMAND : this._Keys.CONTROL;
-    await this.pressKeys([controlKey, 'a']);
-    const actions = this._driver.executor_.w3c === true
-      ? this._driver.actions()
-      : this._driver.actions({ bridge: true });
-    await actions.sendKeys(this._Keys.DELETE).perform();
+  /**
+   * Clear the value of this element using Keyboard
+   * @param { charByChar: false } options
+   */
+  async clearValueWithKeyboard(options = { charByChar: false }) {
+    if (options.charByChar === true) {
+      const value = await this.getAttribute('value');
+      for (let i = 1; i <= value.length; i++) {
+        await this.pressKeys(this._Keys.BACK_SPACE);
+        await delay(100);
+      }
+    } else {
+      const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+      await this.pressKeys([selectionKey, 'a']);
+      await this.pressKeys(this._Keys.NULL); // Release modifier keys
+      await this.pressKeys(this._Keys.BACK_SPACE); // Delete all content
+    }
   }
 
   /**

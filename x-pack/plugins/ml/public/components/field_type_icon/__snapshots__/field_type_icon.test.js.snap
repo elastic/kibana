@@ -5,13 +5,15 @@ exports[`FieldTypeIcon render component when type matches a field type 1`] = `
   ariaLabel="keyword type"
   className="field-type-icon"
   iconChar="t"
+  needsAria={true}
 />
 `;
 
 exports[`FieldTypeIcon update component 1`] = `
 <FieldTypeIconContainer
-  ariaLabel="IP type"
+  ariaLabel="ip type"
   className="field-type-icon kuiIcon fa-laptop"
   iconChar=""
+  needsAria={true}
 />
 `;

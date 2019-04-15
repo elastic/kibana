@@ -57,6 +57,7 @@ class FieldUI extends PureComponent {
     setting: PropTypes.object.isRequired,
     save: PropTypes.func.isRequired,
     clear: PropTypes.func.isRequired,
+    enableSaving: PropTypes.bool.isRequired,
   }
 
   constructor(props) {
@@ -380,6 +381,7 @@ class FieldUI extends PureComponent {
   }
 
   renderField(setting) {
+    const { enableSaving } = this.props;
     const { loading, changeImage, unsavedValue } = this.state;
     const { name, value, type, options, optionLabels = {}, isOverridden, ariaName } = setting;
 
@@ -400,7 +402,7 @@ class FieldUI extends PureComponent {
             )}
             checked={!!unsavedValue}
             onChange={this.onFieldChange}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
             aria-label={ariaName}
@@ -420,7 +422,7 @@ class FieldUI extends PureComponent {
               height="auto"
               minLines={6}
               maxLines={30}
-              isReadOnly={isOverridden}
+              isReadOnly={isOverridden || !enableSaving}
               setOptions={{
                 showLineNumbers: false,
                 tabSize: 2,
@@ -445,7 +447,7 @@ class FieldUI extends PureComponent {
         } else {
           return (
             <EuiFilePicker
-              disabled={loading || isOverridden}
+              disabled={loading || isOverridden || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
               ref={(input) => { this.changeImageForm = input; }}
@@ -467,7 +469,7 @@ class FieldUI extends PureComponent {
             })}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -479,7 +481,7 @@ class FieldUI extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -491,7 +493,7 @@ class FieldUI extends PureComponent {
             value={unsavedValue}
             onChange={this.onFieldChange}
             isLoading={loading}
-            disabled={loading || isOverridden}
+            disabled={loading || isOverridden || !enableSaving}
             onKeyDown={this.onFieldKeyDown}
             data-test-subj={`advancedSetting-editField-${name}`}
           />
@@ -515,10 +517,11 @@ class FieldUI extends PureComponent {
       );
     }
 
+    const canUpdateSetting = this.props.enableSaving;
     const defaultLink = this.renderResetToDefaultLink(setting);
     const imageLink = this.renderChangeImageLink(setting);
 
-    if (defaultLink || imageLink) {
+    if (canUpdateSetting && (defaultLink || imageLink)) {
       return (
         <span>
           {defaultLink}
