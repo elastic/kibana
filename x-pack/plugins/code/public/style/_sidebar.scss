@@ -42,6 +42,10 @@
   .euiToken {
     margin-right: $euiSizeS;
   }
+
+  > .euiIcon {
+    margin-right: $euiSizeXS;
+  }
 }
 
 .codeSymbol--nested {
