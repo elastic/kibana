@@ -28,7 +28,14 @@ import { useSourceConfigurationFormState } from './source_configuration_form_sta
 
 const noop = () => undefined;
 
-export const SourceConfigurationFlyout: React.FunctionComponent = () => {
+interface SourceConfigurationFlyoutProps {
+  shouldAllowEdit: boolean;
+}
+
+export const SourceConfigurationFlyout: React.FunctionComponent<
+  SourceConfigurationFlyoutProps
+> = props => {
+  const { shouldAllowEdit } = props;
   const { isVisible, hide } = useContext(SourceConfigurationFlyoutState.Context);
 
   const {
@@ -98,18 +105,30 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2 id="sourceConfigurationTitle">
-            <FormattedMessage
-              id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
-              defaultMessage="Configure source"
-            />
+            {shouldAllowEdit ? (
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.sourceConfigurationTitle"
+                defaultMessage="Configure source"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.infra.sourceConfiguration.sourceConfigurationReadonlyTitle"
+                defaultMessage="View source configuration"
+              />
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <NameConfigurationPanel isLoading={isLoading} nameFieldProps={fieldProps.name} />
+        <NameConfigurationPanel
+          isLoading={isLoading}
+          readOnly={!shouldAllowEdit}
+          nameFieldProps={fieldProps.name}
+        />
         <EuiSpacer />
         <IndicesConfigurationPanel
           isLoading={isLoading}
+          readOnly={!shouldAllowEdit}
           logAliasFieldProps={fieldProps.logAlias}
           metricAliasFieldProps={fieldProps.metricAlias}
         />
@@ -118,6 +137,7 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
           containerFieldProps={fieldProps.containerField}
           hostFieldProps={fieldProps.hostField}
           isLoading={isLoading}
+          readOnly={!shouldAllowEdit}
           podFieldProps={fieldProps.podField}
           tiebreakerFieldProps={fieldProps.tiebreakerField}
           timestampFieldProps={fieldProps.timestampField}
@@ -157,26 +177,28 @@ export const SourceConfigurationFlyout: React.FunctionComponent = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            {isLoading ? (
-              <EuiButton color="primary" isLoading fill>
-                Loading
-              </EuiButton>
-            ) : (
-              <EuiButton
-                data-test-subj="updateSourceConfigurationButton"
-                color="primary"
-                isDisabled={!isFormDirty || !isFormValid}
-                fill
-                onClick={persistUpdates}
-              >
-                <FormattedMessage
-                  id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
-                  defaultMessage="Update Source"
-                />
-              </EuiButton>
-            )}
-          </EuiFlexItem>
+          {shouldAllowEdit && (
+            <EuiFlexItem grow={false}>
+              {isLoading ? (
+                <EuiButton color="primary" isLoading fill>
+                  Loading
+                </EuiButton>
+              ) : (
+                <EuiButton
+                  data-test-subj="updateSourceConfigurationButton"
+                  color="primary"
+                  isDisabled={!isFormDirty || !isFormValid}
+                  fill
+                  onClick={persistUpdates}
+                >
+                  <FormattedMessage
+                    id="xpack.infra.sourceConfiguration.updateSourceConfigurationButtonLabel"
+                    defaultMessage="Update Source"
+                  />
+                </EuiButton>
+              )}
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>

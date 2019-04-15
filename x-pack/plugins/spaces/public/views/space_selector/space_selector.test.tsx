@@ -49,6 +49,7 @@ test('it uses the spaces on props, when provided', () => {
       id: 'space-1',
       name: 'Space 1',
       description: 'This is the first space',
+      disabledFeatures: [],
     },
   ];
 
@@ -72,6 +73,7 @@ test('it queries for spaces when not provided on props', () => {
       id: 'space-1',
       name: 'Space 1',
       description: 'This is the first space',
+      disabledFeatures: [],
     },
   ];
 
