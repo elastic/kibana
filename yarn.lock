@@ -1943,20 +1943,20 @@
     "@microsoft/tsdoc" "0.12.8"
     "@types/node" "8.5.8"
 
-"@microsoft/api-extractor@7.0.31":
-  version "7.0.31"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.0.31.tgz#4d72755bf234e1c3a0afb22f678b7106158a9b89"
-  integrity sha512-7oiMvxaR9/qOO4SdlG2JFhdCZ1B+JtaX4pDb/aDGsm+7n+PMeLSVgQKeZwVXUIgslHlXxkxbX7zXIz41VqL8sQ==
+"@microsoft/api-extractor@7.0.41":
+  version "7.0.41"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.0.41.tgz#26931b0cc4ecb38dfbc71ec04318cc71dabfbd44"
+  integrity sha512-dO3qyQKKgKhZVDA6lJkyTBeV6qa6vbhES3I0dTJEtg6FA/UsLjvidgBbeRwlNIq4u+38xbhq+L7Qb6O7teVQDw==
   dependencies:
     "@microsoft/api-extractor-model" "7.0.28"
     "@microsoft/node-core-library" "3.13.0"
     "@microsoft/ts-command-line" "4.2.3"
-    "@microsoft/tsdoc" "0.12.8"
+    "@microsoft/tsdoc" "0.12.9"
     colors "~1.2.1"
     lodash "~4.17.5"
     resolve "1.8.1"
     source-map "~0.6.1"
-    typescript "~3.1.6"
+    typescript "~3.4.3"
 
 "@microsoft/node-core-library@3.13.0":
   version "3.13.0"
@@ -1986,6 +1986,11 @@
   version "0.12.8"
   resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.12.8.tgz#e9646c91c650d536f37b04762eaa81afdc9a19d3"
   integrity sha512-0smzAmVIUCsssAqDSPn9AfOPKUobq2WXMygbzC5JNswAJOs4uJK6DTZgfnHC8QLE2q374sPNwWU5D5LuoAJQSA==
+
+"@microsoft/tsdoc@0.12.9":
+  version "0.12.9"
+  resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.12.9.tgz#f92538bebf649b1b9d00bdd34a9c9971aef17d01"
+  integrity sha512-sDhulvuVk65eMppYOE6fr6mMI6RUqs53KUg9deYzNCBpP+2FhR0OFB5innEfdtSedk0LK+1Ppu6MxkfiNjS/Cw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -2677,6 +2682,11 @@
   dependencies:
     "@types/babel-types" "*"
 
+"@types/base64-js@^1.2.5":
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/@types/base64-js/-/base64-js-1.2.5.tgz#582b2476169a6cba460a214d476c744441d873d5"
+  integrity sha1-WCskdhaabLpGCiFNR2x0REHYc9U=
+
 "@types/bluebird@^3.1.1":
   version "3.5.20"
   resolved "https://registry.yarnpkg.com/@types/bluebird/-/bluebird-3.5.20.tgz#f6363172add6f4eabb8cada53ca9af2781e8d6a1"
@@ -2871,6 +2881,11 @@
   version "7.2.1"
   resolved "https://registry.yarnpkg.com/@types/fetch-mock/-/fetch-mock-7.2.1.tgz#5630999aa75532e00af42a54cbe05e1651f4a080"
   integrity sha512-zuLhLEK4gOPxhkiUhqbG4p0lKY2ePEE//5NHTTn/vjYl0XWpfk2x0Fw7EWKtCjlggEsuc1GvpasD46X9PSZFaA==
+
+"@types/file-saver@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@types/file-saver/-/file-saver-2.0.0.tgz#cbb49815a5e1129d5f23836a98d65d93822409af"
+  integrity sha512-dxdRrUov2HVTbSRFX+7xwUPlbGYVEZK6PrSqClg2QPos3PNe0bCajkDDkDeeC1znjSH03KOEqVbXpnJuWa2wgQ==
 
 "@types/form-data@^2.2.1":
   version "2.2.1"
@@ -3112,6 +3127,11 @@
   version "1.27.0"
   resolved "https://registry.yarnpkg.com/@types/mime-db/-/mime-db-1.27.0.tgz#9bc014a1fd1fdf47649c1a54c6dd7966b8284792"
   integrity sha1-m8AUof0f30dknBpUxt15ZrgoR5I=
+
+"@types/mime@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/mime/-/mime-2.0.1.tgz#dc488842312a7f075149312905b5e3c0b054c79d"
+  integrity sha512-FwI9gX75FgVBJ7ywgnq/P7tw+/o1GUbtP0KzbtusLigAOgIgNISRK0ZPl4qertvXSIE8YbsVJueQ90cDt9YYyw==
 
 "@types/mimos@*":
   version "3.0.1"
@@ -4283,7 +4303,7 @@ ajv@^5.0.0, ajv@^5.1.0:
     fast-json-stable-stringify "^2.0.0"
     json-schema-traverse "^0.3.0"
 
-ajv@^6.1.0, ajv@^6.1.1, ajv@^6.5.5:
+ajv@^6.1.0, ajv@^6.5.5:
   version "6.5.5"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.5.5.tgz#cf97cdade71c6399a92c6d6c4177381291b781a1"
   integrity sha512-7q7gtRQDJSyuEHjuVgHoUa2VuemFiCMrfQc9Tc08XTAc4Zj/5U1buQJ0HU6i7fKjXU09SVgSmxa4sLvuvS8Iyg==
@@ -4750,7 +4770,7 @@ are-we-there-yet@~1.1.2:
     delegates "^1.0.0"
     readable-stream "^2.0.6"
 
-argparse@^1.0.2, argparse@~1.0.9:
+argparse@^1.0.2, argparse@~1.0.2, argparse@~1.0.9:
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/argparse/-/argparse-1.0.10.tgz#bcd6791ea5ae09725e17e5ad988134cd40b3d911"
   integrity sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==
@@ -10419,6 +10439,11 @@ esprima@~1.1.1:
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-1.1.1.tgz#5b6f1547f4d102e670e140c509be6771d6aeb549"
   integrity sha1-W28VR/TRAuZw4UDFCb5ncdautUk=
 
+esprima@~2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/esprima/-/esprima-2.2.0.tgz#4292c1d68e4173d815fa2290dc7afc96d81fcd83"
+  integrity sha1-QpLB1o5Bc9gV+iKQ3Hr8ltgfzYM=
+
 esprima@~4.0.0:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/esprima/-/esprima-4.0.1.tgz#13b04cdb3e6c5d19df91ab6987a8695619b0aa71"
@@ -15387,13 +15412,13 @@ js-tokens@^3.0.0, js-tokens@^3.0.2:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-yaml@3.13.1:
-  version "3.13.1"
-  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.13.1.tgz#aff151b30bfdfa8e49e05da22e7415e9dfa37847"
-  integrity sha512-YfbcO7jXDdyj0DGxYVSlSeQNHbD7XPWvrVWeVUujrQEoZzWJIRrCPoyk6kL6IAjAG2IolMK4T0hNUe0HOUs5Jw==
+js-yaml@3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.4.1.tgz#7183990c62f646369eaa04675b2d5f1e71d62b8b"
+  integrity sha1-cYOZDGL2RjaeqgRnWy1fHnHWK4s=
   dependencies:
-    argparse "^1.0.7"
-    esprima "^4.0.0"
+    argparse "~1.0.2"
+    esprima "~2.2.0"
 
 js-yaml@3.x:
   version "3.11.0"
@@ -20469,29 +20494,16 @@ react-dev-utils@^7.0.0, react-dev-utils@^7.0.1:
     strip-ansi "5.0.0"
     text-table "0.2.0"
 
-react-docgen-typescript-loader@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/react-docgen-typescript-loader/-/react-docgen-typescript-loader-3.0.0.tgz#4042e2854d29380e4d01e479d438c03ec00de8e8"
-  integrity sha512-xtE4bZrU9+7grFFzs8v6gWc+Wl2FCCL59hldHoX2DuQAXOmJIilUm2uPmDmRNA8RpxU1Ax+9Gl0JfUcWgx2QPA==
+react-docgen-typescript-loader@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-docgen-typescript-loader/-/react-docgen-typescript-loader-3.1.0.tgz#09cacf872617c97f946ee920d2239f51d543be41"
+  integrity sha512-gY+b7RkRPty5ZN4NMQ+jwx9MzTVuIj6LJCwdWRAi1+nrHJfH2gMMytQfxFdzQ7BlgD4COWnSE8Ixtl2L62kCRw==
   dependencies:
     "@webpack-contrib/schema-utils" "^1.0.0-beta.0"
-    loader-utils "^1.1.0"
-    react-docgen-typescript "^1.9.0"
+    loader-utils "^1.2.3"
+    react-docgen-typescript "^1.12.3"
 
-react-docgen-typescript-webpack-plugin@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/react-docgen-typescript-webpack-plugin/-/react-docgen-typescript-webpack-plugin-1.1.0.tgz#4bfb8c3312fce487083924842cf03f66177ab9df"
-  integrity sha1-S/uMMxL85IcIOSSELPA/Zhd6ud8=
-  dependencies:
-    ajv "^6.1.1"
-    react-docgen-typescript "^1.2.3"
-
-react-docgen-typescript@^1.2.3:
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/react-docgen-typescript/-/react-docgen-typescript-1.12.0.tgz#be25d3604e05676f05a1248952f8d5823d7a216a"
-  integrity sha512-EAb2W5UNTTR75zTWm8bbn9iQmh+W/9DvnCazIdzDb+TnzvpcxEFCjRia+Rhpkx4FRRS3AYyJrw5Ar3zX51gJfQ==
-
-react-docgen-typescript@^1.9.0:
+react-docgen-typescript@^1.12.3:
   version "1.12.3"
   resolved "https://registry.yarnpkg.com/react-docgen-typescript/-/react-docgen-typescript-1.12.3.tgz#fe62a5ce82e93573e316366e53adfe8273121c70"
   integrity sha512-s1XswWs4ykNdWKsPyfM4qptV5dT8nnjnVi2IcjoS/vGlRNYrc0TkW0scVOrinHZ+ndKhPqA4iVNrdwhxZBzJcg==
@@ -25231,7 +25243,7 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@^3.3.3333, typescript@~3.1.6:
+typescript@^3.3.3333, typescript@~3.4.3:
   version "3.3.3333"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.3333.tgz#171b2c5af66c59e9431199117a3bcadc66fdcfd6"
   integrity sha512-JjSKsAfuHBE/fB2oZ8NxtRTk5iGcg6hkYXMnZ3Wc+b2RSqejEqTaem11mHASMnFilHrax3sLK0GDzcJrekZYLw==
