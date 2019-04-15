@@ -35,7 +35,7 @@ const writeFileAsync = promisify(fs.writeFile);
 const rimrafAsync = promisify(rimraf);
 
 export class DllCompiler {
-  static getRawDllConfig(uiBundles = {}, threadLoaderPoolConfig = {}, babelCacheLoaderConfig) {
+  static getRawDllConfig(uiBundles = {}, babelCacheLoaderConfig, threadLoaderPoolConfig = {}) {
     return {
       uiBundles,
       babelCacheLoaderConfig,
@@ -57,8 +57,8 @@ export class DllCompiler {
   constructor(uiBundles, threadLoaderPoolConfig, cacheLoaderConfigGenerator, logWithMetadata) {
     this.rawDllConfig = DllCompiler.getRawDllConfig(
       uiBundles,
-      threadLoaderPoolConfig,
-      cacheLoaderConfigGenerator('babel'),
+      cacheLoaderConfigGenerator(uiBundles.getCacheDirectory('babel')),
+      threadLoaderPoolConfig
     );
     this.logWithMetadata = logWithMetadata || (() => null);
   }

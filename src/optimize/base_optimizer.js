@@ -174,10 +174,10 @@ export default class BaseOptimizer {
     };
   }
 
-  getCacheLoaderConfigGenerator(cacheName) {
+  getCacheLoaderConfigGenerator(cacheDir) {
     return {
       cacheContext: fromRoot('.'),
-      cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
+      cacheDirectory: cacheDir,
       readOnly: !!IS_KIBANA_DISTRIBUTABLE
     };
   }
@@ -223,7 +223,9 @@ export default class BaseOptimizer {
       return [
         {
           loader: 'cache-loader',
-          options: this.getCacheLoaderConfigGenerator(cacheName),
+          options: this.getCacheLoaderConfigGenerator(
+            this.uiBundles.getCacheDirectory(cacheName)
+          ),
         },
         ...loaders
       ];
