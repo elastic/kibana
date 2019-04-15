@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-
-import { initTestBed, registerHttpRequestMockHelpers, nextTick, findTestSubject } from './test_helpers';
-import { AutoFollowPatternAdd } from '../../public/app/sections/auto_follow_pattern_add';
-import { AutoFollowPatternEdit } from '../../public/app/sections/auto_follow_pattern_edit';
 import { AutoFollowPatternForm } from '../../public/app/components/auto_follow_pattern_form';
-import routing from '../../public/app/services/routing';
+import { setupEnvironment, pageHelpers, nextTick, findTestSubject } from './helpers';
+import { AUTO_FOLLOW_PATTERN_EDIT } from './helpers/constants';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path || 'api/cross_cluster_replication',
@@ -34,63 +30,34 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
-const AUTO_FOLLOW_PATTERN_NAME = 'my-autofollow';
-
-const AUTO_FOLLOW_PATTERN = {
-  name: AUTO_FOLLOW_PATTERN_NAME,
-  remoteCluster: 'cluster-2',
-  leaderIndexPatterns: ['my-pattern-*'],
-  followIndexPattern: 'prefix_{{leader_index}}_suffix'
-};
-
-const testBedOptions = {
-  memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router,
-    // The auto-follow pattern id to fetch is read from the router ":id" param
-    // so we first set it in our initial entries
-    initialEntries: [`/${AUTO_FOLLOW_PATTERN_NAME}`],
-    // and then we declarae the :id param on the component route path
-    componentRoutePath: '/:id'
-  }
-};
+const { setup } = pageHelpers.autoFollowPatternEdit;
+const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Edit Auto-follow pattern', () => {
   let server;
-  let find;
-  let component;
-  let getUserActions;
-  let form;
-  let clickSaveForm;
-  let setLoadRemoteClustersResponse;
-  let setGetAutoFollowPatternResponse;
+  let httpRequestsMockHelpers;
 
-  beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
 
-    // Register helpers to mock Http Requests
-    ({
-      setLoadRemoteClustersResponse,
-      setGetAutoFollowPatternResponse
-    } = registerHttpRequestMockHelpers(server));
-
-    // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClustersResponse();
-
-    // Mock all HTTP Requests that have not been handled previously
-    server.respondWith([200, {}, '']);
+  afterAll(() => {
+    server.restore();
   });
 
   describe('on component mount', () => {
+    let find;
+    let component;
+
     const remoteClusters = [
       { name: 'cluster-1', seeds: ['localhost:123'], isConnected: true },
       { name: 'cluster-2', seeds: ['localhost:123'], isConnected: true },
     ];
 
     beforeEach(async () => {
-      setLoadRemoteClustersResponse(remoteClusters);
-      setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN);
-      ({ component, find } = initTestBed(AutoFollowPatternEdit, undefined, testBedOptions));
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
+      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN_EDIT);
+      ({ component, find } = setup());
 
       await nextTick();
       component.update();
@@ -102,7 +69,7 @@ describe('Edit Auto-follow pattern', () => {
      * the form component is indeed shared between the 2 app sections.
      */
     test('should use the same Form component as the "<AutoFollowPatternAdd />" component', async () => {
-      const { component: addAutofollowPatternComponent } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions);
+      const { component: addAutofollowPatternComponent } = setupAutoFollowPatternAdd();
 
       await nextTick();
       addAutofollowPatternComponent.update();
@@ -115,20 +82,24 @@ describe('Edit Auto-follow pattern', () => {
     });
 
     test('should populate the form fields with the values from the auto-follow pattern loaded', () => {
-      expect(find('ccrAutoFollowPatternFormNameInput').props().value).toBe(AUTO_FOLLOW_PATTERN.name);
-      expect(find('ccrRemoteClusterInput').props().value).toBe(AUTO_FOLLOW_PATTERN.remoteCluster);
-      expect(find('ccrAutoFollowPatternFormIndexPatternInput').text()).toBe(AUTO_FOLLOW_PATTERN.leaderIndexPatterns.join(''));
+      expect(find('ccrAutoFollowPatternFormNameInput').props().value).toBe(AUTO_FOLLOW_PATTERN_EDIT.name);
+      expect(find('ccrRemoteClusterInput').props().value).toBe(AUTO_FOLLOW_PATTERN_EDIT.remoteCluster);
+      expect(find('ccrAutoFollowPatternFormIndexPatternInput').text()).toBe(AUTO_FOLLOW_PATTERN_EDIT.leaderIndexPatterns.join(''));
       expect(find('ccrAutoFollowPatternFormPrefixInput').props().value).toBe('prefix_');
       expect(find('ccrAutoFollowPatternFormSuffixInput').props().value).toBe('_suffix');
     });
   });
 
   describe('when the remote cluster is disconnected', () => {
+    let find;
+    let component;
+    let actions;
+    let form;
+
     beforeEach(async () => {
-      setLoadRemoteClustersResponse([{ name: 'cluster-2', seeds: ['localhost:123'], isConnected: false }]);
-      setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN);
-      ({ component, find, getUserActions, form } = initTestBed(AutoFollowPatternEdit, undefined, testBedOptions));
-      ({ clickSaveForm } = getUserActions('autoFollowPatternForm'));
+      httpRequestsMockHelpers.setLoadRemoteClustersResponse([{ name: 'cluster-2', seeds: ['localhost:123'], isConnected: false }]);
+      httpRequestsMockHelpers.setGetAutoFollowPatternResponse(AUTO_FOLLOW_PATTERN_EDIT);
+      ({ component, find, actions, form } = setup());
 
       await nextTick();
       component.update();
@@ -139,12 +110,12 @@ describe('Edit Auto-follow pattern', () => {
 
       expect(error.length).toBe(1);
       expect(error.find('.euiCallOutHeader__title').text())
-        .toBe(`Can't edit auto-follow pattern because remote cluster '${AUTO_FOLLOW_PATTERN.remoteCluster}' is not connected`);
+        .toBe(`Can't edit auto-follow pattern because remote cluster '${AUTO_FOLLOW_PATTERN_EDIT.remoteCluster}' is not connected`);
       expect(findTestSubject(error, 'ccrRemoteClusterEditButton').length).toBe(1);
     });
 
     test('should prevent saving the form and display an error message for the required remote cluster', () => {
-      clickSaveForm();
+      actions.clickSaveForm();
 
       expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
       expect(find('ccrAutoFollowPatternFormSubmitButton').props().disabled).toBe(true);

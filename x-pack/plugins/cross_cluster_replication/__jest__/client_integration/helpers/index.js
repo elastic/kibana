@@ -5,6 +5,7 @@
  */
 
 import { setup as autoFollowPatternAddSetup } from './auto_follow_pattern_add.helpers';
+import { setup as autoFollowPatternEditSetup } from './auto_follow_pattern_edit.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -12,4 +13,5 @@ export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
   autoFollowPatternAdd: { setup: autoFollowPatternAddSetup },
+  autoFollowPatternEdit: { setup: autoFollowPatternEditSetup },
 };
