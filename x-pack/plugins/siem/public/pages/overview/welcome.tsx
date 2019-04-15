@@ -27,7 +27,7 @@ export const Welcome = pure(() => (
       <EuiFlexItem>
         <EuiTitle size="l">
           <h1>
-            <FormattedMessage id="xpack.siem.overview.pageTitle" defaultMessage="Elastic SIEM" />
+            <FormattedMessage id="xpack.siem.overview.pageTitle" defaultMessage="SIEM" />
           </h1>
         </EuiTitle>
         <EuiText color="subdued" size="s">
