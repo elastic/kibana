@@ -5,6 +5,8 @@
  */
 
 import { Server } from 'hapi';
+import { i18n } from '@kbn/i18n';
+import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { checkRepos } from './check_repos';
 import { clientWithInternalUser, CodeNodeInfo } from './code_node_client';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
@@ -67,6 +69,36 @@ function getServerUuid(server: Server): Promise<string> {
 export function init(server: Server, options: any) {
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
+  const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'code',
+    name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
+      defaultMessage: 'Code',
+    }),
+    icon: 'codeApp',
+    navLinkId: 'code',
+    app: ['code', 'kibana'],
+    catalogue: [],
+    privileges: {
+      all: {
+        api: ['code_user', 'code_admin'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show', 'user', 'admin'],
+      },
+      read: {
+        api: ['code_user'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show', 'user'],
+      },
+    },
+  });
+
   // @ts-ignore
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
