@@ -73,7 +73,7 @@ export class LeadfootElementWrapper {
   async clearValue() {
     // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
     // await this._leadfootElement.clearValue();
-    await this._leadfoot.execute(`arguments[0].value=''`, this._leadfootElement);
+    await this._leadfoot.execute(`arguments[0].value=''`, [this._leadfootElement]);
   }
 
   /**
