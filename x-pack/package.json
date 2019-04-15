@@ -91,7 +91,6 @@
     "@types/tar-fs": "^1.16.1",
     "@types/tinycolor2": "^1.4.1",
     "@types/uuid": "^3.4.4",
-    "@types/wreck": "^14.0.0",
     "abab": "^1.0.4",
     "ansi-colors": "^3.0.5",
     "ansicolors": "0.3.2",

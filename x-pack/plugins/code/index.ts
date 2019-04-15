@@ -68,7 +68,7 @@ export const code = (kibana: any) =>
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         disableIndexScheduler: Joi.boolean().default(true), // Temp option to disable index scheduler.
         enableGlobalReference: Joi.boolean().default(false), // Global reference as optional feature for now
-        codeNode: Joi.boolean().default(false),
+        codeNodeUrl: Joi.string(),
       }).default();
     },
     init,
