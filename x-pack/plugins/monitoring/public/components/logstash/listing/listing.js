@@ -72,7 +72,7 @@ class ListingUI extends PureComponent {
         name: i18n.translate('xpack.monitoring.logstash.nodes.eventsIngestedTitle', {
           defaultMessage: 'Events Ingested'
         }),
-        field: 'events_out',
+        field: 'events_ingested',
         sortable: true,
         render: value => formatNumber(value, '0.[0]a')
       },
