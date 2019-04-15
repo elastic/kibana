@@ -22,7 +22,7 @@ export function deserializeSnapshotDetails(
     uuid,
     version_id: versionId,
     version,
-    indices,
+    indices = [],
     include_global_state: includeGlobalState,
     state,
     start_time: startTime,
