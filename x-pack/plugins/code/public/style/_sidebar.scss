@@ -42,10 +42,20 @@
   .euiToken {
     margin-right: $euiSizeS;
   }
+
+  > .euiIcon {
+    margin-right: $euiSizeXS;
+  }
 }
 
 .codeSymbol--nested {
   margin-left: 2rem;
+}
+
+.code-symbol-link {
+  &:focus {
+    animation: none !important;
+  }
 }
 
 // EUI Overrides
