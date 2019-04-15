@@ -50,6 +50,7 @@ new CoreSystem({
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,
+      devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
@@ -83,6 +84,24 @@ new CoreSystem({
       vegaConfig: {
         enabled: true,
         enableExternalUrls: true
+      },
+      uiCapabilities: {
+        navLinks: {
+          myLink: true,
+          notMyLink: true,
+        },
+        discover: {
+          showWriteControls: true
+        },
+        visualize: {
+          save: true
+        },
+        dashboard: {
+          showWriteControls: true
+        },
+        timelion: {
+          save: true
+        },
       },
       interpreterConfig: {
         enableInVisualize: true

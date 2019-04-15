@@ -5,11 +5,12 @@
  */
 
 import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+import { DATES } from './constants';
 
-const DATE_WITH_DATA = new Date(1539806283000);
-const DATE_WITHOUT_DATA = new Date(1539122400000);
+const DATE_WITH_DATA = new Date(DATES.metricsAndLogs.hosts.withData);
+const DATE_WITHOUT_DATA = new Date(DATES.metricsAndLogs.hosts.withoutData);
 
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) => {
   const esArchiver = getService('esArchiver');
   const pageObjects = getPageObjects(['common', 'infraHome']);
