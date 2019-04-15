@@ -18,18 +18,18 @@
  */
 
 import createSelectHandler from '../lib/create_select_handler';
-import GroupBySelect from './group_by_select';
+import { GroupBySelect } from './group_by_select';
 import FilterItems from './filter_items';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-function SplitByFilters(props) {
-  const { onChange, model } = props;
+export const SplitByFilters = (props) => {
+  const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
-  return(
+  return (
     <div>
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem>
@@ -43,6 +43,7 @@ function SplitByFilters(props) {
             <GroupBySelect
               value={model.split_mode}
               onChange={handleSelectChange('split_mode')}
+              uiRestrictions={uiRestrictions}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -55,11 +56,10 @@ function SplitByFilters(props) {
       />
     </div>
   );
-}
+};
 
 SplitByFilters.propTypes = {
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  uiRestrictions: PropTypes.object,
 };
-
-export default SplitByFilters;

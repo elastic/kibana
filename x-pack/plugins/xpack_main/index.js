@@ -17,6 +17,7 @@ import { getLocalizationUsageCollector } from './server/lib/get_localization_usa
 import {
   xpackInfoRoute,
   telemetryRoute,
+  featuresRoute,
   settingsRoute,
 } from './server/routes/api/v1';
 import {
@@ -27,6 +28,7 @@ import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
+import { registerOssFeatures } from './server/lib/register_oss_features';
 
 /**
  * Determine if Telemetry is enabled.
@@ -96,7 +98,6 @@ export const xpackMain = (kibana) => {
           telemetryOptedIn: null,
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
-          userProfile: {},
         };
       },
       hacks: [
@@ -121,11 +122,13 @@ export const xpackMain = (kibana) => {
       mirrorPluginStatus(server.plugins.elasticsearch, this, 'yellow', 'red');
 
       setupXPackMain(server);
+      registerOssFeatures(server.plugins.xpack_main.registerFeature);
 
       // register routes
       xpackInfoRoute(server);
       telemetryRoute(server);
       settingsRoute(server, this.kbnServer);
+      featuresRoute(server);
       server.usage.collectorSet.register(getLocalizationUsageCollector(server));
     }
   });

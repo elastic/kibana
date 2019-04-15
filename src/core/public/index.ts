@@ -18,16 +18,24 @@
  */
 
 import { BasePathSetup } from './base_path';
-import { ChromeSetup } from './chrome';
+import { Capabilities, CapabilitiesSetup } from './capabilities';
+import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup } from './i18n';
-import { InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup } from './notifications';
-import { UiSettingsSetup } from './ui_settings';
+import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
+import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
+import { FlyoutRef, OverlaySetup } from './overlays';
+import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
+import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
-export { CoreSystem } from './core_system';
+export { CoreContext, CoreSystem } from './core_system';
 
+/**
+ * Core services exposed to the start lifecycle
+ *
+ * @public
+ */
 export interface CoreSetup {
   i18n: I18nSetup;
   injectedMetadata: InjectedMetadataSetup;
@@ -35,6 +43,36 @@ export interface CoreSetup {
   notifications: NotificationsSetup;
   http: HttpSetup;
   basePath: BasePathSetup;
+  capabilities: CapabilitiesSetup;
   uiSettings: UiSettingsSetup;
   chrome: ChromeSetup;
+  overlays: OverlaySetup;
 }
+
+export {
+  BasePathSetup,
+  HttpSetup,
+  FatalErrorsSetup,
+  I18nSetup,
+  CapabilitiesSetup,
+  Capabilities,
+  ChromeSetup,
+  ChromeBreadcrumb,
+  ChromeBrand,
+  ChromeHelpExtension,
+  InjectedMetadataSetup,
+  InjectedMetadataParams,
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginSetupContext,
+  NotificationsSetup,
+  OverlaySetup,
+  FlyoutRef,
+  Toast,
+  ToastInput,
+  ToastsSetup,
+  UiSettingsClient,
+  UiSettingsState,
+  UiSettingsSetup,
+};

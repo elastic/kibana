@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import _, { set } from 'lodash';
+import _ from 'lodash';
 import { createTransform, Deprecations } from '../../deprecation';
-import { unset } from '../../utils';
 
 const { rename, unused } = Deprecations;
 
@@ -46,15 +45,6 @@ const rewriteBasePath = (settings, log) => {
   }
 };
 
-const loggingTimezone = (settings, log) => {
-  if (_.has(settings, 'logging.useUTC')) {
-    const timezone = settings.logging.useUTC ? 'UTC' : false;
-    set('logging.timezone', timezone);
-    unset(settings, 'logging.useUTC');
-    log(`Config key "logging.useUTC" is deprecated. It has been replaced with "logging.timezone"`);
-  }
-};
-
 const configPath = (settings, log) => {
   if (_.has(process, 'env.CONFIG_PATH')) {
     log(`Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`);
@@ -78,7 +68,6 @@ const deprecations = [
   rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
   savedObjectsIndexCheckTimeout,
   rewriteBasePath,
-  loggingTimezone,
   configPath,
   dataPath
 ];

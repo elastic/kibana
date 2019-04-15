@@ -13,6 +13,7 @@ export function createJestConfig({
     roots: [
       '<rootDir>/plugins',
       '<rootDir>/server',
+      '<rootDir>/public',
     ],
     moduleFileExtensions: [
       'js',
@@ -37,8 +38,7 @@ export function createJestConfig({
       '**/*.test.{js,ts,tsx}'
     ],
     transform: {
-      '^.+\\.js$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
-      '^.+\\.tsx?$': `${kibanaDirectory}/src/dev/jest/ts_transform.js`,
+      '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
     },
     transformIgnorePatterns: [
       '[/\\\\]node_modules[/\\\\].+\\.js$'

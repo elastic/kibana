@@ -25,20 +25,20 @@ import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
-import { Plugin, PluginManifest } from './plugin';
+import { PluginWrapper, PluginManifest } from './plugin';
 import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingServiceMock.create();
-jest.mock(
+jest.doMock(
   join('plugin-with-initializer-path', 'server'),
   () => ({ plugin: mockPluginInitializer }),
   { virtual: true }
 );
-jest.mock(join('plugin-without-initializer-path', 'server'), () => ({}), {
+jest.doMock(join('plugin-without-initializer-path', 'server'), () => ({}), {
   virtual: true,
 });
-jest.mock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
+jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
   virtual: true,
 });
 
@@ -78,7 +78,7 @@ afterEach(() => {
 
 test('`constructor` correctly initializes plugin instance', () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'some-plugin-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -87,13 +87,13 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.name).toBe('some-plugin-id');
   expect(plugin.configPath).toBe('path');
   expect(plugin.path).toBe('some-plugin-path');
-  expect(plugin.requiredDependencies).toEqual(['some-required-dep']);
-  expect(plugin.optionalDependencies).toEqual(['some-optional-dep']);
+  expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
+  expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
 });
 
 test('`setup` fails if `plugin` initializer is not exported', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-without-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -108,7 +108,7 @@ test('`setup` fails if `plugin` initializer is not exported', async () => {
 
 test('`setup` fails if plugin initializer is not a function', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-wrong-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -123,7 +123,7 @@ test('`setup` fails if plugin initializer is not a function', async () => {
 
 test('`setup` fails if initializer does not return object', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -140,7 +140,7 @@ test('`setup` fails if initializer does not return object', async () => {
 
 test('`setup` fails if object returned from initializer does not define `setup` function', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -159,7 +159,7 @@ test('`setup` fails if object returned from initializer does not define `setup` 
 test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const initializerContext = createPluginInitializerContext(coreContext, manifest);
-  const plugin = new Plugin('plugin-with-initializer-path', manifest, initializerContext);
+  const plugin = new PluginWrapper('plugin-with-initializer-path', manifest, initializerContext);
 
   const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
@@ -177,7 +177,7 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
 
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -194,7 +194,7 @@ test('`stop` fails if plugin is not set up', async () => {
 
 test('`stop` does nothing if plugin does not define `stop` function', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -208,7 +208,7 @@ test('`stop` does nothing if plugin does not define `stop` function', async () =
 
 test('`stop` calls `stop` defined by the plugin instance', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)

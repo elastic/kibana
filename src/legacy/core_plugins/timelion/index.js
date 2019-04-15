@@ -59,11 +59,20 @@ export default function (kibana) {
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-
+      injectDefaultVars() {
+        return {
+          uiCapabilities: {
+            timelion: {
+              save: true,
+            }
+          }
+        };
+      },
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {

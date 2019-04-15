@@ -31,6 +31,7 @@ import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import { i18n } from '@kbn/i18n';
 import { I18nContext } from 'ui/i18n';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { EuiBadge } from '@elastic/eui';
 import { getListBreadcrumbs } from './breadcrumbs';
 
@@ -51,11 +52,13 @@ export function updateIndexPatternList(
 
   render(
     <I18nContext>
-      <IndexPatternTable
-        indexPatterns={indexPatterns}
-        navTo={kbnUrl.redirect}
-        indexPatternCreationOptions={indexPatternCreationOptions}
-      />
+      <UICapabilitiesProvider>
+        <IndexPatternTable
+          indexPatterns={indexPatterns}
+          navTo={kbnUrl.redirect}
+          indexPatternCreationOptions={indexPatternCreationOptions}
+        />
+      </UICapabilitiesProvider>
     </I18nContext>,
     node,
   );
@@ -81,7 +84,8 @@ const indexPatternsResolutions = {
 // add a dependency to all of the subsection routes
 uiRoutes
   .defaults(/management\/kibana\/(index_patterns|index_pattern)/, {
-    resolve: indexPatternsResolutions
+    resolve: indexPatternsResolutions,
+    requireUICapability: 'management.kibana.index_patterns',
   });
 
 uiRoutes

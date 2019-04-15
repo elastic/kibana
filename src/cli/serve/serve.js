@@ -18,10 +18,10 @@
  */
 
 import _ from 'lodash';
-import { statSync, lstatSync, realpathSync } from 'fs';
+import { statSync } from 'fs';
 import { resolve } from 'path';
 
-import { fromRoot } from '../../legacy/utils';
+import { fromRoot, IS_KIBANA_DISTRIBUTABLE } from '../../legacy/utils';
 import { getConfig } from '../../legacy/server/path';
 import { bootstrap } from '../../core/server';
 import { readKeystore } from './read_keystore';
@@ -41,17 +41,6 @@ function canRequire(path) {
   }
 }
 
-function isSymlinkTo(link, dest) {
-  try {
-    const stat = lstatSync(link);
-    return stat.isSymbolicLink() && realpathSync(link) === dest;
-  } catch (error) {
-    if (error.code !== 'ENOENT') {
-      throw error;
-    }
-  }
-}
-
 const CLUSTER_MANAGER_PATH = resolve(__dirname, '../cluster/cluster_manager');
 const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 
@@ -60,10 +49,8 @@ const CAN_REPL = canRequire(REPL_PATH);
 
 // xpack is installed in both dev and the distributable, it's optional if
 // install is a link to the source, not an actual install
-const XPACK_INSTALLED_DIR = resolve(__dirname, '../../../node_modules/x-pack');
-const XPACK_SOURCE_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_INSTALLED_DIR);
-const XPACK_OPTIONAL = isSymlinkTo(XPACK_INSTALLED_DIR, XPACK_SOURCE_DIR);
+const XPACK_DIR = resolve(__dirname, '../../../x-pack');
+const XPACK_INSTALLED = canRequire(XPACK_DIR);
 
 const pathCollector = function () {
   const paths = [];
@@ -127,8 +114,8 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     get('plugins.paths'),
     opts.pluginPath,
 
-    XPACK_INSTALLED && (!XPACK_OPTIONAL || !opts.oss)
-      ? [XPACK_INSTALLED_DIR]
+    XPACK_INSTALLED && !opts.oss
+      ? [XPACK_DIR]
       : [],
   )));
 
@@ -182,7 +169,7 @@ export default function (program) {
     command.option('--repl', 'Run the server with a REPL prompt and access to the server object');
   }
 
-  if (XPACK_OPTIONAL) {
+  if (!IS_KIBANA_DISTRIBUTABLE) {
     command
       .option('--oss', 'Start Kibana without X-Pack');
   }
@@ -225,7 +212,7 @@ export default function (program) {
         },
         features: {
           isClusterModeSupported: CAN_CLUSTER,
-          isOssModeSupported: XPACK_OPTIONAL,
+          isOssModeSupported: !IS_KIBANA_DISTRIBUTABLE,
           isXPackInstalled: XPACK_INSTALLED,
           isReplModeSupported: CAN_REPL,
         },

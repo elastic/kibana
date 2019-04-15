@@ -157,18 +157,13 @@ export class AssetManager extends React.PureComponent {
     const percentageUsed = Math.round((assetsTotal / ASSET_MAX_SIZE) * 100);
 
     const emptyAssets = (
-      <EuiPanel className="canvasAssetManager__emptyPanel">
+      <div className="canvasAssetManager__emptyPanel">
         <EuiEmptyPrompt
           iconType="importAction"
-          title={<h2>No available assets</h2>}
-          titleSize="s"
-          body={
-            <Fragment>
-              <p>Upload your assets above to get started</p>
-            </Fragment>
-          }
+          title={<h2>Import your assets to get started</h2>}
+          titleSize="xs"
         />
-      </EuiPanel>
+      </div>
     );
 
     const assetModal = isModalVisible ? (
@@ -201,9 +196,8 @@ export class AssetManager extends React.PureComponent {
           <EuiModalBody>
             <EuiText size="s" color="subdued">
               <p>
-                Below are the image assets that you added to this workpad. To reclaim space, delete
-                assets that you no longer need. Unfortunately, any assets that are actually in use
-                cannot be determined at this time.
+                Below are the image assets in this workpad. Any assets that are currently in use
+                cannot be determined at this time. To reclaim space, delete assets.
               </p>
             </EuiText>
             <EuiSpacer />

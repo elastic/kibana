@@ -75,13 +75,20 @@ exports[`SpacesGridPage renders as expected 1`] = `
             "sortable": true,
           },
           Object {
-            "field": "id",
-            "name": "Identifier",
+            "field": "description",
+            "name": "Description",
             "sortable": true,
           },
           Object {
-            "field": "description",
-            "name": "Description",
+            "field": "disabledFeatures",
+            "name": "Features",
+            "render": [Function],
+            "sortable": true,
+          },
+          Object {
+            "field": "id",
+            "name": "Identifier",
+            "render": [Function],
             "sortable": true,
           },
           Object {
@@ -122,26 +129,19 @@ exports[`SpacesGridPage renders as expected 1`] = `
       sorting={false}
     />
   </EuiPageContent>
-  <Component
-    userProfile={
-      UserProfileClass {
-        "capabilities": Object {
-          "manageSpaces": true,
-        },
-      }
-    }
-  />
+  <SecureSpaceMessage />
 </div>
 `;
 
 exports[`SpacesGridPage renders the list of spaces 1`] = `
 Array [
-  <Component
+  <SpaceAvatar
     announceSpaceName={true}
     size="s"
     space={
       Object {
         "_reserved": true,
+        "disabledFeatures": Array [],
         "id": "default",
         "name": "Default",
       }
@@ -176,12 +176,13 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </Component>,
-  <Component
+  </SpaceAvatar>,
+  <SpaceAvatar
     announceSpaceName={true}
     size="s"
     space={
       Object {
+        "disabledFeatures": Array [],
         "id": "custom-1",
         "name": "Custom 1",
       }
@@ -216,14 +217,15 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </Component>,
-  <Component
+  </SpaceAvatar>,
+  <SpaceAvatar
     announceSpaceName={true}
     size="s"
     space={
       Object {
         "color": "#ABCDEF",
         "description": "my description here",
+        "disabledFeatures": Array [],
         "id": "custom-2",
         "initials": "LG",
         "name": "Custom 2",
@@ -259,6 +261,6 @@ Array [
         </span>
       </div>
     </EuiAvatar>
-  </Component>,
+  </SpaceAvatar>,
 ]
 `;

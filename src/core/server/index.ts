@@ -16,13 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { ElasticsearchServiceSetup } from './elasticsearch';
+import { HttpServiceSetup } from './http';
+import { PluginsServiceSetup } from './plugins';
 
 export { bootstrap } from './bootstrap';
-export { CallAPIOptions, ClusterClient } from './elasticsearch';
-export { Logger, LoggerFactory } from './logging';
+export { ConfigService } from './config';
+export {
+  CallAPIOptions,
+  ClusterClient,
+  Headers,
+  ScopedClusterClient,
+  ElasticsearchClientConfig,
+  APICaller,
+} from './elasticsearch';
+export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+
 export {
   DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,
 } from './plugins';
+
+/** @public */
+export interface CoreSetup {
+  http: HttpServiceSetup;
+  elasticsearch: ElasticsearchServiceSetup;
+  plugins: PluginsServiceSetup;
+}
+
+export { ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };
