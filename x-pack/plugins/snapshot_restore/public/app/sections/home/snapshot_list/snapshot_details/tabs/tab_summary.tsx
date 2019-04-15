@@ -207,9 +207,7 @@ export const TabSummary: React.SFC<Props> = ({ snapshotDetails }) => {
             className="eui-textBreakWord"
             data-test-subj="srSnapshotDetailEndTimeDescription"
           >
-            <DataPlaceholder data={endTimeInMillis}>
-              {formatDate(endTimeInMillis)}
-            </DataPlaceholder>
+            <DataPlaceholder data={endTimeInMillis}>{formatDate(endTimeInMillis)}</DataPlaceholder>
           </EuiDescriptionListDescription>
         </EuiFlexItem>
       </EuiFlexGroup>

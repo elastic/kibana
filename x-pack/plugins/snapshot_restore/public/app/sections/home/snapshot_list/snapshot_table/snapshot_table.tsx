@@ -68,9 +68,7 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (startTimeInMillis: number) => (
-        <DataPlaceholder data={startTimeInMillis}>
-          {formatDate(startTimeInMillis)}
-        </DataPlaceholder>
+        <DataPlaceholder data={startTimeInMillis}>{formatDate(startTimeInMillis)}</DataPlaceholder>
       ),
     },
     {

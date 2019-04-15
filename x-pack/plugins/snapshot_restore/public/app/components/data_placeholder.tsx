@@ -8,7 +8,7 @@ import React from 'react';
 
 interface Props {
   data: any;
-  children: any,
+  children: any;
 }
 
 export const DataPlaceholder: React.SFC<Props> = ({ data, children }) => {
@@ -16,10 +16,5 @@ export const DataPlaceholder: React.SFC<Props> = ({ data, children }) => {
     return children;
   }
 
-  return (
-    <FormattedMessage
-      id="xpack.snapshotRestore.dataPlaceholderLabel"
-      defaultMessage="-"
-    />
-  );
+  return <FormattedMessage id="xpack.snapshotRestore.dataPlaceholderLabel" defaultMessage="-" />;
 };
