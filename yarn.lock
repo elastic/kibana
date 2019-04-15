@@ -1586,10 +1586,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/getopts@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@types/getopts/-/getopts-2.0.0.tgz#8a603370cb367d3192bd8012ad39ab2320b5b476"
-  integrity sha512-/WJ73/6+Ffulo6LDm0P11Y0uGDaitJBJyVhXr4Eg+/Bqi0epRLOnGDNOgplhMBFy7NLBMlZ5UQcukSABqaV5Kg==
+"@types/getopts@^2.0.1":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/getopts/-/getopts-2.0.1.tgz#b7e5478fe7571838b45aff736a59ab69b8bcda18"
+  integrity sha512-JsQJHtzLYKunMz7acYOX6x5IJ/42CsjjHFfLCmis1Hn/qFoD/y0kJFUIAg8HoDigQpKUcWj55d8rxZQBnvz1Pw==
 
 "@types/glob@*", "@types/glob@^5.0.35":
   version "5.0.35"
@@ -9937,20 +9937,10 @@ getobject@~0.1.0:
   resolved "https://registry.yarnpkg.com/getobject/-/getobject-0.1.0.tgz#047a449789fa160d018f5486ed91320b6ec7885c"
   integrity sha1-BHpEl4n6Fg0Bj1SG7ZEyC27HiFw=
 
-getopts@2.0.0, getopts@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.0.0.tgz#e9119f3e79d22d0685b77fbe78d5cd6e19ca1af0"
-  integrity sha512-mFGXdaF3lC1HVTQ/v9ndEnK14bdog30H1+743D5GZee8mUZTEMs04fXTvOnMwdpbSO9+/SCt5tMcgIj4qqP1ag==
-
-getopts@^2.0.6:
-  version "2.0.6"
-  resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.0.6.tgz#4788d533a977527e79efd57b5e742ffa0dd33105"
-  integrity sha512-LauKhe3IAHTAlefQNg1I4rZRE6uPrCWwtVh/rMwHAvqY0PaEkRxOzhgyam0+ZBGdh0K6vybD81KeaS6v6H9+Ww==
-
-getopts@^2.2.3:
-  version "2.2.3"
-  resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.2.3.tgz#11d229775e2ec2067ed8be6fcc39d9b4bf39cf7d"
-  integrity sha512-viEcb8TpgeG05+Nqo5EzZ8QR0hxdyrYDp6ZSTZqe2M/h53Bk036NmqG38Vhf5RGirC/Of9Xql+v66B2gp256SQ==
+getopts@^2.2.4:
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/getopts/-/getopts-2.2.4.tgz#3137fe8a5fddf304904059a851bdc1c22f0f54fb"
+  integrity sha512-Rz7DGyomZjrenu9Jx4qmzdlvJgvrEFHXHvjK0FcZtcTC1U5FmES7OdZHUwMuSnEE6QvBvwse1JODKj7TgbSEjQ==
 
 getos@^3.1.0:
   version "3.1.0"
