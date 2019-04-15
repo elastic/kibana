@@ -158,7 +158,7 @@ class SetupGuidePage extends React.PureComponent<{ setupOk?: boolean }, { hideTo
         </div>
       );
     }
-    return <Root>{setup}</Root>;
+    return <div className="condeContainer__setup">{setup}</div>;
   }
 }
 

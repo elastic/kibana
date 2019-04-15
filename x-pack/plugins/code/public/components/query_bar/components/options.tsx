@@ -22,13 +22,8 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { unique } from 'lodash';
 import React, { Component } from 'react';
-import styled from 'styled-components';
 import { Repository } from '../../../../model';
 import { SearchOptions as ISearchOptions } from '../../../actions';
-
-const Icon = styled(EuiIcon)`
-  cursor: pointer;
-`;
 
 interface State {
   isFlyoutOpen: boolean;

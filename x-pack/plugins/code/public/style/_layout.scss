@@ -83,6 +83,14 @@
   width: 100%;
 }
 
+.codeContainer__symbolTree {
+  padding: $euiSizeL $euiSizeM;
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+  height: 100%;
+}
+
 .codeContainer__search--results {
   margin-top: $euiSize;
 }
@@ -163,4 +171,9 @@
 .codePanel__error {
   width: 31rem;
   margin: auto;
+}
+
+.codeLoader {
+  padding: 1.5rem;
+  text-align: center;
 }
