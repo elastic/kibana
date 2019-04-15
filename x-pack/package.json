@@ -104,6 +104,7 @@
     "chalk": "^2.4.1",
     "chance": "1.0.10",
     "checksum": "0.1.1",
+    "cheerio": "0.22.0",
     "commander": "2.12.2",
     "copy-webpack-plugin": "^4.5.2",
     "del": "^3.0.0",

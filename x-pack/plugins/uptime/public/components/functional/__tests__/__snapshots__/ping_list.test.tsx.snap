@@ -62,20 +62,28 @@ exports[`PingList component renders sorted list without errors 1`] = `
               compressed={false}
               fullWidth={false}
               isClearable={false}
-              onChange={[MockFunction]}
+              onChange={[Function]}
               options={
                 Array [
                   Object {
                     "label": "All",
                     "value": "",
                   },
+                  Object {
+                    "label": "Up",
+                    "value": "up",
+                  },
+                  Object {
+                    "label": "Down",
+                    "value": "down",
+                  },
                 ]
               }
               selectedOptions={
                 Array [
                   Object {
-                    "label": "All",
-                    "value": "",
+                    "label": "Down",
+                    "value": "down",
                   },
                 ]
               }
