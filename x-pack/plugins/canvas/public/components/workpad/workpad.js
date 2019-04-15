@@ -131,7 +131,7 @@ export class Workpad extends React.PureComponent {
                   {pages.map((page, i) => (
                     <WorkpadPage
                       key={page.id}
-                      page={page}
+                      pageId={page.id}
                       height={height}
                       width={width}
                       isSelected={i + 1 === selectedPageNumber}

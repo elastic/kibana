@@ -40,7 +40,6 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
-  'src/dev/tslint/rules/*',
   'src/legacy/ui/public/assets/fonts/**/*',
 
   // Files in this directory must match a pre-determined name in some cases.

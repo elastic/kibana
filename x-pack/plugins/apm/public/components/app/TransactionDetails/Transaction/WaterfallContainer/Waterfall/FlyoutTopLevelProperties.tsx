@@ -11,7 +11,7 @@ import {
   TRANSACTION_NAME
 } from '../../../../../../../common/elasticsearch_fieldnames';
 import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
-import { KibanaLink } from '../../../../../shared/Links/KibanaLink';
+import { APMLink } from '../../../../../shared/Links/APMLink';
 import { TransactionLink } from '../../../../../shared/Links/TransactionLink';
 import { StickyProperties } from '../../../../../shared/StickyProperties';
 
@@ -31,9 +31,9 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <KibanaLink hash={`/${transaction.service.name}`}>
+        <APMLink path={`/${transaction.service.name}`}>
           {transaction.service.name}
-        </KibanaLink>
+        </APMLink>
       ),
       width: '50%'
     },

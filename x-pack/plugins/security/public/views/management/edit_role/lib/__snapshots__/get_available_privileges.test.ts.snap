@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`getAvailablePrivileges throws when given an unexpected minimum privilege 1`] = `"Unexpected minimumPrivilege value: idk"`;

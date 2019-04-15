@@ -9,10 +9,13 @@ import { ClusterStatus } from '../cluster_status';
 import { ShardActivity } from '../shard_activity';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { EuiPage, EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSpacer, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { Logs } from '../../logs/logs';
 
 export function ElasticsearchOverview({
   clusterStatus,
   metrics,
+  logs,
+  cluster,
   shardActivity,
   ...props
 }) {
@@ -42,8 +45,15 @@ export function ElasticsearchOverview({
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-          <ShardActivity data={shardActivity} {...props} />
         </EuiPageContent>
+        <EuiSpacer size="m" />
+        <EuiPanel>
+          <Logs logs={logs} clusterUuid={cluster.cluster_uuid}/>
+        </EuiPanel>
+        <EuiSpacer size="m" />
+        <EuiPanel>
+          <ShardActivity data={shardActivity} {...props} />
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

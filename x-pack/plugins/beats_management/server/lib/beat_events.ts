@@ -30,7 +30,7 @@ export class BeatEventsLib {
               },
             })
             .catch(e => {
-              // tslint:disable-next-line
+              // eslint-disable-next-line
               console.error('Error inserting event into beats log.', e);
             });
         }
@@ -48,7 +48,7 @@ export class BeatEventsLib {
             },
           })
           .catch(e => {
-            // tslint:disable-next-line
+            // eslint-disable-next-line
             console.error('Error inserting event into beats log.', e);
           });
       }

@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
+<EuiOverlayMask>
+  <form
+    onSubmit={[Function]}
+  >
+    <EuiModal
+      className="dshSaveModal"
+      data-test-subj="savedObjectSaveModal"
+      maxWidth={true}
+      onClose={[Function]}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="common.ui.savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiForm>
+          <EuiFormRow
+            describedByIds={Array []}
+            fullWidth={false}
+            hasEmptyLabelSpace={false}
+            label={
+              <FormattedMessage
+                defaultMessage="Title"
+                id="common.ui.savedObjects.saveModal.titleLabel"
+                values={Object {}}
+              />
+            }
+            labelType="label"
+          >
+            <EuiFieldText
+              autoFocus={true}
+              compressed={false}
+              data-test-subj="savedObjectTitle"
+              fullWidth={false}
+              isInvalid={false}
+              isLoading={false}
+              onChange={[Function]}
+              value="Saved Object title"
+            />
+          </EuiFormRow>
+        </EuiForm>
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty
+          color="primary"
+          data-test-subj="saveCancelButton"
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="common.ui.savedObjects.saveModal.cancelButtonLabel"
+            values={Object {}}
+          />
+        </EuiButtonEmpty>
+        <EuiButton
+          color="primary"
+          data-test-subj="confirmSaveSavedObjectButton"
+          fill={true}
+          iconSide="left"
+          isDisabled={false}
+          isLoading={false}
+          size="m"
+          type="submit"
+        >
+          <FormattedMessage
+            defaultMessage="Confirm Save"
+            id="common.ui.savedObjects.saveModal.confirmSaveButtonLabel"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  </form>
+</EuiOverlayMask>
+`;
