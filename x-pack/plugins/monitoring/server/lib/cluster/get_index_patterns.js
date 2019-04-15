@@ -35,7 +35,7 @@ export function getIndexPatterns(server, additionalPatterns = {}) {
         ...accum,
         [varName]: prefixIndexPattern(config, additionalPatterns[varName], ccs),
       };
-    })
+    }, {})
   };
 
   return indexPatterns;
