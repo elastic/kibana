@@ -28,15 +28,11 @@
       {
         "url_name": "Raw data",
         "url_value": "kibana#/discover?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:ff959d40-b880-11e8-a6d9-e546fe2bba5f)"
-      },
-	{
-	 "url_name":"Investigate continent names",
-	 "url_value":"kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'geoip.continent_name:"$geoip.continent_name$"'))"
-	},
-	{
-	 "url_name": "Investigate customers",
-	 "url_value": "kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'customer_full_name.keyword:"$customer_full_name.keyword$"'))"
-	}
-    ]
+      },	
+      {
+        "url_name": "Investigate data",
+        "url_value": "kibana#/dashboard/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:kuery,query:''))"
+      }
+	]
   }
 }
