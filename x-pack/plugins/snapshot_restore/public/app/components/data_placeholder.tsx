@@ -6,15 +6,23 @@
 
 import React from 'react';
 
+import { useAppDependencies } from '../index';
+
 interface Props {
   data: any;
   children: any;
 }
 
 export const DataPlaceholder: React.SFC<Props> = ({ data, children }) => {
+  const {
+    core: { i18n },
+  } = useAppDependencies();
+
   if (data != null) {
     return children;
   }
 
-  return <FormattedMessage id="xpack.snapshotRestore.dataPlaceholderLabel" defaultMessage="-" />;
+  return i18n.translate('xpack.snapshotRestore.dataPlaceholderLabel', {
+    defaultMessage: '-',
+  });
 };
