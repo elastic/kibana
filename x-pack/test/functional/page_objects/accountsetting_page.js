@@ -22,6 +22,7 @@ export function AccountSettingProvider({ getService }) {
       const emailIdField = await testSubjects.find('email');
       const emailField = await emailIdField.getVisibleText();
       expect(emailField).to.be(expectedEmail);
+      await userMenu.closeMenu();
     }
 
     async changePassword(currentPassword, newPassword) {
