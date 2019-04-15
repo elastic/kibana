@@ -4,12 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import { EuiIcon, EuiLoadingSpinner, isColorDark } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import { EuiLoadingSpinner, EuiIcon, isColorDark } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
 import { hexToRgb } from '../../../common/lib/hex_to_rgb';
 
-export const Loading = ({ animated, text, backgroundColor }) => {
+interface Props {
+  animated?: boolean;
+  backgroundColor?: string;
+  text?: string;
+}
+
+export const Loading: FunctionComponent<Props> = ({
+  animated = false,
+  text = '',
+  backgroundColor = '#000000',
+}) => {
   if (animated) {
     return (
       <div className="canvasLoading">
@@ -25,6 +35,11 @@ export const Loading = ({ animated, text, backgroundColor }) => {
   }
 
   const rgb = hexToRgb(backgroundColor);
+  let color = 'text';
+
+  if (rgb && isColorDark(rgb[0], rgb[1], rgb[2])) {
+    color = 'ghost';
+  }
 
   return (
     <div className="canvasLoading">
@@ -34,7 +49,7 @@ export const Loading = ({ animated, text, backgroundColor }) => {
           &nbsp;
         </span>
       )}
-      <EuiIcon color={rgb && isColorDark(...rgb) ? 'ghost' : 'text'} type="clock" />
+      <EuiIcon color={color} type="clock" />
     </div>
   );
 };

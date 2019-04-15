@@ -5,11 +5,22 @@
  */
 
 /* eslint-disable react/forbid-elements */
-import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
+import PropTypes from 'prop-types';
+import React, { FunctionComponent } from 'react';
 
-export const ConfirmModal = props => {
+interface Props {
+  isOpen: boolean;
+  title?: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  cancelButtonText?: string;
+  confirmButtonText?: string;
+  className?: string;
+}
+
+export const ConfirmModal: FunctionComponent<Props> = props => {
   const {
     isOpen,
     title,
@@ -22,14 +33,6 @@ export const ConfirmModal = props => {
     ...rest
   } = props;
 
-  const confirm = ev => {
-    onConfirm && onConfirm(ev);
-  };
-
-  const cancel = ev => {
-    onCancel && onCancel(ev);
-  };
-
   // render nothing if this component isn't open
   if (!isOpen) {
     return null;
@@ -41,8 +44,8 @@ export const ConfirmModal = props => {
         {...rest}
         className={`canvasConfirmModal ${className || ''}`}
         title={title}
-        onCancel={cancel}
-        onConfirm={confirm}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
         confirmButtonText={confirmButtonText}
         cancelButtonText={cancelButtonText}
         defaultFocusedButton="confirm"
