@@ -31,7 +31,7 @@ export const siemRootBreadcrumb: BreadcrumbItem[] = [
   },
 ];
 
-const rootBreadcrumbs: { [name: string]: BreadcrumbItem[] } = {
+export const rootBreadcrumbs: { [name: string]: BreadcrumbItem[] } = {
   overview: siemRootBreadcrumb,
   hosts: [
     ...siemRootBreadcrumb,

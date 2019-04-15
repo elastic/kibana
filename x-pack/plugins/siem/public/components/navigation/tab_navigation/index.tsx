@@ -55,14 +55,14 @@ const TabNavigationContainer = styled.div`
 `;
 
 export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
-  public readonly state = {
-    selectedTabId: navTabs.reduce((res, tab) => {
-      if (window.location.hash.includes(tab.id)) {
-        res = tab.id;
-      }
-      return res;
-    }, ''),
-  };
+  constructor(props: TabNavigationProps) {
+    super(props);
+    const pathname = props.location;
+    const selectedTabId = this.mapLocationToTab(pathname);
+    this.state = {
+      selectedTabId,
+    };
+  }
   public componentWillReceiveProps(nextProps: TabNavigationProps): void {
     const pathname = nextProps.location;
     const selectedTabId = this.mapLocationToTab(pathname);
@@ -102,6 +102,7 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     navTabs.map((tab: NavTab) => (
       <EuiTab
         data-href={tab.href}
+        data-test-subj={`navigation-${tab.id}`}
         onClick={() => this.handleTabClick(tab.href, tab.id)}
         isSelected={this.state.selectedTabId === tab.id}
         disabled={tab.disabled}
