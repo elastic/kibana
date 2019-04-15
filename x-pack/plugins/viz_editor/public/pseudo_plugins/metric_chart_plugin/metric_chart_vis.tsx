@@ -14,11 +14,7 @@ import moment from 'moment';
 import React from 'react';
 import * as ReactDOM from 'react-dom';
 
-// This simply registers a pipeline function and a pipeline renderer to the global pipeline
-// context. It will be used by the editor config which is shipped in the same plugin, but
-// it could also be used from somewhere else.
-
-function sampleVisFunction() {
+function metricChartFunction() {
   return {
     name: 'metric_chart',
     type: 'render',
@@ -59,15 +55,17 @@ function MetricChart(props: any) {
     >
       <EuiFlexItem grow={false}>
         <h2>{config.title}</h2>
-        {config.data.flatMap((metricRow: object) =>
-          Object.values(metricRow).map(metric => <div>{metric}</div>)
-        )}
+        {config.data
+          .flatMap((metricRow: object) =>
+            Object.values(metricRow).map(metric => <div>{metric}</div>)
+          )
+          .slice(0, 10)}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function sampleVisRenderer() {
+function metricChartRenderer() {
   return {
     name: 'metric_chart_renderer',
     displayName: 'Metric Chart',
@@ -80,7 +78,7 @@ function sampleVisRenderer() {
 
 export const registerPipeline = (registries: any) => {
   register(registries, {
-    browserFunctions: [sampleVisFunction],
-    renderers: [sampleVisRenderer],
+    browserFunctions: [metricChartFunction],
+    renderers: [metricChartRenderer],
   });
 };

@@ -5,8 +5,15 @@
  */
 
 import React from 'react';
-import { DatasourceField, Query } from '../../../common';
-import { selectOperation, Suggestion, updateOperation, VisModel } from '../../../public';
+import { DatasourceField } from '../../../common';
+import {
+  getTopSuggestion,
+  removeOperation,
+  selectOperation,
+  Suggestion,
+  updateOperation,
+  VisModel,
+} from '../../../public';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 import { removePrivateState } from './state_helpers';
 import { XyChartVisModel } from './types';
@@ -42,24 +49,13 @@ export function XAxisEditor({
       canDrop={(f: DatasourceField) => f.type === 'string' || f.type === 'date'}
       removable
       onOperationRemove={() => {
-        const firstQuery = Object.values(visModel.queries)[0] as Query;
         const firstQueryKey = Object.keys(visModel.queries)[0];
         const xAxisOperation = selectOperation(visModel.private.xyChart.xAxis.columns[0], visModel);
-        const extendedQueryState = {
-          ...visModel,
-          queries: {
-            ...visModel.queries,
-            [firstQueryKey]: {
-              ...firstQuery,
-              select: firstQuery.select.filter(
-                currentOperation => currentOperation.id !== xAxisOperation!.id
-              ),
-            },
-          },
-        };
-        const suggestion = getSuggestions(extendedQueryState).sort(
-          ({ score: scoreA }, { score: scoreB }) => (scoreA < scoreB ? 1 : -1)
-        )[0];
+        const extendedQueryState = removeOperation(
+          `${firstQueryKey}_${xAxisOperation!.id}`,
+          visModel
+        );
+        const suggestion = getTopSuggestion(getSuggestions(extendedQueryState));
 
         onChangeVisModel({
           ...removePrivateState(suggestion.visModel),

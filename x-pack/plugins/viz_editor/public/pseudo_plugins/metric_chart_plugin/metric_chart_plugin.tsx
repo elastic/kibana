@@ -14,7 +14,12 @@ import {
   VisualizationPanelProps,
 } from '../..';
 import { DatasourceField, fieldToOperation } from '../../../common';
-import { isApplicableForCardinality, operationToName, selectOperation } from '../../common';
+import {
+  getTopSuggestion,
+  isApplicableForCardinality,
+  operationToName,
+  selectOperation,
+} from '../../common';
 import { Draggable } from '../../common/components/draggable';
 import { AxisEditor } from './axis_editor';
 
@@ -44,15 +49,14 @@ function configPanel({
         ...visModel.queries,
         [firstQueryKey]: {
           ...firstQuery,
+          // add columns in the right order for xy chart to pick up
           select: isMultiOperation
             ? [possibleOperation, ...firstQuery.select]
             : [...firstQuery.select, possibleOperation],
         },
       },
     };
-    const suggestion = getSuggestions(extendedQueryState).sort(
-      ({ score: scoreA }, { score: scoreB }) => (scoreA < scoreB ? 1 : -1)
-    )[0];
+    const suggestion = getTopSuggestion(getSuggestions(extendedQueryState));
 
     onChangeVisModel({
       ...prefillPrivateState(suggestion.visModel),
@@ -75,7 +79,6 @@ function configPanel({
         <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
           Drop another field here
         </Draggable>
-        />
       </div>
     </>
   );

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { DatasourceField } from '../../../common';
-import { selectOperation, updateOperation, VisModel } from '../../../public';
+import { removeOperation, selectOperation, updateOperation, VisModel } from '../../../public';
 import { getOperationSummary, OperationEditor } from '../../common/components/operation_editor';
 
 export function AxisEditor({
@@ -37,6 +37,10 @@ export function AxisEditor({
         field.type === 'date' ? 'date_histogram' : field.type === 'string' ? 'terms' : 'sum'
       }
       canDrop={(f: DatasourceField) => true}
+      removable
+      onOperationRemove={() => {
+        onChangeVisModel(removeOperation(operationId, visModel));
+      }}
     >
       {getOperationSummary(operation)}
     </OperationEditor>

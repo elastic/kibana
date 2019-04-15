@@ -32,18 +32,23 @@ function configPanel({
   const firstQuery = Object.values(visModel.queries)[0];
   const firstQueryKey = Object.keys(visModel.queries)[0];
 
-  const onDropField = (field: DatasourceField) => {
+  const onDropField = (pos: number) => (field: DatasourceField) => {
     const possibleOperator = field.type === 'number' ? 'avg' : getOperatorsForField(field)[0];
     const possibleOperation = fieldToOperation(
-      String(firstQuery.select.length),
+      String(Math.floor(Math.random() * 100000)),
       field,
       possibleOperator
     );
+    const updatedSelect = [...firstQuery.select];
+    updatedSelect.splice(pos, 0, possibleOperation);
     onChangeVisModel({
       ...visModel,
       queries: {
         ...visModel.queries,
-        [firstQueryKey]: { ...firstQuery, select: [...firstQuery.select, possibleOperation] },
+        [firstQueryKey]: {
+          ...firstQuery,
+          select: updatedSelect,
+        },
       },
     });
   };
@@ -51,18 +56,29 @@ function configPanel({
   return (
     <>
       {firstQuery.select.map((operation, index) => (
-        <div className="configPanel-axis">
-          <span className="configPanel-axis-title">Column {index + 1}</span>
-          <AxisEditor
-            operationId={getColumnIdByIndex(visModel.queries, 0, index)!}
-            visModel={visModel}
-            onChangeVisModel={onChangeVisModel}
-          />
-        </div>
+        <React.Fragment key={index}>
+          <div className="configPanel-axis">
+            <span className="configPanel-axis-title">Add dimension</span>
+            <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField(index)}>
+              Drop another field here
+            </Draggable>
+          </div>
+          <div className="configPanel-axis">
+            <span className="configPanel-axis-title">Column {index + 1}</span>
+            <AxisEditor
+              operationId={getColumnIdByIndex(visModel.queries, 0, index)!}
+              visModel={visModel}
+              onChangeVisModel={onChangeVisModel}
+            />
+          </div>
+        </React.Fragment>
       ))}
       <div className="configPanel-axis">
         <span className="configPanel-axis-title">Add dimension</span>
-        <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
+        <Draggable
+          canHandleDrop={(f: DatasourceField) => true}
+          onDrop={onDropField(firstQuery.select.length)}
+        >
           Drop another field here
         </Draggable>
       </div>
@@ -71,18 +87,16 @@ function configPanel({
 }
 
 function toExpression(viewState: TableChartVisModel, mode: 'preview' | 'view' | 'edit' = 'view') {
-  // TODO prob. do this on an AST object and stringify afterwards
-  // TODO actually use the stuff from the viewState
   return `display_kibana_datatable`;
 }
 
 function buildSuggestion(visModel: TableChartVisModel, score: number = 0.5) {
-  const title = 'Simple metric';
+  const title = 'As data table';
 
   return {
     title,
     visModel,
-    previewExpression: toExpression(visModel, 'preview'),
+    previewExpression: '',
     score,
     iconType: 'visMetric',
     pluginName: PLUGIN_NAME,
@@ -99,7 +113,7 @@ function getChartSuggestions(visModel: TableChartVisModel): Suggestion[] {
 
   const prefilledState = prefillPrivateState(visModel);
 
-  return [buildSuggestion(prefilledState, 0.7)];
+  return [buildSuggestion(prefilledState, 0.6)];
 }
 
 function prefillPrivateState(visModel: VisModel) {
@@ -124,6 +138,5 @@ export const config: EditorPlugin<TableChartVisModel> = {
   ConfigPanel: configPanel,
   getChartSuggestions,
   getSuggestionsForField,
-  // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),
 };

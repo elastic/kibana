@@ -5,7 +5,7 @@
  */
 
 import { getColumnIdByIndex, UnknownVisModel, updatePrivateState } from '../..';
-import { XyChartPrivateState, XyChartVisModel, XyDisplayType } from './types';
+import { XyChartPrivateState, XyDisplayType } from './types';
 
 export const updateXyState = updatePrivateState<'xyChart', XyChartPrivateState>('xyChart');
 
@@ -20,24 +20,28 @@ export function removePrivateState(visModel: UnknownVisModel) {
 }
 
 export function prefillPrivateState(visModel: UnknownVisModel, displayType?: XyDisplayType) {
-  if (visModel.private.xyChart) {
-    if (displayType) {
-      return updateXyState(visModel, { displayType });
-    } else {
-      return visModel as XyChartVisModel;
-    }
-  }
+  const firstQuery = Object.values(visModel.queries)[0];
 
   // TODO we maybe need a more stable way to get these
-  const xAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
-  const yAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
-  // TODO check whether we have a split series candidate
+  let xAxisRef: string | undefined;
+  let yAxisRef: string | undefined;
+  let seriesAxisRef: string | undefined;
+
+  if (firstQuery.select.length === 2) {
+    yAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
+    xAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+  }
+  if (firstQuery.select.length === 3) {
+    seriesAxisRef = getColumnIdByIndex(visModel.queries, 0, 0);
+    yAxisRef = getColumnIdByIndex(visModel.queries, 0, 1);
+    xAxisRef = getColumnIdByIndex(visModel.queries, 0, 2);
+  }
 
   if (xAxisRef && yAxisRef) {
     return updateXyState(visModel, {
       xAxis: { title: 'X Axis', columns: [xAxisRef] },
       yAxis: { title: 'Y Axis', columns: [yAxisRef] },
-      seriesAxis: { title: 'Series Axis', columns: [] },
+      seriesAxis: { title: 'Series Axis', columns: seriesAxisRef ? [seriesAxisRef] : [] },
       displayType: displayType || 'line',
     });
   } else {
