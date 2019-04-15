@@ -17,7 +17,6 @@ interface MonitorListPopoverProps {
 }
 
 export const MonitorListPopover = ({ monitor }: MonitorListPopoverProps) => {
-  // TODO: support basePath
   const [isPopoverVisible, setIsPopoverVisible] = useState<boolean>(false);
   const { basePath, dateRangeStart, dateRangeEnd } = useContext(UptimeSettingsContext);
   const domain = get<string | null>(monitor, 'ping.url.domain', null);
