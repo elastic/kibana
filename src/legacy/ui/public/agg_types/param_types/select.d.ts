@@ -17,28 +17,18 @@
  * under the License.
  */
 
-import { ListIterator } from 'lodash';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { IndexedArray } from '../../indexed_array';
 
-interface IndexedArrayConfig<T> {
-  index?: string[];
-  group?: string[];
-  order?: string[];
-  initialSet?: T[];
-  immutable?: boolean;
+interface SelectValueProp {
+  value: string;
+  text: string;
 }
 
-declare class IndexedArray<T> extends Array<T> {
-  public immutable: boolean;
-  public raw: T[];
-  // May not actually be present, is dynamically defined.
-  public inOrder: T[];
-  public byValue: {
-    [key: string]: T;
+interface SelectParamEditorProps {
+  aggParam: {
+    options: IndexedArray<SelectValueProp>;
   };
-
-  constructor(config: IndexedArrayConfig<T>);
-
-  public remove(predicate: ListIterator<T, boolean>): T[];
-
-  public toJSON(): T[];
 }
+
+export { SelectValueProp, SelectParamEditorProps };
