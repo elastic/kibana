@@ -17,8 +17,8 @@
  * under the License.
  */
 
-export function injectMetaAttributes(savedObject, savedObjectSchemas) {
-  const schema = savedObjectSchemas[savedObject.type];
+export function injectMetaAttributes(savedObject, savedObjectsSchema) {
+  const schema = savedObjectsSchema.isImportAndExportable[savedObject.type];
   const result = {
     ...savedObject,
     meta: savedObject.meta || {},

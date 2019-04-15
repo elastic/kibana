@@ -58,6 +58,11 @@ export function savedObjectsMixin(kbnServer, server) {
   const importableAndExportableTypes = getImportableAndExportableTypes({ kbnServer, visibleTypes });
 
   server.decorate('server', 'kibanaMigrator', migrator);
+  server.decorate(
+    'server',
+    'getSavedObjectsSchema',
+    () => new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
+  );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if

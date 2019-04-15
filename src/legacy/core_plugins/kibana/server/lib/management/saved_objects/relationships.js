@@ -24,7 +24,7 @@ export async function findRelationships(type, id, options = {}) {
     size,
     savedObjectsClient,
     savedObjectTypes,
-    savedObjectSchemas,
+    savedObjectsSchema,
   } = options;
 
   const { references = [] } = await savedObjectsClient.get(type, id);
@@ -48,14 +48,14 @@ export async function findRelationships(type, id, options = {}) {
 
   return [].concat(
     referencedObjects.saved_objects
-      .map(obj => injectMetaAttributes(obj, savedObjectSchemas))
+      .map(obj => injectMetaAttributes(obj, savedObjectsSchema))
       .map(extractCommonProperties)
       .map(obj => ({
         ...obj,
         relationship: 'child',
       })),
     referencedResponse.saved_objects
-      .map(obj => injectMetaAttributes(obj, savedObjectSchemas))
+      .map(obj => injectMetaAttributes(obj, savedObjectsSchema))
       .map(extractCommonProperties)
       .map(obj => ({
         ...obj,

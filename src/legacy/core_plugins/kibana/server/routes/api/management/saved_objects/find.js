@@ -68,15 +68,18 @@ export function registerFind(server) {
     },
     async handler(request) {
       const searchFields = new Set();
+      const { types: allTypes } = server.savedObjects;
       const savedObjectsClient = request.getSavedObjectsClient();
-      const { savedObjectSchemas = {} } = request.server.kibanaMigrator.kbnServer.uiExports;
+      const savedObjectsSchema = server.getSavedObjectsSchema();
+      const importAndExportableTypes = allTypes.filter(type => savedObjectsSchema.isImportAndExportable(type));
 
       // Accumulate "titleSearchField" attributes from savedObjectSchemas. Unfortunately
       // search fields apply to all types of saved objects, the sum of these fields will
       // be searched on for each object.
-      for (const schema of Object.values(savedObjectSchemas)) {
-        if (schema.titleSearchField) {
-          searchFields.add(schema.titleSearchField);
+      for (const type of importAndExportableTypes) {
+        const searchField = savedObjectsSchema.getTitleSearchField(type);
+        if (searchField) {
+          searchFields.add(searchField);
         }
       }
 
@@ -88,7 +91,7 @@ export function registerFind(server) {
       return {
         ...findResponse,
         saved_objects: findResponse.saved_objects
-          .map(obj => injectMetaAttributes(obj, savedObjectSchemas))
+          .map(obj => injectMetaAttributes(obj, savedObjectsSchema))
           .map(obj => {
             const result = { ...obj, attributes: {} };
             for (const field of request.query.fields || []) {

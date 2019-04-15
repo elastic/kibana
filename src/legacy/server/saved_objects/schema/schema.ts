@@ -20,6 +20,8 @@
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
+  isImportableAndExportable?: boolean;
+  titleSearchField?: string;
 }
 
 export interface SavedObjectsSchemaDefinition {
@@ -52,5 +54,20 @@ export class SavedObjectsSchema {
       return false;
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
+  }
+
+  public isImportAndExportable(type: string) {
+    // import and exportable by default unless isImportableAndExportable set explicitly to false
+    if (this.definition && this.definition.hasOwnProperty(type)) {
+      return this.definition[type].isImportableAndExportable !== false;
+    }
+
+    return true;
+  }
+
+  public getTitleSearchField(type: string) {
+    if (this.definition && this.definition.hasOwnProperty(type)) {
+      return this.definition[type].titleSearchField;
+    }
   }
 }
