@@ -4,13 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Request } from 'hapi';
 import hapiAuthCookie from 'hapi-auth-cookie';
+import { Legacy } from 'kibana';
 
 const HAPI_STRATEGY_NAME = 'security-cookie';
 // Forbid applying of Hapi authentication strategies to routes automatically.
 const HAPI_STRATEGY_MODE = false;
 
-function assertRequest(request) {
+/**
+ * The shape of the session that is actually stored into cookie.
+ */
+interface InternalSession {
+  /**
+   * Session value that is fed to the authentication provider. The shape is unknown upfront and
+   * entirely determined by the authentication provider that owns current session.
+   */
+  value: unknown;
+
+  /**
+   * The date in ms when session should be considered expired. If `null` session will stay active
+   * until the browser is closed.
+   */
+  expires: number | null;
+}
+
+function assertRequest(request: Request) {
   if (!request || typeof request !== 'object') {
     throw new Error(`Request should be a valid object, was [${typeof request}].`);
   }
@@ -21,39 +40,28 @@ function assertRequest(request) {
  */
 export class Session {
   /**
-   * HapiJS server instance.
-   * @type {Object}
-   * @private
-   */
-  _server = null;
-
-  /**
    * Session duration in ms. If `null` session will stay active until the browser is closed.
-   * @type {?number}
-   * @private
    */
-  _ttl = null;
+  private readonly ttl: number | null = null;
 
   /**
    * Instantiates Session. Constructor is not supposed to be used directly. To make sure that all
    * `Session` dependencies/plugins are properly initialized one should use static `Session.create` instead.
-   * @param {Hapi.Server} server HapiJS Server instance.
+   * @param server HapiJS Server instance.
    */
-  constructor(server) {
-    this._server = server;
-    this._ttl = this._server.config().get('xpack.security.sessionTimeout');
+  constructor(private readonly server: Legacy.Server) {
+    this.ttl = this.server.config().get<number | null>('xpack.security.sessionTimeout');
   }
 
   /**
    * Retrieves session value from the session storage (e.g. cookie).
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<any>}
+   * @param request HapiJS request instance.
    */
-  async get(request) {
+  async get(request: Request) {
     assertRequest(request);
 
     try {
-      const session = await this._server.auth.test(HAPI_STRATEGY_NAME, request);
+      const session = await this.server.auth.test(HAPI_STRATEGY_NAME, request);
 
       // If it's not an array, just return the session value
       if (!Array.isArray(session)) {
@@ -70,35 +78,33 @@ export class Session {
       // to ensure all valid sessions identify the same user, or choose one valid one, but this
       // is the safest option.
       const warning = `Found ${session.length} auth sessions when we were only expecting 1.`;
-      this._server.log(['warning', 'security', 'auth', 'session'], warning);
+      this.server.log(['warning', 'security', 'auth', 'session'], warning);
       return null;
     } catch (err) {
-      this._server.log(['debug', 'security', 'auth', 'session'], err);
+      this.server.log(['debug', 'security', 'auth', 'session'], err);
       return null;
     }
   }
 
   /**
    * Puts current session value into the session storage.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @param {Object} value Any object that will be associated with the request.
-   * @returns {Promise.<void>}
+   * @param request HapiJS request instance.
+   * @param value Any object that will be associated with the request.
    */
-  async set(request, value) {
+  async set(request: Request, value: unknown) {
     assertRequest(request);
 
     request.cookieAuth.set({
       value,
-      expires: this._ttl && Date.now() + this._ttl
-    });
+      expires: this.ttl && Date.now() + this.ttl,
+    } as InternalSession);
   }
 
   /**
    * Clears current session.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<void>}
+   * @param request HapiJS request instance.
    */
-  async clear(request) {
+  async clear(request: Request) {
     assertRequest(request);
 
     request.cookieAuth.clear();
@@ -106,37 +112,36 @@ export class Session {
 
   /**
    * Prepares and creates a session instance.
-   * @param {Hapi.Server} server HapiJS Server instance.
-   * @returns {Promise.<Session>}
+   * @param server HapiJS Server instance.
    */
-  static async create(server) {
+  static async create(server: Legacy.Server) {
     // Register HAPI plugin that manages session cookie and delegate parsing of the session cookie to it.
     await server.register({
-      plugin: hapiAuthCookie
+      plugin: hapiAuthCookie,
     });
 
-    const config =  server.config();
+    const config = server.config();
     const httpOnly = true;
-    const name = config.get('xpack.security.cookieName');
-    const password = config.get('xpack.security.encryptionKey');
-    const path = `${config.get('server.basePath')}/`;
-    const secure = config.get('xpack.security.secureCookies');
+    const name = config.get<string>('xpack.security.cookieName');
+    const password = config.get<string>('xpack.security.encryptionKey');
+    const path = `${config.get<string | undefined>('server.basePath')}/`;
+    const secure = config.get<boolean>('xpack.security.secureCookies');
 
     server.auth.strategy(HAPI_STRATEGY_NAME, 'cookie', {
       cookie: name,
       password,
       clearInvalid: true,
-      validateFunc: Session._validateCookie,
+      validateFunc: Session.validateCookie,
       isHttpOnly: httpOnly,
       isSecure: secure,
       isSameSite: false,
-      path: path,
+      path,
     });
 
     if (HAPI_STRATEGY_MODE) {
       server.auth.default({
         strategy: HAPI_STRATEGY_NAME,
-        mode: 'required'
+        mode: 'required',
       });
     }
 
@@ -146,12 +151,10 @@ export class Session {
   /**
    * Validation function that is passed to hapi-auth-cookie plugin and is responsible
    * only for cookie expiration time validation.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @param {Object} session Session value object retrieved from cookie.
-   * @param {function} callback Callback to be called once validation is completed.
-   * @private
+   * @param request HapiJS request instance.
+   * @param session Session value object retrieved from cookie.
    */
-  static _validateCookie(request, session) {
+  private static validateCookie(request: Request, session: InternalSession) {
     if (session.expires && session.expires < Date.now()) {
       return { valid: false };
     }
