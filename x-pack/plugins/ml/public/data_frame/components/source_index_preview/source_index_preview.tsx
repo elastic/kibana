@@ -135,7 +135,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           setLoading(false);
         });
     },
-    [indexPattern.title, JSON.stringify(query)]
+    [indexPattern.title, query.query.query_string.query]
   );
 
   const columns = selectedFields.map(k => {

@@ -25,7 +25,7 @@ interface Props {
   query: SimpleQuery['query'];
 }
 
-export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
+export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query }) => {
   const indexPattern = useContext(IndexPatternContext);
 
   if (indexPattern === null) {
@@ -57,7 +57,7 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
           setLoading(false);
         });
     },
-    [indexPattern.title, JSON.stringify(aggs)]
+    [indexPattern.title, aggs, groupBy, query]
   );
 
   if (dataFramePreviewData.length === 0) {
@@ -116,4 +116,4 @@ export const PivotPreview: React.SFC<Props> = ({ aggs, groupBy, query }) => {
       )}
     </EuiPanel>
   );
-};
+});

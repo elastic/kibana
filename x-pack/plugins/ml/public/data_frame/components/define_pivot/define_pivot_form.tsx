@@ -18,7 +18,6 @@ import {
   EuiForm,
   EuiFormHelpText,
   EuiFormRow,
-  EuiText,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -156,7 +155,13 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     () => {
       onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
     },
-    [JSON.stringify([aggList, pivotAggs, pivotGroupBy, search])] // TODO improve ...
+    [
+      aggList,
+      pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
+      pivotGroupBy,
+      search,
+      valid,
+    ]
   );
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
