@@ -36,44 +36,53 @@
 
 jest.autoMockOff();
 
-const { transform: babelTransform } = require('babel-core');
+const { transformSync: babelTransform } = require('@babel/core');
 const babelPluginIdx = require('./index');
-const transformAsyncToGenerator = require('babel-plugin-transform-async-to-generator');
-const syntaxFlow = require('babel-plugin-syntax-flow');
+const transformAsyncToGenerator = require('@babel/plugin-transform-async-to-generator');
 const vm = require('vm');
 
 function transform(source, plugins, options) {
   return babelTransform(source, {
     plugins: plugins || [[babelPluginIdx, options]],
     babelrc: false,
+    highlightCode: false,
   }).code;
 }
 
 const asyncToGeneratorHelperCode = `
-  function _asyncToGenerator(fn) {
-    return function () {
-      var gen = fn.apply(this, arguments);
-      return new Promise(function (resolve, reject) {
-        function step(key, arg) {
-          try {
-            var info = gen[key](arg);
-            var value = info.value;
-          } catch (error) {
-            reject(error); return;
-          } if (info.done) {
-            resolve(value);
-          } else {
-            return Promise.resolve(value).then(function (value) {
-              step("next", value);
-            }, function (err) {
-              step("throw", err);
-            });
-          }
-        }
-        return step("next");
-      });
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+    try {
+        var info = gen[key](arg);
+        var value = info.value;
+    } catch (error) {
+        reject(error);
+        return;
+    }
+    if (info.done) {
+        resolve(value);
+    } else {
+        Promise.resolve(value).then(_next, _throw);
+    }
+}
+
+function _asyncToGenerator(fn) {
+    return function() {
+        var self = this,
+            args = arguments;
+        return new Promise(function(resolve, reject) {
+            var gen = fn.apply(self, args);
+
+            function _next(value) {
+                asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+            }
+
+            function _throw(err) {
+                asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+            }
+            _next(undefined);
+        });
     };
-  }
+}
 `;
 
 function stringByTrimmingSpaces(string) {
@@ -100,7 +109,7 @@ expect.extend({
       const code = typeof input === 'string' ? input : input.code;
       transform(code, plugins, options);
     } catch (error) {
-      const actual = error.message.substr(9); // Strip "unknown:".
+      const actual = /^.+:\s*(.*)/.exec(error.message)[1]; // Strip "undefined: " and code snippet
       return {
         pass: actual === expected,
         message: () =>
@@ -267,24 +276,25 @@ describe('kbn-babel-plugin-apm-idx', () => {
       );
     `).toTransformInto(`
       (
-        (base != null && base.a != null ? base.a.b : undefined) != null
-        && (base != null && base.a != null ? base.a.b : undefined).c != null
-          ? (base != null && base.a != null ? base.a.b : undefined).c.d
-          : undefined
+          (base != null && base.a != null ? base.a.b : undefined) != null &&
+          (base != null && base.a != null ? base.a.b : undefined).c != null ?
+          (base != null && base.a != null ? base.a.b : undefined).c.d :
+          undefined
       ) != null
-      && (
-        (base != null && base.a != null ? base.a.b : undefined) != null
-        && (base != null && base.a != null ? base.a.b : undefined).c != null
-          ? (base != null && base.a != null ? base.a.b : undefined).c.d
-          : undefined
-      ).e != null
-        ? (
-          (base != null && base.a != null ? base.a.b : undefined) != null
-          && (base != null && base.a != null ? base.a.b : undefined).c != null
-            ? (base != null && base.a != null ? base.a.b : undefined).c.d
-            : undefined
-        ).e.f
-        : undefined;
+          &&
+          (
+              (base != null && base.a != null ? base.a.b : undefined) != null &&
+              (base != null && base.a != null ? base.a.b : undefined).c != null ?
+              (base != null && base.a != null ? base.a.b : undefined).c.d :
+              undefined
+          ).e != null ?
+          (
+              (base != null && base.a != null ? base.a.b : undefined) != null &&
+              (base != null && base.a != null ? base.a.b : undefined).c != null ?
+              (base != null && base.a != null ? base.a.b : undefined).c.d :
+              undefined
+          ).e.f :
+          undefined;
     `);
   });
 
@@ -298,17 +308,17 @@ describe('kbn-babel-plugin-apm-idx', () => {
         }
       `,
     }).toTransformInto(`
-      let f = (() => {
-        var _ref = _asyncToGenerator(function* () {
+      ${asyncToGeneratorHelperCode}
+      function f() {
+        return _f.apply(this, arguments);
+      }
+
+      function _f() {
+        _f = _asyncToGenerator(function* () {
           base != null && base.b != null && base.b.c != null && base.b.c.d != null ? base.b.c.d.e : undefined;
         });
-
-        return function f() {
-          return _ref.apply(this, arguments);
-        };
-      })();
-
-      ${asyncToGeneratorHelperCode}
+        return _f.apply(this, arguments);
+      }
     `);
   });
 
@@ -322,17 +332,18 @@ describe('kbn-babel-plugin-apm-idx', () => {
         }
       `,
     }).toTransformInto(`
-      let f = (() => {
-        var _ref = _asyncToGenerator(function* () {
+      ${asyncToGeneratorHelperCode}
+
+      function f() {
+        return _f.apply(this, arguments);
+      }
+
+      function _f() {
+        _f = _asyncToGenerator(function* () {
           base != null && base.b != null && base.b.c != null && base.b.c.d != null ? base.b.c.d.e : undefined;
         });
-
-        return function f() {
-          return _ref.apply(this, arguments);
-        };
-      })();
-
-      ${asyncToGeneratorHelperCode}
+        return _f.apply(this, arguments);
+      }
     `);
   });
 
@@ -440,12 +451,12 @@ describe('kbn-babel-plugin-apm-idx', () => {
     `).toThrowTransformError('`idx` cannot be redefined.');
   });
 
-  it('throws if there is a scope conflict', () => {
+  it('throws if there is a duplicate declaration', () => {
     expect(`
       let idx = require('idx');
       idx(base, _ => _.b);
       function idx() {}
-    `).toThrowTransformError('`idx` cannot be redefined.');
+    `).toThrowTransformError('Duplicate declaration "idx"');
   });
 
   it('handles sibling scopes with unique idx', () => {
@@ -506,66 +517,6 @@ describe('kbn-babel-plugin-apm-idx', () => {
         }
       }
     `);
-  });
-
-  it('throws on type imports', () => {
-    expect({
-      plugins: [babelPluginIdx, syntaxFlow],
-      code: `
-        import type idx from 'idx';
-        idx(base, _ => _.b);
-      `,
-    }).toThrowTransformError('The idx import must be a value import.');
-  });
-
-  it('throws on typeof imports', () => {
-    expect({
-      plugins: [babelPluginIdx, syntaxFlow],
-      code: `
-        import typeof idx from 'idx';
-        idx(base, _ => _.b);
-      `,
-    }).toThrowTransformError('The idx import must be a value import.');
-  });
-
-  it('throws on type import specifier', () => {
-    expect({
-      plugins: [babelPluginIdx, syntaxFlow],
-      code: `
-        import {type idx} from 'idx';
-        idx(base, _ => _.b);
-      `,
-    }).toThrowTransformError('The idx import must be a value import.');
-  });
-
-  it('throws on typeof import specifier', () => {
-    expect({
-      plugins: [babelPluginIdx, syntaxFlow],
-      code: `
-        import {typeof idx} from 'idx';
-        idx(base, _ => _.b);
-      `,
-    }).toThrowTransformError('The idx import must be a value import.');
-  });
-
-  it('throws on type default import specifier', () => {
-    expect({
-      plugins: [babelPluginIdx, syntaxFlow],
-      code: `
-        import {type default as idx} from 'idx';
-        idx(base, _ => _.b);
-      `,
-    }).toThrowTransformError('The idx import must be a value import.');
-  });
-
-  it('throws on typeof default import specifier', () => {
-    expect({
-      plugins: [babelPluginIdx, syntaxFlow],
-      code: `
-        import {typeof default as idx} from 'idx';
-        idx(base, _ => _.b);
-      `,
-    }).toThrowTransformError('The idx import must be a value import.');
   });
 
   it('handles named idx import', () => {
