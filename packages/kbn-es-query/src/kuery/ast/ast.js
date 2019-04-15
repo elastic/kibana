@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
-import { parse as parseLegacyKuery } from './legacy_kuery';
 import { KQLSyntaxError } from '../errors';
 
 export function fromLiteralExpression(expression, parseOptions) {
@@ -30,10 +29,6 @@ export function fromLiteralExpression(expression, parseOptions) {
   };
 
   return fromExpression(expression, parseOptions, parseKuery);
-}
-
-export function fromLegacyKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, parseLegacyKuery);
 }
 
 export function fromKueryExpression(expression, parseOptions) {
