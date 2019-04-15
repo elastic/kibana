@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
@@ -18,11 +17,11 @@ import { FullTimeRangeSelector } from './index';
 // with 'mock' so it can be used lazily.
 const mockSetFullTimeRange = jest.fn((indexPattern: IndexPattern, query: Query) => true);
 jest.mock('./full_time_range_selector_service', () => ({
-  setFullTimeRange: (indexPattern: IndexPattern, query: Query) => mockSetFullTimeRange(indexPattern, query)
+  setFullTimeRange: (indexPattern: IndexPattern, query: Query) =>
+    mockSetFullTimeRange(indexPattern, query),
 }));
 
 describe('FullTimeRangeSelector', () => {
-
   const indexPattern: IndexPattern = {
     id: '0844fc70-5ab5-11e9-935e-836737467b0f',
     fields: [],
@@ -32,9 +31,8 @@ describe('FullTimeRangeSelector', () => {
 
   const query: Query = {
     language: QueryLanguageType.KUERY,
-    query: 'region:us-east-1'
+    query: 'region:us-east-1',
   };
-
 
   const requiredProps = {
     indexPattern,
@@ -47,24 +45,18 @@ describe('FullTimeRangeSelector', () => {
       disabled: false,
     };
 
-    const wrapper = shallowWithIntl(
-      <FullTimeRangeSelector {...props} />
-    );
+    const wrapper = shallowWithIntl(<FullTimeRangeSelector {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   test('calls setFullTimeRange on clicking button', () => {
-
     const props = {
       ...requiredProps,
       disabled: false,
     };
 
-    const wrapper = shallowWithIntl(
-      <FullTimeRangeSelector {...props} />
-    );
+    const wrapper = shallowWithIntl(<FullTimeRangeSelector {...props} />);
     wrapper.find('EuiButton').simulate('click');
     expect(mockSetFullTimeRange).toHaveBeenCalled();
   });
-
 });
