@@ -74,7 +74,6 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
       });
     }
   }
-
   public render() {
     return (
       <TabNavigationContainer>
@@ -83,14 +82,13 @@ export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNa
     );
   }
 
-  public mapLocationToTab = (pathname: string) => {
-    return navTabs.reduce((res, tab) => {
+  public mapLocationToTab = (pathname: string) =>
+    navTabs.reduce((res, tab) => {
       if (pathname.includes(tab.id)) {
         res = tab.id;
       }
       return res;
     }, '');
-  };
 
   private handleTabClick = (href: string, id: string) => {
     this.setState({
