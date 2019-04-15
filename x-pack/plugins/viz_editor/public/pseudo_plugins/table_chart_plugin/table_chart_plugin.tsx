@@ -14,7 +14,6 @@ import {
   VisualizationPanelProps,
 } from '../..';
 import { DatasourceField, fieldToOperation } from '../../../common';
-import { isApplicableForCardinality, operationToName, selectOperation } from '../../common';
 import { Draggable } from '../../common/components/draggable';
 import { AxisEditor } from './axis_editor';
 
