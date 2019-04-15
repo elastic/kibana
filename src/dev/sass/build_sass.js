@@ -28,6 +28,7 @@ import { buildAll } from '../../legacy/server/sass/build_all';
 import chokidar from 'chokidar';
 import debounce from 'lodash/function/debounce';
 
+// TODO: clintandrewhall - Extract and use FSWatcher from legacy/server/sass
 const build = async ({ log, kibanaDir, styleSheetPaths, watch }) => {
   if (styleSheetPaths.length === 0) {
     return;

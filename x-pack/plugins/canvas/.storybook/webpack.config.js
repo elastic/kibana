@@ -11,9 +11,6 @@ const { DLL_OUTPUT, KIBANA_ROOT } = require('./constants');
 
 // Extend the Storybook Webpack config with some customizations
 module.exports = async ({ config }) => {
-  // Include timing and other data in the Webpack build stats file.
-  config.profile = true;
-
   // Find and alter the CSS rule to replace the Kibana public path string with a path
   // to the route we've added in middleware.js
   const cssRule = config.module.rules.find(rule => rule.test.source.includes('.css$'));
