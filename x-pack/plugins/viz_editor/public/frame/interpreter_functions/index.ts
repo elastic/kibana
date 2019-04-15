@@ -7,10 +7,11 @@
 // @ts-ignore
 import { register } from '@kbn/interpreter/common';
 
+import { displayKibanaDatatable } from './display_kibana_datatable';
 import { sampleDataFunction } from './sample_data';
 
 export function registerFunctions(registries: any) {
   register(registries, {
-    browserFunctions: [sampleDataFunction],
+    browserFunctions: [sampleDataFunction, displayKibanaDatatable],
   });
 }
