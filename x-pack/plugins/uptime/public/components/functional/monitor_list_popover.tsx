@@ -21,6 +21,10 @@ export const MonitorListPopover = ({ monitor }: MonitorListPopoverProps) => {
   const { basePath, dateRangeStart, dateRangeEnd } = useContext(UptimeSettingsContext);
   const domain = get<string | null>(monitor, 'ping.url.domain', null);
 
+  const apmHref = `${basePath}/app/apm#/services?kuery=${encodeURI(
+    `url.domain: "${domain}"`
+  )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`;
+
   return (
     <EuiPopover
       anchorPosition="rightCenter"
@@ -39,24 +43,23 @@ export const MonitorListPopover = ({ monitor }: MonitorListPopoverProps) => {
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={`${monitor.id.url} APM integration`}>
-            <EuiLink
-              href={`${basePath}/app/apm#/services?kuery=${encodeURI(
-                `url.domain: "${domain}"`
-              )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`}
-              target="_blank"
-            >
+            <EuiLink href={apmHref} target="_blank">
               <EuiButtonIcon aria-label="WARNINGTHISAPM" iconType="apmApp" size="l" />
             </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={`${monitor.id.url} Logging integration`}>
-            <EuiButtonIcon aria-label="WARNINGTHISLOGGING" iconType="loggingApp" size="l" />
+            <EuiLink href="" target="_blank">
+              <EuiButtonIcon aria-label="WARNINGTHISLOGGING" iconType="loggingApp" size="l" />
+            </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip position="top" content={`${monitor.id.url} Infra integration`}>
-            <EuiButtonIcon aria-label="WARNINGTHISINFRA" iconType="infraApp" size="l" />
+            <EuiLink href="" target="_blank">
+              <EuiButtonIcon aria-label="WARNINGTHISINFRA" iconType="infraApp" size="l" />
+            </EuiLink>
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
