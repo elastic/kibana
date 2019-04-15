@@ -161,7 +161,10 @@ MetricsEditor.propTypes = {
     type: PropTypes.oneOf(METRIC_AGGREGATION_VALUES),
     field: PropTypes.string,
   })),
-  fields: PropTypes.object,  // indexPattern.fields IndexedArray object
+  fields: PropTypes.oneOfType([
+    PropTypes.object, // IndexedArray object
+    PropTypes.array // array of Field objects
+  ]),
   onChange: PropTypes.func.isRequired,
   allowMultipleMetrics: PropTypes.bool,
   metricsFilter: PropTypes.func,

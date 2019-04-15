@@ -93,9 +93,8 @@ export class Join extends Component {
 
     this.setState({
       rightFields: indexPattern.fields.filter(field => {
-        // Do not show multi fields as right join options
-        // since they do not have values in _source and exist for indexing only
-        return field.subType !== 'multi';
+        // Only show fields that can be used in terms aggregation
+        return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
       })
     });
   }
