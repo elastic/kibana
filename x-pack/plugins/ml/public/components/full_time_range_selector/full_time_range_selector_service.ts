@@ -18,9 +18,6 @@ import { ml } from '../../services/ml_api_service';
 
 
 export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
-
-  console.log('!!! setFullTimeRange query:', query);
-
   return ml.getTimeFieldRange({
     index: indexPattern.title,
     timeFieldName: indexPattern.timeFieldName,
