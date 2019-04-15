@@ -84,7 +84,6 @@ export class EditorComponent extends React.Component<IProps> {
       path: routePath,
     } = this.props.match.params;
     const prevContent = prevProps.file && prevProps.file.content;
-
     if (prevContent !== file.content) {
       this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
         if (this.props.revealPosition) {
@@ -95,7 +94,6 @@ export class EditorComponent extends React.Component<IProps> {
       file.payload.uri === `${resource}/${org}/${repo}` &&
       file.payload.revision === routeRevision &&
       file.payload.path === routePath &&
-      this.props.revealPosition &&
       prevProps.revealPosition !== this.props.revealPosition
     ) {
       this.revealPosition(this.props.revealPosition);
