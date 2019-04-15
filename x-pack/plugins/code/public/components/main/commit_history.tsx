@@ -15,7 +15,6 @@ import {
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import styled from 'styled-components';
 import { CommitInfo } from '../../../model/commit';
 import { CommitLink } from '../diff_page/commit_link';
 
@@ -70,15 +69,10 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: stri
   );
 };
 
-const LoadingContainer = styled.div`
-  padding: 1.5rem;
-  text-align: center;
-`;
-
 export const CommitHistoryLoading = () => (
-  <LoadingContainer>
+  <div className="codeLoader">
     <EuiLoadingSpinner size="xl" />
-  </LoadingContainer>
+  </div>
 );
 
 export const CommitHistory = (props: {

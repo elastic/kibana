@@ -13,7 +13,6 @@ import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import styled from 'styled-components';
 import chrome from 'ui/chrome';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
@@ -79,10 +78,6 @@ enum ButtonLabel {
   Download = 'Download',
   Raw = 'Raw',
 }
-
-const Title = styled(EuiTitle)`
-  margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
-`;
 
 class CodeContent extends React.PureComponent<Props> {
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
@@ -298,9 +293,9 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <React.Fragment>
-                  <Title>
+                  <EuiTitle className="codeMargin__title">
                     <h3>Recent Commits</h3>
-                  </Title>
+                  </EuiTitle>
                   <EuiButton
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${encodeRevisionString(
                       revision
@@ -380,9 +375,9 @@ class CodeContent extends React.PureComponent<Props> {
                 commits={commits}
                 repoUri={repoUri}
                 header={
-                  <Title>
+                  <EuiTitle className="codeMargin__title">
                     <h3>Commit History</h3>
-                  </Title>
+                  </EuiTitle>
                 }
               />
             </InfiniteScroll>

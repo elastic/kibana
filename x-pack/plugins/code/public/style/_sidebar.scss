@@ -30,6 +30,24 @@
   }
 }
 
+.codeSymbol {
+  cursor: pointer;
+  display: flex;
+  flex-grow: 0;
+  flex-shrink: 0;
+  align-items: center;
+  height: 1.5rem;
+  margin-left: .75rem;
+
+  .euiToken {
+    margin-right: $euiSizeS;
+  }
+}
+
+.codeSymbol--nested {
+  margin-left: 2rem;
+}
+
 // EUI Overrides
 // TODO: Add 'code' prefixed classnames
 .euiSideNavItem--root + .euiSideNavItem--root {
