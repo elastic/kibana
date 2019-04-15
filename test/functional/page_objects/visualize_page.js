@@ -567,8 +567,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getInterval() {
-      const intervalOptions = await find.allByCssSelector(
-        `select[data-test-subj="visEditorInterval"] option`);
+      const intervalOptions = await find.allByCssSelector('select[data-test-subj="visEditorInterval"] option');
 
       for (const option of intervalOptions) {
         try {
@@ -584,7 +583,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
 
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
-      const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
+      const input = await testSubjects.find('visEditorInterval');
       await input.type(newValue);
       // The interval element will only interpret space as "select this" if there
       // was a long enough gap from the typing above to the space click.  Hence the

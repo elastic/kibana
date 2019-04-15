@@ -35,6 +35,7 @@ uiModules
     ['setValidity', { watchDepth: 'reference' }],
     'field',
     'interval',
+    'customInterval',
     'isInvalid',
     'value',
   ]))
@@ -62,6 +63,7 @@ uiModules
             editor-config="editorConfig"
             field="agg.params.field"
             interval="agg.params.interval"
+            custom-interval="agg.params.customInterval"
             indexed-fields="indexedFields"
             is-invalid="isInvalid"
             value="paramValue"
