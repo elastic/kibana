@@ -25,10 +25,9 @@ export class BaseWatch {
    * @param {array} props.actions Action definitions
    */
   constructor(props = {}) {
-    this.id = get(props, 'id', '');
+    this.id = get(props, 'id');
     this.type = get(props, 'type');
     this.isNew = get(props, 'isNew', true);
-
     this.name = get(props, 'name');
     this.isSystemWatch = Boolean(get(props, 'isSystemWatch'));
     this.watchStatus = WatchStatus.fromUpstreamJson(get(props, 'watchStatus'));

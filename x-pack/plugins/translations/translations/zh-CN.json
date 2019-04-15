@@ -7965,7 +7965,6 @@
     "xpack.watcher.sections.watchEdit.json.simulateTabTitle": "模拟监视",
     "xpack.watcher.sections.watchEdit.json.simulateWatchButtonLabel": "模拟监视",
     "xpack.watcher.sections.watchEdit.json.simulationOutputLabel": "模拟输出：",
-    "xpack.watcher.sections.watchEdit.json.warningPossibleInvalidSlackAction.description": "此监视具有不包含“to”属性的 Slack 操作。 只有在 Elasticsearch 的 Slack“message_default”中指定了“to”属性，此监视才有效。",
     "xpack.watcher.sections.watchEdit.json.watchErrorsWarning.confirmSaveWatch": "保存监视",
     "xpack.watcher.sections.watchEdit.threshold.matchingFollowingConditionTitle": "匹配以下条件",
     "xpack.watcher.sections.watchEdit.threshold.saveButtonLabel": "保存",

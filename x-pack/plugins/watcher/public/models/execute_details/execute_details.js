@@ -6,6 +6,7 @@
 
 import { TIME_UNITS } from '../../../common/constants';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 
 export class ExecuteDetails {
   constructor(props = {}) {
@@ -13,11 +14,37 @@ export class ExecuteDetails {
     this.triggeredTimeUnit = props.triggeredTimeUnit;
     this.scheduledTimeValue = props.scheduledTimeValue;
     this.scheduledTimeUnit = props.scheduledTimeUnit;
-    this.scheduledTime = props.scheduledTime;
     this.ignoreCondition = props.ignoreCondition;
-    this.alternativeInput = props.alternativeInput;
+    this.alternativeInput = props.alternativeInput || '';
     this.actionModes = props.actionModes;
     this.recordExecution = props.recordExecution;
+  }
+
+  validate() {
+    const errors = {
+      json: [],
+    };
+    if (this.alternativeInput || this.alternativeInput !== '') {
+      try {
+        const parsedJson = JSON.parse(this.alternativeInput);
+        if (parsedJson && typeof parsedJson !== 'object') {
+          errors.json.push(i18n.translate(
+            'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
+            {
+              defaultMessage: 'Invalid JSON',
+            }
+          ));
+        }
+      } catch (e) {
+        errors.json.push(i18n.translate(
+          'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
+          {
+            defaultMessage: 'Invalid JSON',
+          }
+        ));
+      }
+    }
+    return errors;
   }
 
   formatTime(timeUnit, value) {
@@ -42,18 +69,17 @@ export class ExecuteDetails {
   get upstreamJson() {
     const hasTriggerTime = this.triggeredTimeValue !== '';
     const hasScheduleTime = this.scheduledTimeValue !== '';
-    const formattedTriggerTime = hasTriggerTime ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
-    const formattedScheduleTime = hasScheduleTime ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
-    const triggerData = {
-      triggeredTime: formattedTriggerTime,
-      scheduledTime: formattedScheduleTime,
-    };
+    const triggeredTime = hasTriggerTime ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
+    const scheduledTime = hasScheduleTime ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
     return {
-      triggerData,
+      triggerData: {
+        triggeredTime,
+        scheduledTime,
+      },
       ignoreCondition: this.ignoreCondition,
-      alternativeInput: this.alternativeInput,
+      alternativeInput: this.alternativeInput !== '' ? JSON.parse(this.alternativeInput) : undefined,
       actionModes: this.actionModes,
-      recordExecution: this.recordExecution
+      recordExecution: this.recordExecution,
     };
   }
 }

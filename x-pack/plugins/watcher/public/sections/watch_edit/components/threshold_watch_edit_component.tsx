@@ -138,7 +138,7 @@ const ThresholdWatchEditUi = ({
   const [watchThresholdPopoverOpen, setWatchThresholdPopoverOpen] = useState(false);
   const [watchDurationPopoverOpen, setWatchDurationPopoverOpen] = useState(false);
   const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
-  const [modal, setModal] = useState<{ message: string } | null>(null);
+  const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
   const { watch, setWatchProperty } = useContext(WatchContext);
   const getIndexPatterns = async () => {
     const { savedObjects } = await savedObjectsClient.find({

@@ -11,15 +11,15 @@ export interface ExecutedWatchResults {
   startTime: Date;
   watchStatus: {
     state: string;
-    actionStatuses: Array<{ state: string; lastExecutionReason: string }>;
+    actionStatuses: Array<{ state: string; lastExecutionReason: string; id: string }>;
   };
 }
 
 export interface ExecutedWatchDetails {
-  triggerData: {
-    triggeredTime: Date;
-    scheduledTime: Date;
-  };
+  scheduledTimeValue: string | undefined;
+  scheduledTimeUnit: string;
+  triggeredTimeValue: string | undefined;
+  triggeredTimeUnit: string;
   ignoreCondition: boolean;
   alternativeInput: any;
   actionModes: {
@@ -42,7 +42,7 @@ export interface BaseWatch {
   upstreamJson: any;
   resetActions: () => void;
   createAction: (type: string, actionProps: {}) => void;
-  validate: () => { warning: { message: string } };
+  validate: () => { warning: { message: string; title?: string } };
   actions: [
     {
       id: string;

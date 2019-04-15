@@ -23,4 +23,3 @@ export { WATCH_HISTORY } from './watch_history';
 export { WATCH_STATES } from './watch_states';
 export { WATCH_TYPES } from './watch_types';
 export { ERROR_CODES } from './error_codes';
-export { WATCH_TABS, WATCH_TAB_ID_EDIT, WATCH_TAB_ID_SIMULATE } from './watch_tabs';

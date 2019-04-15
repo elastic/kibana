@@ -14,7 +14,7 @@ import { createWatch, loadWatch } from '../../lib/api';
  * Get the type from an action where a key defines its type.
  * eg: { email: { ... } } | { slack: { ... } }
  */
-function getTypeFromAction(action: { [key: string]: any }) {
+export function getTypeFromAction(action: { [key: string]: any }) {
   const actionKeys = Object.keys(action);
   let type;
   Object.keys(ACTION_TYPES).forEach(k => {
@@ -65,7 +65,6 @@ export async function saveWatch(watch: BaseWatch, urlService: any, licenseServic
         },
       })
     );
-    // TODO: Not correctly redirecting back to /watches route
     urlService.change('/management/elasticsearch/watcher/watches', {});
   } catch (error) {
     return licenseService
@@ -83,6 +82,12 @@ export async function validateActionsAndSaveWatch(
   if (warning) {
     return {
       error: {
+        title: i18n.translate(
+          'xpack.watcher.sections.watchEdit.json.saveConfirmModal.errorValidationTitleText',
+          {
+            defaultMessage: 'Save watch?',
+          }
+        ),
         message: warning.message,
       },
     };
@@ -106,27 +111,25 @@ export async function onWatchSave(
     if (existingWatch) {
       return {
         error: {
-          message: i18n.translate(
-            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionText',
+          title: i18n.translate(
+            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchTitleText',
             {
-              defaultMessage:
-                'Watch with ID "{watchId}" {watchNameMessageFragment} already exists. Do you want to overwrite it?',
-              values: {
-                watchId: existingWatch.id,
-                watchNameMessageFragment: existingWatch.name
-                  ? i18n.translate(
-                      'xpack.watcher.sections.watchEdit.json.saveConfirmModal.descriptionFragmentText',
-                      {
-                        defaultMessage: '(name: "{existingWatchName}")',
-                        values: {
-                          existingWatchName: existingWatch.name,
-                        },
-                      }
-                    )
-                  : '',
-              },
+              defaultMessage: 'A watch with this ID already exists',
             }
           ),
+          message: i18n.translate(
+            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchDescriptionText',
+            {
+              defaultMessage: 'Saving this watch will overwrite previous content.',
+            }
+          ),
+          buttonLabel: i18n.translate(
+            'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchButtonLabel',
+            {
+              defaultMessage: 'Overwrite',
+            }
+          ),
+          buttonType: 'danger',
         },
       };
     }

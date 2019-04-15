@@ -16,94 +16,48 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiLink,
   EuiSelect,
   EuiSpacer,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { map } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { toastNotifications } from 'ui/notify';
 import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
-import { getActionType } from '../../../../common/lib/get_action_type';
-import { BaseWatch, ExecutedWatchResults } from '../../../../common/types/watch_types';
+import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { executeWatch } from '../../../lib/api';
+import { documentationLinks } from '../../../lib/documentation_links';
 import { WatchContext } from '../../../sections/watch_edit/components/watch_context';
 import { timeUnits } from '../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 
-interface TableDataRow {
-  actionId: string | undefined;
-  actionMode: string | undefined;
-  type: string;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface TableData extends Array<TableDataRow> {}
-
-const EXECUTE_DETAILS_INITIAL_STATE = {
-  triggeredTimeValue: 0,
-  triggeredTimeUnit: TIME_UNITS.MILLISECOND,
-  scheduledTimeValue: 0,
-  scheduledTimeUnit: TIME_UNITS.SECOND,
-  ignoreCondition: false,
-};
-
-const INPUT_OVERRIDE_ID = 'simulateExecutionInputOverride';
-
-function getTableData(watch: BaseWatch) {
-  const actions = watch.watch && watch.watch.actions;
-  return map(actions, (action, actionId) => {
-    const type = getActionType(action);
-    return {
-      actionId,
-      type,
-      actionMode: ACTION_MODES.SIMULATE,
-    };
-  });
-}
-
-function getActionModes(items: TableData) {
-  const result = items.reduce((itemsAccum: any, item) => {
-    if (item.actionId) {
-      itemsAccum[item && item.actionId] = item.actionMode;
-    }
-    return itemsAccum;
-  }, {});
-  return result;
-}
-
 export const JsonWatchEditSimulate = ({
-  executeWatchJsonString,
-  setExecuteWatchJsonString,
-  errors,
-  setErrors,
-  isShowingErrors,
-  setIsShowingErrors,
-  isDisabled,
+  executeWatchErrors,
+  hasExecuteWatchErrors,
+  executeDetails,
+  setExecuteDetails,
+  watchActions,
 }: {
-  executeWatchJsonString: string;
-  setExecuteWatchJsonString: (json: string) => void;
-  errors: { [key: string]: string[] };
-  setErrors: (errors: { [key: string]: string[] }) => void;
-  isShowingErrors: boolean;
-  setIsShowingErrors: (isShowingErrors: boolean) => void;
-  isDisabled: boolean;
+  executeWatchErrors: { [key: string]: string[] };
+  hasExecuteWatchErrors: boolean;
+  executeDetails: ExecutedWatchDetails;
+  setExecuteDetails: (details: ExecutedWatchDetails) => void;
+  watchActions: Array<{
+    actionId: string;
+    actionMode: string;
+    type: string;
+  }>;
 }) => {
   const { watch } = useContext(WatchContext);
-  const tableData = getTableData(watch);
-
   // hooks
-  const [executeDetails, setExecuteDetails] = useState(
-    new ExecuteDetails({
-      ...EXECUTE_DETAILS_INITIAL_STATE,
-      actionModes: getActionModes(tableData),
-    })
-  );
   const [executeResults, setExecuteResults] = useState<ExecutedWatchResults | null>(null);
+  const { errors: watchErrors } = watch.validate();
+  const hasWatchJsonError = watchErrors.json.length >= 1;
 
   const columns = [
     {
@@ -176,14 +130,14 @@ export const JsonWatchEditSimulate = ({
         <JsonWatchEditSimulateResults
           executeResults={executeResults}
           executeDetails={executeDetails}
-          watch={watch}
           onCloseFlyout={() => setExecuteResults(null)}
         />
       )}
       <EuiText>
         <p>
           {i18n.translate('xpack.watcher.sections.watchEdit.simulate.pageDescription', {
-            defaultMessage: 'Modify the fields below to simulate a watch execution.',
+            defaultMessage:
+              'Use the simulator to override the watch schedule, input results, conditions, and actions.',
           })}
         </p>
       </EuiText>
@@ -195,15 +149,14 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesTitle',
-                { defaultMessage: 'Trigger overrides' }
+                { defaultMessage: 'Trigger' }
               )}
             </h3>
           }
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.triggerOverridesDescription',
             {
-              defaultMessage:
-                'These fields are parsed as the data of the trigger event that will be used during the watch execution.',
+              defaultMessage: 'Schedule the time and date for starting the watch.',
             }
           )}
         >
@@ -317,7 +270,7 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesTitle',
-                { defaultMessage: 'Input overrides' }
+                { defaultMessage: 'Input' }
               )}
             </h3>
           }
@@ -325,12 +278,12 @@ export const JsonWatchEditSimulate = ({
             'xpack.watcher.sections.watchEdit.simulate.form.inputOverridesDescription',
             {
               defaultMessage:
-                'When present, the watch uses this object as a payload instead of executing its own input.',
+                'Enter JSON data to override the watch payload that comes from running the input.',
             }
           )}
         >
           <ErrableFormRow
-            id={INPUT_OVERRIDE_ID}
+            id="executeWatchJson"
             describedByIds={['simulateExecutionInputOverridesDescription']}
             label={i18n.translate(
               'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldLabel',
@@ -338,10 +291,10 @@ export const JsonWatchEditSimulate = ({
                 defaultMessage: 'Alternative input',
               }
             )}
-            errorKey={INPUT_OVERRIDE_ID}
-            isShowingErrors={isShowingErrors}
+            errorKey="json"
+            isShowingErrors={hasExecuteWatchErrors}
             fullWidth
-            errors={errors}
+            errors={executeWatchErrors}
           >
             <EuiCodeEditor
               fullWidth
@@ -354,38 +307,14 @@ export const JsonWatchEditSimulate = ({
                   defaultMessage: 'Code editor',
                 }
               )}
-              value={executeWatchJsonString}
+              value={executeDetails.alternativeInput}
               onChange={(json: string) => {
-                setExecuteWatchJsonString(json);
-                try {
-                  const alternativeInput = json === '' ? undefined : JSON.parse(json);
-                  if (
-                    typeof alternativeInput === 'undefined' ||
-                    (alternativeInput && typeof alternativeInput === 'object')
-                  ) {
-                    setExecuteDetails(
-                      new ExecuteDetails({
-                        ...executeDetails,
-                        alternativeInput,
-                      })
-                    );
-                    setIsShowingErrors(false);
-                    setErrors({ ...errors, [INPUT_OVERRIDE_ID]: [] });
-                  }
-                } catch (e) {
-                  setErrors({
-                    ...errors,
-                    [INPUT_OVERRIDE_ID]: [
-                      i18n.translate(
-                        'xpack.watcher.sections.watchEdit.simulate.form.alternativeInputFieldError',
-                        {
-                          defaultMessage: 'Invalid JSON',
-                        }
-                      ),
-                    ],
-                  });
-                  setIsShowingErrors(true);
-                }
+                setExecuteDetails(
+                  new ExecuteDetails({
+                    ...executeDetails,
+                    alternativeInput: json,
+                  })
+                );
               }}
             />
           </ErrableFormRow>
@@ -396,14 +325,15 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.conditionOverridesTitle',
-                { defaultMessage: 'Condition overrides' }
+                { defaultMessage: 'Condition' }
               )}
             </h3>
           }
           description={i18n.translate(
             'xpack.watcher.sections.watchEdit.simulate.form.conditionOverridesDescription',
             {
-              defaultMessage: 'When enabled, the watch execution uses the Always Condition.',
+              defaultMessage:
+                'Execute the watch when the condition is met. Otherwise, ignore the condition and run the watch on a fixed schedule.',
             }
           )}
         >
@@ -429,17 +359,28 @@ export const JsonWatchEditSimulate = ({
             <h3>
               {i18n.translate(
                 'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesTitle',
-                { defaultMessage: 'Action overrides' }
+                { defaultMessage: 'Actions' }
               )}
             </h3>
           }
-          description={i18n.translate(
-            'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription',
-            {
-              defaultMessage:
-                'The action modes determine how to handle the watch actions as part of the watch execution.',
-            }
-          )}
+          description={
+            <FormattedMessage
+              id="xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription"
+              defaultMessage="Allow the watch to execute or skip actions. {actionsLink}"
+              values={{
+                actionsLink: (
+                  <EuiLink href={documentationLinks.watcher.executeWatchApi} target="_blank">
+                    {i18n.translate(
+                      'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription.linkLabel',
+                      {
+                        defaultMessage: 'Learn about actions.',
+                      }
+                    )}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
         >
           <EuiFormRow
             describedByIds={['simulateExecutionActionModesDescription']}
@@ -452,7 +393,7 @@ export const JsonWatchEditSimulate = ({
             fullWidth
           >
             <EuiBasicTable
-              items={tableData}
+              items={watchActions}
               itemId="simulateExecutionActionModesTable"
               columns={columns}
             />
@@ -462,7 +403,7 @@ export const JsonWatchEditSimulate = ({
           iconType="play"
           fill
           type="submit"
-          isDisabled={isDisabled}
+          isDisabled={hasExecuteWatchErrors || hasWatchJsonError}
           onClick={async () => {
             try {
               const executedWatch = await executeWatch(executeDetails, watch);
