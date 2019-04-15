@@ -37,6 +37,7 @@ kibana_vars=(
     elasticsearch.ssl.verificationMode
     elasticsearch.startupTimeout
     elasticsearch.username
+    elasticsearch.url
     i18n.locale
     kibana.defaultAppId
     kibana.index
