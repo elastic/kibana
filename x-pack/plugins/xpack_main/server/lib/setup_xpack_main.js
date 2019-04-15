@@ -7,6 +7,7 @@
 import { injectXPackInfoSignature } from './inject_xpack_info_signature';
 import { XPackInfo } from './xpack_info';
 import { XPackUsage } from './xpack_usage';
+import { FeatureRegistry } from './feature_registry';
 
 /**
  * Setup the X-Pack Main plugin. This is fired every time that the Elasticsearch plugin becomes Green.
@@ -29,6 +30,10 @@ export function setupXPackMain(server) {
   server.expose('usage', usage);
   server.expose('createXPackInfo', (options) => new XPackInfo(server, options));
   server.ext('onPreResponse', (request, h) => injectXPackInfoSignature(info, request, h));
+
+  const featureRegistry = new FeatureRegistry();
+  server.expose('registerFeature', (feature) => featureRegistry.register(feature));
+  server.expose('getFeatures', () => featureRegistry.getAll());
 
   const setPluginStatus = () => {
     if (info.isAvailable()) {

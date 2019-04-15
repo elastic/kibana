@@ -50,6 +50,7 @@ jest.mock('../../../../../lib/fetch_export_objects', () => ({
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
+
   it('should render index patterns normally', async () => {
     const props = {
       getRelationships: jest.fn().mockImplementation(() => ({
@@ -65,6 +66,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'index-pattern',
@@ -105,6 +107,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'search',
@@ -143,6 +146,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'visualization',
@@ -181,6 +185,7 @@ describe('Relationships', () => {
         ],
       })),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'dashboard',
@@ -212,6 +217,7 @@ describe('Relationships', () => {
         throw new Error('foo');
       }),
       getEditUrl: () => '',
+      canGoInApp: () => true,
       goInApp: jest.fn(),
       id: '1',
       type: 'dashboard',

@@ -20,7 +20,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
-import { ObjectsTable, INCLUDED_TYPES } from '../objects_table';
+import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
 import { Flyout } from '../components/flyout/';
 import { Relationships } from '../components/relationships/';
 
@@ -145,7 +145,30 @@ const defaultProps = {
   kbnIndex: '',
   services: [],
   getEditUrl: () => {},
+  canGoInApp: () => {},
   goInApp: () => {},
+  uiCapabilities: {
+    savedObjectsManagement: {
+      'index-pattern': {
+        read: true
+      },
+      visualization: {
+        read: true
+      },
+      dashboard: {
+        read: true
+      },
+      search: {
+        read: true
+      }
+    }
+  },
+  canDeleteSavedObjectTypes: [
+    'index-pattern',
+    'visualization',
+    'dashboard',
+    'search'
+  ]
 };
 
 let addDangerMock;
@@ -205,6 +228,41 @@ describe('ObjectsTable', () => {
     component.update();
 
     expect(addDangerMock).toHaveBeenCalled();
+  });
+
+  it('should filter find operation based on the uiCapabilities', async () => {
+    const uiCapabilities = {
+      savedObjectsManagement: {
+        'index-pattern': {
+          read: false,
+        },
+        visualization: {
+          read: false,
+        },
+        dashboard: {
+          read: false,
+        },
+        search: {
+          read: true,
+        }
+      }
+    };
+    const customizedProps = { ...defaultProps, uiCapabilities };
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...customizedProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(defaultProps.savedObjectsClient.find).toHaveBeenCalledWith(expect.objectContaining({
+      type: ['search']
+    }));
   });
 
   describe('export', () => {
@@ -288,7 +346,7 @@ describe('ObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByType).toHaveBeenCalledWith(INCLUDED_TYPES, true);
+      expect(fetchExportByType).toHaveBeenCalledWith(POSSIBLE_TYPES, true);
       expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
     });
@@ -348,7 +406,44 @@ describe('ObjectsTable', () => {
       component.update();
 
       await component.instance().getRelationships('search', '1');
-      expect(getRelationships).toHaveBeenCalledWith('search', '1', defaultProps.$http, defaultProps.basePath);
+      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
+    });
+
+    it('should fetch relationships filtered based on the uiCapabilities', async () => {
+      const { getRelationships } = require('../../../lib/get_relationships');
+
+      const uiCapabilities = {
+        savedObjectsManagement: {
+          'index-pattern': {
+            read: false,
+          },
+          visualization: {
+            read: false,
+          },
+          dashboard: {
+            read: false,
+          },
+          search: {
+            read: true,
+          }
+        }
+      };
+      const customizedProps = { ...defaultProps, uiCapabilities };
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...customizedProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().getRelationships('search', '1');
+      const savedObjectTypes = ['search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
     });
 
     it('should show the flyout', async () => {
