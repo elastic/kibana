@@ -33,7 +33,7 @@ import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
-import { ObservabilityIntegrationsPopover } from './monitor_list_popover';
+import { ObservabilityIntegrationsPopover } from './observability_integrations_popover';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
