@@ -162,7 +162,7 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await wait(10);
     expect(container.innerHTML).toBe(getEmptyValue());
   });
 });

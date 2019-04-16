@@ -201,7 +201,7 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
+    await wait(10);
     expect(container.querySelectorAll('svg').length).toBe(1);
   });
 });
