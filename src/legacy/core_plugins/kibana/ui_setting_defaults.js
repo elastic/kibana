@@ -162,7 +162,8 @@ export function getUiSettingDefaults() {
         },
       }),
       type: 'select',
-      options: ['Browser', ...moment.tz.names()]
+      options: ['Browser', ...moment.tz.names()],
+      requiresPageReload: true,
     },
     'dateFormat:scaled': {
       name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
@@ -302,19 +303,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
-    'courier:maxSegmentCount': {
-      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
-        defaultMessage: 'Maximum segment count',
-      }),
-      value: 30,
-      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
-        defaultMessage:
-          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
-          'This setting attempts to prevent the list of segments from getting too long, ' +
-          'which might cause requests to take much longer to process.',
-      }),
-      category: ['search'],
-    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
@@ -323,8 +311,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When set to false, all filters are applied to all visualizations. ' +
-          'When set to true, filter(s) will be ignored for a visualization ' +
+          'When disabled, all filters are applied to all visualizations. ' +
+          'When enabled, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],
@@ -876,6 +864,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.darkModeText', {
         defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
+      requiresPageReload: true,
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
@@ -1055,6 +1044,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
+      requiresPageReload: true,
     },
   };
 }

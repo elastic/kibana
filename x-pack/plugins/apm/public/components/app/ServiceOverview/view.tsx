@@ -5,59 +5,82 @@
  */
 
 import { EuiPanel } from '@elastic/eui';
-import React, { Component } from 'react';
-import { RRRRenderResponse } from 'react-redux-request';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { loadAgentStatus } from '../../../services/rest/apm/status_check';
-import { ServiceListRequest } from '../../../store/reactReduxRequest/serviceList';
+import { EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { useEffect } from 'react';
+import chrome from 'ui/chrome';
+import { toastNotifications } from 'ui/notify';
+import url from 'url';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { loadServiceList } from '../../../services/rest/apm/services';
+import { IUrlParams } from '../../../store/urlParams';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 
 interface Props {
   urlParams: IUrlParams;
-  serviceList: RRRRenderResponse<IServiceListItem[]>;
 }
 
-interface State {
-  // any data submitted from APM agents found (not just in the given time range)
-  historicalDataFound: boolean;
-}
+const initalData = {
+  items: [],
+  hasHistoricalData: true,
+  hasLegacyData: false
+};
 
-export class ServiceOverview extends Component<Props, State> {
-  public state = { historicalDataFound: true };
+let hasDisplayedToast = false;
 
-  public async checkForHistoricalData() {
-    const result = await loadAgentStatus();
-    this.setState({ historicalDataFound: result.dataFound });
-  }
+export function ServiceOverview({ urlParams }: Props) {
+  const { start, end, kuery } = urlParams;
+  const { data = initalData } = useFetcher(
+    () => loadServiceList({ start, end, kuery }),
+    [start, end, kuery]
+  );
 
-  public componentDidMount() {
-    this.checkForHistoricalData();
-  }
+  useEffect(
+    () => {
+      if (data.hasLegacyData && !hasDisplayedToast) {
+        hasDisplayedToast = true;
+        toastNotifications.addWarning({
+          title: i18n.translate('xpack.apm.serviceOverview.toastTitle', {
+            defaultMessage:
+              'Legacy data was detected within the selected time range'
+          }),
+          text: (
+            <p>
+              {i18n.translate('xpack.apm.serviceOverview.toastText', {
+                defaultMessage:
+                  "You're running Elastic Stack 7.0+ and we've detected incompatible data from a previous 6.x version. If you want to view this data in APM, you should migrate it. See more in "
+              })}
 
-  public render() {
-    const { urlParams } = this.props;
+              <EuiLink
+                href={url.format({
+                  pathname: chrome.addBasePath('/app/kibana'),
+                  hash: '/management/elasticsearch/upgrade_assistant'
+                })}
+              >
+                {i18n.translate(
+                  'xpack.apm.serviceOverview.upgradeAssistantLink',
+                  {
+                    defaultMessage: 'the upgrade assistant'
+                  }
+                )}
+              </EuiLink>
+            </p>
+          )
+        });
+      }
+    },
+    [data.hasLegacyData]
+  );
 
-    // Render method here uses this.props.serviceList instead of received "data" from RRR
-    // to make it easier to test -- mapStateToProps uses the RRR selector so the data
-    // is the same either way
-    return (
-      <EuiPanel>
-        <ServiceListRequest
-          urlParams={urlParams}
-          render={() => (
-            <ServiceList
-              items={this.props.serviceList.data}
-              noItemsMessage={
-                <NoServicesMessage
-                  historicalDataFound={this.state.historicalDataFound}
-                />
-              }
-            />
-          )}
-        />
-      </EuiPanel>
-    );
-  }
+  return (
+    <EuiPanel>
+      <ServiceList
+        items={data.items}
+        noItemsMessage={
+          <NoServicesMessage historicalDataFound={data.hasHistoricalData} />
+        }
+      />
+    </EuiPanel>
+  );
 }

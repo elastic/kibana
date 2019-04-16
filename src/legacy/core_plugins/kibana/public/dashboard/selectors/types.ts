@@ -19,7 +19,9 @@
 
 import { EmbeddableMetadata, Filters, Query, RefreshConfig, TimeRange } from 'ui/embeddable';
 import { DashboardViewMode } from '../dashboard_view_mode';
+import { GridData } from '../types';
 
+export type DashboardViewMode = DashboardViewMode;
 export interface ViewState {
   readonly viewMode: DashboardViewMode;
   readonly isFullScreenMode: boolean;
@@ -31,14 +33,6 @@ export interface ViewState {
   readonly useMargins: boolean;
   readonly query: Query;
   readonly filters: Filters;
-}
-
-export interface GridData {
-  readonly w: number;
-  readonly h: number;
-  readonly x: number;
-  readonly y: number;
-  readonly i: string;
 }
 
 export type PanelId = string;
@@ -65,8 +59,21 @@ export interface EmbeddableReduxState {
   readonly lastReloadRequestTime: number;
 }
 
+export interface Pre61PanelState {
+  size_x: number;
+  size_y: number;
+  row: number;
+  col: number;
+  panelIndex: any; // earlier versions allowed this to be number or string
+  id: string;
+  type: string;
+  // Embeddableconfig didn't actually exist on older panel states but `migrate_app_state.js` handles
+  // stuffing it on.
+  embeddableConfig: any;
+}
+
 export interface PanelStateMap {
-  readonly [panelId: string]: PanelState;
+  [panelId: string]: PanelState | Pre61PanelState;
 }
 
 export interface EmbeddablesMap {

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { getFilterBarQueryString } from '../../../../../plugins/uptime/public/components/queries/filter_bar/get_filter_bar';
+import expect from '@kbn/expect';
+import { filterBarQueryString } from '../../../../../plugins/uptime/public/queries';
 import filterList from './fixtures/filter_list';
 
 export default function ({ getService }) {
@@ -15,7 +15,7 @@ export default function ({ getService }) {
     it('returns the expected filters', async () => {
       const getFilterBarQuery = {
         operationName: 'FilterBar',
-        query: getFilterBarQueryString,
+        query: filterBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',

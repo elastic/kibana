@@ -25,20 +25,20 @@ import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 
-import { Plugin, PluginManifest } from './plugin';
-import { createPluginInitializerContext, createPluginStartContext } from './plugin_context';
+import { PluginWrapper, PluginManifest } from './plugin';
+import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
 const logger = loggingServiceMock.create();
-jest.mock(
+jest.doMock(
   join('plugin-with-initializer-path', 'server'),
   () => ({ plugin: mockPluginInitializer }),
   { virtual: true }
 );
-jest.mock(join('plugin-without-initializer-path', 'server'), () => ({}), {
+jest.doMock(join('plugin-without-initializer-path', 'server'), () => ({}), {
   virtual: true,
 });
-jest.mock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
+jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
   virtual: true,
 });
 
@@ -59,7 +59,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
+const setupDeps = { elasticsearch: elasticsearchServiceMock.createSetupContract() };
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -78,7 +78,7 @@ afterEach(() => {
 
 test('`constructor` correctly initializes plugin instance', () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'some-plugin-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -87,43 +87,43 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.name).toBe('some-plugin-id');
   expect(plugin.configPath).toBe('path');
   expect(plugin.path).toBe('some-plugin-path');
-  expect(plugin.requiredDependencies).toEqual(['some-required-dep']);
-  expect(plugin.optionalDependencies).toEqual(['some-optional-dep']);
+  expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
+  expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
 });
 
-test('`start` fails if `plugin` initializer is not exported', async () => {
+test('`setup` fails if `plugin` initializer is not exported', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-without-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
   );
 
   await expect(
-    plugin.start(createPluginStartContext(coreContext, startDeps, plugin), {})
+    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
   ).rejects.toMatchInlineSnapshot(
     `[Error: Plugin "some-plugin-id" does not export "plugin" definition (plugin-without-initializer-path).]`
   );
 });
 
-test('`start` fails if plugin initializer is not a function', async () => {
+test('`setup` fails if plugin initializer is not a function', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-wrong-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
   );
 
   await expect(
-    plugin.start(createPluginStartContext(coreContext, startDeps, plugin), {})
+    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
   ).rejects.toMatchInlineSnapshot(
     `[Error: Definition of plugin "some-plugin-id" should be a function (plugin-with-wrong-initializer-path).]`
   );
 });
 
-test('`start` fails if initializer does not return object', async () => {
+test('`setup` fails if initializer does not return object', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -132,15 +132,15 @@ test('`start` fails if initializer does not return object', async () => {
   mockPluginInitializer.mockReturnValue(null);
 
   await expect(
-    plugin.start(createPluginStartContext(coreContext, startDeps, plugin), {})
+    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
   ).rejects.toMatchInlineSnapshot(
     `[Error: Initializer for plugin "some-plugin-id" is expected to return plugin instance, but returned "null".]`
   );
 });
 
-test('`start` fails if object returned from initializer does not define `start` function', async () => {
+test('`setup` fails if object returned from initializer does not define `setup` function', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
@@ -150,73 +150,73 @@ test('`start` fails if object returned from initializer does not define `start` 
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
   await expect(
-    plugin.start(createPluginStartContext(coreContext, startDeps, plugin), {})
+    plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {})
   ).rejects.toMatchInlineSnapshot(
-    `[Error: Instance of plugin "some-plugin-id" does not define "start" function.]`
+    `[Error: Instance of plugin "some-plugin-id" does not define "setup" function.]`
   );
 });
 
-test('`start` initializes plugin and calls appropriate lifecycle hook', async () => {
+test('`setup` initializes plugin and calls appropriate lifecycle hook', async () => {
   const manifest = createPluginManifest();
   const initializerContext = createPluginInitializerContext(coreContext, manifest);
-  const plugin = new Plugin('plugin-with-initializer-path', manifest, initializerContext);
+  const plugin = new PluginWrapper('plugin-with-initializer-path', manifest, initializerContext);
 
-  const mockPluginInstance = { start: jest.fn().mockResolvedValue({ contract: 'yes' }) };
+  const mockPluginInstance = { setup: jest.fn().mockResolvedValue({ contract: 'yes' }) };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
-  const startContext = createPluginStartContext(coreContext, startDeps, plugin);
-  const startDependencies = { 'some-required-dep': { contract: 'no' } };
-  await expect(plugin.start(startContext, startDependencies)).resolves.toEqual({ contract: 'yes' });
+  const setupContext = createPluginSetupContext(coreContext, setupDeps, plugin);
+  const setupDependencies = { 'some-required-dep': { contract: 'no' } };
+  await expect(plugin.setup(setupContext, setupDependencies)).resolves.toEqual({ contract: 'yes' });
 
   expect(mockPluginInitializer).toHaveBeenCalledTimes(1);
   expect(mockPluginInitializer).toHaveBeenCalledWith(initializerContext);
 
-  expect(mockPluginInstance.start).toHaveBeenCalledTimes(1);
-  expect(mockPluginInstance.start).toHaveBeenCalledWith(startContext, startDependencies);
+  expect(mockPluginInstance.setup).toHaveBeenCalledTimes(1);
+  expect(mockPluginInstance.setup).toHaveBeenCalledWith(setupContext, setupDependencies);
 });
 
-test('`stop` fails if plugin is not started', async () => {
+test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
   );
 
-  const mockPluginInstance = { start: jest.fn(), stop: jest.fn() };
+  const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
 
   await expect(plugin.stop()).rejects.toMatchInlineSnapshot(
-    `[Error: Plugin "some-plugin-id" can't be stopped since it isn't started.]`
+    `[Error: Plugin "some-plugin-id" can't be stopped since it isn't set up.]`
   );
   expect(mockPluginInstance.stop).not.toHaveBeenCalled();
 });
 
 test('`stop` does nothing if plugin does not define `stop` function', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
   );
 
-  mockPluginInitializer.mockReturnValue({ start: jest.fn() });
-  await plugin.start(createPluginStartContext(coreContext, startDeps, plugin), {});
+  mockPluginInitializer.mockReturnValue({ setup: jest.fn() });
+  await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
 
   await expect(plugin.stop()).resolves.toBeUndefined();
 });
 
 test('`stop` calls `stop` defined by the plugin instance', async () => {
   const manifest = createPluginManifest();
-  const plugin = new Plugin(
+  const plugin = new PluginWrapper(
     'plugin-with-initializer-path',
     manifest,
     createPluginInitializerContext(coreContext, manifest)
   );
 
-  const mockPluginInstance = { start: jest.fn(), stop: jest.fn() };
+  const mockPluginInstance = { setup: jest.fn(), stop: jest.fn() };
   mockPluginInitializer.mockReturnValue(mockPluginInstance);
-  await plugin.start(createPluginStartContext(coreContext, startDeps, plugin), {});
+  await plugin.setup(createPluginSetupContext(coreContext, setupDeps, plugin), {});
 
   await expect(plugin.stop()).resolves.toBeUndefined();
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);

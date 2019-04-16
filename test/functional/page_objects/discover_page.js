@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DiscoverPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -234,6 +234,14 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return await retry.try(async () => {
         await testSubjects.click(`fieldVisualize-${field}`);
       });
+    }
+
+    async expectFieldListItemVisualize(field) {
+      await testSubjects.existOrFail(`fieldVisualize-${field}`);
+    }
+
+    async expectMissingFieldListItemVisualize(field) {
+      await testSubjects.missingOrFail(`fieldVisualize-${field}`);
     }
 
     async clickFieldListPlusFilter(field, value) {

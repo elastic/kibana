@@ -17,13 +17,7 @@
  * under the License.
  */
 
-const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
-
-const mockDiscover = jest.fn();
-jest.mock('./discovery/plugins_discovery', () => ({ discover: mockDiscover }));
-
-jest.mock('./plugins_system');
+import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
@@ -33,7 +27,7 @@ import { getEnvOptions } from '../config/__mocks__/env';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
-import { Plugin } from './plugin';
+import { PluginWrapper } from './plugin';
 import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 
@@ -43,7 +37,7 @@ let pluginsService: PluginsService;
 let configService: ConfigService;
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-const startDeps = { elasticsearch: elasticsearchServiceMock.createStartContract() };
+const setupDeps = { elasticsearch: elasticsearchServiceMock.createSetupContract() };
 const logger = loggingServiceMock.create();
 beforeEach(() => {
   mockPackage.raw = {
@@ -72,13 +66,13 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-test('`start` throws if plugin has an invalid manifest', async () => {
+test('`setup` throws if plugin has an invalid manifest', async () => {
   mockDiscover.mockReturnValue({
     error$: from([PluginDiscoveryError.invalidManifest('path-1', new Error('Invalid JSON'))]),
     plugin$: from([]),
   });
 
-  await expect(pluginsService.start(startDeps)).rejects.toMatchInlineSnapshot(`
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Invalid JSON (invalid-manifest, path-1)]
 `);
@@ -91,7 +85,7 @@ Array [
 `);
 });
 
-test('`start` throws if plugin required Kibana version is incompatible with the current version', async () => {
+test('`setup` throws if plugin required Kibana version is incompatible with the current version', async () => {
   mockDiscover.mockReturnValue({
     error$: from([
       PluginDiscoveryError.incompatibleVersion('path-3', new Error('Incompatible version')),
@@ -99,7 +93,7 @@ test('`start` throws if plugin required Kibana version is incompatible with the 
     plugin$: from([]),
   });
 
-  await expect(pluginsService.start(startDeps)).rejects.toMatchInlineSnapshot(`
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Incompatible version (incompatible-version, path-3)]
 `);
@@ -112,11 +106,11 @@ Array [
 `);
 });
 
-test('`start` throws if discovered plugins with conflicting names', async () => {
+test('`setup` throws if discovered plugins with conflicting names', async () => {
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new Plugin(
+      new PluginWrapper(
         'path-4',
         {
           id: 'conflicting-id',
@@ -130,7 +124,7 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-5',
         {
           id: 'conflicting-id',
@@ -147,26 +141,26 @@ test('`start` throws if discovered plugins with conflicting names', async () => 
     ]),
   });
 
-  await expect(pluginsService.start(startDeps)).rejects.toMatchInlineSnapshot(
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Plugin with id "conflicting-id" is already registered!]`
   );
 
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
-  expect(mockPluginSystem.startPlugins).not.toHaveBeenCalled();
+  expect(mockPluginSystem.setupPlugins).not.toHaveBeenCalled();
 });
 
-test('`start` properly detects plugins that should be disabled.', async () => {
+test('`setup` properly detects plugins that should be disabled.', async () => {
   jest
     .spyOn(configService, 'isEnabledAtPath')
     .mockImplementation(path => Promise.resolve(!path.includes('disabled')));
 
-  mockPluginSystem.startPlugins.mockResolvedValue(new Map());
+  mockPluginSystem.setupPlugins.mockResolvedValue(new Map());
   mockPluginSystem.uiPlugins.mockReturnValue({ public: new Map(), internal: new Map() });
 
   mockDiscover.mockReturnValue({
     error$: from([]),
     plugin$: from([
-      new Plugin(
+      new PluginWrapper(
         'path-1',
         {
           id: 'explicitly-disabled-plugin',
@@ -180,7 +174,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-2',
         {
           id: 'plugin-with-missing-required-deps',
@@ -194,7 +188,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-3',
         {
           id: 'plugin-with-disabled-transitive-dep',
@@ -208,7 +202,7 @@ test('`start` properly detects plugins that should be disabled.', async () => {
         },
         { logger } as any
       ),
-      new Plugin(
+      new PluginWrapper(
         'path-4',
         {
           id: 'another-explicitly-disabled-plugin',
@@ -225,14 +219,14 @@ test('`start` properly detects plugins that should be disabled.', async () => {
     ]),
   });
 
-  const start = await pluginsService.start(startDeps);
+  const start = await pluginsService.setup(setupDeps);
 
   expect(start.contracts).toBeInstanceOf(Map);
   expect(start.uiPlugins.public).toBeInstanceOf(Map);
   expect(start.uiPlugins.internal).toBeInstanceOf(Map);
   expect(mockPluginSystem.addPlugin).not.toHaveBeenCalled();
-  expect(mockPluginSystem.startPlugins).toHaveBeenCalledTimes(1);
-  expect(mockPluginSystem.startPlugins).toHaveBeenCalledWith(startDeps);
+  expect(mockPluginSystem.setupPlugins).toHaveBeenCalledTimes(1);
+  expect(mockPluginSystem.setupPlugins).toHaveBeenCalledWith(setupDeps);
 
   expect(loggingServiceMock.collect(logger).info).toMatchInlineSnapshot(`
 Array [
@@ -252,8 +246,8 @@ Array [
 `);
 });
 
-test('`start` properly invokes `discover` and ignores non-critical errors.', async () => {
-  const firstPlugin = new Plugin(
+test('`setup` properly invokes `discover` and ignores non-critical errors.', async () => {
+  const firstPlugin = new PluginWrapper(
     'path-1',
     {
       id: 'some-id',
@@ -268,7 +262,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
     { logger } as any
   );
 
-  const secondPlugin = new Plugin(
+  const secondPlugin = new PluginWrapper(
     'path-2',
     {
       id: 'some-other-id',
@@ -294,13 +288,13 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
 
   const contracts = new Map();
   const discoveredPlugins = { public: new Map(), internal: new Map() };
-  mockPluginSystem.startPlugins.mockResolvedValue(contracts);
+  mockPluginSystem.setupPlugins.mockResolvedValue(contracts);
   mockPluginSystem.uiPlugins.mockReturnValue(discoveredPlugins);
 
-  const start = await pluginsService.start(startDeps);
+  const setup = await pluginsService.setup(setupDeps);
 
-  expect(start.contracts).toBe(contracts);
-  expect(start.uiPlugins).toBe(discoveredPlugins);
+  expect(setup.contracts).toBe(contracts);
+  expect(setup.uiPlugins).toBe(discoveredPlugins);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledTimes(2);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(firstPlugin);
   expect(mockPluginSystem.addPlugin).toHaveBeenCalledWith(secondPlugin);
@@ -308,6 +302,7 @@ test('`start` properly invokes `discover` and ignores non-critical errors.', asy
   expect(mockDiscover).toHaveBeenCalledTimes(1);
   expect(mockDiscover).toHaveBeenCalledWith(
     {
+      additionalPluginPaths: [],
       initialize: true,
       pluginSearchPaths: [
         resolve(process.cwd(), 'src', 'plugins'),

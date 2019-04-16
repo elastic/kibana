@@ -48,12 +48,12 @@ export class Root {
     this.server = new Server(this.configService, this.logger, this.env);
   }
 
-  public async start() {
-    this.log.debug('starting root');
+  public async setup() {
+    this.log.debug('setting up root');
 
     try {
       await this.setupLogging();
-      await this.server.start();
+      await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
       throw e;
@@ -93,7 +93,7 @@ export class Root {
       switchMap(() => this.configService.atPath('logging', LoggingConfig)),
       map(config => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
-      // tslint:disable-next-line no-console
+      // eslint-disable-next-line no-console
       tap({ error: err => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;

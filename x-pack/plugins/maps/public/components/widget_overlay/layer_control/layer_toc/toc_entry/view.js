@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -144,6 +144,7 @@ export class TOCEntry extends React.Component {
 
   _renderLayerHeader() {
     const {
+      cloneLayer,
       isReadOnly,
       layer,
       zoom,
@@ -155,7 +156,9 @@ export class TOCEntry extends React.Component {
     if (!isReadOnly) {
       sortIcon = (
         <EuiFlexItem grow={false}>
-          <span className="mapTocEntry__grab"><EuiIcon type="grab"/></span>
+          <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
+            <EuiIcon type="grab"/>
+          </span>
         </EuiFlexItem>
       );
     }
@@ -181,6 +184,10 @@ export class TOCEntry extends React.Component {
               toggleVisible(layer.getId());
             }}
             displayName={this.state.displayName}
+            cloneLayer={() => {
+              cloneLayer(layer.getId());
+            }}
+            isReadOnly={this.props.isReadOnly}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -198,10 +205,10 @@ export class TOCEntry extends React.Component {
     }
 
     return (
-      <EuiFlexItem>
+      <Fragment>
         <EuiSpacer size="s"/>
         {tocDetails}
-      </EuiFlexItem>
+      </Fragment>
     );
   }
 

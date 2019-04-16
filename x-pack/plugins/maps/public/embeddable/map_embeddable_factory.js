@@ -10,7 +10,7 @@ import { EmbeddableFactory } from 'ui/embeddable';
 import { MapEmbeddable } from './map_embeddable';
 import { indexPatternService } from '../kibana_services';
 import { i18n } from '@kbn/i18n';
-import { createMapPath, MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
+import { createMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 
 export class MapEmbeddableFactory extends EmbeddableFactory {
 
@@ -22,7 +22,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
           defaultMessage: 'Map',
         }),
         type: MAP_SAVED_OBJECT_TYPE,
-        getIconForSavedObject: () => 'gisApp',
+        getIconForSavedObject: () => APP_ICON
       },
     });
     this._savedObjectLoader = gisMapSavedObjectLoader;
@@ -48,6 +48,7 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
 
     return new MapEmbeddable({
       onEmbeddableStateChanged,
+      embeddableConfig: panelMetadata.embeddableConfig,
       savedMap,
       editUrl: chrome.addBasePath(createMapPath(panelMetadata.id)),
       indexPatterns,

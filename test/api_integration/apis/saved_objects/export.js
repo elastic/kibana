@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -87,6 +87,51 @@ export default function ({ getService }) {
                 message: 'child "objects" fails because ["objects" at position 0 fails because [child "type" fails because ["type" must be one of [index-pattern, search, visualization, dashboard]]]]',
                 validation: { source: 'payload', keys: [ 'objects.0.type' ] },
               });
+            });
+        });
+
+        it('should support including dependencies when exporting selected objects', async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              includeReferencesDeep: true,
+              objects: [
+                {
+                  type: 'dashboard',
+                  id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+                },
+              ],
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(objects).to.have.length(3);
+              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).to.have.property('type', 'index-pattern');
+              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).to.have.property('type', 'visualization');
+              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).to.have.property('type', 'dashboard');
+            });
+        });
+
+        it('should support including dependencies when exporting by type', async () => {
+          await supertest
+            .post('/api/saved_objects/_export')
+            .send({
+              includeReferencesDeep: true,
+              type: ['dashboard'],
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.text.split('\n').map(JSON.parse);
+              expect(objects).to.have.length(3);
+              expect(objects[0]).to.have.property('id', '91200a00-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[0]).to.have.property('type', 'index-pattern');
+              expect(objects[1]).to.have.property('id', 'dd7caf20-9efd-11e7-acb3-3dab96693fab');
+              expect(objects[1]).to.have.property('type', 'visualization');
+              expect(objects[2]).to.have.property('id', 'be3733a0-9efe-11e7-acb3-3dab96693fab');
+              expect(objects[2]).to.have.property('type', 'dashboard');
             });
         });
 
@@ -175,9 +220,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -189,6 +232,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -228,9 +272,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -242,6 +284,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -286,9 +329,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -300,6 +341,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();

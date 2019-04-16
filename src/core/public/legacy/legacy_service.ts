@@ -18,7 +18,7 @@
  */
 
 import angular from 'angular';
-import { CoreStart } from '../';
+import { CoreSetup } from '../';
 
 export interface LegacyPlatformParams {
   targetDomElement: HTMLElement;
@@ -31,12 +31,12 @@ export interface LegacyPlatformParams {
  * the legacy platform by injecting parts of the new platform
  * services into the legacy platform modules, like ui/modules,
  * and then bootstrapping the ui/chrome or ui/test_harness to
- * start either the app or browser tests.
+ * setup either the app or browser tests.
  */
 export class LegacyPlatformService {
   constructor(private readonly params: LegacyPlatformParams) {}
 
-  public start(core: CoreStart) {
+  public setup(core: CoreSetup) {
     const {
       i18n,
       injectedMetadata,
@@ -44,6 +44,7 @@ export class LegacyPlatformService {
       notifications,
       http,
       basePath,
+      capabilities,
       uiSettings,
       chrome,
     } = core;
@@ -54,6 +55,7 @@ export class LegacyPlatformService {
     require('ui/i18n').__newPlatformInit__(i18n.Context);
     require('ui/notify/fatal_error').__newPlatformInit__(fatalErrors);
     require('ui/notify/toasts').__newPlatformInit__(notifications.toasts);
+    require('ui/capabilities').__newPlatformInit__(capabilities);
     require('ui/chrome/api/loading_count').__newPlatformInit__(http);
     require('ui/chrome/api/base_path').__newPlatformInit__(basePath);
     require('ui/chrome/api/ui_settings').__newPlatformInit__(uiSettings);

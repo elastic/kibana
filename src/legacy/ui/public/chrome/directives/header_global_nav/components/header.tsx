@@ -50,22 +50,25 @@ import {
   EuiShowFor,
 } from '@elastic/eui';
 
-import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
-
+import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { UICapabilities } from 'ui/capabilities';
 import chrome, { NavLink } from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
+
+import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderHelpMenu } from './header_help_menu';
+import { HeaderNavControls } from './header_nav_controls';
+
 import { NavControlSide } from '../';
-import { Breadcrumb } from '../../../../../../../core/public/chrome';
+import { ChromeBreadcrumb } from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
-  breadcrumbs$: Rx.Observable<Breadcrumb[]>;
+  breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
   navLinks$: Rx.Observable<NavLink[]>;
@@ -74,6 +77,7 @@ interface Props {
   helpExtension$: Rx.Observable<HelpExtension>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
 }
 
 // Providing a buffer between the limit and the cut off index
@@ -88,10 +92,23 @@ function extendRecentlyAccessedHistoryItem(
   const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
   const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
 
+  let titleAndAriaLabel = recentlyAccessed.label;
+  if (navLink) {
+    const objectTypeForAriaAppendix = navLink.title;
+    titleAndAriaLabel = i18n.translate('common.ui.recentLinks.linkItem.screenReaderLabel', {
+      defaultMessage: '{recentlyAccessedItemLinklabel}, type: {pageType}',
+      values: {
+        recentlyAccessedItemLinklabel: recentlyAccessed.label,
+        pageType: objectTypeForAriaAppendix,
+      },
+    });
+  }
+
   return {
     ...recentlyAccessed,
     href,
     euiIconType: navLink ? navLink.euiIconType : undefined,
+    title: titleAndAriaLabel,
   };
 }
 
@@ -197,7 +214,15 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$, intl } = this.props;
+    const {
+      appTitle,
+      breadcrumbs$,
+      isVisible,
+      navControls,
+      helpExtension$,
+      intl,
+      uiCapabilities,
+    } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
@@ -208,7 +233,7 @@ class HeaderUI extends Component<Props, State> {
     const rightNavControls = navControls.bySide[NavControlSide.Right];
 
     let navLinksArray = navLinks.map(navLink =>
-      navLink.hidden
+      navLink.hidden || !uiCapabilities.navLinks[navLink.id]
         ? null
         : {
             key: navLink.id,
@@ -217,7 +242,12 @@ class HeaderUI extends Component<Props, State> {
             iconType: navLink.euiIconType,
             icon:
               !navLink.euiIconType && navLink.icon ? (
-                <EuiImage size="s" alt="" aria-hidden={true} url={`/${navLink.icon}`} />
+                <EuiImage
+                  size="s"
+                  alt=""
+                  aria-hidden={true}
+                  url={chrome.addBasePath(`/${navLink.icon}`)}
+                />
               ) : (
                 undefined
               ),
@@ -243,9 +273,8 @@ class HeaderUI extends Component<Props, State> {
           }),
           listItems: recentlyAccessed.map(item => ({
             label: truncateRecentItemLabel(item.label),
-            // TODO: Add what type of app/saved object to title attr
-            title: `${item.label}`,
-            'aria-label': item.label,
+            title: item.title,
+            'aria-label': item.title,
             href: item.href,
             iconType: item.euiIconType,
           })),

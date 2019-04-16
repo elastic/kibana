@@ -47,6 +47,7 @@ import 'uiExports/autocompleteProviders';
 import 'uiExports/shareContextMenuExtensions';
 
 import 'ui/autoload/all';
+import 'ui/kbn_top_nav';
 import './home';
 import './discover';
 import './visualize';
@@ -63,6 +64,7 @@ import { showAppRedirectNotification } from 'ui/notify';
 import 'leaflet';
 
 routes.enable();
+
 
 routes
   .otherwise({

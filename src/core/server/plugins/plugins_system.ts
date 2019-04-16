@@ -21,32 +21,33 @@ import { pick } from 'lodash';
 
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-import { DiscoveredPlugin, DiscoveredPluginInternal, Plugin, PluginName } from './plugin';
-import { createPluginStartContext } from './plugin_context';
-import { PluginsServiceStartDeps } from './plugins_service';
+import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
+import { createPluginSetupContext } from './plugin_context';
+import { PluginsServiceSetupDeps } from './plugins_service';
 
 /** @internal */
 export class PluginsSystem {
-  private readonly plugins = new Map<PluginName, Plugin>();
+  private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
-  private readonly startedPlugins: PluginName[] = [];
+  // `satup`, the past-tense version of the noun `setup`.
+  private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-system');
   }
 
-  public addPlugin(plugin: Plugin) {
+  public addPlugin(plugin: PluginWrapper) {
     this.plugins.set(plugin.name, plugin);
   }
 
-  public async startPlugins(deps: PluginsServiceStartDeps) {
-    const exposedValues = new Map<PluginName, unknown>();
+  public async setupPlugins(deps: PluginsServiceSetupDeps) {
+    const contracts = new Map<PluginName, unknown>();
     if (this.plugins.size === 0) {
-      return exposedValues;
+      return contracts;
     }
 
     const sortedPlugins = this.getTopologicallySortedPluginNames();
-    this.log.info(`Starting [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
+    this.log.info(`Setting up [${this.plugins.size}] plugins: [${[...sortedPlugins]}]`);
 
     for (const pluginName of sortedPlugins) {
       const plugin = this.plugins.get(pluginName)!;
@@ -54,43 +55,45 @@ export class PluginsSystem {
         continue;
       }
 
-      this.log.debug(`Starting plugin "${pluginName}"...`);
+      this.log.debug(`Setting up plugin "${pluginName}"...`);
 
-      const exposedDependencyValues = [
-        ...plugin.requiredDependencies,
-        ...plugin.optionalDependencies,
-      ].reduce(
-        (dependencies, dependencyName) => {
-          dependencies[dependencyName] = exposedValues.get(dependencyName);
-          return dependencies;
+      const pluginDepContracts = [...plugin.requiredPlugins, ...plugin.optionalPlugins].reduce(
+        (depContracts, dependencyName) => {
+          // Only set if present. Could be absent if plugin does not have server-side code or is a
+          // missing optional dependency.
+          if (contracts.has(dependencyName)) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
+          }
+
+          return depContracts;
         },
         {} as Record<PluginName, unknown>
       );
 
-      exposedValues.set(
+      contracts.set(
         pluginName,
-        await plugin.start(
-          createPluginStartContext(this.coreContext, deps, plugin),
-          exposedDependencyValues
+        await plugin.setup(
+          createPluginSetupContext(this.coreContext, deps, plugin),
+          pluginDepContracts
         )
       );
 
-      this.startedPlugins.push(pluginName);
+      this.satupPlugins.push(pluginName);
     }
 
-    return exposedValues;
+    return contracts;
   }
 
   public async stopPlugins() {
-    if (this.plugins.size === 0 || this.startedPlugins.length === 0) {
+    if (this.plugins.size === 0 || this.satupPlugins.length === 0) {
       return;
     }
 
     this.log.info(`Stopping all plugins.`);
 
-    // Stop plugins in the reverse order of when they were started.
-    while (this.startedPlugins.length > 0) {
-      const pluginName = this.startedPlugins.pop()!;
+    // Stop plugins in the reverse order of when they were set up.
+    while (this.satupPlugins.length > 0) {
+      const pluginName = this.satupPlugins.pop()!;
 
       this.log.debug(`Stopping plugin "${pluginName}"...`);
       await this.plugins.get(pluginName)!.stop();
@@ -150,8 +153,8 @@ export class PluginsSystem {
         return [
           pluginName,
           new Set([
-            ...plugin.requiredDependencies,
-            ...plugin.optionalDependencies.filter(dependency => this.plugins.has(dependency)),
+            ...plugin.requiredPlugins,
+            ...plugin.optionalPlugins.filter(dependency => this.plugins.has(dependency)),
           ]),
         ] as [PluginName, Set<PluginName>];
       })

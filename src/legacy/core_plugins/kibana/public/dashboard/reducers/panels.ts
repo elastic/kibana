@@ -57,7 +57,7 @@ const setPanelTitle = (panels: PanelStateMap, payload: SetPanelTitleActionPayloa
   },
 });
 
-const setPanels = (panels: PanelStateMap, newPanels: PanelStateMap) => _.cloneDeep(newPanels);
+const setPanels = ({}, newPanels: PanelStateMap) => _.cloneDeep(newPanels);
 
 export const panelsReducer: Reducer<PanelStateMap> = (panels = {}, action): PanelStateMap => {
   switch ((action as PanelActions).type) {
@@ -67,9 +67,9 @@ export const panelsReducer: Reducer<PanelStateMap> = (panels = {}, action): Pane
       return updatePanel(panels, action.payload);
     case PanelActionTypeKeys.UPDATE_PANELS:
       return updatePanels(panels, action.payload);
-    case PanelActionTypeKeys.RESET_PANEl_TITLE:
+    case PanelActionTypeKeys.RESET_PANEL_TITLE:
       return resetPanelTitle(panels, action.payload);
-    case PanelActionTypeKeys.SET_PANEl_TITLE:
+    case PanelActionTypeKeys.SET_PANEL_TITLE:
       return setPanelTitle(panels, action.payload);
     case PanelActionTypeKeys.SET_PANELS:
       return setPanels(panels, action.payload);

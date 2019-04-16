@@ -19,11 +19,11 @@
 
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { bindNodeCallback, from } from 'rxjs';
+import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
-import { Plugin } from '../plugin';
+import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
@@ -46,7 +46,18 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   const log = coreContext.logger.get('plugins-discovery');
   log.debug('Discovering plugins...');
 
-  const discoveryResults$ = processPluginSearchPaths$(config.pluginSearchPaths, log).pipe(
+  if (config.additionalPluginPaths.length) {
+    log.warn(
+      `Explicit plugin paths [${
+        config.additionalPluginPaths
+      }] are only supported in development. Relative imports will not work in production.`
+    );
+  }
+
+  const discoveryResults$ = merge(
+    from(config.additionalPluginPaths),
+    processPluginSearchPaths$(config.pluginSearchPaths, log)
+  ).pipe(
     mergeMap(pluginPathOrError => {
       return typeof pluginPathOrError === 'string'
         ? createPlugin$(pluginPathOrError, log, coreContext)
@@ -56,9 +67,11 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   );
 
   return {
-    plugin$: discoveryResults$.pipe(filter((entry): entry is Plugin => entry instanceof Plugin)),
+    plugin$: discoveryResults$.pipe(
+      filter((entry): entry is PluginWrapper => entry instanceof PluginWrapper)
+    ),
     error$: discoveryResults$.pipe(
-      filter((entry): entry is PluginDiscoveryError => !(entry instanceof Plugin))
+      filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
     ),
   };
 }
@@ -104,7 +117,11 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin(path, manifest, createPluginInitializerContext(coreContext, manifest));
+      return new PluginWrapper(
+        path,
+        manifest,
+        createPluginInitializerContext(coreContext, manifest)
+      );
     }),
     catchError(err => [err])
   );
