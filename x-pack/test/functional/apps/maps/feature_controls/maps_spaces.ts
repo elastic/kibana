@@ -21,10 +21,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
+      PageObjects.maps.setBasePath('/s/custom_space');
     });
 
     after(async () => {
       await esArchiver.unload('maps/kibana');
+      PageObjects.maps.setBasePath('');
     });
 
     describe('space with no features disabled', () => {
