@@ -4,6 +4,8 @@
 
 ## CoreSetup.injectedMetadata property
 
+[InjectedMetadataSetup](./kibana-plugin-public.injectedmetadatasetup.md)
+
 <b>Signature:</b>
 
 ```typescript

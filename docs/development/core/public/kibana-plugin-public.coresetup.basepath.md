@@ -4,6 +4,8 @@
 
 ## CoreSetup.basePath property
 
+[BasePathSetup](./kibana-plugin-public.basepathsetup.md)
+
 <b>Signature:</b>
 
 ```typescript

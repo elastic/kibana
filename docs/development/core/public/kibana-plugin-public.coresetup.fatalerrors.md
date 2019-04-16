@@ -4,6 +4,8 @@
 
 ## CoreSetup.fatalErrors property
 
+[FatalErrorsSetup](./kibana-plugin-public.fatalerrorssetup.md)
+
 <b>Signature:</b>
 
 ```typescript

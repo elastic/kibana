@@ -4,6 +4,8 @@
 
 ## CoreSetup.overlays property
 
+[OverlaySetup](./kibana-plugin-public.overlaysetup.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## CoreSetup.i18n property
 
+[I18nSetup](./kibana-plugin-public.i18nsetup.md)
+
 <b>Signature:</b>
 
 ```typescript

@@ -4,6 +4,8 @@
 
 ## CoreSetup.uiSettings property
 
+[UiSettingsSetup](./kibana-plugin-public.uisettingssetup.md)
+
 <b>Signature:</b>
 
 ```typescript

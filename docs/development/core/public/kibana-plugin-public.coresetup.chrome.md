@@ -4,6 +4,8 @@
 
 ## CoreSetup.chrome property
 
+[ChromeSetup](./kibana-plugin-public.chromesetup.md)
+
 <b>Signature:</b>
 
 ```typescript

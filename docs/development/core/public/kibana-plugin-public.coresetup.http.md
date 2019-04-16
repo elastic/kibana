@@ -4,6 +4,8 @@
 
 ## CoreSetup.http property
 
+[HttpSetup](./kibana-plugin-public.httpsetup.md)
+
 <b>Signature:</b>
 
 ```typescript

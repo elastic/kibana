@@ -4,6 +4,8 @@
 
 ## CoreSetup.notifications property
 
+[NotificationsSetup](./kibana-plugin-public.notificationssetup.md)
+
 <b>Signature:</b>
 
 ```typescript

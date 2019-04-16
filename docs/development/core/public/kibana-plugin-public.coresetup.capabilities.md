@@ -4,6 +4,8 @@
 
 ## CoreSetup.capabilities property
 
+[CapabilitiesSetup](./kibana-plugin-public.capabilitiessetup.md)
+
 <b>Signature:</b>
 
 ```typescript
