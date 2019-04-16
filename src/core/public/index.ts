@@ -35,6 +35,10 @@ export { CoreContext, CoreSystem } from './core_system';
  * Core services exposed to the start lifecycle
  *
  * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
   /** {@link I18nSetup} */
