@@ -4,13 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import {
   EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormHelpText,
   EuiFormRow,
-  EuiSpacer,
+  EuiSelect,
   EuiTitle,
 } from '@elastic/eui';
 import { ReadonlyRepository, Repository } from '../../../../../common/types';
@@ -37,6 +40,58 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
     settings: { url },
   } = repository;
 
+  function getSchemeHelpText(scheme: string): React.ReactNode {
+    switch (scheme) {
+      case 'http':
+      case 'https':
+      case 'ftp':
+        return (
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription"
+            defaultMessage="URL repositories with the {scheme} scheme must be whitelisted as part of the {settingKey} Elasticsearch setting."
+            values={{
+              scheme: <EuiCode>{scheme}</EuiCode>,
+              settingKey: <EuiCode>repositories.url.allowed_urls</EuiCode>,
+            }}
+          />
+        );
+      case 'file':
+        return (
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlFilePathDescription"
+            defaultMessage="URL repositories with the {scheme} scheme can only point to locations registered in the {settingKey} setting."
+            values={{
+              scheme: <EuiCode>file</EuiCode>,
+              settingKey: <EuiCode>path.repo</EuiCode>,
+            }}
+          />
+        );
+      default:
+        return null;
+    }
+  }
+
+  const schemeOptions = [
+    {
+      value: 'http',
+      text: 'http://',
+    },
+    {
+      value: 'https',
+      text: 'https://',
+    },
+    {
+      value: 'ftp',
+      text: 'ftp://',
+    },
+    {
+      value: 'file',
+      text: 'file://',
+    },
+  ];
+
+  const [selectedScheme, selectScheme] = useState(url ? url.split('://')[0] : 'http');
+
   return (
     <Fragment>
       {/* URL field */}
@@ -57,51 +112,58 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
               id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlDescription"
               defaultMessage="Location of the snapshots. Required."
             />
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription"
-              defaultMessage="URL repositories with {httpType}, {httpsType}, and {ftpType} must be whitelisted as part of the {settingKey} Elasticsearch setting."
-              values={{
-                httpType: <EuiCode>http:</EuiCode>,
-                httpsType: <EuiCode>https:</EuiCode>,
-                ftpType: <EuiCode>ftp:</EuiCode>,
-                settingKey: <EuiCode>repositories.url.allowed_urls</EuiCode>,
-              }}
-            />
-            <EuiSpacer size="s" />
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlFilePathDescription"
-              defaultMessage="Similarly, URL repositories with {fileType} URLs can only point to locations registered in the {settingKey} setting."
-              values={{
-                fileType: <EuiCode>file:</EuiCode>,
-                settingKey: <EuiCode>path.repo</EuiCode>,
-              }}
-            />
           </Fragment>
         }
-        idAria="readonlyRepositoryURLDescription"
+        idAria="readonlyRepositoryUrlDescription"
         fullWidth
       >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlLabel"
-              defaultMessage="URL"
-            />
-          }
-          fullWidth
-          describedByIds={['readonlyRepositoryURLDescription']}
-        >
-          <EuiFieldText
-            defaultValue={url || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                url: e.target.value,
-              });
-            }}
-          />
-        </EuiFormRow>
+        <div>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlSchemeLabel"
+                    defaultMessage="Scheme"
+                  />
+                }
+                fullWidth
+                describedByIds={['readonlyRepositoryUrlDescription']}
+              >
+                <EuiSelect
+                  options={schemeOptions}
+                  value={selectedScheme}
+                  onChange={e => selectScheme(e.target.value)}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+
+            <EuiFlexItem>
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlLabel"
+                    defaultMessage="Path"
+                  />
+                }
+                fullWidth
+                describedByIds={['readonlyRepositoryUrlDescription']}
+              >
+                <EuiFieldText
+                  defaultValue={url ? url.split('://')[1] : ''}
+                  fullWidth
+                  onChange={e => {
+                    updateRepositorySettings({
+                      url: `${selectedScheme}://${e.target.value}`,
+                    });
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiFormHelpText>{getSchemeHelpText(selectedScheme)}</EuiFormHelpText>
+        </div>
       </EuiDescribedFormGroup>
     </Fragment>
   );

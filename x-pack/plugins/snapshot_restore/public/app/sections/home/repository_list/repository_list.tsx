@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
-import { BASE_PATH, Section } from '../../../constants';
+import { BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { loadRepositories } from '../../../services/http';
 
@@ -23,42 +23,44 @@ interface MatchParams {
 
 export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
-    params: { repositoryName: name },
+    params: { repositoryName },
   },
   history,
 }) => {
-  const section = 'repositories' as Section;
   const {
     core: {
       i18n: { FormattedMessage },
     },
   } = useAppDependencies();
+
   const {
     error,
     loading,
     data: { repositories, verification },
     request: reload,
   } = loadRepositories();
-  const [currentRepository, setCurrentRepository] = useState<Repository['name'] | undefined>(
-    undefined
-  );
-  const openRepositoryDetails = (repositoryName: Repository['name']) => {
-    setCurrentRepository(repositoryName);
-    history.push(`${BASE_PATH}/${section}/${repositoryName}`);
+
+  const openRepositoryDetails = (newRepositoryName: Repository['name']) => {
+    history.push(`${BASE_PATH}/repositories/${newRepositoryName}`);
   };
+
   const closeRepositoryDetails = () => {
-    setCurrentRepository(undefined);
-    history.push(`${BASE_PATH}/${section}`);
+    history.push(`${BASE_PATH}/repositories`);
   };
-  useEffect(
-    () => {
-      setCurrentRepository(name);
-    },
-    [name]
-  );
+
+  const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
+    if (repositoryName && repositoriesDeleted.includes(repositoryName)) {
+      closeRepositoryDetails();
+    }
+    if (repositoriesDeleted.length) {
+      reload();
+    }
+  };
+
+  let content;
 
   if (loading) {
-    return (
+    content = (
       <SectionLoading>
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryList.loadingRepositories"
@@ -66,10 +68,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         />
       </SectionLoading>
     );
-  }
-
-  if (error) {
-    return (
+  } else if (error) {
+    content = (
       <SectionError
         title={
           <FormattedMessage
@@ -80,10 +80,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         error={error}
       />
     );
-  }
-
-  if (repositories && repositories.length === 0) {
-    return (
+  } else if (repositories && repositories.length === 0) {
+    content = (
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
@@ -121,26 +119,8 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         }
       />
     );
-  }
-
-  const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
-    if (currentRepository && repositoriesDeleted.includes(currentRepository)) {
-      closeRepositoryDetails();
-    }
-    if (repositoriesDeleted.length) {
-      reload();
-    }
-  };
-
-  return (
-    <Fragment>
-      {currentRepository ? (
-        <RepositoryDetails
-          repositoryName={currentRepository}
-          onClose={closeRepositoryDetails}
-          onRepositoryDeleted={onRepositoryDeleted}
-        />
-      ) : null}
+  } else {
+    content = (
       <RepositoryTable
         repositories={repositories || []}
         verification={verification || {}}
@@ -148,6 +128,19 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
         openRepositoryDetails={openRepositoryDetails}
         onRepositoryDeleted={onRepositoryDeleted}
       />
+    );
+  }
+
+  return (
+    <Fragment>
+      {repositoryName ? (
+        <RepositoryDetails
+          repositoryName={repositoryName}
+          onClose={closeRepositoryDetails}
+          onRepositoryDeleted={onRepositoryDeleted}
+        />
+      ) : null}
+      {content}
     </Fragment>
   );
 };

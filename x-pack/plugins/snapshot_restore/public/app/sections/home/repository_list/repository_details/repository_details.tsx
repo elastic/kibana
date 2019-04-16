@@ -56,20 +56,16 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const {
-    error,
-    loading,
-    data: { repository, verification },
-  } = loadRepository(repositoryName);
+  const { error, data: repositoryDetails } = loadRepository(repositoryName);
 
   const renderBody = () => {
-    if (loading) {
-      return renderLoading();
+    if (repositoryDetails) {
+      return renderRepository();
     }
     if (error) {
       return renderError();
     }
-    return renderRepository();
+    return renderLoading();
   };
 
   const renderLoading = () => {
@@ -114,9 +110,12 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   };
 
   const renderRepository = () => {
+    const { repository, verification } = repositoryDetails;
+
     if (!repository) {
       return null;
     }
+
     const { type } = repository as Repository;
     return (
       <Fragment>
@@ -150,12 +149,12 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
-        {renderVerification()}
+        {renderVerification(verification)}
       </Fragment>
     );
   };
 
-  const renderVerification = () => (
+  const renderVerification = (verification: any) => (
     <Fragment>
       <EuiTitle size="s">
         <h3>
@@ -224,7 +223,8 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
-        {!error && !loading && repository ? (
+
+        {repositoryDetails ? (
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
