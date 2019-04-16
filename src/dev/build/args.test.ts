@@ -54,6 +54,7 @@ Object {
   },
   "log": "<ToolingLog>",
   "showHelp": false,
+  "unknownFlags": Array [],
 }
 `);
 });
@@ -75,6 +76,7 @@ Object {
   },
   "log": "<ToolingLog>",
   "showHelp": false,
+  "unknownFlags": Array [],
 }
 `);
 });
@@ -96,6 +98,7 @@ Object {
   },
   "log": "<ToolingLog>",
   "showHelp": false,
+  "unknownFlags": Array [],
 }
 `);
 });
@@ -117,6 +120,7 @@ Object {
   },
   "log": "<ToolingLog>",
   "showHelp": false,
+  "unknownFlags": Array [],
 }
 `);
 });
@@ -138,6 +142,7 @@ Object {
   },
   "log": "<ToolingLog>",
   "showHelp": false,
+  "unknownFlags": Array [],
 }
 `);
 });

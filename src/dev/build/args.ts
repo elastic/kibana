@@ -20,7 +20,16 @@
 import getopts from 'getopts';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
-export function readCliArgs(argv: string[]) {
+interface ParsedArgs {
+  showHelp: boolean;
+  unknownFlags: string[];
+  log?: ToolingLog;
+  buildArgs?: {
+    [key: string]: any;
+  };
+}
+
+export function readCliArgs(argv: string[]): ParsedArgs {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
@@ -95,6 +104,7 @@ export function readCliArgs(argv: string[]) {
 
   return {
     showHelp: false,
+    unknownFlags: [],
     log,
     buildArgs: {
       isRelease: Boolean(flags.release),
