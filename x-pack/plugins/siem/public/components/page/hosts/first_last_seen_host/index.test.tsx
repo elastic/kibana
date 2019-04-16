@@ -12,6 +12,7 @@ import { render } from 'react-testing-library';
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
 import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
+import { getEmptyValue } from '../../../empty_value';
 
 import { FirstLastSeenHost } from '.';
 
@@ -162,6 +163,6 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('GraphQL error: Error!');
+    expect(container.innerHTML).toBe(getEmptyValue());
   });
 });

@@ -6,6 +6,7 @@ exports[`IP Overview Component rendering it renders the default IP Overview 1`] 
     ip="10.10.10.10"
     loading={false}
     type="details"
+    updateFlowTargetAction={[MockFunction]}
   />
 </Component>
 `;

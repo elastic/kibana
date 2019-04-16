@@ -35,6 +35,18 @@ export const sharedSchema = gql`
     desc
   }
 
+  enum FlowTarget {
+    client
+    destination
+    server
+    source
+  }
+
+  enum FlowDirection {
+    uniDirectional
+    biDirectional
+  }
+
   input SortField {
     sortFieldId: String!
     direction: Direction!

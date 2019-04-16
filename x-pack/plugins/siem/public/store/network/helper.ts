@@ -6,25 +6,25 @@
 
 import {
   Direction,
-  NetworkTopNFlowDirection,
+  FlowDirection,
+  FlowTarget,
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 
 export const helperUpdateTopNFlowDirection = (
-  topNFlowType: NetworkTopNFlowType,
-  topNFlowDirection: NetworkTopNFlowDirection
+  flowTarget: FlowTarget,
+  flowDirection: FlowDirection
 ) => {
   const topNFlowSort: NetworkTopNFlowSortField = {
     field: NetworkTopNFlowFields.bytes,
     direction: Direction.desc,
   };
   if (
-    topNFlowDirection === NetworkTopNFlowDirection.uniDirectional &&
-    [NetworkTopNFlowType.client, NetworkTopNFlowType.server].includes(topNFlowType)
+    flowDirection === FlowDirection.uniDirectional &&
+    [FlowTarget.client, FlowTarget.server].includes(flowTarget)
   ) {
-    return { topNFlowDirection, topNFlowType: NetworkTopNFlowType.source, topNFlowSort };
+    return { flowDirection, flowTarget: FlowTarget.source, topNFlowSort };
   }
-  return { topNFlowDirection, topNFlowSort };
+  return { flowDirection, topNFlowSort };
 };

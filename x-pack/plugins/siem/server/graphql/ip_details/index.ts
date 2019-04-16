@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createIpOverviewResolvers } from './resolvers';
-export { ipOverviewSchema } from './schema.gql';
+export { createIpDetailsResolvers } from './resolvers';
+export { ipDetailsSchemas } from './schema.gql';

@@ -7,11 +7,14 @@
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import styled from 'styled-components';
+import { ActionCreator } from 'typescript-fsa';
 import { pure } from 'recompose';
 
-import { IpOverviewData, IpOverviewType, Overview } from '../../../../graphql/types';
+import { FlowDirection, FlowTarget, IpOverviewData, Overview } from '../../../../graphql/types';
 import { networkModel } from '../../../../store';
 import { getEmptyTagValue } from '../../../empty_value';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 
 import {
   autonomousSystemRenderer,
@@ -32,10 +35,13 @@ interface DescriptionList {
 }
 
 interface OwnProps {
+  data: IpOverviewData;
+  flowTarget: FlowTarget;
   ip: string;
   loading: boolean;
-  data: IpOverviewData;
   type: networkModel.NetworkType;
+  updateFlowTargetAction: ActionCreator<{ flowTarget: FlowTarget }>;
+}
   flowType: IpOverviewType;
 }
 
@@ -47,6 +53,104 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
     </EuiFlexItem>
   );
 };
+
+type IpOverviewProps = OwnProps;
+
+export class IpOverview extends React.PureComponent<IpOverviewProps> {
+  public render() {
+    const { ip, data, loading, flowTarget, updateFlowTargetAction } = this.props;
+    const typeData: Overview = data[flowTarget]!;
+
+    const descriptionLists: Readonly<DescriptionList[][]> = [
+      [
+        {
+          title: i18n.LOCATION,
+          description: locationRenderer(
+            [`${flowTarget}.geo.city_name`, `${flowTarget}.geo.region_name`],
+            data
+          ),
+        },
+        {
+          title: i18n.AUTONOMOUS_SYSTEM,
+          description: typeData
+            ? autonomousSystemRenderer(typeData.autonomousSystem, flowTarget)
+            : getEmptyTagValue(),
+        },
+      ],
+      [
+        { title: i18n.FIRST_SEEN, description: dateRenderer('firstSeen', typeData) },
+        { title: i18n.LAST_SEEN, description: dateRenderer('lastSeen', typeData) },
+      ],
+      [
+        {
+          title: i18n.HOST_ID,
+          description: typeData ? hostIdRenderer(typeData.host, ip) : getEmptyTagValue(),
+        },
+        {
+          title: i18n.HOST_NAME,
+          description: typeData ? hostNameRenderer(typeData.host, ip) : getEmptyTagValue(),
+        },
+      ],
+      [
+        { title: i18n.WHOIS, description: whoisRenderer(ip) },
+        { title: i18n.REPUTATION, description: reputationRenderer(ip) },
+      ],
+    ];
+
+    return (
+      <>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiText>
+              <h1>{ip}</h1>
+            </EuiText>
+          </EuiFlexItem>
+          <SelectTypeItem grow={false} data-test-subj={`${IpOverviewId}-select-flow-target`}>
+            <FlowTargetSelect
+              id={IpOverviewId}
+              isLoading={loading}
+              selectedDirection={FlowDirection.uniDirectional}
+              selectedTarget={flowTarget}
+              displayTextOverride={[i18n.AS_SOURCE, i18n.AS_DESTINATION]}
+              updateFlowTargetAction={updateFlowTargetAction}
+            />
+          </SelectTypeItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="s" />
+
+        <EuiText>
+          {i18n.LAST_BEAT}:{' '}
+          {typeData && typeData.lastSeen != null ? (
+            <EuiToolTip position="bottom" content={typeData.lastSeen}>
+              <FormattedRelative value={new Date(typeData.lastSeen)} />
+            </EuiToolTip>
+          ) : (
+            getEmptyTagValue()
+          )}
+        </EuiText>
+
+        <EuiSpacer size="s" />
+        <EuiHorizontalRule margin="xs" />
+        <EuiSpacer size="s" />
+
+        <EuiFlexGroup>
+          {descriptionLists.map((descriptionList, index) =>
+            this.getDescriptionList(descriptionList, index)
+          )}
+        </EuiFlexGroup>
+      </>
+    );
+  }
+
+  private getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
+    return (
+      <EuiFlexItem key={key}>
+        <EuiDescriptionList listItems={descriptionList} />
+      </EuiFlexItem>
+    );
+  };
+}
 
 export const IpOverview = pure<IpOverviewProps>(({ ip, data, flowType }) => {
   if (isEmpty(data)) {

@@ -74,44 +74,30 @@ export const UNIQUE_SERVER_IP = i18n.translate(
 );
 
 export const BY_SOURCE_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.select.bySourceIpTitle',
+  'xpack.siem.networkTopNFlowTable.select.bySourceIpDropDownOptionLabel',
   {
     defaultMessage: 'By Source IP',
   }
 );
 
 export const BY_DESTINATION_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.select.byDestinationIpTitle',
+  'xpack.siem.networkTopNFlowTable.select.byDestinationIpDropDownOptionLabel',
   {
     defaultMessage: 'By Destination IP',
   }
 );
 
 export const BY_CLIENT_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.select.byClientIpSelector',
+  'xpack.siem.networkTopNFlowTable.select.byClientIpDropDownOptionLabel',
   {
     defaultMessage: 'By Client IP',
   }
 );
 
 export const BY_SERVER_IP = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.select.byServerIpSelector',
+  'xpack.siem.networkTopNFlowTable.select.byServerIpDropDownOptionLabel',
   {
     defaultMessage: 'By Server IP',
-  }
-);
-
-export const UNIDIRECTIONAL = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.unidirectionalDescription',
-  {
-    defaultMessage: 'Unidirectional',
-  }
-);
-
-export const BIDIRECTIONAL = i18n.translate(
-  'xpack.siem.networkTopNFlowTable.bidirectionalDescription',
-  {
-    defaultMessage: 'Bidirectional',
   }
 );
 

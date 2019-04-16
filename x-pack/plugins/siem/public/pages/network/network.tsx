@@ -169,7 +169,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
   const mapStateToProps = (state: State) => ({
-    filterQuery: getNetworkFilterQueryAsJson(state) || '',
+    filterQuery: getNetworkFilterQueryAsJson(state, networkModel.NetworkType.page) || '',
   });
   return mapStateToProps;
 };

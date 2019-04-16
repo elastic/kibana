@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -14,6 +14,7 @@ import { ActionCreator } from 'typescript-fsa';
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { CountBadge } from '../../index';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
@@ -71,10 +72,6 @@ const rowItems: ItemsPerRow[] = [
     numberOfRow: 50,
   },
 ];
-
-const CountBadge = styled(EuiBadge)`
-  margin-left: 5px;
-`;
 
 const Sup = styled.sup`
   vertical-align: super;

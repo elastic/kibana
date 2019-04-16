@@ -7,7 +7,9 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
+import { ActionCreator } from 'typescript-fsa';
 
+import { FlowTarget } from '../../../../graphql/types';
 import { TestProviders } from '../../../../mock';
 import { networkModel } from '../../../../store';
 
@@ -16,16 +18,21 @@ import { mockData } from './mock';
 
 describe('IP Overview Component', () => {
   describe('rendering', () => {
+    const mockProps = {
+      flowTarget: FlowTarget.source,
+      loading: false,
+      ip: '10.10.10.10',
+      data: mockData.IpOverview,
+      type: networkModel.NetworkType.details,
+      updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
+        flowTarget: FlowTarget;
+      }>,
+    };
+
     test('it renders the default IP Overview', () => {
       const wrapper = shallow(
-        <TestProviders>
-          <IpOverview
-            loading={false}
-            flowType={networkModel.IpOverviewType}
-            ip="10.10.10.10"
-            data={mockData.IpOverview}
-            type={networkModel.NetworkType.details}
-          />
+        <TestProviders store={store}>
+          <IpOverview {...mockProps} />
         </TestProviders>
       );
 
