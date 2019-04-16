@@ -89,7 +89,7 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
-      timerange: { kind: 'relative', option: 'now-24h', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
       query: [],
       policy: { kind: 'manual', duration: 5000 },
     },

@@ -21,6 +21,10 @@ describe('FirstLastSeen Component', async () => {
   // fixes this: https://github.com/facebook/react/pull/14853
   // For us that mean we need to upgrade to 16.9.0
   // and we will be able to do that when we are in master
+
+  const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
+  const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
+
   // tslint:disable-next-line:no-console
   const originalError = console.error;
   beforeAll(() => {
@@ -63,7 +67,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<div class="euiText euiText--small"><span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span></div>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
     );
   });
 
@@ -77,7 +81,7 @@ describe('FirstLastSeen Component', async () => {
     );
     await wait();
     expect(container.innerHTML).toBe(
-      '<div class="euiText euiText--small"><span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span></div>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
   });
 
@@ -95,7 +99,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<div class="euiText euiText--small"><span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span></div>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
   });
 
@@ -113,7 +117,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<div class="euiText euiText--small"><span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span></div>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
     );
   });
 
@@ -128,7 +132,7 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(container.textContent).toBe('something-invalid');
   });
 
   test('Last Seen With a bad date time string', async () => {
@@ -142,7 +146,7 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(container.textContent).toBe('something-invalid');
   });
 
   test('Show error message', async () => {
@@ -159,6 +163,6 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait(10);
-    expect(container.innerHTML).toBe(getEmptyValue());
+    expect(container.textContent).toBe(getEmptyValue());
   });
 });

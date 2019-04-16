@@ -27,7 +27,7 @@ export const initialHostsState: HostsState = {
     queries: {
       authentications: { limit: DEFAULT_TABLE_LIMIT },
       hosts: {
-        limit: DEFAULT_TABLE_LIMIT,
+        limit: 5,
         direction: Direction.desc,
         sortField: HostsFields.lastSeen,
       },

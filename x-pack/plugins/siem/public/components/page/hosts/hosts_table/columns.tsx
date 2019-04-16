@@ -60,7 +60,7 @@ export const getHostsColumns = (
                   componentFilterType="hosts"
                   type={type}
                 >
-                  <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
+                  <HostDetailsLink hostName={hostName} />
                 </AddToKql>
               )
             }

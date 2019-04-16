@@ -39,8 +39,10 @@ const MyEuiSuperDatePicker: React.SFC<MyEuiSuperDatePickerProps> = EuiSuperDateP
 
 interface SuperDatePickerStateRedux {
   duration: number;
+  policy: string;
   kind: string;
-  option: string;
+  fromStr: string;
+  toStr: string;
   start: number;
   end: number;
   isLoading: boolean;
@@ -51,9 +53,10 @@ interface SuperDatePickerDispatchProps {
   setAbsoluteSuperDatePicker: ActionCreator<{ id: string; from: number; to: number }>;
   setRelativeSuperDatePicker: ActionCreator<{
     id: string;
-    option: string;
+    fromStr: string;
     from: number;
     to: number;
+    toStr: string;
   }>;
   startAutoReload: ActionCreator<{ id: string }>;
   stopAutoReload: ActionCreator<{ id: string }>;
@@ -100,9 +103,9 @@ export const SuperDatePickerComponent = class extends Component<
   }
 
   public render() {
-    const { end, start, kind, option, isLoading } = this.props;
-    const endDate = kind === 'relative' ? 'now' : new Date(end).toISOString();
-    const startDate = kind === 'relative' ? option : new Date(start).toISOString();
+    const { end, start, kind, fromStr, toStr, isLoading } = this.props;
+    const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
+    const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
     return (
       <MyEuiSuperDatePicker
@@ -130,19 +133,22 @@ export const SuperDatePickerComponent = class extends Component<
   };
 
   private onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
-    const { id, duration, stopAutoReload, startAutoReload } = this.props;
+    const { id, duration, policy, stopAutoReload, startAutoReload } = this.props;
 
     if (duration !== refreshInterval) {
       this.props.setDuration({ id, duration: refreshInterval });
     }
 
-    if (isPaused) {
+    if (isPaused && policy === 'interval') {
       stopAutoReload({ id });
-    } else {
+    } else if (!isPaused && policy === 'manual') {
       startAutoReload({ id });
     }
 
-    if (!this.state.isQuickSelection) {
+    if (
+      !isPaused &&
+      (!this.state.isQuickSelection || (this.state.isQuickSelection && this.props.toStr !== 'now'))
+    ) {
       this.refetchQuery(this.props.refetch);
     }
 
@@ -156,8 +162,13 @@ export const SuperDatePickerComponent = class extends Component<
     query.forEach((refetch: inputsModel.Refetch) => refetch());
   };
 
-  private formatDate = (date: string) => {
-    const momentDate = dateMath.parse(date);
+  private formatDate = (
+    date: string,
+    options?: {
+      roundUp?: boolean;
+    }
+  ) => {
+    const momentDate = dateMath.parse(date, options);
     return momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0;
   };
 
@@ -186,13 +197,13 @@ export const SuperDatePickerComponent = class extends Component<
 
   private updateReduxTime = ({ start, end, isQuickSelection }: OnTimeChangeProps) => {
     const { id, setAbsoluteSuperDatePicker, setRelativeSuperDatePicker } = this.props;
-
     if (isQuickSelection) {
       setRelativeSuperDatePicker({
         id,
-        option: start,
+        fromStr: start,
+        toStr: end,
         from: this.formatDate(start),
-        to: this.formatDate(end),
+        to: this.formatDate(end, { roundUp: true }),
       });
     } else {
       setAbsoluteSuperDatePicker({
@@ -207,11 +218,13 @@ export const SuperDatePickerComponent = class extends Component<
 const mapStateToProps = (state: State, { id }: OwnProps) => {
   const myState = getOr({}, `inputs.${id}`, state);
   return {
+    policy: get('policy.kind', myState),
     duration: get('policy.duration', myState),
     kind: get('timerange.kind', myState),
     start: get('timerange.from', myState),
     end: get('timerange.to', myState),
-    option: get('timerange.option', myState),
+    fromStr: get('timerange.fromStr', myState),
+    toStr: get('timerange.toStr', myState),
     isLoading: myState.query.filter((i: inputsModel.GlobalQuery) => i.loading === true).length > 0,
     refetch: myState.query.map((i: inputsModel.GlobalQuery) => i.refetch),
   };

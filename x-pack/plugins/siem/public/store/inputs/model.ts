@@ -6,14 +6,16 @@
 
 interface AbsoluteTimeRange {
   kind: 'absolute';
-  option: undefined;
+  fromStr: undefined;
+  toStr: undefined;
   from: number;
   to: number;
 }
 
 interface RelativeTimeRange {
   kind: 'relative';
-  option: string;
+  fromStr: string;
+  toStr: string;
   from: number;
   to: number;
 }
