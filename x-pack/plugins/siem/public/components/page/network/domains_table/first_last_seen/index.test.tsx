@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
@@ -13,7 +14,6 @@ import { mockFirstLastSeenDomainQuery } from '../../../../../containers/domains/
 import { FlowTarget } from '../../../../../graphql/types';
 import { wait } from '../../../../../lib/helpers';
 import { TestProviders } from '../../../../../mock';
-import { getEmptyValue } from '../../../../empty_value';
 
 import { FirstLastSeenDomain } from '.';
 
@@ -202,7 +202,11 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait(10);
-    expect(container.innerHTML).toBe(getEmptyValue());
+    await wait();
+    expect(container.querySelector('[data-test-subj="firstLastSeenErrorToolTip"]')).toBe(
+      <EuiToolTip position="top" content={'Error!'}>
+        <EuiIcon type="alert" />
+      </EuiToolTip>
+    );
   });
 });

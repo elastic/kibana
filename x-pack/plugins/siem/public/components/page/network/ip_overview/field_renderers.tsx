@@ -80,7 +80,7 @@ export const hostIdRenderer = (host: HostEcsFields, ipFilter?: string): React.Re
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         {host.name != null ? (
-          <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.name'} value={host.name}>
+          <DefaultDraggable id={`${IpOverviewId}-host-id`} field={'host.id'} value={host.name}>
             <HostDetailsLink hostName={host.name}>{host.id}</HostDetailsLink>
           </DefaultDraggable>
         ) : (

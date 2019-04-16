@@ -81,6 +81,13 @@ export const LAST_SEEN = i18n.translate(
   }
 );
 
+export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.siem.network.ipDetails.domainsTable.columns.firstLastSeenToolTip',
+  {
+    defaultMessage: 'Relative to the selected date range',
+  }
+);
+
 // Direction Select
 export const UNIDIRECTIONAL = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.unidirectionalDropDownOptionLabel',

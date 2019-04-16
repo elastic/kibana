@@ -6,6 +6,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FILTER_TO_KQL = i18n.translate('xpack.siem.add_to_kql.filterToKQLDescription', {
-  defaultMessage: 'Add to KQL',
+export const FILTER_FOR_VALUE = i18n.translate('xpack.siem.add_to_kql.filterForValueHoverAction', {
+  defaultMessage: 'Filter for value',
 });

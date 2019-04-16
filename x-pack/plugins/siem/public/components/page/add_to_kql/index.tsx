@@ -34,7 +34,7 @@ class AddToKqlComponent extends React.PureComponent<Props> {
       <WithHoverActions
         hoverContent={
           <HoverActionsContainer data-test-subj="hover-actions-container">
-            <EuiToolTip content={i18n.FILTER_TO_KQL}>
+            <EuiToolTip content={i18n.FILTER_FOR_VALUE}>
               <EuiIcon type="filter" onClick={this.addToKql} />
             </EuiToolTip>
           </HoverActionsContainer>

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
@@ -30,13 +30,25 @@ export const FirstLastSeenDomain = pure<FirstLastSeenProps>(
     return (
       <ApolloConsumer>
         {client => {
-          const { loading, firstSeen, lastSeen } = useFirstLastSeenDomainQuery(
+          const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenDomainQuery(
             ip,
             domainName,
             flowTarget,
             'default',
             client
           );
+
+          if (errorMessage != null) {
+            return (
+              <EuiToolTip
+                position="top"
+                content={errorMessage}
+                data-test-subj="firstLastSeenErrorToolTip"
+              >
+                <EuiIcon type="alert" />
+              </EuiToolTip>
+            );
+          }
           const valueSeen = type === 'first-seen' ? firstSeen : lastSeen;
           return (
             <>
