@@ -13,7 +13,7 @@ import { Repository } from '../../../../common/types';
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/breadcrumb';
+import { breadcrumbService } from '../../services/navigation';
 import { editRepository, loadRepository } from '../../services/http';
 
 interface MatchParams {

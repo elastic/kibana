@@ -11,7 +11,7 @@ import { AppCore, AppPlugins } from './app/types';
 import template from './index.html';
 import { Core, Plugins } from './shim';
 
-import { breadcrumbService } from './app/services/breadcrumb';
+import { breadcrumbService } from './app/services/navigation';
 import { documentationLinksService } from './app/services/documentation';
 import { httpService } from './app/services/http';
 import { textService } from './app/services/text';

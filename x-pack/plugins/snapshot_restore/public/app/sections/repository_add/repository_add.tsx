@@ -13,7 +13,7 @@ import { Repository } from '../../../../common/types';
 import { RepositoryForm, SectionError } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/breadcrumb';
+import { breadcrumbService } from '../../services/navigation';
 import { addRepository } from '../../services/http';
 
 export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ history }) => {

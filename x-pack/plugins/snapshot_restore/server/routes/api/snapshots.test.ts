@@ -13,7 +13,7 @@ const defaultSnapshot = {
   uuid: undefined,
   versionId: undefined,
   version: undefined,
-  indices: undefined,
+  indices: [],
   includeGlobalState: 0,
   state: undefined,
   startTime: undefined,
@@ -21,7 +21,7 @@ const defaultSnapshot = {
   endTime: undefined,
   endTimeInMillis: undefined,
   durationInMillis: undefined,
-  failures: undefined,
+  indexFailures: [],
   shards: undefined,
 };
 
@@ -60,7 +60,8 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
         .mockReturnValueOnce(mockGetSnapshotsBarResponse);
 
       const expectedResponse = {
-        errors: [],
+        errors: {},
+        repositories: ['fooRepository', 'barRepository'],
         snapshots: [
           { ...defaultSnapshot, repository: 'fooRepository', snapshot: 'snapshot1' },
           { ...defaultSnapshot, repository: 'barRepository', snapshot: 'snapshot2' },
@@ -74,7 +75,7 @@ describe('[Snapshot and Restore API Routes] Snapshots', () => {
     test('returns empty arrays if no snapshots returned from ES', async () => {
       const mockSnapshotGetRepositoryEsResponse = {};
       const callWithRequest = jest.fn().mockReturnValue(mockSnapshotGetRepositoryEsResponse);
-      const expectedResponse = { errors: [], snapshots: [] };
+      const expectedResponse = { errors: [], snapshots: [], repositories: [] };
 
       const response = await getAllHandler(mockRequest, callWithRequest, mockResponseToolkit);
       expect(response).toEqual(expectedResponse);

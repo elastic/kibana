@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
+
 import { SnapshotDetails } from '../../common/types';
 import { SnapshotDetailsEs } from '../types';
 
@@ -20,7 +22,7 @@ export function deserializeSnapshotDetails(
     uuid,
     version_id: versionId,
     version,
-    indices,
+    indices = [],
     include_global_state: includeGlobalState,
     state,
     start_time: startTime,
@@ -28,9 +30,34 @@ export function deserializeSnapshotDetails(
     end_time: endTime,
     end_time_in_millis: endTimeInMillis,
     duration_in_millis: durationInMillis,
-    failures,
+    failures = [],
     shards,
   } = snapshotDetailsEs;
+
+  // If an index has multiple failures, we'll want to see them grouped together.
+  const indexToFailuresMap = failures.reduce((map, failure) => {
+    const { index, ...rest } = failure;
+    if (!map[index]) {
+      map[index] = {
+        index,
+        failures: [],
+      };
+    }
+
+    map[index].failures.push(rest);
+    return map;
+  }, {});
+
+  // Sort all failures by their shard.
+  Object.keys(indexToFailuresMap).forEach(index => {
+    indexToFailuresMap[index].failures = sortBy(
+      indexToFailuresMap[index].failures,
+      ({ shard }) => shard
+    );
+  });
+
+  // Sort by index name.
+  const indexFailures = sortBy(Object.values(indexToFailuresMap), ({ index }) => index);
 
   return {
     repository,
@@ -38,7 +65,7 @@ export function deserializeSnapshotDetails(
     uuid,
     versionId,
     version,
-    indices,
+    indices: [...indices].sort(),
     includeGlobalState: Boolean(includeGlobalState) ? 1 : 0,
     state,
     startTime,
@@ -46,7 +73,7 @@ export function deserializeSnapshotDetails(
     endTime,
     endTimeInMillis,
     durationInMillis,
-    failures,
+    indexFailures,
     shards,
   };
 }

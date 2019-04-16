@@ -18,3 +18,11 @@ export enum REPOSITORY_DOC_PATHS {
   gcs = 'repository-gcs.html',
   plugins = 'repository.html',
 }
+
+export enum SNAPSHOT_STATE {
+  IN_PROGRESS = 'IN_PROGRESS',
+  SUCCESS = 'SUCCESS',
+  FAILED = 'FAILED',
+  PARTIAL = 'PARTIAL',
+  INCOMPATIBLE = 'INCOMPATIBLE',
+}
