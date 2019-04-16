@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
-import '../../filters/field_type';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';

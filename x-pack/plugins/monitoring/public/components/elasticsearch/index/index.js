@@ -17,11 +17,15 @@ import {
 import { IndexDetailStatus } from '../index_detail_status';
 import { MonitoringTimeseriesContainer } from '../../chart';
 import { ShardAllocation } from '../shard_allocation/shard_allocation';
+import { Logs } from '../../logs';
 
 export const Index = ({
   scope,
   indexSummary,
   metrics,
+  clusterUuid,
+  indexUuid,
+  logs,
   kbnUrl,
   ...props
 }) => {
@@ -53,6 +57,10 @@ export const Index = ({
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
+          <EuiSpacer size="m"/>
+          <EuiPanel>
+            <Logs logs={logs} indexUuid={indexUuid} clusterUuid={clusterUuid} />
+          </EuiPanel>
           <EuiSpacer size="m"/>
           <ShardAllocation scope={scope} kbnUrl={kbnUrl} type="index" />
         </EuiPageContent>
