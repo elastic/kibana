@@ -91,16 +91,16 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          render: ({ name, isConfiguredByNode }) => {
-            const label = i18n.translate('xpack.snapshotRestore.repositoryList.table.actionEditButton', {
-              defaultMessage: 'Edit',
-            });
+          render: ({ name }: { name: string }) => {
+            const label = i18n.translate(
+              'xpack.snapshotRestore.repositoryList.table.actionEditButton',
+              {
+                defaultMessage: 'Edit',
+              }
+            );
 
             return (
-              <EuiToolTip
-                content={label}
-                delay="long"
-              >
+              <EuiToolTip content={label} delay="long">
                 <EuiButtonIcon
                   aria-label={label}
                   iconType="pencil"

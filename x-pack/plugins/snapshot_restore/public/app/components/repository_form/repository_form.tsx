@@ -212,15 +212,10 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
         >
           {repositoryTypesError ? (
             renderLoadingRepositoryTypesError()
-          ) : isEditing
+          ) : isEditing ? (
             // Show a text field instead of a select to improve readability by removing the
             // caret and other unnecessary visual noise.
-            ? (
-            <EuiFieldText
-              readOnly={true}
-              value={repository.type}
-              fullWidth
-            />
+            <EuiFieldText readOnly={true} value={repository.type} fullWidth />
           ) : (
             <EuiSelect
               isLoading={repositoryTypesLoading}

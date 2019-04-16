@@ -10,7 +10,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { Repository } from '../../../../../common/types';
 import { SectionError, SectionLoading } from '../../../components';
-import { BASE_PATH, Section } from '../../../constants';
+import { BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { loadRepositories } from '../../../services/http';
 
@@ -40,12 +40,21 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     request: reload,
   } = loadRepositories();
 
-  const openRepositoryDetails = (repositoryName: Repository['name']) => {
-    history.push(`${BASE_PATH}/repositories/${repositoryName}`);
+  const openRepositoryDetails = (newRepositoryName: Repository['name']) => {
+    history.push(`${BASE_PATH}/repositories/${newRepositoryName}`);
   };
 
   const closeRepositoryDetails = () => {
     history.push(`${BASE_PATH}/repositories`);
+  };
+
+  const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
+    if (repositoryName && repositoriesDeleted.includes(repositoryName)) {
+      closeRepositoryDetails();
+    }
+    if (repositoriesDeleted.length) {
+      reload();
+    }
   };
 
   let content;
@@ -72,7 +81,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   } else if (repositories && repositories.length === 0) {
-    content (
+    content = (
       <EuiEmptyPrompt
         iconType="managementApp"
         title={
@@ -121,15 +130,6 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   }
-
-  const onRepositoryDeleted = (repositoriesDeleted: Array<Repository['name']>): void => {
-    if (repositoryName && repositoriesDeleted.includes(repositoryName)) {
-      closeRepositoryDetails();
-    }
-    if (repositoriesDeleted.length) {
-      reload();
-    }
-  };
 
   return (
     <Fragment>

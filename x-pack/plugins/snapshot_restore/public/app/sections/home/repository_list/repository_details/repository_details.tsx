@@ -56,11 +56,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
 
   const { FormattedMessage } = i18n;
-  const {
-    error,
-    loading,
-    data: repositoryDetails,
-  } = loadRepository(repositoryName);
+  const { error, data: repositoryDetails } = loadRepository(repositoryName);
 
   const renderBody = () => {
     if (repositoryDetails) {
@@ -69,7 +65,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     if (error) {
       return renderError();
     }
-   return renderLoading();
+    return renderLoading();
   };
 
   const renderLoading = () => {
@@ -158,7 +154,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     );
   };
 
-  const renderVerification = (verification) => (
+  const renderVerification = (verification: any) => (
     <Fragment>
       <EuiTitle size="s">
         <h3>

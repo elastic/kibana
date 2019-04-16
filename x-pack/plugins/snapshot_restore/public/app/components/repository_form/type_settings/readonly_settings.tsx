@@ -40,7 +40,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
     settings: { url },
   } = repository;
 
-  function getSchemeHelpText(scheme) {
+  function getSchemeHelpText(scheme: string): React.ReactNode {
     switch (scheme) {
       case 'http':
       case 'https':
@@ -162,9 +162,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiFormHelpText>
-            {getSchemeHelpText(selectedScheme)}
-          </EuiFormHelpText>
+          <EuiFormHelpText>{getSchemeHelpText(selectedScheme)}</EuiFormHelpText>
         </div>
       </EuiDescribedFormGroup>
     </Fragment>
