@@ -28,7 +28,7 @@ export const mockData: { Events: EventsData } = {
           _index: 'auditbeat-7.0.0-2019.01.07',
           destination: {
             ip: ['24.168.54.169'],
-            port: ['62123'],
+            port: [62123],
           },
           event: {
             category: null,
@@ -44,7 +44,7 @@ export const mockData: { Events: EventsData } = {
           },
           source: {
             ip: ['10.142.0.6'],
-            port: ['9200'],
+            port: [9200],
           },
           suricata: null,
         },
@@ -60,7 +60,7 @@ export const mockData: { Events: EventsData } = {
           _index: 'auditbeat-7.0.0-2019.01.07',
           destination: {
             ip: ['24.168.54.169'],
-            port: ['62145'],
+            port: [62145],
           },
           event: {
             category: null,
@@ -76,7 +76,7 @@ export const mockData: { Events: EventsData } = {
           },
           source: {
             ip: ['10.142.0.6'],
-            port: ['9200'],
+            port: [9200],
           },
           suricata: null,
         },

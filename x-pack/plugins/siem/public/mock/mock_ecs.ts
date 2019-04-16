@@ -19,15 +19,15 @@ export const mockEcsData: Ecs[] = [
       action: ['Action'],
       category: ['Access'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.1'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['1'],
@@ -50,15 +50,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['1'],
+      severity: [1],
     },
     source: {
       ip: ['192.168.0.3'],
-      port: ['443'],
+      port: [443],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['3'],
@@ -81,25 +81,25 @@ export const mockEcsData: Ecs[] = [
       category: ['Attempted Administrator Privilege Gain'],
       type: ['Alert'],
       module: ['suricata'],
-      severity: ['1'],
+      severity: [1],
     },
     source: {
       ip: ['192.168.0.3'],
-      port: ['53'],
+      port: [53],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     suricata: {
       eve: {
-        flow_id: ['4'],
+        flow_id: [4],
         proto: [''],
         alert: {
           signature: [
             'ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)',
           ],
-          signature_id: ['4'],
+          signature_id: [4],
         },
       },
     },
@@ -124,15 +124,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.3'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['5'],
@@ -155,15 +155,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.6'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     geo: {
       region_name: ['xx'],
@@ -182,25 +182,25 @@ export const mockEcsData: Ecs[] = [
       category: ['Web Application Attack'],
       type: ['Alert'],
       module: ['suricata'],
-      severity: ['2'],
+      severity: [2],
     },
     suricata: {
       eve: {
-        flow_id: ['8'],
+        flow_id: [8],
         proto: [''],
         alert: {
           signature: ['ET WEB_SERVER Possible CVE-2014-6271 Attempt in HTTP Cookie'],
-          signature_id: ['8'],
+          signature_id: [8],
         },
       },
     },
     source: {
       ip: ['192.168.0.8'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['8'],
@@ -223,15 +223,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['apache'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.7'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['7'],
@@ -254,15 +254,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.9'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['9'],
@@ -285,15 +285,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.10'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['10'],
@@ -316,15 +316,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.11'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['11'],
@@ -347,15 +347,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Access'],
       type: ['HTTP Request'],
       module: ['nginx'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.12'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['12'],
@@ -378,15 +378,15 @@ export const mockEcsData: Ecs[] = [
       category: ['Authentication'],
       type: ['Authentication Success'],
       module: ['authlog'],
-      severity: ['3'],
+      severity: [3],
     },
     source: {
       ip: ['192.168.0.2'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     user: {
       id: ['1'],
@@ -409,25 +409,25 @@ export const mockEcsData: Ecs[] = [
       category: ['Web Application Attack'],
       type: ['Alert'],
       module: ['suricata'],
-      severity: ['1'],
+      severity: [1],
     },
     suricata: {
       eve: {
-        flow_id: ['13'],
+        flow_id: [13],
         proto: [''],
         alert: {
           signature: ['ET WEB_SERVER Possible Attempt in HTTP Cookie'],
-          signature_id: ['13'],
+          signature_id: [13],
         },
       },
     },
     source: {
       ip: ['192.168.0.8'],
-      port: ['80'],
+      port: [80],
     },
     destination: {
       ip: ['192.168.0.3'],
-      port: ['6343'],
+      port: [6343],
     },
     geo: {
       region_name: ['xx'],
@@ -452,11 +452,11 @@ export const mockEcsData: Ecs[] = [
     },
     source: {
       ip: ['185.176.26.101'],
-      port: ['44059'],
+      port: [44059],
     },
     destination: {
       ip: ['207.154.238.205'],
-      port: ['11568'],
+      port: [11568],
     },
     geo: {
       region_name: ['New York'],
@@ -473,7 +473,7 @@ export const mockEcsData: Ecs[] = [
       connection: {
         local_resp: ['false'],
         local_orig: ['false'],
-        missed_bytes: ['0'],
+        missed_bytes: [0],
         state: ['REJ'],
         history: ['Sr'],
       },
@@ -502,11 +502,11 @@ export const mockEcsData: Ecs[] = [
     },
     source: {
       ip: ['206.189.35.240'],
-      port: ['57475'],
+      port: [57475],
     },
     destination: {
       ip: ['67.207.67.3'],
-      port: ['53'],
+      port: [53],
     },
     geo: {
       region_name: ['New York'],
@@ -558,11 +558,11 @@ export const mockEcsData: Ecs[] = [
     },
     source: {
       ip: ['206.189.35.240'],
-      port: ['36220'],
+      port: [36220],
     },
     destination: {
       ip: ['192.241.164.26'],
-      port: ['80'],
+      port: [80],
     },
     geo: {
       region_name: ['New York'],
@@ -575,15 +575,15 @@ export const mockEcsData: Ecs[] = [
       request: {
         method: null,
         body: {
-          bytes: ['0'],
+          bytes: [0],
           content: null,
         },
         referrer: null,
       },
       response: {
-        status_code: ['302'],
+        status_code: [302],
         body: {
-          bytes: ['154'],
+          bytes: [154],
           content: null,
         },
       },
@@ -667,11 +667,11 @@ export const mockEcsData: Ecs[] = [
     },
     source: {
       ip: ['188.166.66.184'],
-      port: ['34514'],
+      port: [34514],
     },
     destination: {
       ip: ['91.189.95.15'],
-      port: ['443'],
+      port: [443],
     },
     geo: {
       region_name: ['England'],
@@ -732,17 +732,17 @@ export const mockEcsData: Ecs[] = [
         tx_host: ['5.101.111.50'],
         source: ['HTTP'],
         is_orig: ['false'],
-        overflow_bytes: ['0'],
+        overflow_bytes: [0],
         sha1: ['fa5195a5dfacc9d1c68d43600f0e0262cad14dde'],
-        duration: ['0'],
-        depth: ['0'],
+        duration: [0],
+        depth: [0],
         analyzers: ['MD5', 'SHA1'],
         mime_type: ['text/plain'],
         rx_host: ['206.189.35.240'],
-        total_bytes: ['88722'],
+        total_bytes: [88722],
         fuid: ['FePz1uVEVCZ3I0FQi'],
-        seen_bytes: ['1198'],
-        missing_bytes: ['0'],
+        seen_bytes: [1198],
+        missing_bytes: [0],
         md5: ['f7653f1951693021daa9e6be61226e32'],
       },
       ssl: null,
@@ -775,9 +775,9 @@ export const mockEcsData: Ecs[] = [
       name: ['alice'],
     },
     process: {
-      pid: ['5402'],
+      pid: [5402],
       name: ['gpgconf'],
-      ppid: ['5401'],
+      ppid: [5401],
       args: ['gpgconf', '--list-dirs', 'agent-socket'],
       executable: ['/usr/bin/gpgconf'],
       title: ['gpgconf --list-dirs agent-socket'],
@@ -838,7 +838,7 @@ export const mockEcsData: Ecs[] = [
       name: ['root'],
     },
     process: {
-      pid: ['17471'],
+      pid: [17471],
       name: null,
       ppid: null,
       args: null,
@@ -898,7 +898,7 @@ export const mockEcsData: Ecs[] = [
       name: ['root'],
     },
     process: {
-      pid: ['21202'],
+      pid: [21202],
       name: null,
       ppid: null,
       args: null,
@@ -958,7 +958,7 @@ export const mockEcsData: Ecs[] = [
       name: ['root'],
     },
     process: {
-      pid: ['21202'],
+      pid: [21202],
       name: null,
       ppid: null,
       args: null,
@@ -1018,7 +1018,7 @@ export const mockEcsData: Ecs[] = [
       name: ['root'],
     },
     process: {
-      pid: ['9592'],
+      pid: [9592],
       name: null,
       ppid: null,
       args: null,
@@ -1078,7 +1078,7 @@ export const mockEcsData: Ecs[] = [
       name: ['root'],
     },
     process: {
-      pid: ['725'],
+      pid: [725],
       name: null,
       ppid: null,
       args: null,
@@ -1138,7 +1138,7 @@ export const mockEcsData: Ecs[] = [
       name: ['alice'],
     },
     process: {
-      pid: ['21170'],
+      pid: [21170],
       name: null,
       ppid: null,
       args: null,
@@ -1186,7 +1186,7 @@ export const mockEcsData: Ecs[] = [
     source: null,
     destination: {
       ip: ['93.184.216.34'],
-      port: ['80'],
+      port: [80],
     },
     geo: null,
     suricata: null,
@@ -1197,9 +1197,9 @@ export const mockEcsData: Ecs[] = [
       name: ['alice'],
     },
     process: {
-      pid: ['1490'],
+      pid: [1490],
       name: ['wget'],
-      ppid: ['1476'],
+      ppid: [1476],
       args: null,
       executable: ['/usr/bin/wget'],
       title: ['wget www.example.com'],
@@ -1269,9 +1269,9 @@ export const mockEcsData: Ecs[] = [
       name: ['root'],
     },
     process: {
-      pid: ['27244'],
+      pid: [27244],
       name: ['systemd-journal'],
-      ppid: ['1'],
+      ppid: [1],
       args: null,
       executable: ['/lib/systemd/systemd-journald'],
       title: ['/lib/systemd/systemd-journald'],

@@ -18,8 +18,8 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
         country_iso_code: ['US'],
         country_name: null,
         location: {
-          lat: ['40.7214'],
-          lon: ['-74.0052'],
+          lat: [40.7214],
+          lon: [-74.0052],
         },
         region_iso_code: ['US-NY'],
         region_name: ['New York'],
@@ -48,8 +48,8 @@ export const mockData: Readonly<Record<string, IpOverviewData>> = {
         country_iso_code: ['US'],
         country_name: null,
         location: {
-          lat: ['40.7214'],
-          lon: ['-74.0052'],
+          lat: [40.7214],
+          lon: [-74.0052],
         },
         region_iso_code: ['US-NY'],
         region_name: ['New York'],

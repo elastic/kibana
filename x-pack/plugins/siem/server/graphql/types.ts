@@ -42,9 +42,11 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // Scalars
 // ====================================================
 
-export type ToStringArray = string[];
+export type ToStringArray = string[] | string;
 
 export type Date = any;
+
+export type ToNumberArray = number[] | number;
 
 export type EsValue = any;
 
@@ -229,17 +231,17 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 
   ip?: ToStringArray | null;
 
-  port?: ToStringArray | null;
+  port?: ToNumberArray | null;
 
   domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: ToStringArray | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface GeoEcsFields {
@@ -259,9 +261,9 @@ export interface GeoEcsFields {
 }
 
 export interface Location {
-  lon?: ToStringArray | null;
+  lon?: ToNumberArray | null;
 
-  lat?: ToStringArray | null;
+  lat?: ToNumberArray | null;
 }
 
 export interface HostEcsFields {
@@ -411,17 +413,17 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 
   ip?: ToStringArray | null;
 
-  port?: ToStringArray | null;
+  port?: ToNumberArray | null;
 
   domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: ToStringArray | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface EventEcsFields {
@@ -433,7 +435,7 @@ export interface EventEcsFields {
 
   dataset?: ToStringArray | null;
 
-  duration?: ToStringArray | null;
+  duration?: ToNumberArray | null;
 
   end?: ToStringArray | null;
 
@@ -449,11 +451,11 @@ export interface EventEcsFields {
 
   outcome?: ToStringArray | null;
 
-  risk_score?: ToStringArray | null;
+  risk_score?: ToNumberArray | null;
 
-  risk_score_norm?: ToStringArray | null;
+  risk_score_norm?: ToNumberArray | null;
 
-  severity?: ToStringArray | null;
+  severity?: ToNumberArray | null;
 
   start?: ToStringArray | null;
 
@@ -463,13 +465,13 @@ export interface EventEcsFields {
 }
 
 export interface NetworkEcsField {
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 
   community_id?: ToStringArray | null;
 
   direction?: ToStringArray | null;
 
-  packets?: ToStringArray | null;
+  packets?: ToNumberArray | null;
 
   protocol?: ToStringArray | null;
 
@@ -483,7 +485,7 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: ToStringArray | null;
+  flow_id?: ToNumberArray | null;
 
   proto?: ToStringArray | null;
 }
@@ -491,7 +493,7 @@ export interface SuricataEveData {
 export interface SuricataAlertData {
   signature?: ToStringArray | null;
 
-  signature_id?: ToStringArray | null;
+  signature_id?: ToNumberArray | null;
 }
 
 export interface TlsEcsFields {
@@ -543,7 +545,7 @@ export interface ZeekConnectionData {
 
   local_orig?: ToStringArray | null;
 
-  missed_bytes?: ToStringArray | null;
+  missed_bytes?: ToNumberArray | null;
 
   state?: ToStringArray | null;
 
@@ -615,13 +617,13 @@ export interface ZeekFileData {
 
   is_orig?: ToStringArray | null;
 
-  overflow_bytes?: ToStringArray | null;
+  overflow_bytes?: ToNumberArray | null;
 
   sha1?: ToStringArray | null;
 
-  duration?: ToStringArray | null;
+  duration?: ToNumberArray | null;
 
-  depth?: ToStringArray | null;
+  depth?: ToNumberArray | null;
 
   analyzers?: ToStringArray | null;
 
@@ -629,13 +631,13 @@ export interface ZeekFileData {
 
   rx_host?: ToStringArray | null;
 
-  total_bytes?: ToStringArray | null;
+  total_bytes?: ToNumberArray | null;
 
   fuid?: ToStringArray | null;
 
-  seen_bytes?: ToStringArray | null;
+  seen_bytes?: ToNumberArray | null;
 
-  missing_bytes?: ToStringArray | null;
+  missing_bytes?: ToNumberArray | null;
 
   md5?: ToStringArray | null;
 }
@@ -665,21 +667,21 @@ export interface HttpRequestData {
 
   referrer?: ToStringArray | null;
 
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpBodyData {
   content?: ToStringArray | null;
 
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpResponseData {
-  status_code?: ToStringArray | null;
+  status_code?: ToNumberArray | null;
 
   body?: HttpBodyData | null;
 
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface UrlEcsFields {
@@ -693,11 +695,11 @@ export interface UrlEcsFields {
 }
 
 export interface ProcessEcsFields {
-  pid?: ToStringArray | null;
+  pid?: ToNumberArray | null;
 
   name?: ToStringArray | null;
 
-  ppid?: ToStringArray | null;
+  ppid?: ToNumberArray | null;
 
   args?: ToStringArray | null;
 
@@ -705,9 +707,15 @@ export interface ProcessEcsFields {
 
   title?: ToStringArray | null;
 
-  thread?: ToStringArray | null;
+  thread?: Thread | null;
 
   working_directory?: ToStringArray | null;
+}
+
+export interface Thread {
+  id?: ToNumberArray | null;
+
+  start?: ToStringArray | null;
 }
 
 export interface FileFields {
@@ -757,7 +765,7 @@ export interface PackageEcsFields {
 
   name?: ToStringArray | null;
 
-  size?: ToStringArray | null;
+  size?: ToNumberArray | null;
 
   summary?: ToStringArray | null;
 
@@ -1085,12 +1093,6 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
-}
-
-export interface Thread {
-  id?: ToStringArray | null;
-
-  start?: ToStringArray | null;
 }
 
 // ====================================================
@@ -2116,21 +2118,21 @@ export namespace LastSourceHostResolvers {
 
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SourceEcsFields> {
-    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    port?: PortResolver<ToStringArray | null, TypeParent, Context>;
+    port?: PortResolver<ToNumberArray | null, TypeParent, Context>;
 
     domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<ToStringArray | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2140,7 +2142,7 @@ export namespace SourceEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2155,7 +2157,7 @@ export namespace SourceEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2217,18 +2219,18 @@ export namespace GeoEcsFieldsResolvers {
 
 export namespace LocationResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = Location> {
-    lon?: LonResolver<ToStringArray | null, TypeParent, Context>;
+    lon?: LonResolver<ToNumberArray | null, TypeParent, Context>;
 
-    lat?: LatResolver<ToStringArray | null, TypeParent, Context>;
+    lat?: LatResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type LonResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = Location,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type LatResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = Location,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2723,21 +2725,21 @@ export namespace PrimarySecondaryResolvers {
 
 export namespace DestinationEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DestinationEcsFields> {
-    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    port?: PortResolver<ToStringArray | null, TypeParent, Context>;
+    port?: PortResolver<ToNumberArray | null, TypeParent, Context>;
 
     domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<ToStringArray | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2747,7 +2749,7 @@ export namespace DestinationEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2762,7 +2764,7 @@ export namespace DestinationEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2778,7 +2780,7 @@ export namespace EventEcsFieldsResolvers {
 
     dataset?: DatasetResolver<ToStringArray | null, TypeParent, Context>;
 
-    duration?: DurationResolver<ToStringArray | null, TypeParent, Context>;
+    duration?: DurationResolver<ToNumberArray | null, TypeParent, Context>;
 
     end?: EndResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2794,11 +2796,11 @@ export namespace EventEcsFieldsResolvers {
 
     outcome?: OutcomeResolver<ToStringArray | null, TypeParent, Context>;
 
-    risk_score?: RiskScoreResolver<ToStringArray | null, TypeParent, Context>;
+    risk_score?: RiskScoreResolver<ToNumberArray | null, TypeParent, Context>;
 
-    risk_score_norm?: RiskScoreNormResolver<ToStringArray | null, TypeParent, Context>;
+    risk_score_norm?: RiskScoreNormResolver<ToNumberArray | null, TypeParent, Context>;
 
-    severity?: SeverityResolver<ToStringArray | null, TypeParent, Context>;
+    severity?: SeverityResolver<ToNumberArray | null, TypeParent, Context>;
 
     start?: StartResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2828,7 +2830,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DurationResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2868,17 +2870,17 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RiskScoreResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RiskScoreNormResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SeverityResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2901,13 +2903,13 @@ export namespace EventEcsFieldsResolvers {
 
 export namespace NetworkEcsFieldResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkEcsField> {
-    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     community_id?: CommunityIdResolver<ToStringArray | null, TypeParent, Context>;
 
     direction?: DirectionResolver<ToStringArray | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<ToStringArray | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToNumberArray | null, TypeParent, Context>;
 
     protocol?: ProtocolResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2915,7 +2917,7 @@ export namespace NetworkEcsFieldResolvers {
   }
 
   export type BytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2930,7 +2932,7 @@ export namespace NetworkEcsFieldResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2962,7 +2964,7 @@ export namespace SuricataEveDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataEveData> {
     alert?: AlertResolver<SuricataAlertData | null, TypeParent, Context>;
 
-    flow_id?: FlowIdResolver<ToStringArray | null, TypeParent, Context>;
+    flow_id?: FlowIdResolver<ToNumberArray | null, TypeParent, Context>;
 
     proto?: ProtoResolver<ToStringArray | null, TypeParent, Context>;
   }
@@ -2973,7 +2975,7 @@ export namespace SuricataEveDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FlowIdResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = SuricataEveData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2988,7 +2990,7 @@ export namespace SuricataAlertDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataAlertData> {
     signature?: SignatureResolver<ToStringArray | null, TypeParent, Context>;
 
-    signature_id?: SignatureIdResolver<ToStringArray | null, TypeParent, Context>;
+    signature_id?: SignatureIdResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type SignatureResolver<
@@ -2997,7 +2999,7 @@ export namespace SuricataAlertDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SignatureIdResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = SuricataAlertData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3157,7 +3159,7 @@ export namespace ZeekConnectionDataResolvers {
 
     local_orig?: LocalOrigResolver<ToStringArray | null, TypeParent, Context>;
 
-    missed_bytes?: MissedBytesResolver<ToStringArray | null, TypeParent, Context>;
+    missed_bytes?: MissedBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     state?: StateResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -3175,7 +3177,7 @@ export namespace ZeekConnectionDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MissedBytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3381,13 +3383,13 @@ export namespace ZeekFileDataResolvers {
 
     is_orig?: IsOrigResolver<ToStringArray | null, TypeParent, Context>;
 
-    overflow_bytes?: OverflowBytesResolver<ToStringArray | null, TypeParent, Context>;
+    overflow_bytes?: OverflowBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     sha1?: Sha1Resolver<ToStringArray | null, TypeParent, Context>;
 
-    duration?: DurationResolver<ToStringArray | null, TypeParent, Context>;
+    duration?: DurationResolver<ToNumberArray | null, TypeParent, Context>;
 
-    depth?: DepthResolver<ToStringArray | null, TypeParent, Context>;
+    depth?: DepthResolver<ToNumberArray | null, TypeParent, Context>;
 
     analyzers?: AnalyzersResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -3395,13 +3397,13 @@ export namespace ZeekFileDataResolvers {
 
     rx_host?: RxHostResolver<ToStringArray | null, TypeParent, Context>;
 
-    total_bytes?: TotalBytesResolver<ToStringArray | null, TypeParent, Context>;
+    total_bytes?: TotalBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     fuid?: FuidResolver<ToStringArray | null, TypeParent, Context>;
 
-    seen_bytes?: SeenBytesResolver<ToStringArray | null, TypeParent, Context>;
+    seen_bytes?: SeenBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    missing_bytes?: MissingBytesResolver<ToStringArray | null, TypeParent, Context>;
+    missing_bytes?: MissingBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
     md5?: Md5Resolver<ToStringArray | null, TypeParent, Context>;
   }
@@ -3437,7 +3439,7 @@ export namespace ZeekFileDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OverflowBytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3447,12 +3449,12 @@ export namespace ZeekFileDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DurationResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DepthResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3472,7 +3474,7 @@ export namespace ZeekFileDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TotalBytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3482,12 +3484,12 @@ export namespace ZeekFileDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SeenBytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MissingBytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3565,7 +3567,7 @@ export namespace HttpRequestDataResolvers {
 
     referrer?: ReferrerResolver<ToStringArray | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type MethodResolver<
@@ -3584,7 +3586,7 @@ export namespace HttpRequestDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3594,7 +3596,7 @@ export namespace HttpBodyDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpBodyData> {
     content?: ContentResolver<ToStringArray | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type ContentResolver<
@@ -3603,7 +3605,7 @@ export namespace HttpBodyDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = HttpBodyData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3611,15 +3613,15 @@ export namespace HttpBodyDataResolvers {
 
 export namespace HttpResponseDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpResponseData> {
-    status_code?: StatusCodeResolver<ToStringArray | null, TypeParent, Context>;
+    status_code?: StatusCodeResolver<ToNumberArray | null, TypeParent, Context>;
 
     body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<ToStringArray | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type StatusCodeResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = HttpResponseData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3629,7 +3631,7 @@ export namespace HttpResponseDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = HttpResponseData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3670,11 +3672,11 @@ export namespace UrlEcsFieldsResolvers {
 
 export namespace ProcessEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ProcessEcsFields> {
-    pid?: PidResolver<ToStringArray | null, TypeParent, Context>;
+    pid?: PidResolver<ToNumberArray | null, TypeParent, Context>;
 
     name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    ppid?: PpidResolver<ToStringArray | null, TypeParent, Context>;
+    ppid?: PpidResolver<ToNumberArray | null, TypeParent, Context>;
 
     args?: ArgsResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -3682,13 +3684,13 @@ export namespace ProcessEcsFieldsResolvers {
 
     title?: TitleResolver<ToStringArray | null, TypeParent, Context>;
 
-    thread?: ThreadResolver<ToStringArray | null, TypeParent, Context>;
+    thread?: ThreadResolver<Thread | null, TypeParent, Context>;
 
     working_directory?: WorkingDirectoryResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type PidResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3698,7 +3700,7 @@ export namespace ProcessEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PpidResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3718,13 +3720,32 @@ export namespace ProcessEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ThreadResolver<
-    R = ToStringArray | null,
+    R = Thread | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type WorkingDirectoryResolver<
     R = ToStringArray | null,
     Parent = ProcessEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ThreadResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = Thread> {
+    id?: IdResolver<ToNumberArray | null, TypeParent, Context>;
+
+    start?: StartResolver<ToStringArray | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = ToNumberArray | null,
+    Parent = Thread,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type StartResolver<
+    R = ToStringArray | null,
+    Parent = Thread,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
@@ -3871,7 +3892,7 @@ export namespace PackageEcsFieldsResolvers {
 
     name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    size?: SizeResolver<ToStringArray | null, TypeParent, Context>;
+    size?: SizeResolver<ToNumberArray | null, TypeParent, Context>;
 
     summary?: SummaryResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -3894,7 +3915,7 @@ export namespace PackageEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SizeResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = PackageEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -4968,23 +4989,4 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
-}
-
-export namespace ThreadResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = Thread> {
-    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
-
-    start?: StartResolver<ToStringArray | null, TypeParent, Context>;
-  }
-
-  export type IdResolver<
-    R = ToStringArray | null,
-    Parent = Thread,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type StartResolver<
-    R = ToStringArray | null,
-    Parent = Thread,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
 }

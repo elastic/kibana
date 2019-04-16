@@ -22,7 +22,7 @@ describe('ProcessDraggable', () => {
           eventId="event-123"
           processExecutable="process-executable-1"
           processName="process-name-1"
-          processPid="process-pid-1"
+          processPid={123}
         />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
@@ -96,11 +96,11 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable={null}
             processName={null}
-            processPid="[process-pid]"
+            processPid={123}
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[process-pid]');
+      expect(wrapper.text()).toEqual('123');
     });
 
     test('it returns process name if everything else is an empty string', () => {
@@ -111,7 +111,7 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable=""
             processName="[process-name]"
-            processPid=""
+            processPid={NaN}
           />
         </TestProviders>
       );
@@ -126,7 +126,7 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable="[process-executable]"
             processName=""
-            processPid=""
+            processPid={NaN}
           />
         </TestProviders>
       );
@@ -141,11 +141,11 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable=""
             processName=""
-            processPid="[process-pid]"
+            processPid={123}
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('[process-pid]');
+      expect(wrapper.text()).toEqual('123');
     });
 
     test('it returns process name if everything is filled', () => {
@@ -156,7 +156,7 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable="[process-executable]"
             processName="[process-name]"
-            processPid="[process-pid]"
+            processPid={123}
           />
         </TestProviders>
       );
@@ -171,7 +171,7 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable="[process-executable]"
             processName={undefined}
-            processPid="[process-pid]"
+            processPid={123}
           />
         </TestProviders>
       );
@@ -186,7 +186,7 @@ describe('ProcessDraggable', () => {
             eventId="event-123"
             processExecutable="[process-executable]"
             processName=""
-            processPid="[process-pid]"
+            processPid={123}
           />
         </TestProviders>
       );

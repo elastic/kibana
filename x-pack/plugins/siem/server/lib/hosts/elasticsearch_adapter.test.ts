@@ -68,8 +68,7 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
-      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
-      const expected = {
+      const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: { host: { name: 'zeek-london' }, _id: 'zeek-london' },
       };
@@ -80,8 +79,7 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of os correctly', () => {
       const fields: ReadonlyArray<string> = ['host.os.name'];
       const data = formatHostEdgesData(fields, buckets);
-      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
-      const expected = {
+      const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: { host: { os: { name: 'Ubuntu' } }, _id: 'zeek-london' },
       };
@@ -92,8 +90,7 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of version correctly', () => {
       const fields: ReadonlyArray<string> = ['host.os.version'];
       const data = formatHostEdgesData(fields, buckets);
-      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
-      const expected = {
+      const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: { host: { os: { version: '18.04.2 LTS (Bionic Beaver)' } }, _id: 'zeek-london' },
       };
@@ -104,8 +101,7 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
-      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
-      const expected = {
+      const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: { _id: 'zeek-london', host: { name: 'zeek-london' } },
       };
@@ -116,8 +112,7 @@ describe('hosts elasticsearch_adapter', () => {
     test('it formats a host with a source of name, lastBeat, os, and version correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name', 'host.os.name', 'host.os.version'];
       const data = formatHostEdgesData(fields, buckets);
-      // TODO: Re-type formatHostEdgesData since it does not convert things to string arrays and re-use it here
-      const expected = {
+      const expected: HostsEdges = {
         cursor: { tiebreaker: null, value: 'zeek-london' },
         node: {
           _id: 'zeek-london',

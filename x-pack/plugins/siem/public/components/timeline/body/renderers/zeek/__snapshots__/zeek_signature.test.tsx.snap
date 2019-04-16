@@ -10,7 +10,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
           "207.154.238.205",
         ],
         "port": Array [
-          "11568",
+          11568,
         ],
       },
       "event": Object {
@@ -57,7 +57,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
           "185.176.26.101",
         ],
         "port": Array [
-          "44059",
+          44059,
         ],
       },
       "suricata": null,
@@ -75,7 +75,7 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
             "false",
           ],
           "missed_bytes": Array [
-            "0",
+            0,
           ],
           "state": Array [
             "REJ",

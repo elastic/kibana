@@ -69,7 +69,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "executable": null,
               "name": null,
               "pid": Array [
-                "6278",
+                6278,
               ],
               "ppid": null,
               "title": null,
@@ -172,7 +172,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
               "executable": null,
               "name": null,
               "pid": Array [
-                "6278",
+                6278,
               ],
               "ppid": null,
               "title": null,

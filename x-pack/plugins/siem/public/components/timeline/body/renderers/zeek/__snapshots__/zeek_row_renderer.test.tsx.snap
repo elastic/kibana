@@ -384,7 +384,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                 "192.168.0.3",
               ],
               "port": Array [
-                "6343",
+                6343,
               ],
             },
             "event": Object {
@@ -401,7 +401,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                 "nginx",
               ],
               "severity": Array [
-                "3",
+                3,
               ],
             },
             "geo": Object {
@@ -425,7 +425,7 @@ exports[`zeek_row_renderer renders correctly against snapshot 1`] = `
                 "192.168.0.1",
               ],
               "port": Array [
-                "80",
+                80,
               ],
             },
             "timestamp": "2018-11-05T19:03:25.937Z",

@@ -12,7 +12,7 @@ exports[`Load More Events Table Component rendering it renders the default Event
             "24.168.54.169",
           ],
           "port": Array [
-            "62123",
+            62123,
           ],
         },
         "event": Object {
@@ -36,7 +36,7 @@ exports[`Load More Events Table Component rendering it renders the default Event
             "10.142.0.6",
           ],
           "port": Array [
-            "9200",
+            9200,
           ],
         },
         "suricata": null,
@@ -50,7 +50,7 @@ exports[`Load More Events Table Component rendering it renders the default Event
             "24.168.54.169",
           ],
           "port": Array [
-            "62145",
+            62145,
           ],
         },
         "event": Object {
@@ -74,7 +74,7 @@ exports[`Load More Events Table Component rendering it renders the default Event
             "10.142.0.6",
           ],
           "port": Array [
-            "9200",
+            9200,
           ],
         },
         "suricata": null,

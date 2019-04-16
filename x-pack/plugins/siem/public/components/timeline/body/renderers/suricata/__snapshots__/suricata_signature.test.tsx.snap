@@ -4,6 +4,6 @@ exports[`SuricataSignature rendering it renders the default SuricataSignature 1`
 <Component
   id="doc-id-123"
   signature="ET SCAN ATTACK Hello"
-  signatureId="id-123"
+  signatureId={123}
 />
 `;

@@ -55,7 +55,7 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
                 "93.184.216.34",
               ],
               "port": Array [
-                "80",
+                80,
               ],
             },
             "event": Object {
@@ -97,10 +97,10 @@ exports[`GenericRowRenderer #createGenericAuditRowRenderer renders correctly aga
                 "wget",
               ],
               "pid": Array [
-                "1490",
+                1490,
               ],
               "ppid": Array [
-                "1476",
+                1476,
               ],
               "title": Array [
                 "wget www.example.com",
@@ -246,10 +246,10 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
                 "systemd-journal",
               ],
               "pid": Array [
-                "27244",
+                27244,
               ],
               "ppid": Array [
-                "1",
+                1,
               ],
               "title": Array [
                 "/lib/systemd/systemd-journald",

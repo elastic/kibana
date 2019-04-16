@@ -14,7 +14,7 @@ export const ecsSchema = gql`
     category: ToStringArray
     created: ToStringArray
     dataset: ToStringArray
-    duration: ToStringArray
+    duration: ToNumberArray
     end: ToStringArray
     hash: ToStringArray
     id: ToStringArray
@@ -22,17 +22,17 @@ export const ecsSchema = gql`
     module: ToStringArray
     original: ToStringArray
     outcome: ToStringArray
-    risk_score: ToStringArray
-    risk_score_norm: ToStringArray
-    severity: ToStringArray
+    risk_score: ToNumberArray
+    risk_score_norm: ToNumberArray
+    severity: ToNumberArray
     start: ToStringArray
     timezone: ToStringArray
     type: ToStringArray
   }
 
   type Location {
-    lon: ToStringArray
-    lat: ToStringArray
+    lon: ToNumberArray
+    lat: ToNumberArray
   }
 
   type GeoEcsFields {
@@ -93,47 +93,47 @@ export const ecsSchema = gql`
   }
 
   type Thread {
-    id: ToStringArray
+    id: ToNumberArray
     start: ToStringArray
   }
 
   type ProcessEcsFields {
-    pid: ToStringArray
+    pid: ToNumberArray
     name: ToStringArray
-    ppid: ToStringArray
+    ppid: ToNumberArray
     args: ToStringArray
     executable: ToStringArray
     title: ToStringArray
-    thread: ToStringArray
+    thread: Thread
     working_directory: ToStringArray
   }
 
   type SourceEcsFields {
-    bytes: ToStringArray
+    bytes: ToNumberArray
     ip: ToStringArray
-    port: ToStringArray
+    port: ToNumberArray
     domain: ToStringArray
     geo: GeoEcsFields
-    packets: ToStringArray
+    packets: ToNumberArray
   }
 
   type DestinationEcsFields {
-    bytes: ToStringArray
+    bytes: ToNumberArray
     ip: ToStringArray
-    port: ToStringArray
+    port: ToNumberArray
     domain: ToStringArray
     geo: GeoEcsFields
-    packets: ToStringArray
+    packets: ToNumberArray
   }
 
   type SuricataAlertData {
     signature: ToStringArray
-    signature_id: ToStringArray
+    signature_id: ToNumberArray
   }
 
   type SuricataEveData {
     alert: SuricataAlertData
-    flow_id: ToStringArray
+    flow_id: ToNumberArray
     proto: ToStringArray
   }
 
@@ -170,7 +170,7 @@ export const ecsSchema = gql`
   type ZeekConnectionData {
     local_resp: ToStringArray
     local_orig: ToStringArray
-    missed_bytes: ToStringArray
+    missed_bytes: ToNumberArray
     state: ToStringArray
     history: ToStringArray
   }
@@ -226,20 +226,20 @@ export const ecsSchema = gql`
 
   type HttpBodyData {
     content: ToStringArray
-    bytes: ToStringArray
+    bytes: ToNumberArray
   }
 
   type HttpRequestData {
     method: ToStringArray
     body: HttpBodyData
     referrer: ToStringArray
-    bytes: ToStringArray
+    bytes: ToNumberArray
   }
 
   type HttpResponseData {
-    status_code: ToStringArray
+    status_code: ToNumberArray
     body: HttpBodyData
-    bytes: ToStringArray
+    bytes: ToNumberArray
   }
 
   type HttpEcsFields {
@@ -262,17 +262,17 @@ export const ecsSchema = gql`
     tx_host: ToStringArray
     source: ToStringArray
     is_orig: ToStringArray
-    overflow_bytes: ToStringArray
+    overflow_bytes: ToNumberArray
     sha1: ToStringArray
-    duration: ToStringArray
-    depth: ToStringArray
+    duration: ToNumberArray
+    depth: ToNumberArray
     analyzers: ToStringArray
     mime_type: ToStringArray
     rx_host: ToStringArray
-    total_bytes: ToStringArray
+    total_bytes: ToNumberArray
     fuid: ToStringArray
-    seen_bytes: ToStringArray
-    missing_bytes: ToStringArray
+    seen_bytes: ToNumberArray
+    missing_bytes: ToNumberArray
     md5: ToStringArray
   }
 
@@ -303,10 +303,10 @@ export const ecsSchema = gql`
   }
 
   type NetworkEcsField {
-    bytes: ToStringArray
+    bytes: ToNumberArray
     community_id: ToStringArray
     direction: ToStringArray
-    packets: ToStringArray
+    packets: ToNumberArray
     protocol: ToStringArray
     transport: ToStringArray
   }
@@ -315,7 +315,7 @@ export const ecsSchema = gql`
     arch: ToStringArray
     entity_id: ToStringArray
     name: ToStringArray
-    size: ToStringArray
+    size: ToNumberArray
     summary: ToStringArray
     version: ToStringArray
   }

@@ -10,7 +10,8 @@
       ""
     ],
     "scalars": {
-      "ToStringArray": "string[]"
+      "ToStringArray": "string[]",
+      "ToNumberArray": "number[]"
     }
   },
   "primitives": {

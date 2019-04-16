@@ -28,7 +28,7 @@ interface Props {
   text: string;
   secondary: string | null | undefined;
   processName: string | null | undefined;
-  processPid: string | null | undefined;
+  processPid: number | null | undefined;
   processExecutable: string | null | undefined;
   processTitle: string | null | undefined;
   workingDirectory: string | null | undefined;
@@ -111,7 +111,7 @@ export const AuditdGenericDetails = pure<GenericDetailsProps>(({ data, contextId
   const hostName: string | null | undefined = get('host.name[0]', data);
   const userName: string | null | undefined = get('user.name[0]', data);
   const result: string | null | undefined = get('auditd.result[0]', data);
-  const processPid: string | null | undefined = get('process.pid[0]', data);
+  const processPid: number | null | undefined = get('process.pid[0]', data);
   const processName: string | null | undefined = get('process.name[0]', data);
   const processExecutable: string | null | undefined = get('process.executable[0]', data);
   const processTitle: string | null | undefined = get('process.title[0]', data);

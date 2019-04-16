@@ -61,7 +61,7 @@ exports[`SystemGenericDetails rendering it renders the default SystemGenericDeta
         "executable": null,
         "name": null,
         "pid": Array [
-          "6278",
+          6278,
         ],
         "ppid": null,
         "title": null,

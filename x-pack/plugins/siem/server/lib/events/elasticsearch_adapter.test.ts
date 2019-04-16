@@ -39,20 +39,20 @@ describe('events elasticsearch_adapter', () => {
           alert: {
             category: 'suricata-category-1',
             signature: ['suricata-signature-1'],
-            signature_id: ['5000'],
+            signature_id: [5000],
             severity: 1,
           },
-          flow_id: ['100'],
+          flow_id: [100],
           proto: ['suricata-proto-1'],
         },
       },
       source: {
         ip: ['source-ip-1'],
-        port: ['100'],
+        port: [100],
       },
       destination: {
         ip: ['destination-ip-1'],
-        port: ['200'],
+        port: [200],
         geo: {
           region_name: ['geo-region-1'],
           country_iso_code: ['geo-iso-code-1'],
@@ -63,8 +63,8 @@ describe('events elasticsearch_adapter', () => {
         module: ['event-module-1'],
         type: ['event-type-1'],
         category: ['event-category-1'],
-        severity: ['1'],
-        id: ['100'],
+        severity: [1],
+        id: ['event-id-1'],
       },
     },
     sort: ['123567890', '1234'],
@@ -141,7 +141,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            id: ['100'],
+            id: ['event-id-1'],
           },
         },
       };
@@ -199,7 +199,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           event: {
-            severity: ['1'],
+            severity: [1],
           },
         },
       };
@@ -220,7 +220,7 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           suricata: {
             eve: {
-              flow_id: ['100'],
+              flow_id: [100],
             },
           },
         },
@@ -289,7 +289,7 @@ describe('events elasticsearch_adapter', () => {
           suricata: {
             eve: {
               alert: {
-                signature_id: ['5000'],
+                signature_id: [5000],
               },
             },
           },
@@ -331,7 +331,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           source: {
-            port: ['100'],
+            port: [100],
           },
         },
       };
@@ -371,7 +371,7 @@ describe('events elasticsearch_adapter', () => {
           _id: 'id-123',
           _index: 'index-123',
           destination: {
-            port: ['200'],
+            port: [200],
           },
         },
       };
@@ -447,7 +447,7 @@ describe('events elasticsearch_adapter', () => {
             eve: {
               proto: ['suricata-proto-1'],
               alert: {
-                signature_id: ['5000'],
+                signature_id: [5000],
               },
             },
           },
@@ -475,10 +475,8 @@ describe('events elasticsearch_adapter', () => {
       ];
       const ecsfields: ReadonlyArray<string> = ['host.name', 'suricata.eve.alert.signature_id'];
       const data = formatTimelineData(datafields, ecsfields, hit, eventFieldsMap);
-      // TODO:
-      // This should turn back into expected: TimelineEdges = {
-      // once we have all the types converted correctly to ToStringArray
-      // For now, this test _must_ return the data as is with an any for expected
+      // TODO: Re-add TimelineEdges back once we settle on if data can contain numbers or not.
+      // otherwise delete this test.
       const expected = {
         cursor: { tiebreaker: '1234', value: '123567890' },
         node: {
@@ -486,14 +484,14 @@ describe('events elasticsearch_adapter', () => {
           _index: 'index-123',
           data: [
             { field: 'host.name', value: ['hostname-1'] },
-            { field: 'suricata.eve.alert.signature_id', value: ['5000'] },
+            { field: 'suricata.eve.alert.signature_id', value: [5000] },
             { field: '@timestamp', value: ['time-1'] },
           ],
           ecs: {
             _id: 'id-123',
             _index: 'index-123',
             host: { name: ['hostname-1'] },
-            suricata: { eve: { alert: { signature_id: ['5000'] } } },
+            suricata: { eve: { alert: { signature_id: [5000] } } },
           },
         },
       };

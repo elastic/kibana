@@ -17,6 +17,8 @@ export type ToStringArray = string[];
 
 export type Date = any;
 
+export type ToNumberArray = number[];
+
 export type EsValue = any;
 
 // ====================================================
@@ -200,17 +202,17 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 
   ip?: ToStringArray | null;
 
-  port?: ToStringArray | null;
+  port?: ToNumberArray | null;
 
   domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: ToStringArray | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface GeoEcsFields {
@@ -230,9 +232,9 @@ export interface GeoEcsFields {
 }
 
 export interface Location {
-  lon?: ToStringArray | null;
+  lon?: ToNumberArray | null;
 
-  lat?: ToStringArray | null;
+  lat?: ToNumberArray | null;
 }
 
 export interface HostEcsFields {
@@ -382,17 +384,17 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 
   ip?: ToStringArray | null;
 
-  port?: ToStringArray | null;
+  port?: ToNumberArray | null;
 
   domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: ToStringArray | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface EventEcsFields {
@@ -404,7 +406,7 @@ export interface EventEcsFields {
 
   dataset?: ToStringArray | null;
 
-  duration?: ToStringArray | null;
+  duration?: ToNumberArray | null;
 
   end?: ToStringArray | null;
 
@@ -420,11 +422,11 @@ export interface EventEcsFields {
 
   outcome?: ToStringArray | null;
 
-  risk_score?: ToStringArray | null;
+  risk_score?: ToNumberArray | null;
 
-  risk_score_norm?: ToStringArray | null;
+  risk_score_norm?: ToNumberArray | null;
 
-  severity?: ToStringArray | null;
+  severity?: ToNumberArray | null;
 
   start?: ToStringArray | null;
 
@@ -434,13 +436,13 @@ export interface EventEcsFields {
 }
 
 export interface NetworkEcsField {
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 
   community_id?: ToStringArray | null;
 
   direction?: ToStringArray | null;
 
-  packets?: ToStringArray | null;
+  packets?: ToNumberArray | null;
 
   protocol?: ToStringArray | null;
 
@@ -454,7 +456,7 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: ToStringArray | null;
+  flow_id?: ToNumberArray | null;
 
   proto?: ToStringArray | null;
 }
@@ -462,7 +464,7 @@ export interface SuricataEveData {
 export interface SuricataAlertData {
   signature?: ToStringArray | null;
 
-  signature_id?: ToStringArray | null;
+  signature_id?: ToNumberArray | null;
 }
 
 export interface TlsEcsFields {
@@ -514,7 +516,7 @@ export interface ZeekConnectionData {
 
   local_orig?: ToStringArray | null;
 
-  missed_bytes?: ToStringArray | null;
+  missed_bytes?: ToNumberArray | null;
 
   state?: ToStringArray | null;
 
@@ -586,13 +588,13 @@ export interface ZeekFileData {
 
   is_orig?: ToStringArray | null;
 
-  overflow_bytes?: ToStringArray | null;
+  overflow_bytes?: ToNumberArray | null;
 
   sha1?: ToStringArray | null;
 
-  duration?: ToStringArray | null;
+  duration?: ToNumberArray | null;
 
-  depth?: ToStringArray | null;
+  depth?: ToNumberArray | null;
 
   analyzers?: ToStringArray | null;
 
@@ -600,13 +602,13 @@ export interface ZeekFileData {
 
   rx_host?: ToStringArray | null;
 
-  total_bytes?: ToStringArray | null;
+  total_bytes?: ToNumberArray | null;
 
   fuid?: ToStringArray | null;
 
-  seen_bytes?: ToStringArray | null;
+  seen_bytes?: ToNumberArray | null;
 
-  missing_bytes?: ToStringArray | null;
+  missing_bytes?: ToNumberArray | null;
 
   md5?: ToStringArray | null;
 }
@@ -636,21 +638,21 @@ export interface HttpRequestData {
 
   referrer?: ToStringArray | null;
 
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpBodyData {
   content?: ToStringArray | null;
 
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpResponseData {
-  status_code?: ToStringArray | null;
+  status_code?: ToNumberArray | null;
 
   body?: HttpBodyData | null;
 
-  bytes?: ToStringArray | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface UrlEcsFields {
@@ -664,11 +666,11 @@ export interface UrlEcsFields {
 }
 
 export interface ProcessEcsFields {
-  pid?: ToStringArray | null;
+  pid?: ToNumberArray | null;
 
   name?: ToStringArray | null;
 
-  ppid?: ToStringArray | null;
+  ppid?: ToNumberArray | null;
 
   args?: ToStringArray | null;
 
@@ -676,9 +678,15 @@ export interface ProcessEcsFields {
 
   title?: ToStringArray | null;
 
-  thread?: ToStringArray | null;
+  thread?: Thread | null;
 
   working_directory?: ToStringArray | null;
+}
+
+export interface Thread {
+  id?: ToNumberArray | null;
+
+  start?: ToStringArray | null;
 }
 
 export interface FileFields {
@@ -728,7 +736,7 @@ export interface PackageEcsFields {
 
   name?: ToStringArray | null;
 
-  size?: ToStringArray | null;
+  size?: ToNumberArray | null;
 
   summary?: ToStringArray | null;
 
@@ -1056,12 +1064,6 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
-}
-
-export interface Thread {
-  id?: ToStringArray | null;
-
-  start?: ToStringArray | null;
 }
 
 // ====================================================
@@ -1689,7 +1691,7 @@ export namespace GetEventsQuery {
 
     action?: ToStringArray | null;
 
-    severity?: ToStringArray | null;
+    severity?: ToNumberArray | null;
 
     module?: ToStringArray | null;
 
@@ -1713,7 +1715,7 @@ export namespace GetEventsQuery {
 
     ip?: ToStringArray | null;
 
-    port?: ToStringArray | null;
+    port?: ToNumberArray | null;
   };
 
   export type Destination = {
@@ -1721,7 +1723,7 @@ export namespace GetEventsQuery {
 
     ip?: ToStringArray | null;
 
-    port?: ToStringArray | null;
+    port?: ToNumberArray | null;
   };
 
   export type Geo = {
@@ -1743,7 +1745,7 @@ export namespace GetEventsQuery {
 
     proto?: ToStringArray | null;
 
-    flow_id?: ToStringArray | null;
+    flow_id?: ToNumberArray | null;
 
     alert?: Alert | null;
   };
@@ -1753,7 +1755,7 @@ export namespace GetEventsQuery {
 
     signature?: ToStringArray | null;
 
-    signature_id?: ToStringArray | null;
+    signature_id?: ToNumberArray | null;
   };
 
   export type Zeek = {
@@ -2013,9 +2015,9 @@ export namespace GetIpOverviewQuery {
   export type Location = {
     __typename?: 'Location';
 
-    lat?: ToStringArray | null;
+    lat?: ToNumberArray | null;
 
-    lon?: ToStringArray | null;
+    lon?: ToNumberArray | null;
   };
 
   export type Host = {
@@ -2093,9 +2095,9 @@ export namespace GetIpOverviewQuery {
   export type _Location = {
     __typename?: 'Location';
 
-    lat?: ToStringArray | null;
+    lat?: ToNumberArray | null;
 
-    lon?: ToStringArray | null;
+    lon?: ToNumberArray | null;
   };
 
   export type _Host = {
@@ -2769,7 +2771,7 @@ export namespace GetTimelineQuery {
 
     name?: ToStringArray | null;
 
-    size?: ToStringArray | null;
+    size?: ToNumberArray | null;
 
     summary?: ToStringArray | null;
 
@@ -2787,7 +2789,7 @@ export namespace GetTimelineQuery {
 
     dataset?: ToStringArray | null;
 
-    duration?: ToStringArray | null;
+    duration?: ToNumberArray | null;
 
     end?: ToStringArray | null;
 
@@ -2803,11 +2805,11 @@ export namespace GetTimelineQuery {
 
     outcome?: ToStringArray | null;
 
-    risk_score?: ToStringArray | null;
+    risk_score?: ToNumberArray | null;
 
-    risk_score_norm?: ToStringArray | null;
+    risk_score_norm?: ToNumberArray | null;
 
-    severity?: ToStringArray | null;
+    severity?: ToNumberArray | null;
 
     start?: ToStringArray | null;
 
@@ -2915,13 +2917,13 @@ export namespace GetTimelineQuery {
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    bytes?: ToStringArray | null;
+    bytes?: ToNumberArray | null;
 
     ip?: ToStringArray | null;
 
-    packets?: ToStringArray | null;
+    packets?: ToNumberArray | null;
 
-    port?: ToStringArray | null;
+    port?: ToNumberArray | null;
 
     geo?: Geo | null;
   };
@@ -2945,13 +2947,13 @@ export namespace GetTimelineQuery {
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
-    bytes?: ToStringArray | null;
+    bytes?: ToNumberArray | null;
 
     ip?: ToStringArray | null;
 
-    packets?: ToStringArray | null;
+    packets?: ToNumberArray | null;
 
-    port?: ToStringArray | null;
+    port?: ToNumberArray | null;
 
     geo?: _Geo | null;
   };
@@ -2991,7 +2993,7 @@ export namespace GetTimelineQuery {
 
     proto?: ToStringArray | null;
 
-    flow_id?: ToStringArray | null;
+    flow_id?: ToNumberArray | null;
 
     alert?: Alert | null;
   };
@@ -3001,19 +3003,19 @@ export namespace GetTimelineQuery {
 
     signature?: ToStringArray | null;
 
-    signature_id?: ToStringArray | null;
+    signature_id?: ToNumberArray | null;
   };
 
   export type Network = {
     __typename?: 'NetworkEcsField';
 
-    bytes?: ToStringArray | null;
+    bytes?: ToNumberArray | null;
 
     community_id?: ToStringArray | null;
 
     direction?: ToStringArray | null;
 
-    packets?: ToStringArray | null;
+    packets?: ToNumberArray | null;
 
     protocol?: ToStringArray | null;
 
@@ -3043,7 +3045,7 @@ export namespace GetTimelineQuery {
   export type Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: ToStringArray | null;
+    bytes?: ToNumberArray | null;
 
     content?: ToStringArray | null;
   };
@@ -3051,7 +3053,7 @@ export namespace GetTimelineQuery {
   export type Response = {
     __typename?: 'HttpResponseData';
 
-    status_code?: ToStringArray | null;
+    status_code?: ToNumberArray | null;
 
     body?: _Body | null;
   };
@@ -3059,7 +3061,7 @@ export namespace GetTimelineQuery {
   export type _Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: ToStringArray | null;
+    bytes?: ToNumberArray | null;
 
     content?: ToStringArray | null;
   };
@@ -3131,11 +3133,11 @@ export namespace GetTimelineQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    pid?: ToStringArray | null;
+    pid?: ToNumberArray | null;
 
     name?: ToStringArray | null;
 
-    ppid?: ToStringArray | null;
+    ppid?: ToNumberArray | null;
 
     args?: ToStringArray | null;
 
@@ -3171,7 +3173,7 @@ export namespace GetTimelineQuery {
 
     local_orig?: ToStringArray | null;
 
-    missed_bytes?: ToStringArray | null;
+    missed_bytes?: ToNumberArray | null;
 
     state?: ToStringArray | null;
 
@@ -3251,13 +3253,13 @@ export namespace GetTimelineQuery {
 
     is_orig?: ToStringArray | null;
 
-    overflow_bytes?: ToStringArray | null;
+    overflow_bytes?: ToNumberArray | null;
 
     sha1?: ToStringArray | null;
 
-    duration?: ToStringArray | null;
+    duration?: ToNumberArray | null;
 
-    depth?: ToStringArray | null;
+    depth?: ToNumberArray | null;
 
     analyzers?: ToStringArray | null;
 
@@ -3265,13 +3267,13 @@ export namespace GetTimelineQuery {
 
     rx_host?: ToStringArray | null;
 
-    total_bytes?: ToStringArray | null;
+    total_bytes?: ToNumberArray | null;
 
     fuid?: ToStringArray | null;
 
-    seen_bytes?: ToStringArray | null;
+    seen_bytes?: ToNumberArray | null;
 
-    missing_bytes?: ToStringArray | null;
+    missing_bytes?: ToNumberArray | null;
 
     md5?: ToStringArray | null;
   };

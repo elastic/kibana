@@ -90,7 +90,7 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
         ],
         "name": null,
         "pid": Array [
-          "21202",
+          21202,
         ],
         "ppid": null,
         "title": null,

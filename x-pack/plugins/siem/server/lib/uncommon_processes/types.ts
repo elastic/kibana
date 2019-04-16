@@ -22,7 +22,10 @@ export interface UncommonProcessHit extends Hit {
   // host: Array<{ id: string | string[] | null | undefined; name: string | string[] | null | undefined }>;
   // However, since GraphQL ToStringArray converts it I am leaving it as is.
   // TODO: Re-look at this and see if I should add the extra code or not
-  host: Array<{ id: string[] | null | undefined; name: string[] | null | undefined }>;
+  host: Array<{
+    id: string[] | string | null | undefined;
+    name: string[] | string | null | undefined;
+  }>;
   _source: {
     '@timestamp': string;
     process: ProcessEcsFields;

@@ -376,7 +376,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
           "192.168.0.3",
         ],
         "port": Array [
-          "6343",
+          6343,
         ],
       },
       "event": Object {
@@ -390,7 +390,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
           "suricata",
         ],
         "severity": Array [
-          "1",
+          1,
         ],
         "type": Array [
           "Alert",
@@ -417,7 +417,7 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
           "192.168.0.3",
         ],
         "port": Array [
-          "53",
+          53,
         ],
       },
       "suricata": Object {
@@ -427,11 +427,11 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
               "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
             ],
             "signature_id": Array [
-              "4",
+              4,
             ],
           },
           "flow_id": Array [
-            "4",
+            4,
           ],
           "proto": Array [
             "",

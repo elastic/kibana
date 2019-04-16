@@ -12,6 +12,7 @@ import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
 import { ecsSchema } from '../ecs';
 import { dateSchema } from '../scalar_date';
+import { toNumberSchema } from '../scalar_to_number_array';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
 
@@ -117,6 +118,7 @@ describe('SIEM Overview GQL Schema', () => {
       ecsSchema,
       overviewSchema,
       dateSchema,
+      toNumberSchema,
     ];
     const mockSchema = makeExecutableSchema({ typeDefs });
 
@@ -158,6 +160,7 @@ describe('SIEM Overview GQL Schema', () => {
       ecsSchema,
       overviewSchema,
       dateSchema,
+      toNumberSchema,
     ];
     const mockSchema = makeExecutableSchema({ typeDefs });
 

@@ -12,7 +12,8 @@
       "import { SiemContext } from '../lib/types';"
     ],
     "scalars": {
-      "ToStringArray": "string[]"
+      "ToStringArray": "string[] | string",
+      "ToNumberArray": "number[] | number"
     }
   },
   "primitives": {

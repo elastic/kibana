@@ -19,6 +19,7 @@ import { kpiNetworkSchema } from './kpi_network';
 import { networkSchema } from './network';
 import { overviewSchema } from './overview';
 import { dateSchema } from './scalar_date';
+import { toNumberSchema } from './scalar_to_number_array';
 import { sourceStatusSchema } from './source_status';
 import { sourcesSchema } from './sources';
 import { uncommonProcessesSchema } from './uncommon_processes';
@@ -29,6 +30,7 @@ export const schemas = [
   ecsSchema,
   eventsSchema,
   dateSchema,
+  toNumberSchema,
   hostsSchema,
   ...ipDetailsSchemas,
   kpiNetworkSchema,

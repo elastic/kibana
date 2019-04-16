@@ -33,23 +33,23 @@ describe('helpers', () => {
           category: ['Attempted Administrator Privilege Gain'],
           type: ['Alert'],
           module: ['suricata'],
-          severity: ['1'],
+          severity: [1],
         },
         source: {
           ip: ['192.168.0.3'],
-          port: ['53'],
+          port: [53],
         },
         destination: {
           ip: ['192.168.0.3'],
-          port: ['6343'],
+          port: [6343],
         },
         suricata: {
           eve: {
-            flow_id: ['4'],
+            flow_id: [4],
             proto: [''],
             alert: {
               signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
-              signature_id: ['4'],
+              signature_id: [4],
               __typename: 'level 2',
             },
           },
@@ -75,23 +75,23 @@ describe('helpers', () => {
           category: ['Attempted Administrator Privilege Gain'],
           type: ['Alert'],
           module: ['suricata'],
-          severity: ['1'],
+          severity: [1],
         },
         source: {
           ip: ['192.168.0.3'],
-          port: ['53'],
+          port: [53],
         },
         destination: {
           ip: ['192.168.0.3'],
-          port: ['6343'],
+          port: [6343],
         },
         suricata: {
           eve: {
-            flow_id: ['4'],
+            flow_id: [4],
             proto: [''],
             alert: {
               signature: ['ET PHONE HOME Stack Overflow (CVE-2019-90210)'],
-              signature_id: ['4'],
+              signature_id: [4],
             },
           },
         },
@@ -116,18 +116,18 @@ describe('helpers', () => {
           category: ['theory'],
           type: ['Alert'],
           module: ['me'],
-          severity: ['1'],
+          severity: [1],
         },
         source: {
-          port: ['53'],
+          port: [53],
         },
         destination: {
           ip: ['192.168.0.3'],
-          port: ['6343'],
+          port: [6343],
         },
         suricata: {
           eve: {
-            flow_id: ['4'],
+            flow_id: [4],
             proto: [''],
             alert: {
               signature: ['dance moves'],
@@ -155,19 +155,19 @@ describe('helpers', () => {
           category: ['theory'],
           type: ['Alert'],
           module: ['me'],
-          severity: ['1'],
+          severity: [1],
         },
         source: {
           ip: undefined,
-          port: ['53'],
+          port: [53],
         },
         destination: {
           ip: ['192.168.0.3'],
-          port: ['6343'],
+          port: [6343],
         },
         suricata: {
           eve: {
-            flow_id: ['4'],
+            flow_id: [4],
             proto: [''],
             alert: {
               signature: ['dance moves'],

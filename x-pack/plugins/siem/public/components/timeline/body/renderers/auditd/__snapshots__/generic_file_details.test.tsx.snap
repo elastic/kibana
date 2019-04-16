@@ -113,10 +113,10 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
             "systemd-journal",
           ],
           "pid": Array [
-            "27244",
+            27244,
           ],
           "ppid": Array [
-            "1",
+            1,
           ],
           "title": Array [
             "/lib/systemd/systemd-journald",
