@@ -19,31 +19,50 @@ export default function testWithSecurity({ getService, getPageObjects }: TestInv
   const repositoryListSelector = 'codeRepositoryList codeRepositoryItem';
   const manageButtonSelectors = ['indexRepositoryButton', 'deleteRepositoryButton'];
   const log = getService('log');
+  const security = getService('security');
 
   describe('with security enabled:', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
-      await PageObjects.settings.navigateTo();
-      await PageObjects.security.clickElasticsearchUsers();
-      await PageObjects.security.addUser({
-        username: codeAdmin,
+      await security.role.create('global_code_all_role', {
+        elasticsearch: {
+          indices: [],
+        },
+        kibana: [
+          {
+            feature: {
+              code: ['all'],
+            },
+            spaces: ['*'],
+          },
+        ],
+      });
+
+      await security.user.create(codeAdmin, {
         password: dummyPassword,
-        confirmPassword: dummyPassword,
-        fullname: 'Code Admin',
-        email: 'codeAdmin@elastic.co',
-        save: true,
-        roles: ['kibana_user', 'code_admin'],
+        roles: ['global_code_all_role'],
+        full_name: 'code admin',
       });
-      await PageObjects.security.addUser({
-        username: codeUser,
-        password: '123321',
-        confirmPassword: dummyPassword,
-        fullname: 'Code User',
-        email: 'codeUser@elastic.co',
-        save: true,
-        roles: ['kibana_user', 'code_user'],
+
+      await security.role.create('global_code_read_role', {
+        elasticsearch: {
+          indices: [],
+        },
+        kibana: [
+          {
+            feature: {
+              code: ['read'],
+            },
+            spaces: ['*'],
+          },
+        ],
       });
-      // Navigate to the search page of the code app.
+
+      await security.user.create(codeUser, {
+        password: dummyPassword,
+        roles: ['global_code_read_role'],
+        full_name: 'code user',
+      });
     });
 
     async function login(user: string) {

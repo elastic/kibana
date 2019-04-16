@@ -6,6 +6,8 @@
 
 import { Server } from 'hapi';
 import fetch from 'node-fetch';
+import { i18n } from '@kbn/i18n';
+import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { checkRepos } from './check_repos';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
@@ -25,7 +27,7 @@ import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from '.
 import { setupRoute } from './routes/setup';
 import { workspaceRoute } from './routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './scheduler';
-import { enableSecurity } from './security';
+import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 
@@ -77,12 +79,41 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 export function init(server: Server, options: any) {
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
+  const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'code',
+    name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
+      defaultMessage: 'Code',
+    }),
+    icon: 'codeApp',
+    navLinkId: 'code',
+    app: ['code', 'kibana'],
+    catalogue: [], // TODO add catalogue here
+    privileges: {
+      all: {
+        api: ['code_user', 'code_admin'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show', 'user', 'admin'],
+      },
+      read: {
+        api: ['code_user'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show', 'user'],
+      },
+    },
+  });
+
   // @ts-ignore
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
     // enable security check in routes
-    enableSecurity(server);
     const codeNodeUrl = serverOptions.codeNodeUrl;
     if (codeNodeUrl) {
       const codeNodeUuid = (await retryUntilAvailable(
@@ -200,9 +231,11 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   }
   // check code node repos on disk
   await checkRepos(cloneWorker, esClient, serverOptions, log);
+
+  const codeServerRouter = new CodeServerRouter(server);
   // Add server routes and initialize the plugin here
   repositoryRoute(
-    server,
+    codeServerRouter,
     cloneWorker,
     deleteWorker,
     indexWorker,
@@ -210,13 +243,13 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController,
     serverOptions
   );
-  repositorySearchRoute(server, log);
-  documentSearchRoute(server, log);
-  symbolSearchRoute(server, log);
-  fileRoute(server, serverOptions);
-  workspaceRoute(server, serverOptions);
-  symbolByQnameRoute(server, log);
-  installRoute(server, lspService, installManager);
-  lspRoute(server, lspService, serverOptions);
-  setupRoute(server);
+  repositorySearchRoute(codeServerRouter, log);
+  documentSearchRoute(codeServerRouter, log);
+  symbolSearchRoute(codeServerRouter, log);
+  fileRoute(codeServerRouter, serverOptions);
+  workspaceRoute(codeServerRouter, serverOptions);
+  symbolByQnameRoute(codeServerRouter, log);
+  installRoute(codeServerRouter, lspService, installManager);
+  lspRoute(codeServerRouter, lspService, serverOptions);
+  setupRoute(codeServerRouter);
 }

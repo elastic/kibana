@@ -4,81 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-import { Lifecycle, Request, ResponseToolkit, Server, ServerRoute } from 'hapi';
+import { Server, ServerRoute, RouteOptions } from 'hapi';
 
-export interface SecuredRoute extends ServerRoute {
-  requireRoles?: string[];
-  requireAdmin?: boolean;
-}
-
-export const ADMIN_ROLE = 'code_admin';
-
-declare module 'hapi' {
-  interface Server {
-    securedRoute(route: SecuredRoute): void;
-  }
-}
-
-export class SecureRoute {
+export class CodeServerRouter {
   constructor(readonly server: Server) {}
 
-  public install() {
-    const self = this;
-    function securedRoute(route: SecuredRoute) {
-      if (route.handler) {
-        const originHandler = route.handler as Lifecycle.Method;
-        route.handler = async (req: Request, h: ResponseToolkit, err?: Error) => {
-          if (self.isSecurityEnabledInEs()) {
-            let requiredRoles = route.requireRoles || [];
-            if (route.requireAdmin) {
-              requiredRoles = requiredRoles.concat([ADMIN_ROLE]);
-            }
-            if (requiredRoles.length > 0) {
-              if (!req.auth.isAuthenticated) {
-                throw Boom.unauthorized('not login.');
-              } else {
-                // @ts-ignore
-                const userRoles = new Set(req.auth.credentials.roles || []);
-                const authorized =
-                  userRoles.has('superuser') ||
-                  requiredRoles.every((value: string) => userRoles.has(value));
-                if (!authorized) {
-                  throw Boom.forbidden('not authorized user.');
-                }
-              }
-            }
-          }
-          return await originHandler(req, h, err);
-        };
-      }
-      self.server.route({
-        handler: route.handler,
-        method: route.method,
-        options: route.options,
-        path: route.path,
-      });
-    }
+  route(route: CodeRoute) {
+    const routeOptions: RouteOptions = (route.options || {}) as RouteOptions;
+    routeOptions.tags = [
+      ...(routeOptions.tags || []),
+      `access:code_${route.requireAdmin ? 'admin' : 'user'}`,
+    ];
 
-    this.server.securedRoute = securedRoute;
-  }
-
-  private isSecurityEnabledInEs() {
-    const xpackInfo = this.server.plugins.xpack_main.info;
-    if (!xpackInfo.isAvailable()) {
-      throw Boom.serverUnavailable('x-pack info is not available yet.');
-    }
-    if (
-      !xpackInfo.feature('security').isEnabled() ||
-      !xpackInfo.feature('security').isAvailable()
-    ) {
-      return false;
-    }
-    return true;
+    this.server.route({
+      handler: route.handler,
+      method: route.method,
+      options: routeOptions,
+      path: route.path,
+    });
   }
 }
 
-export function enableSecurity(server: Server) {
-  const secureRoute = new SecureRoute(server);
-  secureRoute.install();
+export interface CodeRoute extends ServerRoute {
+  requireAdmin?: boolean;
 }

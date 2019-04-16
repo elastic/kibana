@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResponseToolkit, Server } from 'hapi';
+import { ResponseToolkit } from 'hapi';
+import { CodeServerRouter } from '../security';
 
-export function setupRoute(server: Server) {
+export function setupRoute(server: CodeServerRouter) {
   server.route({
     method: 'get',
     path: '/api/code/setup',

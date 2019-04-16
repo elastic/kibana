@@ -6,7 +6,6 @@
 
 import Boom from 'boom';
 
-import { Server } from 'hapi';
 import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig, RepositoryUri } from '../../model';
@@ -17,9 +16,10 @@ import { RepositoryConfigController } from '../repository_config_controller';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
+import { CodeServerRouter } from '../security';
 
 export function repositoryRoute(
-  server: Server,
+  server: CodeServerRouter,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
   indexWorker: IndexWorker,
@@ -28,7 +28,7 @@ export function repositoryRoute(
   options: ServerOptions
 ) {
   // Clone a git repository
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo',
     requireAdmin: true,
     method: 'POST',
@@ -91,7 +91,7 @@ export function repositoryRoute(
   });
 
   // Remove a git repository
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}',
     requireAdmin: true,
     method: 'DELETE',
@@ -131,7 +131,7 @@ export function repositoryRoute(
   });
 
   // Get a git repository
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}',
     method: 'GET',
     async handler(req) {
@@ -149,7 +149,7 @@ export function repositoryRoute(
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/status/{uri*3}',
     method: 'GET',
     async handler(req) {
@@ -192,7 +192,7 @@ export function repositoryRoute(
   });
 
   // Get all git repositories
-  server.securedRoute({
+  server.route({
     path: '/api/code/repos',
     method: 'GET',
     async handler(req) {
@@ -212,7 +212,7 @@ export function repositoryRoute(
   // Issue a repository index task.
   // TODO(mengwei): This is just temporary API stub to trigger the index job. Eventually in the near
   // future, this route will be removed. The scheduling strategy is still in discussion.
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/index/{uri*3}',
     method: 'POST',
     requireAdmin: true,
@@ -239,7 +239,7 @@ export function repositoryRoute(
   });
 
   // Update a repo config
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/config/{uri*3}',
     method: 'PUT',
     requireAdmin: true,
@@ -271,7 +271,7 @@ export function repositoryRoute(
   });
 
   // Get repository config
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/config/{uri*3}',
     method: 'GET',
     async handler(req) {

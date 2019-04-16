@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { parse as parseQuery } from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import url from 'url';
 
+import { EuiTab, EuiTabs } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { parse as parseQuery } from 'querystring';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+
 import { Repository } from '../../../model';
 import { RootState } from '../../reducers';
 import { EmptyProject } from './empty_project';
@@ -39,7 +40,6 @@ enum AdminTabs {
 interface Props extends RouteComponentProps {
   repositories: Repository[];
   repositoryLoading: boolean;
-  isAdmin: boolean;
 }
 
 interface State {
@@ -120,7 +120,7 @@ class AdminPage extends React.PureComponent<Props, State> {
         const repositoriesCount = this.props.repositories.length;
         const showEmpty = repositoriesCount === 0 && !this.props.repositoryLoading;
         if (showEmpty) {
-          return <EmptyProject isAdmin={this.props.isAdmin} />;
+          return <EmptyProject />;
         }
         return <ProjectTab />;
       }
@@ -142,7 +142,6 @@ class AdminPage extends React.PureComponent<Props, State> {
 const mapStateToProps = (state: RootState) => ({
   repositories: state.repository.repositories,
   repositoryLoading: state.repository.loading,
-  isAdmin: state.userProfile.isCodeAdmin,
 });
 
 export const Admin = withRouter(connect(mapStateToProps)(AdminPage));

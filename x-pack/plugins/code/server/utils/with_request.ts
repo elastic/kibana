@@ -8,11 +8,20 @@ import { Request } from 'hapi';
 import { AnyObject } from '../lib/esqueue';
 
 export class WithRequest {
-  public readonly callWithRequest: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
+  public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
   constructor(readonly req: Request) {
-    this.callWithRequest = req.server.plugins.elasticsearch
-      .getCluster('data')
-      .callWithRequest.bind(null, req);
+    const cluster = req.server.plugins.elasticsearch.getCluster('data');
+
+    // @ts-ignore
+    const securityPlugin = req.server.plugins.security;
+    if (securityPlugin) {
+      const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
+      if (useRbac) {
+        this.callCluster = cluster.callWithInternalUser;
+        return;
+      }
+    }
+    this.callCluster = cluster.callWithRequest.bind(null, req);
   }
 }

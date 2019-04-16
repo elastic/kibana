@@ -24,11 +24,13 @@ export function redirectRoute(server: hapi.Server, redirectUrl: string, log: Log
       },
     },
   };
+
   server.route({
     path: '/api/code/{p*}',
     method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     handler: proxyHandler,
   });
+
   server.route({
     path: '/api/code/lsp/{p*}',
     method: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

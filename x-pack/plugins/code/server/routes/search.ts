@@ -11,9 +11,10 @@ import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } f
 import { Logger } from '../log';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
+import { CodeServerRouter } from '../security';
 
-export function repositorySearchRoute(server: hapi.Server, log: Logger) {
-  server.securedRoute({
+export function repositorySearchRoute(server: CodeServerRouter, log: Logger) {
+  server.route({
     path: '/api/code/search/repo',
     method: 'GET',
     async handler(req) {
@@ -43,7 +44,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/suggestions/repo',
     method: 'GET',
     async handler(req) {
@@ -74,8 +75,8 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
   });
 }
 
-export function documentSearchRoute(server: hapi.Server, log: Logger) {
-  server.securedRoute({
+export function documentSearchRoute(server: CodeServerRouter, log: Logger) {
+  server.route({
     path: '/api/code/search/doc',
     method: 'GET',
     async handler(req) {
@@ -107,7 +108,7 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
     },
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/suggestions/doc',
     method: 'GET',
     async handler(req) {
@@ -138,7 +139,7 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
   });
 }
 
-export function symbolSearchRoute(server: hapi.Server, log: Logger) {
+export function symbolSearchRoute(server: CodeServerRouter, log: Logger) {
   const symbolSearchHandler = async (req: hapi.Request) => {
     let page = 1;
     const { p, q, repoScope } = req.query as hapi.RequestQuery;
@@ -166,12 +167,12 @@ export function symbolSearchRoute(server: hapi.Server, log: Logger) {
   };
 
   // Currently these 2 are the same.
-  server.securedRoute({
+  server.route({
     path: '/api/code/suggestions/symbol',
     method: 'GET',
     handler: symbolSearchHandler,
   });
-  server.securedRoute({
+  server.route({
     path: '/api/code/search/symbol',
     method: 'GET',
     handler: symbolSearchHandler,

@@ -26,16 +26,17 @@ import {
 import { detectLanguage } from '../utils/detect_language';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { promiseTimeout } from '../utils/timeout';
+import { CodeServerRouter } from '../security';
 
 const LANG_SERVER_ERROR = 'language server error';
 
 export function lspRoute(
-  server: hapi.Server,
+  server: CodeServerRouter,
   lspService: LspService,
   serverOptions: ServerOptions
 ) {
-  const log = new Logger(server);
-  server.securedRoute({
+  const log = new Logger(server.server);
+  server.route({
     path: '/api/code/lsp/textDocument/{method}',
     async handler(req, h: hapi.ResponseToolkit) {
       if (typeof req.payload === 'object' && req.payload != null) {
@@ -77,7 +78,7 @@ export function lspRoute(
     method: 'POST',
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/lsp/findReferences',
     method: 'POST',
     async handler(req, h: hapi.ResponseToolkit) {
@@ -169,8 +170,8 @@ export function lspRoute(
   });
 }
 
-export function symbolByQnameRoute(server: hapi.Server, log: Logger) {
-  server.securedRoute({
+export function symbolByQnameRoute(server: CodeServerRouter, log: Logger) {
+  server.route({
     path: '/api/code/lsp/symbol/{qname}',
     method: 'GET',
     async handler(req) {
