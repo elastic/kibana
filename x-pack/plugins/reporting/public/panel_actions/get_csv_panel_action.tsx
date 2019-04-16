@@ -91,7 +91,6 @@ class GetCsvReportPanelAction extends ContextMenuAction {
 
     await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
       .then(blob => {
-        debugger;
         const a = window.document.createElement('a');
         const downloadObject = window.URL.createObjectURL(blob);
         a.href = downloadObject;
