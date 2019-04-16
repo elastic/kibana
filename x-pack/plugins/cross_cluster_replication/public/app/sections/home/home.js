@@ -69,7 +69,7 @@ export class CrossClusterReplicationHome extends PureComponent {
     return (
       <EuiPageBody>
         <EuiPageContent>
-          <EuiTitle size="l" data-test-subj="ccrAppTitle">
+          <EuiTitle size="l" data-test-subj="appTitle">
             <h1>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"

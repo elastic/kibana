@@ -22,7 +22,7 @@ export const setup = (props) => {
 
   // User actions
   const clickSaveForm = () => {
-    testBed.find('ccrAutoFollowPatternFormSubmitButton').simulate('click');
+    testBed.find('submitButton').simulate('click');
   };
 
   return {

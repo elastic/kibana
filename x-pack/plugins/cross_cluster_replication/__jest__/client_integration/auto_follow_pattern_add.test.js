@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { setupEnvironment, pageHelpers, nextTick, findTestSubject, getRandomString } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
 
 jest.mock('ui/chrome', () => ({
@@ -80,21 +80,21 @@ describe('Create Auto-follow pattern', () => {
     });
 
     test('should display the Auto-follow pattern form', async () => {
-      expect(exists('ccrAutoFollowPatternForm')).toBe(true);
+      expect(exists('autoFollowPatternForm')).toBe(true);
     });
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {
-      expect(exists('autoFollowPatternFormError')).toBe(false);
-      expect(find('ccrAutoFollowPatternFormSubmitButton').props().disabled).toBe(false);
+      expect(exists('formError')).toBe(false);
+      expect(find('submitButton').props().disabled).toBe(false);
 
       actions.clickSaveForm();
 
-      expect(exists('autoFollowPatternFormError')).toBe(true);
+      expect(exists('formError')).toBe(true);
       expect(form.getErrorsMessages()).toEqual([
         'Name is required.',
         'At least one leader index pattern is required.',
       ]);
-      expect(find('ccrAutoFollowPatternFormSubmitButton').props().disabled).toBe(true);
+      expect(find('submitButton').props().disabled).toBe(true);
     });
   });
 
@@ -114,19 +114,19 @@ describe('Create Auto-follow pattern', () => {
       });
 
       test('should not allow spaces', () => {
-        form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with space');
+        form.setInputValue('nameInput', 'with space');
         actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should not allow a "_" (underscore) as first character', () => {
-        form.setInputValue('ccrAutoFollowPatternFormNameInput', '_withUnderscore');
+        form.setInputValue('nameInput', '_withUnderscore');
         actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain(`Name can't begin with an underscore.`);
       });
 
       test('should not allow a "," (comma)', () => {
-        form.setInputValue('ccrAutoFollowPatternFormNameInput', 'with,coma');
+        form.setInputValue('nameInput', 'with,coma');
         actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain(`Commas are not allowed in the name.`);
       });
@@ -135,14 +135,13 @@ describe('Create Auto-follow pattern', () => {
     describe('remote clusters', () => {
       describe('when no remote clusters were found', () => {
         test('should indicate it and have a button to add one', async () => {
-          ({ find, component } = setup());
+          ({ exists, component } = setup());
 
           await nextTick();
           component.update();
-          const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
 
-          expect(errorCallOut.length).toBe(1);
-          expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
+          expect(exists('noClusterFoundError')).toBe(true);
+          expect(exists('remoteClusterFormField.addButton')).toBe(true);
         });
       });
 
@@ -150,13 +149,12 @@ describe('Create Auto-follow pattern', () => {
         test('should indicate no clusters found and have a button to add one', async () => {
           httpRequestsMockHelpers.setLoadRemoteClustersResponse(undefined, { body: 'Houston we got a problem' });
 
-          ({ find, component } = setup());
+          ({ component } = setup());
           await nextTick();
           component.update();
-          const errorCallOut = find('remoteClusterFieldNoClusterFoundError');
 
-          expect(errorCallOut.length).toBe(1);
-          expect(findTestSubject(errorCallOut, 'ccrRemoteClusterAddButton').length).toBe(1);
+          expect(exists('noClusterFoundError')).toBe(true);
+          expect(exists('remoteClusterFormField.addButton')).toBe(true);
         });
       });
 
@@ -177,19 +175,19 @@ describe('Create Auto-follow pattern', () => {
         });
 
         test('should show a callout warning and have a button to edit the cluster', () => {
-          const errorCallOut = find('remoteClusterFieldCallOutError');
+          const errorCallOut = find('notConnectedError');
 
           expect(errorCallOut.length).toBe(1);
           expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(`Remote cluster '${clusterName}' is not connected`);
-          expect(findTestSubject(errorCallOut, 'ccrRemoteClusterEditButton').length).toBe(1);
+          expect(exists('notConnectedError.editButton')).toBe(true);
         });
 
         test('should have a button to add another remote cluster', () => {
-          expect(exists('ccrRemoteClusterInlineAddButton')).toBe(true);
+          expect(exists('remoteClusterFormField.addButton')).toBe(true);
         });
 
         test('should indicate in the select option that the cluster is not connected', () => {
-          const selectOptions = find('ccrRemoteClusterSelect').find('option');
+          const selectOptions = find('remoteClusterSelect').find('option');
           expect(selectOptions.at(0).text()).toBe(`${clusterName} (not connected)`);
         });
       });
@@ -206,14 +204,14 @@ describe('Create Auto-follow pattern', () => {
       test('should not allow spaces', () => {
         expect(form.getErrorsMessages()).toEqual([]);
 
-        form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', 'with space');
+        form.setComboBoxValue('indexPatternInput', 'with space');
 
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the index pattern.');
       });
 
       test('should not allow invalid characters', () => {
         const expectInvalidChar = (char) => {
-          form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', `with${char}space`);
+          form.setComboBoxValue('indexPatternInput', `with${char}space`);
           expect(form.getErrorsMessages()).toContain(`Remove the character ${char} from the index pattern.`);
         };
 
@@ -238,24 +236,24 @@ describe('Create Auto-follow pattern', () => {
     });
 
     test('should display a preview of the possible indices generated by the auto-follow pattern', () => {
-      expect(exists('ccrAutoFollowPatternIndicesPreview')).toBe(false);
+      expect(exists('autoFollowPatternIndicesPreview')).toBe(false);
 
-      form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', 'kibana-');
+      form.setComboBoxValue('indexPatternInput', 'kibana-');
 
-      expect(exists('ccrAutoFollowPatternIndicesPreview')).toBe(true);
+      expect(exists('autoFollowPatternIndicesPreview')).toBe(true);
     });
 
     test('should display 3 indices example when providing a wildcard(*)', () => {
-      form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', 'kibana-*');
-      const indicesPreview = find('ccrAutoFollowPatternIndexPreview');
+      form.setComboBoxValue('indexPatternInput', 'kibana-*');
+      const indicesPreview = find('indexPreview');
 
       expect(indicesPreview.length).toBe(3);
       expect(indicesPreview.at(0).text()).toContain('kibana-');
     });
 
     test('should only display 1 index example when *not* providing a wildcard', () => {
-      form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', 'kibana');
-      const indicesPreview = find('ccrAutoFollowPatternIndexPreview');
+      form.setComboBoxValue('indexPatternInput', 'kibana');
+      const indicesPreview = find('indexPreview');
 
       expect(indicesPreview.length).toBe(1);
       expect(indicesPreview.at(0).text()).toEqual('kibana');
@@ -265,11 +263,11 @@ describe('Create Auto-follow pattern', () => {
       const prefix = getRandomString();
       const suffix = getRandomString();
 
-      form.setComboBoxValue('ccrAutoFollowPatternFormIndexPatternInput', 'kibana');
-      form.setInputValue('ccrAutoFollowPatternFormPrefixInput', prefix);
-      form.setInputValue('ccrAutoFollowPatternFormSuffixInput', suffix);
+      form.setComboBoxValue('indexPatternInput', 'kibana');
+      form.setInputValue('prefixInput', prefix);
+      form.setInputValue('suffixInput', suffix);
 
-      const indicesPreview = find('ccrAutoFollowPatternIndexPreview');
+      const indicesPreview = find('indexPreview');
       const textPreview = indicesPreview.at(0).text();
 
       expect(textPreview).toContain(prefix);

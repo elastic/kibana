@@ -103,8 +103,7 @@ export class ContextMenu extends PureComponent {
             values={{ followerIndicesLength }}
           />
         </EuiPopoverTitle>
-        <EuiContextMenuPanel data-test-subj="followerIndexActionContextMenu">
-
+        <EuiContextMenuPanel data-test-subj="contextMenu">
           {
             activeFollowerIndices.length ? (
               <FollowerIndexPauseProvider onConfirm={this.closePopover}>
@@ -112,7 +111,7 @@ export class ContextMenu extends PureComponent {
                   <EuiContextMenuItem
                     icon="pause"
                     onClick={() => pauseFollowerIndex(activeFollowerIndices)}
-                    data-test-subj="ccrFollowerIndexContextMenuPauseActionButton"
+                    data-test-subj="pauseButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.pauseLabel"
@@ -131,7 +130,7 @@ export class ContextMenu extends PureComponent {
                   <EuiContextMenuItem
                     icon="play"
                     onClick={() => resumeFollowerIndex(pausedFollowerIndexNames)}
-                    data-test-subj="ccrFollowerIndexContextMenuResumeActionButton"
+                    data-test-subj="resumeButton"
                   >
                     <FormattedMessage
                       id="xpack.crossClusterReplication.followerIndex.contextMenu.resumeLabel"
@@ -151,7 +150,7 @@ export class ContextMenu extends PureComponent {
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"
-                  data-test-subj="ccrFollowerIndexContextMenuEditActionButton"
+                  data-test-subj="editButton"
                   defaultMessage="Edit follower index"
                 />
               </EuiContextMenuItem>
@@ -163,7 +162,7 @@ export class ContextMenu extends PureComponent {
               <EuiContextMenuItem
                 icon="indexFlush"
                 onClick={() => unfollowLeaderIndex(followerIndexNames)}
-                data-test-subj="ccrFollowerIndexContextMenuUnfollowActionButton"
+                data-test-subj="unfollowButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.unfollowLabel"
