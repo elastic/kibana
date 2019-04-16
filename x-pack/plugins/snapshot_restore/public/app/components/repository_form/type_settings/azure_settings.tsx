@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: AzureRepository;
@@ -23,11 +24,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const AzureSettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -37,6 +40,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
   const {
     settings: { client, container, basePath, compress, chunkSize, readonly, locationMode },
   } = repository;
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const locationModeOptions = ['primary_only', 'secondary_only'].map(option => ({
     value: option,
@@ -75,6 +79,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['azureRepositoryClientDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.client)}
+          error={settingErrors.client}
         >
           <EuiFieldText
             defaultValue={client || ''}
@@ -118,6 +124,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['azureRepositoryContainerDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.container)}
+          error={settingErrors.container}
         >
           <EuiFieldText
             defaultValue={container || ''}
@@ -161,6 +169,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['azureRepositoryBasePathDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.basePath)}
+          error={settingErrors.basePath}
         >
           <EuiFieldText
             defaultValue={basePath || ''}
@@ -201,6 +211,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['azureRepositoryCompressDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.compress)}
+          error={settingErrors.compress}
         >
           <EuiSwitch
             label={
@@ -250,6 +262,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['azureRepositoryChunkSizeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+          error={settingErrors.chunkSize}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -288,6 +302,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['azureRepositoryReadonlyDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
+          error={settingErrors.readonly}
         >
           <EuiSwitch
             disabled={locationMode === locationModeOptions[1].value}
@@ -340,6 +356,8 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['azureRepositoryLocationModeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.locationMode)}
+          error={settingErrors.locationMode}
         >
           <EuiSelect
             options={locationModeOptions}

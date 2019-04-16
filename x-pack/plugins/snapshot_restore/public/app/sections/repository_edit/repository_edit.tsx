@@ -147,9 +147,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         repository={repository}
         isEditing={true}
         isSaving={isSaving}
-        errors={{
-          save: renderSaveError(),
-        }}
+        saveError={renderSaveError()}
         onSave={onSave}
         onCancel={onCancel}
       />

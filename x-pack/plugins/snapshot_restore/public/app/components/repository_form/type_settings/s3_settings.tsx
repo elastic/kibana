@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { Repository, S3Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: S3Repository;
@@ -22,11 +23,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const S3Settings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -59,6 +62,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
     value: option,
     text: option,
   }));
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const storageClassOptions = ['standard', 'reduced_redundancy', 'standard_ia'].map(option => ({
     value: option,
@@ -97,6 +101,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryBucketDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.bucket)}
+          error={settingErrors.bucket}
         >
           <EuiFieldText
             defaultValue={bucket || ''}
@@ -140,6 +146,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryClientDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.client)}
+          error={settingErrors.client}
         >
           <EuiFieldText
             defaultValue={client || ''}
@@ -183,6 +191,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryBasePathDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.basePath)}
+          error={settingErrors.basePath}
         >
           <EuiFieldText
             defaultValue={basePath || ''}
@@ -223,6 +233,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['s3RepositoryCompressDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.compress)}
+          error={settingErrors.compress}
         >
           <EuiSwitch
             label={
@@ -272,6 +284,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryChunkSizeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+          error={settingErrors.chunkSize}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -310,6 +324,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['s3RepositoryServerSideEncryptionDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.serverSideEncryption)}
+          error={settingErrors.serverSideEncryption}
         >
           <EuiSwitch
             label={
@@ -361,6 +377,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryBufferSizeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
+          error={settingErrors.bufferSize}
         >
           <EuiFieldText
             defaultValue={bufferSize || ''}
@@ -404,6 +422,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryCannedAclDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.cannedAcl)}
+          error={settingErrors.cannedAcl}
         >
           <EuiSelect
             options={cannedAclOptions}
@@ -450,6 +470,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['s3RepositoryStorageClassDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.storageClass)}
+          error={settingErrors.storageClass}
         >
           <EuiSelect
             options={storageClassOptions}

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { camelCase, snakeCase } from 'lodash';
+import { flatten } from '../../common/lib';
 
 interface RepositorySettings {
   [key: string]: any;
@@ -16,22 +17,6 @@ const booleanizeValue = (value: any) => {
     return false;
   }
   return value;
-};
-
-const flatten = (source: any, path: any[] = []): any => {
-  if (!(source instanceof Object)) {
-    return {
-      [path.join('.')]: source,
-    };
-  }
-
-  return Object.keys(source).reduce((result, key) => {
-    const flattened: any = flatten(source[key], [...path, key]);
-    return {
-      ...result,
-      ...flattened,
-    };
-  }, {});
 };
 
 export const deserializeRepositorySettings = (settings: RepositorySettings): RepositorySettings => {

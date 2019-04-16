@@ -8,6 +8,7 @@ import React, { Fragment, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGroup,
@@ -21,11 +22,13 @@ import {
 } from '@elastic/eui';
 import { PLUGIN_REPOSITORY_TYPES, REPOSITORY_TYPES } from '../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../common/types';
+import { flatten } from '../../../../common/lib';
 
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
 import { loadRepositoryTypes } from '../../services/http';
 import { textService } from '../../services/text';
+import { RepositoryValidation, validateRepository } from '../../services/validation';
 
 import { SectionError } from '../section_error';
 import { TypeSettings } from './type_settings';
@@ -34,9 +37,7 @@ interface Props {
   repository: Repository;
   isEditing?: boolean;
   isSaving: boolean;
-  errors?: {
-    save?: React.ReactNode;
-  };
+  saveError?: React.ReactNode;
   onSave: (repository: Repository) => void;
   onCancel: () => void;
 }
@@ -45,7 +46,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
   repository: originalRepository,
   isEditing,
   isSaving,
-  errors,
+  saveError,
   onSave,
   onCancel,
 }) => {
@@ -68,6 +69,12 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     settings: {
       ...originalRepository.settings,
     },
+  });
+
+  // Repository validation state
+  const [validation, setValidation] = useState<RepositoryValidation>({
+    isValid: true,
+    errors: {},
   });
 
   // Repository types state and load types
@@ -95,6 +102,23 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     }
     setRepository(newRepository);
   };
+
+  const saveRepository = () => {
+    const newValidation = validateRepository(repository);
+    const { isValid } = newValidation;
+    setValidation(newValidation);
+    if (isValid) {
+      onSave(repository);
+    }
+  };
+
+  const hasValidationErrors: boolean = !validation.isValid;
+  const validationErrors = Object.entries(flatten(validation.errors)).reduce(
+    (acc: string[], [key, value]) => {
+      return [...acc, value];
+    },
+    []
+  );
 
   const renderNameField = () => (
     <EuiDescribedFormGroup
@@ -125,6 +149,8 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
           />
         }
         describedByIds={['repositoryNameDescription']}
+        isInvalid={Boolean(hasValidationErrors && validation.errors.name)}
+        error={validation.errors.name}
         fullWidth
       >
         <EuiFieldText
@@ -209,6 +235,8 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
           describedByIds={['repositoryTypeDescription']}
           fullWidth
           helpText={renderTypeHelp(typeValue)}
+          isInvalid={Boolean(hasValidationErrors && validation.errors.type)}
+          error={validation.errors.type}
         >
           {repositoryTypesError ? (
             renderLoadingRepositoryTypesError()
@@ -276,6 +304,12 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
           describedByIds={['repositoryDelegateTypeDescription']}
           fullWidth
           helpText={renderTypeHelp(typeValue)}
+          isInvalid={Boolean(
+            hasValidationErrors &&
+              validation.errors.settings &&
+              validation.errors.settings.delegateType
+          )}
+          error={validation.errors.settings && validation.errors.settings.delegateType}
         >
           {repositoryTypesError ? (
             renderLoadingRepositoryTypesError()
@@ -343,7 +377,13 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
       </EuiDescribedFormGroup>
 
       {/* Repository settings fields */}
-      <TypeSettings repository={repository} updateRepository={updateRepository} />
+      <TypeSettings
+        repository={repository}
+        updateRepository={updateRepository}
+        settingErrors={
+          hasValidationErrors && validation.errors.settings ? validation.errors.settings : {}
+        }
+      />
     </Fragment>
   );
 
@@ -371,7 +411,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
           <EuiButton
             color="secondary"
             iconType="check"
-            onClick={() => onSave(repository)}
+            onClick={saveRepository}
             fill
             data-test-subj="srRepositoryFormSubmitButton"
             isLoading={isSaving}
@@ -396,24 +436,47 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     );
   };
 
-  const renderSaveError = () => {
-    if (errors && errors.save) {
-      return (
-        <Fragment>
-          {errors.save}
-          <EuiSpacer size="m" />
-        </Fragment>
-      );
+  const renderFormValidationError = () => {
+    if (!hasValidationErrors) {
+      return null;
     }
-    return null;
+    return (
+      <Fragment>
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.validationErrorTitle"
+              defaultMessage="Fix errors before continuing."
+            />
+          }
+          color="danger"
+          iconType="cross"
+          data-test-subj="repositoryFormError"
+        />
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+  };
+
+  const renderSaveError = () => {
+    if (!saveError) {
+      return null;
+    }
+    return (
+      <Fragment>
+        {saveError}
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
   };
 
   return (
-    <EuiForm>
+    <EuiForm isInvalid={hasValidationErrors} error={validationErrors}>
       {renderNameField()}
       {renderTypeField()}
       {renderDelegateTypeField()}
       {renderSettings()}
+      {renderFormValidationError()}
       {renderSaveError()}
       {renderActions()}
     </EuiForm>

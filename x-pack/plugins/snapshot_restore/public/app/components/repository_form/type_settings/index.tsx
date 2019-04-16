@@ -9,6 +9,7 @@ import { REPOSITORY_TYPES } from '../../../../../common/constants';
 import { Repository, RepositoryType } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { cleanSettings } from '../../../services/utils';
+import { RepositorySettingsValidation } from '../../../services/validation';
 import { SectionError } from '../../index';
 
 import { AzureSettings } from './azure_settings';
@@ -21,9 +22,14 @@ import { S3Settings } from './s3_settings';
 interface Props {
   repository: Repository;
   updateRepository: (updatedFields: Partial<Repository>) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
-export const TypeSettings: React.FunctionComponent<Props> = ({ repository, updateRepository }) => {
+export const TypeSettings: React.FunctionComponent<Props> = ({
+  repository,
+  updateRepository,
+  settingErrors,
+}) => {
   const {
     core: { i18n },
   } = useAppDependencies();
@@ -63,6 +69,7 @@ export const TypeSettings: React.FunctionComponent<Props> = ({ repository, updat
         <RepositorySettings
           repository={repository}
           updateRepositorySettings={updateRepositorySettings}
+          settingErrors={settingErrors}
         />
       );
     }

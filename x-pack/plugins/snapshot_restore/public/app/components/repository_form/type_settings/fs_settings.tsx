@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import { FSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: FSRepository;
@@ -23,11 +24,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const FSSettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -44,6 +47,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
       readonly,
     },
   } = repository;
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   return (
     <Fragment>
@@ -87,6 +91,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['fsRepositoryLocationDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.location)}
+          error={settingErrors.location}
         >
           <EuiFieldText
             defaultValue={location || ''}
@@ -127,6 +133,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['fsRepositoryCompressDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.compress)}
+          error={settingErrors.compress}
         >
           <EuiSwitch
             label={
@@ -176,6 +184,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['fsRepositoryChunkSizeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+          error={settingErrors.chunkSize}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -219,6 +229,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['fsRepositoryMaxRestoreBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+          error={settingErrors.maxRestoreBytesPerSec}
         >
           <EuiFieldText
             defaultValue={maxRestoreBytesPerSec || ''}
@@ -262,6 +274,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['fsRepositoryMaxSnapshotBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+          error={settingErrors.maxSnapshotBytesPerSec}
         >
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
@@ -300,6 +314,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['fsRepositoryReadonlyDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
+          error={settingErrors.readonly}
         >
           <EuiSwitch
             label={

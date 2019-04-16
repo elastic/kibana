@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { ReadonlyRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: ReadonlyRepository;
@@ -22,11 +23,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const ReadonlySettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -36,6 +39,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
   const {
     settings: { url },
   } = repository;
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   return (
     <Fragment>
@@ -91,6 +95,8 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['readonlyRepositoryURLDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.url)}
+          error={settingErrors.url}
         >
           <EuiFieldText
             defaultValue={url || ''}

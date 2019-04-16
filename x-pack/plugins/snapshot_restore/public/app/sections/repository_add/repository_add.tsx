@@ -83,9 +83,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
         <RepositoryForm
           repository={emptyRepository}
           isSaving={isSaving}
-          errors={{
-            save: renderSaveError(),
-          }}
+          saveError={renderSaveError()}
           onSave={onSave}
           onCancel={onCancel}
         />
