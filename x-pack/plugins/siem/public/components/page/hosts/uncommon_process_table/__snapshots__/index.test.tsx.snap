@@ -22,8 +22,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 0,
-              "name": "root",
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
             },
           },
         },
@@ -35,8 +39,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "_id": "cPsuhGcB0WOhS6qyTKC0",
             "host": Array [
               Object {
-                "id": "host-id-1",
-                "name": "hello-world",
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
               },
             ],
             "instances": 93,
@@ -49,39 +57,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 0,
-              "name": "root",
-            },
-          },
-        },
-        Object {
-          "cursor": Object {
-            "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
-          },
-          "node": Object {
-            "_id": "KwQDiWcB0WOhS6qyXmrW",
-            "host": Array [
-              Object {
-                "id": "host-id-1",
-                "name": "hello-world",
-              },
-              Object {
-                "id": "host-id-2",
-                "name": "hello-world-2",
-              },
-            ],
-            "instances": 97,
-            "process": Object {
+              "id": Array [
+                "0",
+              ],
               "name": Array [
-                "siem-kibana",
+                "root",
               ],
-              "title": Array [
-                "Hello World",
-              ],
-            },
-            "user": Object {
-              "id": 1,
-              "name": "Evan",
             },
           },
         },
@@ -93,8 +74,19 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "_id": "KwQDiWcB0WOhS6qyXmrW",
             "host": Array [
               Object {
-                "ip": Array [
-                  "127.0.0.1",
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
+              },
+              Object {
+                "id": Array [
+                  "host-id-2",
+                ],
+                "name": Array [
+                  "hello-world-2",
                 ],
               },
             ],
@@ -108,8 +100,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },
@@ -120,24 +116,6 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
           "node": Object {
             "_id": "KwQDiWcB0WOhS6qyXmrW",
             "host": Array [
-              Object {
-                "ip": Array [
-                  "127.0.0.1",
-                ],
-              },
-              Object {
-                "id": "host-id-1",
-                "name": "hello-world",
-              },
-              Object {
-                "ip": Array [
-                  "127.0.0.1",
-                ],
-              },
-              Object {
-                "id": "host-id-2",
-                "name": "hello-world-2",
-              },
               Object {
                 "ip": Array [
                   "127.0.0.1",
@@ -154,8 +132,70 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
               ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
+            },
+          },
+        },
+        Object {
+          "cursor": Object {
+            "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          },
+          "node": Object {
+            "_id": "KwQDiWcB0WOhS6qyXmrW",
+            "host": Array [
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+              Object {
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
+              },
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+              Object {
+                "id": Array [
+                  "host-id-2",
+                ],
+                "name": Array [
+                  "hello-world-2",
+                ],
+              },
+              Object {
+                "ip": Array [
+                  "127.0.0.1",
+                ],
+              },
+            ],
+            "instances": 97,
+            "process": Object {
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
+            },
+            "user": Object {
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },

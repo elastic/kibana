@@ -15,25 +15,25 @@ export const mockData: { Authentications: AuthenticationsData } = {
           _id: 'cPsuhGcB0WOhS6qyTKC0',
           failures: 10,
           successes: 0,
-          user: { name: 'Evan Hassanabad' },
+          user: { name: ['Evan Hassanabad'] },
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '127.0.0.1',
+              ip: ['127.0.0.1'],
             },
             host: {
-              id: 'host-id-1',
-              name: 'host-1',
+              id: ['host-id-1'],
+              name: ['host-1'],
             },
           },
           lastFailure: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '8.8.8.8',
+              ip: ['8.8.8.8'],
             },
             host: {
-              id: 'host-id-1',
-              name: 'host-2',
+              id: ['host-id-1'],
+              name: ['host-2'],
             },
           },
         },
@@ -46,25 +46,25 @@ export const mockData: { Authentications: AuthenticationsData } = {
           _id: 'KwQDiWcB0WOhS6qyXmrW',
           failures: 10,
           successes: 0,
-          user: { name: 'Braden Hassanabad' },
+          user: { name: ['Braden Hassanabad'] },
           lastSuccess: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '127.0.0.1',
+              ip: ['127.0.0.1'],
             },
             host: {
-              id: 'host-id-1',
-              name: 'host-1',
+              id: ['host-id-1'],
+              name: ['host-1'],
             },
           },
           lastFailure: {
             timestamp: '2019-01-23T22:35:32.222Z',
             source: {
-              ip: '8.8.8.8',
+              ip: ['8.8.8.8'],
             },
             host: {
-              id: 'host-id-1',
-              name: 'host-2',
+              id: ['host-id-1'],
+              name: ['host-2'],
             },
           },
         },

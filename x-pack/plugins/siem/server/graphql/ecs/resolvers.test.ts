@@ -20,6 +20,14 @@ describe('Test ToStringArray Scalar Resolver', () => {
       expect(toStringArrayScalar.serialize('hello')).toEqual(['hello']);
     });
 
+    test('Test Basic String in an array', () => {
+      expect(toStringArrayScalar.serialize(['hello'])).toEqual(['hello']);
+    });
+
+    test('Test Two Basic Strings in an array', () => {
+      expect(toStringArrayScalar.serialize(['hello', 'world'])).toEqual(['hello', 'world']);
+    });
+
     test('Test Basic Number', () => {
       expect(toStringArrayScalar.serialize(33)).toEqual(['33']);
     });

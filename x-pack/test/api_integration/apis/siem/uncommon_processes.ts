@@ -118,14 +118,14 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
           __typename: 'ProcessEcsFields',
         },
         user: {
-          id: 0,
-          name: 'root',
+          id: ['0'],
+          name: ['root'],
           __typename: 'UserEcsFields',
         },
         host: [
           {
-            id: '8cc95778cce5407c809480e8e32ad76b',
-            name: 'suricata-zeek-sensor-toronto',
+            id: ['8cc95778cce5407c809480e8e32ad76b'],
+            name: ['suricata-zeek-sensor-toronto'],
             __typename: 'HostEcsFields',
           },
         ],

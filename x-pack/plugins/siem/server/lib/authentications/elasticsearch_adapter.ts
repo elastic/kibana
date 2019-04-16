@@ -84,7 +84,7 @@ export const formatAuthenticationData = (
         ...flattenedFields.node,
         ...{
           _id: hit._id,
-          user: { name: hit.user },
+          user: { name: [hit.user] },
           failures: hit.failures,
           successes: hit.successes,
         },
@@ -97,7 +97,7 @@ export const formatAuthenticationData = (
         successes: 0,
         _id: '',
         user: {
-          name: '',
+          name: [''],
         },
       },
       cursor: {

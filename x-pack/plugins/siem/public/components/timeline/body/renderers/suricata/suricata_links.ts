@@ -7,7 +7,7 @@
 import { uniq } from 'lodash/fp';
 import { db } from 'suricata-sid-db';
 
-export const getLinksFromSignature = (id: string): string[] => {
+export const getLinksFromSignature = (id: number): string[] => {
   const refs = db[id];
   if (refs != null) {
     return uniq(refs);

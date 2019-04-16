@@ -44,7 +44,7 @@ export const Tokens = pure<{ tokens: string[] }>(({ tokens }) => (
   </>
 ));
 
-export const DraggableSignatureId = pure<{ id: string; signatureId: string }>(
+export const DraggableSignatureId = pure<{ id: string; signatureId: number }>(
   ({ id, signatureId }) => (
     <SignatureFlexItem grow={false}>
       <DraggableWrapper
@@ -52,7 +52,7 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: string }>(
           and: [],
           enabled: true,
           id: escapeDataProviderId(`suricata-${id}-sig-${signatureId}`),
-          name: signatureId,
+          name: String(signatureId),
           excluded: false,
           kqlQuery: '',
           queryMatch: {
@@ -81,7 +81,7 @@ export const DraggableSignatureId = pure<{ id: string; signatureId: string }>(
   )
 );
 
-export const SuricataSignature = pure<{ id: string; signature: string; signatureId: string }>(
+export const SuricataSignature = pure<{ id: string; signature: string; signatureId: number }>(
   ({ id, signature, signatureId }) => {
     const tokens = getBeginningTokens(signature);
     return (
