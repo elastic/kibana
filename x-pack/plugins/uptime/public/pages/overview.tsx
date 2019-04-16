@@ -15,6 +15,7 @@ import { UptimeSettingsContext } from '../contexts';
 
 interface OverviewPageProps {
   basePath: string;
+  logOverviewPageLoad: () => void;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -22,7 +23,7 @@ type Props = OverviewPageProps;
 
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
+export const OverviewPage = ({ basePath, logOverviewPageLoad, setBreadcrumbs }: Props) => {
   const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
@@ -31,6 +32,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
+    logOverviewPageLoad();
     if (setHeadingText) {
       setHeadingText(
         i18n.translate('xpack.uptime.overviewPage.headerText', {

@@ -26,6 +26,7 @@ import { UptimeSettingsContext } from '../contexts';
 interface MonitorPageProps {
   history: { push: any };
   location: { pathname: string };
+  logMonitorPageLoad: () => void;
   match: { params: { id: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
@@ -34,7 +35,12 @@ interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
+export const MonitorPage = ({
+  location,
+  logMonitorPageLoad,
+  query,
+  setBreadcrumbs,
+}: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
   const [selectedStatus, setSelectedStatus] = useState<string | null>('down');
   const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
@@ -60,6 +66,7 @@ export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProp
         setHeadingText(heading);
       }
     });
+    logMonitorPageLoad();
   }, []);
   return (
     <Fragment>

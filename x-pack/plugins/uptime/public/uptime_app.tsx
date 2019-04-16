@@ -54,6 +54,8 @@ export interface UptimeAppProps {
   initialAutorefreshInterval: number;
   initialAutorefreshIsPaused: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
+  logMonitorPageLoad: () => void;
+  logOverviewPageLoad: () => void;
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
   persistState(state: UptimePersistedState): void;
@@ -80,6 +82,8 @@ const Application = (props: UptimeAppProps) => {
     initialAutorefreshInterval,
     initialDateRangeStart,
     initialDateRangeEnd,
+    logMonitorPageLoad,
+    logOverviewPageLoad,
     persistState,
     renderGlobalHelpControls,
     routerBasename,
@@ -196,6 +200,7 @@ const Application = (props: UptimeAppProps) => {
                       render={routerProps => (
                         <OverviewPage
                           basePath={basePath}
+                          logOverviewPageLoad={logOverviewPageLoad}
                           setBreadcrumbs={setBreadcrumbs}
                           {...routerProps}
                         />
@@ -205,6 +210,7 @@ const Application = (props: UptimeAppProps) => {
                       path="/monitor/:id"
                       render={routerProps => (
                         <MonitorPage
+                          logMonitorPageLoad={logMonitorPageLoad}
                           query={client.query}
                           setBreadcrumbs={setBreadcrumbs}
                           {...routerProps}

@@ -13,6 +13,7 @@ import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
+import { createLogMonitorPageView, createLogOverviewPageView } from '../telemetry';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -113,17 +114,19 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
           ReactDOM.render(
             renderComponent({
               basePath,
-              darkMode,
-              setBreadcrumbs: chrome.breadcrumbs.set,
-              kibanaBreadcrumbs,
-              routerBasename,
               client: graphQLClient,
+              darkMode,
               initialAutorefreshIsPaused: autorefreshIsPaused,
               initialAutorefreshInterval: autorefreshInterval,
               initialDateRangeStart: dateRangeStart,
               initialDateRangeEnd: dateRangeEnd,
+              kibanaBreadcrumbs,
+              logMonitorPageLoad: createLogMonitorPageView(this.xsrfHeader),
+              logOverviewPageLoad: createLogOverviewPageView(this.xsrfHeader),
               persistState: this.updatePersistedState,
               renderGlobalHelpControls,
+              routerBasename,
+              setBreadcrumbs: chrome.breadcrumbs.set,
             }),
             elem
           );
