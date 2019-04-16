@@ -26,9 +26,9 @@ const $q = { defer: () => ({ resolve() {} }) };
 // axios has a $http like interface so using it to simulate $http
 setHttpClient(axios.create(), $q);
 
-const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
+const initUserActions = ({ getMetadataFromEuiTable, find, form }) => (section) => {
   const userActions = {
-    // Follower indices user actions
+    // Follower indices LIST
     followerIndicesList() {
       const { rows } = getMetadataFromEuiTable('ccrFollowerIndexListTable');
 
@@ -70,7 +70,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickFollowerIndexAt,
       };
     },
-    // Auto-follow patterns user actions
+    // Auto-follow patterns LIST
     autoFollowPatternList() {
       const { rows } = getMetadataFromEuiTable('ccrAutoFollowPatternListTable');
 
@@ -97,7 +97,7 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         if (action === 'delete') {
           button = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListDeleteActionButton');
         } else if (action === 'edit') {
-          findTestSubject(tableCellActions, 'ccrAutoFollowPatternListEditActionButton');
+          button = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListEditActionButton');
         }
 
         if (!button) {
@@ -119,6 +119,31 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickRowActionButtonAt,
         clickAutoFollowPatternAt
       };
+    },
+    // Auto-follow pattern FORM
+    autoFollowPatternForm() {
+      const clickSaveForm = () => {
+        find('ccrAutoFollowPatternFormSubmitButton').simulate('click');
+      };
+
+      return {
+        clickSaveForm,
+      };
+    },
+    // Follower index FORM
+    followerIndexForm() {
+      const clickSaveForm = () => {
+        find('ccrFollowerIndexFormSubmitButton').simulate('click');
+      };
+
+      const toggleAdvancedSettings = () => {
+        form.selectCheckBox('ccrFollowerIndexFormCustomAdvancedSettingsToggle');
+      };
+
+      return {
+        clickSaveForm,
+        toggleAdvancedSettings,
+      };
     }
   };
 
@@ -137,7 +162,7 @@ export const initTestBed = (component, props = {}, options) => {
   };
 };
 
-export const mockAllHttpRequests = server => {
+export const registerHttpRequestMockHelpers = server => {
   const mockResponse = (defaultResponse, response) => ([
     200,
     { 'Content-Type': 'application/json' },
@@ -185,28 +210,47 @@ export const mockAllHttpRequests = server => {
     );
   };
 
-  /**
-   * Set all http request to their default response
-   */
-  setLoadFollowerIndicesResponse();
-  setLoadAutoFollowPatternsResponse();
-  setAutoFollowStatsResponse();
-
-  /**
-   * Return a method to override any of the http reques
-   */
-  return (request, response) => {
-    const mapRequestToHelper = {
-      'loadFollowerIndices': setLoadFollowerIndicesResponse,
-      'loadAutoFollowPatterns': setLoadAutoFollowPatternsResponse,
-      'deleteAutoFollowPattern': setDeleteAutoFollowPatternResponse,
-      'autoFollowStats': setAutoFollowStatsResponse,
-    };
-
-    if (!mapRequestToHelper[request]) {
-      throw new Error(`Did not find a helper to set http response for request ${request}`);
+  const setLoadRemoteClustersResponse = (response = [], error) => {
+    if (error) {
+      server.respondWith('GET', '/api/remote_clusters',
+        [error.status || 400, { 'Content-Type': 'application/json' }, JSON.stringify(error.body)]
+      );
+    } else {
+      server.respondWith('GET', '/api/remote_clusters',
+        [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]
+      );
     }
+  };
 
-    return mapRequestToHelper[request](response);
+  const setGetAutoFollowPatternResponse = (response) => {
+    const defaultResponse = {};
+
+    server.respondWith('GET', /api\/cross_cluster_replication\/auto_follow_patterns\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
+  const setGetClusterIndicesResponse = (response = []) => {
+    server.respondWith('GET', '/api/index_management/indices',
+      [200, { 'Content-Type': 'application/json' }, JSON.stringify(response)]);
+  };
+
+  const setGetFollowerIndexResponse = (response) => {
+    const defaultResponse = {};
+
+    server.respondWith('GET', /api\/cross_cluster_replication\/follower_indices\/.+/,
+      mockResponse(defaultResponse, response)
+    );
+  };
+
+  return {
+    setLoadFollowerIndicesResponse,
+    setLoadAutoFollowPatternsResponse,
+    setDeleteAutoFollowPatternResponse,
+    setAutoFollowStatsResponse,
+    setLoadRemoteClustersResponse,
+    setGetAutoFollowPatternResponse,
+    setGetClusterIndicesResponse,
+    setGetFollowerIndexResponse,
   };
 };

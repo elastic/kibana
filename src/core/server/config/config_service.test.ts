@@ -17,13 +17,12 @@
  * under the License.
  */
 
-/* tslint:disable max-classes-per-file */
+/* eslint-disable max-classes-per-file */
 
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../package.json', () => mockPackage);
+import { mockPackage } from './config_service.test.mocks';
 
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 

@@ -65,6 +65,7 @@ export const createProxyRoute = ({
   path: '/api/console/proxy',
   method: 'POST',
   config: {
+    tags: ['access:console'],
     payload: {
       output: 'stream',
       parse: false

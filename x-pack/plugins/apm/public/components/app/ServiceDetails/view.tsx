@@ -6,56 +6,56 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { Location } from 'history';
-import React, { Fragment } from 'react';
-import { ServiceDetailsRequest } from 'x-pack/plugins/apm/public/store/reactReduxRequest/serviceDetails';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
+import React from 'react';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { loadServiceDetails } from '../../../services/rest/apm/services';
+import { IUrlParams } from '../../../store/urlParams';
 // @ts-ignore
 import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
 
-interface ServiceDetailsProps {
+interface Props {
   urlParams: IUrlParams;
   location: Location;
 }
 
-export class ServiceDetailsView extends React.Component<ServiceDetailsProps> {
-  public render() {
-    const { urlParams, location } = this.props;
-    return (
-      <ServiceDetailsRequest
-        urlParams={urlParams}
-        render={({ data }) => {
-          return (
-            <Fragment>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem>
-                  <EuiTitle size="l">
-                    <h1>{urlParams.serviceName}</h1>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ServiceIntegrations
-                    transactionTypes={data.types}
-                    location={this.props.location}
-                    urlParams={urlParams}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+export function ServiceDetailsView({ urlParams, location }: Props) {
+  const { serviceName, start, end, kuery } = urlParams;
+  const { data: serviceDetailsData } = useFetcher(
+    () => loadServiceDetails({ serviceName, start, end, kuery }),
+    [serviceName, start, end, kuery]
+  );
 
-              <EuiSpacer />
-
-              <FilterBar />
-
-              <ServiceDetailTabs
-                location={location}
-                urlParams={urlParams}
-                transactionTypes={data.types}
-              />
-            </Fragment>
-          );
-        }}
-      />
-    );
+  if (!serviceDetailsData) {
+    return null;
   }
+
+  return (
+    <React.Fragment>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h1>{urlParams.serviceName}</h1>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ServiceIntegrations
+            transactionTypes={serviceDetailsData.types}
+            urlParams={urlParams}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+
+      <FilterBar />
+
+      <ServiceDetailTabs
+        location={location}
+        urlParams={urlParams}
+        transactionTypes={serviceDetailsData.types}
+      />
+    </React.Fragment>
+  );
 }

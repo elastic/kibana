@@ -46,10 +46,19 @@ export default function ({ getService }) {
                   attributes: {
                     'title': 'Count of requests'
                   },
-                  references: [],
+                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
+                  references: [
+                    {
+                      id: '91200a00-9efd-11e7-acb3-3dab96693fab',
+                      name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+                      type: 'index-pattern',
+                    },
+                  ],
+                  updated_at: '2017-09-21T18:51:23.794Z',
                 }
               ]
             });
+            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           })
       ));
 

@@ -161,6 +161,7 @@ class TablePanelConfig extends Component {
             fields={this.props.fields}
             model={this.props.model}
             name={this.props.name}
+            visData$={this.props.visData$}
             onChange={this.props.onChange}
           />
         </div>
@@ -280,6 +281,7 @@ TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
 
 export default TablePanelConfig;

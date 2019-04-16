@@ -5,23 +5,36 @@
  */
 
 // @ts-ignore No typings for EuiSearchBar
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiSearchBar, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FilterBar as FilterBarType, MonitorKey } from '../../../common/graphql/types';
+import { UptimeSearchBarQueryChangeHandler } from '../../pages/overview';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { filterBarQuery } from '../../queries';
+import { FilterBarLoading } from './filter_bar_loading';
 import { filterBarSearchSchema } from './search_schema';
 
-interface FilterBarProps {
-  filterBar: FilterBarType;
-  updateQuery: (query: object | undefined) => void;
+interface FilterBarQueryResult {
+  filterBar?: FilterBarType;
 }
+
+interface FilterBarProps {
+  currentQuery?: object;
+  updateQuery: UptimeSearchBarQueryChangeHandler;
+}
+
+type Props = FilterBarProps & UptimeGraphQLQueryProps<FilterBarQueryResult>;
 
 const SEARCH_THRESHOLD = 2;
 
-export const FilterBar = ({
-  filterBar: { names, ports, ids, schemes },
-  updateQuery,
-}: FilterBarProps) => {
+export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) => {
+  if (!data || !data.filterBar) {
+    return <FilterBarLoading />;
+  }
+  const {
+    filterBar: { ids, names, ports, schemes },
+  } = data;
   // TODO: add a factory function + type for these filter options
   const filters = [
     {
@@ -112,25 +125,18 @@ export const FilterBar = ({
     },
   ];
   return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow>
-        <EuiSearchBar
-          // TODO: update typing
-          onChange={({ query }: { query?: { text: string } }) => {
-            try {
-              let esQuery;
-              if (query && query.text) {
-                esQuery = EuiSearchBar.Query.toESQuery(query);
-              }
-              updateQuery(esQuery);
-            } catch (e) {
-              updateQuery(undefined);
-            }
-          }}
-          filters={filters}
-          schema={filterBarSearchSchema}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiSearchBar
+      box={{ incremental: false }}
+      className="euiFlexGroup--gutterSmall"
+      onChange={updateQuery}
+      filters={filters}
+      query={currentQuery}
+      schema={filterBarSearchSchema}
+    />
   );
 };
+
+export const FilterBar = withUptimeGraphQL<FilterBarQueryResult, FilterBarProps>(
+  FilterBarComponent,
+  filterBarQuery
+);

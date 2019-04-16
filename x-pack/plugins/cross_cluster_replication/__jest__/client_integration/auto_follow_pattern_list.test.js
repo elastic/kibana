@@ -6,7 +6,7 @@
 
 import sinon from 'sinon';
 
-import { initTestBed, mockAllHttpRequests, nextTick, getRandomString, findTestSubject } from './test_helpers';
+import { initTestBed, registerHttpRequestMockHelpers, nextTick, getRandomString, findTestSubject } from './test_helpers';
 import { AutoFollowPatternList } from '../../public/app/sections/home/auto_follow_pattern_list';
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
@@ -16,7 +16,8 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
@@ -29,12 +30,28 @@ describe('<AutoFollowPatternList />', () => {
   let getUserActions;
   let tableCellsValues;
   let rows;
-  let updateHttpMockResponse;
+  let setLoadAutoFollowPatternsResponse;
+  let setDeleteAutoFollowPatternResponse;
+  let setAutoFollowStatsResponse;
 
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    (updateHttpMockResponse = mockAllHttpRequests(server));
+    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
+    // and we can mock them all with a 200 instead of mocking each one individually.
+    server.respondWith([200, {}, '']);
+
+    // Register helpers to mock Http Requests
+    ({
+      setLoadAutoFollowPatternsResponse,
+      setDeleteAutoFollowPatternResponse,
+      setAutoFollowStatsResponse
+    } = registerHttpRequestMockHelpers(server));
+
+    // Set "default" mock responses by not providing any arguments
+    setLoadAutoFollowPatternsResponse();
+    setDeleteAutoFollowPatternResponse();
+    setAutoFollowStatsResponse();
   });
 
   describe('on component mount', () => {
@@ -88,7 +105,7 @@ describe('<AutoFollowPatternList />', () => {
     let clickAutoFollowPatternAt;
 
     beforeEach(async () => {
-      updateHttpMockResponse('loadAutoFollowPatterns', { patterns: autoFollowPatterns });
+      setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
       ({
@@ -179,7 +196,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        updateHttpMockResponse('deleteAutoFollowPattern', { itemsDeleted: [autoFollowPattern1.name] });
+        setDeleteAutoFollowPatternResponse({ itemsDeleted: [autoFollowPattern1.name] });
 
         selectAutoFollowPatternAt(0);
         clickBulkDeleteButton();
@@ -217,7 +234,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     describe('detail panel', () => {
-      test('should open a detail panel when clicking on a follower index', () => {
+      test('should open a detail panel when clicking on an auto-follow pattern', () => {
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(false);
 
         clickAutoFollowPatternAt(0);
@@ -225,7 +242,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(true);
       });
 
-      test('should set the title the index that has been selected', () => {
+      test('should set the title the auto-follow pattern that has been selected', () => {
         clickAutoFollowPatternAt(0); // Open the detail panel
         expect(find('autoFollowPatternDetailsFlyoutTitle').text()).toEqual(autoFollowPattern1.name);
       });
@@ -236,7 +253,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(exists('ccrAutoFollowPatternDetailPanelSettingsValues')).toBe(true);
       });
 
-      test('should set the correct follower index settings values', () => {
+      test('should set the correct auto-follow pattern settings values', () => {
         clickAutoFollowPatternAt(0);
 
         expect(find('ccrAutoFollowPatternDetailRemoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);
@@ -301,7 +318,7 @@ describe('<AutoFollowPatternList />', () => {
           leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
           autoFollowException: { type: 'exception', reason: message }
         }];
-        updateHttpMockResponse('autoFollowStats', { recentAutoFollowErrors });
+        setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
         clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDetailErrors')).toBe(false);

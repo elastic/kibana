@@ -1,3 +1,4 @@
+[role="xpack"]
 [[terms-join]]
 === Terms join
 
@@ -8,7 +9,7 @@ You can augment vector features with property values that symbolize features and
 image::maps/images/terms_join.png[]
 
 Follow the example below to understand how *Terms joins* work.
-This example uses Elastic Maps Service(EMS) World Countries as the vector source and
+This example uses https://www.elastic.co/elastic-maps-service[Elastic Maps Service (EMS)] World Countries as the vector source and
 the Kibana sample data set "Sample web logs" as the Elasticsearch index.
 
 Example feature from World Countries:

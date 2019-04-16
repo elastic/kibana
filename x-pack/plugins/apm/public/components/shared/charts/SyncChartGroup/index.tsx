@@ -6,10 +6,7 @@
 
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
-import {
-  fromQuery,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 export interface RangeSelection {
   start: number;
