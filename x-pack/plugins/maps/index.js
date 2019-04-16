@@ -79,6 +79,33 @@ export function maps(kibana) {
       const xpackMainPlugin = server.plugins.xpack_main;
       let routesInitialized = false;
 
+      xpackMainPlugin.registerFeature({
+        id: 'maps',
+        name: i18n.translate('xpack.maps.featureRegistry.mapsFeatureName', {
+          defaultMessage: 'Maps',
+        }),
+        icon: APP_ICON,
+        navLinkId: 'maps',
+        app: [APP_ID, 'kibana'],
+        catalogue: ['maps'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['map'],
+              read: ['config', 'index-pattern']
+            },
+            ui: ['save'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['map', 'config', 'index-pattern']
+            },
+            ui: [],
+          },
+        }
+      });
+
       watchStatusAndLicenseToInitialize(xpackMainPlugin, this,
         async license => {
           if (license && license.maps && !routesInitialized) {

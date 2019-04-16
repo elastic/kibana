@@ -18,6 +18,16 @@ setHttp(axios.create());
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path ? path : 'api/rollup',
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+    throw new Error(`Unexpected call to chrome.getInjected with key ${key}`);
+  }
 }));
 
 jest.mock('../../public/crud_app/services', () => {

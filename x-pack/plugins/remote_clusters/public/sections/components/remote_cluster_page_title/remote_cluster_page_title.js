@@ -26,7 +26,7 @@ export const RemoteClusterPageTitle = ({ title }) => (
     <EuiPageContentHeader>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="l">
+          <EuiTitle size="l" data-test-subj="remoteClusterPageTitle">
             <h1>{title}</h1>
           </EuiTitle>
         </EuiFlexItem>
@@ -38,6 +38,7 @@ export const RemoteClusterPageTitle = ({ title }) => (
             href={remoteClustersUrl}
             target="_blank"
             iconType="help"
+            data-test-subj="remoteClusterDocsButton"
           >
             <FormattedMessage
               id="xpack.remoteClusters.readDocsButtonLabel"

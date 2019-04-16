@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import chrome from 'ui/chrome';
@@ -19,7 +19,7 @@ import { listBreadcrumb, addBreadcrumb, getRouter, redirect, extractQueryParams 
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
 export const RemoteClusterAdd = injectI18n(
-  class extends Component {
+  class extends PureComponent {
     static propTypes = {
       addCluster: PropTypes.func,
       isAddingCluster: PropTypes.bool,
@@ -27,8 +27,7 @@ export const RemoteClusterAdd = injectI18n(
       clearAddClusterErrors: PropTypes.func,
     }
 
-    constructor(props) {
-      super(props);
+    componentDidMount() {
       chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, addBreadcrumb ]);
     }
 

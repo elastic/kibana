@@ -113,7 +113,12 @@
             data-test-subj="tab-count-{{ editSection.index }}"
             aria-label="{{:: editSection.count + ' ' + editSection.title}}"
           >
-            ({{ editSection.count }})
+            <span ng-if="editSection.count != editSection.totalCount">
+              ({{ editSection.count }} / {{ editSection.totalCount }})
+            </span>
+            <span ng-if="editSection.count == editSection.totalCount">
+              ({{ editSection.count }})
+            </span>
           </span>
         </button>
       </div>

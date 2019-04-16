@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`kbn-pm production builds and copies only OSS projects for production 1`] = `
+Array [
+  "packages/bar/package.json",
+  "packages/bar/src/index.js",
+  "packages/bar/target/index.js",
+  "packages/bar/yarn.lock",
+  "packages/baz/index.js",
+  "packages/baz/package.json",
+  "packages/quux/index.js",
+  "packages/quux/package.json",
+]
+`;
+
 exports[`kbn-pm production builds and copies projects for production 1`] = `
 Array [
   "packages/bar/package.json",
@@ -52,6 +65,11 @@ Object {
     "@babel/core": "^7.3.4",
     "@babel/preset-env": "^7.3.4",
     "moment": "2.20.1",
+  },
+  "kibana": Object {
+    "build": Object {
+      "oss": false,
+    },
   },
   "main": "./target/index.js",
   "name": "@elastic/foo",

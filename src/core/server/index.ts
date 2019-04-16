@@ -39,8 +39,11 @@ export {
   Router,
 } from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+
 export {
   DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,

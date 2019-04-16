@@ -24,7 +24,7 @@ import { CoreContext } from '../core_context';
 import { ClusterClient } from '../elasticsearch';
 import { HttpServiceSetup } from '../http';
 import { LoggerFactory } from '../logging';
-import { Plugin, PluginManifest } from './plugin';
+import { PluginWrapper, PluginManifest } from './plugin';
 import { PluginsServiceSetupDeps } from './plugins_service';
 
 /**
@@ -137,7 +137,7 @@ function preventAccess() {
 export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
   deps: PluginsServiceSetupDeps,
-  plugin: Plugin<TPlugin, TPluginDependencies>
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): PluginSetupContext {
   return {
     elasticsearch: {
