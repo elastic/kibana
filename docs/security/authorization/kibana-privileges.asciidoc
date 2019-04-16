@@ -4,6 +4,7 @@
 
 Privileges have levels that you can use to manage which features users can access. Roles have privileges to determine whether users have write or read access.
 
+For more information and examples, consult the <<role-management-api-put, Role Management API>>.
 
 ==== Privilege levels
 
@@ -15,8 +16,6 @@ Grants access to all available features in Kibana (Discover, Visualize, Dashboar
 
 `feature`::
 Grants access to a specific feature.
-
-For more information, consult the <<role-management-api-put, Role Management API>>
 
 
 ==== Role privileges
