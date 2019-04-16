@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import { EuiPopover, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
+import { EuiPopover, EuiButtonIcon } from '@elastic/eui';
 import React, { useState, useContext } from 'react';
 import { get } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { LatestMonitor } from '../../../common/graphql/types';
 import { UptimeSettingsContext } from '../../contexts';
 
 interface MonitorListPopoverProps {
-  basePath: string;
   monitor: LatestMonitor;
 }
 
-export const MonitorListPopover = ({ monitor }: MonitorListPopoverProps) => {
+export const ObservabilityIntegrationsPopover = ({ monitor }: MonitorListPopoverProps) => {
   const [isPopoverVisible, setIsPopoverVisible] = useState<boolean>(false);
   const { basePath, dateRangeStart, dateRangeEnd } = useContext(UptimeSettingsContext);
   const domain = get<string | null>(monitor, 'ping.url.domain', null);
@@ -30,7 +30,10 @@ export const MonitorListPopover = ({ monitor }: MonitorListPopoverProps) => {
       anchorPosition="rightCenter"
       button={
         <EuiButtonIcon
-          aria-label="WARNINGTHISMUSTBEUPDATED"
+          aria-label={i18n.translate('xpack.uptime.monitorListPopover.toggleButtonAriaLabel', {
+            description: `The aria-label of a button that toggles a popover's visibility`,
+            defaultMessage: 'Display the integrations popover',
+          })}
           color="subdued"
           onClick={() => setIsPopoverVisible(true)}
           iconType="boxesVertical"
@@ -42,25 +45,32 @@ export const MonitorListPopover = ({ monitor }: MonitorListPopoverProps) => {
     >
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={`${monitor.id.url} APM integration`}>
-            <EuiLink href={apmHref} target="_blank">
-              <EuiButtonIcon aria-label="WARNINGTHISAPM" iconType="apmApp" size="l" />
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={`${monitor.id.url} Logging integration`}>
-            <EuiLink href="" target="_blank">
-              <EuiButtonIcon aria-label="WARNINGTHISLOGGING" iconType="loggingApp" size="l" />
-            </EuiLink>
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={`${monitor.id.url} Infra integration`}>
-            <EuiLink href="" target="_blank">
-              <EuiButtonIcon aria-label="WARNINGTHISINFRA" iconType="infraApp" size="l" />
-            </EuiLink>
-          </EuiToolTip>
+          <EuiLink href={apmHref}>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiIcon
+                  aria-label={i18n.translate('xpack.uptime.monitorListPopover.apmIntegrationIcon', {
+                    defaultMessage: 'Navigate to APM in current window',
+                    description:
+                      'We provide integrations for APM. This button will take the user to a new page in the current window.',
+                  })}
+                  type="apmApp"
+                  size="m"
+                />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  {i18n.translate('xpack.uptime.monitorListPopover.apmIntegrationMessage', {
+                    defaultMessage: 'APM Services',
+                    description: `Searches for APM services with the current monitor's domain`,
+                  })}
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiIcon size="m" type="popout" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPopover>

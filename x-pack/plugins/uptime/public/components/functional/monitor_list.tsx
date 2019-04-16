@@ -33,7 +33,7 @@ import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types
 import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
 import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
-import { MonitorListPopover } from './monitor_list_popover';
+import { ObservabilityIntegrationsPopover } from './monitor_list_popover';
 
 interface MonitorListQueryResult {
   // TODO: clean up this ugly result data shape, there should be no nesting
@@ -77,11 +77,7 @@ export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
           render: (status: string, monitor: LatestMonitor) => (
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <MonitorListPopover
-                  dateRangeStart="WARNINGDELETETHISAFTERMERGINGCONTEXT"
-                  dateRangeEnd="WARNINGDELETEHTISATTERMERINGEoife"
-                  monitor={monitor}
-                />
+                <ObservabilityIntegrationsPopover monitor={monitor} />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiHealth
