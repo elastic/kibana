@@ -41,10 +41,17 @@ export const registerTestBed = <T extends string = string>(
    * find('nameInput'); // if there is only 1 form, this is enough
    * find('myForm.nameInput'); // if there are multiple forms, specify the test subject of the form
    */
-  const find: TestBed<T>['find'] = (testSubject: T) =>
-    testSubject
-      .split('.')
-      .reduce((reactWrapper, subject) => findTestSubject(reactWrapper, subject), component);
+  const find: TestBed<T>['find'] = (testSubject: T) => {
+    const testSubjectToArray = testSubject.split('.');
+
+    return testSubjectToArray.reduce((reactWrapper, subject, i) => {
+      const target = findTestSubject(reactWrapper, subject);
+      if (!target.length && i < testSubjectToArray.length - 1) {
+        throw new Error(`Can't access nested test subject of unknown node "${subject}"`);
+      }
+      return target;
+    }, component);
+  };
 
   /**
    * Look in the component if a data test subject exists, and return true or false
