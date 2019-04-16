@@ -27,10 +27,16 @@ export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
   // eslint-disable-next-line max-len
-  const translationsDirs = [fromRoot('src/legacy/ui/translations'), fromRoot('src/legacy/server/translations'), fromRoot('src/core/translations')];
+  const translationsDirs = [
+    fromRoot('src/legacy/ui/translations'),
+    fromRoot('src/legacy/server/translations'),
+    fromRoot('src/core/translations'),
+  ];
+
+  const scanDirs = config.get('plugins.scanDirs').concat([fromRoot('node_modules/@kbn')]);
 
   const groupedEntries = await Promise.all([
-    ...config.get('plugins.scanDirs').map(async path => {
+    ...scanDirs.map(async path => {
       const entries = await globby(`*/translations/${locale}.json`, {
         cwd: path,
       });
