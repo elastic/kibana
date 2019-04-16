@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
+import { setupEnvironment, pageHelpers, nextTick, findTestSubject, getRandomString } from './helpers';
 
-import { initTestBed, registerHttpRequestMockHelpers, nextTick, getRandomString, findTestSubject } from './test_helpers';
-import { AutoFollowPatternList } from '../../public/app/sections/home/auto_follow_pattern_list';
 import { getAutoFollowPatternClientMock } from '../../fixtures/auto_follow_pattern';
 
 jest.mock('ui/chrome', () => ({
@@ -21,42 +19,32 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
+const { setup } = pageHelpers.autoFollowPatternList;
+
 describe('<AutoFollowPatternList />', () => {
   let server;
-  let find;
-  let exists;
-  let component;
-  let table;
-  let getUserActions;
-  let tableCellsValues;
-  let rows;
-  let setLoadAutoFollowPatternsResponse;
-  let setDeleteAutoFollowPatternResponse;
-  let setAutoFollowStatsResponse;
+  let httpRequestsMockHelpers;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
-    // and we can mock them all with a 200 instead of mocking each one individually.
-    server.respondWith([200, {}, '']);
-
-    // Register helpers to mock Http Requests
-    ({
-      setLoadAutoFollowPatternsResponse,
-      setDeleteAutoFollowPatternResponse,
-      setAutoFollowStatsResponse
-    } = registerHttpRequestMockHelpers(server));
-
     // Set "default" mock responses by not providing any arguments
-    setLoadAutoFollowPatternsResponse();
-    setDeleteAutoFollowPatternResponse();
-    setAutoFollowStatsResponse();
+    httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse();
+    httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse();
+    httpRequestsMockHelpers.setAutoFollowStatsResponse();
   });
 
   describe('on component mount', () => {
+    let exists;
+
     beforeEach(async () => {
-      ({ exists } = initTestBed(AutoFollowPatternList));
+      ({ exists } = setup());
     });
 
     test('should show a loading indicator on component', async () => {
@@ -65,8 +53,11 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   describe('when there are no auto-follow patterns', () => {
+    let exists;
+    let component;
+
     beforeEach(async () => {
-      ({ exists, component } = initTestBed(AutoFollowPatternList));
+      ({ exists, component } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
@@ -82,9 +73,17 @@ describe('<AutoFollowPatternList />', () => {
   });
 
   describe('when there are auto-follow patterns', async () => {
+    let find;
+    let exists;
+    let component;
+    let table;
+    let actions;
+    let tableCellsValues;
+    let rows;
+
     // For deterministic tests, we need to make sure that autoFollowPattern1 comes before autoFollowPattern2
     // in the table list that is rendered. As the table orders alphabetically by index name
-    // we prefix the random name to make sure that autoFollowPattern1 comes before autoFollowPattern2
+    // we prefix the random name with "a" and "b" to make sure that autoFollowPattern1 comes before autoFollowPattern2
     const testPrefix = 'prefix_';
     const testSuffix = '_suffix';
 
@@ -98,14 +97,8 @@ describe('<AutoFollowPatternList />', () => {
     });
     const autoFollowPatterns = [autoFollowPattern1, autoFollowPattern2];
 
-    let selectAutoFollowPatternAt;
-    let clickBulkDeleteButton;
-    let clickConfirmModalDeleteAutoFollowPattern;
-    let clickRowActionButtonAt;
-    let clickAutoFollowPatternAt;
-
     beforeEach(async () => {
-      setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
+      httpRequestsMockHelpers.setLoadAutoFollowPatternsResponse({ patterns: autoFollowPatterns });
 
       // Mount the component
       ({
@@ -113,19 +106,11 @@ describe('<AutoFollowPatternList />', () => {
         exists,
         component,
         table,
-        getUserActions,
-      } = initTestBed(AutoFollowPatternList));
+        actions,
+      } = setup());
 
       await nextTick(); // Make sure that the Http request is fulfilled
       component.update();
-
-      ({
-        selectAutoFollowPatternAt,
-        clickBulkDeleteButton,
-        clickConfirmModalDeleteAutoFollowPattern,
-        clickRowActionButtonAt,
-        clickAutoFollowPatternAt,
-      } = getUserActions('autoFollowPatternList'));
 
       // Read the index list table
       ({ tableCellsValues, rows } = table.getMetaData('ccrAutoFollowPatternListTable'));
@@ -169,24 +154,24 @@ describe('<AutoFollowPatternList />', () => {
       test('should be visible when an auto-follow pattern is selected', () => {
         expect(exists('ccrAutoFollowPatternListBulkDeleteActionButton')).toBe(false);
 
-        selectAutoFollowPatternAt(0);
+        actions.selectAutoFollowPatternAt(0);
 
         expect(exists('ccrAutoFollowPatternListBulkDeleteActionButton')).toBe(true);
       });
 
       test('should update the button label according to the number of patterns selected', () => {
-        selectAutoFollowPatternAt(0); // 1 auto-follow pattern selected
+        actions.selectAutoFollowPatternAt(0); // 1 auto-follow pattern selected
         expect(find('ccrAutoFollowPatternListBulkDeleteActionButton').text()).toEqual('Delete auto-follow pattern');
 
-        selectAutoFollowPatternAt(1); // 2 auto-follow patterns selected
+        actions.selectAutoFollowPatternAt(1); // 2 auto-follow patterns selected
         expect(find('ccrAutoFollowPatternListBulkDeleteActionButton').text()).toEqual('Delete auto-follow patterns');
       });
 
       test('should open a confirmation modal when clicking the delete button', () => {
         expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(false);
 
-        selectAutoFollowPatternAt(0);
-        clickBulkDeleteButton();
+        actions.selectAutoFollowPatternAt(0);
+        actions.clickBulkDeleteButton();
 
         expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(true);
       });
@@ -196,11 +181,11 @@ describe('<AutoFollowPatternList />', () => {
         expect(rows.length).toBe(2);
 
         // We wil delete the *first* auto-follow pattern in the table
-        setDeleteAutoFollowPatternResponse({ itemsDeleted: [autoFollowPattern1.name] });
+        httpRequestsMockHelpers.setDeleteAutoFollowPatternResponse({ itemsDeleted: [autoFollowPattern1.name] });
 
-        selectAutoFollowPatternAt(0);
-        clickBulkDeleteButton();
-        clickConfirmModalDeleteAutoFollowPattern();
+        actions.selectAutoFollowPatternAt(0);
+        actions.clickBulkDeleteButton();
+        actions.clickConfirmModalDeleteAutoFollowPattern();
 
         await nextTick();
         component.update();
@@ -227,7 +212,7 @@ describe('<AutoFollowPatternList />', () => {
       test('should open a confirmation modal when clicking on "delete" button', async () => {
         expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(false);
 
-        clickRowActionButtonAt(0, 'delete');
+        actions.clickRowActionButtonAt(0, 'delete');
 
         expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(true);
       });
@@ -237,24 +222,24 @@ describe('<AutoFollowPatternList />', () => {
       test('should open a detail panel when clicking on an auto-follow pattern', () => {
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(false);
 
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
 
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(true);
       });
 
       test('should set the title the auto-follow pattern that has been selected', () => {
-        clickAutoFollowPatternAt(0); // Open the detail panel
+        actions.clickAutoFollowPatternAt(0); // Open the detail panel
         expect(find('autoFollowPatternDetailsFlyoutTitle').text()).toEqual(autoFollowPattern1.name);
       });
 
       test('should have a "settings" section', () => {
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
         expect(find('ccrAutoFollowPatternDetailPanelSettingsSection').find('h3').text()).toEqual('Settings');
         expect(exists('ccrAutoFollowPatternDetailPanelSettingsValues')).toBe(true);
       });
 
       test('should set the correct auto-follow pattern settings values', () => {
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
 
         expect(find('ccrAutoFollowPatternDetailRemoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);
         expect(find('ccrAutoFollowPatternDetailLeaderIndexPatterns').text()).toEqual(autoFollowPattern1.leaderIndexPatterns.join(', '));
@@ -263,14 +248,14 @@ describe('<AutoFollowPatternList />', () => {
       });
 
       test('should have a default value when there are no prefix or no suffix', () => {
-        clickAutoFollowPatternAt(1); // Does not have prefix and suffix
+        actions.clickAutoFollowPatternAt(1); // Does not have prefix and suffix
 
         expect(find('ccrAutoFollowPatternDetailPatternPrefix').text()).toEqual('No prefix');
         expect(find('ccrAutoFollowPatternDetailPatternSuffix').text()).toEqual('No suffix');
       });
 
       test('should show a preview of the indices that might be generated by the auto-follow pattern', () => {
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
         const detailPanel = find('ccrAutoFollowPatternDetailsFlyout');
         const indicesPreview = findTestSubject(detailPanel, 'ccrAutoFollowPatternIndexPreview');
 
@@ -279,20 +264,20 @@ describe('<AutoFollowPatternList />', () => {
       });
 
       test('should have a link to view the indices in Index Management', () => {
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDetailsViewIndexManagementButton')).toBe(true);
         expect(find('ccrAutoFollowPatternDetailsViewIndexManagementButton').text()).toBe('View your follower indices in Index Management');
       });
 
       test('should have a "close", "delete" and "edit" button in the footer', () => {
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDetailsFlyoutCloseButton')).toBe(true);
         expect(exists('ccrAutoFollowPatternDetailsDeleteActionButton')).toBe(true);
         expect(exists('ccrAutoFollowPatternDetailsEditActionButton')).toBe(true);
       });
 
       test('should close the detail panel when clicking the "close" button', () => {
-        clickAutoFollowPatternAt(0); // open the detail panel
+        actions.clickAutoFollowPatternAt(0); // open the detail panel
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(true);
 
         find('ccrAutoFollowPatternDetailsFlyoutCloseButton').simulate('click'); // close the detail panel
@@ -301,7 +286,7 @@ describe('<AutoFollowPatternList />', () => {
       });
 
       test('should open a confirmation modal when clicking the "delete" button', () => {
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(false);
 
         find('ccrAutoFollowPatternDetailsDeleteActionButton').simulate('click');
@@ -318,14 +303,14 @@ describe('<AutoFollowPatternList />', () => {
           leaderIndex: `${autoFollowPattern2.name}:my-leader-test`,
           autoFollowException: { type: 'exception', reason: message }
         }];
-        setAutoFollowStatsResponse({ recentAutoFollowErrors });
+        httpRequestsMockHelpers.setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
-        clickAutoFollowPatternAt(0);
+        actions.clickAutoFollowPatternAt(0);
         expect(exists('ccrAutoFollowPatternDetailErrors')).toBe(false);
 
         // We select the other auto-follow pattern because the stats are fetched
         // each time we change the auto-follow pattern selection
-        clickAutoFollowPatternAt(1);
+        actions.clickAutoFollowPatternAt(1);
         await nextTick();
         component.update();
 
