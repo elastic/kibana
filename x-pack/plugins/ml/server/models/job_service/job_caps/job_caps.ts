@@ -26,7 +26,8 @@ export function jobCapsProvider(callWithRequest: any) {
 }
 
 // replace the recursive field and agg references with a
-// map if ids to allow it to be stringified for the network
+// map of ids to allow it to be stringified for transportation
+// over the network.
 function convertForStringify(aggs: Aggregation[], fields: Field[]) {
   fields.forEach(f => {
     f.aggIds = f.aggs ? f.aggs.map(a => a.id) : [];
