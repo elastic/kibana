@@ -35,7 +35,10 @@ export default function ({ getService }) {
         title: Joi.string().required(),
         icon: Joi.string().required(),
         editUrl: Joi.string().required(),
-        inAppUrl: Joi.string().required(),
+        inAppUrl: Joi.object().keys({
+          path: Joi.string().required(),
+          uiCapabilitiesPath: Joi.string().required(),
+        }).required(),
       }).required(),
     })
   );
@@ -74,7 +77,10 @@ export default function ({ getService }) {
                   title: 'saved_objects*',
                   icon: 'indexPatternApp',
                   editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'management.kibana.index_patterns',
+                  },
                 },
               },
               {
@@ -85,7 +91,10 @@ export default function ({ getService }) {
                   title: 'VisualizationFromSavedSearch',
                   icon: 'visualizeApp',
                   editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
                 },
               },
             ]);
@@ -95,17 +104,38 @@ export default function ({ getService }) {
       it('should filter based on savedObjectTypes', async () => {
         await supertest
           .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('visualization')}`)
-          .expect(res => console.log(res.text))
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              visualization: [
-                {
-                  id: 'a42c0580-3224-11e8-a572-ffca06da1357',
-                  title: 'VisualizationFromSavedSearch',
+            expect(resp.body).to.eql([
+              {
+                id: '8963ca30-3224-11e8-a572-ffca06da1357',
+                type: 'index-pattern',
+                meta: {
+                  icon: 'indexPatternApp',
+                  title: 'saved_objects*',
+                  editUrl: '/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/management/kibana/index_patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'management.kibana.index_patterns',
+                  },
                 },
-              ]
-            });
+                relationship: 'child'
+              },
+              {
+                id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  icon: 'visualizeApp',
+                  title: 'VisualizationFromSavedSearch',
+                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
+                },
+                relationship: 'parent',
+              },
+            ]);
           });
       });
 
@@ -140,7 +170,10 @@ export default function ({ getService }) {
                   icon: 'visualizeApp',
                   title: 'Visualization',
                   editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
                 },
               },
               {
@@ -151,7 +184,10 @@ export default function ({ getService }) {
                   icon: 'visualizeApp',
                   title: 'VisualizationFromSavedSearch',
                   editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
                 },
               },
             ]);
@@ -163,7 +199,36 @@ export default function ({ getService }) {
           .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({});
+            expect(resp.body).to.eql([
+              {
+                id: 'add810b0-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  icon: 'visualizeApp',
+                  title: 'Visualization',
+                  editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
+                },
+                relationship: 'child',
+              },
+              {
+                id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                type: 'visualization',
+                meta: {
+                  icon: 'visualizeApp',
+                  title: 'VisualizationFromSavedSearch',
+                  editUrl: '/management/kibana/objects/savedVisualizations/a42c0580-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/a42c0580-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
+                },
+                relationship: 'child',
+              },
+            ]);
           });
       });
 
@@ -200,7 +265,10 @@ export default function ({ getService }) {
                   icon: 'search',
                   title: 'OneRecord',
                   editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'discover.show',
+                  },
                 },
               },
               {
@@ -211,7 +279,10 @@ export default function ({ getService }) {
                   icon: 'dashboardApp',
                   title: 'Dashboard',
                   editUrl: '/management/kibana/objects/savedDashboards/b70c7ae0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'dashboard.show',
+                  },
                 },
               },
             ]);
@@ -223,14 +294,22 @@ export default function ({ getService }) {
           .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              search: [
-                {
-                  id: '960372e0-3224-11e8-a572-ffca06da1357',
-                  title: 'OneRecord'
+            expect(resp.body).to.eql([
+              {
+                id: '960372e0-3224-11e8-a572-ffca06da1357',
+                type: 'search',
+                meta: {
+                  icon: 'search',
+                  title: 'OneRecord',
+                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'discover.show',
+                  },
                 },
-              ]
-            });
+                relationship: 'child',
+              },
+            ]);
           });
       });
 
@@ -266,7 +345,10 @@ export default function ({ getService }) {
                   icon: 'search',
                   title: 'OneRecord',
                   editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'discover.show',
+                  },
                 },
               },
               {
@@ -277,7 +359,10 @@ export default function ({ getService }) {
                   icon: 'visualizeApp',
                   title: 'Visualization',
                   editUrl: '/management/kibana/objects/savedVisualizations/add810b0-3224-11e8-a572-ffca06da1357',
-                  inAppUrl: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/visualize/edit/add810b0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'visualize.show',
+                  },
                 },
               },
             ]);
@@ -289,14 +374,22 @@ export default function ({ getService }) {
           .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
           .expect(200)
           .then(resp => {
-            expect(resp.body).to.eql({
-              search: [
-                {
-                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+            expect(resp.body).to.eql([
+              {
+                id: '960372e0-3224-11e8-a572-ffca06da1357',
+                type: 'search',
+                meta: {
+                  icon: 'search',
                   title: 'OneRecord',
+                  editUrl: '/management/kibana/objects/savedSearches/960372e0-3224-11e8-a572-ffca06da1357',
+                  inAppUrl: {
+                    path: '/app/kibana#/discover/960372e0-3224-11e8-a572-ffca06da1357',
+                    uiCapabilitiesPath: 'discover.show',
+                  },
                 },
-              ]
-            });
+                relationship: 'parent',
+              },
+            ]);
           });
       });
 

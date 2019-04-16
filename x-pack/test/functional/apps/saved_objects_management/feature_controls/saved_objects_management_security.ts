@@ -65,12 +65,26 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it('shows all saved objects', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['A Dashboard', 'logstash-*', 'A Pie']);
+          expect(objects).to.eql([
+            'config [id=6.0.0]',
+            'config [id=8.0.0]',
+            'A Dashboard',
+            'logstash-*',
+            'A Pie',
+          ]);
         });
 
         it('can view all saved objects in applications', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
+            {
+              title: 'config [id=6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: 'config [id=8.0.0]',
+              canViewInApp: false,
+            },
             {
               title: 'A Dashboard',
               canViewInApp: true,
@@ -173,12 +187,20 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it('shows a visualization and an index pattern', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['logstash-*', 'A Pie']);
+          expect(objects).to.eql(['config [id=6.0.0]', 'config [id=8.0.0]', 'logstash-*', 'A Pie']);
         });
 
         it('can view only the visualization in application', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
+            {
+              title: 'config [id=6.0.0]',
+              canViewInApp: false,
+            },
+            {
+              title: 'config [id=8.0.0]',
+              canViewInApp: false,
+            },
             {
               title: 'logstash-*',
               canViewInApp: false,

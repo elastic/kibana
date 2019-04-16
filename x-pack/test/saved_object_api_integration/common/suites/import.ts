@@ -74,7 +74,7 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create`,
+      message: `Unable to bulk_create dashboard,globaltype`,
     });
   };
 
