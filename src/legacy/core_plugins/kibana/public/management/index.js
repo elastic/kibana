@@ -22,7 +22,6 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './sections';
-import 'ui/field_editor';
 import uiRoutes from 'ui/routes';
 import { I18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
