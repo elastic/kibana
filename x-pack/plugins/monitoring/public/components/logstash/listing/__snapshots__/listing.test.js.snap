@@ -30,7 +30,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
         "sortable": true,
       },
       Object {
-        "field": "events_out",
+        "field": "events_ingested",
         "name": "Events Ingested",
         "render": [Function],
         "sortable": true,
@@ -123,7 +123,7 @@ exports[`Listing should render with expected props 1`] = `
         "sortable": true,
       },
       Object {
-        "field": "events_out",
+        "field": "events_ingested",
         "name": "Events Ingested",
         "render": [Function],
         "sortable": true,
