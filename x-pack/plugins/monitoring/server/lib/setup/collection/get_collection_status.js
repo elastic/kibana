@@ -9,6 +9,7 @@ import { METRICBEAT_INDEX_NAME_UNIQUE_TOKEN } from '../../../../common/constants
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../../xpack_main/common/constants';
 
 const APM_CUSTOM_ID = 'apm';
+const ELASTICSEARCH_CUSTOM_ID = 'elasticsearch';
 
 const getRecentMonitoringDocuments = async (req, indexPatterns, clusterUuid) => {
   const start = get(req.payload, 'timeRange.min', 'now-30s');
@@ -117,7 +118,7 @@ async function detectProducts(req) {
     [KIBANA_SYSTEM_ID]: {
       doesExist: true,
     },
-    'elasticsearch': {
+    [ELASTICSEARCH_CUSTOM_ID]: {
       doesExist: true,
     },
     [BEATS_SYSTEM_ID]: {
@@ -151,19 +152,21 @@ async function detectProducts(req) {
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
   const {
     responses: [
-      beatsDetectionResponse1,
-      beatsDetectionResponse2,
-      logstashDetectionResponse1,
-      logstashDetectionResponse2,
+      beatsDataDetectionResponse,
+      beatsManagementDetectionResponse,
+      logstashDataDetectionResponse,
+      logstashManagementDetectionResponse,
       apmDetectionResponse
     ]
   } = await callWithRequest(req, 'msearch', { body: msearch });
 
-  if (get(beatsDetectionResponse1, 'hits.total.value', 0) > 0 || get(beatsDetectionResponse2, 'hits.total.value', 0) > 0) {
+  if (get(beatsDataDetectionResponse, 'hits.total.value', 0) > 0
+    || get(beatsManagementDetectionResponse, 'hits.total.value', 0) > 0) {
     result[BEATS_SYSTEM_ID].mightExist = true;
   }
 
-  if (get(logstashDetectionResponse1, 'hits.total.value', 0) > 0 || get(logstashDetectionResponse2, 'hits.total.value', 0) > 0) {
+  if (get(logstashDataDetectionResponse, 'hits.total.value', 0) > 0
+    || get(logstashManagementDetectionResponse, 'hits.total.value', 0) > 0) {
     result[LOGSTASH_SYSTEM_ID].mightExist = true;
   }
 
@@ -189,13 +192,27 @@ function getUuidBucketName(productName) {
 }
 
 function isBeatFromAPM(bucket) {
-  if (!bucket.beat_type) {
+  const beatType = get(bucket, 'beat_type');
+  if (!beatType) {
     return false;
   }
 
-  return get(bucket, 'beat_type.buckets[0].key') === 'apm-server';
+  return get(beatType, 'buckets[0].key') === 'apm-server';
 }
 
+/**
+ * Determines if we should ignore this bucket from this product.
+ *
+ * We need this logic because APM and Beats are separate products, but their
+ * monitoring data appears in the same index (.monitoring-beats-*) and the single
+ * way to determine the difference between two documents in that index
+ * is `beats_stats.beat.type` which we are performing a terms agg in the above query.
+ * If that value is `apm-server` and we're attempting to calculating status for beats
+ * we need to ignore that data from that particular  bucket.
+ *
+ * @param {*} product The product object, which are stored in PRODUCTS
+ * @param {*} bucket The agg bucket in the response
+ */
 function shouldSkipBucket(product, bucket) {
   if (product.name === BEATS_SYSTEM_ID && isBeatFromAPM(bucket)) {
     return true;
