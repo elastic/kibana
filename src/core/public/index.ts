@@ -36,17 +36,31 @@ export { CoreContext, CoreSystem } from './core_system';
  * Core services exposed to the start lifecycle
  *
  * @public
+ *
+ * @internalRemarks We document the properties with \@link tags to improve
+ * navigation in the generated docs until there's a fix for
+ * https://github.com/Microsoft/web-build-tools/issues/1237
  */
 export interface CoreSetup {
+  /** {@link I18nSetup} */
   i18n: I18nSetup;
+  /** {@link InjectedMetadataSetup} */
   injectedMetadata: InjectedMetadataSetup;
+  /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
+  /** {@link NotificationsSetup} */
   notifications: NotificationsSetup;
+  /** {@link HttpSetup} */
   http: HttpSetup;
+  /** {@link BasePathSetup} */
   basePath: BasePathSetup;
+  /** {@link CapabilitiesSetup} */
   capabilities: CapabilitiesSetup;
+  /** {@link UiSettingsSetup} */
   uiSettings: UiSettingsSetup;
+  /** {@link ChromeSetup} */
   chrome: ChromeSetup;
+  /** {@link OverlaySetup} */
   overlays: OverlaySetup;
 }
 
@@ -54,13 +68,13 @@ export {
   BasePathSetup,
   HttpSetup,
   FatalErrorsSetup,
-  I18nSetup,
   CapabilitiesSetup,
   Capabilities,
   ChromeSetup,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
+  I18nSetup,
   InjectedMetadataSetup,
   InjectedMetadataParams,
   Plugin,
