@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import ProgressBar from 'progress';
 import {
   ErrorReporter,
   I18nConfig,
@@ -42,7 +41,7 @@ export async function extractUntrackedMessages({
   const inputPaths = Array.isArray(path) ? path : [path || './'];
   const availablePaths = Object.values(config.paths);
   const ignore = availablePaths.concat([
-    'build/**',
+    '**/build/**',
     '**/webpackShims/**',
     '**/__fixtures__/**',
     'utilities/**',
@@ -50,9 +49,10 @@ export async function extractUntrackedMessages({
     'docs/**',
     'optimize/**',
     'data/**',
-    'target/**',
+    '**/target/**',
     'tasks/**',
-    'test/**',
+    '**/test/**',
+    '**/scripts/**',
     'src/dev/**',
     '**/target/**',
     'plugins/canvas/**',
@@ -83,20 +83,12 @@ export async function extractUntrackedMessages({
             }))
         );
 
-        // const bar = new ProgressBar('[:bar] :current/:total :elapseds - :name', {
-        //   total: files.length + 1,
-        //   width: 30,
-        // });
-
         for (const { name, content } of files) {
           const reporterWithContext = reporter.withContext({ name });
-          // bar.tick({ name });
-
           for (const [id] of extractFunction(content, reporterWithContext)) {
             reporterWithContext.report(`File ${name} contains i18n label (${id}).`);
           }
         }
-        // bar.tick({ name: 'Complete' });
       })
     );
   }
