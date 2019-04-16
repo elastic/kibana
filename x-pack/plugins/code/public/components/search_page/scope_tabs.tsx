@@ -42,7 +42,7 @@ export class ScopeTabs extends React.PureComponent<Props> {
           <EuiTab
             className="codeUtility__width--half"
             isSelected={this.props.scope !== SearchScope.REPOSITORY}
-            onClick={this.onTabClicked(SearchScope.DEFAULT)}>
+            onClick={this.onTabClicked(SearchScope.DEFAULT)}
           >
             Code
           </EuiTab>
