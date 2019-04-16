@@ -6,9 +6,6 @@
 
 import './kibana_services';
 
-import './vendor/jquery_ui_sortable.js';
-import './vendor/jquery_ui_sortable.css';
-
 // import the uiExports that we want to "use"
 import 'uiExports/autocompleteProviders';
 import 'uiExports/fieldFormats';
@@ -17,6 +14,7 @@ import 'uiExports/search';
 import 'uiExports/embeddableFactories';
 import 'ui/agg_types';
 
+import { uiCapabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
@@ -55,6 +53,7 @@ routes
       $scope.delete = (ids) => {
         return gisMapSavedObjectLoader.delete(ids);
       };
+      $scope.readOnly = !uiCapabilities.maps.save;
     },
     resolve: {
       hasMaps: function (kbnUrl) {

@@ -5,6 +5,7 @@
  */
 
 import { get, set } from 'lodash';
+import { QUERY } from '../../../common/constants';
 
 /**
  * The types of queries we are handling do not need to use `must`,
@@ -29,10 +30,17 @@ export const getFilteredQuery = (
   } else {
     filtersObj = filters;
   }
-
-  // transfer the provided filters from `must` to `filter`
-  const userFilters = get(filtersObj, 'bool.must', []);
-  if (userFilters.length) {
+  if (get(filtersObj, 'bool.must', undefined)) {
+    const userFilters = get(filtersObj, 'bool.must', []).map((filter: any) =>
+      filter.simple_query_string
+        ? {
+            simple_query_string: {
+              ...filter.simple_query_string,
+              fields: QUERY.SIMPLE_QUERY_STRING_FIELDS,
+            },
+          }
+        : filter
+    );
     delete filtersObj.bool.must;
     filtersObj.bool.filter = [...userFilters];
   }

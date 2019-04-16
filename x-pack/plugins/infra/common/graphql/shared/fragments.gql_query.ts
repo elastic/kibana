@@ -13,4 +13,11 @@ export const sharedFragments = {
       tiebreaker
     }
   `,
+  InfraSourceFields: gql`
+    fragment InfraSourceFields on InfraSource {
+      id
+      version
+      updatedAt
+    }
+  `,
 };

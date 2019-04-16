@@ -16,7 +16,8 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
@@ -36,6 +37,9 @@ describe('<AutoFollowPatternList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
+    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
+    // and we can mock them all with a 200 instead of mocking each one individually.
+    server.respondWith([200, {}, '']);
 
     // Register helpers to mock Http Requests
     ({
@@ -230,7 +234,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     describe('detail panel', () => {
-      test('should open a detail panel when clicking on a follower index', () => {
+      test('should open a detail panel when clicking on an auto-follow pattern', () => {
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(false);
 
         clickAutoFollowPatternAt(0);
@@ -238,7 +242,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(true);
       });
 
-      test('should set the title the index that has been selected', () => {
+      test('should set the title the auto-follow pattern that has been selected', () => {
         clickAutoFollowPatternAt(0); // Open the detail panel
         expect(find('autoFollowPatternDetailsFlyoutTitle').text()).toEqual(autoFollowPattern1.name);
       });
@@ -249,7 +253,7 @@ describe('<AutoFollowPatternList />', () => {
         expect(exists('ccrAutoFollowPatternDetailPanelSettingsValues')).toBe(true);
       });
 
-      test('should set the correct follower index settings values', () => {
+      test('should set the correct auto-follow pattern settings values', () => {
         clickAutoFollowPatternAt(0);
 
         expect(find('ccrAutoFollowPatternDetailRemoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);

@@ -10,7 +10,23 @@ let validator: SpaceValidator;
 
 describe('validateSpaceName', () => {
   beforeEach(() => {
-    validator = new SpaceValidator({ shouldValidate: true });
+    validator = new SpaceValidator({
+      shouldValidate: true,
+      features: [
+        {
+          id: 'foo',
+          name: 'foo',
+          app: [],
+          privileges: {},
+        },
+        {
+          id: 'bar',
+          name: 'bar',
+          app: [],
+          privileges: {},
+        },
+      ],
+    });
   });
 
   test('it allows a name with special characters', () => {
@@ -125,5 +141,29 @@ describe('validateURLIdentifier', () => {
     };
 
     expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
+  });
+});
+
+describe('validateSpaceFeatures', () => {
+  it('allows features to be disabled', () => {
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: ['foo'],
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({ isInvalid: false });
+  });
+
+  it('allows all features to be disabled', () => {
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: ['foo', 'bar'],
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({
+      isInvalid: false,
+    });
   });
 });

@@ -4,28 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { BucketAgg } from 'elasticsearch';
-import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
+import { BucketAgg, ESFilter } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_AGENT_NAME,
   SERVICE_NAME,
   TRANSACTION_TYPE
 } from '../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../common/idx';
+import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 
-export interface ServiceAPIResponse {
-  serviceName: string;
-  types: string[];
-  agentName?: string;
-}
-
-export async function getService(
-  serviceName: string,
-  setup: Setup
-): Promise<ServiceAPIResponse> {
+export type ServiceAPIResponse = PromiseReturnType<typeof getService>;
+export async function getService(serviceName: string, setup: Setup) {
   const { start, end, esFilterQuery, client, config } = setup;
 
   const filter: ESFilter[] = [

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { getSnapshotQueryString } from '../../../../../plugins/uptime/public/components/queries/snapshot/get_snapshot';
+import { snapshotQueryString } from '../../../../../plugins/uptime/public/queries';
 import snapshot from './fixtures/snapshot';
 import snapshotFilteredByDown from './fixtures/snapshot_filtered_by_down';
 import snapshotFilteredByUp from './fixtures/snapshot_filtered_by_up';
@@ -19,7 +19,7 @@ export default function ({ getService }) {
     it('will fetch a monitor snapshot summary', async () => {
       const getSnapshotQuery = {
         operationName: 'Snapshot',
-        query: getSnapshotQueryString,
+        query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -37,7 +37,7 @@ export default function ({ getService }) {
     it('will fetch a monitor snapshot filtered by down status', async () => {
       const getSnapshotQuery = {
         operationName: 'Snapshot',
-        query: getSnapshotQueryString,
+        query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -56,7 +56,7 @@ export default function ({ getService }) {
     it('will fetch a monitor snapshot filtered by up status', async () => {
       const getSnapshotQuery = {
         operationName: 'Snapshot',
-        query: getSnapshotQueryString,
+        query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -75,7 +75,7 @@ export default function ({ getService }) {
     it('returns null histogram data when no data present', async () => {
       const getSnapshotQuery = {
         operationName: 'Snapshot',
-        query: getSnapshotQueryString,
+        query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-25T04:30:54.740Z',
           dateRangeEnd: '2019-01-28T04:50:54.740Z',
@@ -106,7 +106,7 @@ export default function ({ getService }) {
       });
       const getSnapshotQuery = {
         operationName: 'Snapshot',
-        query: getSnapshotQueryString,
+        query: snapshotQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',

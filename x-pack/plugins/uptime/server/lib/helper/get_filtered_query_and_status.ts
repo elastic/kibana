@@ -67,10 +67,10 @@ export const getFilteredQueryAndStatusFilter = (
      */
     const otherFilters = getFilteredQuery(dateRangeStart, dateRangeEnd, {
       bool: {
-        must: get(filterObject, 'bool.must', [])
-          .filter((filter: any) => !filter.match || !filter.match['monitor.status'])
-          .map(addFieldsToSimpleQuery),
-        must_not: get(filterObject, 'bool.must_not', []).map(addFieldsToSimpleQuery),
+        must: filterObject.bool.must.filter(
+          (filter: any) =>
+            (filter.match && !filter.match['monitor.status']) || filter.simple_query_string
+        ),
       },
     });
 

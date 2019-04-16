@@ -18,6 +18,7 @@
  */
 
 import { registerUserActionRoute } from './server/routes/api/ui_metric';
+import { registerUiMetricUsageCollector } from './server/usage/index';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -30,6 +31,7 @@ export default function (kibana) {
 
     init: function (server) {
       registerUserActionRoute(server);
+      registerUiMetricUsageCollector(server);
     }
   });
 }

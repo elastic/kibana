@@ -5,9 +5,9 @@
  */
 
 import * as Joi from 'joi';
-import { ReturnTypeList } from 'x-pack/plugins/beats_management/common/return_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
+import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
 
@@ -27,8 +27,7 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
     }),
   },
   handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
-    let tags: BeatTag[];
-    tags = await libs.tags.getAll(
+    const tags = await libs.tags.getAll(
       request.user,
       request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
     );
