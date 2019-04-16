@@ -20,6 +20,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   describe('spaces feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
+      await esArchiver.load('maps/kibana');
+    });
+
+    after(async () => {
+      await esArchiver.unload('maps/kibana');
     });
 
     describe('space with no features disabled', () => {
