@@ -54,7 +54,7 @@ export function TransactionTabs({
 }: Props) {
   const tabs = [timelineTab, metadataTab];
   const currentTab =
-    urlParams.detailTab === timelineTab.key ? timelineTab : metadataTab;
+    urlParams.detailTab === metadataTab.key ? metadataTab : timelineTab;
 
   return (
     <React.Fragment>
