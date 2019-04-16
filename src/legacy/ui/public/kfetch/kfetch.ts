@@ -35,7 +35,6 @@ export interface KFetchOptions extends RequestInit {
 
 export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
-  parseJson?: boolean;
 }
 
 export interface Interceptor {
@@ -51,7 +50,7 @@ export const addInterceptor = (interceptor: Interceptor) => interceptors.push(in
 
 export async function kfetch(
   options: KFetchOptions,
-  { prependBasePath = true, parseJson = true }: KFetchKibanaOptions = {}
+  { prependBasePath = true }: KFetchKibanaOptions = {}
 ) {
   const combinedOptions = withDefaultOptions(options);
   const promise = requestInterceptors(combinedOptions).then(
@@ -62,15 +61,16 @@ export async function kfetch(
       });
 
       return window.fetch(fullUrl, restOptions).then(async res => {
-        const body = parseJson ? await getBodyAsJson(res) : null;
         if (!res.ok) {
-          throw new KFetchError(res, body);
+          throw new KFetchError(res, await getBodyAsJson(res));
         }
         const contentType = res.headers.get('content-type');
-        if (contentType && contentType.split(';')[0] === 'application/ndjson') {
+        const primaryType = contentType && contentType.split(';')[0];
+
+        if (primaryType === 'application/ndjson' || primaryType === 'text/csv') {
           return await getBodyAsBlob(res);
         }
-        return parseJson ? body : res;
+        return await getBodyAsJson(res);
       });
     }
   );

@@ -16,21 +16,21 @@ export function serverFixture() {
     decorate: stub(),
 
     info: {
-      protocol: 'protocol'
+      protocol: 'protocol',
     },
 
     auth: {
       strategy: stub(),
-      test: stub()
+      test: stub(),
     },
 
     plugins: {
       elasticsearch: {
-        createCluster: stub()
+        createCluster: stub(),
       },
 
       kibana: {
-        systemApi: { isSystemApiRequest: stub() }
+        systemApi: { isSystemApiRequest: stub() },
       },
 
       security: {
@@ -44,11 +44,10 @@ export function serverFixture() {
           isAvailable: stub(),
           feature: stub(),
           license: {
-            isOneOf: stub()
-          }
-        }
-      }
-    }
+            isOneOf: stub(),
+          },
+        },
+      },
+    },
   };
 }
-

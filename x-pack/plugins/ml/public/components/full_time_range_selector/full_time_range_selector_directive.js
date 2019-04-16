@@ -5,30 +5,54 @@
  */
 
 
-
-import template from './full_time_range_selector.html';
-
-import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+const module = uiModules.get('apps/ml', ['react']);
 
-module.directive('mlFullTimeRangeSelector', function (Private) {
+import { I18nContext } from 'ui/i18n';
+
+import { FullTimeRangeSelector } from './index';
+
+// Angular directive wrapper for the 'Use full time range' button.
+module.directive('mlFullTimeRangeSelector', function () {
   return {
     restrict: 'E',
     replace: true,
-    template,
     scope: {
       indexPattern: '=',
       disabled: '=',
       query: '='
     },
-    controller: function ($scope) {
-      const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
+    link: (scope, element) => {
 
-      $scope.setFullTimeRange = function () {
-        mlFullTimeRangeSelectorService.setFullTimeRange($scope.indexPattern, $scope.query);
-      };
+      function renderComponent() {
+        const props = {
+          indexPattern: scope.indexPattern,
+          query: scope.query,
+          disabled: scope.disabled
+        };
+
+        ReactDOM.render(
+          <I18nContext>
+            {React.createElement(FullTimeRangeSelector, props)}
+          </I18nContext>,
+          element[0]
+        );
+      }
+
+      renderComponent();
+
+      // As the directive is only used in the job wizards and the data visualizer,
+      // it is safe to only watch the disabled property.
+      scope.$watch('disabled', renderComponent);
+
+      element.on('$destroy', () => {
+        scope.$destroy();
+      });
+
     }
+
   };
 });
