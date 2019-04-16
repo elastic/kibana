@@ -17,6 +17,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  // @ts-ignore
   EuiInMemoryTable,
   EuiPanel,
   EuiPopover,
@@ -272,7 +273,6 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       </EuiFlexGroup>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      // @ts-ignore
       <EuiInMemoryTable
         items={tableItems}
         columns={columns}

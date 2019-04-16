@@ -6,7 +6,11 @@
 
 import React, { SFC, useEffect, useState } from 'react';
 
-import { EuiEmptyPrompt, EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  // @ts-ignore
+  EuiInMemoryTable,
+} from '@elastic/eui';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
@@ -37,7 +41,6 @@ export const DataFrameJobList: SFC = () => {
   };
 
   return (
-    // @ts-ignore
     <EuiInMemoryTable
       columns={columns}
       hasActions={false}
