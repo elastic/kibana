@@ -2,7 +2,7 @@
 
 exports[`render symbol tree correctly 1`] = `
 <div
-  className="sc-bdVaJa kOLXUa"
+  className="codeContainer__symbolTree"
 >
   <nav
     className="euiSideNav"
@@ -81,7 +81,7 @@ exports[`render symbol tree correctly 1`] = `
               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                className="sc-bwzfXH jYPrbO"
+                className="codeSymbol"
               >
                 <svg
                   className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -109,7 +109,6 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrow1"
                 >
                   <a
-                    className="code-link"
                     href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?tab=structure"
                     onClick={[Function]}
                   >
@@ -117,7 +116,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                     >
                       <div
-                        className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill sc-htpNat hDSXcY"
+                        className="euiToken euiToken--tokenTint12 euiToken--rectangle euiToken--small euiToken--fill"
                       >
                         <svg
                           className="euiIcon euiIcon--medium"
@@ -154,13 +153,12 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH jYpsNE"
+                    className="codeSymbol codeSymbol--nested"
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrow1"
                     >
                       <a
-                        className="code-link"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?tab=structure"
                         onClick={[Function]}
                       >
@@ -168,7 +166,7 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                         >
                           <div
-                            className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                            className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
                           >
                             <svg
                               className="euiIcon euiIcon--medium"
@@ -204,13 +202,12 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH jYpsNE"
+                    className="codeSymbol codeSymbol--nested"
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrow1"
                     >
                       <a
-                        className="code-link"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?tab=structure"
                         onClick={[Function]}
                       >
@@ -218,7 +215,7 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                         >
                           <div
-                            className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                            className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
                           >
                             <svg
                               className="euiIcon euiIcon--medium"
@@ -254,7 +251,7 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH jYPrbO"
+                    className="codeSymbol"
                   >
                     <svg
                       className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -282,7 +279,6 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexItem euiFlexItem--flexGrow1"
                     >
                       <a
-                        className="code-link"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?tab=structure"
                         onClick={[Function]}
                       >
@@ -290,7 +286,7 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                         >
                           <div
-                            className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                            className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
                           >
                             <svg
                               className="euiIcon euiIcon--medium"
@@ -328,13 +324,12 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="codeSymbol codeSymbol--nested"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?tab=structure"
                             onClick={[Function]}
                           >
@@ -342,7 +337,7 @@ exports[`render symbol tree correctly 1`] = `
                               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                             >
                               <div
-                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
                               >
                                 <svg
                                   className="euiIcon euiIcon--medium"
@@ -378,13 +373,12 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="codeSymbol codeSymbol--nested"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?tab=structure"
                             onClick={[Function]}
                           >
@@ -392,7 +386,7 @@ exports[`render symbol tree correctly 1`] = `
                               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                             >
                               <div
-                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
                               >
                                 <svg
                                   className="euiIcon euiIcon--medium"
@@ -428,13 +422,12 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="codeSymbol codeSymbol--nested"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?tab=structure"
                             onClick={[Function]}
                           >
@@ -442,7 +435,7 @@ exports[`render symbol tree correctly 1`] = `
                               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                             >
                               <div
-                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                className="euiToken euiToken--tokenTint02 euiToken--circle euiToken--small"
                               >
                                 <svg
                                   className="euiIcon euiIcon--medium"
@@ -478,13 +471,12 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="codeSymbol codeSymbol--nested"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
                             href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?tab=structure"
                             onClick={[Function]}
                           >
@@ -492,7 +484,7 @@ exports[`render symbol tree correctly 1`] = `
                               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                             >
                               <div
-                                className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                className="euiToken euiToken--tokenTint04 euiToken--circle euiToken--small"
                               >
                                 <svg
                                   className="euiIcon euiIcon--medium"
@@ -528,13 +520,12 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="codeSymbol codeSymbol--nested"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
                             href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?tab=structure"
                             onClick={[Function]}
                           >
@@ -542,7 +533,7 @@ exports[`render symbol tree correctly 1`] = `
                               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                             >
                               <div
-                                className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                className="euiToken euiToken--tokenTint07 euiToken--circle euiToken--small"
                               >
                                 <svg
                                   className="euiIcon euiIcon--medium"
@@ -578,7 +569,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYPrbO"
+                        className="codeSymbol"
                       >
                         <svg
                           className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -606,7 +597,6 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
                             href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?tab=structure"
                             onClick={[Function]}
                           >
@@ -614,7 +604,7 @@ exports[`render symbol tree correctly 1`] = `
                               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                             >
                               <div
-                                className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                className="euiToken euiToken--tokenTint01 euiToken--circle euiToken--small"
                               >
                                 <svg
                                   className="euiIcon euiIcon--medium"
@@ -652,13 +642,12 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
-                            className="sc-bwzfXH jYpsNE"
+                            className="codeSymbol codeSymbol--nested"
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrow1"
                             >
                               <a
-                                className="code-link"
                                 href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?tab=structure"
                                 onClick={[Function]}
                               >
@@ -666,7 +655,7 @@ exports[`render symbol tree correctly 1`] = `
                                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive code-structure-node"
                                 >
                                   <div
-                                    className="euiToken euiToken--tokenTint10 euiToken--circle euiToken--small sc-htpNat hDSXcY"
+                                    className="euiToken euiToken--tokenTint10 euiToken--circle euiToken--small"
                                   >
                                     <svg
                                       className="euiIcon euiIcon--medium"
