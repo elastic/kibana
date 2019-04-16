@@ -170,9 +170,9 @@ const visModel = {
             joins: [{ type: 'column', columns: ['col-0-1', 'timestamp'] }]
         },
         fields: [ // these are calculated based on the definition in `meta`
-            { type: 'date', name: 'joined_date', aggregatable: false },
-            { type: 'number', name: 'aggs_value', aggregatable: false },
-            { type: 'number', name: 'sql_value', aggregatable: false },
+            { type: 'date', name: 'joined_date', aggregatable: false, datasourceRef: 'tablebuilder_result' },
+            { type: 'number', name: 'aggs_value', aggregatable: false, datasourceRef: 'tablebuilder_result' },
+            { type: 'number', name: 'sql_value', aggregatable: false, datasourceRef: 'tablebuilder_result' },
         ]
     },
     datatableSpecs: [
