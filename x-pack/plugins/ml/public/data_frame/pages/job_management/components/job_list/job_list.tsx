@@ -4,17 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { SFC, useEffect, useState } from 'react';
+import React, { FunctionComponent, SFC, useEffect, useState } from 'react';
 
-import {
-  EuiEmptyPrompt,
-  // @ts-ignore
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
+
+// TODO EUI's types for EuiInMemoryTable is missing these props
+interface ExpandableTableProps extends EuiInMemoryTableProps {
+  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
+  isExpandable: boolean;
+}
+
+const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
 export const DataFrameJobList: SFC = () => {
   const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
@@ -41,7 +45,7 @@ export const DataFrameJobList: SFC = () => {
   };
 
   return (
-    <EuiInMemoryTable
+    <ExpandableTable
       columns={columns}
       hasActions={false}
       isExpandable={true}

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { FunctionComponent, useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -17,8 +17,8 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiInMemoryTable,
+  EuiInMemoryTableProps,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
@@ -27,6 +27,14 @@ import {
   EuiTitle,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
+
+// TODO EUI's types for EuiInMemoryTable is missing these props
+interface ExpandableTableProps extends EuiInMemoryTableProps {
+  itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
+  isExpandable: boolean;
+}
+
+const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -273,7 +281,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       </EuiFlexGroup>
       {loading && <EuiProgress size="xs" color="accent" />}
       {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
-      <EuiInMemoryTable
+      <ExpandableTable
         items={tableItems}
         columns={columns}
         pagination={true}
