@@ -5,7 +5,6 @@
  */
 
 import { shallow } from 'enzyme';
-import { LocationDescriptorObject, LocationListener, UnregisterCallback } from 'history';
 import * as React from 'react';
 
 import { SiemNavigationComponent } from './';
@@ -14,7 +13,6 @@ import { setBreadcrumbs } from './breadcrumbs';
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
-const NOOP = () => null;
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
@@ -37,17 +35,14 @@ describe('SIEM Navigation', () => {
       length: 2,
       location,
       action: pop,
-      push: NOOP,
-      replace: NOOP,
-      go: NOOP,
-      goBack: NOOP,
-      goForward: NOOP,
-      block: (t: UnregisterCallback) => t,
-      createHref: (t: LocationDescriptorObject) => `${t}`,
-      listen: (l: LocationListener) => {
-        const temp: UnregisterCallback = () => null;
-        return temp;
-      },
+      push: jest.fn(),
+      replace: jest.fn(),
+      go: jest.fn(),
+      goBack: jest.fn(),
+      goForward: jest.fn(),
+      block: jest.fn(),
+      createHref: jest.fn(),
+      listen: jest.fn(),
     },
   };
   const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
