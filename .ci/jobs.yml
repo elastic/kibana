@@ -1,26 +1,34 @@
 JOB:
-  # - kibana-intake
-  # - x-pack-intake
-  # - kibana-ciGroup1
-  # - kibana-ciGroup2
-  # - kibana-ciGroup3
-  # - kibana-ciGroup4
-  # - kibana-ciGroup5
-  # - kibana-ciGroup6
-  # - kibana-ciGroup7
-  # - kibana-ciGroup8
-  # - kibana-ciGroup9
-  # - kibana-ciGroup10
-  # - kibana-ciGroup11
-  # - kibana-ciGroup12
-  # # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  # - x-pack-ciGroup1
-  # - x-pack-ciGroup2
-  # - x-pack-ciGroup3
-  # - x-pack-ciGroup4
-  # - x-pack-ciGroup5
-  # - x-pack-ciGroup6
-  - x-pack-ciGroup7
-
+  - x-pack-ciGroup7-1
+  - x-pack-ciGroup7-2
+  - x-pack-ciGroup7-3
+  - x-pack-ciGroup7-4
+  - x-pack-ciGroup7-5
+  - x-pack-ciGroup7-6
+  - x-pack-ciGroup7-7
+  - x-pack-ciGroup7-8
+  - x-pack-ciGroup7-9
+  - x-pack-ciGroup7-10
+  - x-pack-ciGroup7-11
+  - x-pack-ciGroup7-12
+  - x-pack-ciGroup7-13
+  - x-pack-ciGroup7-14
+  - x-pack-ciGroup7-15
+  - x-pack-ciGroup7-16
+  - x-pack-ciGroup7-17
+  - x-pack-ciGroup7-18
+  - x-pack-ciGroup7-19
+  - x-pack-ciGroup7-20
+  - x-pack-ciGroup7-21
+  - x-pack-ciGroup7-22
+  - x-pack-ciGroup7-23
+  - x-pack-ciGroup7-24
+  - x-pack-ciGroup7-25
+  - x-pack-ciGroup7-26
+  - x-pack-ciGroup7-27
+  - x-pack-ciGroup7-28
+  - x-pack-ciGroup7-29
+  - x-pack-ciGroup7-30
+  
 # `~` is yaml for `null`
 exclude: ~
