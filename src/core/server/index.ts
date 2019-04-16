@@ -31,10 +31,10 @@ export {
   APICaller,
 } from './elasticsearch';
 export {
-  Authenticate,
+  AuthenticationHandler,
   AuthToolkit,
   KibanaRequest,
-  OnRequest,
+  OnRequestHandler,
   OnRequestToolkit,
   Router,
 } from './http';

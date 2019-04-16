@@ -73,7 +73,7 @@ const toolkit: OnRequestToolkit = {
 };
 
 /** @public */
-export type OnRequest<Params = any, Query = any, Body = any> = (
+export type OnRequestHandler<Params = any, Query = any, Body = any> = (
   req: KibanaRequest<Params, Query, Body>,
   t: OnRequestToolkit
 ) => OnRequestResult | Promise<OnRequestResult>;
@@ -84,7 +84,7 @@ export type OnRequest<Params = any, Query = any, Body = any> = (
  * @param fn - an extension point allowing to perform custom logic for
  * incoming HTTP requests.
  */
-export function adoptToHapiOnRequestFormat(fn: OnRequest) {
+export function adoptToHapiOnRequestFormat(fn: OnRequestHandler) {
   return async function interceptRequest(
     req: Request,
     h: ResponseToolkit

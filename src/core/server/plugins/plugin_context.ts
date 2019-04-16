@@ -116,7 +116,7 @@ export function createPluginInitializerContext(
 
 // Added to improve http typings as make { http: Required<HttpSetup> }
 // Http service is disabled, when Kibana runs in optimizer mode or as dev cluster managed by cluster master.
-// In theory no plugins shouldn't try to access http dependency in this case.
+// In theory no plugins shouldn try to access http dependency in this case.
 function preventAccess() {
   throw new Error('Cannot use http contract when http server not started');
 }

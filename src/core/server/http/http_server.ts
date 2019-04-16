@@ -23,8 +23,8 @@ import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
-import { adoptToHapiAuthFormat, Authenticate } from './lifecycle/auth';
-import { adoptToHapiOnRequestFormat, OnRequest } from './lifecycle/on_request';
+import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
+import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
 import { Router } from './router';
 import {
   SessionStorageCookieOptions,
@@ -34,8 +34,20 @@ import {
 export interface HttpServerInfo {
   server: Server;
   options: ServerOptions;
-  registerAuth: <T>(fn: Authenticate<T>, cookieOptions: SessionStorageCookieOptions<T>) => void;
-  registerOnRequest: (fn: OnRequest) => void;
+  /**
+   * Define custom authentication and/or authorization mechanism for incoming requests.
+   * Applied to all resources by default. Only one AuthenticationHandler can be registered.
+   */
+  registerAuth: <T>(
+    authenticationHandler: AuthenticationHandler<T>,
+    cookieOptions: SessionStorageCookieOptions<T>
+  ) => void;
+  /**
+   * Define custom logic to perform for incoming requests.
+   * Applied to all resources by default.
+   * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
+   */
+  registerOnRequest: (requestHandler: OnRequestHandler) => void;
 }
 
 export class HttpServer {
@@ -90,8 +102,10 @@ export class HttpServer {
       server: this.server,
       options: serverOptions,
       registerOnRequest: this.registerOnRequest.bind(this),
-      registerAuth: <T>(fn: Authenticate<T>, cookieOptions: SessionStorageCookieOptions<T>) =>
-        this.registerAuth(fn, cookieOptions, config.basePath),
+      registerAuth: <T>(
+        fn: AuthenticationHandler<T>,
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) => this.registerAuth(fn, cookieOptions, config.basePath),
     };
   }
 
@@ -143,7 +157,7 @@ export class HttpServer {
     return `${routerPath}${routePath.slice(routePathStartIndex)}`;
   }
 
-  private registerOnRequest(fn: OnRequest) {
+  private registerOnRequest(fn: OnRequestHandler) {
     if (this.server === undefined) {
       throw new Error('Server is not created yet');
     }
@@ -152,7 +166,7 @@ export class HttpServer {
   }
 
   private async registerAuth<T>(
-    fn: Authenticate<T>,
+    fn: AuthenticationHandler<T>,
     cookieOptions: SessionStorageCookieOptions<T>,
     basePath?: string
   ) {

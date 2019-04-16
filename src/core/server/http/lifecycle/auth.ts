@@ -72,7 +72,7 @@ const toolkit: AuthToolkit = {
 };
 
 /** @public */
-export type Authenticate<T> = (
+export type AuthenticationHandler<T> = (
   request: Request,
   sessionStorage: SessionStorage<T>,
   t: AuthToolkit
@@ -80,7 +80,7 @@ export type Authenticate<T> = (
 
 /** @public */
 export function adoptToHapiAuthFormat<T = any>(
-  fn: Authenticate<T>,
+  fn: AuthenticationHandler<T>,
   sessionStorage: SessionStorageFactory<T>
 ) {
   return async function interceptAuth(

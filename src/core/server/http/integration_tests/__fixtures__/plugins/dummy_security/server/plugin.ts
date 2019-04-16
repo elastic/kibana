@@ -17,7 +17,7 @@
  * under the License.
  */
 import Boom from 'boom';
-import { Authenticate, CoreSetup } from '../../../../../../../../core/server';
+import { AuthenticationHandler, CoreSetup } from '../../../../../../../../core/server';
 
 interface User {
   id: string;
@@ -39,7 +39,7 @@ export const url = {
 export const sessionDurationMs = 30;
 export class DummySecurityPlugin {
   public setup(core: CoreSetup) {
-    const authenticate: Authenticate<Storage> = async (request, sessionStorage, t) => {
+    const authenticate: AuthenticationHandler<Storage> = async (request, sessionStorage, t) => {
       if (request.path === url.authRedirect) {
         return t.redirected(url.redirectTo);
       }
