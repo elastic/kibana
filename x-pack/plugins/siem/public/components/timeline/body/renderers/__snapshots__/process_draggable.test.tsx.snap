@@ -6,6 +6,6 @@ exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
   eventId="event-123"
   processExecutable="process-executable-1"
   processName="process-name-1"
-  processPid="process-pid-1"
+  processPid={123}
 />
 `;

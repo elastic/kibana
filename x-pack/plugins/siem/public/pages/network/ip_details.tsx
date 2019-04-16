@@ -18,8 +18,8 @@ import { FlowTargetSelect } from '../../components/flow_controls/flow_target_sel
 import { HeaderPage } from '../../components/header_page';
 import { LastBeatStat } from '../../components/last_beat_stat';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
+import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { manageQuery } from '../../components/page/manage_query';
-import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { IpOverview, IpOverviewId } from '../../components/page/network/ip_overview';
 import { DomainsQuery } from '../../containers/domains';

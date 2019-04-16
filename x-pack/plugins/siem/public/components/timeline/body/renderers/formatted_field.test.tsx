@@ -82,7 +82,7 @@ describe('Events', () => {
         contextId="test"
         fieldName="event.module"
         fieldType="text"
-        value={get('event.module', mockTimelineData[0].ecs)}
+        value={get('event.module[0]', mockTimelineData[0].ecs)}
       />
     );
 

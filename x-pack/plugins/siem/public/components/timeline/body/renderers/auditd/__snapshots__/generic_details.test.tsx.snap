@@ -54,22 +54,32 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
       },
       "destination": null,
       "event": Object {
-        "action": "disposed-credentials",
-        "category": "user-login",
+        "action": Array [
+          "disposed-credentials",
+        ],
+        "category": Array [
+          "user-login",
+        ],
         "dataset": null,
         "id": null,
-        "module": "auditd",
+        "module": Array [
+          "auditd",
+        ],
         "severity": null,
       },
       "geo": null,
       "host": Object {
-        "id": "0a63559c1acf4c419d979c4b4d8b83ff",
+        "id": Array [
+          "0a63559c1acf4c419d979c4b4d8b83ff",
+        ],
         "ip": Array [
           "139.59.11.147",
           "10.47.0.5",
           "fe80::ec0b:1bff:fe29:80bd",
         ],
-        "name": "suricata-bangalore",
+        "name": Array [
+          "suricata-bangalore",
+        ],
       },
       "http": null,
       "network": null,
@@ -80,7 +90,7 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
         ],
         "name": null,
         "pid": Array [
-          "21202",
+          21202,
         ],
         "ppid": null,
         "title": null,
@@ -91,7 +101,9 @@ exports[`GenericDetails rendering it renders the default AuditAcquiredCredsDetai
       "timestamp": "2019-03-13T03:35:21.614Z",
       "url": null,
       "user": Object {
-        "name": "root",
+        "name": Array [
+          "root",
+        ],
       },
       "zeek": null,
     }

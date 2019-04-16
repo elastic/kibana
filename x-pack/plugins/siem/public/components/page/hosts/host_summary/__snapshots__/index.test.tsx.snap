@@ -845,8 +845,12 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
       Object {
         "_id": "yneHlmgBjVl2VqDlAjPR",
         "host": Object {
-          "architecture": "x86_64",
-          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
+          "architecture": Array [
+            "x86_64",
+          ],
+          "id": Array [
+            "aa7ca589f1b8220002f2fc61c64cfbf1",
+          ],
           "ip": Array [
             "10.142.0.7",
             "fe80::4001:aff:fe8e:7",
@@ -854,14 +858,26 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
           "mac": Array [
             "42:01:0a:8e:00:07",
           ],
-          "name": "siem-kibana",
+          "name": Array [
+            "siem-kibana",
+          ],
           "os": Object {
-            "family": "debian",
-            "name": "Debian GNU/Linux",
-            "platform": "debian",
-            "version": "9 (stretch)",
+            "family": Array [
+              "debian",
+            ],
+            "name": Array [
+              "Debian GNU/Linux",
+            ],
+            "platform": Array [
+              "debian",
+            ],
+            "version": Array [
+              "9 (stretch)",
+            ],
           },
-          "type": "projects/189716325846/machineTypes/n1-standard-1",
+          "type": Array [
+            "projects/189716325846/machineTypes/n1-standard-1",
+          ],
         },
       }
     }

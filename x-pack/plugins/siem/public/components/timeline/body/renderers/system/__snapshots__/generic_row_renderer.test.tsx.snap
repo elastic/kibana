@@ -18,16 +18,24 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "auditd": null,
             "destination": null,
             "event": Object {
-              "action": "user_login",
+              "action": Array [
+                "user_login",
+              ],
               "category": null,
               "created": null,
-              "dataset": "login",
+              "dataset": Array [
+                "login",
+              ],
               "duration": null,
               "end": null,
               "hash": null,
               "id": null,
-              "kind": "event",
-              "module": "system",
+              "kind": Array [
+                "event",
+              ],
+              "module": Array [
+                "system",
+              ],
               "original": null,
               "outcome": Array [
                 "failure",
@@ -42,13 +50,17 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "file": null,
             "geo": null,
             "host": Object {
-              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "id": Array [
+                "7c21f5ed03b04d0299569d221fe18bbc",
+              ],
               "ip": Array [
                 "46.101.3.136",
                 "10.16.0.5",
                 "fe80::4066:42ff:fe19:b3b9",
               ],
-              "name": "zeek-london",
+              "name": Array [
+                "zeek-london",
+              ],
             },
             "http": null,
             "network": null,
@@ -57,7 +69,7 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
               "executable": null,
               "name": null,
               "pid": Array [
-                "6278",
+                6278,
               ],
               "ppid": null,
               "title": null,
@@ -66,7 +78,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "source": Object {
               "bytes": null,
               "geo": null,
-              "ip": "128.199.212.120",
+              "ip": Array [
+                "128.199.212.120",
+              ],
               "packets": null,
               "port": null,
             },
@@ -75,7 +89,9 @@ exports[`GenericRowRenderer #createGenericFileRowRenderer renders correctly agai
             "tls": null,
             "url": null,
             "user": Object {
-              "name": "Braden",
+              "name": Array [
+                "Braden",
+              ],
             },
             "zeek": null,
           }
@@ -105,16 +121,24 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "auditd": null,
             "destination": null,
             "event": Object {
-              "action": "process_started",
+              "action": Array [
+                "process_started",
+              ],
               "category": null,
               "created": null,
-              "dataset": "login",
+              "dataset": Array [
+                "login",
+              ],
               "duration": null,
               "end": null,
               "hash": null,
               "id": null,
-              "kind": "event",
-              "module": "system",
+              "kind": Array [
+                "event",
+              ],
+              "module": Array [
+                "system",
+              ],
               "original": null,
               "outcome": Array [
                 "failure",
@@ -129,13 +153,17 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "file": null,
             "geo": null,
             "host": Object {
-              "id": "7c21f5ed03b04d0299569d221fe18bbc",
+              "id": Array [
+                "7c21f5ed03b04d0299569d221fe18bbc",
+              ],
               "ip": Array [
                 "46.101.3.136",
                 "10.16.0.5",
                 "fe80::4066:42ff:fe19:b3b9",
               ],
-              "name": "zeek-london",
+              "name": Array [
+                "zeek-london",
+              ],
             },
             "http": null,
             "network": null,
@@ -144,7 +172,7 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
               "executable": null,
               "name": null,
               "pid": Array [
-                "6278",
+                6278,
               ],
               "ppid": null,
               "title": null,
@@ -153,7 +181,9 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "source": Object {
               "bytes": null,
               "geo": null,
-              "ip": "128.199.212.120",
+              "ip": Array [
+                "128.199.212.120",
+              ],
               "packets": null,
               "port": null,
             },
@@ -162,7 +192,9 @@ exports[`GenericRowRenderer #createGenericSystemRowRenderer renders correctly ag
             "tls": null,
             "url": null,
             "user": Object {
-              "name": "Evan",
+              "name": Array [
+                "Evan",
+              ],
             },
             "zeek": null,
           }

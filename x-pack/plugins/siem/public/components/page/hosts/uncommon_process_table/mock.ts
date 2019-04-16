@@ -20,8 +20,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           host: [],
           instances: 93,
           user: {
-            id: 0,
-            name: 'root',
+            id: ['0'],
+            name: ['root'],
           },
         },
         cursor: {
@@ -35,11 +35,11 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
             title: ['Hello World'],
             name: ['elrond.elstc.co'],
           },
-          host: [{ id: 'host-id-1', name: 'hello-world' }],
+          host: [{ id: ['host-id-1'], name: ['hello-world'] }],
           instances: 93,
           user: {
-            id: 0,
-            name: 'root',
+            id: ['0'],
+            name: ['root'],
           },
         },
         cursor: {
@@ -54,13 +54,13 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
             name: ['siem-kibana'],
           },
           host: [
-            { id: 'host-id-1', name: 'hello-world' },
-            { id: 'host-id-2', name: 'hello-world-2' },
+            { id: ['host-id-1'], name: ['hello-world'] },
+            { id: ['host-id-2'], name: ['hello-world-2'] },
           ],
           instances: 97,
           user: {
-            id: 1,
-            name: 'Evan',
+            id: ['1'],
+            name: ['Evan'],
           },
         },
         cursor: {
@@ -77,8 +77,8 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           host: [{ ip: ['127.0.0.1'] }],
           instances: 97,
           user: {
-            id: 1,
-            name: 'Evan',
+            id: ['1'],
+            name: ['Evan'],
           },
         },
         cursor: {
@@ -94,15 +94,15 @@ export const mockData: { UncommonProcess: UncommonProcessesData } = {
           },
           host: [
             { ip: ['127.0.0.1'] },
-            { id: 'host-id-1', name: 'hello-world' },
+            { id: ['host-id-1'], name: ['hello-world'] },
             { ip: ['127.0.0.1'] },
-            { id: 'host-id-2', name: 'hello-world-2' },
+            { id: ['host-id-2'], name: ['hello-world-2'] },
             { ip: ['127.0.0.1'] },
           ],
           instances: 97,
           user: {
-            id: 1,
-            name: 'Evan',
+            id: ['1'],
+            name: ['Evan'],
           },
         },
         cursor: {

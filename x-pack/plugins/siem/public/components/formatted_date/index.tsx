@@ -42,7 +42,7 @@ export const FormattedDate = pure<{
     return getOrEmptyTagFromValue(value);
   }
 
-  const maybeDate = moment(new Date(value!));
+  const maybeDate = moment(new Date(value));
 
   return maybeDate.isValid() ? (
     <LocalizedDateTooltip date={maybeDate.toDate()} fieldName={fieldName}>

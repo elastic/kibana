@@ -122,7 +122,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('host.name', node);
+      const hostName: string | null | undefined = get('host.name[0]', node);
       if (hostName != null) {
         const id = escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`);
         return (
@@ -136,10 +136,8 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: node.host!.id!,
+                field: 'host.name',
+                value: hostName,
               },
               queryDate: {
                 from: startDate,
@@ -174,7 +172,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('source.ip', node)}:{getOrEmptyTag('source.port', node)}
+        {formatIpSafely('source.ip[0]', node)}:{getOrEmptyTag('source.port', node)}
       </>
     ),
   },
@@ -184,7 +182,7 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     truncateText: true,
     render: ({ node }) => (
       <>
-        {formatIpSafely('destination.ip', node)}:{getOrEmptyTag('destination.port', node)}
+        {formatIpSafely('destination.ip[0]', node)}:{getOrEmptyTag('destination.port', node)}
       </>
     ),
   },

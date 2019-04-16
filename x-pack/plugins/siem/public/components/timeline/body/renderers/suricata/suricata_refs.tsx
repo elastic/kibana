@@ -17,7 +17,7 @@ const LinkEuiFlexItem = styled(EuiFlexItem)`
   display: inline;
 `;
 
-export const SuricataRefs = pure<{ signatureId: string }>(({ signatureId }) => {
+export const SuricataRefs = pure<{ signatureId: number }>(({ signatureId }) => {
   const links = getLinksFromSignature(signatureId);
   return (
     <EuiFlexGroup gutterSize="none" justifyContent="center" wrap>

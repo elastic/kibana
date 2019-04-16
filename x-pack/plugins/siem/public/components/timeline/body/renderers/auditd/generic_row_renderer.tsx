@@ -21,8 +21,8 @@ export const createGenericAuditRowRenderer = ({
   text: string;
 }): RowRenderer => ({
   isInstance: ecs => {
-    const module: string | null | undefined = get('event.module', ecs);
-    const action: string | null | undefined = get('event.action', ecs);
+    const module: string | null | undefined = get('event.module[0]', ecs);
+    const action: string | null | undefined = get('event.action[0]', ecs);
     return (
       module != null &&
       module.toLowerCase() === 'auditd' &&
@@ -55,8 +55,8 @@ export const createGenericFileRowRenderer = ({
   fileIcon?: IconType;
 }): RowRenderer => ({
   isInstance: ecs => {
-    const module: string | null | undefined = get('event.module', ecs);
-    const action: string | null | undefined = get('event.action', ecs);
+    const module: string | null | undefined = get('event.module[0]', ecs);
+    const action: string | null | undefined = get('event.action[0]', ecs);
     return (
       module != null &&
       module.toLowerCase() === 'auditd' &&
@@ -200,7 +200,6 @@ const auditdUnmountedRowRenderer = createGenericFileRowRenderer({
   text: i18n.UNMOUNTED,
 });
 
-// TODO: UI-Testing -- blows up when trying to use with array issues
 const auditdDeletedRowRenderer = createGenericFileRowRenderer({
   actionName: 'deleted',
   text: i18n.DELETED,

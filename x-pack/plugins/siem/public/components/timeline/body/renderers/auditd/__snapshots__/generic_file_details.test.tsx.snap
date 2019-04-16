@@ -43,38 +43,64 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         },
         "destination": null,
         "event": Object {
-          "action": "opened-file",
-          "category": "audit-rule",
+          "action": Array [
+            "opened-file",
+          ],
+          "category": Array [
+            "audit-rule",
+          ],
           "dataset": null,
           "id": null,
-          "module": "auditd",
+          "module": Array [
+            "auditd",
+          ],
           "severity": null,
         },
         "file": Object {
           "ctime": null,
-          "device": "00:00",
+          "device": Array [
+            "00:00",
+          ],
           "extension": null,
-          "gid": "0",
-          "group": "root",
-          "inode": "27672309",
-          "mode": "0666",
+          "gid": Array [
+            "0",
+          ],
+          "group": Array [
+            "root",
+          ],
+          "inode": Array [
+            "27672309",
+          ],
+          "mode": Array [
+            "0666",
+          ],
           "mtime": null,
-          "owner": "root",
-          "path": "/proc/15990/attr/current",
+          "owner": Array [
+            "root",
+          ],
+          "path": Array [
+            "/proc/15990/attr/current",
+          ],
           "size": null,
           "target_path": null,
           "type": null,
-          "uid": "0",
+          "uid": Array [
+            "0",
+          ],
         },
         "geo": null,
         "host": Object {
-          "id": "7c21f5ed03b04d0299569d221fe18bbc",
+          "id": Array [
+            "7c21f5ed03b04d0299569d221fe18bbc",
+          ],
           "ip": Array [
             "46.101.3.136",
             "10.16.0.5",
             "fe80::4066:42ff:fe19:b3b9",
           ],
-          "name": "zeek-london",
+          "name": Array [
+            "zeek-london",
+          ],
         },
         "http": null,
         "network": null,
@@ -87,10 +113,10 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
             "systemd-journal",
           ],
           "pid": Array [
-            "27244",
+            27244,
           ],
           "ppid": Array [
-            "1",
+            1,
           ],
           "title": Array [
             "/lib/systemd/systemd-journald",
@@ -104,7 +130,9 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         "timestamp": "2019-03-26T22:12:18.609Z",
         "url": null,
         "user": Object {
-          "name": "root",
+          "name": Array [
+            "root",
+          ],
         },
         "zeek": null,
       }

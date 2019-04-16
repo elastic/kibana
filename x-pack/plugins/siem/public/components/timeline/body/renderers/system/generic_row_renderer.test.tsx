@@ -53,8 +53,8 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      system.event != null
-        ? (system.event.action = 'some other value')
+      system.event != null && system.event.action != null
+        ? (system.event.action[0] = 'some other value')
         : expect(system.event).toBeDefined();
       expect(connectedToRenderer.isInstance(system)).toBe(false);
     });
@@ -114,8 +114,8 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      systemFile.event != null
-        ? (systemFile.event.action = 'some other value')
+      systemFile.event != null && systemFile.event.action != null
+        ? (systemFile.event.action[0] = 'some other value')
         : expect(systemFile.event).toBeDefined();
       expect(fileToRenderer.isInstance(systemFile)).toBe(false);
     });

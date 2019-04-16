@@ -59,7 +59,7 @@ export const sha1StringRenderer: StringRenderer = (value: string) =>
 export const DraggableZeekElement = pure<{
   id: string;
   field: string;
-  value: string | null;
+  value: string | null | undefined;
   stringRenderer?: StringRenderer;
 }>(({ id, field, value, stringRenderer = defaultStringRenderer }) =>
   value != null ? (
@@ -95,33 +95,35 @@ export const DraggableZeekElement = pure<{
   ) : null
 );
 
-export const Link = pure<{ value: string | null; link?: string | null }>(({ value, link }) => {
-  if (value != null) {
-    if (link != null) {
-      return (
-        <LinkFlexItem grow={false}>
-          <div>
-            <GoogleLink link={link}>{value}</GoogleLink>
-            <ExternalLinkIcon />
-          </div>
-        </LinkFlexItem>
-      );
+export const Link = pure<{ value: string | null | undefined; link?: string | null }>(
+  ({ value, link }) => {
+    if (value != null) {
+      if (link != null) {
+        return (
+          <LinkFlexItem grow={false}>
+            <div>
+              <GoogleLink link={link}>{value}</GoogleLink>
+              <ExternalLinkIcon />
+            </div>
+          </LinkFlexItem>
+        );
+      } else {
+        return (
+          <LinkFlexItem grow={false}>
+            <div>
+              <GoogleLink link={value} />
+              <ExternalLinkIcon />
+            </div>
+          </LinkFlexItem>
+        );
+      }
     } else {
-      return (
-        <LinkFlexItem grow={false}>
-          <div>
-            <GoogleLink link={value} />
-            <ExternalLinkIcon />
-          </div>
-        </LinkFlexItem>
-      );
+      return null;
     }
-  } else {
-    return null;
   }
-});
+);
 
-export const TotalVirusLinkSha = pure<{ value: string | null }>(({ value }) =>
+export const TotalVirusLinkSha = pure<{ value: string | null | undefined }>(({ value }) =>
   value != null ? (
     <LinkFlexItem grow={false}>
       <div>
@@ -150,7 +152,7 @@ export const zeekConnLogDictionay: Readonly<Record<string, string>> = {
   OTH: i18n.OTH,
 };
 
-export const extractStateLink = (state: string | null) => {
+export const extractStateLink = (state: string | null | undefined) => {
   if (state != null) {
     const lookup = zeekConnLogDictionay[state];
     if (lookup != null) {
@@ -163,41 +165,37 @@ export const extractStateLink = (state: string | null) => {
   }
 };
 
-export const extractStateValue = (state: string | null): string | null =>
+export const extractStateValue = (state: string | null | undefined): string | null =>
   state != null && zeekConnLogDictionay[state] != null ? zeekConnLogDictionay[state] : null;
 
-export const constructDroppedValue = (dropped: boolean | null): string | null =>
+export const constructDroppedValue = (dropped: boolean | null | undefined): string | null =>
   dropped != null ? String(dropped) : null;
 
 export const ZeekSignature = pure<{ data: Ecs }>(({ data }) => {
   const id = data._id;
-  const sessionId: string | null = get('zeek.session_id', data);
-
-  const dataSet: string | null = get('event.dataset', data);
-
-  const sslVersion: string | null = get('zeek.ssl.version', data);
-  const cipher: string | null = get('zeek.ssl.cipher', data);
-
-  const state: string | null = get('zeek.connection.state', data);
-  const history: string | null = get('zeek.connection.history', data);
-
-  const note: string | null = get('zeek.notice.note', data);
-  const noteMsg: string | null = get('zeek.notice.msg', data);
-  const dropped: string | null = constructDroppedValue(get('zeek.notice.dropped', data));
-
-  const dnsQuery: string | null = get('zeek.dns.query', data);
-  const qClassName: string | null = get('zeek.dns.qclass_name', data);
-
-  const httpMethod: string | null = get('http.request.method', data);
-  const httpResponseStatusCode: string | null = get('http.response.status_code', data);
-
-  const urlOriginal: string | null = get('url.original', data);
-
-  const fileSha1: string | null = get('zeek.files.sha1', data);
-  const filemd5: string | null = get('zeek.files.md5', data);
-
-  const stateLink: string | null = extractStateLink(state);
-  const stateValue: string | null = extractStateValue(state);
+  const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
+  const dataSet: string | null | undefined = get('event.dataset[0]', data);
+  const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);
+  const cipher: string | null | undefined = get('zeek.ssl.cipher[0]', data);
+  const state: string | null | undefined = get('zeek.connection.state[0]', data);
+  const history: string | null | undefined = get('zeek.connection.history[0]', data);
+  const note: string | null | undefined = get('zeek.notice.note[0]', data);
+  const noteMsg: string | null | undefined = get('zeek.notice.msg[0]', data);
+  const dropped: string | null | undefined = constructDroppedValue(
+    get('zeek.notice.dropped[0]', data)
+  );
+  const dnsQuery: string | null | undefined = get('zeek.dns.query[0]', data);
+  const qClassName: string | null | undefined = get('zeek.dns.qclass_name[0]', data);
+  const httpMethod: string | null | undefined = get('http.request.method[0]', data);
+  const httpResponseStatusCode: string | null | undefined = get(
+    'http.response.status_code[0]',
+    data
+  );
+  const urlOriginal: string | null | undefined = get('url.original[0]', data);
+  const fileSha1: string | null | undefined = get('zeek.files.sha1[0]', data);
+  const filemd5: string | null | undefined = get('zeek.files.md5[0]', data);
+  const stateLink: string | null | undefined = extractStateLink(state);
+  const stateValue: string | null | undefined = extractStateValue(state);
   return (
     <>
       <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>

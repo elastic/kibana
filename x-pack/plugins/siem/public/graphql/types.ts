@@ -13,9 +13,15 @@
 // Scalars
 // ====================================================
 
+export type ToStringArray = string[];
+
 export type Date = any;
 
-export type ToStringArray = string[];
+export type ToNumberArray = number[];
+
+export type ToDateArray = string[];
+
+export type ToBooleanArray = boolean[];
 
 export type EsValue = any;
 
@@ -178,17 +184,17 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
-  id?: number | null;
+  id?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full_name?: string | null;
+  full_name?: ToStringArray | null;
 
-  email?: string | null;
+  email?: ToStringArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 }
 
 export interface LastSourceHost {
@@ -200,69 +206,69 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToNumberArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface GeoEcsFields {
-  city_name?: string | null;
+  city_name?: ToStringArray | null;
 
-  continent_name?: string | null;
+  continent_name?: ToStringArray | null;
 
-  country_iso_code?: string | null;
+  country_iso_code?: ToStringArray | null;
 
-  country_name?: string | null;
+  country_name?: ToStringArray | null;
 
   location?: Location | null;
 
-  region_iso_code?: string | null;
+  region_iso_code?: ToStringArray | null;
 
-  region_name?: string | null;
+  region_name?: ToStringArray | null;
 }
 
 export interface Location {
-  lon?: number | null;
+  lon?: ToNumberArray | null;
 
-  lat?: number | null;
+  lat?: ToNumberArray | null;
 }
 
 export interface HostEcsFields {
-  architecture?: string | null;
+  architecture?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
-  ip?: (string | null)[] | null;
+  ip?: ToStringArray | null;
 
-  mac?: (string | null)[] | null;
+  mac?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
   os?: OsEcsFields | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface OsEcsFields {
-  platform?: string | null;
+  platform?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full?: string | null;
+  full?: ToStringArray | null;
 
-  family?: string | null;
+  family?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 
-  kernel?: string | null;
+  kernel?: ToStringArray | null;
 }
 
 export interface CursorType {
@@ -382,69 +388,69 @@ export interface PrimarySecondary {
 }
 
 export interface DestinationEcsFields {
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToNumberArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface EventEcsFields {
-  action?: string | null;
+  action?: ToStringArray | null;
 
-  category?: string | null;
+  category?: ToStringArray | null;
 
-  created?: Date | null;
+  created?: ToDateArray | null;
 
-  dataset?: string | null;
+  dataset?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToNumberArray | null;
 
-  end?: Date | null;
+  end?: ToDateArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
-  kind?: string | null;
+  kind?: ToStringArray | null;
 
-  module?: string | null;
+  module?: ToStringArray | null;
 
-  original?: (string | null)[] | null;
+  original?: ToStringArray | null;
 
   outcome?: ToStringArray | null;
 
-  risk_score?: number | null;
+  risk_score?: ToNumberArray | null;
 
-  risk_score_norm?: number | null;
+  risk_score_norm?: ToNumberArray | null;
 
-  severity?: number | null;
+  severity?: ToNumberArray | null;
 
-  start?: Date | null;
+  start?: ToDateArray | null;
 
-  timezone?: string | null;
+  timezone?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface NetworkEcsField {
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 
-  community_id?: string | null;
+  community_id?: ToStringArray | null;
 
-  direction?: string | null;
+  direction?: ToStringArray | null;
 
-  packets?: number | null;
+  packets?: ToNumberArray | null;
 
-  protocol?: string | null;
+  protocol?: ToStringArray | null;
 
-  transport?: string | null;
+  transport?: ToStringArray | null;
 }
 
 export interface SuricataEcsFields {
@@ -454,7 +460,7 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: ToStringArray | null;
+  flow_id?: ToNumberArray | null;
 
   proto?: ToStringArray | null;
 }
@@ -462,7 +468,7 @@ export interface SuricataEveData {
 export interface SuricataAlertData {
   signature?: ToStringArray | null;
 
-  signature_id?: ToStringArray | null;
+  signature_id?: ToNumberArray | null;
 }
 
 export interface TlsEcsFields {
@@ -478,7 +484,7 @@ export interface TlsClientCertificateData {
 }
 
 export interface FingerprintData {
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 }
 
 export interface TlsFingerprintsData {
@@ -486,7 +492,7 @@ export interface TlsFingerprintsData {
 }
 
 export interface TlsJa3Data {
-  hash?: string | null;
+  hash?: ToStringArray | null;
 }
 
 export interface TlsServerCertificateData {
@@ -494,7 +500,7 @@ export interface TlsServerCertificateData {
 }
 
 export interface ZeekEcsFields {
-  session_id?: string | null;
+  session_id?: ToStringArray | null;
 
   connection?: ZeekConnectionData | null;
 
@@ -510,119 +516,119 @@ export interface ZeekEcsFields {
 }
 
 export interface ZeekConnectionData {
-  local_resp?: string | null;
+  local_resp?: ToBooleanArray | null;
 
-  local_orig?: string | null;
+  local_orig?: ToBooleanArray | null;
 
-  missed_bytes?: number | null;
+  missed_bytes?: ToNumberArray | null;
 
-  state?: string | null;
+  state?: ToStringArray | null;
 
-  history?: string | null;
+  history?: ToStringArray | null;
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: number | null;
+  suppress_for?: ToNumberArray | null;
 
-  msg?: string | null;
+  msg?: ToStringArray | null;
 
-  note?: string | null;
+  note?: ToStringArray | null;
 
-  sub?: string | null;
+  sub?: ToStringArray | null;
 
-  dst?: string | null;
+  dst?: ToStringArray | null;
 
-  dropped?: boolean | null;
+  dropped?: ToBooleanArray | null;
 
-  peer_descr?: string | null;
+  peer_descr?: ToStringArray | null;
 }
 
 export interface ZeekDnsData {
-  AA?: boolean | null;
+  AA?: ToBooleanArray | null;
 
-  qclass_name?: string | null;
+  qclass_name?: ToStringArray | null;
 
-  RD?: boolean | null;
+  RD?: ToBooleanArray | null;
 
-  qtype_name?: string | null;
+  qtype_name?: ToStringArray | null;
 
-  rejected?: boolean | null;
+  rejected?: ToBooleanArray | null;
 
-  qtype?: number | null;
+  qtype?: ToStringArray | null;
 
-  query?: string | null;
+  query?: ToStringArray | null;
 
-  trans_id?: number | null;
+  trans_id?: ToNumberArray | null;
 
-  qclass?: number | null;
+  qclass?: ToStringArray | null;
 
-  RA?: boolean | null;
+  RA?: ToBooleanArray | null;
 
-  TC?: boolean | null;
+  TC?: ToBooleanArray | null;
 }
 
 export interface ZeekHttpData {
-  resp_mime_types?: string[] | null;
+  resp_mime_types?: ToStringArray | null;
 
-  trans_depth?: string | null;
+  trans_depth?: ToStringArray | null;
 
-  status_msg?: string | null;
+  status_msg?: ToStringArray | null;
 
-  resp_fuids?: string[] | null;
+  resp_fuids?: ToStringArray | null;
 
-  tags?: string[] | null;
+  tags?: ToStringArray | null;
 }
 
 export interface ZeekFileData {
-  session_ids?: string[] | null;
+  session_ids?: ToStringArray | null;
 
-  timedout?: boolean | null;
+  timedout?: ToBooleanArray | null;
 
-  local_orig?: boolean | null;
+  local_orig?: ToBooleanArray | null;
 
-  tx_host?: string | null;
+  tx_host?: ToStringArray | null;
 
-  source?: string | null;
+  source?: ToStringArray | null;
 
-  is_orig?: boolean | null;
+  is_orig?: ToBooleanArray | null;
 
-  overflow_bytes?: number | null;
+  overflow_bytes?: ToNumberArray | null;
 
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToNumberArray | null;
 
-  depth?: number | null;
+  depth?: ToNumberArray | null;
 
-  analyzers?: string[] | null;
+  analyzers?: ToStringArray | null;
 
-  mime_type?: string | null;
+  mime_type?: ToStringArray | null;
 
-  rx_host?: string | null;
+  rx_host?: ToStringArray | null;
 
-  total_bytes?: number | null;
+  total_bytes?: ToNumberArray | null;
 
-  fuid?: string | null;
+  fuid?: ToStringArray | null;
 
-  seen_bytes?: number | null;
+  seen_bytes?: ToNumberArray | null;
 
-  missing_bytes?: number | null;
+  missing_bytes?: ToNumberArray | null;
 
-  md5?: string | null;
+  md5?: ToStringArray | null;
 }
 
 export interface ZeekSslData {
-  cipher?: string | null;
+  cipher?: ToStringArray | null;
 
-  established?: boolean | null;
+  established?: ToBooleanArray | null;
 
-  resumed?: boolean | null;
+  resumed?: ToBooleanArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 }
 
 export interface HttpEcsFields {
-  version?: string | null;
+  version?: ToStringArray | null;
 
   request?: HttpRequestData | null;
 
@@ -630,45 +636,45 @@ export interface HttpEcsFields {
 }
 
 export interface HttpRequestData {
-  method?: string | null;
+  method?: ToStringArray | null;
 
   body?: HttpBodyData | null;
 
-  referrer?: string | null;
+  referrer?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpBodyData {
-  content?: string | null;
+  content?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpResponseData {
-  status_code?: number | null;
+  status_code?: ToNumberArray | null;
 
   body?: HttpBodyData | null;
 
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface UrlEcsFields {
-  domain?: string | null;
+  domain?: ToStringArray | null;
 
-  original?: string | null;
+  original?: ToStringArray | null;
 
-  username?: string | null;
+  username?: ToStringArray | null;
 
-  password?: string | null;
+  password?: ToStringArray | null;
 }
 
 export interface ProcessEcsFields {
-  pid?: ToStringArray | null;
+  pid?: ToNumberArray | null;
 
   name?: ToStringArray | null;
 
-  ppid?: ToStringArray | null;
+  ppid?: ToNumberArray | null;
 
   args?: ToStringArray | null;
 
@@ -676,39 +682,45 @@ export interface ProcessEcsFields {
 
   title?: ToStringArray | null;
 
-  thread?: ToStringArray | null;
+  thread?: Thread | null;
 
   working_directory?: ToStringArray | null;
 }
 
+export interface Thread {
+  id?: ToNumberArray | null;
+
+  start?: ToStringArray | null;
+}
+
 export interface FileFields {
-  path?: string | null;
+  path?: ToStringArray | null;
 
-  target_path?: string | null;
+  target_path?: ToStringArray | null;
 
-  extension?: string | null;
+  extension?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 
-  device?: string | null;
+  device?: ToStringArray | null;
 
-  inode?: string | null;
+  inode?: ToStringArray | null;
 
-  uid?: string | null;
+  uid?: ToStringArray | null;
 
-  owner?: string | null;
+  owner?: ToStringArray | null;
 
-  gid?: string | null;
+  gid?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 
-  mode?: string | null;
+  mode?: ToStringArray | null;
 
-  size?: number | null;
+  size?: ToNumberArray | null;
 
-  mtime?: Date | null;
+  mtime?: ToDateArray | null;
 
-  ctime?: Date | null;
+  ctime?: ToDateArray | null;
 }
 
 export interface SystemEcsField {
@@ -728,7 +740,7 @@ export interface PackageEcsFields {
 
   name?: ToStringArray | null;
 
-  size?: ToStringArray | null;
+  size?: ToNumberArray | null;
 
   summary?: ToStringArray | null;
 
@@ -1056,12 +1068,6 @@ export interface UncommonProcessItem {
 export interface SayMyName {
   /** The id of the source */
   appName: string;
-}
-
-export interface Thread {
-  id?: ToStringArray | null;
-
-  start?: ToStringArray | null;
 }
 
 // ====================================================
@@ -1393,7 +1399,7 @@ export namespace GetAuthenticationsQuery {
   export type User = {
     __typename?: 'UserEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type LastSuccess = {
@@ -1409,15 +1415,15 @@ export namespace GetAuthenticationsQuery {
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type LastFailure = {
@@ -1433,15 +1439,15 @@ export namespace GetAuthenticationsQuery {
   export type __Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
   };
 
   export type _Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Cursor = {
@@ -1687,49 +1693,49 @@ export namespace GetEventsQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    action?: string | null;
+    action?: ToStringArray | null;
 
-    severity?: number | null;
+    severity?: ToNumberArray | null;
 
-    module?: string | null;
+    module?: ToStringArray | null;
 
-    category?: string | null;
+    category?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
   };
 
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    port?: number | null;
+    port?: ToNumberArray | null;
   };
 
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    port?: number | null;
+    port?: ToNumberArray | null;
   };
 
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
   };
 
   export type Suricata = {
@@ -1743,7 +1749,7 @@ export namespace GetEventsQuery {
 
     proto?: ToStringArray | null;
 
-    flow_id?: ToStringArray | null;
+    flow_id?: ToNumberArray | null;
 
     alert?: Alert | null;
   };
@@ -1753,13 +1759,13 @@ export namespace GetEventsQuery {
 
     signature?: ToStringArray | null;
 
-    signature_id?: ToStringArray | null;
+    signature_id?: ToNumberArray | null;
   };
 
   export type Zeek = {
     __typename?: 'ZeekEcsFields';
 
-    session_id?: string | null;
+    session_id?: ToStringArray | null;
   };
 }
 
@@ -1795,31 +1801,31 @@ export namespace GetHostDetailsQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 }
 
@@ -1903,9 +1909,9 @@ export namespace GetHostsTableQuery {
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
   };
@@ -1913,9 +1919,9 @@ export namespace GetHostsTableQuery {
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Cursor = {
@@ -1995,57 +2001,57 @@ export namespace GetIpOverviewQuery {
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
     location?: Location | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type Location = {
     __typename?: 'Location';
 
-    lat?: number | null;
+    lat?: ToNumberArray | null;
 
-    lon?: number | null;
+    lon?: ToNumberArray | null;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Os = {
     __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 
   export type Destination = {
@@ -2075,57 +2081,57 @@ export namespace GetIpOverviewQuery {
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
     location?: _Location | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type _Location = {
     __typename?: 'Location';
 
-    lat?: number | null;
+    lat?: ToNumberArray | null;
 
-    lon?: number | null;
+    lon?: ToNumberArray | null;
   };
 
   export type _Host = {
     __typename?: 'HostEcsFields';
 
-    architecture?: string | null;
+    architecture?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
 
-    mac?: (string | null)[] | null;
+    mac?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
     os?: _Os | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type _Os = {
     __typename?: 'OsEcsFields';
 
-    family?: string | null;
+    family?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    platform?: string | null;
+    platform?: ToStringArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 }
 
@@ -2769,7 +2775,7 @@ export namespace GetTimelineQuery {
 
     name?: ToStringArray | null;
 
-    size?: ToStringArray | null;
+    size?: ToNumberArray | null;
 
     summary?: ToStringArray | null;
 
@@ -2779,41 +2785,41 @@ export namespace GetTimelineQuery {
   export type Event = {
     __typename?: 'EventEcsFields';
 
-    action?: string | null;
+    action?: ToStringArray | null;
 
-    category?: string | null;
+    category?: ToStringArray | null;
 
-    created?: Date | null;
+    created?: ToDateArray | null;
 
-    dataset?: string | null;
+    dataset?: ToStringArray | null;
 
-    duration?: number | null;
+    duration?: ToNumberArray | null;
 
-    end?: Date | null;
+    end?: ToDateArray | null;
 
-    hash?: string | null;
+    hash?: ToStringArray | null;
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    kind?: string | null;
+    kind?: ToStringArray | null;
 
-    module?: string | null;
+    module?: ToStringArray | null;
 
-    original?: (string | null)[] | null;
+    original?: ToStringArray | null;
 
     outcome?: ToStringArray | null;
 
-    risk_score?: number | null;
+    risk_score?: ToNumberArray | null;
 
-    risk_score_norm?: number | null;
+    risk_score_norm?: ToNumberArray | null;
 
-    severity?: number | null;
+    severity?: ToNumberArray | null;
 
-    start?: Date | null;
+    start?: ToDateArray | null;
 
-    timezone?: string | null;
+    timezone?: ToStringArray | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
   };
 
   export type Auditd = {
@@ -2873,55 +2879,55 @@ export namespace GetTimelineQuery {
   export type File = {
     __typename?: 'FileFields';
 
-    path?: string | null;
+    path?: ToStringArray | null;
 
-    target_path?: string | null;
+    target_path?: ToStringArray | null;
 
-    extension?: string | null;
+    extension?: ToStringArray | null;
 
-    type?: string | null;
+    type?: ToStringArray | null;
 
-    device?: string | null;
+    device?: ToStringArray | null;
 
-    inode?: string | null;
+    inode?: ToStringArray | null;
 
-    uid?: string | null;
+    uid?: ToStringArray | null;
 
-    owner?: string | null;
+    owner?: ToStringArray | null;
 
-    gid?: string | null;
+    gid?: ToStringArray | null;
 
-    group?: string | null;
+    group?: ToStringArray | null;
 
-    mode?: string | null;
+    mode?: ToStringArray | null;
 
-    size?: number | null;
+    size?: ToNumberArray | null;
 
-    mtime?: Date | null;
+    mtime?: ToDateArray | null;
 
-    ctime?: Date | null;
+    ctime?: ToDateArray | null;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
 
-    ip?: (string | null)[] | null;
+    ip?: ToStringArray | null;
   };
 
   export type _Source = {
     __typename?: 'SourceEcsFields';
 
-    bytes?: number | null;
+    bytes?: ToNumberArray | null;
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    packets?: number | null;
+    packets?: ToNumberArray | null;
 
-    port?: number | null;
+    port?: ToNumberArray | null;
 
     geo?: Geo | null;
   };
@@ -2929,29 +2935,29 @@ export namespace GetTimelineQuery {
   export type Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type Destination = {
     __typename?: 'DestinationEcsFields';
 
-    bytes?: number | null;
+    bytes?: ToNumberArray | null;
 
-    ip?: string | null;
+    ip?: ToStringArray | null;
 
-    packets?: number | null;
+    packets?: ToNumberArray | null;
 
-    port?: number | null;
+    port?: ToNumberArray | null;
 
     geo?: _Geo | null;
   };
@@ -2959,25 +2965,25 @@ export namespace GetTimelineQuery {
   export type _Geo = {
     __typename?: 'GeoEcsFields';
 
-    continent_name?: string | null;
+    continent_name?: ToStringArray | null;
 
-    country_name?: string | null;
+    country_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
 
-    city_name?: string | null;
+    city_name?: ToStringArray | null;
 
-    region_iso_code?: string | null;
+    region_iso_code?: ToStringArray | null;
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
   };
 
   export type __Geo = {
     __typename?: 'GeoEcsFields';
 
-    region_name?: string | null;
+    region_name?: ToStringArray | null;
 
-    country_iso_code?: string | null;
+    country_iso_code?: ToStringArray | null;
   };
 
   export type Suricata = {
@@ -2991,7 +2997,7 @@ export namespace GetTimelineQuery {
 
     proto?: ToStringArray | null;
 
-    flow_id?: ToStringArray | null;
+    flow_id?: ToNumberArray | null;
 
     alert?: Alert | null;
   };
@@ -3001,29 +3007,29 @@ export namespace GetTimelineQuery {
 
     signature?: ToStringArray | null;
 
-    signature_id?: ToStringArray | null;
+    signature_id?: ToNumberArray | null;
   };
 
   export type Network = {
     __typename?: 'NetworkEcsField';
 
-    bytes?: number | null;
+    bytes?: ToNumberArray | null;
 
-    community_id?: string | null;
+    community_id?: ToStringArray | null;
 
-    direction?: string | null;
+    direction?: ToStringArray | null;
 
-    packets?: number | null;
+    packets?: ToNumberArray | null;
 
-    protocol?: string | null;
+    protocol?: ToStringArray | null;
 
-    transport?: string | null;
+    transport?: ToStringArray | null;
   };
 
   export type Http = {
     __typename?: 'HttpEcsFields';
 
-    version?: string | null;
+    version?: ToStringArray | null;
 
     request?: Request | null;
 
@@ -3033,25 +3039,25 @@ export namespace GetTimelineQuery {
   export type Request = {
     __typename?: 'HttpRequestData';
 
-    method?: string | null;
+    method?: ToStringArray | null;
 
     body?: Body | null;
 
-    referrer?: string | null;
+    referrer?: ToStringArray | null;
   };
 
   export type Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: number | null;
+    bytes?: ToNumberArray | null;
 
-    content?: string | null;
+    content?: ToStringArray | null;
   };
 
   export type Response = {
     __typename?: 'HttpResponseData';
 
-    status_code?: number | null;
+    status_code?: ToNumberArray | null;
 
     body?: _Body | null;
   };
@@ -3059,9 +3065,9 @@ export namespace GetTimelineQuery {
   export type _Body = {
     __typename?: 'HttpBodyData';
 
-    bytes?: number | null;
+    bytes?: ToNumberArray | null;
 
-    content?: string | null;
+    content?: ToStringArray | null;
   };
 
   export type Tls = {
@@ -3083,7 +3089,7 @@ export namespace GetTimelineQuery {
   export type Fingerprint = {
     __typename?: 'FingerprintData';
 
-    sha1?: string | null;
+    sha1?: ToStringArray | null;
   };
 
   export type Fingerprints = {
@@ -3095,7 +3101,7 @@ export namespace GetTimelineQuery {
   export type Ja3 = {
     __typename?: 'TlsJa3Data';
 
-    hash?: string | null;
+    hash?: ToStringArray | null;
   };
 
   export type ServerCertificate = {
@@ -3107,35 +3113,35 @@ export namespace GetTimelineQuery {
   export type _Fingerprint = {
     __typename?: 'FingerprintData';
 
-    sha1?: string | null;
+    sha1?: ToStringArray | null;
   };
 
   export type Url = {
     __typename?: 'UrlEcsFields';
 
-    original?: string | null;
+    original?: ToStringArray | null;
 
-    domain?: string | null;
+    domain?: ToStringArray | null;
 
-    username?: string | null;
+    username?: ToStringArray | null;
 
-    password?: string | null;
+    password?: ToStringArray | null;
   };
 
   export type User = {
     __typename?: 'UserEcsFields';
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    pid?: ToStringArray | null;
+    pid?: ToNumberArray | null;
 
     name?: ToStringArray | null;
 
-    ppid?: ToStringArray | null;
+    ppid?: ToNumberArray | null;
 
     args?: ToStringArray | null;
 
@@ -3149,7 +3155,7 @@ export namespace GetTimelineQuery {
   export type Zeek = {
     __typename?: 'ZeekEcsFields';
 
-    session_id?: string | null;
+    session_id?: ToStringArray | null;
 
     connection?: Connection | null;
 
@@ -3167,125 +3173,125 @@ export namespace GetTimelineQuery {
   export type Connection = {
     __typename?: 'ZeekConnectionData';
 
-    local_resp?: string | null;
+    local_resp?: ToBooleanArray | null;
 
-    local_orig?: string | null;
+    local_orig?: ToBooleanArray | null;
 
-    missed_bytes?: number | null;
+    missed_bytes?: ToNumberArray | null;
 
-    state?: string | null;
+    state?: ToStringArray | null;
 
-    history?: string | null;
+    history?: ToStringArray | null;
   };
 
   export type Notice = {
     __typename?: 'ZeekNoticeData';
 
-    suppress_for?: number | null;
+    suppress_for?: ToNumberArray | null;
 
-    msg?: string | null;
+    msg?: ToStringArray | null;
 
-    note?: string | null;
+    note?: ToStringArray | null;
 
-    sub?: string | null;
+    sub?: ToStringArray | null;
 
-    dst?: string | null;
+    dst?: ToStringArray | null;
 
-    dropped?: boolean | null;
+    dropped?: ToBooleanArray | null;
 
-    peer_descr?: string | null;
+    peer_descr?: ToStringArray | null;
   };
 
   export type Dns = {
     __typename?: 'ZeekDnsData';
 
-    AA?: boolean | null;
+    AA?: ToBooleanArray | null;
 
-    qclass_name?: string | null;
+    qclass_name?: ToStringArray | null;
 
-    RD?: boolean | null;
+    RD?: ToBooleanArray | null;
 
-    qtype_name?: string | null;
+    qtype_name?: ToStringArray | null;
 
-    rejected?: boolean | null;
+    rejected?: ToBooleanArray | null;
 
-    qtype?: number | null;
+    qtype?: ToStringArray | null;
 
-    query?: string | null;
+    query?: ToStringArray | null;
 
-    trans_id?: number | null;
+    trans_id?: ToNumberArray | null;
 
-    qclass?: number | null;
+    qclass?: ToStringArray | null;
 
-    RA?: boolean | null;
+    RA?: ToBooleanArray | null;
 
-    TC?: boolean | null;
+    TC?: ToBooleanArray | null;
   };
 
   export type _Http = {
     __typename?: 'ZeekHttpData';
 
-    resp_mime_types?: string[] | null;
+    resp_mime_types?: ToStringArray | null;
 
-    trans_depth?: string | null;
+    trans_depth?: ToStringArray | null;
 
-    status_msg?: string | null;
+    status_msg?: ToStringArray | null;
 
-    resp_fuids?: string[] | null;
+    resp_fuids?: ToStringArray | null;
 
-    tags?: string[] | null;
+    tags?: ToStringArray | null;
   };
 
   export type Files = {
     __typename?: 'ZeekFileData';
 
-    session_ids?: string[] | null;
+    session_ids?: ToStringArray | null;
 
-    timedout?: boolean | null;
+    timedout?: ToBooleanArray | null;
 
-    local_orig?: boolean | null;
+    local_orig?: ToBooleanArray | null;
 
-    tx_host?: string | null;
+    tx_host?: ToStringArray | null;
 
-    source?: string | null;
+    source?: ToStringArray | null;
 
-    is_orig?: boolean | null;
+    is_orig?: ToBooleanArray | null;
 
-    overflow_bytes?: number | null;
+    overflow_bytes?: ToNumberArray | null;
 
-    sha1?: string | null;
+    sha1?: ToStringArray | null;
 
-    duration?: number | null;
+    duration?: ToNumberArray | null;
 
-    depth?: number | null;
+    depth?: ToNumberArray | null;
 
-    analyzers?: string[] | null;
+    analyzers?: ToStringArray | null;
 
-    mime_type?: string | null;
+    mime_type?: ToStringArray | null;
 
-    rx_host?: string | null;
+    rx_host?: ToStringArray | null;
 
-    total_bytes?: number | null;
+    total_bytes?: ToNumberArray | null;
 
-    fuid?: string | null;
+    fuid?: ToStringArray | null;
 
-    seen_bytes?: number | null;
+    seen_bytes?: ToNumberArray | null;
 
-    missing_bytes?: number | null;
+    missing_bytes?: ToNumberArray | null;
 
-    md5?: string | null;
+    md5?: ToStringArray | null;
   };
 
   export type Ssl = {
     __typename?: 'ZeekSslData';
 
-    cipher?: string | null;
+    cipher?: ToStringArray | null;
 
-    established?: boolean | null;
+    established?: ToBooleanArray | null;
 
-    resumed?: boolean | null;
+    resumed?: ToBooleanArray | null;
 
-    version?: string | null;
+    version?: ToStringArray | null;
   };
 }
 
@@ -3354,17 +3360,17 @@ export namespace GetUncommonProcessesQuery {
   export type User = {
     __typename?: 'UserEcsFields';
 
-    id?: number | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Host = {
     __typename?: 'HostEcsFields';
 
-    id?: string | null;
+    id?: ToStringArray | null;
 
-    name?: string | null;
+    name?: ToStringArray | null;
   };
 
   export type Cursor = {
