@@ -52,6 +52,9 @@ const flags = getopts(process.argv.slice(0), {
   },
   default: {
     debug: true,
+    rpm: null,
+    deb: null,
+    docker: null,
     'version-qualifier': ''
   },
   unknown: (flag) => {
@@ -110,7 +113,7 @@ function isOsPackageDesired(name) {
   }
 
   // build all if no flags specified
-  if (flags.rpm === undefined && flags.deb === undefined && flags.docker === undefined) {
+  if (flags.rpm === null && flags.deb === null && flags.docker === null) {
     return true;
   }
 
