@@ -112,7 +112,7 @@ describe('workpad selectors', () => {
                 {
                   id: 'element-4',
                   expression: 'timefilterControl compact=true column=@timestamp',
-                  filter: 'timefilter column=@timestamp from=now-24h to=now',
+                  filter: 'timefilter filterGroup=one column=@timestamp from=now-24h to=now',
                 },
               ],
             },
@@ -243,7 +243,7 @@ describe('workpad selectors', () => {
       const filters = selector.getGlobalFilters(state);
       expect(filters).to.eql([
         'exactly value="beats" column="project"',
-        'timefilter column=@timestamp from=now-24h to=now',
+        'timefilter filterGroup=one column=@timestamp from=now-24h to=now',
       ]);
     });
 
@@ -251,6 +251,39 @@ describe('workpad selectors', () => {
       const filters = selector.getGlobalFilters({});
       expect(filters).to.be.an(Array);
       expect(filters).to.have.length(0);
+    });
+  });
+
+  describe('getGlobalFilterGroups', () => {
+    it('gets filter group from elements', () => {
+      const filterGroups = selector.getGlobalFilterGroups(state);
+      expect(filterGroups).to.be.an(Array);
+      expect(filterGroups).to.have.length(1);
+      expect(filterGroups[0]).to.equal('one');
+    });
+
+    it('gets all unique filter groups', () => {
+      const filterGroups = selector.getGlobalFilterGroups({
+        persistent: {
+          workpad: {
+            pages: [
+              {
+                elements: [
+                  { filter: 'exactly value=beats column=project' },
+                  { filter: 'exactly filterGroup=one value=complete column=state' },
+                  { filter: 'timefilter filterGroup=one column=@timestamp from=now-24h to=now' },
+                  { filter: 'timefilter filterGroup=two column=timestamp from=now-15m to=now' },
+                  { filter: 'timefilter column=_timestamp from=now-30m to=now' },
+                ],
+              },
+            ],
+          },
+        },
+      });
+      expect(filterGroups).to.be.an(Array);
+      expect(filterGroups).to.have.length(2);
+      expect(filterGroups).to.contain('one');
+      expect(filterGroups).to.contain('two');
     });
   });
 

@@ -5,7 +5,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { safeElementFromExpression } from '@kbn/interpreter/common';
+import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 
@@ -119,6 +119,24 @@ export function getGlobalFilters(state) {
     // check that a filter is defined
     if (el.filter != null && el.filter.length) {
       return acc.concat(el.filter);
+    }
+
+    return acc;
+  }, []);
+}
+
+export function getGlobalFilterGroups(state) {
+  return getAllElements(state).reduce((acc, el) => {
+    // check that a filter is defined
+    if (el.filter != null && el.filter.length) {
+      // extract the filter group
+      const filterAst = fromExpression(el.filter);
+      const filterGroup = get(filterAst, `chain[0].arguments.filterGroup[0]`);
+
+      // add any new group to the array
+      if (filterGroup && filterGroup !== '' && !acc.includes(filterGroup)) {
+        return acc.concat(filterGroup);
+      }
     }
 
     return acc;
