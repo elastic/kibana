@@ -80,8 +80,10 @@ module.controller('MlNewJobStepIndexOrSearch',
 
     timefilter.disableTimeRangeSelector(); // remove time picker from top of page
     timefilter.disableAutoRefreshSelector(); // remove time picker from top of page
-
-    $scope.indexPatterns = getIndexPatterns().filter(indexPattern => !indexPattern.get('type'));
+    $scope.indexPatterns = getIndexPatterns().filter(indexPattern => {
+      console.log(indexPattern.attributes.title, indexPattern.type);
+      return !indexPattern.get('type');
+    });
 
     const path = $route.current.locals.nextStepPath;
 

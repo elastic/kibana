@@ -148,4 +148,19 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     }
   });
 
+  server.route({
+    method: 'GET',
+    path: '/api/ml/jobs/job_caps/{indexPattern}',
+    handler(request) {
+      const callWithRequest = callWithRequestFactory(server, request);
+      const { indexPattern } = request.params;
+      const { jobCaps } = jobServiceProvider(callWithRequest);
+      return jobCaps(indexPattern)
+        .catch(resp => wrapError(resp));
+    },
+    config: {
+      ...commonRouteConfig
+    }
+  });
+
 }

@@ -107,4 +107,11 @@ export const jobs = {
     });
   },
 
+  jobCaps(indexPatternTitle) {
+    return http({
+      url: `${basePath}/jobs/job_caps/${indexPatternTitle}`,
+      method: 'GET',
+    });
+  },
+
 };
