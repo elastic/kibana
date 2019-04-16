@@ -92,8 +92,7 @@ const datatableSpecs: [
         id: '2',
         datasourceRef: 'alerts*',
         columns: [
-            { id: '1', operation: { operator: 'column', field: 'timestamp' } },
-            { id: '2', operation: { operator: 'column', field: 'reason' } },
+            { id: '1', operation: { operator: 'column', field: 'timestamp' } }
         ]
     }
 ]
@@ -108,7 +107,7 @@ This produces two datatables which can be passed to an elastic-charts spec in a 
 </Chart>
 ```
 
-Again it isn't desirable to merge the two tables somehow, because there will be holes in the resulting datatable because the columns don't match - not even the time dimension willhh match up, because alerts can happen anyt9ime while the log buckets are daily and will always produce a data point at midnight.
+Again it isn't desirable to merge the two tables somehow, because there will be holes in the resulting datatable because the columns don't match - not even the time dimension will match up, because alerts can happen anytime while the log buckets are daily and will always produce a data point at midnight.
 
 ### Displaying additional global information
 
@@ -191,18 +190,31 @@ const visModel = {
 
 The editors don't know how the fields got created, but because of the `aggregatable` flag they can only use the column operation. Matching fields with "slots" in the current visualization works as it used to with more complicated datatable specs, it's just not possible anymore to use complex operation configurations in the visualization plugin. This basically separates the data modeling and the visualization phase from a user perspective, but doesn't hurt the flexibility of the model to interweave these steps for an easier user experience.
 
-## Working with the datatable spec
+## WIP - Working with the datatable spec
 
-If a visualization plugin accesses and modifies the datatable spec, it requires additional information about the columns aside from the operation and the used fields - what the resulting data type will be and whether it will be a `segment` (a value which can be used to group rows in some way) or a `metric` (a value which can't be used for grouping but is a property of each given row, mostly numeric). The information about the used operation and the fields of the current datasource are sufficient to infer this information, so it doesn't make sense to store it separately. Instead the helper function `getTableTypes` can be used to get an enriched view on a given table:
+If a visualization plugin accesses and modifies the datatable spec, it requires additional information about the columns aside from the operation and the used fields - what the resulting data type will be, how the data will be accessible in the `kibana_datatable` structure on the expression and whether it will be a `segment` (a value which can be used to group rows in some way) or a `metric` (a value which can't be used for grouping but is a property of each given row, mostly numeric). The information about the used operation and the fields of the current datasource are sufficient to infer this information, so it isn't necessary to store it redundantly in the datatable spec itself. Instead the helper function `getTableDefinition` can be used to get an enriched view on a given table:
 
 ```ts
-interface ColumnType {
+interface ColumnDefinition {
+    id: string;
     dataType: 'string' | 'number' | 'boolean' | /* ... */;
     isMetric: boolean;
     isSegment: boolean;
+    accessor: string | number;
 }
 
-declare getTableTypes(visModel: VisModel, tableId: string): ColumnType[];
+declare function getTableDefinition(visModel: VisModel, tableId?: string): ColumnType[];
+declare function getColumnDefinition(visModel: VisModel, columnId: string; tableId?: string): ColumnType;
+
 ```
 
 A "raw" column is always a segment and a metric, because it might make sense to use it either way.
+
+This information can for example be used for building suggestions or for correctly configuring the renderer function on the expression. A separate set of helper functions can be used to manipulate the table specs and validate:
+
+```ts
+declare function addColumn(visModel: VisModel, operation: DatatableOperation, position?: number; tableId?: string): [newId: string, updatedModel: VisModel];
+declare function removeColumn(visModel: VisModel, columnId: string, tableId?: string): VisModel;
+declare function addTable(visModel: VisModel, operations: DatatableOperations[], tableId?: string): [newTableSpec: DatatableSpec, updatedModel: VisModel];
+declare function removeTable(visModel: VisModel, tableId: string): VisModel;
+```
