@@ -117,6 +117,7 @@ export interface WorkerProgress {
   progress: number;
   timestamp: Date;
   revision?: string;
+  errorMessage?: string;
 }
 
 export interface CloneProgress {
