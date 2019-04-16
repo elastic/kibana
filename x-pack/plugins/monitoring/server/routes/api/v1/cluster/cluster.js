@@ -13,7 +13,8 @@ import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
-  INDEX_ALERTS
+  INDEX_ALERTS,
+  INDEX_PATTERN_FILEBEAT
 } from '../../../../../common/constants';
 
 export function clusterRoute(server) {
@@ -46,7 +47,16 @@ export function clusterRoute(server) {
       const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
       const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
       const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
-      const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, apmIndexPattern, alertsIndex };
+      const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, '*');
+      const indexPatterns = {
+        esIndexPattern,
+        kbnIndexPattern,
+        lsIndexPattern,
+        beatsIndexPattern,
+        apmIndexPattern,
+        alertsIndex,
+        filebeatIndexPattern
+      };
       const options = {
         clusterUuid: req.params.clusterUuid,
         start: req.payload.timeRange.min,
