@@ -15,7 +15,6 @@ export const initElasticsearchIndicesHelpers = (es) => {
 
   const createIndex = (index = getRandomString(), body = {}) => {
     indicesCreated.push(index);
-
     return es.indices.create({
       index,
       body,
@@ -29,20 +28,21 @@ export const initElasticsearchIndicesHelpers = (es) => {
     });
     return es.indices.delete({ index: indices })
       .catch((err) => {
-        // silently fail if an index could not be deleted (unless we got a 404 which means the index has already been deleted)
+        // silently fail if an index could not be deleted
+        // (unless we got a 404 which means the index has already been deleted)
         if (err && err.statusCode !== 404) {
           throw err;
         }
       });
   };
 
-  const deleteAllIndices = () => (
+  const deleteAllIndicesCreated = () => (
     deleteIndex(indicesCreated).then(() => indicesCreated = [])
   );
 
   return ({
     createIndex,
     deleteIndex,
-    deleteAllIndices,
+    deleteAllIndicesCreated,
   });
 };

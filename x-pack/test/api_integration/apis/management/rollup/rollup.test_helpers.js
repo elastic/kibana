@@ -11,7 +11,7 @@ const jobsCreated = [];
 const jobsStarted = [];
 
 export const registerHelpers = ({ supertest, es }) => {
-  const { createIndex, deleteIndex, deleteAllIndices } = initElasticsearchIndicesHelpers(es);
+  const { createIndex, deleteIndex, deleteAllIndicesCreated } = initElasticsearchIndicesHelpers(es);
 
   const createIndexWithMappings = (indexName = undefined, mappings = INDEX_TO_ROLLUP_MAPPINGS) => {
     return createIndex(indexName, { mappings });
@@ -104,13 +104,11 @@ export const registerHelpers = ({ supertest, es }) => {
       .then(({ status, body }) => {
 
         if (status !== 200) {
-          // It seems that there is a flakiness when requesting rollup indices
-          // If we did not succeed fetching the indices we won't be able to delete them.
-          // https://github.com/elastic/kibana/issues/33282
-          throw new Error(`[WARNING] Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
+          throw new Error(`Error fetching rollup indices with error: "${JSON.stringify(body)}"`);
         }
 
         const index = Object.keys(body);
+
         if (!index.length) {
           return;
         }
@@ -122,7 +120,7 @@ export const registerHelpers = ({ supertest, es }) => {
   const cleanUp = () => (
     Promise.all([
       stopAllJobs().then(deleteJob),
-      deleteIndicesGeneratedByJobs().then(deleteAllIndices),
+      deleteIndicesGeneratedByJobs().then(deleteAllIndicesCreated),
     ]).catch(err => {
       console.log('ERROR cleaning up!');
       throw err;
