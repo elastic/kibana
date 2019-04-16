@@ -17,10 +17,15 @@
  * under the License.
  */
 
+import { AggConfig } from '../vis';
+
 interface AggParam {
   type: string;
   name: string;
+  required?: boolean;
   displayName?: string;
+  onChange?(agg: AggConfig): void;
+  disabled?(agg: AggConfig): boolean;
 }
 
 export { AggParam };

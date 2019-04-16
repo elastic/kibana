@@ -38,7 +38,8 @@ export default function ({ getService, getPageObjects }) {
       await browser.refresh();
     });
 
-    it('detect navigate back issues', async ()=> {
+    // FLAKY: https://github.com/elastic/kibana/issues/33468
+    it.skip('detect navigate back issues', async ()=> {
       let currUrl;
       // Detects bug described in issue #31238 - where back navigation would get stuck to URL encoding handling in Angular.
       // Navigate to home app

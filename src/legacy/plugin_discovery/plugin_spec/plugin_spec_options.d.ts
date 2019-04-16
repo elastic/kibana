@@ -29,4 +29,5 @@ export interface PluginSpecOptions {
   publicDir: string;
   uiExports?: UiExports;
   init: InitPluginFunction;
+  config: any;
 }

@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import chrome from 'ui/chrome';
+import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { uiCapabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -24,10 +27,13 @@ import {
   clearTransientLayerStateAndCloseFlyout,
 } from '../actions/store_actions';
 import {
+  DEFAULT_IS_LAYER_TOC_OPEN,
   enableFullScreen,
   getIsFullScreen,
   updateFlyout,
-  FLYOUT_STATE
+  FLYOUT_STATE,
+  setReadOnly,
+  setIsLayerTOCOpen
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
@@ -50,7 +56,7 @@ const app = uiModules.get('app/maps', []);
 
 app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage, AppState, globalState, Private) => {
 
-  const savedMap = $scope.map = $route.current.locals.map;
+  const savedMap = $route.current.locals.map;
   let unsubscribe;
 
   const store = createMapStore();
@@ -121,6 +127,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    store.dispatch(setReadOnly(!uiCapabilities.maps.save));
 
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
@@ -135,6 +142,11 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         lon: mapState.center.lon,
         zoom: mapState.zoom,
       }));
+    }
+
+    if (savedMap.uiStateJSON) {
+      const uiState = JSON.parse(savedMap.uiStateJSON);
+      store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON);
@@ -202,13 +214,18 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
-  // TODO subscribe to store change and change when store updates title
-  chrome.breadcrumbs.set([
-    { text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
-      defaultMessage: 'Maps'
-    }), href: '#' },
-    { text: $scope.map.title }
-  ]);
+  const updateBreadcrumbs = () => {
+    chrome.breadcrumbs.set([
+      {
+        text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
+          defaultMessage: 'Maps'
+        }),
+        href: '#'
+      },
+      { text: savedMap.title }
+    ]);
+  };
+  updateBreadcrumbs();
 
   addHelpMenuToAppChrome(chrome);
 
@@ -241,6 +258,8 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         }),
         'data-test-subj': 'saveMapSuccess',
       });
+
+      updateBreadcrumbs();
 
       if (savedMap.id !== $route.current.params.id) {
         $scope.$evalAsync(() => {
@@ -278,7 +297,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, {
+  }, ...(uiCapabilities.maps.save ? [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
@@ -315,5 +334,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         />);
       showSaveModal(saveModal);
     }
-  }];
+  }] : [])
+  ];
 });
+

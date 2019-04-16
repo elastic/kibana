@@ -17,17 +17,7 @@
  * under the License.
  */
 
-const mockReaddir = jest.fn();
-const mockReadFile = jest.fn();
-const mockStat = jest.fn();
-jest.mock('fs', () => ({
-  readdir: mockReaddir,
-  readFile: mockReadFile,
-  stat: mockStat,
-}));
-
-const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../../../package.json', () => mockPackage);
+import { mockPackage, mockReaddir, mockReadFile, mockStat } from './plugin_discovery.test.mocks';
 
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
@@ -35,7 +25,7 @@ import { first, map, toArray } from 'rxjs/operators';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../../config';
 import { getEnvOptions } from '../../config/__mocks__/env';
 import { loggingServiceMock } from '../../logging/logging_service.mock';
-import { Plugin } from '../plugin';
+import { PluginWrapper } from '../plugin';
 import { PluginsConfig } from '../plugins_config';
 import { discover } from './plugins_discovery';
 
@@ -44,6 +34,7 @@ const TEST_PLUGIN_SEARCH_PATHS = {
   emptyPlugins: resolve(process.cwd(), 'plugins'),
   nonExistentKibanaExtra: resolve(process.cwd(), '..', 'kibana-extra'),
 };
+const TEST_EXTRA_PLUGIN_PATH = resolve(process.cwd(), 'my-extra-plugin');
 
 const logger = loggingServiceMock.create();
 beforeEach(() => {
@@ -122,9 +113,15 @@ test('properly iterates through plugin search locations', async () => {
     },
   };
 
-  const env = Env.createDefault(getEnvOptions());
+  const env = Env.createDefault(
+    getEnvOptions({
+      cliArgs: { envName: 'development' },
+    })
+  );
   const configService = new ConfigService(
-    new BehaviorSubject<Config>(new ObjectToConfigAdapter({})),
+    new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({ plugins: { paths: [TEST_EXTRA_PLUGIN_PATH] } })
+    ),
     env,
     logger
   );
@@ -136,18 +133,19 @@ test('properly iterates through plugin search locations', async () => {
   const { plugin$, error$ } = discover(pluginsConfig, { configService, env, logger });
 
   const plugins = await plugin$.pipe(toArray()).toPromise();
-  expect(plugins).toHaveLength(3);
+  expect(plugins).toHaveLength(4);
 
   for (const path of [
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '1'),
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '3'),
     resolve(TEST_PLUGIN_SEARCH_PATHS.nonEmptySrcPlugins, '6'),
+    TEST_EXTRA_PLUGIN_PATH,
   ]) {
     const discoveredPlugin = plugins.find(plugin => plugin.path === path)!;
-    expect(discoveredPlugin).toBeInstanceOf(Plugin);
+    expect(discoveredPlugin).toBeInstanceOf(PluginWrapper);
     expect(discoveredPlugin.configPath).toEqual(['core', 'config']);
-    expect(discoveredPlugin.requiredDependencies).toEqual(['a', 'b']);
-    expect(discoveredPlugin.optionalDependencies).toEqual(['c', 'd']);
+    expect(discoveredPlugin.requiredPlugins).toEqual(['a', 'b']);
+    expect(discoveredPlugin.optionalPlugins).toEqual(['c', 'd']);
   }
 
   await expect(
@@ -184,4 +182,12 @@ test('properly iterates through plugin search locations', async () => {
       'kibana.json'
     )})`,
   ]);
+
+  expect(loggingServiceMock.collect(logger).warn).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "Explicit plugin paths [${TEST_EXTRA_PLUGIN_PATH}] are only supported in development. Relative imports will not work in production.",
+  ],
+]
+`);
 });

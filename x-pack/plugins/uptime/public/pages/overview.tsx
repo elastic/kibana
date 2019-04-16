@@ -4,59 +4,77 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React, { Fragment } from 'react';
+// @ts-ignore EuiSearchBar missing
+import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import {
-  EmptyStateQuery,
-  ErrorListQuery,
-  FilterBarQuery,
-  MonitorListQuery,
-  SnapshotQuery,
-} from '../components/queries';
+import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeCommonProps } from '../uptime_app';
+import { UptimeSettingsContext } from '../contexts';
 
 interface OverviewPageProps {
   basePath: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-type Props = OverviewPageProps & UptimeCommonProps;
+type Props = OverviewPageProps;
 
-interface OverviewPageState {
-  currentFilterQuery?: string;
-}
+export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
-export class OverviewPage extends React.Component<Props, OverviewPageState> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      currentFilterQuery: undefined,
-    };
-  }
+export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
+  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
+    UptimeSettingsContext
+  );
+  const [currentFilterQueryObj, setFilterQueryObj] = useState<object | undefined>(undefined);
+  const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
 
-  public componentWillMount() {
-    this.props.setBreadcrumbs(getOverviewPageBreadcrumbs());
-  }
+  useEffect(() => {
+    setBreadcrumbs(getOverviewPageBreadcrumbs());
+    if (setHeadingText) {
+      setHeadingText(
+        i18n.translate('xpack.uptime.overviewPage.headerText', {
+          defaultMessage: 'Overview',
+          description: `The text that will be displayed in the app's heading when the Overview page loads.`,
+        })
+      );
+    }
+  }, []);
 
-  public render() {
-    return (
-      <Fragment>
-        <EmptyStateQuery {...this.props}>
-          <FilterBarQuery
-            {...this.props}
-            updateQuery={(query: object | undefined) => {
-              this.setState({ currentFilterQuery: query ? JSON.stringify(query) : query });
-            }}
-          />
-          <SnapshotQuery filters={this.state.currentFilterQuery} {...this.props} />
-          <EuiSpacer size="xl" />
-          <MonitorListQuery filters={this.state.currentFilterQuery} {...this.props} />
-          <EuiSpacer />
-          <ErrorListQuery filters={this.state.currentFilterQuery} {...this.props} />
-        </EmptyStateQuery>
-      </Fragment>
-    );
-  }
-}
+  const sharedProps = { dateRangeStart, dateRangeEnd, currentFilterQuery };
+
+  const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
+    try {
+      let esQuery;
+      if (query && query.text) {
+        esQuery = EuiSearchBar.Query.toESQuery(query);
+      }
+      setFilterQueryObj(query);
+      setCurrentFilterQuery(esQuery ? JSON.stringify(esQuery) : esQuery);
+      if (refreshApp) {
+        refreshApp();
+      }
+    } catch (e) {
+      setFilterQueryObj(undefined);
+      setCurrentFilterQuery(undefined);
+    }
+  };
+
+  return (
+    <Fragment>
+      <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
+        <FilterBar
+          currentQuery={currentFilterQueryObj}
+          updateQuery={updateQuery}
+          variables={sharedProps}
+        />
+        <EuiSpacer size="s" />
+        <Snapshot colors={colors} variables={sharedProps} />
+        <EuiSpacer size="s" />
+        <MonitorList dangerColor={colors.danger} variables={sharedProps} />
+        <EuiSpacer size="s" />
+        <ErrorList variables={sharedProps} />
+      </EmptyState>
+    </Fragment>
+  );
+};

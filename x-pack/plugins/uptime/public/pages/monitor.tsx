@@ -10,49 +10,78 @@ import {
   // @ts-ignore No typings for EuiSuperSelect
   EuiSuperSelect,
 } from '@elastic/eui';
-import React, { Fragment } from 'react';
+import { ApolloQueryResult, OperationVariables, QueryOptions } from 'apollo-client';
+import gql from 'graphql-tag';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { getMonitorPageBreadcrumb } from '../breadcrumbs';
 import {
-  MonitorChartsQuery,
-  MonitorPageTitleQuery,
-  MonitorStatusBarQuery,
-  PingListQuery,
-} from '../components/queries';
+  MonitorCharts,
+  MonitorPageTitle,
+  MonitorStatusBar,
+  PingList,
+} from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
-import { UptimeCommonProps } from '../uptime_app';
+import { UptimeSettingsContext } from '../contexts';
 
 interface MonitorPageProps {
-  updateBreadcrumbs: UMUpdateBreadcrumbs;
   history: { push: any };
   location: { pathname: string };
   match: { params: { id: string } };
+  // this is the query function provided by Apollo's Client API
+  query: <T, TVariables = OperationVariables>(
+    options: QueryOptions<TVariables>
+  ) => Promise<ApolloQueryResult<T>>;
+  setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-type Props = MonitorPageProps & UptimeCommonProps;
-
-export class MonitorPage extends React.Component<Props> {
-  constructor(props: Props) {
-    super(props);
-  }
-
-  public componentWillMount() {
-    this.props.updateBreadcrumbs(getMonitorPageBreadcrumb());
-  }
-
-  public render() {
-    // TODO: this is a hack because the id field's characters mess up react router's
-    // inner params parsing, when we add a synthetic ID for monitors this problem should go away
-    const id = this.props.location.pathname.replace(/^(\/monitor\/)/, '');
-    return (
-      <Fragment>
-        <MonitorPageTitleQuery monitorId={id} {...this.props} />
-        <EuiSpacer />
-        <MonitorStatusBarQuery monitorId={id} {...this.props} />
-        <EuiSpacer />
-        <MonitorChartsQuery monitorId={id} {...this.props} />
-        <EuiSpacer />
-        <PingListQuery monitorId={id} {...this.props} />
-      </Fragment>
-    );
-  }
-}
+export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
+  const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
+  const [selectedStatus, setSelectedStatus] = useState<string | null>('down');
+  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
+    UptimeSettingsContext
+  );
+  useEffect(() => {
+    query({
+      query: gql`
+        query MonitorPageTitle($monitorId: String!) {
+          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+            id
+            url
+            name
+          }
+        }
+      `,
+      variables: { monitorId },
+    }).then((result: any) => {
+      const { name, url, id } = result.data.monitorPageTitle;
+      const heading: string = name || url || id;
+      setBreadcrumbs(getMonitorPageBreadcrumb(heading));
+      if (setHeadingText) {
+        setHeadingText(heading);
+      }
+    });
+  }, []);
+  return (
+    <Fragment>
+      <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
+      <EuiSpacer size="s" />
+      <MonitorStatusBar
+        monitorId={monitorId}
+        variables={{ dateRangeStart, dateRangeEnd, monitorId }}
+      />
+      <EuiSpacer size="s" />
+      <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
+      <EuiSpacer size="s" />
+      <PingList
+        onSelectedStatusUpdate={setSelectedStatus}
+        onUpdateApp={refreshApp}
+        variables={{
+          dateRangeStart,
+          dateRangeEnd,
+          monitorId,
+          status: selectedStatus,
+        }}
+      />
+    </Fragment>
+  );
+};

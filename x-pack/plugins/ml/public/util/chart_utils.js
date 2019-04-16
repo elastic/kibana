@@ -140,21 +140,40 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 
 // get the chart type based on its configuration
 export function getChartType(config) {
+  let chartType = CHART_TYPE.SINGLE_METRIC;
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
     (config.entityFields.some(f => f.fieldType === 'over') === false)
   ) {
-    return CHART_TYPE.EVENT_DISTRIBUTION;
+    chartType = CHART_TYPE.EVENT_DISTRIBUTION;
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription !== 'rare' &&
-    config.entityFields.some(f => f.fieldType === 'over')
+    config.entityFields.some(f => f.fieldType === 'over') &&
+    config.metricFunction !== null  // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
-    return CHART_TYPE.POPULATION_DISTRIBUTION;
+    chartType = CHART_TYPE.POPULATION_DISTRIBUTION;
   }
 
-  return CHART_TYPE.SINGLE_METRIC;
+  if (chartType === CHART_TYPE.EVENT_DISTRIBUTION || chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
+    // Check that the config does not use script fields defined in the datafeed config.
+    if (config.datafeedConfig !== undefined && config.datafeedConfig.script_fields !== undefined) {
+      const scriptFields = Object.keys(config.datafeedConfig.script_fields);
+      const checkFields = config.entityFields.map(entity => entity.fieldName);
+      if (config.metricFieldName) {
+        checkFields.push(config.metricFieldName);
+      }
+      const usesScriptFields =
+        (checkFields.find(fieldName => scriptFields.includes(fieldName)) !== undefined);
+      if (usesScriptFields === true) {
+        // Only single metric chart type supports query of model plot data.
+        chartType = CHART_TYPE.SINGLE_METRIC;
+      }
+    }
+  }
+
+  return chartType;
 }
 
 export function getExploreSeriesLink(series) {

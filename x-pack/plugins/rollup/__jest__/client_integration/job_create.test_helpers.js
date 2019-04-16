@@ -103,7 +103,7 @@ export const initTestBed = () => {
   };
 };
 
-export const nextTick = async () => new Promise((resolve) => setTimeout(resolve));
+export { nextTick } from '../../../../test_utils';
 
 export const mockServerResponses = server => {
   const mockIndexPatternValidityResponse = (response) => {
@@ -130,7 +130,7 @@ export const mockServerResponses = server => {
   };
 
   const mockUserActions = () => {
-    server.respondWith(/\/api\/user_action\/.*/, [
+    server.respondWith(/\/api\/ui_metric\/.*/, [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify({}),

@@ -17,19 +17,15 @@
  * under the License.
  */
 
-import { CoreContext } from '../core_context';
-
-const mockCreatePluginSetupContext = jest.fn();
-jest.mock('./plugin_context', () => ({
-  createPluginSetupContext: mockCreatePluginSetupContext,
-}));
+import { mockCreatePluginSetupContext } from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
+import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
-import { Plugin, PluginName } from './plugin';
+import { PluginWrapper, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
 
 const logger = loggingServiceMock.create();
@@ -41,7 +37,7 @@ function createPlugin(
     server = true,
   }: { required?: string[]; optional?: string[]; server?: boolean } = {}
 ) {
-  return new Plugin(
+  return new PluginWrapper(
     'some-path',
     {
       id,
@@ -144,7 +140,7 @@ test('`setupPlugins` correctly orders plugins and returns exposed values', async
       createPlugin('order-3', { required: ['order-2'], optional: ['missing-dep'] }),
       { 'order-2': 'added-as-2' },
     ],
-  ] as Array<[Plugin, Record<PluginName, unknown>]>);
+  ] as Array<[PluginWrapper, Record<PluginName, unknown>]>);
 
   const setupContextMap = new Map();
 
@@ -255,7 +251,7 @@ test('`uiPlugins` returns ordered Maps of all plugin manifests', async () => {
       createPlugin('order-3', { required: ['order-2'], optional: ['missing-dep'] }),
       { 'order-2': 'added-as-2' },
     ],
-  ] as Array<[Plugin, Record<PluginName, unknown>]>);
+  ] as Array<[PluginWrapper, Record<PluginName, unknown>]>);
 
   [...plugins.keys()].forEach(plugin => {
     pluginsSystem.addPlugin(plugin);

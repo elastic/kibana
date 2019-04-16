@@ -8,10 +8,10 @@ import { HeadlessChromiumDriverFactory } from './driver_factory';
 
 export { paths } from './paths';
 
-export async function createDriverFactory(binaryPath, logger, browserConfig) {
+export async function createDriverFactory(binaryPath, logger, browserConfig, queueTimeout) {
   if (browserConfig.disableSandbox) {
     logger.warning(`Enabling the Chromium sandbox provides an additional layer of protection.`);
   }
 
-  return new HeadlessChromiumDriverFactory(binaryPath, logger, browserConfig);
+  return new HeadlessChromiumDriverFactory(binaryPath, logger, browserConfig, queueTimeout);
 }

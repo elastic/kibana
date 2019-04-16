@@ -32,7 +32,7 @@ import { defaultsDeep, get } from 'lodash';
 import { resolve } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import supertest from 'supertest';
-import { Env } from '../core/server/config';
+import { CliArgs, Env } from '../core/server/config';
 import { LegacyObjectToConfigAdapter } from '../core/server/legacy';
 import { Root } from '../core/server/root';
 
@@ -60,7 +60,10 @@ const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {
   },
 };
 
-export function createRootWithSettings(...settings: Array<Record<string, any>>) {
+export function createRootWithSettings(
+  settings: Record<string, any>,
+  cliArgs: Partial<CliArgs> = {}
+) {
   const env = Env.createDefault({
     configs: [],
     cliArgs: {
@@ -72,13 +75,14 @@ export function createRootWithSettings(...settings: Array<Record<string, any>>) 
       repl: false,
       basePath: false,
       optimize: false,
+      ...cliArgs,
     },
     isDevClusterMaster: false,
   });
 
   return new Root(
     new BehaviorSubject(
-      new LegacyObjectToConfigAdapter(defaultsDeep({}, ...settings, DEFAULTS_SETTINGS))
+      new LegacyObjectToConfigAdapter(defaultsDeep({}, settings, DEFAULTS_SETTINGS))
     ),
     env
   );
@@ -104,8 +108,8 @@ function getSupertest(root: Root, method: HttpMethod, path: string) {
  * @param {Object} [settings={}] Any config overrides for this instance.
  * @returns {Root}
  */
-export function createRoot(settings = {}) {
-  return createRootWithSettings(settings);
+export function createRoot(settings = {}, cliArgs: Partial<CliArgs> = {}) {
+  return createRootWithSettings(settings, cliArgs);
 }
 
 /**
@@ -116,7 +120,7 @@ export function createRoot(settings = {}) {
  *  @returns {Root}
  */
 export function createRootWithCorePlugins(settings = {}) {
-  return createRootWithSettings(settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS);
+  return createRootWithSettings(defaultsDeep({}, settings, DEFAULT_SETTINGS_WITH_CORE_PLUGINS));
 }
 
 /**

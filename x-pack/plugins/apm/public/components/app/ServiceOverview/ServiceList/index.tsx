@@ -8,15 +8,15 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { IServiceListItem } from 'x-pack/plugins/apm/server/lib/services/get_services';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
-  items: IServiceListItem[];
+  items?: ServiceListAPIResponse['items'];
   noItemsMessage?: React.ReactNode;
 }
 
@@ -34,12 +34,14 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(KibanaLink)`
+const AppLink = styled(APMLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
 
-export const SERVICE_COLUMNS: Array<ITableColumn<IServiceListItem>> = [
+export const SERVICE_COLUMNS: Array<
+  ITableColumn<ServiceListAPIResponse['items'][0]>
+> = [
   {
     field: 'serviceName',
     name: i18n.translate('xpack.apm.servicesTable.nameColumnLabel', {
@@ -49,7 +51,7 @@ export const SERVICE_COLUMNS: Array<ITableColumn<IServiceListItem>> = [
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink hash={`/${serviceName}/transactions`}>
+        <AppLink path={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

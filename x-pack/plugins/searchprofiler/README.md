@@ -19,7 +19,7 @@ If you have installed this somewhere other than via x-plugins, and next to the k
 To run the server tests, change into `x-plugins/kibana` and run:
 
 ```bash
-mocha --debug --compilers js:babel/register plugins/profiler/**/__tests__/**/*.js
+mocha --debug --compilers js:@babel/register plugins/profiler/**/__tests__/**/*.js
 ```
 
 

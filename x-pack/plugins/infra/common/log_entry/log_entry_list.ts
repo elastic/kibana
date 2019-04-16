@@ -22,7 +22,7 @@ export function getIndexNearLogEntry(logEntries: LogEntryList, key: LogEntryTime
   let currentKey: LogEntryTime;
 
   while (minIndex < maxIndex) {
-    currentIndex = (minIndex + maxIndex) >>> 1; // tslint:disable-line:no-bitwise
+    currentIndex = (minIndex + maxIndex) >>> 1; // eslint-disable-line no-bitwise
     currentKey = getLogEntryKey(logEntries[currentIndex]);
 
     if ((highest ? isLessOrEqual : isLess)(currentKey, key)) {

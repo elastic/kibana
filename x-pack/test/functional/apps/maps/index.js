@@ -31,6 +31,8 @@ export default function ({ loadTestFile, getService }) {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
+      loadTestFile(require.resolve('./feature_controls/maps_security'));
+      loadTestFile(require.resolve('./feature_controls/maps_spaces'));
     });
 
     describe('', function () {
@@ -41,6 +43,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./add_layer_panel'));
       loadTestFile(require.resolve('./layer_errors'));
       loadTestFile(require.resolve('./embeddable/dashboard'));
+      loadTestFile(require.resolve('./embeddable/embeddable_state'));
     });
   });
 }

@@ -5,26 +5,28 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { ReactNode, SFC } from 'react';
+import React, { FunctionComponent, ReactNode } from 'react';
 import tinycolor from 'tinycolor2';
 
 export interface Props {
-  /** Any valid CSS color. If not a valid CSS string, the dot will not render */
-  value: string;
+  /** Any valid CSS color. If not a valid CSS string, the dot will be transparent and checkered */
+  value?: string;
   /** Nodes to display within the dot.  Should fit within the constraints. */
   children?: ReactNode;
 }
 
-export const ColorDot: SFC<Props> = ({ value, children }) => {
+export const ColorDot: FunctionComponent<Props> = ({ value, children }) => {
   const tc = tinycolor(value);
-  if (!tc.isValid()) {
-    return null;
+  let style = {};
+
+  if (tc.isValid()) {
+    style = { background: value };
   }
 
   return (
     <div className="canvasColorDot">
       <div className="canvasColorDot__background canvasCheckered" />
-      <div className="canvasColorDot__foreground" style={{ background: tc.toRgbString() }}>
+      <div className="canvasColorDot__foreground" style={style}>
         {children}
       </div>
     </div>

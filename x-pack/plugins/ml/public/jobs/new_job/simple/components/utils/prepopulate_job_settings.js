@@ -8,6 +8,7 @@
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { setFullTimeRange } from '../../../../../components/full_time_range_selector/full_time_range_selector_service';
 
 
 export function preLoadJob($scope, appState) {
@@ -16,7 +17,7 @@ export function preLoadJob($scope, appState) {
   if (job !== undefined) {
     const mlJobSettings = jobSettingsFromJob(job, $scope.ui.aggTypeOptions);
     populateAppStateSettings({ mlJobSettings }, $scope);
-    $scope.setFullTimeRange()
+    setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery)
       .then(() => $scope.loadVis())
       .catch(() => $scope.loadVis());
   } else {

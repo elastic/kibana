@@ -89,7 +89,6 @@ export class LegacyService implements CoreService {
             await this.createClusterManager(config);
             return;
           }
-
           return await this.createKbnServer(config, deps);
         })
       )
@@ -132,6 +131,7 @@ export class LegacyService implements CoreService {
   }
 
   private async createKbnServer(config: Config, { elasticsearch, http, plugins }: SetupDeps) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
       // If core HTTP service is run we'll receive internal server reference and
@@ -147,6 +147,7 @@ export class LegacyService implements CoreService {
             }
           : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
+      http,
       elasticsearch,
       plugins,
     });
