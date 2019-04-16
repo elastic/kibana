@@ -2945,7 +2945,7 @@
   resolved "https://registry.yarnpkg.com/@types/handlebars/-/handlebars-4.0.39.tgz#961fb54db68030890942e6aeffe9f93a957807bd"
   integrity sha512-vjaS7Q0dVqFp85QhyPSZqDKnTTCemcSHNHFvDdalO1s0Ifz5KuE64jQD5xoUkfdWwF4WpqdJEl7LsWH8rzhKJA==
 
-"@types/hapi-auth-cookie@9.1.0", "@types/hapi-auth-cookie@^9.1.0":
+"@types/hapi-auth-cookie@^9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@types/hapi-auth-cookie/-/hapi-auth-cookie-9.1.0.tgz#cbcd2236b7d429bd0632a8cc45cfd355fdd7e7a2"
   integrity sha512-qsP08L+fNaE2K5dsDVKvHp0AmSBs8m9PD5eWsTdHnkJOk81iD7c0J4GYt/1aDJwZsyx6CgcxpbkPOCwBJmrwAg==
