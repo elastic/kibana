@@ -179,7 +179,7 @@ async function detectProducts(req) {
 
 function getUuidBucketName(productName) {
   switch (productName) {
-    case 'elasticsearch':
+    case ELASTICSEARCH_CUSTOM_ID:
       return 'es_uuids';
     case KIBANA_SYSTEM_ID:
       return 'kibana_uuids';
@@ -252,7 +252,7 @@ export const getCollectionStatus = async (req, indexPatterns, clusterUuid) => {
     { name: BEATS_SYSTEM_ID },
     { name: LOGSTASH_SYSTEM_ID },
     { name: APM_CUSTOM_ID, token: '-beats-' },
-    { name: 'elasticsearch', token: '-es-' },
+    { name: ELASTICSEARCH_CUSTOM_ID, token: '-es-' },
   ];
 
   const [
