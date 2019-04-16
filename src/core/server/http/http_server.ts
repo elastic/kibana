@@ -23,16 +23,37 @@ import { modifyUrl } from '../../utils';
 import { Logger } from '../logging';
 import { HttpConfig } from './http_config';
 import { createServer, getServerOptions } from './http_tools';
+import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
+import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
 import { Router } from './router';
+import {
+  SessionStorageCookieOptions,
+  createCookieSessionStorageFactory,
+} from './cookie_session_storage';
 
 export interface HttpServerInfo {
   server: Server;
   options: ServerOptions;
+  /**
+   * Define custom authentication and/or authorization mechanism for incoming requests.
+   * Applied to all resources by default. Only one AuthenticationHandler can be registered.
+   */
+  registerAuth: <T>(
+    authenticationHandler: AuthenticationHandler<T>,
+    cookieOptions: SessionStorageCookieOptions<T>
+  ) => void;
+  /**
+   * Define custom logic to perform for incoming requests.
+   * Applied to all resources by default.
+   * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
+   */
+  registerOnRequest: (requestHandler: OnRequestHandler) => void;
 }
 
 export class HttpServer {
   private server?: Server;
-  private registeredRouters: Set<Router> = new Set();
+  private registeredRouters = new Set<Router>();
+  private authRegistered = false;
 
   constructor(private readonly log: Logger) {}
 
@@ -48,7 +69,7 @@ export class HttpServer {
     this.registeredRouters.add(router);
   }
 
-  public async start(config: HttpConfig) {
+  public async start(config: HttpConfig): Promise<HttpServerInfo> {
     this.log.debug('starting http server');
 
     const serverOptions = getServerOptions(config);
@@ -77,7 +98,15 @@ export class HttpServer {
     // Return server instance with the connection options so that we can properly
     // bridge core and the "legacy" Kibana internally. Once this bridge isn't
     // needed anymore we shouldn't return anything from this method.
-    return { server: this.server, options: serverOptions };
+    return {
+      server: this.server,
+      options: serverOptions,
+      registerOnRequest: this.registerOnRequest.bind(this),
+      registerAuth: <T>(
+        fn: AuthenticationHandler<T>,
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) => this.registerAuth(fn, cookieOptions, config.basePath),
+    };
   }
 
   public async stop() {
@@ -126,5 +155,44 @@ export class HttpServer {
     // we should omit one of them to have a valid concatenated path.
     const routePathStartIndex = routerPath.endsWith('/') && routePath.startsWith('/') ? 1 : 0;
     return `${routerPath}${routePath.slice(routePathStartIndex)}`;
+  }
+
+  private registerOnRequest(fn: OnRequestHandler) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+
+    this.server.ext('onRequest', adoptToHapiOnRequestFormat(fn));
+  }
+
+  private async registerAuth<T>(
+    fn: AuthenticationHandler<T>,
+    cookieOptions: SessionStorageCookieOptions<T>,
+    basePath?: string
+  ) {
+    if (this.server === undefined) {
+      throw new Error('Server is not created yet');
+    }
+    if (this.authRegistered) {
+      throw new Error('Auth interceptor was already registered');
+    }
+    this.authRegistered = true;
+
+    const sessionStorage = await createCookieSessionStorageFactory<T>(
+      this.server,
+      cookieOptions,
+      basePath
+    );
+
+    this.server.auth.scheme('login', () => ({
+      authenticate: adoptToHapiAuthFormat(fn, sessionStorage),
+    }));
+    this.server.auth.strategy('session', 'login');
+
+    // The default means that the `session` strategy that is based on `login` schema defined above will be
+    // automatically assigned to all routes that don't contain an auth config.
+    // should be applied for all routes if they don't specify auth strategy in route declaration
+    // https://github.com/hapijs/hapi/blob/master/API.md#-serverauthdefaultoptions
+    this.server.auth.default('session');
   }
 }
