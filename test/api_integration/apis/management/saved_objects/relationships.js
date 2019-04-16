@@ -44,10 +44,15 @@ export default function ({ getService }) {
     before(() => esArchiver.load('management/saved_objects'));
     after(() => esArchiver.unload('management/saved_objects'));
 
+    const baseApiUrl = `/api/kibana/management/saved_objects/relationships`;
+    const coerceToArray = itemOrItems => [].concat(itemOrItems);
+    const getSavedObjectTypesQuery = types => coerceToArray(types).map(type => `savedObjectTypes=${type}`).join('&');
+    const defaultQuery = getSavedObjectTypesQuery(['visualization', 'index-pattern', 'search', 'dashboard']);
+
     describe('searches', async () => {
       it('should validate search response schema', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/search/960372e0-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
@@ -57,7 +62,7 @@ export default function ({ getService }) {
 
       it('should work for searches', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/search/960372e0-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -87,16 +92,33 @@ export default function ({ getService }) {
           });
       });
 
+      it('should filter based on savedObjectTypes', async () => {
+        await supertest
+          .get(`${baseApiUrl}/search/960372e0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('visualization')}`)
+          .expect(res => console.log(res.text))
+          .expect(200)
+          .then(resp => {
+            expect(resp.body).to.eql({
+              visualization: [
+                {
+                  id: 'a42c0580-3224-11e8-a572-ffca06da1357',
+                  title: 'VisualizationFromSavedSearch',
+                },
+              ]
+            });
+          });
+      });
+
       //TODO: https://github.com/elastic/kibana/issues/19713 causes this test to fail.
       it.skip('should return 404 if search finds no results', async () => {
-        await supertest.get(`/api/kibana/management/saved_objects/relationships/search/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`).expect(404);
+        await supertest.get(`${baseApiUrl}/search/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx${defaultQuery}`).expect(404);
       });
     });
 
     describe('dashboards', async () => {
       it('should validate dashboard response schema', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
@@ -106,7 +128,7 @@ export default function ({ getService }) {
 
       it('should work for dashboards', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -136,10 +158,19 @@ export default function ({ getService }) {
           });
       });
 
+      it('should filter based on savedObjectTypes', async () => {
+        await supertest
+          .get(`${baseApiUrl}/dashboard/b70c7ae0-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
+          .expect(200)
+          .then(resp => {
+            expect(resp.body).to.eql({});
+          });
+      });
+
       //TODO: https://github.com/elastic/kibana/issues/19713 causes this test to fail.
       it.skip('should return 404 if dashboard finds no results', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/dashboard/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+          .get(`${baseApiUrl}/dashboard/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx${defaultQuery}`)
           .expect(404);
       });
     });
@@ -147,7 +178,7 @@ export default function ({ getService }) {
     describe('visualizations', async () => {
       it('should validate visualization response schema', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/visualization/a42c0580-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
@@ -157,7 +188,7 @@ export default function ({ getService }) {
 
       it('should work for visualizations', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/visualization/a42c0580-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -187,9 +218,25 @@ export default function ({ getService }) {
           });
       });
 
+      it('should filter based on savedObjectTypes', async () => {
+        await supertest
+          .get(`${baseApiUrl}/visualization/a42c0580-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
+          .expect(200)
+          .then(resp => {
+            expect(resp.body).to.eql({
+              search: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  title: 'OneRecord'
+                },
+              ]
+            });
+          });
+      });
+
       it('should return 404 if  visualizations finds no results', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/visualization/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+          .get(`${baseApiUrl}/visualization/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?${defaultQuery}`)
           .expect(404);
       });
     });
@@ -197,7 +244,7 @@ export default function ({ getService }) {
     describe('index patterns', async () => {
       it('should validate visualization response schema', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             const validationResult = Joi.validate(resp.body, GENERIC_RESPONSE_SCHEMA);
@@ -207,7 +254,7 @@ export default function ({ getService }) {
 
       it('should work for index patterns', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357`)
+          .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${defaultQuery}`)
           .expect(200)
           .then(resp => {
             expect(resp.body).to.eql([
@@ -237,9 +284,25 @@ export default function ({ getService }) {
           });
       });
 
+      it('should filter based on savedObjectTypes', async () => {
+        await supertest
+          .get(`${baseApiUrl}/index-pattern/8963ca30-3224-11e8-a572-ffca06da1357?${getSavedObjectTypesQuery('search')}`)
+          .expect(200)
+          .then(resp => {
+            expect(resp.body).to.eql({
+              search: [
+                {
+                  id: '960372e0-3224-11e8-a572-ffca06da1357',
+                  title: 'OneRecord',
+                },
+              ]
+            });
+          });
+      });
+
       it('should return 404 if index pattern finds no results', async () => {
         await supertest
-          .get(`/api/kibana/management/saved_objects/relationships/index-pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`)
+          .get(`${baseApiUrl}/index-pattern/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx?${defaultQuery}`)
           .expect(404);
       });
     });

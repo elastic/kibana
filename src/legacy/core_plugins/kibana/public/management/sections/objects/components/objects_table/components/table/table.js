@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import chrome from 'ui/chrome';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';
@@ -47,9 +48,11 @@ class TableUI extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
+    canDeleteSavedObjectTypes: PropTypes.array.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     goEditObject: PropTypes.func.isRequired,
+    uiCapabilities: PropTypes.object.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -192,13 +195,14 @@ class TableUI extends PureComponent {
         sortable: false,
         render: (title, object) => {
           const { inAppUrl } = object.meta;
-          if (!inAppUrl) {
+          const canGoInApp = inAppUrl && get(this.props.uiCapabilities, inAppUrl.uiCapabilitiesPath);
+          if (!inAppUrl || !canGoInApp) {
             return (
               <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
             );
           }
           return (
-            <EuiLink href={chrome.addBasePath(inAppUrl)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(inAppUrl.path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
       },
@@ -216,7 +220,7 @@ class TableUI extends PureComponent {
                 defaultMessage: 'Edit this saved object'
               }),
             type: 'icon',
-            icon: 'pencil',
+            icon: 'inspect',
             onClick: object => goEditObject(object),
             available: object => !!object.meta.editUrl,
           },
@@ -252,6 +256,10 @@ class TableUI extends PureComponent {
       );
     }
 
+    const unableToDeleteSavedObjectTypes = selectedSavedObjects
+      .map(({ type }) => type)
+      .filter(type => !this.props.canDeleteSavedObjectTypes.includes(type));
+
     const button = (
       <EuiButton
         iconType="arrowDown"
@@ -278,7 +286,14 @@ class TableUI extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0}
+              isDisabled={
+                selectedSavedObjects.length === 0 ||
+                unableToDeleteSavedObjectTypes.length > 0
+              }
+              title={
+                unableToDeleteSavedObjectTypes.length > 0 ? `Unable to delete ${unableToDeleteSavedObjectTypes.join(', ')}` : undefined
+              }
+              data-test-subj="savedObjectsManagementDelete"
             >
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.table.deleteButtonLabel"

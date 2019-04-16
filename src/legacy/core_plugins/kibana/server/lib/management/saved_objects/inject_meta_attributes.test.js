@@ -126,7 +126,10 @@ test('injects inAppUrl meta attribute', () => {
   const savedObjectsSchema = getSchemaMock({
     a: {
       getInAppUrl() {
-        return 'my-in-app-url';
+        return {
+          path: 'my-in-app-url',
+          uiCapabilitiesPath: 'ui.path',
+        };
       },
     },
   });
@@ -134,7 +137,10 @@ test('injects inAppUrl meta attribute', () => {
   expect(result).toEqual({
     type: 'a',
     meta: {
-      inAppUrl: 'my-in-app-url',
+      inAppUrl: {
+        path: 'my-in-app-url',
+        uiCapabilitiesPath: 'ui.path',
+      },
     },
   });
 });

@@ -200,9 +200,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -214,6 +212,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -253,9 +252,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -267,6 +264,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();
@@ -311,9 +309,7 @@ export default function ({ getService }) {
                   version: 1,
                 },
                 id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
-                migrationVersion: {
-                  dashboard: '7.0.0',
-                },
+                migrationVersion: objects[0].migrationVersion,
                 references: [
                   {
                     id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
@@ -325,6 +321,7 @@ export default function ({ getService }) {
                 updated_at: '2017-09-21T18:57:40.826Z',
                 version: objects[0].version,
               }]);
+              expect(objects[0].migrationVersion).to.be.ok();
               expect(() => JSON.parse(objects[0].attributes.kibanaSavedObjectMeta.searchSourceJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.optionsJSON)).not.to.throwError();
               expect(() => JSON.parse(objects[0].attributes.panelsJSON)).not.to.throwError();

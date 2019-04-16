@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
@@ -44,6 +45,7 @@ class RelationshipsUI extends Component {
     savedObject: PropTypes.object.isRequired,
     close: PropTypes.func.isRequired,
     goEditObject: PropTypes.func.isRequired,
+    uiCapabilities: PropTypes.object.isRequired,
   };
 
   constructor(props) {
@@ -187,13 +189,14 @@ class RelationshipsUI extends Component {
         sortable: false,
         render: (title, object) => {
           const { inAppUrl } = object.meta;
-          if (!inAppUrl) {
+          const canGoInApp = inAppUrl && get(this.props.uiCapabilities, inAppUrl.uiCapabilitiesPath);
+          if (!inAppUrl || !canGoInApp) {
             return (
               <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
             );
           }
           return (
-            <EuiLink href={chrome.addBasePath(inAppUrl)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(inAppUrl.path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
       },

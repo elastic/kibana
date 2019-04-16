@@ -50,6 +50,7 @@ jest.mock('../../../../../lib/fetch_export_objects', () => ({
 import { Relationships } from '../relationships';
 
 describe('Relationships', () => {
+
   it('should render index patterns normally', async () => {
     const props = {
       goEditObject: () => {},

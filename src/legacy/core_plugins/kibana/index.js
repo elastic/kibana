@@ -139,7 +139,10 @@ export default function (kibana) {
             return `/management/kibana/index_patterns/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/app/kibana#/management/kibana/index_patterns/${obj.id}`;
+            return {
+              path: `/app/kibana#/management/kibana/index_patterns/${obj.id}`,
+              uiCapabilitiesPath: 'management.kibana.index_patterns',
+            };
           },
         },
         visualization: {
@@ -152,7 +155,10 @@ export default function (kibana) {
             return `/management/kibana/objects/savedVisualizations/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/app/kibana#/visualize/edit/${obj.id}`;
+            return {
+              path: `/app/kibana#/visualize/edit/${obj.id}`,
+              uiCapabilitiesPath: 'visualize.show',
+            };
           },
         },
         search: {
@@ -165,7 +171,10 @@ export default function (kibana) {
             return `/management/kibana/objects/savedSearches/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/app/kibana#/discover/${obj.id}`;
+            return {
+              path: `/app/kibana#/discover/${obj.id}`,
+              uiCapabilitiesPath: 'discover.show',
+            };
           },
         },
         dashboard: {
@@ -178,7 +187,10 @@ export default function (kibana) {
             return `/management/kibana/objects/savedDashboards/${obj.id}`;
           },
           getInAppUrl(obj) {
-            return `/app/kibana#/dashboard/${obj.id}`;
+            return {
+              path: `/app/kibana#/dashboard/${obj.id}`,
+              uiCapabilitiesPath: 'dashboard.show',
+            };
           },
         },
         url: {
@@ -202,7 +214,10 @@ export default function (kibana) {
         },
         config: {
           getInAppUrl() {
-            return `/app/kibana#/management/kibana/settings`;
+            return {
+              path: `/app/kibana#/management/kibana/settings`,
+              uiCapabilitiesPath: 'advancedSettings.show',
+            };
           },
           getEditUrl() {
             return `/management/kibana/settings`;
@@ -211,9 +226,61 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const { savedObjects } = server;
+
         return {
           kbnIndex: options.index,
-          kbnBaseUrl
+          kbnBaseUrl,
+          uiCapabilities: {
+            discover: {
+              show: true,
+              createShortUrl: true,
+              save: true,
+            },
+            visualize: {
+              show: true,
+              createShortUrl: true,
+              delete: true,
+              save: true,
+            },
+            dashboard: {
+              createNew: true,
+              show: true,
+              showWriteControls: true,
+            },
+            catalogue: {
+              discover: true,
+              dashboard: true,
+              visualize: true,
+              console: true,
+              advanced_settings: true,
+              index_patterns: true,
+            },
+            advancedSettings: {
+              save: true
+            },
+            indexPatterns: {
+              createNew: true,
+            },
+            savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
+              ...acc,
+              [type]: {
+                delete: true,
+                edit: true,
+                read: true,
+              }
+            }), {}),
+            management: {
+              /*
+               * Management settings correspond to management section/link ids, and should not be changed
+               * without also updating those definitions.
+               */
+              kibana: {
+                settings: true,
+                index_patterns: true,
+              },
+            }
+          }
         };
       },
 

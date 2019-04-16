@@ -35,14 +35,14 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       expect(resp.body).to.eql({
         statusCode: 403,
         error: 'Forbidden',
-        message: `Unable to bulk_get ${type}, missing action:saved_objects/${type}/bulk_get`,
+        message: `Unable to bulk_get ${type}`,
       });
       return;
     }
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to find ${type}, missing action:saved_objects/${type}/find`,
+      message: `Unable to find ${type}`,
     });
   };
 
@@ -71,7 +71,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
           id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
         },
       ],
-      migrationVersion: { visualization: '7.1.0' },
+      migrationVersion: response.migrationVersion,
       updated_at: '2017-09-21T18:51:23.794Z',
     });
   };

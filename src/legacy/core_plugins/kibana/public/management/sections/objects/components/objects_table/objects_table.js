@@ -63,7 +63,7 @@ import {
 } from '../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-export const INCLUDED_TYPES = chrome.getInjected('importAndExportableTypes');
+export const POSSIBLE_TYPES = chrome.getInjected('importAndExportableTypes');
 
 class ObjectsTableUI extends Component {
   static propTypes = {
@@ -79,13 +79,16 @@ class ObjectsTableUI extends Component {
 
   constructor(props) {
     super(props);
+    this.savedObjectTypes = POSSIBLE_TYPES.filter(type => {
+      return this.props.uiCapabilities.savedObjectsManagement[type].read;
+    });
 
     this.state = {
       totalCount: 0,
       page: 0,
       perPage: props.perPageConfig || 50,
       savedObjects: [],
-      savedObjectCounts: INCLUDED_TYPES.reduce((typeToCountMap, type) => {
+      savedObjectCounts: this.savedObjectTypes.reduce((typeToCountMap, type) => {
         typeToCountMap[type] = 0;
         return typeToCountMap;
       }, {}),
@@ -119,7 +122,7 @@ class ObjectsTableUI extends Component {
   fetchCounts = async () => {
     const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
-    const filteredTypes = INCLUDED_TYPES.filter(
+    const filteredTypes = this.savedObjectTypes.filter(
       type => !visibleTypes || visibleTypes.includes(type)
     );
 
@@ -148,7 +151,7 @@ class ObjectsTableUI extends Component {
     // the table filter dropdown.
     const savedObjectCounts = await getSavedObjectCounts(
       this.props.$http,
-      INCLUDED_TYPES,
+      this.savedObjectTypes,
       queryText
     );
 
@@ -177,7 +180,7 @@ class ObjectsTableUI extends Component {
       perPage,
       page: page + 1,
       fields: ['id'],
-      type: INCLUDED_TYPES.filter(
+      type: this.savedObjectTypes.filter(
         type => !visibleTypes || visibleTypes.includes(type)
       ),
     };
@@ -394,6 +397,7 @@ class ObjectsTableUI extends Component {
     return await getRelationships(
       type,
       id,
+      this.savedObjectTypes,
       this.props.$http,
       this.props.basePath
     );
@@ -411,6 +415,7 @@ class ObjectsTableUI extends Component {
         services={this.props.services}
         indexPatterns={this.props.indexPatterns}
         newIndexPatternUrl={this.props.newIndexPatternUrl}
+        savedObjectTypes={this.props.savedObjectTypes}
       />
     );
   }
@@ -427,6 +432,7 @@ class ObjectsTableUI extends Component {
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
         goEditObject={this.props.goEditObject}
+        uiCapabilities={this.props.uiCapabilities}
       />
     );
   }
@@ -662,11 +668,15 @@ class ObjectsTableUI extends Component {
       onSelectionChange: this.onSelectionChanged,
     };
 
-    const filterOptions = INCLUDED_TYPES.map(type => ({
+    const filterOptions = this.savedObjectTypes.map(type => ({
       value: type,
       name: type,
       view: `${type} (${savedObjectCounts[type] || 0})`,
     }));
+
+    const canDeleteSavedObjectTypes = POSSIBLE_TYPES.filter(type => {
+      return this.props.uiCapabilities.savedObjectsManagement[type].delete;
+    });
 
     return (
       <EuiPageContent
@@ -693,6 +703,7 @@ class ObjectsTableUI extends Component {
           onTableChange={this.onTableChange}
           filterOptions={filterOptions}
           onExport={this.onExport}
+          canDeleteSavedObjectTypes={canDeleteSavedObjectTypes}
           onDelete={this.onDelete}
           goEditObject={this.props.goEditObject}
           pageIndex={page}
@@ -701,6 +712,7 @@ class ObjectsTableUI extends Component {
           totalItemCount={filteredItemCount}
           isSearching={isSearching}
           onShowRelationships={this.onShowRelationships}
+          uiCapabilities={this.props.uiCapabilities}
         />
       </EuiPageContent>
     );

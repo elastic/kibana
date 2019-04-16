@@ -79,6 +79,7 @@ const defaultProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
+  canDeleteSavedObjectTypes: ['visualization']
 };
 
 describe('Table', () => {
@@ -117,5 +118,17 @@ describe('Table', () => {
     searchBar.simulate('keyup', { keyCode: keyCodes.ENTER, target: { value: 'I am valid' } });
     expect(onQueryChangeMock).toHaveBeenCalledTimes(1);
     expect(component.state().isSearchTextValid).toBe(true);
+  });
+
+  it(`restricts which saved objects can be deleted based on type`, () => {
+    const selectedSavedObjects = [{ type: 'visualization' }, { type: 'search' }, { type: 'index-pattern' }];
+    const customizedProps = { ...defaultProps, selectedSavedObjects, canDeleteSavedObjectTypes: ['visualization'] };
+    const component = shallowWithIntl(
+      <Table.WrappedComponent
+        {...customizedProps}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
   });
 });

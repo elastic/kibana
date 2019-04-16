@@ -27,7 +27,7 @@ interface SavedObjectsSchemaTypeDefinition {
   icon?: string;
   getTitle?: (savedObject: SavedObject) => string;
   getEditUrl?: (savedObject: SavedObject) => string;
-  getInAppUrl?: (savedObject: SavedObject) => string;
+  getInAppUrl?: (savedObject: SavedObject) => { path: string; uiCapabilitiesPath: string };
 }
 
 export interface SavedObjectsSchemaDefinition {

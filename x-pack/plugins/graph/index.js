@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 
 import migrations from './migrations';
 import { initServer } from './server';
@@ -52,6 +52,33 @@ export function graph(kibana) {
           graphSavePolicy: config.get('xpack.graph.savePolicy'),
           canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls')
         };
+      });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'graph',
+        name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
+          defaultMessage: 'Graph',
+        }),
+        icon: 'graphApp',
+        navLinkId: 'graph',
+        app: ['graph', 'kibana'],
+        catalogue: ['graph'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['graph-workspace'],
+              read: ['config', 'index-pattern'],
+            },
+            ui: ['save', 'delete'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['config', 'index-pattern', 'graph-workspace'],
+            },
+            ui: [],
+          }
+        }
       });
 
       initServer(server);

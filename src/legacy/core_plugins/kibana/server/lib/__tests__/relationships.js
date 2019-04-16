@@ -66,7 +66,10 @@ const savedObjectsSchema = getSchemaMock({
       return `/management/kibana/index_patterns/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return `/app/kibana#/management/kibana/index_patterns/${obj.id}`;
+      return {
+        path: `/app/kibana#/management/kibana/index_patterns/${obj.id}`,
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      };
     },
   },
   visualization: {
@@ -79,7 +82,10 @@ const savedObjectsSchema = getSchemaMock({
       return `/management/kibana/objects/savedVisualizations/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return `/app/kibana#/visualize/edit/${obj.id}`;
+      return {
+        path: `/app/kibana#/visualize/edit/${obj.id}`,
+        uiCapabilitiesPath: 'visualize.show',
+      };
     },
   },
   search: {
@@ -92,7 +98,10 @@ const savedObjectsSchema = getSchemaMock({
       return `/management/kibana/objects/savedSearches/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return `/app/kibana#/discover/${obj.id}`;
+      return {
+        path: `/app/kibana#/discover/${obj.id}`,
+        uiCapabilitiesPath: 'discover.show',
+      };
     },
   },
   dashboard: {
@@ -105,7 +114,10 @@ const savedObjectsSchema = getSchemaMock({
       return `/management/kibana/objects/savedDashboards/${obj.id}`;
     },
     getInAppUrl(obj) {
-      return `/app/kibana#/dashboard/${obj.id}`;
+      return {
+        path: `/app/kibana#/dashboard/${obj.id}`,
+        uiCapabilitiesPath: 'dashboard.show',
+      };
     },
   },
 });
@@ -181,7 +193,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'Foo',
           editUrl: '/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/app/kibana#/visualize/edit/1',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/1',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -192,7 +207,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'Bar',
           editUrl: '/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: '/app/kibana#/visualize/edit/2',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/2',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -203,7 +221,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'FooBar',
           editUrl: '/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: '/app/kibana#/visualize/edit/3',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/3',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
     ]);
@@ -300,7 +321,10 @@ describe('findRelationships', () => {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
           editUrl: '/management/kibana/index_patterns/1',
-          inAppUrl: '/app/kibana#/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/app/kibana#/management/kibana/index_patterns/1',
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          },
         },
       },
       {
@@ -312,7 +336,10 @@ describe('findRelationships', () => {
           icon: 'dashboardApp',
           title: 'My Dashboard',
           editUrl: '/management/kibana/objects/savedDashboards/1',
-          inAppUrl: '/app/kibana#/dashboard/1',
+          inAppUrl: {
+            path: '/app/kibana#/dashboard/1',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
         },
       },
       {
@@ -324,7 +351,10 @@ describe('findRelationships', () => {
           icon: 'dashboardApp',
           title: 'Your Dashboard',
           editUrl: '/management/kibana/objects/savedDashboards/2',
-          inAppUrl: '/app/kibana#/dashboard/2',
+          inAppUrl: {
+            path: '/app/kibana#/dashboard/2',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
         },
       },
     ]);
@@ -410,7 +440,10 @@ describe('findRelationships', () => {
           icon: 'indexPatternApp',
           title: 'My Index Pattern',
           editUrl: '/management/kibana/index_patterns/1',
-          inAppUrl: '/app/kibana#/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/app/kibana#/management/kibana/index_patterns/1',
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          },
         },
       },
       {
@@ -422,7 +455,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'Foo',
           editUrl: '/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/app/kibana#/visualize/edit/1',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/1',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -434,7 +470,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'Bar',
           editUrl: '/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: '/app/kibana#/visualize/edit/2',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/2',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -446,7 +485,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'FooBar',
           editUrl: '/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: '/app/kibana#/visualize/edit/3',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/3',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
     ]);
@@ -534,7 +576,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'Foo',
           editUrl: '/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/app/kibana#/visualize/edit/1',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/1',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -546,7 +591,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'Bar',
           editUrl: '/management/kibana/objects/savedVisualizations/2',
-          inAppUrl: '/app/kibana#/visualize/edit/2',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/2',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -558,7 +606,10 @@ describe('findRelationships', () => {
           icon: 'visualizeApp',
           title: 'FooBar',
           editUrl: '/management/kibana/objects/savedVisualizations/3',
-          inAppUrl: '/app/kibana#/visualize/edit/3',
+          inAppUrl: {
+            path: '/app/kibana#/visualize/edit/3',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       {
@@ -570,7 +621,10 @@ describe('findRelationships', () => {
           icon: 'search',
           title: 'My Saved Search',
           editUrl: '/management/kibana/objects/savedSearches/1',
-          inAppUrl: '/app/kibana#/discover/1',
+          inAppUrl: {
+            path: '/app/kibana#/discover/1',
+            uiCapabilitiesPath: 'discover.show',
+          },
         },
       },
     ]);
