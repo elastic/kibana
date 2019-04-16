@@ -184,7 +184,7 @@ describe('UncommonProcess Table Component', () => {
     });
 
     test('it returns null if given undefined', () => {
-      expect(getArgs(null)).toEqual(null);
+      expect(getArgs(undefined)).toEqual(null);
     });
   });
 });
