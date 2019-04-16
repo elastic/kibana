@@ -7469,8 +7469,6 @@
     "xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle": "以权限角色运行",
     "xpack.security.management.editRole.indexPrivilegeForm.deleteSpacePrivilegeAriaLabel": "删除索引权限",
     "xpack.security.management.editRole.indexPrivilegeForm.grantedDocumentsQueryFormRowLabel": "授权的文档查询",
-    "xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowHelpText": "如果未授权任何字段，则分配到此角色的用户将无法查看此索引的任何数据。",
-    "xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowLabel": "授权字段（可选）",
     "xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel": "向特定文档授予读取权限",
     "xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel": "索引",
     "xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel": "权限",
