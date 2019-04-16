@@ -48,6 +48,8 @@ export type Date = any;
 
 export type ToNumberArray = number[] | number;
 
+export type ToDateArray = string[] | string;
+
 export type EsValue = any;
 
 // ====================================================
@@ -431,13 +433,13 @@ export interface EventEcsFields {
 
   category?: ToStringArray | null;
 
-  created?: ToStringArray | null;
+  created?: ToDateArray | null;
 
   dataset?: ToStringArray | null;
 
   duration?: ToNumberArray | null;
 
-  end?: ToStringArray | null;
+  end?: ToDateArray | null;
 
   hash?: ToStringArray | null;
 
@@ -457,7 +459,7 @@ export interface EventEcsFields {
 
   severity?: ToNumberArray | null;
 
-  start?: ToStringArray | null;
+  start?: ToDateArray | null;
 
   timezone?: ToStringArray | null;
 
@@ -553,7 +555,7 @@ export interface ZeekConnectionData {
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: ToStringArray | null;
+  suppress_for?: ToNumberArray | null;
 
   msg?: ToStringArray | null;
 
@@ -583,7 +585,7 @@ export interface ZeekDnsData {
 
   query?: ToStringArray | null;
 
-  trans_id?: ToStringArray | null;
+  trans_id?: ToNumberArray | null;
 
   qclass?: ToStringArray | null;
 
@@ -741,11 +743,11 @@ export interface FileFields {
 
   mode?: ToStringArray | null;
 
-  size?: ToStringArray | null;
+  size?: ToNumberArray | null;
 
-  mtime?: ToStringArray | null;
+  mtime?: ToDateArray | null;
 
-  ctime?: ToStringArray | null;
+  ctime?: ToDateArray | null;
 }
 
 export interface SystemEcsField {
@@ -2776,13 +2778,13 @@ export namespace EventEcsFieldsResolvers {
 
     category?: CategoryResolver<ToStringArray | null, TypeParent, Context>;
 
-    created?: CreatedResolver<ToStringArray | null, TypeParent, Context>;
+    created?: CreatedResolver<ToDateArray | null, TypeParent, Context>;
 
     dataset?: DatasetResolver<ToStringArray | null, TypeParent, Context>;
 
     duration?: DurationResolver<ToNumberArray | null, TypeParent, Context>;
 
-    end?: EndResolver<ToStringArray | null, TypeParent, Context>;
+    end?: EndResolver<ToDateArray | null, TypeParent, Context>;
 
     hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2802,7 +2804,7 @@ export namespace EventEcsFieldsResolvers {
 
     severity?: SeverityResolver<ToNumberArray | null, TypeParent, Context>;
 
-    start?: StartResolver<ToStringArray | null, TypeParent, Context>;
+    start?: StartResolver<ToDateArray | null, TypeParent, Context>;
 
     timezone?: TimezoneResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -2820,7 +2822,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CreatedResolver<
-    R = ToStringArray | null,
+    R = ToDateArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2835,7 +2837,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EndResolver<
-    R = ToStringArray | null,
+    R = ToDateArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2885,7 +2887,7 @@ export namespace EventEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type StartResolver<
-    R = ToStringArray | null,
+    R = ToDateArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3195,7 +3197,7 @@ export namespace ZeekConnectionDataResolvers {
 
 export namespace ZeekNoticeDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekNoticeData> {
-    suppress_for?: SuppressForResolver<ToStringArray | null, TypeParent, Context>;
+    suppress_for?: SuppressForResolver<ToNumberArray | null, TypeParent, Context>;
 
     msg?: MsgResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -3211,7 +3213,7 @@ export namespace ZeekNoticeDataResolvers {
   }
 
   export type SuppressForResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3263,7 +3265,7 @@ export namespace ZeekDnsDataResolvers {
 
     query?: QueryResolver<ToStringArray | null, TypeParent, Context>;
 
-    trans_id?: TransIdResolver<ToStringArray | null, TypeParent, Context>;
+    trans_id?: TransIdResolver<ToNumberArray | null, TypeParent, Context>;
 
     qclass?: QclassResolver<ToStringArray | null, TypeParent, Context>;
 
@@ -3308,7 +3310,7 @@ export namespace ZeekDnsDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransIdResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3774,11 +3776,11 @@ export namespace FileFieldsResolvers {
 
     mode?: ModeResolver<ToStringArray | null, TypeParent, Context>;
 
-    size?: SizeResolver<ToStringArray | null, TypeParent, Context>;
+    size?: SizeResolver<ToNumberArray | null, TypeParent, Context>;
 
-    mtime?: MtimeResolver<ToStringArray | null, TypeParent, Context>;
+    mtime?: MtimeResolver<ToDateArray | null, TypeParent, Context>;
 
-    ctime?: CtimeResolver<ToStringArray | null, TypeParent, Context>;
+    ctime?: CtimeResolver<ToDateArray | null, TypeParent, Context>;
   }
 
   export type PathResolver<
@@ -3837,17 +3839,17 @@ export namespace FileFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SizeResolver<
-    R = ToStringArray | null,
+    R = ToNumberArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MtimeResolver<
-    R = ToStringArray | null,
+    R = ToDateArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CtimeResolver<
-    R = ToStringArray | null,
+    R = ToDateArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

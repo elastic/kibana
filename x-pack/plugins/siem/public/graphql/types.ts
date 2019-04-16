@@ -19,6 +19,8 @@ export type Date = any;
 
 export type ToNumberArray = number[];
 
+export type ToDateArray = string[];
+
 export type EsValue = any;
 
 // ====================================================
@@ -402,13 +404,13 @@ export interface EventEcsFields {
 
   category?: ToStringArray | null;
 
-  created?: ToStringArray | null;
+  created?: ToDateArray | null;
 
   dataset?: ToStringArray | null;
 
   duration?: ToNumberArray | null;
 
-  end?: ToStringArray | null;
+  end?: ToDateArray | null;
 
   hash?: ToStringArray | null;
 
@@ -428,7 +430,7 @@ export interface EventEcsFields {
 
   severity?: ToNumberArray | null;
 
-  start?: ToStringArray | null;
+  start?: ToDateArray | null;
 
   timezone?: ToStringArray | null;
 
@@ -524,7 +526,7 @@ export interface ZeekConnectionData {
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: ToStringArray | null;
+  suppress_for?: ToNumberArray | null;
 
   msg?: ToStringArray | null;
 
@@ -554,7 +556,7 @@ export interface ZeekDnsData {
 
   query?: ToStringArray | null;
 
-  trans_id?: ToStringArray | null;
+  trans_id?: ToNumberArray | null;
 
   qclass?: ToStringArray | null;
 
@@ -712,11 +714,11 @@ export interface FileFields {
 
   mode?: ToStringArray | null;
 
-  size?: ToStringArray | null;
+  size?: ToNumberArray | null;
 
-  mtime?: ToStringArray | null;
+  mtime?: ToDateArray | null;
 
-  ctime?: ToStringArray | null;
+  ctime?: ToDateArray | null;
 }
 
 export interface SystemEcsField {
@@ -2785,13 +2787,13 @@ export namespace GetTimelineQuery {
 
     category?: ToStringArray | null;
 
-    created?: ToStringArray | null;
+    created?: ToDateArray | null;
 
     dataset?: ToStringArray | null;
 
     duration?: ToNumberArray | null;
 
-    end?: ToStringArray | null;
+    end?: ToDateArray | null;
 
     hash?: ToStringArray | null;
 
@@ -2811,7 +2813,7 @@ export namespace GetTimelineQuery {
 
     severity?: ToNumberArray | null;
 
-    start?: ToStringArray | null;
+    start?: ToDateArray | null;
 
     timezone?: ToStringArray | null;
 
@@ -2897,11 +2899,11 @@ export namespace GetTimelineQuery {
 
     mode?: ToStringArray | null;
 
-    size?: ToStringArray | null;
+    size?: ToNumberArray | null;
 
-    mtime?: ToStringArray | null;
+    mtime?: ToDateArray | null;
 
-    ctime?: ToStringArray | null;
+    ctime?: ToDateArray | null;
   };
 
   export type Host = {
@@ -3183,7 +3185,7 @@ export namespace GetTimelineQuery {
   export type Notice = {
     __typename?: 'ZeekNoticeData';
 
-    suppress_for?: ToStringArray | null;
+    suppress_for?: ToNumberArray | null;
 
     msg?: ToStringArray | null;
 
@@ -3215,7 +3217,7 @@ export namespace GetTimelineQuery {
 
     query?: ToStringArray | null;
 
-    trans_id?: ToStringArray | null;
+    trans_id?: ToNumberArray | null;
 
     qclass?: ToStringArray | null;
 

@@ -121,7 +121,6 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
     hideForMobile: false,
     render: ({ node }) => {
       const hostName: string | null | undefined = get('host.name[0]', node);
-      const hostId: string | null | undefined = get('host.name[0]', node);
       if (hostName != null) {
         const id = escapeDataProviderId(`events-table-${node._id}-hostName-${hostName}`);
         return (
@@ -135,10 +134,8 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: hostId ? 'host.id' : 'host.name',
-                value: hostId ? hostId : hostName,
+                field: 'host.name',
+                value: hostName,
               },
               queryDate: {
                 from: startDate,

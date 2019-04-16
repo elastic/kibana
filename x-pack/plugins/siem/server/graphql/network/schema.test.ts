@@ -12,6 +12,7 @@ import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
 import { ecsSchema } from '../ecs';
 import { dateSchema } from '../scalar_date';
+import { toDateSchema } from '../scalar_to_date_array';
 import { toNumberSchema } from '../scalar_to_number_array';
 import { sourceStatusSchema } from '../source_status/schema.gql';
 import { sourcesSchema } from '../sources/schema.gql';
@@ -192,6 +193,7 @@ describe('Test Network Schema', () => {
     networkSchema,
     dateSchema,
     toNumberSchema,
+    toDateSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });
 

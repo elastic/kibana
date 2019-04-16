@@ -12,10 +12,10 @@ export const ecsSchema = gql`
   type EventEcsFields {
     action: ToStringArray
     category: ToStringArray
-    created: ToStringArray
+    created: ToDateArray
     dataset: ToStringArray
     duration: ToNumberArray
-    end: ToStringArray
+    end: ToDateArray
     hash: ToStringArray
     id: ToStringArray
     kind: ToStringArray
@@ -25,7 +25,7 @@ export const ecsSchema = gql`
     risk_score: ToNumberArray
     risk_score_norm: ToNumberArray
     severity: ToNumberArray
-    start: ToStringArray
+    start: ToDateArray
     timezone: ToStringArray
     type: ToStringArray
   }
@@ -176,7 +176,7 @@ export const ecsSchema = gql`
   }
 
   type ZeekNoticeData {
-    suppress_for: ToStringArray
+    suppress_for: ToNumberArray
     msg: ToStringArray
     note: ToStringArray
     sub: ToStringArray
@@ -193,7 +193,7 @@ export const ecsSchema = gql`
     rejected: ToStringArray
     qtype: ToStringArray
     query: ToStringArray
-    trans_id: ToStringArray
+    trans_id: ToNumberArray
     qclass: ToStringArray
     RA: ToStringArray
     TC: ToStringArray
@@ -211,9 +211,9 @@ export const ecsSchema = gql`
     gid: ToStringArray
     group: ToStringArray
     mode: ToStringArray
-    size: ToStringArray
-    mtime: ToStringArray
-    ctime: ToStringArray
+    size: ToNumberArray
+    mtime: ToDateArray
+    ctime: ToDateArray
   }
 
   type ZeekHttpData {

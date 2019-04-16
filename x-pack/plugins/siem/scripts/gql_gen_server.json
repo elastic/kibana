@@ -13,7 +13,8 @@
     ],
     "scalars": {
       "ToStringArray": "string[] | string",
-      "ToNumberArray": "number[] | number"
+      "ToNumberArray": "number[] | number",
+      "ToDateArray": "string[] | string"
     }
   },
   "primitives": {

@@ -530,7 +530,7 @@ export const mockEcsData: Ecs[] = [
         rejected: null,
         qtype: null,
         query: null,
-        trans_id: ['65252'],
+        trans_id: [65252],
         qclass: null,
         RA: ['false'],
         TC: ['false'],
@@ -635,7 +635,7 @@ export const mockEcsData: Ecs[] = [
       session_id: null,
       connection: null,
       notice: {
-        suppress_for: ['3600'],
+        suppress_for: [3600],
         msg: ['8.42.77.171 scanned at least 15 unique ports of host 207.154.238.205 in 0m0s'],
         note: ['Scan::Port_Scan'],
         sub: ['remote'],
