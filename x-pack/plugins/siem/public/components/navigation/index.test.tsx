@@ -14,6 +14,8 @@ import { setBreadcrumbs } from './breadcrumbs';
 jest.mock('./breadcrumbs', () => ({
   setBreadcrumbs: jest.fn(),
 }));
+const NOOP = () => null;
+
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';
 describe('SIEM Navigation', () => {
@@ -35,13 +37,13 @@ describe('SIEM Navigation', () => {
       length: 2,
       location,
       action: pop,
-      push: () => null,
-      replace: () => null,
-      go: () => null,
-      goBack: () => null,
-      goForward: () => null,
+      push: NOOP,
+      replace: NOOP,
+      go: NOOP,
+      goBack: NOOP,
+      goForward: NOOP,
       block: (t: UnregisterCallback) => t,
-      createHref: (t: LocationDescriptorObject) => 't',
+      createHref: (t: LocationDescriptorObject) => `${t}`,
       listen: (l: LocationListener) => {
         const temp: UnregisterCallback = () => null;
         return temp;
@@ -50,13 +52,11 @@ describe('SIEM Navigation', () => {
   };
   const wrapper = shallow(<SiemNavigationComponent {...mockProps} />);
   test('it calls setBreadcrumbs with correct path on mount', () => {
-    // @ts-ignore property mock does not exists
-    expect(setBreadcrumbs.mock.calls[0][0]).toEqual('/hosts');
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(1, '/hosts');
   });
   test('it calls setBreadcrumbs with correct path on update', () => {
     wrapper.setProps({ location: { pathname: '/network' } });
     wrapper.update();
-    // @ts-ignore property mock does not exists
-    expect(setBreadcrumbs.mock.calls[1][0]).toEqual('/network');
+    expect(setBreadcrumbs).toHaveBeenNthCalledWith(2, '/network');
   });
 });
