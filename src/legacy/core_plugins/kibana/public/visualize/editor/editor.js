@@ -20,12 +20,12 @@
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
+import 'plugins/data';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/query_bar';
 import { uiCapabilities } from 'ui/capabilities';
-import 'ui/search_bar';
 import 'ui/apply_filters';
 import 'ui/listen';
 import chrome from 'ui/chrome';

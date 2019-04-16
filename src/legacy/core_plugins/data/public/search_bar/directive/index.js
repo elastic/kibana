@@ -17,6 +17,22 @@
  * under the License.
  */
 
-import './directive';
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+import { SearchBar } from '../components';
 
-export { SearchBar } from './components';
+const app = uiModules.get('app/data', ['react']);
+
+export function setupDirective() {
+  app.directive('searchBar', (reactDirective, localStorage) => {
+    return reactDirective(
+      wrapInI18nContext(SearchBar),
+      undefined,
+      {},
+      {
+        store: localStorage,
+      }
+    );
+  });
+}
