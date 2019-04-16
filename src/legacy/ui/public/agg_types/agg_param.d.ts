@@ -25,7 +25,7 @@ interface AggParam {
   required?: boolean;
   displayName?: string;
   onChange?(agg: AggConfig): void;
-  disabled?(agg: AggConfig): boolean;
+  shouldShow?(agg: AggConfig): boolean;
 }
 
 export { AggParam };

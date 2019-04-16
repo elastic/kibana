@@ -19,10 +19,10 @@
 
 import { isString, isObject } from 'lodash';
 
-function isNotType(type) {
+function isType(type) {
   return function (agg) {
     const field = agg.params.field;
-    return !field || field.type !== type;
+    return field && field.type === type;
   };
 }
 
@@ -42,6 +42,6 @@ const migrateIncludeExcludeFormat = {
 };
 
 export {
-  isNotType,
+  isType,
   migrateIncludeExcludeFormat
 };
