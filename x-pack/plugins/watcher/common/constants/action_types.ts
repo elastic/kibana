@@ -13,8 +13,6 @@ export const ACTION_TYPES: { [key: string]: string } = {
 
   LOGGING: 'logging',
 
-  HIPCHAT: 'hipchat',
-
   SLACK: 'slack',
 
   JIRA: 'jira',

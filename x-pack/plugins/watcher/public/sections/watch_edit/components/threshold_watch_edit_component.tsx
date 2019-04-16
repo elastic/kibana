@@ -35,7 +35,9 @@ import { groupByTypes } from '../../../models/watch/group_by_types';
 import { comparators } from '../comparators';
 import { timeUnits } from '../time_units';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
+import { WatchActionsPanel } from './threshold_watch_action_panel';
 import { WatchContext } from './watch_context';
+
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
     defaultMessage: 'Select a field',
@@ -763,8 +765,11 @@ const ThresholdWatchEditUi = ({
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <WatchActionsPanel />
           </Fragment>
         ) : null}
+        <EuiSpacer size="l" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton

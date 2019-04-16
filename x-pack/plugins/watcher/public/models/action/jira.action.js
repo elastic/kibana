@@ -66,5 +66,12 @@ export class JiraAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new JiraAction(upstreamAction);
   }
+
+  static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
+    defaultMessage: 'Jira',
+  });
+  static selectMessage = i18n.translate('xpack.watcher.models.jiraAction.selectMessageText', {
+    defaultMessage: 'Create issues in Atlassian’s Jira Software.',
+  });
 }
 

@@ -22,7 +22,6 @@ function isEnabledByDefault(actionType) {
 function requiresAccountInfo(actionType) {
   switch (actionType) {
     case ACTION_TYPES.EMAIL:
-    case ACTION_TYPES.HIPCHAT:
     // case ACTION_TYPES.SLACK: // https://github.com/elastic/x-pack-elasticsearch/issues/1573
     case ACTION_TYPES.JIRA:
     case ACTION_TYPES.PAGERDUTY:

@@ -24,8 +24,16 @@ declare module 'plugins/watcher/models/watch_history_item' {
 declare module 'plugins/watcher/models/watch_status' {
   export const WatchStatus: any;
 }
+
+declare module 'plugins/watcher/models/settings' {
+  export const Settings: any;
+}
+declare module 'plugins/watcher/models/action' {
+  export const Action: any;
+}
 // TODO: Remove once typescript definitions are in EUI
 declare module '@elastic/eui' {
   export const EuiCodeEditor: React.SFC<any>;
   export const EuiDescribedFormGroup: React.SFC<any>;
+  export const EuiSuperSelect: React.SFC<any>;
 }

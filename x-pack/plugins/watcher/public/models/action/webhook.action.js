@@ -88,4 +88,11 @@ export class WebhookAction extends BaseAction {
   static fromUpstreamJson(upstreamAction) {
     return new WebhookAction(upstreamAction);
   }
+
+  static typeName = i18n.translate('xpack.watcher.models.webhookAction.typeName', {
+    defaultMessage: 'Webhook',
+  });
+  static selectMessage = i18n.translate('xpack.watcher.models.webhookAction.selectMessageText', {
+    defaultMessage: 'Send a request to any web service.',
+  });
 }

@@ -69,12 +69,19 @@ export class PagerDutyAction extends BaseAction {
 
   get simulateFailMessage() {
     return i18n.translate('xpack.watcher.models.pagerDutyAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send Hipchat event.',
+      defaultMessage: 'Failed to send PagerDuty event.',
     });
   }
 
   static fromUpstreamJson(upstreamAction) {
     return new PagerDutyAction(upstreamAction);
   }
+
+  static typeName = i18n.translate('xpack.watcher.models.pagerDutyAction.typeName', {
+    defaultMessage: 'PagerDuty',
+  });
+  static selectMessage = i18n.translate('xpack.watcher.models.pagerDutyAction.selectMessageText', {
+    defaultMessage: 'Create events in PagerDuty.',
+  });
 }
 

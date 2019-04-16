@@ -19,6 +19,7 @@ set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
 set(ActionTypes, ACTION_TYPES.EMAIL, EmailAction);
 set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
 set(ActionTypes, ACTION_TYPES.UNKNOWN, UnknownAction);
+// TODO add additional actions
 
 export class Action {
   static getActionTypes = () => {

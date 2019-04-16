@@ -70,14 +70,14 @@ export class EmailAction extends BaseAction {
   }
 
   static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
-    defaultMessage: 'E-mail',
+    defaultMessage: 'Email',
   });
   static iconClass = 'kuiIcon fa-envelope-o';
   static template = '<watch-email-action></watch-email-action>';
   static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
-    defaultMessage: 'Send out an e-mail from your server.',
+    defaultMessage: 'Send out an email from your server.',
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.emailAction.simulateButtonLabel', {
-    defaultMessage: 'Test fire an e-mail now'
+    defaultMessage: 'Test fire an email now'
   });
 }

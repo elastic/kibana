@@ -51,6 +51,10 @@ export class LoggingAction extends BaseAction {
     });
   }
 
+  static defaults = {
+    text: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
+  };
+
   static fromUpstreamJson(upstreamAction) {
     return new LoggingAction(upstreamAction);
   }
@@ -58,7 +62,7 @@ export class LoggingAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.loggingAction.typeName', {
     defaultMessage: 'Logging',
   });
-  static iconClass = 'kuiIcon fa-file-text-o';
+  static iconClass = 'document';
   static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
     defaultMessage: 'Add a new item to the logs.',
   });
@@ -66,4 +70,5 @@ export class LoggingAction extends BaseAction {
   static simulatePrompt = i18n.translate('xpack.watcher.models.loggingAction.simulateButtonLabel', {
     defaultMessage: 'Log a sample message now',
   });
+
 }

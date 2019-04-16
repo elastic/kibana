@@ -46,8 +46,9 @@ const watchReducer = (state: any, action: any) => {
         return new (Watch.getWatchTypes())[state.type]({ ...state, [property]: value });
       }
     case 'addAction':
+      const { type, defaults } = payload;
       const newWatch = new (Watch.getWatchTypes())[state.type](state);
-      newWatch.addAction(payload);
+      newWatch.createAction(type, defaults);
       return newWatch;
   }
 };
