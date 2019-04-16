@@ -334,7 +334,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           return addPriv(userObj.elasticsearch.indices[0].privileges);
         })
         //clicking the Granted fields and removing the asterix
-        .then(function () {
+        .then(async function () {
 
           function addGrantedField(field) {
             return field.reduce(function (promise, fieldName) {
@@ -350,6 +350,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
           }
 
           if (userObj.elasticsearch.indices[0].field_security) {
+            // Toggle FLS switch
+            await testSubjects.click('restrictFieldsQuery0');
+
             // have to remove the '*'
             return find.clickByCssSelector('div[data-test-subj="fieldInput0"] .euiBadge[title="*"]')
               .then(function () {
