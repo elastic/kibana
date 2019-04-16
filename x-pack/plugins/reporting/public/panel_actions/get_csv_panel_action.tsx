@@ -89,10 +89,9 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       state,
     });
 
-    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body }, { parseJson: false })
-      .then(r => r.text())
-      .then(csv => {
-        const blob = new Blob([csv], { type: 'text/csv' });
+    await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
+      .then(blob => {
+        debugger;
         const a = window.document.createElement('a');
         const downloadObject = window.URL.createObjectURL(blob);
         a.href = downloadObject;
@@ -109,7 +108,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
         defaultMessage: `CSV download failed`,
       }),
       text: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadMessage', {
-        defaultMessage: `We couldn't download your CSV at this time.`,
+        defaultMessage: `We couldn't generate your CSV at this time.`,
       }),
       'data-test-subj': 'downloadCsvFail',
     });
