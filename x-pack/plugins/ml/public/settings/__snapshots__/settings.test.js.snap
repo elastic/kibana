@@ -17,10 +17,7 @@ exports[`Settings Renders settings page 1`] = `
       <EuiPageContentHeader
         responsive={true}
       >
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             <FormattedMessage
               defaultMessage="Job Management"
