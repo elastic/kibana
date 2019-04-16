@@ -18,7 +18,6 @@
  */
 
 import { SearchBar } from './components/search_bar';
-import { FilterOptions } from './components/filter_options';
 
 // @ts-ignore
 import { setupDirective } from './directive';
@@ -33,7 +32,6 @@ export class SearchBarService {
     setupDirective(); 
     return {
       SearchBar,
-      FilterOptions,
     };
   }
 
