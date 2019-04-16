@@ -22,8 +22,24 @@ import React from 'react';
 import { EuiSwitch, EuiToolTip, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
-function SwitchParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
-  const { dataTestSubj, disabled, displayToolTip, displayLabel, shouldShow } = aggParam;
+interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
+  dataTestSubj?: string;
+  displayLabel?: string;
+  displayToolTip?: string;
+  disabled?: boolean;
+}
+
+function SwitchParamEditor({
+  agg,
+  aggParam,
+  value,
+  setValue,
+  dataTestSubj,
+  displayToolTip,
+  displayLabel,
+  disabled,
+}: SwitchParamEditorProps) {
+  const { shouldShow } = aggParam;
 
   if (shouldShow && !shouldShow(agg)) {
     return null;
@@ -35,7 +51,7 @@ function SwitchParamEditor({ agg, aggParam, value, setValue }: AggParamEditorPro
         <EuiSwitch
           label={displayLabel}
           checked={value}
-          disabled={disabled && disabled(agg)}
+          disabled={disabled}
           data-test-subj={dataTestSubj}
           onChange={ev => setValue(ev.target.checked)}
         />

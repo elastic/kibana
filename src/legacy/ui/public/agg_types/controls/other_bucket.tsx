@@ -17,16 +17,24 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { AggParamEditorProps } from 'ui/vis/editors/default';
+import { SwitchParamEditor } from './switch';
 
-interface AggParam {
-  type: string;
-  name: string;
-  required?: boolean;
-  displayName?: string;
-  onChange?(agg: AggConfig): void;
-  disabled?(agg: AggConfig): boolean;
-  shouldShow?(agg: AggConfig): boolean;
-}
+const OtherBucketParamEditor: React.SFC<AggParamEditorProps<boolean>> = props => (
+  <SwitchParamEditor
+    dataTestSubj="otherBucketSwitch"
+    displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
+      defaultMessage: 'Group other values in separate bucket',
+    })}
+    displayToolTip={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
+      defaultMessage:
+        'Values not in the top N are grouped in this bucket. ' +
+        "To include documents with missing values, enable 'Show missing values'.",
+    })}
+    {...props}
+  />
+);
 
-export { AggParam };
+export { OtherBucketParamEditor };

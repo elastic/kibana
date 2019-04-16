@@ -21,7 +21,7 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
 import { i18n } from '@kbn/i18n';
-import { isType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 export const significantTermsBucketAgg = new BucketAggType({
   name: 'significant_terms',
@@ -34,7 +34,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       values: {
         size: aggConfig.params.size,
         fieldName: aggConfig.getFieldDisplayName(),
-      },
+      }
     });
   },
   createFilter: createFilterTerms,
@@ -43,7 +43,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       name: 'field',
       type: 'field',
       scriptable: false,
-      filterFieldTypes: 'string',
+      filterFieldTypes: 'string'
     },
     {
       name: 'size',
@@ -52,22 +52,22 @@ export const significantTermsBucketAgg = new BucketAggType({
     {
       name: 'exclude',
       displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.excludeLabel', {
-        defaultMessage: 'Exclude',
+        defaultMessage: 'Exclude'
       }),
       type: 'string',
       advanced: true,
-      shouldShow: isType('string'),
-      ...migrateIncludeExcludeFormat,
+      disabled: isNotType('string'),
+      ...migrateIncludeExcludeFormat
     },
     {
       name: 'include',
       displayName: i18n.translate('common.ui.aggTypes.buckets.significantTerms.includeLabel', {
-        defaultMessage: 'Include',
+        defaultMessage: 'Include'
       }),
       type: 'string',
       advanced: true,
-      shouldShow: isType('string'),
-      ...migrateIncludeExcludeFormat,
-    },
-  ],
+      disabled: isNotType('string'),
+      ...migrateIncludeExcludeFormat
+    }
+  ]
 });

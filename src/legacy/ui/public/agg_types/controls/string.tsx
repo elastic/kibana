@@ -31,9 +31,9 @@ function StringParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  const { displayName, name, shouldShow } = aggParam;
+  const { displayName, name, disabled } = aggParam;
 
-  if (shouldShow && !shouldShow(agg)) {
+  if (disabled && disabled(agg)) {
     return null;
   }
 

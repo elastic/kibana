@@ -27,31 +27,16 @@ import orderAggTemplate from '../controls/order_agg.html';
 import orderAndSizeTemplate from '../controls/order_and_size.html';
 import { i18n } from '@kbn/i18n';
 
-import {
-  getRequestInspectorStats,
-  getResponseInspectorStats,
-} from '../../courier/utils/courier_inspector_utils';
-import {
-  buildOtherBucketAgg,
-  mergeOtherBucketAggResponse,
-  updateMissingBucket,
-} from './_terms_other_bucket_helper';
-import { isType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
-import { SwitchParamEditor } from '../controls/switch';
+import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
+import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
+import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { MissingBucketParamEditor } from '../controls/missing_bucket';
+import { OtherBucketParamEditor } from '../controls/other_bucket';
 
 const aggFilter = [
-  '!top_hits',
-  '!percentiles',
-  '!median',
-  '!std_dev',
-  '!derivative',
-  '!moving_avg',
-  '!serial_diff',
-  '!cumulative_sum',
-  '!avg_bucket',
-  '!max_bucket',
-  '!min_bucket',
-  '!sum_bucket',
+  '!top_hits', '!percentiles', '!median', '!std_dev',
+  '!derivative', '!moving_avg', '!serial_diff', '!cumulative_sum',
+  '!avg_bucket', '!max_bucket', '!min_bucket', '!sum_bucket'
 ];
 
 const orderAggSchema = new Schemas([
@@ -288,15 +273,7 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'otherBucket',
       default: false,
-      editorComponent: SwitchParamEditor,
-      dataTestSubj: 'otherBucketSwitch',
-      displayLabel: i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
-        defaultMessage: 'Group other values in separate bucket',
-      }),
-      displayToolTip: i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
-        defaultMessage:
-          'Values not in the top N are grouped in this bucket. To include documents with missing values, enable \'Show missing values\'.',
-      }),
+      editorComponent: OtherBucketParamEditor,
       write: _.noop,
     },
     {
@@ -308,25 +285,13 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
-      shouldShow: agg => agg.params.otherBucket,
+      disabled: agg => !agg.params.otherBucket,
       write: _.noop,
     },
     {
       name: 'missingBucket',
       default: false,
-      editorComponent: SwitchParamEditor,
-      dataTestSubj: 'missingBucketSwitch',
-      displayLabel: i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesLabel', {
-        defaultMessage: 'Show missing values',
-      }),
-      displayToolTip: i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesTooltip', {
-        defaultMessage:
-          'Only works for fields of type "string". When enabled, include documents with missing ' +
-          'values in the search. If this bucket is in the top N, it appears in the chart. ' +
-          'If not in the top N, and you enable "Group other values in separate bucket", ' +
-          'Elasticsearch adds the missing values to the "other" bucket.',
-      }),
-      disabled: agg => !isType('string')(agg),
+      editorComponent: MissingBucketParamEditor,
       write: _.noop,
     },
     {
@@ -340,7 +305,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
-      shouldShow: agg => agg.params.missingBucket,
+      disabled: agg => !agg.params.missingBucket,
       write: _.noop,
     },
     {
@@ -350,7 +315,7 @@ export const termsBucketAgg = new BucketAggType({
       }),
       type: 'string',
       advanced: true,
-      shouldShow: isType('string'),
+      disabled: isNotType('string'),
       ...migrateIncludeExcludeFormat,
     },
     {
@@ -360,7 +325,7 @@ export const termsBucketAgg = new BucketAggType({
       }),
       type: 'string',
       advanced: true,
-      shouldShow: isType('string'),
+      disabled: isNotType('string'),
       ...migrateIncludeExcludeFormat,
     },
   ],
