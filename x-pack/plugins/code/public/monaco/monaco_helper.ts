@@ -138,7 +138,7 @@ export class MonacoHelper {
         range: new this.monaco!.Range(line, 0, line, 0),
         options: {
           isWholeLine: true,
-          className: 'code-monaco-highlight-line',
+          className: `code-monaco-highlight-line code-line-number-${line}`,
           linesDecorationsClassName: 'code-mark-line-number',
         },
       },

@@ -187,7 +187,13 @@ class CodeProjectItem extends React.PureComponent<{
         {this.renderProgress()}
         <EuiFlexGroup alignItems="center" justifyContent="flexStart">
           <EuiFlexItem grow={3}>
-            {disableRepoLink ? repoTitle : <Link to={`/${uri}`}>{repoTitle}</Link>}
+            {disableRepoLink ? (
+              repoTitle
+            ) : (
+              <Link to={`/${uri}`} data-test-subj={`adminLinkTo${name}`}>
+                {repoTitle}
+              </Link>
+            )}
             {showStatus ? repoStatus : null}
           </EuiFlexItem>
           <EuiFlexItem grow={3}>

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
-export default function codeIntelligenceFunctonalTests({
+export default function codeIntelligenceFunctionalTests({
   getService,
   getPageObjects,
 }: TestInvoker) {
@@ -117,7 +117,7 @@ export default function codeIntelligenceFunctonalTests({
           const userModelSpan = spans[1];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
           await browser.moveMouseTo(userModelSpan);
-          // Expect the go to defintion button show up eventually.
+          // Expect the go to definition button show up eventually.
           expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
 
           await testSubjects.click('codeGoToDefinitionButton');
@@ -126,6 +126,16 @@ export default function codeIntelligenceFunctonalTests({
             log.info(`Jump to url: ${currentUrl}`);
             // Expect to jump to src/models/User.ts file on line 5.
             expect(currentUrl.indexOf('src/models/User.ts!L5:13')).to.greaterThan(0);
+          });
+
+          // it should goes back to controllers/user.ts
+          await browser.goBack();
+
+          await retry.try(async () => {
+            const $spans = await find.allByCssSelector('.mtk31', FIND_TIME);
+            expect($spans.length).to.greaterThan(1);
+            const $userModelSpan = $spans[1];
+            expect(await $userModelSpan.getVisibleText()).to.equal('UserModel');
           });
         });
       });
@@ -163,7 +173,7 @@ export default function codeIntelligenceFunctonalTests({
           const userModelSpan = spans[0];
           expect(await userModelSpan.getVisibleText()).to.equal('UserModel');
           await browser.moveMouseTo(userModelSpan);
-          // Expect the go to defintion button show up eventually.
+          // Expect the go to definition button show up eventually.
           expect(await testSubjects.exists('codeFindReferenceButton')).to.be(true);
 
           await testSubjects.click('codeFindReferenceButton');
@@ -218,7 +228,7 @@ export default function codeIntelligenceFunctonalTests({
           const asyncSpan = spans[1];
           expect(await asyncSpan.getVisibleText()).to.equal('async');
           await browser.moveMouseTo(asyncSpan);
-          // Expect the go to defintion button show up eventually.
+          // Expect the go to definition button show up eventually.
           expect(await testSubjects.exists('codeGoToDefinitionButton')).to.be(true);
 
           await testSubjects.click('codeGoToDefinitionButton');
@@ -232,6 +242,16 @@ export default function codeIntelligenceFunctonalTests({
           //     0
           //   );
           // });
+
+          // it should goes back to controllers/user.ts
+          await browser.goBack();
+
+          await retry.try(async () => {
+            const $spans = await find.allByCssSelector('.mtk31', FIND_TIME);
+            expect($spans.length).to.greaterThan(1);
+            const $userModelSpan = $spans[1];
+            expect(await $userModelSpan.getVisibleText()).to.equal('UserModel');
+          });
         });
       });
     });
