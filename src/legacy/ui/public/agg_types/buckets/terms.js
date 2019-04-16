@@ -39,16 +39,16 @@ const aggFilter = [
   '!avg_bucket', '!max_bucket', '!min_bucket', '!sum_bucket'
 ];
 
-const orderAggSchema = new Schemas([
+const orderAggSchema = (new Schemas([
   {
     group: 'none',
     name: 'orderAgg',
     // This string is never visible to the user so it doesn't need to be translated
     title: 'Order Agg',
     hideCustomLabel: true,
-    aggFilter: aggFilter,
-  },
-]).all[0];
+    aggFilter: aggFilter
+  }
+])).all[0];
 
 export const termsBucketAgg = new BucketAggType({
   name: 'terms',
@@ -61,8 +61,8 @@ export const termsBucketAgg = new BucketAggType({
   },
   getFormat: function (bucket) {
     return {
-      getConverterFor: type => {
-        return val => {
+      getConverterFor: (type) => {
+        return (val) => {
           if (val === '__other__') {
             return bucket.params.otherBucketLabel;
           }
@@ -77,7 +77,7 @@ export const termsBucketAgg = new BucketAggType({
           const converter = bucket.params.field.format.getConverterFor(type);
           return converter(val, undefined, undefined, parsedUrl);
         };
-      },
+      }
     };
   },
   createFilter: createFilterTerms,
@@ -88,14 +88,11 @@ export const termsBucketAgg = new BucketAggType({
       nestedSearchSource.setField('aggs', filterAgg);
 
       const request = inspectorAdapters.requests.start(
-        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', {
-          defaultMessage: 'Other bucket',
-        }),
+        i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketTitle', { defaultMessage: 'Other bucket' }),
         {
           description: i18n.translate('common.ui.aggTypes.buckets.terms.otherBucketDescription', {
-            defaultMessage:
-              'This request counts the number of documents that fall ' +
-              'outside the criterion of the data buckets.',
+            defaultMessage: 'This request counts the number of documents that fall ' +
+              'outside the criterion of the data buckets.'
           }),
         }
       );
@@ -105,7 +102,9 @@ export const termsBucketAgg = new BucketAggType({
       request.stats(getRequestInspectorStats(nestedSearchSource));
 
       const response = await nestedSearchSource.fetch();
-      request.stats(getResponseInspectorStats(nestedSearchSource, response)).ok({ json: response });
+      request
+        .stats(getResponseInspectorStats(nestedSearchSource, response))
+        .ok({ json: response });
       resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
     }
     if (aggConfig.params.missingBucket) {
@@ -117,11 +116,11 @@ export const termsBucketAgg = new BucketAggType({
     {
       name: 'field',
       type: 'field',
-      filterFieldTypes: ['number', 'boolean', 'date', 'ip', 'string'],
+      filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
     },
     {
       name: 'size',
-      default: 5,
+      default: 5
     },
     {
       name: 'orderAgg',
@@ -163,7 +162,7 @@ export const termsBucketAgg = new BucketAggType({
           return aggFilter.includes(`!${agg.type.name}`);
         };
 
-        $scope.$watch('agg.params.field.type', type => {
+        $scope.$watch('agg.params.field.type', (type) => {
           if (type !== 'string') {
             $scope.agg.params.missingBucket = false;
           }
@@ -179,9 +178,7 @@ export const termsBucketAgg = new BucketAggType({
 
           // setup the initial value of orderBy
           if (!orderBy && prevOrderBy === INIT) {
-            let respAgg = _($scope.responseValueAggs)
-              .filter(agg => !$scope.rejectAgg(agg))
-              .first();
+            let respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).first();
             if (!respAgg) {
               respAgg = { id: '_key' };
             }
@@ -196,9 +193,7 @@ export const termsBucketAgg = new BucketAggType({
           if (!orderBy || orderBy !== 'custom') {
             params.orderAgg = null;
             // ensure that orderBy is set to a valid agg
-            const respAgg = _($scope.responseValueAggs)
-              .filter(agg => !$scope.rejectAgg(agg))
-              .find({ id: orderBy });
+            const respAgg = _($scope.responseValueAggs).filter((agg) => !$scope.rejectAgg(agg)).find({ id: orderBy });
             if (!respAgg) {
               params.orderBy = '_key';
             }
@@ -210,7 +205,7 @@ export const termsBucketAgg = new BucketAggType({
       },
       write: function (agg, output, aggs) {
         const dir = agg.params.order.val;
-        const order = (output.params.order = {});
+        const order = output.params.order = {};
 
         let orderAgg = agg.params.orderAgg || aggs.getResponseAggById(agg.params.orderBy);
 
@@ -218,8 +213,7 @@ export const termsBucketAgg = new BucketAggType({
         // thus causing issues with filtering. This probably causes other issues since float might not
         // be able to contain the number on the elasticsearch side
         if (output.params.script) {
-          output.params.value_type =
-            agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          output.params.value_type = agg.getField().type === 'number' ? 'float' : agg.getField().type;
         }
 
         if (agg.params.missingBucket && agg.params.field.type === 'string') {
@@ -243,7 +237,7 @@ export const termsBucketAgg = new BucketAggType({
 
         output.subAggs = (output.subAggs || []).concat(orderAgg);
         order[orderAggId] = dir;
-      },
+      }
     },
     {
       name: 'order',
@@ -255,20 +249,20 @@ export const termsBucketAgg = new BucketAggType({
           display: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
             defaultMessage: 'Descending',
           }),
-          val: 'desc',
+          val: 'desc'
         },
         {
           display: i18n.translate('common.ui.aggTypes.buckets.terms.orderAscendingTitle', {
             defaultMessage: 'Ascending',
           }),
-          val: 'asc',
-        },
+          val: 'asc'
+        }
       ],
-      write: _.noop, // prevent default write, it's handled by orderAgg
+      write: _.noop // prevent default write, it's handled by orderAgg
     },
     {
       name: 'orderBy',
-      write: _.noop, // prevent default write, it's handled by orderAgg
+      write: _.noop // prevent default write, it's handled by orderAgg
     },
     {
       name: 'otherBucket',
@@ -310,23 +304,19 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'exclude',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', {
-        defaultMessage: 'Exclude',
-      }),
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', { defaultMessage: 'Exclude' }),
       type: 'string',
       advanced: true,
       disabled: isNotType('string'),
-      ...migrateIncludeExcludeFormat,
+      ...migrateIncludeExcludeFormat
     },
     {
       name: 'include',
-      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', {
-        defaultMessage: 'Include',
-      }),
+      displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', { defaultMessage: 'Include' }),
       type: 'string',
       advanced: true,
       disabled: isNotType('string'),
-      ...migrateIncludeExcludeFormat,
+      ...migrateIncludeExcludeFormat
     },
-  ],
+  ]
 });

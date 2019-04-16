@@ -35,8 +35,6 @@ uiModules
     'field',
     'isInvalid',
     'value',
-    'otherBucket',
-    'missingBucket',
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -66,8 +64,6 @@ uiModules
             on-change="onChange"
             set-touched="setTouched"
             set-validity="setValidity"
-            other-bucket="agg.params.otherBucket"
-            missing-bucket="agg.params.missingBucket"
           ></vis-agg-param-react-wrapper>`;
         }
 
