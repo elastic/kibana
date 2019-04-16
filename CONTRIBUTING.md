@@ -327,26 +327,23 @@ macOS users on a machine with a discrete graphics card may see significant speed
 `yarn debug` will start the server with Node's inspect flag. Kibana's development mode will start three processes on ports `9229`, `9230`, and `9231`. Chrome's developer tools need to be configured to connect to all three connections. Add `localhost:<port>` for each Kibana process in Chrome's developer tools connection tab.
 
 ### Unit testing frameworks
-Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still exist in Mocha but all new unit tests should be written in Jest.
+Kibana is migrating unit testing from Mocha to Jest. Legacy unit tests still
+exist in Mocha but all new unit tests should be written in Jest. Mocha tests
+are contained in `__tests__` directories. Whereas Jest tests are stored in
+the same directory as source code files with the `.test.js` suffix.
 
-#### Mocha (legacy)
-Mocha tests are contained in `__tests__` directories.
-
-#### Jest
-Jest tests are stored in the same directory as source code files with the `.test.js` suffix.
-
-### Running Kibana tests
+### Running specific Kibana tests
 
 The following table outlines possible test file locations and how to invoke them:
 
-| Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `yarn test:jest -t regexp [test path]`                                                  |
-| `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`                                          |
-| `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
-| `test/*integration/**/config.js`<br>`test/*functional/**/config.js`<br>`x-pack/test/*integration/**/config.js`<br>`x-pack/test/*functional/config.js`   | `node scripts/functional_tests --config test/[directory]/config.js --grep=regexp`       |
-| `x-pack/**/*.test.js`<br>`x-pack/**/*.test.ts`                                                                                                          | `cd x-pack && yarn test:jest -t regexp [test path]`                                     |
-| `x-pack/test/*integration/**/config.ts`                                                                                                                 | ??                                                                                      |
+| Test runner        | Test location                                                                                                                                           | Runner command (working directory is kibana root)                                       |
+| -----------------  | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Jest               | `src/**/*.test.js`<br>`src/**/*.test.ts`                                                                                                                | `yarn test:jest -t regexp [test path]`                                                  |
+| Jest (integration) | `**/integration_tests/**/*.test.js`                                                                                                                     | `node scripts/jest_integration -t regexp [test path]`                                   |
+| Mocha              | `src/**/__tests__/**/*.js`<br>`packages/kbn-datemath/test/**/*.js`<br>`packages/kbn-dev-utils/src/**/__tests__/**/*.js`<br>`tasks/**/__tests__/**/*.js` | `node scripts/mocha --grep=regexp [test path]`                                          |
+| Functional         | `test/*integration/**/config.js`<br>`test/*functional/**/config.js`                                                                                     | `node scripts/functional_tests --config test/[directory]/config.js --grep=regexp`       |
+
+For X-Pack tests located in `x-pack/` see [X-Pack Testing](x-pack/README.md#testing)
 
 Test runner arguments:
  - Where applicable, the optional arguments `-t=regexp` or `--grep=regexp` will only run tests or test suites whose descriptions matches the regular expression.
