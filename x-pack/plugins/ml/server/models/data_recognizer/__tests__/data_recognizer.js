@@ -19,6 +19,9 @@ describe('ML - data recognizer', () => {
     'auditbeat_process_hosts_ecs',
     'metricbeat_system_ecs',
     'nginx_ecs',
+    'sample_datasets_ecommerce',
+    'sample_datasets_flights',
+    'sample_datasets_weblogs',
   ];
 
   // check all module IDs are the same as the list above
