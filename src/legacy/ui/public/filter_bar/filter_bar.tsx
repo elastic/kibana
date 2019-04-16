@@ -33,9 +33,13 @@ import classNames from 'classnames';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { IndexPattern } from 'ui/index_patterns';
-import { FilterOptions } from 'ui/search_bar/components/filter_options';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
+
+// TODO: how the unpacking should go?
+import { data } from 'plugins/data';
+console.log(data);
+const { FilterOptions } = data ;
 
 const config = chrome.getUiSettingsClient();
 

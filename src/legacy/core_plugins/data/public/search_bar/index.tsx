@@ -17,20 +17,4 @@
  * under the License.
  */
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../../modules';
-import { SearchBar } from '../components';
-
-const app = uiModules.get('app/kibana', ['react']);
-
-app.directive('searchBar', (reactDirective, localStorage) => {
-  return reactDirective(
-    wrapInI18nContext(SearchBar),
-    undefined,
-    {},
-    {
-      store: localStorage,
-    }
-  );
-});
+export { SearchBarService } from './search_bar_service';
