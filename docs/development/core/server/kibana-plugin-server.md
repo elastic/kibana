@@ -33,11 +33,11 @@
 |  Type Alias | Description |
 |  --- | --- |
 |  [APICaller](./kibana-plugin-server.apicaller.md) |  |
-|  [Authenticate](./kibana-plugin-server.authenticate.md) |  |
+|  [AuthenticationHandler](./kibana-plugin-server.authenticationhandler.md) |  |
 |  [ElasticsearchClientConfig](./kibana-plugin-server.elasticsearchclientconfig.md) |  |
 |  [Headers](./kibana-plugin-server.headers.md) |  |
 |  [HttpServiceSetup](./kibana-plugin-server.httpservicesetup.md) |  |
-|  [OnRequest](./kibana-plugin-server.onrequest.md) |  |
+|  [OnRequestHandler](./kibana-plugin-server.onrequesthandler.md) |  |
 |  [PluginInitializer](./kibana-plugin-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
 |  [PluginName](./kibana-plugin-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
 
