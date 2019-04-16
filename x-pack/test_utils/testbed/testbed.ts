@@ -17,7 +17,7 @@ const defaultOptions = {
   },
 };
 
-export const registerTestBed = <T = string>(
+export const registerTestBed = <T extends string = string>(
   Component: ComponentType<any>,
   defaultProps: any = {},
   options: TestBedOptions = defaultOptions,
@@ -32,20 +32,28 @@ export const registerTestBed = <T = string>(
    */
 
   /**
+   * Look for a data test subject in the component and return it.
+   * It is possible to target a nested test subject by separating it with a dot ('.');
+   *
+   * @param testSubject The data test subject to look for
+   *
+   * @example
+   * find('nameInput'); // if there is only 1 form, this is enough
+   * find('myForm.nameInput'); // if there are multiple forms, specify the test subject of the form
+   */
+  const find: TestBed<T>['find'] = (testSubject: T) =>
+    testSubject
+      .split('.')
+      .reduce((reactWrapper, subject) => findTestSubject(reactWrapper, subject), component);
+
+  /**
    * Look in the component if a data test subject exists, and return true or false
    *
    * @param testSubject The data test subject to look for
    * @param count The number of times the subject needs to appear
    */
   const exists: TestBed<T>['exists'] = (testSubject, count = 1) =>
-    findTestSubject(component, testSubject).length === count;
-
-  /**
-   * Look for a data test subject in the component and return it
-   *
-   * @param testSubject The data test subject to look for
-   */
-  const find: TestBed<T>['find'] = (testSubject: T) => findTestSubject<T>(component, testSubject);
+    find(testSubject).length === count;
 
   /**
    * Update the props of the mounted component
