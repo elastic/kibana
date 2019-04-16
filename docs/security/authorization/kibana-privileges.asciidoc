@@ -2,8 +2,7 @@
 [[kibana-privileges]]
 === Kibana privileges
 
-This section lists the Kibana privileges that you can assign to a role.
-Privileges can be assigned at the following levels:
+Privileges have levels that you can use to manage which features users can access. Roles have privileges to determine whether users have write or read access.
 
 
 ==== Privilege levels
