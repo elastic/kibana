@@ -1,8 +1,15 @@
 {
   "data_frame.put_data_frame_transform": {
     "data_autocomplete_rules": {
-      "source": "SOURCE_INDEX_NAME",
-      "dest": "DEST_INDEX_NAME",
+      "source": {
+        "index": "SOURCE_INDEX_NAME",
+        "query": {
+          "__scope_link": "GLOBAL.query"
+        }
+      },
+      "dest": {
+        "index": "DEST_INDEX_NAME"
+      },
       "pivot": {
         "group_by": {
           "__template": {
