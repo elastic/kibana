@@ -127,10 +127,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
               justifyContent="spaceBetween"
             >
               <EuiFlexItem>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
                   </p>
@@ -209,7 +206,6 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
           <EuiTitle
             className="euiStep__title"
             size="s"
-            textTransform="none"
           >
             <p
               className="euiTitle euiTitle--small euiStep__title"
@@ -231,10 +227,7 @@ exports[`bulkCreate should display error message when bulkCreate request fails 1
                   <div
                     className="euiFlexItem"
                   >
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -445,10 +438,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
               justifyContent="spaceBetween"
             >
               <EuiFlexItem>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <p>
                     Imports index pattern, visualizations and pre-defined dashboards.
                   </p>
@@ -565,7 +555,6 @@ exports[`bulkCreate should display success message when bulkCreate is successful
           <EuiTitle
             className="euiStep__title"
             size="s"
-            textTransform="none"
           >
             <p
               className="euiTitle euiTitle--small euiStep__title"
@@ -587,10 +576,7 @@ exports[`bulkCreate should display success message when bulkCreate is successful
                   <div
                     className="euiFlexItem"
                   >
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -687,10 +673,7 @@ exports[`renders 1`] = `
             justifyContent="spaceBetween"
           >
             <EuiFlexItem>
-              <EuiText
-                grow={true}
-                size="m"
-              >
+              <EuiText>
                 <p>
                   Imports index pattern, visualizations and pre-defined dashboards.
                 </p>
