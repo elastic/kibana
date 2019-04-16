@@ -493,15 +493,7 @@ exports[`Host Summary Component #getEuiDescriptionList if it creates a descripti
       First Seen
     </dt>
     <div>
-      <div
-        class="euiText euiText--small"
-      >
-        <span
-          class="euiToolTipAnchor"
-        >
-          Apr 8, 2019 @ 16:09:40.692
-        </span>
-      </div>
+      --
     </div>
     <dt
       class="euiDescriptionList__title"
@@ -509,15 +501,7 @@ exports[`Host Summary Component #getEuiDescriptionList if it creates a descripti
       Last Seen
     </dt>
     <div>
-      <div
-        class="euiText euiText--small"
-      >
-        <span
-          class="euiToolTipAnchor"
-        >
-          Apr 8, 2019 @ 18:35:45.064
-        </span>
-      </div>
+      --
     </div>
     <dt
       class="euiDescriptionList__title"
@@ -853,12 +837,8 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
       Object {
         "_id": "yneHlmgBjVl2VqDlAjPR",
         "host": Object {
-          "architecture": Array [
-            "x86_64",
-          ],
-          "id": Array [
-            "aa7ca589f1b8220002f2fc61c64cfbf1",
-          ],
+          "architecture": "x86_64",
+          "id": "aa7ca589f1b8220002f2fc61c64cfbf1",
           "ip": Array [
             "10.142.0.7",
             "fe80::4001:aff:fe8e:7",
@@ -866,26 +846,14 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
           "mac": Array [
             "42:01:0a:8e:00:07",
           ],
-          "name": Array [
-            "siem-kibana",
-          ],
+          "name": "siem-kibana",
           "os": Object {
-            "family": Array [
-              "debian",
-            ],
-            "name": Array [
-              "Debian GNU/Linux",
-            ],
-            "platform": Array [
-              "debian",
-            ],
-            "version": Array [
-              "9 (stretch)",
-            ],
+            "family": "debian",
+            "name": "Debian GNU/Linux",
+            "platform": "debian",
+            "version": "9 (stretch)",
           },
-          "type": Array [
-            "projects/189716325846/machineTypes/n1-standard-1",
-          ],
+          "type": "projects/189716325846/machineTypes/n1-standard-1",
         },
       }
     }

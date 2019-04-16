@@ -1846,31 +1846,31 @@ export namespace GetHostDetailsQuery {
   export type Host = {
     __typename?: 'HostFields';
 
-    architecture?: ToStringArray | null;
+    architecture?: string | null;
 
-    id?: ToStringArray | null;
+    id?: string | null;
 
-    ip?: ToStringArray | null;
+    ip?: (string | null)[] | null;
 
-    mac?: ToStringArray | null;
+    mac?: (string | null)[] | null;
 
-    name?: ToStringArray | null;
+    name?: string | null;
 
     os?: Os | null;
 
-    type?: ToStringArray | null;
+    type?: string | null;
   };
 
   export type Os = {
     __typename?: 'OsFields';
 
-    family?: ToStringArray | null;
+    family?: string | null;
 
-    name?: ToStringArray | null;
+    name?: string | null;
 
-    platform?: ToStringArray | null;
+    platform?: string | null;
 
-    version?: ToStringArray | null;
+    version?: string | null;
   };
 }
 
@@ -1957,9 +1957,9 @@ export namespace GetHostsTableQuery {
   export type Host = {
     __typename?: 'HostFields';
 
-    id?: ToStringArray | null;
+    id?: string | null;
 
-    name?: ToStringArray | null;
+    name?: string | null;
 
     os?: Os | null;
   };
@@ -1967,9 +1967,9 @@ export namespace GetHostsTableQuery {
   export type Os = {
     __typename?: 'OsFields';
 
-    name?: ToStringArray | null;
+    name?: string | null;
 
-    version?: ToStringArray | null;
+    version?: string | null;
   };
 
   export type Cursor = {

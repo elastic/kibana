@@ -90,7 +90,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.eql(HOST_NAME);
         });
     });
 

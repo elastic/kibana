@@ -110,7 +110,7 @@ describe('Host Summary Component', () => {
   describe('#getEuiDescriptionList', () => {
     test('All item in description list are loading', async () => {
       const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
-      myMockData.host!.name = ['kibana-siem'];
+      myMockData.host!.name = 'kibana-siem';
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
@@ -123,7 +123,7 @@ describe('Host Summary Component', () => {
 
     test('if it creates a description list', async () => {
       const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
-      myMockData.host!.name = ['kibana-siem'];
+      myMockData.host!.name = 'kibana-siem';
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
