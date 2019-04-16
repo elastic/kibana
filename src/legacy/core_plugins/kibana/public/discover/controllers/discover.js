@@ -30,7 +30,6 @@ import { getSort } from '../doc_table/lib/get_sort';
 import * as columnActions from '../doc_table/actions/columns';
 import * as filterActions from '../doc_table/actions/filter';
 
-import 'plugins/data';
 import 'ui/listen';
 import 'ui/visualize';
 import 'ui/fixed_scroll';
@@ -69,6 +68,8 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
+
+// import { data } from 'plugins/data';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
