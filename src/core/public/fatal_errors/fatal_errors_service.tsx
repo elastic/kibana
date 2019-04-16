@@ -78,7 +78,7 @@ export class FatalErrorsService {
       });
   }
 
-  private add: FatalErrorsSetup['add'] = (error, source?) => {
+  public add: FatalErrorsSetup['add'] = (error, source?) => {
     const errorInfo = getErrorInfo(error, source);
 
     this.errorInfo$.next(errorInfo);
