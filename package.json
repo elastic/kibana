@@ -166,7 +166,7 @@
     "https-proxy-agent": "^2.2.1",
     "inert": "^5.1.0",
     "joi": "^13.5.2",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.0",
     "js-yaml": "3.4.1",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.0.4",
