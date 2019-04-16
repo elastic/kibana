@@ -15,8 +15,8 @@ export default function ({ getService }) {
   describe('get_all_pings', () => {
     const archive = 'uptime/pings';
 
-    beforeEach('put pings in index', () => esArchiver.load(archive));
-    afterEach('delete pings from index', () => esArchiver.unload(archive));
+    before('put pings in index', async () => await esArchiver.load(archive));
+    after('delete pings from index', async () => await esArchiver.unload(archive));
 
     it('should get all pings stored in index', async () => {
       const { body: apiResponse } = await supertest
