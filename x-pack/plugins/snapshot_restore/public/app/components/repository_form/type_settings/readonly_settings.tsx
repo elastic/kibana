@@ -90,7 +90,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
     },
   ];
 
-  const [selectedScheme, selectScheme] = useState('http');
+  const [selectedScheme, selectScheme] = useState(url ? url.split('://')[0] : 'http');
 
   return (
     <Fragment>
