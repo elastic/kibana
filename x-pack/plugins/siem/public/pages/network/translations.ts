@@ -25,3 +25,16 @@ export const LETS_ADD_SOME = i18n.translate('xpack.siem.network.letsAddSome.desc
 export const SETUP_INSTRUCTIONS = i18n.translate('xpack.siem.network.setupInstructions', {
   defaultMessage: 'Setup Instructions',
 });
+
+export const AS_SOURCE = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.asSourceDropDownOptionLabel',
+  {
+    defaultMessage: 'As Source',
+  }
+);
+export const AS_DESTINATION = i18n.translate(
+  'xpack.siem.network.ipDetails.ipOverview.asDestinationDropDownOptionLabel',
+  {
+    defaultMessage: 'As Destination',
+  }
+);
