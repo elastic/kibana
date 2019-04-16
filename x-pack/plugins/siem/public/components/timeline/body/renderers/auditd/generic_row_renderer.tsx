@@ -200,7 +200,6 @@ const auditdUnmountedRowRenderer = createGenericFileRowRenderer({
   text: i18n.UNMOUNTED,
 });
 
-// TODO: UI-Testing -- blows up when trying to use with array issues
 const auditdDeletedRowRenderer = createGenericFileRowRenderer({
   actionName: 'deleted',
   text: i18n.DELETED,
