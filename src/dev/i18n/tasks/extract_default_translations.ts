@@ -30,7 +30,8 @@ export async function extractDefaultMessages({
   path?: string | string[];
   config: I18nConfig;
 }) {
-  const filteredPaths = filterConfigPaths(Array.isArray(path) ? path : [path || './'], config);
+  const inputPaths = Array.isArray(path) ? path : [path || './'];
+  const filteredPaths = filterConfigPaths(inputPaths, config);
   if (filteredPaths.length === 0) {
     throw createFailError(
       `${chalk.white.bgRed(
@@ -39,11 +40,15 @@ export async function extractDefaultMessages({
     );
   }
 
-  const reporter = new ErrorReporter();
-
-  const list = new Listr(
+  return new Listr(
     filteredPaths.map(filteredPath => ({
-      task: async (messages: Map<string, unknown>) => {
+      task: async ({
+        messages,
+        reporter,
+      }: {
+        messages: Map<string, unknown>;
+        reporter: ErrorReporter;
+      }) => {
         const initialErrorsNumber = reporter.errors.length;
 
         // Return result if no new errors were reported for this path.
@@ -61,14 +66,4 @@ export async function extractDefaultMessages({
       exitOnError: false,
     }
   );
-
-  try {
-    return await list.run(new Map());
-  } catch (error) {
-    if (error.name === 'ListrError' && reporter.errors.length) {
-      throw createFailError(reporter.errors.join('\n\n'));
-    }
-
-    throw error;
-  }
 }

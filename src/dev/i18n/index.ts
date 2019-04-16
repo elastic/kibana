@@ -18,7 +18,11 @@
  */
 
 // @ts-ignore
-export { extractMessagesFromPathToMap } from './extract_default_translations';
+export {
+  extractMessagesFromPathToMap,
+  matchEntriesWithExctractors,
+} from './extract_default_translations';
+
 // @ts-ignore
 export { writeFileAsync, readFileAsync, normalizePath, ErrorReporter } from './utils';
 export { serializeToJson, serializeToJson5 } from './serializers';

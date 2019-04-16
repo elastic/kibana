@@ -18,3 +18,4 @@
  */
 
 export { extractDefaultMessages } from './extract_default_translations';
+export { extractUntrackedMessages } from './extract_untracked_translations';

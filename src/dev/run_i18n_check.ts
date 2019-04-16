@@ -20,8 +20,8 @@
 import chalk from 'chalk';
 import Listr from 'listr';
 
-import { integrateLocaleFiles, mergeConfigs } from './i18n';
-import { extractDefaultMessages } from './i18n/tasks';
+import { ErrorReporter, integrateLocaleFiles, mergeConfigs } from './i18n';
+import { extractDefaultMessages, extractUntrackedMessages } from './i18n/tasks';
 import { createFailError, run } from './run';
 
 run(
@@ -31,6 +31,7 @@ run(
       'ignore-missing': ignoreMissing,
       'ignore-unused': ignoreUnused,
       'include-config': includeConfig,
+      'ignore-untracked': ignoreUntracked,
       fix = false,
       path,
     },
@@ -40,12 +41,13 @@ run(
       fix &&
       (ignoreIncompatible !== undefined ||
         ignoreUnused !== undefined ||
-        ignoreMissing !== undefined)
+        ignoreMissing !== undefined ||
+        ignoreUntracked !== undefined)
     ) {
       throw createFailError(
         `${chalk.white.bgRed(
           ' I18N ERROR '
-        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing is allowed when --fix is set.`
+        )} none of the --ignore-incompatible, --ignore-unused or --ignore-missing or --ignore-untracked is allowed when --fix is set.`
       );
     }
 
@@ -59,38 +61,77 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
+    if (typeof ignoreUntracked !== 'undefined' && typeof ignoreUntracked !== 'boolean') {
+      throw createFailError(
+        `${chalk.white.bgRed(' I18N ERROR ')} --ignore-untracked can't have a value`
+      );
+    }
+
     const config = await mergeConfigs(includeConfig);
-    const defaultMessages = await extractDefaultMessages({ path, config });
 
     if (config.translations.length === 0) {
       return;
     }
 
+    const extractDefaultMessagesTask = () => extractDefaultMessages({ path, config });
+
+    const compatibiltyChecksTask = () =>
+      new Listr(
+        config.translations.map(translationsPath => ({
+          task: async ({ messages }: { messages: Map<string, { message: string }> }) => {
+            // If `--fix` is set we should try apply all possible fixes and override translations file.
+            await integrateLocaleFiles(messages, {
+              sourceFileName: translationsPath,
+              targetFileName: fix ? translationsPath : undefined,
+              dryRun: !fix,
+              ignoreIncompatible: fix || !!ignoreIncompatible,
+              ignoreUnused: fix || !!ignoreUnused,
+              ignoreMissing: fix || !!ignoreMissing,
+              config,
+              log,
+            });
+          },
+          title: `Compatibility check with ${translationsPath}`,
+        })),
+        { concurrent: true, exitOnError: false }
+      );
+
+    const srcCodePaths = ['./src', './packages', './x-pack'];
+    const untrackedMessagesTask = async () =>
+      new Listr(
+        srcCodePaths.map(srcPath => ({
+          task: async () => {
+            await extractUntrackedMessages({ path: srcPath, config });
+          },
+          title: `Checking untracked messages in ${srcPath}`,
+        }))
+      );
+
     const list = new Listr(
-      config.translations.map(translationsPath => ({
-        task: async () => {
-          // If `--fix` is set we should try apply all possible fixes and override translations file.
-          await integrateLocaleFiles(defaultMessages, {
-            sourceFileName: translationsPath,
-            targetFileName: fix ? translationsPath : undefined,
-            dryRun: !fix,
-            ignoreIncompatible: fix || !!ignoreIncompatible,
-            ignoreUnused: fix || !!ignoreUnused,
-            ignoreMissing: fix || !!ignoreMissing,
-            config,
-            log,
-          });
+      [
+        {
+          title: 'Checking untracked messages',
+          enabled: () => !ignoreUntracked,
+          task: untrackedMessagesTask,
         },
-        title: `Compatibility check with ${translationsPath}`,
-      })),
+        {
+          title: 'Extracting Default Messages',
+          task: extractDefaultMessagesTask,
+        },
+        {
+          title: 'Compatibility Checks',
+          task: compatibiltyChecksTask,
+        },
+      ],
       {
-        concurrent: true,
-        exitOnError: false,
+        concurrent: false,
+        exitOnError: true,
       }
     );
 
+    const reporter = new ErrorReporter();
     try {
-      await list.run();
+      await list.run({ messages: new Map(), reporter });
     } catch (error) {
       process.exitCode = 1;
 
@@ -98,6 +139,10 @@ run(
         log.error('Unhandled exception!');
         log.error(error);
         process.exit();
+      }
+
+      if (error.name === 'ListrError' && reporter.errors.length) {
+        throw createFailError(reporter.errors.join('\n\n'));
       }
 
       for (const e of error.errors) {
