@@ -25,7 +25,6 @@ import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import 'plugins/data';
 import 'ui/listen';
 import 'ui/apply_filters';
 
@@ -58,6 +57,8 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+
+// import 'plugins/data';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

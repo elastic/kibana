@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import '../saved_visualizations/saved_visualizations';
 import './visualization_editor';
-import 'plugins/data';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
@@ -54,6 +53,8 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+
+// import 'plugins/data';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
