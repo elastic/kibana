@@ -15,7 +15,7 @@ import { FullTimeRangeSelector } from './index';
 // Create a mock for the setFullTimeRange function in the service.
 // The mock is hoisted to the top, so need to prefix the mock function
 // with 'mock' so it can be used lazily.
-const mockSetFullTimeRange = jest.fn((indexPattern: IndexPattern, query: Query) => true);
+const mockSetFullTimeRange = jest.fn();
 jest.mock('./full_time_range_selector_service', () => ({
   setFullTimeRange: (indexPattern: IndexPattern, query: Query) =>
     mockSetFullTimeRange(indexPattern, query),

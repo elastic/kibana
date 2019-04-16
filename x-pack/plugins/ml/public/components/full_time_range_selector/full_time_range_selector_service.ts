@@ -14,12 +14,11 @@ import { timefilter } from 'ui/timefilter';
 import { ml } from '../../services/ml_api_service';
 
 export function setFullTimeRange(indexPattern: IndexPattern, query: Query) {
-  return ml
-    .getTimeFieldRange({
-      index: indexPattern.title,
-      timeFieldName: indexPattern.timeFieldName,
-      query,
-    })
+  ml.getTimeFieldRange({
+    index: indexPattern.title,
+    timeFieldName: indexPattern.timeFieldName,
+    query,
+  })
     .then(resp => {
       timefilter.setTime({
         from: moment(resp.start.epoch).toISOString(),
