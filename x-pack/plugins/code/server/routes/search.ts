@@ -11,8 +11,9 @@ import { DocumentSearchRequest, RepositorySearchRequest, SymbolSearchRequest } f
 import { Logger } from '../log';
 import { DocumentSearchClient, RepositorySearchClient, SymbolSearchClient } from '../search';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
+import { CodeServerRouter } from '../security';
 
-export function repositorySearchRoute(server: hapi.Server, log: Logger) {
+export function repositorySearchRoute(server: CodeServerRouter, log: Logger) {
   server.route({
     path: '/api/code/search/repo',
     method: 'GET',
@@ -74,7 +75,7 @@ export function repositorySearchRoute(server: hapi.Server, log: Logger) {
   });
 }
 
-export function documentSearchRoute(server: hapi.Server, log: Logger) {
+export function documentSearchRoute(server: CodeServerRouter, log: Logger) {
   server.route({
     path: '/api/code/search/doc',
     method: 'GET',
@@ -138,7 +139,7 @@ export function documentSearchRoute(server: hapi.Server, log: Logger) {
   });
 }
 
-export function symbolSearchRoute(server: hapi.Server, log: Logger) {
+export function symbolSearchRoute(server: CodeServerRouter, log: Logger) {
   const symbolSearchHandler = async (req: hapi.Request) => {
     let page = 1;
     const { p, q, repoScope } = req.query as hapi.RequestQuery;

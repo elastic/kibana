@@ -279,3 +279,8 @@
   text-align: center;
   flex-shrink: 0;
 }
+
+.code-line-decoration {
+  border-right: $euiBorderThick;
+  width: 316px !important;
+}

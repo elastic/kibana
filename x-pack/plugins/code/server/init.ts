@@ -5,8 +5,10 @@
  */
 
 import { Server } from 'hapi';
+import fetch from 'node-fetch';
+import { i18n } from '@kbn/i18n';
+import { XPackMainPlugin } from '../../xpack_main/xpack_main';
 import { checkRepos } from './check_repos';
-import { clientWithInternalUser, CodeNodeInfo } from './code_node_client';
 import { LspIndexerFactory, RepositoryIndexInitializerFactory, tryMigrateIndices } from './indexer';
 import { EsClient, Esqueue } from './lib/esqueue';
 import { Logger } from './log';
@@ -25,7 +27,7 @@ import { documentSearchRoute, repositorySearchRoute, symbolSearchRoute } from '.
 import { setupRoute } from './routes/setup';
 import { workspaceRoute } from './routes/workspace';
 import { IndexScheduler, UpdateScheduler } from './scheduler';
-import { enableSecurity } from './security';
+import { CodeServerRouter } from './security';
 import { ServerOptions } from './server_options';
 import { ServerLoggerFactory } from './utils/server_logger_factory';
 
@@ -64,71 +66,80 @@ function getServerUuid(server: Server): Promise<string> {
   return Promise.resolve(uid);
 }
 
+async function getCodeNodeUuid(url: string, log: Logger) {
+  const res = await fetch(`${url}/api/stats`, {});
+  if (res.ok) {
+    return (await res.json()).kibana.uuid;
+  }
+
+  log.info(`Access code node ${url} failed, try again later.`);
+  return null;
+}
+
 export function init(server: Server, options: any) {
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
+  const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'code',
+    name: i18n.translate('xpack.code.featureRegistry.codeFeatureName', {
+      defaultMessage: 'Code',
+    }),
+    icon: 'codeApp',
+    navLinkId: 'code',
+    app: ['code', 'kibana'],
+    catalogue: [], // TODO add catalogue here
+    privileges: {
+      all: {
+        api: ['code_user', 'code_admin'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show', 'user', 'admin'],
+      },
+      read: {
+        api: ['code_user'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show', 'user'],
+      },
+    },
+  });
+
   // @ts-ignore
   const kbnServer = this.kbnServer;
   kbnServer.ready().then(async () => {
     const serverUuid = await retryUntilAvailable(() => getServerUuid(server), 50);
-    const codeNodeClient = await clientWithInternalUser(server);
     // enable security check in routes
-    enableSecurity(server);
-    if (serverOptions.codeNode) {
-      let info = await codeNodeClient.getCodeNodeInfo();
-      if (!info) {
-        let url: string = server.info.uri;
-        const serverHost = server.config().get('server.host');
-        if (serverHost !== undefined && serverHost !== 'localhost') {
-          const serverPort = server.config().get('server.port');
-          const schema = server.config().get('server.ssl.enabled') ? 'https' : 'http';
-          let basePath: string = server.config().get('server.basePath') || '';
-          if (!basePath.startsWith('/')) {
-            basePath = '/' + basePath;
-          }
-          url = `${schema}://${serverHost}:${serverPort}}${basePath}`;
-        }
-        info = await codeNodeClient.createNodeInfo({
-          uuid: serverUuid,
-          url,
-        });
-      }
-      if (info.uuid === serverUuid) {
+    const codeNodeUrl = serverOptions.codeNodeUrl;
+    if (codeNodeUrl) {
+      const codeNodeUuid = (await retryUntilAvailable(
+        async () => await getCodeNodeUuid(codeNodeUrl, log),
+        5000
+      )) as string;
+      if (codeNodeUuid === serverUuid) {
         await initCodeNode(server, serverOptions, log);
       } else {
-        const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-        // @ts-ignore
-        const esUrl = adminCluster.clusterClient.config.hosts[0];
-        log.error(
-          `A code node with different uuid:${info.uuid} is already registered as code nodes.
-            1. If this kibana node should be a non-code node, then please set "xpack.code.codeNode" to false in kibana.yml.
-            2. If you want to replace the code-node to this kibana node, then please delete the old info by execute:
-               curl --request DELETE --url ${esUrl}/.code_node/_doc/code-node-info  
-          `
-        );
-        await initNonCodeNode(info, server, serverOptions, log);
+        await initNonCodeNode(codeNodeUrl, server, serverOptions, log);
       }
     } else {
-      const info = await retryUntilAvailable(
-        async () => await codeNodeClient.getCodeNodeInfo(),
-        50
-      );
-      await initNonCodeNode(info!, server, serverOptions, log);
+      // codeNodeUrl not set, single node mode
+      await initCodeNode(server, serverOptions, log);
     }
   });
 }
 
 async function initNonCodeNode(
-  info: CodeNodeInfo,
+  url: string,
   server: Server,
   serverOptions: ServerOptions,
   log: Logger
 ) {
-  log.info(
-    `Initializing Code plugin as non-code node, redirecting all code requests to ${info.url}`
-  );
-
-  redirectRoute(server, info.url, log);
+  log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
+  redirectRoute(server, url, log);
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
@@ -220,9 +231,11 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   }
   // check code node repos on disk
   await checkRepos(cloneWorker, esClient, serverOptions, log);
+
+  const codeServerRouter = new CodeServerRouter(server);
   // Add server routes and initialize the plugin here
   repositoryRoute(
-    server,
+    codeServerRouter,
     cloneWorker,
     deleteWorker,
     indexWorker,
@@ -230,13 +243,13 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
     repoConfigController,
     serverOptions
   );
-  repositorySearchRoute(server, log);
-  documentSearchRoute(server, log);
-  symbolSearchRoute(server, log);
-  fileRoute(server, serverOptions);
-  workspaceRoute(server, serverOptions);
-  symbolByQnameRoute(server, log);
-  installRoute(server, lspService, installManager);
-  lspRoute(server, lspService, serverOptions);
-  setupRoute(server);
+  repositorySearchRoute(codeServerRouter, log);
+  documentSearchRoute(codeServerRouter, log);
+  symbolSearchRoute(codeServerRouter, log);
+  fileRoute(codeServerRouter, serverOptions);
+  workspaceRoute(codeServerRouter, serverOptions);
+  symbolByQnameRoute(codeServerRouter, log);
+  installRoute(codeServerRouter, lspService, installManager);
+  lspRoute(codeServerRouter, lspService, serverOptions);
+  setupRoute(codeServerRouter);
 }

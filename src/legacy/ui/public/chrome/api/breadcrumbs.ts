@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { IRootScopeService } from 'angular';
-import { fatalError } from 'ui/notify/fatal_error';
 import { ChromeBreadcrumb, ChromeSetup } from '../../../../../core/public';
 export type Breadcrumb = ChromeBreadcrumb;
 
@@ -34,16 +32,12 @@ export function __newPlatformInit__(instance: ChromeSetup) {
 }
 
 function createBreadcrumbsApi(chrome: { [key: string]: any }) {
-  // A flag used to determine if we should automatically
-  // clear the breadcrumbs between angular route changes.
-  let breadcrumbSetSinceRouteChange = false;
   let currentBreadcrumbs: Breadcrumb[] = [];
 
   // reset breadcrumbSetSinceRouteChange any time the breadcrumbs change, even
   // if it was done directly through the new platform
   newPlatformChrome.getBreadcrumbs$().subscribe({
     next(nextBreadcrumbs) {
-      breadcrumbSetSinceRouteChange = true;
       currentBreadcrumbs = nextBreadcrumbs;
     },
   });
@@ -86,39 +80,6 @@ function createBreadcrumbsApi(chrome: { [key: string]: any }) {
         newPlatformChrome.setBreadcrumbs(currentBreadcrumbs.slice(0, -1));
       },
     },
-
-    /**
-     * internal angular run function that will be called when angular bootstraps and
-     * lets us integrate with the angular router so that we can automatically clear
-     * the breadcrumbs if we switch to a Kibana app that does not use breadcrumbs correctly
-     */
-    $setupBreadcrumbsAutoClear: ($rootScope: IRootScopeService, $injector: any) => {
-      const $route = $injector.has('$route') ? $injector.get('$route') : {};
-
-      $rootScope.$on('$routeChangeStart', () => {
-        breadcrumbSetSinceRouteChange = false;
-      });
-
-      $rootScope.$on('$routeChangeSuccess', () => {
-        const current = $route.current || {};
-
-        if (breadcrumbSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
-          return;
-        }
-
-        const k7BreadcrumbsProvider = current.k7Breadcrumbs;
-        if (!k7BreadcrumbsProvider) {
-          newPlatformChrome.setBreadcrumbs([]);
-          return;
-        }
-
-        try {
-          chrome.breadcrumbs.set($injector.invoke(k7BreadcrumbsProvider));
-        } catch (error) {
-          fatalError(error);
-        }
-      });
-    },
   };
 }
 
@@ -126,7 +87,6 @@ export function initBreadcrumbsApi(
   chrome: { [key: string]: any },
   internals: { [key: string]: any }
 ) {
-  const { breadcrumbs, $setupBreadcrumbsAutoClear } = createBreadcrumbsApi(chrome);
+  const { breadcrumbs } = createBreadcrumbsApi(chrome);
   chrome.breadcrumbs = breadcrumbs;
-  internals.$setupBreadcrumbsAutoClear = $setupBreadcrumbsAutoClear;
 }

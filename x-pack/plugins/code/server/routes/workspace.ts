@@ -13,8 +13,9 @@ import { WorkspaceHandler } from '../lsp/workspace_handler';
 import { ServerOptions } from '../server_options';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
 import { ServerLoggerFactory } from '../utils/server_logger_factory';
+import { CodeServerRouter } from '../security';
 
-export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions) {
+export function workspaceRoute(server: CodeServerRouter, serverOptions: ServerOptions) {
   server.route({
     path: '/api/code/workspace',
     method: 'GET',
@@ -25,6 +26,7 @@ export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions
 
   server.route({
     path: '/api/code/workspace/{uri*3}/{revision}',
+    requireAdmin: true,
     method: 'POST',
     async handler(req: hapi.Request, reply) {
       const repoUri = req.params.uri as string;
@@ -32,12 +34,12 @@ export function workspaceRoute(server: hapi.Server, serverOptions: ServerOptions
       const repoConfig = serverOptions.repoConfigs[repoUri];
       const force = !!(req.query as RequestQuery).force;
       if (repoConfig) {
-        const log = new Logger(server, ['workspace', repoUri]);
+        const log = new Logger(server.server, ['workspace', repoUri]);
         const workspaceHandler = new WorkspaceHandler(
           serverOptions.repoPath,
           serverOptions.workspacePath,
           new EsClientWithRequest(req),
-          new ServerLoggerFactory(server)
+          new ServerLoggerFactory(server.server)
         );
         try {
           const { workspaceRepo, workspaceRevision } = await workspaceHandler.openWorkspace(

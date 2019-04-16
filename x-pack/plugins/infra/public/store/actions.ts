@@ -7,7 +7,6 @@
 export {
   logFilterActions,
   logPositionActions,
-  metricTimeActions,
   waffleFilterActions,
   waffleTimeActions,
   waffleOptionsActions,

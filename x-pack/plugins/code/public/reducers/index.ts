@@ -18,7 +18,6 @@ import { setup, SetupState } from './setup';
 import { shortcuts, ShortcutsState } from './shortcuts';
 import { RepoState, RepoStatus, status, StatusState } from './status';
 import { symbol, SymbolState } from './symbol';
-import { userProfile, UserProfileState } from './user';
 
 export { RepoState, RepoStatus };
 
@@ -30,7 +29,6 @@ export interface RootState {
   editor: EditorState;
   route: RouteState;
   status: StatusState;
-  userProfile: UserProfileState;
   commit: CommitState;
   blame: BlameState;
   languageServer: LanguageServerState;
@@ -46,7 +44,6 @@ const reducers = {
   search,
   route,
   status,
-  userProfile,
   commit,
   blame,
   languageServer,

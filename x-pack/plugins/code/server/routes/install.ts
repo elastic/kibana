@@ -5,18 +5,19 @@
  */
 
 import * as Boom from 'boom';
-import { Request, Server } from 'hapi';
+import { Request } from 'hapi';
 import { InstallationType } from '../../common/installation';
 import { InstallManager } from '../lsp/install_manager';
 import { LanguageServerDefinition, LanguageServers } from '../lsp/language_servers';
 import { LspService } from '../lsp/lsp_service';
+import { CodeServerRouter } from '../security';
 
 export function installRoute(
-  server: Server,
+  server: CodeServerRouter,
   lspService: LspService,
   installManager: InstallManager
 ) {
-  const kibanaVersion = server.config().get('pkg.version') as string;
+  const kibanaVersion = server.server.config().get('pkg.version') as string;
   const status = (def: LanguageServerDefinition) => ({
     name: def.name,
     status: lspService.languageServerStatus(def.name),
@@ -51,7 +52,7 @@ export function installRoute(
     method: 'GET',
   });
 
-  server.securedRoute({
+  server.route({
     path: '/api/code/install/{name}',
     requireAdmin: true,
     async handler(req: Request) {

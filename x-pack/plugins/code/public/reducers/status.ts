@@ -33,6 +33,7 @@ export interface RepoStatus {
   cloneProgress?: any;
   timestamp?: Date;
   state?: RepoState;
+  errorMessage?: string;
 }
 
 export interface StatusState {

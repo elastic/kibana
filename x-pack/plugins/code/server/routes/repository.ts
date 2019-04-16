@@ -6,8 +6,7 @@
 
 import Boom from 'boom';
 
-import { Server } from 'hapi';
-import { isValidGitUrl } from '../../common/git_url_utils';
+import { validateGitUrl } from '../../common/git_url_utils';
 import { RepositoryUtils } from '../../common/repository_utils';
 import { RepositoryConfig, RepositoryUri } from '../../model';
 import { RepositoryIndexInitializer, RepositoryIndexInitializerFactory } from '../indexer';
@@ -17,9 +16,10 @@ import { RepositoryConfigController } from '../repository_config_controller';
 import { RepositoryObjectClient } from '../search';
 import { ServerOptions } from '../server_options';
 import { EsClientWithRequest } from '../utils/esclient_with_request';
+import { CodeServerRouter } from '../security';
 
 export function repositoryRoute(
-  server: Server,
+  server: CodeServerRouter,
   cloneWorker: CloneWorker,
   deleteWorker: DeleteWorker,
   indexWorker: IndexWorker,
@@ -28,7 +28,7 @@ export function repositoryRoute(
   options: ServerOptions
 ) {
   // Clone a git repository
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo',
     requireAdmin: true,
     method: 'POST',
@@ -37,14 +37,16 @@ export function repositoryRoute(
       const log = new Logger(req.server);
 
       // Reject the request if the url is an invalid git url.
-      if (
-        !isValidGitUrl(
+      try {
+        validateGitUrl(
           repoUrl,
           options.security.gitHostWhitelist,
           options.security.gitProtocolWhitelist
-        )
-      ) {
-        return Boom.badRequest('Invalid git url.');
+        );
+      } catch (error) {
+        log.error(`Validate git url ${repoUrl} error.`);
+        log.error(error);
+        return Boom.badRequest(error);
       }
 
       const repo = RepositoryUtils.buildRepository(repoUrl);
@@ -89,7 +91,7 @@ export function repositoryRoute(
   });
 
   // Remove a git repository
-  server.securedRoute({
+  server.route({
     path: '/api/code/repo/{uri*3}',
     requireAdmin: true,
     method: 'DELETE',
@@ -213,6 +215,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/code/repo/index/{uri*3}',
     method: 'POST',
+    requireAdmin: true,
     async handler(req) {
       const repoUri = req.params.uri as string;
       const log = new Logger(req.server);
@@ -239,6 +242,7 @@ export function repositoryRoute(
   server.route({
     path: '/api/code/repo/config/{uri*3}',
     method: 'PUT',
+    requireAdmin: true,
     async handler(req, h) {
       const config: RepositoryConfig = req.payload as RepositoryConfig;
       const repoUri: RepositoryUri = config.uri;

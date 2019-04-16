@@ -28,7 +28,10 @@ import {
   EuiLink,
   EuiSpacer,
   EuiToolTip,
-  EuiFormErrorText
+  EuiFormErrorText,
+  EuiPopover,
+  EuiSwitch,
+  EuiFormRow
 } from '@elastic/eui';
 import { getSavedObjectLabel, getSavedObjectIcon } from '../../../../lib';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
@@ -42,9 +45,11 @@ class TableUI extends PureComponent {
       onSelectionChange: PropTypes.func.isRequired,
     }).isRequired,
     filterOptions: PropTypes.array.isRequired,
+    canDeleteSavedObjectTypes: PropTypes.array.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     getEditUrl: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
     goInApp: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
@@ -65,6 +70,8 @@ class TableUI extends PureComponent {
   state = {
     isSearchTextValid: true,
     parseErrorMessage: null,
+    isExportPopoverOpen: false,
+    isIncludeReferencesDeepChecked: true,
   }
 
   onChange = ({ query, error }) => {
@@ -83,6 +90,29 @@ class TableUI extends PureComponent {
     this.props.onQueryChange({ query });
   }
 
+  closeExportPopover = () => {
+    this.setState({ isExportPopoverOpen: false });
+  }
+
+  toggleExportPopoverVisibility = () => {
+    this.setState(state => ({
+      isExportPopoverOpen: !state.isExportPopoverOpen
+    }));
+  }
+
+  toggleIsIncludeReferencesDeepChecked = () => {
+    this.setState(state => ({
+      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
+    }));
+  }
+
+  onExportClick = () => {
+    const { onExport } = this.props;
+    const { isIncludeReferencesDeepChecked } = this.state;
+    onExport(isIncludeReferencesDeepChecked);
+    this.setState({ isExportPopoverOpen: false });
+  }
+
   render() {
     const {
       pageIndex,
@@ -94,9 +124,9 @@ class TableUI extends PureComponent {
       filterOptions,
       selectionConfig: selection,
       onDelete,
-      onExport,
       selectedSavedObjects,
       onTableChange,
+      canGoInApp,
       goInApp,
       getEditUrl,
       onShowRelationships,
@@ -181,6 +211,7 @@ class TableUI extends PureComponent {
               }),
             type: 'icon',
             icon: 'eye',
+            available: object => canGoInApp(object.type),
             onClick: object => goInApp(object.id, object.type),
           },
           {
@@ -216,6 +247,24 @@ class TableUI extends PureComponent {
       );
     }
 
+    const unableToDeleteSavedObjectTypes = selectedSavedObjects
+      .map(({ type }) => type)
+      .filter(type => !this.props.canDeleteSavedObjectTypes.includes(type));
+
+    const button = (
+      <EuiButton
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={this.toggleExportPopoverVisibility}
+        isDisabled={selectedSavedObjects.length === 0}
+      >
+        <FormattedMessage
+          id="kbn.management.objects.objectsTable.table.exportPopoverButtonLabel"
+          defaultMessage="Export"
+        />
+      </EuiButton>
+    );
+
     return (
       <Fragment>
         <EuiSearchBar
@@ -228,24 +277,60 @@ class TableUI extends PureComponent {
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0}
+              isDisabled={
+                selectedSavedObjects.length === 0 ||
+                unableToDeleteSavedObjectTypes.length > 0
+              }
+              title={
+                unableToDeleteSavedObjectTypes.length > 0 ? `Unable to delete ${unableToDeleteSavedObjectTypes.join(', ')}` : undefined
+              }
+              data-test-subj="savedObjectsManagementDelete"
             >
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
             </EuiButton>,
-            <EuiButton
-              key="exportSO"
-              iconType="exportAction"
-              onClick={onExport}
-              isDisabled={selectedSavedObjects.length === 0}
+            <EuiPopover
+              key="exportSOOptions"
+              button={button}
+              isOpen={this.state.isExportPopoverOpen}
+              closePopover={this.closeExportPopover}
             >
-              <FormattedMessage
-                id="kbn.management.objects.objectsTable.table.exportButtonLabel"
-                defaultMessage="Export"
-              />
-            </EuiButton>,
+              <EuiFormRow
+                label={(
+                  <FormattedMessage
+                    id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                    defaultMessage="Options"
+                  />
+                )}
+              >
+                <EuiSwitch
+                  name="includeReferencesDeep"
+                  label={(
+                    <FormattedMessage
+                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      defaultMessage="Include related objects"
+                    />
+                  )}
+                  checked={this.state.isIncludeReferencesDeepChecked}
+                  onChange={this.toggleIsIncludeReferencesDeepChecked}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiButton
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                >
+                  <FormattedMessage
+                    id="kbn.management.objects.objectsTable.table.exportButtonLabel"
+                    defaultMessage="Export"
+                  />
+                </EuiButton>
+              </EuiFormRow>
+            </EuiPopover>,
           ]}
         />
         {queryParseError}

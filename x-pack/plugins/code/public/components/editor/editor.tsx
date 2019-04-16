@@ -21,6 +21,7 @@ import { refUrlSelector } from '../../selectors';
 import { history } from '../../utils/url';
 import { Modifier, Shortcut } from '../shortcuts';
 import { ReferencesPanel } from './references_panel';
+import { encodeRevisionString } from '../../utils/url';
 
 export interface EditorActions {
   closeReferences(changeUrl: boolean): void;
@@ -48,6 +49,7 @@ export class EditorComponent extends React.Component<IProps> {
   private container: HTMLElement | undefined;
   private monaco: MonacoHelper | undefined;
   private editor: editorInterfaces.IStandaloneCodeEditor | undefined;
+  private lineDecorations: string[] | null = null;
 
   constructor(props: IProps, context: any) {
     super(props, context);
@@ -82,7 +84,6 @@ export class EditorComponent extends React.Component<IProps> {
       path: routePath,
     } = this.props.match.params;
     const prevContent = prevProps.file && prevProps.file.content;
-
     if (prevContent !== file.content) {
       this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
         if (this.props.revealPosition) {
@@ -93,7 +94,6 @@ export class EditorComponent extends React.Component<IProps> {
       file.payload.uri === `${resource}/${org}/${repo}` &&
       file.payload.revision === routeRevision &&
       file.payload.path === routePath &&
-      this.props.revealPosition &&
       prevProps.revealPosition !== this.props.revealPosition
     ) {
       this.revealPosition(this.props.revealPosition);
@@ -104,11 +104,11 @@ export class EditorComponent extends React.Component<IProps> {
         this.monaco.editor.updateOptions({ lineHeight: 38 });
       } else if (!this.props.showBlame) {
         this.destroyBlameWidgets();
-        this.monaco.editor.updateOptions({ lineHeight: 18 });
+        this.monaco.editor.updateOptions({ lineHeight: 18, lineDecorationsWidth: 16 });
       }
       if (prevProps.blames !== this.props.blames && this.props.showBlame) {
         this.loadBlame(this.props.blames);
-        this.monaco.editor.updateOptions({ lineHeight: 38 });
+        this.monaco.editor.updateOptions({ lineHeight: 38, lineDecorationsWidth: 316 });
       }
     }
   }
@@ -126,12 +126,7 @@ export class EditorComponent extends React.Component<IProps> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <div
-          tabIndex={0}
-          className="code-editor-container"
-          id="mainEditor"
-          style={{ paddingLeft: this.props.showBlame ? 300 : 0 }}
-        />
+        <div tabIndex={0} className="code-editor-container" id="mainEditor" />
         {this.renderReferences()}
       </EuiFlexItem>
     );
@@ -144,11 +139,26 @@ export class EditorComponent extends React.Component<IProps> {
     this.blameWidgets = blames.map((b, index) => {
       return new BlameWidget(b, index === 0, this.monaco!.editor!);
     });
+    if (!this.lineDecorations) {
+      this.lineDecorations = this.monaco!.editor!.deltaDecorations(
+        [],
+        [
+          {
+            range: new monaco.Range(1, 1, Infinity, 1),
+            options: { isWholeLine: true, linesDecorationsClassName: 'code-line-decoration' },
+          },
+        ]
+      );
+    }
   }
 
   public destroyBlameWidgets() {
     if (this.blameWidgets) {
       this.blameWidgets.forEach((bw: BlameWidget) => bw.destroy());
+    }
+    if (this.lineDecorations) {
+      this.monaco!.editor!.deltaDecorations(this.lineDecorations!, []);
+      this.lineDecorations = null;
     }
     this.blameWidgets = null;
   }
@@ -158,7 +168,7 @@ export class EditorComponent extends React.Component<IProps> {
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
       this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
         if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
-          const uri = `${repo}/blob/${revision}/${file}`;
+          const uri = `${repo}/blob/${encodeRevisionString(revision)}/${file}`;
           history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
         }
         this.monaco!.container.focus();

@@ -29,7 +29,7 @@ import {
   statusSelector,
   treeCommitsSelector,
 } from '../../selectors';
-import { history } from '../../utils/url';
+import { encodeRevisionString, history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
 import { CommitHistory, CommitHistoryLoading } from './commit_history';
@@ -88,6 +88,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoScope: string[];
   fetchMoreCommits(repoUri: string): void;
 }
+const LANG_MD = 'markdown';
 
 enum ButtonOption {
   Code = 'Code',
@@ -96,28 +97,18 @@ enum ButtonOption {
   Folder = 'Directory',
 }
 
+enum ButtonLabel {
+  Code = 'Code',
+  Content = 'Content',
+  Download = 'Download',
+  Raw = 'Raw',
+}
+
 const Title = styled(EuiTitle)`
   margin: ${theme.euiSizeXS} 0 ${theme.euiSize};
 `;
 
 class CodeContent extends React.PureComponent<Props> {
-  public buttonOptions = [
-    {
-      id: ButtonOption.Code,
-      label: ButtonOption.Code,
-    },
-    {
-      id: ButtonOption.Blame,
-      label: ButtonOption.Blame,
-    },
-    {
-      id: ButtonOption.History,
-      label: ButtonOption.History,
-    },
-  ];
-
-  public rawButtonOptions = [{ id: 'Raw', label: 'Raw' }];
-
   public findNode = (pathSegments: string[], node: FileTree): FileTree | undefined => {
     if (!node) {
       return undefined;
@@ -141,16 +132,24 @@ class CodeContent extends React.PureComponent<Props> {
     const repoUri = `${resource}/${org}/${repo}`;
     switch (id) {
       case ButtonOption.Code:
-        history.push(`/${repoUri}/${PathTypes.blob}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.blob}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
       case ButtonOption.Folder:
-        history.push(`/${repoUri}/${PathTypes.tree}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.tree}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
       case ButtonOption.Blame:
-        history.push(`/${repoUri}/${PathTypes.blame}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.blame}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
       case ButtonOption.History:
-        history.push(`/${repoUri}/${PathTypes.commits}/${revision}/${path || ''}`);
+        history.push(
+          `/${repoUri}/${PathTypes.commits}/${encodeRevisionString(revision)}/${path || ''}`
+        );
         break;
     }
   };
@@ -158,7 +157,9 @@ class CodeContent extends React.PureComponent<Props> {
   public openRawFile = () => {
     const { path, resource, org, repo, revision } = this.props.match.params;
     const repoUri = `${resource}/${org}/${repo}`;
-    window.open(chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`));
+    window.open(
+      chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${encodeRevisionString(revision)}/${path}`)
+    );
   };
 
   public renderButtons = () => {
@@ -181,15 +182,39 @@ class CodeContent extends React.PureComponent<Props> {
     }
     const currentTree = this.props.currentTree;
     if (
+      this.props.file &&
       currentTree &&
       (currentTree.type === FileTreeItemType.File || currentTree.type === FileTreeItemType.Link)
     ) {
+      const { isUnsupported, isOversize, isImage, lang } = this.props.file;
+      const isMarkdown = lang === LANG_MD;
+      const isText = !isUnsupported && !isOversize && !isImage;
+
+      const buttonOptions = [
+        {
+          id: ButtonOption.Code,
+          label: isText && !isMarkdown ? ButtonLabel.Code : ButtonLabel.Content,
+        },
+        {
+          id: ButtonOption.Blame,
+          label: ButtonOption.Blame,
+          isDisabled: isUnsupported || isImage || isOversize,
+        },
+        {
+          id: ButtonOption.History,
+          label: ButtonOption.History,
+        },
+      ];
+      const rawButtonOptions = [
+        { id: 'Raw', label: isText ? ButtonLabel.Raw : ButtonLabel.Download },
+      ];
+
       return (
         <ButtonsContainer>
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
-            options={this.buttonOptions}
+            options={buttonOptions}
             type="single"
             idSelected={buttonId}
             onChange={this.switchButton}
@@ -197,7 +222,7 @@ class CodeContent extends React.PureComponent<Props> {
           <EuiButtonGroup
             buttonSize="s"
             color="primary"
-            options={this.rawButtonOptions}
+            options={rawButtonOptions}
             type="single"
             idSelected={''}
             onChange={this.openRawFile}
@@ -298,8 +323,9 @@ class CodeContent extends React.PureComponent<Props> {
                     <h3>Recent Commits</h3>
                   </Title>
                   <EuiButton
-                    href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${revision}/${path ||
-                      ''}`}
+                    href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${encodeRevisionString(
+                      revision
+                    )}/${path || ''}`}
                   >
                     View All
                   </EuiButton>
@@ -312,7 +338,13 @@ class CodeContent extends React.PureComponent<Props> {
         if (!file) {
           return null;
         }
-        const { lang: fileLanguage, content: fileContent, url, isUnsupported, isOversize } = file;
+        const {
+          lang: fileLanguage,
+          content: fileContent,
+          isUnsupported,
+          isOversize,
+          isImage,
+        } = file;
         if (isUnsupported) {
           return (
             <ErrorPanel
@@ -329,16 +361,17 @@ class CodeContent extends React.PureComponent<Props> {
             />
           );
         }
-        if (fileLanguage === 'markdown') {
+        if (fileLanguage === LANG_MD) {
           return (
             <div className="markdown-body code-markdown-container">
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
             </div>
           );
-        } else if (this.props.file!.isImage) {
+        } else if (isImage) {
+          const rawUrl = chrome.addBasePath(`/app/code/repo/${repoUri}/raw/${revision}/${path}`);
           return (
             <div className="code-auto-margin">
-              <img src={url} alt={url} />
+              <img src={rawUrl} alt={rawUrl} />
             </div>
           );
         }

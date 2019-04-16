@@ -30,6 +30,7 @@ import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../../legacy/utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { isNumeric } from 'ui/utils/numeric';
+import { canViewInApp } from './lib/in_app_url';
 
 import { getViewBreadcrumbs } from './breadcrumbs';
 
@@ -45,7 +46,7 @@ uiModules.get('apps/management', ['monospaced.elastic'])
   .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal, i18n) {
     return {
       restrict: 'E',
-      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
+      controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private, uiCapabilities) {
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -135,6 +136,11 @@ uiModules.get('apps/management', ['monospaced.elastic'])
             });
           }
         };
+
+        const { edit: canEdit, delete: canDelete } = uiCapabilities.savedObjectsManagement[service.type];
+        $scope.canEdit = canEdit;
+        $scope.canDelete = canDelete;
+        $scope.canViewInApp = canViewInApp(uiCapabilities, service.type);
 
         $scope.notFound = $routeParams.notFound;
 

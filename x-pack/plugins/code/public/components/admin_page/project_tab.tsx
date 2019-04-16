@@ -29,6 +29,8 @@ import moment from 'moment';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
+import { uiCapabilities } from 'ui/capabilities';
+
 import { Repository } from '../../../model';
 import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
@@ -77,12 +79,11 @@ const sortOptions = [
 interface Props {
   projects: Repository[];
   status: { [key: string]: RepoStatus };
-  isAdmin: boolean;
   importRepo: (repoUrl: string) => void;
   importLoading: boolean;
   toastMessage?: string;
   showToast: boolean;
-  toastType: ToastType;
+  toastType?: ToastType;
   closeToast: () => void;
 }
 interface State {
@@ -161,7 +162,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
               <h3>Repository URL</h3>
             </EuiTitle>
             <EuiForm>
-              <EuiFormRow isInvalid={this.state.isInvalid} error="This field shouldn't be empty.">
+              <EuiFormRow isInvalid={this.state.isInvalid} error="The URL shouldn't be empty.">
                 <EuiFieldText
                   value={this.state.repoURL}
                   onChange={this.onChange}
@@ -192,7 +193,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
   };
 
   public render() {
-    const { projects, isAdmin, status, toastMessage, showToast, toastType } = this.props;
+    const { projects, status, toastMessage, showToast, toastType } = this.props;
     const projectsCount = projects.length;
     const modal = this.state.showImportProjectModal && this.renderImportModal();
 
@@ -205,7 +206,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         project={repo}
         showStatus={true}
         status={status[repo.uri]}
-        enableManagement={isAdmin}
+        enableManagement={uiCapabilities.code.admin as boolean}
       />
     ));
 
@@ -243,7 +244,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem grow />
           <EuiFlexItem grow />
           <EuiFlexItem>
-            {isAdmin && (
+            {(uiCapabilities.code.admin as boolean) && (
               // @ts-ignore
               <NewProjectButton onClick={this.openModal} data-test-subj="newProjectButton">
                 Add New Project
@@ -270,7 +271,6 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
 const mapStateToProps = (state: RootState) => ({
   projects: state.repository.repositories,
   status: state.status.status,
-  isAdmin: state.userProfile.isCodeAdmin,
   importLoading: state.repository.importLoading,
   toastMessage: state.repository.toastMessage,
   toastType: state.repository.toastType,
@@ -285,5 +285,4 @@ const mapDispatchToProps = {
 export const ProjectTab = connect(
   mapStateToProps,
   mapDispatchToProps
-  // @ts-ignore
 )(CodeProjectTab);

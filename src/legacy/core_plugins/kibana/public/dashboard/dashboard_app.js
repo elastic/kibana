@@ -500,6 +500,7 @@ app.directive('dashboardApp', function ($injector) {
         showShareContextMenu({
           anchorElement,
           allowEmbed: true,
+          allowShortUrl: !dashboardConfig.getHideWriteControls(),
           getUnhashableStates,
           objectId: dash.id,
           objectType: 'dashboard',

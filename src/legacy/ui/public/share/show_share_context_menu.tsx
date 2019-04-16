@@ -37,6 +37,7 @@ const onClose = () => {
 interface ShowProps {
   anchorElement: any;
   allowEmbed: boolean;
+  allowShortUrl: boolean;
   getUnhashableStates: () => object[];
   objectId?: string;
   objectType: string;
@@ -48,6 +49,7 @@ interface ShowProps {
 export function showShareContextMenu({
   anchorElement,
   allowEmbed,
+  allowShortUrl,
   getUnhashableStates,
   objectId,
   objectType,
@@ -76,6 +78,7 @@ export function showShareContextMenu({
       >
         <ShareContextMenu
           allowEmbed={allowEmbed}
+          allowShortUrl={allowShortUrl}
           getUnhashableStates={getUnhashableStates}
           objectId={objectId}
           objectType={objectType}

@@ -19,10 +19,11 @@ import {
 import { ServerOptions } from '../server_options';
 import { extractLines } from '../utils/buffer';
 import { detectLanguage } from '../utils/detect_language';
+import { CodeServerRouter } from '../security';
 
 const TEXT_FILE_LIMIT = 1024 * 1024; // 1mb
 
-export function fileRoute(server: hapi.Server, options: ServerOptions) {
+export function fileRoute(server: CodeServerRouter, options: ServerOptions) {
   server.route({
     path: '/api/code/repo/{uri*3}/tree/{ref}/{path*}',
     method: 'GET',
@@ -136,11 +137,13 @@ export function fileRoute(server: hapi.Server, options: ServerOptions) {
     method: 'GET',
     handler: historyHandler,
   });
+
   server.route({
     path: '/api/code/repo/{uri*3}/history/{ref}/{path*}',
     method: 'GET',
     handler: historyHandler,
   });
+
   async function historyHandler(req: hapi.Request) {
     const gitOperations = new GitOperations(options.repoPath);
     const { uri, ref, path } = req.params;
