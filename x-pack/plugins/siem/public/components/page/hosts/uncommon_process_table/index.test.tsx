@@ -13,7 +13,7 @@ import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 
-import { UncommonProcessTable } from './index';
+import { getArgs, UncommonProcessTable } from '.';
 import { mockData } from './mock';
 
 describe('UncommonProcess Table Component', () => {
@@ -165,6 +165,26 @@ describe('UncommonProcess Table Component', () => {
           .at(5)
           .text()
       ).toBe('Hostshello-world,\u00a0hello-world-2');
+    });
+  });
+
+  describe('#getArgs', () => {
+    test('it works with string array', () => {
+      const args = ['1', '2', '3'];
+      expect(getArgs(args)).toEqual('1 2 3');
+    });
+
+    test('it returns null if empty array', () => {
+      const args: string[] = [];
+      expect(getArgs(args)).toEqual(null);
+    });
+
+    test('it returns null if given null', () => {
+      expect(getArgs(null)).toEqual(null);
+    });
+
+    test('it returns null if given undefined', () => {
+      expect(getArgs(null)).toEqual(null);
     });
   });
 });

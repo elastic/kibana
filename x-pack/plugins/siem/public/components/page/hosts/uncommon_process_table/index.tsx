@@ -5,7 +5,7 @@
  */
 
 import { EuiBadge } from '@elastic/eui';
-import { get, getOr } from 'lodash/fp';
+import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -69,6 +69,14 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
+export const getArgs = (args: string[] | null | undefined): string | null => {
+  if (args != null && args.length !== 0) {
+    return args.join(' ');
+  } else {
+    return null;
+  }
+};
+
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   ({
     data,
@@ -105,9 +113,8 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
-    return getUncommonProcessesSelector(state, type);
-  };
+  const mapStateToProps = (state: State, { type }: OwnProps) =>
+    getUncommonProcessesSelector(state, type);
   return mapStateToProps;
 };
 
@@ -174,7 +181,7 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     name: i18n.LAST_COMMAND,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(getOr(null, 'node.process.title[0]', node)),
+    render: ({ node }) => defaultToEmptyTag(getArgs(node.process.args)),
   },
   {
     name: i18n.NUMBER_OF_INSTANCES,

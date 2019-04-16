@@ -22,7 +22,7 @@ export const uncommonProcessesQuery = gql`
             _id
             instances
             process {
-              title
+              args
               name
             }
             user {
@@ -30,7 +30,6 @@ export const uncommonProcessesQuery = gql`
               name
             }
             host {
-              id
               name
             }
           }
