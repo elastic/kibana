@@ -170,8 +170,9 @@ export class UiBundlesController {
   }
 
   getCacheDirectory(...subPath) {
-    const hashBundleEntries = !IS_KIBANA_DISTRIBUTABLE ? this.hashBundleEntries() : '';
-    return this.resolvePath('../.cache', hashBundleEntries, ...subPath);
+    return !IS_KIBANA_DISTRIBUTABLE
+      ? this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath)
+      : this.resolvePath('../../built_assets/.cache', ...subPath);
   }
 
   getDescription() {
