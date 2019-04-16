@@ -11,42 +11,42 @@ export class EsIndexClient {
   constructor(readonly self: WithRequest) {}
 
   public exists(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.exists', params);
+    return this.self.callCluster('indices.exists', params);
   }
 
   public create(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.create', params);
+    return this.self.callCluster('indices.create', params);
   }
 
   public refresh(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.refresh', params);
+    return this.self.callCluster('indices.refresh', params);
   }
 
   public delete(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.delete', params);
+    return this.self.callCluster('indices.delete', params);
   }
 
   public existsAlias(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.existsAlias', params);
+    return this.self.callCluster('indices.existsAlias', params);
   }
 
   public getAlias(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.getAlias', params);
+    return this.self.callCluster('indices.getAlias', params);
   }
 
   public putAlias(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.putAlias', params);
+    return this.self.callCluster('indices.putAlias', params);
   }
 
   public deleteAlias(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.deleteAlias', params);
+    return this.self.callCluster('indices.deleteAlias', params);
   }
 
   public updateAliases(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.updateAliases', params);
+    return this.self.callCluster('indices.updateAliases', params);
   }
 
   public getMapping(params: AnyObject): Promise<any> {
-    return this.self.callWithRequest('indices.getMapping', params);
+    return this.self.callCluster('indices.getMapping', params);
   }
 }

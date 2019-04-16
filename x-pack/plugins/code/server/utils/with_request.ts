@@ -8,7 +8,7 @@ import { Request } from 'hapi';
 import { AnyObject } from '../lib/esqueue';
 
 export class WithRequest {
-  public readonly callWithRequest: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
+  public readonly callCluster: (endpoint: string, clientOptions?: AnyObject) => Promise<any>;
 
   constructor(readonly req: Request) {
     const cluster = req.server.plugins.elasticsearch.getCluster('data');
@@ -18,10 +18,10 @@ export class WithRequest {
     if (securityPlugin) {
       const useRbac = securityPlugin.authorization.mode.useRbacForRequest(req);
       if (useRbac) {
-        this.callWithRequest = cluster.callWithInternalUser;
+        this.callCluster = cluster.callWithInternalUser;
         return;
       }
     }
-    this.callWithRequest = cluster.callWithRequest.bind(null, req);
+    this.callCluster = cluster.callWithRequest.bind(null, req);
   }
 }

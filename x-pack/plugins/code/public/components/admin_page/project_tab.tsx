@@ -206,7 +206,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         project={repo}
         showStatus={true}
         status={status[repo.uri]}
-        enableManagement={uiCapabilities.code.admin as boolean} // TODO check if this is the right use
+        enableManagement={uiCapabilities.code.admin as boolean}
       />
     ));
 

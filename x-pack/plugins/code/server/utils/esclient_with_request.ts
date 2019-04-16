@@ -17,38 +17,38 @@ export class EsClientWithRequest extends WithRequest implements EsClient {
   }
 
   public bulk(params: AnyObject): Promise<any> {
-    return this.callWithRequest('bulk', params);
+    return this.callCluster('bulk', params);
   }
 
   public delete(params: AnyObject): Promise<any> {
-    return this.callWithRequest('delete', params);
+    return this.callCluster('delete', params);
   }
 
   public deleteByQuery(params: AnyObject): Promise<any> {
-    return this.callWithRequest('deleteByQuery', params);
+    return this.callCluster('deleteByQuery', params);
   }
 
   public get(params: AnyObject): Promise<any> {
-    return this.callWithRequest('get', params);
+    return this.callCluster('get', params);
   }
 
   public index(params: AnyObject): Promise<any> {
-    return this.callWithRequest('index', params);
+    return this.callCluster('index', params);
   }
 
   public ping(): Promise<void> {
-    return this.callWithRequest('ping');
+    return this.callCluster('ping');
   }
 
   public reindex(params: AnyObject): Promise<any> {
-    return this.callWithRequest('reindex', params);
+    return this.callCluster('reindex', params);
   }
 
   public search(params: AnyObject): Promise<any> {
-    return this.callWithRequest('search', params);
+    return this.callCluster('search', params);
   }
 
   public update(params: AnyObject): Promise<any> {
-    return this.callWithRequest('update', params);
+    return this.callCluster('update', params);
   }
 }
