@@ -95,7 +95,6 @@ module.controller('MlExplorerController', function (
     selectedJobIds,
     swimlaneViewByFieldName
   }) {
-    console.log('JOB SELECTION UPDATE', selectedJobIds); // remove
     const jobs = createJobs(fullJobs).map((job) => {
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
@@ -152,7 +151,6 @@ module.controller('MlExplorerController', function (
           if (resp.jobs.length > 0) {
             // Select any jobs set in the global state (i.e. passed in the URL).
             const selectedJobIds = mlJobSelectService.getValue();
-            console.log('SELECTED FROM LOAD LISTENER', selectedJobIds); // remove
             let selectedCells;
             let filterData = {};
 
@@ -209,7 +207,6 @@ module.controller('MlExplorerController', function (
   //   jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
   // });
   mlJobSelectService.subscribe((selectedIds) => {
-    console.log('SELECTED FROM SUBSCRIPTION', selectedIds); // remove
     if (selectedIds !== undefined) {
       $scope.jobSelectionUpdateInProgress = true;
       jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selectedIds });

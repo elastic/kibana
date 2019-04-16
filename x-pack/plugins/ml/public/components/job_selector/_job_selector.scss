@@ -7,3 +7,11 @@
   padding-bottom: $euiSizeS;
   padding-top: $euiSizeS;
 }
+
+.mlJobSelectorFlyoutBody > .euiFlyoutBody__overflow {
+  padding-top: $euiSizeS;
+}
+
+.groupBadge {
+  width: $euiSizeM;
+}

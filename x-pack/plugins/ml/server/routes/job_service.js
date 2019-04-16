@@ -98,7 +98,6 @@ export function jobServiceRoutes(server, commonRouteConfig) {
       const { jobsWithTimerange } = jobServiceProvider(callWithRequest);
       return jobsWithTimerange()
         .catch(resp => {
-          console.log('SOMETHING IS UP ****', resp, jobsWithTimerange);  // remove
           wrapError(resp);
         });
     },
