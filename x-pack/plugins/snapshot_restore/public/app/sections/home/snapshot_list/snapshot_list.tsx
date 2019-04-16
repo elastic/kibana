@@ -7,12 +7,14 @@
 import React, { Fragment } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH } from '../../../constants';
 import { useAppDependencies } from '../../../index';
 import { documentationLinksService } from '../../../services/documentation';
 import { loadSnapshots } from '../../../services/http';
+import { linkToRepositories } from '../../../services/navigation';
 
 import { SnapshotDetails } from './snapshot_details';
 import { SnapshotTable } from './snapshot_table';
@@ -37,7 +39,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   const {
     error,
     loading,
-    data: { snapshots },
+    data: { snapshots = [], repositories = [], errors = {} },
     request: reload,
   } = loadSnapshots();
 
@@ -72,7 +74,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         error={error}
       />
     );
-  } else if (snapshots && snapshots.length === 0) {
+  } else if (snapshots.length === 0) {
     content = (
       <EuiEmptyPrompt
         iconType="managementApp"
@@ -111,12 +113,49 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       />
     );
   } else {
+    const repositoryErrorsWarning = Object.keys(errors).length ? (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryWarningTitle"
+            defaultMessage="Some of your repositories contain errors"
+          />
+        }
+        color="warning"
+        iconType="alert"
+      >
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryWarningMessage"
+          defaultMessage="These errors might prevent some snapshots from being loaded and might
+            cause other snapshots to load slowly. You can fix these problems by addressing the
+            errors in the {tab}."
+          values={{
+            tab: (
+              <EuiLink href={linkToRepositories()}>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.repositoryWarningLinkMessage"
+                  defaultMessage="Repositories tab"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
+    ) : null;
+
     content = (
-      <SnapshotTable
-        snapshots={snapshots || []}
-        reload={reload}
-        openSnapshotDetails={openSnapshotDetails}
-      />
+      <Fragment>
+        {repositoryErrorsWarning}
+
+        <EuiSpacer />
+
+        <SnapshotTable
+          snapshots={snapshots}
+          repositories={repositories}
+          reload={reload}
+          openSnapshotDetails={openSnapshotDetails}
+        />
+      </Fragment>
     );
   }
 

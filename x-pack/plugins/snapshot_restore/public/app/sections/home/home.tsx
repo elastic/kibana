@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
-import { breadcrumbService } from '../../services/breadcrumb';
+import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
@@ -26,8 +26,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   },
   history,
 }) => {
-  const [activeSection, setActiveSection] = useState<Section>(section);
-
   const {
     core: {
       i18n: { FormattedMessage },
@@ -58,7 +56,6 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
   ];
 
   const onSectionChange = (newSection: Section) => {
-    setActiveSection(newSection);
     history.push(`${BASE_PATH}/${newSection}`);
   };
 
@@ -85,7 +82,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           {tabs.map(tab => (
             <EuiTab
               onClick={() => onSectionChange(tab.id)}
-              isSelected={tab.id === activeSection}
+              isSelected={tab.id === section}
               key={tab.id}
               data-test-subject={tab.testSubj}
             >

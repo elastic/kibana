@@ -12,15 +12,19 @@ import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
+import { linkToRepository } from '../../../../services/navigation';
+import { DataPlaceholder } from '../../../../components';
 
 interface Props extends RouteComponentProps {
   snapshots: SnapshotDetails[];
+  repositories: string[];
   reload: () => Promise<void>;
   openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
 }
 
 const SnapshotTableUi: React.FunctionComponent<Props> = ({
   snapshots,
+  repositories,
   reload,
   openSnapshotDetails,
   history,
@@ -52,7 +56,9 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (repository: string) => repository,
+      render: (repositoryName: string) => (
+        <EuiLink href={linkToRepository(repositoryName)}>{repositoryName}</EuiLink>
+      ),
     },
     {
       field: 'startTimeInMillis',
@@ -61,7 +67,9 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       }),
       truncateText: true,
       sortable: true,
-      render: (startTimeInMillis: number) => formatDate(startTimeInMillis),
+      render: (startTimeInMillis: number) => (
+        <DataPlaceholder data={startTimeInMillis}>{formatDate(startTimeInMillis)}</DataPlaceholder>
+      ),
     },
     {
       field: 'durationInMillis',
@@ -72,11 +80,13 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       sortable: true,
       width: '100px',
       render: (durationInMillis: number) => (
-        <FormattedMessage
-          id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
-          defaultMessage="{seconds}s"
-          values={{ seconds: Math.round(durationInMillis / 1000) }}
-        />
+        <DataPlaceholder data={durationInMillis}>
+          <FormattedMessage
+            id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
+            defaultMessage="{seconds}s"
+            values={{ seconds: Math.ceil(durationInMillis / 1000) }}
+          />
+        </DataPlaceholder>
       ),
     },
     {
@@ -137,6 +147,18 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
       incremental: true,
       schema: true,
     },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'repository',
+        name: 'Repository',
+        multiSelect: false,
+        options: repositories.map(repository => ({
+          value: repository,
+          view: repository,
+        })),
+      },
+    ],
   };
 
   return (

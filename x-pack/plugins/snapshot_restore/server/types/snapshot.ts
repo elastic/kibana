@@ -19,7 +19,7 @@ export interface SnapshotDetailsEs {
   end_time: string;
   end_time_in_millis: number;
   duration_in_millis: number;
-  failures: string[];
+  failures: any[];
   shards: SnapshotDetailsShardsStatusEs;
 }
 
