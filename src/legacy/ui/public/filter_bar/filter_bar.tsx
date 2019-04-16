@@ -35,11 +35,7 @@ import chrome from 'ui/chrome';
 import { IndexPattern } from 'ui/index_patterns';
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
-
-// TODO: how the unpacking should go?
-import { data } from 'plugins/data';
-console.log(data);
-const { FilterOptions } = data ;
+import { FilterOptions } from './filter_options';
 
 const config = chrome.getUiSettingsClient();
 

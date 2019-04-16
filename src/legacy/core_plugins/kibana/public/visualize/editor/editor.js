@@ -54,7 +54,7 @@ import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 
-// import 'plugins/data';
+import 'plugins/data';
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
