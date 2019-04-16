@@ -35,6 +35,7 @@ export const ObservabilityIntegrationsPopover = ({ monitor }: MonitorListPopover
             defaultMessage: 'Display the integrations popover',
           })}
           color="subdued"
+          isDisabled={domain === null}
           onClick={() => setIsPopoverVisible(true)}
           iconType="boxesVertical"
         />
@@ -43,10 +44,10 @@ export const ObservabilityIntegrationsPopover = ({ monitor }: MonitorListPopover
       id="integrationsPopover"
       isOpen={isPopoverVisible}
     >
-      <EuiFlexGroup gutterSize="m" direction="column">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiLink href={apmHref}>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiIcon
                   aria-label={i18n.translate('xpack.uptime.monitorListPopover.apmIntegrationIcon', {
