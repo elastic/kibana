@@ -26,6 +26,8 @@ function isType(type) {
   };
 }
 
+const shouldWrite = isType('string');
+
 const migrateIncludeExcludeFormat = {
   serialize: function (value) {
     if (!value || isString(value)) return value;
@@ -33,9 +35,10 @@ const migrateIncludeExcludeFormat = {
   },
   write: function (aggConfig, output) {
     const value = aggConfig.params[this.name];
+
     if (isObject(value)) {
       output.params[this.name] = value.pattern;
-    } else if (value) {
+    } else if (value && shouldWrite(aggConfig)) {
       output.params[this.name] = value;
     }
   }

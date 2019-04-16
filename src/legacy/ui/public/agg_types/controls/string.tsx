@@ -32,8 +32,6 @@ function StringParamEditor({
   setTouched,
 }: AggParamEditorProps<string>) {
   if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
-    // reset model value
-    setValue();
     return null;
   }
 
