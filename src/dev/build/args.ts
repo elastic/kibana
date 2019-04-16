@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
 import getopts from 'getopts';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
 interface ParsedArgs {
   showHelp: boolean;
