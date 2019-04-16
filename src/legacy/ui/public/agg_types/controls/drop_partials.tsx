@@ -23,10 +23,6 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 
 function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
-  if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
-    return null;
-  }
-
   const content = i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
     defaultMessage:
       "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",

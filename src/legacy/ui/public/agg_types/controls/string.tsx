@@ -31,10 +31,6 @@ function StringParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
-    return null;
-  }
-
   useEffect(
     () => {
       if (aggParam.required) {
