@@ -6,31 +6,23 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../store/urlParams';
 import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
-import {
-  getCurrentTab,
-  getTabsFromObject
-} from '../../../shared/PropertiesTable/tabConfig';
 
 interface Props {
   location: Location;
   transaction: Transaction;
-  urlParams: IUrlParams;
 }
 
 export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
   location,
-  transaction,
-  urlParams
+  transaction
 }) => {
-  const tabs = getTabsFromObject(transaction);
-  const currentTab = getCurrentTab(tabs, urlParams.flyoutDetailTab);
-  const agentName = transaction.agent.name;
+  const metadataTab = { key: 'metadata', label: 'Metadata' };
+  const tabs = [metadataTab];
+  const currentTab = metadataTab;
 
   return (
     <div>
@@ -56,11 +48,7 @@ export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
         })}
       </EuiTabs>
       <EuiSpacer />
-      <PropertiesTable
-        propData={get(transaction, currentTab.key)}
-        propKey={currentTab.key}
-        agentName={agentName}
-      />
+      <PropertiesTable item={transaction} />
     </div>
   );
 };

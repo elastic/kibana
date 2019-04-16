@@ -14,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React from 'react';
 import styled from 'styled-components';
 import { idx } from '../../../../../common/idx';
@@ -25,7 +24,7 @@ import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 import { PropertiesTable } from '../../../shared/PropertiesTable';
-import { getCurrentTab } from '../../../shared/PropertiesTable/tabConfig';
+import { getCurrentTab } from '../../../shared/PropertiesTable/helpers';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import {
   ErrorTab,
@@ -124,7 +123,6 @@ export function TabContent({
   currentTab: ErrorTab;
 }) {
   const codeLanguage = error.service.name;
-  const agentName = error.agent.name;
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
   const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
 
@@ -138,13 +136,6 @@ export function TabContent({
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = get(error, currentTab.key);
-      return (
-        <PropertiesTable
-          propData={propData}
-          propKey={currentTab.key}
-          agentName={agentName}
-        />
-      );
+      return <PropertiesTable item={error} />;
   }
 }

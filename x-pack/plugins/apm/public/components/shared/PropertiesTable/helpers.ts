@@ -9,15 +9,12 @@ import { first, has } from 'lodash';
 import { StringMap } from '../../../../typings/common';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
-import {
-  PropertyTab,
-  PropertyTabKey,
-  TAB_CONFIG,
-  TabConfig
-} from './tabConfigConst';
+import { Property, PROPERTY_CONFIG } from './propertyConfig';
 
-export function getTabsFromObject(obj: Transaction | APMError): PropertyTab[] {
-  return TAB_CONFIG.filter(
+export function getPropertiesFromObject(
+  obj: Transaction | APMError
+): Property[] {
+  return PROPERTY_CONFIG.filter(
     ({ key, required }) => required || has(obj, key)
   ).map(({ key, label }) => ({ key, label }));
 }
@@ -25,7 +22,7 @@ export function getTabsFromObject(obj: Transaction | APMError): PropertyTab[] {
 export type KeySorter = (data: StringMap, parentKey?: string) => string[];
 
 export const sortKeysByConfig: KeySorter = (object, currentKey) => {
-  const indexedPropertyConfig = indexBy(TAB_CONFIG, 'key');
+  const indexedPropertyConfig = indexBy(PROPERTY_CONFIG, 'key');
   const presorted = get(
     indexedPropertyConfig,
     `${currentKey}.presortedKeys`,
@@ -41,5 +38,3 @@ export function getCurrentTab<T extends { key: string; label: string }>(
   const selectedTab = tabs.find(({ key }) => key === currentTabKey);
   return selectedTab ? selectedTab : first(tabs) || {};
 }
-
-export { TAB_CONFIG, TabConfig, PropertyTab, PropertyTabKey };

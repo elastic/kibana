@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../tabConfigConst', () => {
+jest.mock('../propertyConfig', () => {
   return {
-    TAB_CONFIG: [
+    PROPERTY_CONFIG: [
       {
         key: 'testProperty',
         label: 'testPropertyLabel',
@@ -27,11 +27,11 @@ jest.mock('../tabConfigConst', () => {
   };
 });
 
-import * as propertyConfig from '../tabConfig';
-const { getTabsFromObject, sortKeysByConfig } = propertyConfig;
+import * as propertyConfig from '../helpers';
+const { getPropertiesFromObject, sortKeysByConfig } = propertyConfig;
 
-describe('tabConfig', () => {
-  describe('getTabsFromObject', () => {
+describe('propertyConfig', () => {
+  describe('getPropertiesFromObject', () => {
     it('should return selected and required keys only', () => {
       const expectedTabs = [
         {
@@ -43,7 +43,7 @@ describe('tabConfig', () => {
           label: 'requiredPropertyLabel'
         }
       ];
-      expect(getTabsFromObject({ testProperty: {} } as any)).toEqual(
+      expect(getPropertiesFromObject({ testProperty: {} } as any)).toEqual(
         expectedTabs
       );
     });

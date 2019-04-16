@@ -5,12 +5,12 @@
  */
 
 import { AgentName } from '../../../typings/es_schemas/ui/fields/Agent';
-import { PropertyTabKey } from '../../components/shared/PropertiesTable/tabConfig';
+import { PropertyKey } from '../../components/shared/PropertiesTable/propertyConfig';
 
 const AGENT_URL_ROOT = 'https://www.elastic.co/guide/en/apm/agent';
 
 type DocUrls = {
-  [tabKey in PropertyTabKey]?: { [agentName in AgentName]: string | undefined }
+  [tabKey in PropertyKey]?: { [agentName in AgentName]: string | undefined }
 };
 
 const customUrls = {
@@ -49,11 +49,11 @@ const AGENT_DOC_URLS: DocUrls = {
   'error.custom': customUrls
 };
 
-export function getAgentDocUrlForTab(
-  tabKey: PropertyTabKey,
+export function getAgentDocUrlForProperty(
+  propertyKey: PropertyKey,
   agentName?: AgentName
 ) {
-  const agentUrls = AGENT_DOC_URLS[tabKey];
+  const agentUrls = AGENT_DOC_URLS[propertyKey];
   if (agentUrls && agentName) {
     return agentUrls[agentName];
   }

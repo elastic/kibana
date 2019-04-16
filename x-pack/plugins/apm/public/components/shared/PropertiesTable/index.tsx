@@ -4,122 +4,71 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { get } from 'lodash';
+import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { getPropertiesFromObject } from './helpers';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { SectionHelpMessage } from './SectionHelpMessage';
 import { StringMap } from '../../../../typings/common';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/Agent';
-import { fontSize, fontSizes, px, unit, units } from '../../../style/variables';
-import { getAgentDocUrlForTab } from '../../../utils/documentation/agents';
-import { NestedKeyValueTable } from './NestedKeyValueTable';
-import { PropertyTabKey } from './tabConfig';
+import { PropertyKey } from './propertyConfig';
+import { DottedKeyValueTable } from '../DottedKeyValueTable';
 
-const TableContainer = styled.div`
-  padding-bottom: ${px(units.double)};
-`;
-
-const TableInfo = styled.div`
-  padding: ${px(unit)} 0 0;
-  text-align: center;
-  font-size: ${fontSize};
-  color: ${theme.euiColorDarkShade};
-  line-height: 1.5;
-`;
-
-const TableInfoHeader = styled(TableInfo)`
-  font-size: ${fontSizes.large};
-  color: ${theme.euiColorDarkestShade};
-`;
-
-const EuiIconWithSpace = styled(EuiIcon)`
-  margin-right: ${px(units.half)};
-`;
-
-function getTabHelpText(tabKey: PropertyTabKey) {
-  switch (tabKey) {
-    case 'user':
-      return i18n.translate(
-        'xpack.apm.propertiesTable.userTab.agentFeatureText',
-        {
-          defaultMessage:
-            'You can configure your agent to add contextual information about your users.'
-        }
-      );
-    case 'labels':
-      return i18n.translate(
-        'xpack.apm.propertiesTable.labelsTab.agentFeatureText',
-        {
-          defaultMessage:
-            'You can configure your agent to add filterable tags on transactions.'
-        }
-      );
-    case 'transaction.custom':
-    case 'error.custom':
-      return i18n.translate(
-        'xpack.apm.propertiesTable.customTab.agentFeatureText',
-        {
-          defaultMessage:
-            'You can configure your agent to add custom contextual information on transactions.'
-        }
-      );
-  }
+interface Props {
+  item: Transaction | APMError;
 }
 
-export function TabHelpMessage({
-  tabKey,
-  agentName
-}: {
-  tabKey?: PropertyTabKey;
-  agentName?: AgentName;
-}) {
-  if (!tabKey) {
-    return null;
-  }
-  const docsUrl = getAgentDocUrlForTab(tabKey, agentName);
-  if (!docsUrl) {
-    return null;
-  }
-
+export function PropertiesTable({ item }: Props) {
+  const sections = getPropertiesFromObject(item);
+  const agentName = item.agent.name;
   return (
-    <TableInfo>
-      <EuiIconWithSpace type="iInCircle" />
-      {getTabHelpText(tabKey)}{' '}
-      <EuiLink target="_blank" rel="noopener" href={docsUrl}>
-        {i18n.translate(
-          'xpack.apm.propertiesTable.agentFeature.learnMoreLinkLabel',
-          { defaultMessage: 'Learn more in the documentation.' }
-        )}
-      </EuiLink>
-    </TableInfo>
+    <React.Fragment>
+      {sections.map(section => (
+        <div key={section.key}>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h6>{section.label}</h6>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SectionHelpMessage
+                propertyKey={section.key}
+                agentName={agentName}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+          <Section propData={get(item, section.key)} propKey={section.key} />
+          <EuiSpacer size="xl" />
+        </div>
+      ))}
+    </React.Fragment>
   );
 }
 
-export function PropertiesTable({
+function Section({
   propData,
-  propKey,
-  agentName
+  propKey
 }: {
   propData?: StringMap;
-  propKey?: PropertyTabKey;
-  agentName?: AgentName;
+  propKey?: PropertyKey;
 }) {
   return (
-    <TableContainer>
+    <React.Fragment>
       {propData ? (
-        <NestedKeyValueTable data={propData} parentKey={propKey} depth={1} />
+        <DottedKeyValueTable data={propData} parentKey={propKey} maxDepth={5} />
       ) : (
-        <TableInfoHeader>
+        <EuiText size="s">
           {i18n.translate(
             'xpack.apm.propertiesTable.agentFeature.noDataAvailableLabel',
             { defaultMessage: 'No data available' }
           )}
-        </TableInfoHeader>
+        </EuiText>
       )}
-
-      <TabHelpMessage tabKey={propKey} agentName={agentName} />
-    </TableContainer>
+    </React.Fragment>
   );
 }

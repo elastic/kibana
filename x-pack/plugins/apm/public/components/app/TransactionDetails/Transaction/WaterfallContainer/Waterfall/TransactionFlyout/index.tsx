@@ -20,7 +20,6 @@ import { Location } from 'history';
 import React from 'react';
 import { idx } from '../../../../../../../../common/idx';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../../../../store/urlParams';
 import { DROPPED_SPANS_DOCS } from '../../../../../../../utils/documentation/apm-get-started';
 import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
@@ -32,7 +31,6 @@ interface Props {
   onClose: () => void;
   transaction?: Transaction;
   location: Location;
-  urlParams: IUrlParams;
   errorCount: number;
   traceRootDuration?: number;
 }
@@ -76,7 +74,6 @@ export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
   location,
-  urlParams,
   errorCount,
   traceRootDuration
 }: Props) {
@@ -120,7 +117,6 @@ export function TransactionFlyout({
           <TransactionPropertiesTableForFlyout
             transaction={transactionDoc}
             location={location}
-            urlParams={urlParams}
           />
         </EuiFlyoutBody>
       </ResponsiveFlyout>

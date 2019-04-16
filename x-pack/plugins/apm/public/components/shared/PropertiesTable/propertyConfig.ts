@@ -5,16 +5,38 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { APMError } from '../../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 
-export interface Tab {
-  key: string;
+export type PropertyKey =
+  | keyof Transaction
+  | keyof APMError
+  | 'metadata'
+  | 'transaction.custom'
+  | 'error.custom';
+
+export interface Property {
+  key: PropertyKey;
   label: string;
 }
 
-export const PROPERTY_CONFIG = [
+export interface PropertyConfig extends Property {
+  required: boolean;
+  presortedKeys: string[];
+}
+
+export const PROPERTY_CONFIG: PropertyConfig[] = [
+  {
+    key: 'labels',
+    label: i18n.translate('xpack.apm.propertiesTable.properties.labelsLabel', {
+      defaultMessage: 'Labels'
+    }),
+    required: true,
+    presortedKeys: []
+  },
   {
     key: 'http',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.httpLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.httpLabel', {
       defaultMessage: 'HTTP'
     }),
     required: false,
@@ -22,15 +44,26 @@ export const PROPERTY_CONFIG = [
   },
   {
     key: 'host',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.hostLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.hostLabel', {
       defaultMessage: 'Host'
     }),
     required: false,
     presortedKeys: ['hostname', 'architecture', 'platform']
   },
   {
+    key: 'container',
+    label: i18n.translate(
+      'xpack.apm.propertiesTable.properties.containerLabel',
+      {
+        defaultMessage: 'Container'
+      }
+    ),
+    required: false,
+    presortedKeys: []
+  },
+  {
     key: 'service',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.serviceLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.serviceLabel', {
       defaultMessage: 'Service'
     }),
     required: false,
@@ -38,7 +71,7 @@ export const PROPERTY_CONFIG = [
   },
   {
     key: 'process',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.processLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.processLabel', {
       defaultMessage: 'Process'
     }),
     required: false,
@@ -46,7 +79,7 @@ export const PROPERTY_CONFIG = [
   },
   {
     key: 'agent',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.agentLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.agentLabel', {
       defaultMessage: 'Agent'
     }),
     required: false,
@@ -54,40 +87,24 @@ export const PROPERTY_CONFIG = [
   },
   {
     key: 'url',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.urlLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.urlLabel', {
       defaultMessage: 'URL'
     }),
     required: false,
     presortedKeys: []
   },
   {
-    key: 'container',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.containerLabel', {
-      defaultMessage: 'Container'
-    }),
-    required: false,
-    presortedKeys: []
-  },
-  {
     key: 'user',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.userLabel', {
+    label: i18n.translate('xpack.apm.propertiesTable.properties.userLabel', {
       defaultMessage: 'User'
     }),
     required: true,
     presortedKeys: ['id', 'username', 'email']
   },
   {
-    key: 'labels',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.labelsLabel', {
-      defaultMessage: 'Labels'
-    }),
-    required: true,
-    presortedKeys: []
-  },
-  {
     key: 'transaction.custom',
     label: i18n.translate(
-      'xpack.apm.propertiesTable.tabs.transactionCustomLabel',
+      'xpack.apm.propertiesTable.properties.transactionCustomLabel',
       {
         defaultMessage: 'Custom'
       }
@@ -97,9 +114,12 @@ export const PROPERTY_CONFIG = [
   },
   {
     key: 'error.custom',
-    label: i18n.translate('xpack.apm.propertiesTable.tabs.errorCustomLabel', {
-      defaultMessage: 'Custom'
-    }),
+    label: i18n.translate(
+      'xpack.apm.propertiesTable.properties.errorCustomLabel',
+      {
+        defaultMessage: 'Custom'
+      }
+    ),
     required: false,
     presortedKeys: []
   }

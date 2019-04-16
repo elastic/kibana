@@ -8,12 +8,8 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import { idx } from '../../../../../common/idx';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
-import {
-  getTabsFromObject,
-  PropertyTab
-} from '../../../shared/PropertiesTable/tabConfig';
 
-export type ErrorTab = PropertyTab | ExceptionTab | LogTab;
+export type ErrorTab = MetadataTab | ExceptionTab | LogTab;
 
 interface LogTab {
   key: 'log_stacktrace';
@@ -42,11 +38,23 @@ export const exceptionStacktraceTab: ExceptionTab = {
   )
 };
 
+interface MetadataTab {
+  key: 'metadata';
+  label: string;
+}
+
+export const metadataTab: MetadataTab = {
+  key: 'metadata',
+  label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+    defaultMessage: 'Metadata'
+  })
+};
+
 export function getTabs(error: APMError) {
   const hasLogStacktrace = !isEmpty(idx(error, _ => _.error.log.stacktrace));
   return [
     ...(hasLogStacktrace ? [logStacktraceTab] : []),
     exceptionStacktraceTab,
-    ...getTabsFromObject(error)
+    metadataTab
   ];
 }
