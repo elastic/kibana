@@ -5,13 +5,24 @@
 This section lists the Kibana privileges that you can assign to a role.
 Privileges can be assigned at the following levels:
 
+
+==== Privilege levels
+
+You can assign privileges the following levels:
+
+[horizontal]
 `base`::
-Privileges assigned at the base level will grant access to all available features within Kibana (Discover, Visualize, Dashboard, etc).
+Grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
 
 `feature`::
-Privileges assigned at the feature level will grant access to a specific feature.
+Grants access to a specific feature.
 
 For more information, consult the <<role-management-api-put, Role Management API>>
+
+
+==== Role privileges
+
+You can assign a role these privileges:
 
 [horizontal]
 [[kibana-privileges-all]]

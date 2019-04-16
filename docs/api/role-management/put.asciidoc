@@ -32,22 +32,22 @@ that begin with `_` are reserved for system usage.
 `elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
 `cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
-`kibana`:: (array) An array of objects which specify the <<kibana-privileges>> for this role:
+`kibana`:: (array) An array of objects that specifies the <<kibana-privileges>> for this role:
 [source,js]
 --------------------------------------------------
 [{
   // An optional base privilege. 
   // If specified, must either be ["all"] or ["read"].
-  // Privileges granted here cannot be revoked or downgraded via the `feature` section.
-  // "all" grants read/write access to all features within Kibana for the specified spaces.
-  // "read" grants read-only access to all featuers within Kibana for the specified spaces.
+  // You can't revoke or downgrade privileges via the `feature` section.
+  // "all" grants read/write access to all Kibana features for the specified spaces.
+  // "read" grants read-only access to all Kibana features for the specified spaces.
   "base": [],
 
   // Object containing privileges for specific features.
-  // Privileges specified here will be added to the base privilege, if one was provided.
+  // Privileges are added to the base privilege, if one is provided.
   // For example, specifying `base: ["read"]` will grant read access to every feature,
   // even if they aren't granted anything in this feature section.
-  // Use the Features API to retrieve a list of available features <1>
+  // Use the Features API to retrieve a list of available features. <1>
   "feature": {
     "advancedSettings": ["all"],
     "discover": ["all"],
@@ -56,7 +56,7 @@ that begin with `_` are reserved for system usage.
   },
   
   // The spaces these privileges should be applied to.
-  // To grant access to all spaces, set this to `["*"]`, or omit the value altogether.
+  // To grant access to all spaces, set this to `["*"]`, or omit the value.
   "spaces": ["default", "marketing", "sales"]
 }]
 --------------------------------------------------
