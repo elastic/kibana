@@ -6,7 +6,7 @@
 
 import { toDateArrayScalar } from './resolvers';
 
-describe('Test ToNumberArray Scalar Resolver', () => {
+describe('Test ToDateArray Scalar Resolver', () => {
   describe('#serialize', () => {
     test('Test Null Number', () => {
       expect(toDateArrayScalar.serialize(null)).toEqual(null);

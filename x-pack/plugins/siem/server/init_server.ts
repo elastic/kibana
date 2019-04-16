@@ -15,6 +15,7 @@ import { createKpiNetworkResolvers } from './graphql/kpi_network';
 import { createNetworkResolvers } from './graphql/network';
 import { createOverviewResolvers } from './graphql/overview';
 import { createScalarDateResolvers } from './graphql/scalar_date';
+import { createScalarToBooleanArrayValueResolvers } from './graphql/scalar_to_boolean_array';
 import { createScalarToDateArrayValueResolvers } from './graphql/scalar_to_date_array';
 import { createScalarToNumberArrayValueResolvers } from './graphql/scalar_to_number_array';
 import { createSourceStatusResolvers } from './graphql/source_status';
@@ -44,6 +45,7 @@ export const initServer = (libs: AppBackendLibs, config: Config) => {
       createNetworkResolvers(libs) as IResolvers,
       createScalarDateResolvers() as IResolvers,
       createScalarToDateArrayValueResolvers() as IResolvers,
+      createScalarToBooleanArrayValueResolvers() as IResolvers,
       createScalarToNumberArrayValueResolvers() as IResolvers,
       createSourcesResolvers(libs) as IResolvers,
       createSourceStatusResolvers(libs) as IResolvers,

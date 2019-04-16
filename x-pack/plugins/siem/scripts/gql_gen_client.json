@@ -12,7 +12,8 @@
     "scalars": {
       "ToStringArray": "string[]",
       "ToNumberArray": "number[]",
-      "ToDateArray": "string[]"
+      "ToDateArray": "string[]",
+      "ToBooleanArray": "boolean[]"
     }
   },
   "primitives": {

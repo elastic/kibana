@@ -5,7 +5,7 @@
  */
 
 import { GraphQLScalarType, Kind } from 'graphql';
-import { isBoolean, isNumber, isObject, isString } from 'lodash/fp';
+import { isNumber, isObject, isString } from 'lodash/fp';
 
 /*
  *  serialize: gets invoked when serializing the result to send it back to a client.
@@ -15,16 +15,16 @@ import { isBoolean, isNumber, isObject, isString } from 'lodash/fp';
  *  parseLiteral: gets invoked to parse client input that was passed inline in the query.
  */
 
-export const toNumberArrayScalar = new GraphQLScalarType({
-  name: 'NumberArray',
+export const toBooleanArrayScalar = new GraphQLScalarType({
+  name: 'BooleanArray',
   description: 'Represents value in detail item from the timeline who wants to more than one type',
-  serialize(value): number[] | null {
+  serialize(value): boolean[] | null {
     if (value == null) {
       return null;
     } else if (Array.isArray(value)) {
-      return convertArrayToNumber(value) as number[];
-    } else if (isBoolean(value) || isString(value) || isObject(value)) {
-      return [convertToNumber(value)];
+      return convertArrayToBoolean(value) as boolean[];
+    } else if (isString(value) || isObject(value) || isNumber(value)) {
+      return [convertToBoolean(value)];
     }
     return [value];
   },
@@ -33,12 +33,14 @@ export const toNumberArrayScalar = new GraphQLScalarType({
   },
   parseLiteral(ast) {
     switch (ast.kind) {
+      case Kind.BOOLEAN:
+        return ast.value;
       case Kind.INT:
         return ast.value;
       case Kind.FLOAT:
         return ast.value;
       case Kind.STRING:
-        return parseFloat(ast.value);
+        return ast.value;
       case Kind.LIST:
         return ast.values;
       case Kind.OBJECT:
@@ -48,24 +50,26 @@ export const toNumberArrayScalar = new GraphQLScalarType({
   },
 });
 
-export const createScalarToNumberArrayValueResolvers = () => ({
-  ToNumberArray: toNumberArrayScalar,
+export const createScalarToBooleanArrayValueResolvers = () => ({
+  ToBooleanArray: toBooleanArrayScalar,
 });
 
-const convertToNumber = (value: object | number | boolean | string): number => {
-  if (isNumber(value)) {
-    return value;
+const convertToBoolean = (value: object | number | boolean | string): boolean => {
+  if (isObject(value)) {
+    return false;
   } else if (isString(value)) {
-    return parseFloat(value);
+    return value.toLowerCase() === 'true' || value.toLowerCase() === 't' ? true : false;
   } else {
-    return NaN;
+    return Boolean(value);
   }
 };
 
 // tslint:disable-next-line:no-any
-const convertArrayToNumber = (values: any[]): number[] | number => {
+const convertArrayToBoolean = (values: any[]): boolean[] | boolean => {
   if (Array.isArray(values)) {
-    return values.filter(item => item != null).map(item => convertArrayToNumber(item)) as number[];
+    return values
+      .filter(item => item != null)
+      .map(item => convertArrayToBoolean(item)) as boolean[];
   }
-  return convertToNumber(values);
+  return convertToBoolean(values);
 };

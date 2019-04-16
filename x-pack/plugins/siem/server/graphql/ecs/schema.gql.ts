@@ -168,8 +168,8 @@ export const ecsSchema = gql`
   }
 
   type ZeekConnectionData {
-    local_resp: ToStringArray
-    local_orig: ToStringArray
+    local_resp: ToBooleanArray
+    local_orig: ToBooleanArray
     missed_bytes: ToNumberArray
     state: ToStringArray
     history: ToStringArray
@@ -181,22 +181,22 @@ export const ecsSchema = gql`
     note: ToStringArray
     sub: ToStringArray
     dst: ToStringArray
-    dropped: ToStringArray
+    dropped: ToBooleanArray
     peer_descr: ToStringArray
   }
 
   type ZeekDnsData {
-    AA: ToStringArray
+    AA: ToBooleanArray
     qclass_name: ToStringArray
-    RD: ToStringArray
+    RD: ToBooleanArray
     qtype_name: ToStringArray
-    rejected: ToStringArray
+    rejected: ToBooleanArray
     qtype: ToStringArray
     query: ToStringArray
     trans_id: ToNumberArray
     qclass: ToStringArray
-    RA: ToStringArray
-    TC: ToStringArray
+    RA: ToBooleanArray
+    TC: ToBooleanArray
   }
 
   type FileFields {
@@ -257,11 +257,11 @@ export const ecsSchema = gql`
 
   type ZeekFileData {
     session_ids: ToStringArray
-    timedout: ToStringArray
-    local_orig: ToStringArray
+    timedout: ToBooleanArray
+    local_orig: ToBooleanArray
     tx_host: ToStringArray
     source: ToStringArray
-    is_orig: ToStringArray
+    is_orig: ToBooleanArray
     overflow_bytes: ToNumberArray
     sha1: ToStringArray
     duration: ToNumberArray
@@ -278,8 +278,8 @@ export const ecsSchema = gql`
 
   type ZeekSslData {
     cipher: ToStringArray
-    established: ToStringArray
-    resumed: ToStringArray
+    established: ToBooleanArray
+    resumed: ToBooleanArray
     version: ToStringArray
   }
 

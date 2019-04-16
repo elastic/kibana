@@ -3212,7 +3212,7 @@
             "name": "local_resp",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3220,7 +3220,7 @@
             "name": "local_orig",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3251,6 +3251,16 @@
         ],
         "inputFields": null,
         "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "SCALAR",
+        "name": "ToBooleanArray",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
         "enumValues": null,
         "possibleTypes": null
       },
@@ -3303,7 +3313,7 @@
             "name": "dropped",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3330,7 +3340,7 @@
             "name": "AA",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3346,7 +3356,7 @@
             "name": "RD",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3362,7 +3372,7 @@
             "name": "rejected",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3402,7 +3412,7 @@
             "name": "RA",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3410,7 +3420,7 @@
             "name": "TC",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3488,7 +3498,7 @@
             "name": "timedout",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3496,7 +3506,7 @@
             "name": "local_orig",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3520,7 +3530,7 @@
             "name": "is_orig",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3643,7 +3653,7 @@
             "name": "established",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -3651,7 +3661,7 @@
             "name": "resumed",
             "description": "",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "ToStringArray", "ofType": null },
+            "type": { "kind": "SCALAR", "name": "ToBooleanArray", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },

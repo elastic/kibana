@@ -21,6 +21,8 @@ export type ToNumberArray = number[];
 
 export type ToDateArray = string[];
 
+export type ToBooleanArray = boolean[];
+
 export type EsValue = any;
 
 // ====================================================
@@ -514,9 +516,9 @@ export interface ZeekEcsFields {
 }
 
 export interface ZeekConnectionData {
-  local_resp?: ToStringArray | null;
+  local_resp?: ToBooleanArray | null;
 
-  local_orig?: ToStringArray | null;
+  local_orig?: ToBooleanArray | null;
 
   missed_bytes?: ToNumberArray | null;
 
@@ -536,21 +538,21 @@ export interface ZeekNoticeData {
 
   dst?: ToStringArray | null;
 
-  dropped?: ToStringArray | null;
+  dropped?: ToBooleanArray | null;
 
   peer_descr?: ToStringArray | null;
 }
 
 export interface ZeekDnsData {
-  AA?: ToStringArray | null;
+  AA?: ToBooleanArray | null;
 
   qclass_name?: ToStringArray | null;
 
-  RD?: ToStringArray | null;
+  RD?: ToBooleanArray | null;
 
   qtype_name?: ToStringArray | null;
 
-  rejected?: ToStringArray | null;
+  rejected?: ToBooleanArray | null;
 
   qtype?: ToStringArray | null;
 
@@ -560,9 +562,9 @@ export interface ZeekDnsData {
 
   qclass?: ToStringArray | null;
 
-  RA?: ToStringArray | null;
+  RA?: ToBooleanArray | null;
 
-  TC?: ToStringArray | null;
+  TC?: ToBooleanArray | null;
 }
 
 export interface ZeekHttpData {
@@ -580,15 +582,15 @@ export interface ZeekHttpData {
 export interface ZeekFileData {
   session_ids?: ToStringArray | null;
 
-  timedout?: ToStringArray | null;
+  timedout?: ToBooleanArray | null;
 
-  local_orig?: ToStringArray | null;
+  local_orig?: ToBooleanArray | null;
 
   tx_host?: ToStringArray | null;
 
   source?: ToStringArray | null;
 
-  is_orig?: ToStringArray | null;
+  is_orig?: ToBooleanArray | null;
 
   overflow_bytes?: ToNumberArray | null;
 
@@ -618,9 +620,9 @@ export interface ZeekFileData {
 export interface ZeekSslData {
   cipher?: ToStringArray | null;
 
-  established?: ToStringArray | null;
+  established?: ToBooleanArray | null;
 
-  resumed?: ToStringArray | null;
+  resumed?: ToBooleanArray | null;
 
   version?: ToStringArray | null;
 }
@@ -3171,9 +3173,9 @@ export namespace GetTimelineQuery {
   export type Connection = {
     __typename?: 'ZeekConnectionData';
 
-    local_resp?: ToStringArray | null;
+    local_resp?: ToBooleanArray | null;
 
-    local_orig?: ToStringArray | null;
+    local_orig?: ToBooleanArray | null;
 
     missed_bytes?: ToNumberArray | null;
 
@@ -3195,7 +3197,7 @@ export namespace GetTimelineQuery {
 
     dst?: ToStringArray | null;
 
-    dropped?: ToStringArray | null;
+    dropped?: ToBooleanArray | null;
 
     peer_descr?: ToStringArray | null;
   };
@@ -3203,15 +3205,15 @@ export namespace GetTimelineQuery {
   export type Dns = {
     __typename?: 'ZeekDnsData';
 
-    AA?: ToStringArray | null;
+    AA?: ToBooleanArray | null;
 
     qclass_name?: ToStringArray | null;
 
-    RD?: ToStringArray | null;
+    RD?: ToBooleanArray | null;
 
     qtype_name?: ToStringArray | null;
 
-    rejected?: ToStringArray | null;
+    rejected?: ToBooleanArray | null;
 
     qtype?: ToStringArray | null;
 
@@ -3221,9 +3223,9 @@ export namespace GetTimelineQuery {
 
     qclass?: ToStringArray | null;
 
-    RA?: ToStringArray | null;
+    RA?: ToBooleanArray | null;
 
-    TC?: ToStringArray | null;
+    TC?: ToBooleanArray | null;
   };
 
   export type _Http = {
@@ -3245,15 +3247,15 @@ export namespace GetTimelineQuery {
 
     session_ids?: ToStringArray | null;
 
-    timedout?: ToStringArray | null;
+    timedout?: ToBooleanArray | null;
 
-    local_orig?: ToStringArray | null;
+    local_orig?: ToBooleanArray | null;
 
     tx_host?: ToStringArray | null;
 
     source?: ToStringArray | null;
 
-    is_orig?: ToStringArray | null;
+    is_orig?: ToBooleanArray | null;
 
     overflow_bytes?: ToNumberArray | null;
 
@@ -3285,9 +3287,9 @@ export namespace GetTimelineQuery {
 
     cipher?: ToStringArray | null;
 
-    established?: ToStringArray | null;
+    established?: ToBooleanArray | null;
 
-    resumed?: ToStringArray | null;
+    resumed?: ToBooleanArray | null;
 
     version?: ToStringArray | null;
   };

@@ -69,10 +69,10 @@ exports[`ZeekSignature rendering it renders the default Zeek 1`] = `
             "Sr",
           ],
           "local_orig": Array [
-            "false",
+            false,
           ],
           "local_resp": Array [
-            "false",
+            false,
           ],
           "missed_bytes": Array [
             0,

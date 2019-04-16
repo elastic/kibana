@@ -12,6 +12,7 @@ import { sharedSchema } from '../../../common/graphql/shared';
 import { Logger } from '../../utils/logger';
 import { ecsSchema } from '../ecs';
 import { dateSchema } from '../scalar_date';
+import { toBooleanSchema } from '../scalar_to_boolean_array';
 import { toDateSchema } from '../scalar_to_date_array';
 import { toNumberSchema } from '../scalar_to_number_array';
 import { sourceStatusSchema } from '../source_status/schema.gql';
@@ -296,6 +297,7 @@ describe('Test Source Schema', () => {
     dateSchema,
     toNumberSchema,
     toDateSchema,
+    toBooleanSchema,
   ];
   const mockSchema = makeExecutableSchema({ typeDefs });
 

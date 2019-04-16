@@ -16,7 +16,7 @@ import { isBoolean, isNumber, isObject, isString } from 'lodash/fp';
  */
 
 export const toDateArrayScalar = new GraphQLScalarType({
-  name: 'DetailItemValue',
+  name: 'DateArray',
   description: 'Represents value in detail item from the timeline who wants to more than one type',
   serialize(value): string[] | null {
     if (value == null) {
