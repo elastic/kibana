@@ -5,11 +5,8 @@
       "pivot": {
         "group_by": {
           "__template": {
-            "NAME": {
-              "terms": {
-                "field": "FIELD_NAME"
-              }
-            }
+            "NAME": {},
+            "__scope_link": "GLOBAL.groupByAggs"
           }
         },
         "aggregations": {
