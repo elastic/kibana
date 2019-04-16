@@ -40,6 +40,7 @@ interface OwnProps {
 }
 
 export type IpOverviewProps = OwnProps;
+
 const getDescriptionList = (descriptionList: DescriptionList[], key: number) => {
   return (
     <EuiFlexItem key={key}>
@@ -47,8 +48,6 @@ const getDescriptionList = (descriptionList: DescriptionList[], key: number) => 
     </EuiFlexItem>
   );
 };
-
-type IpOverviewProps = OwnProps;
 
 export const IpOverview = pure<IpOverviewProps>(({ ip, data, loading, flowTarget }) => {
   if (isEmpty(data)) {

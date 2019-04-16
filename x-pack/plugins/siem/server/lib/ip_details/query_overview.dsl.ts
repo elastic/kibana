@@ -117,6 +117,5 @@ export const buildOverviewQuery = ({
       track_total_hits: true,
     },
   };
-  console.log('dslQuery', JSON.stringify(dslQuery.body));
   return dslQuery;
 };
