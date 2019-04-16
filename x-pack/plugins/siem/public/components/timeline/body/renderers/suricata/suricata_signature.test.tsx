@@ -22,7 +22,7 @@ describe('SuricataSignature', () => {
   describe('rendering', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = shallow(
-        <SuricataSignature id="doc-id-123" signatureId="id-123" signature="ET SCAN ATTACK Hello" />
+        <SuricataSignature id="doc-id-123" signatureId={123} signature="ET SCAN ATTACK Hello" />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });
@@ -57,16 +57,16 @@ describe('SuricataSignature', () => {
     test('it renders the default SuricataSignature', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <DraggableSignatureId id="id-123" signatureId="signature-123" />
+          <DraggableSignatureId id="id-123" signatureId={123} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual('signature-123');
+      expect(wrapper.text()).toEqual('123');
     });
 
     test('it renders a tooltip for the signature field', () => {
       const wrapper = mountWithIntl(
         <TestProviders>
-          <DraggableSignatureId id="id-123" signatureId="signature-123" />
+          <DraggableSignatureId id="id-123" signatureId={123} />
         </TestProviders>
       );
 

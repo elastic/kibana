@@ -14,18 +14,18 @@ export const mockData: { Hosts: HostsData; DateFields: string[] } = {
         node: {
           _id: 'yneHlmgBjVl2VqDlAjPR',
           host: {
-            architecture: 'x86_64',
-            id: 'aa7ca589f1b8220002f2fc61c64cfbf1',
+            architecture: ['x86_64'],
+            id: ['aa7ca589f1b8220002f2fc61c64cfbf1'],
             ip: ['10.142.0.7', 'fe80::4001:aff:fe8e:7'],
             mac: ['42:01:0a:8e:00:07'],
-            name: 'siem-kibana',
+            name: ['siem-kibana'],
             os: {
-              family: 'debian',
-              name: 'Debian GNU/Linux',
-              platform: 'debian',
-              version: '9 (stretch)',
+              family: ['debian'],
+              name: ['Debian GNU/Linux'],
+              platform: ['debian'],
+              version: ['9 (stretch)'],
             },
-            type: 'projects/189716325846/machineTypes/n1-standard-1',
+            type: ['projects/189716325846/machineTypes/n1-standard-1'],
           },
         },
         cursor: {

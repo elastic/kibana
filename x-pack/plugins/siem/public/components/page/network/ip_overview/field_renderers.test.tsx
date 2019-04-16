@@ -101,13 +101,13 @@ describe('Field Renderers', () => {
 
   describe('#hostIdRenderer', () => {
     const emptyIdHost: Partial<HostEcsFields> = {
-      name: 'test',
+      name: ['test'],
       id: null,
       ip: ['10.10.10.10'],
     };
     const emptyIpHost: Partial<HostEcsFields> = {
-      name: 'test',
-      id: 'test',
+      name: ['test'],
+      id: ['test'],
       ip: null,
     };
     test('it renders correctly against snapshot', () => {
@@ -145,18 +145,18 @@ describe('Field Renderers', () => {
 
   describe('#hostNameRenderer', () => {
     const emptyIdHost: Partial<HostEcsFields> = {
-      name: 'test',
+      name: ['test'],
       id: null,
       ip: ['10.10.10.10'],
     };
     const emptyIpHost: Partial<HostEcsFields> = {
-      name: 'test',
-      id: 'test',
+      name: ['test'],
+      id: ['test'],
       ip: null,
     };
     const emptyNameHost: Partial<HostEcsFields> = {
       name: null,
-      id: 'test',
+      id: ['test'],
       ip: ['10.10.10.10'],
     };
     test('it renders correctly against snapshot', () => {

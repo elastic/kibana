@@ -10,39 +10,39 @@ export const ecsSchema = gql`
   scalar ToStringArray
 
   type EventEcsFields {
-    action: String
-    category: String
-    created: Date
-    dataset: String
-    duration: Float
-    end: Date
-    hash: String
-    id: String
-    kind: String
-    module: String
-    original: [String]
+    action: ToStringArray
+    category: ToStringArray
+    created: ToDateArray
+    dataset: ToStringArray
+    duration: ToNumberArray
+    end: ToDateArray
+    hash: ToStringArray
+    id: ToStringArray
+    kind: ToStringArray
+    module: ToStringArray
+    original: ToStringArray
     outcome: ToStringArray
-    risk_score: Float
-    risk_score_norm: Float
-    severity: Float
-    start: Date
-    timezone: String
-    type: String
+    risk_score: ToNumberArray
+    risk_score_norm: ToNumberArray
+    severity: ToNumberArray
+    start: ToDateArray
+    timezone: ToStringArray
+    type: ToStringArray
   }
 
   type Location {
-    lon: Float
-    lat: Float
+    lon: ToNumberArray
+    lat: ToNumberArray
   }
 
   type GeoEcsFields {
-    city_name: String
-    continent_name: String
-    country_iso_code: String
-    country_name: String
+    city_name: ToStringArray
+    continent_name: ToStringArray
+    country_iso_code: ToStringArray
+    country_name: ToStringArray
     location: Location
-    region_iso_code: String
-    region_name: String
+    region_iso_code: ToStringArray
+    region_name: ToStringArray
   }
 
   type PrimarySecondary {
@@ -74,66 +74,66 @@ export const ecsSchema = gql`
   }
 
   type OsEcsFields {
-    platform: String
-    name: String
-    full: String
-    family: String
-    version: String
-    kernel: String
+    platform: ToStringArray
+    name: ToStringArray
+    full: ToStringArray
+    family: ToStringArray
+    version: ToStringArray
+    kernel: ToStringArray
   }
 
   type HostEcsFields {
-    architecture: String
-    id: String
-    ip: [String]
-    mac: [String]
-    name: String
+    architecture: ToStringArray
+    id: ToStringArray
+    ip: ToStringArray
+    mac: ToStringArray
+    name: ToStringArray
     os: OsEcsFields
-    type: String
+    type: ToStringArray
   }
 
   type Thread {
-    id: ToStringArray
+    id: ToNumberArray
     start: ToStringArray
   }
 
   type ProcessEcsFields {
-    pid: ToStringArray
+    pid: ToNumberArray
     name: ToStringArray
-    ppid: ToStringArray
+    ppid: ToNumberArray
     args: ToStringArray
     executable: ToStringArray
     title: ToStringArray
-    thread: ToStringArray
+    thread: Thread
     working_directory: ToStringArray
   }
 
   type SourceEcsFields {
-    bytes: Float
-    ip: String
-    port: Float
-    domain: [String!]
+    bytes: ToNumberArray
+    ip: ToStringArray
+    port: ToNumberArray
+    domain: ToStringArray
     geo: GeoEcsFields
-    packets: Float
+    packets: ToNumberArray
   }
 
   type DestinationEcsFields {
-    bytes: Float
-    ip: String
-    port: Float
-    domain: [String!]
+    bytes: ToNumberArray
+    ip: ToStringArray
+    port: ToNumberArray
+    domain: ToStringArray
     geo: GeoEcsFields
-    packets: Float
+    packets: ToNumberArray
   }
 
   type SuricataAlertData {
     signature: ToStringArray
-    signature_id: ToStringArray
+    signature_id: ToNumberArray
   }
 
   type SuricataEveData {
     alert: SuricataAlertData
-    flow_id: ToStringArray
+    flow_id: ToNumberArray
     proto: ToStringArray
   }
 
@@ -142,11 +142,11 @@ export const ecsSchema = gql`
   }
 
   type TlsJa3Data {
-    hash: String
+    hash: ToStringArray
   }
 
   type FingerprintData {
-    sha1: String
+    sha1: ToStringArray
   }
 
   type TlsClientCertificateData {
@@ -168,123 +168,123 @@ export const ecsSchema = gql`
   }
 
   type ZeekConnectionData {
-    local_resp: String
-    local_orig: String
-    missed_bytes: Float
-    state: String
-    history: String
+    local_resp: ToBooleanArray
+    local_orig: ToBooleanArray
+    missed_bytes: ToNumberArray
+    state: ToStringArray
+    history: ToStringArray
   }
 
   type ZeekNoticeData {
-    suppress_for: Float
-    msg: String
-    note: String
-    sub: String
-    dst: String
-    dropped: Boolean
-    peer_descr: String
+    suppress_for: ToNumberArray
+    msg: ToStringArray
+    note: ToStringArray
+    sub: ToStringArray
+    dst: ToStringArray
+    dropped: ToBooleanArray
+    peer_descr: ToStringArray
   }
 
   type ZeekDnsData {
-    AA: Boolean
-    qclass_name: String
-    RD: Boolean
-    qtype_name: String
-    rejected: Boolean
-    qtype: Float
-    query: String
-    trans_id: Float
-    qclass: Float
-    RA: Boolean
-    TC: Boolean
+    AA: ToBooleanArray
+    qclass_name: ToStringArray
+    RD: ToBooleanArray
+    qtype_name: ToStringArray
+    rejected: ToBooleanArray
+    qtype: ToStringArray
+    query: ToStringArray
+    trans_id: ToNumberArray
+    qclass: ToStringArray
+    RA: ToBooleanArray
+    TC: ToBooleanArray
   }
 
   type FileFields {
-    path: String
-    target_path: String
-    extension: String
-    type: String
-    device: String
-    inode: String
-    uid: String
-    owner: String
-    gid: String
-    group: String
-    mode: String
-    size: Float
-    mtime: Date
-    ctime: Date
+    path: ToStringArray
+    target_path: ToStringArray
+    extension: ToStringArray
+    type: ToStringArray
+    device: ToStringArray
+    inode: ToStringArray
+    uid: ToStringArray
+    owner: ToStringArray
+    gid: ToStringArray
+    group: ToStringArray
+    mode: ToStringArray
+    size: ToNumberArray
+    mtime: ToDateArray
+    ctime: ToDateArray
   }
 
   type ZeekHttpData {
-    resp_mime_types: [String!]
-    trans_depth: String
-    status_msg: String
-    resp_fuids: [String!]
-    tags: [String!]
+    resp_mime_types: ToStringArray
+    trans_depth: ToStringArray
+    status_msg: ToStringArray
+    resp_fuids: ToStringArray
+    tags: ToStringArray
   }
 
   type HttpBodyData {
-    content: String
-    bytes: Float
+    content: ToStringArray
+    bytes: ToNumberArray
   }
 
   type HttpRequestData {
-    method: String
+    method: ToStringArray
     body: HttpBodyData
-    referrer: String
-    bytes: Float
+    referrer: ToStringArray
+    bytes: ToNumberArray
   }
 
   type HttpResponseData {
-    status_code: Float
+    status_code: ToNumberArray
     body: HttpBodyData
-    bytes: Float
+    bytes: ToNumberArray
   }
 
   type HttpEcsFields {
-    version: String
+    version: ToStringArray
     request: HttpRequestData
     response: HttpResponseData
   }
 
   type UrlEcsFields {
-    domain: String
-    original: String
-    username: String
-    password: String
+    domain: ToStringArray
+    original: ToStringArray
+    username: ToStringArray
+    password: ToStringArray
   }
 
   type ZeekFileData {
-    session_ids: [String!]
-    timedout: Boolean
-    local_orig: Boolean
-    tx_host: String
-    source: String
-    is_orig: Boolean
-    overflow_bytes: Float
-    sha1: String
-    duration: Float
-    depth: Float
-    analyzers: [String!]
-    mime_type: String
-    rx_host: String
-    total_bytes: Float
-    fuid: String
-    seen_bytes: Float
-    missing_bytes: Float
-    md5: String
+    session_ids: ToStringArray
+    timedout: ToBooleanArray
+    local_orig: ToBooleanArray
+    tx_host: ToStringArray
+    source: ToStringArray
+    is_orig: ToBooleanArray
+    overflow_bytes: ToNumberArray
+    sha1: ToStringArray
+    duration: ToNumberArray
+    depth: ToNumberArray
+    analyzers: ToStringArray
+    mime_type: ToStringArray
+    rx_host: ToStringArray
+    total_bytes: ToNumberArray
+    fuid: ToStringArray
+    seen_bytes: ToNumberArray
+    missing_bytes: ToNumberArray
+    md5: ToStringArray
   }
 
   type ZeekSslData {
-    cipher: String
-    established: Boolean
-    resumed: Boolean
-    version: String
+    cipher: ToStringArray
+    established: ToBooleanArray
+    resumed: ToBooleanArray
+    version: ToStringArray
   }
 
   type ZeekEcsFields {
-    session_id: String
+    session_id: ToStringArray
     connection: ZeekConnectionData
     notice: ZeekNoticeData
     dns: ZeekDnsData
@@ -294,28 +294,28 @@ export const ecsSchema = gql`
   }
 
   type UserEcsFields {
-    id: Float
-    name: String
-    full_name: String
-    email: String
-    hash: String
-    group: String
+    id: ToStringArray
+    name: ToStringArray
+    full_name: ToStringArray
+    email: ToStringArray
+    hash: ToStringArray
+    group: ToStringArray
   }
 
   type NetworkEcsField {
-    bytes: Float
-    community_id: String
-    direction: String
-    packets: Float
-    protocol: String
-    transport: String
+    bytes: ToNumberArray
+    community_id: ToStringArray
+    direction: ToStringArray
+    packets: ToNumberArray
+    protocol: ToStringArray
+    transport: ToStringArray
   }
 
   type PackageEcsFields {
     arch: ToStringArray
     entity_id: ToStringArray
     name: ToStringArray
-    size: ToStringArray
+    size: ToNumberArray
     summary: ToStringArray
     version: ToStringArray
   }

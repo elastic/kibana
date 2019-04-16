@@ -372,29 +372,53 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
     Object {
       "_id": "4",
       "destination": Object {
-        "ip": "192.168.0.3",
-        "port": 6343,
+        "ip": Array [
+          "192.168.0.3",
+        ],
+        "port": Array [
+          6343,
+        ],
       },
       "event": Object {
-        "category": "Attempted Administrator Privilege Gain",
-        "id": "4",
-        "module": "suricata",
-        "severity": 1,
-        "type": "Alert",
+        "category": Array [
+          "Attempted Administrator Privilege Gain",
+        ],
+        "id": Array [
+          "4",
+        ],
+        "module": Array [
+          "suricata",
+        ],
+        "severity": Array [
+          1,
+        ],
+        "type": Array [
+          "Alert",
+        ],
       },
       "geo": Object {
-        "country_iso_code": "xx",
-        "region_name": "xx",
+        "country_iso_code": Array [
+          "xx",
+        ],
+        "region_name": Array [
+          "xx",
+        ],
       },
       "host": Object {
         "ip": Array [
           "192.168.0.1",
         ],
-        "name": "suricata",
+        "name": Array [
+          "suricata",
+        ],
       },
       "source": Object {
-        "ip": "192.168.0.3",
-        "port": 53,
+        "ip": Array [
+          "192.168.0.3",
+        ],
+        "port": Array [
+          53,
+        ],
       },
       "suricata": Object {
         "eve": Object {
@@ -403,11 +427,11 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
               "ET EXPLOIT NETGEAR WNR2000v5 hidden_lang_avi Stack Overflow (CVE-2016-10174)",
             ],
             "signature_id": Array [
-              "4",
+              4,
             ],
           },
           "flow_id": Array [
-            "4",
+            4,
           ],
           "proto": Array [
             "",
@@ -416,8 +440,12 @@ exports[`ZeekDetails rendering it renders the default ZeekDetails 1`] = `
       },
       "timestamp": "2018-11-08T19:03:25.937Z",
       "user": Object {
-        "id": 4,
-        "name": "jenny.jones",
+        "id": Array [
+          "4",
+        ],
+        "name": Array [
+          "jenny.jones",
+        ],
       },
     }
   }

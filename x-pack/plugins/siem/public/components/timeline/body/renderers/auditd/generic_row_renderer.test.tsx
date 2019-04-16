@@ -53,8 +53,8 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      auditd.event != null
-        ? (auditd.event.action = 'some other value')
+      auditd.event != null && auditd.event.action != null
+        ? (auditd.event.action[0] = 'some other value')
         : expect(auditd.event).toBeDefined();
       expect(connectedToRenderer.isInstance(auditd)).toBe(false);
     });
@@ -129,8 +129,8 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      auditdFile.event != null
-        ? (auditdFile.event.action = 'some other value')
+      auditdFile.event != null && auditdFile.event.action != null
+        ? (auditdFile.event.action[0] = 'some other value')
         : expect(auditdFile.event).toBeDefined();
       expect(fileToRenderer.isInstance(auditdFile)).toBe(false);
     });

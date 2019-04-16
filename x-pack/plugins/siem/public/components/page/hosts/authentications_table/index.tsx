@@ -120,7 +120,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const userName: string | null = get('user.name', node);
+      const userName: string | null | undefined = get('user.name[0]', node);
       if (userName != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`);
         return (
@@ -182,7 +182,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const sourceIp: string | null = get('lastFailure.source.ip', node);
+      const sourceIp: string | null | undefined = get('lastFailure.source.ip[0]', node);
       if (sourceIp != null) {
         const id = escapeDataProviderId(
           `authentications-table-${node._id}-lastFailure-${sourceIp}`
@@ -227,8 +227,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('lastFailure.host.name', node);
-      const hostId: string | null = get('lastFailure.host.id', node);
+      const hostName: string | null | undefined = get('lastFailure.host.name[0]', node);
+      const hostId: string | null | undefined = get('lastFailure.host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostId}`);
         return (
@@ -287,7 +287,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const sourceIp: string | null = get('lastSuccess.source.ip', node);
+      const sourceIp: string | null | undefined = get('lastSuccess.source.ip[0]', node);
       if (sourceIp != null) {
         const id = escapeDataProviderId(
           `authentications-table-${node._id}-lastSuccess-${sourceIp}`
@@ -332,8 +332,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('lastSuccess.host.name', node);
-      const hostId: string | null = get('lastSuccess.host.id', node);
+      const hostName: string | null | undefined = get('lastSuccess.host.name[0]', node);
+      const hostId: string | null | undefined = get('lastSuccess.host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostId}`);
         return (

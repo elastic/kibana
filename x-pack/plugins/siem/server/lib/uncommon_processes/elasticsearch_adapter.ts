@@ -74,8 +74,8 @@ export const getHits = (
 
 export const getHosts = (buckets: ReadonlyArray<{ key: string; host: HostHits }>) =>
   buckets.map(bucket => ({
-    id: bucket.key,
-    name: bucket.host.hits.hits[0]._source.host.name!,
+    id: [bucket.key],
+    name: bucket.host.hits.hits[0]._source.host.name,
   }));
 
 export const formatUncommonProcessesData = (

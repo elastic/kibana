@@ -84,7 +84,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
 
           expect(events.edges.length).to.be(EDGE_LENGTH);
           expect(events.totalCount).to.be(TOTAL_COUNT);
-          expect(events.edges[0]!.node.host!.name).to.be(HOST_NAME);
+          expect(events.edges[0]!.node.host!.name).to.eql([HOST_NAME]);
         });
     });
   });

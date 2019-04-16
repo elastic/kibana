@@ -98,7 +98,11 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
       <pure(Component)
         field="source.geo.city_name"
         id="ip-overview-source.geo.city_name"
-        value="New York"
+        value={
+          Array [
+            "New York",
+          ]
+        }
       />
     </EuiFlexItem>
     , 
@@ -108,7 +112,11 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
       <pure(Component)
         field="source.geo.region_name"
         id="ip-overview-source.geo.region_name"
-        value="New York"
+        value={
+          Array [
+            "New York",
+          ]
+        }
       />
     </EuiFlexItem>
   </EuiFlexGroup>

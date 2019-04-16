@@ -10,7 +10,10 @@
       ""
     ],
     "scalars": {
-      "ToStringArray": "string[]"
+      "ToStringArray": "string[]",
+      "ToNumberArray": "number[]",
+      "ToDateArray": "string[]",
+      "ToBooleanArray": "boolean[]"
     }
   },
   "primitives": {

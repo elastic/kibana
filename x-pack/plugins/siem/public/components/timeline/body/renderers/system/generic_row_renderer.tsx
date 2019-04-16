@@ -22,8 +22,8 @@ export const createGenericSystemRowRenderer = ({
   text: string;
 }): RowRenderer => ({
   isInstance: ecs => {
-    const module: string | null | undefined = get('event.module', ecs);
-    const action: string | null | undefined = get('event.action', ecs);
+    const module: string | null | undefined = get('event.module[0]', ecs);
+    const action: string | null | undefined = get('event.action[0]', ecs);
     return (
       module != null &&
       module.toLowerCase() === 'system' &&
@@ -54,8 +54,8 @@ export const createGenericFileRowRenderer = ({
   text: string;
 }): RowRenderer => ({
   isInstance: ecs => {
-    const module: string | null | undefined = get('event.module', ecs);
-    const action: string | null | undefined = get('event.action', ecs);
+    const module: string | null | undefined = get('event.module[0]', ecs);
+    const action: string | null | undefined = get('event.action[0]', ecs);
     return (
       module != null &&
       module.toLowerCase() === 'system' &&
