@@ -7,7 +7,6 @@
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { SourceFields } from '../../../../common/graphql/types';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -17,10 +16,11 @@ import { MetricsExplorerCharts } from '../../../components/metrics_exploerer/cha
 import { MetricsExplorerToolbar } from '../../../components/metrics_exploerer/toolbar';
 import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
 import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
+import { SourceQuery } from '../../../../common/graphql/types';
 
 interface MetricsExplorerPageProps {
   intl: InjectedIntl;
-  source: SourceFields.Configuration | undefined;
+  source: SourceQuery.Query['source']['configuration'] | undefined;
   derivedIndexPattern: StaticIndexPattern;
 }
 

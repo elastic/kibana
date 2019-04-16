@@ -8,7 +8,7 @@ import DateMath from '@elastic/datemath';
 import { isEqual, omit } from 'lodash';
 import { useEffect, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { SourceFields } from '../../../common/graphql/types';
+import { SourceQuery } from '../../../common/graphql/types';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerResponse,
@@ -27,7 +27,7 @@ function isSameOptionsExceptAfterKey(
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
-  source: SourceFields.Configuration,
+  source: SourceQuery.Query['source']['configuration'],
   derivedIndexPattern: StaticIndexPattern,
   timerange: MetricsExplorerTimeOptions,
   signal: any

@@ -41,17 +41,9 @@ export const MetricsExplorerAggregationPicker = injectI18n(({ intl, options, onC
       id: `${intlPrefix}.aggregationLables.cardinality`,
       defaultMessage: 'Cardinality',
     }),
-    [MetricsExplorerAggregation.rateMax]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.rateMax`,
-      defaultMessage: 'Rate of Max',
-    }),
-    [MetricsExplorerAggregation.rateMin]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.rateMin`,
-      defaultMessage: 'Rate of Min',
-    }),
-    [MetricsExplorerAggregation.rateAvg]: intl.formatMessage({
-      id: `${intlPrefix}.aggregationLables.rateAvg`,
-      defaultMessage: 'Rate of Avg',
+    [MetricsExplorerAggregation.rate]: intl.formatMessage({
+      id: `${intlPrefix}.aggregationLables.rate`,
+      defaultMessage: 'Rate',
     }),
     [MetricsExplorerAggregation.count]: intl.formatMessage({
       id: `${intlPrefix}.aggregationLables.count`,

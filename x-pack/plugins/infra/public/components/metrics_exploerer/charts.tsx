@@ -6,9 +6,7 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiHorizontalRule,
