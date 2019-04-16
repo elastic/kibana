@@ -39,25 +39,25 @@ if (unknownFlags.length) {
 if (showHelp) {
   console.log(
     dedent(chalk`
-    {dim usage:} node scripts/build
+      {dim usage:} node scripts/build
 
-    build the Kibana distributable
+      build the Kibana distributable
 
-    options:
-      --oss                   {dim Only produce the OSS distributable of Kibana}
-      --no-oss                {dim Only produce the default distributable of Kibana}
-      --skip-archives         {dim Don't produce tar/zip archives}
-      --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
-      --all-platforms         {dim Produce archives for all platforms, not just this one}
-      --rpm                   {dim Only build the rpm package}
-      --deb                   {dim Only build the deb package}
-      --docker                {dim Only build the docker image}
-      --release               {dim Produce a release-ready distributable}
-      --version-qualifier     {dim Suffix version with a qualifier}
-      --skip-node-download    {dim Reuse existing downloads of node.js}
-      --verbose,-v            {dim Turn on verbose logging}
-      --no-debug              {dim Turn off debug logging}
-  `) + '\n'
+      options:
+        --oss                   {dim Only produce the OSS distributable of Kibana}
+        --no-oss                {dim Only produce the default distributable of Kibana}
+        --skip-archives         {dim Don't produce tar/zip archives}
+        --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
+        --all-platforms         {dim Produce archives for all platforms, not just this one}
+        --rpm                   {dim Only build the rpm package}
+        --deb                   {dim Only build the deb package}
+        --docker                {dim Only build the docker image}
+        --release               {dim Produce a release-ready distributable}
+        --version-qualifier     {dim Suffix version with a qualifier}
+        --skip-node-download    {dim Reuse existing downloads of node.js}
+        --verbose,-v            {dim Turn on verbose logging}
+        --no-debug              {dim Turn off debug logging}
+    `) + '\n'
   );
   process.exit(1);
 }
