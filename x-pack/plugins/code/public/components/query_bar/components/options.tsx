@@ -117,7 +117,7 @@ export class SearchOptions extends Component<Props, State> {
           onClose={this.closeOptionsFlyout}
           size="s"
           aria-labelledby="flyoutSmallTitle"
-          className="code-search-settings-flyout"
+          className="codeSearchSettings__flyout"
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">

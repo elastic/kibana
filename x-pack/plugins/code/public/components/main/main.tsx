@@ -45,7 +45,7 @@ class CodeMain extends React.Component<Props> {
     const { loadingFileTree, loadingStructureTree, hasStructure } = this.props;
     return (
       <div className="codeContainer__root">
-        <div className="codeContainer__root--inner">
+        <div className="codeContainer__rootInner">
           <React.Fragment>
             <SideTabs
               loadingFileTree={loadingFileTree}
