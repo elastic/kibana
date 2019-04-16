@@ -7,6 +7,7 @@
 import { setup as autoFollowPatternListSetup } from './auto_follow_pattern_list.helpers';
 import { setup as autoFollowPatternAddSetup } from './auto_follow_pattern_add.helpers';
 import { setup as autoFollowPatternEditSetup } from './auto_follow_pattern_edit.helpers';
+import { setup as followerIndexAddSetup } from './follower_index_add.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -16,4 +17,5 @@ export const pageHelpers = {
   autoFollowPatternList: { setup: autoFollowPatternListSetup },
   autoFollowPatternAdd: { setup: autoFollowPatternAddSetup },
   autoFollowPatternEdit: { setup: autoFollowPatternEditSetup },
+  followerIndexAdd: { setup: followerIndexAddSetup },
 };

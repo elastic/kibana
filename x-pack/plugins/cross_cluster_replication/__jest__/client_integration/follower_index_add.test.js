@@ -4,15 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-
-import { initTestBed, registerHttpRequestMockHelpers, nextTick } from './test_helpers';
-import { FollowerIndexAdd } from '../../public/app/sections/follower_index_add';
-import { AutoFollowPatternAdd } from '../../public/app/sections/auto_follow_pattern_add';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RemoteClustersFormField } from '../../public/app/components';
 
 import { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } from '../../../../../src/legacy/ui/public/index_patterns';
-import routing from '../../public/app/services/routing';
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path || 'api/cross_cluster_replication',
@@ -36,42 +31,32 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE, validateIndexPattern, ILLEGAL_CHARACTERS, CONTAINS_SPACES };
 });
 
-const testBedOptions = {
-  memoryRouter: {
-    onRouter: (router) => routing.reactRouter = router
-  }
-};
+const { setup } = pageHelpers.followerIndexAdd;
+const { setup: setupAutoFollowPatternAdd } = pageHelpers.autoFollowPatternAdd;
 
 describe('Create Follower index', () => {
   let server;
-  let find;
-  let exists;
-  let component;
-  let getUserActions;
-  let form;
-  let clickSaveForm;
-  let toggleAdvancedSettings;
-  let setLoadRemoteClustersResponse;
+  let httpRequestsMockHelpers;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-
-    // Register helpers to mock Http Requests
-    ({
-      setLoadRemoteClustersResponse,
-    } = registerHttpRequestMockHelpers(server));
-
     // Set "default" mock responses by not providing any arguments
-    setLoadRemoteClustersResponse();
-
-    // Mock all HTTP Requests that have not been handled previously
-    server.respondWith([200, {}, '']);
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse();
   });
 
   describe('on component mount', () => {
+    let find;
+    let exists;
+
     beforeEach(() => {
-      ({ find, exists } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+      ({ find, exists } = setup());
     });
 
     test('should display a "loading remote clusters" indicator', () => {
@@ -85,10 +70,14 @@ describe('Create Follower index', () => {
   });
 
   describe('when remote clusters are loaded', () => {
-    beforeEach(async () => {
-      ({ find, exists, component, getUserActions, form } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+    let find;
+    let exists;
+    let component;
+    let form;
+    let actions;
 
-      ({ clickSaveForm } = getUserActions('followerIndexForm'));
+    beforeEach(async () => {
+      ({ find, exists, component, actions, form } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
@@ -102,7 +91,7 @@ describe('Create Follower index', () => {
       expect(exists('followerIndexFormError')).toBe(false);
       expect(find('ccrFollowerIndexFormSubmitButton').props().disabled).toBe(false);
 
-      clickSaveForm();
+      actions.clickSaveForm();
 
       expect(exists('followerIndexFormError')).toBe(true);
       expect(form.getErrorsMessages()).toEqual([
@@ -114,10 +103,14 @@ describe('Create Follower index', () => {
   });
 
   describe('form validation', () => {
-    beforeEach(async () => {
-      ({ component, form, getUserActions, exists, find } = initTestBed(FollowerIndexAdd, undefined, testBedOptions));
+    let find;
+    let exists;
+    let component;
+    let form;
+    let actions;
 
-      ({ clickSaveForm, toggleAdvancedSettings } = getUserActions('followerIndexForm'));
+    beforeEach(async () => {
+      ({ component, form, actions, exists, find } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
@@ -128,7 +121,7 @@ describe('Create Follower index', () => {
       // done inside the <RemoteClustersFormField /> component. The same component that we use in the <AutoFollowPatternAdd /> section.
       // To avoid copy/pasting the same tests here, we simply make sure that both sections use the <RemoteClustersFormField />
       test('should use the same <RemoteClustersFormField /> component as the <AutoFollowPatternAdd /> section', async () => {
-        const { component: autoFollowPatternAddComponent } = initTestBed(AutoFollowPatternAdd, undefined, testBedOptions);
+        const { component: autoFollowPatternAddComponent } = setupAutoFollowPatternAdd();
         await nextTick();
         autoFollowPatternAddComponent.update();
 
@@ -143,12 +136,12 @@ describe('Create Follower index', () => {
     describe('leader index', () => {
       test('should not allow spaces', () => {
         form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', 'with space');
-        clickSaveForm();
+        actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the leader index.');
       });
 
       test('should not allow invalid characters', () => {
-        clickSaveForm(); // Make all errors visible
+        actions.clickSaveForm(); // Make all errors visible
 
         const expectInvalidChar = (char) => {
           form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', `with${char}`);
@@ -164,18 +157,18 @@ describe('Create Follower index', () => {
     describe('follower index', () => {
       test('should not allow spaces', () => {
         form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', 'with space');
-        clickSaveForm();
+        actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should not allow a "." (period) as first character', () => {
         form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', '.withDot');
-        clickSaveForm();
+        actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain(`Name can't begin with a period.`);
       });
 
       test('should not allow invalid characters', () => {
-        clickSaveForm(); // Make all errors visible
+        actions.clickSaveForm(); // Make all errors visible
 
         const expectInvalidChar = (char) => {
           form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', `with${char}`);
@@ -188,13 +181,9 @@ describe('Create Follower index', () => {
       });
 
       describe('ES index name validation', () => {
-        let setGetClusterIndicesResponse;
-        beforeEach(() => {
-          ({ setGetClusterIndicesResponse } = registerHttpRequestMockHelpers(server));
-        });
 
         test('should make a request to check if the index name is available in ES', async () => {
-          setGetClusterIndicesResponse([]);
+          httpRequestsMockHelpers.setGetClusterIndicesResponse([]);
 
           // Keep track of the request count made until this point
           const totalRequests = server.requests.length;
@@ -208,7 +197,7 @@ describe('Create Follower index', () => {
 
         test('should display an error if the index already exists', async () => {
           const indexName = 'index-name';
-          setGetClusterIndicesResponse([{ name: indexName }]);
+          httpRequestsMockHelpers.setGetClusterIndicesResponse([{ name: indexName }]);
 
           form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', indexName);
           await nextTick(550);
@@ -283,14 +272,14 @@ describe('Create Follower index', () => {
         // Make sure no advanced settings is visible
         Object.keys(advancedSettingsInputFields).forEach(expectDoesNotExist);
 
-        toggleAdvancedSettings();
+        actions.toggleAdvancedSettings();
 
         // Make sure no advanced settings is visible
         Object.keys(advancedSettingsInputFields).forEach(expectDoesExist);
       });
 
       test('should set the correct default value for each advanced setting', () => {
-        toggleAdvancedSettings();
+        actions.toggleAdvancedSettings();
 
         Object.entries(advancedSettingsInputFields).forEach(([testSubject, data]) => {
           expect(find(testSubject).props().value).toBe(data.default);
@@ -298,7 +287,7 @@ describe('Create Follower index', () => {
       });
 
       test('should set number input field for numeric advanced settings', () => {
-        toggleAdvancedSettings();
+        actions.toggleAdvancedSettings();
 
         Object.entries(advancedSettingsInputFields).forEach(([testSubject, data]) => {
           if (data.type === 'number') {
