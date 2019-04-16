@@ -13,18 +13,18 @@ const HAPI_STRATEGY_NAME = 'security-cookie';
 const HAPI_STRATEGY_MODE = false;
 
 /**
- * The shape of the session that is actually stored into cookie.
+ * The shape of the session that is actually stored in the cookie.
  */
 interface InternalSession {
   /**
    * Session value that is fed to the authentication provider. The shape is unknown upfront and
-   * entirely determined by the authentication provider that owns current session.
+   * entirely determined by the authentication provider that owns the current session.
    */
   value: unknown;
 
   /**
-   * The date in ms when session should be considered expired. If `null` session will stay active
-   * until the browser is closed.
+   * The Unix time in ms when the session should be considered expired. If `null`, session will stay
+   * active until the browser is closed.
    */
   expires: number | null;
 }
