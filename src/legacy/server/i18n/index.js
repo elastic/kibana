@@ -26,7 +26,6 @@ import { fromRoot } from '../../utils';
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
-  // eslint-disable-next-line max-len
   const translationsDirs = [
     fromRoot('src/legacy/ui/translations'),
     fromRoot('src/legacy/server/translations'),
