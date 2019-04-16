@@ -45,7 +45,7 @@ that begin with `_` are reserved for system usage.
 
   // Object containing privileges for specific features.
   // Privileges are added to the base privilege, if one is provided.
-  // For example, specifying `base: ["read"]` will grant read access to every feature,
+  // For example, specifying `base: ["read"]` grants users read access to every feature,
   // even if they aren't granted anything in this feature section.
   // Use the Features API to retrieve a list of available features. <1>
   "feature": {
