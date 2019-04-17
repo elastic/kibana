@@ -87,7 +87,7 @@ export class Waterfall extends Component<Props> {
   };
 
   public getFlyOut = () => {
-    const { waterfall, location, urlParams } = this.props;
+    const { waterfall, urlParams } = this.props;
 
     const currentItem =
       urlParams.waterfallItemId &&
@@ -116,7 +116,6 @@ export class Waterfall extends Component<Props> {
           <TransactionFlyout
             transaction={currentItem.transaction}
             onClose={this.onCloseFlyout}
-            location={location}
             traceRootDuration={waterfall.traceRootDuration}
             errorCount={currentItem.errorCount}
           />

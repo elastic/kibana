@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { TableHTMLAttributes } from 'react';
 import { compact, isObject } from 'lodash';
 import {
   EuiTable,
+  EuiTableProps,
   EuiTableBody,
   EuiTableRow,
   EuiTableRowCell
@@ -53,16 +54,18 @@ export function pathify(
 export function DottedKeyValueTable({
   data,
   parentKey,
-  maxDepth
+  maxDepth,
+  tableProps = {}
 }: {
   data: StringMap;
   parentKey?: string;
   maxDepth: number;
+  tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
 }) {
   const pathified = pathify(data, { maxDepth, parentKey });
   const rows = Object.keys(pathified).map(k => [k, pathified[k]]);
   return (
-    <EuiTable compressed>
+    <EuiTable compressed {...tableProps}>
       <EuiTableBody>
         {rows.map(([key, value]) => (
           <EuiTableRow key={key}>
