@@ -23,7 +23,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { goToWatchList } from 'x-pack/plugins/watcher/public/lib/navigation';
+import { goToWatchList } from '../../../lib/navigation';
 import { fetchWatchDetail } from '../../../lib/api';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
 import { WatchActionStatus } from './watch_action_status';
