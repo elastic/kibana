@@ -8,6 +8,10 @@ import { IndexPattern } from 'ui/index_patterns';
 import { Field, Aggregation } from '../../common/types/fields';
 import { ml } from '../services/ml_api_service';
 
+interface IndexPatternWithType extends IndexPattern {
+  type?: string;
+}
+
 class FieldsService {
   private _fields: Field[];
   private _aggs: Aggregation[];
@@ -79,8 +83,8 @@ class FieldsService {
     };
   }
 
-  public async initializeFromIndexPattern(indexPattern: IndexPattern) {
-    const resp = await ml.jobs.jobCaps(indexPattern.title);
+  public async initializeFromIndexPattern(indexPattern: IndexPatternWithType) {
+    const resp = await ml.jobs.jobCaps(indexPattern.title, indexPattern.type === 'rollup');
     const { fields, aggs } = this.createObjects(resp, indexPattern.title);
     this._fields = fields;
     this._aggs = aggs;
