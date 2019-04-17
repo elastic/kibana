@@ -21,7 +21,7 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const HOST_NAME = 'Ubuntu';
-const TOTAL_COUNT = 6;
+const TOTAL_COUNT = 7;
 const EDGE_LENGTH = 1;
 const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
 
