@@ -8,11 +8,8 @@ import { metricAggregationCreators } from './metric_aggregation_creators';
 import { InfraSnapshotRequestOptions } from './snapshot';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
-  const sources = [];
-  options.groupBy.forEach(gb => {
-    sources.push({
-      [`${gb.field}`]: { terms: { field: gb.field } },
-    });
+  const sources = options.groupBy.map(gb => {
+    return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
     node: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },

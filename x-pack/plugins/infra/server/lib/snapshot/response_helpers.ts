@@ -49,23 +49,25 @@ export const getNodePath = (
   groupBucket: InfraSnaphotNodeGroupByBucket,
   options: InfraSnapshotRequestOptions
 ): InfraSnapshotNodePath[] => {
-  const path = [];
   const node = groupBucket.key;
-  options.groupBy.forEach(gb => {
-    path.push({ value: node[`${gb.field}`], label: node[`${gb.field}`] });
+  const path = options.groupBy.map(gb => {
+    return { value: node[`${gb.field}`], label: node[`${gb.field}`] };
   });
   path.push({ value: node.node, label: node.node });
   return path;
 };
 
+interface NodeMetricsForLookup {
+  [node: string]: InfraSnapshotMetricsBucket[];
+}
+
 export const getNodeMetricsForLookup = (
   metrics: InfraSnapshotNodeMetricsBucket[]
-): { [key: string]: InfraSnapshotMetricsBucket } => {
-  const nodeMetricsForLookup: any = {};
-  metrics.forEach(metric => {
-    nodeMetricsForLookup[`${metric.key.node}`] = metric.histogram.buckets;
-  });
-  return nodeMetricsForLookup;
+): NodeMetricsForLookup => {
+  return metrics.reduce((acc: NodeMetricsForLookup, metric) => {
+    acc[`${metric.key.node}`] = metric.histogram.buckets;
+    return acc;
+  }, {});
 };
 
 // In the returned object,
