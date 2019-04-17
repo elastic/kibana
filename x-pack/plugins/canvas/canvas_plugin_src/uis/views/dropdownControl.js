@@ -4,9 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
-import { getState, getValue } from '../../../public/lib/resolved_arg';
-
 export const dropdownControl = () => ({
   name: 'dropdownControl',
   displayName: 'Dropdown filter',
@@ -40,10 +37,4 @@ export const dropdownControl = () => ({
       },
     },
   ],
-  resolve({ context }) {
-    if (getState(context) !== 'ready') {
-      return { columns: [] };
-    }
-    return { columns: get(getValue(context), 'columns', []) };
-  },
 });
