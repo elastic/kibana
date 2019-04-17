@@ -4,17 +4,45 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { WatchStatus } from './sections/watch_status/watch_status';
 import { WatchEdit } from './sections/watch_edit/components/watch_edit';
 import { WatchList } from './sections/watch_list/components/watch_list';
+import { registerRouter } from './lib/navigation';
 import { BASE_PATH } from './constants';
 
+class ShareRouter extends Component {
+  static contextTypes = {
+    router: PropTypes.shape({
+      history: PropTypes.shape({
+        push: PropTypes.func.isRequired,
+        createHref: PropTypes.func.isRequired
+      }).isRequired
+    }).isRequired
+  }
+  constructor(...args) {
+    super(...args);
+    this.registerRouter();
+  }
+
+  registerRouter() {
+    // Share the router with the app without requiring React or context.
+    const { router } = this.context;
+    registerRouter(router);
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
 export const App = () => {
   return (
     <HashRouter>
-      <AppWithoutRouter />
+      <ShareRouter>
+        <AppWithoutRouter />
+      </ShareRouter>
     </HashRouter>
   );
 };

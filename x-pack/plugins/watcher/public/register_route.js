@@ -13,7 +13,6 @@ import { App } from './app';
 import 'plugins/watcher/services/license';
 import { getWatchListBreadcrumbs } from './lib/breadcrumbs';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
-import { setUrlService } from './lib/navigation';
 import { I18nContext } from 'ui/i18n';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
 import { LicenseServiceContext } from './license_service_context';
@@ -32,7 +31,7 @@ const renderReact = async (elem, licenseService) => {
 routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param4?', {
   template,
   controller: class WatcherController {
-    constructor($injector, $scope, $http, Private, kbnUrl, $rootScope) {
+    constructor($injector, $scope, $http, Private) {
       const $route = $injector.get('$route');
       const licenseService = $injector.get('xpackWatcherLicenseService');
       // clean up previously rendered React app if one exists
@@ -42,16 +41,6 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
       // NOTE: We depend upon Angular's $http service because it's decorated with interceptors,
       // e.g. to check license status per request.
       setHttpClient($http);
-      setUrlService({
-        change(url) {
-          kbnUrl.change(url);
-          $rootScope.$digest();
-        },
-        redirect(url) {
-          kbnUrl.redirect(url);
-          $rootScope.$digest();
-        }
-      });
       $scope.$$postDigest(() => {
         elem = document.getElementById('watchReactRoot');
         renderReact(elem, licenseService);

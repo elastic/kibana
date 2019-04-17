@@ -4,21 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-let urlService: any;
 import { BASE_PATH } from '../constants';
-export const setUrlService = (aUrlService: any) => {
-  urlService = aUrlService;
-};
-export const getUrlService = () => {
-  return urlService;
+let router: any;
+export const registerRouter = (aRouter: any) => {
+  router = aRouter;
 };
 
-export const goToWatchList = (shouldRedirect: boolean) => {
-  const path = `${BASE_PATH}watches`;
-  history.
-    if(shouldRedirect) {
-    urlService.redirect(path);
-  } else {
-    urlService.change(path);
-  }
+export const goToWatchList = () => {
+  router.history.push({ pathname: `${BASE_PATH}watches` });
 };
