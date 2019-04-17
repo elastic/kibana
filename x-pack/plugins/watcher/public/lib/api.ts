@@ -20,7 +20,7 @@ export const getHttpClient = () => {
   return httpClient;
 };
 let savedObjectsClient: any;
-export const setSavedObjectsClient = (aSavedObjectsClient: ng.any) => {
+export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
   savedObjectsClient = aSavedObjectsClient;
 };
 export const getSavedObjectsClient = () => {

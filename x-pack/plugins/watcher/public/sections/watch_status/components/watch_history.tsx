@@ -274,7 +274,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       <DeleteWatchesModal
         callback={(deleted?: string[]) => {
           if (deleted) {
-            goToWatchList(true);
+            goToWatchList();
           }
           setWatchesToDelete([]);
         }}
