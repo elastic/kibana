@@ -446,7 +446,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     private async _withTimeout(timeout: number) {
       if (timeout !== this.currentWait) {
         this.currentWait = timeout;
-        await driver.manage().setTimeouts({ implicit: timeout });
+        await (driver.manage() as any).setTimeouts({ implicit: timeout });
       }
     }
   }

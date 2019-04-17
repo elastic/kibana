@@ -38,7 +38,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Is WebDriver instance W3C compatible
      */
-    isW3CEnabled = driver.executor_.w3c === true;
+    isW3CEnabled = (driver as any).executor_.w3c === true;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
@@ -217,7 +217,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async pressKeys(keys: string | string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void> {
-      const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
+      const actions = this.isW3CEnabled
+        ? driver.actions()
+        : (driver as any).actions({ bridge: true });
       const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
     }
