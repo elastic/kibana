@@ -5,7 +5,7 @@
  */
 
 import { handleResponse } from '../get_beat_summary';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('get_beat_summary', () => {
   it('Handles empty aggregation', () => {

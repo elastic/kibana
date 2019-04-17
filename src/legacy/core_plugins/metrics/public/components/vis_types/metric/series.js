@@ -41,7 +41,8 @@ function MetricSeriesUi(props) {
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions
   } = props;
 
   const defaults = { label: '' };
@@ -78,6 +79,7 @@ function MetricSeriesUi(props) {
               fields={fields}
               panel={panel}
               model={model}
+              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -193,6 +195,8 @@ function MetricSeriesUi(props) {
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
             responsive={false}
@@ -228,7 +232,9 @@ MetricSeriesUi.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
+  uiRestrictions: PropTypes.object,
 };
 
 const MetricSeries = injectI18n(MetricSeriesUi);

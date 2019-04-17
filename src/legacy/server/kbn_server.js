@@ -24,6 +24,7 @@ import { Config } from './config';
 import loggingConfiguration from './logging/configuration';
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
+import { coreMixin } from './core';
 import { loggingMixin } from './logging';
 import warningsMixin from './warnings';
 import { usageMixin } from './usage';
@@ -53,7 +54,21 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    this.core = core;
+    const { plugins, http, elasticsearch, serverOptions, handledConfigPaths } = core;
+    this.newPlatform = {
+      setup: {
+        core: {
+          elasticsearch,
+          http,
+        },
+        plugins,
+      },
+      stop: null,
+      params: {
+        serverOptions,
+        handledConfigPaths,
+      },
+    };
 
     this.ready = constant(this.mixin(
       Plugins.waitForInitSetupMixin,
@@ -63,6 +78,8 @@ export default class KbnServer {
 
       // sets this.server
       httpMixin,
+
+      coreMixin,
 
       // adds methods for extending this.server
       serverExtensionsMixin,

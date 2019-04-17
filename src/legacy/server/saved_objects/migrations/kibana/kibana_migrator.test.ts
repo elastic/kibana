@@ -66,7 +66,7 @@ describe('KibanaMigrator', () => {
 
     it('waits for kbnServer.ready and elasticsearch.ready before attempting migrations', async () => {
       const { kbnServer } = mockKbnServer();
-      const clusterStub = jest.fn(() => {
+      const clusterStub = jest.fn<any, any>(() => {
         throw new Error('Doh!');
       });
       const waitUntilReady = jest.fn(async () => undefined);

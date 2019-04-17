@@ -85,7 +85,13 @@ module.controller('MlExplorerController', function (
 
   let resizeTimeout = null;
 
-  function jobSelectionUpdate(action, { fullJobs, selectedCells, selectedJobIds, swimlaneViewByFieldName }) {
+  function jobSelectionUpdate(action, {
+    fullJobs,
+    filterData,
+    selectedCells,
+    selectedJobIds,
+    swimlaneViewByFieldName
+  }) {
     const jobs = createJobs(fullJobs).map((job) => {
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
@@ -106,9 +112,12 @@ module.controller('MlExplorerController', function (
           noJobsFound,
           selectedCells,
           selectedJobs,
-          swimlaneViewByFieldName
+          swimlaneViewByFieldName,
+          filterData
         }
       });
+      $scope.jobSelectionUpdateInProgress = false;
+      $scope.$applyAsync();
     }
 
     // Populate the map of jobs / detectors / field formatters for the selected IDs.
@@ -125,6 +134,7 @@ module.controller('MlExplorerController', function (
   // AppState is used to store state in the URL.
   $scope.appState = new AppState({
     mlExplorerSwimlane: {},
+    mlExplorerFilter: {}
   });
 
   // Load the job info needed by the dashboard, then do the first load.
@@ -139,6 +149,7 @@ module.controller('MlExplorerController', function (
             // Select any jobs set in the global state (i.e. passed in the URL).
             const selectedJobIds = $scope.mlJobSelectService.getSelectedJobIds(true);
             let selectedCells;
+            let filterData = {};
 
             // keep swimlane selection, restore selectedCells from AppState
             if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
@@ -151,7 +162,18 @@ module.controller('MlExplorerController', function (
               };
             }
 
+            // keep influencers filter selection, restore from AppState
+            if ($scope.appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
+              filterData = {
+                influencersFilterQuery: $scope.appState.mlExplorerFilter.influencersFilterQuery,
+                filterActive: $scope.appState.mlExplorerFilter.filterActive,
+                filteredFields: $scope.appState.mlExplorerFilter.filteredFields,
+                queryString: $scope.appState.mlExplorerFilter.queryString,
+              };
+            }
+
             jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
+              filterData,
               fullJobs: resp.jobs,
               selectedCells,
               selectedJobIds,
@@ -176,19 +198,25 @@ module.controller('MlExplorerController', function (
   const explorerSubscriber = explorer$.subscribe(loadJobsListener);
 
   // Listen for changes to job selection.
+  $scope.jobSelectionUpdateInProgress = false;
   $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
+    $scope.jobSelectionUpdateInProgress = true;
     jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
   });
 
   // Refresh all the data when the time range is altered.
   $scope.$listenAndDigestAsync(timefilter, 'fetch', () => {
-    explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
   });
 
   // Add a watcher for auto-refresh of the time filter to refresh all the data.
   const refreshWatcher = Private(refreshIntervalWatcher);
   refreshWatcher.init(async () => {
-    explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.RELOAD });
+    }
   });
 
   // Redraw the swimlane when the window resizes or the global nav is toggled.
@@ -210,7 +238,9 @@ module.controller('MlExplorerController', function (
   });
 
   function redrawOnResize() {
-    explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    if ($scope.jobSelectionUpdateInProgress === false) {
+      explorer$.next({ action: EXPLORER_ACTION.REDRAW });
+    }
   }
 
   $scope.appStateHandler = ((action, payload) => {
@@ -235,6 +265,20 @@ module.controller('MlExplorerController', function (
 
     if (action === APP_STATE_ACTION.SAVE_SWIMLANE_VIEW_BY_FIELD_NAME) {
       $scope.appState.mlExplorerSwimlane.viewByFieldName = payload.swimlaneViewByFieldName;
+    }
+
+    if (action === APP_STATE_ACTION.SAVE_INFLUENCER_FILTER_SETTINGS) {
+      $scope.appState.mlExplorerFilter.influencersFilterQuery = payload.influencersFilterQuery;
+      $scope.appState.mlExplorerFilter.filterActive = payload.filterActive;
+      $scope.appState.mlExplorerFilter.filteredFields = payload.filteredFields;
+      $scope.appState.mlExplorerFilter.queryString = payload.queryString;
+    }
+
+    if (action === APP_STATE_ACTION.CLEAR_INFLUENCER_FILTER_SETTINGS) {
+      delete $scope.appState.mlExplorerFilter.influencersFilterQuery;
+      delete $scope.appState.mlExplorerFilter.filterActive;
+      delete $scope.appState.mlExplorerFilter.filteredFields;
+      delete $scope.appState.mlExplorerFilter.queryString;
     }
 
     $scope.appState.save();

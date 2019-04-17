@@ -104,38 +104,37 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
   function createDescription(jobs) {
     let txt = '';
     // add up the number of jobs including duplicates if they belong to multiple groups
-    const count = mlJobService.jobs.reduce((sum, job) => {
-      return sum + ((job.groups === undefined) ? 1 : job.groups.length);
-    }, 0);
-    if (jobs.length === count) {
+    const jobCount = mlJobService.jobs.length;
+
+    // add up how many jobs belong to groups and how many don't
+    const selectedGroupJobs = [];
+    const groupCounts = {};
+    let groupLessJobs = 0;
+    const splitJobs = jobs.map(job => {
+      const obj = splitJobId(job);
+      if (obj.group) {
+        // keep track of selected jobs from group selection
+        selectedGroupJobs.push(obj.job);
+      }
+      return obj;
+    });
+
+    splitJobs.forEach(jobObj => {
+      if (jobObj.group) {
+        groupCounts[jobObj.group] = (groupCounts[jobObj.group] || 0) + 1;
+      } else {
+        // if job has already been included via group selection don't add as groupless job
+        if (selectedGroupJobs.includes(jobObj.job) === false) {
+          groupLessJobs++;
+        }
+      }
+    });
+    // All jobs have been selected
+    if ((_.uniq(selectedGroupJobs).length + groupLessJobs) === jobCount) {
       txt = i18n('xpack.ml.jobSelect.allJobsDescription', {
         defaultMessage: 'All jobs',
       });
     } else {
-      // not all jobs have been selected
-      // add up how many jobs belong to groups and how many don't
-      const selectedGroupJobs = [];
-      const groupCounts = {};
-      let groupLessJobs = 0;
-      const splitJobs = jobs.map(job => {
-        const obj = splitJobId(job);
-        if (obj.group) {
-          // keep track of selected jobs from group selection
-          selectedGroupJobs.push(obj.job);
-        }
-        return obj;
-      });
-
-      splitJobs.forEach(jobObj => {
-        if (jobObj.group) {
-          groupCounts[jobObj.group] = (groupCounts[jobObj.group] || 0) + 1;
-        } else {
-          // if job has already been included via group selection don't add as groupless job
-          if (selectedGroupJobs.includes(jobObj.job) === false) {
-            groupLessJobs++;
-          }
-        }
-      });
       const wholeGroups = [];
       const groups = mlJobService.getJobGroups();
       // work out how many groups have all of their jobs selected
@@ -159,7 +158,7 @@ export function JobSelectServiceProvider($rootScope, globalState, i18n) {
           const total = (wholeGroups.length - 1) + groupLessJobs;
           txt = i18n('xpack.ml.jobSelect.wholeGroupDescription', {
             defaultMessage: `{wholeGroup} (with {count, plural, zero {# job} one {# job} other {# jobs}}) and
-              {total, plural, zero {# other} one {# other} other {# others}}`,
+            {total, plural, zero {# other} one {# other} other {# others}}`,
             values: {
               count: groupCounts[wholeGroups[0]],
               wholeGroup: wholeGroups[0],

@@ -22,7 +22,7 @@ import { VisProvider } from '../../vis';
 import { aggTypes } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
   const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);

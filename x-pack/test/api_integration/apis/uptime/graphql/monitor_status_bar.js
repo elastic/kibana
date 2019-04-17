@@ -5,9 +5,9 @@
  */
 
 import { omit } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 // eslint-disable-next-line max-len
-import { getMonitorStatusBarQueryString } from '../../../../../plugins/uptime/public/components/queries/monitor_status_bar/get_monitor_status_bar';
+import { monitorStatusBarQueryString } from '../../../../../plugins/uptime/public/queries';
 import monitorStatus from './fixtures/monitor_status';
 import monitorStatusById from './fixtures/monitor_status_by_id';
 
@@ -18,7 +18,7 @@ export default function ({ getService }) {
     it('returns the status for all monitors with no ID filtering', async () => {
       const getMonitorStatusBarQuery = {
         operationName: 'MonitorStatus',
-        query: getMonitorStatusBarQueryString,
+        query: monitorStatusBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -40,7 +40,7 @@ export default function ({ getService }) {
     it('returns the status for only the given monitor', async () => {
       const getMonitorStatusBarQuery = {
         operationName: 'MonitorStatus',
-        query: getMonitorStatusBarQueryString,
+        query: monitorStatusBarQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',

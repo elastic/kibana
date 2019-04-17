@@ -42,13 +42,15 @@ Array [
             data-test-subj="remoteClusterFormNameFormRow"
             id="mockId-row"
           >
-            <label
-              aria-invalid="false"
-              class="euiFormLabel"
-              for="mockId"
-            >
-              Name
-            </label>
+            <div>
+              <label
+                aria-invalid="false"
+                class="euiFormLabel"
+                for="mockId"
+              >
+                Name
+              </label>
+            </div>
             <div
               class="euiFormControlLayout euiFormControlLayout--fullWidth"
             >
@@ -58,6 +60,7 @@ Array [
                 <input
                   aria-describedby="mockId-help"
                   class="euiFieldText euiFieldText--fullWidth"
+                  data-test-subj="remoteClusterFormNameInput"
                   id="mockId"
                   type="text"
                   value=""
@@ -113,18 +116,21 @@ Array [
             data-test-subj="remoteClusterFormSeedNodesFormRow"
             id="mockId-row"
           >
-            <label
-              aria-invalid="false"
-              class="euiFormLabel"
-              for="mockId"
-            >
-              Seed nodes
-            </label>
+            <div>
+              <label
+                aria-invalid="false"
+                class="euiFormLabel"
+                for="mockId"
+              >
+                Seed nodes
+              </label>
+            </div>
             <div
               aria-describedby="mockId-help"
               aria-expanded="false"
               aria-haspopup="listbox"
               class="euiComboBox euiComboBox--fullWidth"
+              data-test-subj="remoteClusterFormSeedsInput"
               role="combobox"
             >
               <div
@@ -237,6 +243,7 @@ Array [
             >
               <input
                 class="euiSwitch__input"
+                data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
                 id="mockId"
                 type="checkbox"
               />
@@ -338,13 +345,15 @@ Array [
     data-test-subj="remoteClusterFormNameFormRow"
     id="mockId-row"
   >
-    <label
-      aria-invalid="true"
-      class="euiFormLabel euiFormLabel-isInvalid"
-      for="mockId"
-    >
-      Name
-    </label>
+    <div>
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormLabel-isInvalid"
+        for="mockId"
+      >
+        Name
+      </label>
+    </div>
     <div
       class="euiFormControlLayout euiFormControlLayout--fullWidth"
     >
@@ -354,6 +363,7 @@ Array [
         <input
           aria-describedby="mockId-help mockId-error-0"
           class="euiFieldText euiFieldText--fullWidth"
+          data-test-subj="remoteClusterFormNameInput"
           id="mockId"
           type="text"
           value=""
@@ -379,18 +389,21 @@ Array [
     data-test-subj="remoteClusterFormSeedNodesFormRow"
     id="mockId-row"
   >
-    <label
-      aria-invalid="true"
-      class="euiFormLabel euiFormLabel-isInvalid"
-      for="mockId"
-    >
-      Seed nodes
-    </label>
+    <div>
+      <label
+        aria-invalid="true"
+        class="euiFormLabel euiFormLabel-isInvalid"
+        for="mockId"
+      >
+        Seed nodes
+      </label>
+    </div>
     <div
       aria-describedby="mockId-help mockId-error-0"
       aria-expanded="false"
       aria-haspopup="listbox"
       class="euiComboBox euiComboBox-isInvalid euiComboBox--fullWidth"
+      data-test-subj="remoteClusterFormSeedsInput"
       role="combobox"
     >
       <div
@@ -461,6 +474,7 @@ Array [
     >
       <input
         class="euiSwitch__input"
+        data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
         id="mockId"
         type="checkbox"
       />

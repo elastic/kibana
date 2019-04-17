@@ -20,15 +20,16 @@ const compactWhitespace = str => {
 };
 
 export class HeadlessChromiumDriverFactory {
-  constructor(binaryPath, logger, browserConfig) {
+  constructor(binaryPath, logger, browserConfig, queueTimeout) {
     this.binaryPath = binaryPath;
     this.logger = logger.clone(['chromium-driver-factory']);
     this.browserConfig = browserConfig;
+    this.queueTimeout = queueTimeout;
   }
 
   type = 'chromium';
 
-  test({ viewport, browserTimezone }, log) {
+  test({ viewport, browserTimezone }, logger) {
     const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'chromium-'));
     const chromiumArgs = args({
       userDataDir,
@@ -49,10 +50,10 @@ export class HeadlessChromiumDriverFactory {
         },
       })
       .catch(error => {
-        log(
+        logger.warning(
           `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports: [${error}]`
         );
-        log(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
+        logger.warning(`See Chromium's log output at "${getChromeLogLocation(this.binaryPath)}"`);
         return null;
       });
   }
@@ -82,6 +83,12 @@ export class HeadlessChromiumDriverFactory {
         });
 
         page = await browser.newPage();
+
+        // All navigation/waitFor methods default to 30 seconds,
+        // which can cause the job to fail even if we bump timeouts in
+        // the config. Help alleviate errors like
+        // "TimeoutError: waiting for selector ".application" failed: timeout 30000ms exceeded"
+        page.setDefaultTimeout(this.queueTimeout);
       } catch (err) {
         observer.error(new Error(`Error spawning Chromium browser: [${err}]`));
         throw err;
@@ -114,6 +121,7 @@ export class HeadlessChromiumDriverFactory {
         new HeadlessChromiumDriver(page, {
           maxScreenshotDimension: this.browserConfig.maxScreenshotDimension,
           logger: this.logger,
+          inspect: this.browserConfig.inspect,
         })
       );
 

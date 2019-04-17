@@ -23,11 +23,15 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
+import 'ui/query_bar';
+import { uiCapabilities } from 'ui/capabilities';
 import 'ui/search_bar';
 import 'ui/apply_filters';
+import 'ui/listen';
 import chrome from 'ui/chrome';
 import React from 'react';
 import angular from 'angular';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -146,7 +150,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [{
+  $scope.topNavMenu = [...(uiCapabilities.visualize.save ? [{
     key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
@@ -181,6 +185,13 @@ function VisEditor(
         });
       };
 
+      const confirmButtonLabel = $scope.isAddToDashMode() ? (
+        <FormattedMessage
+          id="kbn.visualize.saveDialog.saveAndAddToDashboardButtonLabel"
+          defaultMessage="Save and add to dashboard"
+        />
+      ) : null;
+
       const saveModal = (
         <SavedObjectSaveModal
           onSave={onSave}
@@ -188,10 +199,11 @@ function VisEditor(
           title={savedVis.title}
           showCopyOnSave={savedVis.id ? true : false}
           objectType="visualization"
+          confirmButtonLabel={confirmButtonLabel}
         />);
       showSaveModal(saveModal);
     }
-  }, {
+  }] : []), {
     key: i18n('kbn.topNavMenu.shareVisualizationButtonLabel', { defaultMessage: 'share' }),
     description: i18n('kbn.visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
       defaultMessage: 'Share Visualization',
@@ -203,6 +215,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
+        allowShortUrl: uiCapabilities.visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
@@ -223,7 +236,11 @@ function VisEditor(
       return !vis.hasInspector || !vis.hasInspector();
     },
     run() {
-      vis.openInspector().bindToAngularScope($scope);
+      const inspectorSession = vis.openInspector();
+      // Close the inspector if this scope is destroyed (e.g. because the user navigates away).
+      const removeWatch = $scope.$on('$destroy', () => inspectorSession.close());
+      // Remove that watch in case the user closes the inspector session herself.
+      inspectorSession.onClose.finally(removeWatch);
     },
     tooltip() {
       if (!vis.hasInspector || !vis.hasInspector()) {
@@ -346,7 +363,8 @@ function VisEditor(
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watch('state.query', (query) => {
+    $scope.$watch('state.query', (newQuery) => {
+      const query = migrateLegacyQuery(newQuery);
       $scope.updateQueryAndFetch({ query });
     });
 
@@ -434,7 +452,7 @@ function VisEditor(
 
   $scope.updateQueryAndFetch = function ({ query, dateRange }) {
     timefilter.setTime(dateRange);
-    $state.query = migrateLegacyQuery(query);
+    $state.query = query;
     $scope.fetch();
   };
 

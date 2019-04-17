@@ -14,6 +14,7 @@ import {
   getMapReady,
   getWaitingForMapReadyLayerListRaw,
   getTransientLayerId,
+  getTooltipState
 } from '../selectors/map_selectors';
 import { updateFlyout, FLYOUT_STATE } from '../store/ui';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
@@ -49,6 +50,7 @@ export const CLEAR_GOTO = 'CLEAR_GOTO';
 export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
+export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -65,6 +67,12 @@ function getLayerLoadingCallbacks(dispatch, layerId) {
       dispatch(updateSourceDataRequest(layerId, newData));
     }
   };
+}
+
+function getLayerById(layerId, state) {
+  return getLayerList(state).find(layer => {
+    return layerId === layer.getId();
+  });
 }
 
 async function syncDataForAllLayers(getState, dispatch, dataFilters) {
@@ -117,6 +125,18 @@ export function replaceLayerList(newLayerList) {
   };
 }
 
+export function cloneLayer(layerId) {
+  return async (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+
+    const clonedDescriptor = await layer.cloneDescriptor();
+    dispatch(addLayer(clonedDescriptor));
+  };
+}
+
 export function addLayer(layerDescriptor) {
   return (dispatch, getState) => {
     const isMapReady = getMapReady(getState());
@@ -136,13 +156,23 @@ export function addLayer(layerDescriptor) {
   };
 }
 
-export function setLayerErrorStatus(layerId, errorMessage) {
+function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
       type: SET_LAYER_ERROR_STATUS,
+      isInErrorState: errorMessage !== null,
       layerId,
-      errorMessage,
+      errorMessage
     });
+  };
+}
+
+export function clearTooltipStateForLayer(layerId) {
+  return (dispatch, getState) => {
+    const tooltipState = getTooltipState(getState());
+    if (tooltipState && tooltipState.layerId === layerId) {
+      dispatch(setTooltipState(null));
+    }
   };
 }
 
@@ -150,13 +180,16 @@ export function toggleLayerVisible(layerId) {
   return async (dispatch, getState) => {
     //if the current-state is invisible, we also want to sync data
     //e.g. if a layer was invisible at start-up, it won't have any data loaded
-    const layer = getLayerList(getState()).find(layer => {
-      return layerId === layer.getId();
-    });
+    const layer = getLayerById(layerId, getState());
     if (!layer) {
       return;
     }
     const makeVisible = !layer.isVisible();
+
+    if (!makeVisible) {
+      dispatch(clearTooltipStateForLayer(layerId));
+    }
+
     await dispatch({
       type: TOGGLE_LAYER_VISIBLE,
       layerId
@@ -195,7 +228,7 @@ export function removeTransientLayer() {
 }
 
 export function setTransientLayer(layerId) {
-  return  {
+  return {
     type: SET_TRANSIENT_LAYER,
     transientLayerId: layerId,
   };
@@ -284,8 +317,15 @@ export function mapExtentChanged(newMapConstants) {
         ...newMapConstants
       }
     });
-    const newDataFilters =  { ...dataFilters, ...newMapConstants };
+    const newDataFilters = { ...dataFilters, ...newMapConstants };
     await syncDataForAllLayers(getState, dispatch, newDataFilters);
+  };
+}
+
+export function setTooltipState(tooltipState) {
+  return {
+    type: 'SET_TOOLTIP_STATE',
+    tooltipState: tooltipState
   };
 }
 
@@ -313,9 +353,7 @@ export function clearMouseCoordinates() {
 
 export function fitToLayerExtent(layerId) {
   return async function (dispatch, getState) {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
 
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
@@ -366,18 +404,26 @@ export function updateSourceDataRequest(layerId, newData) {
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
-  return ({
-    type: LAYER_DATA_LOAD_ENDED,
-    layerId,
-    dataId,
-    data,
-    meta,
-    requestToken
-  });
+  return async (dispatch) => {
+    dispatch(clearTooltipStateForLayer(layerId));
+    dispatch({
+      type: LAYER_DATA_LOAD_ENDED,
+      layerId,
+      dataId,
+      data,
+      meta,
+      requestToken
+    });
+    //Clear any data-load errors when there is a succesful data return.
+    //Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
+    //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
+    dispatch(setLayerDataLoadErrorStatus(layerId, null));
+  };
 }
 
 export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
   return async (dispatch) => {
+    dispatch(clearTooltipStateForLayer(layerId));
     dispatch({
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
@@ -385,7 +431,7 @@ export function onDataLoadError(layerId, dataId, requestToken, errorMessage) {
       requestToken,
     });
 
-    dispatch(setLayerErrorStatus(layerId, errorMessage));
+    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
@@ -404,9 +450,7 @@ export function updateSourceProp(layerId, propName, value) {
 
 export function syncDataForLayer(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
     if (targetLayer) {
       const dataFilters = getDataFilters(getState());
       const loadingFunctions = getLayerLoadingCallbacks(dispatch, layerId);
@@ -454,6 +498,19 @@ export function updateLayerAlpha(id, alpha) {
   };
 }
 
+export function setLayerQuery(id, query) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'query',
+      newValue: query,
+    });
+
+    dispatch(syncDataForLayer(id));
+  };
+}
+
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();
@@ -463,23 +520,22 @@ export function removeSelectedLayer() {
   };
 }
 
-export function removeLayer(id) {
+export function removeLayer(layerId) {
   return (dispatch, getState) => {
-    const layerGettingRemoved = getLayerList(getState()).find(layer => {
-      return id === layer.getId();
-    });
-    if (layerGettingRemoved) {
-      layerGettingRemoved.destroy();
+    const layerGettingRemoved = getLayerById(layerId, getState());
+    if (!layerGettingRemoved) {
+      return;
     }
-
+    dispatch(clearTooltipStateForLayer(layerId));
+    layerGettingRemoved.destroy();
     dispatch({
       type: REMOVE_LAYER,
-      id
+      id: layerId
     });
   };
 }
 
-export function setQuery({ query, timeFilters }) {
+export function setQuery({ query, timeFilters, filters = [] }) {
   return async (dispatch, getState) => {
     dispatch({
       type: SET_QUERY,
@@ -489,6 +545,7 @@ export function setQuery({ query, timeFilters }) {
         // ensure query changes to trigger re-fetch even when query is the same because "Refresh" clicked
         queryLastTriggeredAt: (new Date()).toISOString(),
       },
+      filters,
     });
 
     const dataFilters = getDataFilters(getState());
@@ -517,9 +574,7 @@ export function triggerRefreshTimer() {
 
 export function clearMissingStyleProperties(layerId) {
   return async (dispatch, getState) => {
-    const targetLayer = getLayerList(getState()).find(layer => {
-      return layer.getId() === layerId;
-    });
+    const targetLayer = getLayerById(layerId, getState());
     if (!targetLayer) {
       return;
     }

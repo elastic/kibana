@@ -23,6 +23,7 @@ import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
 
+/** @public */
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
 
 export interface ErrorToastOptions {
@@ -49,7 +50,8 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
   return toastOrTitle;
 };
 
-export class ToastsStart {
+/** @public */
+export class ToastsSetup {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
 

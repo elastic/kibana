@@ -22,6 +22,7 @@ import handleErrorResponse from './handle_error_response';
 import { getAnnotations } from './get_annotations';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
+import { getActiveSeries } from './helpers/get_active_series';
 
 export async function getSeriesData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
@@ -29,31 +30,43 @@ export async function getSeriesData(req, panel) {
   const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
 
-  const bodiesPromises = panel.series.map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
+  const bodiesPromises = getActiveSeries(panel)
+    .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
+
   const body = (await Promise.all(bodiesPromises))
     .reduce((acc, items) => acc.concat(items), []);
 
-  return searchRequest.search({ body })
-    .then(data => {
-      const series = data.map(handleResponseBody(panel));
-      return {
-        [panel.id]: {
-          id: panel.id,
-          series: series.reduce((acc, series) => acc.concat(series), []),
-        },
-      };
-    })
-    .then(resp => {
-      if (!panel.annotations || panel.annotations.length === 0) return resp;
-      return getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities).then(annotations => {
-        resp[panel.id].annotations = annotations;
-        return resp;
-      });
-    })
-    .then(resp => {
-      resp.type = panel.type;
-      return resp;
-    })
-    .catch(handleErrorResponse(panel));
-}
+  const meta = {
+    type: panel.type,
+    uiRestrictions: capabilities.uiRestrictions,
+  };
 
+  try {
+    const data = await searchRequest.search({ body });
+    const series = data.map(handleResponseBody(panel));
+    let annotations = null;
+
+    if (panel.annotations && panel.annotations.length) {
+      annotations = await getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities);
+    }
+
+    return {
+      ...meta,
+      [panel.id]: {
+        annotations,
+        id: panel.id,
+        series: series.reduce((acc, series) => acc.concat(series), []),
+      },
+    };
+
+  } catch (err) {
+    if (err.body) {
+      err.response = err.body;
+
+      return {
+        ...meta,
+        ...handleErrorResponse(panel)(err),
+      };
+    }
+  }
+}

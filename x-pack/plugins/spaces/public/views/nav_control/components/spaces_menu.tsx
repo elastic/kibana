@@ -7,7 +7,6 @@
 import { EuiContextMenuItem, EuiContextMenuPanel, EuiFieldSearch, EuiText } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
 import { SPACE_SEARCH_COUNT_THRESHOLD } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
 import { ManageSpacesButton, SpaceAvatar } from '../../../components';
@@ -16,7 +15,6 @@ interface Props {
   spaces: Space[];
   onSelectSpace: (space: Space) => void;
   onManageSpacesClick: () => void;
-  userProfile: UserProfile;
   intl: InjectedIntl;
 }
 
@@ -106,19 +104,21 @@ class SpacesMenuUI extends Component<Props, State> {
     const { intl } = this.props;
     return (
       <div key="manageSpacesSearchField" className="spcMenu__searchFieldWrapper">
-        <EuiFieldSearch
-          placeholder={intl.formatMessage({
-            id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
-            defaultMessage: 'Find a space',
-          })}
-          incremental={true}
-          // FIXME needs updated typedef
+        {
           // @ts-ignore
-          onSearch={this.onSearch}
-          onKeyDown={this.onSearchKeyDown}
-          onFocus={this.onSearchFocus}
-          compressed
-        />
+          <EuiFieldSearch
+            placeholder={intl.formatMessage({
+              id: 'xpack.spaces.navControl.spacesMenu.findSpacePlaceholder',
+              defaultMessage: 'Find a space',
+            })}
+            incremental={true}
+            // FIXME needs updated typedef
+            onSearch={this.onSearch}
+            onKeyDown={this.onSearchKeyDown}
+            onFocus={this.onSearchFocus}
+            compressed
+          />
+        }
       </div>
     );
   };
@@ -150,7 +150,6 @@ class SpacesMenuUI extends Component<Props, State> {
         key="manageSpacesButton"
         className="spcMenu__manageButton"
         size="s"
-        userProfile={this.props.userProfile}
         onClick={this.props.onManageSpacesClick}
       />
     );

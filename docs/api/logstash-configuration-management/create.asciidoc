@@ -43,7 +43,7 @@ PUT api/logstash/pipeline/hello-world
 {
   "pipeline": "input { stdin {} } output { stdout {} }",
   "settings": {
-    "queue.type": "persistent"
+    "queue.type": "persisted"
   }
 }
 --------------------------------------------------

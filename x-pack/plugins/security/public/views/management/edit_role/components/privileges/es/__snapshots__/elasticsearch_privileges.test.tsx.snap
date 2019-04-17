@@ -10,7 +10,7 @@ exports[`it renders without crashing 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="Manage the actions this role can perform against your cluster. "
-          id="xpack.security.management.editRoles.elasticSearchPrivileges.manageRoleActionsDescription"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.manageRoleActionsDescription"
           values={Object {}}
         />
         <EuiLink
@@ -22,7 +22,7 @@ exports[`it renders without crashing 1`] = `
         >
           <FormattedMessage
             defaultMessage="Learn more"
-            id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
         </EuiLink>
@@ -34,7 +34,7 @@ exports[`it renders without crashing 1`] = `
       <h3>
         <FormattedMessage
           defaultMessage="Cluster privileges"
-          id="xpack.security.management.editRoles.elasticSearchPrivileges.clusterPrivilegesTitle"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.clusterPrivilegesTitle"
           values={Object {}}
         />
       </h3>
@@ -45,6 +45,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={true}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <ClusterPrivileges
         onChange={[Function]}
@@ -55,25 +56,20 @@ exports[`it renders without crashing 1`] = `
               "indices": Array [],
               "run_as": Array [],
             },
-            "kibana": Object {
-              "global": Array [],
-              "space": Object {},
-            },
+            "kibana": Array [],
             "name": "",
           }
         }
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiDescribedFormGroup
     description={
       <p>
         <FormattedMessage
           defaultMessage="Allow requests to be submitted on the behalf of other users. "
-          id="xpack.security.management.editRoles.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.howToBeSubmittedOnBehalfOfOtherUsersDescription"
           values={Object {}}
         />
         <EuiLink
@@ -85,7 +81,7 @@ exports[`it renders without crashing 1`] = `
         >
           <FormattedMessage
             defaultMessage="Learn more"
-            id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+            id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
             values={Object {}}
           />
         </EuiLink>
@@ -97,7 +93,7 @@ exports[`it renders without crashing 1`] = `
       <h3>
         <FormattedMessage
           defaultMessage="Run As privileges"
-          id="xpack.security.management.editRoles.elasticSearchPrivileges.runAsPrivilegesTitle"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.runAsPrivilegesTitle"
           values={Object {}}
         />
       </h3>
@@ -108,6 +104,7 @@ exports[`it renders without crashing 1`] = `
       describedByIds={Array []}
       fullWidth={false}
       hasEmptyLabelSpace={true}
+      labelType="label"
     >
       <EuiComboBox
         compressed={false}
@@ -115,6 +112,7 @@ exports[`it renders without crashing 1`] = `
         isClearable={true}
         isDisabled={false}
         onChange={[Function]}
+        onCreateOption={[Function]}
         options={Array []}
         placeholder="Add a user…"
         selectedOptions={Array []}
@@ -122,9 +120,7 @@ exports[`it renders without crashing 1`] = `
       />
     </EuiFormRow>
   </EuiDescribedFormGroup>
-  <EuiSpacer
-    size="l"
-  />
+  <EuiSpacer />
   <EuiTitle
     size="xs"
     textTransform="none"
@@ -132,7 +128,7 @@ exports[`it renders without crashing 1`] = `
     <h3>
       <FormattedMessage
         defaultMessage="Index privileges"
-        id="xpack.security.management.editRoles.elasticSearchPrivileges.indexPrivilegesTitle"
+        id="xpack.security.management.editRole.elasticSearchPrivileges.indexPrivilegesTitle"
         values={Object {}}
       />
     </h3>
@@ -148,7 +144,7 @@ exports[`it renders without crashing 1`] = `
     <p>
       <FormattedMessage
         defaultMessage="Control access to the data in your cluster. "
-        id="xpack.security.management.editRoles.elasticSearchPrivileges.controlAccessToClusterDataDescription"
+        id="xpack.security.management.editRole.elasticSearchPrivileges.controlAccessToClusterDataDescription"
         values={Object {}}
       />
       <EuiLink
@@ -160,7 +156,7 @@ exports[`it renders without crashing 1`] = `
       >
         <FormattedMessage
           defaultMessage="Learn more"
-          id="xpack.security.management.editRoles.elasticSearchPrivileges.learnMoreLinkText"
+          id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
           values={Object {}}
         />
       </EuiLink>
@@ -179,36 +175,29 @@ exports[`it renders without crashing 1`] = `
           "indices": Array [],
           "run_as": Array [],
         },
-        "kibana": Object {
-          "global": Array [],
-          "space": Object {},
-        },
+        "kibana": Array [],
         "name": "",
       }
     }
     validator={
       RoleValidator {
-        "inProgressSpacePrivileges": Array [],
         "shouldValidate": undefined,
       }
     }
   />
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiButton
     color="primary"
     fill={false}
     iconSide="left"
-    iconType="plusInCircle"
+    iconType="plusInCircleFilled"
     onClick={[Function]}
-    size="s"
+    size="m"
     type="button"
   >
     <FormattedMessage
       defaultMessage="Add index privilege"
-      id="xpack.security.management.editRoles.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
+      id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
       values={Object {}}
     />
   </EuiButton>

@@ -4,6 +4,8 @@
     "paths": {
       // Allows for importing from `kibana` package for the exported types.
       "kibana": ["./kibana"],
+      "kibana/public": ["src/core/public"],
+      "kibana/server": ["src/core/server"],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],
@@ -47,7 +49,12 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
-    "skipLibCheck": true
+    // adding global typings
+    "types": [
+      "node",
+      "jest",
+      "react"
+    ]
   },
   "include": [
     "kibana.d.ts",
@@ -56,7 +63,7 @@
     "test_utils/**/*"
   ],
   "exclude": [
-    "src/**/__fixtures__/**/*",
+    "src/**/__fixtures__/**/*"
     // In the build we actually exclude **/public/**/* from this config so that
     // we can run the TSC on both this and the .browser version of this config
     // file, but if we did it during development IDEs would not be able to find

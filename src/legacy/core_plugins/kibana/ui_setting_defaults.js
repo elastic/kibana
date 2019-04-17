@@ -162,7 +162,8 @@ export function getUiSettingDefaults() {
         },
       }),
       type: 'select',
-      options: ['Browser', ...moment.tz.names()]
+      options: ['Browser', ...moment.tz.names()],
+      requiresPageReload: true,
     },
     'dateFormat:scaled': {
       name: i18n.translate('kbn.advancedSettings.dateFormat.scaledTitle', {
@@ -302,19 +303,6 @@ export function getUiSettingDefaults() {
       }),
       category: ['discover'],
     },
-    'courier:maxSegmentCount': {
-      name: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountTitle', {
-        defaultMessage: 'Maximum segment count',
-      }),
-      value: 30,
-      description: i18n.translate('kbn.advancedSettings.courier.maxSegmentCountText', {
-        defaultMessage:
-          'Requests in discover are split into segments to prevent massive requests from being sent to elasticsearch. ' +
-          'This setting attempts to prevent the list of segments from getting too long, ' +
-          'which might cause requests to take much longer to process.',
-      }),
-      category: ['search'],
-    },
     'courier:ignoreFilterIfFieldNotInIndex': {
       name: i18n.translate('kbn.advancedSettings.courier.ignoreFilterTitle', {
         defaultMessage: 'Ignore filter(s)',
@@ -323,8 +311,8 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.courier.ignoreFilterText', {
         defaultMessage:
           'This configuration enhances support for dashboards containing visualizations accessing dissimilar indexes. ' +
-          'When set to false, all filters are applied to all visualizations. ' +
-          'When set to true, filter(s) will be ignored for a visualization ' +
+          'When disabled, all filters are applied to all visualizations. ' +
+          'When enabled, filter(s) will be ignored for a visualization ' +
           `when the visualization's index does not contain the filtering field.`,
       }),
       category: ['search'],
@@ -810,50 +798,59 @@ export function getUiSettingDefaults() {
         {
           from: 'now/d',
           to: 'now/d',
-          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),
         },
         {
           from: 'now/w',
           to: 'now/w',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),
         },
         {
-          from: 'now/M',
-          to: 'now/M',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' })
-        },
-        {
-          from: 'now/y',
-          to: 'now/y',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' })
-        },
-        {
-          from: 'now/d',
+          from: 'now-15m',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last15Minutes', { defaultMessage: 'Last 15 minutes' }),
         },
         {
-          from: 'now/w',
+          from: 'now-30m',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Minutes', { defaultMessage: 'Last 30 minutes' }) },
+        {
+          from: 'now-1h',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Hour', { defaultMessage: 'Last 1 hour' }),
         },
         {
-          from: 'now/M',
+          from: 'now-24h',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last24Hours', { defaultMessage: 'Last 24 hours' }),
         },
         {
-          from: 'now/y',
+          from: 'now-7d',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last7Days', { defaultMessage: 'Last 7 days' }),
+        },
+        {
+          from: 'now-30d',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Days', { defaultMessage: 'Last 30 days' }),
+        },
+        {
+          from: 'now-90d',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last90Days', { defaultMessage: 'Last 90 days' }),
+        },
+        {
+          from: 'now-1y',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),
         },
       ], null, 2),
       type: 'json',
       description: i18n.translate('kbn.advancedSettings.timepicker.quickRangesText', {
         defaultMessage:
           'The list of ranges to show in the Quick section of the time picker. This should be an array of objects, ' +
-          'with each object containing "from", "to" (see {acceptedFormatsLink}), ' +
-          '"display" (the title to be displayed), and "section" (which column to put the option in).',
+          'with each object containing "from", "to" (see {acceptedFormatsLink}), and ' +
+          '"display" (the title to be displayed).',
         description:
           'Part of composite text: kbn.advancedSettings.timepicker.quickRangesText + ' +
           'kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText',
@@ -876,6 +873,7 @@ export function getUiSettingDefaults() {
       description: i18n.translate('kbn.advancedSettings.darkModeText', {
         defaultMessage: `Enable a dark mode for the Kibana UI. A page refresh is required for the setting to be applied.`,
       }),
+      requiresPageReload: true,
     },
     'filters:pinnedByDefault': {
       name: i18n.translate('kbn.advancedSettings.pinFiltersTitle', {
@@ -1055,18 +1053,7 @@ export function getUiSettingDefaults() {
         defaultMessage: 'Turn off all unnecessary animations in the Kibana UI. Refresh the page to apply the changes.',
       }),
       category: ['accessibility'],
-    },
-    'rollups:enableIndexPatterns': {
-      name: i18n.translate('kbn.advancedSettings.rollupIndexPatternsTitle', {
-        defaultMessage: 'Enable rollup index patterns',
-      }),
-      value: true,
-      description: i18n.translate('kbn.advancedSettings.rollupIndexPatternsText', {
-        defaultMessage:
-          'Enable the creation of index patterns which capture rollup indices, which in turn enable ' +
-          'visualizations based on rollup data. Refresh the page to apply the changes.',
-      }),
-      category: ['rollups'],
+      requiresPageReload: true,
     },
   };
 }

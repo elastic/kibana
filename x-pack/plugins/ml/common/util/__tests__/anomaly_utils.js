@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   getSeverity,
   getSeverityWithLow,
@@ -14,6 +14,7 @@ import {
   getMultiBucketImpactLabel,
   getEntityFieldName,
   getEntityFieldValue,
+  getEntityFieldList,
   showActualForFunction,
   showTypicalForFunction,
   isRuleSupported,
@@ -347,6 +348,52 @@ describe('ML - anomaly utils', () => {
       expect(getEntityFieldValue(noEntityRecord)).to.be(undefined);
     });
 
+  });
+
+  describe('getEntityFieldList', () => {
+    it('returns an empty list for a record with no by, over or partition fields', () => {
+      expect(getEntityFieldList(noEntityRecord)).to.be.empty();
+    });
+
+    it('returns correct list for a record with a by field', () => {
+      expect(getEntityFieldList(byEntityRecord)).to.eql([
+        {
+          fieldName: 'airline',
+          fieldValue: 'JZA',
+          fieldType: 'by'
+        }
+      ]);
+    });
+
+    it('returns correct list for a record with a partition field', () => {
+      expect(getEntityFieldList(partitionEntityRecord)).to.eql([
+        {
+          fieldName: 'airline',
+          fieldValue: 'AAL',
+          fieldType: 'partition'
+        }
+      ]);
+    });
+
+    it('returns correct list for a record with an over field', () => {
+      expect(getEntityFieldList(overEntityRecord)).to.eql([
+        {
+          fieldName: 'clientip',
+          fieldValue: '37.157.32.164',
+          fieldType: 'over'
+        }
+      ]);
+    });
+
+    it('returns correct list for a record with a by and over field', () => {
+      expect(getEntityFieldList(rareEntityRecord)).to.eql([
+        {
+          fieldName: 'clientip',
+          fieldValue: '173.252.74.112',
+          fieldType: 'over'
+        }
+      ]);
+    });
   });
 
   describe('showActualForFunction', () => {

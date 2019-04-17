@@ -54,7 +54,6 @@ function getProxyHeaders(req) {
   if (contentType) {
     headers['content-type'] = contentType;
   }
-
   return headers;
 }
 
@@ -66,6 +65,7 @@ export const createProxyRoute = ({
   path: '/api/console/proxy',
   method: 'POST',
   config: {
+    tags: ['access:console'],
     payload: {
       output: 'stream',
       parse: false
@@ -107,30 +107,37 @@ export const createProxyRoute = ({
         agent,
         headers,
       } = getConfigForReq(req, uri);
+      const makeRequest = async (payloadToSend) => {
+        const wreckOptions = {
+          payload: payloadToSend,
+          timeout,
+          rejectUnauthorized,
+          agent,
+          headers: {
+            ...headers,
+            ...getProxyHeaders(req)
+          },
+        };
 
-      const wreckOptions = {
-        payload,
-        timeout,
-        rejectUnauthorized,
-        agent,
-        headers: {
-          ...headers,
-          ...getProxyHeaders(req)
-        },
-      };
+        const esResponse = await Wreck.request(method, uri, wreckOptions);
 
-      const esResponse = await Wreck.request(method, uri, wreckOptions);
+        if (method.toUpperCase() !== 'HEAD') {
+          return h.response(esResponse)
+            .code(esResponse.statusCode)
+            .header('warning', esResponse.headers.warning);
+        }
 
-      if (method.toUpperCase() !== 'HEAD') {
-        return h.response(esResponse)
+        return h.response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
           .code(esResponse.statusCode)
+          .type('text/plain')
           .header('warning', esResponse.headers.warning);
+      };
+      if (method.toUpperCase() === 'DELETE') {
+        const data = await Wreck.read(payload);
+        return await makeRequest(data);
+      } else {
+        return await makeRequest(payload);
       }
-
-      return h.response(`${esResponse.statusCode} - ${esResponse.statusMessage}`)
-        .code(esResponse.statusCode)
-        .type('text/plain')
-        .header('warning', esResponse.headers.warning);
     }
   }
 });

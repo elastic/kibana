@@ -22,16 +22,13 @@ import ReactDOM from 'react-dom';
 import $ from 'jquery';
 
 import { uiModules } from '../../modules';
-import {
-  getUnhashableStatesProvider,
-  unhashUrl,
-} from '../../state_management/state_hashing';
+
 import {
   notify,
   GlobalBannerList,
   banners,
 } from '../../notify';
-import { SubUrlRouteFilterProvider } from './sub_url_route_filter';
+
 import { I18nContext } from '../../i18n';
 
 export function kbnChromeProvider(chrome, internals) {
@@ -57,28 +54,13 @@ export function kbnChromeProvider(chrome, internals) {
         },
 
         controllerAs: 'chrome',
-        controller($scope, $rootScope, Private) {
-          const getUnhashableStates = Private(getUnhashableStatesProvider);
-          const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
-
-          function updateSubUrls() {
-            const urlWithHashes = window.location.href;
-            const urlWithStates = unhashUrl(urlWithHashes, getUnhashableStates());
-            internals.trackPossibleSubUrl(urlWithStates);
-          }
-
-          function onRouteChange($event) {
-            if (subUrlRouteFilter($event)) {
-              updateSubUrls();
-            }
-          }
-
-          $rootScope.$on('$routeChangeSuccess', onRouteChange);
-          $rootScope.$on('$routeUpdate', onRouteChange);
-          updateSubUrls(); // initialize sub urls
-
+        controller($scope, $location) {
           // Notifications
           $scope.notifList = notify._notifs;
+
+          $scope.getFirstPathSegment = () => {
+            return $location.path().split('/')[1];
+          };
 
           // Non-scope based code (e.g., React)
 

@@ -27,6 +27,7 @@ import _ from 'lodash';
 import Timeseries from '../../../visualizations/components/timeseries';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
+import { getInterval } from '../../lib/get_interval';
 import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 
 function hasSeparateAxis(row) {
@@ -35,20 +36,10 @@ function hasSeparateAxis(row) {
 
 class TimeseriesVisualization extends Component {
 
-  constructor(props) {
-    super(props);
-  }
-
   getInterval = () => {
     const { visData, model } = this.props;
-    const series = _.get(visData, `${model.id}.series`, []);
-    return series.reduce((currentInterval, item) => {
-      if (item.data.length > 1) {
-        const seriesInterval = item.data[1][0] - item.data[0][0];
-        if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
-      }
-      return currentInterval;
-    }, 0);
+
+    return getInterval(visData, model);
   }
 
   xaxisFormatter = (val) => {

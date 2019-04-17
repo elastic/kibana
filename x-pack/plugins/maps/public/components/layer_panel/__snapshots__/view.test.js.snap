@@ -2,13 +2,8 @@
 
 exports[`LayerPanel is rendered 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
   direction="column"
   gutterSize="none"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlyoutHeader
     className="mapLayerPanel__header"
@@ -16,15 +11,10 @@ exports[`LayerPanel is rendered 1`] = `
   >
     <EuiFlexGroup
       alignItems="center"
-      component="div"
-      direction="row"
       gutterSize="s"
-      justifyContent="flexStart"
       responsive={false}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonIcon
@@ -35,13 +25,14 @@ exports[`LayerPanel is rendered 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Fit
+          <FormattedMessage
+            defaultMessage="Fit"
+            id="xpack.maps.layerPanel.fitToBoundsButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonIcon>
       </EuiFlexItem>
-      <EuiFlexItem
-        component="div"
-        grow={true}
-      >
+      <EuiFlexItem>
         <EuiTitle
           size="s"
           textTransform="none"
@@ -91,10 +82,9 @@ exports[`LayerPanel is rendered 1`] = `
   <EuiFlyoutBody
     className="mapLayerPanel__body"
   >
-    <SettingsPanel />
-    <EuiSpacer
-      size="s"
-    />
+    <LayerErrors />
+    <LayerSettings />
+    <SourceSettings />
     <EuiPanel
       grow={true}
       hasShadow={false}
@@ -113,6 +103,7 @@ exports[`LayerPanel is rendered 1`] = `
           "getImmutableSourceProperties": [Function],
           "getLayerTypeIconName": [Function],
           "isJoinable": [Function],
+          "supportsElasticsearchFilters": [Function],
         }
       }
     />

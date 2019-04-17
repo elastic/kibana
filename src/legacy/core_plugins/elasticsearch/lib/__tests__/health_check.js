@@ -19,7 +19,7 @@
 
 import Promise from 'bluebird';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 const NoConnections = require('elasticsearch').errors.NoConnections;
 
@@ -27,7 +27,6 @@ import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 
 const esPort = 9220;
-const esUrl = `http://elastic:changement@localhost:9220`;
 
 describe('plugins/elasticsearch', () => {
   describe('lib/health_check', function () {
@@ -58,7 +57,7 @@ describe('plugins/elasticsearch', () => {
         }
       };
 
-      cluster = { callWithInternalUser: sinon.stub() };
+      cluster = { callWithInternalUser: sinon.stub(), errors: { NoConnections } };
       cluster.callWithInternalUser.withArgs('index', sinon.match.any).returns(Promise.resolve());
       cluster.callWithInternalUser.withArgs('mget', sinon.match.any).returns(Promise.resolve({ ok: true }));
       cluster.callWithInternalUser.withArgs('get', sinon.match.any).returns(Promise.resolve({ found: false }));
@@ -73,19 +72,11 @@ describe('plugins/elasticsearch', () => {
         }
       }));
 
-      // setup the config().get()/.set() stubs
-      const get = sinon.stub();
-      get.withArgs('elasticsearch.hosts').returns([esUrl]);
-      get.withArgs('kibana.index').returns('.my-kibana');
-      get.withArgs('pkg.version').returns('1.0.0');
-
-      const set = sinon.stub();
-
       // Setup the server mock
       server = {
         logWithMetadata: sinon.stub(),
         info: { port: 5601 },
-        config: function () { return { get, set }; },
+        config: () => ({ get: sinon.stub() }),
         plugins: {
           elasticsearch: {
             getCluster: sinon.stub().returns(cluster)
@@ -94,7 +85,7 @@ describe('plugins/elasticsearch', () => {
         ext: sinon.stub()
       };
 
-      health = healthCheck(plugin, server);
+      health = healthCheck(plugin, server, 0);
     });
 
     afterEach(() => sandbox.restore());
@@ -124,38 +115,8 @@ describe('plugins/elasticsearch', () => {
           sinon.assert.calledOnce(plugin.status.yellow);
           sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
-          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.notCalled(plugin.status.red);
-          sinon.assert.calledOnce(plugin.status.green);
-          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
-        });
-    });
-
-    it('should set the cluster red if the ping fails, then to green', async () => {
-      const ping = cluster.callWithInternalUser.withArgs('ping');
-      ping.onCall(0).returns(Promise.reject(new NoConnections()));
-      ping.onCall(1).returns(Promise.resolve());
-
-      const healthRunPromise = health.run();
-
-      // Exhaust micro-task queue, to make sure that next health check is rescheduled.
-      await Promise.resolve();
-      sandbox.clock.runAll();
-
-      return healthRunPromise
-        .then(() => {
-          sinon.assert.calledOnce(plugin.status.yellow);
-          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
-
-          sinon.assert.calledOnce(plugin.status.red);
-          sinon.assert.calledWithExactly(
-            plugin.status.red,
-            `Unable to connect to Elasticsearch.`
-          );
-
-          sinon.assert.calledTwice(ping);
-          sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
           sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });

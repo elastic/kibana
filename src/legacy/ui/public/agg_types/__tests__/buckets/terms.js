@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { aggTypes } from '../..';
 
@@ -231,7 +231,7 @@ describe('Terms Agg', function () {
     it('saves the "custom metric" to state and refreshes from it');
     it('invalidates the form if the metric agg form is not complete');
 
-    describe('convert import/export from old format', function () {
+    describe('convert include/exclude from old format', function () {
 
       it('it doesnt do anything with string type', function () {
         init({

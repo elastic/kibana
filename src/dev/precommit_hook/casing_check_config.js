@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -41,13 +40,14 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
-  'src/dev/tslint/rules/*',
   'src/legacy/ui/public/assets/fonts/**/*',
+
+  // Files in this directory must match a pre-determined name in some cases.
+  'x-pack/plugins/canvas/.storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 ];
-
 
 /**
  * These patterns are matched against directories and indicate
@@ -55,11 +55,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
-  'x-pack',
-];
-
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
 
 /**
  * These patterns are matched against directories and indicate
@@ -89,7 +85,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
 ];
 
-
 /**
  * DO NOT ADD FILES TO THIS LIST!!
  *
@@ -107,7 +102,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
 export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
   'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/console/public/webpackShims/ui-bootstrap-custom.js',
   'src/legacy/core_plugins/kibana/public/assets/play-circle.svg',
   'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
   'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
@@ -120,12 +114,9 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/timelion/server/series_functions/__tests__/fixtures/tlConfig.js',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/fixtures/vislib/mock_data/terms/_seriesMultiple.js',
-  'src/legacy/ui/public/angular-bootstrap/accordion/accordion-group.html',
   'src/legacy/ui/public/angular-bootstrap/bindHtml/bindHtml.js',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-html-unsafe-popup.html',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-popup.html',
-  'src/legacy/ui/public/angular-bootstrap/typeahead/typeahead-match.html',
-  'src/legacy/ui/public/angular-bootstrap/typeahead/typeahead-popup.html',
   'src/legacy/ui/public/assets/favicons/android-chrome-192x192.png',
   'src/legacy/ui/public/assets/favicons/android-chrome-256x256.png',
   'src/legacy/ui/public/assets/favicons/android-chrome-512x512.png',
@@ -138,16 +129,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/ui/public/assets/favicons/mstile-310x150.png',
   'src/legacy/ui/public/assets/favicons/mstile-310x310.png',
   'src/legacy/ui/public/assets/favicons/safari-pinned-tab.svg',
-  'src/legacy/ui/public/directives/__tests__/confirm-click.js',
-  'src/legacy/ui/public/icons/beats-color.svg',
-  'src/legacy/ui/public/icons/beats-gray.svg',
-  'src/legacy/ui/public/icons/elasticsearch-color.svg',
-  'src/legacy/ui/public/icons/elasticsearch-gray.svg',
-  'src/legacy/ui/public/icons/kibana-color.svg',
-  'src/legacy/ui/public/icons/kibana-gray.svg',
-  'src/legacy/ui/public/icons/logstash-color.svg',
-  'src/legacy/ui/public/icons/logstash-gray.svg',
-  'src/legacy/ui/public/icons/security-gray.svg',
   'src/legacy/ui/public/styles/bootstrap/component-animations.less',
   'src/legacy/ui/public/styles/bootstrap/input-groups.less',
   'src/legacy/ui/public/styles/bootstrap/list-group.less',

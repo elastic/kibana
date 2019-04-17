@@ -13,6 +13,7 @@ import {
 import { MultiFieldSelect } from '../../../components/multi_field_select';
 
 import { indexPatternService } from '../../../../kibana_services';
+import { i18n } from '@kbn/i18n';
 
 export class UpdateSourceEditor extends Component {
 
@@ -43,7 +44,12 @@ export class UpdateSourceEditor extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: `Unable to find Index pattern ${this.props.indexPatternId}`
+          loadError: i18n.translate('xpack.maps.source.esSearch.loadErrorMessage', {
+            defaultMessage: `Unable to find Index pattern {id}`,
+            values: {
+              id: this.props.indexPatternId
+            }
+          })
         });
       }
       return;
@@ -53,7 +59,13 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    this.setState({ fields: indexPattern.fields });
+    this.setState({
+      fields: indexPattern.fields.filter(field => {
+        // Do not show multi fields as tooltip field options
+        // since they do not have values in _source and exist for indexing only
+        return field.subType !== 'multi';
+      })
+    });
   }
 
   onTooltipPropertiesSelect = (propertyNames) => {
@@ -68,10 +80,17 @@ export class UpdateSourceEditor extends Component {
     return (
       <Fragment>
         <EuiFormRow
-          label="Fields to display in tooltip"
+          label={
+            i18n.translate('xpack.maps.source.esSearch.fieldsLabel', {
+              defaultMessage: `Fields to display in tooltip`
+            })
+          }
         >
           <MultiFieldSelect
-            placeholder="Select fields"
+            placeholder={i18n.translate('xpack.maps.source.esSearch.fieldsPlaceholder', {
+              defaultMessage: `Select fields`
+            })
+            }
             value={this.props.tooltipProperties}
             onChange={this.onTooltipPropertiesSelect}
             fields={this.state.fields}
@@ -80,7 +99,12 @@ export class UpdateSourceEditor extends Component {
 
         <EuiFormRow>
           <EuiSwitch
-            label="Dynamically filter for data in the visible map area."
+            label={
+              i18n.translate('xpack.maps.source.esSearch.extentFilterLabel', {
+                defaultMessage: `Dynamically filter for data in the visible map area.`
+              })
+
+            }
             checked={this.props.filterByMapBounds}
             onChange={this.onFilterByMapBoundsChange}
           />

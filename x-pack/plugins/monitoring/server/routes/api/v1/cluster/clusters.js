@@ -14,7 +14,8 @@ import {
   INDEX_PATTERN_KIBANA,
   INDEX_PATTERN_LOGSTASH,
   INDEX_PATTERN_BEATS,
-  INDEX_ALERTS
+  INDEX_ALERTS,
+  INDEX_PATTERN_FILEBEAT
 } from '../../../../../common/constants';
 
 export function clustersRoute(server) {
@@ -53,7 +54,16 @@ export function clustersRoute(server) {
         const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
         const apmIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
         const alertsIndex = prefixIndexPattern(config, INDEX_ALERTS, ccs);
-        const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, apmIndexPattern, alertsIndex };
+        const filebeatIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_FILEBEAT, ccs);
+        const indexPatterns = {
+          esIndexPattern,
+          kbnIndexPattern,
+          lsIndexPattern,
+          beatsIndexPattern,
+          apmIndexPattern,
+          alertsIndex,
+          filebeatIndexPattern
+        };
 
         clusters = await getClustersFromRequest(req, indexPatterns);
       } catch (err) {

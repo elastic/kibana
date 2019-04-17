@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
-import expect from 'expect.js';
+
+import expect from '@kbn/expect';
 import { CidrMask } from '../cidr_mask';
 
 describe('CidrMask', () => {

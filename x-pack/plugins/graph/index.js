@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import Boom from 'boom';
+import { i18n } from '@kbn/i18n';
 
 import migrations from './migrations';
 import { initServer } from './server';
@@ -23,7 +23,6 @@ export function graph(kibana) {
         order: 9000,
         icon: 'plugins/graph/icon.png',
         euiIconType: 'graphApp',
-        description: 'Graph exploration',
         main: 'plugins/graph/app',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -45,11 +44,36 @@ export function graph(kibana) {
       server.injectUiAppVars('graph', () => {
         const config = server.config();
         return {
-          esApiVersion: config.get('elasticsearch.apiVersion'),
-          esShardTimeout: config.get('elasticsearch.shardTimeout'),
           graphSavePolicy: config.get('xpack.graph.savePolicy'),
           canEditDrillDownUrls: config.get('xpack.graph.canEditDrillDownUrls')
         };
+      });
+
+      server.plugins.xpack_main.registerFeature({
+        id: 'graph',
+        name: i18n.translate('xpack.graph.featureRegistry.graphFeatureName', {
+          defaultMessage: 'Graph',
+        }),
+        icon: 'graphApp',
+        navLinkId: 'graph',
+        app: ['graph', 'kibana'],
+        catalogue: ['graph'],
+        privileges: {
+          all: {
+            savedObject: {
+              all: ['graph-workspace'],
+              read: ['config', 'index-pattern'],
+            },
+            ui: ['save', 'delete'],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: ['config', 'index-pattern', 'graph-workspace'],
+            },
+            ui: [],
+          }
+        }
       });
 
       initServer(server);

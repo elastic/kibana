@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -45,9 +45,9 @@ export default function ({ getService, getPageObjects }) {
       log.debug('Click Date Histogram');
       await PageObjects.visualize.selectAggregation('Date Histogram');
       log.debug('Check field value');
-      const fieldValue = await PageObjects.visualize.getField();
-      log.debug('fieldValue = ' + fieldValue);
-      expect(fieldValue).to.be('@timestamp');
+      const fieldValues = await PageObjects.visualize.getField();
+      log.debug('fieldValue = ' + fieldValues);
+      expect(fieldValues[0]).to.be('@timestamp');
       const intervalValue = await PageObjects.visualize.getInterval();
       log.debug('intervalValue = ' + intervalValue);
       expect(intervalValue).to.be('Auto');

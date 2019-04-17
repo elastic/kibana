@@ -18,13 +18,15 @@
  */
 import { SearchStrategiesRegister } from './search_strategies/search_strategies_register';
 import { uniq } from 'lodash';
+import { getIndexPatternObject } from './vis_data/helpers/get_index_pattern';
 
 export async function getFields(req) {
-  const indexPattern = req.query.index || '*';
-  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPattern);
+  const indexPattern = req.query.index;
+  const { indexPatternString } = await getIndexPatternObject(req, indexPattern);
+  const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, indexPatternString);
 
   const fields = (await searchStrategy
-    .getFieldsForWildcard(req, indexPattern, capabilities))
+    .getFieldsForWildcard(req, indexPatternString, capabilities))
     .filter(field => field.aggregatable);
 
   return uniq(fields, field => field.name);

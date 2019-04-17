@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -61,8 +61,8 @@ export default function ({ getService, getPageObjects }) {
       await pointSeriesVis.toggleCollapsibleTitle('Average machine.ram');
       log.debug('Average memory value axis - ValueAxis-2');
       await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
     });
 
     describe('secondary value axis', function () {

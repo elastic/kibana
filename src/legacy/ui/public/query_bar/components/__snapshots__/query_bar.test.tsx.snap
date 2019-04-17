@@ -2,19 +2,11 @@
 
 exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="kbnQueryBar"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
   responsive={false}
-  wrap={false}
 >
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiOutsideClickDetector
       onOutsideClick={[Function]}
     >
@@ -32,7 +24,6 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
       >
         <form
           name="queryBarForm"
-          role="form"
         >
           <div
             role="search"
@@ -50,7 +41,7 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
                 aria-activedescendant=""
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
-                aria-label="Search input"
+                aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
                 autoComplete="off"
                 autoFocus={false}
                 compressed={false}
@@ -83,7 +74,6 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
     </EuiOutsideClickDetector>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiSuperUpdateButton
@@ -99,19 +89,11 @@ exports[`QueryBar Should disable autoFocus on EuiFieldText when disableAutoFocus
 
 exports[`QueryBar Should pass the query language to the language switcher 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="kbnQueryBar"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
   responsive={false}
-  wrap={false}
 >
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiOutsideClickDetector
       onOutsideClick={[Function]}
     >
@@ -129,7 +111,6 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
       >
         <form
           name="queryBarForm"
-          role="form"
         >
           <div
             role="search"
@@ -147,7 +128,7 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
                 aria-activedescendant=""
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
-                aria-label="Search input"
+                aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
                 autoComplete="off"
                 autoFocus={true}
                 compressed={false}
@@ -180,7 +161,6 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
     </EuiOutsideClickDetector>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiSuperUpdateButton
@@ -196,19 +176,11 @@ exports[`QueryBar Should pass the query language to the language switcher 1`] = 
 
 exports[`QueryBar Should render the given query 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
   className="kbnQueryBar"
-  component="div"
-  direction="row"
   gutterSize="s"
-  justifyContent="flexStart"
   responsive={false}
-  wrap={false}
 >
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiOutsideClickDetector
       onOutsideClick={[Function]}
     >
@@ -226,7 +198,6 @@ exports[`QueryBar Should render the given query 1`] = `
       >
         <form
           name="queryBarForm"
-          role="form"
         >
           <div
             role="search"
@@ -244,7 +215,7 @@ exports[`QueryBar Should render the given query 1`] = `
                 aria-activedescendant=""
                 aria-autocomplete="list"
                 aria-controls="kbnTypeahead__items"
-                aria-label="Search input"
+                aria-label="You are on search box of Another Screen page. Start typing to search and filter the discover"
                 autoComplete="off"
                 autoFocus={true}
                 compressed={false}
@@ -277,7 +248,6 @@ exports[`QueryBar Should render the given query 1`] = `
     </EuiOutsideClickDetector>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiSuperUpdateButton

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as actions from '../../actions/resolved_args';
 import { flushContextAfterIndex } from '../../actions/elements';
 import { resolvedArgsReducer } from '../resolved_args';
@@ -16,7 +16,7 @@ describe('resolved args reducer', () => {
   beforeEach(() => {
     state = {
       selectedPage: 'page-1',
-      selectedElement: 'element-1',
+      selectedToplevelNodes: ['element-1'],
       resolvedArgs: {
         'element-0': [
           {
@@ -119,7 +119,7 @@ describe('resolved args reducer', () => {
 
   describe('clear', () => {
     it('removed resolved value at path', () => {
-      const action = actionCreator(actions.clear)({
+      const action = actionCreator(actions.clearValue)({
         path: 'element-0.1',
       });
 
@@ -135,7 +135,7 @@ describe('resolved args reducer', () => {
     });
 
     it('deeply removes resolved values', () => {
-      const action = actionCreator(actions.clear)({
+      const action = actionCreator(actions.clearValue)({
         path: 'element-0',
       });
 
@@ -148,7 +148,7 @@ describe('resolved args reducer', () => {
     it('removes expression context from a given index to the end', () => {
       state = {
         selectedPage: 'page-1',
-        selectedElement: 'element-1',
+        selectedToplevelNodes: ['element-1'],
         resolvedArgs: {
           'element-1': {
             expressionContext: {

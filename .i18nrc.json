@@ -31,6 +31,7 @@
     "xpack.infra": "x-pack/plugins/infra",
     "xpack.kueryAutocomplete": "x-pack/plugins/kuery_autocomplete",
     "xpack.licenseMgmt": "x-pack/plugins/license_management",
+    "xpack.maps": "x-pack/plugins/maps",
     "xpack.ml": "x-pack/plugins/ml",
     "xpack.logstash": "x-pack/plugins/logstash",
     "xpack.main": "x-pack/plugins/xpack_main",
@@ -47,9 +48,7 @@
     "xpack.watcher": "x-pack/plugins/watcher"
   },
   "exclude": [
-    "src/legacy/ui/ui_render/bootstrap/app_bootstrap.js",
-    "src/legacy/ui/ui_render/ui_render_mixin.js",
-    "x-pack/plugins/infra/server/lib/domains/log_entries_domain/log_entries_domain.ts"
+    "src/legacy/ui/ui_render/ui_render_mixin.js"
   ],
   "translations": [
     "x-pack/plugins/translations/translations/zh-CN.json"

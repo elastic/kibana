@@ -30,8 +30,8 @@
 .visEditorSidebar__indexPattern {
   font-weight: $euiFontWeightBold;
   padding: $euiSizeXS $euiSizeS;
-  background-color: shade($euiColorPrimary, 60%);
-  color: $euiColorGhost;
+  background-color: shadeOrTint($euiColorPrimary, 60%, 60%);
+  color: $euiColorEmptyShade;
   line-height: $euiSizeL;
 }
 
@@ -97,7 +97,7 @@
     margin-top: $euiSizeS;
   }
 
-  label {
+  label:not([class^="eui"]) {
     @include __legacyLabelStyles__bad;
     display: block;
   }
@@ -136,7 +136,6 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  line-height: 1.5;
   white-space: nowrap;
 
   + * {
@@ -158,6 +157,7 @@
   display: flex;
   align-items: center;
   margin-right: $euiSizeXS;
+  line-height: $euiLineHeight;
 }
 
 .visEditorSidebar__collapsibleTitleText {
@@ -221,3 +221,7 @@
   }
 }
 
+.visEditorSidebar__aggParamFormRow {
+  margin-top: $euiSizeS;
+  margin-bottom: $euiSizeS;
+}

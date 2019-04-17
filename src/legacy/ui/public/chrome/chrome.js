@@ -27,9 +27,9 @@ import '../notify';
 import '../private';
 import '../promises';
 import '../storage';
-import '../directives/kbn_src';
 import '../watch_multi';
 import './services';
+import '../react_components';
 import '../i18n';
 
 import { initAngularApi } from './api/angular';

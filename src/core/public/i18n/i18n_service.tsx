@@ -25,21 +25,18 @@ import { I18nProvider } from '@kbn/i18n/react';
 
 /**
  * Service that is responsible for i18n capabilities.
+ * @internal
  */
 export class I18nService {
-  public start() {
+  public setup() {
     const mapping = {
       'euiTablePagination.rowsPerPage': i18n.translate('core.euiTablePagination.rowsPerPage', {
         defaultMessage: 'Rows per page',
       }),
     };
 
-    return {
-      /**
-       * I18n context is required by any localizable React component from @kbn/i18n and @elastic/eui packages
-       * and is supposed to be used as the topmost component for any i18n-compatible React tree.
-       */
-      Context: function I18nContext({ children }: { children: React.ReactNode }) {
+    const setup: I18nSetup = {
+      Context: function I18nContext({ children }) {
         return (
           <I18nProvider>
             <EuiContext i18n={{ mapping }}>{children}</EuiContext>
@@ -47,6 +44,8 @@ export class I18nService {
         );
       },
     };
+
+    return setup;
   }
 
   public stop() {
@@ -54,4 +53,16 @@ export class I18nService {
   }
 }
 
-export type I18nStart = ReturnType<I18nService['start']>;
+/**
+ * I18nSetup.Context is required by any localizable React component from \@kbn/i18n and \@elastic/eui packages
+ * and is supposed to be used as the topmost component for any i18n-compatible React tree.
+ *
+ * @public
+ *
+ */
+export interface I18nSetup {
+  /**
+   * React Context provider required as the topmost component for any i18n-compatible React tree.
+   */
+  Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
+}

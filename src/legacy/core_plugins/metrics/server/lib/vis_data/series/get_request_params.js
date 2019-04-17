@@ -25,7 +25,7 @@ export async function getSeriesRequestParams(req, panel, series, esQueryConfig, 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const { indexPatternObject, indexPatternString } = await getIndexPatternObject(req, indexPattern);
   const request = buildRequestBody(req, panel, series, esQueryConfig, indexPatternObject, capabilities);
-  const esShardTimeout = getEsShardTimeout(req);
+  const esShardTimeout = await getEsShardTimeout(req);
 
   if (capabilities.batchRequestsSupport) {
     bodies.push({

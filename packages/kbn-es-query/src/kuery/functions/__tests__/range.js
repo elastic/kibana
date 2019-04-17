@@ -17,11 +17,10 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as range from '../range';
 import { nodeTypes } from '../../node_types';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
-
 
 let indexPattern;
 
@@ -134,6 +133,52 @@ describe('kuery functions', function () {
         const node = nodeTypes.function.buildNode('range', 'script number', { gt: 1000, lt: 8000 });
         const result = range.toElasticsearchQuery(node, indexPattern);
         expect(result.bool.should[0]).to.have.key('script');
+      });
+
+      it('should support date fields without a dateFormat provided', function () {
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  '@timestamp': {
+                    gt: '2018-01-03T19:04:17',
+                    lt: '2018-04-03T19:04:17',
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', '@timestamp', { gt: '2018-01-03T19:04:17', lt: '2018-04-03T19:04:17' });
+        const result = range.toElasticsearchQuery(node, indexPattern);
+        expect(result).to.eql(expected);
+      });
+
+      it('should support date fields with a dateFormat provided', function () {
+        const config = { dateFormatTZ: 'America/Phoenix' };
+        const expected = {
+          bool: {
+            should: [
+              {
+                range: {
+                  '@timestamp': {
+                    gt: '2018-01-03T19:04:17',
+                    lt: '2018-04-03T19:04:17',
+                    time_zone: 'America/Phoenix',
+                  }
+                }
+              }
+            ],
+            minimum_should_match: 1
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('range', '@timestamp', { gt: '2018-01-03T19:04:17', lt: '2018-04-03T19:04:17' });
+        const result = range.toElasticsearchQuery(node, indexPattern, config);
+        expect(result).to.eql(expected);
       });
 
     });

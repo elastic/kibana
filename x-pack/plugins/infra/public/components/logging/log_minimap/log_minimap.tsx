@@ -6,8 +6,8 @@
 
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
 // import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { DensityChart } from './density_chart';
@@ -24,15 +24,6 @@ interface LogMinimapProps {
     start: number;
   } | null;
   jumpToTarget: (params: LogEntryTime) => any;
-  reportVisibleInterval: (
-    params: {
-      start: number;
-      end: number;
-      bucketsOnPage: number;
-      pagesBeforeStart: number;
-      pagesAfterEnd: number;
-    }
-  ) => any;
   intervalSize: number;
   summaryBuckets: SummaryBucket[];
   // searchSummaryBuckets?: SearchSummaryBucket[];
@@ -69,37 +60,6 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
 
     return ((time - minTime) * height) / intervalSize;
   };
-
-  public updateVisibleInterval = () => {
-    const { summaryBuckets, intervalSize } = this.props;
-    const [minTime, maxTime] = this.getYScale().domain();
-
-    const firstBucket = summaryBuckets[0];
-    const lastBucket = summaryBuckets[summaryBuckets.length - 1];
-
-    const pagesBeforeStart = firstBucket ? (minTime - firstBucket.start) / intervalSize : 0;
-    const pagesAfterEnd = lastBucket ? (lastBucket.end - maxTime) / intervalSize : 0;
-    const bucketsOnPage = firstBucket
-      ? (maxTime - minTime) / (firstBucket.end - firstBucket.start)
-      : 0;
-
-    this.props.reportVisibleInterval({
-      end: Math.ceil(maxTime),
-      start: Math.floor(minTime),
-      bucketsOnPage,
-      pagesBeforeStart,
-      pagesAfterEnd,
-    });
-  };
-
-  public componentDidUpdate(prevProps: LogMinimapProps) {
-    const hasNewTarget = prevProps.target !== this.props.target;
-    const hasNewIntervalSize = prevProps.intervalSize !== this.props.intervalSize;
-
-    if (hasNewTarget || hasNewIntervalSize) {
-      this.updateVisibleInterval();
-    }
-  }
 
   public render() {
     const {
@@ -141,7 +101,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             width={width}
           />
         ) : null}
-        {/*<g transform={`translate(${width * 0.5}, 0)`}>
+        {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
             start={minTime}
@@ -150,17 +110,17 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             height={height}
             jumpToTarget={jumpToTarget}
           />
-        </g>*/}
+        </g> */}
       </svg>
     );
   }
 }
 
-const MinimapBackground = styled.rect`
+const MinimapBackground = euiStyled.rect`
   fill: ${props => props.theme.eui.euiColorLightestShade};
 `;
 
-const MinimapBorder = styled.line`
+const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
 `;
