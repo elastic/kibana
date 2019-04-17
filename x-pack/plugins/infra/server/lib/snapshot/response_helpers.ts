@@ -7,7 +7,11 @@
 import { isNumber, last, max, sum } from 'lodash';
 import moment from 'moment';
 
-import { InfraSnapshotMetricType } from '../../graphql/types';
+import {
+  InfraSnapshotMetricType,
+  InfraSnapshotNodePath,
+  InfraSnapshotNodeMetric,
+} from '../../graphql/types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './snapshot';
 
@@ -44,7 +48,7 @@ export interface InfraSnaphotNodeGroupByBucket {
 export const getNodePath = (
   groupBucket: InfraSnaphotNodeGroupByBucket,
   options: InfraSnapshotRequestOptions
-) => {
+): InfraSnapshotNodePath[] => {
   const path = [];
   const node = groupBucket.key;
   options.groupBy.forEach(gb => {
@@ -54,7 +58,9 @@ export const getNodePath = (
   return path;
 };
 
-export const getNodeMetricsForLookup = (metrics: InfraSnapshotNodeMetricsBucket[]) => {
+export const getNodeMetricsForLookup = (
+  metrics: InfraSnapshotNodeMetricsBucket[]
+): { [key: string]: InfraSnapshotMetricsBucket } => {
   const nodeMetricsForLookup: any = {};
   metrics.forEach(metric => {
     nodeMetricsForLookup[`${metric.key.node}`] = metric.histogram.buckets;
@@ -68,7 +74,7 @@ export const getNodeMetricsForLookup = (metrics: InfraSnapshotNodeMetricsBucket[
 export const getNodeMetrics = (
   nodeBuckets: InfraSnapshotMetricsBucket[],
   options: InfraSnapshotRequestOptions
-) => {
+): InfraSnapshotNodeMetric => {
   if (!nodeBuckets) {
     return {
       name: options.metric.type,
