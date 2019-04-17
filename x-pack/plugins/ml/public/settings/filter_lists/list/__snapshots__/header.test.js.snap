@@ -17,10 +17,7 @@ exports[`Filter Lists Header renders header 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Filter Lists"
@@ -35,7 +32,6 @@ exports[`Filter Lists Header renders header 1`] = `
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -84,14 +80,10 @@ exports[`Filter Lists Header renders header 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <p>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Filter lists contain values that you can use to include or exclude events from the machine learning analysis.

@@ -24,7 +24,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -73,7 +72,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -114,7 +112,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage

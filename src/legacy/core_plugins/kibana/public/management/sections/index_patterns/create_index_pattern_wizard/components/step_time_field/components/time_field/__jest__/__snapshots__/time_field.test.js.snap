@@ -243,10 +243,7 @@ exports[`TimeField should render normally 1`] = `
 
 exports[`TimeField should render something if hiding time field 1`] = `
 <EuiForm>
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <p>
       <FormattedMessage
         defaultMessage="The indices which match this index pattern don't contain any time fields."

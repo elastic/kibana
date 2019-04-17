@@ -188,9 +188,13 @@ Array [
                             class="euiFlyoutBody"
                           >
                             <div
-                              class="euiText euiText--medium"
+                              class="euiFlyoutBody__overflow"
                             >
-                              Could not fetch the job info
+                              <div
+                                class="euiText euiText--medium"
+                              >
+                                Could not fetch the job info
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -248,9 +252,13 @@ Array [
                               class="euiFlyoutBody"
                             >
                               <div
-                                class="euiText euiText--medium"
+                                class="euiFlyoutBody__overflow"
                               >
-                                Could not fetch the job info
+                                <div
+                                  class="euiText euiText--medium"
+                                >
+                                  Could not fetch the job info
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -327,7 +335,6 @@ Array [
                       >
                         <EuiTitle
                           size="s"
-                          textTransform="none"
                         >
                           <h2
                             className="euiTitle euiTitle--small"
@@ -342,16 +349,17 @@ Array [
                       <div
                         className="euiFlyoutBody"
                       >
-                        <EuiText
-                          grow={true}
-                          size="m"
+                        <div
+                          className="euiFlyoutBody__overflow"
                         >
-                          <div
-                            className="euiText euiText--medium"
-                          >
-                            Could not fetch the job info
-                          </div>
-                        </EuiText>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            >
+                              Could not fetch the job info
+                            </div>
+                          </EuiText>
+                        </div>
                       </div>
                     </EuiFlyoutBody>
                   </div>
@@ -444,7 +452,6 @@ Array [
       >
         <EuiTitle
           size="s"
-          textTransform="none"
         >
           <h2
             className="euiTitle euiTitle--small"
@@ -459,16 +466,17 @@ Array [
       <div
         className="euiFlyoutBody"
       >
-        <EuiText
-          grow={true}
-          size="m"
+        <div
+          className="euiFlyoutBody__overflow"
         >
-          <div
-            className="euiText euiText--medium"
-          >
-            Could not fetch the job info
-          </div>
-        </EuiText>
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            >
+              Could not fetch the job info
+            </div>
+          </EuiText>
+        </div>
       </div>
     </EuiFlyoutBody>
   </div>,
@@ -619,8 +627,12 @@ Array [
                             class="euiFlyoutBody"
                           >
                             <div
-                              class="euiText euiText--medium"
-                            />
+                              class="euiFlyoutBody__overflow"
+                            >
+                              <div
+                                class="euiText euiText--medium"
+                              />
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -677,8 +689,12 @@ Array [
                               class="euiFlyoutBody"
                             >
                               <div
-                                class="euiText euiText--medium"
-                              />
+                                class="euiFlyoutBody__overflow"
+                              >
+                                <div
+                                  class="euiText euiText--medium"
+                                />
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -754,7 +770,6 @@ Array [
                       >
                         <EuiTitle
                           size="s"
-                          textTransform="none"
                         >
                           <h2
                             className="euiTitle euiTitle--small"
@@ -769,14 +784,15 @@ Array [
                       <div
                         className="euiFlyoutBody"
                       >
-                        <EuiText
-                          grow={true}
-                          size="m"
+                        <div
+                          className="euiFlyoutBody__overflow"
                         >
-                          <div
-                            className="euiText euiText--medium"
-                          />
-                        </EuiText>
+                          <EuiText>
+                            <div
+                              className="euiText euiText--medium"
+                            />
+                          </EuiText>
+                        </div>
                       </div>
                     </EuiFlyoutBody>
                   </div>
@@ -869,7 +885,6 @@ Array [
       >
         <EuiTitle
           size="s"
-          textTransform="none"
         >
           <h2
             className="euiTitle euiTitle--small"
@@ -884,14 +899,15 @@ Array [
       <div
         className="euiFlyoutBody"
       >
-        <EuiText
-          grow={true}
-          size="m"
+        <div
+          className="euiFlyoutBody__overflow"
         >
-          <div
-            className="euiText euiText--medium"
-          />
-        </EuiText>
+          <EuiText>
+            <div
+              className="euiText euiText--medium"
+            />
+          </EuiText>
+        </div>
       </div>
     </EuiFlyoutBody>
   </div>,
