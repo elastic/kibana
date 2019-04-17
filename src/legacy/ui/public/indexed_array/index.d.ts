@@ -32,9 +32,6 @@ declare class IndexedArray<T> extends Array<T> {
   public raw: T[];
   // May not actually be present, is dynamically defined.
   public inOrder: T[];
-  public byValue: {
-    [key: string]: T;
-  };
 
   constructor(config: IndexedArrayConfig<T>);
 

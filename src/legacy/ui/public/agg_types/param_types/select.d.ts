@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { IndexedArray } from '../../indexed_array';
 
 interface SelectValueProp {
@@ -25,9 +24,15 @@ interface SelectValueProp {
   text: string;
 }
 
+interface SelectOptions extends IndexedArray<SelectValueProp> {
+  byValue: {
+    [key: string]: SelectValueProp;
+  };
+}
+
 interface SelectParamEditorProps {
   aggParam: {
-    options: IndexedArray<SelectValueProp>;
+    options: SelectOptions;
   };
 }
 
