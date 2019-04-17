@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { OverwrittenSessionPage } from './overwritten_session_page';
+export { AuthenticationState } from './authentication_state';

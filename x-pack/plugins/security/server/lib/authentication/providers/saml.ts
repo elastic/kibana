@@ -9,7 +9,7 @@ import { Request } from 'hapi';
 import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
-import { User } from '../../get_user';
+import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 
@@ -146,7 +146,7 @@ export class SAMLAuthenticationProvider {
         authenticationResult = await this.authenticateViaNewPayload(
           request,
           (authenticationResult.state || state) as ProviderState,
-          authenticationResult.user as User
+          authenticationResult.user as AuthenticatedUser
         );
       }
     }
@@ -305,7 +305,7 @@ export class SAMLAuthenticationProvider {
   private async authenticateViaNewPayload(
     request: RequestWithSAMLPayload,
     existingState: ProviderState,
-    user: User
+    user: AuthenticatedUser
   ) {
     this.debug('Trying to authenticate via SAML response payload with existing valid session.');
 

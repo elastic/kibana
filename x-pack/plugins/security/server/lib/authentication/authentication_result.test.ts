@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { User } from '../get_user';
+import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {
@@ -55,7 +55,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('correctly produces `succeeded` authentication result without state.', () => {
-      const user = { username: 'user' } as User;
+      const user = { username: 'user' } as AuthenticatedUser;
       const authenticationResult = AuthenticationResult.succeeded(user);
 
       expect(authenticationResult.succeeded()).toBe(true);
@@ -70,7 +70,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('correctly produces `succeeded` authentication result with state.', () => {
-      const user = { username: 'user' } as User;
+      const user = { username: 'user' } as AuthenticatedUser;
       const state = { some: 'state' };
       const authenticationResult = AuthenticationResult.succeeded(user, state);
 
@@ -153,7 +153,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('depends on `state` for `succeeded`.', () => {
-      const mockUser = { username: 'u' } as User;
+      const mockUser = { username: 'u' } as AuthenticatedUser;
       expect(AuthenticationResult.succeeded(mockUser, 'string').shouldUpdateState()).toBe(true);
       expect(AuthenticationResult.succeeded(mockUser, 0).shouldUpdateState()).toBe(true);
       expect(AuthenticationResult.succeeded(mockUser, true).shouldUpdateState()).toBe(true);
@@ -199,7 +199,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('depends on `state` for `succeeded`.', () => {
-      const mockUser = { username: 'u' } as User;
+      const mockUser = { username: 'u' } as AuthenticatedUser;
       expect(AuthenticationResult.succeeded(mockUser, null).shouldClearState()).toBe(true);
 
       expect(AuthenticationResult.succeeded(mockUser).shouldClearState()).toBe(false);

@@ -1,24 +1,24 @@
-.overwrittenSession {
+.authenticationState {
   @include kibanaFullScreenGraphics;
 }
 
-.overwrittenSession__header {
+.authenticationState__header {
   position: relative;
   padding: $euiSizeXL;
   z-index: 10;
 }
 
-.overwrittenSession__logo {
+.authenticationState__logo {
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
 
   margin-bottom: $euiSizeXL;
 }
 
-.overwrittenSession__content {
+.authenticationState__content {
   position: relative;
   margin: auto;
-  max-width: 560px;
+  max-width: 460px;
   padding-left: $euiSizeXL;
   padding-right: $euiSizeXL;
   z-index: 10;
