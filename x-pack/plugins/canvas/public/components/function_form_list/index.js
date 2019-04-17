@@ -29,9 +29,8 @@ function getArgTypeDef(fn) {
   return modelRegistry.get(fn) || viewRegistry.get(fn) || transformRegistry.get(fn);
 }
 
-const functionFormItems = withProps((props) => {
-  const selectedElement = props.element;
-  const FunctionFormChain = get(selectedElement, 'ast.chain', []);
+const functionFormItems = withProps(({ element }) => {
+  const FunctionFormChain = get(element, 'ast.chain', []);
 
   // map argTypes from AST, attaching nextArgType if one exists
   const FunctionFormListItems = FunctionFormChain.reduce(

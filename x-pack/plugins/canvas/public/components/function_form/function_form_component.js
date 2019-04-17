@@ -16,7 +16,6 @@ export const FunctionFormComponent = (props) => {
     filterGroups: props.filterGroups,
     context: props.context,
     expressionIndex: props.expressionIndex,
-    expressionType: props.expressionType,
     nextArgType: props.nextArgType,
     nextExpressionType: props.nextExpressionType,
     onAssetAdd: props.onAssetAdd,
@@ -25,7 +24,7 @@ export const FunctionFormComponent = (props) => {
     onValueRemove: props.onValueRemove,
   };
 
-  return <div className="canvasFunctionForm">{props.expressionType.render(passedProps)}</div>;
+  return <div className="canvasFunctionForm">{props.argTypeDef.render(passedProps)}</div>;
 };
 
 FunctionFormComponent.propTypes = {
@@ -37,7 +36,6 @@ FunctionFormComponent.propTypes = {
   filterGroups: PropTypes.array.isRequired,
   context: PropTypes.object,
   expressionIndex: PropTypes.number.isRequired,
-  expressionType: PropTypes.object.isRequired,
   nextArgType: PropTypes.string,
   nextExpressionType: PropTypes.object,
   onAssetAdd: PropTypes.func.isRequired,

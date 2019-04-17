@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import isEqual from 'react-fast-compare';
 import { Loading } from '../loading';
 
-export class FunctionFormContextPending extends React.PureComponent {
+export class FunctionFormContextPending extends Component {
   static propTypes = {
     context: PropTypes.object,
     contextExpression: PropTypes.string,
-    expressionType: PropTypes.object.isRequired,
+    requiresContext: PropTypes.bool.isRequired,
     updateContext: PropTypes.func.isRequired,
   };
 
@@ -20,17 +21,27 @@ export class FunctionFormContextPending extends React.PureComponent {
     this.fetchContext(this.props);
   }
 
-  UNSAFE_componentWillReceiveProps(newProps) {
+  shouldComponentUpdate(newProps) {
+    // avoid needless re-renders
+    if (isEqual(this.props, newProps)) {
+      return false;
+    }
+
     const oldContext = this.props.contextExpression;
     const newContext = newProps.contextExpression;
-    const forceUpdate = newProps.expressionType.requiresContext && oldContext !== newContext;
-    this.fetchContext(newProps, forceUpdate);
+    const forceUpdate = newProps.requiresContext && oldContext !== newContext;
+    if (!newProps.context || forceUpdate) {
+      this.fetchContext(newProps, forceUpdate);
+      return false;
+    }
+
+    return true;
   }
 
   fetchContext = (props, force = false) => {
     // dispatch context update if none is provided
-    const { expressionType, context, updateContext } = props;
-    if (force || (context == null && expressionType.requiresContext)) {
+    const { requiresContext, context, updateContext } = props;
+    if (force || (context == null && requiresContext)) {
       updateContext();
     }
   };

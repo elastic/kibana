@@ -8,9 +8,10 @@ import React, { Fragment } from 'react';
 import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
 import { EuiSpacer } from '@elastic/eui';
+import { ComponentStrings } from '../../../i18n';
+import { globalStateUpdater } from '../workpad_page/integration_utils';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
 import { SidebarHeader } from '../sidebar_header';
-import { ComponentStrings } from '../../../i18n';
 import { MultiElementSettings } from './multi_element_settings';
 import { GroupSettings } from './group_settings';
 import { GlobalConfig } from './global_config';
@@ -23,11 +24,31 @@ const mapStateToProps = (state) => ({
   selectedElementId: getSelectedElementId(state),
 });
 
-const MultiElementSidebar = () => (
+const mergeProps = (
+  { state, ...restStateProps },
+  { dispatch, ...restDispatchProps },
+  ownProps
+) => ({
+  ...ownProps,
+  ...restDispatchProps,
+  ...restStateProps,
+  updateGlobalState: globalStateUpdater(dispatch, state),
+});
+
+const withGlobalState = (commit, updateGlobalState) => (type, payload) => {
+  const newLayoutState = commit(type, payload);
+  if (newLayoutState.currentScene.gestureEnd) {
+    updateGlobalState(newLayoutState);
+  }
+};
+
+const MultiElementSidebar = ({ commit, updateGlobalState, selectedToplevelNodes }) => (
   <Fragment>
-    <SidebarHeader title={strings.getMultiElementSidebarTitle()} />
-    <EuiSpacer />
-    <MultiElementSettings />
+    <SidebarHeader
+      title={strings.getMultiElementSidebarTitle()}
+      commit={withGlobalState(commit, updateGlobalState)}
+    />
+    <MultiElementSettings selectedToplevelNodes={selectedToplevelNodes} />
   </Fragment>
 );
 
@@ -65,4 +86,7 @@ const branches = [
   ),
 ];
 
-export const SidebarContent = compose(connect(mapStateToProps), ...branches)(GlobalConfig);
+export const SidebarContent = compose(
+  connect(mapStateToProps, mergeProps),
+  ...branches
+)(GlobalConfig);

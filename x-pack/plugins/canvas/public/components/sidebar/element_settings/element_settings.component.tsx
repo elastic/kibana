@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { Component } from 'react';
+import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { EuiTabbedContent } from '@elastic/eui';
 // @ts-expect-error unconverted component
@@ -46,10 +47,5 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
       ),
     },
   ];
-
   return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />;
-};
-
-ElementSettings.propTypes = {
-  element: PropTypes.object,
 };

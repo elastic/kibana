@@ -8,12 +8,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FunctionForm } from '../function_form';
 
-export const FunctionFormList = ({ functionFormItems }) => {
+export const FunctionFormList = ({ functionFormItems, element }) => {
   const argTypeComponents = functionFormItems.map((functionFormProps) => {
     return (
       <FunctionForm
         {...functionFormProps}
         key={`${functionFormProps.argType}-${functionFormProps.expressionIndex}`}
+        elementId={element.id}
       />
     );
   });

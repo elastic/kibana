@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, branch, renderComponent } from 'recompose';
 import { FunctionFormComponent } from './function_form_component';
@@ -19,14 +20,27 @@ function checkState(state) {
   };
 }
 
+const ContextPending = ({ context, contextExpression, expressionType, updateContext }) => (
+  <FunctionFormContextPending
+    context={context}
+    contextExpression={contextExpression}
+    requiresContext={expressionType.requiresContext}
+    updateContext={updateContext}
+  />
+);
+
+const ContextError = ({ context }) => <FunctionFormContextError context={context} />;
+
+const UnknownFunction = ({ argType }) => <FunctionUnknown argType={argType} />;
+
 // alternate render paths based on expression state
 const branches = [
   // if no expressionType was provided, render the ArgTypeUnknown component
-  branch((props) => !props.expressionType, renderComponent(FunctionUnknown)),
+  branch((props) => !props.argType, renderComponent(UnknownFunction)),
   // if the expressionType is in a pending state, render ArgTypeContextPending
-  branch(checkState('pending'), renderComponent(FunctionFormContextPending)),
+  branch(checkState('pending'), renderComponent(ContextPending)),
   // if the expressionType is in an error state, render ArgTypeContextError
-  branch(checkState('error'), renderComponent(FunctionFormContextError)),
+  branch(checkState('error'), renderComponent(ContextError)),
 ];
 
 export const FunctionForm = compose(...branches)(FunctionFormComponent);

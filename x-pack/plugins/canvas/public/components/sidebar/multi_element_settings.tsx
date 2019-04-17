@@ -5,16 +5,34 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiText } from '@elastic/eui';
-import { ComponentStrings } from '../../../i18n/components';
+import { EuiAccordion, EuiText } from '@elastic/eui';
+import { ElementSettings } from './element_settings';
 
-const { MultiElementSettings: strings } = ComponentStrings;
+interface Props {
+  selectedToplevelNodes: string[];
+}
 
-export const MultiElementSettings: FunctionComponent = () => (
-  <div className="canvasSidebar__panel canvasSidebar__panel--isEmpty">
-    <EuiText size="s">
-      <p>{strings.getMultipleElementsDescription()}</p>
-      <p>{strings.getMultipleElementsActionsDescription()}</p>
-    </EuiText>
-  </div>
+export const MultiElementSettings: FunctionComponent<Props> = ({ selectedToplevelNodes }) => (
+  <>
+    {selectedToplevelNodes.map((elementId: string) => {
+      // skip groups for now
+      if (elementId.includes('group')) {
+        return null;
+      }
+
+      return (
+        <EuiAccordion
+          id={`element-config-${elementId}`}
+          key={`element-config-${elementId}`}
+          buttonContent={
+            <EuiText size="s" color="subdued">
+              {elementId}
+            </EuiText>
+          }
+        >
+          <ElementSettings selectedElementId={elementId} />
+        </EuiAccordion>
+      );
+    })}
+  </>
 );
