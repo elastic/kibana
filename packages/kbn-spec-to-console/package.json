@@ -10,10 +10,6 @@
     "test": "jest",
     "format": "prettier **/*.js --write"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jbudz/spec-to-console.git"
-  },
   "author": "",
   "license": "Apache-2.0",
   "bugs": {
@@ -21,8 +17,8 @@
   },
   "homepage": "https://github.com/jbudz/spec-to-console#readme",
   "devDependencies": {
-    "jest": "^21.0.1",
-    "prettier": "^1.9.2"
+    "jest": "^24.1.0",
+    "prettier": "^1.14.3"
   },
   "dependencies": {
     "commander": "^2.11.0",
