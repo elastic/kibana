@@ -50,5 +50,8 @@
   },
   "exclude": [
     "src/legacy/ui/ui_render/ui_render_mixin.js"
+  ],
+  "translations": [	
+    "x-pack/plugins/translations/translations/zh-CN.json"	
   ]
 }
