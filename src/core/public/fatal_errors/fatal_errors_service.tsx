@@ -37,6 +37,28 @@ interface Deps {
   i18n: I18nSetup;
 }
 
+/**
+ * FatalErrors stop the Kibana Public Core and displays a fatal error screen
+ * with details about the Kibana build and the error.
+ *
+ * @public
+ */
+export interface FatalErrorsSetup {
+  /**
+   * Add a new fatal error. This will stop the Kibana Public Core and display
+   * a fatal error screen with details about the Kibana build and the error.
+   *
+   * @param error - The error to display
+   * @param source - Adds a prefix of the form `${source}: ` to the error message
+   */
+  add: (error: string | Error, source?: string) => never;
+
+  /**
+   * An Observable that will emit whenever a fatal error is added with `add()`
+   */
+  get$: () => Rx.Observable<ErrorInfo>;
+}
+
 /** @interal */
 export class FatalErrorsService {
   private readonly errorInfo$ = new Rx.ReplaySubject<ErrorInfo>();
@@ -56,7 +78,7 @@ export class FatalErrorsService {
       });
   }
 
-  public add = (error: Error | string, source?: string) => {
+  public add: FatalErrorsSetup['add'] = (error, source?) => {
     const errorInfo = getErrorInfo(error, source);
 
     this.errorInfo$.next(errorInfo);
@@ -73,12 +95,14 @@ export class FatalErrorsService {
   public setup({ i18n }: Deps) {
     this.i18n = i18n;
 
-    return {
+    const fatalErrorsSetup: FatalErrorsSetup = {
       add: this.add,
       get$: () => {
         return this.errorInfo$.asObservable();
       },
     };
+
+    return fatalErrorsSetup;
   }
 
   private onFirstError() {
@@ -109,6 +133,3 @@ export class FatalErrorsService {
     );
   }
 }
-
-/** @public */
-export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
