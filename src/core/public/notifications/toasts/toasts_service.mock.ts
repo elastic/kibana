@@ -26,6 +26,7 @@ const createSetupContractMock = () => {
     addSuccess: jest.fn(),
     addWarning: jest.fn(),
     addDanger: jest.fn(),
+    addError: jest.fn(),
   };
   return setupContract;
 };
