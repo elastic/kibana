@@ -1,21 +1,21 @@
-.authenticationState {
+.secAuthenticationStatePage {
   @include kibanaFullScreenGraphics;
 }
 
-.authenticationState__header {
+.secAuthenticationStatePage__header {
   position: relative;
   padding: $euiSizeXL;
   z-index: 10;
 }
 
-.authenticationState__logo {
+.secAuthenticationStatePage__logo {
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
 
   margin-bottom: $euiSizeXL;
 }
 
-.authenticationState__content {
+.secAuthenticationStatePage__content {
   position: relative;
   margin: auto;
   max-width: 460px;

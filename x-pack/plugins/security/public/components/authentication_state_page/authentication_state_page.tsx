@@ -11,23 +11,25 @@ interface Props {
   title: React.ReactNode;
 }
 
-export class AuthenticationState extends Component<Props, {}> {
+export class AuthenticationStatePage extends Component<Props, {}> {
   public render() {
     return (
-      <div className="authenticationState">
-        <header className="authenticationState__header">
-          <div className="authenticationState__content eui-textCenter">
+      <div className="secAuthenticationStatePage">
+        <header className="secAuthenticationStatePage__header">
+          <div className="secAuthenticationStatePage__content eui-textCenter">
             <EuiSpacer size="xxl" />
-            <span className="authenticationState__logo">
+            <span className="secAuthenticationStatePage__logo">
               <EuiIcon type="logoKibana" size="xxl" />
             </span>
-            <EuiTitle size="l" className="authenticationState__title">
+            <EuiTitle size="l" className="secAuthenticationStatePage__title">
               <h1>{this.props.title}</h1>
             </EuiTitle>
             <EuiSpacer size="xl" />
           </div>
         </header>
-        <div className="authenticationState__content eui-textCenter">{this.props.children}</div>
+        <div className="secAuthenticationStatePage__content eui-textCenter">
+          {this.props.children}
+        </div>
       </div>
     );
   }

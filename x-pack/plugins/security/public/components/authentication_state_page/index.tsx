@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { AuthenticationState } from './authentication_state';
+export { AuthenticationStatePage } from './authentication_state_page';

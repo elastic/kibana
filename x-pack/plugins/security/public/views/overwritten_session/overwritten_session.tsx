@@ -12,7 +12,7 @@ import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
 import { I18nContext } from 'ui/i18n';
 import { AuthenticatedUser } from '../../../common/model';
-import { AuthenticationState } from '../../components/authentication_state';
+import { AuthenticationStatePage } from '../../components/authentication_state_page';
 
 chrome
   .setVisible(false)
@@ -22,7 +22,7 @@ chrome
       ShieldUser.getCurrent().$promise.then((user: AuthenticatedUser) => {
         const overwrittenSessionPage = (
           <I18nContext>
-            <AuthenticationState
+            <AuthenticationStatePage
               title={
                 <FormattedMessage
                   id="xpack.security.overwrittenSession.title"
@@ -37,7 +37,7 @@ chrome
                   values={{ username: user.username }}
                 />
               </EuiButton>
-            </AuthenticationState>
+            </AuthenticationStatePage>
           </I18nContext>
         );
         render(overwrittenSessionPage, document.getElementById('reactOverwrittenSessionRoot'));
