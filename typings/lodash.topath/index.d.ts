@@ -18,7 +18,7 @@
  */
 
 
- declare module 'lodash/internal/toPath' {
+declare module 'lodash/internal/toPath' {
   function toPath(value: string | string[]): string[]
   export = toPath;
 }
