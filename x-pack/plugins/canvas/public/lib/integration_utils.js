@@ -5,12 +5,12 @@
  */
 
 import { shallowEqual } from 'recompose';
-import { getNodes, getSelectedPage } from '../../state/selectors/workpad';
-import { addElement, removeElements, setMultiplePositions } from '../../state/actions/elements';
-import { selectToplevelNodes } from '../../state/actions/transient';
-import { matrixToAngle, multiply, rotateZ, translate } from '../../lib/aeroelastic/matrix';
-import { arrayToMap, flatten, identity } from '../../lib/aeroelastic/functional';
-import { getLocalTransformMatrix } from '../../lib/aeroelastic/layout_functions';
+import { getNodes, getSelectedPage } from '../state/selectors/workpad';
+import { addElement, removeElements, setMultiplePositions } from '../state/actions/elements';
+import { selectToplevelNodes } from '../state/actions/transient';
+import { matrixToAngle, multiply, rotateZ, translate } from './aeroelastic/matrix';
+import { arrayToMap, flatten, identity } from './aeroelastic/functional';
+import { getLocalTransformMatrix } from './aeroelastic/layout_functions';
 
 const isGroupId = id => id.startsWith('group');
 
