@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'ui/filters/moment';
+import '../../../../directives/moment';
 import { uiModules } from 'ui/modules';
 import template from './watch_history_table.html';
 import 'plugins/watcher/components/watch_state_icon';

@@ -64,11 +64,13 @@ export default function ({ getService, getPageObjects }) {
 
         beforeEach(async function () {
           await inspector.open();
+          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         });
 
         afterEach(async function () {
           await inspector.close();
           await filterBar.removeFilter('machine.os.raw');
+          await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         });
 
         it('should allow filtering for values', async function () {
