@@ -40,7 +40,7 @@ function retrieveSessionCookie(cookies: string) {
 }
 
 const userData = { id: '42' };
-const sessionDurationMs = 30;
+const sessionDurationMs = 1000;
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 const cookieOptions = {
   name: 'sid',
