@@ -10,7 +10,6 @@ import { AgentName } from '../../typings/es_schemas/ui/fields/Agent';
 import { createApmTelementry, storeApmTelemetry } from '../lib/apm_telemetry';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
-import { ensureIndexPatternExists } from '../lib/index_pattern';
 import { getService } from '../lib/services/get_service';
 import { getServices } from '../lib/services/get_services';
 
@@ -62,6 +61,4 @@ export function initServicesApi(core: CoreSetup) {
       return getService(serviceName, setup).catch(defaultErrorHandler);
     }
   });
-
-  ensureIndexPatternExists(server);
 }

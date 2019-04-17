@@ -3,23 +3,23 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Server } from 'hapi';
-// @ts-ignore
-import { getSavedObjects } from '../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/saved_objects/get_saved_objects';
+import { CoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
+import indexPattern from '../../../common/index_pattern.json';
 
-export async function ensureIndexPatternExists(server: Server) {
+export async function ensureIndexPatternExists(core: CoreSetup) {
+  const { server } = core.http;
   const config = server.config();
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
   const savedObjectsClient = getSavedObjectsClient(server);
-  const apmIndexPatternSearchResp = await savedObjectsClient.find({
-    type: 'index-pattern',
-    search: `"${apmIndexPatternTitle}"`,
-    searchFields: ['title'],
-    perPage: 200
-  });
-  if (apmIndexPatternSearchResp.total === 0) {
-    const savedObjects = getSavedObjects(apmIndexPatternTitle);
-    await savedObjectsClient.bulkCreate(savedObjects, { overwrite: false });
-  }
+  const savedObjects = [
+    {
+      ...indexPattern,
+      attributes: {
+        ...indexPattern.attributes,
+        title: apmIndexPatternTitle
+      }
+    }
+  ];
+  await savedObjectsClient.bulkCreate(savedObjects, { overwrite: false });
 }
