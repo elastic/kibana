@@ -8,6 +8,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { Field, Aggregation } from '../../common/types/fields';
 import { ml } from '../services/ml_api_service';
 
+// the type property is missing from the official IndexPattern interface
 interface IndexPatternWithType extends IndexPattern {
   type?: string;
 }
@@ -29,18 +30,25 @@ class FieldsService {
     return this._aggs;
   }
 
+  // using the response from the endpoint, create the field and aggs objects
+  // when transported over the endpoint, the fields and aggs contain lists of ids of the
+  // fields and aggs they are related to.
+  // this function creates lists of real Fields and Aggregations and cross references them.
+  // the list if ids are then deleted.
   private createObjects(resp: any, indexPatternTitle: string) {
     const results = resp[indexPatternTitle];
 
-    const aggs: Aggregation[] = [];
-    const aggMap: { [id: string]: Aggregation } = {};
-    const aggIdMap: { [id: string]: string[] } = {};
-
     const fields: Field[] = [];
+    const aggs: Aggregation[] = [];
+    // for speed, a map of aggregations, keyed on their id
+    const aggMap: { [id: string]: Aggregation } = {};
+    // for speed, a map of aggregation id lists from a field, keyed on the field id
+    const aggIdMap: { [id: string]: string[] } = {};
 
     if (results !== undefined) {
       results.aggs.forEach((a: Aggregation) => {
-        const agg = {
+        // copy the agg and add a Fields list
+        const agg: Aggregation = {
           ...a,
           fields: [],
         };
@@ -49,7 +57,8 @@ class FieldsService {
       });
 
       results.fields.forEach((f: Field) => {
-        const field = {
+        // copy the field and add an Aggregations list
+        const field: Field = {
           ...f,
           aggs: [],
         };
@@ -59,21 +68,17 @@ class FieldsService {
         fields.push(field);
       });
 
+      // loop through the fields and add populate their aggs lists.
+      // for each agg added to a field, also add that field to the agg's field list
       fields.forEach((field: Field) => {
         aggIdMap[field.id].forEach((aggId: string) => {
-          const agg = aggMap[aggId];
-          if (agg.fields === undefined) {
-            agg.fields = [];
-          }
-          if (field.aggs === undefined) {
-            field.aggs = [];
-          }
-          agg.fields.push(field);
-          field.aggs.push(agg);
+          mix(field, aggMap[aggId]);
         });
       });
     }
 
+    // the aggIds and fieldIds lists are no longer needed as we've created
+    // lists of real fields and aggs
     fields.forEach(f => delete f.aggIds);
     aggs.forEach(a => delete a.fieldIds);
 
@@ -89,6 +94,17 @@ class FieldsService {
     this._fields = fields;
     this._aggs = aggs;
   }
+}
+
+function mix(field: Field, agg: Aggregation) {
+  if (agg.fields === undefined) {
+    agg.fields = [];
+  }
+  if (field.aggs === undefined) {
+    field.aggs = [];
+  }
+  agg.fields.push(field);
+  field.aggs.push(agg);
 }
 
 export const fieldsService = new FieldsService();

@@ -5,29 +5,30 @@
  */
 
 import { Request } from 'src/legacy/server/kbn_server';
+import { SavedObject } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 
-export interface RollupConfig {
+export interface RollupJob {
   job_id: string;
   rollup_index: string;
   index_pattern: string;
   fields: { [id: string]: [{ [id: string]: string }] };
 }
 
-export async function getRollupConfig(
+export async function getRollupJob(
   indexPattern: string,
   callWithRequest: CallWithRequestType,
   request: Request
-): Promise<RollupConfig | null> {
-  const rollupConfig = await loadRollupConfig(indexPattern, request);
+): Promise<RollupJob | null> {
+  const savedObject = await loadRollupIndexPattern(indexPattern, request);
 
-  if (rollupConfig) {
-    const parsedTypeMetaData = JSON.parse(rollupConfig.attributes.typeMeta);
+  if (savedObject !== null) {
+    const parsedTypeMetaData = JSON.parse(savedObject.attributes.typeMeta);
     const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
     const resp = await callWithRequest('ml.rollupIndexCapabilities', { indexPattern: rollUpIndex });
 
     if (resp[rollUpIndex] && resp[rollUpIndex].rollup_jobs) {
-      const rollupJobs: any[] = resp[rollUpIndex].rollup_jobs;
+      const rollupJobs: RollupJob[] = resp[rollUpIndex].rollup_jobs;
       const job = rollupJobs.find(j => j.job_id === rollUpIndex);
       if (job !== undefined) {
         return job;
@@ -38,7 +39,10 @@ export async function getRollupConfig(
   return null;
 }
 
-async function loadRollupConfig(indexPattern: string, request: Request): Promise<any> {
+async function loadRollupIndexPattern(
+  indexPattern: string,
+  request: Request
+): Promise<SavedObject | null> {
   const savedObjectsClient = request.getSavedObjectsClient();
   const resp = await savedObjectsClient.find({
     type: 'index-pattern',

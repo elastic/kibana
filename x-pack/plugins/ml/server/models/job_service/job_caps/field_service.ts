@@ -8,12 +8,13 @@ import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
 import { Field, Aggregation } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { getRollupConfig, RollupConfig } from './rollup';
+import { getRollupJob, RollupJob } from './rollup';
 import { aggregations } from './aggregations';
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 
 const METRIC_AGG_TYPE: string = 'metrics';
 
+// TODO, is this list correct?
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
   ES_FIELD_TYPES.KEYWORD,
@@ -22,6 +23,11 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.LONG,
   ES_FIELD_TYPES.TEXT,
 ];
+
+export interface AggAndFieldList {
+  aggs: Aggregation[];
+  fields: Field[];
+}
 
 export function fieldServiceProvider(
   indexPattern: string,
@@ -57,6 +63,7 @@ class FieldsService {
     });
   }
 
+  // create field object from the results from _field_caps
   private async createFields(): Promise<Field[]> {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
@@ -66,6 +73,7 @@ class FieldsService {
         const firstKey = Object.keys(fc)[0];
         if (firstKey !== undefined) {
           const field = fc[firstKey];
+          // add to the list of fields if the field type can be used by ML
           if (supportedTypes.includes(field.type) === true) {
             fields.push({
               id: k,
@@ -81,28 +89,30 @@ class FieldsService {
     return fields;
   }
 
-  public async getData() {
+  // public function to load fields from _field_caps and create a list
+  // of aggregations and fields that can be used for an ML job
+  // if the index is a rollup, the fields and aggs will be filtered
+  // based on what is available in the rollup job
+  public async getData(): Promise<AggAndFieldList> {
     const aggs = cloneDeep(aggregations);
     const fields: Field[] = await this.createFields();
 
-    let rollupConfig: RollupConfig | null = null;
+    let rollupConfig: RollupJob | null = null;
     if (this._isRollup) {
-      rollupConfig = await getRollupConfig(
-        this._indexPattern,
-        this._callWithRequest,
-        this._request
-      );
+      rollupConfig = await getRollupJob(this._indexPattern, this._callWithRequest, this._request);
     }
 
     return await combineFieldsAndAggs(fields, aggs, rollupConfig);
   }
 }
 
+// cross reference fields and aggs.
+// fields contain a list of aggs that are compatible, and vice versa.
 async function combineFieldsAndAggs(
   fields: Field[],
   aggs: Aggregation[],
-  rollupConfig: RollupConfig | null
-) {
+  rollupConfig: RollupJob | null
+): Promise<AggAndFieldList> {
   const textAndKeywordFields = getTextAndKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
 
@@ -136,16 +146,20 @@ async function combineFieldsAndAggs(
   };
 }
 
-function filterFields(fields: Field[]) {
+// remove fields that have no aggs associated to them
+function filterFields(fields: Field[]): Field[] {
   return fields.filter(f => f.aggs && f.aggs.length);
 }
 
-function filterAggs(aggs: Aggregation[]) {
+// remove aggs that have no fields associated to them
+function filterAggs(aggs: Aggregation[]): Aggregation[] {
   return aggs.filter(a => a.fields && a.fields.length);
 }
 
-function mixFactory(rollupConfig: RollupConfig | null) {
-  return function mix(field: Field, agg: Aggregation) {
+// returns a mix function that is used to cross-reference aggs and fields.
+// wrapped in a provider to allow filtering based on rollup job capabilities
+function mixFactory(rollupConfig: RollupJob | null) {
+  return function mix(field: Field, agg: Aggregation): void {
     if (
       rollupConfig === null ||
       (rollupConfig.fields[field.id] &&

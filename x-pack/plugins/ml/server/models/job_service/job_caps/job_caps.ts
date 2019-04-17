@@ -8,9 +8,14 @@ import { Request } from 'src/legacy/server/kbn_server';
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 import { Aggregation, Field } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
+import { AggAndFieldList } from './field_service';
+
+interface JobCaps {
+  [indexPattern: string]: AggAndFieldList;
+}
 
 export function jobCapsProvider(callWithRequest: CallWithRequestType, request: Request) {
-  async function jobCaps(indexPattern: string, isRollup: boolean = false) {
+  async function jobCaps(indexPattern: string, isRollup: boolean = false): Promise<JobCaps> {
     const fieldService = fieldServiceProvider(indexPattern, isRollup, callWithRequest, request);
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
@@ -30,7 +35,7 @@ export function jobCapsProvider(callWithRequest: CallWithRequestType, request: R
 // replace the recursive field and agg references with a
 // map of ids to allow it to be stringified for transportation
 // over the network.
-function convertForStringify(aggs: Aggregation[], fields: Field[]) {
+function convertForStringify(aggs: Aggregation[], fields: Field[]): void {
   fields.forEach(f => {
     f.aggIds = f.aggs ? f.aggs.map(a => a.id) : [];
     delete f.aggs;
