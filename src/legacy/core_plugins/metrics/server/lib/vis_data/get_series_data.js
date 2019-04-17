@@ -23,12 +23,14 @@ import { getAnnotations } from './get_annotations';
 import { SearchStrategiesRegister } from '../search_strategies/search_strategies_register';
 import { getEsQueryConfig } from './helpers/get_es_query_uisettings';
 import { getActiveSeries } from './helpers/get_active_series';
+import { makeFilter, getLastSeriesTimestamp, annotationFilter } from '../../../common/annotations';
 
 export async function getSeriesData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
   const { searchStrategy, capabilities } = await SearchStrategiesRegister.getViableStrategy(req, panelIndexPattern);
   const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const esQueryConfig = await getEsQueryConfig(req);
+  const filterAnnotations = makeFilter(annotationFilter);
 
   const bodiesPromises = getActiveSeries(panel)
     .map(series => getSeriesRequestParams(req, panel, series, esQueryConfig, capabilities));
@@ -44,16 +46,21 @@ export async function getSeriesData(req, panel) {
   try {
     const data = await searchRequest.search({ body });
     const series = data.map(handleResponseBody(panel));
+    const lastSeriesTimestamp = getLastSeriesTimestamp(series);
+    const filterAnnotationsBy = filterAnnotations(lastSeriesTimestamp);
+
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {
       annotations = await getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities);
     }
 
+    const filteredAnnotations = filterAnnotationsBy(annotations);
+
     return {
       ...meta,
       [panel.id]: {
-        annotations,
+        annotations: filteredAnnotations,
         id: panel.id,
         series: series.reduce((acc, series) => acc.concat(series), []),
       },
