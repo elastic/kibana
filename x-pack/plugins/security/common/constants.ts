@@ -6,6 +6,5 @@
 
 export const GLOBAL_RESOURCE = '*';
 export const IGNORED_TYPES = ['space'];
-export const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 export const APPLICATION_PREFIX = 'kibana-';
 export const RESERVED_PRIVILEGES_APPLICATION_WILDCARD = 'kibana-*';
