@@ -92,6 +92,13 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
     [repositoryTypes]
   );
 
+  const resetValidation = () => {
+    setValidation({
+      isValid: true,
+      errors: {},
+    });
+  };
+
   const updateRepository = (updatedFields: Partial<Repository>): void => {
     const newRepository: Repository = { ...repository, ...updatedFields };
     const { type, settings } = newRepository;
@@ -259,6 +266,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
                   type: e.target.value,
                   settings: {},
                 });
+                resetValidation();
               }}
               fullWidth
             />
@@ -334,6 +342,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
                     delegateType: e.target.value,
                   },
                 });
+                resetValidation();
               }}
               fullWidth
             />
