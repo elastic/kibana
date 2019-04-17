@@ -201,7 +201,7 @@ class RolesGridPageUI extends Component<Props, State> {
             </span>
           </EuiToolTip>
         ),
-        sortable: true,
+        sortable: ({ metadata }: any) => (metadata && metadata._reserved) || false,
         dataType: 'boolean',
         align: 'right',
         description: reservedRoleDesc,
@@ -244,13 +244,8 @@ class RolesGridPageUI extends Component<Props, State> {
   private async loadRoles() {
     try {
       const roles = await RolesApi.getRoles();
-      // ensure each role has a `metadata._reserved` property to enable proper sorting.
-      const transformedRoles = roles.map(role => ({
-        ...role,
-        metadata: { _reserved: false, ...role.metadata },
-      }));
 
-      this.setState({ roles: transformedRoles });
+      this.setState({ roles });
     } catch (e) {
       if (_.get(e, 'body.statusCode') === 403) {
         this.setState({ permissionDenied: true });
