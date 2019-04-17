@@ -22,6 +22,7 @@ export function ComboBoxProvider({ getService }) {
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
+  const browser = getService('browser');
 
   // wrapper around EuiComboBox interactions
   class ComboBox {
@@ -126,8 +127,8 @@ export function ComboBoxProvider({ getService }) {
     async closeOptionsList(comboBoxElement) {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
-        await toggleBtn.click();
+        const input = await comboBoxElement.findByTagName('input');
+        await input.pressKeys(browser.keys.ESCAPE);
       }
     }
 
