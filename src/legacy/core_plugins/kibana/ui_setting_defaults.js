@@ -842,7 +842,7 @@ export function getUiSettingDefaults() {
         {
           from: 'now-1y',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.lasy1Year', { defaultMessage: 'Last 1 year' }),
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),
         },
       ], null, 2),
       type: 'json',
