@@ -13,10 +13,10 @@ export class RolesApi {
   }
 
   public static async getRole(roleName: string): Promise<Role> {
-    return kfetch({ pathname: `/api/security/role/${roleName}` });
+    return kfetch({ pathname: `/api/security/role/${encodeURIComponent(roleName)}` });
   }
 
   public static async deleteRole(roleName: string) {
-    return kfetch({ pathname: `/api/security/role/${roleName}`, method: 'DELETE' });
+    return kfetch({ pathname: `/api/security/role/${encodeURIComponent(roleName)}`, method: 'DELETE' });
   }
 }
