@@ -78,21 +78,17 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     startDate={from}
                     endDate={to}
                   >
-                    {({ hostDetails, loading, id, refetch }) => {
-                      return (
-                        <>
-                          <HostSummaryManage
-                            id={id}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            startDate={from}
-                            endDate={to}
-                            data={hostDetails}
-                            loading={loading}
-                          />
-                        </>
-                      );
-                    }}
+                    {({ hostDetails, loading, id, refetch }) => (
+                      <HostSummaryManage
+                        id={id}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        startDate={from}
+                        endDate={to}
+                        data={hostDetails}
+                        loading={loading}
+                      />
+                    )}
                   </HostDetailsByNameQuery>
 
                   <EuiSpacer />
