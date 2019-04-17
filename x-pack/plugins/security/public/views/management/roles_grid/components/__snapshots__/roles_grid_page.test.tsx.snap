@@ -90,15 +90,11 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                 </EuiSpacer>
                 <EuiTextColor
                   color="subdued"
-                  component="span"
                 >
                   <span
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiTitle
-                      size="m"
-                      textTransform="none"
-                    >
+                    <EuiTitle>
                       <h2
                         className="euiTitle euiTitle--medium"
                       >
@@ -118,10 +114,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                         className="euiSpacer euiSpacer--m"
                       />
                     </EuiSpacer>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
