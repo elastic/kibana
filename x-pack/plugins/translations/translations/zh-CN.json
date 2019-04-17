@@ -7490,7 +7490,6 @@
     "xpack.security.management.passwordForm.passwordLabel": "密码",
     "xpack.security.management.passwordForm.passwordLengthDescription": "密码长度必须至少为 6 个字符",
     "xpack.security.management.roles.createRoleButtonLabel": "创建角色",
-    "xpack.security.management.roles.deleteRoleConfirmButtonLabel": "删除角色",
     "xpack.security.management.roles.deletingRolesWarningMessage": "是否确定要删除选定角色？此操作不可逆！",
     "xpack.security.management.roles.noPermissionToManageRolesDescription": "您没有权限管理角色。",
     "xpack.security.management.roles.roleTitle": "角色",
