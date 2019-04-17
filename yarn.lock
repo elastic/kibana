@@ -1691,20 +1691,20 @@
     "@microsoft/tsdoc" "0.12.8"
     "@types/node" "8.5.8"
 
-"@microsoft/api-extractor@7.0.31":
-  version "7.0.31"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.0.31.tgz#4d72755bf234e1c3a0afb22f678b7106158a9b89"
-  integrity sha512-7oiMvxaR9/qOO4SdlG2JFhdCZ1B+JtaX4pDb/aDGsm+7n+PMeLSVgQKeZwVXUIgslHlXxkxbX7zXIz41VqL8sQ==
+"@microsoft/api-extractor@7.0.41":
+  version "7.0.41"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-extractor/-/api-extractor-7.0.41.tgz#26931b0cc4ecb38dfbc71ec04318cc71dabfbd44"
+  integrity sha512-dO3qyQKKgKhZVDA6lJkyTBeV6qa6vbhES3I0dTJEtg6FA/UsLjvidgBbeRwlNIq4u+38xbhq+L7Qb6O7teVQDw==
   dependencies:
     "@microsoft/api-extractor-model" "7.0.28"
     "@microsoft/node-core-library" "3.13.0"
     "@microsoft/ts-command-line" "4.2.3"
-    "@microsoft/tsdoc" "0.12.8"
+    "@microsoft/tsdoc" "0.12.9"
     colors "~1.2.1"
     lodash "~4.17.5"
     resolve "1.8.1"
     source-map "~0.6.1"
-    typescript "~3.1.6"
+    typescript "~3.4.3"
 
 "@microsoft/node-core-library@3.13.0":
   version "3.13.0"
@@ -1734,6 +1734,11 @@
   version "0.12.8"
   resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.12.8.tgz#e9646c91c650d536f37b04762eaa81afdc9a19d3"
   integrity sha512-0smzAmVIUCsssAqDSPn9AfOPKUobq2WXMygbzC5JNswAJOs4uJK6DTZgfnHC8QLE2q374sPNwWU5D5LuoAJQSA==
+
+"@microsoft/tsdoc@0.12.9":
+  version "0.12.9"
+  resolved "https://registry.yarnpkg.com/@microsoft/tsdoc/-/tsdoc-0.12.9.tgz#f92538bebf649b1b9d00bdd34a9c9971aef17d01"
+  integrity sha512-sDhulvuVk65eMppYOE6fr6mMI6RUqs53KUg9deYzNCBpP+2FhR0OFB5innEfdtSedk0LK+1Ppu6MxkfiNjS/Cw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -25012,7 +25017,7 @@ typescript-fsa@^2.0.0, typescript-fsa@^2.5.0:
   resolved "https://registry.yarnpkg.com/typescript-fsa/-/typescript-fsa-2.5.0.tgz#1baec01b5e8f5f34c322679d1327016e9e294faf"
   integrity sha1-G67AG16PXzTDImedEycBbp4pT68=
 
-typescript@^3.3.3333, typescript@~3.1.6:
+typescript@^3.3.3333, typescript@~3.4.3:
   version "3.3.3333"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-3.3.3333.tgz#171b2c5af66c59e9431199117a3bcadc66fdcfd6"
   integrity sha512-JjSKsAfuHBE/fB2oZ8NxtRTk5iGcg6hkYXMnZ3Wc+b2RSqejEqTaem11mHASMnFilHrax3sLK0GDzcJrekZYLw==
