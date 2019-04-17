@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { get, getOr } from 'lodash/fp';
 import React from 'react';
@@ -15,9 +15,9 @@ import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { getEmptyTagValue } from '../../components/empty_value';
 import { HeaderPage } from '../../components/header_page';
+import { LastBeatStat } from '../../components/last_beat_stat';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
-import { LastBeatHost } from '../../components/page/hosts/last_beat_host';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
@@ -63,12 +63,12 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                   type={hostsModel.HostsType.page}
                 >
                   {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => {
-                    const hostName: string = get('node.host.name[0]', hosts[0]);
+                    const lastSeen: string = get('node.lastSeen', hosts[0]);
                     return (
                       <>
                         <HeaderPage
                           subtitle={
-                            hostName ? <LastBeatHost hostName={hostName} /> : getEmptyTagValue()
+                            lastSeen ? <LastBeatStat lastSeen={lastSeen} /> : getEmptyTagValue()
                           }
                           title={
                             <FormattedMessage

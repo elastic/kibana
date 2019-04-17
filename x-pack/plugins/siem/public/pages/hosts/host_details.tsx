@@ -14,14 +14,14 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
+import { getEmptyTagValue } from '../../components/empty_value';
 import { HeaderPage } from '../../components/header_page';
-import { LastBeatStat } from '../../components/last_beat_stat';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
-import { FirstLastSeenHost } from '../../components/page/hosts/first_last_seen_host';
 import { HostSummary } from '../../components/page/hosts/host_summary';
+import { LastBeatHost } from '../../components/page/hosts/last_beat_host';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
@@ -35,8 +35,6 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
-import { LastBeatHost } from '../../components/page/hosts/last_beat_host';
-import { getEmptyTagValue } from '../../components/empty_value';
 
 const basePath = chrome.getBasePath();
 const type = hostsModel.HostsType.details;
@@ -64,6 +62,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
         indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
           <>
             <HostsKql indexPattern={indexPattern} type={type} />
+            <HeaderPage
+              subtitle={hostName ? <LastBeatHost hostName={hostName} /> : getEmptyTagValue()}
+              title={hostName}
+            >
+              {/* DEV NOTE: Date picker to be moved here */}
+            </HeaderPage>
 
             <GlobalTime>
               {({ poll, to, from, setQuery }) => (
@@ -77,14 +81,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     {({ hostDetails, loading, id, refetch }) => {
                       return (
                         <>
-                          <HeaderPage
-                            subtitle={
-                              hostName ? <LastBeatHost hostName={hostName} /> : getEmptyTagValue()
-                            }
-                            title={hostName}
-                          >
-                            {/* DEV NOTE: Date picker to be moved here */}
-                          </HeaderPage>
                           <HostSummaryManage
                             id={id}
                             refetch={refetch}
