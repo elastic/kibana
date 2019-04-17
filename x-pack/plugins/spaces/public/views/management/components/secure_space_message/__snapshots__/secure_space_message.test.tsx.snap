@@ -7,8 +7,6 @@ exports[`SecureSpaceMessage renders if user profile allows security to be manage
   <EuiHorizontalRule />
   <EuiText
     className="eui-textCenter"
-    grow={true}
-    size="m"
   >
     <p>
       <FormattedMessage

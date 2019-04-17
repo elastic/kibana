@@ -8,7 +8,6 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
 >
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h5>
       <FormattedMessage

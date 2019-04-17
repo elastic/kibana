@@ -503,6 +503,33 @@ describe('DocumentMigrator', () => {
     }
   });
 
+  it('logs message in transform function', () => {
+    const logStash: string[] = [];
+    const logTestMsg = '...said the joker to the thief';
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      migrations: {
+        dog: {
+          '1.2.3': (doc, log) => {
+            log!.info(logTestMsg);
+            return doc;
+          },
+        },
+      },
+      log: (path: string[], message: string) => {
+        logStash.push(message);
+      },
+    });
+    const doc = {
+      id: 'joker',
+      type: 'dog',
+      attributes: {},
+      migrationVersion: {},
+    };
+    migrator.migrate(doc);
+    expect(logStash[0]).toEqual(logTestMsg);
+  });
+
   test('extracts the latest migration version info', () => {
     const { migrationVersion } = new DocumentMigrator({
       ...testOpts(),
