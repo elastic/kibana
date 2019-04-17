@@ -182,18 +182,9 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         await find.setValue(SELECTOR, variableName);
       } else {
         const input = await find.byCssSelector(SELECTOR);
-        if (process.platform === 'darwin') {
-          // Mac workaround
-          for (let i = 0; i <= type.length; i++) {
-            await input.pressKeys(browser.keys.BACK_SPACE);
-          }
-        } else {
-          await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
-          await input.pressKeys(browser.keys.NULL); // Release modifier keys
-          await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
-        }
+        input.clearValueWithKeyboard({ charByChar: true });
+        await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
       }
-      await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }
 
     public async clickSeriesOption(nth = 0) {
