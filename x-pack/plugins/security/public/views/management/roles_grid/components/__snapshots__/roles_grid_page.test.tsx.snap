@@ -27,7 +27,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   data-test-subj="permissionDeniedMessage"
                 >
                   <FormattedMessage
-                    defaultMessage="You do not have permission to manage roles."
+                    defaultMessage="Contact your system administrator."
                     id="xpack.security.management.roles.noPermissionToManageRolesDescription"
                     values={Object {}}
                   />
@@ -38,7 +38,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
               title={
                 <h2>
                   <FormattedMessage
-                    defaultMessage="Permission denied"
+                    defaultMessage="You need permission to manage roles"
                     id="xpack.security.management.roles.deniedPermissionTitle"
                     values={Object {}}
                   />
@@ -103,11 +103,11 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                         className="euiTitle euiTitle--medium"
                       >
                         <FormattedMessage
-                          defaultMessage="Permission denied"
+                          defaultMessage="You need permission to manage roles"
                           id="xpack.security.management.roles.deniedPermissionTitle"
                           values={Object {}}
                         >
-                          Permission denied
+                          You need permission to manage roles
                         </FormattedMessage>
                       </h2>
                     </EuiTitle>
@@ -129,11 +129,11 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                           data-test-subj="permissionDeniedMessage"
                         >
                           <FormattedMessage
-                            defaultMessage="You do not have permission to manage roles."
+                            defaultMessage="Contact your system administrator."
                             id="xpack.security.management.roles.noPermissionToManageRolesDescription"
                             values={Object {}}
                           >
-                            You do not have permission to manage roles.
+                            Contact your system administrator.
                           </FormattedMessage>
                         </p>
                       </div>

@@ -16,7 +16,7 @@ export const PermissionDenied = () => (
           <h2>
             <FormattedMessage
               id="xpack.security.management.roles.deniedPermissionTitle"
-              defaultMessage="Permission denied"
+              defaultMessage="You need permission to manage roles"
             />
           </h2>
         }
@@ -24,7 +24,7 @@ export const PermissionDenied = () => (
           <p data-test-subj="permissionDeniedMessage">
             <FormattedMessage
               id="xpack.security.management.roles.noPermissionToManageRolesDescription"
-              defaultMessage="You do not have permission to manage roles."
+              defaultMessage="Contact your system administrator."
             />
           </p>
         }

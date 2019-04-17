@@ -100,7 +100,7 @@ class UsersUI extends Component {
                 <h2>
                   <FormattedMessage
                     id="xpack.security.management.users.deniedPermissionTitle"
-                    defaultMessage="Permission denied"
+                    defaultMessage="You need permission to manage users"
                   />
                 </h2>
               }
@@ -108,7 +108,7 @@ class UsersUI extends Component {
                 <p data-test-subj="permissionDeniedMessage">
                   <FormattedMessage
                     id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
-                    defaultMessage="You do not have permission to manage users."
+                    defaultMessage="Contact your system administrator."
                   />
                 </p>
               }
