@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiLink,
+  EuiFlexGroup,
   EuiInMemoryTable,
   EuiPageContent,
   EuiTitle,
@@ -91,28 +92,29 @@ class UsersUI extends Component {
     const { intl } = this.props;
     if (permissionDenied) {
       return (
-        <div className="secUsersListingPage">
+        <EuiFlexGroup gutterSize="none">
           <EuiPageContent horizontalPosition="center">
             <EuiEmptyPrompt
               iconType="securityApp"
-              iconColor={null}
               title={
                 <h2>
                   <FormattedMessage
                     id="xpack.security.management.users.deniedPermissionTitle"
                     defaultMessage="Permission denied"
                   />
-                </h2>}
+                </h2>
+              }
               body={
                 <p data-test-subj="permissionDeniedMessage">
                   <FormattedMessage
                     id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
                     defaultMessage="You do not have permission to manage users."
                   />
-                </p>}
+                </p>
+              }
             />
           </EuiPageContent>
-        </div>
+        </EuiFlexGroup>
       );
     }
     const path = '#/management/security/';
