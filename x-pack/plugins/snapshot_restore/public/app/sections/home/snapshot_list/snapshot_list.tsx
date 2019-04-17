@@ -63,7 +63,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     if (search) {
       const parsedParams = parse(search.replace(/^\?/, ''));
       if (parsedParams.repository && parsedParams.repository !== filteredRepository) {
-        setFilteredRepository(decodeURIComponent(String(parsedParams.repository)));
+        setFilteredRepository(String(parsedParams.repository));
         history.replace(`${BASE_PATH}/snapshots`);
       }
     }

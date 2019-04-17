@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiLink, Query } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
@@ -133,6 +133,14 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     pageSizeOptions: [10, 20, 50],
   };
 
+  const searchSchema = {
+    fields: {
+      repository: {
+        type: 'string',
+      },
+    },
+  };
+
   const search = {
     toolsRight: (
       <EuiButton color="secondary" iconType="refresh" onClick={reload}>
@@ -144,7 +152,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
     ),
     box: {
       incremental: true,
-      schema: true,
+      schema: searchSchema,
     },
     filters: [
       {
@@ -158,7 +166,14 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         })),
       },
     ],
-    defaultQuery: filterToRepository ? `repository:"${filterToRepository}"` : '',
+    defaultQuery: filterToRepository
+      ? Query.parse(`repository:'${filterToRepository}'`, {
+          schema: {
+            ...searchSchema,
+            strict: true,
+          },
+        })
+      : '',
   };
 
   return (
