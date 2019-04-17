@@ -3,6 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import React, { useState } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -10,9 +14,8 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
+  EuiToolTip,
 } from '@elastic/eui';
-import React, { useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../../../../common/types';
@@ -88,19 +91,24 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
       }),
       actions: [
         {
-          name: i18n.translate('xpack.snapshotRestore.repositoryList.table.actionEditButton', {
-            defaultMessage: 'Edit',
-          }),
-          description: i18n.translate(
-            'xpack.snapshotRestore.repositoryList.table.actionEditDescription',
-            {
-              defaultMessage: 'Edit repository',
-            }
-          ),
-          icon: 'pencil',
-          type: 'icon',
-          onClick: ({ name }: Repository) => {
-            history.push(`${BASE_PATH}/edit_repository/${name}`);
+          render: ({ name }: { name: string }) => {
+            const label = i18n.translate(
+              'xpack.snapshotRestore.repositoryList.table.actionEditButton',
+              {
+                defaultMessage: 'Edit',
+              }
+            );
+
+            return (
+              <EuiToolTip content={label} delay="long">
+                <EuiButtonIcon
+                  aria-label={label}
+                  iconType="pencil"
+                  color="primary"
+                  href={`#${BASE_PATH}/edit_repository/${name}`}
+                />
+              </EuiToolTip>
+            );
           },
         },
         {
