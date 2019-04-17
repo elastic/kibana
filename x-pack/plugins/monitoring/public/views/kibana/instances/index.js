@@ -49,7 +49,6 @@ uiRoutes.when('/kibana/instances', {
                 <KibanaInstances
                   instances={this.data.kibanas}
                   setupMode={setupMode}
-                  productUuidField="kibana.uuid"
                   clusterStatus={this.data.clusterStatus}
                   angular={{
                     $scope,

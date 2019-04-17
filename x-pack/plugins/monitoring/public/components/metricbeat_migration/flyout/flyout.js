@@ -111,7 +111,7 @@ export class Flyout extends Component {
   }
 
   render() {
-    const { onClose } = this.props;
+    const { onClose, productName } = this.props;
     const { activeStep } = this.state;
     const horizontalSteps = [
       {
@@ -120,7 +120,7 @@ export class Flyout extends Component {
         onClick: () => this.setState({ activeStep: 1 }),
       },
       {
-        title: 'Setup stack products',
+        title: `Setup ${productName}`,
         isComplete: activeStep > 2,
         onClick: () => {
           this.setState({ activeStep: 2 });

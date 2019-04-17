@@ -203,7 +203,7 @@ const getColumns = showCgroupMetricsElasticsearch => {
 
 function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticsearch, intl, ...props }) {
   const columns = getColumns(showCgroupMetricsElasticsearch);
-  const { sorting, pagination, onTableChange } = props;
+  const { sorting, pagination, onTableChange, setupMode } = props;
 
   return (
     <EuiPage>
@@ -219,6 +219,8 @@ function ElasticsearchNodesUI({ clusterStatus, nodes, showCgroupMetricsElasticse
             columns={columns}
             sorting={sorting}
             pagination={pagination}
+            setupMode={setupMode}
+            productUuidField="resolver"
             search={{
               box: {
                 incremental: true,

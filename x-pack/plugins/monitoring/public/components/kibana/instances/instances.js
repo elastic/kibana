@@ -123,7 +123,6 @@ export class KibanaInstances extends PureComponent {
       clusterStatus,
       angular,
       setupMode,
-      productUuidField,
     } = this.props;
 
     const dataFlattened = instances.map(item => ({
@@ -148,7 +147,7 @@ export class KibanaInstances extends PureComponent {
                 sorting={this.sorting}
                 pagination={this.pagination}
                 setupMode={setupMode}
-                productUuidField={productUuidField}
+                productUuidField="kibana.uuid"
                 search={{
                   box: {
                     incremental: true,

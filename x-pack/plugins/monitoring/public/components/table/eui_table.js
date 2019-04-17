@@ -62,7 +62,7 @@ export class EuiMonitoringTable extends React.PureComponent {
             );
           }
 
-          return null;
+          return 'N/A';
         }
       });
     }

@@ -5,11 +5,15 @@
  */
 
 import { getKibanaInstructions } from './kibana_instructions';
+import { getElasticsearchInstructions } from './elasticsearch_instructions';
 
 export function getInstructionSteps(productName, product, opts) {
   switch (productName) {
     case 'kibana':
       return getKibanaInstructions(product, opts);
+    case 'elasticsearch':
+      return getElasticsearchInstructions(product, opts);
+
   }
   return [];
 }
