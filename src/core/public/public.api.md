@@ -276,6 +276,7 @@ export class UiSettingsClient {
         newValue: any;
         oldValue: any;
     }>;
+    getUpdateErrors$(): Rx.Observable<Error>;
     isCustom(key: string): boolean;
     isDeclared(key: string): boolean;
     isDefault(key: string): boolean;
