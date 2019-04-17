@@ -1,0 +1,54 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      "logstash": {
+        "is_write_index": true
+      }
+    },
+    "index": "logstash-2019.04.16-000001",
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "@version": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "host": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "message": {
+          "fields": {
+            "keyword": {
+              "ignore_above": 256,
+              "type": "keyword"
+            }
+          },
+          "type": "text"
+        },
+        "sequence": {
+          "type": "long"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

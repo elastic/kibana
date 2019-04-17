@@ -1922,10 +1922,10 @@
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
   integrity sha512-Es6WcD0nO5l+2BOQS4uLfNPYQaNDfbot3X1XUoloz+x0mPDS3eeORZJl06HXjwBG1fOGwCRnzK88LMdxKRrd6Q==
 
-"@microsoft/api-documenter@7.0.41":
-  version "7.0.41"
-  resolved "https://registry.yarnpkg.com/@microsoft/api-documenter/-/api-documenter-7.0.41.tgz#fd511e2780985cb2c4f14320044628a40cef117b"
-  integrity sha512-6MAfyt8yCvQNT41nFqI3Inn6kKzCfRIQR4Z11++AUwSGlu1bGfvOwgoOeDXNmVniiISOYADEoJjioC5XZV5fTw==
+"@microsoft/api-documenter@7.0.49":
+  version "7.0.49"
+  resolved "https://registry.yarnpkg.com/@microsoft/api-documenter/-/api-documenter-7.0.49.tgz#8f3077d50eec64d20e439457814e84dd8cf473ea"
+  integrity sha512-Z8em7Nx7MQpBMbnM6aZ5VsD98VRzCPiv5qL3gmXE80ZTzhYvjAUJD27j0zxqiShjJEgx/wspzhFlOZjw6IrdJA==
   dependencies:
     "@microsoft/api-extractor-model" "7.0.28"
     "@microsoft/node-core-library" "3.13.0"
@@ -10688,6 +10688,11 @@ exit-hook@^1.0.0:
   resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-1.1.1.tgz#f05ca233b48c05d54fff07765df8507e95c02ff8"
   integrity sha1-8FyiM7SMBdVP/wd2XfhQfpXAL/g=
 
+exit-hook@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-2.1.0.tgz#2be08d8d01220050878577bfa017e104a6c3bcf3"
+  integrity sha512-JCSm9Znc/KW6hoKYHOIqLxM2Z88+AQcabo07rJHZSyXcQIq6HsXkSWRVZRp13RFkGVIDcz1DRIbKR5cnU1uzCA==
+
 exit@^0.1.2, exit@~0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/exit/-/exit-0.1.2.tgz#0632638f8d877cc82107d30a0fff1a17cba1cd0c"
@@ -15383,10 +15388,15 @@ jpeg-js@^0.3.4:
   resolved "https://registry.yarnpkg.com/jpeg-js/-/jpeg-js-0.3.4.tgz#dc2ba501ee3d58b7bb893c5d1fab47294917e7e7"
   integrity sha512-6IzjQxvnlT8UlklNmDXIJMWxijULjqGrzgqc0OG7YadZdvm7KPQ1j0ehmQQHckgEWOfgpptzcnWgESovxudpTA==
 
-jquery@^3.2.1, jquery@^3.3.1:
+jquery@^3.2.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
   integrity sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==
+
+jquery@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.0.tgz#8de513fa0fa4b2c7d2e48a530e26f0596936efdf"
+  integrity sha512-ggRCXln9zEqv6OqAGXFEcshF5dSBvCkzj6Gm2gzuR5fWawaX8t7cxKVkkygKODrDAzKdoYw3l/e3pm3vlT4IbQ==
 
 js-base64@^2.1.8:
   version "2.4.5"
