@@ -15,7 +15,6 @@ exports[`render 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <FormattedMessage

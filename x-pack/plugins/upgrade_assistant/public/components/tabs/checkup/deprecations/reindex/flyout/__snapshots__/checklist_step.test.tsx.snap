@@ -33,7 +33,6 @@ exports[`ChecklistFlyout renders 1`] = `
     <EuiSpacer />
     <EuiTitle
       size="xs"
-      textTransform="none"
     >
       <h3>
         <FormattedMessage

@@ -243,7 +243,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
 >
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h3
       className="euiTitle euiTitle--small"
@@ -327,7 +326,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
         </span>
       </div>
       <EuiText
-        grow={true}
         size="s"
       >
         <div
@@ -699,7 +697,6 @@ exports[`ilm summary extension should return extension when index has lifecycle 
 >
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h3
       className="euiTitle euiTitle--small"

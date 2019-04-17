@@ -22,10 +22,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             if
           </h2>
@@ -34,10 +31,7 @@ exports[`DetailDrawer component If vertices shows basic info and no stats for if
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <div>
         <p>
           <FormattedMessage
@@ -87,10 +81,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             grok filter
           </h2>
@@ -99,10 +90,7 @@ exports[`DetailDrawer component Plugin vertices Plugin does not have explicit ID
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <div>
         <p>
           <FormattedMessage
@@ -448,10 +436,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             grok filter
           </h2>
@@ -460,10 +445,7 @@ exports[`DetailDrawer component Plugin vertices Plugin has explicit ID shows bas
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="This {vertexType}'s ID is {vertexId}."
@@ -806,10 +788,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             queue
           </h2>
@@ -818,10 +797,7 @@ exports[`DetailDrawer component Queue vertices shows basic info and no stats for
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="This is an internal structure used by Logstash to buffer events between inputs and the rest of the pipeline."
@@ -863,20 +839,14 @@ exports[`DetailDrawer component shows vertex title 1`] = `
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2 />
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
-    <EuiText
-      grow={true}
-      size="m"
-    />
+    <EuiText />
   </EuiFlyoutBody>
 </EuiFlyout>
 `;
