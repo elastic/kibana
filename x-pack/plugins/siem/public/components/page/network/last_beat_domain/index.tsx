@@ -8,15 +8,27 @@ import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
 import { pure } from 'recompose';
 
-import { useFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen';
+import { useFirstLastSeenDomainQuery } from '../../../../containers/domains/first_last_seen_domain';
 import { getEmptyTagValue } from '../../../empty_value';
 
+import { FlowTarget } from '../../../../graphql/types';
 import { LastBeatStat } from '../../../last_beat_stat';
 
-export const LastBeatHost = pure<{ hostName: string }>(({ hostName }) => (
+interface LastBeatDomainProps {
+  ip: string;
+  flowTarget: FlowTarget;
+}
+
+export const LastBeatDomain = pure<LastBeatDomainProps>(({ ip, flowTarget }) => (
   <ApolloConsumer>
     {client => {
-      const { loading, lastSeen } = useFirstLastSeenHostQuery(hostName, 'default', client);
+      const { loading, lastSeen } = useFirstLastSeenDomainQuery(
+        ip,
+        null,
+        flowTarget,
+        'default',
+        client
+      );
       return (
         <>
           {loading && getEmptyTagValue()}

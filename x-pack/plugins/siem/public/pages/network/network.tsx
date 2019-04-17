@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { getOr } from 'lodash/fp';
 import React from 'react';
@@ -14,16 +14,16 @@ import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { HeaderPage } from '../../components/header_page';
-import { LastBeatStat } from '../../components/last_beat_stat';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
+import { LastBeatDomain } from '../../components/page/network/last_beat_domain';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
 import { GlobalTime } from '../../containers/global_time';
 import { KpiNetworkQuery } from '../../containers/kpi_network';
 import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
-import { IndexType } from '../../graphql/types';
+import { FlowTarget, IndexType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
@@ -36,10 +36,11 @@ const NetworkDnsTableManage = manageQuery(NetworkDnsTable);
 const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
   filterQuery: string;
+  flowTarget: FlowTarget;
 }
 
 type NetworkComponentProps = NetworkComponentReduxProps;
-const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
+const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery, flowTarget }) => (
   <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
     {({ filebeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
@@ -47,16 +48,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
           <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
 
           <HeaderPage
-            subtitle={
-              <FormattedMessage
-                id="xpack.siem.network.pageSubtitle"
-                defaultMessage="Last Beat: TODO from {beat}"
-                values={{
-                  beat: <EuiLink href="#">TODO</EuiLink>,
-                }}
-              />
-            }
-            sub={<LastBeatStat lastSeen={'2019-04-10T17:10:13.414Z'} />}
+            subtitle={<LastBeatDomain ip={'157.230.208.30'} flowTarget={flowTarget} />}
             title={<FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />}
           >
             {/* DEV NOTE: Date picker to be moved here */}
@@ -73,7 +65,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   startDate={from}
                 >
                   {({ kpiNetwork, loading, id, refetch }) => {
-                    console.log('kpiNetwork', kpiNetwork);
                     return (
                       <KpiNetworkComponentManage
                         id={id}
@@ -97,15 +88,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   type={networkModel.NetworkType.page}
                 >
                   {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => {
-                    console.log('NetworkTopNFlowTableManage', {
-                      totalCount,
-                      loading,
-                      networkTopNFlow,
-                      pageInfo,
-                      loadMore,
-                      id,
-                      refetch,
-                    });
                     return (
                       <NetworkTopNFlowTableManage
                         data={networkTopNFlow}
@@ -168,8 +150,10 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
 
 const makeMapStateToProps = () => {
   const getNetworkFilterQueryAsJson = networkSelectors.networkFilterQueryAsJson();
+  const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
   const mapStateToProps = (state: State) => ({
     filterQuery: getNetworkFilterQueryAsJson(state, networkModel.NetworkType.page) || '',
+    flowTarget: getIpDetailsFlowTargetSelector(state),
   });
   return mapStateToProps;
 };

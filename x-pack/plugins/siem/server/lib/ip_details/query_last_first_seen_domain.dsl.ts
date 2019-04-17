@@ -18,11 +18,10 @@ export const buildFirstLastSeenDomainQuery = ({
     winlogbeatAlias,
   },
 }: DomainFirstLastSeenRequestOptions) => {
-  const filter = [
-    { term: { [`${flowTarget}.ip`]: ip } },
-    { term: { [`${flowTarget}.domain`]: domainName } },
-  ];
-
+  let filter = [{ term: { [`${flowTarget}.ip`]: ip } }];
+  if (domainName) {
+    filter = [...filter, { term: { [`${flowTarget}.domain`]: domainName } }];
+  }
   const dslQuery = {
     allowNoIndices: true,
     index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],

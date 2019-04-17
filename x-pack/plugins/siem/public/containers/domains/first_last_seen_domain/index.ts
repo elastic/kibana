@@ -27,13 +27,13 @@ export interface DomainFirstLastSeenArgs {
 export interface OwnProps extends QueryTemplateProps {
   children: (args: DomainFirstLastSeenArgs) => React.ReactNode;
   ip: string;
-  domainName: string;
+  domainName?: string | null;
   flowTarget: FlowTarget;
 }
 
 export function useFirstLastSeenDomainQuery<TCache = object>(
   ip: string,
-  domainName: string,
+  domainName: string | null,
   flowTarget: FlowTarget,
   sourceId: string,
   apolloClient: ApolloClient<TCache>

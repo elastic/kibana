@@ -106,7 +106,7 @@ const firstLastSeenSchema = gql`
     DomainFirstLastSeen(
       id: String
       ip: String!
-      domainName: String!
+      domainName: String
       flowTarget: FlowTarget!
     ): FirstLastSeenDomain!
   }

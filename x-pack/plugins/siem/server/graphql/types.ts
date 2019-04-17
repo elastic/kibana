@@ -1275,7 +1275,7 @@ export interface DomainFirstLastSeenSourceArgs {
 
   ip: string;
 
-  domainName: string;
+  domainName?: string | null;
 
   flowTarget: FlowTarget;
 }
@@ -1647,7 +1647,7 @@ export namespace SourceResolvers {
 
     ip: string;
 
-    domainName: string;
+    domainName?: string | null;
 
     flowTarget: FlowTarget;
   }

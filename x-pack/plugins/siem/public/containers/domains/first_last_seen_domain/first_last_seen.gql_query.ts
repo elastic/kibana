@@ -10,7 +10,7 @@ export const DomainFirstLastSeenGqlQuery = gql`
   query GetDomainFirstLastSeenQuery(
     $sourceId: ID!
     $ip: String!
-    $domainName: String!
+    $domainName: String
     $flowTarget: FlowTarget!
   ) {
     source(id: $sourceId) {

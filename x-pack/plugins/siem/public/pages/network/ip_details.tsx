@@ -81,7 +81,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   >
                     {({ ipOverviewData, loading }) => {
                       const typeData: Overview = ipOverviewData[flowTarget]!;
-
                       return (
                         <>
                           <HeaderPage
@@ -101,7 +100,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                                 updateFlowTargetAction={updateIpDetailsFlowTarget}
                               />
                             </SelectTypeItem>
-                            {/* DEV NOTE: SelectTypeItem component from components/page/network/ip_overview/index.tsx to be moved here */}
                             {/* DEV NOTE: Date picker to be moved here */}
                           </HeaderPage>
                           <IpOverview

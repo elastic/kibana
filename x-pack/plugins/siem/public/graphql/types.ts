@@ -1246,7 +1246,7 @@ export interface DomainFirstLastSeenSourceArgs {
 
   ip: string;
 
-  domainName: string;
+  domainName?: string | null;
 
   flowTarget: FlowTarget;
 }
@@ -1520,7 +1520,7 @@ export namespace GetDomainFirstLastSeenQuery {
   export type Variables = {
     sourceId: string;
     ip: string;
-    domainName: string;
+    domainName?: string | null;
     flowTarget: FlowTarget;
   };
 
