@@ -140,7 +140,17 @@ export function DashboardPanelActionsProvider({ getService, getPageObjects }) {
         panelOptions = await this.getPanelHeading(originalTitle);
       }
       await this.customizePanel(panelOptions);
-      await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+      if (customTitle.length === 0) {
+        if (browser.isW3CEnabled) {
+          const input = await testSubjects.find('customDashboardPanelTitleInput');
+          await input.clearValueWithKeyboard();
+        } else {
+          // to clean in Chrome we trigger a change: put letter and delete it
+          await testSubjects.setValue('customDashboardPanelTitleInput', 'h\b');
+        }
+      } else {
+        await testSubjects.setValue('customDashboardPanelTitleInput', customTitle);
+      }
       await this.toggleContextMenu(panelOptions);
     }
 

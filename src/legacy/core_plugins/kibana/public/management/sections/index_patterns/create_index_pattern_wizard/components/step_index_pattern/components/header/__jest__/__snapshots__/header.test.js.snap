@@ -4,7 +4,6 @@ exports[`Header should mark the input as invalid 1`] = `
 <div>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h2>
       <FormattedMessage
@@ -119,7 +118,6 @@ exports[`Header should render normally 1`] = `
 <div>
   <EuiTitle
     size="s"
-    textTransform="none"
   >
     <h2>
       <FormattedMessage

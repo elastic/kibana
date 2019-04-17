@@ -22,6 +22,7 @@ import { filter, first, mergeMap, tap, toArray } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { ElasticsearchServiceSetup } from '../elasticsearch/elasticsearch_service';
+import { HttpServiceSetup } from '../http/http_service';
 import { Logger } from '../logging';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName } from './plugin';
@@ -40,6 +41,7 @@ export interface PluginsServiceSetup {
 /** @internal */
 export interface PluginsServiceSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
+  http?: HttpServiceSetup;
 }
 
 /** @internal */
