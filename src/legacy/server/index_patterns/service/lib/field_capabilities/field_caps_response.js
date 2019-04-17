@@ -116,6 +116,7 @@ export function readFieldCapsResponse(fieldCapsResponse) {
     return {
       name: fieldName,
       type: castEsToKbnFieldTypeName(esType),
+      esTypes: types,
       searchable: isSearchable,
       aggregatable: isAggregatable,
       readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),

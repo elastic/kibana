@@ -20,6 +20,7 @@
 export interface Field {
   name: string;
   type: string;
+  esTypes: string[];
   aggregatable: boolean;
   filterable: boolean;
   searchable: boolean;
