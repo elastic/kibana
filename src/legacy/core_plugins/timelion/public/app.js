@@ -379,12 +379,13 @@ app.controller('timelion', function (
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       if (id) {
-        toastNotifications.addSuccess(
-          i18n('timelion.saveSheet.successNotificationText', {
+        toastNotifications.addSuccess({
+          title: i18n('timelion.saveSheet.successNotificationText', {
             defaultMessage: `Saved sheet '{title}'`,
             values: { title: savedSheet.title },
-          })
-        );
+          }),
+          'data-test-subj': 'timelionSaveSuccessToast',
+        });
 
         if (savedSheet.id !== $routeParams.id) {
           kbnUrl.change('/{{id}}', { id: savedSheet.id });

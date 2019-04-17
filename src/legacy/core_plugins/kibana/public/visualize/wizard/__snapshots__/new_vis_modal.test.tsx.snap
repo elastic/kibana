@@ -1375,7 +1375,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                             >
                               <EuiTitle
                                 size="s"
-                                textTransform="none"
                               >
                                 <h2
                                   className="euiTitle euiTitle--small"
@@ -1397,10 +1396,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 />
                               </EuiSpacer>
                               <NewVisHelp>
-                                <EuiText
-                                  grow={true}
-                                  size="m"
-                                >
+                                <EuiText>
                                   <div
                                     className="euiText euiText--medium"
                                   >
@@ -2802,7 +2798,6 @@ exports[`NewVisModal should render as expected 1`] = `
                             >
                               <EuiTitle
                                 size="s"
-                                textTransform="none"
                               >
                                 <h2
                                   className="euiTitle euiTitle--small"
@@ -2824,10 +2819,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                 />
                               </EuiSpacer>
                               <NewVisHelp>
-                                <EuiText
-                                  grow={true}
-                                  size="m"
-                                >
+                                <EuiText>
                                   <div
                                     className="euiText euiText--medium"
                                   >
