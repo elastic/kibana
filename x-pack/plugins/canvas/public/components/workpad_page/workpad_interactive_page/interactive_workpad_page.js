@@ -27,7 +27,6 @@ export class InteractiveWorkpadPage extends PureComponent {
       pageId,
       pageStyle,
       className,
-      animationStyle,
       elements,
       cursor = 'auto',
       height,
@@ -77,7 +76,7 @@ export class InteractiveWorkpadPage extends PureComponent {
         data-test-subj="canvasWorkpadPage"
         className={`canvasPage kbn-resetFocusState canvasInteractivePage ${className}`}
         data-shared-items-container
-        style={{ ...pageStyle, ...animationStyle, height, width, cursor }}
+        style={{ ...pageStyle, height, width, cursor }}
         onKeyDown={onKeyDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
