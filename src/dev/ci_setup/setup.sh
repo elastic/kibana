@@ -180,8 +180,3 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
-
-###
-### for github-checks-reporter
-###
-export GITHUB_CHECKS_REPORTER_ID=26774
