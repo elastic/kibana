@@ -47,7 +47,7 @@ representation of the spaces.
     "id": "sales",
     "name": "Sales",
     "initials": "MK",
-    "disabledFeatures": ["kibana:discover", "timelion"],
+    "disabledFeatures": ["discover", "timelion"],
   },
 ]
 --------------------------------------------------
