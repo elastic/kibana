@@ -69,7 +69,6 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
       allowDocumentLevelSecurity,
       allowFieldLevelSecurity,
       onChange,
-      editable,
     };
 
     return (
