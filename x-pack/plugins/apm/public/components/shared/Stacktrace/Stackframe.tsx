@@ -49,7 +49,6 @@ export function Stackframe({
   isLibraryFrame = false
 }: Props) {
   if (!hasLineContext(stackframe)) {
-    console.log('no line context');
     return (
       <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
     );

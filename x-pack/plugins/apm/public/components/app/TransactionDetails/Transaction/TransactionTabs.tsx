@@ -15,24 +15,14 @@ import { PropertiesTable } from '../../../shared/PropertiesTable';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
-interface TimelineTab {
-  key: 'timeline';
-  label: string;
-}
-
-interface MetadataTab {
-  key: 'metadata';
-  label: string;
-}
-
-const timelineTab: TimelineTab = {
+const timelineTab = {
   key: 'timeline',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.timelineLabel', {
     defaultMessage: 'Timeline'
   })
 };
 
-const metadataTab: MetadataTab = {
+const metadataTab = {
   key: 'metadata',
   label: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
     defaultMessage: 'Metadata'
