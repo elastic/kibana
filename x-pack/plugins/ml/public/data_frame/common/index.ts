@@ -55,7 +55,23 @@ type PivotGroupBy = {
 };
 type PivotGroupByDict = Dictionary<PivotGroupBy>;
 
-type PivotAggSupportedAggs = 'avg' | 'cardinality' | 'max' | 'min' | 'sum' | 'value_count';
+export enum PIVOT_SUPPORTED_AGGS {
+  AVG = 'avg',
+  CARDINALITY = 'cardinality',
+  MAX = 'max',
+  MIN = 'min',
+  SUM = 'sum',
+  VALUE_COUNT = 'value_count',
+}
+
+type PivotAggSupportedAggs =
+  | PIVOT_SUPPORTED_AGGS.AVG
+  | PIVOT_SUPPORTED_AGGS.CARDINALITY
+  | PIVOT_SUPPORTED_AGGS.MAX
+  | PIVOT_SUPPORTED_AGGS.MIN
+  | PIVOT_SUPPORTED_AGGS.SUM
+  | PIVOT_SUPPORTED_AGGS.VALUE_COUNT;
+
 type PivotAgg = {
   [key in PivotAggSupportedAggs]?: {
     field: fieldName;
@@ -81,12 +97,12 @@ export interface DataFrameRequest extends DataFramePreviewRequest {
 }
 
 export const pivotSupportedAggs = [
-  'avg',
-  'cardinality',
-  'max',
-  'min',
-  'sum',
-  'value_count',
+  PIVOT_SUPPORTED_AGGS.AVG,
+  PIVOT_SUPPORTED_AGGS.CARDINALITY,
+  PIVOT_SUPPORTED_AGGS.MAX,
+  PIVOT_SUPPORTED_AGGS.MIN,
+  PIVOT_SUPPORTED_AGGS.SUM,
+  PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
 ] as PivotAggSupportedAggs[];
 
 export function getPivotQuery(search: string) {

@@ -50,12 +50,7 @@ export function getDataFrameCreateBreadcrumbs() {
 export function getDataFrameIndexOrSearchBreadcrumbs() {
   return [
     ML_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.dataFrameLabel', {
-        defaultMessage: 'Data Frame',
-      }),
-      href: '#/data_frame',
-    },
+    DATA_FRAME_HOME,
     {
       text: i18n.translate('xpack.ml.dataFrameBreadcrumbs.selectIndexOrSearchLabel', {
         defaultMessage: 'Select index or search',

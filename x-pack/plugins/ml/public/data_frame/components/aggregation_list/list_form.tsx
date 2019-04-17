@@ -33,9 +33,9 @@ interface ListProps {
 
 export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
   <EuiListGroup flush={true}>
-    {list.map((l: string) => (
+    {list.map((optionsDataId: string) => (
       <EuiListGroupItem
-        key={l}
+        key={optionsDataId}
         label={
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -44,7 +44,7 @@ export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, options
                   defaultMessage: 'Custom name',
                 })}
               >
-                <EuiFieldText defaultValue={optionsData[l].formRowLabel} />
+                <EuiFieldText defaultValue={optionsData[optionsDataId].formRowLabel} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -53,7 +53,7 @@ export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, options
                   defaultMessage: 'Aggregation',
                 })}
               >
-                <EuiFieldText defaultValue={optionsData[l].agg} />
+                <EuiFieldText defaultValue={optionsData[optionsDataId].agg} />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -62,17 +62,17 @@ export const AggListForm: React.SFC<ListProps> = ({ deleteHandler, list, options
                   defaultMessage: 'Field',
                 })}
               >
-                <EuiFieldText defaultValue={optionsData[l].field} />
+                <EuiFieldText defaultValue={optionsData[optionsDataId].field} />
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
         }
         extraAction={
           (deleteHandler && {
-            onClick: () => deleteHandler(l),
+            onClick: () => deleteHandler(optionsDataId),
             iconType: 'cross',
             iconSize: 's',
-            'aria-label': l,
+            'aria-label': optionsDataId,
             alwaysShow: false,
           }) ||
           undefined

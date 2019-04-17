@@ -75,7 +75,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
           aria-label={i18n.translate(
             'xpack.ml.dataframe.jobDetailsForm.targetIndexInputAriaLabel',
             {
-              defaultMessage: 'Choose a non-existant target index name.',
+              defaultMessage: 'Choose a unique target index name.',
             }
           )}
         />

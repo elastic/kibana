@@ -54,10 +54,18 @@ import { ExpandedRow } from './expanded_row';
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
+// Defining our own ENUM here.
+// EUI's SortDirection wasn't usable as a union type
+// required for the Sorting interface.
+enum SORT_DIRECTON {
+  ASC = 'asc',
+  DESC = 'desc',
+}
+
 interface Sorting {
   sort: {
     field: string;
-    direction: 'asc' | 'desc';
+    direction: SORT_DIRECTON.ASC | SORT_DIRECTON.DESC;
   };
 }
 
@@ -173,7 +181,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     sorting = {
       sort: {
         field: columns[0].field,
-        direction: 'asc',
+        direction: SORT_DIRECTON.ASC,
       },
     };
   }
@@ -257,7 +265,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
                     {i18n.translate(
                       'xpack.ml.dataframe.sourceIndexPreview.selectFieldsPopoverTitle',
                       {
-                        defaultMessage: 'Select Fields',
+                        defaultMessage: 'Select fields',
                       }
                     )}
                   </EuiPopoverTitle>

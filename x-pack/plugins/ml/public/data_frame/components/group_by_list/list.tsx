@@ -15,18 +15,18 @@ interface ListProps {
 
 export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
   <EuiListGroup flush={true}>
-    {list.map((l: string) => (
-      <Fragment key={l}>
+    {list.map((fieldName: string) => (
+      <Fragment key={fieldName}>
         <EuiPanel paddingSize="s">
           <EuiListGroupItem
             iconType="string"
-            label={l}
+            label={fieldName}
             extraAction={
               (deleteHandler && {
-                onClick: () => deleteHandler(l),
+                onClick: () => deleteHandler(fieldName),
                 iconType: 'cross',
                 iconSize: 's',
-                'aria-label': l,
+                'aria-label': fieldName,
                 alwaysShow: false,
               }) ||
               undefined

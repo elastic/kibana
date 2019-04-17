@@ -6,7 +6,12 @@
 
 import React, { FunctionComponent, SFC, useEffect, useState } from 'react';
 
-import { EuiEmptyPrompt, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
+import {
+  EuiEmptyPrompt,
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
+  SortDirection,
+} from '@elastic/eui';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getJobsFactory } from './job_service';
@@ -40,7 +45,7 @@ export const DataFrameJobList: SFC = () => {
   const sorting = {
     sort: {
       field: DataFrameJobListColumn.id,
-      direction: 'asc',
+      direction: SortDirection.ASC,
     },
   };
 

@@ -35,9 +35,16 @@ import {
   Label,
   OptionsDataElement,
   pivotSupportedAggs,
+  PIVOT_SUPPORTED_AGGS,
 } from '../../common';
 
 import { IndexPatternContext } from '../../common';
+
+enum FIELD_TYPE {
+  IP = 'ip',
+  NUMBER = 'number',
+  STRING = 'string',
+}
 
 export interface DefinePivotExposedState {
   aggList: Label[];
@@ -133,8 +140,9 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     const o: DropDownOption = { label: field.name, options: [] };
     pivotSupportedAggs.forEach(agg => {
       if (
-        (agg === 'cardinality' && (field.type === 'string' || field.type === 'ip')) ||
-        (agg !== 'cardinality' && field.type === 'number')
+        (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
+          (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
+        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
       ) {
         const label = `${agg}(${field.name})`;
         o.options.push({ label });
@@ -231,7 +239,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <EuiFormHelpText style={{ maxWidth: '320px' }}>
               {i18n.translate('xpack.ml.dataframe.definePivotForm.formHelp', {
                 defaultMessage:
-                  'Data Frame Transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
+                  'Data frame fransforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
               })}
             </EuiFormHelpText>
           )}
