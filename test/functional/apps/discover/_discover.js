@@ -440,7 +440,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [
-          '2015-09-19 12:00',
           '2015-09-20 00:00',
           '2015-09-20 12:00',
           '2015-09-21 00:00',
@@ -448,6 +447,7 @@ export default function ({ getService, getPageObjects }) {
           '2015-09-22 00:00',
           '2015-09-22 12:00',
           '2015-09-23 00:00',
+          '2015-09-23 12:00'
         ];
 
         await retry.try(async function () {
