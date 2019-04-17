@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
 import * as React from 'react';
+import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockFrameworks, mockGlobalState } from '../../../../mock';
+import { mockFrameworks, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { KibanaConfigContext } from '../../../formatted_date';
 
@@ -48,6 +49,84 @@ describe('Load More Table Component', () => {
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    describe('Sorting on Table', () => {
+      let wrapper = mount(
+        <MockedProvider>
+          <TestProviders store={store}>
+            <HostsTable
+              loading={false}
+              data={mockData.Hosts.edges}
+              totalCount={mockData.Hosts.totalCount}
+              hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+              loadMore={loadMore}
+              startDate={startDate}
+              type={hostsModel.HostsType.page}
+            />
+          </TestProviders>
+        </MockedProvider>
+      );
+
+      beforeEach(() => {
+        wrapper = mount(
+          <MockedProvider>
+            <TestProviders store={store}>
+              <HostsTable
+                loading={false}
+                data={mockData.Hosts.edges}
+                totalCount={mockData.Hosts.totalCount}
+                hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
+                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+                loadMore={loadMore}
+                startDate={startDate}
+                type={hostsModel.HostsType.page}
+              />
+            </TestProviders>
+          </MockedProvider>
+        );
+      });
+      test('Initial value of the store', () => {
+        expect(store.getState().hosts.page.queries.hosts).toEqual({
+          direction: 'desc',
+          sortField: 'lastSeen',
+          limit: 10,
+        });
+        expect(
+          wrapper
+            .find('.euiTable thead tr th button')
+            .at(1)
+            .text()
+        ).toEqual('Last SeenClick to sort in ascending order');
+        expect(
+          wrapper
+            .find('.euiTable thead tr th button')
+            .at(1)
+            .find('svg')
+        ).toBeTruthy();
+      });
+
+      test('when you click on the column header, you should show the sorting icon', () => {
+        wrapper
+          .find('.euiTable thead tr th button')
+          .first()
+          .simulate('click');
+
+        wrapper.update();
+
+        expect(store.getState().hosts.page.queries.hosts).toEqual({
+          direction: 'asc',
+          sortField: 'hostName',
+          limit: 10,
+        });
+        expect(
+          wrapper
+            .find('.euiTable thead tr th button')
+            .first()
+            .text()
+        ).toEqual('NameClick to sort in descending order');
+      });
     });
   });
 });

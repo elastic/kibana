@@ -81,7 +81,7 @@ describe('Host Summary Component', () => {
       );
       await wait();
       expect(container.innerHTML).toBe(
-        '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+        '<div class="euiText euiText--small"><span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span></div>'
       );
     });
     test('if it returns an empty value', () => {
@@ -110,7 +110,7 @@ describe('Host Summary Component', () => {
   describe('#getEuiDescriptionList', () => {
     test('All item in description list are loading', async () => {
       const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
-      myMockData.host!.name = ['kibana-siem'];
+      myMockData.host!.name = 'kibana-siem';
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
@@ -123,7 +123,7 @@ describe('Host Summary Component', () => {
 
     test('if it creates a description list', async () => {
       const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
-      myMockData.host!.name = ['kibana-siem'];
+      myMockData.host!.name = 'kibana-siem';
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>

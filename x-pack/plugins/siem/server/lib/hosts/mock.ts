@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestOptions } from '../framework';
+import { Direction, HostsFields } from '../../graphql/types';
 
-import { HostDetailsRequestOptions, HostLastFirstSeenRequestOptions } from '.';
+import { HostDetailsRequestOptions, HostLastFirstSeenRequestOptions, HostsRequestOptions } from '.';
 
-export const mockGetHostsOptions: RequestOptions = {
+export const mockGetHostsOptions: HostsRequestOptions = {
   sourceConfiguration: {
     logAlias: 'filebeat-*',
     auditbeatAlias: 'auditbeat-*',
@@ -24,6 +24,7 @@ export const mockGetHostsOptions: RequestOptions = {
     },
   },
   timerange: { interval: '12h', to: 1554824274610, from: 1554737874610 },
+  sort: { field: HostsFields.lastSeen, direction: Direction.asc },
   pagination: { limit: 10, cursor: null, tiebreaker: null },
   filterQuery: {},
   fields: [
@@ -47,10 +48,11 @@ export const mockGetHostsRequest = {
       sourceId: 'default',
       timerange: { interval: '12h', from: 1554737729201, to: 1554824129202 },
       pagination: { limit: 10, cursor: null, tiebreaker: null },
+      sort: { field: HostsFields.lastSeen, direction: Direction.asc },
       filterQuery: '',
     },
     query:
-      'query GetHostsTableQuery($sourceId: ID!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    Hosts(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {\n      totalCount\n      edges {\n        node {\n          _id\n          host {\n            id\n            name\n            os {\n              name\n              version\n              __typename\n            }\n            __typename\n          }\n          __typename\n        }\n        cursor {\n          value\n          __typename\n        }\n        __typename\n      }\n      pageInfo {\n        endCursor {\n          value\n          __typename\n        }\n        hasNextPage\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetHostsTableQuery($sourceId: ID!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $sort: HostsSortField!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    Hosts(timerange: $timerange, pagination: $pagination, sort: $sort, filterQuery: $filterQuery) {\n      totalCount\n      edges {\n        node {\n          _id\n          host {\n            id\n            name\n            os {\n              name\n              version\n              __typename\n            }\n            __typename\n          }\n          __typename\n        }\n        cursor {\n          value\n          __typename\n        }\n        __typename\n      }\n      pageInfo {\n        endCursor {\n          value\n          __typename\n        }\n        hasNextPage\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };

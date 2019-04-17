@@ -7,9 +7,29 @@
 import gql from 'graphql-tag';
 
 export const hostsSchema = gql`
+  type OsFields {
+    platform: String
+    name: String
+    full: String
+    family: String
+    version: String
+    kernel: String
+  }
+
+  type HostFields {
+    architecture: String
+    id: String
+    ip: [String]
+    mac: [String]
+    name: String
+    os: OsFields
+    type: String
+  }
+
   type HostItem {
     _id: String
-    host: HostEcsFields
+    lastSeen: Date
+    host: HostFields
   }
 
   type HostsEdges {
@@ -28,12 +48,23 @@ export const hostsSchema = gql`
     lastSeen: Date
   }
 
+  enum HostsFields {
+    hostName
+    lastSeen
+  }
+
+  input HostsSortField {
+    field: HostsFields!
+    direction: Direction!
+  }
+
   extend type Source {
     "Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Hosts(
       id: String
       timerange: TimerangeInput!
       pagination: PaginationInput!
+      sort: HostsSortField!
       filterQuery: String
     ): HostsData!
     HostDetails(id: String, hostName: String!, timerange: TimerangeInput!): HostItem!

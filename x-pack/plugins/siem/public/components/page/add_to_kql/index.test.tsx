@@ -76,36 +76,36 @@ describe('AddToKql Component', async () => {
       .simulate('click');
     wrapper.update();
 
-    expect(JSON.stringify(store.getState().hosts.page)).toBe(
-      JSON.stringify({
-        queries: {
-          authentications: {
-            limit: 10,
-          },
-          hosts: {
-            limit: 10,
-          },
-          events: {
-            limit: 10,
-          },
-          uncommonProcesses: {
-            limit: 10,
-          },
+    expect(store.getState().hosts.page).toEqual({
+      queries: {
+        authentications: {
+          limit: 10,
         },
-        filterQuery: {
-          query: {
-            kind: 'kuery',
-            expression: 'host.name: siem-kibana',
-          },
-          serializedQuery:
-            '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+        hosts: {
+          limit: 10,
+          direction: 'desc',
+          sortField: 'lastSeen',
         },
-        filterQueryDraft: {
+        events: {
+          limit: 10,
+        },
+        uncommonProcesses: {
+          limit: 10,
+        },
+      },
+      filterQuery: {
+        query: {
           kind: 'kuery',
           expression: 'host.name: siem-kibana',
         },
-      })
-    );
+        serializedQuery:
+          '{"bool":{"should":[{"match":{"host.name":"siem-kibana"}}],"minimum_should_match":1}}',
+      },
+      filterQueryDraft: {
+        kind: 'kuery',
+        expression: 'host.name: siem-kibana',
+      },
+    });
   });
 
   test('Functionality with network state', async () => {

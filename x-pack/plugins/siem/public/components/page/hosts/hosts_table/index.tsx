@@ -5,26 +5,18 @@
  */
 
 import { EuiIconTip, EuiPanel } from '@elastic/eui';
-import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { HostsEdges } from '../../../../graphql/types';
-import { escapeQueryValue } from '../../../../lib/keury';
+import { Direction, HostsEdges, HostsFields, HostsSortField } from '../../../../graphql/types';
+import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../empty_value';
-import { HostDetailsLink } from '../../../links';
-import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
-import { AddToKql } from '../../add_to_kql';
+import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { CountBadge } from '../../index';
-import { FirstLastSeenHost } from '../first_last_seen_host';
 
+import { getHostsColumns } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -40,10 +32,16 @@ interface OwnProps {
 
 interface HostsTableReduxProps {
   limit: number;
+  sortField: HostsFields;
+  direction: Direction;
 }
 
 interface HostsTableDispatchProps {
   updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateHostsSort: ActionCreator<{
+    sort: HostsSortField;
+    hostsType: hostsModel.HostsType;
+  }>;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
@@ -76,20 +74,24 @@ const Sup = styled.sup`
   padding: 0 5px;
 `;
 
-const HostsTableComponent = pure<HostsTableProps>(
-  ({
-    data,
-    hasNextPage,
-    limit,
-    loading,
-    loadMore,
-    totalCount,
-    nextCursor,
-    updateLimitPagination,
-    startDate,
-    type,
-  }) => (
-    <EuiPanel>
+class HostsTableComponent extends React.PureComponent<HostsTableProps> {
+  public render() {
+    const {
+      data,
+      direction,
+      hasNextPage,
+      limit,
+      loading,
+      loadMore,
+      totalCount,
+      nextCursor,
+      updateLimitPagination,
+      startDate,
+      sortField,
+      type,
+    } = this.props;
+    return (
+      <EuiPanel>
       <LoadMoreTable
         columns={getHostsColumns(startDate, type)}
         loadingTitle={i18n.HOSTS}
@@ -99,10 +101,10 @@ const HostsTableComponent = pure<HostsTableProps>(
         limit={limit}
         hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
-        updateLimitPagination={newLimit =>
+        onChange={this.onChange}updateLimitPagination={newLimit =>
           updateLimitPagination({ limit: newLimit, hostsType: type })
         }
-        title={
+        sorting={{ field: getNodeField(sortField), direction }}title={
           <h3>
             {i18n.HOSTS}
             <Sup>
@@ -113,8 +115,45 @@ const HostsTableComponent = pure<HostsTableProps>(
         }
       />
     </EuiPanel>
-  )
-);
+    );
+  }
+
+  private onChange = (criteria: Criteria) => {
+    if (criteria.sort != null) {
+      const sort: HostsSortField = {
+        field: getSortField(criteria.sort.field),
+        direction: criteria.sort.direction,
+      };
+      if (sort.direction !== this.props.direction || sort.field !== this.props.sortField) {
+        this.props.updateHostsSort({
+          sort,
+          hostsType: this.props.type,
+        });
+      }
+    }
+  };
+}
+
+const getSortField = (field: string): HostsFields => {
+  switch (field) {
+    case 'node.host.name':
+      return HostsFields.hostName;
+    case 'node.lastSeen':
+      return HostsFields.lastSeen;
+    default:
+      return HostsFields.lastSeen;
+  }
+};
+
+const getNodeField = (field: HostsFields): string => {
+  switch (field) {
+    case HostsFields.hostName:
+      return 'node.host.name';
+    case HostsFields.lastSeen:
+      return 'node.lastSeen';
+  }
+  assertUnreachable(field);
+};
 
 const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
@@ -128,118 +167,6 @@ export const HostsTable = connect(
   makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateHostsLimit,
+    updateHostsSort: hostsActions.updateHostsSort,
   }
 )(HostsTableComponent);
-
-const getHostsColumns = (
-  startDate: number,
-  type: hostsModel.HostsType
-): Array<Columns<HostsEdges>> => [
-  {
-    name: i18n.NAME,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostName: string | null | undefined = get('host.name[0]', node);
-      const hostId: string | null | undefined = get('host.id[0]', node);
-      if (hostName != null && hostId != null) {
-        const id = escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostId}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              excluded: false,
-              id,
-              name: hostName,
-              kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName },
-              queryDate: { from: startDate, to: Date.now() },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <AddToKql
-                  expression={`host.name: ${escapeQueryValue(hostName)}`}
-                  componentFilterType="hosts"
-                  type={type}
-                >
-                  <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
-                </AddToKql>
-              )
-            }
-          />
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    name: i18n.FIRST_SEEN,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostname: string | null | undefined = get('host.name[0]', node);
-      if (hostname != null) {
-        return <FirstLastSeenHost hostname={hostname} type="first-seen" />;
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    name: i18n.LAST_SEEN,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostname: string | null | undefined = get('host.name[0]', node);
-      if (hostname != null) {
-        return <FirstLastSeenHost hostname={hostname} type="last-seen" />;
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    name: i18n.OS,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostOsName: string | null | undefined = get('host.os.name[0]', node);
-      if (hostOsName != null) {
-        return (
-          <AddToKql
-            expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
-            componentFilterType="hosts"
-            type={type}
-          >
-            <>{hostOsName}</>
-          </AddToKql>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    name: i18n.VERSION,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostOsVersion: string | null | undefined = get('host.os.version', node);
-      if (hostOsVersion != null) {
-        return (
-          <AddToKql
-            expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
-            componentFilterType="hosts"
-            type={type}
-          >
-            <>{hostOsVersion}</>
-          </AddToKql>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-];

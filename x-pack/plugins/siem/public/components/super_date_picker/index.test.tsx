@@ -22,8 +22,13 @@ describe('SIEM Super Date Picker', () => {
     });
 
     describe('Pick Relative Date', () => {
+      let wrapper = mount(
+        <TestProviders store={store}>
+          <SuperDatePicker id="global" />
+        </TestProviders>
+      );
       beforeEach(() => {
-        const wrapper = mount(
+        wrapper = mount(
           <TestProviders store={store}>
             <SuperDatePicker id="global" />
           </TestProviders>
@@ -35,7 +40,7 @@ describe('SIEM Super Date Picker', () => {
         wrapper.update();
 
         wrapper
-          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .find('button.euiQuickSelect__applyButton')
           .first()
           .simulate('click');
         wrapper.update();
@@ -45,8 +50,63 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.kind).toBe('relative');
       });
 
-      test('Make Sure it is today date', () => {
-        expect(store.getState().inputs.global.timerange.option).toBe('now/d');
+      test('Make Sure it is last 15 minutes date', () => {
+        expect(store.getState().inputs.global.timerange.fromStr).toBe('now-15m');
+        expect(store.getState().inputs.global.timerange.toStr).toBe('now');
+      });
+
+      test('Make Sure it is Today date', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Today"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/d');
+        expect(store.getState().inputs.global.timerange.toStr).toBe('now/d');
+      });
+
+      test('Make Sure it is this week', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_This_week"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/w');
+        expect(store.getState().inputs.global.timerange.toStr).toBe('now/w');
+      });
+
+      test('Make Sure it is week to date', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_Week_to date"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/w');
+        expect(store.getState().inputs.global.timerange.toStr).toBe('now');
+      });
+
+      test('Make Sure to (end date) is superior than from (start date)', () => {
+        expect(store.getState().inputs.global.timerange.to).toBeGreaterThan(
+          store.getState().inputs.global.timerange.from
+        );
       });
     });
 

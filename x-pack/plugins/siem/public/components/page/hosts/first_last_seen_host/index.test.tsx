@@ -21,6 +21,10 @@ describe('FirstLastSeen Component', async () => {
   // fixes this: https://github.com/facebook/react/pull/14853
   // For us that mean we need to upgrade to 16.9.0
   // and we will be able to do that when we are in master
+
+  const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
+  const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
+
   // tslint:disable-next-line:no-console
   const originalError = console.error;
   beforeAll(() => {
@@ -63,7 +67,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
     );
   });
 
@@ -77,14 +81,13 @@ describe('FirstLastSeen Component', async () => {
     );
     await wait();
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
   });
 
   test('First Seen is empty but not Last Seen', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.firstSeen = null;
+    badDateTime[0].result.data!.source.HostFirstLastSeen.firstSeen = null;
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -96,14 +99,13 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
   });
 
   test('Last Seen is empty but not First Seen', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.lastSeen = null;
+    badDateTime[0].result.data!.source.HostFirstLastSeen.lastSeen = null;
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -115,14 +117,13 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
     );
   });
 
   test('First Seen With a bad date time string', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.firstSeen = 'something-invalid';
+    badDateTime[0].result.data!.source.HostFirstLastSeen.firstSeen = 'something-invalid';
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -131,13 +132,12 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(container.textContent).toBe('something-invalid');
   });
 
   test('Last Seen With a bad date time string', async () => {
     const badDateTime = cloneDeep(mockFirstLastSeenHostQuery);
-    // tslint:disable-next-line:no-any
-    (badDateTime[0] as any).result.data.source.HostFirstLastSeen.lastSeen = 'something-invalid';
+    badDateTime[0].result.data!.source.HostFirstLastSeen.lastSeen = 'something-invalid';
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
@@ -146,7 +146,7 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(container.textContent).toBe('something-invalid');
   });
 
   test('Show error message', async () => {
@@ -162,7 +162,7 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait();
-    expect(container.innerHTML).toBe(getEmptyValue());
+    await wait(10);
+    expect(container.textContent).toBe(getEmptyValue());
   });
 });

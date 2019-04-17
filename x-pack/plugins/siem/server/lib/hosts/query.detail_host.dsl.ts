@@ -42,11 +42,12 @@ export const buildHostDetailsQuery = ({
     ignoreUnavailable: true,
     body: {
       aggregations: {
+        lastSeen: { max: { field: '@timestamp' } },
         ...buildFieldsTermAggregation(esFields.filter(field => !['@timestamp'].includes(field))),
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
 

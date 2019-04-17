@@ -16,7 +16,7 @@ import { AuthenticationsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -164,7 +164,41 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     name: i18n.FAILURES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.failures),
+    render: ({ node }) => {
+      const id = escapeDataProviderId(
+        `authentications-table-${node._id}-node-failures-${node.failures}`
+      );
+      return (
+        <DraggableWrapper
+          key={id}
+          dataProvider={{
+            and: [],
+            enabled: true,
+            id,
+            name: 'authentication_failure',
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: 'event.type',
+              value: 'authentication_failure',
+            },
+            queryDate: {
+              from: startDate,
+              to: Date.now(),
+            },
+          }}
+          render={(dataProvider, _, snapshot) =>
+            snapshot.isDragging ? (
+              <DragEffects>
+                <Provider dataProvider={dataProvider} />
+              </DragEffects>
+            ) : (
+              node.failures
+            )
+          }
+        />
+      );
+    },
   },
   {
     name: i18n.LAST_FAILED_TIME,
@@ -269,7 +303,41 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     name: i18n.SUCCESSES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.successes),
+    render: ({ node }) => {
+      const id = escapeDataProviderId(
+        `authentications-table-${node._id}-node-successes-${node.successes}`
+      );
+      return (
+        <DraggableWrapper
+          key={id}
+          dataProvider={{
+            and: [],
+            enabled: true,
+            id,
+            name: 'authentication_success',
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: 'event.type',
+              value: 'authentication_success',
+            },
+            queryDate: {
+              from: startDate,
+              to: Date.now(),
+            },
+          }}
+          render={(dataProvider, _, snapshot) =>
+            snapshot.isDragging ? (
+              <DragEffects>
+                <Provider dataProvider={dataProvider} />
+              </DragEffects>
+            ) : (
+              node.successes
+            )
+          }
+        />
+      );
+    },
   },
   {
     name: i18n.LAST_SUCCESSFUL_TIME,

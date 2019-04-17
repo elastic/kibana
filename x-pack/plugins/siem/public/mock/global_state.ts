@@ -10,6 +10,7 @@ import {
   DomainsFields,
   FlowDirection,
   FlowTarget,
+  HostsFields,
   NetworkDnsFields,
   NetworkTopNFlowFields,
 } from '../graphql/types';
@@ -29,7 +30,11 @@ export const mockGlobalState: State = {
     page: {
       queries: {
         authentications: { limit: 10 },
-        hosts: { limit: 10 },
+        hosts: {
+          limit: 10,
+          direction: Direction.desc,
+          sortField: HostsFields.lastSeen,
+        },
         events: { limit: 10 },
         uncommonProcesses: { limit: 10 },
       },
@@ -39,7 +44,11 @@ export const mockGlobalState: State = {
     details: {
       queries: {
         authentications: { limit: 10 },
-        hosts: { limit: 10 },
+        hosts: {
+          limit: 10,
+          direction: Direction.desc,
+          sortField: HostsFields.lastSeen,
+        },
         events: { limit: 10 },
         uncommonProcesses: { limit: 10 },
       },
@@ -80,7 +89,7 @@ export const mockGlobalState: State = {
   },
   inputs: {
     global: {
-      timerange: { kind: 'relative', option: 'now-24h', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
       query: [],
       policy: { kind: 'manual', duration: 5000 },
     },

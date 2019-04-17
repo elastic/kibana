@@ -9,6 +9,7 @@ import {
   HostEcsFields,
   HostItem,
   HostsData,
+  HostsSortField,
   SourceConfiguration,
   TimerangeInput,
 } from '../../graphql/types';
@@ -16,7 +17,7 @@ import { FrameworkRequest, RequestOptions } from '../framework';
 import { Hit, Hits, SearchHit } from '../types';
 
 export interface HostsAdapter {
-  getHosts(req: FrameworkRequest, options: RequestOptions): Promise<HostsData>;
+  getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData>;
   getHostDetails(req: FrameworkRequest, options: HostDetailsRequestOptions): Promise<HostItem>;
   getHostFirstLastSeen(
     req: FrameworkRequest,
@@ -37,6 +38,10 @@ export interface HostHit extends Hit {
 }
 
 export type HostHits = Hits<number, HostHit>;
+
+export interface HostsRequestOptions extends RequestOptions {
+  sort: HostsSortField;
+}
 
 export interface HostLastFirstSeenRequestOptions {
   hostName: string;
