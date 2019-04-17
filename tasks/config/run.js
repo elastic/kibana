@@ -105,7 +105,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/tslint')
-      ],
+      ]
     },
 
     // used by the test and jenkins:unit tasks
