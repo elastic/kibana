@@ -40,18 +40,23 @@ const createSetupContractMock = () => {
   return setupContract;
 };
 
+const createStartContractMock = () => {
+  return createSetupContractMock();
+};
+
 type InjectedMetadataServiceContract = PublicMethodsOf<InjectedMetadataService>;
 const createMock = () => {
   const mocked: jest.Mocked<InjectedMetadataServiceContract> = {
-    setup: jest.fn(),
+    setup: jest.fn().mockReturnValue(createSetupContractMock()),
+    start: jest.fn().mockReturnValue(createStartContractMock()),
     getKibanaVersion: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
   };
-  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const injectedMetadataServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };
