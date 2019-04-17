@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 
@@ -72,7 +73,14 @@ export const getHostsColumns = (
   },
   {
     field: 'node.lastSeen',
-    name: i18n.LAST_SEEN,
+    name: (
+      <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
+        <span>
+          {i18n.LAST_SEEN}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </span>
+      </EuiToolTip>
+    ),
     truncateText: false,
     hideForMobile: false,
     sortable: true,

@@ -7,17 +7,16 @@
 import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
-import uuid from 'uuid';
 
 import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
-import { appActions, inputsModel, store } from '../../../store';
-import * as i18n from '../../errors/translations';
+import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
 
 import { HostFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
 
 export interface FirstLastSeenHostArgs {
   id: string;
+  errorMessage: string;
   firstSeen: Date;
   lastSeen: Date;
   loading: boolean;
@@ -37,6 +36,7 @@ export function useFirstLastSeenHostQuery<TCache = object>(
   const [loading, updateLoading] = useState(false);
   const [firstSeen, updateFirstSeen] = useState(null);
   const [lastSeen, updateLastSeen] = useState(null);
+  const [errorMessage, updateErrorMessage] = useState(null);
 
   async function fetchFirstLastSeenHost() {
     updateLoading(true);
@@ -51,18 +51,13 @@ export function useFirstLastSeenHostQuery<TCache = object>(
           updateLoading(false);
           updateFirstSeen(get('data.source.HostFirstLastSeen.firstSeen', result));
           updateLastSeen(get('data.source.HostFirstLastSeen.lastSeen', result));
+          updateErrorMessage(null);
           return result;
         },
         error => {
-          store.dispatch(
-            appActions.addError({
-              id: uuid.v4(),
-              title: i18n.NETWORK_FAILURE,
-              message: error.message,
-            })
-          );
           updateLoading(false);
-          return null;
+          updateErrorMessage(error.message);
+          return error;
         }
       );
   }
@@ -73,8 +68,9 @@ export function useFirstLastSeenHostQuery<TCache = object>(
     } catch (err) {
       updateFirstSeen(null);
       updateLastSeen(null);
+      updateErrorMessage(err.toString());
     }
   }, []);
 
-  return { firstSeen, lastSeen, loading };
+  return { firstSeen, lastSeen, loading, errorMessage };
 }

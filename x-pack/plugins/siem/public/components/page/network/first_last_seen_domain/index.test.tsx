@@ -7,14 +7,14 @@
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render } from 'react-testing-library';
+import { render, waitForElement } from 'react-testing-library';
 
-import { mockFirstLastSeenDomainQuery } from '../../../../../containers/domains/first_last_seen_domain/mock';
-import { FlowTarget } from '../../../../../graphql/types';
-import { wait } from '../../../../../lib/helpers';
-import { TestProviders } from '../../../../../mock';
+import { mockFirstLastSeenDomainQuery } from '../../../../containers/domains/first_last_seen_domain/mock';
+import { FlowTarget } from '../../../../graphql/types';
+import { wait } from '../../../../lib/helpers';
+import { TestProviders } from '../../../../mock';
 
-import { FirstLastSeenDomain } from '.';
+import { FirstLastSeenDomain } from './index';
 
 describe('FirstLastSeen Component', async () => {
   // this is just a little hack to silence a warning that we'll get until react
@@ -40,6 +40,8 @@ describe('FirstLastSeen Component', async () => {
 
   const ip = '10.10.10.10';
   const domainName = 'example.com';
+  const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
+  const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
 
   test('Loading', async () => {
     const { container } = render(
@@ -76,7 +78,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
     );
   });
 
@@ -95,7 +97,7 @@ describe('FirstLastSeen Component', async () => {
     );
     await wait();
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
   });
 
@@ -118,7 +120,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 18:35:45.064</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
     );
   });
 
@@ -141,7 +143,7 @@ describe('FirstLastSeen Component', async () => {
     await wait();
 
     expect(container.innerHTML).toBe(
-      '<span class="euiToolTipAnchor">Apr 8, 2019 @ 16:09:40.692</span>'
+      `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
     );
   });
 
@@ -161,7 +163,7 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(container.textContent).toBe('something-invalid');
   });
 
   test('Last Seen With a bad date time string', async () => {
@@ -180,7 +182,7 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     await wait();
-    expect(container.innerHTML).toBe('something-invalid');
+    expect(container.textContent).toBe('something-invalid');
   });
 
   test('Show error message', async () => {
@@ -201,7 +203,8 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait(10);
-    expect(container.querySelectorAll('svg').length).toBe(1);
+    await wait();
+    const alertIcon = await waitForElement(() => container.querySelectorAll('svg'), { container });
+    expect(alertIcon.length).toBe(1);
   });
 });

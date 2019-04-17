@@ -72,6 +72,7 @@ export function useFirstLastSeenDomainQuery<TCache = object>(
     } catch (err) {
       updateFirstSeen(null);
       updateLastSeen(null);
+      updateErrorMessage(err.toString());
     }
   }, []);
 

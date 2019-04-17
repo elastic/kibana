@@ -7,12 +7,11 @@
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render } from 'react-testing-library';
+import { render, waitForElement } from 'react-testing-library';
 
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
 import { wait } from '../../../../lib/helpers';
 import { TestProviders } from '../../../../mock';
-import { getEmptyValue } from '../../../empty_value';
 
 import { FirstLastSeenHost } from '.';
 
@@ -162,7 +161,8 @@ describe('FirstLastSeen Component', async () => {
         </MockedProvider>
       </TestProviders>
     );
-    await wait(10);
-    expect(container.textContent).toBe(getEmptyValue());
+    await wait();
+    const alertIcon = await waitForElement(() => container.querySelectorAll('svg'), { container });
+    expect(alertIcon.length).toBe(1);
   });
 });
