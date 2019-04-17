@@ -7,9 +7,11 @@
 import expect from '@kbn/expect';
 
 import {
+  Direction,
   GetHostDetailsQuery,
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
+  HostsFields,
 } from '../../../../plugins/siem/public/graphql/types';
 import { HostDetailsQuery } from './../../../../plugins/siem/public/containers/hosts/details/host_details.gql_query';
 import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
@@ -44,6 +46,10 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            sort: {
+              field: HostsFields.lastSeen,
+              direction: Direction.asc,
+            },
             pagination: {
               limit: 1,
               cursor: null,
@@ -69,6 +75,10 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
               to: TO,
               from: FROM,
             },
+            sort: {
+              field: HostsFields.lastSeen,
+              direction: Direction.asc,
+            },
             pagination: {
               limit: 2,
               cursor: '1',
@@ -80,26 +90,26 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
 
           expect(hosts.edges.length).to.be(EDGE_LENGTH);
           expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
+          expect(hosts.edges[0]!.node.host!.os!.name).to.eql(HOST_NAME);
         });
     });
 
     it('Make sure that we get Host Details data', () => {
       const expectedHost: GetHostDetailsQuery.Host = {
-        architecture: ['x86_64'],
-        id: [CURSOR_ID],
+        architecture: 'x86_64',
+        id: CURSOR_ID,
         ip: [],
         mac: [],
-        name: ['zeek-sensor-san-francisco'],
+        name: 'zeek-sensor-san-francisco',
         os: {
-          family: ['debian'],
-          name: [HOST_NAME],
-          platform: ['ubuntu'],
-          version: ['18.04.2 LTS (Bionic Beaver)'],
-          __typename: 'OsEcsFields',
+          family: 'debian',
+          name: HOST_NAME,
+          platform: 'ubuntu',
+          version: '18.04.2 LTS (Bionic Beaver)',
+          __typename: 'OsFields',
         },
         type: null,
-        __typename: 'HostEcsFields',
+        __typename: 'HostFields',
       };
 
       return client

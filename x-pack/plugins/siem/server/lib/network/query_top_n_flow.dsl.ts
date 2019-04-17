@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { assertUnreachable } from '../../../public/lib/helpers';
 import {
   Direction,
   FlowDirection,
@@ -12,7 +11,7 @@ import {
   NetworkTopNFlowFields,
   NetworkTopNFlowSortField,
 } from '../../graphql/types';
-import { createQueryFilterClauses } from '../../utils/build_query';
+import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkTopNFlowRequestOptions } from './index';
 

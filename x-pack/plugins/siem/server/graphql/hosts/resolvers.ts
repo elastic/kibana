@@ -43,7 +43,10 @@ export const createHostsResolvers = (
 } => ({
   Source: {
     async Hosts(source, args, { req }, info) {
-      const options = createOptions(source, args, info);
+      const options = {
+        ...createOptions(source, args, info),
+        sort: args.sort,
+      };
       return libs.hosts.getHosts(req, options);
     },
     async HostDetails(source, args, { req }, info) {

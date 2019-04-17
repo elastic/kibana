@@ -5,9 +5,14 @@
  */
 
 import { FirstLastSeenHost, HostItem, HostsData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkRequest } from '../framework';
 
-import { HostDetailsRequestOptions, HostLastFirstSeenRequestOptions, HostsAdapter } from './types';
+import {
+  HostDetailsRequestOptions,
+  HostLastFirstSeenRequestOptions,
+  HostsAdapter,
+  HostsRequestOptions,
+} from './types';
 
 export * from './elasticsearch_adapter';
 export * from './types';
@@ -15,7 +20,7 @@ export * from './types';
 export class Hosts {
   constructor(private readonly adapter: HostsAdapter) {}
 
-  public async getHosts(req: FrameworkRequest, options: RequestOptions): Promise<HostsData> {
+  public async getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData> {
     return await this.adapter.getHosts(req, options);
   }
 

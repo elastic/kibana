@@ -9,7 +9,13 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import { GetHostsTableQuery, HostsEdges, PageInfo } from '../../graphql/types';
+import {
+  Direction,
+  GetHostsTableQuery,
+  HostsEdges,
+  HostsFields,
+  PageInfo,
+} from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
@@ -39,6 +45,8 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface HostsComponentReduxProps {
   limit: number;
+  sortField: HostsFields;
+  direction: Direction;
 }
 
 type HostsProps = OwnProps & HostsComponentReduxProps;
@@ -52,12 +60,14 @@ class HostsComponentQuery extends QueryTemplate<
     const {
       id = 'hostsQuery',
       children,
+      direction,
       filterQuery,
-      sourceId,
-      startDate,
       endDate,
       limit,
       poll,
+      startDate,
+      sourceId,
+      sortField,
     } = this.props;
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
@@ -71,6 +81,10 @@ class HostsComponentQuery extends QueryTemplate<
             interval: '12h',
             from: startDate,
             to: endDate,
+          },
+          sort: {
+            direction,
+            field: sortField,
           },
           pagination: {
             limit,

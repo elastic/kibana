@@ -9,13 +9,17 @@ import styled from 'styled-components';
 
 import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
 
-import * as i18n from './translations';
+import * as i18n from '../translations';
 
 interface NavTab {
   id: string;
   name: string;
   href: string;
   disabled: boolean;
+}
+
+interface TabNavigationProps {
+  location: string;
 }
 
 const navTabs: NavTab[] = [
@@ -39,34 +43,52 @@ const navTabs: NavTab[] = [
   },
 ];
 
-interface NavigationState {
+interface TabNavigationState {
   selectedTabId: string;
 }
 
-const NavigationContainer = styled.div`
+const TabNavigationContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
   margin-top: -8px;
 `;
 
-export class Navigation extends React.PureComponent<{}, NavigationState> {
-  public readonly state = {
-    selectedTabId: navTabs.reduce((res, tab) => {
-      if (window.location.hash.includes(tab.id)) {
+export class TabNavigation extends React.PureComponent<TabNavigationProps, TabNavigationState> {
+  constructor(props: TabNavigationProps) {
+    super(props);
+    const pathname = props.location;
+    const selectedTabId = this.mapLocationToTab(pathname);
+    this.state = {
+      selectedTabId,
+    };
+  }
+  public componentWillReceiveProps(nextProps: TabNavigationProps): void {
+    const pathname = nextProps.location;
+    const selectedTabId = this.mapLocationToTab(pathname);
+
+    if (this.state.selectedTabId !== selectedTabId) {
+      this.setState({
+        ...this.state,
+        selectedTabId,
+      });
+    }
+  }
+  public render() {
+    return (
+      <TabNavigationContainer>
+        <EuiTabs>{this.renderTabs()}</EuiTabs>
+      </TabNavigationContainer>
+    );
+  }
+
+  public mapLocationToTab = (pathname: string) =>
+    navTabs.reduce((res, tab) => {
+      if (pathname.includes(tab.id)) {
         res = tab.id;
       }
       return res;
-    }, ''),
-  };
-
-  public render() {
-    return (
-      <NavigationContainer>
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
-      </NavigationContainer>
-    );
-  }
+    }, '');
 
   private handleTabClick = (href: string, id: string) => {
     this.setState({
@@ -80,6 +102,7 @@ export class Navigation extends React.PureComponent<{}, NavigationState> {
     navTabs.map((tab: NavTab) => (
       <EuiTab
         data-href={tab.href}
+        data-test-subj={`navigation-${tab.id}`}
         onClick={() => this.handleTabClick(tab.href, tab.id)}
         isSelected={this.state.selectedTabId === tab.id}
         disabled={tab.disabled}

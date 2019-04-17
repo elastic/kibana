@@ -17,7 +17,7 @@ import {
   NetworkTopNFlowEdges,
   NetworkTopNFlowItem,
 } from '../../../../graphql/types';
-import { ValueOf } from '../../../../lib/helpers';
+import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -212,32 +212,32 @@ export const getNetworkTopNFlowColumns = (
   },
 ];
 
-// Xavier fix this stuff under DO NOT FORGET
-
 const getIpTitle = (flowTarget: FlowTarget) => {
-  if (flowTarget === FlowTarget.source) {
-    return i18n.SOURCE_IP;
-  } else if (flowTarget === FlowTarget.destination) {
-    return i18n.DESTINATION_IP;
-  } else if (flowTarget === FlowTarget.client) {
-    return i18n.CLIENT_IP;
-  } else if (flowTarget === FlowTarget.server) {
-    return i18n.SERVER_IP;
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return i18n.SOURCE_IP;
+    case FlowTarget.destination:
+      return i18n.DESTINATION_IP;
+    case FlowTarget.client:
+      return i18n.CLIENT_IP;
+    case FlowTarget.server:
+      return i18n.SERVER_IP;
   }
-  return '';
+  assertUnreachable(flowTarget);
 };
 
 const getUniqueTitle = (flowTarget: FlowTarget) => {
-  if (flowTarget === FlowTarget.source) {
-    return i18n.UNIQUE_DESTINATION_IP;
-  } else if (flowTarget === FlowTarget.destination) {
-    return i18n.UNIQUE_SOURCE_IP;
-  } else if (flowTarget === FlowTarget.client) {
-    return i18n.UNIQUE_SERVER_IP;
-  } else if (flowTarget === FlowTarget.server) {
-    return i18n.UNIQUE_CLIENT_IP;
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return i18n.UNIQUE_DESTINATION_IP;
+    case FlowTarget.destination:
+      return i18n.UNIQUE_SOURCE_IP;
+    case FlowTarget.client:
+      return i18n.UNIQUE_SERVER_IP;
+    case FlowTarget.server:
+      return i18n.UNIQUE_CLIENT_IP;
   }
-  return '';
+  assertUnreachable(flowTarget);
 };
 
 const MoreDomains = styled(EuiIcon)`
