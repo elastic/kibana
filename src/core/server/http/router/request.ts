@@ -23,6 +23,7 @@ import { Request } from 'hapi';
 import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
+/** @public */
 export class KibanaRequest<Params, Query, Body> {
   /**
    * Factory for creating requests. Validates the request before creating an
@@ -68,9 +69,11 @@ export class KibanaRequest<Params, Query, Body> {
   }
 
   public readonly headers: Headers;
+  public readonly path: string;
 
   constructor(req: Request, readonly params: Params, readonly query: Query, readonly body: Body) {
     this.headers = req.headers;
+    this.path = req.path;
   }
 
   public getFilteredHeaders(headersToKeep: string[]) {
