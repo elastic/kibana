@@ -55,6 +55,7 @@ function SizeParamEditor({
         isInvalid={isInvalid}
         onBlur={setTouched}
         min={1}
+        data-test-subj="sizeParamEditor"
       />
     </EuiFormRow>
   );
