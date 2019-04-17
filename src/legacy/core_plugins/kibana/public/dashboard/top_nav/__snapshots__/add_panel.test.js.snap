@@ -8,7 +8,7 @@ exports[`render 1`] = `
   maxWidth={false}
   onClose={[Function]}
   ownFocus={true}
-  size="s"
+  size="m"
 >
   <EuiFlyoutBody>
     <EuiTitle
