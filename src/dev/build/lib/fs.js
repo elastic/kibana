@@ -40,7 +40,6 @@ const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
 const copyFileAsync = promisify(fs.copyFile);
-const unlinkAsync = promisify(fs.unlink);
 
 export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
@@ -84,13 +83,6 @@ export async function copy(source, destination) {
 
   // do a stat call to make sure the source exists before creating the destination directory
   await statAsync(source);
-  // Delete `destination` since `fs.copyFile` with the copy-on-write reflink/COPYFILE_FICLONE
-  // flag fails if the destination already exists. https://github.com/nodejs/node/issues/27273
-  try {
-    await unlinkAsync(destination);
-  } catch (e) {
-    // ignore
-  }
   await mkdirp(dirname(destination));
   await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
 }
