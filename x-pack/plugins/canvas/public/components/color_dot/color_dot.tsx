@@ -34,8 +34,6 @@ export const ColorDot: FunctionComponent<Props> = ({ value, children }) => {
 };
 
 ColorDot.propTypes = {
-  // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/28015
-  // TODO: revert to string
-  value: PropTypes.any,
+  value: PropTypes.string,
   children: PropTypes.node,
 };
