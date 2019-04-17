@@ -29,7 +29,6 @@ exports[`AdvancedSettingsTitle renders as expected 1`] = `
   >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h1
         data-test-subj="managementSettingsTitle"

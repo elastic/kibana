@@ -95,10 +95,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="Select which types to export."

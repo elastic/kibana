@@ -1339,10 +1339,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.9.0":
-  version "9.9.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.9.0.tgz#bbe1a3d3cb22f1198e05665ca52cd48335a73b53"
-  integrity sha512-T6Cr68Il8tfbke/361UUW6gyQXEQwAvmDIUYOZSqCjsYjSq6JTFbwzQ6ezRD11RMN2vn8CPUwPVP5JAGNUXz8Q==
+"@elastic/eui@10.0.1":
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-10.0.1.tgz#519f52dae25cd0495e2cffca60ff62b415a50c70"
+  integrity sha512-l0nltFhHEDo4MIkdSCv6T8GmEi+W30iZcQ5fno6muZ6haji5VG6K9jCQtGUDHcns61IJ5t2yzs7Gqz+CJqlKKw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
@@ -10688,6 +10688,11 @@ exit-hook@^1.0.0:
   resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-1.1.1.tgz#f05ca233b48c05d54fff07765df8507e95c02ff8"
   integrity sha1-8FyiM7SMBdVP/wd2XfhQfpXAL/g=
 
+exit-hook@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/exit-hook/-/exit-hook-2.1.0.tgz#2be08d8d01220050878577bfa017e104a6c3bcf3"
+  integrity sha512-JCSm9Znc/KW6hoKYHOIqLxM2Z88+AQcabo07rJHZSyXcQIq6HsXkSWRVZRp13RFkGVIDcz1DRIbKR5cnU1uzCA==
+
 exit@^0.1.2, exit@~0.1.1:
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/exit/-/exit-0.1.2.tgz#0632638f8d877cc82107d30a0fff1a17cba1cd0c"
@@ -15383,10 +15388,15 @@ jpeg-js@^0.3.4:
   resolved "https://registry.yarnpkg.com/jpeg-js/-/jpeg-js-0.3.4.tgz#dc2ba501ee3d58b7bb893c5d1fab47294917e7e7"
   integrity sha512-6IzjQxvnlT8UlklNmDXIJMWxijULjqGrzgqc0OG7YadZdvm7KPQ1j0ehmQQHckgEWOfgpptzcnWgESovxudpTA==
 
-jquery@^3.2.1, jquery@^3.3.1:
+jquery@^3.2.1:
   version "3.3.1"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
   integrity sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==
+
+jquery@^3.4.0:
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.0.tgz#8de513fa0fa4b2c7d2e48a530e26f0596936efdf"
+  integrity sha512-ggRCXln9zEqv6OqAGXFEcshF5dSBvCkzj6Gm2gzuR5fWawaX8t7cxKVkkygKODrDAzKdoYw3l/e3pm3vlT4IbQ==
 
 js-base64@^2.1.8:
   version "2.4.5"
