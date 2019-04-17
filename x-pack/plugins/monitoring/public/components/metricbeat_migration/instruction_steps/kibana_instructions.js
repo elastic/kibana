@@ -48,8 +48,9 @@ export function getKibanaInstructions(product, {
   if (product.isInternalCollector || product.isPartiallyMigrated) {
     let status = null;
     if (hasCheckedMigrationStatus) {
+      const lastInternallyCollectedTimestamp = formatDateTimeLocal(product.lastInternallyCollectedTimestamp);
+
       if (product.isPartiallyMigrated) {
-        const lastInternallyCollectedTimestamp = formatDateTimeLocal(product.lastInternallyCollectedTimestamp);
         status = (
           <Fragment>
             <EuiSpacer size="m"/>
@@ -58,7 +59,7 @@ export function getKibanaInstructions(product, {
               color="warning"
               title="We still see data coming from the default collection of Kibana. Make sure you disable that before moving forward."
             >
-              <p>Last default collection occurred at {lastInternallyCollectedTimestamp}</p>
+              <p>Last internal collection occurred at {lastInternallyCollectedTimestamp}</p>
             </EuiCallOut>
           </Fragment>
         );
@@ -71,7 +72,9 @@ export function getKibanaInstructions(product, {
               size="s"
               color="warning"
               title={`We have not detected any monitoring data coming from Metricbeat for this Kibana`}
-            />
+            >
+              <p>Last internal collection occurred at {lastInternallyCollectedTimestamp}</p>
+            </EuiCallOut>
           </Fragment>
         );
       }

@@ -15,7 +15,8 @@ import {
   EuiFieldText,
   EuiButton,
   EuiPanel,
-  EuiSteps
+  EuiSteps,
+  EuiStepsHorizontal
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 
@@ -24,22 +25,22 @@ export class Flyout extends Component {
     super(props);
 
     this.state = {
-      activeStep: 2,
+      activeStep: 1,
       esMonitoringUrl: props.monitoringHosts ? props.monitoringHosts[0] : '',
       hasCheckedMigrationStatus: false,
       checkingMigrationStatus: false,
     };
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    const productChanged = nextProps.product !== this.props.product;
-    const stateChanged = nextState !== this.state;
+  // shouldComponentUpdate(nextProps, nextState) {
+  //   const productChanged = nextProps.product !== this.props.product;
+  //   const stateChanged = nextState !== this.state;
 
-    if (productChanged || stateChanged) {
-      return true;
-    }
-    return false;
-  }
+  //   if (productChanged || stateChanged) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
 
   renderActiveStep() {
     const { product, updateProduct, productName, onClose } = this.props;
@@ -60,7 +61,12 @@ export class Flyout extends Component {
             >
               <EuiFieldText value={esMonitoringUrl} onChange={e => this.setState({ esMonitoringUrl: e.target.value })}/>
             </EuiFormRow>
-            <EuiButton type="submit" fill onClick={() => this.setState({ activeStep: 2 })}>
+            <EuiButton
+              type="submit"
+              fill
+              isDisabled={esMonitoringUrl.length === 0}
+              onClick={() => this.setState({ activeStep: 2 })}
+            >
               Next
             </EuiButton>
           </EuiForm>
@@ -106,21 +112,21 @@ export class Flyout extends Component {
 
   render() {
     const { onClose } = this.props;
-    // const { activeStep } = this.state;
-    // const horizontalSteps = [
-    //   {
-    //     title: 'Configure monitoring cluster',
-    //     isComplete: activeStep > 1,
-    //     onClick: () => this.setState({ activeStep: 1 }),
-    //   },
-    //   {
-    //     title: 'Setup stack products',
-    //     isComplete: activeStep > 2,
-    //     onClick: () => {
-    //       this.setState({ activeStep: 2 });
-    //     }
-    //   }
-    // ];
+    const { activeStep } = this.state;
+    const horizontalSteps = [
+      {
+        title: 'Configure monitoring cluster',
+        isComplete: activeStep > 1,
+        onClick: () => this.setState({ activeStep: 1 }),
+      },
+      {
+        title: 'Setup stack products',
+        isComplete: activeStep > 2,
+        onClick: () => {
+          this.setState({ activeStep: 2 });
+        }
+      }
+    ];
 
     return (
       <EuiFlyout
@@ -135,10 +141,10 @@ export class Flyout extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {/* <EuiStepsHorizontal
+          <EuiStepsHorizontal
             steps={horizontalSteps}
           />
-          <EuiSpacer size="m"/> */}
+          <EuiSpacer size="m"/>
           {this.renderActiveStep()}
         </EuiFlyoutBody>
       </EuiFlyout>

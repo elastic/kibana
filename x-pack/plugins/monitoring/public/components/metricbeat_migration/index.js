@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MetricbeatMigration } from './metricbeat_migration';
+// export { MetricbeatMigration } from './metricbeat_migration';

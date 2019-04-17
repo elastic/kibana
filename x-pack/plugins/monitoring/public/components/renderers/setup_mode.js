@@ -29,6 +29,7 @@ export class SetupModeRenderer extends React.Component {
         onClose={() => this.setState({ isFlyoutOpen: false })}
         productName={productName}
         product={product}
+        updateProduct={updateSetupModeData}
       />
     );
   }

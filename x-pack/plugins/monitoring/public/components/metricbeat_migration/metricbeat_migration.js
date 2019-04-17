@@ -4,112 +4,119 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
-import {
-  EuiCallOut,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
-import { Flyout } from './flyout';
 
-export class MetricbeatMigration extends Component {
-  constructor(props) {
-    super(props);
+// /*
+//  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+//  * or more contributor license agreements. Licensed under the Elastic License;
+//  * you may not use this file except in compliance with the Elastic License.
+//  */
 
-    this.state = {
-      isShowingFlyout: false,
-      capabilities: null,
-    };
-  }
+// import React, { Component } from 'react';
+// import {
+//   EuiCallOut,
+//   EuiButton,
+//   EuiButtonEmpty,
+//   EuiSpacer,
+//   EuiFlexGroup,
+//   EuiFlexItem,
+// } from '@elastic/eui';
+// import { Flyout } from './flyout';
 
-  componentWillMount() {
-    this.updateCapabilities();
-  }
+// export class MetricbeatMigration extends Component {
+//   constructor(props) {
+//     super(props);
 
-  async updateCapabilities() {
-    const { fetchCapabilities } = this.props;
+//     this.state = {
+//       isShowingFlyout: false,
+//       capabilities: null,
+//     };
+//   }
 
-    const capabilities = await fetchCapabilities();
-    this.setState({ capabilities });
-  }
+//   componentWillMount() {
+//     this.updateCapabilities();
+//   }
 
-  renderFlyout() {
-    const { isShowingFlyout, capabilities } = this.state;
+//   async updateCapabilities() {
+//     const { fetchCapabilities } = this.props;
 
-    if (!isShowingFlyout) {
-      return null;
-    }
+//     const capabilities = await fetchCapabilities();
+//     this.setState({ capabilities });
+//   }
 
-    return (
-      <Flyout
-        onClose={() => this.closeFlyout()}
-        products={capabilities}
-        updateCapabilities={() => this.updateCapabilities()}
-      />
-    );
-  }
+//   renderFlyout() {
+//     const { isShowingFlyout, capabilities } = this.state;
 
-  showFlyout() {
-    this.setState({ isShowingFlyout: true });
-  }
+//     if (!isShowingFlyout) {
+//       return null;
+//     }
 
-  closeFlyout() {
-    this.setState({ isShowingFlyout: false });
-  }
+//     return (
+//       <Flyout
+//         onClose={() => this.closeFlyout()}
+//         products={capabilities}
+//         updateCapabilities={() => this.updateCapabilities()}
+//       />
+//     );
+//   }
 
-  render() {
-    const { capabilities } = this.state;
+//   showFlyout() {
+//     this.setState({ isShowingFlyout: true });
+//   }
 
-    if (!capabilities) {
-      return null;
-    }
+//   closeFlyout() {
+//     this.setState({ isShowingFlyout: false });
+//   }
 
-    const isFullyMigrated = Object.values(capabilities).reduce((isFullyMigrated, cap) => {
-      return isFullyMigrated && cap.isFullyMigrated;
-    }, true);
+//   render() {
+//     const { capabilities } = this.state;
 
-    if (isFullyMigrated) {
-      return null;
-    }
+//     if (!capabilities) {
+//       return null;
+//     }
 
-    let title = '';
-    if (capabilities.isInternalCollector) {
-      title = 'Hey! You are using internal collection. Why?';
-    }
+//     const isFullyMigrated = Object.values(capabilities).reduce((isFullyMigrated, cap) => {
+//       return isFullyMigrated && cap.isFullyMigrated;
+//     }, true);
 
-    return (
-      <div>
-        <EuiCallOut
-          title={title}
-          color="warning"
-        >
-          <p>
-            Hey! You should be using Metricbeat to ship this data! Want help migrating?
-          </p>
-          <EuiFlexGroup gutterSize="s" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton fill={true} onClick={() => this.showFlyout()}>
-               Use Wizard
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty href="http://www.elastic.co">
-                Use the docs
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => this.updateCapabilities()}>
-                Refresh
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiCallOut>
-        <EuiSpacer/>
-        {this.renderFlyout()}
-      </div>
-    );
-  }
-}
+//     if (isFullyMigrated) {
+//       return null;
+//     }
+
+//     let title = '';
+//     if (capabilities.isInternalCollector) {
+//       title = 'Hey! You are using internal collection. Why?';
+//     }
+
+//     return (
+//       <div>
+//         <EuiCallOut
+//           title={title}
+//           color="warning"
+//         >
+//           <p>
+//             Hey! You should be using Metricbeat to ship this data! Want help migrating?
+//           </p>
+//           <EuiFlexGroup gutterSize="s" alignItems="center">
+//             <EuiFlexItem grow={false}>
+//               <EuiButton fill={true} onClick={() => this.showFlyout()}>
+//                Use Wizard
+//               </EuiButton>
+//             </EuiFlexItem>
+//             <EuiFlexItem grow={false}>
+//               <EuiButtonEmpty href="http://www.elastic.co">
+//                 Use the docs
+//               </EuiButtonEmpty>
+//             </EuiFlexItem>
+//             <EuiFlexItem grow={false}>
+//               <EuiButton size="s" onClick={() => this.updateCapabilities()}>
+//                 Refresh
+//               </EuiButton>
+//             </EuiFlexItem>
+//           </EuiFlexGroup>
+//         </EuiCallOut>
+//         <EuiSpacer/>
+//         {this.renderFlyout()}
+//       </div>
+//     );
+//   }
+// }
