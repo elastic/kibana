@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, omit } from 'lodash';
-import { QUERY } from '../../../common/constants';
+import { get } from 'lodash';
 import { getFilteredQuery } from './get_filtered_query';
 
 /**
@@ -23,23 +22,6 @@ const getMonitorsListFilteredQuery = (filters: any): string | undefined => {
     }
   }
 };
-
-/**
- * When the client's search component generates a simple_query_string, it doesn't
- * provide a set of fields for ES to search. This function will apply a default set
- * of fields to each of those.
- * @param filter - an object that may or may not contain a simple_query_string
- */
-const addFieldsToSimpleQuery = (filter: any) =>
-  filter.simple_query_string
-    ? {
-        ...omit(filter, 'simple_query_string'),
-        simple_query_string: {
-          ...filter.simple_query_string,
-          fields: QUERY.SIMPLE_QUERY_STRING_FIELDS,
-        },
-      }
-    : filter;
 
 /**
  * This function exists to parse the filter parameters provided by the client.
