@@ -7,7 +7,6 @@
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
-import InfiniteScroll from 'react-infinite-scroller';
 import Markdown from 'react-markdown';
 import { connect } from 'react-redux';
 import { RouteComponentProps } from 'react-router-dom';
@@ -23,12 +22,7 @@ import {
   Repository,
 } from '../../../model';
 import { CommitInfo, ReferenceInfo } from '../../../model/commit';
-import {
-  changeSearchScope,
-  FetchFileResponse,
-  fetchMoreCommits,
-  SearchOptions,
-} from '../../actions';
+import { changeSearchScope, FetchFileResponse, SearchOptions } from '../../actions';
 import { MainRouteParams, PathTypes } from '../../common/types';
 import { RepoState, RepoStatus, RootState } from '../../reducers';
 import {
@@ -36,12 +30,11 @@ import {
   hasMoreCommitsSelector,
   repoUriSelector,
   statusSelector,
-  treeCommitsSelector,
 } from '../../selectors';
 import { encodeRevisionString, history } from '../../utils/url';
 import { Editor } from '../editor/editor';
 import { CloneStatus } from './clone_status';
-import { CommitHistory, CommitHistoryLoading } from './commit_history';
+import { CommitHistory } from './commit_history';
 import { Directory } from './directory';
 import { ErrorPanel } from './error_panel';
 import { NotFound } from './not_found';
@@ -58,8 +51,8 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   hasMoreCommits: boolean;
   loadingCommits: boolean;
   onSearchScopeChanged: (s: SearchScope) => void;
+  repoScope: string[];
   searchOptions: SearchOptions;
-  fetchMoreCommits(repoUri: string): void;
   currentRepository?: Repository;
 }
 const LANG_MD = 'markdown';
@@ -278,7 +271,7 @@ class CodeContent extends React.PureComponent<Props> {
       return this.renderProgress();
     }
 
-    const { file, commits, match, tree, hasMoreCommits, loadingCommits } = this.props;
+    const { file, match, tree } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -288,7 +281,6 @@ class CodeContent extends React.PureComponent<Props> {
           <div className="codeContainer__directoryView">
             <Directory node={node} />
             <CommitHistory
-              commits={commits}
               repoUri={repoUri}
               header={
                 <React.Fragment>
@@ -362,24 +354,15 @@ class CodeContent extends React.PureComponent<Props> {
       case PathTypes.commits:
         return (
           <div className="codeContainer__history">
-            <InfiniteScroll
-              initialLoad={true}
-              loadMore={() => !loadingCommits && this.props.fetchMoreCommits(repoUri)}
-              hasMore={hasMoreCommits}
-              useWindow={false}
-              loader={<CommitHistoryLoading />}
-            >
-              <CommitHistory
-                hideLoading={true}
-                commits={commits}
-                repoUri={repoUri}
-                header={
-                  <EuiTitle className="codeMargin__title">
-                    <h3>Commit History</h3>
-                  </EuiTitle>
-                }
-              />
-            </InfiniteScroll>
+            <CommitHistory
+              repoUri={repoUri}
+              header={
+                <EuiTitle className="codeMargin__title">
+                  <h3>Commit History</h3>
+                </EuiTitle>
+              }
+              showPagination={true}
+            />
           </div>
         );
     }
@@ -391,7 +374,6 @@ const mapStateToProps = (state: RootState) => ({
   file: state.file.file,
   tree: state.file.tree,
   currentTree: currentTreeSelector(state),
-  commits: treeCommitsSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),
   loadingCommits: state.file.loadingCommits,
@@ -401,7 +383,6 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = {
-  fetchMoreCommits,
   onSearchScopeChanged: changeSearchScope,
 };
 
