@@ -43,7 +43,6 @@ const DEFAULT_OPTIONS: MetricsExplorerOptions = {
   metrics: [],
 };
 
-
 export const useMetricsExplorerOptions = () => {
   const [options, setOptions] = useState<MetricsExplorerOptions>(DEFAULT_OPTIONS);
   const [currentTimerange, setTimeRange] = useState<MetricsExplorerTimeOptions>(DEFAULT_TIMERANGE);

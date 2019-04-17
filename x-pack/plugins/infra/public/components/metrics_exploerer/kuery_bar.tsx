@@ -32,7 +32,6 @@ export const MetricsExploererKueryBar = injectI18n(
     const [draftQuery, setDraftQuery] = useState<string>(value || '');
     const [isValid, setValidation] = useState<boolean>(true);
 
-
     // This ensures that if value changes out side this component it will update.
     useEffect(
       () => {
