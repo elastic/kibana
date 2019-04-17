@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Server } from 'hapi';
+import { CoreSetup } from 'src/core/server';
 import {
   APM_TELEMETRY_DOC_ID,
   createApmTelementry,
@@ -12,16 +12,22 @@ import {
 } from './apm_telemetry';
 
 // TODO this type should be defined by the platform
-interface KibanaHapiServer extends Server {
-  usage: {
-    collectorSet: {
-      makeUsageCollector: (options: unknown) => unknown;
-      register: (options: unknown) => unknown;
+export interface CoreSetupWithUsageCollector extends CoreSetup {
+  http: CoreSetup['http'] & {
+    server: {
+      usage: {
+        collectorSet: {
+          makeUsageCollector: (options: unknown) => unknown;
+          register: (options: unknown) => unknown;
+        };
+      };
     };
   };
 }
 
-export function makeApmUsageCollector(server: KibanaHapiServer): void {
+export function makeApmUsageCollector(core: CoreSetupWithUsageCollector) {
+  const { server } = core.http;
+
   const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({
     type: 'apm',
     fetch: async () => {

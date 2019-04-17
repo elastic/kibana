@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { BasePathSetup } from '../base_path';
 import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
@@ -24,8 +25,6 @@ import { NotificationsSetup } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
-
-import { i18n } from '@kbn/i18n';
 
 interface UiSettingsServiceDeps {
   notifications: NotificationsSetup;

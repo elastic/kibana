@@ -15,13 +15,6 @@ import moment from 'moment';
 import React, { Component } from 'react';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { Poller } from '../../../../common/poller';
-import { JobStatuses } from '../constants/job_statuses';
-import { downloadReport } from '../lib/download_report';
-import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
-import { ReportErrorButton } from './report_error_button';
-import { ReportInfoButton } from './report_info_button';
-
 import {
   EuiBasicTable as EuiBasicTableTyped,
   EuiButtonIcon,
@@ -32,6 +25,12 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { Poller } from '../../../../common/poller';
+import { JobStatuses } from '../constants/job_statuses';
+import { downloadReport } from '../lib/download_report';
+import { jobQueueClient, JobQueueEntry } from '../lib/job_queue_client';
+import { ReportErrorButton } from './report_error_button';
+import { ReportInfoButton } from './report_info_button';
 
 interface Job {
   id: string;

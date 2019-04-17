@@ -9,7 +9,14 @@ import PropTypes from 'prop-types';
 import { EuiButton } from '@elastic/eui';
 
 export const WorkpadCreate = ({ createPending, onCreate, ...rest }) => (
-  <EuiButton {...rest} iconType="plusInCircle" fill onClick={onCreate} isLoading={createPending}>
+  <EuiButton
+    {...rest}
+    iconType="plusInCircle"
+    fill
+    onClick={onCreate}
+    isLoading={createPending}
+    data-test-subj="create-workpad-button"
+  >
     Create workpad
   </EuiButton>
 );

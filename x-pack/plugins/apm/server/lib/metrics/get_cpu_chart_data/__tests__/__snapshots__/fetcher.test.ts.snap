@@ -56,7 +56,7 @@ Array [
                 "min": 100,
               },
               "field": "@timestamp",
-              "interval": "1s",
+              "interval": "30s",
               "min_doc_count": 0,
             },
           },

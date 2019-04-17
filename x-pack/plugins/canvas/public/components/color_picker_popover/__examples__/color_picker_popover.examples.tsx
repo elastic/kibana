@@ -36,7 +36,7 @@ class Interactive extends React.Component<
         />
         <p style={{ marginTop: 20 }}>
           <label>
-            {/* tslint:disable-next-line:react-a11y-input-elements*/}
+            {/* eslint-disable-next-line react-a11y-input-elements */}
             <input
               aria-checked={this.state.hasButtons}
               type="checkbox"

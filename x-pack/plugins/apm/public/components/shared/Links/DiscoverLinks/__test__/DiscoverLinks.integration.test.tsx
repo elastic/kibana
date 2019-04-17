@@ -21,6 +21,14 @@ jest
     Promise.resolve({ id: 'apm-index-pattern-id' } as savedObjects.ISavedObject)
   );
 
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation(() => null);
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
+});
+
 test('DiscoverTransactionLink should produce the correct URL', async () => {
   const transaction = {
     transaction: {
@@ -30,11 +38,12 @@ test('DiscoverTransactionLink should produce the correct URL', async () => {
       id: '8b60bd32ecc6e1506735a8b6cfcf175c'
     }
   } as Transaction;
+
   const href = await getRenderedHref(
     () => <DiscoverTransactionLink transaction={transaction} />,
     {
-      location: { search: '?rangeFrom=now/w&rangeTo=now' } as Location
-    }
+      search: '?rangeFrom=now/w&rangeTo=now'
+    } as Location
   );
 
   expect(href).toEqual(
@@ -48,9 +57,10 @@ test('DiscoverSpanLink should produce the correct URL', async () => {
       id: 'test-span-id'
     }
   } as Span;
+
   const href = await getRenderedHref(() => <DiscoverSpanLink span={span} />, {
-    location: { search: '?rangeFrom=now/w&rangeTo=now' } as Location
-  });
+    search: '?rangeFrom=now/w&rangeTo=now'
+  } as Location);
 
   expect(href).toEqual(
     `/app/kibana#/discover?_g=(refreshInterval:(pause:true,value:'0'),time:(from:now%2Fw,to:now))&_a=(index:apm-index-pattern-id,interval:auto,query:(language:lucene,query:'span.id:"test-span-id"'))`
@@ -69,8 +79,8 @@ test('DiscoverErrorLink should produce the correct URL', async () => {
   const href = await getRenderedHref(
     () => <DiscoverErrorLink error={error} />,
     {
-      location: { search: '?rangeFrom=now/w&rangeTo=now' } as Location
-    }
+      search: '?rangeFrom=now/w&rangeTo=now'
+    } as Location
   );
 
   expect(href).toEqual(
@@ -87,11 +97,12 @@ test('DiscoverErrorLink should include optional kuery string in URL', async () =
       grouping_key: 'grouping-key'
     }
   } as APMError;
+
   const href = await getRenderedHref(
     () => <DiscoverErrorLink error={error} kuery="some:kuery-string" />,
     {
-      location: { search: '?rangeFrom=now/w&rangeTo=now' } as Location
-    }
+      search: '?rangeFrom=now/w&rangeTo=now'
+    } as Location
   );
 
   expect(href).toEqual(

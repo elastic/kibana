@@ -6,5 +6,5 @@
 
 import { createTestConfig } from '../common/config';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default createTestConfig('security_and_spaces', { license: 'trial' });

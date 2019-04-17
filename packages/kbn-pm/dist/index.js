@@ -99,8 +99,17 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "prepareExternalProjectDependencies", function() { return _production__WEBPACK_IMPORTED_MODULE_1__["prepareExternalProjectDependencies"]; });
 
-/* harmony import */ var _utils_workspaces__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(131);
-/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "copyWorkspacePackages", function() { return _utils_workspaces__WEBPACK_IMPORTED_MODULE_2__["copyWorkspacePackages"]; });
+/* harmony import */ var _utils_projects__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(35);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getProjects", function() { return _utils_projects__WEBPACK_IMPORTED_MODULE_2__["getProjects"]; });
+
+/* harmony import */ var _utils_project__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(53);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "Project", function() { return _utils_project__WEBPACK_IMPORTED_MODULE_3__["Project"]; });
+
+/* harmony import */ var _utils_workspaces__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(131);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "copyWorkspacePackages", function() { return _utils_workspaces__WEBPACK_IMPORTED_MODULE_4__["copyWorkspacePackages"]; });
+
+/* harmony import */ var _config__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(132);
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "getProjectPaths", function() { return _config__WEBPACK_IMPORTED_MODULE_5__["getProjectPaths"]; });
 
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -120,6 +129,9 @@ __webpack_require__.r(__webpack_exports__);
  * specific language governing permissions and limitations
  * under the License.
  */
+
+
+
 
 
 
@@ -2266,28 +2278,41 @@ if (true) {
 
 /***/ }),
 /* 15 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-const SHORTSPLIT = /$|[!-@\[-`{-~].*/g
-const EMPTY = []
+"use strict";
 
-function array(any) {
-  return Array.isArray(any) ? any : [any]
+
+const EMPTYARR = []
+const SHORTSPLIT = /$|[!-@[-`{-~][\s\S]*/g
+const isArray = Array.isArray
+
+const parseValue = function(any) {
+  if (any === "") return ""
+  if (any === "false") return false
+  const maybe = Number(any)
+  return maybe * 0 === 0 ? maybe : any
 }
 
-function aliases(aliases) {
-  var out = {}
+const parseAlias = function(aliases) {
+  let out = {},
+    key,
+    alias,
+    prev,
+    len,
+    any,
+    i,
+    k
 
-  for (var key in aliases) {
-    var alias = (out[key] = array(aliases[key]))
+  for (key in aliases) {
+    any = aliases[key]
+    alias = out[key] = isArray(any) ? any : [any]
 
-    for (var i = 0, len = alias.length; i < len; i++) {
-      var curr = (out[alias[i]] = [key])
+    for (i = 0, len = alias.length; i < len; i++) {
+      prev = out[alias[i]] = [key]
 
-      for (var j = 0; j < len; j++) {
-        if (i !== j) {
-          curr.push(alias[j])
-        }
+      for (k = 0; k < len; k++) {
+        if (i !== k) prev.push(alias[k])
       }
     }
   }
@@ -2295,22 +2320,25 @@ function aliases(aliases) {
   return out
 }
 
-function booleans(aliases, booleans) {
-  var out = {}
+const parseDefault = function(aliases, defaults) {
+  let out = {},
+    key,
+    alias,
+    value,
+    len,
+    i
 
-  if (booleans !== undefined) {
-    for (var i = 0, len = booleans.length; i < len; i++) {
-      var key = booleans[i]
-      var alias = aliases[key]
+  for (key in defaults) {
+    value = defaults[key]
+    alias = aliases[key]
 
-      out[key] = true
+    out[key] = value
 
-      if (alias === undefined) {
-        aliases[key] = EMPTY
-      } else {
-        for (var j = 0, end = alias.length; j < end; j++) {
-          out[alias[j]] = true
-        }
+    if (alias === undefined) {
+      aliases[key] = EMPTYARR
+    } else {
+      for (i = 0, len = alias.length; i < len; i++) {
+        out[alias[i]] = value
       }
     }
   }
@@ -2318,21 +2346,27 @@ function booleans(aliases, booleans) {
   return out
 }
 
-function defaults(aliases, defaults) {
-  var out = {}
+const parseOptions = function(aliases, options, value) {
+  let out = {},
+    key,
+    alias,
+    len,
+    end,
+    i,
+    k
 
-  for (var key in defaults) {
-    var value = defaults[key]
-    var alias = aliases[key]
+  if (options !== undefined) {
+    for (i = 0, len = options.length; i < len; i++) {
+      key = options[i]
+      alias = aliases[key]
 
-    if (out[key] === undefined) {
       out[key] = value
 
       if (alias === undefined) {
-        aliases[key] = EMPTY
+        aliases[key] = EMPTYARR
       } else {
-        for (var i = 0, len = alias.length; i < len; i++) {
-          out[alias[i]] = value
+        for (k = 0, end = alias.length; k < end; k++) {
+          out[alias[k]] = value
         }
       }
     }
@@ -2341,95 +2375,117 @@ function defaults(aliases, defaults) {
   return out
 }
 
-function set(out, key, value, aliases, unknown) {
-  var curr = out[key]
-  var alias = aliases[key]
-  var known = alias !== undefined
+const write = function(out, key, value, aliases, unknown) {
+  let i,
+    prev,
+    alias = aliases[key],
+    len = alias === undefined ? -1 : alias.length
 
-  if (known || unknown === undefined || false !== unknown(key)) {
-    if (curr === undefined) {
+  if (len >= 0 || unknown === undefined || unknown(key)) {
+    prev = out[key]
+
+    if (prev === undefined) {
       out[key] = value
     } else {
-      if (Array.isArray(curr)) {
-        curr.push(value)
+      if (isArray(prev)) {
+        prev.push(value)
       } else {
-        out[key] = [curr, value]
+        out[key] = [prev, value]
       }
     }
 
-    if (known) {
-      for (var i = 0, len = alias.length; i < len; ) {
-        out[alias[i++]] = out[key]
-      }
+    for (i = 0; i < len; i++) {
+      out[alias[i]] = out[key]
     }
   }
 }
 
-module.exports = function(argv, opts) {
-  var unknown = (opts = opts || {}).unknown
-  var alias = aliases(opts.alias)
-  var values = defaults(alias, opts.default)
-  var bools = booleans(alias, opts.boolean)
-  var out = { _: [] }
+const getopts = function(argv, opts) {
+  let unknown = (opts = opts || {}).unknown,
+    aliases = parseAlias(opts.alias),
+    strings = parseOptions(aliases, opts.string, ""),
+    values = parseDefault(aliases, opts.default),
+    bools = parseOptions(aliases, opts.boolean, false),
+    stopEarly = opts.stopEarly,
+    _ = [],
+    out = { _ },
+    i = 0,
+    k = 0,
+    len = argv.length,
+    key,
+    arg,
+    end,
+    match,
+    value
 
-  for (var i = 0, j = 0, len = argv.length, _ = out._; i < len; i++) {
-    var arg = argv[i]
+  for (; i < len; i++) {
+    arg = argv[i]
 
-    if (arg === "--") {
-      while (++i < len) {
-        _.push(argv[i])
-      }
-    } else if (arg === "-" || arg[0] !== "-") {
-      _.push(arg)
-    } else {
-      if (arg[1] === "-") {
-        var end = arg.indexOf("=", 2)
-
-        if (0 <= end) {
-          set(out, arg.slice(2, end), arg.slice(end + 1), alias, unknown)
-        } else {
-          if ("n" === arg[2] && "o" === arg[3] && "-" === arg[4]) {
-            set(out, arg.slice(5), false, alias, unknown)
-          } else {
-            var key = arg.slice(2)
-            set(
-              out,
-              key,
-              len === (j = i + 1) ||
-                argv[j][0] === "-" ||
-                bools[key] !== undefined ||
-                argv[(i = j)],
-              alias,
-              unknown
-            )
-          }
-        }
+    if (arg[0] !== "-" || arg === "-") {
+      if (stopEarly) while (i < len) _.push(argv[i++])
+      else _.push(arg)
+    } else if (arg === "--") {
+      while (++i < len) _.push(argv[i])
+    } else if (arg[1] === "-") {
+      end = arg.indexOf("=", 2)
+      if (arg[2] === "n" && arg[3] === "o" && arg[4] === "-") {
+        key = arg.slice(5, end >= 0 ? end : undefined)
+        value = false
+      } else if (end >= 0) {
+        key = arg.slice(2, end)
+        value =
+          bools[key] !== undefined ||
+          (strings[key] === undefined
+            ? parseValue(arg.slice(end + 1))
+            : arg.slice(end + 1))
       } else {
-        SHORTSPLIT.lastIndex = 2
-        var match = SHORTSPLIT.exec(arg)
-        var end = match.index
-        var value =
-          match[0] ||
-          len === (j = i + 1) ||
-          argv[j][0] === "-" ||
-          bools[arg[end - 1]] !== undefined ||
-          argv[(i = j)]
+        key = arg.slice(2)
+        value =
+          bools[key] !== undefined ||
+          (len === i + 1 || argv[i + 1][0] === "-"
+            ? strings[key] === undefined
+              ? true
+              : ""
+            : strings[key] === undefined
+            ? parseValue(argv[++i])
+            : argv[++i])
+      }
+      write(out, key, value, aliases, unknown)
+    } else {
+      SHORTSPLIT.lastIndex = 2
+      match = SHORTSPLIT.exec(arg)
+      end = match.index
+      value = match[0]
 
-        for (j = 1; j < end; ) {
-          set(out, arg[j], ++j !== end || value, alias, unknown)
-        }
+      for (k = 1; k < end; k++) {
+        write(
+          out,
+          (key = arg[k]),
+          k + 1 < end
+            ? strings[key] === undefined ||
+                arg.substring(k + 1, (k = end)) + value
+            : value === ""
+            ? len === i + 1 || argv[i + 1][0] === "-"
+              ? strings[key] === undefined || ""
+              : bools[key] !== undefined ||
+                (strings[key] === undefined ? parseValue(argv[++i]) : argv[++i])
+            : bools[key] !== undefined ||
+              (strings[key] === undefined ? parseValue(value) : value),
+          aliases,
+          unknown
+        )
       }
     }
   }
 
-  for (var key in values) {
-    if (out[key] === undefined) {
-      out[key] = values[key]
-    }
-  }
+  for (key in values) if (out[key] === undefined) out[key] = values[key]
+  for (key in bools) if (out[key] === undefined) out[key] = false
+  for (key in strings) if (out[key] === undefined) out[key] = ""
 
   return out
 }
+
+module.exports = getopts
 
 
 /***/ }),
@@ -2646,6 +2702,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "chmod", function() { return chmod; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "readFile", function() { return readFile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "mkdirp", function() { return mkdirp; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isSymlink", function() { return isSymlink; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isDirectory", function() { return isDirectory; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "isFile", function() { return isFile; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createSymlink", function() { return createSymlink; });
@@ -2685,7 +2742,7 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const stat = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.stat);
+const lstat = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.lstat);
 const readFile = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.readFile);
 const symlink = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.symlink);
 const chmod = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(fs__WEBPACK_IMPORTED_MODULE_1___default.a.chmod);
@@ -2697,7 +2754,7 @@ const copyDirectory = Object(util__WEBPACK_IMPORTED_MODULE_5__["promisify"])(ncp
 
 async function statTest(path, block) {
   try {
-    return block((await stat(path)));
+    return block((await lstat(path)));
   } catch (e) {
     if (e.code === 'ENOENT') {
       return false;
@@ -2707,10 +2764,18 @@ async function statTest(path, block) {
   }
 }
 /**
- * Test if a path points to a directory.
+ * Test if a path points to a symlink.
  * @param path
  */
 
+
+async function isSymlink(path) {
+  return await statTest(path, stats => stats.isSymbolicLink());
+}
+/**
+ * Test if a path points to a directory.
+ * @param path
+ */
 
 async function isDirectory(path) {
   return await statTest(path, stats => stats.isDirectory());
@@ -4136,7 +4201,7 @@ const log = {
    * @param  ...args
    */
   write(...args) {
-    // tslint:disable no-console
+    // eslint-disable-next-line no-console
     console.log(...args);
   }
 
@@ -7822,14 +7887,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Project", function() { return Project; });
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(2);
 /* harmony import */ var chalk__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(chalk__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(16);
-/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(29);
-/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(52);
-/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(33);
-/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(54);
-/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(92);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(23);
+/* harmony import */ var fs__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(fs__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(16);
+/* harmony import */ var path__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(path__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(29);
+/* harmony import */ var util__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(util__WEBPACK_IMPORTED_MODULE_3__);
+/* harmony import */ var _errors__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(52);
+/* harmony import */ var _log__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(33);
+/* harmony import */ var _package_json__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(54);
+/* harmony import */ var _scripts__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(92);
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; var ownKeys = Object.keys(source); if (typeof Object.getOwnPropertySymbols === 'function') { ownKeys = ownKeys.concat(Object.getOwnPropertySymbols(source).filter(function (sym) { return Object.getOwnPropertyDescriptor(source, sym).enumerable; })); } ownKeys.forEach(function (key) { _defineProperty(target, key, source[key]); }); } return target; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -7859,9 +7926,10 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 
 
+
 class Project {
   static async fromPath(path) {
-    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["readPackageJson"])(path);
+    const pkgJson = await Object(_package_json__WEBPACK_IMPORTED_MODULE_6__["readPackageJson"])(path);
     return new Project(pkgJson, path);
   }
 
@@ -7890,9 +7958,9 @@ class Project {
 
     this.json = Object.freeze(packageJson);
     this.path = projectPath;
-    this.packageJsonLocation = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, 'package.json');
-    this.nodeModulesLocation = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, 'node_modules');
-    this.targetLocation = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, 'target');
+    this.packageJsonLocation = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.path, 'package.json');
+    this.nodeModulesLocation = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.path, 'node_modules');
+    this.targetLocation = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.path, 'target');
     this.productionDependencies = this.json.dependencies || {};
     this.devDependencies = this.json.devDependencies || {};
     this.allDependencies = _objectSpread({}, this.devDependencies, this.productionDependencies);
@@ -7911,7 +7979,7 @@ class Project {
     if (dependentProjectIsInWorkspace) {
       expectedVersionInPackageJson = project.json.version;
     } else {
-      const relativePathToProject = normalizePath(Object(path__WEBPACK_IMPORTED_MODULE_1__["relative"])(this.path, project.path));
+      const relativePathToProject = normalizePath(Object(path__WEBPACK_IMPORTED_MODULE_2__["relative"])(this.path, project.path));
       expectedVersionInPackageJson = `link:${relativePathToProject}`;
     } // No issues!
 
@@ -7922,15 +7990,15 @@ class Project {
 
     let problemMsg;
 
-    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(versionInPackageJson) && dependentProjectIsInWorkspace) {
+    if (Object(_package_json__WEBPACK_IMPORTED_MODULE_6__["isLinkDependency"])(versionInPackageJson) && dependentProjectIsInWorkspace) {
       problemMsg = `but should be using a workspace`;
-    } else if (Object(_package_json__WEBPACK_IMPORTED_MODULE_5__["isLinkDependency"])(versionInPackageJson)) {
+    } else if (Object(_package_json__WEBPACK_IMPORTED_MODULE_6__["isLinkDependency"])(versionInPackageJson)) {
       problemMsg = `using 'link:', but the path is wrong`;
     } else {
       problemMsg = `but it's not using the local package`;
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`, {
+    throw new _errors__WEBPACK_IMPORTED_MODULE_4__["CliError"](`[${this.name}] depends on [${project.name}] ${problemMsg}. Update its package.json to the expected value below.`, {
       actual: `"${project.name}": "${versionInPackageJson}"`,
       expected: `"${project.name}": "${expectedVersionInPackageJson}"`,
       package: `${this.name} (${this.packageJsonLocation})`
@@ -7948,7 +8016,7 @@ class Project {
 
 
   getIntermediateBuildDirectory() {
-    return Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
+    return Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.path, this.getBuildConfig().intermediateBuildDirectory || '.');
   }
 
   getCleanConfig() {
@@ -7968,7 +8036,7 @@ class Project {
 
     if (typeof raw === 'string') {
       return {
-        [this.name]: Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, raw)
+        [this.name]: Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.path, raw)
       };
     }
 
@@ -7976,25 +8044,25 @@ class Project {
       const binsConfig = {};
 
       for (const binName of Object.keys(raw)) {
-        binsConfig[binName] = Object(path__WEBPACK_IMPORTED_MODULE_1__["resolve"])(this.path, raw[binName]);
+        binsConfig[binName] = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.path, raw[binName]);
       }
 
       return binsConfig;
     }
 
-    throw new _errors__WEBPACK_IMPORTED_MODULE_3__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
-      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_2__["inspect"])(raw),
+    throw new _errors__WEBPACK_IMPORTED_MODULE_4__["CliError"](`[${this.name}] has an invalid "bin" field in its package.json, ` + `expected an object or a string`, {
+      binConfig: Object(util__WEBPACK_IMPORTED_MODULE_3__["inspect"])(raw),
       package: `${this.name} (${this.packageJsonLocation})`
     });
   }
 
   async runScript(scriptName, args = []) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\n\nRunning script [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(scriptName)}] in [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(this.name)}]:\n`));
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackage"])(scriptName, args, this);
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\n\nRunning script [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(scriptName)}] in [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(this.name)}]:\n`));
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_7__["runScriptInPackage"])(scriptName, args, this);
   }
 
   runScriptStreaming(scriptName, args = []) {
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["runScriptInPackageStreaming"])(scriptName, args, this);
+    return Object(_scripts__WEBPACK_IMPORTED_MODULE_7__["runScriptInPackageStreaming"])(scriptName, args, this);
   }
 
   hasDependencies() {
@@ -8004,8 +8072,45 @@ class Project {
   async installDependencies({
     extraArgs
   }) {
-    _log__WEBPACK_IMPORTED_MODULE_4__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\n\nInstalling dependencies in [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(this.name)}]:\n`));
-    return Object(_scripts__WEBPACK_IMPORTED_MODULE_6__["installInDir"])(this.path, extraArgs);
+    _log__WEBPACK_IMPORTED_MODULE_5__["log"].write(chalk__WEBPACK_IMPORTED_MODULE_0___default.a.bold(`\n\nInstalling dependencies in [${chalk__WEBPACK_IMPORTED_MODULE_0___default.a.green(this.name)}]:\n`));
+    await Object(_scripts__WEBPACK_IMPORTED_MODULE_7__["installInDir"])(this.path, extraArgs);
+    await this.removeExtraneousNodeModules();
+  }
+  /**
+   * Yarn workspaces symlinks workspace projects to the root node_modules, even
+   * when there is no depenency on the project. This results in unnecicary, and
+   * often duplicated code in the build archives.
+   */
+
+
+  async removeExtraneousNodeModules() {
+    // this is only relevant for the root workspace
+    if (!this.isWorkspaceRoot) {
+      return;
+    }
+
+    const workspacesInfo = await Object(_scripts__WEBPACK_IMPORTED_MODULE_7__["yarnWorkspacesInfo"])(this.path);
+    const unusedWorkspaces = new Set(Object.keys(workspacesInfo)); // check for any cross-project dependency
+
+    for (const name of Object.keys(workspacesInfo)) {
+      const workspace = workspacesInfo[name];
+      workspace.workspaceDependencies.forEach(w => unusedWorkspaces.delete(w));
+    }
+
+    unusedWorkspaces.forEach(name => {
+      const {
+        dependencies,
+        devDependencies
+      } = this.json;
+      const nodeModulesPath = Object(path__WEBPACK_IMPORTED_MODULE_2__["resolve"])(this.nodeModulesLocation, name);
+      const isDependency = dependencies && dependencies.hasOwnProperty(name);
+      const isDevDependency = devDependencies && devDependencies.hasOwnProperty(name);
+
+      if (!isDependency && !isDevDependency && fs__WEBPACK_IMPORTED_MODULE_1___default.a.existsSync(nodeModulesPath)) {
+        _log__WEBPACK_IMPORTED_MODULE_5__["log"].write(`No dependency on ${name}, removing link in node_modules`);
+        fs__WEBPACK_IMPORTED_MODULE_1___default.a.unlinkSync(nodeModulesPath);
+      }
+    });
   }
 
 } // We normalize all path separators to `/` in generated files
@@ -13451,6 +13556,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "installInDir", function() { return installInDir; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runScriptInPackage", function() { return runScriptInPackage; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "runScriptInPackageStreaming", function() { return runScriptInPackageStreaming; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "yarnWorkspacesInfo", function() { return yarnWorkspacesInfo; });
 /* harmony import */ var _child_process__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(93);
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -13505,6 +13611,14 @@ function runScriptInPackageStreaming(script, args, pkg) {
     prefix: pkg.name
   });
 }
+async function yarnWorkspacesInfo(directory) {
+  const workspacesInfo = await Object(_child_process__WEBPACK_IMPORTED_MODULE_0__["spawn"])('yarn', ['workspaces', 'info', '--json'], {
+    cwd: directory,
+    stdio: 'pipe'
+  });
+  const stdout = JSON.parse(workspacesInfo.stdout);
+  return JSON.parse(stdout.data);
+}
 
 /***/ }),
 /* 93 */
@@ -13557,17 +13671,17 @@ function generateColors() {
 }
 
 function spawn(command, args, opts) {
-  return execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({}, opts, {
+  return execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({
     stdio: 'inherit'
-  }));
+  }, opts));
 }
 const nextColor = generateColors();
 function spawnStreaming(command, args, opts, {
   prefix
 }) {
-  const spawned = execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({}, opts, {
+  const spawned = execa__WEBPACK_IMPORTED_MODULE_1___default()(command, args, _objectSpread({
     stdio: ['ignore', 'pipe', 'pipe']
-  }));
+  }, opts));
   const color = nextColor();
   const prefixedStdout = strong_log_transformer__WEBPACK_IMPORTED_MODULE_3___default()({
     tag: `${color.bold(prefix)}:`
@@ -17423,28 +17537,21 @@ async function workspacePackagePaths(rootPath) {
   return workspaceProjectsPaths;
 }
 async function copyWorkspacePackages(rootPath) {
-  const workspaceProjects = await getWorkspaceProjects(rootPath);
+  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])(rootPath, {});
+  const projects = await Object(_projects__WEBPACK_IMPORTED_MODULE_6__["getProjects"])(rootPath, projectPaths);
 
-  for (const project of workspaceProjects.values()) {
-    const dest = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(rootPath, 'node_modules', project.name); // Remove the symlink
+  for (const project of projects.values()) {
+    const dest = path__WEBPACK_IMPORTED_MODULE_1___default.a.resolve(rootPath, 'node_modules', project.name);
+
+    if ((await Object(_fs__WEBPACK_IMPORTED_MODULE_4__["isSymlink"])(dest)) === false) {
+      continue;
+    } // Remove the symlink
+
 
     await Object(_fs__WEBPACK_IMPORTED_MODULE_4__["unlink"])(dest); // Copy in the package
 
     await Object(_fs__WEBPACK_IMPORTED_MODULE_4__["copyDirectory"])(project.path, dest);
   }
-}
-
-async function getWorkspaceProjects(rootPath) {
-  const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])(rootPath, {});
-  const projects = await Object(_projects__WEBPACK_IMPORTED_MODULE_6__["getProjects"])(rootPath, projectPaths);
-
-  for (const [key, project] of projects.entries()) {
-    if (!project.isWorkspaceProject) {
-      projects.delete(key);
-    }
-  }
-
-  return projects;
 }
 
 function packagesFromGlobPattern({
@@ -17496,7 +17603,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Returns all the paths where plugins are located
  */
-function getProjectPaths(rootPath, options) {
+function getProjectPaths(rootPath, options = {}) {
   const skipKibanaPlugins = Boolean(options['skip-kibana-plugins']);
   const ossOnly = Boolean(options.oss);
   const projectPaths = [rootPath, Object(path__WEBPACK_IMPORTED_MODULE_0__["resolve"])(rootPath, 'packages/*')]; // This is needed in order to install the dependencies for the declared
@@ -31713,9 +31820,10 @@ __webpack_require__.r(__webpack_exports__);
 
 async function buildProductionProjects({
   kibanaRoot,
-  buildRoots
+  buildRoot,
+  onlyOSS
 }) {
-  const projects = await getProductionProjects(kibanaRoot);
+  const projects = await getProductionProjects(kibanaRoot, onlyOSS);
   const projectGraph = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["buildProjectGraph"])(projects);
   const batchedProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["topologicallyBatchProjects"])(projects, projectGraph);
   const projectNames = [...projects.values()].map(project => project.name);
@@ -31725,10 +31833,7 @@ async function buildProductionProjects({
     for (const project of batch) {
       await deleteTarget(project);
       await buildProject(project);
-
-      for (const buildRoot of buildRoots) {
-        await copyToBuild(project, kibanaRoot, buildRoot);
-      }
+      await copyToBuild(project, kibanaRoot, buildRoot);
     }
   }
 }
@@ -31736,17 +31841,33 @@ async function buildProductionProjects({
  * Returns the subset of projects that should be built into the production
  * bundle. As we copy these into Kibana's `node_modules` during the build step,
  * and let Kibana's build process be responsible for installing dependencies,
- * we only include Kibana's transitive _production_ dependencies.
+ * we only include Kibana's transitive _production_ dependencies. If onlyOSS
+ * is supplied, we omit projects with build.oss in their package.json set to false.
  */
 
-async function getProductionProjects(rootPath) {
+async function getProductionProjects(rootPath, onlyOSS) {
   const projectPaths = Object(_config__WEBPACK_IMPORTED_MODULE_3__["getProjectPaths"])(rootPath, {});
   const projects = await Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["getProjects"])(rootPath, projectPaths);
-  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])([projects.get('kibana')], projects, {
+  const projectsSubset = [projects.get('kibana')];
+
+  if (projects.has('x-pack')) {
+    projectsSubset.push(projects.get('x-pack'));
+  }
+
+  const productionProjects = Object(_utils_projects__WEBPACK_IMPORTED_MODULE_7__["includeTransitiveProjects"])(projectsSubset, projects, {
     onlyProductionDependencies: true
   }); // We remove Kibana, as we're already building Kibana
 
   productionProjects.delete('kibana');
+
+  if (onlyOSS) {
+    productionProjects.forEach(project => {
+      if (project.getBuildConfig().oss === false) {
+        productionProjects.delete(project.json.name);
+      }
+    });
+  }
+
   return productionProjects;
 }
 

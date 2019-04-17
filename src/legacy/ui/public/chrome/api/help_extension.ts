@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { IRootScopeService } from 'angular';
-
 import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public';
 
 let newPlatformChrome: ChromeSetup;
@@ -34,17 +32,6 @@ export type HelpExtensionApi = ReturnType<typeof createHelpExtensionApi>['helpEx
 export type HelpExtension = ChromeHelpExtension;
 
 function createHelpExtensionApi() {
-  /**
-   * reset helpExtensionSetSinceRouteChange any time the helpExtension changes, even
-   * if it was done directly through the new platform
-   */
-  let helpExtensionSetSinceRouteChange = false;
-  newPlatformChrome.getHelpExtension$().subscribe({
-    next() {
-      helpExtensionSetSinceRouteChange = true;
-    },
-  });
-
   return {
     helpExtension: {
       /**
@@ -60,30 +47,6 @@ function createHelpExtensionApi() {
        */
       get$: () => newPlatformChrome.getHelpExtension$(),
     },
-
-    /**
-     * internal angular run function that will be called when angular bootstraps and
-     * lets us integrate with the angular router so that we can automatically clear
-     * the helpExtension if we switch to a Kibana app that does not set its own
-     * helpExtension
-     */
-    $setupHelpExtensionAutoClear: ($rootScope: IRootScopeService, $injector: any) => {
-      const $route = $injector.has('$route') ? $injector.get('$route') : {};
-
-      $rootScope.$on('$routeChangeStart', () => {
-        helpExtensionSetSinceRouteChange = false;
-      });
-
-      $rootScope.$on('$routeChangeSuccess', () => {
-        const current = $route.current || {};
-
-        if (helpExtensionSetSinceRouteChange || (current.$$route && current.$$route.redirectTo)) {
-          return;
-        }
-
-        newPlatformChrome.setHelpExtension(current.helpExtension);
-      });
-    },
   };
 }
 
@@ -91,7 +54,6 @@ export function initHelpExtensionApi(
   chrome: { [key: string]: any },
   internal: { [key: string]: any }
 ) {
-  const { helpExtension, $setupHelpExtensionAutoClear } = createHelpExtensionApi();
+  const { helpExtension } = createHelpExtensionApi();
   chrome.helpExtension = helpExtension;
-  internal.$setupHelpExtensionAutoClear = $setupHelpExtensionAutoClear;
 }
