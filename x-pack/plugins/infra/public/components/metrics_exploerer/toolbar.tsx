@@ -64,7 +64,7 @@ export const MetricsExplorerToolbar = injectI18n(
           {options.aggregation !== MetricsExplorerAggregation.count && (
             <EuiText size="s" color="subdued">
               <FormattedMessage
-                id={`xpack.infra.metricsExplorer.aggregationLabel`}
+                id="xpack.infra.metricsExplorer.aggregationLabel"
                 defaultMessage="of"
               />
             </EuiText>
@@ -81,7 +81,7 @@ export const MetricsExplorerToolbar = injectI18n(
           )}
           <EuiText size="s" color="subdued">
             <FormattedMessage
-              id={`xpack.infra.metricsExplorer.groupByLabel`}
+              id="xpack.infra.metricsExplorer.groupByToolbarLabel"
               defaultMessage="graph per"
             />
           </EuiText>

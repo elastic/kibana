@@ -80,7 +80,6 @@ interface Props {
 }
 export const MetricsExplorerCharts = injectI18n(
   ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter }: Props) => {
-    const intlPrefix = 'xpack.infra.metricsExplorer';
     if (!data && loading) {
       return (
         <InfraLoadingPanel
@@ -88,7 +87,7 @@ export const MetricsExplorerCharts = injectI18n(
           width="100%"
           text={intl.formatMessage({
             defaultMessage: 'Loading charts',
-            id: `${intlPrefix}.loadingCharts`,
+            id: 'xpack.infra.metricsExplorer.loadingCharts',
           })}
         />
       );
@@ -98,15 +97,15 @@ export const MetricsExplorerCharts = injectI18n(
       return (
         <NoData
           titleText={intl.formatMessage({
-            id: `${intlPrefix}.noDataTitle`,
+            id: 'xpack.infra.metricsExplorer.noDataTitle',
             defaultMessage: 'There is no data to display.',
           })}
           bodyText={intl.formatMessage({
-            id: `${intlPrefix}.noDataBodyText`,
+            id: 'xpack.infra.metricsExplorer.noDataBodyText',
             defaultMessage: 'Try adjusting your time, filters or group by settings.',
           })}
           refetchText={intl.formatMessage({
-            id: `${intlPrefix}.noDataRefetchText`,
+            id: 'xpack.infra.metricsExplorer.noDataRefetchText',
             defaultMessage: 'Check for new data',
           })}
           testString="metrics-explorer-no-data"
@@ -157,7 +156,10 @@ export const MetricsExplorerCharts = injectI18n(
               {data.series.length > 1 ? (
                 <EuiToolTip
                   content={intl.formatMessage(
-                    { defaultMessage: 'Filter by "{name}"', id: `${intlPrefix}.titleTooltip` },
+                    {
+                      defaultMessage: 'Filter by "{name}"',
+                      id: 'xpack.infra.metricsExplorer.titleTooltip',
+                    },
                     { name: series.id }
                   )}
                 >
@@ -215,7 +217,7 @@ export const MetricsExplorerCharts = injectI18n(
             <EuiText color="subdued">
               <p>
                 <FormattedMessage
-                  id={`${intlPrefix}.footerPaginationMessage`}
+                  id="xpack.infra.metricsExplorer.footerPaginationMessage"
                   defaultMessage='Displaying {length} of {total} charts grouped by "{groupBy}".'
                   values={{
                     length: data.series.length,
@@ -233,7 +235,7 @@ export const MetricsExplorerCharts = injectI18n(
                   onClick={() => onLoadMore(data.pageInfo.afterKey || null)}
                 >
                   <FormattedMessage
-                    id={`${intlPrefix}.loadMoreChartsButton`}
+                    id="xpack.infra.metricsExplorer.loadMoreChartsButton"
                     defaultMessage="Load More Charts"
                   />
                 </EuiButton>

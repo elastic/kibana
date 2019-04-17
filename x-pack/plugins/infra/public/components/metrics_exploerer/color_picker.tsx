@@ -16,7 +16,6 @@ interface Props {
 }
 
 export const MetricsExplorerColorPicker = injectI18n(({ intl, value, onChange }: Props) => {
-  const intlPrefix = 'xpack.infra.metricsExplorer.colorPicker';
   return (
     <Container>
       {Object.values(MetricsExplorerColor).map((color, index) => {
@@ -27,7 +26,7 @@ export const MetricsExplorerColorPicker = injectI18n(({ intl, value, onChange }:
             color={colorTransformer(color)}
             aria-label={intl.formatMessage(
               {
-                id: `${intlPrefix}.swatchLabel`,
+                id: 'xpack.infra.metricsExplorer.swatchLabel',
                 defaultMessage: 'color {number}',
               },
               { number: index }
