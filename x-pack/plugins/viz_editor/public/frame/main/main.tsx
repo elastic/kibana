@@ -135,22 +135,24 @@ export function Main(props: MainProps) {
       .map(addDataFetchingToSuggestion);
   };
 
+  const getSuggestions = (visModel: VisModel) =>
+    editorRegistry
+      .getAll()
+      .flatMap(plugin => (plugin.getChartSuggestions ? plugin.getChartSuggestions(visModel) : []))
+      .map(addDataFetchingToSuggestion);
+
+  const suggestions = getSuggestions(state.visModel);
+
   const panelProps = {
     visModel: state.visModel,
     onChangeVisModel,
     getSuggestionsForField: getAllSuggestionsForField,
+    getSuggestions,
   };
 
   const expression = state.metadata.expressionMode
     ? state.visModel.private.expression
     : getRenderExpression(state.visModel);
-
-  const suggestions = editorRegistry
-    .getAll()
-    .flatMap(plugin =>
-      plugin.getChartSuggestions ? plugin.getChartSuggestions(state.visModel) : []
-    )
-    .map(addDataFetchingToSuggestion);
 
   const hasData = Object.keys(state.visModel.queries).length > 0;
 

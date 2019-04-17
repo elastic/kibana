@@ -200,10 +200,10 @@ function getChartSuggestions(visModel: ScatterChartVisModel): Suggestion[] {
   if (Object.keys(visModel.queries).length === 0) {
     return [];
   }
-  if (!visModel.datasource) {
+  const firstQuery = Object.values(visModel.queries)[0];
+  if (!visModel.datasource || (firstQuery && firstQuery.select.length < 2)) {
     return [];
   }
-  const firstQuery = Object.values(visModel.queries)[0];
   const containsNonNumberColumns = getTypes(firstQuery, visModel.datasource.fields).some(
     type => type !== 'number'
   );

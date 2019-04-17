@@ -5,6 +5,7 @@
  */
 
 import { DatasourceField, Query, SelectOperation } from '../../../common';
+import { Suggestion } from '../../editor_plugin_registry';
 
 export interface Datasource<M = any> {
   id: string;
@@ -51,6 +52,10 @@ export function selectOperation(id: string, model: VisModel) {
   const query = model.queries[queryId];
 
   return query ? query.select.find(({ id: currentId }) => currentId === operationId) : undefined;
+}
+
+export function getTopSuggestion(suggestions: Suggestion[]) {
+  return suggestions.sort(({ score: scoreA }, { score: scoreB }) => (scoreA < scoreB ? 1 : -1))[0];
 }
 
 export function removeOperation(id: string, model: VisModel) {

@@ -37,7 +37,7 @@ export interface OperationEditorProps<T extends BasicOperation = BasicOperation>
   removable?: boolean;
   visModel: VisModel;
   allowedScale: Scale;
-  allowedCardinality: Cardinality;
+  allowedCardinality?: Cardinality;
   defaultOperator: (field: DatasourceField) => SelectOperator;
   canDrop?: (field: DatasourceField) => boolean;
 }

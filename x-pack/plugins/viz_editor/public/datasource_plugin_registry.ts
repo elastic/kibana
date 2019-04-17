@@ -6,6 +6,7 @@
 
 import { VisModel } from './common';
 
+import { GetSuggestionsType, Suggestion } from './editor_plugin_registry';
 import { config as csvPlugin } from './pseudo_plugins/csv_datasource_plugin';
 import { config as essqlPlugin } from './pseudo_plugins/essql_datasource_plugin';
 import { config as indexpatternPlugin } from './pseudo_plugins/indexpattern_datasource_plugin';
@@ -13,6 +14,8 @@ import { config as indexpatternPlugin } from './pseudo_plugins/indexpattern_data
 export interface DatasourcePanelProps<S extends VisModel = VisModel> {
   visModel: S;
   onChangeVisModel: (newState: S) => void;
+  getSuggestionsForField: GetSuggestionsType<S>;
+  getSuggestions: (visModel: S) => Suggestion[];
 }
 
 export interface DatasourcePlugin<S extends VisModel = VisModel> {

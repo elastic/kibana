@@ -78,6 +78,17 @@ function queryToEsAggsConfigs(query: Query): any {
   });
 }
 
+function fixBucketAggsWithoutMetricColumn(aggs: any[]) {
+  const onlySegments = aggs.every(agg => agg.schema === 'segment');
+  if (onlySegments) {
+    return [
+      ...aggs,
+      { enabled: true, id: String(aggs.length), params: {}, schema: 'metric', type: 'count' },
+    ];
+  }
+  return aggs;
+}
+
 function whereClauseToFilter(where?: WhereOperation) {
   // TODO build something which maps this
   return {};
@@ -100,7 +111,9 @@ export function toExpression(viewState: VisModel) {
       firstQuery.select.map(operation => (operation.operator === 'column' ? operation.id : ''))
     )}' filter='${JSON.stringify(whereClauseToFilter(firstQuery.where))}'`;
   }
-  return `esaggs aggConfigs='${JSON.stringify(queryToEsAggsConfigs(firstQuery))}' index='${
-    viewState.datasource.id
-  }' | column_types types='${JSON.stringify(getTypes(firstQuery, viewState.datasource.fields))}'`;
+  return `esaggs aggConfigs='${JSON.stringify(
+    fixBucketAggsWithoutMetricColumn(queryToEsAggsConfigs(firstQuery))
+  )}' index='${viewState.datasource.id}' | column_types types='${JSON.stringify(
+    getTypes(firstQuery, viewState.datasource.fields)
+  )}'`;
 }

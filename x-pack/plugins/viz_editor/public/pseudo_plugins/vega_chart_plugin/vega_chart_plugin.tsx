@@ -92,7 +92,7 @@ function getSuggestion(visModel: VegaChartVisModel): Suggestion {
   return {
     pluginName: 'vega_chart',
     previewExpression: toExpression(prefilledVisModel),
-    score: 0.5,
+    score: 0.3,
     visModel: prefilledVisModel,
     title: 'Vega Chart',
     iconType: 'visVega',
