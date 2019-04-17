@@ -47,6 +47,19 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           "render": [Function],
           "width": "180px",
         },
+        Object {
+          "actions": Array [
+            Object {
+              "description": "Search APM for this monitor",
+              "icon": "apmApp",
+              "isPrimary": true,
+              "name": "APM",
+              "onClick": [Function],
+              "type": "icon",
+            },
+          ],
+          "name": "Integrations",
+        },
       ]
     }
     executeQueryOptions={Object {}}
