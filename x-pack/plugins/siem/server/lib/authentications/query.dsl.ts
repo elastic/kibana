@@ -35,7 +35,7 @@ export const buildQuery = ({
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     { term: { 'event.module': 'system' } },
-    { term: { 'event.action': 'user_login' } },
+    { term: { 'event.category': 'authentication' } },
     {
       range: {
         [timestamp]: {
@@ -71,7 +71,7 @@ export const buildQuery = ({
             failures: {
               filter: {
                 term: {
-                  'event.outcome': 'failure',
+                  'event.type': 'authentication_failure',
                 },
               },
               aggs: {
@@ -87,7 +87,7 @@ export const buildQuery = ({
             successes: {
               filter: {
                 term: {
-                  'event.outcome': 'success',
+                  'event.type': 'authentication_success',
                 },
               },
               aggs: {

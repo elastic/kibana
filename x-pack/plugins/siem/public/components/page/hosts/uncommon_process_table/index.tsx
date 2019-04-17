@@ -15,12 +15,7 @@ import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import {
-  defaultToEmptyTag,
-  getEmptyTagValue,
-  getEmptyValue,
-  getOrEmptyTag,
-} from '../../../empty_value';
+import { defaultToEmptyTag, getEmptyTagValue, getEmptyValue } from '../../../empty_value';
 import { HostDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -175,7 +170,44 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
     name: i18n.LAST_USER,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag('user.name', node),
+    render: ({ node }) => {
+      const userName: string | null | undefined = get('user.name[0]', node);
+      if (userName != null) {
+        const id = escapeDataProviderId(`uncommon-process-table-${node._id}-user-${userName}`);
+        return (
+          <DraggableWrapper
+            key={id}
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id,
+              name: userName,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: {
+                field: 'user.name',
+                value: userName,
+              },
+              queryDate: {
+                from: startDate,
+                to: Date.now(),
+              },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                userName
+              )
+            }
+          />
+        );
+      } else {
+        return getEmptyTagValue();
+      }
+    },
   },
   {
     name: i18n.LAST_COMMAND,
