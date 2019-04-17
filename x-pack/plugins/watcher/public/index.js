@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TIME_UNITS } from './time_units';
-export { BASE_PATH } from './base_path';
+import './register_route';
+import './register_management_sections';

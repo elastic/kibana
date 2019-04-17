@@ -23,19 +23,15 @@ import { ErrableFormRow } from '../../../components/form_errors';
 import { documentationLinks } from '../../../lib/documentation_links';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
+import { LicenseServiceContext } from '../../../license_service_context';
 
-export const JsonWatchEditForm = ({
-  urlService,
-  licenseService,
-}: {
-  urlService: any;
-  licenseService: any;
-}) => {
+export const JsonWatchEditForm = () => {
   const { watch, setWatchProperty } = useContext(WatchContext);
   // hooks
   const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const licenseService = useContext(LicenseServiceContext);
 
   if (errors.json.length === 0) {
     setWatchProperty('watch', JSON.parse(watch.watchString));
@@ -47,7 +43,7 @@ export const JsonWatchEditForm = ({
         modalOptions={modal}
         callback={async isConfirmed => {
           if (isConfirmed) {
-            saveWatch(watch, urlService, licenseService);
+            saveWatch(watch, licenseService);
           }
           setModal(null);
         }}
@@ -144,7 +140,7 @@ export const JsonWatchEditForm = ({
               type="submit"
               isDisabled={hasErrors}
               onClick={async () => {
-                const savedWatch = await onWatchSave(watch, urlService, licenseService);
+                const savedWatch = await onWatchSave(watch, licenseService);
                 if (savedWatch && savedWatch.error) {
                   return setModal(savedWatch.error);
                 }

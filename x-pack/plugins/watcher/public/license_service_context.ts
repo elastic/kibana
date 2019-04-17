@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { TIME_UNITS } from './time_units';
-export { BASE_PATH } from './base_path';
+import React from 'react';
+export const LicenseServiceContext = React.createContext({} as any);

@@ -19,6 +19,13 @@ export const setHttpClient = (anHttpClient: ng.IHttpService) => {
 export const getHttpClient = () => {
   return httpClient;
 };
+let savedObjectsClient: any;
+export const setSavedObjectsClient = (aSavedObjectsClient: ng.any) => {
+  savedObjectsClient = aSavedObjectsClient;
+};
+export const getSavedObjectsClient = () => {
+  return savedObjectsClient;
+};
 const basePath = chrome.addBasePath(ROUTES.API_ROOT);
 export const fetchWatches = async () => {
   const {
@@ -122,4 +129,12 @@ export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, wa
     watch: watch.upstreamJson,
   });
   return data;
+};
+export const loadIndexPatterns = async () => {
+  const { savedObjects } = await getSavedObjectsClient().find({
+    type: 'index-pattern',
+    fields: ['title'],
+    perPage: 10000,
+  });
+  return savedObjects;
 };
