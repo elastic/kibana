@@ -3,6 +3,7 @@
 exports[`render correctly with empty query string 1`] = `
 <CodeQueryBar
   appName="mockapp"
+  defaultRepoOptions={Array []}
   disableAutoFocus={false}
   enableSubmitWhenOptionsChanged={false}
   onSearchScopeChanged={[Function]}
@@ -622,6 +623,7 @@ exports[`render correctly with empty query string 1`] = `
                       </EuiFormControlLayout>
                     </EuiFieldText>
                     <SearchOptions
+                      defaultRepoOptions={Array []}
                       repoSearchResults={Array []}
                       repositorySearch={[Function]}
                       saveSearchOptions={[Function]}
@@ -729,6 +731,7 @@ exports[`render correctly with input query string changed 1`] = `
   >
     <CodeQueryBar
       appName="mockapp"
+      defaultRepoOptions={Array []}
       disableAutoFocus={false}
       enableSubmitWhenOptionsChanged={false}
       onSearchScopeChanged={[Function]}
@@ -1360,6 +1363,7 @@ exports[`render correctly with input query string changed 1`] = `
                           </EuiFormControlLayout>
                         </EuiFieldText>
                         <SearchOptions
+                          defaultRepoOptions={Array []}
                           repoSearchResults={Array []}
                           repositorySearch={[Function]}
                           saveSearchOptions={[Function]}

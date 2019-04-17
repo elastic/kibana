@@ -17,7 +17,7 @@ import {
 import { matchPairs } from '../lib/match_pairs';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
 
-import { SearchScope } from '../../../../model';
+import { SearchScope, Repository } from '../../../../model';
 import { SearchScopePlaceholderText } from '../../../common/types';
 import { RootState } from '../../../reducers';
 import {
@@ -55,6 +55,7 @@ interface Props {
   searchLoading: boolean;
   searchScope: SearchScope;
   searchOptions: ISearchOptions;
+  defaultRepoOptions: Repository[];
 }
 
 interface State {
@@ -460,6 +461,7 @@ export class CodeQueryBar extends Component<Props, State> {
                       role="textbox"
                     />
                     <SearchOptions
+                      defaultRepoOptions={this.props.defaultRepoOptions}
                       repositorySearch={this.props.repositorySearch}
                       saveSearchOptions={this.props.saveSearchOptions}
                       repoSearchResults={this.props.repoSearchResults}
@@ -494,6 +496,7 @@ const mapStateToProps = (state: RootState) => ({
   searchLoading: state.search.isScopeSearchLoading,
   searchScope: state.search.scope,
   searchOptions: state.search.searchOptions,
+  defaultRepoOptions: state.repository.repositories.slice(0, 5),
 });
 
 const mapDispatchToProps = {

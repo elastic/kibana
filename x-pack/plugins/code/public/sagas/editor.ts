@@ -26,6 +26,7 @@ import {
   Match,
   resetRepoTree,
   revealPosition,
+  fetchRepos,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
@@ -137,6 +138,8 @@ export function* watchLoadRepo() {
 }
 
 function* handleMainRouteChange(action: Action<Match>) {
+  // in source view page, we need repos as default repo scope options when no query input
+  yield put(fetchRepos());
   const { location } = action.payload!;
   const search = location.search.startsWith('?') ? location.search.substring(1) : location.search;
   const queryParams = queryString.parse(search);
