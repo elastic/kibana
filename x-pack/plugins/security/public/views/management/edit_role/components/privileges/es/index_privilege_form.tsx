@@ -35,7 +35,6 @@ interface Props {
   onChange: (indexPrivilege: RoleIndexPrivilege) => void;
   onDelete: () => void;
   isReadOnlyRole: boolean;
-  allowDelete: boolean;
   allowDocumentLevelSecurity: boolean;
   allowFieldLevelSecurity: boolean;
   validator: RoleValidator;
@@ -70,7 +69,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
         <EuiHorizontalRule />
         <EuiFlexGroup className="index-privilege-form">
           <EuiFlexItem>{this.getPrivilegeForm()}</EuiFlexItem>
-          {this.props.allowDelete && !this.props.isReadOnlyRole && (
+          {!this.props.isReadOnlyRole && (
             <EuiFlexItem grow={false}>
               <EuiFormRow hasEmptyLabelSpace>
                 <EuiButtonIcon

@@ -60,7 +60,6 @@ export class IndexPrivileges extends Component<Props, State> {
         {...props}
         formIndex={idx}
         validator={this.props.validator}
-        allowDelete={!props.isReadOnlyRole}
         indexPrivilege={indexPrivilege}
         availableFields={this.state.availableFields[indexPrivilege.names.join(',')]}
         onChange={this.onIndexPrivilegeChange(idx)}
