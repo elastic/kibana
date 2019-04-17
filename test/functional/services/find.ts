@@ -270,12 +270,9 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.existsByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(
-        async drive => {
-          return wrapAll(await drive.findElements(By.css(selector)));
-        },
-        timeout
-      );
+      return await this.exists(async drive => {
+        return wrapAll(await drive.findElements(By.css(selector)));
+      }, timeout);
     }
 
     public async clickByCssSelectorWhenNotDisabled(
@@ -438,9 +435,19 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       await driver.wait(until.stalenessOf(element._webElement), timeout);
     }
 
-    async waitForElementHidden(element, timeout = defaultFindTimeout) {
+    public async waitForElementHidden(
+      element: WebElementWrapper,
+      timeout: number = defaultFindTimeout
+    ) {
       log.debug(`Find.waitForElementHidden with timeout=${timeout}`);
       await driver.wait(until.elementIsNotVisible(element._webElement), timeout);
+    }
+
+    private async _withTimeout(timeout: number) {
+      if (timeout !== this.currentWait) {
+        this.currentWait = timeout;
+        await driver.manage().setTimeouts({ implicit: timeout });
+      }
     }
   }
 
