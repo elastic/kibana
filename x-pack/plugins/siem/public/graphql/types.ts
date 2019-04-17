@@ -3352,7 +3352,7 @@ export namespace GetUncommonProcessesQuery {
   export type Process = {
     __typename?: 'ProcessEcsFields';
 
-    title?: ToStringArray | null;
+    args?: ToStringArray | null;
 
     name?: ToStringArray | null;
   };
@@ -3367,8 +3367,6 @@ export namespace GetUncommonProcessesQuery {
 
   export type Host = {
     __typename?: 'HostEcsFields';
-
-    id?: ToStringArray | null;
 
     name?: ToStringArray | null;
   };

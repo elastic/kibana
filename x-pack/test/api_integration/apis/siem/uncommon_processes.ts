@@ -113,7 +113,14 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
         _id: 'Ax5CB2kBR346wHgnUJ1s',
         instances: 1,
         process: {
-          title: null,
+          args: [
+            '/usr/bin/suricata',
+            '-c',
+            '/etc/suricata/suricata.yaml',
+            '-i',
+            'eth0',
+            '--init-errors-fatal',
+          ],
           name: ['Suricata-Main'],
           __typename: 'ProcessEcsFields',
         },
@@ -124,7 +131,6 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
         },
         host: [
           {
-            id: ['8cc95778cce5407c809480e8e32ad76b'],
             name: ['suricata-zeek-sensor-toronto'],
             __typename: 'HostEcsFields',
           },
