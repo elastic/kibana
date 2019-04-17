@@ -26,14 +26,7 @@ export const initElasticsearchIndicesHelpers = (es) => {
     indices.forEach((_index) => {
       indicesCreated = indicesCreated.filter(i => i !== _index);
     });
-    return es.indices.delete({ index: indices })
-      .catch((err) => {
-        // silently fail if an index could not be deleted
-        // (unless we got a 404 which means the index has already been deleted)
-        if (err && err.statusCode !== 404) {
-          throw err;
-        }
-      });
+    return es.indices.delete({ index: indices }, { ignoreUnavailable: true });
   };
 
   const deleteAllIndicesCreated = () => (
