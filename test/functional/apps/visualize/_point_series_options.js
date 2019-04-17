@@ -191,6 +191,7 @@ export default function ({ getService, getPageObjects }) {
       ];
 
       it('should show round labels in default timezone', async function () {
+        await initChart();
         const labels = await PageObjects.visualize.getXAxisLabels();
         expect(labels).to.eql(expectedLabels);
       });
