@@ -38,7 +38,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Is WebDriver instance W3C compatible
      */
-    isW3CEnabled = (driver.executor_.w3c === true);
+    isW3CEnabled = driver.executor_.w3c === true;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
