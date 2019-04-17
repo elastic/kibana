@@ -80,3 +80,7 @@ export const updateDomainsFlowDirection = actionCreator<{
 export const updateDomainsSort = actionCreator<{
   domainsSortField: DomainsSortField;
 }>('UPDATE_DOMAINS_SORT');
+
+export const updateOverviewStatIp = actionCreator<{
+  overviewStatIp: string;
+}>('UPDATE_OVERVIEW_STAT_IP');

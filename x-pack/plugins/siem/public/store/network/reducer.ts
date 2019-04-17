@@ -26,6 +26,7 @@ import {
   updateDomainsSort,
   updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
+  updateOverviewStatIp,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowSort,
@@ -74,6 +75,7 @@ export const initialNetworkState: NetworkState = {
     filterQuery: null,
     filterQueryDraft: null,
     flowTarget: FlowTarget.source,
+    overviewStatIp: null,
   },
 };
 
@@ -235,6 +237,13 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
           domainsSortField,
         },
       },
+    },
+  }))
+  .case(updateOverviewStatIp, (state, { overviewStatIp }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      overviewStatIp,
     },
   }))
   .build();

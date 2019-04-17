@@ -60,6 +60,7 @@ export interface NetworkDetailsModel {
   filterQueryDraft: KueryFilterQuery | null;
   flowTarget: FlowTarget;
   queries: IpOverviewQueries;
+  overviewStatIp: string | null;
 }
 
 // Network Model
