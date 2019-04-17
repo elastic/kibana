@@ -11,10 +11,10 @@ import { InfraSnapshotMetricType } from '../../graphql/types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './snapshot';
 
-export interface InfraSnapshotMetricResponse {
+export interface InfraSnapshotNodeMetricsBucket {
   key: { node: string };
   histogram: {
-    buckets: InfraSnapshotMetricBucket[];
+    buckets: InfraSnapshotMetricsBucket[];
   };
 }
 
@@ -32,9 +32,9 @@ export interface InfraSnapshotBucketWithValues {
   [name: string]: { value: number; normalized_value?: number };
 }
 
-export type InfraSnapshotMetricBucket = InfraSnapshotBucketWithKey & InfraSnapshotBucketWithValues;
+export type InfraSnapshotMetricsBucket = InfraSnapshotBucketWithKey & InfraSnapshotBucketWithValues;
 
-export interface InfraSnaphotGroupBucket {
+export interface InfraSnaphotNodeGroupByBucket {
   key: {
     node: string;
     [groupByField: string]: string;
@@ -42,7 +42,7 @@ export interface InfraSnaphotGroupBucket {
 }
 
 export const getNodePath = (
-  groupBucket: InfraSnaphotGroupBucket,
+  groupBucket: InfraSnaphotNodeGroupByBucket,
   options: InfraSnapshotRequestOptions
 ) => {
   const path = [];
@@ -54,7 +54,7 @@ export const getNodePath = (
   return path;
 };
 
-export const getNodeMetricsForLookup = (metrics: InfraSnapshotMetricResponse[]) => {
+export const getNodeMetricsForLookup = (metrics: InfraSnapshotNodeMetricsBucket[]) => {
   const nodeMetricsForLookup: any = {};
   metrics.forEach(metric => {
     nodeMetricsForLookup[`${metric.key.node}`] = metric.histogram.buckets;
@@ -66,7 +66,7 @@ export const getNodeMetricsForLookup = (metrics: InfraSnapshotMetricResponse[]) 
 // value contains the value from the last bucket spanning a full interval
 // max and avg are calculated from all buckets returned for the timerange
 export const getNodeMetrics = (
-  nodeBuckets: InfraSnapshotMetricBucket[],
+  nodeBuckets: InfraSnapshotMetricsBucket[],
   options: InfraSnapshotRequestOptions
 ) => {
   if (!nodeBuckets) {
@@ -88,7 +88,7 @@ export const getNodeMetrics = (
 };
 
 const findLastFullBucket = (
-  buckets: InfraSnapshotMetricBucket[],
+  buckets: InfraSnapshotMetricsBucket[],
   options: InfraSnapshotRequestOptions
 ) => {
   const to = moment.utc(options.timerange.to);
@@ -105,16 +105,16 @@ const findLastFullBucket = (
 
 const getMetricValueFromBucket = (
   type: InfraSnapshotMetricType,
-  bucket: InfraSnapshotMetricBucket
+  bucket: InfraSnapshotMetricsBucket
 ) => {
   const metric = bucket[type];
   return (metric && (metric.normalized_value || metric.value)) || 0;
 };
 
-function calculateMax(buckets: InfraSnapshotMetricBucket[], type: InfraSnapshotMetricType) {
+function calculateMax(buckets: InfraSnapshotMetricsBucket[], type: InfraSnapshotMetricType) {
   return max(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) || 0;
 }
 
-function calculateAvg(buckets: InfraSnapshotMetricBucket[], type: InfraSnapshotMetricType) {
+function calculateAvg(buckets: InfraSnapshotMetricsBucket[], type: InfraSnapshotMetricType) {
   return sum(buckets.map(bucket => getMetricValueFromBucket(type, bucket))) / buckets.length || 0;
 }
