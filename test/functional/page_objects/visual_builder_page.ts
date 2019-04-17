@@ -324,12 +324,12 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async setFieldForAggregation(field: string, aggNth: number = 0): Promise<void> {
-      const label = (await find.allByCssSelector('.tvbSeriesEditor__container .tvbSeriesEditor'))[aggNth];
+      const labels = await find.allByCssSelector('.tvbSeriesEditor__container .tvbSeriesEditor');
+      const label = labels[aggNth];
       const fieldEl = (await label.findAllByCssSelector('[data-test-subj = "comboBoxInput"]'))[1];
       await comboBox.setElement(fieldEl, field);
     }
   }
-
 
   return new VisualBuilderPage();
 }
