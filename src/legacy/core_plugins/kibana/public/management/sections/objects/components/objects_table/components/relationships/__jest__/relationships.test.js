@@ -62,7 +62,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedSearches/1',
             icon: 'search',
-            inAppUrl: '/app/kibana#/discover/1',
+            inAppUrl: {
+              path: '/app/kibana#/discover/1',
+              uiCapabilitiesPath: 'discover.show',
+            },
             title: 'My Search Title',
           },
         },
@@ -73,7 +76,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
-            inAppUrl: '/app/kibana#/visualize/edit/2',
+            inAppUrl: {
+              path: '/app/kibana#/visualize/edit/2',
+              uiCapabilitiesPath: 'visualize.show',
+            },
             title: 'My Visualization Title',
           },
         },
@@ -85,7 +91,10 @@ describe('Relationships', () => {
           title: 'MyIndexPattern*',
           icon: 'indexPatternApp',
           editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: '/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/management/kibana/index_patterns/1',
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          },
         },
       },
       close: jest.fn(),
@@ -120,7 +129,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/index_patterns/1',
             icon: 'indexPatternApp',
-            inAppUrl: '/app/kibana#/management/kibana/index_patterns/1',
+            inAppUrl: {
+              path: '/app/kibana#/management/kibana/index_patterns/1',
+              uiCapabilitiesPath: 'management.kibana.index_patterns',
+            },
             title: 'My Index Pattern',
           },
         },
@@ -131,7 +143,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
-            inAppUrl: '/app/kibana#/visualize/edit/2',
+            inAppUrl: {
+              path: '/app/kibana#/visualize/edit/2',
+              uiCapabilitiesPath: 'visualize.show',
+            },
             title: 'My Visualization Title',
           },
         },
@@ -143,7 +158,10 @@ describe('Relationships', () => {
           title: 'MySearch',
           icon: 'search',
           editUrl: '#/management/kibana/objects/savedSearches/1',
-          inAppUrl: '/discover/1',
+          inAppUrl: {
+            path: '/discover/1',
+            uiCapabilitiesPath: 'discover.show',
+          },
         },
       },
       close: jest.fn(),
@@ -178,7 +196,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedDashboards/1',
             icon: 'dashboardApp',
-            inAppUrl: '/app/kibana#/dashboard/1',
+            inAppUrl: {
+              path: '/app/kibana#/dashboard/1',
+              uiCapabilitiesPath: 'dashboard.show',
+            },
             title: 'My Dashboard 1',
           },
         },
@@ -189,7 +210,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedDashboards/2',
             icon: 'dashboardApp',
-            inAppUrl: '/app/kibana#/dashboard/2',
+            inAppUrl: {
+              path: '/app/kibana#/dashboard/2',
+              uiCapabilitiesPath: 'dashboard.show',
+            },
             title: 'My Dashboard 2',
           },
         },
@@ -201,7 +225,10 @@ describe('Relationships', () => {
           title: 'MyViz',
           icon: 'visualizeApp',
           editUrl: '#/management/kibana/objects/savedVisualizations/1',
-          inAppUrl: '/visualize/edit/1',
+          inAppUrl: {
+            path: '/visualize/edit/1',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
       close: jest.fn(),
@@ -236,7 +263,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedVisualizations/1',
             icon: 'visualizeApp',
-            inAppUrl: '/app/kibana#/visualize/edit/1',
+            inAppUrl: {
+              path: '/app/kibana#/visualize/edit/1',
+              uiCapabilitiesPath: 'visualize.show',
+            },
             title: 'My Visualization Title 1',
           },
         },
@@ -247,7 +277,10 @@ describe('Relationships', () => {
           meta: {
             editUrl: '/management/kibana/objects/savedVisualizations/2',
             icon: 'visualizeApp',
-            inAppUrl: '/app/kibana#/visualize/edit/2',
+            inAppUrl: {
+              path: '/app/kibana#/visualize/edit/2',
+              uiCapabilitiesPath: 'visualize.show',
+            },
             title: 'My Visualization Title 2',
           },
         },
@@ -259,7 +292,10 @@ describe('Relationships', () => {
           title: 'MyDashboard',
           icon: 'dashboardApp',
           editUrl: '#/management/kibana/objects/savedDashboards/1',
-          inAppUrl: '/dashboard/1',
+          inAppUrl: {
+            path: '/dashboard/1',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
         },
       },
       close: jest.fn(),
@@ -296,7 +332,10 @@ describe('Relationships', () => {
           title: 'MyDashboard',
           icon: 'dashboardApp',
           editUrl: '#/management/kibana/objects/savedDashboards/1',
-          inAppUrl: '/dashboard/1',
+          inAppUrl: {
+            path: '/dashboard/1',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
         },
       },
       close: jest.fn(),

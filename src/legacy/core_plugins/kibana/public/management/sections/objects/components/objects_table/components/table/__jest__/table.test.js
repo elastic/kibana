@@ -51,7 +51,10 @@ const defaultProps = {
       title: `MyIndexPattern*`,
       icon: 'indexPatternApp',
       editUrl: '#/management/kibana/index_patterns/1',
-      inAppUrl: '/management/kibana/index_patterns/1',
+      inAppUrl: {
+        path: '/management/kibana/index_patterns/1',
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      },
     },
   }],
   selectionConfig: {
@@ -70,7 +73,10 @@ const defaultProps = {
       title: `MyIndexPattern*`,
       icon: 'indexPatternApp',
       editUrl: '#/management/kibana/index_patterns/1',
-      inAppUrl: '/management/kibana/index_patterns/1',
+      inAppUrl: {
+        path: '/management/kibana/index_patterns/1',
+        uiCapabilitiesPath: 'management.kibana.index_patterns',
+      },
     },
   }],
   itemId: 'id',

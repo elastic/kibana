@@ -226,7 +226,10 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
       "meta": Object {
         "editUrl": "#/management/kibana/objects/savedSearches/2",
         "icon": "search",
-        "inAppUrl": "/discover/2",
+        "inAppUrl": Object {
+          "path": "/discover/2",
+          "uiCapabilitiesPath": "discover.show",
+        },
         "title": "MySearch",
       },
       "type": "search",
@@ -303,7 +306,10 @@ exports[`ObjectsTable should render normally 1`] = `
           "meta": Object {
             "editUrl": "#/management/kibana/index_patterns/1",
             "icon": "indexPatternApp",
-            "inAppUrl": "/management/kibana/index_patterns/1",
+            "inAppUrl": Object {
+              "path": "/management/kibana/index_patterns/1",
+              "uiCapabilitiesPath": "management.kibana.index_patterns",
+            },
             "title": "MyIndexPattern*",
           },
           "type": "index-pattern",
@@ -313,7 +319,10 @@ exports[`ObjectsTable should render normally 1`] = `
           "meta": Object {
             "editUrl": "#/management/kibana/objects/savedSearches/2",
             "icon": "search",
-            "inAppUrl": "/discover/2",
+            "inAppUrl": Object {
+              "path": "/discover/2",
+              "uiCapabilitiesPath": "discover.show",
+            },
             "title": "MySearch",
           },
           "type": "search",
@@ -323,7 +332,10 @@ exports[`ObjectsTable should render normally 1`] = `
           "meta": Object {
             "editUrl": "#/management/kibana/objects/savedDashboards/3",
             "icon": "dashboardApp",
-            "inAppUrl": "/dashboard/3",
+            "inAppUrl": Object {
+              "path": "/dashboard/3",
+              "uiCapabilitiesPath": "dashboard.show",
+            },
             "title": "MyDashboard",
           },
           "type": "dashboard",
@@ -333,7 +345,10 @@ exports[`ObjectsTable should render normally 1`] = `
           "meta": Object {
             "editUrl": "#/management/kibana/objects/savedVisualizations/4",
             "icon": "visualizeApp",
-            "inAppUrl": "/visualize/edit/4",
+            "inAppUrl": Object {
+              "path": "/visualize/edit/4",
+              "uiCapabilitiesPath": "visualize.show",
+            },
             "title": "MyViz",
           },
           "type": "visualization",

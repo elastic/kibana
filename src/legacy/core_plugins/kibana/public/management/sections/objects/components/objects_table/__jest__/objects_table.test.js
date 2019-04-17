@@ -166,7 +166,10 @@ beforeEach(() => {
           title: `MyIndexPattern*`,
           icon: 'indexPatternApp',
           editUrl: '#/management/kibana/index_patterns/1',
-          inAppUrl: '/management/kibana/index_patterns/1',
+          inAppUrl: {
+            path: '/management/kibana/index_patterns/1',
+            uiCapabilitiesPath: 'management.kibana.index_patterns',
+          },
         },
       },
       {
@@ -176,7 +179,10 @@ beforeEach(() => {
           title: `MySearch`,
           icon: 'search',
           editUrl: '#/management/kibana/objects/savedSearches/2',
-          inAppUrl: '/discover/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
         },
       },
       {
@@ -186,7 +192,10 @@ beforeEach(() => {
           title: `MyDashboard`,
           icon: 'dashboardApp',
           editUrl: '#/management/kibana/objects/savedDashboards/3',
-          inAppUrl: '/dashboard/3',
+          inAppUrl: {
+            path: '/dashboard/3',
+            uiCapabilitiesPath: 'dashboard.show',
+          },
         },
       },
       {
@@ -196,7 +205,10 @@ beforeEach(() => {
           title: `MyViz`,
           icon: 'visualizeApp',
           editUrl: '#/management/kibana/objects/savedVisualizations/4',
-          inAppUrl: '/visualize/edit/4',
+          inAppUrl: {
+            path: '/visualize/edit/4',
+            uiCapabilitiesPath: 'visualize.show',
+          },
         },
       },
     ],
@@ -494,7 +506,10 @@ describe('ObjectsTable', () => {
           title: `MySearch`,
           icon: 'search',
           editUrl: '#/management/kibana/objects/savedSearches/2',
-          inAppUrl: '/discover/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
         },
       });
       component.update();
@@ -507,7 +522,10 @@ describe('ObjectsTable', () => {
           title: 'MySearch',
           editUrl: '#/management/kibana/objects/savedSearches/2',
           icon: 'search',
-          inAppUrl: '/discover/2',
+          inAppUrl: {
+            path: '/discover/2',
+            uiCapabilitiesPath: 'discover.show',
+          },
         },
       });
     });

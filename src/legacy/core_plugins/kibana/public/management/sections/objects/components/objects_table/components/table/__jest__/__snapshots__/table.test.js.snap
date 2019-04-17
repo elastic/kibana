@@ -178,7 +178,10 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
             "meta": Object {
               "editUrl": "#/management/kibana/index_patterns/1",
               "icon": "indexPatternApp",
-              "inAppUrl": "/management/kibana/index_patterns/1",
+              "inAppUrl": Object {
+                "path": "/management/kibana/index_patterns/1",
+                "uiCapabilitiesPath": "management.kibana.index_patterns",
+              },
               "title": "MyIndexPattern*",
             },
             "type": "index-pattern",
@@ -390,7 +393,10 @@ exports[`Table should render normally 1`] = `
             "meta": Object {
               "editUrl": "#/management/kibana/index_patterns/1",
               "icon": "indexPatternApp",
-              "inAppUrl": "/management/kibana/index_patterns/1",
+              "inAppUrl": Object {
+                "path": "/management/kibana/index_patterns/1",
+                "uiCapabilitiesPath": "management.kibana.index_patterns",
+              },
               "title": "MyIndexPattern*",
             },
             "type": "index-pattern",
