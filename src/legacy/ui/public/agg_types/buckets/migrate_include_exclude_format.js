@@ -26,10 +26,11 @@ function isType(type) {
   };
 }
 
-const shouldWrite = isType('string');
+const isStringType = isType('string');
 
 const migrateIncludeExcludeFormat = {
-  serialize: function (value) {
+  serialize: function (value, agg) {
+    if (this.shouldShow && !this.shouldShow(agg)) return;
     if (!value || isString(value)) return value;
     else return value.pattern;
   },
@@ -38,7 +39,7 @@ const migrateIncludeExcludeFormat = {
 
     if (isObject(value)) {
       output.params[this.name] = value.pattern;
-    } else if (value && shouldWrite(aggConfig)) {
+    } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
     }
   }
@@ -46,5 +47,6 @@ const migrateIncludeExcludeFormat = {
 
 export {
   isType,
+  isStringType,
   migrateIncludeExcludeFormat
 };

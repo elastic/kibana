@@ -43,7 +43,6 @@ function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
     () => {
       if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
         setValidity(true);
-        onChange();
       }
     },
     [agg, agg.params.field]
