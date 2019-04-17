@@ -11,8 +11,12 @@ import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
-// @public (undocumented)
-export type BasePathSetup = ReturnType<BasePathService['setup']>;
+// @public
+export interface BasePathSetup {
+    addToPath(path: string): string;
+    get(): string;
+    removeFromPath(path: string): string;
+}
 
 // @public
 export interface Capabilities {
@@ -86,20 +90,17 @@ export class CoreSystem {
     constructor(params: Params);
     // (undocumented)
     setup(): Promise<{
-        fatalErrors: {
-            add: (error: string | Error, source?: string | undefined) => never;
-            get$: () => import("rxjs").Observable<{
-                message: string;
-                stack: string | undefined;
-            }>;
-        };
+        fatalErrors: import(".").FatalErrorsSetup;
     } | undefined>;
     // (undocumented)
     stop(): void;
     }
 
-// @public (undocumented)
-export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
+// @public
+export interface FatalErrorsSetup {
+    add: (error: string | Error, source?: string) => never;
+    get$: () => Rx.Observable<ErrorInfo>;
+}
 
 // @public
 export class FlyoutRef {
@@ -111,8 +112,12 @@ export class FlyoutRef {
 // @public (undocumented)
 export type HttpSetup = ReturnType<HttpService['setup']>;
 
-// @public (undocumented)
-export type I18nSetup = ReturnType<I18nService['setup']>;
+// @public
+export interface I18nSetup {
+    Context: ({ children }: {
+        children: default.ReactNode;
+    }) => JSX.Element;
+}
 
 // @internal (undocumented)
 export interface InjectedMetadataParams {
@@ -151,8 +156,45 @@ export interface InjectedMetadataParams {
     };
 }
 
-// @public (undocumented)
-export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;
+// @public
+export interface InjectedMetadataSetup {
+    // (undocumented)
+    getBasePath: () => string;
+    // (undocumented)
+    getCspConfig: () => {
+        warnLegacyBrowsers: boolean;
+    };
+    // (undocumented)
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    // (undocumented)
+    getInjectedVars: () => {
+        [key: string]: unknown;
+    };
+    // (undocumented)
+    getKibanaVersion: () => string;
+    // (undocumented)
+    getLegacyMetadata: () => {
+        app: unknown;
+        translations: unknown;
+        bundleId: string;
+        nav: unknown;
+        version: string;
+        branch: string;
+        buildNum: number;
+        buildSha: string;
+        basePath: string;
+        serverName: string;
+        devMode: boolean;
+        uiSettings: {
+            defaults: UiSettingsState;
+            user?: UiSettingsState | undefined;
+        };
+    };
+    getPlugins: () => Array<{
+        id: string;
+        plugin: DiscoveredPlugin;
+    }>;
+}
 
 // @public (undocumented)
 export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
