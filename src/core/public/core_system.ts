@@ -126,7 +126,6 @@ export class CoreSystem {
   public async setup() {
     try {
       const i18n = this.i18n.setup();
-      const notifications = this.notifications.setup({ i18n });
       const injectedMetadata = this.injectedMetadata.setup();
       const fatalErrors = this.fatalErrors.setup({ i18n });
       const http = this.http.setup({ fatalErrors });
@@ -134,11 +133,11 @@ export class CoreSystem {
       const basePath = this.basePath.setup({ injectedMetadata });
       const capabilities = this.capabilities.setup({ injectedMetadata });
       const uiSettings = this.uiSettings.setup({
-        notifications,
         http,
         injectedMetadata,
         basePath,
       });
+      const notifications = this.notifications.setup({ i18n, uiSettings });
       const chrome = this.chrome.setup({
         injectedMetadata,
         notifications,

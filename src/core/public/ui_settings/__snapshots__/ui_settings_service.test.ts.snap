@@ -48,7 +48,6 @@ exports[`#setup constructs UiSettingsClient and UiSettingsApi: UiSettingsClient 
         "initialSettings": Object {
           "legacyInjectedUiSettingUserValues": true,
         },
-        "onUpdateError": [Function],
       },
     ],
   ],

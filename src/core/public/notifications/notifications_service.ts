@@ -17,9 +17,12 @@
  * under the License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 import { Observable, Subject, Subscription } from 'rxjs';
 import { I18nSetup } from '../i18n';
 import { ToastsService } from './toasts';
+import { UiSettingsSetup } from '../ui_settings';
 
 interface NotificationServiceParams {
   targetDomElement$: Observable<HTMLElement>;
@@ -27,6 +30,7 @@ interface NotificationServiceParams {
 
 interface NotificationsServiceDeps {
   i18n: I18nSetup;
+  uiSettings: UiSettingsSetup
 }
 
 /** @public */
@@ -35,6 +39,7 @@ export class NotificationsService {
 
   private readonly toastsContainer$: Subject<HTMLElement>;
   private domElemSubscription?: Subscription;
+  private uiSettingsErrorSubscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
   constructor(private readonly params: NotificationServiceParams) {
@@ -44,7 +49,7 @@ export class NotificationsService {
     });
   }
 
-  public setup({ i18n }: NotificationsServiceDeps) {
+  public setup({ i18n: i18nDep, uiSettings }: NotificationsServiceDeps) {
     this.domElemSubscription = this.params.targetDomElement$.subscribe({
       next: targetDomElement => {
         this.cleanupTargetDomElement();
@@ -56,7 +61,18 @@ export class NotificationsService {
       },
     });
 
-    return { toasts: this.toasts.setup({ i18n }) };
+    const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nDep }) };
+
+    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error) => {
+      notificationSetup.toasts.addDanger({
+        title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
+          defaultMessage: 'Unable to update UI setting',
+        }),
+        text: error.message,
+      });
+    });
+
+    return notificationSetup;
   }
 
   public stop() {
@@ -65,6 +81,10 @@ export class NotificationsService {
 
     if (this.domElemSubscription) {
       this.domElemSubscription.unsubscribe();
+    }
+
+    if (this.uiSettingsErrorSubscription) {
+      this.uiSettingsErrorSubscription.unsubscribe();
     }
   }
 

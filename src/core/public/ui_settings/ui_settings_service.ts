@@ -17,17 +17,14 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import { BasePathSetup } from '../base_path';
 import { HttpSetup } from '../http';
 import { InjectedMetadataSetup } from '../injected_metadata';
-import { NotificationsSetup } from '../notifications';
 
 import { UiSettingsApi } from './ui_settings_api';
 import { UiSettingsClient } from './ui_settings_client';
 
 interface UiSettingsServiceDeps {
-  notifications: NotificationsSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   basePath: BasePathSetup;
@@ -39,7 +36,6 @@ export class UiSettingsService {
   private uiSettingsClient?: UiSettingsClient;
 
   public setup({
-    notifications,
     http,
     injectedMetadata,
     basePath,
@@ -52,14 +48,6 @@ export class UiSettingsService {
 
     this.uiSettingsClient = new UiSettingsClient({
       api: this.uiSettingsApi,
-      onUpdateError: error => {
-        notifications.toasts.addDanger({
-          title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
-            defaultMessage: 'Unable to update UI setting',
-          }),
-          text: error.message,
-        });
-      },
       defaults: legacyMetadata.uiSettings.defaults,
       initialSettings: legacyMetadata.uiSettings.user,
     });
