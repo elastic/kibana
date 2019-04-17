@@ -67,7 +67,7 @@ export class JiraAction extends BaseAction {
     return new JiraAction(upstreamAction);
   }
 
-  static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
+  static typeName = i18n.translate('xpack.watcher.models.jiraAction.typeName', {
     defaultMessage: 'Jira',
   });
   static selectMessage = i18n.translate('xpack.watcher.models.jiraAction.selectMessageText', {

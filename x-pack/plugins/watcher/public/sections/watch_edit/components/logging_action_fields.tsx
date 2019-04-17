@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ErrableFormRow } from '../../../components/form_errors';
 
 export const LoggingActionFields = ({
   action,
@@ -16,10 +16,16 @@ export const LoggingActionFields = ({
   editAction: (changedProperty: { key: string; value: string }) => void;
 }) => {
   const { text } = action;
+  const errors = action.validateAction();
+  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
   return (
     <Fragment>
-      <EuiFormRow
+      <ErrableFormRow
+        id="loggingText"
+        errorKey="text"
         fullWidth
+        errors={errors}
+        isShowingErrors={hasErrors && text !== undefined}
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.loggingAction.logTextFieldLabel',
           {
@@ -29,12 +35,18 @@ export const LoggingActionFields = ({
       >
         <EuiFieldText
           fullWidth
-          value={text}
-          onChange={e => {
+          name="text"
+          value={text || ''}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             editAction({ key: 'text', value: e.target.value });
           }}
+          onBlur={() => {
+            if (!text) {
+              editAction({ key: 'text', value: '' });
+            }
+          }}
         />
-      </EuiFormRow>
+      </ErrableFormRow>
     </Fragment>
   );
 };

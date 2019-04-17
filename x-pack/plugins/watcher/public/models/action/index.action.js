@@ -89,7 +89,7 @@ export class IndexAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.indexAction.typeName', {
     defaultMessage: 'Index',
   });
-  static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
+  static selectMessage = i18n.translate('xpack.watcher.models.indexAction.selectMessageText', {
     defaultMessage: 'Index data into Elasticsearch.',
   });
 }

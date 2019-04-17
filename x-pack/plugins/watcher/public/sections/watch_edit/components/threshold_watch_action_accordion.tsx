@@ -23,11 +23,15 @@ import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { WatchAction } from '../../../../common/types/watch_types';
 import { ACTION_TYPES, ACTION_MODES } from '../../../../common/constants';
 import { WatchContext } from './watch_context';
+import { EmailActionFields } from './email_action_fields';
 import { LoggingActionFields } from './logging_action_fields';
+import { SlackActionFields } from './slack_action_fields';
 import { executeWatch } from '../../../lib/api';
 
 const ActionFieldsComponent = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,
+  [ACTION_TYPES.SLACK]: SlackActionFields,
+  [ACTION_TYPES.EMAIL]: EmailActionFields,
   // TODO add support for additional action types
 };
 

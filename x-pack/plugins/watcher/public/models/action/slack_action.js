@@ -16,15 +16,36 @@ export class SlackAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    const toArray = get(props, 'to', []);
-    this.to = isArray(toArray) ? toArray : [ toArray ];
+    const toArray = get(props, 'to');
+    this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
     this.text = props.text;
+  }
+  validateAction() {
+    const errors = {
+      to: [],
+      text: []
+    };
+    if (!this.to || this.to.length === 0) {
+      errors.to.push(
+        i18n.translate('xpack.watcher.watchActions.slack.slackRecipientIsRequiredValidationMessage', {
+          defaultMessage: 'Recipient is required.',
+        })
+      );
+    }
+    if (!this.text) {
+      errors.text.push(
+        i18n.translate('xpack.watcher.watchActions.slack.slackMessageIsRequiredValidationMessage', {
+          defaultMessage: 'Message is required.',
+        })
+      );
+    }
+    return errors;
   }
 
   validate() {
     const errors = [];
 
-    if (!this.to.length) {
+    if (!this.to || !this.to.length) {
       const message = (
         <FormattedMessage
           id="xpack.watcher.sections.watchEdit.json.slackActionValidationWarningMessage"
@@ -101,6 +122,10 @@ export class SlackAction extends BaseAction {
     });
   }
 
+  static defaults = {
+    text: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
+  }
+
   static fromUpstreamJson(upstreamAction) {
     return new SlackAction(upstreamAction);
   }
@@ -108,10 +133,10 @@ export class SlackAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.slackAction.TypeName', {
     defaultMessage: 'Slack'
   });
-  static iconClass = 'kuiIcon fa-slack';
+  static iconClass = 'logoSlack';
   static template = '<watch-slack-action></watch-slack-action>';
   static selectMessage = i18n.translate('xpack.watcher.models.slackAction.selectMessageText', {
-    defaultMessage: 'Send a message to a slack user or channel.'
+    defaultMessage: 'Send a message to a Slack user or channel.'
   });
   static simulatePrompt = i18n.translate('xpack.watcher.models.slackAction.simulateButtonLabel', {
     defaultMessage: 'Send a sample message now'

@@ -12,10 +12,40 @@ export class EmailAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    const toArray = get(props, 'to', []);
-    this.to = isArray(toArray) ? toArray : [ toArray ];
-    this.subject = get(props, 'subject', '');
-    this.body = get(props, 'body', '');
+    const toArray = get(props, 'to');
+    this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
+    this.subject = get(props, 'subject');
+    this.body = get(props, 'body');
+  }
+
+  validateAction() {
+    const errors = {
+      to: [],
+      subject: [],
+      body: [],
+    };
+    if (!this.to || this.to.length === 0) {
+      errors.to.push(
+        i18n.translate('xpack.watcher.watchActions.email.emailRecipientIsRequiredValidationMessage', {
+          defaultMessage: 'To email address is required.',
+        })
+      );
+    }
+    if (!this.subject) {
+      errors.subject.push(
+        i18n.translate('xpack.watcher.watchActions.email.emailSubhectIsRequiredValidationMessage', {
+          defaultMessage: 'Subject is required.',
+        })
+      );
+    }
+    if (!this.body) {
+      errors.body.push(
+        i18n.translate('xpack.watcher.watchActions.email.emailBodyIsRequiredValidationMessage', {
+          defaultMessage: 'Body is required.',
+        })
+      );
+    }
+    return errors;
   }
 
   get upstreamJson() {
@@ -48,7 +78,7 @@ export class EmailAction extends BaseAction {
   get simulateMessage() {
     const toList = this.to.join(', ');
     return i18n.translate('xpack.watcher.models.emailAction.simulateMessage', {
-      defaultMessage: 'Sample e-mail sent to {toList}',
+      defaultMessage: 'Sample email sent to {toList}',
       values: {
         toList
       }
@@ -58,7 +88,7 @@ export class EmailAction extends BaseAction {
   get simulateFailMessage() {
     const toList = this.to.join(', ');
     return i18n.translate('xpack.watcher.models.emailAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send e-mail to {toList}.',
+      defaultMessage: 'Failed to send email to {toList}.',
       values: {
         toList
       }
@@ -72,7 +102,7 @@ export class EmailAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.emailAction.typeName', {
     defaultMessage: 'Email',
   });
-  static iconClass = 'kuiIcon fa-envelope-o';
+  static iconClass = 'email';
   static template = '<watch-email-action></watch-email-action>';
   static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
     defaultMessage: 'Send out an email from your server.',
@@ -80,4 +110,7 @@ export class EmailAction extends BaseAction {
   static simulatePrompt = i18n.translate('xpack.watcher.models.emailAction.simulateButtonLabel', {
     defaultMessage: 'Test fire an email now'
   });
+  static defaults = {
+    subject: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
+  };
 }

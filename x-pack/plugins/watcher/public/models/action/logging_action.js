@@ -12,7 +12,21 @@ export class LoggingAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    this.text = get(props, 'text', '');
+    this.text = get(props, 'text');
+  }
+
+  validateAction() {
+    const errors = {
+      text: [],
+    };
+    if (!this.text) {
+      errors.text.push(
+        i18n.translate('xpack.watcher.watchActions.logging.logTextIsRequiredValidationMessage', {
+          defaultMessage: 'Log text is required.',
+        })
+      );
+    }
+    return errors;
   }
 
   get upstreamJson() {
