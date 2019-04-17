@@ -17,13 +17,13 @@ import { InteractivePage } from './workpad_interactive_page';
 const animationProps = ({ animation, isSelected }) =>
   animation
     ? {
-        className: animation.name + ' ' + (isSelected ? 'active' : 'inactive'),
+        className: animation.name + ' ' + (isSelected ? 'isActive' : 'isInactive'),
         animationStyle: {
           animationDirection: animation.direction,
           animationDuration: '1s', // TODO: Make this configurable
         },
       }
-    : { className: isSelected ? 'active' : 'inactive', animationStyle: {} };
+    : { className: isSelected ? 'isActive' : 'isInactive', animationStyle: {} };
 
 const mapStateToProps = (state, { isSelected, pageId }) => ({
   isInteractive: isSelected && !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
