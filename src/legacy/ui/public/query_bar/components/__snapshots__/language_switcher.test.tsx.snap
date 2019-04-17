@@ -41,10 +41,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       }
     }
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
@@ -146,10 +143,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       }
     }
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."

@@ -12,7 +12,6 @@ exports[`render 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -96,7 +95,6 @@ exports[`statusCheckState checking status 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -215,7 +213,6 @@ exports[`statusCheckState failed status check - error 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -339,7 +336,6 @@ exports[`statusCheckState failed status check - no data 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -463,7 +459,6 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -582,7 +577,6 @@ exports[`statusCheckState successful status check 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1

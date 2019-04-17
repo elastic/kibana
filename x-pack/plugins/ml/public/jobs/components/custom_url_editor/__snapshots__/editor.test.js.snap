@@ -4,7 +4,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
 <Fragment>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h4>
       <FormattedMessage
@@ -197,7 +196,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
 <Fragment>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h4>
       <FormattedMessage
@@ -428,7 +426,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
 <Fragment>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h4>
       <FormattedMessage
@@ -655,7 +652,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
 <Fragment>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h4>
       <FormattedMessage
@@ -852,7 +848,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
 <Fragment>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h4>
       <FormattedMessage
@@ -965,7 +960,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
 <Fragment>
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h4>
       <FormattedMessage
