@@ -25,7 +25,6 @@ import {
   indexRepoFailed,
   indexRepoSuccess,
   initRepoCommand,
-  updateCloneProgress,
   updateDeleteProgress,
   updateIndexProgress,
 } from '../actions';
@@ -96,12 +95,6 @@ function* handleImportRepo(action: Action<string>) {
   try {
     const data = yield call(requestImportRepo, action.payload || '');
     yield put(importRepoSuccess(data));
-    yield put(
-      updateCloneProgress({
-        repoUri: action.payload as string,
-        progress: 0,
-      })
-    );
   } catch (err) {
     yield put(importRepoFailed(err));
   }

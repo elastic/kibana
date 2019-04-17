@@ -157,12 +157,13 @@ const handleRepoCloneStatusPolling = createRepoStatusPollingHandler(
     }
 
     if (status.gitStatus) {
-      const { progress, cloneProgress, timestamp } = status.gitStatus;
+      const { progress, cloneProgress, errorMessage, timestamp } = status.gitStatus;
       yield put(
         updateCloneProgress({
           progress,
           timestamp: moment(timestamp).toDate(),
           repoUri,
+          errorMessage,
           cloneProgress,
         })
       );
