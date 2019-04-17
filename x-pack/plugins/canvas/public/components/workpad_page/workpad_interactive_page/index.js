@@ -6,14 +6,14 @@
 
 import { compose, withHandlers, withProps, withState } from 'recompose';
 import { connect } from 'react-redux';
-import { createStore } from '../../lib/aeroelastic/store';
-import { updater } from '../../lib/aeroelastic/layout';
-import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
-import { flatten } from '../../lib/aeroelastic/functional';
-import { canUserWrite, getFullscreen } from '../../state/selectors/app';
-import { elementLayer, insertNodes, removeElements } from '../../state/actions/elements';
-import { selectToplevelNodes } from '../../state/actions/transient';
-import { crawlTree, globalStateUpdater, shapesForNodes } from '../../lib/integration_utils';
+import { createStore } from '../../../lib/aeroelastic/store';
+import { updater } from '../../../lib/aeroelastic/layout';
+import { getNodes, getPageById, isWriteable } from '../../../state/selectors/workpad';
+import { flatten } from '../../../lib/aeroelastic/functional';
+import { canUserWrite, getFullscreen } from '../../../state/selectors/app';
+import { elementLayer, insertNodes, removeElements } from '../../../state/actions/elements';
+import { selectToplevelNodes } from '../../../state/actions/transient';
+import { crawlTree, globalStateUpdater, shapesForNodes } from '../integration_utils';
 import { InteractiveWorkpadPage as InteractiveComponent } from './interactive_workpad_page';
 import { eventHandlers } from './event_handlers';
 

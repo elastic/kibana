@@ -5,14 +5,14 @@
  */
 
 import React, { PureComponent } from 'react';
-import { ElementWrapper } from '../element_wrapper';
-import { AlignmentGuide } from '../alignment_guide';
-import { HoverAnnotation } from '../hover_annotation';
-import { TooltipAnnotation } from '../tooltip_annotation';
-import { RotationHandle } from '../rotation_handle';
-import { BorderConnection } from '../border_connection';
-import { BorderResizeHandle } from '../border_resize_handle';
-import { interactiveWorkpadPagePropTypes } from '../workpad_page/prop_types';
+import { ElementWrapper } from '../../element_wrapper';
+import { AlignmentGuide } from '../../alignment_guide';
+import { HoverAnnotation } from '../../hover_annotation';
+import { TooltipAnnotation } from '../../tooltip_annotation';
+import { RotationHandle } from '../../rotation_handle';
+import { BorderConnection } from '../../border_connection';
+import { BorderResizeHandle } from '../../border_resize_handle';
+import { interactiveWorkpadPagePropTypes } from '../prop_types';
 import { WorkpadShortcuts } from './workpad_shortcuts';
 
 export class InteractiveWorkpadPage extends PureComponent {

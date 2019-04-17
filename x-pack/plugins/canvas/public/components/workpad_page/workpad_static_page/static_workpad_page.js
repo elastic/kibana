@@ -5,8 +5,8 @@
  */
 
 import React, { PureComponent } from 'react';
-import { ElementWrapper } from '../element_wrapper';
-import { staticWorkpadPagePropTypes } from '../workpad_page/prop_types';
+import { ElementWrapper } from '../../element_wrapper';
+import { staticWorkpadPagePropTypes } from '../prop_types';
 
 export class StaticWorkpadPage extends PureComponent {
   static propTypes = staticWorkpadPagePropTypes;

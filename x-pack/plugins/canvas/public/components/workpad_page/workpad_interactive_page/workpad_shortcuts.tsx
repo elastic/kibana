@@ -10,11 +10,11 @@ import isEqual from 'react-fast-compare';
 // @ts-ignore
 import { Shortcuts } from 'react-shortcuts';
 // @ts-ignore
-import { getClipboardData, setClipboardData } from '../../lib/clipboard';
+import { getClipboardData, setClipboardData } from '../../../lib/clipboard';
 // @ts-ignore
-import { cloneSubgraphs } from '../../lib/clone_subgraphs';
+import { cloneSubgraphs } from '../../../lib/clone_subgraphs';
 // @ts-ignore
-import { notify } from '../../lib/notify';
+import { notify } from '../../../lib/notify';
 
 export interface Props {
   pageId: string;

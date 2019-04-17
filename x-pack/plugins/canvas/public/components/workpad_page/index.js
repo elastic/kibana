@@ -11,8 +11,8 @@ import { branch, compose, shouldUpdate, withProps } from 'recompose';
 import { canUserWrite, getFullscreen } from '../../state/selectors/app';
 import { getNodes, getPageById, isWriteable } from '../../state/selectors/workpad';
 import { not } from '../../lib/aeroelastic/functional';
-import { StaticPage } from '../workpad_static_page';
-import { InteractivePage } from '../workpad_interactive_page';
+import { StaticPage } from './workpad_static_page';
+import { InteractivePage } from './workpad_interactive_page';
 
 const animationProps = ({ animation, isSelected }) =>
   animation
