@@ -21,17 +21,13 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function({ getPageObjects }: FtrProviderContext) {
   const { visualBuilder, visualize } = getPageObjects(['visualBuilder', 'visualize']);
-  const log = getService('log');
 
   describe('visual builder', function describeIndexTests() {
     describe('table', () => {
       beforeEach(async () => {
-        await visualBuilder.resetPage(
-          '2015-09-22 06:00:00.000',
-          '2015-09-22 11:00:00.000'
-        );
+        await visualBuilder.resetPage('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
         await visualBuilder.clickTable();
         // table preparation
         await visualBuilder.selectGroupByField('machine.os.raw');
