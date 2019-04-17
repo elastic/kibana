@@ -31,7 +31,6 @@ type FatalErrorsServiceContract = PublicMethodsOf<FatalErrorsService>;
 const createMock = () => {
   const mocked: jest.Mocked<FatalErrorsServiceContract> = {
     setup: jest.fn(),
-    add: jest.fn<never, any>(() => undefined as never),
   };
 
   mocked.setup.mockReturnValue(createSetupContractMock());
