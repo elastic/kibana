@@ -249,8 +249,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<boolean> {
       log.debug(`Find.existsByLinkText('${linkText}')  with timeout=${timeout}`);
       return await this.exists(
-        // tslint:disable-next-line:no-shadowed-variable
-        async driver => wrapAll(await driver.findElements(By.linkText(linkText))),
+        async drive => wrapAll(await drive.findElements(By.linkText(linkText))),
         timeout
       );
     }
@@ -260,9 +259,8 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.existsByDisplayedByCssSelector('${selector}') with timeout=${timeout}`);
-      // tslint:disable-next-line:no-shadowed-variable
-      return await this.exists(async driver => {
-        const elements = wrapAll(await driver.findElements(By.css(selector)));
+      return await this.exists(async drive => {
+        const elements = wrapAll(await drive.findElements(By.css(selector)));
         return await this.filterElementIsDisplayed(elements);
       }, timeout);
     }
@@ -273,9 +271,8 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<boolean> {
       log.debug(`Find.existsByCssSelector('${selector}') with timeout=${timeout}`);
       return await this.exists(
-        // tslint:disable-next-line:no-shadowed-variable
-        async driver => {
-          return wrapAll(await driver.findElements(By.css(selector)));
+        async drive => {
+          return wrapAll(await drive.findElements(By.css(selector)));
         },
         timeout
       );

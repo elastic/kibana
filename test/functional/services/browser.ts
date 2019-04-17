@@ -60,7 +60,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async setWindowSize(width: number, height: number): Promise<void>;
     public async setWindowSize(...args: number[]): Promise<void>;
-    public async setWindowSize(...args: Array<unknown>): Promise<void> {
+    public async setWindowSize(...args: unknown[]): Promise<void> {
       await (driver.manage().window() as any).setRect({ width: args[0], height: args[1] });
     }
 
@@ -235,7 +235,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
     public async clickMouseButton(element: WebElementWrapper): Promise<void>;
-    public async clickMouseButton(...args: Array<unknown>): Promise<void> {
+    public async clickMouseButton(...args: unknown[]): Promise<void> {
       const mouse = (driver.actions() as any).mouse();
       const actions = (driver as any).actions({ bridge: true });
       if (args[0] instanceof WebElementWrapper) {
