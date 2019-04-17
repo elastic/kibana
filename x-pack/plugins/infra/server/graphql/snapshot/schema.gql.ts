@@ -59,7 +59,7 @@ export const snapshotSchema: any = gql`
     "Nodes of type host, container or pod grouped by 0, 1 or 2 terms"
     nodes(
       type: InfraNodeType!
-      groupby: [InfraSnapshotGroupbyInput!]!
+      groupBy: [InfraSnapshotGroupbyInput!]!
       metric: InfraSnapshotMetricInput!
     ): [InfraSnapshotNode!]!
   }

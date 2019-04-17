@@ -37,7 +37,7 @@ export type InfraSnapshotMetricBucket = InfraSnapshotBucketWithKey & InfraSnapsh
 export interface InfraSnaphotGroupBucket {
   key: {
     node: string;
-    [groupbyField: string]: string;
+    [groupByField: string]: string;
   };
 }
 
@@ -47,7 +47,7 @@ export const getNodePath = (
 ) => {
   const path = [];
   const node = groupBucket.key;
-  options.groupby.forEach(gb => {
+  options.groupBy.forEach(gb => {
     path.push({ value: node[`${gb.field}`], label: node[`${gb.field}`] });
   });
   path.push({ value: node.node, label: node.node });

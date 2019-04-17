@@ -24,7 +24,7 @@ export interface InfraSnapshotRequestOptions {
   nodeType: InfraNodeType;
   sourceConfiguration: InfraSourceConfiguration;
   timerange: InfraTimerangeInput;
-  groupby: InfraSnapshotGroupbyInput[];
+  groupBy: InfraSnapshotGroupbyInput[];
   metric: InfraSnapshotMetricInput;
   filterQuery: JsonObject | undefined;
 }

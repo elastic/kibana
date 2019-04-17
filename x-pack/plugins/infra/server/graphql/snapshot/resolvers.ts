@@ -60,7 +60,7 @@ export const createSnapshotResolvers = (
       const options: InfraSnapshotRequestOptions = {
         filterQuery: parseFilterQuery(filterQuery),
         nodeType: args.type,
-        groupby: args.groupby,
+        groupBy: args.groupBy,
         sourceConfiguration: source.configuration,
         metric: args.metric,
         timerange,

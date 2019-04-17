@@ -493,7 +493,7 @@ export interface NodesInfraResponseArgs {
 export interface NodesInfraSnapshotResponseArgs {
   type: InfraNodeType;
 
-  groupby: InfraSnapshotGroupbyInput[];
+  groupBy: InfraSnapshotGroupbyInput[];
 
   metric: InfraSnapshotMetricInput;
 }

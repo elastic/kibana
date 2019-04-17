@@ -9,7 +9,7 @@ import { InfraSnapshotRequestOptions } from './snapshot';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
   const sources = [];
-  options.groupby.forEach(gb => {
+  options.groupBy.forEach(gb => {
     sources.push({
       [`${gb.field}`]: { terms: { field: gb.field } },
     });

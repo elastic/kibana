@@ -1874,7 +1874,7 @@
                 "defaultValue": null
               },
               {
-                "name": "groupby",
+                "name": "groupBy",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",

@@ -521,7 +521,7 @@ export interface NodesInfraResponseArgs {
 export interface NodesInfraSnapshotResponseArgs {
   type: InfraNodeType;
 
-  groupby: InfraSnapshotGroupbyInput[];
+  groupBy: InfraSnapshotGroupbyInput[];
 
   metric: InfraSnapshotMetricInput;
 }
@@ -1414,7 +1414,7 @@ export namespace InfraSnapshotResponseResolvers {
   export interface NodesArgs {
     type: InfraNodeType;
 
-    groupby: InfraSnapshotGroupbyInput[];
+    groupBy: InfraSnapshotGroupbyInput[];
 
     metric: InfraSnapshotMetricInput;
   }
