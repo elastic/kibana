@@ -399,7 +399,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor', function () {
+    describe('filter editor', async function () {
       it('should add a phrases filter', async function () {
         await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);

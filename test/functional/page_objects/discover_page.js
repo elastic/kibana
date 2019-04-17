@@ -31,7 +31,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
   const config = getService('config');
   const defaultFindTimeout = config.get('timeouts.find');
 
-
   class DiscoverPage {
     async getQueryField() {
       return await find.byCssSelector('input[ng-model=\'state.query\']');
@@ -61,6 +60,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
         const name = await this.getCurrentQueryName();
         expect(name).to.be(searchName);
       });
+    }
+
+    async waitUntilSearchingHasFinished() {
+      const spinner = await testSubjects.find('loadingSpinner');
+      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
     }
 
     async getColumnHeaders() {

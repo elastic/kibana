@@ -282,7 +282,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectAggregation('Terms');
         await PageObjects.visualize.selectField('machine.os');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-
         await PageObjects.visualize.clickGo();
 
         const expectedEntries = [
@@ -312,9 +311,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.toggleOpenEditor(1);
         await PageObjects.visualize.selectAggregation('Derivative', 'metrics');
         await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-
         await PageObjects.visualize.clickGo();
-        await PageObjects.header.waitUntilLoadingHasFinished();
 
         const expectedEntries = [
           'Derivative of Count'
