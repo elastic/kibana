@@ -38,15 +38,19 @@ export const createGlobalTimeEpic = <State>(): Epic<
   return action$.pipe(
     filter(startAutoReload.match),
     withLatestFrom(policy$, timerange$),
-    filter(([action, policy, timerange]) => timerange.kind === 'relative'),
+    filter(
+      ([action, policy, timerange]) =>
+        timerange.kind === 'relative' && timerange.toStr != null && timerange.toStr === 'now'
+    ),
     exhaustMap(([action, policy, timerange]) =>
       timer(0, policy.duration).pipe(
         map(() => {
-          const option = get('option', timerange);
-          const momentDate = option != null ? dateMath.parse(option) : null;
+          const fromStr = get('fromStr', timerange);
+          const momentDate = fromStr != null ? dateMath.parse(fromStr) : null;
           return setRelativeRangeDatePicker({
             id: 'global',
-            option: option != null ? option : '',
+            fromStr: fromStr != null ? fromStr : '',
+            toStr: 'now',
             to: Date.now(),
             from: momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0,
           });

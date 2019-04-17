@@ -18,7 +18,8 @@ export const setAbsoluteRangeDatePicker = actionCreator<{
 
 export const setRelativeRangeDatePicker = actionCreator<{
   id: string;
-  option: string;
+  fromStr: string;
+  toStr: string;
   from: number;
   to: number;
 }>('SET_RELATIVE_RANGE_DATE_PICKER');

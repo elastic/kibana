@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
@@ -35,9 +35,11 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
                 ? valueSeen
                 : !loading &&
                   valueSeen != null && (
-                    <LocalizedDateTooltip date={moment(new Date(valueSeen)).toDate()}>
-                      <PreferenceFormattedDate value={new Date(valueSeen)} />
-                    </LocalizedDateTooltip>
+                    <EuiText size="s">
+                      <LocalizedDateTooltip date={moment(new Date(valueSeen)).toDate()}>
+                        <PreferenceFormattedDate value={new Date(valueSeen)} />
+                      </LocalizedDateTooltip>
+                    </EuiText>
                   )}
               {!loading && valueSeen == null && getEmptyTagValue()}
             </>

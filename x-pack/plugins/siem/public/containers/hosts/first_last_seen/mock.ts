@@ -4,11 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { GetHostFirstLastSeenQuery } from '../../../graphql/types';
+
 import { HostFirstLastSeenGqlQuery } from './first_last_seen.gql_query';
 
 interface MockedProvidedQuery {
-  request: object;
-  result: object;
+  request: {
+    query: GetHostFirstLastSeenQuery.Query;
+    variables: GetHostFirstLastSeenQuery.Variables;
+  };
+  result: {
+    data?: {
+      source: {
+        id: string;
+        HostFirstLastSeen: {
+          firstSeen: string | null;
+          lastSeen: string | null;
+        };
+      };
+    };
+    errors?: [{ message: string }];
+  };
 }
 export const mockFirstLastSeenHostQuery: MockedProvidedQuery[] = [
   {

@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createQueryFilterClauses } from '../../utils/build_query';
+import { Direction, HostsFields, HostsSortField } from '../../graphql/types';
+import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 import { reduceFields } from '../../utils/build_query/reduce_fields';
 import { hostFieldsMap } from '../ecs_fields';
-import { RequestOptions } from '../framework';
 
+import { HostsRequestOptions } from '.';
 import { buildFieldsTermAggregation } from './helpers';
 
 export const buildHostsQuery = ({
   fields,
   filterQuery,
   pagination: { limit, cursor },
+  sort,
   sourceConfiguration: {
     fields: { timestamp },
     logAlias,
@@ -23,7 +25,7 @@ export const buildHostsQuery = ({
     winlogbeatAlias,
   },
   timerange: { from, to },
-}: RequestOptions) => {
+}: HostsRequestOptions) => {
   const esFields = reduceFields(fields, hostFieldsMap);
 
   const filter = [
@@ -48,10 +50,9 @@ export const buildHostsQuery = ({
       aggregations: {
         ...agg,
         host_data: {
-          terms: { size: limit + 1, field: 'host.name', order: { lastSeen: 'desc' } },
+          terms: { size: limit + 1, field: 'host.name', order: getQueryOrder(sort) },
           aggs: {
             lastSeen: { max: { field: '@timestamp' } },
-            firstSeen: { min: { field: '@timestamp' } },
             ...buildFieldsTermAggregation(
               esFields.filter(field => !['@timestamp', '_id'].includes(field))
             ),
@@ -60,9 +61,21 @@ export const buildHostsQuery = ({
       },
       query: { bool: { filter } },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   };
-
   return dslQuery;
+};
+
+type QueryOrder = { lastSeen: Direction } | { _key: Direction };
+
+const getQueryOrder = (sort: HostsSortField): QueryOrder => {
+  switch (sort.field) {
+    case HostsFields.lastSeen:
+      return { lastSeen: sort.direction };
+    case HostsFields.hostName:
+      return { _key: sort.direction };
+    default:
+      return assertUnreachable(sort.field);
+  }
 };
