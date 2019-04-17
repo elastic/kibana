@@ -152,30 +152,6 @@ export const getDomainsColumns = (
     name: (
       <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
         <span>
-          {i18n.FIRST_SEEN}
-          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
-      </EuiToolTip>
-    ),
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const firstSeenAttr = `${flowTarget}.firstSeen`;
-      const firstSeen = getOr(null, firstSeenAttr, node);
-      if (firstSeen != null) {
-        return (
-          <LocalizedDateTooltip date={moment(new Date(firstSeen)).toDate()}>
-            <PreferenceFormattedDate value={new Date(firstSeen)} />
-          </LocalizedDateTooltip>
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    name: (
-      <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
-        <span>
           {i18n.LAST_SEEN}
           <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
         </span>

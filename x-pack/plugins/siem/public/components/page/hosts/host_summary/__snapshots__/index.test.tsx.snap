@@ -176,7 +176,7 @@ exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in
         class="euiToolTipAnchor"
       >
         <svg
-          aria-describedby="2rxrocai"
+          aria-describedby="iik281fe"
           class="euiIcon euiIcon--medium"
           focusable="false"
           height="16"
@@ -201,7 +201,7 @@ exports[`Host Summary Component #getEuiDescriptionList if IP is an empty list in
         class="euiToolTipAnchor"
       >
         <svg
-          aria-describedby="h55l2x4i"
+          aria-describedby="n0l2riba"
           class="euiIcon euiIcon--medium"
           focusable="false"
           height="16"
