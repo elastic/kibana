@@ -62,7 +62,6 @@ export class MBMapContainer extends React.Component {
       featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
       location: popupAnchorLocation
     });
-
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
@@ -251,7 +250,15 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
-    ReactDOM.render((<FeatureTooltip properties={content} onCloseClick={this._onTooltipClose}/>), this._tooltipContainer);
+    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
+    ReactDOM.render((
+      <FeatureTooltip
+        properties={content}
+        closeTooltip={this._onTooltipClose}
+        showFilterButtons={this.props.isFilterable && isLocked}
+        showCloseButton={isLocked}
+      />
+    ), this._tooltipContainer);
 
     this._mbPopup.setLngLat(location)
       .setDOMContent(this._tooltipContainer)
@@ -270,8 +277,10 @@ export class MBMapContainer extends React.Component {
 
   _syncTooltipState() {
     if (this.props.tooltipState) {
+      this._mbMap.getCanvas().style.cursor = 'pointer';
       this._showTooltip();
     } else {
+      this._mbMap.getCanvas().style.cursor = '';
       this._hideTooltip();
     }
   }

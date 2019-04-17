@@ -31,15 +31,21 @@ export const getAllNodeVersions = async (callCluster: CallCluster) => {
 
 export const verifyAllMatchKibanaVersion = (allNodeVersions: SemVer[]) => {
   // Determine if all nodes in the cluster are running the same major version as Kibana.
-  const anyDifferentEsNodes = !!allNodeVersions.find(
+  const numDifferentVersion = allNodeVersions.filter(
     esNodeVersion => esNodeVersion.major !== CURRENT_VERSION.major
-  );
+  ).length;
+  const numSameVersion = allNodeVersions.filter(
+    esNodeVersion => esNodeVersion.major === CURRENT_VERSION.major
+  ).length;
 
-  if (anyDifferentEsNodes) {
-    throw new Boom(`There are some nodes running a different version of Elasticsearch`, {
+  if (numDifferentVersion) {
+    const error = new Boom(`There are some nodes running a different version of Elasticsearch`, {
       // 426 means "Upgrade Required" and is used when semver compatibility is not met.
       statusCode: 426,
     });
+
+    error.output.payload.attributes = { allNodesUpgraded: !numSameVersion };
+    throw error;
   }
 };
 

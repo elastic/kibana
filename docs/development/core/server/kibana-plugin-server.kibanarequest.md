@@ -1,0 +1,28 @@
+[Home](./index) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [KibanaRequest](./kibana-plugin-server.kibanarequest.md)
+
+## KibanaRequest class
+
+
+<b>Signature:</b>
+
+```typescript
+export declare class KibanaRequest<Params, Query, Body> 
+```
+
+## Properties
+
+|  Property | Modifiers | Type | Description |
+|  --- | --- | --- | --- |
+|  [body](./kibana-plugin-server.kibanarequest.body.md) |  | <code>Body</code> |  |
+|  [headers](./kibana-plugin-server.kibanarequest.headers.md) |  | <code>Headers</code> |  |
+|  [params](./kibana-plugin-server.kibanarequest.params.md) |  | <code>Params</code> |  |
+|  [path](./kibana-plugin-server.kibanarequest.path.md) |  | <code>string</code> |  |
+|  [query](./kibana-plugin-server.kibanarequest.query.md) |  | <code>Query</code> |  |
+
+## Methods
+
+|  Method | Modifiers | Description |
+|  --- | --- | --- |
+|  [from(req, routeSchemas)](./kibana-plugin-server.kibanarequest.from.md) | <code>static</code> | Factory for creating requests. Validates the request before creating an instance of a KibanaRequest. |
+|  [getFilteredHeaders(headersToKeep)](./kibana-plugin-server.kibanarequest.getfilteredheaders.md) |  |  |
+

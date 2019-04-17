@@ -77,6 +77,16 @@ const initUserActions = ({ getMetadataFromEuiTable, find }) => (section) => {
         clickRemoteClusterAt,
       };
     },
+    // Remote cluster Add
+    remoteClusterAdd() {
+      const clickSaveForm = () => {
+        find('remoteClusterFormSaveButton').simulate('click');
+      };
+
+      return {
+        clickSaveForm,
+      };
+    }
   };
 
   return userActions[section]();
@@ -104,7 +114,7 @@ export const registerHttpRequestMockHelpers = server => {
   const setLoadRemoteClustersResponse = (response) => {
     const defaultResponse = [];
 
-    server.respondWith('GET', 'api/remote_clusters', [
+    server.respondWith('GET', '/api/remote_clusters', [
       200,
       { 'Content-Type': 'application/json' },
       JSON.stringify(response ? response : defaultResponse),
@@ -112,7 +122,10 @@ export const registerHttpRequestMockHelpers = server => {
   };
 
   const setDeleteRemoteClusterResponse = (response) => {
-    const defaultResponse = { success: true };
+    const defaultResponse = {
+      itemsDeleted: [],
+      errors: [],
+    };
 
     server.respondWith('DELETE', /api\/remote_clusters/,
       mockResponse(defaultResponse, response)
@@ -124,3 +137,11 @@ export const registerHttpRequestMockHelpers = server => {
     setDeleteRemoteClusterResponse,
   };
 };
+
+export const NON_ALPHA_NUMERIC_CHARS = [
+  '#', '@', '.', '$', '*', '(', ')', '+', ';', '~', ':', '\'', '/', '%', '?', ',', '=', '&', '!', '-', '_'
+];
+
+export const ACCENTED_CHARS = ['À', 'à', 'Á', 'á', 'Â', 'â', 'Ã', 'ã', 'Ä', 'ä', 'Ç', 'ç', 'È', 'è', 'É', 'é', 'Ê', 'ê', 'Ë', 'ë', 'Ì',
+  'ì', 'Í', 'í', 'Î', 'î', 'Ï', 'ï', 'Ñ', 'ñ', 'Ò', 'ò', 'Ó', 'ó', 'Ô', 'ô', 'Õ', 'õ', 'Ö', 'ö', 'Š', 'š', 'Ú', 'ù', 'Û', 'ú',
+  'Ü', 'û', 'Ù', 'ü', 'Ý', 'ý', 'Ÿ', 'ÿ', 'Ž', 'ž'];

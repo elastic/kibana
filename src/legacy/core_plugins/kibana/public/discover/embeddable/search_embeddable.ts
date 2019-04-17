@@ -58,6 +58,7 @@ interface SearchEmbeddableConfig {
   onEmbeddableStateChanged: OnEmbeddableStateChanged;
   savedSearch: SavedSearch;
   editUrl: string;
+  editable: boolean;
   $rootScope: ng.IRootScopeService;
   $compile: ng.ICompileService;
 }
@@ -80,6 +81,7 @@ export class SearchEmbeddable extends Embeddable {
   constructor({
     onEmbeddableStateChanged,
     savedSearch,
+    editable,
     editUrl,
     $rootScope,
     $compile,
@@ -87,6 +89,7 @@ export class SearchEmbeddable extends Embeddable {
     super({
       title: savedSearch.title,
       editUrl,
+      editable,
       indexPatterns: _.compact([savedSearch.searchSource.getField('index')]),
     });
     this.onEmbeddableStateChanged = onEmbeddableStateChanged;
