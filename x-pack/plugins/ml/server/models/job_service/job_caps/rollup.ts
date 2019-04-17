@@ -5,6 +5,7 @@
  */
 
 import { Request } from 'src/legacy/server/kbn_server';
+import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 
 export interface RollupConfig {
   job_id: string;
@@ -15,7 +16,7 @@ export interface RollupConfig {
 
 export async function getRollupConfig(
   indexPattern: string,
-  callWithRequest: any,
+  callWithRequest: CallWithRequestType,
   request: Request
 ): Promise<RollupConfig | null> {
   const rollupConfig = await loadRollupConfig(indexPattern, request);

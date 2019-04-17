@@ -10,6 +10,7 @@ import { Field, Aggregation } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { getRollupConfig, RollupConfig } from './rollup';
 import { aggregations } from './aggregations';
+import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 
 const METRIC_AGG_TYPE: string = 'metrics';
 
@@ -25,7 +26,7 @@ const supportedTypes: string[] = [
 export function fieldServiceProvider(
   indexPattern: string,
   isRollup: boolean,
-  callWithRequest: any,
+  callWithRequest: CallWithRequestType,
   request: Request
 ) {
   return new FieldsService(indexPattern, isRollup, callWithRequest, request);
@@ -34,10 +35,15 @@ export function fieldServiceProvider(
 class FieldsService {
   private _indexPattern: string;
   private _isRollup: boolean;
-  private _callWithRequest: (func: string, params: any) => void;
+  private _callWithRequest: CallWithRequestType;
   private _request: Request;
 
-  constructor(indexPattern: string, isRollup: boolean, callWithRequest: any, request: Request) {
+  constructor(
+    indexPattern: string,
+    isRollup: boolean,
+    callWithRequest: CallWithRequestType,
+    request: Request
+  ) {
     this._indexPattern = indexPattern;
     this._isRollup = isRollup;
     this._callWithRequest = callWithRequest;

@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CallClusterWithRequest } from 'src/legacy/core_plugins/elasticsearch';
 import { Request } from 'src/legacy/server/kbn_server';
+import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 import { Aggregation, Field } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
-export function jobCapsProvider(callWithRequest: CallClusterWithRequest, request: Request) {
+export function jobCapsProvider(callWithRequest: CallWithRequestType, request: Request) {
   async function jobCaps(indexPattern: string, isRollup: boolean = false) {
     const fieldService = fieldServiceProvider(indexPattern, isRollup, callWithRequest, request);
     const { aggs, fields } = await fieldService.getData();
