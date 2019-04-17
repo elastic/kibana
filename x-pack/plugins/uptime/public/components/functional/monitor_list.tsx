@@ -144,7 +144,11 @@ export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => {
             ),
           },
           {
-            name: 'Integrations',
+            name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
+              defaultMessage: 'Integrations',
+              description:
+                'The heading column of some action buttons that will take users to other Obsevability apps',
+            }),
             actions: [getApmIntegrationAction(dateRangeStart, dateRangeEnd, basePath)],
           },
         ]}
