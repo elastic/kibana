@@ -22,7 +22,7 @@ export const TIME_UNITS = {
     }),
     labelSingular: i18n.translate('xpack.watcher.timeUnits.minuteSingularLabel', {
       defaultMessage: 'minute',
-    })
+    }),
   },
   [COMMON_TIME_UNITS.HOUR]: {
     labelPlural: i18n.translate('xpack.watcher.timeUnits.hourPluralLabel', {
@@ -39,5 +39,5 @@ export const TIME_UNITS = {
     labelSingular: i18n.translate('xpack.watcher.timeUnits.daySingularLabel', {
       defaultMessage: 'day',
     }),
-  }
+  },
 };
