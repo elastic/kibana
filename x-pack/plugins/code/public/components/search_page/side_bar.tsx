@@ -105,7 +105,12 @@ export class SideBar extends React.PureComponent<Props> {
       <div className="codeSidebar__container">
         <ScopeTabs query={this.props.query} scope={this.props.scope} />
         <div className="codeFilter__group">
-          <EuiFlexGroup className="codeFilter__title" gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
+          <EuiFlexGroup
+            className="codeFilter__title"
+            gutterSize="s"
+            alignItems="center"
+            style={{ marginBottom: '.5rem' }}
+          >
             <EuiFlexItem grow={false}>
               <EuiToken iconType="tokenRepo" />
             </EuiFlexItem>
@@ -117,7 +122,12 @@ export class SideBar extends React.PureComponent<Props> {
           </EuiFlexGroup>
           <EuiFacetGroup>{repoStatsComp}</EuiFacetGroup>
           <EuiSpacer />
-          <EuiFlexGroup className="codeFilter__title" gutterSize="s" alignItems="center" style={{ marginBottom: '.5rem' }}>
+          <EuiFlexGroup
+            className="codeFilter__title"
+            gutterSize="s"
+            alignItems="center"
+            style={{ marginBottom: '.5rem' }}
+          >
             <EuiFlexItem grow={false}>
               <EuiToken
                 iconType="tokenElement"

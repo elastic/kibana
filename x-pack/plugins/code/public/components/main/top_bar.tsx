@@ -51,7 +51,11 @@ export class TopBar extends React.Component<Props, { value: string }> {
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem>
             <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem className="codeContainer__select" grow={false} style={{ display: 'none' }}>
+              <EuiFlexItem
+                className="codeContainer__select"
+                grow={false}
+                style={{ display: 'none' }}
+              >
                 <EuiSelect
                   options={this.props.branches.map(b => ({ value: b.name, text: b.name }))}
                   onChange={this.onChange}

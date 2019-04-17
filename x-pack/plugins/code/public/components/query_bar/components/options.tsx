@@ -104,7 +104,11 @@ export class SearchOptions extends Component<Props, State> {
                     <b>{r.name}</b>
                   </EuiText>
                 </div>
-                <EuiIcon className="codeUtility__cursor--pointer" type="cross" onClick={this.removeRepoScope(r.uri)} />
+                <EuiIcon
+                  className="codeUtility__cursor--pointer"
+                  type="cross"
+                  onClick={this.removeRepoScope(r.uri)}
+                />
               </EuiFlexGroup>
             </EuiPanel>
             <EuiSpacer size="s" />
