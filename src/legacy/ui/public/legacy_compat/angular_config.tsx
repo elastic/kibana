@@ -70,6 +70,7 @@ export const configureAppAngularModule = (angularModule: IModule) => {
     .config($setupXsrfRequestInterceptor(newPlatform))
     .run(capture$httpLoadingCount(newPlatform))
     .run($setupBreadcrumbsAutoClear(newPlatform))
+    .run($setupBadgeAutoClear(newPlatform))
     .run($setupHelpExtensionAutoClear(newPlatform))
     .run($setupUrlOverflowHandling(newPlatform));
 };
