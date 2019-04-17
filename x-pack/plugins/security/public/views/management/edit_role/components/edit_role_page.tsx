@@ -165,13 +165,11 @@ class EditRolePageUI extends Component<Props, State> {
     }
 
     return (
-      <>
-        <EuiTitle size="l">
-          <h1 {...props}>
-            {titleText} <ReservedRoleBadge role={this.props.role} />
-          </h1>
-        </EuiTitle>
-      </>
+      <EuiTitle size="l">
+        <h1 {...props}>
+          {titleText} <ReservedRoleBadge role={this.props.role} />
+        </h1>
+      </EuiTitle>
     );
   };
 
@@ -280,14 +278,7 @@ class EditRolePageUI extends Component<Props, State> {
 
   public getFormButtons = () => {
     if (isReadOnlyRole(this.props.role)) {
-      return (
-        <EuiButton onClick={this.backToRoleList} data-test-subj="roleFormReturnButton">
-          <FormattedMessage
-            id="xpack.security.management.editRole.returnToRoleListButtonLabel"
-            defaultMessage="Return to role list"
-          />
-        </EuiButton>
-      );
+      return this.getReturnToRoleListButton();
     }
 
     const buttons = [];
