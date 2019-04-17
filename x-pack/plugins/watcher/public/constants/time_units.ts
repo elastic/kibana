@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TIME_UNITS as COMMON_TIME_UNITS } from 'plugins/watcher/../common/constants/time_units';
 import { i18n } from '@kbn/i18n';
+import { TIME_UNITS as COMMON_TIME_UNITS } from '../../common/constants/time_units';
 
 export const TIME_UNITS = {
   [COMMON_TIME_UNITS.SECOND]: {
