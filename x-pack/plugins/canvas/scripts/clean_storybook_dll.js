@@ -7,5 +7,4 @@
 const del = require('del');
 const { DLL_OUTPUT } = require('../.storybook/constants');
 
-console.log('cleaning', DLL_OUTPUT);
 del.sync([DLL_OUTPUT]);
