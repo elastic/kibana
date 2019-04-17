@@ -29,6 +29,7 @@ export async function getReportingApiConfig({ readConfigFile }) {
       ...apiConfig.get('kbnTestServer'),
       serverArgs: [
         ...apiConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.reporting.csv.enablePanelActionDownload=true',
         `--optimize.enabled=true`,
         '--logging.events.log', JSON.stringify(['info', 'warning', 'error', 'fatal', 'optimize', 'reporting'])
       ],

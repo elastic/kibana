@@ -44,10 +44,13 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     return searchEmbeddable.searchScope.searchSource.getSearchRequestBody();
   }
 
-  // @TODO: Clean this up once we update SavedSearch's interface
-  // and location in the file-system. `viewMode` also has an enum
-  // buried inside of the dashboard folder we could use vs a bare string
   public isVisible = (panelActionAPI: PanelActionAPI): boolean => {
+    const enablePanelActionDownload = chrome.getInjected('enablePanelActionDownload');
+
+    if (!enablePanelActionDownload) {
+      return false;
+    }
+
     const { embeddable, containerState } = panelActionAPI;
 
     return (
