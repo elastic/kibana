@@ -6,7 +6,12 @@
 
 import { ConfigOptions } from 'elasticsearch';
 import { Duration } from 'moment';
+import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
+import { Request } from 'hapi';
+import { ResponseObject } from 'hapi';
+import { ResponseToolkit } from 'hapi';
+import { Schema } from '@kbn/config-schema';
 import { Server } from 'hapi';
 import { ServerOptions } from 'hapi';
 import { Type } from '@kbn/config-schema';
@@ -14,6 +19,18 @@ import { TypeOf } from '@kbn/config-schema';
 
 // @public (undocumented)
 export type APICaller = (endpoint: string, clientParams: Record<string, unknown>, options?: CallAPIOptions) => Promise<unknown>;
+
+// @public (undocumented)
+export type AuthenticationHandler<T> = (request: Request, sessionStorage: SessionStorage<T>, t: AuthToolkit) => Promise<AuthResult>;
+
+// @public
+export interface AuthToolkit {
+    authenticated: (credentials: any) => AuthResult;
+    redirected: (url: string) => AuthResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => AuthResult;
+}
 
 // @internal (undocumented)
 export function bootstrap({ configs, cliArgs, applyConfigOverrides, features, }: BootstrapArgs): Promise<void>;
@@ -90,8 +107,26 @@ export interface ElasticsearchServiceSetup {
 // @public (undocumented)
 export type Headers = Record<string, string | string[] | undefined>;
 
-// @internal (undocumented)
+// @public (undocumented)
 export type HttpServiceSetup = HttpServerInfo;
+
+// @public (undocumented)
+export class KibanaRequest<Params, Query, Body> {
+    constructor(req: Request, params: Params, query: Query, body: Body);
+    // (undocumented)
+    readonly body: Body;
+    static from<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(req: Request, routeSchemas: RouteSchemas<P, Q, B> | undefined): KibanaRequest<P["type"], Q["type"], B["type"]>;
+    // (undocumented)
+    getFilteredHeaders(headersToKeep: string[]): Pick<Record<string, string | string[] | undefined>, string>;
+    // (undocumented)
+    readonly headers: Headers;
+    // (undocumented)
+    readonly params: Params;
+    // (undocumented)
+    readonly path: string;
+    // (undocumented)
+    readonly query: Query;
+    }
 
 // @public
 export interface Logger {
@@ -160,6 +195,18 @@ export interface LogRecord {
     timestamp: Date;
 }
 
+// @public (undocumented)
+export type OnRequestHandler<Params = any, Query = any, Body = any> = (req: KibanaRequest<Params, Query, Body>, t: OnRequestToolkit) => OnRequestResult | Promise<OnRequestResult>;
+
+// @public
+export interface OnRequestToolkit {
+    next: () => OnRequestResult;
+    redirected: (url: string) => OnRequestResult;
+    rejected: (error: Error, options?: {
+        statusCode?: number;
+    }) => OnRequestResult;
+}
+
 // @public
 export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
     // (undocumented)
@@ -196,6 +243,11 @@ export interface PluginSetupContext {
         adminClient$: Observable<ClusterClient>;
         dataClient$: Observable<ClusterClient>;
     };
+    // (undocumented)
+    http: {
+        registerAuth: HttpServiceSetup['registerAuth'];
+        registerOnRequest: HttpServiceSetup['registerOnRequest'];
+    };
 }
 
 // @internal (undocumented)
@@ -208,6 +260,20 @@ export interface PluginsServiceSetup {
         internal: Map<PluginName, DiscoveredPluginInternal>;
     };
 }
+
+// @public (undocumented)
+export class Router {
+    constructor(path: string);
+    delete<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    get<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    getRoutes(): Readonly<RouterRoute>[];
+    // (undocumented)
+    readonly path: string;
+    post<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    put<P extends ObjectType, Q extends ObjectType, B extends ObjectType>(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>): void;
+    // (undocumented)
+    routes: Array<Readonly<RouterRoute>>;
+    }
 
 // @public
 export class ScopedClusterClient {

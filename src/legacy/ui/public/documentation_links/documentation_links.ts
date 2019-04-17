@@ -46,6 +46,9 @@ export const documentationLinks = {
   logstash: {
     base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`,
   },
+  functionbeat: {
+    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/functionbeat/${DOC_LINK_VERSION}`,
+  },
   aggs: {
     date_histogram: `${ELASTIC_DOCS}search-aggregations-bucket-datehistogram-aggregation.html`,
     date_range: `${ELASTIC_DOCS}search-aggregations-bucket-daterange-aggregation.html`,
