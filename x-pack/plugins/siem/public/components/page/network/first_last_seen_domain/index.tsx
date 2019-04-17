@@ -44,8 +44,13 @@ export const FirstLastSeenDomain = pure<FirstLastSeenProps>(
                 position="top"
                 content={errorMessage}
                 data-test-subj="firstLastSeenErrorToolTip"
+                aria-label={`firstLastSeenError-${type}`}
+                id={`firstLastSeenError-${domainName}-${type}`}
               >
-                <EuiIcon type="alert" />
+                <EuiIcon
+                  aria-describedby={`firstLastSeenError-${domainName}-${type}`}
+                  type="alert"
+                />
               </EuiToolTip>
             );
           }

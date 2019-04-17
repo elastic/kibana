@@ -75,10 +75,10 @@ export const getHostsColumns = (
     field: 'node.lastSeen',
     name: (
       <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
-        <span>
+        <>
           {i18n.LAST_SEEN}
           <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
+        </>
       </EuiToolTip>
     ),
     truncateText: false,

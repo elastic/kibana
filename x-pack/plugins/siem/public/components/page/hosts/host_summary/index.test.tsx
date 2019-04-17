@@ -121,20 +121,6 @@ describe('Host Summary Component', () => {
       expect(container).toMatchSnapshot();
     });
 
-    test('if it creates a description list', async () => {
-      const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
-      myMockData.host!.name = 'kibana-siem';
-      const { container } = render(
-        <TestProviders>
-          <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-            {getEuiDescriptionList(myMockData, 552204000000, 618472800000, false)}
-          </MockedProvider>
-        </TestProviders>
-      );
-      await wait();
-      expect(container).toMatchSnapshot();
-    });
-
     test('if IP is an empty list in description list', async () => {
       const myMockData = cloneDeep(mockData.Hosts.edges[0].node);
       myMockData.host!.ip = [];

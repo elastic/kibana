@@ -11,8 +11,8 @@ import moment from 'moment';
 import React from 'react';
 
 import {
-  DomainsEdges,
-  DomainsNode,
+  DomainsItem,
+  DomainsNetworkField,
   FlowDirection,
   FlowTarget,
   NetworkDirectionEcs,
@@ -39,7 +39,7 @@ export const getDomainsColumns = (
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<DomainsEdges | ValueOf<DomainsNode>>> => [
+): Array<Columns<ValueOf<DomainsItem> | ValueOf<DomainsNetworkField>>> => [
   {
     field: `node.${flowTarget}.domainName`,
     name: i18n.DOMAIN_NAME,
@@ -151,10 +151,10 @@ export const getDomainsColumns = (
   {
     name: (
       <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
-        <span>
+        <>
           {i18n.LAST_SEEN}
           <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
-        </span>
+        </>
       </EuiToolTip>
     ),
     truncateText: false,

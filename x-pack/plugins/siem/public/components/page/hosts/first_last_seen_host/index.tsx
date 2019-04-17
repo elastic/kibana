@@ -33,8 +33,10 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
                 position="top"
                 content={errorMessage}
                 data-test-subj="firstLastSeenErrorToolTip"
+                aria-label={`firstLastSeenError-${type}`}
+                id={`firstLastSeenError-${hostname}-${type}`}
               >
-                <EuiIcon type="alert" />
+                <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
               </EuiToolTip>
             );
           }
