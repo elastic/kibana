@@ -49,8 +49,8 @@ module.config(($httpProvider) => {
   });
 });
 
-export function track(appName: string, actionType: string, httpClient: any = _http) {
+export function track(appName: string, actionType: string) {
   const uri = chrome.addBasePath(`${API_BASE_PATH}/${appName}/${actionType}`);
   // Silently swallow request failures.
-  httpClient.post(uri).then(() => {}, () => {});
+  _http.post(uri).then(() => {}, () => {});
 }

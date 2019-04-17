@@ -29,10 +29,8 @@ import {
   defaultHotPhase,
 } from '../store/defaults';
 
-import { getHttpClient } from './api';
-
-export function trackUiMetric(metricType, httpClient = getHttpClient()) {
-  track(UIM_APP_NAME, metricType, httpClient);
+export function trackUiMetric(metricType) {
+  track(UIM_APP_NAME, metricType);
 }
 
 export function getUiMetricsForPhases(phases) {
