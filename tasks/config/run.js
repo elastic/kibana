@@ -214,7 +214,7 @@ module.exports = function (grunt) {
     }),
 
     serverIntegrationTests: scriptWithGithubChecks({
-      title: 'Server Integration Tests',
+      title: 'Server integration tests',
       cmd: NODE,
       args: [
         'scripts/functional_tests',
@@ -227,7 +227,7 @@ module.exports = function (grunt) {
     }),
 
     interpreterFunctionalTestsRelease: scriptWithGithubChecks({
-      title: 'Interpreter Functional Tests',
+      title: 'Interpreter functional tests',
       cmd: NODE,
       args: [
         'scripts/functional_tests',
@@ -259,6 +259,16 @@ module.exports = function (grunt) {
         '--bail',
         '--debug',
       ],
+    }),
+
+    licenses: scriptWithGithubChecks({
+      title: 'Licenses',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'licenses'
+      ]
     }),
 
     ...getFunctionalTestGroupRunConfigs({
