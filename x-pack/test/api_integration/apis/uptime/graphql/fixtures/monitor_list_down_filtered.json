@@ -12,7 +12,7 @@
             "name": "",
             "status": "down"
           },
-          "url": { "full": "http://localhost:12349/" }
+          "url": { "domain": "localhost", "full": "http://localhost:12349/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": null },
@@ -54,7 +54,7 @@
             "name": "",
             "status": "down"
           },
-          "url": { "full": "http://www.example.com/" }
+          "url": { "domain": "www.example.com", "full": "http://www.example.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": null },
