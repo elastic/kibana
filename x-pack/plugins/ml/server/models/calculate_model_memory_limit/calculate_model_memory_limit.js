@@ -105,7 +105,7 @@ export function calculateModelMemoryLimitProvider(callWithRequest) {
           const maxBytes = numeral(limits.max_model_memory_limit.toUpperCase()).value();
           const mmlBytes = numeral(`${mmlMB}MB`).value();
           if (mmlBytes > maxBytes) {
-            mmlMB = (maxBytes / numeral('1MB').value());
+            mmlMB = Math.floor(maxBytes / numeral('1MB').value());
           }
         }
         response({ modelMemoryLimit: `${mmlMB}MB` });

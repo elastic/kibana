@@ -1339,10 +1339,10 @@
     tabbable "^1.1.0"
     uuid "^3.1.0"
 
-"@elastic/eui@9.9.0":
-  version "9.9.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-9.9.0.tgz#bbe1a3d3cb22f1198e05665ca52cd48335a73b53"
-  integrity sha512-T6Cr68Il8tfbke/361UUW6gyQXEQwAvmDIUYOZSqCjsYjSq6JTFbwzQ6ezRD11RMN2vn8CPUwPVP5JAGNUXz8Q==
+"@elastic/eui@10.0.1":
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-10.0.1.tgz#519f52dae25cd0495e2cffca60ff62b415a50c70"
+  integrity sha512-l0nltFhHEDo4MIkdSCv6T8GmEi+W30iZcQ5fno6muZ6haji5VG6K9jCQtGUDHcns61IJ5t2yzs7Gqz+CJqlKKw==
   dependencies:
     "@types/lodash" "^4.14.116"
     "@types/numeral" "^0.0.25"
