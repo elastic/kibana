@@ -50,7 +50,7 @@ const createAgent = (legacyConfig) => {
   }
 
   if (legacyConfig.ssl && Array.isArray(legacyConfig.ssl.certificateAuthorities)
-    && legacyConfig.ssl.certificateAuthorities.length > 0) {
+      && legacyConfig.ssl.certificateAuthorities.length > 0) {
     agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
   }
 
