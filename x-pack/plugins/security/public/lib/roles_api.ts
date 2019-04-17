@@ -17,6 +17,9 @@ export class RolesApi {
   }
 
   public static async deleteRole(roleName: string) {
-    return kfetch({ pathname: `/api/security/role/${encodeURIComponent(roleName)}`, method: 'DELETE' });
+    return kfetch({
+      pathname: `/api/security/role/${encodeURIComponent(roleName)}`,
+      method: 'DELETE',
+    });
   }
 }
