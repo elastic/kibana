@@ -35,11 +35,7 @@ export class UiSettingsService {
   private uiSettingsApi?: UiSettingsApi;
   private uiSettingsClient?: UiSettingsClient;
 
-  public setup({
-    http,
-    injectedMetadata,
-    basePath,
-  }: UiSettingsServiceDeps): UiSettingsSetup {
+  public setup({ http, injectedMetadata, basePath }: UiSettingsServiceDeps): UiSettingsSetup {
     this.uiSettingsApi = new UiSettingsApi(basePath, injectedMetadata.getKibanaVersion());
     http.addLoadingCount(this.uiSettingsApi.getLoadingCount$());
 

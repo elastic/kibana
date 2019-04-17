@@ -30,7 +30,7 @@ interface NotificationServiceParams {
 
 interface NotificationsServiceDeps {
   i18n: I18nSetup;
-  uiSettings: UiSettingsSetup
+  uiSettings: UiSettingsSetup;
 }
 
 /** @public */
@@ -63,7 +63,7 @@ export class NotificationsService {
 
     const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nDep }) };
 
-    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error) => {
+    this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
       notificationSetup.toasts.addDanger({
         title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
           defaultMessage: 'Unable to update UI setting',
