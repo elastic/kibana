@@ -156,6 +156,8 @@ export const formatDomainsEdges = (
       [flowTarget]: {
         uniqueIpCount: getOrNumber('uniqueIpCount.value', bucket),
         domainName: bucket.key,
+        firstSeen: get('firstSeen.value_as_string', bucket),
+        lastSeen: get('lastSeen.value_as_string', bucket),
       },
       network: {
         bytes: getOrNumber('bytes.value', bucket),

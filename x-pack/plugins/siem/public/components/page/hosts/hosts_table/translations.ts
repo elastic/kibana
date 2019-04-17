@@ -22,6 +22,13 @@ export const LAST_SEEN = i18n.translate('xpack.siem.hostsTable.lastSeenTitle', {
   defaultMessage: 'Last Seen',
 });
 
+export const FIRST_LAST_SEEN_TOOLTIP = i18n.translate(
+  'xpack.siem.hostsTable.firstLastSeenToolTip',
+  {
+    defaultMessage: 'Relative to the selected date range',
+  }
+);
+
 export const OS = i18n.translate('xpack.siem.hostsTable.osTitle', {
   defaultMessage: 'OS',
 });
