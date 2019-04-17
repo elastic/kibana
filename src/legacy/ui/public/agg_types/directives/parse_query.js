@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { toUser, fromUser } from '../../query_bar/lib';
+import { data } from 'plugins/data';
+const { toUser, fromUser } = data;
 import { uiModules } from '../../modules';
 
 uiModules

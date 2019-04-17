@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { documentationLinks } from '../../documentation_links/documentation_links';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const kueryQuerySyntaxDocs = documentationLinks.query.kueryQuerySyntax;
 

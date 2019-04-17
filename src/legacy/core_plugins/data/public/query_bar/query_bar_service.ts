@@ -17,22 +17,34 @@
  * under the License.
  */
 
+import { QueryBar } from './components/query_bar';
+import { fromUser } from './lib/from_user';
+import { toUser } from './lib/to_user';
 
+// @ts-ignore
+import { setupDirective } from './directive';
 
-import 'ngreact';
-import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../../modules';
-import { QueryBar } from '../components';
+/**
+ * Search Bar Service
+ * 
+ * @internal
+ */
+export class QueryBarService {
+  public setup() {
+    setupDirective(); 
+    return {
+      helpers: {
+        fromUser,
+        toUser,
+      },
+      QueryBar,
+    };
+  }
 
-const app = uiModules.get('app/kibana', ['react']);
+  public stop() {
+    // nothing to do here yet
+  }
+}
 
-app.directive('queryBar', (reactDirective, localStorage) => {
-  return reactDirective(
-    wrapInI18nContext(QueryBar),
-    undefined,
-    {},
-    {
-      store: localStorage,
-    }
-  );
-});
+/** @public */
+export type QueryBarSetup = ReturnType<QueryBarService['setup']>;

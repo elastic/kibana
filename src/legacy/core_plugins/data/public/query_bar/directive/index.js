@@ -17,26 +17,24 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
 
-// eslint-disable-next-line import/no-default-export
-export default function DataPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'data',
-    require: ['elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-    uiExports: {
-      injectDefaultVars: () => ({}),
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  };
 
-  return new kibana.Plugin(config);
+import 'ngreact';
+import { wrapInI18nContext } from 'ui/i18n';
+import { uiModules } from 'ui/modules';
+import { QueryBar } from '../components';
+
+const app = uiModules.get('app/kibana', ['react']);
+
+export function setupDirective() {
+  app.directive('queryBar', (reactDirective, localStorage) => {
+    return reactDirective(
+      wrapInI18nContext(QueryBar),
+      undefined,
+      {},
+      {
+        store: localStorage,
+      }
+    );
+  });
 }

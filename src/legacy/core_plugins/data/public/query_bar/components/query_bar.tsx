@@ -45,13 +45,13 @@ import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
-
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   getAutocompleteProvider,
-} from '../../autocomplete_providers';
-import chrome from '../../chrome';
+} from 'ui/autocomplete_providers';
+import chrome from 'ui/chrome';
+
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';

@@ -19,28 +19,31 @@
 
 import { IndexPatternsService } from './index_patterns';
 import { SearchBarService } from './search_bar';
+import { QueryBarService } from './query_bar';
 
 class DataService {
   private readonly indexPatterns: IndexPatternsService;
   private readonly searchBar: SearchBarService;
+  private readonly queryBar: QueryBarService;
 
   constructor() {
-    // debugger;
     this.indexPatterns = new IndexPatternsService();
     this.searchBar = new SearchBarService();
+    this.queryBar = new QueryBarService();
   }
 
   public setup() {
-    // debugger;
     return {
       indexPatterns: this.indexPatterns.setup(),
       ...this.searchBar.setup(),
+      ...this.queryBar.setup(),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
     this.searchBar.stop();
+    this.queryBar.stop();
   }
 }
 
@@ -50,7 +53,6 @@ class DataService {
  * the data that will eventually be injected by the new platform.
  */
 // eslint-disable-next-line import/no-default-export
-// debugger;
 const data = new DataService().setup();
 export { data };
 

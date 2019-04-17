@@ -23,7 +23,6 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
 import { uiCapabilities } from 'ui/capabilities';
 import 'ui/apply_filters';
 import 'ui/listen';
