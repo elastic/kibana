@@ -23,6 +23,7 @@ import {
   SearchOptions,
   searchReposForScope,
   searchReposForScopeSuccess,
+  turnOnDefaultRepoScope,
 } from '../actions';
 
 export interface SearchState {
@@ -45,7 +46,7 @@ const initialState: SearchState = {
   isLoading: false,
   isScopeSearchLoading: false,
   scope: SearchScope.DEFAULT,
-  searchOptions: { repoScope: [] },
+  searchOptions: { repoScope: [], defaultRepoScopeOn: false },
   scopeSearchResults: { repositories: [] },
 };
 
@@ -173,6 +174,10 @@ export const search = handleActions<SearchState, any>(
       produce<SearchState>(state, draft => {
         draft.scopeSearchResults = action.payload;
         draft.isScopeSearchLoading = false;
+      }),
+    [String(turnOnDefaultRepoScope)]: (state: SearchState, action: Action<any>) =>
+      produce<SearchState>(state, draft => {
+        draft.searchOptions.defaultRepoScopeOn = true;
       }),
   },
   initialState

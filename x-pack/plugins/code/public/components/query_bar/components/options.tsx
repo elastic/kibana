@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { unique } from 'lodash';
@@ -40,6 +41,7 @@ interface State {
   isFlyoutOpen: boolean;
   repoScope: Repository[];
   query: string;
+  defaultRepoScopeOn: boolean;
 }
 
 interface Props {
@@ -49,6 +51,7 @@ interface Props {
   searchLoading: boolean;
   searchOptions: ISearchOptions;
   defaultRepoOptions: Repository[];
+  defaultSearchScope?: Repository;
 }
 
 export class SearchOptions extends Component<Props, State> {
@@ -56,23 +59,53 @@ export class SearchOptions extends Component<Props, State> {
     query: '',
     isFlyoutOpen: false,
     repoScope: this.props.searchOptions.repoScope,
+    defaultRepoScopeOn: this.props.searchOptions.defaultRepoScopeOn,
   };
 
+  componentDidUpdate(prevProps: Props) {
+    if (
+      this.props.searchOptions.defaultRepoScopeOn &&
+      !prevProps.searchOptions.defaultRepoScopeOn
+    ) {
+      this.setState({ defaultRepoScopeOn: this.props.searchOptions.defaultRepoScopeOn });
+    }
+  }
+
   public applyAndClose = () => {
-    this.props.saveSearchOptions({ repoScope: this.state.repoScope });
+    if (this.state.defaultRepoScopeOn && this.props.defaultSearchScope) {
+      this.props.saveSearchOptions({
+        repoScope: unique([...this.state.repoScope, this.props.defaultSearchScope], r => r.uri),
+        defaultRepoScopeOn: this.state.defaultRepoScopeOn,
+      });
+    } else {
+      this.props.saveSearchOptions({
+        repoScope: this.state.repoScope,
+        defaultRepoScopeOn: this.state.defaultRepoScopeOn,
+      });
+    }
     this.setState({ isFlyoutOpen: false });
   };
 
   public removeRepoScope = (r: string) => () => {
-    this.setState(prevState => ({
-      repoScope: prevState.repoScope.filter(rs => rs.uri !== r),
-    }));
+    this.setState(prevState => {
+      const nextState: any = {
+        repoScope: prevState.repoScope.filter(rs => rs.uri !== r),
+      };
+      if (this.props.defaultSearchScope && r === this.props.defaultSearchScope.uri) {
+        nextState.defaultRepoScopeOn = false;
+      }
+      return nextState;
+    });
   };
 
   public render() {
     let optionsFlyout;
+    const repoScope =
+      this.state.defaultRepoScopeOn && this.props.defaultSearchScope
+        ? unique([...this.state.repoScope, this.props.defaultSearchScope], r => r.uri)
+        : this.state.repoScope;
     if (this.state.isFlyoutOpen) {
-      const selectedRepos = this.state.repoScope.map(r => {
+      const selectedRepos = repoScope.map(r => {
         return (
           <div key={r.uri}>
             <EuiPanel paddingSize="s">
@@ -100,7 +133,15 @@ export class SearchOptions extends Component<Props, State> {
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">
-              <h2 id="flyoutSmallTitle"> Search Settings </h2>
+              <h2 id="flyoutSmallTitle" className="">
+                <EuiNotificationBadge size="m" className="code-notification-badge">
+                  {repoScope.length}
+                </EuiNotificationBadge>
+                <EuiTextColor color="secondary" className="code-flyout-title">
+                  {' '}
+                  Search Filters{' '}
+                </EuiTextColor>
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
@@ -144,7 +185,10 @@ export class SearchOptions extends Component<Props, State> {
       <div>
         <div className="kuiLocalSearchAssistedInput__assistance">
           <EuiButtonEmpty size="xs" onClick={this.toggleOptionsFlyout}>
-            Options
+            <EuiNotificationBadge size="m" className="code-notification-badge">
+              {repoScope.length}
+            </EuiNotificationBadge>
+            <EuiTextColor color="secondary"> Search Filters </EuiTextColor>
           </EuiButtonEmpty>
         </div>
         {optionsFlyout}
@@ -155,7 +199,9 @@ export class SearchOptions extends Component<Props, State> {
   private onRepoSearchChange = (searchValue: string) => {
     this.setState({ query: searchValue });
     if (searchValue) {
-      this.props.repositorySearch({ query: searchValue });
+      this.props.repositorySearch({
+        query: searchValue,
+      });
     }
   };
 
@@ -181,6 +227,8 @@ export class SearchOptions extends Component<Props, State> {
   private closeOptionsFlyout = () => {
     this.setState({
       isFlyoutOpen: false,
+      repoScope: this.props.searchOptions.repoScope,
+      defaultRepoScopeOn: this.props.searchOptions.defaultRepoScopeOn,
     });
   };
 }

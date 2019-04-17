@@ -20,6 +20,8 @@ import {
   importRepoFailed,
   importRepoSuccess,
   loadConfigsSuccess,
+  loadRepoSuccess,
+  loadRepoFailed,
 } from '../actions';
 
 export enum ToastType {
@@ -38,6 +40,7 @@ export interface RepositoryState {
   toastMessage?: string;
   toastType?: ToastType;
   projectConfigs: { [key: string]: RepositoryConfig };
+  currentRepository?: Repository;
 }
 
 const initialState: RepositoryState = {
@@ -112,6 +115,14 @@ export const repository = handleActions(
     [String(loadConfigsSuccess)]: (state: RepositoryState, action: Action<any>) =>
       produce<RepositoryState>(state, draft => {
         draft.projectConfigs = action.payload;
+      }),
+    [String(loadRepoSuccess)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.currentRepository = action.payload;
+      }),
+    [String(loadRepoFailed)]: (state: RepositoryState, action: Action<any>) =>
+      produce<RepositoryState>(state, draft => {
+        draft.currentRepository = undefined;
       }),
   },
   initialState

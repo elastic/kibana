@@ -10,7 +10,8 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import styled from 'styled-components';
 import url from 'url';
 
-import { SearchScope } from '../../../model';
+import { unique } from 'lodash';
+import { SearchScope, Repository } from '../../../model';
 import { MainRouteParams, SearchScopeText } from '../../common/types';
 import {
   AutocompleteSuggestion,
@@ -20,6 +21,7 @@ import {
   SymbolSuggestionsProvider,
 } from '../query_bar';
 import { Shortcut } from '../shortcuts';
+import { SearchOptions } from '../../actions';
 
 const SearchBarContainer = styled.div`
   width: 100%;
@@ -27,7 +29,8 @@ const SearchBarContainer = styled.div`
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   onSearchScopeChanged: (s: SearchScope) => void;
-  repoScope: string[];
+  searchOptions: SearchOptions;
+  defaultSearchScope?: Repository;
 }
 
 export class CodeSearchBar extends React.Component<Props> {
@@ -51,8 +54,16 @@ export class CodeSearchBar extends React.Component<Props> {
     const query: ParsedUrlQuery = {
       q: queryString,
     };
-    if (this.props.repoScope) {
-      query.repoScope = this.props.repoScope.join(',');
+    if (this.props.searchOptions.repoScope) {
+      // search from a repo page may have a default scope of this repo
+      if (this.props.searchOptions.defaultRepoScopeOn && this.props.defaultSearchScope) {
+        query.repoScope = unique([
+          ...this.props.searchOptions.repoScope.map(r => r.uri),
+          this.props.defaultSearchScope.uri,
+        ]).join(',');
+      } else {
+        query.repoScope = this.props.searchOptions.repoScope.map(r => r.uri).join(',');
+      }
     }
     if (this.state.searchScope === SearchScope.REPOSITORY) {
       query.scope = SearchScope.REPOSITORY;

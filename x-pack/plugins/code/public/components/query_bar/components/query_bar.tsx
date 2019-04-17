@@ -56,6 +56,7 @@ interface Props {
   searchScope: SearchScope;
   searchOptions: ISearchOptions;
   defaultRepoOptions: Repository[];
+  currentRepository?: Repository;
 }
 
 interface State {
@@ -462,6 +463,7 @@ export class CodeQueryBar extends Component<Props, State> {
                     />
                     <SearchOptions
                       defaultRepoOptions={this.props.defaultRepoOptions}
+                      defaultSearchScope={this.props.currentRepository}
                       repositorySearch={this.props.repositorySearch}
                       saveSearchOptions={this.props.saveSearchOptions}
                       repoSearchResults={this.props.repoSearchResults}
@@ -497,6 +499,7 @@ const mapStateToProps = (state: RootState) => ({
   searchScope: state.search.scope,
   searchOptions: state.search.searchOptions,
   defaultRepoOptions: state.repository.repositories.slice(0, 5),
+  currentRepository: state.repository.currentRepository,
 });
 
 const mapDispatchToProps = {

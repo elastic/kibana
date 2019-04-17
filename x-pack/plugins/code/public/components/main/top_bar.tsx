@@ -8,13 +8,14 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { ChangeEvent } from 'react';
 import styled from 'styled-components';
-import { SearchScope } from '../../../model';
+import { SearchScope, Repository } from '../../../model';
 import { ReferenceInfo } from '../../../model/commit';
 import { MainRouteParams } from '../../common/types';
 import { encodeRevisionString } from '../../utils/url';
 import { history } from '../../utils/url';
 import { Breadcrumb } from './breadcrumb';
 import { SearchBar } from './search_bar';
+import { SearchOptions } from '../../actions';
 
 const SelectContainer = styled(EuiFlexItem)`
   margin-right: ${theme.euiSizeS};
@@ -24,8 +25,9 @@ interface Props {
   routeParams: MainRouteParams;
   onSearchScopeChanged: (s: SearchScope) => void;
   buttons: React.ReactNode;
-  repoScope: string[];
+  searchOptions: SearchOptions;
   branches: ReferenceInfo[];
+  defaultSearchScope?: Repository;
 }
 
 export class TopBar extends React.Component<Props, { value: string }> {
@@ -48,8 +50,9 @@ export class TopBar extends React.Component<Props, { value: string }> {
     return (
       <div className="code-top-bar__container">
         <SearchBar
+          defaultSearchScope={this.props.defaultSearchScope}
           onSearchScopeChanged={this.props.onSearchScopeChanged}
-          repoScope={this.props.repoScope}
+          searchOptions={this.props.searchOptions}
         />
         <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem>

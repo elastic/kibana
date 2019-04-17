@@ -21,6 +21,7 @@ export interface RepositorySearchPayload {
 
 export interface SearchOptions {
   repoScope: Repository[];
+  defaultRepoScopeOn: boolean;
 }
 
 // For document search page
@@ -43,6 +44,8 @@ export const repositoryTypeaheadSearchSuccess = createAction<string>('REPOSITORY
 export const repositoryTypeaheadSearchFailed = createAction<string>('REPOSITORY SEARCH FAILED');
 
 export const saveSearchOptions = createAction<SearchOptions>('SAVE SEARCH OPTIONS');
+
+export const turnOnDefaultRepoScope = createAction('TURN ON DEFAULT REPO SCOPE');
 
 export const searchReposForScope = createAction<RepositorySearchPayload>('SEARCH REPOS FOR SCOPE');
 export const searchReposForScopeSuccess = createAction<any>('SEARCH REPOS FOR SCOPE SUCCESS');
