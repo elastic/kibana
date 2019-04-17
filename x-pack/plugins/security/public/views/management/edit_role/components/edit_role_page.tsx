@@ -304,7 +304,7 @@ class EditRolePageUI extends Component<Props, State> {
 
   public getReturnToRoleListButton = () => {
     return (
-      <EuiButton onClick={this.backToRoleList}>
+      <EuiButton onClick={this.backToRoleList} data-test-subj="roleFormReturnButton">
         <FormattedMessage
           id="xpack.security.management.editRole.returnToRoleListButtonLabel"
           defaultMessage="Return to role list"
