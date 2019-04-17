@@ -12,10 +12,13 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const security = getService('security');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
+  let version: string = '';
 
   describe('feature controls saved objects management', () => {
     before(async () => {
       await esArchiver.load('saved_objects_management/feature_controls/security');
+      const versionService = getService('kibanaServer').version;
+      version = await versionService.get();
     });
 
     after(async () => {
@@ -67,7 +70,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           const objects = await PageObjects.settings.getSavedObjectsInTable();
           expect(objects).to.eql([
             'config [id=6.0.0]',
-            'config [id=8.0.0]',
+            `config [id=${version}]`,
             'A Dashboard',
             'logstash-*',
             'A Pie',
@@ -82,7 +85,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
               canViewInApp: false,
             },
             {
-              title: 'config [id=8.0.0]',
+              title: `config [id=${version}]`,
               canViewInApp: false,
             },
             {
@@ -187,7 +190,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
         it('shows a visualization and an index pattern', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
-          expect(objects).to.eql(['config [id=6.0.0]', 'config [id=8.0.0]', 'logstash-*', 'A Pie']);
+          expect(objects).to.eql([
+            'config [id=6.0.0]',
+            `config [id=${version}]`,
+            'logstash-*',
+            'A Pie',
+          ]);
         });
 
         it('can view only the visualization in application', async () => {
@@ -198,7 +206,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
               canViewInApp: false,
             },
             {
-              title: 'config [id=8.0.0]',
+              title: `config [id=${version}]`,
               canViewInApp: false,
             },
             {
