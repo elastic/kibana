@@ -5,7 +5,6 @@
  */
 
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiTitle } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import 'github-markdown-css/github-markdown.css';
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';

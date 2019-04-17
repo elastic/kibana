@@ -78,7 +78,8 @@ class CodeProjectItem extends React.PureComponent<{
           <EuiToolTip position="top" content={status.errorMessage}>
             <EuiIcon type="iInCircle" />
           </EuiToolTip>
-        </div>);
+        </div>
+      );
       // Disable repo link is clone failed.
       disableRepoLink = true;
       hasError = true;

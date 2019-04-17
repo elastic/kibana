@@ -61,12 +61,12 @@ class CodeImportProject extends React.PureComponent<
     return (
       <div className="codeContainer__import">
         {showToast && (
-            <EuiGlobalToastList
-              toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
-              dismissToast={this.props.closeToast}
-              toastLifeTimeMs={6000}
-            />
-          )}
+          <EuiGlobalToastList
+            toasts={[{ title: '', color: toastType, text: toastMessage, id: toastMessage || '' }]}
+            dismissToast={this.props.closeToast}
+            toastLifeTimeMs={6000}
+          />
+        )}
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem>
