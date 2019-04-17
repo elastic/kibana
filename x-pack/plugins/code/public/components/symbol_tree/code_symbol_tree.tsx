@@ -33,6 +33,7 @@ const Symbol = styled.div<{ isContainer: boolean }>`
   align-items: center;
   height: 1.5rem;
   margin-left: ${props => (props.isContainer ? '0.75rem' : '2rem')};
+  z-index: 2;
 `;
 
 const Token = styled(EuiToken)`
@@ -106,7 +107,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
                 pathname: RepositoryUtils.locationToUrl(location),
                 query: { tab: 'structure' },
               })}
-              className="code-link"
+              className="code-symbol-link"
               onClick={this.getClickHandler(path)}
             >
               <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
@@ -131,8 +132,10 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
         onClick: () => void 0,
       };
       if (s.members) {
-        item.items = this.symbolsToSideNavItems(s.members);
         item.forceOpen = !this.props.closedPaths.includes(s.path!);
+        if (item.forceOpen) {
+          item.items = this.symbolsToSideNavItems(s.members);
+        }
         item.renderItem = this.getStructureTreeItemRenderer(
           s.location,
           s.name,
