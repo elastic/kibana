@@ -13,7 +13,7 @@ import {
   EUI_MODAL_CONFIRM_BUTTON,
 } from '@elastic/eui';
 
-import { DataFrameJobListRow } from './common';
+import { DataFrameJobListRow, DATA_FRAME_RUNNING_STATE } from './common';
 import { deleteJobFactory, startJobFactory, stopJobFactory } from './job_service';
 
 interface DeleteActionProps {
@@ -88,7 +88,10 @@ export const getActions = (getJobs: () => void) => {
     {
       isPrimary: true,
       render: (item: DataFrameJobListRow) => {
-        if (item.state.transform_state !== 'started') {
+        if (
+          item.state.indexer_state !== DATA_FRAME_RUNNING_STATE.STARTED &&
+          item.state.task_state !== DATA_FRAME_RUNNING_STATE.STARTED
+        ) {
           return (
             <EuiButtonEmpty
               iconType="play"
@@ -117,7 +120,10 @@ export const getActions = (getJobs: () => void) => {
         return (
           <DeleteAction
             deleteJob={deleteJob}
-            disabled={item.state.transform_state === 'started'}
+            disabled={
+              item.state.indexer_state === DATA_FRAME_RUNNING_STATE.STARTED ||
+              item.state.task_state === DATA_FRAME_RUNNING_STATE.STARTED
+            }
             item={item}
           />
         );

@@ -56,13 +56,13 @@ export const getColumns = (
       truncateText: true,
     },
     {
-      field: DataFrameJobListColumn.configSource,
+      field: DataFrameJobListColumn.configSourceIndex,
       name: i18n.translate('xpack.ml.dataframe.sourceIndex', { defaultMessage: 'Source index' }),
       sortable: true,
       truncateText: true,
     },
     {
-      field: DataFrameJobListColumn.configDest,
+      field: DataFrameJobListColumn.configDestIndex,
       name: i18n.translate('xpack.ml.dataframe.targetIndex', { defaultMessage: 'Target index' }),
       sortable: true,
       truncateText: true,

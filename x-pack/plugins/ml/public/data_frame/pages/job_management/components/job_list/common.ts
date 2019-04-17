@@ -14,16 +14,42 @@ export interface DataFrameJob {
   source: string;
 }
 
+export enum DATA_FRAME_RUNNING_STATE {
+  STARTED = 'started',
+  STOPPED = 'stopped',
+}
+type RunningState = DATA_FRAME_RUNNING_STATE.STARTED | DATA_FRAME_RUNNING_STATE.STOPPED;
+
+interface DataFrameJobState {
+  checkpoint: number;
+  current_position: Dictionary<any>;
+  indexer_state: RunningState;
+  task_state: RunningState;
+}
+
+interface DataFrameJobStats {
+  documents_indexed: number;
+  documents_processed: number;
+  index_failures: number;
+  index_time_in_ms: number;
+  index_total: number;
+  pages_processed: number;
+  search_failures: number;
+  search_time_in_ms: number;
+  search_total: number;
+  trigger_count: number;
+}
+
 export interface DataFrameJobListRow {
-  state: Dictionary<any>;
-  stats: Dictionary<any>;
+  state: DataFrameJobState;
+  stats: DataFrameJobStats;
   config: DataFrameJob;
 }
 
 // Used to pass on attribute names to table columns
 export enum DataFrameJobListColumn {
-  configDest = 'config.dest',
-  configSource = 'config.source',
+  configDestIndex = 'config.dest.index',
+  configSourceIndex = 'config.source.index',
   id = 'id',
 }
 

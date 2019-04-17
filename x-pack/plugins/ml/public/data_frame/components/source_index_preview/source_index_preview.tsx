@@ -178,7 +178,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     };
   }
 
-  if (docFieldsCount > MAX_COLUMNS) {
+  if (docFieldsCount > MAX_COLUMNS || docFieldsCount > selectedFields.length) {
     columns.unshift({
       align: RIGHT_ALIGNMENT,
       width: '40px',

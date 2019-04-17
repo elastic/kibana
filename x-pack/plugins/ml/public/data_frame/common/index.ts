@@ -68,12 +68,16 @@ export interface DataFramePreviewRequest {
     group_by: PivotGroupByDict;
     aggregations: PivotAggDict;
   };
-  query?: any;
-  source: string;
+  source: {
+    index: string;
+    query?: any;
+  };
 }
 
 export interface DataFrameRequest extends DataFramePreviewRequest {
-  dest: string;
+  dest: {
+    index: string;
+  };
 }
 
 export const pivotSupportedAggs = [
@@ -102,12 +106,14 @@ export function getDataFramePreviewRequest(
   aggs: OptionsDataElement[]
 ) {
   const request: DataFramePreviewRequest = {
-    source: indexPatternTitle,
+    source: {
+      index: indexPatternTitle,
+      query,
+    },
     pivot: {
       group_by: {},
       aggregations: {},
     },
-    query,
   };
 
   groupBy.forEach(g => {
@@ -141,7 +147,9 @@ export function getDataFrameRequest(
       pivotState.groupBy,
       pivotState.aggs
     ),
-    dest: jobDetailsState.targetIndex,
+    dest: {
+      index: jobDetailsState.targetIndex,
+    },
   };
 
   return request;
