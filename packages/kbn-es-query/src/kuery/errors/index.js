@@ -20,40 +20,30 @@
 import { repeat } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-const translationConfigs = {
-  fieldName: {
-    defaultMessage: 'field name',
-    key: 'kbnESQuery.kql.errors.fieldNameText',
-  },
-  value: {
-    defaultMessage: 'value',
-    key: 'kbnESQuery.kql.errors.valueText',
-  },
-  literal: {
-    defaultMessage: 'literal',
-    key: 'kbnESQuery.kql.errors.LiteralText',
-  },
-  whitespace: {
-    defaultMessage: 'whitespace',
-    key: 'kbnESQuery.kql.errors.whitespaceText',
-  },
-};
-
 const endOfInputText = i18n.translate('kbnESQuery.kql.errors.endOfInputText', {
   defaultMessage: 'end of input',
 });
 
 export class KQLSyntaxError extends Error {
-  constructor(error, expression) {
-    const translatedExpectations = error.expected.map((expected) => {
-      const translationConfig = translationConfigs[expected.description];
-      if (!translationConfig) {
-        return expected.description;
-      }
 
-      return i18n.translate(translationConfig.key, {
-        defaultMessage: translationConfig.defaultMessage,
-      });
+  constructor(error, expression) {
+    const grammarRuleTranslations = {
+      fieldName: i18n.translate('kbnESQuery.kql.errors.fieldNameText', {
+        defaultMessage: 'field name',
+      }),
+      value: i18n.translate('kbnESQuery.kql.errors.valueText', {
+        defaultMessage: 'value',
+      }),
+      literal: i18n.translate('kbnESQuery.kql.errors.LiteralText', {
+        defaultMessage: 'literal',
+      }),
+      whitespace: i18n.translate('kbnESQuery.kql.errors.whitespaceText', {
+        defaultMessage: 'whitespace',
+      }),
+    };
+
+    const translatedExpectations = error.expected.map((expected) => {
+      return grammarRuleTranslations[expected.description] || expected.description;
     });
 
     const translatedExpectationText = translatedExpectations.join(', ');
@@ -62,8 +52,8 @@ export class KQLSyntaxError extends Error {
       defaultMessage: 'Expected {expectedList} but {foundInput} found.',
       values: {
         expectedList: translatedExpectationText,
-        foundInput: error.found ? `"${error.found}"` : endOfInputText
-      }
+        foundInput: error.found ? `"${error.found}"` : endOfInputText,
+      },
     });
 
     const fullMessage = [
