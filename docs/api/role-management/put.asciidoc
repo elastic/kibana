@@ -32,36 +32,20 @@ that begin with `_` are reserved for system usage.
 `elasticsearch`:: (object) Optional {es} cluster and index privileges, valid keys are 
 `cluster`, `indices` and `run_as`. For more information, see {xpack-ref}/defining-roles.html[Defining Roles].
 
-`kibana`:: (array) An array of objects that specifies the <<kibana-privileges>> for this role:
-[source,js]
---------------------------------------------------
-[{
-  // An optional base privilege. 
-  // If specified, must either be ["all"] or ["read"].
-  // You can't revoke or downgrade privileges via the `feature` section.
-  // "all" grants read/write access to all Kibana features for the specified spaces.
-  // "read" grants read-only access to all Kibana features for the specified spaces.
-  "base": [],
+`kibana`:: (list) A list of objects that specifies the <<kibana-privileges>> for this role:
+`base` ::: (list) An optional base privilege. If specified, must either be `["all"]` or `["read"]`.
+You can't revoke or downgrade privileges via the `feature` section.
+"all" grants read/write access to all Kibana features for the specified spaces.
+"read" grants read-only access to all Kibana features for the specified spaces.
 
-  // Object containing privileges for specific features.
-  // Privileges are added to the base privilege, if one is provided.
-  // For example, specifying `base: ["read"]` grants users read access to every feature,
-  // even if they aren't granted anything in this feature section.
-  // Use the Features API to retrieve a list of available features. <1>
-  "feature": {
-    "advancedSettings": ["all"],
-    "discover": ["all"],
-    "visualize": ["all"],
-    "dashboard": ["read"]
-  },
-  
-  // The spaces these privileges should be applied to.
-  // To grant access to all spaces, set this to `["*"]`, or omit the value.
-  "spaces": ["default", "marketing", "sales"]
-}]
---------------------------------------------------
+`feature` ::: (object) Object containing privileges for specific features.
+Privileges are added to the base privilege, if one is provided.
+For example, specifying `base: ["read"]` grants users read access to every feature,
+even if they aren't granted anything in this feature section.
+Use the <<features-api, Features API>> to retrieve a list of available features.
 
-<1> <<features-api>>
+`spaces` ::: (list) The spaces these privileges should be applied to.
+To grant access to all spaces, set this to `["*"]`, or omit the value.
 
 ===== Example 1
 Granting read access to all features in all spaces, with full access to Advanced Settings.
@@ -74,15 +58,8 @@ PUT /api/security/role/my_kibana_role
     "version" : 1
   },
   "elasticsearch": {
-    "cluster" : [ "all" ],
-    "indices" : [ {
-      "names" : [ "index1", "index2" ],
-      "privileges" : [ "all" ],
-      "field_security" : {
-        "grant" : [ "title", "body" ]
-      },
-      "query" : "{\"match\": {\"title\": \"foo\"}}"
-    } ]
+    "cluster" : [ ],
+    "indices" : [ ]
   },
   "kibana": [
     {
@@ -112,15 +89,8 @@ PUT /api/security/role/my_kibana_role
     "version" : 1
   },
   "elasticsearch": {
-    "cluster" : [ "all" ],
-    "indices" : [ {
-      "names" : [ "index1", "index2" ],
-      "privileges" : [ "all" ],
-      "field_security" : {
-        "grant" : [ "title", "body" ]
-      },
-      "query" : "{\"match\": {\"title\": \"foo\"}}"
-    } ]
+    "cluster" : [ ],
+    "indices" : [ ]
   },
   "kibana": [
     {
@@ -138,6 +108,73 @@ PUT /api/security/role/my_kibana_role
 
 ===== Example 3
 Granting full access to all features in the Default space.
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": ["all"],
+      "feature": {
+      },
+      "spaces": [
+        "default"
+      ]
+    }
+  ]
+}
+--------------------------------------------------
+
+===== Example 4
+Granting different access to different spaces.
+
+[source,js]
+--------------------------------------------------
+PUT /api/security/role/my_kibana_role
+{
+  "metadata" : {
+    "version" : 1
+  },
+  "elasticsearch": {
+    "cluster" : [ ],
+    "indices" : [ ]
+  },
+  "kibana": [
+    {
+      "base": [],
+      "feature": {
+        "discover": ["all"],
+        "dashboard": ["all"]
+      },
+      "spaces": [
+        "default"
+      ]
+    },
+    {
+      "base": ["read"],
+      "feature": {
+        "canvas": ["all"]
+      },
+      "spaces": [
+        "marketing",
+        "sales"
+      ]
+    }
+  ]
+}
+--------------------------------------------------
+
+
+===== Example 5
+Granting access to both Kibana and Elasticsearch.
 
 [source,js]
 --------------------------------------------------
