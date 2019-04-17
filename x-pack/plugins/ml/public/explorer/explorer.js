@@ -186,7 +186,6 @@ export const Explorer = injectI18n(
         let currentSelectedCells = this.state.selectedCells;
         let currentSwimlaneViewByFieldName = this.state.swimlaneViewByFieldName;
 
-
         if (swimlaneViewByFieldName !== undefined) {
           currentSwimlaneViewByFieldName = swimlaneViewByFieldName;
         }
