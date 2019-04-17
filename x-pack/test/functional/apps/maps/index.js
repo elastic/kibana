@@ -27,8 +27,7 @@ export default function ({ loadTestFile, getService }) {
       await esArchiver.unload('maps/kibana');
     });
 
-    // eslint-disable-next-line mocha/no-exclusive-tests
-    describe.only('', function () {
+    describe('', function () {
       this.tags('ciGroup7');
       loadTestFile(require.resolve('./saved_object_management'));
       loadTestFile(require.resolve('./sample_data'));
