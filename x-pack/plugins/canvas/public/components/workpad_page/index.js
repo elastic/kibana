@@ -25,26 +25,16 @@ const animationProps = ({ animation, isSelected }) =>
       }
     : { className: isSelected ? 'active' : 'inactive', animationStyle: {} };
 
-const mapStateToProps = (state, ownProps) => ({
-  isEditable: !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
-  elements: getNodes(state, ownProps.pageId),
-  pageStyle: getPageById(state, ownProps.pageId).style,
-});
-
-const mergeProps = ({ isEditable, ...restState }, {}, { isSelected, ...remainingOwnProps }) => ({
-  isInteractive: isEditable && isSelected,
-  ...remainingOwnProps,
-  ...restState,
+const mapStateToProps = (state, { isSelected, pageId }) => ({
+  isInteractive: isSelected && !getFullscreen(state) && isWriteable(state) && canUserWrite(state),
+  elements: getNodes(state, pageId),
+  pageStyle: getPageById(state, pageId).style,
 });
 
 export const WorkpadPage = compose(
   shouldUpdate(not(isEqual)), // this is critical, else random unrelated rerenders in the parent cause glitches here
   withProps(animationProps),
-  connect(
-    mapStateToProps,
-    null,
-    mergeProps
-  ),
+  connect(mapStateToProps),
   branch(({ isInteractive }) => isInteractive, InteractivePage, StaticPage)
 )();
 
