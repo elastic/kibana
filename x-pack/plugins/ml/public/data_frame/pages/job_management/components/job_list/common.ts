@@ -6,7 +6,7 @@
 
 import { Dictionary } from '../../../../../../common/types/common';
 
-type jobId = string;
+export type jobId = string;
 
 export interface DataFrameJob {
   dest: string;
@@ -20,14 +20,14 @@ export enum DATA_FRAME_RUNNING_STATE {
 }
 type RunningState = DATA_FRAME_RUNNING_STATE.STARTED | DATA_FRAME_RUNNING_STATE.STOPPED;
 
-interface DataFrameJobState {
+export interface DataFrameJobState {
   checkpoint: number;
   current_position: Dictionary<any>;
   indexer_state: RunningState;
   task_state: RunningState;
 }
 
-interface DataFrameJobStats {
+export interface DataFrameJobStats {
   documents_indexed: number;
   documents_processed: number;
   index_failures: number;

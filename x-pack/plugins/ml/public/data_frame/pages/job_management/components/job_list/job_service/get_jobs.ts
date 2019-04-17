@@ -7,15 +7,18 @@
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 import { ml } from '../../../../../../services/ml_api_service';
-import { Dictionary } from '../../../../../../../common/types/common';
-import { DataFrameJob, DataFrameJobListRow } from '../common';
+import {
+  DataFrameJob,
+  DataFrameJobListRow,
+  DataFrameJobState,
+  DataFrameJobStats,
+  jobId,
+} from '../common';
 
-type jobId = string;
-
-interface DataFrameJobStats {
+interface DataFrameJobStateStats {
   id: jobId;
-  state: Dictionary<any>;
-  stats: Dictionary<any>;
+  state: DataFrameJobState;
+  stats: DataFrameJobStats;
 }
 
 interface GetDataFrameTransformsResponse {
@@ -25,7 +28,7 @@ interface GetDataFrameTransformsResponse {
 
 interface GetDataFrameTransformsStatsResponse {
   count: number;
-  transforms: DataFrameJobStats[];
+  transforms: DataFrameJobStateStats[];
 }
 
 export const getJobsFactory = (
@@ -39,7 +42,7 @@ export const getJobsFactory = (
       const stats = jobStats.transforms.find(d => config.id === d.id);
 
       if (stats === undefined) {
-        return { config, state: {}, stats: {} };
+        throw new Error('job stats not available');
       }
 
       // table with expandable rows requires `id` on the outer most level
