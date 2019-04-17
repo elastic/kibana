@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { convertMicrosecondsToMilliseconds } from './convert_measurements';
-export { getApmIntegrationAction } from './observability_integrations';
+export { getApmIntegrationAction } from './get_apm_integration_action';

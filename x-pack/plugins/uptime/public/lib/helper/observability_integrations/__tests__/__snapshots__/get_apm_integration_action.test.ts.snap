@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getApmIntegrationAction creates expected action object 1`] = `
+Object {
+  "description": "Search APM for this monitor",
+  "icon": "apmApp",
+  "isPrimary": true,
+  "name": "APM",
+  "onClick": [Function],
+  "type": "icon",
+}
+`;
