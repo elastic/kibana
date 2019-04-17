@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
 import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
@@ -15,19 +13,20 @@ import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
 import { DataPlaceholder } from '../../../../components';
 
-interface Props extends RouteComponentProps {
+interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: () => Promise<void>;
   openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
+  filterToRepository?: string;
 }
 
-const SnapshotTableUi: React.FunctionComponent<Props> = ({
+export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
   openSnapshotDetails,
-  history,
+  filterToRepository,
 }) => {
   const {
     core: {
@@ -159,6 +158,7 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
         })),
       },
     ],
+    defaultQuery: filterToRepository ? `repository:"${filterToRepository}"` : '',
   };
 
   return (
@@ -178,5 +178,3 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
     />
   );
 };
-
-export const SnapshotTable = withRouter(SnapshotTableUi);

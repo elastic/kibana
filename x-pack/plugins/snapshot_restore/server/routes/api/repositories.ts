@@ -74,9 +74,16 @@ export const getOneHandler: RouterRouteHandler = async (
 ): Promise<{
   repository: Repository | {};
   verification: RepositoryVerification | {};
+  snapshots: { count: number | undefined } | {};
 }> => {
   const { name } = req.params;
   const repositoryByName = await callWithRequest('snapshot.getRepository', { repository: name });
+  const { snapshots } = await callWithRequest('snapshot.get', {
+    repository: name,
+    snapshot: '_all',
+  }).catch(e => ({
+    snapshots: null,
+  }));
   const verificationResults = await callWithRequest('snapshot.verifyRepository', {
     repository: name,
   }).catch(e => ({
@@ -98,11 +105,15 @@ export const getOneHandler: RouterRouteHandler = async (
             valid: true,
             response: verificationResults,
           },
+      snapshots: {
+        count: snapshots ? snapshots.length : null,
+      },
     };
   } else {
     return {
       repository: {},
       verification: {},
+      snapshots: {},
     };
   }
 };

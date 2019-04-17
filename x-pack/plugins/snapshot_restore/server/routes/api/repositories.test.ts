@@ -125,10 +125,12 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
+        .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
         verification: { valid: true, response: {} },
+        snapshots: { count: null },
       };
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
@@ -140,10 +142,12 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
+        .mockResolvedValueOnce({})
         .mockResolvedValueOnce({});
       const expectedResponse = {
         repository: {},
         verification: {},
+        snapshots: {},
       };
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
@@ -158,10 +162,58 @@ describe('[Snapshot and Restore API Routes] Repositories', () => {
       const callWithRequest = jest
         .fn()
         .mockReturnValueOnce(mockEsResponse)
+        .mockResolvedValueOnce({})
         .mockRejectedValueOnce(verificationError);
       const expectedResponse = {
         repository: { name, ...mockEsResponse[name] },
         verification: { valid: false, error: verificationError },
+        snapshots: { count: null },
+      };
+      await expect(
+        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return snapshot count from ES', async () => {
+      const mockEsResponse = {
+        [name]: { type: '', settings: {} },
+      };
+      const mockEsSnapshotResponse = {
+        snapshots: [{}, {}],
+      };
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce(mockEsResponse)
+        .mockResolvedValueOnce(mockEsSnapshotResponse)
+        .mockResolvedValueOnce({});
+      const expectedResponse = {
+        repository: { name, ...mockEsResponse[name] },
+        verification: { valid: true, response: {} },
+        snapshots: {
+          count: 2,
+        },
+      };
+      await expect(
+        getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)
+      ).resolves.toEqual(expectedResponse);
+    });
+
+    it('should return null snapshot count if ES error', async () => {
+      const mockEsResponse = {
+        [name]: { type: '', settings: {} },
+      };
+      const mockEsSnapshotError = new Error('snapshot error');
+      const callWithRequest = jest
+        .fn()
+        .mockReturnValueOnce(mockEsResponse)
+        .mockRejectedValueOnce(mockEsSnapshotError)
+        .mockResolvedValueOnce({});
+      const expectedResponse = {
+        repository: { name, ...mockEsResponse[name] },
+        verification: { valid: true, response: {} },
+        snapshots: {
+          count: null,
+        },
       };
       await expect(
         getOneHandler(mockOneRequest, callWithRequest, mockResponseToolkit)

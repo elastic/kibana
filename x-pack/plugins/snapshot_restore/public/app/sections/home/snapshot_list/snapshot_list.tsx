@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useCallback, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { parse } from 'querystring';
 
 import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
@@ -28,6 +29,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   match: {
     params: { repositoryName, snapshotId },
   },
+  location: { search },
   history,
 }) => {
   const {
@@ -44,12 +46,28 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
   } = loadSnapshots();
 
   const openSnapshotDetails = (repositoryNameToOpen: string, snapshotIdToOpen: string) => {
-    history.push(`${BASE_PATH}/snapshots/${repositoryNameToOpen}/${snapshotIdToOpen}`);
+    history.push(
+      `${BASE_PATH}/snapshots/${encodeURIComponent(repositoryNameToOpen)}/${encodeURIComponent(
+        snapshotIdToOpen
+      )}`
+    );
   };
 
   const closeSnapshotDetails = () => {
     history.push(`${BASE_PATH}/snapshots`);
   };
+
+  // Allow deeplinking to list pre-filtered by repository name
+  const [filteredRepository, setFilteredRepository] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    if (search) {
+      const parsedParams = parse(search.replace(/^\?/, ''));
+      if (parsedParams.repository && parsedParams.repository !== filteredRepository) {
+        setFilteredRepository(decodeURIComponent(String(parsedParams.repository)));
+        history.replace(`${BASE_PATH}/snapshots`);
+      }
+    }
+  }, []);
 
   let content;
 
@@ -154,6 +172,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           repositories={repositories}
           reload={reload}
           openSnapshotDetails={openSnapshotDetails}
+          filterToRepository={filteredRepository}
         />
       </Fragment>
     );

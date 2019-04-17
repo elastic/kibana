@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,6 +28,7 @@ import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import { loadRepository } from '../../../../services/http';
 import { textService } from '../../../../services/text';
+import { linkToSnapshots } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';
@@ -59,7 +61,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
   const {
     error,
     loading,
-    data: { repository, verification },
+    data: { repository, verification, snapshots },
   } = loadRepository(repositoryName);
 
   const renderBody = () => {
@@ -147,6 +149,30 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.snapshotsTitle"
+              defaultMessage="Snapshots"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {snapshots && Number.isInteger(snapshots.count) ? (
+          <EuiLink href={linkToSnapshots(repositoryName)}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.snapshotsDescription"
+              defaultMessage="{count} {count, plural, one {snapshot} other {snapshots}} found"
+              values={{ count: snapshots.count }}
+            />
+          </EuiLink>
+        ) : (
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryDetails.noSnapshotsDescription"
+            defaultMessage="No snapshot information"
+          />
+        )}
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />
