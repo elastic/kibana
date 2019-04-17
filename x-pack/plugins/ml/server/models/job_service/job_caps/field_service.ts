@@ -5,9 +5,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { aggregations } from './aggregations';
+import { Request } from 'src/legacy/server/kbn_server';
 import { Field, Aggregation } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
+import { getRollupConfig, RollupConfig } from './rollup';
+import { aggregations } from './aggregations';
 
 const METRIC_AGG_TYPE: string = 'metrics';
 
@@ -20,17 +22,26 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.TEXT,
 ];
 
-export function fieldServiceProvider(indexPattern: string, callWithRequest: any) {
-  return new FieldsService(indexPattern, callWithRequest);
+export function fieldServiceProvider(
+  indexPattern: string,
+  isRollup: boolean,
+  callWithRequest: any,
+  request: Request
+) {
+  return new FieldsService(indexPattern, isRollup, callWithRequest, request);
 }
 
 class FieldsService {
   private _indexPattern: string;
+  private _isRollup: boolean;
   private _callWithRequest: (func: string, params: any) => void;
+  private _request: Request;
 
-  constructor(indexPattern: string, callWithRequest: any) {
+  constructor(indexPattern: string, isRollup: boolean, callWithRequest: any, request: Request) {
     this._indexPattern = indexPattern;
+    this._isRollup = isRollup;
     this._callWithRequest = callWithRequest;
+    this._request = request;
   }
 
   private async loadFieldCaps(): Promise<any> {
@@ -65,15 +76,31 @@ class FieldsService {
   }
 
   public async getData() {
-    const fields = await this.createFields();
     const aggs = cloneDeep(aggregations);
-    return combineFieldsAndAggs(fields, aggs);
+    const fields: Field[] = await this.createFields();
+
+    let rollupConfig: RollupConfig | null = null;
+    if (this._isRollup) {
+      rollupConfig = await getRollupConfig(
+        this._indexPattern,
+        this._callWithRequest,
+        this._request
+      );
+    }
+
+    return await combineFieldsAndAggs(fields, aggs, rollupConfig);
   }
 }
 
-function combineFieldsAndAggs(fields: Field[], aggs: Aggregation[]) {
+async function combineFieldsAndAggs(
+  fields: Field[],
+  aggs: Aggregation[],
+  rollupConfig: RollupConfig | null
+) {
   const textAndKeywordFields = getTextAndKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
+
+  const mix = mixFactory(rollupConfig);
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE) {
@@ -98,18 +125,34 @@ function combineFieldsAndAggs(fields: Field[], aggs: Aggregation[]) {
   });
 
   return {
-    aggs,
-    fields,
+    aggs: filterAggs(aggs),
+    fields: filterFields(fields),
   };
 }
 
-function mix(field: Field, agg: Aggregation) {
-  if (field.aggs !== undefined) {
-    field.aggs.push(agg);
-  }
-  if (agg.fields !== undefined) {
-    agg.fields.push(field);
-  }
+function filterFields(fields: Field[]) {
+  return fields.filter(f => f.aggs && f.aggs.length);
+}
+
+function filterAggs(aggs: Aggregation[]) {
+  return aggs.filter(a => a.fields && a.fields.length);
+}
+
+function mixFactory(rollupConfig: RollupConfig | null) {
+  return function mix(field: Field, agg: Aggregation) {
+    if (
+      rollupConfig === null ||
+      (rollupConfig.fields[field.id] &&
+        rollupConfig.fields[field.id].find(f => f.agg === agg.kibanaName))
+    ) {
+      if (field.aggs !== undefined) {
+        field.aggs.push(agg);
+      }
+      if (agg.fields !== undefined) {
+        agg.fields.push(field);
+      }
+    }
+  };
 }
 
 function getTextAndKeywordFields(fields: Field[]): Field[] {

@@ -154,8 +154,9 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexPattern } = request.params;
-      const { jobCaps } = jobServiceProvider(callWithRequest);
-      return jobCaps(indexPattern)
+      const isRollup = (request.query.rollup === 'true');
+      const { jobCaps } = jobServiceProvider(callWithRequest, request);
+      return jobCaps(indexPattern, isRollup)
         .catch(resp => wrapError(resp));
     },
     config: {
