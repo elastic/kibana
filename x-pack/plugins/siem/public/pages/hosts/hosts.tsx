@@ -6,16 +6,18 @@
 
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getOr } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
+import { getEmptyTagValue } from '../../components/empty_value';
 import { HeaderPage } from '../../components/header_page';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
+import { LastBeatHost } from '../../components/page/hosts/last_beat_host';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
@@ -49,21 +51,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
 
-          <HeaderPage
-            subtitle={
-              <FormattedMessage
-                id="xpack.siem.hosts.pageSubtitle"
-                defaultMessage="Last Beat: TODO from {beat}"
-                values={{
-                  beat: <EuiLink href="#">TODO</EuiLink>,
-                }}
-              />
-            }
-            title={<FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />}
-          >
-            {/* DEV NOTE: Date picker to be moved here */}
-          </HeaderPage>
-
           <GlobalTime>
             {({ poll, to, from, setQuery }) => (
               <>
@@ -75,21 +62,39 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                   poll={poll}
                   type={hostsModel.HostsType.page}
                 >
-                  {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                    <HostsTableManage
-                      id={id}
-                      refetch={refetch}
-                      setQuery={setQuery}
-                      loading={loading}
-                      startDate={from}
-                      data={hosts}
-                      totalCount={totalCount}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      loadMore={loadMore}
-                      type={hostsModel.HostsType.page}
-                    />
-                  )}
+                  {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => {
+                    const hostName: string = get('node.host.name[0]', hosts[0]);
+                    return (
+                      <>
+                        <HeaderPage
+                          subtitle={
+                            hostName ? <LastBeatHost hostName={hostName} /> : getEmptyTagValue()
+                          }
+                          title={
+                            <FormattedMessage
+                              id="xpack.siem.hosts.pageTitle"
+                              defaultMessage="Hosts"
+                            />
+                          }
+                        >
+                          {/* DEV NOTE: Date picker to be moved here */}
+                        </HeaderPage>
+                        <HostsTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          startDate={from}
+                          data={hosts}
+                          totalCount={totalCount}
+                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                          loadMore={loadMore}
+                          type={hostsModel.HostsType.page}
+                        />
+                      </>
+                    );
+                  }}
                 </HostsQuery>
 
                 <EuiSpacer />

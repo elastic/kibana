@@ -20,6 +20,7 @@ import { getHostsUrl, HostComponentProps } from '../../components/link_to/redire
 import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
+import { FirstLastSeenHost } from '../../components/page/hosts/first_last_seen_host';
 import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
 import { AuthenticationsQuery } from '../../containers/authentications';
@@ -34,6 +35,8 @@ import { hostsModel, hostsSelectors, State } from '../../store';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
+import { LastBeatHost } from '../../components/page/hosts/last_beat_host';
+import { getEmptyTagValue } from '../../components/empty_value';
 
 const basePath = chrome.getBasePath();
 const type = hostsModel.HostsType.details;
@@ -74,15 +77,14 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     {({ hostDetails, loading, id, refetch }) => {
                       return (
                         <>
-                          {/* DEV NOTE: HeaderPage title prop value should be changed to host name, if available
                           <HeaderPage
                             subtitle={
-                              <LastBeatStat lastSeen={getOr(null, 'node.lastBeat', hosts[0])} />
+                              hostName ? <LastBeatHost hostName={hostName} /> : getEmptyTagValue()
                             }
                             title={hostName}
                           >
-                             DEV NOTE: Date picker to be moved here
-                          </HeaderPage> */}
+                            {/* DEV NOTE: Date picker to be moved here */}
+                          </HeaderPage>
                           <HostSummaryManage
                             id={id}
                             refetch={refetch}

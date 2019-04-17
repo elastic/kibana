@@ -54,6 +54,9 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       'search',
       buildHostDetailsQuery(options)
     );
+    console.log('REQ!!!', buildHostDetailsQuery(options));
+    console.log('response!!!', response);
+
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
     return { _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
   }
