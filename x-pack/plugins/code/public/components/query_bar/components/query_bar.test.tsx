@@ -40,6 +40,7 @@ test('render correctly with empty query string', () => {
       onSelect={emptyFn}
       onSearchScopeChanged={emptyFn}
       searchScope={SearchScope.DEFAULT}
+      defaultRepoOptions={[]}
     />
   );
   expect(toJson(queryBarComp)).toMatchSnapshot();
@@ -100,6 +101,7 @@ test('render correctly with input query string changed', done => {
         onSelect={emptyFn}
         onSearchScopeChanged={emptyFn}
         searchScope={SearchScope.DEFAULT}
+        defaultRepoOptions={[]}
       />
     </MemoryRouter>
   );

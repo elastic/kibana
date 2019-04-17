@@ -39,6 +39,7 @@ const Icon = styled(EuiIcon)`
 interface State {
   isFlyoutOpen: boolean;
   repoScope: Repository[];
+  query: string;
 }
 
 interface Props {
@@ -47,10 +48,12 @@ interface Props {
   repoSearchResults: any[];
   searchLoading: boolean;
   searchOptions: ISearchOptions;
+  defaultRepoOptions: Repository[];
 }
 
 export class SearchOptions extends Component<Props, State> {
   public state: State = {
+    query: '',
     isFlyoutOpen: false,
     repoScope: this.props.searchOptions.repoScope,
   };
@@ -109,9 +112,15 @@ export class SearchOptions extends Component<Props, State> {
             <EuiComboBox
               placeholder="Search to add repos"
               async={true}
-              options={this.props.repoSearchResults.map(repo => ({
-                label: repo.name,
-              }))}
+              options={
+                this.state.query
+                  ? this.props.repoSearchResults.map(repo => ({
+                      label: repo.name,
+                    }))
+                  : this.props.defaultRepoOptions.map(repo => ({
+                      label: repo.name,
+                    }))
+              }
               selectedOptions={[]}
               isLoading={this.props.searchLoading}
               onChange={this.onRepoChange}
@@ -144,6 +153,7 @@ export class SearchOptions extends Component<Props, State> {
   }
 
   private onRepoSearchChange = (searchValue: string) => {
+    this.setState({ query: searchValue });
     if (searchValue) {
       this.props.repositorySearch({ query: searchValue });
     }
@@ -153,7 +163,11 @@ export class SearchOptions extends Component<Props, State> {
     this.setState(prevState => ({
       repoScope: unique([
         ...prevState.repoScope,
-        ...repos.map((r: any) => this.props.repoSearchResults.find(rs => rs.name === r.label)),
+        ...repos.map((r: any) =>
+          [...this.props.repoSearchResults, ...this.props.defaultRepoOptions].find(
+            rs => rs.name === r.label
+          )
+        ),
       ]),
     }));
   };
