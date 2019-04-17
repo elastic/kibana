@@ -4,7 +4,7 @@
 
 experimental[This API is *experimental* and may be changed or removed completely in a future release.]
 
-The features API allows people to view information about available features in {kib}. Features are used by spaces and security to refine and secure access to {kib}.
+The features API allows you to view information about available features in {kib}. Features are used by spaces and security to refine and secure access to {kib}.
 
 NOTE: You cannot access these endpoints via the Console in {kib}.
 
