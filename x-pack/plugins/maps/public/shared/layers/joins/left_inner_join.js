@@ -67,7 +67,7 @@ export class LeftInnerJoin {
     return { ...featureCollection };
   }
 
-  getJoinSource() {
+  getRightJoinSource() {
     return this._rightSource;
   }
 

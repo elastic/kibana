@@ -6,19 +6,15 @@
 
 /* global jest */
 
-import { mount, ReactWrapper } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import enzymeToJson from 'enzyme-to-json';
+import { History, Location } from 'history';
 import 'jest-styled-components';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
 import React from 'react';
-import { Provider } from 'react-redux';
-import { MemoryRouter } from 'react-router-dom';
-// @ts-ignore
-import { createMockStore } from 'redux-test-utils';
-// @ts-ignore
-import configureStore from '../store/config/configureStore';
-import { IReduxState } from '../store/rootReducer';
+import { render, waitForElement } from 'react-testing-library';
+import { LocationProvider } from '../context/LocationContext';
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -44,22 +40,25 @@ export function mockMoment() {
 }
 
 // Useful for getting the rendered href from any kind of link component
-export async function getRenderedHref(
-  Component: React.FunctionComponent<{}>,
-  globalState: Partial<IReduxState> = {}
-) {
-  const store = configureStore(globalState);
-  const mounted = mount(
-    <Provider store={store}>
-      <MemoryRouter>
-        <Component />
-      </MemoryRouter>
-    </Provider>
+export async function getRenderedHref(Component: React.FC, location: Location) {
+  const el = render(
+    <LocationProvider
+      history={
+        ({
+          listen: jest.fn(),
+          location
+        } as unknown) as History
+      }
+    >
+      <Component />
+    </LocationProvider>
   );
 
   await tick();
+  await waitForElement(() => el.container.querySelector('a'));
 
-  return mounted.render().attr('href');
+  const a = el.container.querySelector('a');
+  return a ? a.getAttribute('href') : '';
 }
 
 export function mockNow(date: string) {

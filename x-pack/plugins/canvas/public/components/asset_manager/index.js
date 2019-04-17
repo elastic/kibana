@@ -26,7 +26,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  addImageElement: pageId => assetId => {
+  onAddImageElement: pageId => assetId => {
     const imageElement = elementsRegistry.get('image');
     const elementAST = fromExpression(imageElement.expression);
     const selector = ['chain', '0', 'arguments', 'dataurl'];
@@ -56,7 +56,7 @@ const mapDispatchToProps = dispatch => ({
     // then return the id, so the caller knows the id that will be created
     return assetId;
   },
-  removeAsset: assetId => dispatch(removeAsset(assetId)),
+  onAssetDelete: assetId => dispatch(removeAsset(assetId)),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -67,9 +67,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   return {
     ...ownProps,
     ...dispatchProps,
+    onAddImageElement: dispatchProps.onAddImageElement(stateProps.selectedPage),
     selectedPage,
     assetValues,
-    addImageElement: dispatchProps.addImageElement(stateProps.selectedPage),
     onAssetAdd: file => {
       const [type, subtype] = get(file, 'type', '').split('/');
       if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
@@ -94,5 +94,5 @@ export const AssetManager = compose(
     mapDispatchToProps,
     mergeProps
   ),
-  withProps({ copyAsset: assetId => notify.success(`Copied '${assetId}' to clipboard`) })
+  withProps({ onAssetCopy: asset => notify.success(`Copied '${asset.id}' to clipboard`) })
 )(Component);

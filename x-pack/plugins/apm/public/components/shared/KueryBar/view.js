@@ -129,10 +129,7 @@ class KueryBarView extends Component {
                   values={{
                     apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
                     setupInstructionsLink: (
-                      <KibanaLink
-                        pathname={'/app/kibana'}
-                        hash={`/home/tutorial/apm`}
-                      >
+                      <KibanaLink path={`/home/tutorial/apm`}>
                         {i18n.translate(
                           'xpack.apm.kueryBar.setupInstructionsLinkLabel',
                           { defaultMessage: 'Setup Instructions' }

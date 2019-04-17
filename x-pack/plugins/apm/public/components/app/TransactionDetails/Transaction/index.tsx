@@ -124,10 +124,7 @@ export const Transaction: React.SFC<Props> = ({
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <TransactionActionMenu
-                transaction={transaction}
-                location={location}
-              />
+              <TransactionActionMenu transaction={transaction} />
             </EuiFlexItem>
             <MaybeViewTraceLink
               transaction={transaction}

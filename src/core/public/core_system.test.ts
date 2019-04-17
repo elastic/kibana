@@ -36,9 +36,11 @@ import {
   MockInjectedMetadataService,
   MockLegacyPlatformService,
   MockNotificationsService,
+  MockOverlayService,
   MockPluginsService,
   MockUiSettingsService,
   NotificationServiceConstructor,
+  OverlayServiceConstructor,
   UiSettingsServiceConstructor,
 } from './core_system.test.mocks';
 
@@ -81,6 +83,7 @@ describe('constructor', () => {
     expect(BasePathServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UiSettingsServiceConstructor).toHaveBeenCalledTimes(1);
     expect(ChromeServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(OverlayServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -229,7 +232,7 @@ describe('#setup()', () => {
     const root = document.createElement('div');
     root.innerHTML = '<p>foo bar</p>';
     await setupCore(root);
-    expect(root.innerHTML).toBe('<div></div><div></div>');
+    expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
   });
 
   it('calls injectedMetadata#setup()', async () => {
@@ -270,6 +273,11 @@ describe('#setup()', () => {
   it('calls chrome#setup()', async () => {
     await setupCore();
     expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls overlays#setup()', () => {
+    setupCore();
+    expect(MockOverlayService.setup).toHaveBeenCalledTimes(1);
   });
 
   it('calls plugin#setup()', async () => {

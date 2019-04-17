@@ -79,6 +79,30 @@ export const ml = (kibana) => {
         xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
+      xpackMainPlugin.registerFeature({
+        id: 'ml',
+        name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
+          defaultMessage: 'Machine Learning',
+        }),
+        icon: 'machineLearningApp',
+        navLinkId: 'ml',
+        app: ['ml', 'kibana'],
+        catalogue: ['ml'],
+        privileges: {},
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: [],
+              read: ['config']
+            },
+            ui: [],
+          },
+          description: i18n.translate('xpack.ml.feature.reserved.description', {
+            defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
+          })
+        }
+      });
+
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [

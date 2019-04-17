@@ -20,7 +20,6 @@ interface WithKibanaChromeProps {
 
 interface WithKibanaChromeState {
   basePath: string;
-  dateFormat?: string;
 }
 
 export class WithKibanaChrome extends React.Component<
@@ -29,7 +28,6 @@ export class WithKibanaChrome extends React.Component<
 > {
   public state: WithKibanaChromeState = {
     basePath: chrome.getBasePath(),
-    dateFormat: chrome.getUiSettingsClient().get('dateFormat'),
   };
 
   public render() {

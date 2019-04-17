@@ -145,6 +145,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
           onVisibleChildrenChange={this.handleVisibleChildrenChange}
           target={targetId}
           hideScrollbar={true}
+          data-test-subj={'logStream'}
         >
           {registerChild => (
             <>

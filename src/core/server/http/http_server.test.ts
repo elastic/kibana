@@ -571,3 +571,22 @@ test('returns server and connection options on start', async () => {
   expect(innerServer).toBe((server as any).server);
   expect(options).toMatchSnapshot();
 });
+
+test('registers auth request interceptor only once', async () => {
+  const { registerAuth } = await server.start(config);
+  const doRegister = () =>
+    registerAuth(() => null as any, {
+      encryptionKey: 'any_password',
+    } as any);
+
+  await doRegister();
+  expect(doRegister()).rejects.toThrowError('Auth interceptor was already registered');
+});
+
+test('registers onRequest interceptor several times', async () => {
+  const { registerOnRequest } = await server.start(config);
+  const doRegister = () => registerOnRequest(() => null as any);
+
+  doRegister();
+  expect(doRegister).not.toThrowError();
+});
