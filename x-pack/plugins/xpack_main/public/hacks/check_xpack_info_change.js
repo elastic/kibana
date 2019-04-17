@@ -81,18 +81,21 @@ module.factory('checkXPackInfoChange', ($q, Private) => {
       return handleResponse(response);
     }
 
-    const currentSignature = response.headers('kbn-xpack-sig');
-    const cachedSignature = xpackInfoSignature.get();
+    // If another interceptor has rejected a request, then headers will be undefined.
+    if (response.headers) {
+      const currentSignature = response.headers('kbn-xpack-sig');
+      const cachedSignature = xpackInfoSignature.get();
 
-    if (currentSignature && cachedSignature !== currentSignature) {
-      // Signature from the server differ from the signature of our
-      // cached info, so we need to refresh it.
-      // Intentionally swallowing this error
-      // because nothing catches it and it's an ugly console error.
-      xpackInfo.refresh().then(
-        () => notifyIfLicenseIsExpired(),
-        () => {}
-      );
+      if (currentSignature && cachedSignature !== currentSignature) {
+        // Signature from the server differ from the signature of our
+        // cached info, so we need to refresh it.
+        // Intentionally swallowing this error
+        // because nothing catches it and it's an ugly console error.
+        xpackInfo.refresh().then(
+          () => notifyIfLicenseIsExpired(),
+          () => {}
+        );
+      }
     }
 
     return handleResponse(response);

@@ -5,16 +5,19 @@
  */
 
 import moment from 'moment';
+import { setCanGatherUiMetrics } from 'ui/ui_metric';
 
 export function TelemetryOptInProvider($injector, chrome) {
-
   const Notifier = $injector.get('Notifier');
   const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
+  setCanGatherUiMetrics(currentOptInStatus);
 
   return {
     getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled) => {
+      setCanGatherUiMetrics(enabled);
+
       const $http = $injector.get('$http');
 
       try {
