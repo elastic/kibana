@@ -8,7 +8,7 @@ import { get, getOr, has, head, set } from 'lodash/fp';
 
 import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
 import { hostFieldsMap } from '../ecs_fields';
-import { FrameworkAdapter, FrameworkRequest, RequestOptions } from '../framework';
+import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
 
 import { buildHostDetailsQuery } from './query.detail_host.dsl';
@@ -22,13 +22,17 @@ import {
   HostEsData,
   HostLastFirstSeenRequestOptions,
   HostsAdapter,
+  HostsRequestOptions,
   HostValue,
 } from './types';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
 
-  public async getHosts(request: FrameworkRequest, options: RequestOptions): Promise<HostsData> {
+  public async getHosts(
+    request: FrameworkRequest,
+    options: HostsRequestOptions
+  ): Promise<HostsData> {
     const response = await this.framework.callWithRequest<HostEsData, TermAggregation>(
       request,
       'search',

@@ -853,7 +853,39 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
-  host?: HostEcsFields | null;
+  lastSeen?: Date | null;
+
+  host?: HostFields | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
+}
+
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
 }
 
 export interface FirstLastSeenHost {
@@ -1127,6 +1159,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface HostsSortField {
+  field: HostsFields;
+
+  direction: Direction;
+}
+
 export interface DomainsSortField {
   field: DomainsFields;
 
@@ -1191,6 +1229,8 @@ export interface HostsSourceArgs {
   timerange: TimerangeInput;
 
   pagination: PaginationInput;
+
+  sort: HostsSortField;
 
   filterQuery?: string | null;
 }
@@ -1314,6 +1354,11 @@ export enum IndexType {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum HostsFields {
+  hostName = 'hostName',
+  lastSeen = 'lastSeen',
 }
 
 export enum DomainsFields {
@@ -1524,6 +1569,8 @@ export namespace SourceResolvers {
     timerange: TimerangeInput;
 
     pagination: PaginationInput;
+
+    sort: HostsSortField;
 
     filterQuery?: string | null;
   }
@@ -4178,7 +4225,9 @@ export namespace HostItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HostItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+
+    host?: HostResolver<HostFields | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SiemContext> = Resolver<
@@ -4186,9 +4235,115 @@ export namespace HostItemResolvers {
     Parent,
     Context
   >;
-  export type HostResolver<
-    R = HostEcsFields | null,
+  export type LastSeenResolver<
+    R = Date | null,
     Parent = HostItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HostResolver<
+    R = HostFields | null,
+    Parent = HostItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace HostFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = HostFields> {
+    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+
+    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    os?: OsResolver<OsFields | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ArchitectureResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IdResolver<R = string | null, Parent = HostFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IpResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MacResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OsResolver<
+    R = OsFields | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace OsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = OsFields> {
+    platform?: PlatformResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    full?: FullResolver<string | null, TypeParent, Context>;
+
+    family?: FamilyResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+
+    kernel?: KernelResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PlatformResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FullResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FamilyResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KernelResolver<
+    R = string | null,
+    Parent = OsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

@@ -25,7 +25,8 @@ export const initialInputsState: InputsState = {
   global: {
     timerange: {
       kind: 'relative',
-      option: 'now-24h',
+      fromStr: 'now-24h',
+      toStr: 'now',
       from: momentDate ? momentDate.valueOf() : 0,
       to: Date.now(),
     },
@@ -49,13 +50,14 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     },
   }))
-  .case(setRelativeRangeDatePicker, (state, { id, option, from, to }) => ({
+  .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => ({
     ...state,
     [id]: {
       ...get(id, state),
       timerange: {
         kind: 'relative',
-        option,
+        fromStr,
+        toStr,
         from,
         to,
       },

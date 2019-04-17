@@ -10,7 +10,7 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
     }
   }
 >
-  <Connect(pure(Component))
+  <Connect(HostsTableComponent)
     data={
       Array [
         Object {
@@ -20,16 +20,10 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           "node": Object {
             "_id": "cPsuhGcB0WOhS6qyTKC0",
             "host": Object {
-              "name": Array [
-                "elrond.elstc.co",
-              ],
+              "name": "elrond.elstc.co",
               "os": Object {
-                "name": Array [
-                  "Ubuntu",
-                ],
-                "version": Array [
-                  "18.04.1 LTS (Bionic Beaver)",
-                ],
+                "name": "Ubuntu",
+                "version": "18.04.1 LTS (Bionic Beaver)",
               },
             },
           },
@@ -41,16 +35,10 @@ exports[`Load More Table Component rendering it renders the default Hosts table 
           "node": Object {
             "_id": "KwQDiWcB0WOhS6qyXmrW",
             "host": Object {
-              "name": Array [
-                "siem-kibana",
-              ],
+              "name": "siem-kibana",
               "os": Object {
-                "name": Array [
-                  "Debian GNU/Linux",
-                ],
-                "version": Array [
-                  "9 (stretch)",
-                ],
+                "name": "Debian GNU/Linux",
+                "version": "9 (stretch)",
               },
             },
           },
