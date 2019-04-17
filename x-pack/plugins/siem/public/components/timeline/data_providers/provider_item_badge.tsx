@@ -6,7 +6,6 @@
 
 import React, { PureComponent } from 'react';
 
-import { QueryDate } from './data_provider';
 import { ProviderBadge } from './provider_badge';
 import { ProviderItemActions } from './provider_item_actions';
 
@@ -17,7 +16,6 @@ interface ProviderItemBadgeProps {
   isEnabled: boolean;
   isExcluded: boolean;
   providerId: string;
-  queryDate?: QueryDate;
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   val: string | number;
@@ -33,16 +31,7 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
   };
 
   public render() {
-    const {
-      deleteProvider,
-      field,
-      kqlQuery,
-      isEnabled,
-      isExcluded,
-      queryDate,
-      providerId,
-      val,
-    } = this.props;
+    const { deleteProvider, field, kqlQuery, isEnabled, isExcluded, providerId, val } = this.props;
 
     const badge = (
       <ProviderBadge
@@ -52,7 +41,6 @@ export class ProviderItemBadge extends PureComponent<ProviderItemBadgeProps, Own
         isEnabled={isEnabled}
         isExcluded={isExcluded}
         providerId={providerId}
-        queryDate={queryDate}
         togglePopover={this.togglePopover}
         val={val}
       />

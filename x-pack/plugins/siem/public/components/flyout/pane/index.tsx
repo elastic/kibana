@@ -18,7 +18,7 @@ import { FlyoutHeader } from '../header';
 
 import * as i18n from './translations';
 
-const minWidthPixels = 440; // do not allow the flyout to shrink below this width (pixels)
+const minWidthPixels = 550; // do not allow the flyout to shrink below this width (pixels)
 const maxWidthPercent = 95; // do not allow the flyout to grow past this percentage of the view
 interface OwnProps {
   children: React.ReactNode;
@@ -60,6 +60,9 @@ const EuiFlyoutContainer = styled.div<{ headerHeight: number; width: number }>`
   .timeline-flyout-body {
     overflow-y: hidden;
     padding: 0;
+    .euiFlyoutBody__overflow {
+      padding: 0;
+    }
   }
 `;
 
@@ -68,11 +71,12 @@ const FlyoutHeaderContainer = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  width: 100%;
 `;
 
 // manually wrap the close button because EuiButtonIcon can't be a wrapped `styled`
 const WrappedCloseButton = styled.div`
-  margin-right: 10px;
+  margin-right: 5px;
 `;
 
 const FlyoutHeaderWithCloseButton = pure<{

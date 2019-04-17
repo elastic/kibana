@@ -31,7 +31,6 @@ import { AddToKql } from '../../add_to_kql';
 import * as i18n from './translations';
 
 export const getNetworkTopNFlowColumns = (
-  startDate: number,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
@@ -57,7 +56,6 @@ export const getNetworkTopNFlowColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: { field: ipAttr, value: ip },
-              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -101,7 +99,6 @@ export const getNetworkTopNFlowColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: { field: domainAttr, value: domain },
-              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

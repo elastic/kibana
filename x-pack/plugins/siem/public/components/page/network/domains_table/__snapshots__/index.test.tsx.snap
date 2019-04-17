@@ -63,14 +63,12 @@ exports[`Domains Table Component Rendering it renders the default Domains table 
       },
     ]
   }
-  endDate={1549643470707}
   flowTarget="source"
   hasNextPage={false}
   ip="10.10.10.10"
   loadMore={[MockFunction]}
   loading={false}
   nextCursor="10"
-  startDate={1546965070707}
   totalCount={1}
   type="details"
 />

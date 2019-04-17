@@ -32,13 +32,11 @@ import * as i18n from './translations';
 interface OwnProps {
   data: HostItem;
   loading: boolean;
-  startDate: number;
-  endDate: number;
 }
 
 type HostSummaryProps = OwnProps;
 
-export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, loading }) => (
+export const HostSummary = pure<HostSummaryProps>(({ data, loading }) => (
   <EuiFlexGroup>
     <StyledEuiFlexItem>
       <EuiPanel>
@@ -46,7 +44,7 @@ export const HostSummary = pure<HostSummaryProps>(({ data, startDate, endDate, l
           <h3>{i18n.SUMMARY}</h3>
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
-        {getEuiDescriptionList(data, startDate, endDate, loading)}
+        {getEuiDescriptionList(data, loading)}
       </EuiPanel>
     </StyledEuiFlexItem>
   </EuiFlexGroup>
@@ -67,12 +65,7 @@ const fieldTitleMapping: Readonly<Record<string, string>> = {
   'host.architecture': i18n.ARCHITECTURE,
 };
 
-export const getEuiDescriptionList = (
-  host: HostItem | null,
-  startDate: number,
-  endDate: number,
-  loading: boolean
-): JSX.Element => (
+export const getEuiDescriptionList = (host: HostItem | null, loading: boolean): JSX.Element => (
   <EuiDescriptionList type="column" compressed>
     {Object.entries(fieldTitleMapping).map(([field, title]) => {
       const summaryValue: string | string[] | null = get(field, host);
@@ -88,11 +81,11 @@ export const getEuiDescriptionList = (
                 getEmptyTagValue()
               ) : (
                 summaryValue.map((value: string) =>
-                  createDraggable(value, field, startDate, endDate, get('host.name', host))
+                  createDraggable(value, field, get('host.name', host))
                 )
               )
             ) : (
-              createDraggable(summaryValue, field, startDate, endDate, get('host.name', host))
+              createDraggable(summaryValue, field, get('host.name', host))
             )}
           </div>
         </React.Fragment>
@@ -104,8 +97,6 @@ export const getEuiDescriptionList = (
 export const createDraggable = (
   summaryValue: string | null,
   field: string,
-  startDate: number,
-  endDate: number,
   hostName: string | null | undefined
 ) =>
   summaryValue == null && hostName != null && ['firstSeen', 'lastSeen'].includes(field) ? (
@@ -123,7 +114,6 @@ export const createDraggable = (
         name: summaryValue,
         kqlQuery: '',
         queryMatch: { field, value: summaryValue },
-        queryDate: { from: startDate, to: endDate },
       }}
       render={(dataProvider, _, snapshot) =>
         snapshot.isDragging ? (

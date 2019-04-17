@@ -8,23 +8,42 @@ import { createSelector } from 'reselect';
 
 import { State } from '../reducer';
 
-import { GlobalQuery, Policy, TimeRange } from './model';
+import { InputsModel, InputsRange } from './model';
 
-const selectGlobalTimeRange = (state: State): TimeRange => state.inputs.global.timerange;
-const selectGlobalPolicy = (state: State): Policy => state.inputs.global.policy;
-const selectGlobalQuery = (state: State): GlobalQuery[] => state.inputs.global.query;
+const selectInputs = (state: State): InputsModel => state.inputs;
+
+const selectGlobal = (state: State): InputsRange => state.inputs.global;
+
+const selectTimeline = (state: State): InputsRange => state.inputs.timeline;
+
+export const inpustSelector = createSelector(
+  selectInputs,
+  inputs => inputs
+);
 
 export const globalTimeRangeSelector = createSelector(
-  selectGlobalTimeRange,
-  timerange => timerange
+  selectGlobal,
+  global => global.timerange
 );
 
 export const globalPolicySelector = createSelector(
-  selectGlobalPolicy,
-  policy => policy
+  selectGlobal,
+  global => global.policy
 );
 
 export const globalQuery = createSelector(
-  selectGlobalQuery,
-  query => query
+  selectGlobal,
+  global => global.query
 );
+
+export const globalSelector = () =>
+  createSelector(
+    selectGlobal,
+    global => global
+  );
+
+export const getTimelineSelector = () =>
+  createSelector(
+    selectTimeline,
+    timeline => timeline
+  );

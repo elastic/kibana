@@ -26,8 +26,7 @@ export const createStore = (state = initialState): Store<State, AnyAction> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
   const middlewareDependencies = {
-    selectGlobalPolicy: inputsSelectors.globalPolicySelector,
-    selectGlobalTimeRange: inputsSelectors.globalTimeRangeSelector,
+    selectInputs: inputsSelectors.inpustSelector,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(

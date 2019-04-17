@@ -58,7 +58,6 @@ class DomainsComponentQuery extends QueryTemplate<
       startDate,
       endDate,
       limit,
-      poll,
       flowTarget,
       flowDirection,
     } = this.props;
@@ -66,7 +65,6 @@ class DomainsComponentQuery extends QueryTemplate<
       <Query<GetDomainsQuery.Query, GetDomainsQuery.Variables>
         query={domainsQuery}
         fetchPolicy="cache-and-network"
-        pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{
           sourceId,

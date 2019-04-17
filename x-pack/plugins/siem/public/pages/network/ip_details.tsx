@@ -66,7 +66,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             <PageContent data-test-subj="pageContent" panelPaddingSize="none">
               <PageContentBody data-test-subj="pane1ScrollContainer">
                 <GlobalTime>
-                  {({ poll, to, from, setQuery }) => (
+                  {({ to, from, setQuery }) => (
                     <>
                       <IpOverviewQuery
                         sourceId="default"
@@ -95,7 +95,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         filterQuery={filterQuery}
                         flowTarget={flowTarget}
                         ip={decodeIpv6(ip)}
-                        poll={poll}
                         sourceId="default"
                         startDate={from}
                         type={networkModel.NetworkType.details}
@@ -112,8 +111,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                             nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                             refetch={refetch}
                             setQuery={setQuery}
-                            startDate={from}
-                            endDate={to}
                             totalCount={totalCount}
                             type={networkModel.NetworkType.details}
                           />

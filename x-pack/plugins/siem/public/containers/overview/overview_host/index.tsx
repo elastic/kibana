@@ -27,7 +27,6 @@ export interface OverviewHostProps extends QueryTemplateProps {
   children: (args: OverviewHostArgs) => React.ReactNode;
   sourceId: string;
   endDate: number;
-  poll: number;
   startDate: number;
 }
 

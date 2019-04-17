@@ -94,3 +94,33 @@ export const NEW_TIMELINE_TOOL_TIP = i18n.translate(
     defaultMessage: 'Create a new timeline',
   }
 );
+
+export const LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
+  'xpack.siem.timeline.properties.lockDatePickerTooltip',
+  {
+    defaultMessage:
+      'Disable syncing of date/time range between the currently viewed page and your timeline',
+  }
+);
+
+export const UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
+  'xpack.siem.timeline.properties.unlockDatePickerTooltip',
+  {
+    defaultMessage:
+      'Enable syncing of date/time range between the currently viewed page and your timeline',
+  }
+);
+
+export const LOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
+  'xpack.siem.timeline.properties.lockDatePickerDescription',
+  {
+    defaultMessage: 'Lock date picker to global date picker',
+  }
+);
+
+export const UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
+  'xpack.siem.timeline.properties.unlockDatePickerDescription',
+  {
+    defaultMessage: 'Unlock date picker to global date picker',
+  }
+);

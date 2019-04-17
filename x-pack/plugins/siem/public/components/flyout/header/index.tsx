@@ -14,6 +14,9 @@ import { Note } from '../../../lib/note';
 import {
   appActions,
   appSelectors,
+  inputsActions,
+  inputsModel,
+  inputsSelectors,
   State,
   timelineActions,
   timelineModel,
@@ -32,9 +35,8 @@ interface OwnProps {
 interface StateReduxProps {
   description?: string;
   getNotesByIds: (noteIds: string[]) => Note[];
-  history?: History[];
   isFavorite?: boolean;
-  isLive?: boolean;
+  isLock?: boolean;
   noteIds: string[];
   title?: string;
   width?: number;
@@ -58,9 +60,9 @@ interface DispatchProps {
     }
   ) => void;
   createTimeline?: ({ id, show }: { id: string; show?: boolean }) => void;
+  toggleLock?: ({ linkToId }: { linkToId: inputsModel.InputsModelId }) => void;
   updateDescription?: ({ id, description }: { id: string; description: string }) => void;
   updateIsFavorite?: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-  updateIsLive?: ({ id, isLive }: { id: string; isLive: boolean }) => void;
   updateNote?: UpdateNote;
   updateTitle?: ({ id, title }: { id: string; title: string }) => void;
 }
@@ -73,16 +75,15 @@ const statefulFlyoutHeader = pure<Props>(
     createTimeline,
     description,
     getNotesByIds,
-    history,
     isFavorite,
-    isLive,
+    isLock,
     title,
     width = defaultWidth,
     noteIds,
     timelineId,
+    toggleLock,
     updateDescription,
     updateIsFavorite,
-    updateIsLive,
     updateNote,
     updateTitle,
     usersViewing,
@@ -92,15 +93,14 @@ const statefulFlyoutHeader = pure<Props>(
       createTimeline={createTimeline!}
       description={description!}
       getNotesByIds={getNotesByIds}
-      history={history!}
+      isLock={isLock!}
       isFavorite={isFavorite!}
-      isLive={isLive!}
       title={title!}
       noteIds={noteIds}
       timelineId={timelineId}
+      toggleLock={toggleLock!}
       updateDescription={updateDescription!}
       updateIsFavorite={updateIsFavorite!}
-      updateIsLive={updateIsLive!}
       updateTitle={updateTitle!}
       updateNote={updateNote!}
       usersViewing={usersViewing}
@@ -114,13 +114,13 @@ const emptyHistory: History[] = []; // stable reference
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
+  const getGlobalInput = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: timelineModel.TimelineModel = getTimeline(state, timelineId);
-
+    const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
       description = '',
       isFavorite = false,
-      isLive = false,
       title = '',
       noteIds = [],
       width = defaultWidth,
@@ -133,7 +133,7 @@ const makeMapStateToProps = () => {
       getNotesByIds: getNotesByIds(state),
       history,
       isFavorite,
-      isLive,
+      isLock: globalInput.linkTo.includes('timeline'),
       noteIds,
       title,
       width,
@@ -186,6 +186,9 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   },
   updateTitle: ({ id, title }: { id: string; title: string }) => {
     dispatch(timelineActions.updateTitle({ id, title }));
+  },
+  toggleLock: ({ linkToId }: { linkToId: inputsModel.InputsModelId }) => {
+    dispatch(inputsActions.toggleTimelineLinkTo({ linkToId }));
   },
 });
 

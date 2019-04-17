@@ -27,6 +27,7 @@ describe('Footer Timeline Component', () => {
           serverSideEventCount={mockData.Events.totalCount}
           hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
           height={100}
+          isLive={false}
           isLoading={false}
           itemsCount={mockData.Events.edges.length}
           itemsPerPage={2}
@@ -49,6 +50,7 @@ describe('Footer Timeline Component', () => {
           serverSideEventCount={mockData.Events.totalCount}
           hasNextPage={false}
           height={100}
+          isLive={false}
           isLoading={true}
           itemsCount={mockData.Events.edges.length}
           itemsPerPage={2}
@@ -72,6 +74,7 @@ describe('Footer Timeline Component', () => {
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
+            isLive={false}
             isLoading={false}
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
@@ -96,6 +99,7 @@ describe('Footer Timeline Component', () => {
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
+            isLive={false}
             isLoading={true}
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
@@ -129,6 +133,7 @@ describe('Footer Timeline Component', () => {
           serverSideEventCount={mockData.Events.totalCount}
           hasNextPage={false}
           height={100}
+          isLive={false}
           isLoading={true}
           itemsCount={mockData.Events.edges.length}
           itemsPerPage={2}
@@ -152,6 +157,7 @@ describe('Footer Timeline Component', () => {
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
+            isLive={false}
             isLoading={false}
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={1}
@@ -182,6 +188,7 @@ describe('Footer Timeline Component', () => {
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
+            isLive={false}
             isLoading={false}
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={2}
@@ -211,6 +218,7 @@ describe('Footer Timeline Component', () => {
             serverSideEventCount={mockData.Events.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             height={100}
+            isLive={false}
             isLoading={false}
             itemsCount={mockData.Events.edges.length}
             itemsPerPage={1}
@@ -235,6 +243,58 @@ describe('Footer Timeline Component', () => {
         .first()
         .simulate('click');
       expect(onChangeItemsPerPage).toBeCalled();
+    });
+
+    test('it does render the auto-refresh message instead of load more button when stream live is on', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Footer
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLive={true}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            getUpdatedAt={getUpdatedAt}
+            width={width}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="paging-control"]').exists()).toBeFalsy();
+      expect(wrapper.find('[data-test-subj="is-live-on-message"]').exists()).toBeTruthy();
+    });
+
+    test('it does render the load more button when stream live is off', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <Footer
+            serverSideEventCount={mockData.Events.totalCount}
+            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
+            height={100}
+            isLive={false}
+            isLoading={false}
+            itemsCount={mockData.Events.edges.length}
+            itemsPerPage={2}
+            itemsPerPageOptions={[1, 5, 10, 20]}
+            onChangeItemsPerPage={onChangeItemsPerPage}
+            onLoadMore={loadMore}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            tieBreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
+            getUpdatedAt={getUpdatedAt}
+            width={width}
+          />
+        </TestProviders>
+      );
+
+      expect(wrapper.find('[data-test-subj="paging-control"]').exists()).toBeTruthy();
+      expect(wrapper.find('[data-test-subj="is-live-on-message"]').exists()).toBeFalsy();
     });
   });
 });

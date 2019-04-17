@@ -25,10 +25,15 @@ export const LocalizedDateTooltip = pure<{
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem grow={false}>
-          <FormattedRelative data-test-subj="humanized-relative-date" value={date} />
+          <FormattedRelative
+            data-test-subj="humanized-relative-date"
+            value={moment.utc(date).toDate()}
+          />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="with-day-of-week" grow={false}>
-          {moment(date)
+          xavier
+          {moment
+            .utc(date)
             .local()
             .format('llll')}
         </EuiFlexItem>

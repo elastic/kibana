@@ -33,8 +33,6 @@ import * as i18n from './translations';
 
 export const getDomainsColumns = (
   ip: string,
-  startDate: number,
-  endDate: number,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
@@ -63,7 +61,6 @@ export const getDomainsColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: { field: domainNameAttr, value: domainName },
-              queryDate: { from: startDate, to: endDate },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

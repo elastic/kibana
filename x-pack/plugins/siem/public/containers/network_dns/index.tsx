@@ -60,13 +60,11 @@ class NetworkDnsComponentQuery extends QueryTemplate<
       startDate,
       endDate,
       limit,
-      poll,
     } = this.props;
     return (
       <Query<GetNetworkDnsQuery.Query, GetNetworkDnsQuery.Variables>
         query={networkDnsQuery}
         fetchPolicy="cache-and-network"
-        pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{
           sourceId,

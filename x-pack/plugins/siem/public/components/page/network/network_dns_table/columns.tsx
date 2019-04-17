@@ -20,7 +20,6 @@ import { Provider } from '../../../timeline/data_providers/provider';
 import * as i18n from './translations';
 
 export const getNetworkDnsColumns = (
-  startDate: number,
   type: networkModel.NetworkType
 ): Array<Columns<ValueOf<NetworkDnsItem>>> => [
   {
@@ -43,7 +42,6 @@ export const getNetworkDnsColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: { field: 'dns.question.etld_plus_one', value: escapeQueryValue(dnsName) },
-              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

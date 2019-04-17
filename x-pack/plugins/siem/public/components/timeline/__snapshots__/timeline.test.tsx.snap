@@ -469,10 +469,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 1",
         "kqlQuery": "",
         "name": "Provider 1",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 1",
@@ -485,10 +481,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 2",
         "kqlQuery": "",
         "name": "Provider 2",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 2",
@@ -501,10 +493,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 3",
         "kqlQuery": "",
         "name": "Provider 3",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 3",
@@ -517,10 +505,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 4",
         "kqlQuery": "",
         "name": "Provider 4",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 4",
@@ -533,10 +517,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 5",
         "kqlQuery": "",
         "name": "Provider 5",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 5",
@@ -549,10 +529,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 6",
         "kqlQuery": "",
         "name": "Provider 6",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 6",
@@ -565,10 +541,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 7",
         "kqlQuery": "",
         "name": "Provider 7",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 7",
@@ -581,10 +553,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 8",
         "kqlQuery": "",
         "name": "Provider 8",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 8",
@@ -597,10 +565,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 9",
         "kqlQuery": "",
         "name": "Provider 9",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 9",
@@ -613,10 +577,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
         "id": "id-Provider 10",
         "kqlQuery": "",
         "name": "Provider 10",
-        "queryDate": Object {
-          "from": 1521830963132,
-          "to": 1521862432253,
-        },
         "queryMatch": Object {
           "field": "name",
           "value": "Provider 10",
@@ -624,6 +584,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
       },
     ]
   }
+  end={1521862432253}
   flyoutHeaderHeight={48}
   flyoutHeight={980}
   id="foo"
@@ -712,6 +673,7 @@ Can be one or multiple IPv4 or IPv6 addresses.",
       "title": "filebeat-*,auditbeat-*,packetbeat-*",
     }
   }
+  isLive={false}
   itemsPerPage={5}
   itemsPerPageOptions={
     Array [
@@ -735,5 +697,6 @@ Can be one or multiple IPv4 or IPv6 addresses.",
       "sortDirection": "desc",
     }
   }
+  start={1521830963132}
 />
 `;

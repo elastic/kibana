@@ -44,7 +44,6 @@ describe('Load More Events Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546878704036}
             type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>

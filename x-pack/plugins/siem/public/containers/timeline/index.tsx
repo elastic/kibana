@@ -60,7 +60,6 @@ export class TimelineQuery extends QueryTemplate<
       limit,
       fields,
       filterQuery,
-      poll,
       sourceId,
       sortField,
     } = this.props;
@@ -76,7 +75,6 @@ export class TimelineQuery extends QueryTemplate<
         query={timelineQuery}
         fetchPolicy="network-only"
         notifyOnNetworkStatusChange
-        pollInterval={poll}
         variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
@@ -98,7 +96,7 @@ export class TimelineQuery extends QueryTemplate<
                 ...fetchMoreResult,
                 source: {
                   ...fetchMoreResult.source,
-                  Events: {
+                  Timeline: {
                     ...fetchMoreResult.source.Timeline,
                     edges: [
                       ...prev.source.Timeline.edges,

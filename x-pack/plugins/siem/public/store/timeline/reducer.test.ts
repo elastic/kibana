@@ -50,10 +50,7 @@ const timelineByIdMock: TimelineById = {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       },
@@ -239,10 +236,7 @@ describe('Timeline', () => {
             field: '',
             value: '',
           },
-          queryDate: {
-            from: 0,
-            to: 1,
-          },
+
           excluded: false,
           kqlQuery: '',
         },
@@ -261,10 +255,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -287,10 +278,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -312,10 +300,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -519,10 +504,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -544,10 +526,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -575,10 +554,7 @@ describe('Timeline', () => {
               field: '',
               value: '',
             },
-            queryDate: {
-              from: 0,
-              to: 1,
-            },
+
             excluded: false,
             kqlQuery: '',
           },
@@ -590,10 +566,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -615,10 +588,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -730,10 +700,7 @@ describe('Timeline', () => {
               field: '',
               value: '',
             },
-            queryDate: {
-              from: 0,
-              to: 1,
-            },
+
             excluded: false,
             kqlQuery: '',
           },
@@ -753,10 +720,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -865,10 +829,6 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
             },
           ],
           description: '',
@@ -908,10 +868,6 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
       const update = updateTimelineProviderEnabled({
@@ -936,10 +892,6 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
             },
             {
               and: [],
@@ -951,10 +903,6 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
-              },
-              queryDate: {
-                from: 0,
-                to: 1,
               },
             },
           ],
@@ -998,10 +946,7 @@ describe('Timeline', () => {
               field: '',
               value: '',
             },
-            queryDate: {
-              from: 0,
-              to: 1,
-            },
+
             excluded: false,
             kqlQuery: '',
           },
@@ -1013,10 +958,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -1077,10 +1019,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       });
@@ -1147,10 +1086,6 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
             },
           ],
           description: '',
@@ -1190,10 +1125,6 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
       });
       const multiDataProviderMock = set('foo.dataProviders', multiDataProvider, timelineByIdMock);
       const update = updateTimelineProviderExcluded({
@@ -1218,10 +1149,6 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
             },
             {
               and: [],
@@ -1233,10 +1160,6 @@ describe('Timeline', () => {
               queryMatch: {
                 field: '',
                 value: '',
-              },
-              queryDate: {
-                from: 0,
-                to: 1,
               },
             },
           ],
@@ -1280,10 +1203,7 @@ describe('Timeline', () => {
               field: '',
               value: '',
             },
-            queryDate: {
-              from: 0,
-              to: 1,
-            },
+
             excluded: false,
             kqlQuery: '',
           },
@@ -1295,10 +1215,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       };
@@ -1359,10 +1276,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       });
@@ -1415,10 +1329,7 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
+
               excluded: false,
               kqlQuery: '',
             },
@@ -1478,10 +1389,7 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
+
               excluded: false,
               kqlQuery: '',
             },
@@ -1542,10 +1450,7 @@ describe('Timeline', () => {
           field: '',
           value: '',
         },
-        queryDate: {
-          from: 0,
-          to: 1,
-        },
+
         excluded: false,
         kqlQuery: '',
       });
@@ -1568,10 +1473,7 @@ describe('Timeline', () => {
                 field: '',
                 value: '',
               },
-              queryDate: {
-                from: 0,
-                to: 1,
-              },
+
               excluded: false,
               kqlQuery: '',
             },

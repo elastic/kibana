@@ -7,7 +7,7 @@
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render, waitForElement } from 'react-testing-library';
+import { render } from 'react-testing-library';
 
 import { mockFirstLastSeenDomainQuery } from '../../../../containers/domains/first_last_seen_domain/mock';
 import { FlowTarget } from '../../../../graphql/types';
@@ -183,28 +183,5 @@ describe('FirstLastSeen Component', async () => {
     );
     await wait();
     expect(container.textContent).toBe('something-invalid');
-  });
-
-  test('Show error message', async () => {
-    const myErrorMock = cloneDeep(mockFirstLastSeenDomainQuery);
-    delete myErrorMock[0].result;
-    myErrorMock[0].result = {
-      errors: [{ message: 'Error!' }],
-    };
-    const { container } = render(
-      <TestProviders>
-        <MockedProvider mocks={myErrorMock} addTypename={false}>
-          <FirstLastSeenDomain
-            ip={ip}
-            domainName={domainName}
-            flowTarget={FlowTarget.source}
-            type="last-seen"
-          />
-        </MockedProvider>
-      </TestProviders>
-    );
-    await wait();
-    const alertIcon = await waitForElement(() => container.querySelectorAll('svg'), { container });
-    expect(alertIcon.length).toBe(1);
   });
 });

@@ -51,13 +51,11 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
       startDate,
       endDate,
       limit,
-      poll,
     } = this.props;
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
         query={uncommonProcessesQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{
           sourceId,

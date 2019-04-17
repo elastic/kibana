@@ -30,7 +30,6 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
-  startDate: number;
   type: hostsModel.HostsType;
 }
 
@@ -75,11 +74,10 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
-    startDate,
     type,
   }) => (
     <LoadMoreTable
-      columns={getAuthenticationColumns(startDate)}
+      columns={getAuthenticationColumns()}
       loadingTitle={i18n.AUTHENTICATIONS}
       loading={loading}
       pageOfItems={data}
@@ -114,7 +112,7 @@ export const AuthenticationTable = connect(
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (startDate: number): Array<Columns<AuthenticationsEdges>> => [
+const getAuthenticationColumns = (): Array<Columns<AuthenticationsEdges>> => [
   {
     name: i18n.USER,
     truncateText: false,
@@ -136,10 +134,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               queryMatch: {
                 field: 'user.name',
                 value: userName,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -179,10 +173,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
             queryMatch: {
               field: 'event.type',
               value: 'authentication_failure',
-            },
-            queryDate: {
-              from: startDate,
-              to: Date.now(),
             },
           }}
           render={(dataProvider, _, snapshot) =>
@@ -235,10 +225,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 field: 'source.ip',
                 value: sourceIp,
               },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -279,7 +265,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 field: 'host.name',
                 value: hostName,
               },
-              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -318,10 +303,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
             queryMatch: {
               field: 'event.type',
               value: 'authentication_success',
-            },
-            queryDate: {
-              from: startDate,
-              to: Date.now(),
             },
           }}
           render={(dataProvider, _, snapshot) =>
@@ -374,10 +355,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 field: 'source.ip',
                 value: sourceIp,
               },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -418,7 +395,6 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                 field: 'host.name',
                 value: hostName,
               },
-              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

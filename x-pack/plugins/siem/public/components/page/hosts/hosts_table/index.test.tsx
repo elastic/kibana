@@ -20,7 +20,6 @@ import { mockData } from './mock';
 
 describe('Load More Table Component', () => {
   const loadMore = jest.fn();
-  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
   const state: State = mockGlobalState;
 
   let store = createStore(state);
@@ -41,7 +40,6 @@ describe('Load More Table Component', () => {
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={hostsModel.HostsType.page}
             />
           </KibanaConfigContext.Provider>
@@ -62,7 +60,6 @@ describe('Load More Table Component', () => {
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={hostsModel.HostsType.page}
             />
           </TestProviders>
@@ -80,7 +77,6 @@ describe('Load More Table Component', () => {
                 hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
                 nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
                 loadMore={loadMore}
-                startDate={startDate}
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>

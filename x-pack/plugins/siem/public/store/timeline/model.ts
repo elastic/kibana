@@ -93,7 +93,7 @@ export const timelineDefaults: Readonly<
   isFavorite: false,
   isLive: false,
   itemsPerPage: 25,
-  itemsPerPageOptions: [10, 25, 50],
+  itemsPerPageOptions: [10, 25, 50, 100],
   kqlMode: 'filter',
   kqlQuery: {
     filterQuery: null,

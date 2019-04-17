@@ -24,10 +24,7 @@ import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 
-export const getHostsColumns = (
-  startDate: number,
-  type: hostsModel.HostsType
-): Array<Columns<ValueOf<HostItem>>> => [
+export const getHostsColumns = (type: hostsModel.HostsType): Array<Columns<ValueOf<HostItem>>> => [
   {
     field: 'node.host.name',
     name: i18n.NAME,
@@ -48,7 +45,6 @@ export const getHostsColumns = (
               name: hostName,
               kqlQuery: '',
               queryMatch: { field: 'host.name', value: hostName },
-              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (

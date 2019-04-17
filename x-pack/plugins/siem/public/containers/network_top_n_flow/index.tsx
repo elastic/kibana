@@ -61,7 +61,6 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       startDate,
       endDate,
       limit,
-      poll,
       flowDirection,
       topNFlowSort,
       flowTarget,
@@ -70,7 +69,6 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
         query={networkTopNFlowQuery}
         fetchPolicy="cache-and-network"
-        pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{
           sourceId,

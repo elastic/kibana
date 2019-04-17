@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiIcon, EuiToolTip } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import classNames from 'classnames';
-import { isEmpty } from 'lodash/fp';
-import moment from 'moment';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-import { QueryDate } from './data_provider';
 import * as i18n from './translations';
 
 const ProviderBadgeStyled = styled(EuiBadge)`
@@ -43,13 +40,12 @@ interface ProviderBadgeProps {
   isEnabled: boolean;
   isExcluded: boolean;
   providerId: string;
-  queryDate?: QueryDate;
   togglePopover?: () => void;
   val: string | number;
 }
 
 export const ProviderBadge = pure<ProviderBadgeProps>(
-  ({ deleteProvider, field, isEnabled, isExcluded, queryDate, providerId, togglePopover, val }) => {
+  ({ deleteProvider, field, isEnabled, isExcluded, providerId, togglePopover, val }) => {
     const deleteFilter: React.MouseEventHandler<HTMLButtonElement> = (
       event: React.MouseEvent<HTMLButtonElement>
     ) => {
@@ -66,10 +62,6 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
     const prefix = isExcluded ? <span>{i18n.NOT} </span> : null;
 
     const title = `${field}: "${val}"`;
-
-    const tooltipStr = isEmpty(queryDate)
-      ? null
-      : `${moment(queryDate!.from).format('L LTS')} - ${moment(queryDate!.to).format('L LTS')}`;
 
     return (
       <ProviderBadgeStyled
@@ -90,11 +82,6 @@ export const ProviderBadge = pure<ProviderBadgeProps>(
         }}
         data-test-subj="providerBadge"
       >
-        {tooltipStr !== null && (
-          <EuiToolTip data-test-subj="add-tool-tip" content={tooltipStr} position="bottom">
-            <EuiIcon type="calendar" />
-          </EuiToolTip>
-        )}
         {prefix}
         <span className="field-value">{field}: </span>
         <span className="field-value">&quot;{val}&quot;</span>

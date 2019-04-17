@@ -90,8 +90,15 @@ export const mockGlobalState: State = {
   inputs: {
     global: {
       timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
+      linkTo: ['timeline'],
       query: [],
-      policy: { kind: 'manual', duration: 5000 },
+      policy: { kind: 'manual', duration: 500000 },
+    },
+    timeline: {
+      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
+      linkTo: ['global'],
+      query: [],
+      policy: { kind: 'manual', duration: 500000 },
     },
   },
   dragAndDrop: { dataProviders: {} },

@@ -28,6 +28,8 @@ describe('Timeline', () => {
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   };
+  const startDate = new Date('2018-03-23T18:49:23.132Z').valueOf();
+  const endDate = new Date('2018-03-24T03:33:52.253Z').valueOf();
 
   const indexPattern = mockIndexPattern;
 
@@ -43,9 +45,11 @@ describe('Timeline', () => {
           columns={defaultHeaders}
           id="foo"
           dataProviders={mockDataProviders}
+          end={endDate}
           flyoutHeight={testFlyoutHeight}
           flyoutHeaderHeight={flyoutHeaderHeight}
           indexPattern={indexPattern}
+          isLive={false}
           itemsPerPage={5}
           itemsPerPageOptions={[5, 10, 20]}
           kqlMode="search"
@@ -57,6 +61,7 @@ describe('Timeline', () => {
           onToggleDataProviderEnabled={jest.fn()}
           onToggleDataProviderExcluded={jest.fn()}
           show={true}
+          start={startDate}
           sort={sort}
         />
       );
@@ -72,9 +77,11 @@ describe('Timeline', () => {
               columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
+              end={endDate}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
+              isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
@@ -86,6 +93,7 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              start={startDate}
               sort={sort}
             />
           </MockedProvider>
@@ -104,9 +112,11 @@ describe('Timeline', () => {
               columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
+              end={endDate}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
+              isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
@@ -118,6 +128,7 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              start={startDate}
               sort={sort}
             />
           </MockedProvider>
@@ -136,9 +147,11 @@ describe('Timeline', () => {
               columns={defaultHeaders}
               id="foo"
               dataProviders={mockDataProviders}
+              end={endDate}
               flyoutHeight={testFlyoutHeight}
               flyoutHeaderHeight={flyoutHeaderHeight}
               indexPattern={indexPattern}
+              isLive={false}
               itemsPerPage={5}
               itemsPerPageOptions={[5, 10, 20]}
               kqlMode="search"
@@ -150,6 +163,7 @@ describe('Timeline', () => {
               onToggleDataProviderEnabled={jest.fn()}
               onToggleDataProviderExcluded={jest.fn()}
               show={true}
+              start={startDate}
               sort={sort}
             />
           </MockedProvider>
@@ -173,9 +187,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -187,6 +203,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -212,9 +229,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -226,6 +245,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -259,9 +279,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -273,6 +295,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -310,9 +333,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={mockDataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -324,6 +349,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -362,9 +388,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -376,6 +404,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -406,9 +435,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -420,6 +451,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -454,9 +486,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -468,6 +502,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={mockOnToggleDataProviderEnabled}
                 onToggleDataProviderExcluded={jest.fn()}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>
@@ -506,9 +541,11 @@ describe('Timeline', () => {
                 columns={defaultHeaders}
                 id="foo"
                 dataProviders={dataProviders}
+                end={endDate}
                 flyoutHeight={testFlyoutHeight}
                 flyoutHeaderHeight={flyoutHeaderHeight}
                 indexPattern={indexPattern}
+                isLive={false}
                 itemsPerPage={5}
                 itemsPerPageOptions={[5, 10, 20]}
                 kqlMode="search"
@@ -520,6 +557,7 @@ describe('Timeline', () => {
                 onToggleDataProviderEnabled={jest.fn()}
                 onToggleDataProviderExcluded={mockOnToggleDataProviderExcluded}
                 show={true}
+                start={startDate}
                 sort={sort}
               />
             </MockedProvider>

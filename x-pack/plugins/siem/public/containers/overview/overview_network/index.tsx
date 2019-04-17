@@ -27,7 +27,6 @@ export interface OverviewNetworkProps extends QueryTemplateProps {
   children: (args: OverviewNetworkArgs) => React.ReactNode;
   sourceId: string;
   endDate: number;
-  poll: number;
   startDate: number;
 }
 
