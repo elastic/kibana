@@ -92,29 +92,31 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     } = this.props;
     return (
       <EuiPanel>
-      <LoadMoreTable
-        columns={getHostsColumns(startDate, type)}
-        loadingTitle={i18n.HOSTS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
-        hasNextPage={hasNextPage}
-        itemsPerRow={rowItems}
-        onChange={this.onChange}updateLimitPagination={newLimit =>
-          updateLimitPagination({ limit: newLimit, hostsType: type })
-        }
-        sorting={{ field: getNodeField(sortField), direction }}title={
-          <h3>
-            {i18n.HOSTS}
-            <Sup>
-              <EuiIconTip content={i18n.TOOLTIP} position="right" />
-            </Sup>
-            <CountBadge color="hollow">{totalCount}</CountBadge>
-          </h3>
-        }
-      />
-    </EuiPanel>
+        <LoadMoreTable
+          columns={getHostsColumns(startDate, type)}
+          loadingTitle={i18n.HOSTS}
+          loading={loading}
+          pageOfItems={data}
+          loadMore={() => loadMore(nextCursor)}
+          limit={limit}
+          hasNextPage={hasNextPage}
+          itemsPerRow={rowItems}
+          onChange={this.onChange}
+          updateLimitPagination={newLimit =>
+            updateLimitPagination({ limit: newLimit, hostsType: type })
+          }
+          sorting={{ field: getNodeField(sortField), direction }}
+          title={
+            <h3>
+              {i18n.HOSTS}
+              <Sup>
+                <EuiIconTip content={i18n.TOOLTIP} position="right" />
+              </Sup>
+              <CountBadge color="hollow">{totalCount}</CountBadge>
+            </h3>
+          }
+        />
+      </EuiPanel>
     );
   }
 

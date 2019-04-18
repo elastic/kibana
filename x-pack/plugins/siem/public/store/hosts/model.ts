@@ -34,7 +34,16 @@ export interface GenericHostsModel {
   queries: Queries;
 }
 
+export interface OverviewStatHostModel {
+  hostName: string | null;
+  lastSeen: string | null;
+}
+
+export interface DetailsHostsModel extends GenericHostsModel {
+  overviewStatHost: OverviewStatHostModel;
+}
+
 export interface HostsModel {
   page: GenericHostsModel;
-  details: GenericHostsModel;
+  details: DetailsHostsModel;
 }
