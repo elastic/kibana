@@ -22,7 +22,6 @@ import { delay } from 'bluebird';
 import chromeDriver from 'chromedriver';
 // @ts-ignore types not available
 import geckoDriver from 'geckodriver';
-
 // @ts-ignore types for 4.0 not available yet
 import { Builder, By, Key, logging, until } from 'selenium-webdriver';
 // @ts-ignore types not available
@@ -100,7 +99,7 @@ async function attemptToCreateCommand(log: ToolingLog, browserType: 'chrome' | '
     // Only chrome supports this option.
     log.debug('NETWORK THROTTLED: 768k down, 256k up, 100ms latency.');
 
-    session.setNetworkConditions({
+    (session as any).setNetworkConditions({
       offline: false,
       latency: 100, // Additional latency (ms).
       download_throughput: 768 * 1024, // These speeds are in bites per second, not kilobytes.
