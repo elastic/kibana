@@ -282,7 +282,7 @@ module.exports = function (grunt) {
     }),
 
     test_server: scriptWithGithubChecks({
-      title: 'Test server',
+      title: 'Server tests',
       cmd: 'yarn',
       args: [
         'run',
