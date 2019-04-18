@@ -68,6 +68,12 @@ module.exports = function (grunt) {
     cmd: 'yarn',
     args: ['run', 'github-checks-reporter', title, cmd, ...args],
   });
+  const gruntTaskWithGithubChecks = (title, task) =>
+    scriptWithGithubChecks({
+      title,
+      cmd: 'yarn',
+      args: ['run', 'grunt', task]
+    });
 
   return {
     // used by the test and jenkins:unit tasks
@@ -261,75 +267,17 @@ module.exports = function (grunt) {
       ],
     }),
 
-    licenses: scriptWithGithubChecks({
-      title: 'Licenses',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'licenses'
-      ]
-    }),
-
-    verifyDependencyVersions: scriptWithGithubChecks({
-      title: 'Verify dependency versions',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'verifyDependencyVersions'
-      ]
-    }),
-
-    test_server: scriptWithGithubChecks({
-      title: 'Server tests',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'test:server'
-      ]
-    }),
-
-    test_jest: scriptWithGithubChecks({
-      title: 'Jest tests',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'test:jest'
-      ]
-    }),
-
-    test_jest_integration: scriptWithGithubChecks({
-      title: 'Jest integration tests',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'test:jest_integration'
-      ]
-    }),
-
-    test_projects: scriptWithGithubChecks({
-      title: 'Project tests',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'test:projects'
-      ]
-    }),
-
-    test_browser_ci: scriptWithGithubChecks({
-      title: 'Browser tests',
-      cmd: 'yarn',
-      args: [
-        'run',
-        'grunt',
-        'test:browser-ci'
-      ]
-    }),
+    licenses: gruntTaskWithGithubChecks('Licenses', 'licenses'),
+    verifyDependencyVersions:
+      gruntTaskWithGithubChecks('Verify dependency versions', 'verifyDependencyVersions'),
+    test_server:
+      gruntTaskWithGithubChecks('Server tests', 'test:server'),
+    test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
+    test_jest_integration:
+      gruntTaskWithGithubChecks('Jest integration tests', 'test:jest_integration'),
+    test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
+    test_browser_ci:
+      gruntTaskWithGithubChecks('Browser tests', 'test:browser-ci'),
 
     ...getFunctionalTestGroupRunConfigs({
       kibanaInstallDir: KIBANA_INSTALL_DIR
