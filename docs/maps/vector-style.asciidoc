@@ -29,6 +29,9 @@ Set border color to style line geometries.
 
 Use static styling to specificy a constant value for a style property.
 
+The image below shows an example of static styling using the <<add-sample-data, Kibana sample web logs>> data set.
+The *kibana_sample_data_logs* layer uses static styling for all properties.
+
 [role="screenshot"]
 image::maps/images/vector_style_static.png[]
 
