@@ -31,12 +31,6 @@ function StringParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  const { displayName, name, disabled } = aggParam;
-
-  if (disabled && disabled(agg)) {
-    return null;
-  }
-
   useEffect(
     () => {
       if (aggParam.required) {
@@ -48,14 +42,14 @@ function StringParamEditor({
 
   return (
     <EuiFormRow
-      label={displayName || name}
+      label={aggParam.displayName || aggParam.name}
       fullWidth={true}
       className="visEditorSidebar__aggParamFormRow"
       isInvalid={isInvalid}
     >
       <EuiFieldText
         value={value || ''}
-        data-test-subj={`visEditorStringInput${agg.id}${name}`}
+        data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
         onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
         onBlur={setTouched}

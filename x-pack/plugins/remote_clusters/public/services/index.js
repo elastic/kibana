@@ -45,3 +45,7 @@ export {
   getRouter,
   getRouterLinkProps,
 } from './routing';
+
+export {
+  trackUiMetric,
+} from './track_ui_metric';

@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
-import { selectElement } from '../../../state/actions/transient';
+import { selectToplevelNodes } from '../../../state/actions/transient';
 import { canUserWrite, getAppReady } from '../../../state/selectors/app';
 import { getWorkpad, isWriteable } from '../../../state/selectors/workpad';
 import { LoadWorkpad } from './load_workpad';
@@ -25,7 +25,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   deselectElement(ev) {
     ev && ev.stopPropagation();
-    dispatch(selectElement(null));
+    dispatch(selectToplevelNodes([]));
   },
 });
 

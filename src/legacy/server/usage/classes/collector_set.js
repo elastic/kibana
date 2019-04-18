@@ -107,6 +107,7 @@ export class CollectorSet {
 
   // convert an array of fetched stats results into key/object
   toObject(statsData) {
+    if (!statsData) return {};
     return statsData.reduce((accumulatedStats, { type, result }) => {
       return {
         ...accumulatedStats,

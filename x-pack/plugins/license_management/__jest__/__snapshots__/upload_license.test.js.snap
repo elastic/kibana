@@ -153,7 +153,6 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
               >
                 <EuiTitle
                   size="m"
-                  textTransform="none"
                 >
                   <h1
                     className="euiTitle euiTitle--medium"
@@ -231,23 +230,27 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                 class="euiModalBody"
                               >
                                 <div
-                                  class="euiText euiText--medium"
-                                  data-test-subj="confirmModalBodyText"
+                                  class="euiModalBody__overflow"
                                 >
-                                  <div>
-                                    <div
-                                      class="euiText euiText--medium"
-                                    >
-                                      Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                    </div>
-                                    <div
-                                      class="euiText euiText--medium"
-                                    >
-                                      <ul>
-                                        <li>
-                                          Watcher will be disabled
-                                        </li>
-                                      </ul>
+                                  <div
+                                    class="euiText euiText--medium"
+                                    data-test-subj="confirmModalBodyText"
+                                  >
+                                    <div>
+                                      <div
+                                        class="euiText euiText--medium"
+                                      >
+                                        Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                      </div>
+                                      <div
+                                        class="euiText euiText--medium"
+                                      >
+                                        <ul>
+                                          <li>
+                                            Watcher will be disabled
+                                          </li>
+                                        </ul>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>
@@ -426,23 +429,27 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                           class="euiModalBody"
                                         >
                                           <div
-                                            class="euiText euiText--medium"
-                                            data-test-subj="confirmModalBodyText"
+                                            class="euiModalBody__overflow"
                                           >
-                                            <div>
-                                              <div
-                                                class="euiText euiText--medium"
-                                              >
-                                                Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                              </div>
-                                              <div
-                                                class="euiText euiText--medium"
-                                              >
-                                                <ul>
-                                                  <li>
-                                                    Watcher will be disabled
-                                                  </li>
-                                                </ul>
+                                            <div
+                                              class="euiText euiText--medium"
+                                              data-test-subj="confirmModalBodyText"
+                                            >
+                                              <div>
+                                                <div
+                                                  class="euiText euiText--medium"
+                                                >
+                                                  Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                </div>
+                                                <div
+                                                  class="euiText euiText--medium"
+                                                >
+                                                  <ul>
+                                                    <li>
+                                                      Watcher will be disabled
+                                                    </li>
+                                                  </ul>
+                                                </div>
                                               </div>
                                             </div>
                                           </div>
@@ -536,23 +543,27 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                             class="euiModalBody"
                                           >
                                             <div
-                                              class="euiText euiText--medium"
-                                              data-test-subj="confirmModalBodyText"
+                                              class="euiModalBody__overflow"
                                             >
-                                              <div>
-                                                <div
-                                                  class="euiText euiText--medium"
-                                                >
-                                                  Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                                </div>
-                                                <div
-                                                  class="euiText euiText--medium"
-                                                >
-                                                  <ul>
-                                                    <li>
-                                                      Watcher will be disabled
-                                                    </li>
-                                                  </ul>
+                                              <div
+                                                class="euiText euiText--medium"
+                                                data-test-subj="confirmModalBodyText"
+                                              >
+                                                <div>
+                                                  <div
+                                                    class="euiText euiText--medium"
+                                                  >
+                                                    Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                  </div>
+                                                  <div
+                                                    class="euiText euiText--medium"
+                                                  >
+                                                    <ul>
+                                                      <li>
+                                                        Watcher will be disabled
+                                                      </li>
+                                                    </ul>
+                                                  </div>
                                                 </div>
                                               </div>
                                             </div>
@@ -688,45 +699,41 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                                     <div
                                       className="euiModalBody"
                                     >
-                                      <EuiText
-                                        data-test-subj="confirmModalBodyText"
-                                        grow={true}
-                                        size="m"
+                                      <div
+                                        className="euiModalBody__overflow"
                                       >
-                                        <div
-                                          className="euiText euiText--medium"
+                                        <EuiText
                                           data-test-subj="confirmModalBodyText"
                                         >
-                                          <div>
-                                            <EuiText
-                                              grow={true}
-                                              size="m"
-                                            >
-                                              <div
-                                                className="euiText euiText--medium"
-                                              >
-                                                Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
-                                              </div>
-                                            </EuiText>
-                                            <EuiText
-                                              grow={true}
-                                              size="m"
-                                            >
-                                              <div
-                                                className="euiText euiText--medium"
-                                              >
-                                                <ul>
-                                                  <li
-                                                    key="Watcher will be disabled"
-                                                  >
-                                                    Watcher will be disabled
-                                                  </li>
-                                                </ul>
-                                              </div>
-                                            </EuiText>
+                                          <div
+                                            className="euiText euiText--medium"
+                                            data-test-subj="confirmModalBodyText"
+                                          >
+                                            <div>
+                                              <EuiText>
+                                                <div
+                                                  className="euiText euiText--medium"
+                                                >
+                                                  Some functionality will be lost if you replace your TRIAL license with a BASIC license. Review the list of features below.
+                                                </div>
+                                              </EuiText>
+                                              <EuiText>
+                                                <div
+                                                  className="euiText euiText--medium"
+                                                >
+                                                  <ul>
+                                                    <li
+                                                      key="Watcher will be disabled"
+                                                    >
+                                                      Watcher will be disabled
+                                                    </li>
+                                                  </ul>
+                                                </div>
+                                              </EuiText>
+                                            </div>
                                           </div>
-                                        </div>
-                                      </EuiText>
+                                        </EuiText>
+                                      </div>
                                     </div>
                                   </EuiModalBody>
                                   <EuiModalFooter>
@@ -823,10 +830,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                     </EuiConfirmModal>
                   </Portal>
                 </EuiOverlayMask>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <div
                     className="euiText euiText--medium"
                   >
@@ -870,10 +874,7 @@ exports[`UploadLicense should display a modal when license requires acknowledgem
                   <div
                     className="euiForm"
                   >
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -1227,7 +1228,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
               >
                 <EuiTitle
                   size="m"
-                  textTransform="none"
                 >
                   <h1
                     className="euiTitle euiTitle--medium"
@@ -1246,10 +1246,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <div
                     className="euiText euiText--medium"
                   >
@@ -1320,7 +1317,6 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                             </span>
                           </div>
                           <EuiText
-                            grow={true}
                             size="s"
                           >
                             <div
@@ -1339,10 +1335,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
                         </div>
                       </EuiCallOut>
                     </EuiI18n>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -1722,7 +1715,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
               >
                 <EuiTitle
                   size="m"
-                  textTransform="none"
                 >
                   <h1
                     className="euiTitle euiTitle--medium"
@@ -1741,10 +1733,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <div
                     className="euiText euiText--medium"
                   >
@@ -1815,7 +1804,6 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                             </span>
                           </div>
                           <EuiText
-                            grow={true}
                             size="s"
                           >
                             <div
@@ -1834,10 +1822,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
                         </div>
                       </EuiCallOut>
                     </EuiI18n>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -2217,7 +2202,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
               >
                 <EuiTitle
                   size="m"
-                  textTransform="none"
                 >
                   <h1
                     className="euiTitle euiTitle--medium"
@@ -2236,10 +2220,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <div
                     className="euiText euiText--medium"
                   >
@@ -2310,7 +2291,6 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                             </span>
                           </div>
                           <EuiText
-                            grow={true}
                             size="s"
                           >
                             <div
@@ -2329,10 +2309,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
                         </div>
                       </EuiCallOut>
                     </EuiI18n>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >
@@ -2712,7 +2689,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
               >
                 <EuiTitle
                   size="m"
-                  textTransform="none"
                 >
                   <h1
                     className="euiTitle euiTitle--medium"
@@ -2731,10 +2707,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                     className="euiSpacer euiSpacer--l"
                   />
                 </EuiSpacer>
-                <EuiText
-                  grow={true}
-                  size="m"
-                >
+                <EuiText>
                   <div
                     className="euiText euiText--medium"
                   >
@@ -2805,7 +2778,6 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                             </span>
                           </div>
                           <EuiText
-                            grow={true}
                             size="s"
                           >
                             <div
@@ -2824,10 +2796,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
                         </div>
                       </EuiCallOut>
                     </EuiI18n>
-                    <EuiText
-                      grow={true}
-                      size="m"
-                    >
+                    <EuiText>
                       <div
                         className="euiText euiText--medium"
                       >

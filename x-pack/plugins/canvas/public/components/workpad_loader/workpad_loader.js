@@ -17,6 +17,7 @@ import {
   EuiToolTip,
   EuiEmptyPrompt,
   EuiFilePicker,
+  EuiLink,
 } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import moment from 'moment';
@@ -230,7 +231,17 @@ export class WorkpadLoader extends React.PureComponent {
         titleSize="s"
         body={
           <Fragment>
-            <p>Create a new workpad or drag and drop previously built workpad JSON files here.</p>
+            <p>
+              Create a new workpad, start from a template, or import a workpad JSON file by dropping
+              it here.
+            </p>
+            <p>
+              New to Canvas?{' '}
+              <EuiLink href="kibana#/home/tutorial_directory/sampleData">
+                Try the sample data workpads
+              </EuiLink>
+              .
+            </p>
           </Fragment>
         }
       />

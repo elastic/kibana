@@ -41,11 +41,11 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await pageObjects.infraHome.openSourceConfigurationFlyout();
 
         const nameInput = await infraSourceConfigurationFlyout.getNameInput();
-        await nameInput.clearValue();
+        await nameInput.clearValueWithKeyboard({ charByChar: true });
         await nameInput.type('Modified Source');
 
         const metricIndicesInput = await infraSourceConfigurationFlyout.getMetricIndicesInput();
-        await metricIndicesInput.clearValue();
+        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await metricIndicesInput.type('does-not-exist-*');
 
         await infraSourceConfigurationFlyout.saveConfiguration();
@@ -60,7 +60,7 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
         await pageObjects.infraHome.openSourceConfigurationFlyout();
 
         const metricIndicesInput = await infraSourceConfigurationFlyout.getMetricIndicesInput();
-        await metricIndicesInput.clearValue();
+        await metricIndicesInput.clearValueWithKeyboard({ charByChar: true });
         await metricIndicesInput.type('metricbeat-*');
 
         await infraSourceConfigurationFlyout.saveConfiguration();

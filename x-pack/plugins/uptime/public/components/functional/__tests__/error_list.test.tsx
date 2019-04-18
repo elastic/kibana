@@ -7,7 +7,7 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { ErrorListItem } from '../../../../common/graphql/types';
-import { ErrorList } from '../error_list';
+import { ErrorListComponent } from '../error_list';
 
 describe('ErrorList component', () => {
   let getErrorListResponse: { errorList: ErrorListItem[] };
@@ -57,7 +57,7 @@ describe('ErrorList component', () => {
 
   it('renders the error list without errors', () => {
     const { errorList } = getErrorListResponse;
-    const component = shallowWithIntl(<ErrorList loading={false} errorList={errorList} />);
+    const component = shallowWithIntl(<ErrorListComponent loading={false} data={{ errorList }} />);
     expect(component).toMatchSnapshot();
   });
 });
