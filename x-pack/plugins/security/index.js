@@ -11,6 +11,7 @@ import { initUsersApi } from './server/routes/api/v1/users';
 import { initPublicRolesApi } from './server/routes/api/public/roles';
 import { initPrivilegesApi } from './server/routes/api/public/privileges';
 import { initIndicesApi } from './server/routes/api/v1/indices';
+import { initOverwrittenSessionView } from './server/routes/views/overwritten_session';
 import { initLoginView } from './server/routes/views/login';
 import { initLogoutView } from './server/routes/views/logout';
 import { initLoggedOutView } from './server/routes/views/logged_out';
@@ -77,6 +78,12 @@ export const security = (kibana) => new kibana.Plugin({
       id: 'login',
       title: 'Login',
       main: 'plugins/security/views/login',
+      hidden: true,
+    }, {
+      id: 'overwritten_session',
+      title: 'Overwritten Session',
+      main: 'plugins/security/views/overwritten_session',
+      description: 'The view is shown when user had an active session previously, but logged in as a different user.',
       hidden: true,
     }, {
       id: 'logout',
@@ -220,6 +227,7 @@ export const security = (kibana) => new kibana.Plugin({
     initLoginView(server, xpackMainPlugin);
     initLogoutView(server);
     initLoggedOutView(server);
+    initOverwrittenSessionView(server);
 
     server.injectUiAppVars('login', () => {
 
