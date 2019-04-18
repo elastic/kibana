@@ -122,8 +122,14 @@ dashboards. Kibana creates a new index if the index doesn’t already exist.
 
 `logging.dest:`:: *Default: `stdout`* Enables you specify a file where Kibana stores log output.
 
-`logging.quiet:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output other than
-error messages.
+`logging.json:`:: *Default: false* Logs output as JSON. When set to `true`, the 
+logs will be formatted as JSON strings that include timestamp, log level, context, message 
+text and any other metadata that may be associated with the log message itself. 
+If `logging.dest.stdout` is set and there is no interactive terminal ("TTY"), this setting
+will default to `true`.
+
+`logging.quiet:`:: *Default: false* Set the value of this setting to `true` to
+suppress all logging output other than error messages.
 
 `logging.silent:`:: *Default: false* Set the value of this setting to `true` to suppress all logging output.
 
