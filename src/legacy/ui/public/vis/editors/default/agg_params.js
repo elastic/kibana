@@ -205,7 +205,6 @@ uiModules
             attrs['editor-component'] = `agg.type.params[${idx}].editorComponent`;
             attrs['indexed-fields'] = 'indexedFields';
             attrs['editor-config'] = 'editorConfig';
-            attrs.vis = 'vis';
             // The form should interact with reactified components as well.
             // So we set the ng-model (using a random ng-model variable) to have the method to set dirty
             // inside the  agg_param.js directive, which can get access to the ngModelController to manipulate it.

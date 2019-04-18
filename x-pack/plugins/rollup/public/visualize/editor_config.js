@@ -62,13 +62,10 @@ export function initEditorConfig() {
         time_zone: {
           fixedValue: timezone,
         },
-        interval: {
-          fixedValue: 'custom',
-        },
         useNormalizedEsInterval: {
           fixedValue: false,
         },
-        customInterval: {
+        interval: {
           default: interval,
           timeBase: interval,
           help: i18n.translate('xpack.rollupJobs.editorConfig.dateHistogram.customInterval.helpText', {

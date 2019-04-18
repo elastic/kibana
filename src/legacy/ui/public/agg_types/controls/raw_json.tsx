@@ -49,8 +49,8 @@ function RawJsonParamEditor({
 
   const onChange = (ev: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textValue = ev.target.value;
-    setValidity(isValidJson(textValue));
     setValue(textValue);
+    setValidity(isValidJson(textValue));
   };
 
   setValidity(isValidJson(value));

@@ -32,7 +32,7 @@ interface AggParam {
 interface AggParamOption {
   val: string;
   display: string;
-  enabled(agg: AggConfig): void;
+  enabled?(agg: AggConfig): void;
 }
 
 export { AggParam, AggParamOption };

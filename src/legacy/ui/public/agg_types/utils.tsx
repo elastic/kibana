@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { parseInterval } from '../utils/parse_interval';
+import { leastCommonInterval } from '../vis/lib/least_common_interval';
+
 function isValidJson(value: string): boolean {
   if (!value || value.length === 0) {
     return true;
@@ -40,4 +43,24 @@ function isValidJson(value: string): boolean {
   }
 }
 
-export { isValidJson };
+function check(value: string, baseInterval?: string) {
+  if (baseInterval) {
+    return _parseWithBase(value, baseInterval) === true;
+  } else {
+    return parseInterval(value) != null;
+  }
+}
+
+// When base interval is set, check for least common interval and allow
+// input the value is the same. This means that the input interval is a
+// multiple of the base interval.
+function _parseWithBase(value: string, baseInterval: string) {
+  try {
+    const interval = leastCommonInterval(baseInterval, value);
+    return interval === value.replace(/\s/g, '');
+  } catch (e) {
+    return false;
+  }
+}
+
+export { isValidJson, check as parseInterval };
