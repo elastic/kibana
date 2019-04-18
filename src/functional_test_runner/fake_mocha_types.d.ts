@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { Config } from './config/config';
-export { Lifecycle } from './lifecycle';
+/**
+ * The real mocha types conflict with the global jest types, because
+ * globals are terrible. So instead of using any for everything this
+ * tries to mock out simple versions of the Mocha types
+ */
+
+import EventEmitter from 'events';
+
+export interface Suite {
+  suites: Suite[];
+  tests: Test[];
+}
+
+export interface Test {
+  fullTitle(): string;
+}
+
+export interface Runner extends EventEmitter {
+  failures: any[];
+  abort(): void;
+}
+
+export interface Mocha {
+  run(cb: () => void): Runner;
+}
