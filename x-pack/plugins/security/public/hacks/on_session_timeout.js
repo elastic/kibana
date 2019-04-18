@@ -65,9 +65,7 @@ module.config(($httpProvider) => {
 
     function interceptorFactory(responseHandler) {
       return function interceptor(response) {
-        // If another interceptor has rejected a request, then config will be undefined.
-        const isSystemRequest = response.config ? isSystemApiRequest(response.config) : false;
-        if (!isUnauthenticated && !isSystemRequest && sessionTimeout !== null) {
+        if (!isUnauthenticated && !isSystemApiRequest(response.config) && sessionTimeout !== null) {
           clearNotifications();
           scheduleNotification();
         }
