@@ -41,12 +41,12 @@ export class ProviderCollection {
     return pageObjects;
   };
 
-  public loadExternalService(name: string, provider: (...args: any) => any) {
+  public loadExternalService(name: string, provider: (...args: any[]) => any) {
     return this.getInstance('Service', name, provider);
   }
 
   public async loadAll() {
-    const asyncInitFailures = [];
+    const asyncInitFailures: string[] = [];
 
     await Promise.all(
       this.providers.map(async ({ type, name }) => {
