@@ -8,7 +8,7 @@ import React, { useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiInMemoryTable, EuiPanel, EuiProgress, EuiTitle } from '@elastic/eui';
+import { EuiInMemoryTable, EuiPanel, EuiProgress, EuiTitle, SortDirection } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -91,7 +91,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   const sorting = {
     sort: {
       field: columns[0].field,
-      direction: 'asc',
+      direction: SortDirection.ASC,
     },
   };
 
