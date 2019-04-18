@@ -18,7 +18,7 @@
  */
 
 import { data } from 'plugins/data';
-const { toUser, fromUser } = data;
+const { toUser, fromUser } = data.helpers;
 import { uiModules } from '../../modules';
 
 uiModules
