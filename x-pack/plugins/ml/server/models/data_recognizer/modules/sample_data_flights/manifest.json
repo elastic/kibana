@@ -1,5 +1,5 @@
 {
-  "id": "sample_dataset_flights",
+  "id": "sample_data_flights",
   "title": "Kibana Sample Data Flights",
   "description": "Find anomalies in Kibana Sample Data for Flights",
   "type": "Sample Dataset",

@@ -1,5 +1,5 @@
 {
-  "id": "sample_dataset_weblogs",
+  "id": "sample_data_weblogs",
   "title": "Kibana Sample Data Web Logs",
   "description": "Find anomalies in Kibana Sample Data for Web Logs",
   "type": "Sample Dataset",
