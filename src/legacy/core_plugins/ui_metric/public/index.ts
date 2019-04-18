@@ -29,10 +29,11 @@ uiModules.get('kibana').run($http => {
 });
 
 export function trackUiMetric(appName: string, metricType: string | string[]) {
+  if (!getCanTrackUiMetrics()) {
+    return;
+  }
+
   const metricTypes = Array.isArray(metricType) ? metricType.join(',') : metricType;
   const uri = chrome.addBasePath(`${API_BASE_PATH}/${appName}/${metricTypes}`);
-
-  if (getCanTrackUiMetrics()) {
-    _http.post(uri);
-  }
+  _http.post(uri);
 }
