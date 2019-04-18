@@ -43,6 +43,7 @@ export default function (Private) {
     this.fieldFormatMap = {};
     this.routes = getRoutes();
 
+    this.getIndex = () => pattern;
     this.getComputedFields = getComputedFields.bind(this);
     this.flattenHit = flattenHit(this);
     this.formatHit = formatHit(this, fieldFormats.getDefaultInstance('string'));
