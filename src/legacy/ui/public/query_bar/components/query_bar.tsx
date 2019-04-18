@@ -332,7 +332,9 @@ export class QueryBarUI extends Component<Props, State> {
   };
 
   public onOutsideClick = () => {
-    this.setState({ isSuggestionsVisible: false, index: null });
+    if (this.state.isSuggestionsVisible) {
+      this.setState({ isSuggestionsVisible: false, index: null });
+    }
   };
 
   public onClickInput = (event: React.MouseEvent<HTMLInputElement>) => {
