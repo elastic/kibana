@@ -23,7 +23,33 @@ export function getElasticsearchInstructions(product, {
   checkingMigrationStatus,
   hasCheckedMigrationStatus
 }) {
-  const disableInternalCollection = {
+  const enableCollectionStep = {
+    title: 'Enable monitoring collection',
+    children: (
+      <Fragment>
+        <p>
+          Set the xpack.monitoring.collection.enabled setting to true on each node in the production cluster.
+          By default, it is disabled (false).
+        </p>
+        <EuiSpacer size="s"/>
+        <EuiCodeBlock
+          isCopyable
+          language="curl"
+        >
+          {`
+PUT _cluster/settings
+{
+  "persistent": {
+    "xpack.monitoring.collection.enabled": true
+  }
+}
+          `}
+        </EuiCodeBlock>
+      </Fragment>
+    )
+  };
+
+  const disableInternalCollectionStep = {
     title: 'Disable the default collection of Elasticsearch monitoring metrics',
     children: (
       <Fragment>
@@ -49,7 +75,88 @@ PUT _cluster/settings
     )
   };
 
-  let updateStep = null;
+  const installMetricbeatStep = {
+    title: 'Install Metricbeat on the same node as Elasticsearch',
+    children: (
+      <Fragment>
+        <p>
+          Follow <EuiLink to="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html">the instructions here</EuiLink>
+        </p>
+      </Fragment>
+    )
+  };
+
+
+  const enableMetricbeatModuleStep = {
+    title: 'Enable and configure the Elasticsearch module in Metricbeat',
+    children: (
+      <Fragment>
+        <EuiCodeBlock
+          isCopyable
+          language="bash"
+        >
+            metricbeat modules enable elasticsearch
+        </EuiCodeBlock>
+        <EuiSpacer size="s"/>
+        <p>Then, configure the module</p>
+        <EuiSpacer size="s"/>
+        <EuiCodeBlock
+          isCopyable
+        >
+          {`
+- module: elasticsearch
+  metricsets:
+    - ccr
+    - cluster_stats
+    - index
+    - index_recovery
+    - index_summary
+    - ml_job
+    - node_stats
+    - shard
+  period: 10s
+  hosts: ["${esMonitoringUrl}"]
+  xpack.enabled: true
+`}
+        </EuiCodeBlock>
+      </Fragment>
+    )
+  };
+
+  const configureMetricbeatStep = {
+    title: 'Configure metricbeat to send to the monitoring cluster',
+    children: (
+      <Fragment>
+        <EuiCodeBlock
+          isCopyable
+        >
+          {`
+output.elasticsearch:
+  hosts: ["${esMonitoringUrl}"]
+`}
+        </EuiCodeBlock>
+      </Fragment>
+
+    )
+  };
+
+  const startMetricbeatStep = {
+    title: 'Start Metricbeat',
+    children: (
+      <Fragment>
+        <EuiCodeBlock
+          isCopyable
+        >
+          {`
+./metricbeat -e
+`}
+        </EuiCodeBlock>
+      </Fragment>
+
+    )
+  };
+
+  let migrationStatusStep = null;
   if (product.isInternalCollector || product.isPartiallyMigrated) {
     let status = null;
     if (hasCheckedMigrationStatus) {
@@ -86,7 +193,7 @@ PUT _cluster/settings
       }
     }
 
-    updateStep = {
+    migrationStatusStep = {
       title: 'Migration status',
       status: 'incomplete',
       children: (
@@ -109,7 +216,7 @@ PUT _cluster/settings
     };
   }
   else if (product.isFullyMigrated) {
-    updateStep = {
+    migrationStatusStep = {
       title: 'Migration status',
       status: 'complete',
       children: (
@@ -128,116 +235,18 @@ PUT _cluster/settings
 
   if (product.isPartiallyMigrated) {
     return [
-      disableInternalCollection,
-      updateStep
+      disableInternalCollectionStep,
+      migrationStatusStep
     ];
   }
 
-  const instructions = [
-    {
-      title: 'Enable monitoring collection',
-      children: (
-        <Fragment>
-          <p>
-            Set the xpack.monitoring.collection.enabled setting to true on each node in the production cluster.
-            By default, it is disabled (false).
-          </p>
-          <EuiSpacer size="s"/>
-          <EuiCodeBlock
-            isCopyable
-            language="curl"
-          >
-            {`
-PUT _cluster/settings
-{
-  "persistent": {
-    "xpack.monitoring.collection.enabled": true
-  }
-}
-            `}
-          </EuiCodeBlock>
-        </Fragment>
-      )
-    },
-    disableInternalCollection,
-    {
-      title: 'Install Metricbeat on the same node as Elastcisearch',
-      children: (
-        <Fragment>
-          <p>
-            Follow <EuiLink to="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html">the instructions here</EuiLink>
-          </p>
-        </Fragment>
-      )
-    },
-    {
-      title: 'Enable and configure the Elasticsearch module in Metricbeat',
-      children: (
-        <Fragment>
-          <EuiCodeBlock
-            isCopyable
-            language="bash"
-          >
-            metricbeat modules enable elasticsearch
-          </EuiCodeBlock>
-          <EuiSpacer size="s"/>
-          <p>Then, configure the module</p>
-          <EuiSpacer size="s"/>
-          <EuiCodeBlock
-            isCopyable
-          >
-            {`
-- module: elasticsearch
-metricsets:
-  - ccr
-  - cluster_stats
-  - index
-  - index_recovery
-  - index_summary
-  - ml_job
-  - node_stats
-  - shard
-period: 10s
-hosts: ["${esMonitoringUrl}"]
-xpack.enabled: true
-`}
-          </EuiCodeBlock>
-        </Fragment>
-      )
-    },
-    {
-      title: 'Configure metricbeat to send to the monitoring cluster',
-      children: (
-        <Fragment>
-          <EuiCodeBlock
-            isCopyable
-          >
-            {`
-output.elasticsearch:
-  hosts: ["${esMonitoringUrl}"]
-`}
-          </EuiCodeBlock>
-        </Fragment>
-
-      )
-    },
-    {
-      title: 'Start Metricbeat',
-      children: (
-        <Fragment>
-          <EuiCodeBlock
-            isCopyable
-          >
-            {`
-./metricbeat -e
-`}
-          </EuiCodeBlock>
-        </Fragment>
-
-      )
-    },
-    updateStep
+  return [
+    enableCollectionStep,
+    disableInternalCollectionStep,
+    installMetricbeatStep,
+    enableMetricbeatModuleStep,
+    configureMetricbeatStep,
+    startMetricbeatStep,
+    migrationStatusStep
   ];
-
-  return instructions;
 }
