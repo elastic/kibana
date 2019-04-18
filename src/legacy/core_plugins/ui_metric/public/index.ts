@@ -51,6 +51,8 @@ module.config($httpProvider => {
 
 export function track(appName: string, actionType: string) {
   const uri = chrome.addBasePath(`${API_BASE_PATH}/${appName}/${actionType}`);
-  // Silently swallow request failures.
-  _http.post(uri).then(() => {}, () => {});
+  // Silently swallow request failures. Without this empty error handler, Angular will complain
+  // in the console that the rejected promise isn't being handled.
+  const emptyHandler = () => {};
+  _http.post(uri).then(emptyHandler, emptyHandler);
 }
