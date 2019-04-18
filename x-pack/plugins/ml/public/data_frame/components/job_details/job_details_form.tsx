@@ -19,13 +19,13 @@ export interface JobDetailsExposedState {
   valid: boolean;
 }
 
-export function getDefaultJobDetailsState() {
+export function getDefaultJobDetailsState(): JobDetailsExposedState {
   return {
     jobId: '',
     targetIndex: '',
     touched: false,
     valid: false,
-  } as JobDetailsExposedState;
+  };
 }
 
 interface Props {
