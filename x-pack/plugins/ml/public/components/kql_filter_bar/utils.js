@@ -45,7 +45,11 @@ export function escapeRegExp(string) {
 }
 
 export function escapeParens(string) {
-  return string.replace(/[()]/g, '\\$&'); // $& means the whole matched string
+  return string.replace(/[()]/g, '\\$&');
+}
+
+export function escapeDoubleQuotes(string) {
+  return string.replace(/\"/g, '\\$&');
 }
 
 export function getKqlQueryValues(inputValue, indexPattern) {

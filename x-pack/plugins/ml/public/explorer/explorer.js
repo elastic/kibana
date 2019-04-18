@@ -49,7 +49,8 @@ import {
   getKqlQueryValues,
   removeFilterFromQueryString,
   getQueryPattern,
-  escapeParens
+  escapeParens,
+  escapeDoubleQuotes
 } from '../components/kql_filter_bar/utils';
 
 import {
@@ -937,6 +938,7 @@ export const Explorer = injectI18n(injectObservablesAsProps(
       const { queryString } = this.state;
       const operator = 'and ';
       const sanitizedFieldName = escapeParens(fieldName);
+      const sanitizedFieldValue = escapeDoubleQuotes(fieldValue);
 
       if (action === FILTER_ACTION.ADD) {
         // Don't re-add if already exists in the query
@@ -944,12 +946,12 @@ export const Explorer = injectI18n(injectObservablesAsProps(
         if (queryString.match(queryPattern) !== null) {
           return;
         }
-        newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${sanitizedFieldName}:"${fieldValue}"`;
+        newQueryString = `${queryString ? `${queryString} ${operator}` : ''}${sanitizedFieldName}:"${sanitizedFieldValue}"`;
       } else if (action === FILTER_ACTION.REMOVE) {
         if (this.state.filterActive === false) {
           return;
         } else {
-          newQueryString = removeFilterFromQueryString(this.state.queryString, sanitizedFieldName, fieldValue);
+          newQueryString = removeFilterFromQueryString(this.state.queryString, sanitizedFieldName, sanitizedFieldValue);
         }
       }
 
