@@ -108,14 +108,14 @@ export function maps(kibana) {
               all: ['map'],
               read: ['config', 'index-pattern']
             },
-            ui: ['save'],
+            ui: ['save', 'show'],
           },
           read: {
             savedObject: {
               all: [],
               read: ['map', 'config', 'index-pattern']
             },
-            ui: [],
+            ui: ['show'],
           },
         }
       });

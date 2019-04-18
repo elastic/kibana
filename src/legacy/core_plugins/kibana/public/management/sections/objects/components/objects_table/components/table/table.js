@@ -52,7 +52,6 @@ class TableUI extends PureComponent {
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
     goEditObject: PropTypes.func.isRequired,
-    uiCapabilities: PropTypes.object.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -194,15 +193,15 @@ class TableUI extends PureComponent {
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
-          const { inAppUrl } = object.meta;
-          const canGoInApp = inAppUrl && get(this.props.uiCapabilities, inAppUrl.uiCapabilitiesPath);
-          if (!inAppUrl || !canGoInApp) {
+          const { path } = object.meta.inAppUrl;
+          const canGoInApp = this.props.canGoInApp(object);
+          if (!canGoInApp) {
             return (
               <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
             );
           }
           return (
-            <EuiLink href={chrome.addBasePath(inAppUrl.path)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
       },

@@ -235,24 +235,6 @@ exports[`ObjectsTable relationships should show the flyout 1`] = `
       "type": "search",
     }
   }
-  uiCapabilities={
-    Object {
-      "savedObjectsManagement": Object {
-        "dashboard": Object {
-          "read": true,
-        },
-        "index-pattern": Object {
-          "read": true,
-        },
-        "search": Object {
-          "read": true,
-        },
-        "visualization": Object {
-          "read": true,
-        },
-      },
-    }
-  }
 />
 `;
 
@@ -369,24 +351,6 @@ exports[`ObjectsTable should render normally 1`] = `
       }
     }
     totalItemCount={4}
-    uiCapabilities={
-      Object {
-        "savedObjectsManagement": Object {
-          "dashboard": Object {
-            "read": true,
-          },
-          "index-pattern": Object {
-            "read": true,
-          },
-          "search": Object {
-            "read": true,
-          },
-          "visualization": Object {
-            "read": true,
-          },
-        },
-      }
-    }
   />
 </EuiPageContent>
 `;

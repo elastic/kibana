@@ -45,7 +45,7 @@ class RelationshipsUI extends Component {
     savedObject: PropTypes.object.isRequired,
     close: PropTypes.func.isRequired,
     goEditObject: PropTypes.func.isRequired,
-    uiCapabilities: PropTypes.object.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -188,15 +188,15 @@ class RelationshipsUI extends Component {
         dataType: 'string',
         sortable: false,
         render: (title, object) => {
-          const { inAppUrl } = object.meta;
-          const canGoInApp = inAppUrl && get(this.props.uiCapabilities, inAppUrl.uiCapabilitiesPath);
-          if (!inAppUrl || !canGoInApp) {
+          const { path } = object.meta.inAppUrl;
+          const canGoInApp = this.props.canGoInApp(object);
+          if (!canGoInApp) {
             return (
               <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>
             );
           }
           return (
-            <EuiLink href={chrome.addBasePath(inAppUrl.path)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink href={chrome.addBasePath(path)}>{title || getDefaultTitle(object)}</EuiLink>
           );
         },
       },
@@ -217,7 +217,7 @@ class RelationshipsUI extends Component {
                 defaultMessage: 'Edit this saved object',
               }),
             type: 'icon',
-            icon: 'pencil',
+            icon: 'inspect',
             onClick: object => goEditObject(object),
             available: object => !!object.meta.editUrl,
           },

@@ -64,6 +64,7 @@ const defaultProps = {
   onDelete: () => {},
   onExport: () => {},
   goEditObject: () => {},
+  canGoInApp: () => {},
   pageIndex: 1,
   pageSize: 2,
   items: [{

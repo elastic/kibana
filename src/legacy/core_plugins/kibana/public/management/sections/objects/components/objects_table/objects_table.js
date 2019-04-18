@@ -74,7 +74,9 @@ class ObjectsTableUI extends Component {
     perPageConfig: PropTypes.number,
     newIndexPatternUrl: PropTypes.string.isRequired,
     services: PropTypes.array.isRequired,
+    uiCapabilities: PropTypes.object.isRequired,
     goEditObject: PropTypes.func.isRequired,
+    canGoInApp: PropTypes.func.isRequired,
   };
 
   constructor(props) {
@@ -432,7 +434,7 @@ class ObjectsTableUI extends Component {
         close={this.onHideRelationships}
         getDashboardUrl={this.props.getDashboardUrl}
         goEditObject={this.props.goEditObject}
-        uiCapabilities={this.props.uiCapabilities}
+        canGoInApp={this.props.canGoInApp}
       />
     );
   }
@@ -712,7 +714,7 @@ class ObjectsTableUI extends Component {
           totalItemCount={filteredItemCount}
           isSearching={isSearching}
           onShowRelationships={this.onShowRelationships}
-          uiCapabilities={this.props.uiCapabilities}
+          canGoInApp={this.props.canGoInApp}
         />
       </EuiPageContent>
     );

@@ -27,6 +27,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
 import { I18nContext } from 'ui/i18n';
+import { get } from 'lodash';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
 
@@ -65,6 +66,10 @@ function updateObjectsTable($scope, $injector) {
               kbnUrl.change(object.meta.editUrl);
               $scope.$apply();
             }
+          }}
+          canGoInApp={object => {
+            const { inAppUrl } = object.meta;
+            return inAppUrl && get(uiCapabilites, inAppUrl.uiCapabilitiesPath);
           }}
         />
       </I18nContext>,
