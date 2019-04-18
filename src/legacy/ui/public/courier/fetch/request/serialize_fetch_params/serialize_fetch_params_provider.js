@@ -19,12 +19,11 @@
 
 import { serializeFetchParams } from './serialize_fetch_params';
 
-export function SerializeFetchParamsProvider(Promise, kbnIndex, sessionId, config, esShardTimeout) {
+export function SerializeFetchParamsProvider(Promise, sessionId, config, esShardTimeout) {
   return (fetchParams) => (
     serializeFetchParams(
       fetchParams,
       Promise,
-      kbnIndex,
       sessionId,
       config,
       esShardTimeout)
