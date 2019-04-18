@@ -19,40 +19,20 @@
 
 import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
-import { getCanGatherUiMetrics } from 'ui/ui_metric';
+import { getCanTrackUiMetrics } from 'ui/ui_metric';
 import { API_BASE_PATH } from '../common';
-
-const module = uiModules.get('kibana');
 
 let _http;
 
-module.run($http => {
+uiModules.get('kibana').run($http => {
   _http = $http;
 });
 
-module.config($httpProvider => {
-  $httpProvider.interceptors.push($q => {
-    return {
-      request: config => {
-        const { url } = config;
-        const isUiMetricRequest = url.indexOf(`${chrome.getBasePath()}${API_BASE_PATH}`) === 0;
-        const canGatherUiMetrics = getCanGatherUiMetrics();
+export function trackUiMetric(appName: string, metricType: string | string[]) {
+  const metricTypes = Array.isArray(metricType) ? metricType.join(',') : metricType;
+  const uri = chrome.addBasePath(`${API_BASE_PATH}/${appName}/${metricTypes}`);
 
-        if (isUiMetricRequest && !canGatherUiMetrics) {
-          // Block request from going out if the user has disabled telemetry.
-          return $q.reject('uiMetricsDisallowed');
-        } else {
-          return $q.resolve(config);
-        }
-      },
-    };
-  });
-});
-
-export function track(appName: string, actionType: string) {
-  const uri = chrome.addBasePath(`${API_BASE_PATH}/${appName}/${actionType}`);
-  // Silently swallow request failures. Without this empty error handler, Angular will complain
-  // in the console that the rejected promise isn't being handled.
-  const emptyHandler = () => {};
-  _http.post(uri).then(emptyHandler, emptyHandler);
+  if (getCanTrackUiMetrics()) {
+    _http.post(uri);
+  }
 }

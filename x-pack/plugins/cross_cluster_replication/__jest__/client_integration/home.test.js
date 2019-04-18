@@ -33,7 +33,7 @@ jest.mock('ui/index_patterns', () => {
 });
 
 jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  track: jest.fn(),
+  trackUiMetric: jest.fn(),
 }));
 
 const testBedOptions = {

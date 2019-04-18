@@ -17,12 +17,12 @@
  * under the License.
  */
 
-let _canGatherUiMetrics = false;
+let _canTrackUiMetrics = false;
 
-export function setCanGatherUiMetrics(flag: boolean) {
-  _canGatherUiMetrics = flag;
+export function setCanTrackUiMetrics(flag: boolean) {
+  _canTrackUiMetrics = flag;
 }
 
-export function getCanGatherUiMetrics(): boolean {
-  return _canGatherUiMetrics;
+export function getCanTrackUiMetrics(): boolean {
+  return _canTrackUiMetrics;
 }

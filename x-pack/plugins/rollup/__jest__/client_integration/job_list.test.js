@@ -31,7 +31,7 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  track: jest.fn(),
+  trackUiMetric: jest.fn(),
 }));
 
 jest.mock('../../public/crud_app/services', () => {

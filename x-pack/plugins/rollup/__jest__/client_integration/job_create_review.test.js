@@ -21,7 +21,7 @@ jest.mock('ui/chrome', () => ({
 jest.mock('lodash/function/debounce', () => fn => fn);
 
 jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
-  track: jest.fn(),
+  trackUiMetric: jest.fn(),
 }));
 
 describe('Create Rollup Job, step 5: Metrics', () => {
