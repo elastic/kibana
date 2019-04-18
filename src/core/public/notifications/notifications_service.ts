@@ -65,7 +65,7 @@ export class NotificationsService {
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
       notificationSetup.toasts.addDanger({
-        title: i18n.translate('core.uiSettings.unableUpdateUISettingNotificationMessageTitle', {
+        title: i18n.translate('core.notifications.unableUpdateUISettingNotificationMessageTitle', {
           defaultMessage: 'Unable to update UI setting',
         }),
         text: error.message,
