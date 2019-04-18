@@ -90,8 +90,8 @@ export const MetricsExplorerChart = injectI18n(
             </EuiTitle>
           </EuiToolTip>
         ) : null}
-        <div style={{ height }}>
-          <Chart size={[width, height]}>
+        <div style={{ height, width }}>
+          <Chart>
             <Axis id={getAxisId('data')} position={Position.Left} tickFormat={formatter} />
             <Axis
               id={getAxisId('Time')}
