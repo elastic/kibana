@@ -132,7 +132,8 @@ export default function ({ getService, getPageObjects }) {
       expect(headers.length).to.be(0);
     });
 
-    it('Tile map with no changes will update with visualization changes', async () => {
+    // FF bug: https://github.com/elastic/kibana/issues/35172
+    it.skip('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
