@@ -161,7 +161,7 @@ const start = async function () {
     console.log('chech_run_id: ', checkRunId);
     clientWithAuth.checks.update({
       ...commonArgs,
-      chech_run_id: checkRunId,
+      check_run_id: checkRunId,
       conclusion: code === 0 ? 'success' : 'failure',
       completed_at: `${new Date().toISOString().slice(0,-5)}Z`,
       output: {
