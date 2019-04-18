@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapGeoBoundingBoxProvider(Promise, indexPatterns) {
-  return function (filter) {
+export function checkIsGeoBoundingBox(indexPatterns) {
+  return async function (filter) {
     if (filter.geo_bounding_box) {
       function getParams(indexPattern) {
         const type = 'geo_bounding_box';
@@ -43,7 +43,7 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, indexPatterns) {
         return { type, key, value, params };
       }
 
-      return indexPatterns
+      return await indexPatterns
         .get(filter.meta.index)
         .then(getParams)
         .catch((error) => {
@@ -53,6 +53,6 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, indexPatterns) {
           throw error;
         });
     }
-    return Promise.reject(filter);
+    throw filter;
   };
 }

@@ -18,22 +18,19 @@
  */
 
 import _ from 'lodash';
-import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
-import { FilterBarLibMapMatchAllProvider } from './map_match_all';
-import { FilterBarLibMapPhraseProvider } from './map_phrase';
-import { FilterBarLibMapPhrasesProvider } from './map_phrases';
-import { FilterBarLibMapRangeProvider } from './map_range';
-import { FilterBarLibMapExistsProvider } from './map_exists';
-import { FilterBarLibMapMissingProvider } from './map_missing';
-import { FilterBarLibMapQueryStringProvider } from './map_query_string';
-import { FilterBarLibMapGeoBoundingBoxProvider } from './map_geo_bounding_box';
-import { FilterBarLibMapGeoPolygonProvider } from './map_geo_polygon';
-import { FilterBarLibMapDefaultProvider } from './map_default';
+import { checkIsMatchAll } from './map_match_all';
+import { checkIsPhrase } from './map_phrase';
+import { checkIsPhrases } from './map_phrases';
+import { checkIsRange } from './map_range';
+import { checkIsExists } from './map_exists';
+import { checkIsMissing } from './map_missing';
+import { checkIsQueryString } from './map_query_string';
+import { checkIsGeoBoundingBox } from './map_geo_bounding_box';
+import { checkIsGeoPolygon } from './map_geo_polygon';
+import { checkIsDefault } from './map_default';
+import { generateMappingChain } from './generate_mapping_chain';
 
-export function FilterBarLibMapFilterProvider(Promise, Private) {
-
-  const generateMappingChain = Private(FilterBarLibGenerateMappingChainProvider);
-
+export async function mapFilter(indexPatterns, filter) {
   /** Mappers **/
 
   // Each mapper is a simple promise function that test if the mapper can
@@ -51,27 +48,26 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
-    Private(FilterBarLibMapMatchAllProvider),
-    Private(FilterBarLibMapRangeProvider),
-    Private(FilterBarLibMapPhraseProvider),
-    Private(FilterBarLibMapPhrasesProvider),
-    Private(FilterBarLibMapExistsProvider),
-    Private(FilterBarLibMapMissingProvider),
-    Private(FilterBarLibMapQueryStringProvider),
-    Private(FilterBarLibMapGeoBoundingBoxProvider),
-    Private(FilterBarLibMapGeoPolygonProvider),
-    Private(FilterBarLibMapDefaultProvider),
+    checkIsMatchAll,
+    checkIsRange(indexPatterns),
+    checkIsPhrase(indexPatterns),
+    checkIsPhrases,
+    checkIsExists,
+    checkIsMissing,
+    checkIsQueryString,
+    checkIsGeoBoundingBox(indexPatterns),
+    checkIsGeoPolygon(indexPatterns),
+    checkIsDefault,
   ];
 
   const noop = function () {
-    return Promise.reject(new Error('No mappings have been found for filter.'));
+    throw new Error('No mappings have been found for filter.');
   };
 
   // Create a chain of responsibility by reducing all the
   // mappers down into one function.
   const mapFn = _.reduceRight(mappers, function (memo, map) {
-    const filterChainFn = generateMappingChain(map);
-    return filterChainFn(memo);
+    return generateMappingChain(map, memo);
   }, noop);
 
   /**
@@ -80,18 +76,15 @@ export function FilterBarLibMapFilterProvider(Promise, Private) {
    * @param {object} filter The filter the map
    * @returns {Promise}
    */
-  return function (filter) {
-    // Apply the mapping function
-    return mapFn(filter).then(function (result) {
-      filter.meta = filter.meta || {};
-      filter.meta.type = result.type;
-      filter.meta.key = result.key;
-      filter.meta.value = result.value;
-      filter.meta.params = result.params;
-      filter.meta.disabled = !!(filter.meta.disabled);
-      filter.meta.negate = !!(filter.meta.negate);
-      filter.meta.alias = filter.meta.alias || null;
-      return filter;
-    });
-  };
+  return mapFn(filter).then(function (result) {
+    filter.meta = filter.meta || {};
+    filter.meta.type = result.type;
+    filter.meta.key = result.key;
+    filter.meta.value = result.value;
+    filter.meta.params = result.params;
+    filter.meta.disabled = !!(filter.meta.disabled);
+    filter.meta.negate = !!(filter.meta.negate);
+    filter.meta.alias = filter.meta.alias || null;
+    return filter;
+  });
 }
