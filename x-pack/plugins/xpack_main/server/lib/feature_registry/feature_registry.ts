@@ -148,6 +148,8 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
   /**
    * Optional array of supported licenses.
    * If omitted, all licenses are allowed.
+   * This does not restrict access to your feature based on license.
+   * Its only purpose is to inform the space and roles UIs on which features to display.
    */
   validLicenses?: Array<'basic' | 'standard' | 'gold' | 'platinum'>;
 
@@ -155,12 +157,6 @@ export interface Feature<TPrivileges extends Partial<PrivilegesSet> = Privileges
    * An optional EUI Icon to be used when displaying your feature.
    */
   icon?: string;
-
-  /**
-   * Optional description for your plugin.
-   * ~~ currently unused ~~
-   */
-  description?: string;
 
   /**
    * The optional Nav Link ID for feature.
