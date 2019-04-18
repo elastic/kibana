@@ -72,7 +72,7 @@ export function ErrorToast({ title, error, toastMessage }: ErrorToastProps) {
             </EuiModalBody>
             <EuiModalFooter>
               <EuiButton onClick={() => setModalVisible(false)} fill>
-                <FormattedMessage id="core.toasts.errorToast.closeModal" defaultMessage="Close" />
+                <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
               </EuiButton>
             </EuiModalFooter>
           </EuiModal>
