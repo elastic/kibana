@@ -78,7 +78,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToActualUrl('kibana', '/management/kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,

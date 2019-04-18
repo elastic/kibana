@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }) {
   describe('chart types', function () {
     before(function () {
       log.debug('navigateToApp visualize');
-      return PageObjects.common.navigateToUrl('visualize', 'new');
+      // return PageObjects.common.navigateToUrl('visualize', 'new');
+      return PageObjects.common.navigateToApp('visualize');
     });
 
     it('should show the correct chart types', async function () {
