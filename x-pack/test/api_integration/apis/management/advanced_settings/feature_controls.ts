@@ -117,9 +117,10 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
     });
 
     describe('spaces', () => {
-      // the following tests create a user_1 which has advancedSettings all access to space_1 and dashboard all access to space_2
+      // the following tests create a user_1 which has dashboard all access to space_1 and dashboard read access to space_2
       const space1Id = 'space_1';
       const space2Id = 'space_2';
+      const space3Id = 'space_3';
 
       const roleName = 'user_1';
       const username = 'user_1';
@@ -136,6 +137,11 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
           name: space2Id,
           disabledFeatures: [],
         });
+        await spaces.create({
+          id: space3Id,
+          name: space3Id,
+          disabledFeatures: [],
+        });
         await security.role.create(roleName, {
           kibana: [
             {
@@ -150,6 +156,12 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
               },
               spaces: [space2Id],
             },
+            {
+              feature: {
+                dashboard: ['read'],
+              },
+              spaces: [space3Id],
+            },
           ],
         });
         await security.user.create(username, {
@@ -161,11 +173,12 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
       after(async () => {
         await spaces.delete(space1Id);
         await spaces.delete(space2Id);
+        await spaces.delete(space3Id);
         await security.role.delete(roleName);
         await security.user.delete(username);
       });
 
-      it('user_1 can save settings in space_1', async () => {
+      it('user_1 can save settings and telemetry in space_1', async () => {
         const regularSettingResult = await saveAdvancedSetting(username, password, space1Id);
         expectResponse(regularSettingResult);
 
@@ -173,11 +186,19 @@ export default function featureControlsTests({ getService }: KibanaFunctionalTes
         expectResponse(telemetryResult);
       });
 
-      it(`user_1 can't save settings in space_2`, async () => {
+      it(`user_1 can only save telemetry in space_2`, async () => {
         const regularSettingResult = await saveAdvancedSetting(username, password, space2Id);
         expect403(regularSettingResult);
 
         const telemetryResult = await saveTelemetrySetting(username, password, space2Id);
+        expectResponse(telemetryResult);
+      });
+
+      it(`user_1 can't save either settings or telemetry in space_3`, async () => {
+        const regularSettingResult = await saveAdvancedSetting(username, password, space3Id);
+        expect403(regularSettingResult);
+
+        const telemetryResult = await saveTelemetrySetting(username, password, space3Id);
         expect403(telemetryResult);
       });
     });

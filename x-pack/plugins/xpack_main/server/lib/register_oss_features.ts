@@ -148,7 +148,7 @@ const kibanaFeatures: Feature[] = [
     privileges: {
       all: {
         savedObject: {
-          all: ['config', 'telemetry'],
+          all: ['config'],
           read: [],
         },
         ui: ['save'],
