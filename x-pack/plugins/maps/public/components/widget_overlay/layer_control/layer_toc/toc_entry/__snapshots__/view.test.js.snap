@@ -34,34 +34,38 @@ exports[`TOCEntry is rendered 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiLink
-        color="text"
-        data-test-subj="mapOpenLayerButtonlayer_1"
-        onClick={[Function]}
-        type="button"
-      >
+      <EuiText>
         <div
           className="eui-textTruncate eui-textLeft"
           style={
             Object {
-              "width": 180,
+              "maxWidth": "19rem",
             }
           }
         >
           layer 1
         </div>
-      </EuiLink>
-    </EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-    >
-      <span
-        className="mapTocEntry__grab"
-      >
-        <EuiIcon
-          type="grab"
-        />
-      </span>
+        <span
+          className="mapTocEntry__layerIcons"
+        >
+          <EuiButtonIcon
+            aria-label="Edit layer"
+            color="primary"
+            iconSize="m"
+            iconType="pencil"
+            onClick={[Function]}
+            title="Edit layer"
+            type="button"
+          />
+          <span
+            className="mapTocEntry__grab"
+          >
+            <EuiIcon
+              type="grab"
+            />
+          </span>
+        </span>
+      </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiSpacer
@@ -113,7 +117,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
           className="eui-textTruncate eui-textLeft"
           style={
             Object {
-              "width": 180,
+              "maxWidth": "19rem",
             }
           }
         >

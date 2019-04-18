@@ -2,6 +2,14 @@
   padding: $euiSizeS $euiSize;
   position: relative;
   background-color: $euiColorEmptyShade;
+
+  &:hover,
+  &:focus {
+    .mapTocEntry__layerIcons {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
 }
 
 .mapTocEntry-visible {
@@ -12,11 +20,17 @@
   opacity: 0.5;
 }
 
-.mapTocEntry__grab {
-  margin-left: $euiSizeXS;
-}
-
 .mapTocEntry__grab:hover {
   cursor: grab;
+}
+
+.mapTocEntry__layerIcons {
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: $euiColorEmptyShade;
+  padding: $euiSizeXS;
+  visibility: hidden;
+  opacity: 0;
 }
 

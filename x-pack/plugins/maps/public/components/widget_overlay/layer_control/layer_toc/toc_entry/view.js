@@ -16,10 +16,11 @@ import {
   EuiModalFooter,
   EuiButton,
   EuiButtonEmpty,
-  EuiLink,
   EuiText,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
+import { i18n } from '@kbn/i18n';
 
 export class TOCEntry extends React.Component {
 
@@ -113,32 +114,40 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLayerName() {
-    const displayName = (
-      <div style={{ width: 180 }} className="eui-textTruncate eui-textLeft">
-        {this.state.displayName}
-      </div>
+    return (
+      <EuiText>
+        <div style={{ maxWidth: '19rem' }} className="eui-textTruncate eui-textLeft">
+          {this.state.displayName}
+        </div>
+        {this._renderLayerIcons()}
+      </EuiText>
     );
+  }
 
+  _renderLayerIcons() {
     if (this.props.isReadOnly) {
-      return (
-        <EuiText>
-          {displayName}
-        </EuiText>
-      );
+      return null;
     }
 
     return (
-      <EuiLink
-        color="text"
-        onClick={this._openLayerPanelWithCheck}
-        data-test-subj={
-          `mapOpenLayerButton${this.state.displayName
-            ? this.state.displayName.replace(' ', '_')
-            : ''}`
-        }
-      >
-        {displayName}
-      </EuiLink>
+      <span className="mapTocEntry__layerIcons">
+
+        <EuiButtonIcon
+          iconType="pencil"
+          aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonAriaLabel', {
+            defaultMessage: 'Edit layer'
+          })}
+          title={i18n.translate('xpack.maps.layerControl.tocEntry.editButtonTitle', {
+            defaultMessage: 'Edit layer'
+          })}
+          onClick={this._openLayerPanelWithCheck}
+        />
+
+        <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
+          <EuiIcon type="grab"/>
+        </span>
+
+      </span>
     );
   }
 
@@ -151,17 +160,6 @@ export class TOCEntry extends React.Component {
       toggleVisible,
       fitToBounds
     } = this.props;
-
-    let sortIcon;
-    if (!isReadOnly) {
-      sortIcon = (
-        <EuiFlexItem grow={false}>
-          <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
-            <EuiIcon type="grab"/>
-          </span>
-        </EuiFlexItem>
-      );
-    }
 
     return (
       <EuiFlexGroup
@@ -187,13 +185,12 @@ export class TOCEntry extends React.Component {
             cloneLayer={() => {
               cloneLayer(layer.getId());
             }}
-            isReadOnly={this.props.isReadOnly}
+            isReadOnly={isReadOnly}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           {this._renderLayerName()}
         </EuiFlexItem>
-        {sortIcon}
       </EuiFlexGroup>
     );
   }
