@@ -35,7 +35,6 @@ uiModules
     ['setValidity', { watchDepth: 'reference' }],
     'isInvalid',
     'value',
-    'minDocCount'
   ]))
   .directive('visAggParamEditor', function (config) {
     return {
@@ -65,7 +64,6 @@ uiModules
             on-change="onChange"
             set-touched="setTouched"
             set-validity="setValidity"
-            min-doc-count="agg.params.min_doc_count"
           ></vis-agg-param-react-wrapper>`;
         }
 

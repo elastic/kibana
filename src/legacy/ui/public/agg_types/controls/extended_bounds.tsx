@@ -48,19 +48,7 @@ function areBoundsInvalid({ min, max }: Bounds): boolean {
   return minValue > maxValue;
 }
 
-function ExtendedBoundsParamEditor({
-  agg,
-  value,
-  setValue,
-  setValidity,
-}: AggParamEditorProps<Bounds>) {
-  const { min_doc_count: minDocCount, field } = agg.params;
-
-  if (!minDocCount || !field || (field.type !== 'number' && field.type !== 'date')) {
-    setValidity(true);
-    return null;
-  }
-
+function ExtendedBoundsParamEditor({ value, setValue, setValidity }: AggParamEditorProps<Bounds>) {
   const tooltipContent = i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
     defaultMessage:
       'Min and Max do not filter the results, but rather extend the bounds of the result set',

@@ -28,6 +28,7 @@ import { createFilterHistogram } from './create_filter/histogram';
 import intervalTemplate from '../controls/number_interval.html';
 import { MinDocCountParamEditor } from '../controls/min_doc_count';
 import { ExtendedBoundsParamEditor } from '../controls/extended_bounds';
+import { isType } from './migrate_include_exclude_format';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -169,13 +170,16 @@ export const histogramBucketAgg = new BucketAggType({
       write: function (aggConfig, output) {
         const val = aggConfig.params.extended_bounds;
 
-        if (aggConfig.params.min_doc_count && val.min && val.max) {
+        if (aggConfig.params.min_doc_count &&
+          (val.min || val.min === 0) &&
+          (val.max || val.max === 0)) {
           output.params.extended_bounds = {
             min: val.min,
             max: val.max
           };
         }
-      }
+      },
+      shouldShow: aggConfig => aggConfig.params.min_doc_count && isType('number')(aggConfig) || isType('date')(aggConfig)
     }
   ]
 });
