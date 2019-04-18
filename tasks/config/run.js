@@ -271,6 +271,66 @@ module.exports = function (grunt) {
       ]
     }),
 
+    verifyDependencyVersions: scriptWithGithubChecks({
+      title: 'Verify dependency versions',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'verifyDependencyVersions'
+      ]
+    }),
+
+    test_server: scriptWithGithubChecks({
+      title: 'Test server',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'test:server'
+      ]
+    }),
+
+    test_jest: scriptWithGithubChecks({
+      title: 'Jest tests',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'test:jest'
+      ]
+    }),
+
+    test_jest_integration: scriptWithGithubChecks({
+      title: 'Jest integration tests',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'test:jest_integration'
+      ]
+    }),
+
+    test_projects: scriptWithGithubChecks({
+      title: 'Project tests',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'test:projects'
+      ]
+    }),
+
+    test_browser_ci: scriptWithGithubChecks({
+      title: 'Browser tests',
+      cmd: 'yarn',
+      args: [
+        'run',
+        'grunt',
+        'test:browser-ci'
+      ]
+    }),
+
     ...getFunctionalTestGroupRunConfigs({
       kibanaInstallDir: KIBANA_INSTALL_DIR
     })
