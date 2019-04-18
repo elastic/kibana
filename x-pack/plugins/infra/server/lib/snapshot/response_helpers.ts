@@ -38,7 +38,7 @@ export interface InfraSnapshotBucketWithValues {
 
 export type InfraSnapshotMetricsBucket = InfraSnapshotBucketWithKey & InfraSnapshotBucketWithValues;
 
-export interface InfraSnaphotNodeGroupByBucket {
+export interface InfraSnapshotNodeGroupByBucket {
   key: {
     node: string;
     [groupByField: string]: string;
@@ -46,7 +46,7 @@ export interface InfraSnaphotNodeGroupByBucket {
 }
 
 export const getNodePath = (
-  groupBucket: InfraSnaphotNodeGroupByBucket,
+  groupBucket: InfraSnapshotNodeGroupByBucket,
   options: InfraSnapshotRequestOptions
 ): InfraSnapshotNodePath[] => {
   const node = groupBucket.key;
