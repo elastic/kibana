@@ -81,7 +81,7 @@ exports[`render symbol tree correctly 1`] = `
               className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
             >
               <div
-                className="sc-bwzfXH jYPrbO"
+                className="sc-bwzfXH cgXZRx"
               >
                 <svg
                   className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -109,7 +109,7 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexItem euiFlexItem--flexGrow1"
                 >
                   <a
-                    className="code-link"
+                    className="code-symbol-link"
                     href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L1:0?tab=structure"
                     onClick={[Function]}
                   >
@@ -154,13 +154,13 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH jYpsNE"
+                    className="sc-bwzfXH JSSYh"
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrow1"
                     >
                       <a
-                        className="code-link"
+                        className="code-symbol-link"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L10:9?tab=structure"
                         onClick={[Function]}
                       >
@@ -204,13 +204,13 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH jYpsNE"
+                    className="sc-bwzfXH JSSYh"
                   >
                     <div
                       className="euiFlexItem euiFlexItem--flexGrow1"
                     >
                       <a
-                        className="code-link"
+                        className="code-symbol-link"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L11:9?tab=structure"
                         onClick={[Function]}
                       >
@@ -254,7 +254,7 @@ exports[`render symbol tree correctly 1`] = `
                   className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    className="sc-bwzfXH jYPrbO"
+                    className="sc-bwzfXH cgXZRx"
                   >
                     <svg
                       className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -282,7 +282,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexItem euiFlexItem--flexGrow1"
                     >
                       <a
-                        className="code-link"
+                        className="code-symbol-link"
                         href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L13:0?tab=structure"
                         onClick={[Function]}
                       >
@@ -328,13 +328,13 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="sc-bwzfXH JSSYh"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
+                            className="code-symbol-link"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L14:2?tab=structure"
                             onClick={[Function]}
                           >
@@ -378,13 +378,13 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="sc-bwzfXH JSSYh"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
+                            className="code-symbol-link"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L15:2?tab=structure"
                             onClick={[Function]}
                           >
@@ -428,13 +428,13 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="sc-bwzfXH JSSYh"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
+                            className="code-symbol-link"
                             href="/github.com/vmware/clarity/blob/master/src/clr-angular/data/stack-view/stack-control.ts!L17:14?tab=structure"
                             onClick={[Function]}
                           >
@@ -478,13 +478,13 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="sc-bwzfXH JSSYh"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
+                            className="code-symbol-link"
                             href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L21:0?tab=structure"
                             onClick={[Function]}
                           >
@@ -528,13 +528,13 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYpsNE"
+                        className="sc-bwzfXH JSSYh"
                       >
                         <div
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
+                            className="code-symbol-link"
                             href="/github.com/elastic/kibana/blob/master/packages/elastic-datemath/src/index.d.ts!L23:14?tab=structure"
                             onClick={[Function]}
                           >
@@ -578,7 +578,7 @@ exports[`render symbol tree correctly 1`] = `
                       className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        className="sc-bwzfXH jYPrbO"
+                        className="sc-bwzfXH cgXZRx"
                       >
                         <svg
                           className="euiIcon euiIcon--small euiIcon--subdued codeStructureTree--icon"
@@ -606,7 +606,7 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexItem euiFlexItem--flexGrow1"
                         >
                           <a
-                            className="code-link"
+                            className="code-symbol-link"
                             href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L137:13?tab=structure"
                             onClick={[Function]}
                           >
@@ -652,13 +652,13 @@ exports[`render symbol tree correctly 1`] = `
                           className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <div
-                            className="sc-bwzfXH jYpsNE"
+                            className="sc-bwzfXH JSSYh"
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrow1"
                             >
                               <a
-                                className="code-link"
+                                className="code-symbol-link"
                                 href="/github.com/elastic/openjdkMirror/blob/master/jdk/src/share/classes/java/util/HashMap.java!L140:30?tab=structure"
                                 onClick={[Function]}
                               >
