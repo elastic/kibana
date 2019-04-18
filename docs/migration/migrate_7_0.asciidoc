@@ -12,6 +12,7 @@ See also <<release-highlights>> and <<release-notes>>.
 * <<breaking_70_api_changes>>
 * <<breaking_70_browser_support_changes>>
 * <<breaking_70_ems_changes>>
+* <<breaking_70_index_pattern_changes>>
 * <<breaking_70_packaging_changes>>
 * <<breaking_70_plugin_changes>>
 * <<breaking_70_security_changes>>
@@ -147,6 +148,23 @@ generalized from the source data for visualization and locations are approximate
 *Impact:* Region Map, Vega, and Maps plugin visualizations using the USA Zip 
 Codes layer will appear differently. ZCTA boundaries have changed dramatically 
 in some areas. Also, some zip codes have been deprecated and new ones have been added.
+
+
+[float]
+[[breaking_70_index_pattern_changes]]
+=== Index pattern changes 
+
+[float]
+==== Time-based internal index patterns queried as wildcard index patterns
+*Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
+you could no longer create time-based interval index patterns, but they continued 
+to function as expected. In 7.0, functionality has changed such that {kib} will 
+automatically query a time-based interval index pattern as a wildcard index pattern.
+
+*Impact:* If you query a time-based index pattern, that query will now be performed 
+on the root wildcard term. For example, a query on `logstash-2019-04-18` will now 
+query all indices that match `logstash-*`.
+
 
 [float]
 [[breaking_70_packaging_changes]]
