@@ -6,7 +6,7 @@ When styling a vector layer, you can customize your data by properties such as s
 For each property, you can specify whether to use a constant or dynamic value for the style.
 
 [float]
-[maps-vector-style-properties]]
+[[maps-vector-style-properties]]
 ==== Style properties
 
 You can configure the following properties:
@@ -24,7 +24,7 @@ Set border color to style line geometries
 
 
 [float]
-[maps-vector-style-types]]
+[[maps-vector-style-types]]
 ==== Style types
 
 You can specify a style using static, data driven, or classification styling.
