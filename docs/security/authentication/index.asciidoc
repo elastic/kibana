@@ -49,8 +49,6 @@ IMPORTANT: The {kib} user-facing origin should be the same in {kib}, {es}, and t
 
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
 
-NOTE: Some Identity Providers support a portal or dashboard from which users can open an application that is integrated with the Identity Provider. This login scenario is known as _Identity Provider initiated login_, and {kib} has limitations with this scenario. Users cannot open {kib} in multiple tabs from the Identity Provider portal in the same browser context if an active {kib} session exists. No issues exist if users open {kib} in multiple tabs using _direct_ {kib} URL.
-
 [float]
 ===== Access and Refresh Tokens
 

@@ -1403,10 +1403,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
   integrity sha1-wYrCgvY16I8EHMFVXYBuSSyo87E=
 
-"@elastic/numeral@2.3.2":
-  version "2.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.2.tgz#06c9ef22f18dd8c2b39ffe353868d4d0c13ea4f9"
-  integrity sha1-BsnvIvGN2MKzn/41OGjU0ME+pPk=
+"@elastic/numeral@2.3.3":
+  version "2.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.3.tgz#94d38a35bd315efa7a6918b22695128fc40a885e"
+  integrity sha512-0OyB9oztlYIq8F1LHjcNf+T089PKfYw78tgUY+q2dtox/jmb4xzFKtI9kv1hwAt5tcgBUTtUMK9kszpSh1UZaQ==
 
 "@elastic/ui-ace@0.2.3":
   version "0.2.3"
@@ -3419,6 +3419,11 @@
   dependencies:
     "@types/glob" "*"
     "@types/node" "*"
+
+"@types/selenium-webdriver@^3.0.15":
+  version "3.0.15"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-3.0.15.tgz#024c24051c3798e9a0cf5cceb1c893140df1bc31"
+  integrity sha512-5nh8/K2u9p4bk95GGCJB7KBvewaB0TUziZ9DTr+mR2I6RoO4OJVqx7rxK83hs2J1tomwtCGkhiW+Dy8EUnfB+Q==
 
 "@types/semver@^5.5.0":
   version "5.5.0"
