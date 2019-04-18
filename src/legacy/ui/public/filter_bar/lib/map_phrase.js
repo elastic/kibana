@@ -20,11 +20,11 @@
 import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapPhraseProvider(Promise, indexPatterns) {
-  return function (filter) {
+export function checkIsPhrase(indexPatterns) {
+  return async function (filter) {
     const isScriptedPhraseFilter = isScriptedPhrase(filter);
     if (!_.has(filter, ['query', 'match']) && !isScriptedPhraseFilter) {
-      return Promise.reject(filter);
+      throw filter;
     }
 
     function getParams(indexPattern) {
@@ -41,7 +41,7 @@ export function FilterBarLibMapPhraseProvider(Promise, indexPatterns) {
       return { type, key, value, params };
     }
 
-    return indexPatterns
+    return await indexPatterns
       .get(filter.meta.index)
       .then(getParams)
       .catch((error) => {

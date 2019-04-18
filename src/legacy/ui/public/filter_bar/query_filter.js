@@ -23,13 +23,12 @@ import { onlyStateChanged } from './lib/only_state_changed';
 import { uniqFilters } from './lib/uniq_filters';
 import { compareFilters } from './lib/compare_filters';
 import { EventsProvider } from '../events';
-import { FilterBarLibMapAndFlattenFiltersProvider } from './lib/map_and_flatten_filters';
+import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { FilterBarLibExtractTimeFilterProvider } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, globalState, config) {
+export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
-  const mapAndFlattenFilters = Private(FilterBarLibMapAndFlattenFiltersProvider);
   const extractTimeFilter = Private(FilterBarLibExtractTimeFilterProvider);
 
   const queryFilter = new EventEmitter();
@@ -85,7 +84,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
       filters = [filters];
     }
 
-    return mapAndFlattenFilters(filters)
+    return mapAndFlattenFilters(indexPatterns, filters)
       .then(function (filters) {
         if (!filterState.filters) {
           filterState.filters = [];
@@ -220,7 +219,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
   };
 
   queryFilter.setFilters = filters => {
-    return mapAndFlattenFilters(filters)
+    return mapAndFlattenFilters(indexPatterns, filters)
       .then(mappedFilters => {
         const appState = getAppState();
         const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {

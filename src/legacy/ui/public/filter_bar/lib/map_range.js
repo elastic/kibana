@@ -20,11 +20,11 @@
 import { has, get } from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapRangeProvider(Promise, indexPatterns) {
-  return function (filter) {
+export function checkIsRange(indexPatterns) {
+  return async function (filter) {
     const isScriptedRangeFilter = isScriptedRange(filter);
     if (!filter.range && !isScriptedRangeFilter) {
-      return Promise.reject(filter);
+      throw filter;
     }
 
     function getParams(indexPattern) {
@@ -51,7 +51,7 @@ export function FilterBarLibMapRangeProvider(Promise, indexPatterns) {
       return { type, key, value, params };
     }
 
-    return indexPatterns
+    return await indexPatterns
       .get(filter.meta.index)
       .then(getParams)
       .catch((error) => {
@@ -60,7 +60,6 @@ export function FilterBarLibMapRangeProvider(Promise, indexPatterns) {
         }
         throw error;
       });
-
   };
 }
 

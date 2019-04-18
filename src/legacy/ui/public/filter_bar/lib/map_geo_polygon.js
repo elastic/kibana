@@ -20,8 +20,8 @@
 import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
-export function FilterBarLibMapGeoPolygonProvider(Promise, indexPatterns) {
-  return function (filter) {
+export function checkIsGeoPolygon(indexPatterns) {
+  return async function (filter) {
     if (filter.geo_polygon) {
       function getParams(indexPattern) {
         const type = 'geo_polygon';
@@ -42,7 +42,7 @@ export function FilterBarLibMapGeoPolygonProvider(Promise, indexPatterns) {
         return { type, key, value, params };
       }
 
-      return indexPatterns
+      return await indexPatterns
         .get(filter.meta.index)
         .then(getParams)
         .catch((error) => {
@@ -52,6 +52,6 @@ export function FilterBarLibMapGeoPolygonProvider(Promise, indexPatterns) {
           throw error;
         });
     }
-    return Promise.reject(filter);
+    throw filter;
   };
 }
