@@ -41,6 +41,7 @@ test('creates and sets up http server', async () => {
 
   const httpServer = {
     isListening: () => false,
+    setup: jest.fn(),
     start: jest.fn(),
     stop: noop,
   };
@@ -49,10 +50,14 @@ test('creates and sets up http server', async () => {
   const service = new HttpService(config$.asObservable(), logger);
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
+
+  expect(httpServer.setup).not.toHaveBeenCalled();
   expect(httpServer.start).not.toHaveBeenCalled();
 
   await service.setup();
+  expect(httpServer.setup).toHaveBeenCalledTimes(1);
 
+  await service.start();
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
@@ -63,6 +68,7 @@ test('logs error if already set up', async () => {
 
   const httpServer = {
     isListening: () => true,
+    setup: jest.fn(),
     start: noop,
     stop: noop,
   };
@@ -82,6 +88,7 @@ test('stops http server', async () => {
 
   const httpServer = {
     isListening: () => false,
+    setup: noop,
     start: noop,
     stop: jest.fn(),
   };
@@ -98,14 +105,14 @@ test('stops http server', async () => {
   expect(httpServer.stop).toHaveBeenCalledTimes(1);
 });
 
-test('register route handler', () => {
+test('register route handler', async () => {
   const config = {} as HttpConfig;
-
   const config$ = new BehaviorSubject(config);
 
+  const registerRouterMock = jest.fn();
   const httpServer = {
     isListening: () => false,
-    registerRouter: jest.fn(),
+    setup: () => ({ registerRouter: registerRouterMock }),
     start: noop,
     stop: noop,
   };
@@ -114,33 +121,11 @@ test('register route handler', () => {
   const service = new HttpService(config$.asObservable(), logger);
 
   const router = new Router('/foo');
-  service.registerRouter(router);
+  const { registerRouter } = await service.setup();
+  registerRouter(router);
 
-  expect(httpServer.registerRouter).toHaveBeenCalledTimes(1);
-  expect(httpServer.registerRouter).toHaveBeenLastCalledWith(router);
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
-});
-
-test('throws if registering route handler after http server is set up', () => {
-  const config = {} as HttpConfig;
-
-  const config$ = new BehaviorSubject(config);
-
-  const httpServer = {
-    isListening: () => true,
-    registerRouter: jest.fn(),
-    start: noop,
-    stop: noop,
-  };
-  mockHttpServer.mockImplementation(() => httpServer);
-
-  const service = new HttpService(config$.asObservable(), logger);
-
-  const router = new Router('/foo');
-  service.registerRouter(router);
-
-  expect(httpServer.registerRouter).toHaveBeenCalledTimes(0);
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot();
+  expect(registerRouterMock).toHaveBeenCalledTimes(1);
+  expect(registerRouterMock).toHaveBeenLastCalledWith(router);
 });
 
 test('returns http server contract on setup', async () => {
@@ -157,5 +142,5 @@ test('returns http server contract on setup', async () => {
 
   const service = new HttpService(new BehaviorSubject({ ssl: {} } as HttpConfig), logger);
 
-  expect(await service.setup()).toBe(httpServer);
+  expect(await service.start()).toBe(httpServer);
 });
