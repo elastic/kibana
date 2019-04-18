@@ -53,7 +53,7 @@ export class Root {
 
     try {
       await this.setupLogging();
-      await this.server.setup();
+      return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
       throw e;
@@ -64,7 +64,7 @@ export class Root {
     this.log.debug('starting root');
 
     try {
-      await this.server.start();
+      return await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;
