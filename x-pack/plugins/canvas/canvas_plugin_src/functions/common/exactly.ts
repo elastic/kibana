@@ -35,7 +35,6 @@ export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter>
       },
       filterGroup: {
         type: ['string', 'null'],
-        aliases: ['group', 'g'],
         help: 'Group name for the filter',
       },
     },

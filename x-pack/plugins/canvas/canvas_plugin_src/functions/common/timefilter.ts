@@ -44,7 +44,6 @@ export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, F
       },
       filterGroup: {
         type: ['string', 'null'],
-        aliases: ['group', 'g'],
         help: 'Group name for the filter',
       },
     },
