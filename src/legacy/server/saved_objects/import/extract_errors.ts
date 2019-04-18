@@ -18,24 +18,45 @@
  */
 
 import { SavedObject } from '../service';
+import { ImportError } from './types';
 
-export interface CustomError {
-  id: string;
-  type: string;
-  error: {
-    message: string;
-    statusCode: number;
-  };
-}
-
-export function extractErrors(savedObjects: SavedObject[]) {
-  const errors: CustomError[] = [];
-  for (const savedObject of savedObjects) {
+export function extractErrors(
+  savedObjectResults: SavedObject[],
+  savedObjectsToImport: SavedObject[]
+) {
+  const errors: ImportError[] = [];
+  const originalSavedObjectsMap = new Map<string, SavedObject>();
+  for (const savedObject of savedObjectsToImport) {
+    originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
+  }
+  for (const savedObject of savedObjectResults) {
     if (savedObject.error) {
+      const originalSavedObject = originalSavedObjectsMap.get(
+        `${savedObject.type}:${savedObject.id}`
+      );
+      const title =
+        originalSavedObject &&
+        originalSavedObject.attributes &&
+        originalSavedObject.attributes.title;
+      if (savedObject.error.statusCode === 409) {
+        errors.push({
+          id: savedObject.id,
+          type: savedObject.type,
+          title,
+          error: {
+            type: 'conflict',
+          },
+        });
+        continue;
+      }
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
-        error: savedObject.error,
+        title,
+        error: {
+          ...savedObject.error,
+          type: 'unknown',
+        },
       });
     }
   }

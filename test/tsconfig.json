@@ -3,11 +3,14 @@
   "compilerOptions": {
     "types": [
       "node",
-      "mocha",
-      "@kbn/test/types/expect.js"
+      "mocha"
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "plugin_functional/plugins/**/*"
   ]
 }

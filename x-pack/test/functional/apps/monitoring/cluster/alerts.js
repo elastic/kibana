@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 const HIGH_ALERT_MESSAGE = 'High severity alert';

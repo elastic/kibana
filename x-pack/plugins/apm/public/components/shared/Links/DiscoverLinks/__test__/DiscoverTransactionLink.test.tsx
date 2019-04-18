@@ -5,9 +5,9 @@
  */
 
 import 'jest-styled-components';
+import { Transaction } from '../../../../../../typings/es_schemas/ui/Transaction';
 // @ts-ignore
-import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import configureStore from '../../../../../store/config/configureStore';
 import { getDiscoverQuery } from '../DiscoverTransactionLink';
 
 function getMockTransaction() {

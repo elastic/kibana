@@ -18,7 +18,7 @@
  */
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getAspects } from '../_get_aspects';
 
 describe('getAspects', function () {

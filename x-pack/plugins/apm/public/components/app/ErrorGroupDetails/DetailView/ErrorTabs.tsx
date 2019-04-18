@@ -6,8 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
+import { idx } from '../../../../../common/idx';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import {
   getTabsFromObject,
   PropertyTab

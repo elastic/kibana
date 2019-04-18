@@ -36,9 +36,7 @@ export class SuggestionItem extends React.Component<SuggestionItemProps> {
           <EuiIcon type={getEuiIconType(suggestion.type)} />
         </SuggestionItemIconField>
         <SuggestionItemTextField>{suggestion.text}</SuggestionItemTextField>
-        <SuggestionItemDescriptionField
-          dangerouslySetInnerHTML={{ __html: suggestion.description }}
-        />
+        <SuggestionItemDescriptionField>{suggestion.description}</SuggestionItemDescriptionField>
       </SuggestionItemContainer>
     );
   }

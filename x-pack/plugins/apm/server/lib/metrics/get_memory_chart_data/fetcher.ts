@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AggregationSearchResponse, ESFilter } from 'elasticsearch';
+import { ESFilter } from 'elasticsearch';
 import {
   METRIC_SYSTEM_FREE_MEMORY,
   METRIC_SYSTEM_TOTAL_MEMORY,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+} from '../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../typings/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
@@ -26,14 +27,10 @@ interface Aggs {
   memoryUsedMax: AggValue;
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
-export async function fetch({
-  serviceName,
-  setup
-}: MetricsRequestArgs): Promise<ESResponse> {
+export type ESResponse = PromiseReturnType<typeof fetch>;
+export async function fetch({ serviceName, setup }: MetricsRequestArgs) {
   const { start, end, esFilterQuery, client, config } = setup;
-  const { intervalString } = getBucketSize(start, end, 'auto');
+  const { bucketSize } = getBucketSize(start, end, 'auto');
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'metric' } },
@@ -62,7 +59,9 @@ export async function fetch({
         timeseriesData: {
           date_histogram: {
             field: '@timestamp',
-            interval: intervalString,
+
+            // ensure minimum bucket size of 30s since this is the default resolution for metric data
+            interval: `${Math.max(bucketSize, 30)}s`,
             min_doc_count: 0,
             extended_bounds: { min: start, max: end }
           },

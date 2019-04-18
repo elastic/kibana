@@ -148,13 +148,10 @@ export class AutoFollowPatternForm extends PureComponent {
   };
 
   onLeaderIndexPatternInputChange = (leaderIndexPattern) => {
-    if (!leaderIndexPattern || !leaderIndexPattern.trim()) {
-      return;
-    }
-
+    const isEmpty = !leaderIndexPattern || !leaderIndexPattern.trim();
     const { autoFollowPattern: { leaderIndexPatterns } } = this.state;
 
-    if (leaderIndexPatterns.includes(leaderIndexPattern)) {
+    if (!isEmpty && leaderIndexPatterns.includes(leaderIndexPattern)) {
       const errorMsg = i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternForm.leaderIndexPatternError.duplicateMessage',
         {
@@ -172,7 +169,12 @@ export class AutoFollowPatternForm extends PureComponent {
       this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
     } else {
       this.setState(({ fieldsErrors, autoFollowPattern: { leaderIndexPatterns } }) => {
-        const errors = validateAutoFollowPattern({ leaderIndexPatterns });
+        const errors = Boolean(leaderIndexPatterns.length)
+          // Validate existing patterns, so we can surface an error if this required input is missing.
+          ? validateAutoFollowPattern({ leaderIndexPatterns })
+          // Validate the input as the user types so they have immediate feedback about errors.
+          : validateAutoFollowPattern({ leaderIndexPatterns: [leaderIndexPattern] });
+
         return updateFormErrors(errors, fieldsErrors);
       });
     }
@@ -223,7 +225,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
       return (
         <Fragment>
-          <SectionError title={title} error={apiError} />
+          <SectionError title={title} error={apiError} data-test-subj="autoFollowPatternFormApiError" />
           <EuiSpacer size="l" />
         </Fragment>
       );
@@ -372,7 +374,7 @@ export class AutoFollowPatternForm extends PureComponent {
      * Leader index pattern(s)
      */
     const renderLeaderIndexPatterns = () => {
-      const hasError = !!fieldsErrors.leaderIndexPatterns;
+      const hasError = !!(fieldsErrors.leaderIndexPatterns && fieldsErrors.leaderIndexPatterns.message);
       const isInvalid = hasError && (fieldsErrors.leaderIndexPatterns.alwaysVisible || areErrorsVisible);
       const formattedLeaderIndexPatterns = leaderIndexPatterns.map(pattern => ({ label: pattern }));
 
@@ -576,6 +578,7 @@ export class AutoFollowPatternForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
+            data-test-subj="autoFollowPatternFormError"
           />
           <EuiSpacer size="l" />
         </Fragment>
@@ -643,12 +646,13 @@ export class AutoFollowPatternForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm>
+        <EuiForm data-test-subj="ccrAutoFollowPatternForm">
           {renderAutoFollowPatternName()}
           {renderRemoteClusterField()}
           {renderLeaderIndexPatterns()}
           {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
+        <EuiSpacer />
         {renderFormErrorWarning()}
         {this.renderApiErrors()}
         {renderActions()}

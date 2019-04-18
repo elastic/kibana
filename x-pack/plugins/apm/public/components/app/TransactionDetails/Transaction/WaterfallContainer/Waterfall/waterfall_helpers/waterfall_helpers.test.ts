@@ -5,8 +5,8 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from 'x-pack/plugins/apm/typings/es_schemas/Span';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
 import {
   getClockSkew,
   getOrderedWaterfallItems,
@@ -96,13 +96,12 @@ describe('waterfall_helpers', () => {
 
     it('should return full waterfall', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorCountsByTransactionId = {
+      const errorsPerTransaction = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        hits,
-        errorCountsByTransactionId,
+        { trace: hits, errorsPerTransaction },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(6);
@@ -112,13 +111,12 @@ describe('waterfall_helpers', () => {
 
     it('should return partial waterfall', () => {
       const entryTransactionId = 'myTransactionId2';
-      const errorCountsByTransactionId = {
+      const errorsPerTransaction = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        hits,
-        errorCountsByTransactionId,
+        { trace: hits, errorsPerTransaction },
         entryTransactionId
       );
       expect(waterfall.orderedItems.length).toBe(4);
@@ -128,13 +126,12 @@ describe('waterfall_helpers', () => {
 
     it('getTransactionById', () => {
       const entryTransactionId = 'myTransactionId1';
-      const errorCountsByTransactionId = {
+      const errorsPerTransaction = {
         myTransactionId1: 2,
         myTransactionId2: 3
       };
       const waterfall = getWaterfall(
-        hits,
-        errorCountsByTransactionId,
+        { trace: hits, errorsPerTransaction },
         entryTransactionId
       );
       const transaction = waterfall.getTransactionById('myTransactionId2');

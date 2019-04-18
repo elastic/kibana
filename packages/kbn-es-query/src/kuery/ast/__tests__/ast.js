@@ -18,12 +18,13 @@
  */
 
 import * as ast from '../ast';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { nodeTypes } from '../../node_types/index';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
 // Helpful utility allowing us to test the PEG parser by simply checking for deep equality between
 // the nodes the parser generates and the nodes our constructor functions generate.
+
 function fromLegacyKueryExpressionNoMeta(text) {
   return ast.fromLegacyKueryExpression(text, { includeMetadata: false });
 }
@@ -414,6 +415,14 @@ describe('kuery AST API', function () {
       const unknownTypeNode = nodeTypes.function.buildNode('exists', 'foo');
       unknownTypeNode.type = 'notValid';
       expect(ast.toElasticsearchQuery(unknownTypeNode)).to.eql(expected);
+    });
+
+    it('should return the given node type\'s ES query representation including a time zone parameter when one is provided', function () {
+      const config = { dateFormatTZ: 'America/Phoenix' };
+      const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+      const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
+      const result = ast.toElasticsearchQuery(node, indexPattern, config);
+      expect(result).to.eql(expected);
     });
 
   });

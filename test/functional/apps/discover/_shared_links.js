@@ -17,7 +17,7 @@
 * under the License.
 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
@@ -66,17 +66,13 @@ export default function ({ getService, getPageObjects }) {
       it('should allow for copying the snapshot URL', async function () {
         const expectedUrl =
           baseUrl +
-          '/app/kibana?_t=1453775307251#' +
-          '/discover?_g=(refreshInterval:(pause:!t,value:0),time' +
+          '/app/kibana#/discover?_g=(refreshInterval:(pause:!t,value:0),time' +
           ':(from:\'2015-09-19T06:31:44.000Z\',to:\'2015-09' +
           '-23T18:31:44.000Z\'))&_a=(columns:!(_source),index:\'logstash-' +
           '*\',interval:auto,query:(language:kuery,query:\'\')' +
           ',sort:!(\'@timestamp\',desc))';
         const actualUrl = await PageObjects.share.getSharedUrl();
-        // strip the timestamp out of each URL
-        expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')).to.be(
-          expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP')
-        );
+        expect(actualUrl).to.be(expectedUrl);
       });
 
       it('should allow for copying the snapshot URL as a short URL', async function () {

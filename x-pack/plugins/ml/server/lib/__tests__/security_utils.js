@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   isSecurityDisabled
 } from '../security_utils';

@@ -73,8 +73,7 @@ xpack.security.sessionTimeout: 600000
 
 . Restart {kib}.
 
-[[kibana-roles]]
-. Choose an authentication mechanism and grant users the privileges they need to
+. [[kibana-roles]]Choose an authentication mechanism and grant users the privileges they need to
 use {kib}.
 +
 --

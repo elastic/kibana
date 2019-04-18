@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import fs from 'fs';
 import { promisify } from 'bluebird';

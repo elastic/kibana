@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { UiApp } from '../ui_app';
 import { UiNavLink } from '../../ui_nav_links';

@@ -113,9 +113,7 @@ function Suggestion(props) {
         <EuiIcon type={getEuiIconType(props.suggestion.type)} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
-      <Description
-        dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
-      />
+      <Description>{props.suggestion.description}</Description>
     </ListItem>
   );
 }

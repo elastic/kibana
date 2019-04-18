@@ -53,7 +53,6 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
       </EuiFormRow>
     </EuiForm>
     <EuiText
-      grow={true}
       size="xs"
     >
       <FormattedMessage
@@ -77,6 +76,7 @@ exports[`AddItemPopover calls addItems with multiple items on clicking Add butto
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -144,7 +144,6 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
       </EuiFormRow>
     </EuiForm>
     <EuiText
-      grow={true}
       size="xs"
     >
       <FormattedMessage
@@ -168,6 +167,7 @@ exports[`AddItemPopover opens the popover onButtonClick 1`] = `
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -235,7 +235,6 @@ exports[`AddItemPopover renders the popover 1`] = `
       </EuiFormRow>
     </EuiForm>
     <EuiText
-      grow={true}
       size="xs"
     >
       <FormattedMessage
@@ -259,6 +258,7 @@ exports[`AddItemPopover renders the popover 1`] = `
           fill={false}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage

@@ -19,7 +19,9 @@
 
 import _ from 'lodash';
 import { uiModules } from '../modules';
-import paginatedSelectableListTemplate from '../partials/paginated_selectable_list.html';
+import './paginate';
+import './kbn_href';
+import paginatedSelectableListTemplate from './partials/paginated_selectable_list.html';
 
 const module = uiModules.get('kibana');
 

@@ -33,7 +33,7 @@ export * from './notice_file_task';
 export * from './optimize_task';
 export * from './os_packages';
 export * from './transpile_babel_task';
-export * from './transpile_typescript_task';
+export * from './typecheck_typescript_task';
 export * from './transpile_scss_task';
 export * from './verify_env_task';
 export * from './write_sha_sums_task';

@@ -17,23 +17,9 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-import { filter } from 'rxjs/operators';
-import { toastNotifications } from 'ui/notify';
-import { i18n } from '@kbn/i18n';
-
 // All Kibana styles inside of the /styles dir
 const context = require.context('../styles', false, /[\/\\](?!mixins|variables|_|\.|bootstrap_(light|dark))[^\/\\]+\.less/);
 context.keys().forEach(key => context(key));
 
 // manually require non-less files
 import '../styles/disable_animations';
-
-chrome.getUiSettingsClient()
-  .getSaved$()
-  .pipe(filter(update => update.key === 'theme:darkMode'))
-  .subscribe(() => {
-    toastNotifications.addSuccess(i18n.translate('common.ui.styles.themeAppliedToast', {
-      defaultMessage: 'Theme applied, please refresh your browser to take affect.'
-    }));
-  });

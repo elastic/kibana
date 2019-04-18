@@ -19,7 +19,7 @@
 
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VislibComponentsZeroInjectionInjectZerosProvider } from '../../components/zero_injection/inject_zeros';
 import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../../components/zero_injection/ordered_x_keys';

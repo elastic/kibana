@@ -39,9 +39,17 @@ class KueryBarView extends Component {
     isLoadingSuggestions: false
   };
 
+  willUnmount = false;
+
+  componentWillUnmount() {
+    this.willUnmount = true;
+  }
+
   async componentDidMount() {
     const indexPattern = await getAPMIndexPatternForKuery();
-    this.setState({ indexPattern, isLoadingIndexPattern: false });
+    if (!this.willUnmount) {
+      this.setState({ indexPattern, isLoadingIndexPattern: false });
+    }
   }
 
   onChange = async (inputValue, selectionStart) => {
@@ -121,10 +129,7 @@ class KueryBarView extends Component {
                   values={{
                     apmIndexPatternTitle: `"${apmIndexPatternTitle}"`,
                     setupInstructionsLink: (
-                      <KibanaLink
-                        pathname={'/app/kibana'}
-                        hash={`/home/tutorial/apm`}
-                      >
+                      <KibanaLink path={`/home/tutorial/apm`}>
                         {i18n.translate(
                           'xpack.apm.kueryBar.setupInstructionsLinkLabel',
                           { defaultMessage: 'Setup Instructions' }

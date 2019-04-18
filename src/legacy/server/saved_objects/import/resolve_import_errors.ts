@@ -21,68 +21,86 @@ import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
-import { CustomError, extractErrors } from './extract_errors';
+import { extractErrors } from './extract_errors';
+import { splitOverwrites } from './split_overwrites';
+import { ImportError, Retry } from './types';
+import { validateReferences } from './validate_references';
 
 interface ResolveImportErrorsOptions {
   readStream: Readable;
   objectLimit: number;
   savedObjectsClient: SavedObjectsClient;
-  overwrites: Array<{
-    type: string;
-    id: string;
-  }>;
-  replaceReferences: Array<{
-    type: string;
-    from: string;
-    to: string;
-  }>;
-  skips: Array<{
-    type: string;
-    id: string;
-  }>;
+  retries: Retry[];
 }
 
 interface ImportResponse {
   success: boolean;
   successCount: number;
-  errors?: CustomError[];
+  errors?: ImportError[];
 }
 
 export async function resolveImportErrors({
   readStream,
   objectLimit,
-  skips,
-  overwrites,
+  retries,
   savedObjectsClient,
-  replaceReferences,
 }: ResolveImportErrorsOptions): Promise<ImportResponse> {
-  let errors: CustomError[] = [];
-  const filter = createObjectsFilter(skips, overwrites, replaceReferences);
+  let successCount = 0;
+  let errors: ImportError[] = [];
+  const filter = createObjectsFilter(retries);
+
+  // Get the objects to resolve errors
   const objectsToResolve = await collectSavedObjects(readStream, objectLimit, filter);
 
-  // Replace references
-  const refReplacementsMap: Record<string, string> = {};
-  for (const { type, to, from } of replaceReferences) {
-    refReplacementsMap[`${type}:${from}`] = to;
+  // Create a map of references to replace for each object to avoid iterating through
+  // retries for every object to resolve
+  const retriesReferencesMap = new Map<string, { [key: string]: string }>();
+  for (const retry of retries) {
+    const map: { [key: string]: string } = {};
+    for (const { type, from, to } of retry.replaceReferences) {
+      map[`${type}:${from}`] = to;
+    }
+    retriesReferencesMap.set(`${retry.type}:${retry.id}`, map);
   }
+
+  // Replace references
   for (const savedObject of objectsToResolve) {
+    const refMap = retriesReferencesMap.get(`${savedObject.type}:${savedObject.id}`);
+    if (!refMap) {
+      continue;
+    }
     for (const reference of savedObject.references || []) {
-      if (refReplacementsMap[`${reference.type}:${reference.id}`]) {
-        reference.id = refReplacementsMap[`${reference.type}:${reference.id}`];
+      if (refMap[`${reference.type}:${reference.id}`]) {
+        reference.id = refMap[`${reference.type}:${reference.id}`];
       }
     }
   }
 
-  if (objectsToResolve.length) {
-    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToResolve, {
+  // Validate references
+  const { filteredObjects, errors: validationErrors } = await validateReferences(
+    objectsToResolve,
+    savedObjectsClient
+  );
+  errors = errors.concat(validationErrors);
+
+  // Bulk create in two batches, overwrites and non-overwrites
+  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(filteredObjects, retries);
+  if (objectsToOverwrite.length) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToOverwrite, {
       overwrite: true,
     });
-    errors = extractErrors(bulkCreateResult.saved_objects);
+    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToOverwrite));
+    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
+  }
+  if (objectsToNotOverwrite.length) {
+    const bulkCreateResult = await savedObjectsClient.bulkCreate(objectsToNotOverwrite);
+    errors = errors.concat(extractErrors(bulkCreateResult.saved_objects, objectsToNotOverwrite));
+    successCount += bulkCreateResult.saved_objects.filter(obj => !obj.error).length;
   }
 
   return {
+    successCount,
     success: errors.length === 0,
-    successCount: objectsToResolve.length - errors.length,
     ...(errors.length ? { errors } : {}),
   };
 }

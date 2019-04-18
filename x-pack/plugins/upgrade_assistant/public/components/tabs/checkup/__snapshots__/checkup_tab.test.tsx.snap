@@ -5,7 +5,6 @@ exports[`CheckupTab render with deprecations 1`] = `
   <EuiSpacer />
   <EuiText
     grow={false}
-    size="m"
   >
     <p>
       <FormattedMessage
@@ -63,7 +62,7 @@ exports[`CheckupTab render with deprecations 1`] = `
     panelPaddingSize="l"
   >
     <EuiPageContentBody>
-      <InjectIntl(Component)
+      <InjectIntl(CheckupControlsUI)
         allDeprecations={
           Array [
             Object {
@@ -293,7 +292,6 @@ exports[`CheckupTab render with error 1`] = `
   <EuiSpacer />
   <EuiText
     grow={false}
-    size="m"
   >
     <p>
       <FormattedMessage
@@ -351,7 +349,7 @@ exports[`CheckupTab render with error 1`] = `
     panelPaddingSize="l"
   >
     <EuiPageContentBody>
-      <Component
+      <LoadingErrorBanner
         loadingError={[Error: something bad!]}
       />
     </EuiPageContentBody>
@@ -364,7 +362,6 @@ exports[`CheckupTab render without deprecations 1`] = `
   <EuiSpacer />
   <EuiText
     grow={false}
-    size="m"
   >
     <p>
       <FormattedMessage

@@ -4,14 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import styled from 'styled-components';
-
-import { EuiHideFor, EuiPageSideBar, EuiShowFor, EuiSideNav } from '@elastic/eui';
-
-import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-
+import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraMetricLayout, InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
 
 interface Props {
@@ -73,7 +70,7 @@ export const MetricsSideNav = injectI18n(
   }
 );
 
-const SideNavContainer = styled.div`
+const SideNavContainer = euiStyled.div`
   position: fixed;
   z-index: 1;
   height: 88vh;

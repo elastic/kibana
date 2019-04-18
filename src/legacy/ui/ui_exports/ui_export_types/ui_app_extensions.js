@@ -57,6 +57,7 @@ export const search = appExtension;
 export const shareContextMenuExtensions = appExtension;
 // Add a visualize app extension that should be used for visualize specific stuff
 export const visualize = appExtension;
+export const interpreter = appExtension;
 
 // aliases visTypeEnhancers to the visTypes group
 export const visTypeEnhancers = wrap(alias('visTypes'), appExtension);

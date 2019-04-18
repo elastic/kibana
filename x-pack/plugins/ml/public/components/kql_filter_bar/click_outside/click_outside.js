@@ -27,10 +27,11 @@ export class ClickOutside extends Component {
   };
 
   render() {
-    const { ...restProps } = this.props;
+    const { style, children } = this.props;
+
     return (
-      <div ref={this.setNodeRef} {...restProps}>
-        {this.props.children}
+      <div ref={this.setNodeRef} style={style}>
+        {children}
       </div>
     );
   }

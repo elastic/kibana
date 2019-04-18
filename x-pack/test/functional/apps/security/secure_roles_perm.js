@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
@@ -24,7 +24,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
+      await esArchiver.load('security/discover');
       await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
     });
@@ -63,15 +63,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.logout();
       await PageObjects.security.login('Rashmi', 'changeme');
     });
-
-    //Verify the Access Denied message is displayed
-    it('Kibana User navigating to Monitoring gets Access Denied', async function () {
-      const expectedMessage = 'Access Denied';
-      await PageObjects.monitoring.navigateTo();
-      const actualMessage = await PageObjects.monitoring.getAccessDeniedMessage();
-      expect(actualMessage).to.be(expectedMessage);
-    });
-
 
     it('Kibana User navigating to Management gets permission denied', async function () {
       await PageObjects.settings.navigateTo();

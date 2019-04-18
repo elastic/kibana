@@ -29,7 +29,7 @@
 // 3. Filter in Discover by the scripted field
 // 4. Visualize with aggregation on the scripted field by clicking discover.clickFieldListItemVisualize
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
@@ -72,6 +72,33 @@ export default function ({ getService, getPageObjects }) {
         expect(invalidScriptErrorExists).to.be(true);
       });
     });
+
+
+    describe('testing regression for issue #33251', function describeIndexTests() {
+      const scriptedPainlessFieldName = 'ram_Pain_reg';
+
+      it('should create and edit scripted field', async function () {
+        await PageObjects.settings.navigateTo();
+        await PageObjects.settings.clickKibanaIndexPatterns();
+        await PageObjects.settings.clickIndexPatternLogstash();
+        const startingCount = parseInt(await PageObjects.settings.getScriptedFieldsTabCount());
+        await PageObjects.settings.clickScriptedFieldsTab();
+        await log.debug('add scripted field');
+        const script = `1`;
+        await PageObjects.settings.addScriptedField(scriptedPainlessFieldName, 'painless', 'number', null, '1', script);
+        await retry.try(async function () {
+          expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
+        });
+
+        for (let i = 0; i < 3; i++) {
+          await PageObjects.settings.editScriptedField(scriptedPainlessFieldName);
+          const fieldSaveButton = await testSubjects.exists('fieldSaveButton');
+          expect(fieldSaveButton).to.be(true);
+          await PageObjects.settings.clickSaveScriptedField();
+        }
+      });
+    });
+
 
     describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';

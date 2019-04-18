@@ -81,7 +81,7 @@ module.directive('gaugeOptions', function (i18n) {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return 0;
+        if (index === 0) return -Infinity;
         return $scope.editorState.params.gauge.colorsRange[index - 1].to;
       };
 

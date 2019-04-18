@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getSetupMock } from 'x-pack/plugins/apm/server/testHelpers/mocks';
+import { getSetupMock } from '../../../../testHelpers/mocks';
 import { fetch } from '../fetcher';
 
 describe('get memory chart data fetcher', () => {

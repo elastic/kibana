@@ -5,7 +5,7 @@
  */
 
 import { set } from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { calculateNodeType } from '../calculate_node_type.js';
 
 const masterNodeId = 'def456';

@@ -13,12 +13,12 @@ import {
   TRANSACTION_ID,
   URL_FULL,
   USER_ID
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+} from '../../../../../common/elasticsearch_fieldnames';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { idx } from '../../../../../common/idx';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { StickyProperties } from '../../../shared/StickyProperties';
 
@@ -27,12 +27,16 @@ interface Props {
   transaction: Transaction | undefined;
 }
 
-function TransactionLink({ error, transaction }: Props) {
+function TransactionLink({
+  transaction
+}: {
+  transaction: Transaction | undefined;
+}) {
   if (!transaction) {
     return <Fragment>{NOT_AVAILABLE_LABEL}</Fragment>;
   }
 
-  const isSampled = error.transaction.sampled;
+  const isSampled = transaction.transaction.sampled;
   if (!isSampled) {
     return <Fragment>{transaction.transaction.id}</Fragment>;
   }
@@ -44,15 +48,16 @@ function TransactionLink({ error, transaction }: Props) {
   )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
 
   return (
-    <KibanaLink
-      hash={path}
+    <APMLink
+      path={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceId: transaction.trace.id
+        traceId: transaction.trace.id,
+        banana: 'ok'
       }}
     >
       {transaction.transaction.id}
-    </KibanaLink>
+    </APMLink>
   );
 }
 
@@ -101,7 +106,7 @@ export function StickyErrorProperties({ error, transaction }: Props) {
           defaultMessage: 'Transaction sample ID'
         }
       ),
-      val: <TransactionLink transaction={transaction} error={error} />,
+      val: <TransactionLink transaction={transaction} />,
       width: '25%'
     },
     {

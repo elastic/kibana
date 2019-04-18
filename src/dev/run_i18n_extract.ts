@@ -58,5 +58,10 @@ run(
       resolve(outputDir, 'en.json'),
       outputFormat === 'json5' ? serializeToJson5(sortedMessages) : serializeToJson(sortedMessages)
     );
+  },
+  {
+    flags: {
+      allowUnexpected: true,
+    },
   }
 );

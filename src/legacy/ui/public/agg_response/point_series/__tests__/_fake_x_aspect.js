@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { makeFakeXAspect } from '../_fake_x_aspect';
 
 describe('makeFakeXAspect', function () {

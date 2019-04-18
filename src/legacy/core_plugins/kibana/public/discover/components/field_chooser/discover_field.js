@@ -22,7 +22,9 @@ import html from './discover_field.html';
 import _ from 'lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
+import './string_progress_bar';
 import detailsHtml from './lib/detail_views/string.html';
+import { uiCapabilities } from 'ui/capabilities';
 import { uiModules } from 'ui/modules';
 const app = uiModules.get('apps/discover');
 
@@ -74,6 +76,8 @@ app.directive('discoverField', function ($compile, i18n) {
         return warnings;
 
       };
+
+      $scope.canVisualize = uiCapabilities.visualize.show;
 
       $scope.toggleDisplay = function (field) {
         if (field.display) {

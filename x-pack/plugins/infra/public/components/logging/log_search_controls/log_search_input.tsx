@@ -8,7 +8,8 @@ import { EuiFieldSearch } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import * as React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface LogSearchInputProps {
   className?: string;
@@ -76,7 +77,7 @@ export const LogSearchInput = injectI18n(
   }
 );
 
-const PlainSearchField = styled(EuiFieldSearch)`
+const PlainSearchField = euiStyled(EuiFieldSearch)`
   background: transparent;
   box-shadow: none;
 

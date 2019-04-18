@@ -16,6 +16,7 @@ exports[`TOCEntry is rendered 1`] = `
       grow={false}
     >
       <LayerTocActions
+        cloneLayer={[Function]}
         displayName="layer 1"
         fitToBounds={[Function]}
         layer={
@@ -63,14 +64,12 @@ exports[`TOCEntry is rendered 1`] = `
       </span>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiSpacer
-      size="s"
-    />
-    <div>
-      TOC details mock
-    </div>
-  </EuiFlexItem>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    TOC details mock
+  </div>
 </div>
 `;
 
@@ -90,8 +89,10 @@ exports[`TOCEntry props isReadOnly 1`] = `
       grow={false}
     >
       <LayerTocActions
+        cloneLayer={[Function]}
         displayName="layer 1"
         fitToBounds={[Function]}
+        isReadOnly={true}
         layer={
           Object {
             "getDisplayName": [Function],
@@ -107,10 +108,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <div
           className="eui-textTruncate eui-textLeft"
           style={
@@ -124,13 +122,11 @@ exports[`TOCEntry props isReadOnly 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiFlexItem>
-    <EuiSpacer
-      size="s"
-    />
-    <div>
-      TOC details mock
-    </div>
-  </EuiFlexItem>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    TOC details mock
+  </div>
 </div>
 `;

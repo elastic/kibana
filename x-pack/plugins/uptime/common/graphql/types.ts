@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 
 // ====================================================
 // START: Typescript template
@@ -45,7 +45,7 @@ export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: number | null;
+  millisFromNow?: UnsignedInteger | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -314,9 +314,9 @@ export interface LatestMonitor {
   /** Information from the latest document. */
   ping?: Ping | null;
   /** Buckets of recent up count status data. */
-  upSeries?: (MonitorSeriesPoint | null)[] | null;
+  upSeries?: MonitorSeriesPoint[] | null;
   /** Buckets of recent down count status data. */
-  downSeries?: (MonitorSeriesPoint | null)[] | null;
+  downSeries?: MonitorSeriesPoint[] | null;
 }
 
 export interface MonitorKey {
@@ -417,6 +417,8 @@ export interface ErrorListItem {
   statusCode?: string | null;
 
   timestamp?: string | null;
+
+  name?: string | null;
 }
 
 export interface MonitorPageTitle {

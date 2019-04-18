@@ -43,6 +43,10 @@ export const SimpleSettings = injectI18n(function ({
           disabled={(initialized === true)}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
+          aria-label={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.simpleImportSettings.indexNameAriaLabel',
+            defaultMessage: 'Index name, required field'
+          })}
         />
       </EuiFormRow>
 

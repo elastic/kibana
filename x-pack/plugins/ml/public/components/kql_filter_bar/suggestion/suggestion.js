@@ -35,21 +35,21 @@ const Description = styled.div`
     span {
       font-family: ${theme.euiFontFamily};
       color: ${theme.euiColorFullShade};
-      padding: 0 ${theme.euiSizeXs};
+      padding: 0 ${theme.euiSizeXS};
       display: inline-block;
     }
   }
 `;
 
 const ListItem = styled.li`
-  font-size: ${theme.euiFontSizeXs};
-  height: ${theme.euiSizeXl};
+  font-size: ${theme.euiFontSizeXS};
+  height: ${theme.euiSizeXL};
   align-items: center;
   display: flex;
   background: ${props =>
     props.selected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
-  border-radius: ${theme.euiSizeXs};
+  border-radius: ${theme.euiSizeXS};
 
   ${Description} {
     p span {
@@ -62,13 +62,13 @@ const ListItem = styled.li`
 `;
 
 const Icon = styled.div`
-  flex: 0 0 ${theme.euiSizeXl};
+  flex: 0 0 ${theme.euiSizeXL};
   background: ${props => tint(0.1, getIconColor(props.type))};
   color: ${props => getIconColor(props.type)};
   width: 100%;
   height: 100%;
   text-align: center;
-  line-height: ${theme.euiSizeXl};
+  line-height: ${theme.euiSizeXL};
 `;
 
 const TextValue = styled.div`
@@ -106,9 +106,7 @@ export const Suggestion = (props) => {
         <EuiIcon type={getEuiIconType(props.suggestion.type)} />
       </Icon>
       <TextValue>{props.suggestion.text}</TextValue>
-      <Description
-        dangerouslySetInnerHTML={{ __html: props.suggestion.description }}
-      />
+      <Description>{props.suggestion.description}</Description>
     </ListItem>
   );
 };

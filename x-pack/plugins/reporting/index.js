@@ -5,7 +5,7 @@
  */
 
 import { resolve } from 'path';
-import { UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
+import { PLUGIN_ID, UI_SETTINGS_CUSTOM_PDF_LOGO } from './common/constants';
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { registerRoutes } from './server/routes';
 
@@ -26,7 +26,7 @@ const kbToBase64Length = (kb) => {
 
 export const reporting = (kibana) => {
   return new kibana.Plugin({
-    id: 'reporting',
+    id: PLUGIN_ID,
     configPrefix: 'xpack.reporting',
     publicDir: resolve(__dirname, 'public'),
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -60,7 +60,7 @@ export const reporting = (kibana) => {
               description: '200 kB',
             }
           },
-          category: ['reporting'],
+          category: [PLUGIN_ID],
         }
       }
     },

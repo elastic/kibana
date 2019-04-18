@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PROCESSOR_EVENT } from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
+import { PROCESSOR_EVENT } from '../../../../../common/elasticsearch_fieldnames';
 import { getBuckets } from '../get_buckets';
 
 describe('timeseriesFetcher', () => {

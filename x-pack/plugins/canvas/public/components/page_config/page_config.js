@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCard, EuiFormRow, EuiTitle, EuiSpacer, EuiSelect } from '@elastic/eui';
-import { ColorPickerMini } from '../color_picker_mini';
+import { WorkpadColorPicker } from '../workpad_color_picker';
 
 export const PageConfig = ({
   pageIndex,
@@ -23,8 +23,8 @@ export const PageConfig = ({
         <h4>Page</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiFormRow label="Background color">
-        <ColorPickerMini onChange={setBackground} value={background} />
+      <EuiFormRow label="Background color" helpText="Accepts HEX, RGB or HTML Color names">
+        <WorkpadColorPicker onChange={setBackground} value={background} />
       </EuiFormRow>
       {/* No need to show the transition for the first page because transitions occur when
         switching between pages (for example, when moving from the first page to the second

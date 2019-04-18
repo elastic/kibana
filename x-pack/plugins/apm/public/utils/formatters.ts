@@ -7,7 +7,7 @@
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../common/i18n';
 
 const SECONDS_CUT_OFF = 10 * 1000000; // 10 seconds (in microseconds)
 const MILLISECONDS_CUT_OFF = 10 * 1000; // 10 milliseconds (in microseconds)

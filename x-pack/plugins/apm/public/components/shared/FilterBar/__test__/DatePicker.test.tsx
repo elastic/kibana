@@ -4,102 +4,119 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { mount } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { MemoryRouter } from 'react-router-dom';
+import { Store } from 'redux';
 // @ts-ignore
-import configureStore from 'x-pack/plugins/apm/public/store/config/configureStore';
-import { mockNow } from 'x-pack/plugins/apm/public/utils/testHelpers';
-import { DatePicker } from '../DatePicker';
+import configureStore from '../../../../store/config/configureStore';
+import { mockNow, tick } from '../../../../utils/testHelpers';
+import { DatePicker, DatePickerComponent } from '../DatePicker';
 
-function mountPicker(search?: string) {
-  const store = configureStore();
-  let path = '/whatever';
-  if (search) {
-    path += `?${search}`;
-  }
-  const mounted = mount(
+function mountPicker(initialState = {}) {
+  const store = configureStore(initialState);
+  const wrapper = mount(
     <Provider store={store}>
-      <MemoryRouter initialEntries={[path]}>
+      <MemoryRouter>
         <DatePicker />
       </MemoryRouter>
     </Provider>
   );
-  return { mounted, store };
+  return { wrapper, store };
 }
 
 describe('DatePicker', () => {
-  describe('date calculations', () => {
-    let restoreNow: () => void;
+  describe('url updates', () => {
+    function setupTest() {
+      const routerProps = {
+        location: { search: '' },
+        history: { push: jest.fn() }
+      } as any;
 
-    beforeAll(() => {
-      restoreNow = mockNow('2019-02-15T12:00:00.000Z');
-    });
-
-    afterAll(() => {
-      restoreNow();
-    });
-
-    it('should initialize with APM default date range', () => {
-      const { store } = mountPicker();
-      expect(store.getState().urlParams).toEqual({
-        start: '2019-02-14T12:00:00.000Z',
-        end: '2019-02-15T12:00:00.000Z'
-      });
-    });
-
-    it('should parse "last 15 minutes" from URL params', () => {
-      const { store } = mountPicker('rangeFrom=now-15m&rangeTo=now');
-      expect(store.getState().urlParams).toEqual({
-        start: '2019-02-15T11:45:00.000Z',
-        end: '2019-02-15T12:00:00.000Z'
-      });
-    });
-
-    it('should parse "last 7 days" from URL params', () => {
-      const { store } = mountPicker('rangeFrom=now-7d&rangeTo=now');
-      expect(store.getState().urlParams).toEqual({
-        start: '2019-02-08T12:00:00.000Z',
-        end: '2019-02-15T12:00:00.000Z'
-      });
-    });
-
-    it('should parse absolute dates from URL params', () => {
-      const { store } = mountPicker(
-        `rangeFrom=2019-02-03T10:00:00.000Z&rangeTo=2019-02-10T16:30:00.000Z`
+      const wrapper = shallow<DatePickerComponent>(
+        <DatePickerComponent
+          {...routerProps}
+          dispatchUpdateTimePicker={jest.fn()}
+          urlParams={{}}
+        />
       );
-      expect(store.getState().urlParams).toEqual({
-        start: '2019-02-03T10:00:00.000Z',
-        end: '2019-02-10T16:30:00.000Z'
+
+      return { history: routerProps.history, wrapper };
+    }
+
+    it('should push an entry to the stack for each change', () => {
+      const { history, wrapper } = setupTest();
+      wrapper.instance().updateUrl({ rangeFrom: 'now-20m', rangeTo: 'now' });
+      expect(history.push).toHaveBeenCalledWith({
+        search: 'rangeFrom=now-20m&rangeTo=now'
       });
     });
   });
 
   describe('refresh cycle', () => {
+    let nowSpy: jest.Mock;
     beforeEach(() => {
+      nowSpy = mockNow('2010');
       jest.useFakeTimers();
     });
 
     afterEach(() => {
+      nowSpy.mockRestore();
       jest.useRealTimers();
     });
 
-    it('should refresh the store once per refresh interval', async () => {
-      const { store } = mountPicker(
-        'rangeFrom=now-15m&rangeTo=now&refreshPaused=false&refreshInterval=200'
-      );
-      const listener = jest.fn();
-      store.subscribe(listener);
-      jest.advanceTimersByTime(1100);
+    describe('when refresh is not paused', () => {
+      let listener: jest.Mock;
+      let store: Store;
+      beforeEach(async () => {
+        const obj = mountPicker({
+          urlParams: {
+            rangeFrom: 'now-15m',
+            rangeTo: 'now',
+            refreshPaused: false,
+            refreshInterval: 200
+          }
+        });
+        store = obj.store;
 
-      expect(listener).toHaveBeenCalledTimes(5);
+        listener = jest.fn();
+        store.subscribe(listener);
+
+        jest.advanceTimersByTime(200);
+        await tick();
+        jest.advanceTimersByTime(200);
+        await tick();
+        jest.advanceTimersByTime(200);
+        await tick();
+      });
+
+      it('should dispatch every refresh interval', async () => {
+        expect(listener).toHaveBeenCalledTimes(3);
+      });
+
+      it('should update the store with the new date range', () => {
+        expect(store.getState().urlParams).toEqual({
+          end: '2010-01-01T00:00:00.000Z',
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          refreshInterval: 200,
+          refreshPaused: false,
+          start: '2009-12-31T23:45:00.000Z'
+        });
+      });
     });
 
-    it('should not refresh when paused', async () => {
-      const { store } = mountPicker(
-        'rangeFrom=now-15m&rangeTo=now&refreshPaused=true&refreshInterval=200'
-      );
+    it('should not refresh when paused', () => {
+      const { store } = mountPicker({
+        urlParams: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          refreshPaused: true,
+          refreshInterval: 200
+        }
+      });
+
       const listener = jest.fn();
       store.subscribe(listener);
       jest.advanceTimersByTime(1100);
@@ -107,10 +124,15 @@ describe('DatePicker', () => {
       expect(listener).not.toHaveBeenCalled();
     });
 
-    it('should be paused by default', async () => {
-      const { store } = mountPicker(
-        'rangeFrom=now-15m&rangeTo=now&refreshInterval=200'
-      );
+    it('should be paused by default', () => {
+      const { store } = mountPicker({
+        urlParams: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          refreshInterval: 200
+        }
+      });
+
       const listener = jest.fn();
       store.subscribe(listener);
       jest.advanceTimersByTime(1100);
@@ -118,13 +140,19 @@ describe('DatePicker', () => {
       expect(listener).not.toHaveBeenCalled();
     });
 
-    it('should not attempt refreshes after unmounting', async () => {
-      const { store, mounted } = mountPicker(
-        'rangeFrom=now-15m&rangeTo=now&refreshPaused=false&refreshInterval=200'
-      );
+    it('should not attempt refreshes after unmounting', () => {
+      const { store, wrapper } = mountPicker({
+        urlParams: {
+          rangeFrom: 'now-15m',
+          rangeTo: 'now',
+          refreshPaused: false,
+          refreshInterval: 200
+        }
+      });
+
       const listener = jest.fn();
       store.subscribe(listener);
-      mounted.unmount();
+      wrapper.unmount();
       jest.advanceTimersByTime(1100);
 
       expect(listener).not.toHaveBeenCalled();

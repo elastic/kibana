@@ -2,56 +2,54 @@
 
 exports[`MonitorCharts component renders the component without errors 1`] = `
 <Fragment>
-  <EuiFlexGroup>
+  <EuiFlexGroup
+    gutterSize="s"
+  >
     <EuiFlexItem>
-      <EuiTitle
-        size="xs"
-        textTransform="none"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="Monitor Duration ms"
-            description="The 'ms' is an abbreviation for milliseconds."
-            id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
       <EuiPanel
         grow={true}
         hasShadow={false}
-        paddingSize="m"
+        paddingSize="s"
         style={
           Object {
-            "maxHeight": 220,
-            "maxWidth": 520,
+            "height": 248,
           }
         }
       >
+        <EuiTitle
+          size="xs"
+        >
+          <h4>
+            <FormattedMessage
+              defaultMessage="Monitor duration in milliseconds"
+              description="The 'ms' is an abbreviation for milliseconds."
+              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+              values={Object {}}
+            />
+          </h4>
+        </EuiTitle>
         <FlexibleEuiSeriesChart
-          crosshairValue={150}
+          animateData={false}
           height={200}
           margins={
             Object {
-              "bottom": 40,
-              "left": 60,
-              "right": 40,
-              "top": 10,
+              "bottom": 32,
+              "left": 64,
+              "right": 0,
+              "top": 16,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
-          width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
           yDomain={
             Array [
               0,
-              75,
+              6669,
             ]
           }
         >
           <EuiAreaSeries
-            color="secondaryColor"
+            color="range"
             curve="curveBasis"
             data={
               Array [
@@ -118,7 +116,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
           />
           <EuiLineSeries
             borderOpacity={1}
-            color="primaryColor"
+            color="mean"
             curve="linear"
             data={
               Array [
@@ -169,7 +167,7 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               ]
             }
             lineMarkSize={0}
-            lineSize={1}
+            lineSize={2}
             name="Mean duration"
             showLineMarks={false}
           />
@@ -177,43 +175,39 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
       </EuiPanel>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiTitle
-        size="xs"
-        textTransform="none"
-      >
-        <h4>
-          <FormattedMessage
-            defaultMessage="Check status"
-            id="xpack.uptime.monitorCharts.checkStatus.title"
-            values={Object {}}
-          />
-        </h4>
-      </EuiTitle>
       <EuiPanel
         grow={true}
         hasShadow={false}
-        paddingSize="m"
+        paddingSize="s"
         style={
           Object {
-            "maxHeight": 220,
-            "maxWidth": 520,
+            "height": 248,
           }
         }
       >
+        <EuiTitle
+          size="xs"
+        >
+          <h4>
+            <FormattedMessage
+              defaultMessage="Check status"
+              id="xpack.uptime.monitorCharts.checkStatus.title"
+              values={Object {}}
+            />
+          </h4>
+        </EuiTitle>
         <FlexibleEuiSeriesChart
-          crosshairValue={150}
+          animateData={false}
           height={200}
           margins={
             Object {
-              "bottom": 40,
-              "left": 60,
-              "right": 40,
-              "top": 10,
+              "bottom": 32,
+              "left": 64,
+              "right": 0,
+              "top": 16,
             }
           }
-          onCrosshairUpdate={[MockFunction]}
           stackBy="y"
-          width={500}
           xCrosshairFormat="YYYY-MM-DD hh:mmZ"
           xType="time"
           yDomain={
@@ -224,8 +218,8 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
           }
         >
           <EuiAreaSeries
-            color="primaryColor"
-            curve="curveBasis"
+            color="success"
+            curve="linear"
             data={
               Array [
                 Object {
@@ -285,47 +279,47 @@ exports[`MonitorCharts component renders the component without errors 1`] = `
               Array [
                 Object {
                   "x": 1548697620000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548697920000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548698220000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548698520000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548698820000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548699120000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548699420000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548699720000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548700020000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548700320000,
-                  "y": null,
+                  "y": 0,
                 },
                 Object {
                   "x": 1548700620000,
-                  "y": null,
+                  "y": 0,
                 },
               ]
             }

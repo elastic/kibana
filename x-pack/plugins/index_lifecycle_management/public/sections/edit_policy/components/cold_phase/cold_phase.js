@@ -22,7 +22,7 @@ import {
   PHASE_ENABLED,
   PHASE_REPLICA_COUNT,
   PHASE_FREEZE_ENABLED
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { ErrableFormRow } from '../../form_errors';
 import { MinAgeInput } from '../min_age_input';
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, OptionalLabel } from '../../../components';

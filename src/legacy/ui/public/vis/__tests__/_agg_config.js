@@ -18,7 +18,7 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { VisProvider } from '..';
 import { AggType } from '../../agg_types/agg_type';

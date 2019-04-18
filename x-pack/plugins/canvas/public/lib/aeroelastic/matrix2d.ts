@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { transformMatrix2d, vector2d } from './types';
+import { transformMatrix2d, vector2d } from '.';
 
 export const ORIGIN = [0, 0, 1] as vector2d;
 

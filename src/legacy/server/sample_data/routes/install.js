@@ -19,6 +19,7 @@
 
 import Boom from 'boom';
 import Joi from 'joi';
+import { usage } from '../usage';
 import { loadData } from './lib/load_data';
 import { createIndexName } from './lib/create_index_name';
 import {
@@ -120,7 +121,7 @@ export const createInstallRoute = () => ({
           const createIndexParams = {
             index: index,
             body: {
-              settings: { index: { number_of_shards: 1, number_of_replicas: 0 } },
+              settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
           };
@@ -170,6 +171,9 @@ export const createInstallRoute = () => ({
           .response(`Unable to load kibana saved objects, see kibana logs for details`)
           .code(403);
       }
+
+      // track the usage operation in a non-blocking way
+      usage(request).addInstall(params.id);
 
       return h.response({
         elasticsearchIndicesCreated: counts,

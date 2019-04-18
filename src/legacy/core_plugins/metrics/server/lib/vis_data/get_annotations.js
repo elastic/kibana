@@ -24,7 +24,8 @@ function validAnnotation(annotation) {
     annotation.time_field &&
     annotation.fields &&
     annotation.icon &&
-    annotation.template;
+    annotation.template &&
+    !annotation.hidden;
 }
 
 export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities) {
