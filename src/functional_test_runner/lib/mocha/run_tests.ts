@@ -17,6 +17,9 @@
  * under the License.
  */
 
+import { Lifecycle } from '../lifecycle';
+import { Mocha } from '../../fake_mocha_types';
+
 /**
  *  Run the tests that have already been loaded into
  *  mocha. aborts tests on 'cleanup' lifecycle runs
@@ -26,7 +29,7 @@
  *  @param  {Mocha} mocha
  *  @return {Promise<Number>} resolves to the number of test failures
  */
-export async function runTests(lifecycle, log, mocha) {
+export async function runTests(lifecycle: Lifecycle, mocha: Mocha) {
   let runComplete = false;
   const runner = mocha.run(() => {
     runComplete = true;
@@ -36,7 +39,7 @@ export async function runTests(lifecycle, log, mocha) {
     if (!runComplete) runner.abort();
   });
 
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const respond = () => resolve(runner.failures);
 
     // if there are no tests, mocha.run() is sync
