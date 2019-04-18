@@ -33,7 +33,7 @@ interface Params {
 
 interface Deps {
   i18n: I18nSetup;
-  uiSettings: UiSettingsSetup
+  uiSettings: UiSettingsSetup;
 }
 
 export class ToastsService {
@@ -43,7 +43,7 @@ export class ToastsService {
   constructor(private readonly params: Params) {}
 
   public setup({ i18n, uiSettings }: Deps) {
-    const toasts = new ToastsSetup(uiSettings);
+    const toasts = new ToastsSetup({ uiSettings, i18n });
 
     this.domElemSubscription = this.params.targetDomElement$.subscribe({
       next: targetDomElement => {

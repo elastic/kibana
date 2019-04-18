@@ -30,54 +30,82 @@ import {
 } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useState } from 'react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+
+import { I18nSetup } from '../../i18n';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
+  i18nContext: I18nSetup['Context'];
 }
 
-export function ErrorToast({ title, error, toastMessage }: ErrorToastProps) {
-  const [isModalVisible, setModalVisible] = useState(false);
+/**
+ * This should instead be replaced by the overlay service once it's available.
+ */
+function showErrorDialog({
+  title,
+  error,
+  i18nContext: I18nContext,
+}: Pick<ErrorToastProps, 'error' | 'title' | 'i18nContext'>) {
+  const container = document.createElement('div');
+  const onClose = () => {
+    ReactDOM.unmountComponentAtNode(container);
+    document.body.removeChild(container);
+  };
 
+  document.body.appendChild(container);
+  const modal = (
+    <I18nContext>
+      <EuiOverlayMask>
+        <EuiModal onClose={onClose} data-test-subj="fullErrorModal">
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+            {error.stack && (
+              <React.Fragment>
+                <EuiSpacer size="s" />
+                <EuiCodeBlock isCopyable={true} paddingSize="s">
+                  {error.stack}
+                </EuiCodeBlock>
+              </React.Fragment>
+            )}
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton onClick={onClose} fill>
+              <FormattedMessage
+                id="core.notifications.errorToast.closeModal"
+                defaultMessage="Close"
+              />
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiOverlayMask>
+    </I18nContext>
+  );
+  ReactDOM.render(modal, container);
+}
+
+export function ErrorToast({ title, error, toastMessage, i18nContext }: ErrorToastProps) {
   return (
     <React.Fragment>
       <p data-test-subj="errorToastMessage">{toastMessage}</p>
       <div className="eui-textRight">
-        <EuiButton size="s" color="danger" onClick={() => setModalVisible(true)}>
+        <EuiButton
+          size="s"
+          color="danger"
+          onClick={() => showErrorDialog({ title, error, i18nContext })}
+        >
           <FormattedMessage
             id="core.toasts.errorToast.seeFullError"
             defaultMessage="See the full error"
           />
         </EuiButton>
       </div>
-
-      {isModalVisible && (
-        <EuiOverlayMask>
-          <EuiModal onClose={() => setModalVisible(false)} data-test-subj="fullErrorModal">
-            <EuiModalHeader>
-              <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-            </EuiModalHeader>
-            <EuiModalBody>
-              <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
-              {error.stack && (
-                <React.Fragment>
-                  <EuiSpacer size="s" />
-                  <EuiCodeBlock isCopyable={true} paddingSize="s">
-                    {error.stack}
-                  </EuiCodeBlock>
-                </React.Fragment>
-              )}
-            </EuiModalBody>
-            <EuiModalFooter>
-              <EuiButton onClick={() => setModalVisible(false)} fill>
-                <FormattedMessage id="core.notifications.errorToast.closeModal" defaultMessage="Close" />
-              </EuiButton>
-            </EuiModalFooter>
-          </EuiModal>
-        </EuiOverlayMask>
-      )}
     </React.Fragment>
   );
 }

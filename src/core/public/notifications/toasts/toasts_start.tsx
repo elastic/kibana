@@ -23,6 +23,7 @@ import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
 import { UiSettingsSetup } from '../../ui_settings';
+import { I18nSetup } from '../../i18n';
 
 /** @public */
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
@@ -55,8 +56,13 @@ const normalizeToast = (toastOrTitle: ToastInput) => {
 export class ToastsSetup {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
+  private uiSettings: UiSettingsSetup;
+  private i18n: I18nSetup;
 
-  constructor(private uiSettings: UiSettingsSetup) {}
+  constructor(deps: { uiSettings: UiSettingsSetup; i18n: I18nSetup }) {
+    this.uiSettings = deps.uiSettings;
+    this.i18n = deps.i18n;
+  }
 
   public get$() {
     return this.toasts$.asObservable();
@@ -115,7 +121,14 @@ export class ToastsSetup {
       iconType: 'alert',
       title: options.title,
       toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
-      text: <ErrorToast error={error} title={options.title} toastMessage={message} />,
+      text: (
+        <ErrorToast
+          error={error}
+          title={options.title}
+          toastMessage={message}
+          i18nContext={this.i18n.Context}
+        />
+      ),
     });
   }
 }

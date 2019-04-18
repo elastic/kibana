@@ -22,6 +22,7 @@ import { mockReactDomRender, mockReactDomUnmount } from './toasts_service.test.m
 import { of } from 'rxjs';
 import { ToastsService } from './toasts_service';
 import { ToastsSetup } from './toasts_start';
+import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 
 const mockI18n: any = {
   Context: function I18nContext() {
@@ -36,7 +37,7 @@ describe('#setup()', () => {
     const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
 
     expect(mockReactDomRender).not.toHaveBeenCalled();
-    toasts.setup({ i18n: mockI18n });
+    toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() });
     expect(mockReactDomRender.mock.calls).toMatchSnapshot();
   });
 
@@ -45,7 +46,9 @@ describe('#setup()', () => {
       targetDomElement$: of(document.createElement('div')),
     });
 
-    expect(toasts.setup({ i18n: mockI18n })).toBeInstanceOf(ToastsSetup);
+    expect(
+      toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() })
+    ).toBeInstanceOf(ToastsSetup);
   });
 });
 
@@ -55,7 +58,7 @@ describe('#stop()', () => {
     targetDomElement.setAttribute('test', 'target-dom-element');
     const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
 
-    toasts.setup({ i18n: mockI18n });
+    toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() });
 
     expect(mockReactDomUnmount).not.toHaveBeenCalled();
     toasts.stop();
@@ -75,7 +78,7 @@ describe('#stop()', () => {
     const targetDomElement = document.createElement('div');
     const toasts = new ToastsService({ targetDomElement$: of(targetDomElement) });
 
-    toasts.setup({ i18n: mockI18n });
+    toasts.setup({ i18n: mockI18n, uiSettings: uiSettingsServiceMock.createSetupContract() });
     toasts.stop();
     expect(targetDomElement.childNodes).toHaveLength(0);
   });

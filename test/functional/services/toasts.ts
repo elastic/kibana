@@ -17,9 +17,9 @@
  * under the License.
  */
 
-import { TestWrapper } from 'typings';
+import { FtrProviderContext } from '../ftr_provider_context';
 
-export function ToastsProvider({ getService }: TestWrapper) {
+export function ToastsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
 
   class Toasts {

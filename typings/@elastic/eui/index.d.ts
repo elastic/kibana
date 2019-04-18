@@ -18,13 +18,14 @@
  */
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
-import { Toast as OriginalToast } from '@elastic/eui';
+import { EuiToastProps } from '@elastic/eui';
 
 // TODO: Remove once typescript definitions are in EUI
 
 declare module '@elastic/eui' {
-
-  export interface Toast extends OriginalToast {
+  export interface Toast extends EuiToastProps {
+    id: string;
+    text?: React.ReactChild;
     toastLifeTimeMs?: number;
   }
 
