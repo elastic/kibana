@@ -7,7 +7,6 @@
 import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
-  EuiButtonEmpty,
   EuiFlexItem,
   EuiPanel,
   EuiButton,
@@ -64,10 +63,12 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, s
       </Fragment>
     );
     importFile = (
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          flush="right"
+      <Fragment>
+        <EuiSpacer size="s" />
+        <EuiButton
+          className="mapLayerControl__addLayerButton"
+          fill
+          fullWidth
           onClick={showFileImportWizard}
           data-test-subj="importFileButton"
         >
@@ -75,8 +76,8 @@ export function LayerControl({ isReadOnly, isLayerTOCOpen, showAddLayerWizard, s
             id="xpack.maps.layerControl.importFileButtonLabel"
             defaultMessage="Import file"
           />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
+        </EuiButton>
+      </Fragment>
     );
   }
 
