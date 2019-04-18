@@ -186,4 +186,5 @@ fi
 ###
 export CHECKS_REPORTER_ACTIVE=true
 
-source functions.sh
+script_dir="$(dirname "$0")"
+source "$script_dir/functions.sh"
