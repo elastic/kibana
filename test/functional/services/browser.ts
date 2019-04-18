@@ -18,24 +18,27 @@
  */
 
 import { cloneDeep } from 'lodash';
+import { IKey, logging } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
+// @ts-ignore no support ts yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
-export async function BrowserProvider({ getService }) {
+import { FtrProviderContext } from '../ftr_provider_context';
+
+export async function BrowserProvider({ getService }: FtrProviderContext) {
   const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
 
   class BrowserService {
-
     /**
      * Keyboard events
      */
-    keys = Key;
+    public readonly keys: IKey = Key;
 
     /**
      * Is WebDriver instance W3C compatible
      */
-    isW3CEnabled = (driver.executor_.w3c === true);
+    isW3CEnabled = (driver as any).executor_.w3c === true;
 
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
@@ -43,8 +46,8 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
-    async getWindowSize() {
-      return await driver.manage().window().getRect();
+    public async getWindowSize(): Promise<{ height: number; width: number; x: number; y: number }> {
+      return await (driver.manage().window() as any).getRect();
     }
 
     /**
@@ -55,8 +58,10 @@ export async function BrowserProvider({ getService }) {
      * @param {number} height
      * @return {Promise<void>}
      */
-    async setWindowSize(...args) {
-      await driver.manage().window().setRect({ width: args[0], height: args[1] });
+    public async setWindowSize(width: number, height: number): Promise<void>;
+    public async setWindowSize(...args: number[]): Promise<void>;
+    public async setWindowSize(...args: unknown[]): Promise<void> {
+      await (driver.manage().window() as any).setRect({ width: args[0], height: args[1] });
     }
 
     /**
@@ -65,11 +70,12 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<string>}
      */
-    async getCurrentUrl() {
+    public async getCurrentUrl(): Promise<string> {
       // strip _t=Date query param when url is read
       const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, parsed => {
-        delete parsed.query._t;
+        delete (parsed.query as any)._t;
+        return void 0;
       });
       return currentWithoutTime;
     }
@@ -82,10 +88,11 @@ export async function BrowserProvider({ getService }) {
      * @param {boolean} insertTimestamp Optional
      * @return {Promise<void>}
      */
-    async get(url, insertTimestamp = true) {
+    public async get(url: string, insertTimestamp: boolean = true): Promise<void> {
       if (insertTimestamp) {
         const urlWithTime = modifyUrl(url, parsed => {
-          parsed.query._t = Date.now();
+          (parsed.query as any)._t = Date.now();
+          return void 0;
         });
 
         return await driver.get(urlWithTime);
@@ -103,13 +110,25 @@ export async function BrowserProvider({ getService }) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    async moveMouseTo(element, xOffset, yOffset) {
-      const mouse = driver.actions().mouse();
-      const actions = driver.actions({ bridge: true });
+    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async moveMouseTo(element: WebElementWrapper): Promise<void>;
+    public async moveMouseTo(
+      element: WebElementWrapper,
+      xOffset?: number,
+      yOffset?: number
+    ): Promise<void> {
+      const mouse = (driver.actions() as any).mouse();
+      const actions = (driver as any).actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
-        await actions.pause(mouse).move({ origin: element._webElement }).perform();
-      } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
-        await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
+        await actions
+          .pause(mouse)
+          .move({ origin: element._webElement })
+          .perform();
+      } else if (isNaN(xOffset!) || isNaN(yOffset!) === false) {
+        await actions
+          .pause(mouse)
+          .move({ origin: { x: xOffset, y: yOffset } })
+          .perform();
       } else {
         throw new Error('Element or coordinates should be provided');
       }
@@ -123,11 +142,20 @@ export async function BrowserProvider({ getService }) {
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
      * @return {Promise<void>}
      */
-    async dragAndDrop(from, to) {
+    public async dragAndDrop(
+      from: { offset: { x: any; y: any }; location: { _webElement: any } },
+      to: { offset: { x: any; y: any }; location: { _webElement: any; x: any } }
+    ) {
+      // tslint:disable-next-line:variable-name
       let _from;
+      // tslint:disable-next-line:variable-name
       let _to;
-      const _fromOffset = (from.offset) ? { x: from.offset.x || 0,  y: from.offset.y || 0 } : { x: 0, y: 0 };
-      const _toOffset = (to.offset) ? { x: to.offset.x || 0,  y: to.offset.y || 0 } : { x: 0, y: 0 };
+      // tslint:disable-next-line:variable-name
+      const _fromOffset = from.offset
+        ? { x: from.offset.x || 0, y: from.offset.y || 0 }
+        : { x: 0, y: 0 };
+      // tslint:disable-next-line:variable-name
+      const _toOffset = to.offset ? { x: to.offset.x || 0, y: to.offset.y || 0 } : { x: 0, y: 0 };
 
       if (from.location instanceof WebElementWrapper) {
         _from = from.location._webElement;
@@ -142,7 +170,7 @@ export async function BrowserProvider({ getService }) {
       }
 
       if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
-        const actions = driver.actions({ bridge: true });
+        const actions = (driver as any).actions({ bridge: true });
         return await actions
           .move({ origin: _from })
           .press()
@@ -165,7 +193,7 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<void>}
      */
-    async refresh() {
+    public async refresh(): Promise<void> {
       await driver.navigate().refresh();
     }
 
@@ -175,7 +203,7 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<void>}
      */
-    async goBack() {
+    public async goBack(): Promise<void> {
       await driver.navigate().back();
     }
 
@@ -186,8 +214,12 @@ export async function BrowserProvider({ getService }) {
      * @param  {string|string[]} keys
      * @return {Promise<void>}
      */
-    async pressKeys(...args) {
-      const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
+    public async pressKeys(keys: string | string[]): Promise<void>;
+    public async pressKeys(...args: string[]): Promise<void>;
+    public async pressKeys(...args: string[]): Promise<void> {
+      const actions = this.isW3CEnabled
+        ? driver.actions()
+        : (driver as any).actions({ bridge: true });
       const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
     }
@@ -203,13 +235,23 @@ export async function BrowserProvider({ getService }) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    async clickMouseButton(...args) {
-      const mouse = driver.actions().mouse();
-      const actions = driver.actions({ bridge: true });
+    public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async clickMouseButton(element: WebElementWrapper): Promise<void>;
+    public async clickMouseButton(...args: unknown[]): Promise<void> {
+      const mouse = (driver.actions() as any).mouse();
+      const actions = (driver as any).actions({ bridge: true });
       if (args[0] instanceof WebElementWrapper) {
-        await actions.pause(mouse).move({ origin: args[0]._webElement }).click().perform();
-      } else if (isNaN(args[1]) || isNaN(args[2]) === false) {
-        await actions.pause(mouse).move({ origin: { x: args[1], y: args[2] } }).click().perform();
+        await actions
+          .pause(mouse)
+          .move({ origin: (args[0] as any)._webElement })
+          .click()
+          .perform();
+      } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
+        await actions
+          .pause(mouse)
+          .move({ origin: { x: args[1], y: args[2] } })
+          .click()
+          .perform();
       } else {
         throw new Error('Element or coordinates should be provided');
       }
@@ -222,7 +264,7 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<string>}
      */
-    async getPageSource() {
+    public async getPageSource(): Promise<string> {
       return await driver.getPageSource();
     }
 
@@ -234,14 +276,18 @@ export async function BrowserProvider({ getService }) {
      * @param {!logging.Type} type The desired log type.
      * @return {Promise<LogEntry[]>}
      */
-    async getLogsFor(...args) {
+    public async getLogsFor(type: typeof logging.Type | string): Promise<logging.Entry[]>;
+    public async getLogsFor(...args: any[]): Promise<logging.Entry[]> {
       // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
       // See: https://github.com/w3c/webdriver/issues/406
       // See: https://w3c.github.io/webdriver/#endpoints
       if (this.isW3CEnabled) {
         return [];
       } else {
-        return await driver.manage().logs().get(...args);
+        return await (driver as any)
+          .manage()
+          .logs()
+          .get(...args);
       }
     }
 
@@ -251,7 +297,7 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<Buffer>}
      */
-    async takeScreenshot() {
+    public async takeScreenshot(): Promise<string | Buffer> {
       return await driver.takeScreenshot();
     }
 
@@ -261,8 +307,8 @@ export async function BrowserProvider({ getService }) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    async doubleClick(element) {
-      const actions = driver.actions({ bridge: true });
+    public async doubleClick(element: WebElementWrapper): Promise<void> {
+      const actions = (driver as any).actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
         await actions.doubleClick(element._webElement).perform();
       } else {
@@ -278,8 +324,10 @@ export async function BrowserProvider({ getService }) {
      * @param {string} handle
      * @return {Promise<void>}
      */
-    async switchToWindow(...args) {
-      await driver.switchTo().window(...args);
+    public async switchToWindow(handle: string): Promise<void>;
+    public async switchToWindow(...args: string[]): Promise<void>;
+    public async switchToWindow(...args: string[]): Promise<void> {
+      await (driver.switchTo() as any).window(...args);
     }
 
     /**
@@ -288,7 +336,7 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<string[]>}
      */
-    async getAllWindowHandles() {
+    public async getAllWindowHandles(): Promise<string[]> {
       return await driver.getAllWindowHandles();
     }
 
@@ -299,8 +347,12 @@ export async function BrowserProvider({ getService }) {
      * @param {string} value
      * @return {Promise<void>}
      */
-    async setLocalStorageItem(key, value) {
-      await driver.executeScript('return window.localStorage.setItem(arguments[0], arguments[1]);', key, value);
+    public async setLocalStorageItem(key: string, value: string): Promise<void> {
+      await driver.executeScript(
+        'return window.localStorage.setItem(arguments[0], arguments[1]);',
+        key,
+        value
+      );
     }
 
     /**
@@ -310,7 +362,7 @@ export async function BrowserProvider({ getService }) {
      *
      * @return {Promise<void>}
      */
-    async closeCurrentWindow() {
+    public async closeCurrentWindow(): Promise<void> {
       await driver.close();
     }
 
@@ -318,50 +370,56 @@ export async function BrowserProvider({ getService }) {
      * Executes JavaScript code within the focused window/frame. The code should return a value synchronously.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#executeScript
      *
-     * @param  {string|function} function
+     * @param  {string|function} fn
      * @param  {...any[]} args
      */
-    async execute(fn, ...args) {
-      return await driver.executeScript(fn, ...cloneDeep(args, arg => {
-        if (arg instanceof WebElementWrapper) {
-          return arg._webElement;
-        }
-      }));
+    public async execute<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
+      return await driver.executeScript(
+        fn,
+        ...cloneDeep(args, arg => {
+          if (arg instanceof WebElementWrapper) {
+            return arg._webElement;
+          }
+        })
+      );
     }
 
-    async executeAsync(fn, ...args) {
-      return await driver.executeAsyncScript(fn, ...cloneDeep(args, arg => {
-        if (arg instanceof WebElementWrapper) {
-          return arg._webElement;
-        }
-      }));
+    public async executeAsync<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
+      return await driver.executeAsyncScript(
+        fn,
+        ...cloneDeep(args, arg => {
+          if (arg instanceof WebElementWrapper) {
+            return arg._webElement;
+          }
+        })
+      );
     }
 
-    getScrollTop() {
+    public getScrollTop() {
       return driver
         .executeScript('return document.body.scrollTop')
-        .then(scrollSize => parseInt(scrollSize, 10));
+        .then((scrollSize: any) => parseInt(scrollSize, 10));
     }
 
-    getScrollLeft() {
+    public getScrollLeft() {
       return driver
         .executeScript('return document.body.scrollLeft')
-        .then(scrollSize => parseInt(scrollSize, 10));
+        .then((scrollSize: any) => parseInt(scrollSize, 10));
     }
 
     // return promise with REAL scroll position
-    setScrollTop(scrollSize) {
+    public setScrollTop(scrollSize: number | string) {
       return driver
         .executeScript('document.body.scrollTop = ' + scrollSize)
-        .then(() => this.getScrollTop(driver));
+        .then(this.getScrollTop);
     }
 
-    setScrollLeft(scrollSize) {
+    public setScrollLeft(scrollSize: number | string) {
       return driver
         .executeScript('document.body.scrollLeft = ' + scrollSize)
-        .then(() => this.getScrollLeft(driver));
+        .then(this.getScrollLeft);
     }
   }
 
-  return  new BrowserService();
+  return new BrowserService();
 }
