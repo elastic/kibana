@@ -80,6 +80,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     };
   }
 
+  public async start() {}
+
   public async stop() {
     this.log.debug('Stopping plugins service');
     await this.pluginsSystem.stopPlugins();

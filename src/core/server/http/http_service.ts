@@ -23,15 +23,15 @@ import { first } from 'rxjs/operators';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { HttpServer, HttpServerInfo } from './http_server';
+import { HttpServer, HttpServerSetup, HttpServerInfo } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
-import { Router } from './router';
 
 /** @public */
-export type HttpServiceSetup = HttpServerInfo;
+export type HttpServiceSetup = HttpServerSetup;
+export type HttpServiceStart = HttpServerInfo;
 
 /** @internal */
-export class HttpService implements CoreService<HttpServiceSetup> {
+export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private configSubscription?: Subscription;
@@ -58,6 +58,12 @@ export class HttpService implements CoreService<HttpServiceSetup> {
 
     const config = await this.config$.pipe(first()).toPromise();
 
+    return this.httpServer.setup(config);
+  }
+
+  public async start() {
+    const config = await this.config$.pipe(first()).toPromise();
+
     // If a redirect port is specified, we start an HTTP server at this port and
     // redirect all requests to the SSL port.
     if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
@@ -80,20 +86,5 @@ export class HttpService implements CoreService<HttpServiceSetup> {
 
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
-  }
-
-  public registerRouter(router: Router): void {
-    if (this.httpServer.isListening()) {
-      // If the server is already running we can't make any config changes
-      // to it, so we warn and don't allow the config to pass through.
-      // TODO Should we throw instead?
-      this.log.error(
-        `Received new router [${router.path}] after server was started. ` +
-          'Router will **not** be applied.'
-      );
-    } else {
-      this.log.debug(`registering route handler for [${router.path}]`);
-      this.httpServer.registerRouter(router);
-    }
   }
 }

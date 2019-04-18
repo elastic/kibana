@@ -60,6 +60,17 @@ export class Root {
     }
   }
 
+  public async start() {
+    this.log.debug('starting root');
+
+    try {
+      await this.server.start();
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
+  }
+
   public async shutdown(reason?: any) {
     this.log.debug('shutting root down');
 

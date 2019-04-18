@@ -25,7 +25,7 @@ import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig } from '../dev';
 import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { BasePathProxyServer, HttpConfig, HttpServiceSetup } from '../http';
+import { BasePathProxyServer, HttpConfig, HttpServiceSetup, HttpServiceStart } from '../http';
 import { Logger } from '../logging';
 import { PluginsServiceSetup } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
@@ -37,10 +37,14 @@ interface LegacyKbnServer {
   close: () => Promise<void>;
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
-  http?: HttpServiceSetup;
+  http: HttpServiceSetup;
   plugins: PluginsServiceSetup;
+}
+
+export interface StartDeps {
+  http?: HttpServiceStart;
 }
 
 function getLegacyRawConfig(config: Config) {
@@ -64,8 +68,8 @@ export class LegacyService implements CoreService {
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
   }
-
-  public async setup(deps: SetupDeps) {
+  public async setup() {}
+  public async start(setupDeps: SetupDeps, startDeps: StartDeps) {
     this.log.debug('setting up legacy service');
 
     const update$ = this.coreContext.configService.getConfig$().pipe(
@@ -89,7 +93,7 @@ export class LegacyService implements CoreService {
             await this.createClusterManager(config);
             return;
           }
-          return await this.createKbnServer(config, deps);
+          return await this.createKbnServer(config, setupDeps, startDeps);
         })
       )
       .toPromise();
@@ -130,7 +134,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, { elasticsearch, http, plugins }: SetupDeps) {
+  private async createKbnServer(config: Config, setupDeps: SetupDeps, startDeps: StartDeps) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
@@ -140,16 +144,15 @@ export class LegacyService implements CoreService {
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
       serverOptions:
-        http !== undefined
+        startDeps.http !== undefined
           ? {
-              ...http.options,
-              listener: this.setupProxyListener(http.server),
+              ...setupDeps.http.options,
+              listener: this.setupProxyListener(startDeps.http.server),
             }
           : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
-      http,
-      elasticsearch,
-      plugins,
+      setupDeps,
+      startDeps,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl

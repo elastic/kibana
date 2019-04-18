@@ -98,6 +98,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     return { contracts };
   }
 
+  public async start() {}
+
   public async stop() {
     // Stop plugins in reverse topological order.
     for (const pluginName of this.satupPlugins.reverse()) {

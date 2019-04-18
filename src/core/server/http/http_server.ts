@@ -31,9 +31,9 @@ import {
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 
-export interface HttpServerInfo {
-  server: Server;
+export interface HttpServerSetup {
   options: ServerOptions;
+  registerRouter: (router: Router) => void;
   /**
    * Define custom authentication and/or authorization mechanism for incoming requests.
    * Applied to all resources by default. Only one AuthenticationHandler can be registered.
@@ -48,6 +48,10 @@ export interface HttpServerInfo {
    * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
    */
   registerOnRequest: (requestHandler: OnRequestHandler) => void;
+}
+
+export interface HttpServerInfo {
+  server: Server;
 }
 
 export class HttpServer {
@@ -66,14 +70,30 @@ export class HttpServer {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
 
+    this.log.debug(`registering route handler for [${router.path}]`);
     this.registeredRouters.add(router);
   }
 
-  public async start(config: HttpConfig): Promise<HttpServerInfo> {
-    this.log.debug('starting http server');
-
+  public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);
+
+    return {
+      options: serverOptions,
+      registerRouter: this.registerRouter.bind(this),
+      registerOnRequest: this.registerOnRequest.bind(this),
+      registerAuth: <T>(
+        fn: AuthenticationHandler<T>,
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) => this.registerAuth(fn, cookieOptions, config.basePath),
+    };
+  }
+
+  public async start(config: HttpConfig): Promise<HttpServerInfo> {
+    if (this.server === undefined) {
+      throw new Error('server is not setup up yet');
+    }
+    this.log.debug('starting http server');
 
     this.setupBasePathRewrite(this.server, config);
 
@@ -100,12 +120,6 @@ export class HttpServer {
     // needed anymore we shouldn't return anything from this method.
     return {
       server: this.server,
-      options: serverOptions,
-      registerOnRequest: this.registerOnRequest.bind(this),
-      registerAuth: <T>(
-        fn: AuthenticationHandler<T>,
-        cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.registerAuth(fn, cookieOptions, config.basePath),
     };
   }
 
