@@ -7,12 +7,15 @@
 import { Request } from 'src/legacy/server/kbn_server';
 import { SavedObject } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
+import { FieldId, AggId } from '../../../../common/types/fields';
+
+type agg = 'agg';
 
 export interface RollupJob {
   job_id: string;
   rollup_index: string;
   index_pattern: string;
-  fields: { [id: string]: [{ [id: string]: string }] };
+  fields: { [id in FieldId]: [{ [key in agg]: AggId }] };
 }
 
 export async function getRollupJob(

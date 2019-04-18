@@ -5,8 +5,9 @@
  */
 
 import { IndexPattern } from 'ui/index_patterns';
-import { Field, Aggregation } from '../../common/types/fields';
+import { Field, Aggregation, AggId } from '../../common/types/fields';
 import { ml } from '../services/ml_api_service';
+import { Dictionary } from '../../common/types/common';
 
 // the type property is missing from the official IndexPattern interface
 interface IndexPatternWithType extends IndexPattern {
@@ -41,9 +42,9 @@ class FieldsService {
     const fields: Field[] = [];
     const aggs: Aggregation[] = [];
     // for speed, a map of aggregations, keyed on their id
-    const aggMap: { [id: string]: Aggregation } = {};
+    const aggMap: Dictionary<Aggregation> = {};
     // for speed, a map of aggregation id lists from a field, keyed on the field id
-    const aggIdMap: { [id: string]: string[] } = {};
+    const aggIdMap: Dictionary<AggId[]> = {};
 
     if (results !== undefined) {
       results.aggs.forEach((a: Aggregation) => {
@@ -71,7 +72,7 @@ class FieldsService {
       // loop through the fields and add populate their aggs lists.
       // for each agg added to a field, also add that field to the agg's field list
       fields.forEach((field: Field) => {
-        aggIdMap[field.id].forEach((aggId: string) => {
+        aggIdMap[field.id].forEach((aggId: AggId) => {
           mix(field, aggMap[aggId]);
         });
       });

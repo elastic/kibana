@@ -6,17 +6,20 @@
 
 import { ES_FIELD_TYPES } from '../../common/constants/field_types';
 
+export type FieldId = string;
+export type AggId = string;
+
 export interface Field {
-  id: string;
+  id: FieldId;
   name: string;
   type: ES_FIELD_TYPES;
   aggregatable: boolean;
-  aggIds?: string[];
+  aggIds?: AggId[];
   aggs?: Aggregation[];
 }
 
 export interface Aggregation {
-  id: string;
+  id: AggId;
   title: string;
   kibanaName: string;
   dslName: string;
@@ -25,6 +28,6 @@ export interface Aggregation {
     min: string;
     max: string;
   };
-  fieldIds?: string[];
+  fieldIds?: FieldId[];
   fields?: Field[];
 }

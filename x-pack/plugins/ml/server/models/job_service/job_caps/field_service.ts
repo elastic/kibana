@@ -6,7 +6,7 @@
 
 import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
-import { Field, Aggregation } from '../../../../common/types/fields';
+import { Field, Aggregation, FieldId } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { getRollupJob, RollupJob } from './rollup';
 import { aggregations } from './aggregations';
@@ -68,7 +68,7 @@ class FieldsService {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
     if (fieldCaps.fields) {
-      Object.keys(fieldCaps.fields).forEach(k => {
+      Object.keys(fieldCaps.fields).forEach((k: FieldId) => {
         const fc = fieldCaps.fields[k];
         const firstKey = Object.keys(fc)[0];
         if (firstKey !== undefined) {
