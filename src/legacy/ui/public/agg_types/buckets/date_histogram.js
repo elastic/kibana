@@ -172,6 +172,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
       default: false,
       write: _.noop,
       editorComponent: DropPartialsParamEditor,
+      shouldShow: agg => {
+        const field = agg.params.field;
+        return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
+      },
     },
 
     {
