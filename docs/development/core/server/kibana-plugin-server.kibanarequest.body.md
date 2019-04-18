@@ -1,0 +1,9 @@
+[Home](./index) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [KibanaRequest](./kibana-plugin-server.kibanarequest.md) &gt; [body](./kibana-plugin-server.kibanarequest.body.md)
+
+## KibanaRequest.body property
+
+<b>Signature:</b>
+
+```typescript
+readonly body: Body;
+```

@@ -89,11 +89,11 @@ const rules = {
       },
     },
     adjacency_matrix: {
-      filters: {}
+      filters: {},
     },
     diversified_sampler: {
       shard_size: '',
-      field: ''
+      field: '',
     },
     min: simple_metric,
     max: simple_metric,
@@ -173,7 +173,7 @@ const rules = {
     },
     significant_text: {
       ...significantTermsArgs,
-      filter_duplicate_text: '__flag__'
+      filter_duplicate_text: '__flag__',
     },
     significant_terms: significantTermsArgs,
     range: {
@@ -248,15 +248,7 @@ const rules = {
       },
       field: '{field}',
       interval: {
-        __one_of: [
-          'year',
-          'quarter',
-          'week',
-          'day',
-          'hour',
-          'minute',
-          'second',
-        ],
+        __one_of: ['year', 'quarter', 'week', 'day', 'hour', 'minute', 'second'],
       },
       min_doc_count: 0,
       extended_bounds: {
@@ -449,11 +441,11 @@ const rules = {
     stats_bucket: simple_pipeline,
     extended_stats_bucket: {
       ...simple_pipeline,
-      sigma: ''
+      sigma: '',
     },
     percentiles_bucket: {
       ...simple_pipeline,
-      percents: []
+      percents: [],
     },
     sum_bucket: simple_pipeline,
     moving_avg: {
@@ -526,8 +518,9 @@ const rules = {
     },
   },
 };
-
+const { terms, histogram, date_histogram } = rules['*'];
 export default function (api) {
   api.addGlobalAutocompleteRules('aggregations', rules);
-  api.addGlobalAutocompleteRules('aggs', rules);
+  api.addGlobalAutocompleteRules('aggs', rules['*']);
+  api.addGlobalAutocompleteRules('groupByAggs', { '*': { terms, histogram, date_histogram } });
 }

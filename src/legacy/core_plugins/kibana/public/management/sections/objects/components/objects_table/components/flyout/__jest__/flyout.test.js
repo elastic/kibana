@@ -22,7 +22,7 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { Flyout } from '../flyout';
 
-jest.mock('ui/kfetch', () => jest.fn());
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
 
 jest.mock('ui/errors', () => ({
   SavedObjectNotFound: class SavedObjectNotFound extends Error {
@@ -118,6 +118,21 @@ describe('Flyout', () => {
     expect(component.state('file')).toBe(undefined);
     component.find('EuiFilePicker').simulate('change', [mockFile]);
     expect(component.state('file')).toBe(mockFile);
+  });
+
+  it('should allow removing a file', async () => {
+    const component = shallowWithIntl(<Flyout.WrappedComponent {...defaultProps} />);
+
+    // Ensure all promises resolve
+    await Promise.resolve();
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component.state('file')).toBe(undefined);
+    component.find('EuiFilePicker').simulate('change', [mockFile]);
+    expect(component.state('file')).toBe(mockFile);
+    component.find('EuiFilePicker').simulate('change', []);
+    expect(component.state('file')).toBe(undefined);
   });
 
   it('should handle invalid files', async () => {

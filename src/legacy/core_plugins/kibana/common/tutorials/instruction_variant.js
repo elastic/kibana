@@ -18,6 +18,7 @@
  */
 
 export const INSTRUCTION_VARIANT = {
+  ESC: 'esc',
   OSX: 'osx',
   DEB: 'deb',
   RPM: 'rpm',
@@ -35,6 +36,7 @@ export const INSTRUCTION_VARIANT = {
 };
 
 const DISPLAY_MAP = {
+  [INSTRUCTION_VARIANT.ESC]: 'Elastic Cloud',
   [INSTRUCTION_VARIANT.OSX]: 'macOS',
   [INSTRUCTION_VARIANT.DEB]: 'DEB',
   [INSTRUCTION_VARIANT.RPM]: 'RPM',

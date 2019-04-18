@@ -132,11 +132,13 @@ module.exports = {
                 ],
                 from: [
                   'src/core/public/**/*',
-                  '!src/core/public/index*',
+                  '!src/core/public/index.ts',
+                  '!src/core/public/mocks.ts',
                   '!src/core/public/utils/**/*',
 
                   'src/core/server/**/*',
-                  '!src/core/server/index*',
+                  '!src/core/server/index.ts',
+                  '!src/core/server/mocks.ts',
 
                   'src/plugins/**/public/**/*',
                   '!src/plugins/**/public/index*',

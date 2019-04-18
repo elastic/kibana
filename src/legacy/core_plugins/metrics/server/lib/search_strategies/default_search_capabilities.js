@@ -33,8 +33,30 @@ export class DefaultSearchCapabilities {
     return null;
   }
 
+  get whiteListedMetrics() {
+    return this.createUiRestriction();
+  }
+
+  get whiteListedGroupByFields() {
+    return this.createUiRestriction();
+  }
+
+  get uiRestrictions() {
+    return {
+      whiteListedMetrics: this.whiteListedMetrics,
+      whiteListedGroupByFields: this.whiteListedGroupByFields,
+    };
+  }
+
   get searchTimezone() {
     return getTimezoneFromRequest(this.request);
+  }
+
+  createUiRestriction(restrictionsObject) {
+    return {
+      '*': !restrictionsObject,
+      ...(restrictionsObject || {}),
+    };
   }
 
   parseInterval(interval) {

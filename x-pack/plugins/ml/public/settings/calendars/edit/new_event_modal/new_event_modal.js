@@ -263,7 +263,7 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
       <Fragment>
         <EuiModal
           onClose={closeModal}
-          initialFocus="[name=description]"
+          initialFocus="[name=eventDescription]"
           maxWidth={false}
         >
           <EuiModalHeader>
@@ -285,7 +285,7 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
                 fullWidth
               >
                 <EuiFieldText
-                  name="description"
+                  name="eventDescription"
                   onChange={this.onDescriptionChange}
                   isInvalid={!description}
                   fullWidth

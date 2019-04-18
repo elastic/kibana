@@ -41,7 +41,8 @@ function GaugeSeriesUi(props) {
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions
   } = props;
 
   const defaults = { label: '' };
@@ -78,6 +79,7 @@ function GaugeSeriesUi(props) {
               fields={fields}
               panel={panel}
               model={model}
+              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -227,6 +229,7 @@ GaugeSeriesUi.propTypes = {
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
+  uiRestrictions: PropTypes.object,
 };
 
 const GaugeSeries = injectI18n(GaugeSeriesUi);

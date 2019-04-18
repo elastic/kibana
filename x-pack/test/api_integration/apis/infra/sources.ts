@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
-import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
+import { sourceQuery } from '../../../../plugins/infra/public/containers/source/query_source.gql_query';
 import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 

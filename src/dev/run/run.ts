@@ -17,11 +17,17 @@
  * under the License.
  */
 
+// @ts-ignore @types are outdated and module is super simple
+import exitHook from 'exit-hook';
+
 import { pickLevelFromFlags, ToolingLog } from '@kbn/dev-utils';
 import { createFlagError, isFailError } from './fail';
 import { Flags, getFlags, getHelp } from './flags';
 
-type RunFn = (args: { log: ToolingLog; flags: Flags }) => Promise<void> | void;
+type CleanupTask = () => void;
+type RunFn = (
+  args: { log: ToolingLog; flags: Flags; addCleanupTask: (task: CleanupTask) => void }
+) => Promise<void> | void;
 
 export interface Options {
   usage?: string;
@@ -50,13 +56,13 @@ export async function run(fn: RunFn, options: Options = {}) {
     writeTo: process.stdout,
   });
 
-  try {
-    if (!allowUnexpected && flags.unexpected.length) {
-      throw createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
-    }
+  process.on('unhandledRejection', error => {
+    log.error('UNHANDLED PROMISE REJECTION');
+    log.error(error);
+    process.exit(1);
+  });
 
-    await fn({ log, flags });
-  } catch (error) {
+  const handleErrorWithoutExit = (error: any) => {
     if (isFailError(error)) {
       log.error(error.message);
 
@@ -64,11 +70,46 @@ export async function run(fn: RunFn, options: Options = {}) {
         log.write(getHelp(options));
       }
 
-      process.exit(error.exitCode);
+      process.exitCode = error.exitCode;
     } else {
       log.error('UNHANDLED ERROR');
       log.error(error);
-      process.exit(1);
+      process.exitCode = 1;
     }
+  };
+
+  const doCleanup = () => {
+    const tasks = cleanupTasks.slice(0);
+    cleanupTasks.length = 0;
+
+    for (const task of tasks) {
+      try {
+        task();
+      } catch (error) {
+        handleErrorWithoutExit(error);
+      }
+    }
+  };
+
+  const unhookExit: CleanupTask = exitHook(doCleanup);
+  const cleanupTasks: CleanupTask[] = [unhookExit];
+
+  try {
+    if (!allowUnexpected && flags.unexpected.length) {
+      throw createFlagError(`Unknown flag(s) "${flags.unexpected.join('", "')}"`);
+    }
+
+    try {
+      await fn({
+        log,
+        flags,
+        addCleanupTask: (task: CleanupTask) => cleanupTasks.push(task),
+      });
+    } finally {
+      doCleanup();
+    }
+  } catch (error) {
+    handleErrorWithoutExit(error);
+    process.exit();
   }
 }

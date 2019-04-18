@@ -92,7 +92,11 @@ describe('useMetricsTime hook', () => {
       const timeRange = getLastHookValue().timeRange;
       expect(timeRange.from).toBeGreaterThan(from);
       expect(timeRange.to).toBeGreaterThan(to);
-      expect(timeRange.to - timeRange.from).toBe(RANGE);
+      const newRange = timeRange.to - timeRange.from;
+      // The following two assertions allow 5ms of leniency, rather than expect(newRange).toBe(RANGE),
+      // due to failures in CI that don't happen locally.
+      expect(newRange).toBeGreaterThanOrEqual(RANGE);
+      expect(newRange).toBeLessThanOrEqual(RANGE + 5);
     });
   });
 });

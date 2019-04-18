@@ -34,11 +34,10 @@ export const useMetricsTime = () => {
   const setTimeRangeToNow = useCallback(
     () => {
       const range = timeRange.to - timeRange.from;
+      const nowInMs = moment().valueOf();
       setTimeRange({
-        from: moment()
-          .subtract(range, 'ms')
-          .valueOf(),
-        to: moment().valueOf(),
+        from: nowInMs - range,
+        to: nowInMs,
         interval: '>=1m',
       });
     },
