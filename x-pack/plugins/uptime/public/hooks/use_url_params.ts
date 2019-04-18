@@ -11,19 +11,21 @@ interface Location {
   search: string;
 }
 
-export const useUrlParams = (history: any, location: Location) => {
+export const useUrlParams = (
+  history: any,
+  location: Location
+): [any, (updatedParams: any) => string] => {
   const { pathname, search } = location;
-  const currentParams = qs.parse(search);
+  const currentParams = qs.parse(search[0] === '?' ? search.slice(1) : search);
 
   const updateUrl = (updatedParams: any) => {
     const updatedSearch = qs.stringify({ ...currentParams, ...updatedParams });
-
     history.push({
       pathname,
       search: updatedSearch,
     });
 
-    return pathname + search;
+    return `${pathname}?${updatedSearch}`;
   };
 
   return [currentParams, updateUrl];
