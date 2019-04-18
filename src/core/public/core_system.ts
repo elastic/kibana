@@ -182,6 +182,7 @@ export class CoreSystem {
         overlays,
       };
 
+      await this.plugins.start(core);
       await this.legacyPlatform.start({ core, targetDomElement: legacyPlatformTargetDomElement });
     } catch (error) {
       this.fatalErrors.add(error);

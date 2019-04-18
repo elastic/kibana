@@ -243,6 +243,11 @@ describe('#start()', () => {
     });
   });
 
+  it('calls plugins#start()', async () => {
+    await startCore();
+    expect(MockPluginsService.start).toHaveBeenCalledTimes(1);
+  });
+
   it('calls legacyPlatform#start()', async () => {
     await startCore();
     expect(MockLegacyPlatformService.start).toHaveBeenCalledTimes(1);
