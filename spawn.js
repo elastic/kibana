@@ -107,7 +107,7 @@ const start = async function () {
 
   clientWithAuth.checks.create({
     ...commonArgs,
-    started_at: new Date().toISOString(),
+    started_at: `${new Date().toISOString().slice(0,-5)}Z`,
     status: 'in_progress',
     output: {
       title,
@@ -163,7 +163,7 @@ const start = async function () {
       ...commonArgs,
       chech_run_id: checkRunId,
       conclusion: code === 0 ? 'success' : 'failure',
-      completed_at: new Date().toISOString(),
+      completed_at: `${new Date().toISOString().slice(0,-5)}Z`,
       output: {
         title,
         summary: `.`,
