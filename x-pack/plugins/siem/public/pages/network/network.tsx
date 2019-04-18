@@ -10,7 +10,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
@@ -26,7 +25,7 @@ import { NetworkDnsQuery } from '../../containers/network_dns';
 import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { FlowTarget, IndexType } from '../../graphql/types';
-import { networkActions, networkModel, networkSelectors, State } from '../../store';
+import { networkModel, networkSelectors, State } from '../../store';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
@@ -41,16 +40,9 @@ interface NetworkComponentReduxProps {
   flowTarget: FlowTarget;
   overviewStatIp: string | null;
 }
-
-export interface NetworkComponentDispatchProps {
-  updateOverviewStatIp: ActionCreator<{
-    overviewStatIp: string;
-  }>;
-}
-
-type NetworkComponentProps = NetworkComponentReduxProps & NetworkComponentDispatchProps;
+type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(
-  ({ filterQuery, flowTarget, overviewStatIp, updateOverviewStatIp }) => (
+  ({ filterQuery, flowTarget, overviewStatIp }) => (
     <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
@@ -114,10 +106,6 @@ const NetworkComponent = pure<NetworkComponentProps>(
                       id,
                       refetch,
                     }) => {
-                      const newOverviewStatIp = getOr(null, '[0].node.source.ip', networkTopNFlow);
-                      if (newOverviewStatIp !== null) {
-                        updateOverviewStatIp({ overviewStatIp: newOverviewStatIp });
-                      }
                       return (
                         <NetworkTopNFlowTableManage
                           data={networkTopNFlow}
@@ -131,6 +119,7 @@ const NetworkComponent = pure<NetworkComponentProps>(
                           startDate={from}
                           totalCount={totalCount}
                           type={networkModel.NetworkType.page}
+                          overviewStatIp={overviewStatIp}
                         />
                       );
                     }}
@@ -191,9 +180,4 @@ const makeMapStateToProps = () => {
   return mapStateToProps;
 };
 
-export const Network = connect(
-  makeMapStateToProps,
-  {
-    updateOverviewStatIp: networkActions.updateOverviewStatIp,
-  }
-)(NetworkComponent);
+export const Network = connect(makeMapStateToProps)(NetworkComponent);

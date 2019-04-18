@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { isEqual, last } from 'lodash/fp';
+import { get, isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -36,6 +36,7 @@ interface OwnProps {
   loadMore: (cursor: string) => void;
   startDate: number;
   type: networkModel.NetworkType;
+  overviewStatIp: string | null;
 }
 
 interface NetworkTopNFlowTableReduxProps {
@@ -46,6 +47,9 @@ interface NetworkTopNFlowTableReduxProps {
 }
 
 interface NetworkTopNFlowTableDispatchProps {
+  updateOverviewStatIp: ActionCreator<{
+    overviewStatIp: string;
+  }>;
   updateTopNFlowDirection: ActionCreator<{
     flowDirection: FlowDirection;
     networkType: networkModel.NetworkType;
@@ -89,6 +93,13 @@ const rowItems: ItemsPerRow[] = [
 export const NetworkTopNFlowTableId = 'networkTopNFlow-top-talkers';
 
 class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowTableProps> {
+  public componentWillReceiveProps(nextProps: Readonly<NetworkTopNFlowTableProps>): void {
+    const newOverviewStatIp = get('[0].node.source.ip', nextProps.data);
+    if (newOverviewStatIp && nextProps.overviewStatIp !== newOverviewStatIp) {
+      nextProps.updateOverviewStatIp({ overviewStatIp: newOverviewStatIp });
+    }
+  }
+
   public render() {
     const {
       data,
@@ -150,16 +161,16 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                   >
                     <FlowTargetSelect
                       id={NetworkTopNFlowTableId}
-                    isLoading={loading}
+                      isLoading={loading}
                       selectedDirection={flowDirection}
                       selectedTarget={flowTarget}
                       displayTextOverride={[
-                      i18n.BY_SOURCE_IP,
-                      i18n.BY_DESTINATION_IP,
-                      i18n.BY_CLIENT_IP,
-                      i18n.BY_SERVER_IP,
-                    ]}
-                    updateFlowTargetAction={updateTopNFlowTarget}
+                        i18n.BY_SOURCE_IP,
+                        i18n.BY_DESTINATION_IP,
+                        i18n.BY_CLIENT_IP,
+                        i18n.BY_SERVER_IP,
+                      ]}
+                      updateFlowTargetAction={updateTopNFlowTarget}
                     />
                   </SelectTypeItem>
                 </EuiFlexGroup>
@@ -208,6 +219,7 @@ const makeMapStateToProps = () => {
 export const NetworkTopNFlowTable = connect(
   makeMapStateToProps,
   {
+    updateOverviewStatIp: networkActions.updateOverviewStatIp,
     updateTopNFlowLimit: networkActions.updateTopNFlowLimit,
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
     updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
