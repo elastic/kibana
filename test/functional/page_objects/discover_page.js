@@ -160,11 +160,6 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       return bars;
     }
 
-    async waitUntilSearchingHasFinished() {
-      const spinner = await testSubjects.find('loadingSpinner');
-      await find.waitForElementHidden(spinner, defaultFindTimeout * 10);
-    }
-
     async getChartInterval() {
       const selectedValue = await testSubjects.getProperty('discoverIntervalSelect', 'value');
       const selectedOption = await find.byCssSelector('option[value="' + selectedValue + '"]');

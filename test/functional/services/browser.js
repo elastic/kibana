@@ -23,7 +23,12 @@ import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function BrowserProvider({ getService }) {
-  const { driver, Key, LegacyActionSequence } = await getService('__webdriver__').init();
+  const { driver, Key, LegacyActionSequence, browserType } = await getService('__webdriver__').init();
+  const browsers = Object.freeze({
+    CHROME: 'chrome',
+    FIREFOX: 'firefox',
+    IE: 'ie'
+  });
 
   class BrowserService {
 
@@ -31,6 +36,11 @@ export async function BrowserProvider({ getService }) {
      * Keyboard events
      */
     keys = Key;
+
+    /**
+     * Browser name
+     */
+    browserName = browserType;
 
     /**
      * Is WebDriver instance W3C compatible
@@ -104,14 +114,25 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async moveMouseTo(element, xOffset, yOffset) {
-      const mouse = driver.actions().mouse();
-      const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
-      if (element instanceof WebElementWrapper) {
-        await actions.pause(mouse).move({ origin: element._webElement }).perform();
-      } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
-        await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
+      if (this.browserName === browsers.FIREFOX) {
+        // workaround for Actions API bug in FF 65+
+        const actions = driver.actions();
+        await actions
+          .move({ x: 0, y: 0 })
+          .perform();
+        await actions
+          .move({ x: 10, y: 10, origin: element._webElement })
+          .perform();
       } else {
-        throw new Error('Element or coordinates should be provided');
+        const mouse = driver.actions().mouse();
+        const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
+        if (element instanceof WebElementWrapper) {
+          await actions.pause(mouse).move({ origin: element._webElement }).perform();
+        } else if (isNaN(xOffset) || isNaN(yOffset) === false) {
+          await actions.pause(mouse).move({ origin: { x: xOffset, y: yOffset } }).perform();
+        } else {
+          throw new Error('Element or coordinates should be provided');
+        }
       }
     }
 

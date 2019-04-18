@@ -28,13 +28,14 @@ export async function FindProvider({ getService }) {
   const driver = webdriver.driver;
   const By = webdriver.By;
   const until =  webdriver.until;
+  const browserName = webdriver.browserType;
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
   const wrap = webElement => (
-    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log)
+    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log, browserName)
   );
 
   const wrapAll = webElements => (

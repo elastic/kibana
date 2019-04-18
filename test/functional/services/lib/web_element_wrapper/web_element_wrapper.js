@@ -24,7 +24,7 @@ import cheerio from 'cheerio';
 import testSubjSelector from '@kbn/test-subj-selector';
 
 export class WebElementWrapper {
-  constructor(webElement, webDriver, timeout, fixedHeaderHeight, log) {
+  constructor(webElement, webDriver, timeout, fixedHeaderHeight, log, browserName) {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
     }
@@ -38,6 +38,7 @@ export class WebElementWrapper {
     this._defaultFindTimeout = timeout;
     this._fixedHeaderHeight = fixedHeaderHeight;
     this._logger = log;
+    this._browserName = browserName;
   }
 
   async _findWithCustomTimeout(findFunction, timeout) {
@@ -52,7 +53,14 @@ export class WebElementWrapper {
   }
 
   _wrap(otherWebElement) {
-    return new WebElementWrapper(otherWebElement, this._webDriver, this._defaultFindTimeout, this._fixedHeaderHeight, this._logger);
+    return new WebElementWrapper(
+      otherWebElement,
+      this._webDriver,
+      this._defaultFindTimeout,
+      this._fixedHeaderHeight,
+      this._logger,
+      this._browserName
+    );
   }
 
   _wrapAll(otherWebElements) {
@@ -289,9 +297,20 @@ export class WebElementWrapper {
    */
   async moveMouseTo() {
     await this.scrollIntoViewIfNecessary();
-    const mouse = this._driver.actions().mouse();
-    const actions = this._driver.actions({ bridge: true });
-    await actions.pause(mouse).move({ origin: this._webElement }).perform();
+    if (this._browserName === 'firefox') {
+      // workaround for Actions API bug in FF 65+
+      const actions = this._driver.actions();
+      await actions
+        .move({ x: 0, y: 0 })
+        .perform();
+      await actions
+        .move({ x: 10, y: 10, origin: this._webElement })
+        .perform();
+    } else {
+      const mouse = this._driver.actions().mouse();
+      const actions = this._driver.actions({ bridge: true });
+      await actions.pause(mouse).move({ origin: this._webElement }).perform();
+    }
   }
 
   /**

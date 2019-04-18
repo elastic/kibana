@@ -75,5 +75,5 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.on('cleanup', async () => await driver.quit());
 
-  return { driver, By, Key, until, LegacyActionSequence };
+  return { driver, By, Key, until, LegacyActionSequence, browserType };
 }
