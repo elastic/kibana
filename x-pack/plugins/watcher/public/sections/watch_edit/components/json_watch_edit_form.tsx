@@ -61,6 +61,7 @@ export const JsonWatchEditForm = () => {
         >
           <EuiFieldText
             fullWidth
+            id="id"
             name="id"
             value={watch.id || ''}
             readOnly={!watch.isNew}
@@ -83,6 +84,7 @@ export const JsonWatchEditForm = () => {
         >
           <EuiFieldText
             fullWidth
+            id="name"
             name="name"
             value={watch.name || ''}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -136,6 +138,7 @@ export const JsonWatchEditForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subject="btnSaveWatch"
               fill
               type="submit"
               isDisabled={hasErrors}
