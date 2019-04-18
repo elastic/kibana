@@ -27,12 +27,12 @@ uiModules
   .directive('visAggParamReactWrapper', reactDirective => reactDirective(wrapInI18nContext(AggParamReactWrapper), [
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
+    ['aggParams', { watchDepth: 'collection' }],
     ['indexedFields', { watchDepth: 'collection' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    'field',
     'isInvalid',
     'value',
   ]))
@@ -56,8 +56,8 @@ uiModules
             ng-if="editorComponent"
             param-editor="editorComponent"
             agg="agg"
+            agg-params="agg.params"
             agg-param="aggParam"
-            field="agg.params.field"
             indexed-fields="indexedFields"
             is-invalid="isInvalid"
             value="paramValue"
