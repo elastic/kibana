@@ -22,7 +22,6 @@ export const pluginDefinition = {
   require: ['kibana', 'elasticsearch', 'xpack_main'],
   uiExports: {
     managementSections: ['plugins/watcher'],
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     home: ['plugins/watcher/register_feature'],
   },
   init: function (server) {
