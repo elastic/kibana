@@ -5,7 +5,7 @@
  */
 
 import DateMath from '@elastic/datemath';
-import { isEqual, omit } from 'lodash';
+import { isEqual } from 'lodash';
 import { useEffect, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { SourceQuery } from '../../../common/graphql/types';
@@ -17,12 +17,8 @@ import { fetch } from '../../utils/fetch';
 import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 
-function isSameOptionsExceptAfterKey(
-  current: MetricsExplorerOptions,
-  next: MetricsExplorerOptions
-) {
-  const without = ['afterKey'];
-  return isEqual(omit(current, without), omit(next, without));
+function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {
+  return isEqual(current, next);
 }
 
 export function useMetricsExplorerData(
@@ -30,6 +26,7 @@ export function useMetricsExplorerData(
   source: SourceQuery.Query['source']['configuration'],
   derivedIndexPattern: StaticIndexPattern,
   timerange: MetricsExplorerTimeOptions,
+  afterKey: string | null,
   signal: any
 ) {
   const [error, setError] = useState<Error | null>(null);
@@ -59,7 +56,7 @@ export function useMetricsExplorerData(
                       field: metric.field,
                     })),
               groupBy: options.groupBy,
-              afterKey: options.afterKey,
+              afterKey,
               limit: options.limit,
               indexPattern: source.metricAlias,
               filterQuery:
@@ -79,8 +76,9 @@ export function useMetricsExplorerData(
               data &&
               lastOptions &&
               data.pageInfo.afterKey !== response.data.pageInfo.afterKey &&
-              isSameOptionsExceptAfterKey(lastOptions, options) &&
-              isEqual(timerange, lastTimerange)
+              isSameOptions(lastOptions, options) &&
+              isEqual(timerange, lastTimerange) &&
+              afterKey
             ) {
               const { series } = data;
               setData({
@@ -99,7 +97,7 @@ export function useMetricsExplorerData(
         setLoading(false);
       })();
     },
-    [options, source, timerange, signal]
+    [options, source, timerange, signal, afterKey]
   );
   return { error, loading, data };
 }

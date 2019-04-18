@@ -58,7 +58,7 @@ export const getGroupings = async (
         groupings: {
           composite: {
             size: limit,
-            sources: [{ groupBy: { terms: { field: options.groupBy } } }],
+            sources: [{ groupBy: { terms: { field: options.groupBy, order: 'asc' } } }],
           },
         },
       },

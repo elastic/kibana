@@ -31,6 +31,7 @@ export const MetricsExplorerPage = injectI18n(
     }
 
     const [refreshSignal, setRefreshSignal] = useState(0);
+    const [afterKey, setAfterKey] = useState<string | null>(null);
     const { options, currentTimerange, setTimeRange, setOptions } = useContext(
       MetricsExplorerOptionsContainer.Context
     );
@@ -39,11 +40,13 @@ export const MetricsExplorerPage = injectI18n(
       source,
       derivedIndexPattern,
       currentTimerange,
+      afterKey,
       refreshSignal
     );
 
     const handleRefresh = useCallback(
       () => {
+        setAfterKey(null);
         setRefreshSignal(refreshSignal + 1);
       },
       [refreshSignal]
@@ -51,7 +54,8 @@ export const MetricsExplorerPage = injectI18n(
 
     const handleTimeChange = useCallback(
       (start: string, end: string) => {
-        setOptions({ ...options, afterKey: null });
+        setOptions({ ...options });
+        setAfterKey(null);
         setTimeRange({ ...currentTimerange, from: start, to: end });
       },
       [options, currentTimerange]
@@ -59,6 +63,7 @@ export const MetricsExplorerPage = injectI18n(
 
     const handleGroupByChange = useCallback(
       (groupBy: string | null) => {
+        setAfterKey(null);
         setOptions({
           ...options,
           groupBy: groupBy || void 0,
@@ -69,6 +74,7 @@ export const MetricsExplorerPage = injectI18n(
 
     const handleFilterQuerySubmit = useCallback(
       (query: string) => {
+        setAfterKey(null);
         setOptions({
           ...options,
           filterQuery: query,
@@ -79,22 +85,18 @@ export const MetricsExplorerPage = injectI18n(
 
     const handleMetricsChange = useCallback(
       (metrics: MetricsExplorerMetric[]) => {
+        setAfterKey(null);
         setOptions({
           ...options,
-          afterKey: null, // since we are changing the metrics we need to reset the pagination
           metrics,
         });
       },
       [options]
     );
 
-    const handleLoadMore = useCallback(
-      (afterKey: string | null) => setOptions({ ...options, afterKey }),
-      [options]
-    );
-
     const handleAggregationChange = useCallback(
       (aggregation: MetricsExplorerAggregation) => {
+        setAfterKey(null);
         setOptions({
           ...options,
           aggregation,
@@ -140,7 +142,7 @@ export const MetricsExplorerPage = injectI18n(
             loading={loading}
             data={data}
             options={options}
-            onLoadMore={handleLoadMore}
+            onLoadMore={setAfterKey}
             onFilter={handleFilterQuerySubmit}
             onRefetch={handleRefresh}
           />

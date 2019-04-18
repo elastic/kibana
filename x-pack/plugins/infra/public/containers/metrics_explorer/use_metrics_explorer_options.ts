@@ -19,7 +19,6 @@ export type MetricsExplorerOptionsMetric = MetricsExplorerMetric & {
 
 export interface MetricsExplorerOptions {
   metrics: MetricsExplorerOptionsMetric[];
-  afterKey?: string | null;
   limit?: number;
   groupBy?: string;
   filterQuery?: string;

@@ -68,7 +68,6 @@ function isMetricExplorerOptions(subject: any): subject is MetricsExplorerOption
     limit: Joi.number()
       .min(1)
       .default(9),
-    afterKey: Joi.string().allow(null),
     groupBy: Joi.string(),
     filterQuery: Joi.string().allow(''),
     aggregation: Joi.string().required(),
