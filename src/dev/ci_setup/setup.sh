@@ -186,5 +186,5 @@ fi
 ###
 export CHECKS_REPORTER_ACTIVE=true
 
-script_dir="$(dirname "$0")"
-source "functions.sh"
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$script_dir/functions.sh"
