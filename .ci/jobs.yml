@@ -1,86 +1,26 @@
 JOB:
   - kibana-intake
   - x-pack-intake
-  # - kibana-ciGroup1
-  # - kibana-ciGroup2
-  # - kibana-ciGroup3
-  # - kibana-ciGroup4
-  # - kibana-ciGroup5
-  # - kibana-ciGroup6
-  # - kibana-ciGroup7
-  # - kibana-ciGroup8
-  # - kibana-ciGroup9
-  # - kibana-ciGroup10
-  # - kibana-ciGroup11
-  # - kibana-ciGroup12
-  - x-pack-ciGroup12-1
-  - x-pack-ciGroup12-2
-  - x-pack-ciGroup12-3
-  - x-pack-ciGroup12-4
-  - x-pack-ciGroup12-5
-  - x-pack-ciGroup12-6
-  - x-pack-ciGroup12-7
-  - x-pack-ciGroup12-8
-  - x-pack-ciGroup12-9
-  - x-pack-ciGroup12-10
-  - x-pack-ciGroup12-11
-  - x-pack-ciGroup12-12
-  - x-pack-ciGroup12-13
-  - x-pack-ciGroup12-14
-  - x-pack-ciGroup12-15
-  - x-pack-ciGroup12-16
-  - x-pack-ciGroup12-17
-  - x-pack-ciGroup12-18
-  - x-pack-ciGroup12-19
-  - x-pack-ciGroup12-20
-  - x-pack-ciGroup12-21
-  - x-pack-ciGroup12-22
-  - x-pack-ciGroup12-23
-  - x-pack-ciGroup12-24
-  - x-pack-ciGroup12-25
-  - x-pack-ciGroup12-26
-  - x-pack-ciGroup12-27
-  - x-pack-ciGroup12-28
-  - x-pack-ciGroup12-29
-  - x-pack-ciGroup12-30
-  - x-pack-ciGroup12-31
-  - x-pack-ciGroup12-32
-  - x-pack-ciGroup12-33
-  - x-pack-ciGroup12-34
-  - x-pack-ciGroup12-35
-  - x-pack-ciGroup12-36
-  - x-pack-ciGroup12-37
-  - x-pack-ciGroup12-38
-  - x-pack-ciGroup12-39
-  - x-pack-ciGroup12-40
-  - x-pack-ciGroup12-41
-  - x-pack-ciGroup12-42
-  - x-pack-ciGroup12-43
-  - x-pack-ciGroup12-44
-  - x-pack-ciGroup12-45
-  - x-pack-ciGroup12-46
-  - x-pack-ciGroup12-47
-  - x-pack-ciGroup12-48
-  - x-pack-ciGroup12-49
-  - x-pack-ciGroup12-50
-  - x-pack-ciGroup12-51
-  - x-pack-ciGroup12-52
-  - x-pack-ciGroup12-53
-  - x-pack-ciGroup12-54
-  - x-pack-ciGroup12-55
-  - x-pack-ciGroup12-56
-  - x-pack-ciGroup12-57
-  - x-pack-ciGroup12-58
-  - x-pack-ciGroup12-59
-  - x-pack-ciGroup12-60
+  - kibana-ciGroup1
+  - kibana-ciGroup2
+  - kibana-ciGroup3
+  - kibana-ciGroup4
+  - kibana-ciGroup5
+  - kibana-ciGroup6
+  - kibana-ciGroup7
+  - kibana-ciGroup8
+  - kibana-ciGroup9
+  - kibana-ciGroup10
+  - kibana-ciGroup11
+  - kibana-ciGroup12
   # make sure all x-pack-ciGroups are listed in test/scripts/jenkins_xpack_ci_group.sh
-  # - x-pack-ciGroup1
-  # - x-pack-ciGroup2
-  # - x-pack-ciGroup3
-  # - x-pack-ciGroup4
-  # - x-pack-ciGroup5
-  # - x-pack-ciGroup6
-  # - x-pack-ciGroup7
+  - x-pack-ciGroup1
+  - x-pack-ciGroup2
+  - x-pack-ciGroup3
+  - x-pack-ciGroup4
+  - x-pack-ciGroup5
+  - x-pack-ciGroup6
+  - x-pack-ciGroup7
 
 # `~` is yaml for `null`
 exclude: ~
