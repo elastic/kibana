@@ -5,23 +5,10 @@
  */
 
 import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import styled from 'styled-components';
 import { GitBlame } from '../../../common/git_blame';
-
-const BlameMessage = styled(EuiText)`
-  overflow: hidden;
-  max-width: 10rem;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`;
-
-const Avatar = styled(EuiAvatar)`
-  margin: auto ${theme.euiSizeS} auto 0;
-`;
 
 export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: boolean }> {
   public render(): React.ReactNode {
@@ -35,10 +22,18 @@ export class Blame extends React.PureComponent<{ blame: GitBlame; isFirstLine: b
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem grow={false}>
-              <Avatar size="s" type="space" name={blame.committer.name} initialsLength={1} />
+              <EuiAvatar
+                size="s"
+                type="space"
+                className="codeAvatar"
+                name={blame.committer.name}
+                initialsLength={1}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <BlameMessage size="xs">{blame.commit.message}</BlameMessage>
+              <EuiText size="xs" className="codeText__blameMessage eui-textTruncate">
+                {blame.commit.message}
+              </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

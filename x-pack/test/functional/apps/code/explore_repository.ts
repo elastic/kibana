@@ -42,6 +42,15 @@ export default function exploreRepositoryFunctonalTests({
             'elastic/TypeScript-Node-Starter'
           );
         });
+
+        // Wait for the index to start.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('repositoryIndexOngoing')).to.be(true);
+        });
+        // Wait for the index to end.
+        await retry.try(async () => {
+          expect(await testSubjects.exists('repositoryIndexDone')).to.be(true);
+        });
       });
 
       after(async () => {

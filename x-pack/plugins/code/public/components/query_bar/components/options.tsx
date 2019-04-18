@@ -22,20 +22,8 @@ import {
 import { EuiIcon } from '@elastic/eui';
 import { unique } from 'lodash';
 import React, { Component } from 'react';
-import styled from 'styled-components';
 import { Repository } from '../../../../model';
 import { SearchOptions as ISearchOptions } from '../../../actions';
-
-const SelectedRepo = styled.div`
-  max-width: 90%;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-`;
-
-const Icon = styled(EuiIcon)`
-  cursor: pointer;
-`;
 
 interface State {
   isFlyoutOpen: boolean;
@@ -110,13 +98,17 @@ export class SearchOptions extends Component<Props, State> {
           <div key={r.uri}>
             <EuiPanel paddingSize="s">
               <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" alignItems="center">
-                <SelectedRepo>
+                <div className="codeQueryBar">
                   <EuiText>
                     <EuiTextColor color="subdued">{r.org}/</EuiTextColor>
                     <b>{r.name}</b>
                   </EuiText>
-                </SelectedRepo>
-                <Icon type="cross" onClick={this.removeRepoScope(r.uri)} />
+                </div>
+                <EuiIcon
+                  className="codeUtility__cursor--pointer"
+                  type="cross"
+                  onClick={this.removeRepoScope(r.uri)}
+                />
               </EuiFlexGroup>
             </EuiPanel>
             <EuiSpacer size="s" />
@@ -129,7 +121,7 @@ export class SearchOptions extends Component<Props, State> {
           onClose={this.closeOptionsFlyout}
           size="s"
           aria-labelledby="flyoutSmallTitle"
-          className="code-search-settings-flyout"
+          className="codeSearchSettings__flyout"
         >
           <EuiFlyoutHeader>
             <EuiTitle size="s">

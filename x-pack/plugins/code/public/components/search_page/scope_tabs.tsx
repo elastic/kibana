@@ -7,19 +7,10 @@
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
-import styled from 'styled-components';
 import url from 'url';
 
 import { SearchScope } from '../../../model';
 import { history } from '../../utils/url';
-
-const ScopeTabContainer = styled.div`
-  height: 56px;
-`;
-
-const ScopeTab = styled(EuiTab)`
-  width: 50%;
-`;
 
 interface Props {
   query: string;
@@ -46,22 +37,24 @@ export class ScopeTabs extends React.PureComponent<Props> {
 
   public render() {
     return (
-      <ScopeTabContainer>
+      <div className="codeContainer__tabs">
         <EuiTabs style={{ height: '100%' }}>
-          <ScopeTab
+          <EuiTab
+            className="codeUtility__width--half"
             isSelected={this.props.scope !== SearchScope.REPOSITORY}
             onClick={this.onTabClicked(SearchScope.DEFAULT)}
           >
             Code
-          </ScopeTab>
-          <ScopeTab
+          </EuiTab>
+          <EuiTab
+            className="codeUtility__width--half"
             isSelected={this.props.scope === SearchScope.REPOSITORY}
             onClick={this.onTabClicked(SearchScope.REPOSITORY)}
           >
             Repository
-          </ScopeTab>
+          </EuiTab>
         </EuiTabs>
-      </ScopeTabContainer>
+      </div>
     );
   }
 }

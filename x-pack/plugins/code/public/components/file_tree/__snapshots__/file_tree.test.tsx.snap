@@ -75,10 +75,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-android"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -86,7 +86,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -122,7 +122,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -137,10 +137,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-futures"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -148,7 +148,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -184,7 +184,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -199,10 +199,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-guava"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -210,7 +210,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -245,7 +245,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -262,10 +262,10 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch"
             >
               <div
-                className="sc-bwzfXH fpBhud"
+                className="codeFileTree__node"
               >
                 <div
-                  className="code-file-node"
+                  className="codeFileTree__item"
                   data-test-subj="codeFileTreeNode-Directory-guava/javadoc-link"
                   onClick={[Function]}
                   onKeyDown={[Function]}
@@ -273,7 +273,7 @@ exports[`render correctly 1`] = `
                   tabIndex={0}
                 >
                   <svg
-                    className="euiIcon euiIcon--small codeFileTree--icon"
+                    className="euiIcon euiIcon--small codeFileTree__icon"
                     focusable="false"
                     height="16"
                     style={null}
@@ -309,7 +309,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa gwdwEa"
+                    className="codeFileTree__directory"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -324,10 +324,10 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch"
             >
               <div
-                className="sc-bwzfXH fpBhud"
+                className="codeFileTree__node"
               >
                 <div
-                  className="code-file-node code-file-tree-file"
+                  className="codeFileTree__item codeFileTree__file"
                   data-test-subj="codeFileTreeNode-File-guava/pom.xml"
                   onClick={[Function]}
                   onKeyDown={[Function]}
@@ -355,7 +355,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa gwdwEa"
+                    className="codeFileTree__directory"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -374,10 +374,10 @@ exports[`render correctly 1`] = `
               className="euiSideNavItem euiSideNavItem--branch euiSideNavItem--hasChildItems"
             >
               <div
-                className="sc-bwzfXH fpBhud"
+                className="codeFileTree__node"
               >
                 <div
-                  className="code-file-node"
+                  className="codeFileTree__item"
                   data-test-subj="codeFileTreeNode-Directory-guava/src/com/google"
                   onClick={[Function]}
                   onKeyDown={[Function]}
@@ -385,7 +385,7 @@ exports[`render correctly 1`] = `
                   tabIndex={0}
                 >
                   <svg
-                    className="euiIcon euiIcon--small codeFileTree--icon"
+                    className="euiIcon euiIcon--small codeFileTree__icon"
                     focusable="false"
                     height="16"
                     style={null}
@@ -420,7 +420,7 @@ exports[`render correctly 1`] = `
                     />
                   </svg>
                   <span
-                    className="sc-bdVaJa gwdwEa"
+                    className="codeFileTree__directory"
                   >
                     <div
                       className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -430,7 +430,7 @@ exports[`render correctly 1`] = `
                   </span>
                 </div>
                 <div
-                  className="code-full-width-file-node"
+                  className="codeFileTree__node--fullWidth"
                 />
               </div>
               <div
@@ -440,10 +440,10 @@ exports[`render correctly 1`] = `
                   className="euiSideNavItem euiSideNavItem--branch"
                 >
                   <div
-                    className="sc-bwzfXH fpBhud"
+                    className="codeFileTree__node"
                   >
                     <div
-                      className="code-file-node"
+                      className="codeFileTree__item"
                       data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/common"
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -451,7 +451,7 @@ exports[`render correctly 1`] = `
                       tabIndex={0}
                     >
                       <svg
-                        className="euiIcon euiIcon--small codeFileTree--icon"
+                        className="euiIcon euiIcon--small codeFileTree__icon"
                         focusable="false"
                         height="16"
                         style={null}
@@ -487,7 +487,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <span
-                        className="sc-bdVaJa gwdwEa"
+                        className="codeFileTree__directory"
                       >
                         <div
                           className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -502,10 +502,10 @@ exports[`render correctly 1`] = `
                   className="euiSideNavItem euiSideNavItem--branch"
                 >
                   <div
-                    className="sc-bwzfXH fpBhud"
+                    className="codeFileTree__node"
                   >
                     <div
-                      className="code-file-node"
+                      className="codeFileTree__item"
                       data-test-subj="codeFileTreeNode-Directory-guava/src/com/google/thirdparty/publicsuffix"
                       onClick={[Function]}
                       onKeyDown={[Function]}
@@ -513,7 +513,7 @@ exports[`render correctly 1`] = `
                       tabIndex={0}
                     >
                       <svg
-                        className="euiIcon euiIcon--small codeFileTree--icon"
+                        className="euiIcon euiIcon--small codeFileTree__icon"
                         focusable="false"
                         height="16"
                         style={null}
@@ -549,7 +549,7 @@ exports[`render correctly 1`] = `
                         />
                       </svg>
                       <span
-                        className="sc-bdVaJa gwdwEa"
+                        className="codeFileTree__directory"
                       >
                         <div
                           className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -568,10 +568,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-guava-bom"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -579,7 +579,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -615,7 +615,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -630,10 +630,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-guava-gwt"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -641,7 +641,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -677,7 +677,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -692,10 +692,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-guava-testlib"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -703,7 +703,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -739,7 +739,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -754,10 +754,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-guava-tests"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -765,7 +765,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -801,7 +801,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -816,10 +816,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-refactorings"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -827,7 +827,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -863,7 +863,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -878,10 +878,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node"
+              className="codeFileTree__item"
               data-test-subj="codeFileTreeNode-Directory-util"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -889,7 +889,7 @@ exports[`render correctly 1`] = `
               tabIndex={0}
             >
               <svg
-                className="euiIcon euiIcon--small codeFileTree--icon"
+                className="euiIcon euiIcon--small codeFileTree__icon"
                 focusable="false"
                 height="16"
                 style={null}
@@ -925,7 +925,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -940,10 +940,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-.gitattributes"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -971,7 +971,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -990,10 +990,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-.gitignore"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1021,7 +1021,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1040,10 +1040,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-.travis.yml"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1071,7 +1071,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1090,10 +1090,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-CONTRIBUTING.md"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1121,7 +1121,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1140,10 +1140,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-CONTRIBUTORS"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1171,7 +1171,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1190,10 +1190,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-COPYING"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1221,7 +1221,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1240,10 +1240,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-README.md"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1271,7 +1271,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1290,10 +1290,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-cycle_whitelist.txt"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1321,7 +1321,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1340,10 +1340,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-javadoc-stylesheet.css"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1371,7 +1371,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"
@@ -1390,10 +1390,10 @@ exports[`render correctly 1`] = `
           className="euiSideNavItem euiSideNavItem--trunk"
         >
           <div
-            className="sc-bwzfXH fpBhud"
+            className="codeFileTree__node"
           >
             <div
-              className="code-file-node code-file-tree-file"
+              className="codeFileTree__item codeFileTree__file"
               data-test-subj="codeFileTreeNode-File-pom.xml"
               onClick={[Function]}
               onKeyDown={[Function]}
@@ -1421,7 +1421,7 @@ exports[`render correctly 1`] = `
                 />
               </svg>
               <span
-                className="sc-bdVaJa gwdwEa"
+                className="codeFileTree__directory"
               >
                 <div
                   className="euiText euiText--small eui-displayInlineBlock euiText--constrainedWidth"

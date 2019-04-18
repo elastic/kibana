@@ -6,39 +6,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSideNav, EuiText, EuiToken } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React from 'react';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
 import url from 'url';
 import { Location, SymbolKind } from 'vscode-languageserver-types/lib/umd/main';
 
 import { RepositoryUtils } from '../../../common/repository_utils';
 import { EuiSideNavItem } from '../../common/types';
 import { SymbolWithMembers } from '../../reducers/symbol';
-
-const Root = styled.div`
-  padding: ${theme.paddingSizes.l} ${theme.paddingSizes.m};
-  position: relative;
-  display: inline-block;
-  min-width: 100%;
-  height: 100%;
-`;
-
-const Symbol = styled.div<{ isContainer: boolean }>`
-  cursor: pointer;
-  display: flex;
-  flex-grow: 0;
-  flex-shrink: 0;
-  align-items: center;
-  height: 1.5rem;
-  margin-left: ${props => (props.isContainer ? '0.75rem' : '2rem')};
-  z-index: 2;
-`;
-
-const Token = styled(EuiToken)`
-  margin-right: ${theme.euiSizeS};
-`;
 
 interface Props {
   structureTree: SymbolWithMembers[];
@@ -82,7 +57,7 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
     }
     return (
       <EuiFlexGroup gutterSize="none" alignItems="center">
-        <Symbol isContainer={isContainer}>
+        <div className={isContainer ? 'codeSymbol' : 'codeSymbol codeSymbol--nested'}>
           {isContainer &&
             (forceOpen ? (
               <EuiIcon
@@ -111,14 +86,14 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
               onClick={this.getClickHandler(path)}
             >
               <EuiFlexGroup gutterSize="none" alignItems="center" className="code-structure-node">
-                <Token iconType={tokenType as IconType} />
+                <EuiToken iconType={tokenType as IconType} />
                 <EuiText data-test-subj={`codeStructureTreeNode-${name}`} size="s">
                   {name}
                 </EuiText>
               </EuiFlexGroup>
             </Link>
           </EuiFlexItem>
-        </Symbol>
+        </div>
         {bg}
       </EuiFlexGroup>
     );
@@ -163,9 +138,9 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
       { name: '', id: '', items: this.symbolsToSideNavItems(this.props.structureTree) },
     ];
     return (
-      <Root>
+      <div className="codeContainer__symbolTree">
         <EuiSideNav items={items} />
-      </Root>
+      </div>
     );
   }
 }

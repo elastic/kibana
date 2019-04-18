@@ -12,27 +12,13 @@ import {
   EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import theme from '@elastic/eui/dist/eui_theme_light.json';
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import styled from 'styled-components';
 import { CommitInfo } from '../../../model/commit';
 import { CommitLink } from '../diff_page/commit_link';
 
 const COMMIT_ID_LENGTH = 8;
-
-const CommitMessages = styled.div`
-  overflow: auto;
-  flex: 1;
-  padding: ${theme.paddingSizes.m};
-`;
-
-const Header = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-`;
 
 const Commit = (props: { commit: CommitInfo; date: string; repoUri: string }) => {
   const { date, commit } = props;
@@ -83,15 +69,10 @@ const CommitGroup = (props: { commits: CommitInfo[]; date: string; repoUri: stri
   );
 };
 
-const LoadingContainer = styled.div`
-  padding: 1.5rem;
-  text-align: center;
-`;
-
 export const CommitHistoryLoading = () => (
-  <LoadingContainer>
+  <div className="codeLoader">
     <EuiLoadingSpinner size="xl" />
-  </LoadingContainer>
+  </div>
 );
 
 export const CommitHistory = (props: {
@@ -102,10 +83,10 @@ export const CommitHistory = (props: {
 }) => {
   if (!props.commits) {
     return (
-      <CommitMessages>
+      <div className="codeContainer__commitMessages">
         <h1>Commits</h1>
         {!props.hideLoading && <CommitHistoryLoading />}
-      </CommitMessages>
+      </div>
     );
   }
   const commits = _.groupBy(props.commits, commit => moment(commit.updated).format('YYYYMMDD'));
@@ -119,9 +100,9 @@ export const CommitHistory = (props: {
     />
   ));
   return (
-    <CommitMessages>
-      <Header>{props.header}</Header>
+    <div className="codeContainer__commitMessages">
+      <div className="codeHeader__commit">{props.header}</div>
       {commitList}
-    </CommitMessages>
+    </div>
   );
 };
