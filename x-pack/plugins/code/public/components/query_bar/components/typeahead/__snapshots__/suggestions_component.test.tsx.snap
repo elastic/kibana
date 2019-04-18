@@ -193,8 +193,6 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                       <EuiText
                         className="codeSearch-suggestion__group-title"
-                        grow={true}
-                        size="m"
                       >
                         <div
                           className="euiText euiText--medium codeSearch-suggestion__group-title"
@@ -368,8 +366,6 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                       <EuiText
                         className="codeSearch-suggestion__group-title"
-                        grow={true}
-                        size="m"
                       >
                         <div
                           className="euiText euiText--medium codeSearch-suggestion__group-title"
@@ -497,8 +493,6 @@ exports[`render full suggestions component 1`] = `
                       </EuiToken>
                       <EuiText
                         className="codeSearch-suggestion__group-title"
-                        grow={true}
-                        size="m"
                       >
                         <div
                           className="euiText euiText--medium codeSearch-suggestion__group-title"

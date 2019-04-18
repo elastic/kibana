@@ -51,7 +51,6 @@ exports[`render correctly with empty query string 1`] = `
                   Object {
                     "inputDisplay": <div>
                       <EuiText
-                        grow={true}
                         size="s"
                       >
                         <EuiIcon
@@ -65,7 +64,6 @@ exports[`render correctly with empty query string 1`] = `
                   },
                   Object {
                     "inputDisplay": <EuiText
-                      grow={true}
                       size="s"
                     >
                       <EuiIcon
@@ -78,7 +76,6 @@ exports[`render correctly with empty query string 1`] = `
                   },
                   Object {
                     "inputDisplay": <EuiText
-                      grow={true}
                       size="s"
                     >
                       <EuiIcon
@@ -91,7 +88,6 @@ exports[`render correctly with empty query string 1`] = `
                   },
                   Object {
                     "inputDisplay": <EuiText
-                      grow={true}
                       size="s"
                     >
                       <EuiIcon
@@ -129,7 +125,6 @@ exports[`render correctly with empty query string 1`] = `
                         Object {
                           "inputDisplay": <div>
                             <EuiText
-                              grow={true}
                               size="s"
                             >
                               <EuiIcon
@@ -143,7 +138,6 @@ exports[`render correctly with empty query string 1`] = `
                         },
                         Object {
                           "inputDisplay": <EuiText
-                            grow={true}
                             size="s"
                           >
                             <EuiIcon
@@ -156,7 +150,6 @@ exports[`render correctly with empty query string 1`] = `
                         },
                         Object {
                           "inputDisplay": <EuiText
-                            grow={true}
                             size="s"
                           >
                             <EuiIcon
@@ -169,7 +162,6 @@ exports[`render correctly with empty query string 1`] = `
                         },
                         Object {
                           "inputDisplay": <EuiText
-                            grow={true}
                             size="s"
                           >
                             <EuiIcon
@@ -228,7 +220,6 @@ exports[`render correctly with empty query string 1`] = `
                             Object {
                               "inputDisplay": <div>
                                 <EuiText
-                                  grow={true}
                                   size="s"
                                 >
                                   <EuiIcon
@@ -242,7 +233,6 @@ exports[`render correctly with empty query string 1`] = `
                             },
                             Object {
                               "inputDisplay": <EuiText
-                                grow={true}
                                 size="s"
                               >
                                 <EuiIcon
@@ -255,7 +245,6 @@ exports[`render correctly with empty query string 1`] = `
                             },
                             Object {
                               "inputDisplay": <EuiText
-                                grow={true}
                                 size="s"
                               >
                                 <EuiIcon
@@ -268,7 +257,6 @@ exports[`render correctly with empty query string 1`] = `
                             },
                             Object {
                               "inputDisplay": <EuiText
-                                grow={true}
                                 size="s"
                               >
                                 <EuiIcon
@@ -321,7 +309,6 @@ exports[`render correctly with empty query string 1`] = `
                                       Object {
                                         "selectedValue": <div>
                                           <EuiText
-                                            grow={true}
                                             size="s"
                                           >
                                             <EuiIcon
@@ -338,7 +325,6 @@ exports[`render correctly with empty query string 1`] = `
                                       selectedValue={
                                         <div>
                                           <EuiText
-                                            grow={true}
                                             size="s"
                                           >
                                             <EuiIcon
@@ -355,7 +341,6 @@ exports[`render correctly with empty query string 1`] = `
                                         key="1"
                                       >
                                         <EuiText
-                                          grow={true}
                                           size="s"
                                         >
                                           <div
@@ -415,7 +400,6 @@ exports[`render correctly with empty query string 1`] = `
                               >
                                 <div>
                                   <EuiText
-                                    grow={true}
                                     size="s"
                                   >
                                     <div
@@ -670,7 +654,6 @@ exports[`render correctly with empty query string 1`] = `
                                   </EuiNotificationBadge>
                                   <EuiTextColor
                                     color="secondary"
-                                    component="span"
                                   >
                                     <span
                                       className="euiTextColor euiTextColor--secondary"
@@ -812,7 +795,6 @@ exports[`render correctly with input query string changed 1`] = `
                       Object {
                         "inputDisplay": <div>
                           <EuiText
-                            grow={true}
                             size="s"
                           >
                             <EuiIcon
@@ -826,7 +808,6 @@ exports[`render correctly with input query string changed 1`] = `
                       },
                       Object {
                         "inputDisplay": <EuiText
-                          grow={true}
                           size="s"
                         >
                           <EuiIcon
@@ -839,7 +820,6 @@ exports[`render correctly with input query string changed 1`] = `
                       },
                       Object {
                         "inputDisplay": <EuiText
-                          grow={true}
                           size="s"
                         >
                           <EuiIcon
@@ -852,7 +832,6 @@ exports[`render correctly with input query string changed 1`] = `
                       },
                       Object {
                         "inputDisplay": <EuiText
-                          grow={true}
                           size="s"
                         >
                           <EuiIcon
@@ -890,7 +869,6 @@ exports[`render correctly with input query string changed 1`] = `
                             Object {
                               "inputDisplay": <div>
                                 <EuiText
-                                  grow={true}
                                   size="s"
                                 >
                                   <EuiIcon
@@ -904,7 +882,6 @@ exports[`render correctly with input query string changed 1`] = `
                             },
                             Object {
                               "inputDisplay": <EuiText
-                                grow={true}
                                 size="s"
                               >
                                 <EuiIcon
@@ -917,7 +894,6 @@ exports[`render correctly with input query string changed 1`] = `
                             },
                             Object {
                               "inputDisplay": <EuiText
-                                grow={true}
                                 size="s"
                               >
                                 <EuiIcon
@@ -930,7 +906,6 @@ exports[`render correctly with input query string changed 1`] = `
                             },
                             Object {
                               "inputDisplay": <EuiText
-                                grow={true}
                                 size="s"
                               >
                                 <EuiIcon
@@ -989,7 +964,6 @@ exports[`render correctly with input query string changed 1`] = `
                                 Object {
                                   "inputDisplay": <div>
                                     <EuiText
-                                      grow={true}
                                       size="s"
                                     >
                                       <EuiIcon
@@ -1003,7 +977,6 @@ exports[`render correctly with input query string changed 1`] = `
                                 },
                                 Object {
                                   "inputDisplay": <EuiText
-                                    grow={true}
                                     size="s"
                                   >
                                     <EuiIcon
@@ -1016,7 +989,6 @@ exports[`render correctly with input query string changed 1`] = `
                                 },
                                 Object {
                                   "inputDisplay": <EuiText
-                                    grow={true}
                                     size="s"
                                   >
                                     <EuiIcon
@@ -1029,7 +1001,6 @@ exports[`render correctly with input query string changed 1`] = `
                                 },
                                 Object {
                                   "inputDisplay": <EuiText
-                                    grow={true}
                                     size="s"
                                   >
                                     <EuiIcon
@@ -1082,7 +1053,6 @@ exports[`render correctly with input query string changed 1`] = `
                                           Object {
                                             "selectedValue": <div>
                                               <EuiText
-                                                grow={true}
                                                 size="s"
                                               >
                                                 <EuiIcon
@@ -1099,7 +1069,6 @@ exports[`render correctly with input query string changed 1`] = `
                                           selectedValue={
                                             <div>
                                               <EuiText
-                                                grow={true}
                                                 size="s"
                                               >
                                                 <EuiIcon
@@ -1116,7 +1085,6 @@ exports[`render correctly with input query string changed 1`] = `
                                             key="1"
                                           >
                                             <EuiText
-                                              grow={true}
                                               size="s"
                                             >
                                               <div
@@ -1176,7 +1144,6 @@ exports[`render correctly with input query string changed 1`] = `
                                   >
                                     <div>
                                       <EuiText
-                                        grow={true}
                                         size="s"
                                       >
                                         <div
@@ -1431,7 +1398,6 @@ exports[`render correctly with input query string changed 1`] = `
                                       </EuiNotificationBadge>
                                       <EuiTextColor
                                         color="secondary"
-                                        component="span"
                                       >
                                         <span
                                           className="euiTextColor euiTextColor--secondary"
