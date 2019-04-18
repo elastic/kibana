@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { CoreSetup, PluginInitializerContext } from 'src/core/server/index.js';
+import { CoreStart, PluginInitializerContext } from 'src/core/server/index.js';
 import mappings from './mappings.json';
 import { plugin } from './server/new-platform/index';
 
@@ -106,7 +106,7 @@ export function apm(kibana: any) {
         http: {
           server
         }
-      } as CoreSetup;
+      } as CoreStart;
       plugin(initializerContext).setup(core);
     }
   });

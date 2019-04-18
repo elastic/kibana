@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup } from 'src/core/server';
+import { CoreStart } from 'src/core/server';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
-import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
+import { CoreStartWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { initErrorsApi } from '../routes/errors';
 import { initMetricsApi } from '../routes/metrics';
 import { initServicesApi } from '../routes/services';
@@ -14,12 +14,12 @@ import { initTracesApi } from '../routes/traces';
 import { initTransactionGroupsApi } from '../routes/transaction_groups';
 
 export class Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreStart) {
     initTransactionGroupsApi(core);
     initTracesApi(core);
     initServicesApi(core);
     initErrorsApi(core);
     initMetricsApi(core);
-    makeApmUsageCollector(core as CoreSetupWithUsageCollector);
+    makeApmUsageCollector(core as CoreStartWithUsageCollector);
   }
 }

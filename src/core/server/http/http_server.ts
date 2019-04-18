@@ -65,7 +65,7 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  public registerRouter(router: Router) {
+  private registerRouter(router: Router) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
