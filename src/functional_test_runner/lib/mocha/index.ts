@@ -17,7 +17,6 @@
  * under the License.
  */
 
-export { createLifecycle } from './lifecycle';
-export { readConfigFile } from './config';
-export { setupMocha, runTests } from './mocha';
-export { readProviderSpec, ProviderCollection } from './providers';
+// @ts-ignore will be replaced shortly
+export { setupMocha } from './setup_mocha';
+export { runTests } from './run_tests';

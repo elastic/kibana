@@ -17,5 +17,28 @@
  * under the License.
  */
 
-export { createFunctionalTestRunner } from './functional_test_runner';
-export { readConfigFile } from './lib';
+/**
+ * The real mocha types conflict with the global jest types, because
+ * globals are terrible. So instead of using any for everything this
+ * tries to mock out simple versions of the Mocha types
+ */
+
+import EventEmitter from 'events';
+
+export interface Suite {
+  suites: Suite[];
+  tests: Test[];
+}
+
+export interface Test {
+  fullTitle(): string;
+}
+
+export interface Runner extends EventEmitter {
+  abort(): void;
+  failures: any[];
+}
+
+export interface Mocha {
+  run(cb: () => void): Runner;
+}

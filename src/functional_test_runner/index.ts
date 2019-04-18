@@ -17,12 +17,5 @@
  * under the License.
  */
 
-export function readProviderSpec(type, providers) {
-  return Object.keys(providers).map(name => {
-    return {
-      type,
-      name,
-      fn: providers[name],
-    };
-  });
-}
+export { FunctionalTestRunner } from './functional_test_runner';
+export { readConfigFile } from './lib';
