@@ -22,10 +22,7 @@ export const timefilterControl = () => ({
       name: 'filterGroup',
       displayName: 'Filter Group',
       help: 'Add a group name to the filter for individual selection',
-      argType: 'string',
-      options: {
-        confirm: 'Set',
-      },
+      argType: 'filterGroup',
     },
   ],
 });

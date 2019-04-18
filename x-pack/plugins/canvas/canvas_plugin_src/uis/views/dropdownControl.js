@@ -20,7 +20,7 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterColumn',
-      displayName: 'Filter column ',
+      displayName: 'Filter column',
       help: 'Column to which the value selected from the dropdown is applied',
       argType: 'string',
       options: {
@@ -31,10 +31,7 @@ export const dropdownControl = () => ({
       name: 'filterGroup',
       displayName: 'Filter Group',
       help: 'Add a group name to the filter for individual selection',
-      argType: 'string',
-      options: {
-        confirm: 'Set',
-      },
+      argType: 'filterGroup',
     },
   ],
 });
