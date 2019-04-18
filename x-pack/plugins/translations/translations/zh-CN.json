@@ -824,8 +824,6 @@
     "kbn.advancedSettings.historyLimitTitle": "历史记录限制",
     "kbn.advancedSettings.indexPattern.recentMatchingText": "对于名称中包含时间戳的索引模式，寻找此数目的最近匹配模式，以从其中查询字段映射",
     "kbn.advancedSettings.indexPattern.recentMatchingTitle": "最近匹配模式",
-    "kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningText": "索引模式使用当前不受支持的“时间模式”格式时，使用此模式的每个会话会显示一次警告。将其设置为 false 可禁用该警告。",
-    "kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningTitle": "时间模式警告",
     "kbn.advancedSettings.indexPatternPlaceholderText": "在“管理 > 索引模式 > 创建索引模式”中“索引模式名称”的占位符。",
     "kbn.advancedSettings.indexPatternPlaceholderTitle": "索引模式占位符",
     "kbn.advancedSettings.maxBucketsText": "单个数据源可以返回的最大存储桶数目",
