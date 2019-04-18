@@ -21,7 +21,7 @@ import { TransactionActionMenu } from '../../../../../../shared/TransactionActio
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
-import { PropertiesTable } from '../../../../../../shared/PropertiesTable';
+import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
 import { DroppedSpansWarning } from './DroppedSpansWarning';
 
 interface Props {
@@ -42,7 +42,7 @@ function TransactionPropertiesTable({
         <h4>Metadata</h4>
       </EuiTitle>
       <EuiSpacer />
-      <PropertiesTable item={transaction} />
+      <TransactionMetadata transaction={transaction} />
     </div>
   );
 }

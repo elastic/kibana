@@ -13,22 +13,30 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import React from 'react';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getPropertiesFromObject } from './helpers';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { StringMap } from '../../../../typings/common';
-import { PropertyKey } from './propertyConfig';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
+import { Span } from '../../../../typings/es_schemas/ui/Span';
+
+type MetadataItem = Transaction | APMError | Span;
 
 interface Props {
-  item: Transaction | APMError;
+  item: MetadataItem;
+  sections: MetadataSection[];
 }
 
-export function PropertiesTable({ item }: Props) {
-  const sections = getPropertiesFromObject(item);
+export interface MetadataSection {
+  key: string;
+  label: string;
+  required?: boolean;
+}
+
+export function MetadataTable({ item, sections }: Props) {
+  const filteredSections = filterSections(item, sections);
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd">
@@ -40,7 +48,7 @@ export function PropertiesTable({ item }: Props) {
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {sections.map(section => (
+      {filteredSections.map(section => (
         <div key={section.key}>
           <EuiTitle size="xs">
             <h6>{section.label}</h6>
@@ -54,12 +62,16 @@ export function PropertiesTable({ item }: Props) {
   );
 }
 
+function filterSections(item: MetadataItem, sections: MetadataSection[]) {
+  return sections.filter(({ key, required }) => required || has(item, key));
+}
+
 function Section({
   propData,
   propKey
 }: {
   propData?: StringMap;
-  propKey?: PropertyKey;
+  propKey?: string;
 }) {
   return (
     <React.Fragment>

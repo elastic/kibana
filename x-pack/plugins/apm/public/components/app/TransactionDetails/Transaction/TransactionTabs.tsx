@@ -11,7 +11,7 @@ import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { IUrlParams } from '../../../../store/urlParams';
 import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
-import { PropertiesTable } from '../../../shared/PropertiesTable';
+import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 import { WaterfallContainer } from './WaterfallContainer';
 import { IWaterfall } from './WaterfallContainer/Waterfall/waterfall_helpers/waterfall_helpers';
 
@@ -80,7 +80,7 @@ export function TransactionTabs({
           waterfall={waterfall}
         />
       ) : (
-        <PropertiesTable item={transaction} />
+        <TransactionMetadata transaction={transaction} />
       )}
     </React.Fragment>
   );

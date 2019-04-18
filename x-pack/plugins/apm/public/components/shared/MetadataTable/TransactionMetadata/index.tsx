@@ -4,25 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import React from 'react';
+import { MetadataTable } from '..';
+import { TRANSACTION_METADATA_SECTIONS } from './sections';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
 
 interface Props {
   transaction: Transaction;
 }
 
-export const TransactionPropertiesTableForFlyout: React.SFC<Props> = ({
-  transaction
-}) => {
+export function TransactionMetadata({ transaction }: Props) {
   return (
-    <div>
-      <EuiTitle size="s">
-        <h4>Metadata</h4>
-      </EuiTitle>
-      <EuiSpacer />
-      <TransactionMetadata transaction={transaction} />
-    </div>
+    <MetadataTable
+      item={transaction}
+      sections={TRANSACTION_METADATA_SECTIONS}
+    />
   );
-};
+}

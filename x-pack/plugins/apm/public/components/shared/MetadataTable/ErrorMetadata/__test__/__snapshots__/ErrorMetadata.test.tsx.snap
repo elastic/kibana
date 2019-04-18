@@ -1,0 +1,1415 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ErrorMetadata should render a transaction with all sections 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <a
+            class="euiLink euiLink--primary"
+            href="/something"
+          >
+            <div
+              class="euiText euiText--small"
+            >
+              <svg
+                class="euiIcon euiIcon--medium"
+                focusable="false"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+              >
+                <defs>
+                  <path
+                    d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                    id="help-a"
+                  />
+                </defs>
+                <use
+                  fill-rule="evenodd"
+                  xlink:href="#help-a"
+                />
+              </svg>
+               How to add labels and other data
+            </div>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Labels
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      labels.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    labels value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          HTTP
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      http.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    http value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Host
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      host.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    host value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Container
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      container.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    container value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Service
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      service.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    service value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Process
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      process.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    process value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Agent
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      agent.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    agent value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          URL
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      url.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    url value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          User
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      user.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    user value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Custom
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <table
+          class="euiTable euiTable--compressed euiTable--responsive"
+        >
+          <tbody>
+            <tr
+              class="euiTableRow"
+            >
+              <td
+                class="euiTableRowCell"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    <strong
+                      data-testid="dot-key"
+                    >
+                      error.custom.someKey
+                    </strong>
+                  </span>
+                </div>
+              </td>
+              <td
+                class="euiTableRowCell"
+                data-testid="value"
+              >
+                <div
+                  class="euiTableCellContent"
+                >
+                  <span
+                    class="euiTableCellContent__text"
+                  >
+                    custom value
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <a
+          class="euiLink euiLink--primary"
+          href="/something"
+        >
+          <div
+            class="euiText euiText--small"
+          >
+            <svg
+              class="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                  id="help-a"
+                />
+              </defs>
+              <use
+                fill-rule="evenodd"
+                xlink:href="#help-a"
+              />
+            </svg>
+             How to add labels and other data
+          </div>
+        </a>
+      </div>
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Labels
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    labels.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  labels value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        HTTP
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    http.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  http value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Host
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    host.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  host value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Container
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    container.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  container value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Service
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    service.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  service value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Process
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    process.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  process value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Agent
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    agent.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  agent value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        URL
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    url.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  url value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        User
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    user.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  user value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Custom
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <table
+        class="euiTable euiTable--compressed euiTable--responsive"
+      >
+        <tbody>
+          <tr
+            class="euiTableRow"
+          >
+            <td
+              class="euiTableRowCell"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  <strong
+                    data-testid="dot-key"
+                  >
+                    error.custom.someKey
+                  </strong>
+                </span>
+              </div>
+            </td>
+            <td
+              class="euiTableRowCell"
+              data-testid="value"
+            >
+              <div
+                class="euiTableCellContent"
+              >
+                <span
+                  class="euiTableCellContent__text"
+                >
+                  custom value
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+  </div>,
+  "debug": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllBySelectText": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getAllByValue": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getBySelectText": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "getByValue": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllBySelectText": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryAllByValue": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryBySelectText": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "queryByValue": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`ErrorMetadata should render a transaction with only the required sections 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+      >
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <a
+            class="euiLink euiLink--primary"
+            href="/something"
+          >
+            <div
+              class="euiText euiText--small"
+            >
+              <svg
+                class="euiIcon euiIcon--medium"
+                focusable="false"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+                xmlns="http://www.w3.org/2000/svg"
+                xmlns:xlink="http://www.w3.org/1999/xlink"
+              >
+                <defs>
+                  <path
+                    d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                    id="help-a"
+                  />
+                </defs>
+                <use
+                  fill-rule="evenodd"
+                  xlink:href="#help-a"
+                />
+              </svg>
+               How to add labels and other data
+            </div>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          Labels
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiText euiText--small"
+        >
+          No data available
+        </div>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+      <div>
+        <h6
+          class="euiTitle euiTitle--xsmall"
+        >
+          User
+        </h6>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiText euiText--small"
+        >
+          No data available
+        </div>
+        <div
+          class="euiSpacer euiSpacer--xl"
+        />
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <a
+          class="euiLink euiLink--primary"
+          href="/something"
+        >
+          <div
+            class="euiText euiText--small"
+          >
+            <svg
+              class="euiIcon euiIcon--medium"
+              focusable="false"
+              height="16"
+              viewBox="0 0 16 16"
+              width="16"
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+            >
+              <defs>
+                <path
+                  d="M13.6 12.186l-1.357-1.358c-.025-.025-.058-.034-.084-.056.53-.794.84-1.746.84-2.773a4.977 4.977 0 0 0-.84-2.772c.026-.02.059-.03.084-.056L13.6 3.813a6.96 6.96 0 0 1 0 8.373zM8 15A6.956 6.956 0 0 1 3.814 13.6l1.358-1.358c.025-.025.034-.057.055-.084C6.02 12.688 6.974 13 8 13a4.978 4.978 0 0 0 2.773-.84c.02.026.03.058.056.083l1.357 1.358A6.956 6.956 0 0 1 8 15zm-5.601-2.813a6.963 6.963 0 0 1 0-8.373l1.359 1.358c.024.025.057.035.084.056A4.97 4.97 0 0 0 3 8c0 1.027.31 1.98.842 2.773-.027.022-.06.031-.084.056l-1.36 1.358zm5.6-.187A4 4 0 1 1 8 4a4 4 0 0 1 0 8zM8 1c1.573 0 3.019.525 4.187 1.4l-1.357 1.358c-.025.025-.035.057-.056.084A4.979 4.979 0 0 0 8 3a4.979 4.979 0 0 0-2.773.842c-.021-.027-.03-.059-.055-.084L3.814 2.4A6.957 6.957 0 0 1 8 1zm0-1a8.001 8.001 0 1 0 .003 16.002A8.001 8.001 0 0 0 8 0z"
+                  id="help-a"
+                />
+              </defs>
+              <use
+                fill-rule="evenodd"
+                xlink:href="#help-a"
+              />
+            </svg>
+             How to add labels and other data
+          </div>
+        </a>
+      </div>
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        Labels
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <div
+        class="euiText euiText--small"
+      >
+        No data available
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+    <div>
+      <h6
+        class="euiTitle euiTitle--xsmall"
+      >
+        User
+      </h6>
+      <div
+        class="euiSpacer euiSpacer--s"
+      />
+      <div
+        class="euiText euiText--small"
+      >
+        No data available
+      </div>
+      <div
+        class="euiSpacer euiSpacer--xl"
+      />
+    </div>
+  </div>,
+  "debug": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllBySelectText": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getAllByValue": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getBySelectText": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "getByValue": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllBySelectText": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryAllByValue": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryBySelectText": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "queryByValue": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

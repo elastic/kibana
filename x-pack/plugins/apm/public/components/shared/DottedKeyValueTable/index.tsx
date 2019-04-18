@@ -17,7 +17,7 @@ import { StringMap } from '../../../../typings/common';
 import { FormattedValue } from './FormattedValue';
 
 interface PathifyOptions {
-  maxDepth: number;
+  maxDepth?: number;
   parentKey?: string;
   depth?: number;
 }
@@ -34,21 +34,23 @@ export function pathify(
   item: StringMap<any>,
   { maxDepth, parentKey = '', depth = 0 }: PathifyOptions
 ): PathifyResult {
-  return Object.keys(item).reduce((pathified, key) => {
-    const currentKey = compact([parentKey, key]).join('.');
-    if (depth + 1 <= maxDepth && isObject(item[key])) {
-      return {
-        ...pathified,
-        ...pathify(item[key], {
-          maxDepth,
-          parentKey: currentKey,
-          depth: depth + 1
-        })
-      };
-    } else {
-      return { ...pathified, [currentKey]: item[key] };
-    }
-  }, {});
+  return Object.keys(item)
+    .sort()
+    .reduce((pathified, key) => {
+      const currentKey = compact([parentKey, key]).join('.');
+      if ((!maxDepth || depth + 1 <= maxDepth) && isObject(item[key])) {
+        return {
+          ...pathified,
+          ...pathify(item[key], {
+            maxDepth,
+            parentKey: currentKey,
+            depth: depth + 1
+          })
+        };
+      } else {
+        return { ...pathified, [currentKey]: item[key] };
+      }
+    }, {});
 }
 
 export function DottedKeyValueTable({
@@ -59,20 +61,22 @@ export function DottedKeyValueTable({
 }: {
   data: StringMap;
   parentKey?: string;
-  maxDepth: number;
+  maxDepth?: number;
   tableProps?: EuiTableProps & TableHTMLAttributes<HTMLTableElement>;
 }) {
   const pathified = pathify(data, { maxDepth, parentKey });
-  const rows = Object.keys(pathified).map(k => [k, pathified[k]]);
+  const rows = Object.keys(pathified)
+    .sort()
+    .map(k => [k, pathified[k]]);
   return (
     <EuiTable compressed {...tableProps}>
       <EuiTableBody>
         {rows.map(([key, value]) => (
           <EuiTableRow key={key}>
             <EuiTableRowCell>
-              <strong>{key}</strong>
+              <strong data-testid="dot-key">{key}</strong>
             </EuiTableRowCell>
-            <EuiTableRowCell>
+            <EuiTableRowCell data-testid="value">
               <FormattedValue value={value} />
             </EuiTableRowCell>
           </EuiTableRow>

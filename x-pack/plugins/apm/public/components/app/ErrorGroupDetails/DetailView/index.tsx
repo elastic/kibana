@@ -16,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import styled from 'styled-components';
+import { first } from 'lodash';
 import { idx } from '../../../../../common/idx';
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
@@ -23,8 +24,7 @@ import { IUrlParams } from '../../../../store/urlParams';
 import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
 import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
-import { PropertiesTable } from '../../../shared/PropertiesTable';
-import { getCurrentTab } from '../../../shared/PropertiesTable/helpers';
+import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import {
   ErrorTab,
@@ -45,6 +45,15 @@ interface Props {
   errorGroup: ErrorGroupAPIResponse;
   urlParams: IUrlParams;
   location: Location;
+}
+
+// TODO: Move query-string-based tabs into a re-usable component?
+function getCurrentTab<T extends { key: string; label: string }>(
+  tabs: T[] = [],
+  currentTabKey: string | undefined
+): T {
+  const selectedTab = tabs.find(({ key }) => key === currentTabKey);
+  return selectedTab ? selectedTab : first(tabs) || {};
 }
 
 export function DetailView({ errorGroup, urlParams, location }: Props) {
@@ -136,6 +145,6 @@ export function TabContent({
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      return <PropertiesTable item={error} />;
+      return <ErrorMetadata error={error} />;
   }
 }
