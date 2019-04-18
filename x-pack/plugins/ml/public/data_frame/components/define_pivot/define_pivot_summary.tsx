@@ -28,9 +28,11 @@ import {
   IndexPatternContext,
   Label,
   OptionsDataElement,
+  PIVOT_SUPPORTED_AGGS,
   pivotSupportedAggs,
   SimpleQuery,
 } from '../../common';
+import { FIELD_TYPE } from './common';
 
 const defaultSearch = '*';
 const emptySearch = '';
@@ -67,8 +69,9 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
     const o: DropDownOption = { label: field.name, options: [] };
     pivotSupportedAggs.forEach(agg => {
       if (
-        (agg === 'cardinality' && (field.type === 'string' || field.type === 'ip')) ||
-        (agg !== 'cardinality' && field.type === 'number')
+        (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
+          (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
+        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
       ) {
         const label = `${agg}(${field.name})`;
         o.options.push({ label });
@@ -83,11 +86,9 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
   const pivotGroupBy = groupBy;
 
   const pivotQuery: SimpleQuery = {
-    query: {
-      query_string: {
-        query: search,
-        default_operator: 'AND',
-      },
+    query_string: {
+      query: search,
+      default_operator: 'AND',
     },
   };
 
@@ -125,7 +126,7 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
 
       <EuiFlexItem>
         <EuiText>
-          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery.query} />
+          <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery} />
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

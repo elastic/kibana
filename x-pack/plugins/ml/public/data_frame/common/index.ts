@@ -27,22 +27,20 @@ export interface DropDownOption {
 }
 
 // The internal representation of an aggregation definition.
-type aggName = string;
-type fieldName = string;
+type AggName = string;
+type FieldName = string;
 export interface OptionsDataElement {
   agg: PivotAggSupportedAggs;
-  field: fieldName;
-  formRowLabel: aggName;
+  field: FieldName;
+  formRowLabel: AggName;
 }
 
 export type OptionsDataElementDict = Dictionary<OptionsDataElement>;
 
 export interface SimpleQuery {
-  query: {
-    query_string: {
-      query: string;
-      default_operator: DefaultOperator;
-    };
+  query_string: {
+    query: string;
+    default_operator: DefaultOperator;
   };
 }
 
@@ -74,10 +72,10 @@ type PivotAggSupportedAggs =
 
 type PivotAgg = {
   [key in PivotAggSupportedAggs]?: {
-    field: fieldName;
+    field: FieldName;
   }
 };
-type PivotAggDict = { [key in aggName]: PivotAgg };
+type PivotAggDict = { [key in AggName]: PivotAgg };
 
 export interface DataFramePreviewRequest {
   pivot: {
@@ -105,22 +103,21 @@ export const pivotSupportedAggs = [
   PIVOT_SUPPORTED_AGGS.VALUE_COUNT,
 ] as PivotAggSupportedAggs[];
 
-export function getPivotQuery(search: string) {
+export function getPivotQuery(search: string): SimpleQuery {
   return {
-    query: {
-      query_string: {
-        query: search,
-        default_operator: 'AND',
-      },
+    query_string: {
+      query: search,
+      default_operator: 'AND',
     },
-  } as SimpleQuery;
+  };
 }
+
 export function getDataFramePreviewRequest(
   indexPatternTitle: StaticIndexPattern['title'],
-  query: SimpleQuery['query'],
+  query: SimpleQuery,
   groupBy: string[],
   aggs: OptionsDataElement[]
-) {
+): DataFramePreviewRequest {
   const request: DataFramePreviewRequest = {
     source: {
       index: indexPatternTitle,
@@ -155,11 +152,11 @@ export function getDataFrameRequest(
   indexPatternTitle: StaticIndexPattern['title'],
   pivotState: DefinePivotExposedState,
   jobDetailsState: any
-) {
+): DataFrameRequest {
   const request: DataFrameRequest = {
     ...getDataFramePreviewRequest(
       indexPatternTitle,
-      getPivotQuery(pivotState.search).query,
+      getPivotQuery(pivotState.search),
       pivotState.groupBy,
       pivotState.aggs
     ),

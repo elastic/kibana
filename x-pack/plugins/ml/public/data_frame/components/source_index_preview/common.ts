@@ -18,7 +18,7 @@ export interface EsDoc extends Dictionary<any> {
 
 export const MAX_COLUMNS = 5;
 
-function getFlattenedFields(obj: EsDocSource) {
+function getFlattenedFields(obj: EsDocSource): EsFieldName[] {
   const flatDocFields: EsFieldName[] = [];
   const newDocFields = Object.keys(obj);
   newDocFields.forEach(f => {
@@ -34,13 +34,21 @@ function getFlattenedFields(obj: EsDocSource) {
   return flatDocFields;
 }
 
-export const getSelectableFields = (docs: EsDoc[]) => {
+export const getSelectableFields = (docs: EsDoc[]): EsFieldName[] => {
+  if (docs.length === 0) {
+    return [];
+  }
+
   const newDocFields = getFlattenedFields(docs[0]._source);
   newDocFields.sort();
   return newDocFields;
 };
 
-export const getDefaultSelectableFields = (docs: EsDoc[]) => {
+export const getDefaultSelectableFields = (docs: EsDoc[]): EsFieldName[] => {
+  if (docs.length === 0) {
+    return [];
+  }
+
   const newDocFields = getFlattenedFields(docs[0]._source);
   newDocFields.sort();
   return newDocFields
@@ -57,7 +65,10 @@ export const getDefaultSelectableFields = (docs: EsDoc[]) => {
     .slice(0, MAX_COLUMNS);
 };
 
-export const toggleSelectedField = (selectedFields: EsFieldName[], column: EsFieldName) => {
+export const toggleSelectedField = (
+  selectedFields: EsFieldName[],
+  column: EsFieldName
+): EsFieldName[] => {
   const index = selectedFields.indexOf(column);
   if (index === -1) {
     selectedFields.push(column);

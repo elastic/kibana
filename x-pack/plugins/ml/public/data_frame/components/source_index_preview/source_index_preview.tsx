@@ -134,7 +134,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
         index: indexPattern.title,
         rest_total_hits_as_int: true,
         size: SEARCH_SIZE,
-        body: query,
+        body: { query },
       })
         .then((resp: SearchResponse<any>) => {
           const docs = resp.hits.hits;
@@ -152,7 +152,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           setLoading(false);
         });
     },
-    [indexPattern.title, query.query.query_string.query]
+    [indexPattern.title, query.query_string.query]
   );
 
   const columns = selectedFields.map(k => {

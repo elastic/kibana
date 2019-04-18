@@ -26,11 +26,11 @@ export interface JobDetailsExposedState {
   started: boolean;
 }
 
-export function getDefaultJobCreateState() {
+export function getDefaultJobCreateState(): JobDetailsExposedState {
   return {
     created: false,
     started: false,
-  } as JobDetailsExposedState;
+  };
 }
 
 function gotToDataFrameJobManagement() {

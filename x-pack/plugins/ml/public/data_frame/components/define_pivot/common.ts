@@ -4,10 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { callWithRequestType, dataFrameProvider } from './data_frame';
-
-export function dataFrameServiceProvider(callWithRequest: callWithRequestType) {
-  return {
-    ...dataFrameProvider(callWithRequest),
-  };
+export enum FIELD_TYPE {
+  IP = 'ip',
+  NUMBER = 'number',
+  STRING = 'string',
 }

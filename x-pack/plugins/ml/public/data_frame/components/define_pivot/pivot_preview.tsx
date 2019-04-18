@@ -22,7 +22,7 @@ import {
 interface Props {
   aggs: OptionsDataElement[];
   groupBy: string[];
-  query: SimpleQuery['query'];
+  query: SimpleQuery;
 }
 
 export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query }) => {

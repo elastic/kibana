@@ -39,12 +39,7 @@ import {
 } from '../../common';
 
 import { IndexPatternContext } from '../../common';
-
-enum FIELD_TYPE {
-  IP = 'ip',
-  NUMBER = 'number',
-  STRING = 'string',
-}
+import { FIELD_TYPE } from './common';
 
 export interface DefinePivotExposedState {
   aggList: Label[];
@@ -57,13 +52,14 @@ export interface DefinePivotExposedState {
 const defaultSearch = '*';
 const emptySearch = '';
 
-export function getDefaultPivotState() {
+export function getDefaultPivotState(): DefinePivotExposedState {
   return {
     aggList: [] as Label[],
+    aggs: [] as OptionsDataElement[],
     groupBy: [] as Label[],
     search: defaultSearch,
     valid: false,
-  } as DefinePivotExposedState;
+  };
 }
 
 interface Props {
@@ -249,7 +245,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       <EuiFlexItem>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
         <EuiSpacer size="l" />
-        <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery.query} />
+        <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

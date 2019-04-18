@@ -6,7 +6,6 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
-import { dataFrameServiceProvider } from '../models/data_frame_service';
 
 export function dataFrameRoutes(server, commonRouteConfig) {
 
@@ -15,8 +14,7 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { getDataFrameTransforms } = dataFrameServiceProvider(callWithRequest);
-      return getDataFrameTransforms()
+      return callWithRequest('ml.getDataFrameTransforms')
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -29,8 +27,7 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/_stats',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { getDataFrameTransformsStats } = dataFrameServiceProvider(callWithRequest);
-      return getDataFrameTransformsStats()
+      return callWithRequest('ml.getDataFrameTransformsStats')
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -43,9 +40,8 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/{jobId}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { createDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
       const { jobId } = request.params;
-      return createDataFrameTransformsJob(jobId, request.payload)
+      return callWithRequest('ml.createDataFrameTransformsJob', { body: request.payload, jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -58,9 +54,8 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/{jobId}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { deleteDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
       const { jobId } = request.params;
-      return deleteDataFrameTransformsJob(jobId)
+      return callWithRequest('ml.deleteDataFrameTransformsJob', { jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -73,8 +68,7 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/_preview',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { getDataFrameTransformsPreview } = dataFrameServiceProvider(callWithRequest);
-      return getDataFrameTransformsPreview(request.payload)
+      return callWithRequest('ml.getDataFrameTransformsPreview', { body: request.payload })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -87,9 +81,8 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/{jobId}/_start',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { startDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
       const { jobId } = request.params;
-      return startDataFrameTransformsJob(jobId)
+      return callWithRequest('ml.startDataFrameTransformsJob', { jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
@@ -102,9 +95,8 @@ export function dataFrameRoutes(server, commonRouteConfig) {
     path: '/api/ml/_data_frame/transforms/{jobId}/_stop',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { stopDataFrameTransformsJob } = dataFrameServiceProvider(callWithRequest);
       const { jobId } = request.params;
-      return stopDataFrameTransformsJob(jobId)
+      return callWithRequest('ml.stopDataFrameTransformsJob', { jobId })
         .catch(resp => wrapError(resp));
     },
     config: {
