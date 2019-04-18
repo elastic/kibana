@@ -1,7 +1,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "heartbeat",
+    "index": "heartbeat-7.1.0",
     "source": {
       "@timestamp": "2018-10-30T18:51:56.792Z",
       "beat": {
@@ -85,7 +85,7 @@
 {
   "type": "doc",
   "value": {
-    "index": "heartbeat",
+    "index": "heartbeat-7.1.0",
     "source": {
       "@timestamp": "2018-10-30T14:49:23.889Z",
       "beat": {
