@@ -5,15 +5,15 @@
  */
 
 import React, { PureComponent } from 'react';
-import { ElementWrapper } from '../element_wrapper';
-import { AlignmentGuide } from '../alignment_guide';
-import { HoverAnnotation } from '../hover_annotation';
-import { TooltipAnnotation } from '../tooltip_annotation';
-import { RotationHandle } from '../rotation_handle';
-import { BorderConnection } from '../border_connection';
-import { BorderResizeHandle } from '../border_resize_handle';
+import { ElementWrapper } from '../../element_wrapper';
+import { AlignmentGuide } from '../../alignment_guide';
+import { HoverAnnotation } from '../../hover_annotation';
+import { TooltipAnnotation } from '../../tooltip_annotation';
+import { RotationHandle } from '../../rotation_handle';
+import { BorderConnection } from '../../border_connection';
+import { BorderResizeHandle } from '../../border_resize_handle';
+import { interactiveWorkpadPagePropTypes } from '../prop_types';
 import { WorkpadShortcuts } from './workpad_shortcuts';
-import { interactiveWorkpadPagePropTypes } from './prop_types';
 
 export class InteractiveWorkpadPage extends PureComponent {
   static propTypes = interactiveWorkpadPagePropTypes;
@@ -27,7 +27,6 @@ export class InteractiveWorkpadPage extends PureComponent {
       pageId,
       pageStyle,
       className,
-      animationStyle,
       elements,
       cursor = 'auto',
       height,
@@ -75,9 +74,9 @@ export class InteractiveWorkpadPage extends PureComponent {
           }
         }}
         data-test-subj="canvasWorkpadPage"
-        className={`canvasPage kbn-resetFocusState ${className} canvasPage--isEditable`}
+        className={`canvasPage kbn-resetFocusState canvasInteractivePage ${className}`}
         data-shared-items-container
-        style={{ ...pageStyle, ...animationStyle, height, width, cursor }}
+        style={{ ...pageStyle, height, width, cursor }}
         onKeyDown={onKeyDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}

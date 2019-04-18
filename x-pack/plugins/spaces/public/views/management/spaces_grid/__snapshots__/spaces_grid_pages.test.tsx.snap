@@ -16,7 +16,6 @@ exports[`SpacesGridPage renders as expected 1`] = `
       >
         <EuiTitle
           size="m"
-          textTransform="none"
         >
           <h1>
             <FormattedMessage
@@ -28,7 +27,6 @@ exports[`SpacesGridPage renders as expected 1`] = `
         </EuiTitle>
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
