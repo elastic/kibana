@@ -30,9 +30,9 @@ module.exports = {
     // See https://github.com/babel/proposals/issues/12 for progress
     require.resolve('@babel/plugin-proposal-class-properties'),
     [
-      require.resolve('@kbn/babel-plugin-apm-idx'),
+      require.resolve('@kbn/elastic-idx/babel'),
       {
-        importName: /\/common\/idx$/,
+        importName: '@kbn/elastic-idx',
       },
     ],
   ],
