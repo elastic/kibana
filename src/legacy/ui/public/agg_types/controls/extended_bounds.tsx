@@ -86,7 +86,15 @@ function ExtendedBoundsParamEditor({ value, setValue, setValidity }: AggParamEdi
     });
   }
 
-  useEffect(() => setValidity(!isInvalid), [value]);
+  useEffect(
+    () => {
+      setValidity(!isInvalid);
+
+      // we reset validity when the element will be hidden
+      return () => setValidity(true);
+    },
+    [value]
+  );
 
   return (
     <EuiFormRow
