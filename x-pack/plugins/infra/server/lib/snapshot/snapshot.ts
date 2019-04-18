@@ -54,7 +54,7 @@ export class InfraSnapshot {
     const groupedNodeBuckets = await groupedNodesPromise;
     const nodeMetricBuckets = await nodeMetricsPromise;
 
-    return mergeNodeMetrics(groupedNodeBuckets, nodeMetricBuckets, options);
+    return mergeNodeBuckets(groupedNodeBuckets, nodeMetricBuckets, options);
   }
 }
 
@@ -198,15 +198,15 @@ const getAllCompositeAggregationData = async <BucketType>(
   );
 };
 
-const mergeNodeMetrics = (
-  nodes: InfraSnapshotNodeGroupByBucket[],
-  metrics: InfraSnapshotNodeMetricsBucket[],
+const mergeNodeBuckets = (
+  nodeGroupByBuckets: InfraSnapshotNodeGroupByBucket[],
+  nodeMetricsBuckets: InfraSnapshotNodeMetricsBucket[],
   options: InfraSnapshotRequestOptions
 ): InfraSnapshotNode[] => {
   const result: any[] = [];
-  const nodeMetricsForLookup = getNodeMetricsForLookup(metrics);
+  const nodeMetricsForLookup = getNodeMetricsForLookup(nodeMetricsBuckets);
 
-  nodes.forEach(node => {
+  nodeGroupByBuckets.forEach(node => {
     const returnNode = {
       path: getNodePath(node, options),
       metric: getNodeMetrics(nodeMetricsForLookup[node.key.node], options),
