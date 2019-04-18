@@ -19,9 +19,6 @@
 
 import { reduce, last, head } from 'lodash';
 
-export const ERROR_DATA_MESSAGE = 'There is discrepancy between series data values';
-export const ERROR_SERIES_MESSAGE = 'At least one series should exist';
-
 /**
  * @param {Array} seriesGroup
  * [
@@ -42,10 +39,6 @@ export const ERROR_SERIES_MESSAGE = 'At least one series should exist';
  * @return {number} lastTimestamp
  */
 export function getLastSeriesTimestamp(seriesGroup = []) {
-  if (!seriesGroup.length) {
-    throw new Error(ERROR_SERIES_MESSAGE);
-  }
-
   let lastTimestamp = null;
 
   seriesGroup.forEach(series => {
@@ -54,8 +47,8 @@ export function getLastSeriesTimestamp(seriesGroup = []) {
 
       if (lastTimestamp === null) {
         lastTimestamp = dataLastTimestamp;
-      } else if (lastTimestamp !== dataLastTimestamp) {
-        throw new Error(ERROR_DATA_MESSAGE);
+      } else if (lastTimestamp < dataLastTimestamp) {
+        lastTimestamp = dataLastTimestamp;
       }
     });
   });

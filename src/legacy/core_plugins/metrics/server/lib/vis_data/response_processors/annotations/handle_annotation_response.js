@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import _ from 'lodash';
+import { get } from 'lodash';
+
 export default function handleAnnotationResponse(resp, annotation) {
-  return _.get(resp, `aggregations.${annotation.id}.buckets`, [])
+  return get(resp, `aggregations.${annotation.id}.buckets`, [])
     .filter(bucket => bucket.hits.hits.total)
     .map((bucket) => {
       return {

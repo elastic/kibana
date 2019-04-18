@@ -20,9 +20,7 @@
 import {
   getLastSeriesTimestamp,
   makeFilter,
-  annotationFilter,
-  ERROR_DATA_MESSAGE,
-  ERROR_SERIES_MESSAGE
+  annotationFilter
 } from './annotations';
 
 describe('src/legacy/core_plugins/metrics/common/annotations.test.js', () => {
@@ -96,28 +94,26 @@ describe('src/legacy/core_plugins/metrics/common/annotations.test.js', () => {
   });
 
   describe('getLastSeriesTimestamp()', () => {
-    test('should return last timestamp', () => {
+    test('should return the last timestamp', () => {
       const timestamp = getLastSeriesTimestamp(series);
 
       expect(timestamp).toBe(lastTimestamp);
     });
 
-    test('should throw Error if last timestamps are different', () => {
-      series[1][1].data = [[1, 2], [2, 3], [3, 4]];
+    test('should return the max last timestamp of series', () => {
+      const maxLastTimestamp = 20000;
 
-      try {
-        getLastSeriesTimestamp(series);
-      } catch (e) {
-        expect(e.message).toBe(ERROR_DATA_MESSAGE);
-      }
+      series[0][1].data = [[100, 5], [1000, 7], [maxLastTimestamp, 50]];
+
+      const timestamp = getLastSeriesTimestamp(series);
+
+      expect(timestamp).toBe(maxLastTimestamp);
     });
 
-    test('should throw Error if series don\'t exist', () => {
-      try {
-        getLastSeriesTimestamp([]);
-      } catch (e) {
-        expect(e.message).toBe(ERROR_SERIES_MESSAGE);
-      }
+    test('should return null if nothing is passed', () => {
+      const timestamp = getLastSeriesTimestamp();
+
+      expect(timestamp).toBe(null);
     });
   });
 
