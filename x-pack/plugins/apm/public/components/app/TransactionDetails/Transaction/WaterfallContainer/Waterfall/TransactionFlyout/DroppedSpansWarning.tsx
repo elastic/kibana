@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiCallOut, EuiHorizontalRule, EuiLink } from '@elastic/eui';
+import { EuiCallOut, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { idx } from '../../../../../../../../common/idx';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
-import { DROPPED_SPANS_DOCS } from '../../../../../../../utils/documentation/apm-get-started';
+import { ElasticDocsLink } from '../../../../../../shared/Links/ElasticDocsLink';
 
 export function DroppedSpansWarning({
   transactionDoc
@@ -32,14 +32,18 @@ export function DroppedSpansWarning({
             values: { dropped }
           }
         )}{' '}
-        <EuiLink href={DROPPED_SPANS_DOCS} target="_blank">
+        <ElasticDocsLink
+          section="/apm/get-started"
+          path="/transaction-spans.html#dropped-spans"
+          target="_blank"
+        >
           {i18n.translate(
             'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
             {
               defaultMessage: 'Learn more about dropped spans.'
             }
           )}
-        </EuiLink>
+        </ElasticDocsLink>
       </EuiCallOut>
       <EuiHorizontalRule />
     </React.Fragment>

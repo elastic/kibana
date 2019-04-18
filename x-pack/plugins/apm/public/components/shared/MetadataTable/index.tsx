@@ -8,7 +8,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiLink,
   EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
@@ -20,9 +19,9 @@ import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMError } from '../../../../typings/es_schemas/ui/APMError';
 import { StringMap } from '../../../../typings/common';
 import { DottedKeyValueTable } from '../DottedKeyValueTable';
-import { Span } from '../../../../typings/es_schemas/ui/Span';
+import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 
-type MetadataItem = Transaction | APMError | Span;
+type MetadataItem = Transaction | APMError;
 
 interface Props {
   item: MetadataItem;
@@ -36,16 +35,18 @@ export interface MetadataSection {
 }
 
 export function MetadataTable({ item, sections }: Props) {
-  const filteredSections = filterSections(item, sections);
+  const filteredSections = sections.filter(
+    ({ key, required }) => required || has(item, key)
+  );
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiLink href="/something">
+          <ElasticDocsLink section="/apm/get-started" path="/metadata.html">
             <EuiText size="s">
               <EuiIcon type="help" /> How to add labels and other data
             </EuiText>
-          </EuiLink>
+          </ElasticDocsLink>
         </EuiFlexItem>
       </EuiFlexGroup>
       {filteredSections.map(section => (
@@ -60,10 +61,6 @@ export function MetadataTable({ item, sections }: Props) {
       ))}
     </React.Fragment>
   );
-}
-
-function filterSections(item: MetadataItem, sections: MetadataSection[]) {
-  return sections.filter(({ key, required }) => required || has(item, key));
 }
 
 function Section({
