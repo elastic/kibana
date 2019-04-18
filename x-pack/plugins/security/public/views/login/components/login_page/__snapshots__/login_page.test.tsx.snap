@@ -24,7 +24,6 @@ exports[`LoginPage disabled form states renders as expected when a connection to
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -37,7 +36,6 @@ exports[`LoginPage disabled form states renders as expected when a connection to
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -106,7 +104,6 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -119,7 +116,6 @@ exports[`LoginPage disabled form states renders as expected when an unknown logi
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -188,7 +184,6 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -201,7 +196,6 @@ exports[`LoginPage disabled form states renders as expected when secure cookies 
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -270,7 +264,6 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -283,7 +276,6 @@ exports[`LoginPage disabled form states renders as expected when xpack is not av
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -352,7 +344,6 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
       <EuiTitle
         className="loginWelcome__title"
         size="l"
-        textTransform="none"
       >
         <h1>
           <FormattedMessage
@@ -365,7 +356,6 @@ exports[`LoginPage enabled form state renders as expected 1`] = `
       <EuiText
         className="loginWelcome__subtitle"
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
