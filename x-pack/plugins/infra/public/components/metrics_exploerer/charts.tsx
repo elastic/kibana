@@ -4,70 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButton,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiText,
-  EuiHorizontalRule,
-  EuiTitle,
-  EuiToolTip,
-  EuiIcon,
-} from '@elastic/eui';
-import {
-  EuiCrosshairX,
-  EuiDataPoint,
-  EuiLineSeries,
-  EuiSeriesChart,
-  EuiYAxis,
-  EuiXAxis,
-} from '@elastic/eui/lib/experimental';
+import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { first, isNumber, last } from 'lodash';
-import moment from 'moment';
-import React, { useCallback } from 'react';
-import euiStyled from '../../../../..//common/eui_styled_components';
-import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import {
-  MetricsExplorerResponse,
-  MetricsExplorerAggregation,
-  MetricsExplorerMetric,
-} from '../../../server/routes/metrics_explorer/types';
+import React from 'react';
+import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { InfraLoadingPanel } from '../loading';
-import { createMetricLabel } from './create_metric_label';
-import { createFormatter } from '../../utils/formatters';
-import { InfraFormatterType } from '../../lib/lib';
 import { NoData } from '../empty_states/no_data';
-
-const LEFT_MARGIN = 60;
-
-const titleFormatter = (dataPoints: EuiDataPoint[]) => {
-  if (dataPoints.length > 0) {
-    const [firstDataPoint] = dataPoints;
-    const { originalValues } = firstDataPoint;
-    return {
-      title: <EuiIcon type="clock" />,
-      value: moment(originalValues.x).format('MMM D, YYYY h:mm:ss A'),
-    };
-  }
-};
-
-const createFormatterForMetric = (metric?: MetricsExplorerMetric) => {
-  if (metric && metric.field) {
-    const suffix = last(metric.field.split(/\./));
-    if (suffix === 'pct') {
-      return createFormatter(InfraFormatterType.percent);
-    }
-    if (suffix === 'bytes' && metric.aggregation === MetricsExplorerAggregation.rate) {
-      return createFormatter(InfraFormatterType.bits, '{{value}}/s');
-    }
-    if (suffix === 'bytes') {
-      return createFormatter(InfraFormatterType.bytes);
-    }
-  }
-  return createFormatter(InfraFormatterType.number);
-};
+import { MetricsExplorerChart } from './chart';
 
 interface Props {
   loading: boolean;
@@ -114,100 +58,19 @@ export const MetricsExplorerCharts = injectI18n(
       );
     }
 
-    const metrics =
-      options.aggregation === MetricsExplorerAggregation.count
-        ? [{ aggregation: MetricsExplorerAggregation.count }]
-        : options.metrics;
-
-    const formatter = useCallback(createFormatterForMetric(first(metrics)), [options]);
-
-    const itemsFormatter = useCallback(
-      (dataPoints: EuiDataPoint[]) => {
-        return dataPoints.map(d => {
-          const metric = metrics[d.seriesIndex];
-          const dataFormatter = createFormatterForMetric(metric);
-          return {
-            title: (
-              <span>
-                <EuiIcon
-                  type="dot"
-                  style={{
-                    color: colorTransformer(
-                      (metric && metric.color) || MetricsExplorerColor.color0
-                    ),
-                  }}
-                />
-                {createMetricLabel(metric)}
-              </span>
-            ),
-            value: dataFormatter(d.y),
-          };
-        });
-      },
-      [options]
-    );
-
-    const seriesNames = metrics.map(createMetricLabel);
     return (
       <div>
         <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
           {data.series.map(series => (
             <EuiFlexItem key={series.id} style={{ padding: 16, minWidth: 0 }}>
-              {data.series.length > 1 ? (
-                <EuiToolTip
-                  content={intl.formatMessage(
-                    {
-                      defaultMessage: 'Filter by "{name}"',
-                      id: 'xpack.infra.metricsExplorer.titleTooltip',
-                    },
-                    { name: series.id }
-                  )}
-                >
-                  <EuiTitle size="xs">
-                    <ChartTitle onClick={() => onFilter(`${options.groupBy}: "${series.id}"`)}>
-                      {series.id}
-                    </ChartTitle>
-                  </EuiTitle>
-                </EuiToolTip>
-              ) : null}
-              <div style={{ height: data.series.length > 1 ? 200 : 400 }}>
-                <EuiSeriesChart
-                  animateData={false}
-                  xType="time"
-                  showDefaultAxis={false}
-                  showCrosshair={false}
-                  marginLeft={LEFT_MARGIN}
-                >
-                  <EuiXAxis marginLeft={LEFT_MARGIN} />
-                  <EuiYAxis tickFormat={formatter} marginLeft={LEFT_MARGIN} />
-                  <EuiCrosshairX
-                    marginLeft={LEFT_MARGIN}
-                    titleFormat={titleFormatter}
-                    itemsFormat={itemsFormatter}
-                    seriesNames={seriesNames}
-                  />
-                  {metrics.map((metric, id) => {
-                    const chartData = series.rows.map(row => ({
-                      x: row.timestamp,
-                      y: isNumber(row[`metric_${id}`]) ? (row[`metric_${id}`] as number) : 0,
-                      y0: 0,
-                    }));
-                    return (
-                      <EuiLineSeries
-                        marginLeft={LEFT_MARGIN}
-                        key={`metric_chart_${id}`}
-                        color={
-                          (metric.color && colorTransformer(metric.color)) ||
-                          colorTransformer(MetricsExplorerColor.color0)
-                        }
-                        lineSize={2}
-                        name={createMetricLabel(metric)}
-                        data={chartData}
-                      />
-                    );
-                  })}
-                </EuiSeriesChart>
-              </div>
+              <MetricsExplorerChart
+                key={`chart-${series.id}`}
+                onFilter={onFilter}
+                options={options}
+                title={options.groupBy ? series.id : null}
+                height={data.series.length > 1 ? 200 : 400}
+                series={series}
+              />
             </EuiFlexItem>
           ))}
         </EuiFlexGrid>
@@ -247,11 +110,3 @@ export const MetricsExplorerCharts = injectI18n(
     );
   }
 );
-
-const ChartTitle = euiStyled.button`
-  width: 100%
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
-`;
