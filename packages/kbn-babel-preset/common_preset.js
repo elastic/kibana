@@ -44,7 +44,11 @@ module.exports = {
         /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
         /x-pack[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
       ],
-      plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
-    },
-  ],
+      plugins: [
+        [
+          require.resolve('babel-plugin-typescript-strip-namespaces'),
+        ],
+      ]
+    }
+  ]
 };
