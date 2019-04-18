@@ -304,6 +304,17 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     }
 
     /**
+     * check that table visualization is visible and ready for interact
+     *
+     * @returns {Promise<void>}
+     * @memberof VisualBuilderPage
+     */
+    public async checkTableExisting(): Promise<void> {
+      await testSubjects.existOrFail('visualizationLoader');
+      await testSubjects.existOrFail('noTSVBDataMessage');
+    }
+
+    /**
      * set label name for aggregation
      *
      * @param {string} labelName
