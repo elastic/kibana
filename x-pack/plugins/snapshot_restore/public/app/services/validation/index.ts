@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { breadcrumbService } from './breadcrumb';
-export { linkToRepository, linkToRepositories, linkToSnapshots } from './links';
+export {
+  RepositoryValidation,
+  RepositorySettingsValidation,
+  validateRepository,
+} from './validate_repository';

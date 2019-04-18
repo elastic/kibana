@@ -8,6 +8,7 @@ import React, { Fragment } from 'react';
 import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } from '@elastic/eui';
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: GCSRepository;
@@ -15,11 +16,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const GCSSettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -29,6 +32,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
   const {
     settings: { bucket, client, basePath, compress, chunkSize },
   } = repository;
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   return (
     <Fragment>
@@ -62,6 +66,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['gcsRepositoryBucketDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.bucket)}
+          error={settingErrors.bucket}
         >
           <EuiFieldText
             defaultValue={bucket || ''}
@@ -105,6 +111,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['gcsRepositoryClientDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.client)}
+          error={settingErrors.client}
         >
           <EuiFieldText
             defaultValue={client || ''}
@@ -148,6 +156,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['gcsRepositoryBasePathDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.basePath)}
+          error={settingErrors.basePath}
         >
           <EuiFieldText
             defaultValue={basePath || ''}
@@ -188,6 +198,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['gcsRepositoryCompressDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.compress)}
+          error={settingErrors.compress}
         >
           <EuiSwitch
             label={
@@ -237,6 +249,8 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['gcsRepositoryChunkSizeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+          error={settingErrors.chunkSize}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}

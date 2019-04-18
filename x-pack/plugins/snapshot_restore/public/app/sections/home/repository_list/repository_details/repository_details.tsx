@@ -17,6 +17,7 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiHorizontalRule,
+  EuiLink,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -27,6 +28,7 @@ import { useAppDependencies } from '../../../../index';
 import { documentationLinksService } from '../../../../services/documentation';
 import { loadRepository } from '../../../../services/http';
 import { textService } from '../../../../services/text';
+import { linkToSnapshots } from '../../../../services/navigation';
 
 import { REPOSITORY_TYPES } from '../../../../../../common/constants';
 import { Repository } from '../../../../../../common/types';
@@ -109,6 +111,35 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     );
   };
 
+  const renderSnapshotCount = () => {
+    const { snapshots } = repositoryDetails;
+    if (!Number.isInteger(snapshots.count)) {
+      return (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.noSnapshotInformationDescription"
+          defaultMessage="No snapshot information"
+        />
+      );
+    }
+    if (snapshots.count === 0) {
+      return (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.zeroSnapshotsDescription"
+          defaultMessage="Repository has no snapshots"
+        />
+      );
+    }
+    return (
+      <EuiLink href={linkToSnapshots(repositoryName)}>
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.snapshotsDescription"
+          defaultMessage="{count} {count, plural, one {snapshot} other {snapshots}} found"
+          values={{ count: snapshots.count }}
+        />
+      </EuiLink>
+    );
+  };
+
   const renderRepository = () => {
     const { repository, verification } = repositoryDetails;
 
@@ -146,6 +177,17 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <EuiSpacer size="l" />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryDetails.snapshotsTitle"
+              defaultMessage="Snapshots"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        {renderSnapshotCount()}
         <EuiSpacer size="l" />
         <TypeDetails repository={repository} />
         <EuiHorizontalRule />

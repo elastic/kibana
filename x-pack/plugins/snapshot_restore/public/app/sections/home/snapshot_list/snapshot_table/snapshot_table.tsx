@@ -5,9 +5,7 @@
  */
 
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-
-import { EuiButton, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiLink, Query } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
 import { useAppDependencies } from '../../../../index';
@@ -15,19 +13,20 @@ import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
 import { DataPlaceholder } from '../../../../components';
 
-interface Props extends RouteComponentProps {
+interface Props {
   snapshots: SnapshotDetails[];
   repositories: string[];
   reload: () => Promise<void>;
   openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
+  repositoryFilter?: string;
 }
 
-const SnapshotTableUi: React.FunctionComponent<Props> = ({
+export const SnapshotTable: React.FunctionComponent<Props> = ({
   snapshots,
   repositories,
   reload,
   openSnapshotDetails,
-  history,
+  repositoryFilter,
 }) => {
   const {
     core: {
@@ -134,6 +133,14 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
     pageSizeOptions: [10, 20, 50],
   };
 
+  const searchSchema = {
+    fields: {
+      repository: {
+        type: 'string',
+      },
+    },
+  };
+
   const search = {
     toolsRight: (
       <EuiButton color="secondary" iconType="refresh" onClick={reload}>
@@ -145,7 +152,7 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
     ),
     box: {
       incremental: true,
-      schema: true,
+      schema: searchSchema,
     },
     filters: [
       {
@@ -159,6 +166,14 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
         })),
       },
     ],
+    defaultQuery: repositoryFilter
+      ? Query.parse(`repository:'${repositoryFilter}'`, {
+          schema: {
+            ...searchSchema,
+            strict: true,
+          },
+        })
+      : '',
   };
 
   return (
@@ -178,5 +193,3 @@ const SnapshotTableUi: React.FunctionComponent<Props> = ({
     />
   );
 };
-
-export const SnapshotTable = withRouter(SnapshotTableUi);

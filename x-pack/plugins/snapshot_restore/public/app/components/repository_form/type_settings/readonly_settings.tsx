@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { ReadonlyRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: ReadonlyRepository;
@@ -25,11 +26,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const ReadonlySettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -39,6 +42,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
   const {
     settings: { url },
   } = repository;
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   function getSchemeHelpText(scheme: string): React.ReactNode {
     switch (scheme) {
@@ -148,6 +152,8 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                 }
                 fullWidth
                 describedByIds={['readonlyRepositoryUrlDescription']}
+                isInvalid={Boolean(hasErrors && settingErrors.url)}
+                error={settingErrors.url}
               >
                 <EuiFieldText
                   defaultValue={url ? url.split('://')[1] : ''}

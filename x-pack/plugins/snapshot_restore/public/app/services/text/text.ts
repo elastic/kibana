@@ -8,7 +8,7 @@ import { RepositoryType } from '../../../../common/types';
 
 class TextService {
   public breadcrumbs: { [key: string]: string } = {};
-  private i18n: any;
+  public i18n: any;
   private repositoryTypeNames: { [key in RepositoryType]: string } = {};
 
   public init(i18n: any): void {

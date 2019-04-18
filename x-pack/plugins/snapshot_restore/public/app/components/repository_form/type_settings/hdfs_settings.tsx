@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
+import { RepositorySettingsValidation } from '../../../services/validation';
 
 interface Props {
   repository: HDFSRepository | SourceRepository<HDFSRepository>;
@@ -27,11 +28,13 @@ interface Props {
     updatedSettings: Partial<Repository['settings']>,
     replaceSettings?: boolean
   ) => void;
+  settingErrors: RepositorySettingsValidation;
 }
 
 export const HDFSSettings: React.FunctionComponent<Props> = ({
   repository,
   updateRepositorySettings,
+  settingErrors,
 }) => {
   const {
     core: {
@@ -50,6 +53,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
       ...rest // For conf.* settings
     },
   } = repository;
+  const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   const [additionalConf, setAdditionalConf] = useState<string>(JSON.stringify(rest, null, 2));
   const [isConfInvalid, setIsConfInvalid] = useState<boolean>(false);
@@ -85,6 +89,9 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             />
           }
           fullWidth
+          describedByIds={['hdfsRepositoryUriDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.uri)}
+          error={settingErrors.uri}
         >
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
@@ -139,6 +146,8 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['hdfsRepositoryPathDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.path)}
+          error={settingErrors.path}
         >
           <EuiFieldText
             defaultValue={path || ''}
@@ -177,6 +186,8 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['hdfsRepositoryLoadDefaultsDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.loadDefaults)}
+          error={settingErrors.loadDefaults}
         >
           <EuiSwitch
             label={
@@ -222,6 +233,8 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           hasEmptyLabelSpace={true}
           fullWidth
           describedByIds={['hdfsRepositoryCompressDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.compress)}
+          error={settingErrors.compress}
         >
           <EuiSwitch
             label={
@@ -271,6 +284,8 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['hdfsRepositoryChunkSizeDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
+          error={settingErrors.chunkSize}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -314,6 +329,8 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           }
           fullWidth
           describedByIds={['hdfsRepositorySecurityPrincipalDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.securityPrincipal)}
+          error={settingErrors.securityPrincipal}
         >
           <EuiFieldText
             defaultValue={securityPrincipal || ''}

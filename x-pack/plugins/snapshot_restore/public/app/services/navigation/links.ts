@@ -11,5 +11,12 @@ export function linkToRepositories() {
 }
 
 export function linkToRepository(repositoryName: string) {
-  return `#${BASE_PATH}/repositories/${repositoryName}`;
+  return `#${BASE_PATH}/repositories/${encodeURIComponent(repositoryName)}`;
+}
+
+export function linkToSnapshots(repositoryName?: string) {
+  if (repositoryName) {
+    return `#${BASE_PATH}/snapshots?repository=${repositoryName}`;
+  }
+  return `#${BASE_PATH}/snapshots`;
 }

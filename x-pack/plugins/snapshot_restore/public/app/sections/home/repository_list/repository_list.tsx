@@ -36,7 +36,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
   const {
     error,
     loading,
-    data: { repositories, verification },
+    data: { repositories, verification } = { repositories: undefined, verification: undefined },
     request: reload,
   } = loadRepositories();
 
