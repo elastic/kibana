@@ -9,7 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import { HostsSortField } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
-import { HostsType } from './model';
+import { HostsType, OverviewStatHostModel } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/siem/local/hosts');
 
@@ -43,3 +43,7 @@ export const applyHostsFilterQuery = actionCreator<{
   filterQuery: SerializedFilterQuery;
   hostsType: HostsType;
 }>('APPLY_HOSTS_FILTER_QUERY');
+
+export const updateOverviewStatHost = actionCreator<OverviewStatHostModel>(
+  'UPDATE_OVERVIEW_STAT_HOST'
+);

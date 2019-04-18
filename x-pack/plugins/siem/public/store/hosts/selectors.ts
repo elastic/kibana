@@ -10,7 +10,7 @@ import { createSelector } from 'reselect';
 import { isFromKueryExpressionValid } from '../../lib/keury';
 import { State } from '../reducer';
 
-import { GenericHostsModel, HostsType } from './model';
+import { DetailsHostsModel, GenericHostsModel, HostsType } from './model';
 
 const selectHosts = (state: State, hostsType: HostsType): GenericHostsModel =>
   get(hostsType, state.hosts);
@@ -61,4 +61,12 @@ export const isHostFilterQueryDraftValid = () =>
   createSelector(
     selectHosts,
     hosts => isFromKueryExpressionValid(hosts.filterQueryDraft)
+  );
+
+const selectHostsDetails = (state: State): DetailsHostsModel => get('details', state.hosts);
+
+export const overviewStatHost = () =>
+  createSelector(
+    selectHostsDetails,
+    hosts => hosts.overviewStatHost
   );

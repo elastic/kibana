@@ -16,6 +16,7 @@ import {
   updateEventsLimit,
   updateHostsLimit,
   updateHostsSort,
+  updateOverviewStatHost,
   updateUncommonProcessesLimit,
 } from './actions';
 import { HostsModel } from './model';
@@ -50,6 +51,10 @@ export const initialHostsState: HostsState = {
     },
     filterQuery: null,
     filterQueryDraft: null,
+    overviewStatHost: {
+      hostName: null,
+      lastSeen: null,
+    },
   },
 };
 
@@ -130,6 +135,17 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       ...state[hostsType],
       filterQueryDraft: filterQuery.query,
       filterQuery,
+    },
+  }))
+  .case(updateOverviewStatHost, (state, { hostName, lastSeen }) => ({
+    ...state,
+    details: {
+      ...state.details,
+      overviewStatHost: {
+        ...state.details.overviewStatHost,
+        hostName,
+        lastSeen,
+      },
     },
   }))
   .build();
