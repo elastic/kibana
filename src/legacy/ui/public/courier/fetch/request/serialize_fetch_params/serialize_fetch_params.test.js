@@ -26,7 +26,6 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
   const paramDefaults = {
     requestFetchParams: [],
     Promise,
-    kbnIndex: '.kibana',
     sessionId: DEFAULT_SESSION_ID,
     config: {
       get: () => {
@@ -40,7 +39,6 @@ function serializeFetchParamsWithDefaults(paramOverrides) {
   return serializeFetchParams(
     params.requestFetchParams,
     Promise,
-    params.kbnIndex,
     params.sessionId,
     params.config,
     params.timeout,

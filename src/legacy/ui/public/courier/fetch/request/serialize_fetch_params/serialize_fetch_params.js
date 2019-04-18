@@ -21,14 +21,12 @@
  *
  * @param requestsFetchParams {Array.<Object>}
  * @param Promise
- * @param kbnIndex
  * @param sessionId
  * @return {Promise.<string>}
  */
 export function serializeFetchParams(
   requestsFetchParams,
   Promise,
-  kbnIndex,
   sessionId,
   config,
   esShardTimeout) {
@@ -42,7 +40,7 @@ export function serializeFetchParams(
           body.timeout = `${esShardTimeout}ms`;
         }
 
-        const index = indexPattern.title ? indexPattern.title : indexPattern;
+        const index = (indexPattern && indexPattern.title) ? indexPattern.title : indexPattern;
 
         const header = {
           index,
