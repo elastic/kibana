@@ -29,4 +29,9 @@ describe('Query decorator', function () {
     const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true });
     expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true } });
   });
+
+  it('should add a default of a time_zone parameter if one is provided', function () {
+    const decoratedQuery = decorateQuery({ query_string: { query: '*' } }, { analyze_wildcard: true }, 'America/Phoenix');
+    expect(decoratedQuery).to.eql({ query_string: { query: '*', analyze_wildcard: true, time_zone: 'America/Phoenix' } });
+  });
 });

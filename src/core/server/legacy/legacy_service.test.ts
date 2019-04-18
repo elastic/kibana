@@ -162,6 +162,7 @@ describe('once LegacyService is set up with connection info', () => {
       { server: { autoListen: true } },
       {
         elasticsearch: setupDeps.elasticsearch,
+        http: setupDeps.http,
         serverOptions: {
           listener: expect.any(LegacyPlatformProxy),
           someAnotherOption: 'bar',
@@ -187,6 +188,7 @@ describe('once LegacyService is set up with connection info', () => {
       { server: { autoListen: true } },
       {
         elasticsearch: setupDeps.elasticsearch,
+        http: setupDeps.http,
         serverOptions: {
           listener: expect.any(LegacyPlatformProxy),
           someAnotherOption: 'bar',

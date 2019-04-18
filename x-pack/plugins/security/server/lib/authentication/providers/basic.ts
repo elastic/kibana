@@ -130,7 +130,7 @@ export class BasicAuthenticationProvider {
   /**
    * Validates whether request contains a login payload and authenticates the
    * user if necessary.
-   * @param HapiJS request instance.
+   * @param request HapiJS request instance.
    */
   private async authenticateViaLoginAttempt(request: RequestWithLoginAttempt) {
     this.debug('Trying to authenticate via login attempt.');

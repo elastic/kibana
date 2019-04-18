@@ -23,31 +23,43 @@ import {
   EuiComboBox,
 } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+import { isGroupByFieldsEnabled } from '../../lib/check_ui_restrictions';
 
 function GroupBySelectUi(props) {
-  const { intl } = props;
-  const modeOptions = [
+  const { intl, uiRestrictions } = props;
+  const modeOptions = ([
     {
-      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.everythingLabel', defaultMessage: 'Everything' }),
-      value: 'everything'
+      label: intl.formatMessage({
+        id: 'tsvb.splits.groupBySelect.modeOptions.everythingLabel',
+        defaultMessage: 'Everything',
+      }),
+      value: 'everything',
     },
     {
       label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filterLabel', defaultMessage: 'Filter' }),
-      value: 'filter'
+      value: 'filter',
     },
     {
-      label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.filtersLabel', defaultMessage: 'Filters' }),
-      value: 'filters'
+      label: intl.formatMessage({
+        id: 'tsvb.splits.groupBySelect.modeOptions.filtersLabel',
+        defaultMessage: 'Filters',
+      }),
+      value: 'filters',
     },
     {
       label: intl.formatMessage({ id: 'tsvb.splits.groupBySelect.modeOptions.termsLabel', defaultMessage: 'Terms' }),
-      value: 'terms'
-    }
-  ];
+      value: 'terms',
+    },
+  ]).map(field => ({
+    ...field,
+    disabled: !isGroupByFieldsEnabled(field.value, uiRestrictions),
+  }));
+
   const selectedValue = props.value || 'everything';
   const selectedOption = modeOptions.find(option => {
     return selectedValue === option.value;
   });
+
   return (
     <EuiComboBox
       id={props.id}
@@ -58,13 +70,12 @@ function GroupBySelectUi(props) {
       singleSelection={{ asPlainText: true }}
     />
   );
-
 }
 
 GroupBySelectUi.propTypes = {
   onChange: PropTypes.func,
-  value: PropTypes.string
+  value: PropTypes.string,
+  uiRestrictions: PropTypes.object,
 };
 
-const GroupBySelect = injectI18n(GroupBySelectUi);
-export default GroupBySelect;
+export const GroupBySelect = injectI18n(GroupBySelectUi);

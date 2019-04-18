@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Location } from 'history';
 import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
@@ -35,7 +34,7 @@ import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
 import { IUrlParams } from '../../../../store/urlParams';
 import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
-import { UnconnectedKibanaLink } from '../../../shared/Links/KibanaLink';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
 
 type ScheduleKey = keyof Schedule;
@@ -59,7 +58,6 @@ const SmallInput = styled.div`
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
   onClose: () => void;
-  location: Location;
   isOpen: boolean;
 }
 
@@ -253,10 +251,8 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <UnconnectedKibanaLink
-            location={this.props.location}
-            pathname={'/app/kibana'}
-            hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
+          <KibanaLink
+            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
@@ -264,7 +260,7 @@ export class WatcherFlyout extends Component<
                 defaultMessage: 'View watch'
               }
             )}
-          </UnconnectedKibanaLink>
+          </KibanaLink>
         </p>
       )
     });

@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
+import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common/is_reserved_space';
 import { Space } from '../../../../common/model/space';
 import { isValidSpaceIdentifier } from './space_identifier_utils';
 
 interface SpaceValidatorOptions {
+  features: Feature[];
   shouldValidate?: boolean;
 }
 
 export class SpaceValidator {
   private shouldValidate: boolean;
 
-  constructor(options: SpaceValidatorOptions = {}) {
+  constructor(options: SpaceValidatorOptions) {
     this.shouldValidate = options.shouldValidate || false;
   }
 
@@ -99,12 +101,17 @@ export class SpaceValidator {
     return valid();
   }
 
+  public validateEnabledFeatures(space: Partial<Space>) {
+    return valid();
+  }
+
   public validateForSave(space: Space) {
     const { isInvalid: isNameInvalid } = this.validateSpaceName(space);
     const { isInvalid: isDescriptionInvalid } = this.validateSpaceDescription(space);
     const { isInvalid: isIdentifierInvalid } = this.validateURLIdentifier(space);
+    const { isInvalid: areFeaturesInvalid } = this.validateEnabledFeatures(space);
 
-    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid) {
+    if (isNameInvalid || isDescriptionInvalid || isIdentifierInvalid || areFeaturesInvalid) {
       return invalid();
     }
 

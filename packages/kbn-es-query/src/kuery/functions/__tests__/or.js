@@ -23,7 +23,6 @@ import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
-
 let indexPattern;
 
 const childNode1 = nodeTypes.function.buildNode('is', 'machine.os', 'osx');
@@ -33,10 +32,10 @@ describe('kuery functions', function () {
 
   describe('or', function () {
 
-
     beforeEach(() => {
       indexPattern = indexPatternResponse;
     });
+
 
     describe('buildNodeParams', function () {
 
