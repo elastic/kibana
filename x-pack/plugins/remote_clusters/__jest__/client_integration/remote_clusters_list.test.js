@@ -26,6 +26,10 @@ jest.mock('ui/chrome', () => ({
   }
 }));
 
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  track: jest.fn(),
+}));
+
 const testBedOptions = {
   memoryRouter: {
     onRouter: (router) => registerRouter(router)
@@ -47,8 +51,7 @@ describe('<RemoteClusterList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
-    // and we can mock them all with a 200 instead of mocking each one individually.
+    // Mock all HTTP Requests that have not been handled previously
     server.respondWith([200, {}, '']);
 
     // Register helpers to mock Http Requests

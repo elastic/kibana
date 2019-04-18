@@ -21,6 +21,10 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  track: jest.fn(),
+}));
+
 describe('<AutoFollowPatternList />', () => {
   let server;
   let find;
@@ -37,8 +41,7 @@ describe('<AutoFollowPatternList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
-    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
-    // and we can mock them all with a 200 instead of mocking each one individually.
+    // Mock all HTTP Requests that have not been handled previously
     server.respondWith([200, {}, '']);
 
     // Register helpers to mock Http Requests

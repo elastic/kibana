@@ -30,8 +30,8 @@ module.run($http => {
   _http = $http;
 });
 
-module.config(($httpProvider) => {
-  $httpProvider.interceptors.push(($q) => {
+module.config($httpProvider => {
+  $httpProvider.interceptors.push($q => {
     return {
       request: config => {
         const { url } = config;

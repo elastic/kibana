@@ -21,7 +21,8 @@ import { resolve } from 'path';
 import { registerUserActionRoute } from './server/routes/api/ui_metric';
 import { registerUiMetricUsageCollector } from './server/usage/index';
 
-export default function (kibana) {
+// eslint-disable-next-line import/no-default-export
+export default function(kibana) {
   return new kibana.Plugin({
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
@@ -29,12 +30,12 @@ export default function (kibana) {
 
     uiExports: {
       mappings: require('./mappings.json'),
-      hacks: [ 'plugins/ui_metric' ]
+      hacks: ['plugins/ui_metric'],
     },
 
-    init: function (server) {
+    init(server) {
       registerUserActionRoute(server);
       registerUiMetricUsageCollector(server);
-    }
+    },
   });
 }
