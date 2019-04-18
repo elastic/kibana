@@ -29,7 +29,6 @@ describe('FeatureRegistry', () => {
     const feature: Feature = {
       id: 'test-feature',
       name: 'Test Feature',
-      description: 'this is a rather boring feature description !@#$%^&*()_+-=\\[]{}|;\':"/.,<>?',
       icon: 'addDataApp',
       navLinkId: 'someNavLink',
       app: ['app1', 'app2'],
