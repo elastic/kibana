@@ -37,13 +37,10 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   // const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
 
   const [currentParams, updateUrl] = useUrlParams(history, location);
+  console.log(currentParams);
   const currentFilterQuery = currentParams.search;
-  console.log(currentFilterQuery);
-  console.log(location);
-  const { search } = location;
-  const res = qs.parse(search);
-  console.log(res);
-  console.log(qs.stringify(res));
+  // console.log(currentFilterQuery);
+  // console.log(location);
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -67,13 +64,13 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
         esQuery = EuiSearchBar.Query.toESQuery(query);
       }
       setFilterQueryObj(query);
-      setCurrentFilterQuery(esQuery ? JSON.stringify(esQuery) : esQuery);
+      // setCurrentFilterQuery(esQuery ? JSON.stringify(esQuery) : esQuery);
       if (refreshApp) {
         refreshApp();
       }
     } catch (e) {
       setFilterQueryObj(undefined);
-      setCurrentFilterQuery(undefined);
+      // setCurrentFilterQuery(undefined);
     }
   };
 
@@ -81,7 +78,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
-          currentQuery={currentFilterQueryObj}
+          currentQuery={''}
           updateQuery={updateQuery}
           variables={sharedProps}
         />
