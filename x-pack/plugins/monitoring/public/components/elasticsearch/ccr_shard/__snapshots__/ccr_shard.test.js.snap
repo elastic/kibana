@@ -9,12 +9,10 @@ exports[`CcrShard that is renders an exception properly 1`] = `
   <EuiTitle
     color="danger"
     size="s"
-    textTransform="none"
   >
     <h3>
       <EuiTextColor
         color="danger"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Errors"
@@ -145,10 +143,7 @@ exports[`CcrShard that it renders normally 1`] = `
     <EuiHorizontalRule />
     <EuiAccordion
       buttonContent={
-        <EuiTitle
-          size="m"
-          textTransform="none"
-        >
+        <EuiTitle>
           <h2>
             <FormattedMessage
               defaultMessage="Advanced"
@@ -164,7 +159,6 @@ exports[`CcrShard that it renders normally 1`] = `
     >
       <EuiTitle
         size="s"
-        textTransform="none"
       >
         <h4>
           September 27, 2018 9:32:09 AM
