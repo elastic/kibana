@@ -572,7 +572,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
       if ($scope.urlTemplates.indexOf($scope.newUrlTemplate.templateBeingEdited) >= 0) {
         //patch any existing object
-        Object.assign($scope.newUrlTemplate.templateBeingEdited, $scope.newUrlTemplate);
+        Object.assign($scope.newUrlTemplate.templateBeingEdited, $scope.newUrlTemplate, { isDefault: false });
         return;
       }
     }
@@ -660,6 +660,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
     $scope.workspace = gws.createWorkspace(options);
     $scope.detail = null;
 
+    // filter out default url templates because they will get re-added
+    $scope.urlTemplates = $scope.urlTemplates.filter(template => !template.isDefault);
+
     if ($scope.urlTemplates.length === 0) {
       // url templates specified by users can include the `{{gquery}}` tag and
       // will have the elasticsearch query for the graph nodes injected there
@@ -689,7 +692,8 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
         description: i18n('xpack.graph.settings.drillDowns.defaultUrlTemplateTitle', {
           defaultMessage: 'Raw documents',
         }),
-        encoder: $scope.outlinkEncoders[0]
+        encoder: $scope.outlinkEncoders[0],
+        isDefault: true
       });
     }
   }

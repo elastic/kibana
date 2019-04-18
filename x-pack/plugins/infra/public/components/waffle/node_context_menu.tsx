@@ -65,19 +65,22 @@ export const NodeContextMenu = injectUICapabilities(
           })
         : undefined;
 
-      const apmTracesUrl = uiCapabilities.apm.show
-        ? {
-            name: intl.formatMessage(
-              {
-                id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
-                defaultMessage: 'View {nodeType} APM traces',
-              },
-              { nodeType }
-            ),
-            href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${node.id}~22`,
-            'data-test-subj': 'viewApmTracesContextMenuItem',
-          }
-        : undefined;
+      const apmTracesUrl =
+        uiCapabilities.apm && uiCapabilities.apm.show
+          ? {
+              name: intl.formatMessage(
+                {
+                  id: 'xpack.infra.nodeContextMenu.viewAPMTraces',
+                  defaultMessage: 'View {nodeType} APM traces',
+                },
+                { nodeType }
+              ),
+              href: `../app/apm#/traces?_g=()&kuery=${APM_FIELDS[nodeType]}~20~3A~20~22${
+                node.id
+              }~22`,
+              'data-test-subj': 'viewApmTracesContextMenuItem',
+            }
+          : undefined;
 
       const panels: EuiContextMenuPanelDescriptor[] = [
         {

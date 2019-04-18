@@ -23,7 +23,6 @@ import { FieldParamEditor } from '../controls/field';
 import '../directives/scroll_bottom';
 import { BaseParamType } from './base';
 import '../filters/sort_prefix_first';
-import '../../filters/field_type';
 import { IndexedArray } from '../../indexed_array';
 import { toastNotifications } from '../../notify';
 import { createLegacyClass } from '../../utils/legacy_class';
