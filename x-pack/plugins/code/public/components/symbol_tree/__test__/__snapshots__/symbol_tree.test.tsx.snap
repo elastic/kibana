@@ -55,7 +55,7 @@ exports[`render symbol tree correctly 1`] = `
               <span
                 className="euiSideNavItemButton__label"
               >
-
+                
               </span>
             </span>
           }
@@ -67,7 +67,7 @@ exports[`render symbol tree correctly 1`] = `
             <span
               className="euiSideNavItemButton__label"
             >
-
+              
             </span>
           </span>
         </div>
