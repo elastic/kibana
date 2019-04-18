@@ -526,6 +526,90 @@ describe('PUT role', () => {
       },
     });
 
+    putRoleTest(`allows base with empty array and feature in the same entry`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            base: [],
+            feature: {
+              foo: ['foo']
+            }
+          }
+        ]
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => { }],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'feature_foo.foo',
+                    ],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                ],
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: null,
+      },
+    });
+
+    putRoleTest(`allows base and feature with empty object in the same entry`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            base: ['all'],
+            feature: {}
+          }
+        ]
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => { }],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'all',
+                    ],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                ],
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: null,
+      },
+    });
+
     putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {

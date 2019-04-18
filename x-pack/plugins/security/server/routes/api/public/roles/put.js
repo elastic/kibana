@@ -86,10 +86,12 @@ export function initPutRolesApi(
       Joi.object({
         base: Joi.alternatives().when('spaces', {
           is: allSpacesSchema,
-          then: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))),
-          otherwise: Joi.array().items(Joi.string().valid(Object.keys(privileges.space))),
+          then: Joi.array().items(Joi.string().valid(Object.keys(privileges.global))).empty(Joi.array().length(0)),
+          otherwise: Joi.array().items(Joi.string().valid(Object.keys(privileges.space))).empty(Joi.array().length(0)),
         }),
-        feature: Joi.object().pattern(/^[a-zA-Z0-9_-]+$/, Joi.array().items(Joi.string().regex(/^[a-zA-Z0-9_-]+$/))),
+        feature: Joi.object()
+          .pattern(/^[a-zA-Z0-9_-]+$/, Joi.array().items(Joi.string().regex(/^[a-zA-Z0-9_-]+$/)))
+          .empty(Joi.object().length(0)),
         spaces: Joi.alternatives(
           allSpacesSchema,
           Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),
