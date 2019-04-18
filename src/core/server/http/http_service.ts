@@ -27,7 +27,7 @@ import { HttpServer, HttpServerInfo } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
-/** @internal */
+/** @public */
 export type HttpServiceSetup = HttpServerInfo;
 
 /** @internal */
