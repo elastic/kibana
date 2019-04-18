@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 
 import { getRequestInspectorStats, getResponseInspectorStats } from '../../courier/utils/courier_inspector_utils';
 import { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } from './_terms_other_bucket_helper';
-import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 const aggFilter = [
   '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -295,7 +295,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.buckets.terms.excludeLabel', { defaultMessage: 'Exclude' }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
+      shouldShow: isStringType,
       ...migrateIncludeExcludeFormat
     },
     {
@@ -303,7 +303,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.buckets.terms.includeLabel', { defaultMessage: 'Include' }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
+      shouldShow: isStringType,
       ...migrateIncludeExcludeFormat
     },
   ]

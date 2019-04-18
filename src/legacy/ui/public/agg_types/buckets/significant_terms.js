@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { SizeParamEditor } from '../controls/size';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterTerms } from './create_filter/terms';
-import { isNotType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
+import { isStringType, migrateIncludeExcludeFormat } from './migrate_include_exclude_format';
 
 export const significantTermsBucketAgg = new BucketAggType({
   name: 'significant_terms',
@@ -57,7 +57,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
+      shouldShow: isStringType,
       ...migrateIncludeExcludeFormat
     },
     {
@@ -67,7 +67,7 @@ export const significantTermsBucketAgg = new BucketAggType({
       }),
       type: 'string',
       advanced: true,
-      disabled: isNotType('string'),
+      shouldShow: isStringType,
       ...migrateIncludeExcludeFormat
     }
   ]

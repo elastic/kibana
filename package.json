@@ -69,7 +69,8 @@
     "kbn:watch": "node scripts/kibana --dev --logging.json=false",
     "build:types": "tsc --p tsconfig.types.json",
     "core:acceptApiChanges": "node scripts/check_core_api_changes.js --accept",
-    "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook"
+    "kbn:bootstrap": "yarn build:types && node scripts/register_git_hook",
+    "spec_to_console": "node scripts/spec_to_console"
   },
   "repository": {
     "type": "git",
@@ -101,7 +102,7 @@
     "@babel/polyfill": "^7.2.5",
     "@babel/register": "^7.0.0",
     "@elastic/datemath": "5.0.2",
-    "@elastic/eui": "9.9.0",
+    "@elastic/eui": "10.0.1",
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
@@ -317,6 +318,7 @@
     "@types/redux-actions": "^2.2.1",
     "@types/request": "^2.48.1",
     "@types/rimraf": "^2.0.2",
+    "@types/selenium-webdriver": "^3.0.15",
     "@types/semver": "^5.5.0",
     "@types/sinon": "^5.0.1",
     "@types/strip-ansi": "^3.0.0",
