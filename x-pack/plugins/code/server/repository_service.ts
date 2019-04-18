@@ -106,6 +106,10 @@ export class RepositoryService {
         callbacks: {
           credentials: this.credentialFunc(key),
         },
+        certificateCheck: () => {
+          // Ignore cert check failures.
+          return 1;
+        },
       });
       // TODO(mengwei): deal with the case when the default branch has changed.
       const currentBranch = await repo.getCurrentBranch();
