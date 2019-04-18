@@ -187,4 +187,4 @@ fi
 export CHECKS_REPORTER_ACTIVE=true
 
 script_dir="$(dirname "$0")"
-source "$script_dir/functions.sh"
+source "functions.sh"
