@@ -7889,8 +7889,6 @@
     "xpack.watcher.models.watchHistoryItem.watchIdPropertyMissingBadRequestMessage": "json 参数必须包含 {watchId} 属性",
     "xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage": "json 参数必须包含 {id} 属性",
     "xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage": "json 参数必须包含 {watchStatusJson} 属性",
-    "xpack.watcher.sections.watchEdit.actionsExecuteSummary.actionColumnLabel": "操作",
-    "xpack.watcher.sections.watchEdit.detail.invalidJSONErrorMessage": "JSON 无效",
     "xpack.watcher.sections.watchEdit.json.editTabLabel": "编辑",
     "xpack.watcher.sections.watchEdit.threshold.saveButtonLabel": "保存",
     "xpack.watcher.sections.watchEdit.threshold.enterOneOrMoreIndicesValidationMessage": "输入一个或多个索引",
@@ -7925,9 +7923,6 @@
     "xpack.watcher.timeUnits.minuteSingularLabel": "分钟",
     "xpack.watcher.timeUnits.secondPluralLabel": "秒",
     "xpack.watcher.timeUnits.secondSingularLabel": "秒",
-    "xpack.watcher.watchActions.email.bodyIsRequiredValidationMessage": "“正文”必填。",
-    "xpack.watcher.watchActions.errorInActionValidationMessage": "此操作中有错误，在可以保存之前，需要解决这些错误。",
-    "xpack.watcher.watchActionsTitle": "满足后将执行 {watchActionsCount, plural, one{# 个操作} other {# 个操作}}",
     "xpack.watcher.watcherDescription": "通过创建、管理和监测警报来检测数据中的更改。"
   }
 }
