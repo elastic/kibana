@@ -279,7 +279,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForOtherBucketLabel', {
         defaultMessage: 'Label for other bucket',
       }),
-      disabled: agg => !agg.params.otherBucket,
+      shouldShow: agg => agg.params.otherBucket,
       write: _.noop,
     },
     {
@@ -299,7 +299,7 @@ export const termsBucketAgg = new BucketAggType({
       displayName: i18n.translate('common.ui.aggTypes.otherBucket.labelForMissingValuesLabel', {
         defaultMessage: 'Label for missing values',
       }),
-      disabled: agg => !agg.params.missingBucket,
+      shouldShow: agg => agg.params.missingBucket,
       write: _.noop,
     },
     {

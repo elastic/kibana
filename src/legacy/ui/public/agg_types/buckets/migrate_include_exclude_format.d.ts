@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export function isNotType(type: string): any;
+import { AggConfig } from 'ui/vis/agg_config';
+
+export function isStringType(type: AggConfig): boolean;

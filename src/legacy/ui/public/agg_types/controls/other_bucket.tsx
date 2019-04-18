@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { SwitchParamEditor } from './switch';
 
-const OtherBucketParamEditor: React.SFC<AggParamEditorProps<boolean>> = props => (
+const OtherBucketParamEditor: React.FunctionComponent<AggParamEditorProps<boolean>> = props => (
   <SwitchParamEditor
     dataTestSubj="otherBucketSwitch"
     displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {

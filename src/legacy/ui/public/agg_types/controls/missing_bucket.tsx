@@ -21,9 +21,9 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { SwitchParamEditor } from './switch';
-import { isNotType } from '../buckets/migrate_include_exclude_format';
+import { isStringType } from '../buckets/migrate_include_exclude_format';
 
-const MissingBucketParamEditor: React.SFC<AggParamEditorProps<boolean>> = props => (
+const MissingBucketParamEditor: React.FunctionComponent<AggParamEditorProps<boolean>> = props => (
   <SwitchParamEditor
     dataTestSubj="missingBucketSwitch"
     displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.showMissingValuesLabel', {
@@ -36,7 +36,7 @@ const MissingBucketParamEditor: React.SFC<AggParamEditorProps<boolean>> = props 
         'If not in the top N, and you enable "Group other values in separate bucket", ' +
         'Elasticsearch adds the missing values to the "other" bucket.',
     })}
-    disabled={isNotType('string')(props.agg)}
+    disabled={!isStringType(props.agg)}
     {...props}
   />
 );
