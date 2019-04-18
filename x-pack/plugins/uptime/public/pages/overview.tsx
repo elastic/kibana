@@ -12,9 +12,16 @@ import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
+import qs from 'querystring';
+import { useUrlParams } from '../hooks/useUrlParams';
 
 interface OverviewPageProps {
   basePath: string;
+  history: any;
+  location: {
+    pathname: string;
+    search: string;
+  };
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -22,12 +29,21 @@ type Props = OverviewPageProps;
 
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
+export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
   const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
   const [currentFilterQueryObj, setFilterQueryObj] = useState<object | undefined>(undefined);
-  const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
+  // const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
+
+  const [currentParams, updateUrl] = useUrlParams(history, location);
+  const currentFilterQuery = currentParams.search;
+  console.log(currentFilterQuery);
+  console.log(location);
+  const { search } = location;
+  const res = qs.parse(search);
+  console.log(res);
+  console.log(qs.stringify(res));
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -47,6 +63,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
     try {
       let esQuery;
       if (query && query.text) {
+        updateUrl({ search: query.text });
         esQuery = EuiSearchBar.Query.toESQuery(query);
       }
       setFilterQueryObj(query);
