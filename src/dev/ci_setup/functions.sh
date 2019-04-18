@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
 ### $* - all the arguments
