@@ -11,6 +11,7 @@ import { ACTION_TYPES } from '../../../common/constants';
 import { LoggingAction } from './logging_action';
 import { EmailAction } from './email_action';
 import { SlackAction } from './slack_action';
+import { IndexAction } from './index_action';
 import { UnknownAction } from './unknown_action';
 import { i18n } from '@kbn/i18n';
 
@@ -18,6 +19,7 @@ const ActionTypes = {};
 set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
 set(ActionTypes, ACTION_TYPES.EMAIL, EmailAction);
 set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
+set(ActionTypes, ACTION_TYPES.INDEX, IndexAction);
 set(ActionTypes, ACTION_TYPES.UNKNOWN, UnknownAction);
 // TODO add additional actions
 

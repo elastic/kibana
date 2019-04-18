@@ -9,75 +9,66 @@ import { get } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 
-const requiredFields = ['host', 'port'];
-const optionalFields = [
-  'scheme',
-  'path',
-  'method',
-  'headers',
-  'params',
-  'auth',
-  'body',
-  'proxy',
-  'connection_timeout',
-  'read_timeout',
-  'url'
-];
-
-const allFields = [...requiredFields, ...optionalFields];
-
 export class IndexAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    this.fields = {};
-    allFields.forEach((field) => {
-      this.fields[field] = get(props, field);
-    });
+    this.index = get(props, 'index');
   }
 
-  get upstreamJson() {
-    // Add all required fields to the request body
-    let result = requiredFields.reduce((acc, field) => {
-      acc[field] = this.fields[field];
-      return acc;
-    }, super.upstreamJson);
+  validateAction() {
+    const errors = {
+      index: [],
+    };
+    if (!this.index) {
+      errors.index.push(
+        i18n.translate('xpack.watcher.watchActions.index.indexIsRequiredValidationMessage', {
+          defaultMessage: 'Index is required.',
+        })
+      );
+    }
+    return errors;
+  }
 
-    // If optional fields have been set, add them to the body
-    result = optionalFields.reduce((acc, field) => {
-      if (this[field]) {
-        acc[field] = this.fields[field];
+
+  get upstreamJson() {
+    const result = super.upstreamJson;
+
+    Object.assign(result, {
+      index: {
+        index: this.index,
       }
-      return acc;
-    }, result);
+    });
 
     return result;
   }
 
   get description() {
+    const index = this.index || '';
     return i18n.translate('xpack.watcher.models.indexAction.description', {
-      defaultMessage: 'The {index} will be indexed as {docType}',
+      defaultMessage: 'The {index} will be indexed',
       values: {
-        index: this.fields.index,
-        docType: this.fields.doc_type,
+        index,
       }
     });
   }
 
   get simulateMessage() {
+    const index = this.index || '';
     return i18n.translate('xpack.watcher.models.indexAction.simulateMessage', {
       defaultMessage: 'Index {index} has been indexed.',
       values: {
-        index: this.index,
+        index,
       }
     });
   }
 
   get simulateFailMessage() {
+    const index = this.index || '';
     return i18n.translate('xpack.watcher.models.indexAction.simulateFailMessage', {
       defaultMessage: 'Failed to index {index}.',
       values: {
-        index: this.index
+        index,
       }
     });
   }
@@ -86,10 +77,15 @@ export class IndexAction extends BaseAction {
     return new IndexAction(upstreamAction);
   }
 
+  static defaults = {};
   static typeName = i18n.translate('xpack.watcher.models.indexAction.typeName', {
     defaultMessage: 'Index',
   });
+  static iconClass = 'apps';
   static selectMessage = i18n.translate('xpack.watcher.models.indexAction.selectMessageText', {
     defaultMessage: 'Index data into Elasticsearch.',
+  });
+  static simulatePrompt = i18n.translate('xpack.watcher.models.indexAction.simulateButtonLabel', {
+    defaultMessage: 'Index data now',
   });
 }

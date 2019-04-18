@@ -26,12 +26,14 @@ import { WatchContext } from './watch_context';
 import { EmailActionFields } from './email_action_fields';
 import { LoggingActionFields } from './logging_action_fields';
 import { SlackActionFields } from './slack_action_fields';
+import { IndexActionFields } from './index_action_fields';
 import { executeWatch } from '../../../lib/api';
 
 const ActionFieldsComponent = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,
   [ACTION_TYPES.SLACK]: SlackActionFields,
   [ACTION_TYPES.EMAIL]: EmailActionFields,
+  [ACTION_TYPES.INDEX]: IndexActionFields,
   // TODO add support for additional action types
 };
 
@@ -44,7 +46,7 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
     iconClass,
   }: {
     name: string;
-    iconClass: 'document' | 'logoWebhook' | 'logoSlack' | 'apps' | 'email';
+    iconClass: 'loggingApp' | 'logoWebhook' | 'logoSlack' | 'apps' | 'email';
   }) => (
     <Fragment>
       <EuiFlexGroup gutterSize="s" alignItems="center">

@@ -13,35 +13,35 @@ interface Props {
   editAction: (changedProperty: { key: string; value: string }) => void;
 }
 
-export const LoggingActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
-  const { text } = action;
+export const IndexActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
+  const { index } = action;
   const errors = action.validateAction();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
   return (
     <Fragment>
       <ErrableFormRow
-        id="loggingText"
-        errorKey="text"
+        id="indexName"
+        errorKey="index"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && text !== undefined}
+        isShowingErrors={hasErrors && index !== undefined}
         label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.loggingAction.logTextFieldLabel',
+          'xpack.watcher.sections.watchEdit.threshold.indexAction.indexFieldLabel',
           {
-            defaultMessage: 'Log text',
+            defaultMessage: 'Index',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          name="text"
-          value={text || ''}
+          name="index"
+          value={index || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction({ key: 'text', value: e.target.value });
+            editAction({ key: 'index', value: e.target.value });
           }}
           onBlur={() => {
-            if (!text) {
-              editAction({ key: 'text', value: '' });
+            if (!index) {
+              editAction({ key: 'index', value: '' });
             }
           }}
         />
