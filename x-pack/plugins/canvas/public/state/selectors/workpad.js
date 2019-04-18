@@ -126,7 +126,7 @@ export function getGlobalFilters(state) {
 }
 
 export function getGlobalFilterGroups(state) {
-  return getAllElements(state).reduce((acc, el) => {
+  const filterGroups = getAllElements(state).reduce((acc, el) => {
     // check that a filter is defined
     if (el.filter != null && el.filter.length) {
       // extract the filter group
@@ -135,12 +135,14 @@ export function getGlobalFilterGroups(state) {
 
       // add any new group to the array
       if (filterGroup && filterGroup !== '' && !acc.includes(filterGroup)) {
-        return acc.concat(filterGroup);
+        return acc.concat(String(filterGroup));
       }
     }
 
     return acc;
   }, []);
+
+  return filterGroups.sort();
 }
 
 // element getters
