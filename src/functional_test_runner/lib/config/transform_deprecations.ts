@@ -17,8 +17,16 @@
  * under the License.
  */
 
+// @ts-ignore
 import { createTransform, Deprecations } from '../../../legacy/deprecation';
 
-export const transformDeprecations = createTransform([
-  Deprecations.unused('servers.webdriver')
+type DeprecationTransformer = (
+  settings: object,
+  log: (msg: string) => void
+) => {
+  [key: string]: any;
+};
+
+export const transformDeprecations: DeprecationTransformer = createTransform([
+  Deprecations.unused('servers.webdriver'),
 ]);

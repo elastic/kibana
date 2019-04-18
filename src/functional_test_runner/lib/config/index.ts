@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { Config } from './config/config';
-export { Lifecycle } from './lifecycle';
+export { Config } from './config';
+export { readConfigFile } from './read_config_file';

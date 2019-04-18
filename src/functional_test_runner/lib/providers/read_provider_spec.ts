@@ -17,5 +17,15 @@
  * under the License.
  */
 
-export { ProviderCollection } from './provider_collection';
-export { readProviderSpec } from './read_provider_spec';
+export type Providers = ReturnType<typeof readProviderSpec>;
+export type Provider = Providers extends Array<infer X> ? X : unknown;
+
+export function readProviderSpec(type: string, providers: Record<string, (...args: any[]) => any>) {
+  return Object.keys(providers).map(name => {
+    return {
+      type,
+      name,
+      fn: providers[name],
+    };
+  });
+}

@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { setupMocha } from './setup_mocha';
-export { runTests } from './run_tests';
+export { ProviderCollection } from './provider_collection';
+export { Provider, readProviderSpec } from './read_provider_spec';
