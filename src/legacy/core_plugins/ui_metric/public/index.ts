@@ -18,13 +18,14 @@
  */
 
 import chrome from 'ui/chrome';
+// @ts-ignore
 import { uiModules } from 'ui/modules';
 import { getCanTrackUiMetrics } from 'ui/ui_metric';
 import { API_BASE_PATH } from '../common';
 
-let _http;
+let _http: any;
 
-uiModules.get('kibana').run($http => {
+uiModules.get('kibana').run(($http: any) => {
   _http = $http;
 });
 

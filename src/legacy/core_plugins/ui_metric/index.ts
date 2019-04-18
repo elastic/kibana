@@ -18,11 +18,12 @@
  */
 
 import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
 import { registerUserActionRoute } from './server/routes/api/ui_metric';
 import { registerUiMetricUsageCollector } from './server/usage/index';
 
 // eslint-disable-next-line import/no-default-export
-export default function(kibana) {
+export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
@@ -33,7 +34,7 @@ export default function(kibana) {
       hacks: ['plugins/ui_metric'],
     },
 
-    init(server) {
+    init(server: Legacy.Server) {
       registerUserActionRoute(server);
       registerUiMetricUsageCollector(server);
     },
