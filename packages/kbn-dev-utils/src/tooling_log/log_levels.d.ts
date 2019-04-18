@@ -24,6 +24,9 @@ export interface ParsedLogLevel {
   flags: { [key in LogLevel]: boolean };
 }
 
-export function pickLevelFromFlags(flags: { [key: string]: any }): LogLevel;
+export function pickLevelFromFlags(
+  flags: { [key: string]: any },
+  options?: { default?: LogLevel }
+): LogLevel;
 
 export function parseLogLevel(level: LogLevel): ParsedLogLevel;

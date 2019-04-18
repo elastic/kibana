@@ -35,7 +35,7 @@ interface Props<T> {
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
-    field: keyof T;
+    field: Extract<keyof T, string>;
     direction: string;
   };
   noItemsMessage?: React.ReactNode;
