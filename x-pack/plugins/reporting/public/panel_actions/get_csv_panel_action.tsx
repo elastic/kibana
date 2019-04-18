@@ -31,7 +31,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     );
   }
 
-  public async generateJobParams({ searchEmbeddable }: { searchEmbeddable: any }) {
+  public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
     const adapters = searchEmbeddable.getInspectorAdapters();
     if (!adapters) {
       return {};
@@ -69,7 +69,8 @@ class GetCsvReportPanelAction extends ContextMenuAction {
     }
 
     const searchEmbeddable = embeddable;
-    const state = await this.generateJobParams({ searchEmbeddable });
+    const searchRequestBody = await this.getSearchRequestBody({ searchEmbeddable });
+    const state = _.pick(searchRequestBody, ['sort', 'docvalue_fields', 'query']);
 
     const id = `search:${embeddable.savedSearch.id}`;
     const filename = embeddable.getPanelTitle();
