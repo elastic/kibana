@@ -95,6 +95,8 @@ export function initPutRolesApi(
           Joi.array().items(Joi.string().regex(/^[a-z0-9_-]+$/)),
         ).default([GLOBAL_RESOURCE]),
       })
+        // the following can be replaced with .oxor once we upgrade Joi
+        .without('base', ['feature'])
     ).unique((a, b) => {
       return intersection(a.spaces, b.spaces).length !== 0;
     });
