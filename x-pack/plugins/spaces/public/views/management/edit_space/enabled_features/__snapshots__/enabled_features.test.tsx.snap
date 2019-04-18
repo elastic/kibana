@@ -118,7 +118,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
        
       <EuiText
         color="danger"
-        grow={true}
         size="s"
         style={
           Object {
@@ -141,7 +140,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
     <EuiFlexItem>
       <EuiTitle
         size="xs"
-        textTransform="none"
       >
         <h3>
           <FormattedMessage
@@ -156,7 +154,6 @@ exports[`EnabledFeatures renders as expected 1`] = `
       />
       <EuiText
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
