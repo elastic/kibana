@@ -55,6 +55,7 @@ describe('badge', () => {
       const badge = {
         text: 'foo',
         tooltip: `foo's tooltip`,
+        iconType: 'alert'
       };
       chrome.badge.set(badge);
       expect(newPlatformChrome.setBadge).toHaveBeenCalledTimes(1);
