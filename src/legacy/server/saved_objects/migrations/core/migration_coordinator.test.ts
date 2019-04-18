@@ -18,23 +18,24 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { coordinateMigration } from './migration_coordinator';
 
 describe('coordinateMigration', () => {
+  const log = {
+    debug: jest.fn(),
+    warning: jest.fn(),
+    info: jest.fn(),
+  };
+
   test('waits for isMigrated, if there is an index conflict', async () => {
-    const log = logStub();
     const pollInterval = 1;
-    const runMigration = sinon.spy(() => {
+    const runMigration = jest.fn(() => {
+      // eslint-disable-next-line no-throw-literal
       throw { body: { error: { index: '.foo', type: 'resource_already_exists_exception' } } };
     });
-    const isMigrated = sinon.stub();
+    const isMigrated = jest.fn();
 
-    isMigrated
-      .onFirstCall()
-      .returns(Promise.resolve(false))
-      .onSecondCall()
-      .returns(Promise.resolve(true));
+    isMigrated.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
 
     await coordinateMigration({
       log,
@@ -43,17 +44,16 @@ describe('coordinateMigration', () => {
       isMigrated,
     });
 
-    sinon.assert.calledOnce(runMigration);
-    sinon.assert.calledTwice(isMigrated);
-    const warnings = log.warning.args.filter((msg: any) => /deleting index \.foo/.test(msg));
+    expect(runMigration).toHaveBeenCalledTimes(1);
+    expect(isMigrated).toHaveBeenCalledTimes(2);
+    const warnings = log.warning.mock.calls.filter((msg: any) => /deleting index \.foo/.test(msg));
     expect(warnings.length).toEqual(1);
   });
 
   test('does not poll if the runMigration succeeds', async () => {
-    const log = logStub();
     const pollInterval = 1;
-    const runMigration = sinon.spy(() => Promise.resolve());
-    const isMigrated = sinon.spy(() => Promise.resolve(true));
+    const runMigration = jest.fn<any, any>(() => Promise.resolve());
+    const isMigrated = jest.fn(() => Promise.resolve(true));
 
     await coordinateMigration({
       log,
@@ -61,16 +61,15 @@ describe('coordinateMigration', () => {
       pollInterval,
       isMigrated,
     });
-    sinon.assert.notCalled(isMigrated);
+    expect(isMigrated).not.toHaveBeenCalled();
   });
 
   test('does not swallow exceptions', async () => {
-    const log = logStub();
     const pollInterval = 1;
-    const runMigration = sinon.spy(() => {
+    const runMigration = jest.fn(() => {
       throw new Error('Doh');
     });
-    const isMigrated = sinon.spy(() => Promise.resolve(true));
+    const isMigrated = jest.fn(() => Promise.resolve(true));
 
     await expect(
       coordinateMigration({
@@ -80,13 +79,6 @@ describe('coordinateMigration', () => {
         isMigrated,
       })
     ).rejects.toThrow(/Doh/);
-    sinon.assert.notCalled(isMigrated);
+    expect(isMigrated).not.toHaveBeenCalled();
   });
 });
-
-function logStub(): any {
-  return sinon.stub({
-    debug: _.noop,
-    warning: _.noop,
-  });
-}

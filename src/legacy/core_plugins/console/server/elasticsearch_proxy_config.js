@@ -25,16 +25,13 @@ import url from 'url';
 
 const readFile = (file) => readFileSync(file, 'utf8');
 
-const createAgent = (server) => {
-  const config = server.config();
-  const target = url.parse(
-    _.head(config.get('elasticsearch.hosts'))
-  );
+const createAgent = (legacyConfig) => {
+  const target = url.parse(_.head(legacyConfig.hosts));
   if (!/^https/.test(target.protocol)) return new http.Agent();
 
   const agentOptions = {};
 
-  const verificationMode = config.get('elasticsearch.ssl.verificationMode');
+  const verificationMode = legacyConfig.ssl && legacyConfig.ssl.verificationMode;
   switch (verificationMode) {
     case 'none':
       agentOptions.rejectUnauthorized = false;
@@ -52,26 +49,28 @@ const createAgent = (server) => {
       throw new Error(`Unknown ssl verificationMode: ${verificationMode}`);
   }
 
-  if (_.size(config.get('elasticsearch.ssl.certificateAuthorities'))) {
-    agentOptions.ca = config.get('elasticsearch.ssl.certificateAuthorities').map(readFile);
+  if (legacyConfig.ssl && Array.isArray(legacyConfig.ssl.certificateAuthorities)
+      && legacyConfig.ssl.certificateAuthorities.length > 0) {
+    agentOptions.ca = legacyConfig.ssl.certificateAuthorities.map(readFile);
   }
 
   if (
-    config.get('elasticsearch.ssl.alwaysPresentCertificate') &&
-    config.get('elasticsearch.ssl.certificate') &&
-    config.get('elasticsearch.ssl.key')
+    legacyConfig.ssl &&
+    legacyConfig.ssl.alwaysPresentCertificate &&
+    legacyConfig.ssl.certificate &&
+    legacyConfig.ssl.key
   ) {
-    agentOptions.cert = readFile(config.get('elasticsearch.ssl.certificate'));
-    agentOptions.key = readFile(config.get('elasticsearch.ssl.key'));
-    agentOptions.passphrase = config.get('elasticsearch.ssl.keyPassphrase');
+    agentOptions.cert = readFile(legacyConfig.ssl.certificate);
+    agentOptions.key = readFile(legacyConfig.ssl.key);
+    agentOptions.passphrase = legacyConfig.ssl.keyPassphrase;
   }
 
   return new https.Agent(agentOptions);
 };
 
-export const getElasticsearchProxyConfig = (server) => {
+export const getElasticsearchProxyConfig = (legacyConfig) => {
   return {
-    timeout: server.config().get('elasticsearch.requestTimeout'),
-    agent: createAgent(server)
+    timeout: legacyConfig.requestTimeout.asMilliseconds(),
+    agent: createAgent(legacyConfig)
   };
 };

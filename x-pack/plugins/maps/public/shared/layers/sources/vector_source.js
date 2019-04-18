@@ -6,10 +6,12 @@
 
 
 import { VectorLayer } from '../vector_layer';
+import { TooltipProperty } from '../tooltips/tooltip_property';
 import { VectorStyle } from '../styles/vector_style';
 import { AbstractSource } from './source';
 import * as topojson from 'topojson-client';
 import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 export class AbstractVectorSource extends AbstractSource {
 
@@ -24,7 +26,10 @@ export class AbstractVectorSource extends AbstractSource {
       }
       fetchedJson = await response.json();
     } catch (e) {
-      throw new Error(`Unable to fetch vector shapes from url: ${fetchUrl}`);
+      throw new Error(i18n.translate('xpack.maps.source.vetorSource.requestFailedErrorMessage', {
+        defaultMessage: `Unable to fetch vector shapes from url: {fetchUrl}`,
+        values: { fetchUrl }
+      }));
     }
 
     if (format === 'geojson') {
@@ -36,7 +41,10 @@ export class AbstractVectorSource extends AbstractSource {
       return topojson.feature(fetchedJson, features);
     }
 
-    throw new Error(`Unrecognized vector shape format: ${format}`);
+    throw new Error(i18n.translate('xpack.maps.source.vetorSource.formatErrorMessage', {
+      defaultMessage: `Unable to fetch vector shapes from url: {format}`,
+      values: { format }
+    }));
   }
 
   _createDefaultLayerDescriptor(options, mapColors) {
@@ -88,16 +96,15 @@ export class AbstractVectorSource extends AbstractSource {
   }
 
   // Allow source to filter and format feature properties before displaying to user
-  async filterAndFormatProperties(properties) {
-    //todo :this is quick hack... should revise (should model proeprties explicitly in vector_layer
-    const props = {};
+  async filterAndFormatPropertiesToHtml(properties) {
+    const tooltipProperties = [];
     for (const key in properties) {
       if (key.startsWith('__kbn')) {//these are system properties and should be ignored
         continue;
       }
-      props[key] = properties[key];
+      tooltipProperties.push(new TooltipProperty(key, properties[key]));
     }
-    return props;
+    return tooltipProperties;
   }
 
   async isTimeAware() {

@@ -24,12 +24,7 @@ function makeDirectiveDef(id, compare) {
     return {
       require: 'ngModel',
       link: function ($scope, $el, $attr, ngModel) {
-        const getBound = function () { return $parse($attr[id])(); };
-        const defaultVal = {
-          'greaterThan': -Infinity,
-          'greaterOrEqualThan': -Infinity,
-          'lessThan': Infinity
-        }[id];
+        const getBound = function () { return $parse($attr[id])($scope); };
 
         ngModel.$parsers.push(validate);
         ngModel.$formatters.push(validate);
@@ -38,11 +33,19 @@ function makeDirectiveDef(id, compare) {
           validate(ngModel.$viewValue);
         });
 
+        // We only set it to invalid when both the model value and the value to compare against are
+        // provided, and the values do not meet the condition.
         function validate(val) {
-          const bound = !isNaN(getBound()) ? +getBound() : defaultVal;
-          const valid = !isNaN(bound) && !isNaN(val) && compare(val, bound);
-          ngModel.$setValidity(id, valid);
+          const bound = getBound();
+          const left = parseFloat(val);
+          const right = parseFloat(bound);
+          const isValid = isEmpty(val) || isEmpty(bound) || compare(left, right);
+          ngModel.$setValidity(id, isValid);
           return val;
+        }
+
+        function isEmpty(val) {
+          return typeof val === 'undefined' || val === null || val === '';
         }
       }
     };

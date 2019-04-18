@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import 'ui/autoload/modules';
 import 'ui/autoload/styles';
 import 'ui/i18n';
 import chrome from 'ui/chrome';

@@ -57,7 +57,7 @@ const makeAsset = (request, { path, root, boundry, copyRoot, urlRoot }) => {
 };
 
 export class Build {
-  constructor({ log, sourcePath, targetPath, urlImports, theme }) {
+  constructor({ log, sourcePath, targetPath, urlImports, theme, sourceMap  = true, outputStyle = 'nested' }) {
     this.log = log;
     this.sourcePath = sourcePath;
     this.sourceDir = dirname(this.sourcePath);
@@ -66,6 +66,8 @@ export class Build {
     this.urlImports = urlImports;
     this.theme = theme;
     this.includedFiles = [sourcePath];
+    this.sourceMap = sourceMap;
+    this.outputStyle = outputStyle;
   }
 
   /**
@@ -88,8 +90,9 @@ export class Build {
     const rendered = await renderSass({
       file: this.sourcePath,
       outFile: this.targetPath,
-      sourceMap: true,
-      sourceMapEmbed: true,
+      sourceMap: this.sourceMap,
+      outputStyle: this.outputStyle,
+      sourceMapEmbed: this.sourceMap,
       includePaths: [
         resolve(__dirname, '../../../../node_modules'),
       ],

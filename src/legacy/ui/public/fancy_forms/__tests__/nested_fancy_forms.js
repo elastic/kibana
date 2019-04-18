@@ -18,7 +18,8 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
+import testSubjSelector from '@kbn/test-subj-selector';
 import sinon from 'sinon';
 import $ from 'jquery';
 
@@ -85,7 +86,7 @@ describe('fancy forms', function () {
 
       expect($scope.person.errorCount()).to.be(1);
       expect($scope.person.softErrorCount()).to.be(0);
-      $el.findTestSubject('submit').click();
+      $el.find(testSubjSelector('submit')).click();
       expect($scope.person.errorCount()).to.be(1);
       expect($scope.person.softErrorCount()).to.be(1);
     });
@@ -96,7 +97,7 @@ describe('fancy forms', function () {
 
       expect($scope.person.errorCount()).to.be(1);
       sinon.assert.notCalled(onSubmit);
-      $el.findTestSubject('submit').click();
+      $el.find(testSubjSelector('submit')).click();
       expect($scope.person.errorCount()).to.be(1);
       sinon.assert.notCalled(onSubmit);
 
@@ -106,7 +107,7 @@ describe('fancy forms', function () {
 
       expect($scope.person.errorCount()).to.be(0);
       sinon.assert.notCalled(onSubmit);
-      $el.findTestSubject('submit').click();
+      $el.find(testSubjSelector('submit')).click();
       expect($scope.person.errorCount()).to.be(0);
       sinon.assert.calledOnce(onSubmit);
     });
@@ -114,7 +115,7 @@ describe('fancy forms', function () {
     it('new fields are no longer soft after blur', function () {
       const { $scope, $el } = setup({ name: '' });
       expect($scope.person.softErrorCount()).to.be(0);
-      $el.findTestSubject('name').blur();
+      $el.find(testSubjSelector('name')).blur();
       expect($scope.person.softErrorCount()).to.be(1);
     });
 
@@ -139,7 +140,7 @@ describe('fancy forms', function () {
       expect($scope.person.errorCount()).to.be(2);
       expect($scope.person.softErrorCount()).to.be(0);
 
-      $el.findTestSubject('taskDesc').first().blur();
+      $el.find(testSubjSelector('taskDesc')).first().blur();
 
       expect($scope.person.errorCount()).to.be(2);
       expect($scope.person.softErrorCount()).to.be(1);
@@ -177,7 +178,7 @@ describe('fancy forms', function () {
         expect(form.softErrorCount()).to.be(0);
 
         // blurs only count locally
-        $task.findTestSubject('taskDesc').blur();
+        $task.find(testSubjSelector('taskDesc')).blur();
         expect(form.softErrorCount()).to.be(1);
 
         // but parent form see them

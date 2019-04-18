@@ -4,71 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const genericRules = [
-  {
-    when: {
-      exists: ['event.dataset', 'log.level', 'message'],
-    },
-    format: [
-      {
-        constant: '[',
-      },
-      {
-        field: 'event.dataset',
-      },
-      {
-        constant: '][',
-      },
-      {
-        field: 'log.level',
-      },
-      {
-        constant: '] ',
-      },
-      {
-        field: 'message',
-      },
-    ],
-  },
-  {
-    when: {
-      exists: ['log.level', 'message'],
-    },
-    format: [
-      {
-        constant: '[',
-      },
-      {
-        field: 'log.level',
-      },
-      {
-        constant: '] ',
-      },
-      {
-        field: 'message',
-      },
-    ],
-  },
-  {
-    when: {
-      exists: ['message'],
-    },
-    format: [
-      {
-        field: 'message',
-      },
-    ],
-  },
-  {
-    when: {
-      exists: ['@message'],
-    },
-    format: [
-      {
-        field: '@message',
-      },
-    ],
-  },
+import { LogMessageFormattingRule } from '../rule_types';
+
+const BUILTIN_GENERIC_MESSAGE_FIELDS = ['message', '@message'];
+
+export const getGenericRules = (genericMessageFields: string[]) => [
+  ...Array.from(new Set([...genericMessageFields, ...BUILTIN_GENERIC_MESSAGE_FIELDS])).reduce<
+    LogMessageFormattingRule[]
+  >((genericRules, fieldName) => [...genericRules, ...createGenericRulesForField(fieldName)], []),
   {
     when: {
       exists: ['event.dataset', 'log.original'],
@@ -95,6 +38,63 @@ export const genericRules = [
     format: [
       {
         field: 'log.original',
+      },
+    ],
+  },
+];
+
+const createGenericRulesForField = (fieldName: string) => [
+  {
+    when: {
+      exists: ['event.dataset', 'log.level', fieldName],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'event.dataset',
+      },
+      {
+        constant: '][',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+    ],
+  },
+  {
+    when: {
+      exists: ['log.level', fieldName],
+    },
+    format: [
+      {
+        constant: '[',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: fieldName,
+      },
+    ],
+  },
+  {
+    when: {
+      exists: [fieldName],
+    },
+    format: [
+      {
+        field: fieldName,
       },
     ],
   },

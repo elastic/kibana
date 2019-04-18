@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { App } from '../../public/app';
+import { AppWithoutRouter } from '../../public/app';
 import { Provider } from 'react-redux';
 import { loadIndicesSuccess } from '../../public/store/actions';
 import { indexManagementStore } from '../../public/store';
@@ -67,6 +67,7 @@ const status = (rendered, row = 0) => {
   rendered.update();
   return findTestSubject(rendered, 'indexTableCell-status')
     .at(row)
+    .find('.euiTableCellContent')
     .text();
 };
 
@@ -122,7 +123,7 @@ describe('index table', () => {
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <App />
+          <AppWithoutRouter />
         </MemoryRouter>
       </Provider>
     );

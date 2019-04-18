@@ -6,13 +6,12 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-
 import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
 } from '@elastic/eui';
-
+import { i18n } from '@kbn/i18n';
 import { JoinExpression } from './join_expression';
 import { MetricsExpression } from './metrics_expression';
 
@@ -74,7 +73,10 @@ export class Join extends Component {
     } catch (err) {
       if (this._isMounted) {
         this.setState({
-          loadError: `Unable to find Index pattern ${indexPatternId}`
+          loadError: i18n.translate('xpack.maps.layerPanel.join.noIndexPatternErrorMessage', {
+            defaultMessage: `Unable to find Index pattern {indexPatternId}`,
+            values: { indexPatternId }
+          })
         });
       }
       return;
@@ -89,7 +91,13 @@ export class Join extends Component {
       return;
     }
 
-    this.setState({ rightFields: indexPattern.fields });
+    this.setState({
+      rightFields: indexPattern.fields.filter(field => {
+        // Do not show multi fields as right join options
+        // since they do not have values in _source and exist for indexing only
+        return field.subType !== 'multi';
+      })
+    });
   }
 
   async _loadLeftSourceName() {
@@ -204,8 +212,12 @@ export class Join extends Component {
             className="mapJoinItem__delete"
             iconType="trash"
             color="danger"
-            aria-label="Delete join"
-            title="Delete join"
+            aria-label={i18n.translate('xpack.maps.layerPanel.join.deleteJoinAriaLabel', {
+              defaultMessage: 'Delete join'
+            })}
+            title={i18n.translate('xpack.maps.layerPanel.join.deleteJoinTitle', {
+              defaultMessage: 'Delete join'
+            })}
             onClick={onRemove}
           />
         </EuiFlexGroup>

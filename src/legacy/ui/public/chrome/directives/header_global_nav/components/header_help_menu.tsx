@@ -21,9 +21,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component, Fragment } from 'react';
 import * as Rx from 'rxjs';
 
-import { documentationLinks } from '../../../../documentation_links';
-import { metadata } from '../../../../metadata';
-
 import {
   // TODO: add type annotations
   // @ts-ignore
@@ -42,6 +39,8 @@ import {
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { HelpExtension } from 'ui/chrome';
+import { metadata } from '../../../../metadata';
+import { documentationLinks } from '../../../../documentation_links';
 
 import { HeaderExtension } from './header_extension';
 
@@ -127,12 +126,12 @@ class HeaderHelpMenuUI extends Component<Props, State> {
     );
 
     return (
+      // @ts-ignore repositionOnScroll doesn't exist in EuiPopover
       <EuiPopover
         id="headerHelpMenu"
         button={button}
         isOpen={this.state.isOpen}
         anchorPosition="downRight"
-        // @ts-ignore
         repositionOnScroll
         closePopover={this.closeMenu}
         data-test-subj="helpMenuButton"

@@ -292,7 +292,7 @@ const handleClickIncompatibleLicense = (scope, clusterName) => {
             defaultMessage="Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring."
             values={{
               getLicenseInfoLink: (
-                <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
+                <a href="https://www.elastic.co/subscriptions" target="_blank">
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
                     defaultMessage="Get a license with full functionality"
@@ -340,7 +340,7 @@ const handleClickInvalidLicense = (scope, clusterName) => {
                 </a>
               ),
               getLicenseInfoLink: (
-                <a href="https://www.elastic.co/subscriptions/xpack" target="_blank">
+                <a href="https://www.elastic.co/subscriptions" target="_blank">
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.invalidLicense.getLicenseLinkLabel"
                     defaultMessage="get a license with full functionality"

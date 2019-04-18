@@ -28,6 +28,7 @@ import { UrlPanelContent } from './url_panel_content';
 
 interface Props {
   allowEmbed: boolean;
+  allowShortUrl: boolean;
   objectId?: string;
   objectType: string;
   getUnhashableStates: () => object[];
@@ -63,6 +64,7 @@ class ShareContextMenuUI extends Component<Props> {
       }),
       content: (
         <UrlPanelContent
+          allowShortUrl={this.props.allowShortUrl}
           objectId={this.props.objectId}
           objectType={this.props.objectType}
           getUnhashableStates={this.props.getUnhashableStates}
@@ -89,6 +91,7 @@ class ShareContextMenuUI extends Component<Props> {
         }),
         content: (
           <UrlPanelContent
+            allowShortUrl={this.props.allowShortUrl}
             isEmbedded
             objectId={this.props.objectId}
             objectType={this.props.objectType}

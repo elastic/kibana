@@ -77,7 +77,7 @@ it('builds dark themed SASS', async () => {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: #191919 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
+  background: #232635 url(./images/img.png) url(ui/assets/favicons/favicon.ico); }
 /*# sourceMappingURL=... */"
 `);
 });
@@ -106,7 +106,7 @@ it('rewrites url imports', async () => {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  background: #191919 url(__REPLACE_WITH_PUBLIC_PATH__foo/bar/images/img.png) url(__REPLACE_WITH_PUBLIC_PATH__ui/favicons/favicon.ico); }
+  background: #232635 url(__REPLACE_WITH_PUBLIC_PATH__foo/bar/images/img.png) url(__REPLACE_WITH_PUBLIC_PATH__ui/favicons/favicon.ico); }
 /*# sourceMappingURL=... */"
 `);
 

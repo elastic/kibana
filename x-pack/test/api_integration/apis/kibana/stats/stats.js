@@ -4,22 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertestNoAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
 
   describe('/api/stats', () => {
     describe('operational stats and usage stats', () => {
-      before('load clusters archive', () => {
-        return esArchiver.load('discover');
-      });
-
-      after('unload clusters archive', () => {
-        return esArchiver.unload('discover');
-      });
 
       describe('no auth', () => {
         it('should return 200 and stats for no extended', async () => {

@@ -20,7 +20,11 @@
 import { KibanaMigrator } from './migrations';
 import { SavedObjectsSchema } from './schema';
 import { SavedObjectsSerializer } from './serialization';
-import { SavedObjectsClient, SavedObjectsRepository, ScopedSavedObjectsClientProvider } from './service';
+import {
+  SavedObjectsClient,
+  SavedObjectsRepository,
+  ScopedSavedObjectsClientProvider,
+} from './service';
 import { getRootPropertiesObjects } from '../mappings';
 
 import {
@@ -31,6 +35,10 @@ import {
   createFindRoute,
   createGetRoute,
   createUpdateRoute,
+  createExportRoute,
+  createImportRoute,
+  createResolveImportErrorsRoute,
+  createLogLegacyImportRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
@@ -38,7 +46,7 @@ export function savedObjectsMixin(kbnServer, server) {
 
   server.decorate('server', 'kibanaMigrator', migrator);
 
-  const warn = (message) => server.log(['warning', 'saved-objects'], message);
+  const warn = message => server.log(['warning', 'saved-objects'], message);
   // we use kibana.index which is technically defined in the kibana plugin, so if
   // we don't have the plugin (mainly tests) we can't initialize the saved objects
   if (!kbnServer.pluginSpecs.some(p => p.getId() === 'kibana')) {
@@ -61,6 +69,10 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createFindRoute(prereqs));
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
+  server.route(createExportRoute(prereqs, server));
+  server.route(createImportRoute(prereqs, server));
+  server.route(createResolveImportErrorsRoute(prereqs, server));
+  server.route(createLogLegacyImportRoute());
 
   const schema = new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas);
   const serializer = new SavedObjectsSerializer(schema);
@@ -69,12 +81,12 @@ export function savedObjectsMixin(kbnServer, server) {
   const visibleTypes = allTypes.filter(type => !schema.isHiddenType(type));
 
   const createRepository = (callCluster, extraTypes = []) => {
-    if(typeof callCluster !== 'function') {
+    if (typeof callCluster !== 'function') {
       throw new TypeError('Repository requires a "callCluster" function to be provided.');
     }
     // throw an exception if an extraType is not defined.
     extraTypes.forEach(type => {
-      if(!allTypes.includes(type)) {
+      if (!allTypes.includes(type)) {
         throw new Error(`Missing mappings for saved objects type '${type}'`);
       }
     });
@@ -88,7 +100,7 @@ export function savedObjectsMixin(kbnServer, server) {
       schema,
       serializer,
       allowedTypes,
-      callCluster
+      callCluster,
     });
   };
 
@@ -117,7 +129,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjects', service);
 
   const savedObjectsClientCache = new WeakMap();
-  server.decorate('request', 'getSavedObjectsClient', function () {
+  server.decorate('request', 'getSavedObjectsClient', function() {
     const request = this;
 
     if (savedObjectsClientCache.has(request)) {

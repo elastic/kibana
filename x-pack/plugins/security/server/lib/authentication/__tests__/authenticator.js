@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import Boom from 'boom';
 
@@ -28,11 +28,10 @@ describe('Authenticator', () => {
     session = sinon.createStubInstance(Session);
 
     config = { get: sinon.stub() };
-    cluster = { callWithRequest: sinon.stub() };
 
     // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
     // a static singleton, so we should use sandbox to set/reset its behavior between tests.
-    cluster = sinon.stub({ callWithRequest() {} });
+    cluster = sinon.stub({ callWithRequest() {}, callWithInternalUser() {} });
     sandbox.stub(ClientShield, 'getClient').returns(cluster);
 
     server.config.returns(config);
@@ -357,6 +356,35 @@ describe('Authenticator', () => {
       sinon.assert.calledWithExactly(session.clear, notSystemAPIRequest);
     });
 
+    it('clears session if provider requested it via setting state to `null`.', async () => {
+      // Use `token` provider for this test as it's the only one that does what we want.
+      config.get.withArgs('xpack.security.authProviders').returns(['token']);
+      await initAuthenticator(server);
+      authenticate = server.expose.withArgs('authenticate').lastCall.args[1];
+
+      const request = requestFixture({ headers: { xCustomHeader: 'xxx' } });
+
+      session.get.withArgs(request).resolves({
+        state: { accessToken: 'access-xxx', refreshToken: 'refresh-xxx' },
+        provider: 'token'
+      });
+
+      session.clear.resolves();
+
+      cluster.callWithRequest
+        .withArgs(request).rejects({ statusCode: 401 });
+
+      cluster.callWithInternalUser.withArgs('shield.getAccessToken').rejects(
+        Boom.badRequest('refresh token expired')
+      );
+
+      const authenticationResult = await authenticate(request);
+      expect(authenticationResult.redirected()).to.be(true);
+
+      sinon.assert.calledOnce(session.clear);
+      sinon.assert.calledWithExactly(session.clear, request);
+    });
+
     it('does not clear session if provider failed to authenticate request with non-401 reason with active session.',
       async () => {
         const systemAPIRequest = requestFixture({ headers: { xCustomHeader: 'xxx' } });
@@ -426,6 +454,41 @@ describe('Authenticator', () => {
       sinon.assert.notCalled(session.clear);
     });
 
+    it('clears session if it belongs to not configured provider.', async () => {
+      // Add `kbn-xsrf` header to the raw part of the request to make `can_redirect_request`
+      // think that it's AJAX request and redirect logic shouldn't be triggered.
+      const systemAPIRequest = requestFixture({
+        headers: { xCustomHeader: 'xxx', 'kbn-xsrf': 'xsrf' }
+      });
+      const notSystemAPIRequest = requestFixture({
+        headers: { xCustomHeader: 'yyy', 'kbn-xsrf': 'xsrf' }
+      });
+
+      session.get.withArgs(systemAPIRequest).resolves({
+        state: { accessToken: 'some old token' },
+        provider: 'token'
+      });
+
+      session.get.withArgs(notSystemAPIRequest).resolves({
+        state: { accessToken: 'some old token' },
+        provider: 'token'
+      });
+
+      session.clear.resolves();
+
+      server.plugins.kibana.systemApi.isSystemApiRequest
+        .withArgs(systemAPIRequest).returns(true)
+        .withArgs(notSystemAPIRequest).returns(false);
+
+      const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
+      expect(systemAPIAuthenticationResult.notHandled()).to.be(true);
+      sinon.assert.calledOnce(session.clear);
+
+      const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
+      expect(notSystemAPIAuthenticationResult.notHandled()).to.be(true);
+      sinon.assert.calledTwice(session.clear);
+    });
+
     it('complements user with `scope` property.', async () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
@@ -489,6 +552,20 @@ describe('Authenticator', () => {
       sinon.assert.calledWithExactly(session.clear, request);
       expect(deauthenticationResult.redirected()).to.be(true);
       expect(deauthenticationResult.redirectURL).to.be('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED');
+    });
+
+    it('only clears session if it belongs to not configured provider.', async () => {
+      const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
+      session.get.withArgs(request).resolves({
+        state: {},
+        provider: 'token'
+      });
+
+      const deauthenticationResult = await deauthenticate(request);
+
+      sinon.assert.calledOnce(session.clear);
+      sinon.assert.calledWithExactly(session.clear, request);
+      expect(deauthenticationResult.notHandled()).to.be(true);
     });
   });
 

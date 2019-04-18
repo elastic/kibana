@@ -38,6 +38,7 @@ export const FollowerIndexPageTitle = ({ title }) => (
             href={followerIndexUrl}
             target="_blank"
             iconType="help"
+            data-test-subj="followerIndexDocsButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.readDocsFollowerIndexButtonLabel"

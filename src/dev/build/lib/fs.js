@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import archiver from 'archiver';
 import fs from 'fs';
 import { createHash } from 'crypto';
-import { resolve, dirname, isAbsolute } from 'path';
+import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect } from 'util';
 
@@ -34,11 +35,11 @@ import { Extract } from 'tar';
 
 const mkdirpAsync = promisify(mkdirpCb);
 const statAsync = promisify(fs.stat);
-const chmodAsync = promisify(fs.chmod);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
+const copyFileAsync = promisify(fs.copyFile);
 
 export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
@@ -80,19 +81,10 @@ export async function copy(source, destination) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
-  const stat = await statAsync(source);
-
-  // mkdirp after the stat(), stat will throw if source
-  // doesn't exist and ideally we won't create the parent directory
-  // unless the source exists
+  // do a stat call to make sure the source exists before creating the destination directory
+  await statAsync(source);
   await mkdirp(dirname(destination));
-
-  await createPromiseFromStreams([
-    fs.createReadStream(source),
-    fs.createWriteStream(destination),
-  ]);
-
-  await chmodAsync(destination, stat.mode);
+  await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
 }
 
 export async function deleteAll(patterns, log) {
@@ -202,4 +194,16 @@ export async function untar(source, destination, extractOptions = {}) {
       path: destination
     }),
   ]);
+}
+
+export async function compress(type, options = {}, source, destination) {
+  const output = fs.createWriteStream(destination);
+  const archive = archiver(type, options);
+  const name = source.split(sep).slice(-1)[0];
+
+  archive.pipe(output);
+
+  return archive
+    .directory(source, name)
+    .finalize();
 }

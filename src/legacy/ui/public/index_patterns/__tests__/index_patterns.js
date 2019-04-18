@@ -18,7 +18,7 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { IndexPatternProvider } from '../_index_pattern';
 import { IndexPatternsProvider } from '../index_patterns';

@@ -4,40 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRandomString } from '../__jest__/utils';
+import { getRandomString } from '../../../test_utils';
 
 const initialValues = {
   dateHistogramField: 'timestamp',
   dateHistogramInterval: '24h',
   dateHistogramTimeZone: 'UTC',
-  documentsProcessed: 0,
+  documentsProcessed: 10,
   histogram: [
     { name: 'DistanceMiles' },
     { name: 'FlightTimeMin' },
   ],
   id: 'test',
   indexPattern: 'kibana*',
+  json: {
+    foo: 'bar',
+  },
   metrics: [
     {
       name: 'dayOfWeek',
-      types: ['avg', 'min']
+      types: ['avg', 'max', 'min']
     },
     {
       name: 'distanceKilometers',
       types: ['avg', 'max']
     }
   ],
-  pagesProcessed: 0,
+  pagesProcessed: 3,
   rollupCron: '0 0 0 ? * 7',
   rollupDelay: '1d',
   rollupIndex: 'my_rollup_index',
-  rollupsIndexed: 0,
+  rollupsIndexed: 2,
   status: 'stopped',
   terms: [
+    { name: 'Dest' },
     { name: 'Carrier' },
     { name: 'DestCountry' },
   ],
-  triggerCount: 0,
+  triggerCount: 7,
 };
 
 export const getJob = (values = { id: getRandomString() }) => ({ ...initialValues, ...values });

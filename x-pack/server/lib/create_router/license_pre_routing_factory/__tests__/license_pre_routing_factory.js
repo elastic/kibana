@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { licensePreRoutingFactory } from '../license_pre_routing_factory';
+import { LICENSE_STATUS_INVALID, LICENSE_STATUS_VALID } from '../../../../../common/constants';
 
 describe('license_pre_routing_factory', () => {
   describe('#reportingFeaturePreRoutingFactory', () => {
@@ -26,17 +27,17 @@ describe('license_pre_routing_factory', () => {
       };
     });
 
-    it('only instantiates one instance per server', () => {
-      const firstInstance = licensePreRoutingFactory(mockServer);
-      const secondInstance = licensePreRoutingFactory(mockServer);
+    it('instantiates a new instance per plugin', () => {
+      const firstInstance = licensePreRoutingFactory(mockServer, 'foo');
+      const secondInstance = licensePreRoutingFactory(mockServer, 'bar');
 
-      expect(firstInstance).to.be(secondInstance);
+      expect(firstInstance).to.not.be(secondInstance);
     });
 
-    describe('isAvailable is false', () => {
+    describe('status is invalid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: false
+          status: LICENSE_STATUS_INVALID
         };
       });
 
@@ -51,10 +52,10 @@ describe('license_pre_routing_factory', () => {
       });
     });
 
-    describe('isAvailable is true', () => {
+    describe('status is valid', () => {
       beforeEach(() => {
         mockLicenseCheckResults = {
-          isAvailable: true
+          status: LICENSE_STATUS_VALID
         };
       });
 

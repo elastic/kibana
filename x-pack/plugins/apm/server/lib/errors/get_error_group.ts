@@ -5,24 +5,20 @@
  */
 
 import { ESFilter } from 'elasticsearch';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/Error';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
 import {
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
+import { idx } from '../../../common/idx';
+import { PromiseReturnType } from '../../../typings/common';
+import { APMError } from '../../../typings/es_schemas/ui/APMError';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { getTransaction } from '../transactions/get_transaction';
 
-export interface ErrorGroupAPIResponse {
-  transaction?: Transaction;
-  error?: APMError;
-  occurrencesCount: number;
-}
+export type ErrorGroupAPIResponse = PromiseReturnType<typeof getErrorGroup>;
 
 // TODO: rename from "getErrorGroup"  to "getErrorGroupSample" (since a single error is returned, not an errorGroup)
 export async function getErrorGroup({
@@ -33,7 +29,7 @@ export async function getErrorGroup({
   serviceName: string;
   groupId: string;
   setup: Setup;
-}): Promise<ErrorGroupAPIResponse> {
+}) {
   const { start, end, esFilterQuery, client, config } = setup;
   const filter: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },

@@ -23,5 +23,8 @@
   },
   "model_plot_config": {
     "enabled": true
+  },
+  "custom_settings": {
+    "created_by": "ml-module-apm-transaction"
   }
 }

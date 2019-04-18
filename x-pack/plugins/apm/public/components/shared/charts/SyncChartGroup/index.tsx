@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import moment from 'moment';
 import React from 'react';
-import { timefilter } from 'ui/timefilter';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 export interface RangeSelection {
   start: number;
@@ -25,7 +25,7 @@ export interface HoverXHandlers {
   hoverX: HoverX | null;
 }
 
-interface SyncChartGroupProps {
+interface SyncChartGroupProps extends RouteComponentProps {
   render: (props: HoverXHandlers) => React.ReactNode;
 }
 
@@ -33,7 +33,7 @@ interface SyncChartState {
   hoverX: HoverX | null;
 }
 
-export class SyncChartGroup extends React.Component<
+class SyncChartGroupComponent extends React.Component<
   SyncChartGroupProps,
   SyncChartState
 > {
@@ -44,12 +44,22 @@ export class SyncChartGroup extends React.Component<
     this.setState({ hoverX: null });
   public onSelectionEnd: OnSelectionEndHandler = range => {
     this.setState({ hoverX: null });
-    timefilter.setTime({
-      from: moment(range.start).toISOString(),
-      to: moment(range.end).toISOString(),
-      mode: 'absolute'
+
+    const currentSearch = toQuery(this.props.location.search);
+    const nextSearch = {
+      rangeFrom: new Date(range.start).toISOString(),
+      rangeTo: new Date(range.end).toISOString()
+    };
+
+    this.props.history.push({
+      ...this.props.location,
+      search: fromQuery({
+        ...currentSearch,
+        ...nextSearch
+      })
     });
   };
+
   public render() {
     return this.props.render({
       onHover: this.onHover,
@@ -59,3 +69,5 @@ export class SyncChartGroup extends React.Component<
     });
   }
 }
+
+export const SyncChartGroup = withRouter(SyncChartGroupComponent);

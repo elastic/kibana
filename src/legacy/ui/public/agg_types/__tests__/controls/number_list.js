@@ -18,10 +18,10 @@
  */
 
 import $ from 'jquery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import simulateKeys from 'test_utils/simulate_keys';
 import ngMock from 'ng_mock';
-import '../../../number_list';
+import '../../number_list';
 describe('NumberList directive', function () {
 
 

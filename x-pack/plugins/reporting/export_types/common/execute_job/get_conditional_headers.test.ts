@@ -197,3 +197,27 @@ test(`uses basePath from server if job doesn't have a basePath when creating sav
     '/sbp'
   );
 });
+
+describe('config formatting', () => {
+  test(`lowercases server.host`, async () => {
+    mockServer = createMockServer({ settings: { 'server.host': 'COOL-HOSTNAME' } });
+    const { conditionalHeaders } = await getConditionalHeaders({
+      job: {},
+      filteredHeaders: {},
+      server: mockServer,
+    });
+    expect(conditionalHeaders.conditions.hostname).toEqual('cool-hostname');
+  });
+
+  test(`lowercases xpack.reporting.kibanaServer.hostname`, async () => {
+    mockServer = createMockServer({
+      settings: { 'xpack.reporting.kibanaServer.hostname': 'GREAT-HOSTNAME' },
+    });
+    const { conditionalHeaders } = await getConditionalHeaders({
+      job: {},
+      filteredHeaders: {},
+      server: mockServer,
+    });
+    expect(conditionalHeaders.conditions.hostname).toEqual('great-hostname');
+  });
+});

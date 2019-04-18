@@ -22,38 +22,47 @@ describe('NestedKeyValueTable component', () => {
       c: [3, 4, 5],
       d: { aa: 1, bb: 2 }
     };
-    expect(shallow(<NestedKeyValueTable data={testData} />)).toMatchSnapshot();
+    expect(
+      shallow(<NestedKeyValueTable data={testData} depth={0} />)
+    ).toMatchSnapshot();
   });
+
   it('should render an empty table if there is no data', () => {
-    expect(shallow(<NestedKeyValueTable data={{}} />)).toMatchSnapshot();
+    expect(
+      shallow(<NestedKeyValueTable data={{}} depth={0} />)
+    ).toMatchSnapshot();
   });
 });
 
 describe('NestedValue component', () => {
-  let props: any;
-
-  beforeEach(() => {
-    props = {
-      value: { a: 'hello' },
-      depth: 0,
-      keySorter: jest.fn(),
-      parentKey: 'who_cares'
-    };
-  });
-
   it('should render a formatted value when depth is 0', () => {
-    expect(shallow(<NestedValue {...props} />)).toMatchSnapshot();
+    const wrapper = shallow(
+      <NestedValue value={{ a: 'hello' }} depth={0} parentKey="who_cares" />
+    );
+
+    expect(
+      wrapper.equals(
+        <NestedKeyValueTable
+          data={{ a: 'hello' }}
+          depth={1}
+          parentKey="who_cares"
+        />
+      )
+    ).toBe(true);
   });
 
   it('should render a formatted value when depth > 0 but value is not an object', () => {
-    props.value = 2;
-    props.depth = 3;
-    expect(shallow(<NestedValue {...props} />)).toMatchSnapshot();
+    expect(
+      shallow(<NestedValue value={2} depth={3} parentKey="who_cares" />)
+    ).toMatchSnapshot();
   });
 
   it('should render a nested KV Table when depth > 0 and value is an object', () => {
-    props.depth = 1;
-    expect(shallow(<NestedValue {...props} />)).toMatchSnapshot();
+    expect(
+      shallow(
+        <NestedValue value={{ a: 'hello' }} depth={1} parentKey="who_cares" />
+      )
+    ).toMatchSnapshot();
   });
 });
 

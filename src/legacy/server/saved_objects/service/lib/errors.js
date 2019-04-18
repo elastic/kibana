@@ -65,7 +65,6 @@ export function isInvalidVersionError(error) {
   return error && error[code] === CODE_INVALID_VERSION;
 }
 
-
 // 401 - Not Authorized
 const CODE_NOT_AUTHORIZED = 'SavedObjectsClient/notAuthorized';
 export function decorateNotAuthorizedError(error, reason) {
@@ -74,7 +73,6 @@ export function decorateNotAuthorizedError(error, reason) {
 export function isNotAuthorizedError(error) {
   return error && error[code] === CODE_NOT_AUTHORIZED;
 }
-
 
 // 403 - Forbidden
 const CODE_FORBIDDEN = 'SavedObjectsClient/forbidden';
@@ -85,7 +83,6 @@ export function isForbiddenError(error) {
   return error && error[code] === CODE_FORBIDDEN;
 }
 
-
 // 413 - Request Entity Too Large
 const CODE_REQUEST_ENTITY_TOO_LARGE = 'SavedObjectsClient/requestEntityTooLarge';
 export function decorateRequestEntityTooLargeError(error, reason) {
@@ -94,7 +91,6 @@ export function decorateRequestEntityTooLargeError(error, reason) {
 export function isRequestEntityTooLargeError(error) {
   return error && error[code] === CODE_REQUEST_ENTITY_TOO_LARGE;
 }
-
 
 // 404 - Not Found
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
@@ -108,7 +104,6 @@ export function isNotFoundError(error) {
   return error && error[code] === CODE_NOT_FOUND;
 }
 
-
 // 409 - Conflict
 const CODE_CONFLICT = 'SavedObjectsClient/conflict';
 export function decorateConflictError(error, reason) {
@@ -118,7 +113,6 @@ export function isConflictError(error) {
   return error && error[code] === CODE_CONFLICT;
 }
 
-
 // 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
 export function decorateEsUnavailableError(error, reason) {
@@ -127,7 +121,6 @@ export function decorateEsUnavailableError(error, reason) {
 export function isEsUnavailableError(error) {
   return error && error[code] === CODE_ES_UNAVAILABLE;
 }
-
 
 // 503 - Unable to automatically create index because of action.auto_create_index setting
 const CODE_ES_AUTO_CREATE_INDEX_ERROR = 'SavedObjectsClient/autoCreateIndex';
@@ -140,7 +133,6 @@ export function createEsAutoCreateIndexError() {
 export function isEsAutoCreateIndexError(error) {
   return error && error[code] === CODE_ES_AUTO_CREATE_INDEX_ERROR;
 }
-
 
 // 500 - General Error
 const CODE_GENERAL_ERROR = 'SavedObjectsClient/generalError';

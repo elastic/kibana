@@ -124,7 +124,7 @@ export const TableView = injectI18n(
       const items = nodes.map(node => {
         const name = last(node.path);
         return {
-          name: (name && name.value) || 'unknown',
+          name: (name && name.label) || 'unknown',
           ...getGroupPaths(node.path).reduce(
             (acc, path, index) => ({
               ...acc,

@@ -9,7 +9,7 @@ import { uiModules } from 'ui/modules';
 import template from './watch_edit_execute_detail.html';
 import '../watch_action_mode_table';
 import 'ace';
-import 'ui/toggle_panel';
+import 'plugins/watcher/directives/toggle_panel';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details';
 
 const app = uiModules.get('xpack/watcher');

@@ -5,8 +5,8 @@
  */
 
 import { camelCase } from 'lodash';
-import { PLUGIN } from 'x-pack/plugins/beats_management/common/constants';
-import { CONFIG_PREFIX } from 'x-pack/plugins/beats_management/common/constants/plugin';
+import { PLUGIN } from '../../../common/constants';
+import { CONFIG_PREFIX } from '../../../common/constants/plugin';
 import { ElasticsearchBeatsAdapter } from '../adapters/beats/elasticsearch_beats_adapter';
 import { ElasticsearchConfigurationBlockAdapter } from '../adapters/configuration_blocks/elasticsearch_configuration_block_adapter';
 import { DatabaseKbnESPlugin } from '../adapters/database/adapter_types';

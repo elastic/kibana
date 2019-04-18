@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import { EuiSelect, EuiButtonEmpty, EuiCallOut, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { PHASE_NODE_ATTRS } from '../../../../store/constants';
+import { PHASE_NODE_ATTRS } from '../../../../constants';
 import { ErrableFormRow } from '../../form_errors';
 import { LearnMoreLink } from '../../../components/learn_more_link';
 const learnMoreLinks = (
@@ -88,8 +88,8 @@ class NodeAllocationUi extends Component {
             id={`${phase}-${PHASE_NODE_ATTRS}`}
             value={phaseData[PHASE_NODE_ATTRS] || ' '}
             options={nodeOptions}
-            onChange={async e => {
-              await setPhaseData(PHASE_NODE_ATTRS, e.target.value);
+            onChange={e => {
+              setPhaseData(PHASE_NODE_ATTRS, e.target.value);
             }}
           />
 

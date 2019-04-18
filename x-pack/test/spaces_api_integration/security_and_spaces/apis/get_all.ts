@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { getAllTestSuiteFactory } from '../../common/suites/get_all';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
@@ -35,6 +35,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          apmUser: AUTHENTICATION.APM_USER,
+          machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
+          machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
+          monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
       {
@@ -51,6 +55,10 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           legacyAll: AUTHENTICATION.KIBANA_LEGACY_USER,
           dualAll: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_USER,
           dualRead: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
+          apmUser: AUTHENTICATION.APM_USER,
+          machineLearningAdmin: AUTHENTICATION.MACHINE_LEARING_ADMIN,
+          machineLearningUser: AUTHENTICATION.MACHINE_LEARNING_USER,
+          monitoringUser: AUTHENTICATION.MONITORING_USER,
         },
       },
     ].forEach(scenario => {
@@ -180,6 +188,50 @@ export default function getAllSpacesTestSuite({ getService }: TestInvoker) {
           },
         }
       );
+
+      getAllTest(`apm_user can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.apmUser,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      getAllTest(`machine_learning_admin can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.machineLearningAdmin,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      getAllTest(`machine_learning_user can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.machineLearningUser,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
+
+      getAllTest(`monitoring_user can't access any spaces from ${scenario.spaceId}`, {
+        spaceId: scenario.spaceId,
+        user: scenario.users.monitoringUser,
+        tests: {
+          exists: {
+            statusCode: 403,
+            response: expectRbacForbidden,
+          },
+        },
+      });
     });
   });
 }

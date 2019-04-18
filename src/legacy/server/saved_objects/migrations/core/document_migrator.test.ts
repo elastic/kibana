@@ -18,7 +18,6 @@
  */
 
 import _ from 'lodash';
-import sinon from 'sinon';
 import { RawSavedObjectDoc } from '../../serialization';
 import { DocumentMigrator } from './document_migrator';
 
@@ -28,7 +27,7 @@ describe('DocumentMigrator', () => {
       kibanaVersion: '25.2.3',
       migrations: {},
       validateDoc: _.noop,
-      log: sinon.spy(),
+      log: jest.fn(),
     };
   }
 
@@ -475,7 +474,7 @@ describe('DocumentMigrator', () => {
   });
 
   it('logs the document and transform that failed', () => {
-    const log = sinon.spy();
+    const log = jest.fn();
     const migrator = new DocumentMigrator({
       ...testOpts(),
       migrations: {
@@ -498,10 +497,37 @@ describe('DocumentMigrator', () => {
       expect('Did not throw').toEqual('But it should have!');
     } catch (error) {
       expect(error.message).toMatch(/Dang diggity!/);
-      const warning = log.args.filter(([[level]]) => level === 'warning')[0][1];
+      const warning = log.mock.calls.filter(([[level]]) => level === 'warning')[0][1];
       expect(warning).toContain(JSON.stringify(failedDoc));
       expect(warning).toContain('dog:1.2.3');
     }
+  });
+
+  it('logs message in transform function', () => {
+    const logStash: string[] = [];
+    const logTestMsg = '...said the joker to the thief';
+    const migrator = new DocumentMigrator({
+      ...testOpts(),
+      migrations: {
+        dog: {
+          '1.2.3': (doc, log) => {
+            log!.info(logTestMsg);
+            return doc;
+          },
+        },
+      },
+      log: (path: string[], message: string) => {
+        logStash.push(message);
+      },
+    });
+    const doc = {
+      id: 'joker',
+      type: 'dog',
+      attributes: {},
+      migrationVersion: {},
+    };
+    migrator.migrate(doc);
+    expect(logStash[0]).toEqual(logTestMsg);
   });
 
   test('extracts the latest migration version info', () => {

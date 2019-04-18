@@ -1,13 +1,16 @@
 {
-  "presets": [["env", {
-    "targets": {
-      "node": "current",
-      "browsers": [
-        "last 2 versions",
-        "> 5%",
-        "Safari 7",
-      ]
+  "presets": [
+    ["@babel/preset-env", {
+      "targets": {
+        "node": "current",
+        "browsers": [
+          "last 2 versions",
+          "> 5%",
+          "Safari 7"
+        ]
+      }
     }
-  }]],
+    ]
+  ],
   "plugins": ["add-module-exports"]
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { IE_REGEX } from '../url_overflow_service.js';
 
 describe('IE_REGEX', () => {

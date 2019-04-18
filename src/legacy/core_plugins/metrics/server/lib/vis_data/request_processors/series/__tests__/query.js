@@ -65,9 +65,9 @@ describe('query(req, panel, series)', () => {
             {
               range: {
                 timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
+                  gte: '2017-01-01T00:00:00.000Z',
+                  lte: '2017-01-01T01:00:00.000Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             }
@@ -92,9 +92,9 @@ describe('query(req, panel, series)', () => {
             {
               range: {
                 timestamp: {
-                  gte: 1483225200000,
-                  lte: 1483228800000,
-                  format: 'epoch_millis'
+                  gte: '2016-12-31T23:00:00.000Z',
+                  lte: '2017-01-01T00:00:00.000Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             }
@@ -142,9 +142,9 @@ describe('query(req, panel, series)', () => {
             {
               range: {
                 timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
+                  gte: '2017-01-01T00:00:00.000Z',
+                  lte: '2017-01-01T01:00:00.000Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             },
@@ -169,9 +169,9 @@ describe('query(req, panel, series)', () => {
             {
               range: {
                 timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
+                  gte: '2017-01-01T00:00:00.000Z',
+                  lte: '2017-01-01T01:00:00.000Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             },
@@ -225,9 +225,9 @@ describe('query(req, panel, series)', () => {
             {
               range: {
                 timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
+                  gte: '2017-01-01T00:00:00.000Z',
+                  lte: '2017-01-01T01:00:00.000Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             },
@@ -272,9 +272,9 @@ describe('query(req, panel, series)', () => {
             {
               range: {
                 timestamp: {
-                  gte: 1483228800000,
-                  lte: 1483232400000,
-                  format: 'epoch_millis'
+                  gte: '2017-01-01T00:00:00.000Z',
+                  lte: '2017-01-01T01:00:00.000Z',
+                  format: 'strict_date_optional_time'
                 }
               }
             },

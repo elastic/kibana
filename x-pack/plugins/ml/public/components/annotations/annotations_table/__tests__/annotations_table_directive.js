@@ -7,7 +7,7 @@
 import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote';
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 import { ml } from '../../../../services/ml_api_service';

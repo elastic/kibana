@@ -116,6 +116,7 @@ class RequestSelector extends Component {
       >
         <EuiContextMenuPanel
           items={this.props.requests.map(this.renderRequestDropdownItem)}
+          data-test-subj="inspectorRequestChooserMenuPanel"
         />
       </EuiPopover>
     );
@@ -140,7 +141,7 @@ class RequestSelector extends Component {
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           {requests.length <= 1 &&
-            <div className="insRequestSelector__singleRequest">
+            <div className="insRequestSelector__singleRequest" data-test-subj="inspectorRequestName">
               {selectedRequest.name}
             </div>
           }

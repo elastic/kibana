@@ -30,7 +30,7 @@ const {
   403: Forbidden,
   413: RequestEntityTooLarge,
   NotFound,
-  BadRequest
+  BadRequest,
 } = elasticsearch.errors;
 
 import {

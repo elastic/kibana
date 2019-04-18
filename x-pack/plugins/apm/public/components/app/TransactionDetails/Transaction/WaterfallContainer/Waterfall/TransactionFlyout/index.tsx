@@ -8,7 +8,6 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
@@ -19,15 +18,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
-import styled from 'styled-components';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { TransactionActionMenu } from 'x-pack/plugins/apm/public/components/shared/TransactionActionMenu/TransactionActionMenu';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { DROPPED_SPANS_DOCS } from 'x-pack/plugins/apm/public/utils/documentation/apm-get-started';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/Transaction';
+import { idx } from '../../../../../../../../common/idx';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { IUrlParams } from '../../../../../../../store/urlParams';
+import { DROPPED_SPANS_DOCS } from '../../../../../../../utils/documentation/apm-get-started';
+import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
 import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
+import { ResponsiveFlyout } from '../ResponsiveFlyout';
 
 interface Props {
   onClose: () => void;
@@ -37,26 +36,6 @@ interface Props {
   errorCount: number;
   traceRootDuration?: number;
 }
-
-const ResponsiveFlyout = styled(EuiFlyout)`
-  width: 100%;
-
-  @media (min-width: 800px) {
-    width: 90%;
-  }
-
-  @media (min-width: 1000px) {
-    width: 70%;
-  }
-
-  @media (min-width: 1400px) {
-    width: 50%;
-  }
-
-  @media (min-width: 2000px) {
-    width: 35%;
-  }
-`;
 
 function DroppedSpansWarning({
   transactionDoc
@@ -124,10 +103,7 @@ export function TransactionFlyout({
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <TransactionActionMenu
-                transaction={transactionDoc}
-                location={location}
-              />
+              <TransactionActionMenu transaction={transactionDoc} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>

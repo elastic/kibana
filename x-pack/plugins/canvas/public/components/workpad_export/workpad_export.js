@@ -57,7 +57,7 @@ export class WorkpadExport extends React.PureComponent {
     return (
       <div className="canvasWorkpadExport__panelContent">
         <EuiText size="s">
-          <p>PDFs can take a minute or two to generate based upon the size of your workpad</p>
+          <p>PDFs can take a minute or two to generate based on the size of your workpad.</p>
         </EuiText>
         <EuiSpacer size="s" />
 
@@ -92,10 +92,10 @@ export class WorkpadExport extends React.PureComponent {
           }}
         >
           <EuiButton
-            aria-label="Copy to clipboard"
             iconType="copy"
             size="s"
             style={{ width: '100%' }}
+            aria-label="Alternatively, you can generate a PDF from a script or with Watcher by using this URL. Press Enter to copy the URL to clipboard."
           >
             Copy POST URL
           </EuiButton>
@@ -117,11 +117,11 @@ export class WorkpadExport extends React.PureComponent {
         },
       },
       {
-        name: 'PDF Reports',
+        name: 'PDF reports',
         icon: 'document',
         panel: {
           id: 1,
-          title: 'PDF Reports',
+          title: 'PDF reports',
           content: this.props.enabled
             ? this.renderPDFControls(closePopover)
             : this.renderDisabled(),

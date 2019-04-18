@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import moment from 'moment';
 import { noop, random, get, find, identity } from 'lodash';
@@ -102,11 +102,9 @@ describe('Worker class', function () {
       worker = new Worker(mockQueue, jobtype, workerFn, defaultWorkerOptions);
       expect(worker).to.have.property('id');
       expect(worker).to.have.property('queue', mockQueue);
-      expect(worker).to.have.property('client', client);
       expect(worker).to.have.property('jobtype', jobtype);
       expect(worker).to.have.property('workerFn', workerFn);
       expect(worker).to.have.property('checkSize');
-      expect(worker).to.have.property('doctype');
     });
 
     it('should have a unique ID', function () {
@@ -117,14 +115,6 @@ describe('Worker class', function () {
       expect(worker2.id).to.be.a('string');
 
       expect(worker.id).to.not.equal(worker2.id);
-    });
-
-    it('should use custom client', function () {
-      const newClient = new ClientMock();
-      worker = new Worker(mockQueue, 'test', noop, { ...defaultWorkerOptions, client: newClient });
-      expect(worker).to.have.property('queue', mockQueue);
-      expect(worker).to.have.property('client', newClient);
-      expect(worker.client).to.not.equal(client);
     });
   });
 
@@ -281,15 +271,14 @@ describe('Worker class', function () {
     function getSearchParams(jobtype = 'test', params = {}) {
       worker = new Worker(mockQueue, jobtype, noop, { ...defaultWorkerOptions, ...params });
       worker._getPendingJobs();
-      return searchStub.firstCall.args[0];
+      return searchStub.firstCall.args[1];
     }
 
     describe('error handling', function () {
-      beforeEach(() => {
-      });
-
       it('should pass search errors', function (done) {
-        searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.reject());
+        searchStub = sinon.stub(mockQueue.client, 'callWithInternalUser')
+          .withArgs('search')
+          .callsFake(() => Promise.reject());
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
         worker._getPendingJobs()
           .then(() => done(new Error('should not resolve')))
@@ -301,9 +290,9 @@ describe('Worker class', function () {
       describe('missing index', function () {
 
         it('should swallow error', function (done) {
-          searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.reject({
-            status: 404
-          }));
+          searchStub = sinon.stub(mockQueue.client, 'callWithInternalUser')
+            .withArgs('search')
+            .callsFake(() => Promise.reject({ status: 404 }));
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
           worker._getPendingJobs()
             .then(() => { done(); })
@@ -311,9 +300,9 @@ describe('Worker class', function () {
         });
 
         it('should return an empty array', function (done) {
-          searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.reject({
-            status: 404
-          }));
+          searchStub = sinon.stub(mockQueue.client, 'callWithInternalUser')
+            .withArgs('search')
+            .callsFake(() => Promise.reject({ status: 404 }));
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
           worker._getPendingJobs()
             .then((res) => {
@@ -330,30 +319,14 @@ describe('Worker class', function () {
       });
     });
 
-
-    describe('query parameters', function () {
-      beforeEach(() => {
-        searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.resolve({ hits: { hits: [] } }));
-      });
-
-      it('should query by default doctype', function () {
-        const params = getSearchParams();
-        expect(params).to.have.property('type', constants.DEFAULT_SETTING_DOCTYPE);
-      });
-
-      it('should query by custom doctype', function () {
-        const doctype = 'custom_test';
-        const params = getSearchParams('type', { doctype });
-        expect(params).to.have.property('type', doctype);
-      });
-    });
-
     describe('query body', function () {
       const conditionPath = 'query.bool.filter.bool';
       const jobtype = 'test_jobtype';
 
       beforeEach(() => {
-        searchStub = sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.resolve({ hits: { hits: [] } }));
+        searchStub = sinon.stub(mockQueue.client, 'callWithInternalUser')
+          .withArgs('search')
+          .callsFake(() => Promise.resolve({ hits: { hits: [] } }));
         anchorMoment = moment(anchor);
         clock = sinon.useFakeTimers(anchorMoment.valueOf());
       });
@@ -372,12 +345,6 @@ describe('Worker class', function () {
         const { body } = getSearchParams(jobtype);
         expect(body).to.have.property('_source');
         expect(body._source).to.eql({ excludes: excludedFields });
-      });
-
-      it('should search by job type', function () {
-        const { body } = getSearchParams(jobtype);
-        const conditions = get(body, conditionPath);
-        expect(conditions.must).to.eql({ term: { jobtype: jobtype } });
       });
 
       it('should search for pending or expired jobs', function () {
@@ -433,11 +400,11 @@ describe('Worker class', function () {
         type: 'test',
         id: 12345,
       };
-      return mockQueue.client.get(params)
+      return mockQueue.client.callWithInternalUser('get', params)
         .then((jobDoc) => {
           job = jobDoc;
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
-          updateSpy = sinon.spy(mockQueue.client, 'update');
+          updateSpy = sinon.spy(mockQueue.client, 'callWithInternalUser').withArgs('update');
         });
     });
 
@@ -447,9 +414,8 @@ describe('Worker class', function () {
 
     it('should use seqNo and primaryTerm on update', function () {
       worker._claimJob(job);
-      const query = updateSpy.firstCall.args[0];
+      const query = updateSpy.firstCall.args[1];
       expect(query).to.have.property('index', job._index);
-      expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
       expect(query).to.have.property('if_seq_no', job._seq_no);
       expect(query).to.have.property('if_primary_term', job._primary_term);
@@ -457,19 +423,19 @@ describe('Worker class', function () {
 
     it('should increment the job attempts', function () {
       worker._claimJob(job);
-      const doc = updateSpy.firstCall.args[0].body.doc;
+      const doc = updateSpy.firstCall.args[1].body.doc;
       expect(doc).to.have.property('attempts', job._source.attempts + 1);
     });
 
     it('should update the job status', function () {
       worker._claimJob(job);
-      const doc = updateSpy.firstCall.args[0].body.doc;
+      const doc = updateSpy.firstCall.args[1].body.doc;
       expect(doc).to.have.property('status', constants.JOB_STATUS_PROCESSING);
     });
 
     it('should set job expiration time', function () {
       worker._claimJob(job);
-      const doc = updateSpy.firstCall.args[0].body.doc;
+      const doc = updateSpy.firstCall.args[1].body.doc;
       const expiration = anchorMoment.add(defaults.timeout).toISOString();
       expect(doc).to.have.property('process_expiration', expiration);
     });
@@ -501,8 +467,10 @@ describe('Worker class', function () {
     });
 
     it('should reject the promise on conflict errors', function () {
-      mockQueue.client.update.restore();
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
+      mockQueue.client.callWithInternalUser.restore();
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 409 }));
       return worker._claimJob(job)
         .catch(err => {
           expect(err).to.eql({ statusCode: 409 });
@@ -510,8 +478,10 @@ describe('Worker class', function () {
     });
 
     it('should reject the promise on other errors', function () {
-      mockQueue.client.update.restore();
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
+      mockQueue.client.callWithInternalUser.restore();
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 401 }));
       return worker._claimJob(job)
         .catch(err => {
           expect(err).to.eql({ statusCode: 401 });
@@ -522,7 +492,6 @@ describe('Worker class', function () {
   describe('find a pending job to claim', function () {
     const getMockJobs = (status = 'pending') => ([{
       _index: 'myIndex',
-      _type: 'test',
       _id: 12345,
       _seq_no: 3,
       _primary_term: 3,
@@ -545,11 +514,13 @@ describe('Worker class', function () {
     });
 
     afterEach(() => {
-      mockQueue.client.update.restore();
+      mockQueue.client.callWithInternalUser.restore();
     });
 
     it('should emit for errors from claiming job', function (done) {
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 401 }));
 
       worker.once(constants.EVENT_WORKER_JOB_CLAIM_ERROR, function (err) {
         try {
@@ -567,7 +538,9 @@ describe('Worker class', function () {
     });
 
     it('should reject the promise if an error claiming the job', function () {
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 409 }));
       return worker._claimPendingJobs(getMockJobs())
         .catch(err => {
           expect(err).to.eql({ statusCode: 409 });
@@ -575,12 +548,13 @@ describe('Worker class', function () {
     });
 
     it('should get the pending job', function () {
-      sinon.stub(mockQueue.client, 'update').returns(Promise.resolve({ test: 'cool' }));
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.resolve({ test: 'cool' }));
       sinon.stub(worker, '_performJob').callsFake(identity);
       return worker._claimPendingJobs(getMockJobs())
         .then(claimedJob => {
           expect(claimedJob._index).to.be('myIndex');
-          expect(claimedJob._type).to.be('test');
           expect(claimedJob._source.jobtype).to.be('jobtype');
           expect(claimedJob._source.status).to.be('processing');
           expect(claimedJob.test).to.be('cool');
@@ -597,11 +571,11 @@ describe('Worker class', function () {
       anchorMoment = moment(anchor);
       clock = sinon.useFakeTimers(anchorMoment.valueOf());
 
-      return mockQueue.client.get()
+      return mockQueue.client.callWithInternalUser('get')
         .then((jobDoc) => {
           job = jobDoc;
           worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
-          updateSpy = sinon.spy(mockQueue.client, 'update');
+          updateSpy = sinon.spy(mockQueue.client, 'callWithInternalUser').withArgs('update');
         });
     });
 
@@ -611,9 +585,8 @@ describe('Worker class', function () {
 
     it('should use _seq_no and _primary_term on update', function () {
       worker._failJob(job);
-      const query = updateSpy.firstCall.args[0];
+      const query = updateSpy.firstCall.args[1];
       expect(query).to.have.property('index', job._index);
-      expect(query).to.have.property('type', job._type);
       expect(query).to.have.property('id', job._id);
       expect(query).to.have.property('if_seq_no', job._seq_no);
       expect(query).to.have.property('if_primary_term', job._primary_term);
@@ -621,28 +594,32 @@ describe('Worker class', function () {
 
     it('should set status to failed', function () {
       worker._failJob(job);
-      const doc = updateSpy.firstCall.args[0].body.doc;
+      const doc = updateSpy.firstCall.args[1].body.doc;
       expect(doc).to.have.property('status', constants.JOB_STATUS_FAILED);
     });
 
     it('should append error message if supplied', function () {
       const msg = 'test message';
       worker._failJob(job, msg);
-      const doc = updateSpy.firstCall.args[0].body.doc;
+      const doc = updateSpy.firstCall.args[1].body.doc;
       expect(doc).to.have.property('output');
       expect(doc.output).to.have.property('content', msg);
     });
 
     it('should return true on conflict errors', function () {
-      mockQueue.client.update.restore();
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 409 }));
+      mockQueue.client.callWithInternalUser.restore();
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 409 }));
       return worker._failJob(job)
         .then((res) => expect(res).to.equal(true));
     });
 
     it('should return false on other document update errors', function () {
-      mockQueue.client.update.restore();
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
+      mockQueue.client.callWithInternalUser.restore();
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 401 }));
       return worker._failJob(job)
         .then((res) => expect(res).to.equal(false));
     });
@@ -653,7 +630,7 @@ describe('Worker class', function () {
       clock.tick(100);
 
       worker._failJob(job, msg);
-      const doc = updateSpy.firstCall.args[0].body.doc;
+      const doc = updateSpy.firstCall.args[1].body.doc;
       expect(doc).to.have.property('output');
       expect(doc).to.have.property('status', constants.JOB_STATUS_FAILED);
       expect(doc).to.have.property('completed_at');
@@ -677,8 +654,10 @@ describe('Worker class', function () {
     });
 
     it('should emit on other document update errors', function (done) {
-      mockQueue.client.update.restore();
-      sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 401 }));
+      mockQueue.client.callWithInternalUser.restore();
+      sinon.stub(mockQueue.client, 'callWithInternalUser')
+        .withArgs('update')
+        .returns(Promise.reject({ statusCode: 401 }));
 
       worker.on(constants.EVENT_WORKER_FAIL_UPDATE_ERROR, function (err) {
         try {
@@ -705,10 +684,10 @@ describe('Worker class', function () {
         value: random(0, 100, true)
       };
 
-      return mockQueue.client.get({}, { payload })
+      return mockQueue.client.callWithInternalUser('get', {}, { payload })
         .then((jobDoc) => {
           job = jobDoc;
-          updateSpy = sinon.spy(mockQueue.client, 'update');
+          updateSpy = sinon.spy(mockQueue.client, 'callWithInternalUser').withArgs('update');
         });
     });
 
@@ -724,7 +703,7 @@ describe('Worker class', function () {
       });
 
       it('should update the job with the workerFn output', function () {
-        const workerFn = function (jobPayload) {
+        const workerFn = function (job, jobPayload) {
           expect(jobPayload).to.eql(payload);
           return payload;
         };
@@ -733,9 +712,9 @@ describe('Worker class', function () {
         return worker._performJob(job)
           .then(() => {
             sinon.assert.calledOnce(updateSpy);
-            const query = updateSpy.firstCall.args[0];
+            const query = updateSpy.firstCall.args[1];
+
             expect(query).to.have.property('index', job._index);
-            expect(query).to.have.property('type', job._type);
             expect(query).to.have.property('id', job._id);
             expect(query).to.have.property('if_seq_no', job._seq_no);
             expect(query).to.have.property('if_primary_term', job._primary_term);
@@ -747,7 +726,7 @@ describe('Worker class', function () {
 
       it('should update the job status and completed time', function () {
         const startTime = moment().valueOf();
-        const workerFn = function (jobPayload) {
+        const workerFn = function (job, jobPayload) {
           expect(jobPayload).to.eql(payload);
           return new Promise(function (resolve) {
             setTimeout(() => resolve(payload), 10);
@@ -758,7 +737,7 @@ describe('Worker class', function () {
         return worker._performJob(job)
           .then(() => {
             sinon.assert.calledOnce(updateSpy);
-            const doc = updateSpy.firstCall.args[0].body.doc;
+            const doc = updateSpy.firstCall.args[1].body.doc;
             expect(doc).to.have.property('status', constants.JOB_STATUS_COMPLETED);
             expect(doc).to.have.property('completed_at');
             const completedTimestamp = moment(doc.completed_at).valueOf();
@@ -776,7 +755,6 @@ describe('Worker class', function () {
             expect(workerJob).to.have.property('job');
             expect(workerJob.job).to.have.property('id');
             expect(workerJob.job).to.have.property('index');
-            expect(workerJob.job).to.have.property('type');
 
             expect(workerJob).to.have.property('output');
             expect(workerJob.output).to.have.property('content');
@@ -880,7 +858,9 @@ describe('Worker class', function () {
           }
         };
 
-        sinon.stub(mockQueue.client, 'update').returns(Promise.reject({ statusCode: 413 }));
+        sinon.stub(mockQueue.client, 'callWithInternalUser')
+          .withArgs('update')
+          .returns(Promise.reject({ statusCode: 413 }));
 
         const workerFn = function (jobPayload) {
           return new Promise(function (resolve) {
@@ -899,7 +879,9 @@ describe('Worker class', function () {
 
     describe('search failure', function () {
       it('causes _processPendingJobs to reject the Promise', function () {
-        sinon.stub(mockQueue.client, 'search').returns(Promise.reject(new Error('test error')));
+        sinon.stub(mockQueue.client, 'callWithInternalUser')
+          .withArgs('search')
+          .returns(Promise.reject(new Error('test error')));
         worker = new Worker(mockQueue, 'test', noop, defaultWorkerOptions);
         return worker._processPendingJobs()
           .then(() => {
@@ -919,7 +901,7 @@ describe('Worker class', function () {
         const timeout = 20;
         cancellationCallback = function () {};
 
-        const workerFn = function (payload, cancellationToken) {
+        const workerFn = function (job, payload, cancellationToken) {
           cancellationToken.on(cancellationCallback);
           return new Promise(function (resolve) {
             setTimeout(() => {
@@ -998,7 +980,9 @@ describe('Worker class', function () {
       };
 
       beforeEach(function () {
-        sinon.stub(mockQueue.client, 'search').callsFake(() => Promise.resolve({ hits: { hits: [] } }));
+        sinon.stub(mockQueue.client, 'callWithInternalUser')
+          .withArgs('search')
+          .callsFake(() => Promise.resolve({ hits: { hits: [] } }));
       });
 
       describe('workerFn rejects promise', function () {

@@ -7,16 +7,9 @@ exports[`EmptyStatusBar component renders a default message when no message prov
   paddingSize="m"
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
     gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       No data found for monitor id mon_id
@@ -32,16 +25,9 @@ exports[`EmptyStatusBar component renders a message when provided 1`] = `
   paddingSize="m"
 >
   <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    direction="row"
     gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       foobarbaz

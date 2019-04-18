@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 
 // ====================================================
 // START: Typescript template
@@ -60,6 +60,8 @@ export interface InfraSourceFields {
   container: string;
   /** The fields to identify a host by */
   host: string;
+  /** The fields to use as the log message */
+  message: string[];
   /** The field to identify a pod by */
   pod: string;
   /** The field to use as a tiebreaker for log events that have identical timestamps */
@@ -586,6 +588,50 @@ export namespace FlyoutItemQuery {
   };
 }
 
+export namespace LogSummary {
+  export type Variables = {
+    sourceId?: string | null;
+    start: number;
+    end: number;
+    bucketSize: number;
+    filterQuery?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    logSummaryBetween: LogSummaryBetween;
+  };
+
+  export type LogSummaryBetween = {
+    __typename?: 'InfraLogSummaryInterval';
+
+    start?: number | null;
+
+    end?: number | null;
+
+    buckets: Buckets[];
+  };
+
+  export type Buckets = {
+    __typename?: 'InfraLogSummaryBucket';
+
+    start: number;
+
+    end: number;
+
+    entriesCount: number;
+  };
+}
+
 export namespace MetadataQuery {
   export type Variables = {
     sourceId: string;
@@ -672,6 +718,92 @@ export namespace MetricsQuery {
   };
 }
 
+export namespace CreateSourceConfigurationMutation {
+  export type Variables = {
+    sourceId: string;
+    sourceConfiguration: CreateSourceInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    createSource: CreateSource;
+  };
+
+  export type CreateSource = {
+    __typename?: 'CreateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace UpdateSourceMutation {
+  export type Variables = {
+    sourceId?: string | null;
+    changes: UpdateSourceInput[];
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    updateSource: UpdateSource;
+  };
+
+  export type UpdateSource = {
+    __typename?: 'UpdateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
 export namespace WaffleNodesQuery {
   export type Variables = {
     sourceId: string;
@@ -728,62 +860,6 @@ export namespace WaffleNodesQuery {
 
     max: number;
   };
-}
-
-export namespace CreateSourceMutation {
-  export type Variables = {
-    sourceId: string;
-    sourceConfiguration: CreateSourceInput;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    createSource: CreateSource;
-  };
-
-  export type CreateSource = {
-    __typename?: 'CreateSourceResult';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
-}
-
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
-}
-
-export namespace UpdateSourceMutation {
-  export type Variables = {
-    sourceId?: string | null;
-    changes: UpdateSourceInput[];
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    updateSource: UpdateSource;
-  };
-
-  export type UpdateSource = {
-    __typename?: 'UpdateSourceResult';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
 }
 
 export namespace LogEntries {
@@ -864,75 +940,17 @@ export namespace LogEntries {
   };
 }
 
-export namespace LogSummary {
-  export type Variables = {
-    sourceId?: string | null;
-    start: number;
-    end: number;
-    bucketSize: number;
-    filterQuery?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    logSummaryBetween: LogSummaryBetween;
-  };
-
-  export type LogSummaryBetween = {
-    __typename?: 'InfraLogSummaryInterval';
-
-    start?: number | null;
-
-    end?: number | null;
-
-    buckets: Buckets[];
-  };
-
-  export type Buckets = {
-    __typename?: 'InfraLogSummaryBucket';
-
-    start: number;
-
-    end: number;
-
-    entriesCount: number;
-  };
-}
-
-export namespace SourceFields {
+export namespace SourceConfigurationFields {
   export type Fragment = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    version?: string | null;
-
-    updatedAt?: number | null;
-
-    configuration: Configuration;
-
-    status: Status;
-  };
-
-  export type Configuration = {
     __typename?: 'InfraSourceConfiguration';
 
     name: string;
 
     description: string;
 
-    metricAlias: string;
-
     logAlias: string;
+
+    metricAlias: string;
 
     fields: Fields;
   };
@@ -944,14 +962,18 @@ export namespace SourceFields {
 
     host: string;
 
+    message: string[];
+
     pod: string;
 
     tiebreaker: string;
 
     timestamp: string;
   };
+}
 
-  export type Status = {
+export namespace SourceStatusFields {
+  export type Fragment = {
     __typename?: 'InfraSourceStatus';
 
     indexFields: IndexFields[];
@@ -981,5 +1003,17 @@ export namespace InfraTimeKeyFields {
     time: number;
 
     tiebreaker: number;
+  };
+}
+
+export namespace InfraSourceFields {
+  export type Fragment = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    version?: string | null;
+
+    updatedAt?: number | null;
   };
 }

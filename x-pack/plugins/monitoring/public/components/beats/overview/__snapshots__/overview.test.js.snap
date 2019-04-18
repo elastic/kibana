@@ -14,18 +14,9 @@ exports[`Overview that overview page renders normally 1`] = `
         stats={Array []}
       />
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
         wrap={true}
       >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -33,7 +24,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -74,10 +64,7 @@ exports[`Overview that overview page renders normally 1`] = `
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -85,7 +72,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -118,10 +104,7 @@ exports[`Overview that overview page renders normally 1`] = `
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiPanel
             grow={true}
             hasShadow={false}
@@ -129,7 +112,6 @@ exports[`Overview that overview page renders normally 1`] = `
           >
             <EuiTitle
               size="s"
-              textTransform="none"
             >
               <h3>
                 <FormattedMessage
@@ -163,17 +145,9 @@ exports[`Overview that overview page renders normally 1`] = `
         size="s"
       />
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
         wrap={true}
       >
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="0"
           style={
             Object {
@@ -192,8 +166,6 @@ exports[`Overview that overview page renders normally 1`] = `
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="1"
           style={
             Object {
@@ -212,8 +184,6 @@ exports[`Overview that overview page renders normally 1`] = `
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="2"
           style={
             Object {
@@ -232,8 +202,6 @@ exports[`Overview that overview page renders normally 1`] = `
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="3"
           style={
             Object {
@@ -281,17 +249,9 @@ exports[`Overview that overview page shows a message if there is no beats data 1
         size="s"
       />
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
         wrap={true}
       >
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="0"
           style={
             Object {
@@ -310,8 +270,6 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="1"
           style={
             Object {
@@ -330,8 +288,6 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="2"
           style={
             Object {
@@ -350,8 +306,6 @@ exports[`Overview that overview page shows a message if there is no beats data 1
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
           key="3"
           style={
             Object {

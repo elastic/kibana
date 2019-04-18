@@ -18,10 +18,7 @@ exports[`renders DashboardCloneModal 1`] = `
       </EuiModalHeaderTitle>
     </EuiModalHeader>
     <EuiModalBody>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           <FormattedMessage
             defaultMessage="Please enter a new name for your dashboard."
@@ -30,9 +27,7 @@ exports[`renders DashboardCloneModal 1`] = `
           />
         </p>
       </EuiText>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiFieldText
         autoFocus={true}
         compressed={false}
@@ -51,6 +46,7 @@ exports[`renders DashboardCloneModal 1`] = `
         fill={false}
         iconSide="left"
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage
@@ -66,6 +62,7 @@ exports[`renders DashboardCloneModal 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="button"
       >
         <FormattedMessage

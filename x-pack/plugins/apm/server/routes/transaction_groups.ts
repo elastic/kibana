@@ -5,8 +5,8 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
 import Joi from 'joi';
+import { CoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getChartsData } from '../lib/transactions/charts';
@@ -14,12 +14,14 @@ import { getDistribution } from '../lib/transactions/distribution';
 import { getTopTransactions } from '../lib/transactions/get_top_transactions';
 
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initTransactionGroupsApi(server: Server) {
+export function initTransactionGroupsApi(core: CoreSetup) {
+  const { server } = core.http;
+
   server.route({
     method: 'GET',
     path:
@@ -29,7 +31,8 @@ export function initTransactionGroupsApi(server: Server) {
         query: withDefaultValidators({
           query: Joi.string()
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const { serviceName, transactionType } = req.params;
@@ -49,7 +52,8 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -69,7 +73,8 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -88,7 +93,8 @@ export function initTransactionGroupsApi(server: Server) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);
@@ -112,7 +118,8 @@ export function initTransactionGroupsApi(server: Server) {
           transactionId: Joi.string().default(''),
           traceId: Joi.string().default('')
         })
-      }
+      },
+      tags: ['access:apm']
     },
     handler: req => {
       const setup = setupRequest(req);

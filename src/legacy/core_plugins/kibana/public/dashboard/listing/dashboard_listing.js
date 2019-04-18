@@ -46,14 +46,13 @@ class DashboardListingUi extends React.Component {
   render() {
     return (
       <TableListView
-        createItem={this.props.createItem}
+        createItem={this.props.hideWriteControls ? null : this.props.createItem}
         findItems={this.props.findItems}
-        deleteItems={this.props.deleteItems}
-        editItem={this.props.editItem}
+        deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
+        editItem={this.props.hideWriteControls ? null : this.props.editItem}
         tableColumns={this.getTableColumns()}
         listingLimit={this.props.listingLimit}
         initialFilter={this.props.initialFilter}
-        hideWriteControls={this.props.hideWriteControls}
         noItemsFragment={this.getNoItemsMessage()}
         entityName={
           i18n.translate('kbn.dashboard.listing.table.entityName', {
@@ -160,7 +159,7 @@ class DashboardListingUi extends React.Component {
         sortable: true,
         render: (field, record) => (
           <EuiLink
-            onClick={() => this.props.editItem(record)}
+            href={this.props.getViewUrl(record)}
             data-test-subj={`dashboardListingTitleLink-${record.title.split(' ').join('-')}`}
           >
             {field}
@@ -185,6 +184,7 @@ DashboardListingUi.propTypes = {
   findItems: PropTypes.func.isRequired,
   deleteItems: PropTypes.func.isRequired,
   editItem: PropTypes.func.isRequired,
+  getViewUrl: PropTypes.func.isRequired,
   listingLimit: PropTypes.number.isRequired,
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,

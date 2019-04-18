@@ -85,7 +85,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       get: (key: string) => config[key],
     };
 
-    server.decorate('server', 'config', jest.fn(() => mockConfig));
+    server.decorate('server', 'config', jest.fn<any, any>(() => mockConfig));
 
     initApiFn(server, pre);
 

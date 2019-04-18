@@ -27,7 +27,7 @@ export function buildAggBody(fieldName, scriptedFields) {
   if (scriptedField) {
     return {
       script: {
-        inline: scriptedField.script,
+        source: scriptedField.script,
         lang: scriptedField.lang
       }
     };

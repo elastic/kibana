@@ -7,7 +7,6 @@
 import { applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import { getWindow } from '../../lib/get_window';
-import { aeroelastic } from './aeroelastic';
 import { breadcrumbs } from './breadcrumbs';
 import { esPersistMiddleware } from './es_persist';
 import { fullscreen } from './fullscreen';
@@ -16,13 +15,16 @@ import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { workpadRefresh } from './workpad_refresh';
 import { appReady } from './app_ready';
+import { elementStats } from './element_stats';
+import { resolvedArgs } from './resolved_args';
 
 const middlewares = [
   applyMiddleware(
     thunkMiddleware,
+    elementStats,
+    resolvedArgs,
     esPersistMiddleware,
     historyMiddleware,
-    aeroelastic,
     breadcrumbs,
     fullscreen,
     inFlight,
@@ -32,7 +34,7 @@ const middlewares = [
   ),
 ];
 
-// intitialize redux devtools if extension is installed
+// initialize redux devtools if extension is installed
 if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) {
   middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
 }

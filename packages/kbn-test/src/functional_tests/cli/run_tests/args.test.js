@@ -22,6 +22,14 @@ import { createAbsolutePathSerializer } from '@kbn/dev-utils';
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer(process.cwd()));
 
+const INITIAL_TEST_ES_FROM = process.env.TEST_ES_FROM;
+beforeEach(() => {
+  process.env.TEST_ES_FROM = 'snapshot';
+});
+afterEach(() => {
+  process.env.TEST_ES_FROM = INITIAL_TEST_ES_FROM;
+});
+
 describe('display help for run tests CLI', () => {
   it('displays as expected', () => {
     expect(displayHelp()).toMatchSnapshot();
@@ -70,6 +78,18 @@ describe('process options for run tests CLI', () => {
 
   it('accepts source value for esFrom', () => {
     const options = processOptions({ esFrom: 'source' }, ['foo']);
+    expect(options).toMatchSnapshot();
+  });
+
+  it('accepts source value for $TEST_ES_FROM', () => {
+    process.env.TEST_ES_FROM = 'source';
+    const options = processOptions({}, ['foo']);
+    expect(options).toMatchSnapshot();
+  });
+
+  it('prioritizes source flag over $TEST_ES_FROM', () => {
+    process.env.TEST_ES_FROM = 'source';
+    const options = processOptions({ esFrom: 'snapshot' }, ['foo']);
     expect(options).toMatchSnapshot();
   });
 

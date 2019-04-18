@@ -12,8 +12,8 @@ import { management } from 'ui/management';
 import { uiModules } from 'ui/modules';
 // @ts-ignore: path dynamic for kibana
 import routes from 'ui/routes';
-import { configBlockSchemas } from 'x-pack/plugins/beats_management/common/config_schemas';
-import { translateConfigSchema } from 'x-pack/plugins/beats_management/common/config_schemas_translations_map';
+import { configBlockSchemas } from '../../../common/config_schemas';
+import { translateConfigSchema } from '../../../common/config_schemas_translations_map';
 // @ts-ignore: path dynamic for kibana
 import { MemoryBeatsAdapter } from '../adapters/beats/memory_beats_adapter';
 import { KibanaFrameworkAdapter } from '../adapters/framework/kibana_framework_adapter';

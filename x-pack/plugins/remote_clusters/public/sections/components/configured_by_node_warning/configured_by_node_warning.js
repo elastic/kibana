@@ -23,6 +23,7 @@ export function ConfiguredByNodeWarning() {
       }
       color="primary"
       iconType="iInCircle"
+      data-test-subj="remoteClusterConfiguredByNodeWarning"
     />
   );
 }

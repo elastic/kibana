@@ -44,7 +44,12 @@ export function remoteClusters(kibana) {
         enabled: Joi.boolean().default(true),
       }).default();
     },
-
+    isEnabled(config) {
+      return (
+        config.get('xpack.remote_clusters.enabled') &&
+        config.get('xpack.index_management.enabled')
+      );
+    },
     init: function (server) {
       registerLicenseChecker(server);
       registerListRoute(server);

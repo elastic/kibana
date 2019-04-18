@@ -21,7 +21,6 @@ import Handlebars from 'handlebars';
 import { createHash } from 'crypto';
 import { readFile } from 'fs';
 import { resolve } from 'path';
-import { i18n } from '@kbn/i18n';
 
 export class AppBootstrap {
   constructor({ templateData }) {
@@ -34,17 +33,13 @@ export class AppBootstrap {
       this._rawTemplate = await loadRawTemplate();
     }
 
-    Handlebars.registerHelper('i18n', (id, options) => i18n.translate(id, JSON.parse(options)));
     const template = Handlebars.compile(this._rawTemplate, {
-      knownHelpers: { i18n: true },
       knownHelpersOnly: true,
       noEscape: true, // this is a js file, so html escaping isn't appropriate
       strict: true,
     });
-    const compiledJsFile = template(this.templateData);
-    Handlebars.unregisterHelper('i18n');
 
-    return compiledJsFile;
+    return template(this.templateData);
   }
 
   async getJsFileHash() {

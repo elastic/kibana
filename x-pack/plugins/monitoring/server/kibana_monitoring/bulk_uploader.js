@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, isEmpty, uniq, compact } from 'lodash';
+import { defaultsDeep, uniq, compact } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
 import {
   LOGGING_TAG,
@@ -48,7 +48,7 @@ export class BulkUploader {
       warn: message => server.log(['warning', ...LOGGING_TAGS], message)
     };
 
-    this._client = server.plugins.elasticsearch.getCluster('admin').createClient({
+    this._cluster = server.plugins.elasticsearch.createCluster('admin', {
       plugins: [monitoringBulk],
     });
 
@@ -121,7 +121,7 @@ export class BulkUploader {
   }
 
   _onPayload(payload) {
-    return sendBulkPayload(this._client, this._interval, payload);
+    return sendBulkPayload(this._cluster, this._interval, payload);
   }
 
   /*
@@ -169,9 +169,6 @@ export class BulkUploader {
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
-      if (isEmpty(result)) {
-        return accum;
-      }
       const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});

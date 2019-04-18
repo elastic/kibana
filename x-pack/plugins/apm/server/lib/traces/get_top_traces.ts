@@ -9,16 +9,13 @@ import {
   PROCESSOR_EVENT,
   TRANSACTION_SAMPLED
 } from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../typings/common';
 import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { getTransactionGroups } from '../transaction_groups';
-import { ITransactionGroup } from '../transaction_groups/transform';
 
-export type TraceListAPIResponse = ITransactionGroup[];
-
-export async function getTopTraces(
-  setup: Setup
-): Promise<TraceListAPIResponse> {
+export type TraceListAPIResponse = PromiseReturnType<typeof getTopTraces>;
+export async function getTopTraces(setup: Setup) {
   const { start, end } = setup;
 
   const bodyQuery = {

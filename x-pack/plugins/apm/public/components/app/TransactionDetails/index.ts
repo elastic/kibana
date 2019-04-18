@@ -5,9 +5,9 @@
  */
 
 import { connect } from 'react-redux';
-import { TransactionDetailsView } from 'x-pack/plugins/apm/public/components/app/TransactionDetails/view';
-import { getUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
 import { IReduxState } from '../../../store/rootReducer';
+import { getUrlParams } from '../../../store/urlParams';
+import { TransactionDetailsView } from './view';
 
 function mapStateToProps(state = {} as IReduxState) {
   return {

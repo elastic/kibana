@@ -79,7 +79,7 @@ export default async function (kbnServer, server, config) {
   });
 
   const unusedKeys = await getUnusedConfigKeys(
-    kbnServer.core.handledConfigPaths,
+    kbnServer.newPlatform.params.handledConfigPaths,
     kbnServer.plugins,
     kbnServer.disabledPluginSpecs,
     kbnServer.settings,

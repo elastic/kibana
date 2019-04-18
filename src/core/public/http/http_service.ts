@@ -28,17 +28,18 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { FatalErrorsStartContract } from '../fatal_errors';
+import { FatalErrorsSetup } from '../fatal_errors';
 
 interface Deps {
-  fatalErrors: FatalErrorsStartContract;
+  fatalErrors: FatalErrorsSetup;
 }
 
+/** @internal */
 export class HttpService {
   private readonly loadingCount$ = new Rx.BehaviorSubject(0);
   private readonly stop$ = new Rx.Subject();
 
-  public start({ fatalErrors }: Deps) {
+  public setup({ fatalErrors }: Deps) {
     return {
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
@@ -83,4 +84,5 @@ export class HttpService {
   }
 }
 
-export type HttpStartContract = ReturnType<HttpService['start']>;
+/** @public */
+export type HttpSetup = ReturnType<HttpService['setup']>;

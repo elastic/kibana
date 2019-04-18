@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 
 // ====================================================
 // START: Typescript template
@@ -24,7 +24,7 @@ export interface Query {
 
   getSnapshot?: Snapshot | null;
 
-  getMonitorChartsData?: (MonitorChartEntry | null)[] | null;
+  getMonitorChartsData?: MonitorChart | null;
 
   getLatestMonitors: Ping[];
 
@@ -45,7 +45,7 @@ export interface Ping {
   /** The timestamp of the ping's creation */
   timestamp: string;
   /** Milliseconds from the timestamp to the current time */
-  millisFromNow?: number | null;
+  millisFromNow?: UnsignedInteger | null;
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
@@ -307,15 +307,16 @@ export interface DocCount {
 export interface LatestMonitorsResult {
   monitors?: LatestMonitor[] | null;
 }
-
+/** Represents the latest recorded information about a monitor. */
 export interface LatestMonitor {
+  /** The ID of the monitor represented by this data. */
   id: MonitorKey;
-
+  /** Information from the latest document. */
   ping?: Ping | null;
-
-  upSeries?: (MonitorSeriesPoint | null)[] | null;
-
-  downSeries?: (MonitorSeriesPoint | null)[] | null;
+  /** Buckets of recent up count status data. */
+  upSeries?: MonitorSeriesPoint[] | null;
+  /** Buckets of recent down count status data. */
+  downSeries?: MonitorSeriesPoint[] | null;
 }
 
 export interface MonitorKey {
@@ -351,42 +352,44 @@ export interface HistogramDataPoint {
 
   y?: UnsignedInteger | null;
 }
-
-export interface MonitorChartEntry {
-  maxContent?: DataPoint | null;
-
-  maxResponse?: DataPoint | null;
-
-  maxValidate?: DataPoint | null;
-
-  maxTotal?: DataPoint | null;
-
-  maxWriteRequest?: DataPoint | null;
-
-  maxTcpRtt?: DataPoint | null;
-
-  maxDuration?: DataPoint | null;
-
-  minDuration?: DataPoint | null;
-
-  avgDuration?: DataPoint | null;
-
-  status?: StatusData | null;
+/** The data used to populate the monitor charts. */
+export interface MonitorChart {
+  /** The max and min values for the monitor duration. */
+  durationArea: MonitorDurationAreaPoint[];
+  /** The average values for the monitor duration. */
+  durationLine: MonitorDurationAveragePoint[];
+  /** The counts of up/down checks for the monitor. */
+  status: StatusData[];
+  /** The maximum status doc count in this chart. */
+  statusMaxCount: number;
+  /** The maximum duration value in this chart. */
+  durationMaxValue: number;
 }
-
-export interface DataPoint {
-  x?: UnsignedInteger | null;
-
+/** Represents a monitor's duration performance in microseconds at a point in time. */
+export interface MonitorDurationAreaPoint {
+  /** The timeseries value for this point in time. */
+  x: UnsignedInteger;
+  /** The min duration value in microseconds at this time. */
+  yMin?: number | null;
+  /** The max duration value in microseconds at this point. */
+  yMax?: number | null;
+}
+/** Represents the average monitor duration ms at a point in time. */
+export interface MonitorDurationAveragePoint {
+  /** The timeseries value for this point. */
+  x: UnsignedInteger;
+  /** The average duration ms for the monitor. */
   y?: number | null;
 }
-
+/** Represents a bucket of monitor status information. */
 export interface StatusData {
-  x?: UnsignedInteger | null;
-
+  /** The timeseries point for this status data. */
+  x: UnsignedInteger;
+  /** The value of up counts for this point. */
   up?: number | null;
-
+  /** The value for down counts for this point. */
   down?: number | null;
-
+  /** The total down counts for this point. */
   total?: number | null;
 }
 
@@ -414,6 +417,8 @@ export interface ErrorListItem {
   statusCode?: string | null;
 
   timestamp?: string | null;
+
+  name?: string | null;
 }
 
 export interface MonitorPageTitle {
@@ -422,6 +427,12 @@ export interface MonitorPageTitle {
   url?: string | null;
 
   name?: string | null;
+}
+
+export interface DataPoint {
+  x?: UnsignedInteger | null;
+
+  y?: number | null;
 }
 
 // ====================================================

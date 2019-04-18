@@ -24,7 +24,7 @@
  *
  */
 
-import { transformMatrix3d, vector3d } from './types';
+import { transformMatrix3d, vector3d } from '.';
 
 const NANMATRIX = [
   NaN,

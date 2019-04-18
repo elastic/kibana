@@ -48,6 +48,8 @@ import {
   TypeOf,
   TypeOptions,
   UnionType,
+  URIOptions,
+  URIType,
 } from './types';
 
 export { ObjectType, TypeOf, Type };
@@ -63,6 +65,10 @@ function boolean(options?: TypeOptions<boolean>): Type<boolean> {
 
 function string(options?: StringOptions): Type<string> {
   return new StringType(options);
+}
+
+function uri(options?: URIOptions): Type<string> {
+  return new URIType(options);
 }
 
 function literal<T extends string | number | boolean>(value: T): Type<T> {
@@ -188,6 +194,7 @@ export const schema = {
   recordOf,
   siblingRef,
   string,
+  uri,
 };
 
 export type Schema = typeof schema;

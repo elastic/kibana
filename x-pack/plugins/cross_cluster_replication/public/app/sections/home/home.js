@@ -69,11 +69,11 @@ export class CrossClusterReplicationHome extends PureComponent {
     return (
       <EuiPageBody>
         <EuiPageContent>
-          <EuiTitle size="l">
+          <EuiTitle size="l" data-test-subj="ccrAppTitle">
             <h1>
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternList.crossClusterReplicationTitle"
-                defaultMessage="Cross Cluster Replication"
+                defaultMessage="Cross-Cluster Replication"
               />
             </h1>
           </EuiTitle>
@@ -86,7 +86,7 @@ export class CrossClusterReplicationHome extends PureComponent {
                 onClick={() => this.onSectionChange(tab.id)}
                 isSelected={tab.id === this.state.activeSection}
                 key={tab.id}
-                data-test-subject={tab.testSubj}
+                data-test-subj={tab.testSubj}
               >
                 {tab.name}
               </EuiTab>

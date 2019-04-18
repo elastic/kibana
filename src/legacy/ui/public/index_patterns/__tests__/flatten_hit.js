@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { IndexPatternsFlattenHitProvider } from '../_flatten_hit';
 
@@ -50,11 +50,7 @@ describe('IndexPattern#flattenHit()', function () {
       }
     };
 
-    const cachedFlatten = Private(IndexPatternsFlattenHitProvider)(indexPattern);
-    flattenHit = function (hit, deep = false) {
-      delete hit.$$_flattened;
-      return cachedFlatten(hit, deep);
-    };
+    flattenHit = Private(IndexPatternsFlattenHitProvider)(indexPattern);
 
     config = $injector.get('config');
 
@@ -188,5 +184,12 @@ describe('IndexPattern#flattenHit()', function () {
     config.set('metaFields', ['_metaKey']);
     const flat = flattenHit(hit);
     expect(flat).to.have.property('_metaKey', 20000);
+  });
+
+  it('does not change the contents of the hit object', function () {
+    const originalHit = JSON.stringify(hit);
+    flattenHit(hit);
+
+    expect(JSON.stringify(hit)).to.eql(originalHit);
   });
 });

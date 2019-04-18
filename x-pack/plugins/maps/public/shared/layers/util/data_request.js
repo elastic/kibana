@@ -12,7 +12,6 @@ export class DataRequest {
       ...descriptor
     };
   }
-
   getData() {
     return this._descriptor.data;
   }

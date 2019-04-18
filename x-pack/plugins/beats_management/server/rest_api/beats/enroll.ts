@@ -6,9 +6,10 @@
 import Joi from 'joi';
 import { omit } from 'lodash';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { CMBeat } from '../../../common/domain_types';
+import { BaseReturnType, ReturnTypeCreate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
 import { BeatEnrollmentStatus, CMServerLibs } from '../../lib/types';
-import { wrapEsError } from '../../utils/error_wrappers';
 
 // TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
@@ -31,38 +32,38 @@ export const createBeatEnrollmentRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest, h: any) => {
+  handler: async (
+    request: FrameworkRequest
+  ): Promise<BaseReturnType | ReturnTypeCreate<CMBeat>> => {
     const { beatId } = request.params;
     const enrollmentToken = request.headers['kbn-beats-enrollment-token'];
 
-    try {
-      const { status, accessToken } = await libs.beats.enrollBeat(
-        enrollmentToken,
-        beatId,
-        request.info.remoteAddress,
-        omit(request.payload, 'enrollment_token')
-      );
+    const { status, accessToken } = await libs.beats.enrollBeat(
+      enrollmentToken,
+      beatId,
+      request.info.remoteAddress,
+      omit(request.payload, 'enrollment_token')
+    );
 
-      switch (status) {
-        case BeatEnrollmentStatus.ExpiredEnrollmentToken:
-          return h
-            .response({
-              message: BeatEnrollmentStatus.ExpiredEnrollmentToken,
-            })
-            .code(400);
-        case BeatEnrollmentStatus.InvalidEnrollmentToken:
-          return h
-            .response({
-              message: BeatEnrollmentStatus.InvalidEnrollmentToken,
-            })
-            .code(400);
-        case BeatEnrollmentStatus.Success:
-        default:
-          return h.response({ access_token: accessToken }).code(201);
-      }
-    } catch (err) {
-      // FIXME move this to kibana route thing in adapter
-      return wrapEsError(err);
+    switch (status) {
+      case BeatEnrollmentStatus.ExpiredEnrollmentToken:
+        return {
+          error: { message: BeatEnrollmentStatus.ExpiredEnrollmentToken, code: 400 },
+          success: false,
+        };
+
+      case BeatEnrollmentStatus.InvalidEnrollmentToken:
+        return {
+          error: { message: BeatEnrollmentStatus.InvalidEnrollmentToken, code: 400 },
+          success: false,
+        };
+      case BeatEnrollmentStatus.Success:
+      default:
+        return {
+          item: accessToken,
+          action: 'created',
+          success: true,
+        };
     }
   },
 });

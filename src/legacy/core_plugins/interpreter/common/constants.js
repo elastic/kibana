@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export const SECURITY_AUTH_MESSAGE = 'Authentication failed';
-export const API_ROUTE = '/api/canvas';
+export const API_ROUTE = '/api/interpreter';

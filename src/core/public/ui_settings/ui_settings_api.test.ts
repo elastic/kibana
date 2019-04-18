@@ -22,12 +22,12 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
 import { UiSettingsApi } from './ui_settings_api';
 
 function setup() {
-  const basePath: any = {
-    addToPath: jest.fn(path => `/foo/bar${path}`),
-  };
+  const basePath = basePathServiceMock.createSetupContract();
+  basePath.addToPath.mockImplementation(path => `/foo/bar${path}`);
 
   const uiSettingsApi = new UiSettingsApi(basePath, 'v9.9.9');
 

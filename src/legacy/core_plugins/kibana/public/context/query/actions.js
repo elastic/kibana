@@ -70,7 +70,7 @@ export function QueryActionsProvider(courier, Private, Promise, i18n) {
     setLoadingStatus(state)('anchor');
 
     return Promise.try(() => (
-      fetchAnchor(indexPatternId, anchorType, anchorId, [_.zipObject([sort]), { [tieBreakerField]: 'asc' }])
+      fetchAnchor(indexPatternId, anchorType, anchorId, [_.zipObject([sort]), { [tieBreakerField]: sort[1] }])
     ))
       .then(
         (anchorDocument) => {
@@ -112,7 +112,6 @@ export function QueryActionsProvider(courier, Private, Promise, i18n) {
         sort[1],
         anchor.sort[0],
         tieBreakerField,
-        'asc',
         anchor.sort[1],
         predecessorCount,
         filters
@@ -158,7 +157,6 @@ export function QueryActionsProvider(courier, Private, Promise, i18n) {
         sort[1],
         anchor.sort[0],
         tieBreakerField,
-        'asc',
         anchor.sort[1],
         successorCount,
         filters

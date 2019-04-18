@@ -1,5 +1,6 @@
 : This only needs to be run once per environment to set it up.
 : This requires a GUI, as the VS installation is graphical.
+: If initilization fails, you can simply install run the `install_vs.exe`
 
 @echo off
 
@@ -19,7 +20,7 @@ powershell -command "& {iwr -outf %~dp0../../depot_tools.zip https://storage.goo
 powershell -command "& {Expand-Archive %~dp0../../depot_tools.zip -DestinationPath %~dp0../../depot_tools}"
 
 : Set the environment variables required by depot_tools
-@echo "When Visual Studio is installed, you need to enable the Windows SDK in Control Panel. After taht, press <enter> here to continue initialization"
+@echo "When Visual Studio is installed, you need to enable the Windows SDK in Control Panel. After that, press <enter> here to continue initialization"
 
 pause
 

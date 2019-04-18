@@ -44,9 +44,11 @@ export default function handleResponseBody(panel) {
         })
       );
     }
-    const seriesId = keys[0];
-    const series = panel.series.find(s => s.id === seriesId);
-    const processor = buildProcessorFunction(processors, resp, panel, series);
+    const [ seriesId ] = keys;
+    const meta = get(resp, `aggregations.${seriesId}.meta`, {});
+    const series = panel.series.find(s => s.id === (meta.seriesId || seriesId));
+    const processor = buildProcessorFunction(processors, resp, panel, series, meta);
+
     return processor([]);
   };
 }

@@ -28,7 +28,7 @@ import createAggRowRender from '../../lib/create_agg_row_render';
 import { createUpDownHandler } from '../../lib/sort_keyhandler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-function TopNSeries(props) {
+function TableSeries(props) {
   const {
     model,
     onAdd,
@@ -165,6 +165,8 @@ function TopNSeries(props) {
             onDelete={onDelete}
             onClone={props.onClone}
             onAdd={onAdd}
+            togglePanelActivation={props.togglePanelActivation}
+            isPanelActive={!model.hidden}
             disableDelete={disableDelete}
             disableAdd={disableAdd}
             responsive={false}
@@ -177,7 +179,7 @@ function TopNSeries(props) {
   );
 }
 
-TopNSeries.propTypes = {
+TableSeries.propTypes = {
   className: PropTypes.string,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
@@ -198,7 +200,9 @@ TopNSeries.propTypes = {
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
-  visible: PropTypes.bool
+  visible: PropTypes.bool,
+  togglePanelActivation: PropTypes.func,
+  uiRestrictions: PropTypes.object,
 };
 
-export default injectI18n(TopNSeries);
+export default injectI18n(TableSeries);

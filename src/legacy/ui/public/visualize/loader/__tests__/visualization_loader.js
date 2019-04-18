@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 
 import { setupAndTeardownInjectorStub } from 'test_utils/stub_get_active_injector';
@@ -48,7 +48,7 @@ describe('visualization loader', () => {
   it('should render visualization', async () => {
     const element = document.createElement('div');
     expect(visualizationLoader.render).to.be.a('function');
-    visualizationLoader.render(element, vis);
+    visualizationLoader.render(element, vis, null, vis.params);
     expect($(element).find('.visualization').length).to.be(1);
   });
 
