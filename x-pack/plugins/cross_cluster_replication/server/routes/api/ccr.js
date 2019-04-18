@@ -63,16 +63,11 @@ export const registerCcrRoutes = (server) => {
         throw new Boom('Security info unavailable', { statusCode: 503 });
       }
 
-      // we assume that `xpack.isAvailable()` always returns `true` because we're inside x-pack
-      // if for whatever reason it returns `false`, `isSecurityDisabled()` would also return `false`
-      // which would result in follow-up behavior assuming security is enabled. This is intentional,
-      // because it results in more defensive behavior.
       const securityInfo = (xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security'));
       if (!securityInfo || !securityInfo.isEnabled()) {
-        // If security isn't enabled, tell the user it's required.
+        // If security isn't enabled, let the user use CCR.
         return {
-          isSecurityEnabled: false,
-          hasPermission: false,
+          hasPermission: true,
           missingClusterPrivileges: [],
         };
       }
@@ -97,7 +92,6 @@ export const registerCcrRoutes = (server) => {
         }, []);
 
         return {
-          isSecurityEnabled: true,
           hasPermission,
           missingClusterPrivileges,
         };
