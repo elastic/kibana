@@ -22,19 +22,21 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { SwitchParamEditor } from './switch';
 
-const OtherBucketParamEditor: React.FunctionComponent<AggParamEditorProps<boolean>> = props => (
-  <SwitchParamEditor
-    dataTestSubj="otherBucketSwitch"
-    displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
-      defaultMessage: 'Group other values in separate bucket',
-    })}
-    displayToolTip={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
-      defaultMessage:
-        'Values not in the top N are grouped in this bucket. ' +
-        "To include documents with missing values, enable 'Show missing values'.",
-    })}
-    {...props}
-  />
-);
+function OtherBucketParamEditor(props: AggParamEditorProps<boolean>) {
+  return (
+    <SwitchParamEditor
+      dataTestSubj="otherBucketSwitch"
+      displayLabel={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesLabel', {
+        defaultMessage: 'Group other values in separate bucket',
+      })}
+      displayToolTip={i18n.translate('common.ui.aggTypes.otherBucket.groupValuesTooltip', {
+        defaultMessage:
+          'Values not in the top N are grouped in this bucket. ' +
+          "To include documents with missing values, enable 'Show missing values'.",
+      })}
+      {...props}
+    />
+  );
+}
 
 export { OtherBucketParamEditor };

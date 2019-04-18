@@ -30,8 +30,6 @@ interface SwitchParamEditorProps extends AggParamEditorProps<boolean> {
 }
 
 function SwitchParamEditor({
-  agg,
-  aggParam,
   value,
   setValue,
   dataTestSubj,
@@ -39,12 +37,6 @@ function SwitchParamEditor({
   displayLabel,
   disabled,
 }: SwitchParamEditorProps) {
-  const { shouldShow } = aggParam;
-
-  if (shouldShow && !shouldShow(agg)) {
-    return null;
-  }
-
   return (
     <div className="visEditorSidebar__aggParamFormRow">
       <EuiToolTip content={displayToolTip} delay="long" position="right">
