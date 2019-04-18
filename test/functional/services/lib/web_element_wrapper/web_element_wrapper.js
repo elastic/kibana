@@ -116,7 +116,28 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   async clearValue() {
-    await this._webElement.clear();
+    // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
+    // await this._webElement.clear();
+    await this._driver.executeScript(`arguments[0].value=''`, this._webElement);
+  }
+
+  /**
+   * Clear the value of this element using Keyboard
+   * @param { charByChar: false } options
+   */
+  async clearValueWithKeyboard(options = { charByChar: false }) {
+    if (options.charByChar === true) {
+      const value = await this.getAttribute('value');
+      for (let i = 1; i <= value.length; i++) {
+        await this.pressKeys(this._Keys.BACK_SPACE);
+        await delay(100);
+      }
+    } else {
+      const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+      await this.pressKeys([selectionKey, 'a']);
+      await this.pressKeys(this._Keys.NULL); // Release modifier keys
+      await this.pressKeys(this._Keys.BACK_SPACE); // Delete all content
+    }
   }
 
   /**
@@ -153,16 +174,13 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  async pressKeys(...args) {
-    let chord;
-    //leadfoot compatibility
-    if (Array.isArray(args[0])) {
-      chord = this._Keys.chord(...args[0]);
+  async pressKeys(keys) {
+    if (Array.isArray(keys)) {
+      const chord = this._Keys.chord(keys);
+      await this._webElement.sendKeys(chord);
     } else {
-      chord = this._Keys.chord(...args);
+      await this._webElement.sendKeys(keys);
     }
-
-    await this._webElement.sendKeys(chord);
   }
 
   /**
@@ -177,11 +195,6 @@ export class WebElementWrapper {
    * @param {string} name
    */
   async getAttribute(name) {
-    const rectAttributes = ['height', 'width', 'x', 'y'];
-    if (rectAttributes.includes(name)) {
-      const rect = await this.getSize();
-      return rect[name];
-    }
     return await this._webElement.getAttribute(name);
   }
 

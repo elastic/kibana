@@ -17,10 +17,7 @@ exports[`CalendarListsHeader renders header 1`] = `
         <EuiFlexItem
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Calendars"
@@ -35,7 +32,6 @@ exports[`CalendarListsHeader renders header 1`] = `
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -84,14 +80,10 @@ exports[`CalendarListsHeader renders header 1`] = `
   <EuiSpacer
     size="m"
   />
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <p>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Calendars contain a list of scheduled events for which you do not want to generate anomalies, such as planned system outages or public holidays. The same calendar can be assigned to multiple jobs.{br}{learnMoreLink}"

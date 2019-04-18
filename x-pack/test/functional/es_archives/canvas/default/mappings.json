@@ -224,6 +224,9 @@
             "initials": {
               "type": "keyword"
             },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
             "name": {
               "fields": {
                 "keyword": {

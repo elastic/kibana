@@ -10,6 +10,7 @@ import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { uiCapabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -31,6 +32,7 @@ import {
   getIsFullScreen,
   updateFlyout,
   FLYOUT_STATE,
+  setReadOnly,
   setIsLayerTOCOpen
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
@@ -125,6 +127,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
+    store.dispatch(setReadOnly(!uiCapabilities.maps.save));
 
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
@@ -294,7 +297,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, {
+  }, ...(uiCapabilities.maps.save ? [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
@@ -331,5 +334,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
         />);
       showSaveModal(saveModal);
     }
-  }];
+  }] : [])
+  ];
 });
+

@@ -296,6 +296,7 @@ export const RemoteClusterForm = injectI18n(
               onSearchChange={this.onSeedsInputChange}
               isInvalid={showErrors}
               fullWidth
+              data-test-subj="remoteClusterFormSeedsInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -375,6 +376,7 @@ export const RemoteClusterForm = injectI18n(
               })}
               checked={skipUnavailable}
               onChange={this.onSkipUnavailableChange}
+              data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -590,6 +592,7 @@ export const RemoteClusterForm = injectI18n(
                   onChange={e => this.onFieldsChange({ name: e.target.value })}
                   fullWidth
                   disabled={disabledName}
+                  data-test-subj="remoteClusterFormNameInput"
                 />
               </EuiFormRow>
             </EuiDescribedFormGroup>

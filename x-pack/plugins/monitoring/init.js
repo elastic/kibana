@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from './common/constants';
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
@@ -51,6 +52,30 @@ export const init = (monitoringPlugin, server) => {
       await instantiateClient(server); // Instantiate the dedicated ES client
       await initMonitoringXpackInfo(server); // Route handlers depend on this for xpackInfo
       await requireUIRoutes(server);
+    }
+  });
+
+  xpackMainPlugin.registerFeature({
+    id: 'monitoring',
+    name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
+      defaultMessage: 'Stack Monitoring',
+    }),
+    icon: 'monitoringApp',
+    navLinkId: 'monitoring',
+    app: ['monitoring', 'kibana'],
+    catalogue: ['monitoring'],
+    privileges: {},
+    reserved: {
+      privilege: {
+        savedObject: {
+          all: [],
+          read: ['config']
+        },
+        ui: [],
+      },
+      description: i18n.translate('xpack.monitoring.feature.reserved.description', {
+        defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
+      })
     }
   });
 
