@@ -16,10 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { InjectedMetadataService, InjectedMetadataStart } from './injected_metadata_service';
+import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metadata_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<InjectedMetadataStart> = {
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<InjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getKibanaVersion: jest.fn(),
     getCspConfig: jest.fn(),
@@ -28,30 +28,30 @@ const createStartContractMock = () => {
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
   };
-  startContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
-  startContract.getKibanaVersion.mockReturnValue('kibanaVersion');
-  startContract.getLegacyMetadata.mockReturnValue({
+  setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
+  setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
+  setupContract.getLegacyMetadata.mockReturnValue({
     uiSettings: {
       defaults: { legacyInjectedUiSettingDefaults: true },
       user: { legacyInjectedUiSettingUserValues: true },
     },
   } as any);
-  startContract.getPlugins.mockReturnValue([]);
-  return startContract;
+  setupContract.getPlugins.mockReturnValue([]);
+  return setupContract;
 };
 
 type InjectedMetadataServiceContract = PublicMethodsOf<InjectedMetadataService>;
 const createMock = () => {
   const mocked: jest.Mocked<InjectedMetadataServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     getKibanaVersion: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const injectedMetadataServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

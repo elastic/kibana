@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import moment from 'moment';
 import sinon from 'sinon';
 import { Filter, getTime } from './get_time';

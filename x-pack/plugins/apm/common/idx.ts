@@ -8,6 +8,7 @@
  * DeepRequiredArray
  * Nested array condition handler
  */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface DeepRequiredArray<T> extends Array<DeepRequired<T>> {}
 
 /**

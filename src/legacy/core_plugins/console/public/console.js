@@ -21,11 +21,9 @@ import uiRoutes from 'ui/routes';
 import template from './index.html';
 
 require('brace');
-require('ui-bootstrap-custom');
 
-require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
-require('ui/tooltip');
 require('ui/autoload/styles');
+require('ui/capabilities/route_setup');
 
 require('./src/controllers/sense_controller');
 require('./src/directives/sense_history');
@@ -36,6 +34,7 @@ require('./src/directives/console_menu_directive');
 
 
 uiRoutes.when('/dev_tools/console', {
+  requireUICapability: 'dev_tools.show',
   controller: 'SenseController',
   template,
 });

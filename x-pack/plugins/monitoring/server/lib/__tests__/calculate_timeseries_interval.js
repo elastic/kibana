@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { calculateTimeseriesInterval } from '../calculate_timeseries_interval';
 
 describe('calculateTimeseriesInterval', () => {

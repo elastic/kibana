@@ -10,7 +10,7 @@ import thunk from 'redux-thunk';
 import { remoteClusters } from './reducers';
 import { detailPanel } from './middleware';
 
-function createRemoteClustersStore(initialState = {}) {
+export function createRemoteClustersStore(initialState = {}) {
   const enhancers = [ applyMiddleware(thunk, detailPanel) ];
   return createStore(
     remoteClusters,

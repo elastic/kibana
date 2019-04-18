@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getSavedObjects } from './get_saved_objects';
 
 const indexPatternTitle = 'dynamic index pattern title';

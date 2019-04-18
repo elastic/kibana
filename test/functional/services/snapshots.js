@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { dirname, resolve } from 'path';
 import { writeFile, readFileSync } from 'fs';
 import { fromNode as fcb, promisify } from 'bluebird';

@@ -20,7 +20,7 @@
 import { spawnSync } from 'child_process';
 import { resolve } from 'path';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 const SCRIPT = resolve(__dirname, '../../../../scripts/functional_test_runner.js');
 const BASIC_CONFIG = resolve(__dirname, '../fixtures/simple_project/config.js');

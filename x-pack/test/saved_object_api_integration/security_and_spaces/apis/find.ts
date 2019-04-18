@@ -9,7 +9,7 @@ import { SPACES } from '../../common/lib/spaces';
 import { TestInvoker } from '../../common/lib/types';
 import { findTestSuiteFactory } from '../../common/suites/find';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ getService }: TestInvoker) {
   const supertest = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');

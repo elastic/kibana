@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { getMlIndex } from 'x-pack/plugins/apm/common/ml_job_constants';
+import { idx } from '../../../../../common/idx';
+import { getMlIndex } from '../../../../../common/ml_job_constants';
 import { Setup } from '../../../helpers/setup_request';
 
 interface IOptions {

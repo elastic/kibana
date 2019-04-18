@@ -7,7 +7,6 @@ exports[`Header should render normally 1`] = `
   <EuiFlexItem>
     <EuiTitle
       size="s"
-      textTransform="none"
     >
       <h3>
         <FormattedMessage
@@ -17,10 +16,7 @@ exports[`Header should render normally 1`] = `
         />
       </h3>
     </EuiTitle>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="You can use scripted fields in visualizations and display them in your documents. However, you cannot search scripted fields."
@@ -39,6 +35,7 @@ exports[`Header should render normally 1`] = `
       fill={false}
       href=""
       iconSide="left"
+      size="m"
       type="button"
     >
       <FormattedMessage

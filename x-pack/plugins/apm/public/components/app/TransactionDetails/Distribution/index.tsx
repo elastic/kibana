@@ -9,18 +9,14 @@ import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { Location } from 'history';
 import React, { Component } from 'react';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
-import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
+import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { IUrlParams } from '../../../../store/urlParams';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
@@ -52,7 +48,7 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 
 interface Props {
   location: Location;
-  distribution: ITransactionDistributionAPIResponse;
+  distribution?: ITransactionDistributionAPIResponse;
   urlParams: IUrlParams;
 }
 
@@ -95,8 +91,44 @@ export class TransactionDistribution extends Component<Props> {
         );
   };
 
+  public redirectToTransactionType() {
+    const { urlParams, location, distribution } = this.props;
+
+    if (
+      !distribution ||
+      !distribution.defaultSample ||
+      urlParams.traceId ||
+      urlParams.transactionId
+    ) {
+      return;
+    }
+
+    const { traceId, transactionId } = distribution.defaultSample;
+
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        traceId,
+        transactionId
+      })
+    });
+  }
+
+  public componentDidMount() {
+    this.redirectToTransactionType();
+  }
+
+  public componentDidUpdate() {
+    this.redirectToTransactionType();
+  }
+
   public render() {
     const { location, distribution, urlParams } = this.props;
+
+    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
+      return null;
+    }
 
     const buckets = getFormattedBuckets(
       distribution.buckets,
@@ -163,7 +195,7 @@ export class TransactionDistribution extends Component<Props> {
           bucketIndex={bucketIndex}
           onClick={(bucket: IChartPoint) => {
             if (bucket.sample && bucket.y > 0) {
-              history.replace({
+              history.push({
                 ...location,
                 search: fromQuery({
                   ...toQuery(location.search),

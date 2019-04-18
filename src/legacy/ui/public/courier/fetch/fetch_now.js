@@ -42,7 +42,6 @@ export function FetchNowProvider(Private, Promise) {
   const continueIncomplete = Private(ContinueIncompleteProvider);
 
   const ABORTED = RequestStatus.ABORTED;
-  const DUPLICATE = RequestStatus.DUPLICATE;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function fetchNow(searchRequests) {
@@ -94,7 +93,6 @@ export function FetchNowProvider(Private, Promise) {
           switch (resp) {
             case ABORTED:
               return null;
-            case DUPLICATE:
             case INCOMPLETE:
               throw new Error(
                 i18n.translate('common.ui.courier.fetch.failedToClearRequestErrorMessage', {

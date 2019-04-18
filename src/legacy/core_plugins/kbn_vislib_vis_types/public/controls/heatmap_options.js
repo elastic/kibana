@@ -64,7 +64,7 @@ module.directive('heatmapOptions', function (i18n) {
       };
 
       $scope.getGreaterThan = function (index) {
-        if (index === 0) return;
+        if (index === 0) return -Infinity;
         return $scope.editorState.params.colorsRange[index - 1].to;
       };
 

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
-import { sourceQuery } from '../../../../plugins/infra/public/containers/with_source/query_source.gql_query';
+import { sourceQuery } from '../../../../plugins/infra/public/containers/source/query_source.gql_query';
 import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
 
@@ -339,7 +339,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default sourcesTests;
 
 const createSourceMutation = gql`

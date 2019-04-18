@@ -10,6 +10,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import 'ace';
 import 'ui/angular_ui_select';
+import 'ui/directives/input_focus';
 
 import { parseInterval } from 'ui/utils/parse_interval';
 import { timefilter } from 'ui/timefilter';

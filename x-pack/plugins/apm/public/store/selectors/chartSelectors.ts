@@ -10,15 +10,11 @@ import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
-import { TimeSeriesAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts';
-import { AnomalyTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_anomaly_data/transform';
-import { ApmTimeSeriesResponse } from 'x-pack/plugins/apm/server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
-import {
-  Coordinate,
-  RectCoordinate
-} from 'x-pack/plugins/apm/typings/timeseries';
+import { MetricsChartAPIResponse } from '../../../server/lib/metrics/get_all_metrics_chart_data';
+import { TimeSeriesAPIResponse } from '../../../server/lib/transactions/charts';
+import { ApmTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_timeseries_data/transform';
+import { StringMap } from '../../../typings/common';
+import { Coordinate, RectCoordinate } from '../../../typings/timeseries';
 import {
   asDecimal,
   asMillis,
@@ -65,14 +61,27 @@ export interface ITransactionChartData {
   noHits: boolean;
   tpmSeries: ITpmBucket[] | IEmptySeries[];
   responseTimeSeries: TimeSerie[] | IEmptySeries[];
+  hasMLJob: boolean;
 }
 
+const INITIAL_DATA = {
+  apmTimeseries: {
+    totalHits: 0,
+    responseTimes: {
+      avg: [],
+      p95: [],
+      p99: []
+    },
+    tpmBuckets: [],
+    overallAvgDuration: undefined
+  },
+  anomalyTimeseries: undefined
+};
+
 export function getTransactionCharts(
-  urlParams: IUrlParams,
-  timeseriesResponse: TimeSeriesAPIResponse
-) {
-  const { start, end, transactionType } = urlParams;
-  const { apmTimeseries, anomalyTimeseries } = timeseriesResponse;
+  { start, end, transactionType }: IUrlParams,
+  { apmTimeseries, anomalyTimeseries }: TimeSeriesAPIResponse = INITIAL_DATA
+): ITransactionChartData {
   const noHits = apmTimeseries.totalHits === 0;
   const tpmSeries = noHits
     ? getEmptySerie(start, end)
@@ -80,28 +89,24 @@ export function getTransactionCharts(
 
   const responseTimeSeries = noHits
     ? getEmptySerie(start, end)
-    : getResponseTimeSeries(apmTimeseries, anomalyTimeseries);
+    : getResponseTimeSeries({ apmTimeseries, anomalyTimeseries });
 
-  const chartsResult: ITransactionChartData = {
+  return {
     noHits,
     tpmSeries,
-    responseTimeSeries
+    responseTimeSeries,
+    hasMLJob: anomalyTimeseries !== undefined
   };
-
-  return chartsResult;
 }
 
-export interface IMemoryChartData extends MetricsChartAPIResponse {
-  series: TimeSerie[] | IEmptySeries[];
-}
+export type MemoryMetricSeries = ReturnType<typeof getMemorySeries>;
 
 export function getMemorySeries(
-  urlParams: IUrlParams,
+  { start, end }: IUrlParams,
   memoryChartResponse: MetricsChartAPIResponse['memory']
 ) {
-  const { start, end } = urlParams;
   const { series, overallValues, totalHits } = memoryChartResponse;
-  const seriesList: IMemoryChartData['series'] =
+  const seriesList =
     totalHits === 0
       ? getEmptySerie(start, end)
       : [
@@ -132,14 +137,12 @@ export function getMemorySeries(
         ];
 
   return {
-    ...memoryChartResponse,
+    totalHits: memoryChartResponse.totalHits,
     series: seriesList
   };
 }
 
-export interface ICPUChartData extends MetricsChartAPIResponse {
-  series: TimeSerie[];
-}
+export type CPUMetricSeries = ReturnType<typeof getCPUSeries>;
 
 export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
   const { series, overallValues } = CPUChartResponse;
@@ -183,7 +186,7 @@ export function getCPUSeries(CPUChartResponse: MetricsChartAPIResponse['cpu']) {
     }
   ];
 
-  return { ...CPUChartResponse, series: seriesList };
+  return { totalHits: CPUChartResponse.totalHits, series: seriesList };
 }
 
 interface TimeSerie {
@@ -198,10 +201,10 @@ interface TimeSerie {
   areaColor?: string;
 }
 
-export function getResponseTimeSeries(
-  apmTimeseries: ApmTimeSeriesResponse,
-  anomalyTimeseries?: AnomalyTimeSeriesResponse
-) {
+export function getResponseTimeSeries({
+  apmTimeseries,
+  anomalyTimeseries
+}: TimeSeriesAPIResponse) {
   const { overallAvgDuration } = apmTimeseries;
   const { avg, p95, p99 } = apmTimeseries.responseTimes;
 

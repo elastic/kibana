@@ -19,7 +19,6 @@
 
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
-import 'ui/filters/unique';
 import './discover_field';
 import 'ui/angular_ui_select';
 import _ from 'lodash';

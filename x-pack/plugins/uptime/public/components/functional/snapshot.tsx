@@ -18,119 +18,129 @@ import {
   EuiStat,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { Snapshot as SnapshotType } from '../../../common/graphql/types';
+import { UptimeAppColors } from '../../uptime_app';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { snapshotQuery } from '../../queries';
 import { SnapshotHistogram } from './snapshot_histogram';
+import { SnapshotLoading } from './snapshot_loading';
 
-interface SnapshotProps {
-  dangerColor: string;
-  primaryColor: string;
-  snapshot: SnapshotType;
-  windowWidth: number;
+interface SnapshotQueryResult {
+  snapshot?: SnapshotType;
 }
 
-export const Snapshot = ({
-  dangerColor,
-  primaryColor,
-  snapshot: { up, down, total, histogram },
-  windowWidth,
-}: SnapshotProps) => (
-  <EuiFlexGroup alignItems="baseline" gutterSize="xl">
-    <EuiFlexItem grow={4}>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.endpointStatusTitle"
-            defaultMessage="Endpoint status"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiPanel>
-        <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="xl">
-          <EuiFlexItem>
-            {/* TODO: this is a UI hack that needs to be replaced */}
-            <EuiPanel>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
-                  defaultMessage: 'Up',
-                })}
-                textAlign="center"
-                title={up}
-                titleColor="primary"
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
-                  defaultMessage: 'Down',
-                })}
-                textAlign="center"
-                title={down}
-                titleColor="danger"
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiPanel>
-              <EuiStat
-                description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
-                  defaultMessage: 'Total',
-                })}
-                textAlign="center"
-                title={total}
-                titleColor="subdued"
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
-    </EuiFlexItem>
-    <EuiFlexItem grow={8} style={{ paddingTop: '12px', paddingRight: '12px' }}>
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.uptime.snapshot.statusOverTimeTitle"
-            defaultMessage="Status over time"
-          />
-        </h5>
-      </EuiTitle>
-      {/* TODO: this is a UI hack that should be replaced */}
-      <EuiPanel paddingSize="s" style={{ maxHeight: '137px' }}>
-        {histogram && (
-          <SnapshotHistogram
-            dangerColor={dangerColor}
-            histogram={histogram}
-            primaryColor={primaryColor}
-            windowWidth={windowWidth}
-          />
-        )}
-        {!histogram && (
-          <EuiEmptyPrompt
-            title={
-              <EuiTitle>
+interface SnapshotProps {
+  colors: UptimeAppColors;
+}
+
+type Props = UptimeGraphQLQueryProps<SnapshotQueryResult> & SnapshotProps;
+
+export const SnapshotComponent = ({ colors: { danger, success }, data }: Props) =>
+  data && data.snapshot ? (
+    <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem grow={4}>
+        <EuiPanel paddingSize="s">
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
                 <h5>
                   <FormattedMessage
-                    id="xpack.uptime.snapshot.noDataTitle"
-                    defaultMessage="No histogram data available"
+                    id="xpack.uptime.snapshot.endpointStatusTitle"
+                    defaultMessage="Current status"
                   />
                 </h5>
               </EuiTitle>
-            }
-            body={
-              <p>
-                <FormattedMessage
-                  id="xpack.uptime.snapshot.noDataDescription"
-                  defaultMessage="Sorry, there is no data available for the histogram"
-                />
-              </p>
-            }
-          />
-        )}
-      </EuiPanel>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+              <EuiSpacer size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFlexGroup justifyContent="spaceEvenly" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.upDescription', {
+                      defaultMessage: 'Up',
+                    })}
+                    textAlign="center"
+                    title={data.snapshot.up}
+                    titleColor="secondary"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.downDescription', {
+                      defaultMessage: 'Down',
+                    })}
+                    textAlign="center"
+                    title={data.snapshot.down}
+                    titleColor="danger"
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiStat
+                    description={i18n.translate('xpack.uptime.snapshot.stats.totalDescription', {
+                      defaultMessage: 'Total',
+                    })}
+                    textAlign="center"
+                    title={data.snapshot.total}
+                    titleColor="subdued"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlexItem>
+      <EuiFlexItem grow={8}>
+        <EuiPanel paddingSize="s" style={{ height: 170 }}>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.uptime.snapshot.statusOverTimeTitle"
+                defaultMessage="Status over time"
+              />
+            </h5>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {data.snapshot.histogram && (
+            <SnapshotHistogram
+              dangerColor={danger}
+              histogram={data.snapshot.histogram}
+              successColor={success}
+            />
+          )}
+          {!data.snapshot.histogram && (
+            <EuiEmptyPrompt
+              title={
+                <EuiTitle>
+                  <h5>
+                    <FormattedMessage
+                      id="xpack.uptime.snapshot.noDataTitle"
+                      defaultMessage="No histogram data available"
+                    />
+                  </h5>
+                </EuiTitle>
+              }
+              body={
+                <p>
+                  <FormattedMessage
+                    id="xpack.uptime.snapshot.noDataDescription"
+                    defaultMessage="Sorry, there is no data available for the histogram"
+                  />
+                </p>
+              }
+            />
+          )}
+        </EuiPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    <SnapshotLoading />
+  );
+
+export const Snapshot = withUptimeGraphQL<SnapshotQueryResult, SnapshotProps>(
+  SnapshotComponent,
+  snapshotQuery
 );

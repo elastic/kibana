@@ -147,7 +147,7 @@ function peg$parse(input, options) {
       peg$c3 = function(first, rest) {
           return addMeta({
             type: 'expression',
-            chain: [first].concat(rest)
+            chain: first ? [first].concat(rest) : []
           }, text(), location());
         },
       peg$c4 = peg$otherExpectation("function"),
@@ -364,6 +364,9 @@ function peg$parse(input, options) {
     }
     if (s1 !== peg$FAILED) {
       s2 = peg$parsefunction();
+      if (s2 === peg$FAILED) {
+        s2 = null;
+      }
       if (s2 !== peg$FAILED) {
         s3 = [];
         s4 = peg$currPos;

@@ -16,26 +16,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { I18nService, I18nStart } from './i18n_service';
 
-const createStartContractMock = () => {
-  const startContract: jest.Mocked<I18nStart> = {
-    Context: jest.fn(),
+import React from 'react';
+import { I18nService, I18nSetup } from './i18n_service';
+
+const PassThroughComponent = ({ children }: { children: React.ReactNode }) => children;
+
+const createSetupContractMock = () => {
+  const setupContract: jest.Mocked<I18nSetup> = {
+    // By default mock the Context component so it simply renders all children
+    Context: jest.fn().mockImplementation(PassThroughComponent),
   };
-  return startContract;
+  return setupContract;
 };
 
 type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {
   const mocked: jest.Mocked<I18nServiceContract> = {
-    start: jest.fn(),
+    setup: jest.fn(),
     stop: jest.fn(),
   };
-  mocked.start.mockReturnValue(createStartContractMock());
+  mocked.setup.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
 export const i18nServiceMock = {
   create: createMock,
-  createStartContract: createStartContractMock,
+  createSetupContract: createSetupContractMock,
 };

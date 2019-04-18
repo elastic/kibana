@@ -662,7 +662,7 @@ export class FieldEditorComponent extends PureComponent {
     }
 
     if (!fieldFormatId) {
-      indexPattern.fieldFormatMap[field.name] = {};
+      indexPattern.fieldFormatMap[field.name] = undefined;
     } else {
       indexPattern.fieldFormatMap[field.name] = field.format;
     }

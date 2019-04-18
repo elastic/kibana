@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable @typescript-eslint/no-empty-interface */
+
 import * as runtimeTypes from 'io-ts';
 import moment from 'moment';
 

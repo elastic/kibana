@@ -44,11 +44,11 @@ afterEach(() => {
   jest.resetModules();
 });
 
-describe('#start()', () => {
+describe('#setup()', () => {
   it('returns `Context` component', () => {
     const i18nService = new I18nService();
 
-    const i18n = i18nService.start();
+    const i18n = i18nService.setup();
 
     expect(shallow(<i18n.Context>content</i18n.Context>)).toMatchSnapshot();
   });

@@ -6,8 +6,8 @@
 
 import { scaleLinear } from 'd3-scale';
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntryTime } from '../../../../common/log_entry';
 // import { SearchSummaryBucket } from '../../../../common/log_search_summary';
 import { DensityChart } from './density_chart';
@@ -101,7 +101,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             width={width}
           />
         ) : null}
-        {/*<g transform={`translate(${width * 0.5}, 0)`}>
+        {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
             start={minTime}
@@ -110,17 +110,17 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             height={height}
             jumpToTarget={jumpToTarget}
           />
-        </g>*/}
+        </g> */}
       </svg>
     );
   }
 }
 
-const MinimapBackground = styled.rect`
+const MinimapBackground = euiStyled.rect`
   fill: ${props => props.theme.eui.euiColorLightestShade};
 `;
 
-const MinimapBorder = styled.line`
+const MinimapBorder = euiStyled.line`
   stroke: ${props => props.theme.eui.euiColorMediumShade};
   stroke-width: 1px;
 `;

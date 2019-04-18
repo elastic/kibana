@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }) {
       // initial metric of "Count" is selected by default
       return retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visualize.getGaugeValue();
-        expect(expectedCount).to.eql(metricValue[0].split('\n'));
+        expect(expectedCount).to.eql(metricValue);
       });
     });
 
@@ -67,16 +67,16 @@ export default function ({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         expect(await PageObjects.visualize.getGaugeValue()).to.eql([
-          'win 8',
-          'win xp',
-          'win 7',
-          'ios'
+          '2,904', 'win 8',
+          '2,858', 'win xp',
+          '2,814', 'win 7',
+          '2,784', 'ios',
         ]);
       });
     });
 
     it('should show correct values for fields with fieldFormatters', async function () {
-      const expectedTexts = [ '2,904\nwin 8: Count', '0B\nwin 8: Min bytes' ];
+      const expectedTexts = [ '2,904', 'win 8: Count', '0B', 'win 8: Min bytes' ];
 
       await PageObjects.visualize.clickMetricEditor();
       await PageObjects.visualize.selectAggregation('Terms');

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { KibanaMap } from 'ui/vis/map/kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 // import heatmapPng from './heatmap.png';

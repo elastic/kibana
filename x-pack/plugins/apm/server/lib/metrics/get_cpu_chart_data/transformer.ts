@@ -3,27 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { Coordinate } from '../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
-export interface CPUChartAPIResponse {
-  series: {
-    systemCPUAverage: Coordinate[];
-    systemCPUMax: Coordinate[];
-    processCPUAverage: Coordinate[];
-    processCPUMax: Coordinate[];
-  };
-  // overall totals for the whole time range
-  overallValues: {
-    systemCPUAverage: number | null;
-    systemCPUMax: number | null;
-    processCPUAverage: number | null;
-    processCPUMax: number | null;
-  };
-  totalHits: number;
-}
-
-export type CPUMetricName =
+type CPUMetricName =
   | 'systemCPUAverage'
   | 'systemCPUMax'
   | 'processCPUAverage'
@@ -36,7 +19,9 @@ const CPU_METRIC_NAMES: CPUMetricName[] = [
   'processCPUMax'
 ];
 
-export function transform(result: ESResponse): CPUChartAPIResponse {
+export type CPUChartAPIResponse = ReturnType<typeof transform>;
+
+export function transform(result: ESResponse) {
   const { aggregations, hits } = result;
   const {
     timeseriesData,
@@ -46,11 +31,11 @@ export function transform(result: ESResponse): CPUChartAPIResponse {
     processCPUMax
   } = aggregations;
 
-  const series: CPUChartAPIResponse['series'] = {
-    systemCPUAverage: [],
-    systemCPUMax: [],
-    processCPUAverage: [],
-    processCPUMax: []
+  const series = {
+    systemCPUAverage: [] as Coordinate[],
+    systemCPUMax: [] as Coordinate[],
+    processCPUAverage: [] as Coordinate[],
+    processCPUMax: [] as Coordinate[]
   };
 
   // using forEach here to avoid looping over the entire dataset

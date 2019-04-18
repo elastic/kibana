@@ -25,7 +25,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -52,7 +51,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -83,7 +81,6 @@ exports[`home directories should not render directory entry when showOnHomePage 
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -102,6 +99,7 @@ exports[`home directories should not render directory entry when showOnHomePage 
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -141,7 +139,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -168,7 +165,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -212,7 +208,6 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -231,6 +226,7 @@ exports[`home directories should render ADMIN directory entry in "Manage" panel 
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -270,7 +266,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -310,7 +305,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -341,7 +335,6 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -360,6 +353,7 @@ exports[`home directories should render DATA directory entry in "Explore Data" p
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -399,7 +393,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -426,7 +419,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -457,7 +449,6 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -476,6 +467,7 @@ exports[`home isNewKibanaInstance should safely handle execeptions 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -515,7 +507,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -542,7 +533,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -573,7 +563,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -592,6 +581,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to false when t
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -631,7 +621,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -658,7 +647,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -689,7 +677,6 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -708,6 +695,7 @@ exports[`home isNewKibanaInstance should set isNewKibanaInstance to true when th
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -747,7 +735,6 @@ exports[`home should render home component 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -774,7 +761,6 @@ exports[`home should render home component 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -805,7 +791,6 @@ exports[`home should render home component 1`] = `
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -824,6 +809,7 @@ exports[`home should render home component 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -863,7 +849,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -890,7 +875,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -921,7 +905,6 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -940,6 +923,7 @@ exports[`home welcome should show the normal home page if loading fails 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -979,7 +963,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1006,7 +989,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1037,7 +1019,6 @@ exports[`home welcome should show the normal home page if welcome screen is disa
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -1056,6 +1037,7 @@ exports[`home welcome should show the normal home page if welcome screen is disa
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage
@@ -1102,7 +1084,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1129,7 +1110,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
         >
           <EuiTitle
             size="s"
-            textTransform="none"
           >
             <h3>
               <FormattedMessage
@@ -1160,7 +1140,6 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <p>
@@ -1179,6 +1158,7 @@ exports[`home welcome stores skip welcome setting if skipped 1`] = `
           fill={false}
           href="#/home/feature_directory"
           iconSide="left"
+          size="m"
           type="button"
         >
           <FormattedMessage

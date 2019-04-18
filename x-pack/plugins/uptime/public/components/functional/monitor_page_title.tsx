@@ -4,23 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiTextColor, EuiTitle } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
-import { MonitorPageTitle as TitleType } from 'x-pack/plugins/uptime/common/graphql/types';
+import { MonitorPageTitle as TitleType } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { monitorPageTitleQuery } from '../../queries';
 
-interface MonitorPageTitleProps {
-  pageTitle: TitleType;
+interface MonitorPageTitleQueryResult {
+  monitorPageTitle?: TitleType;
 }
 
-export const MonitorPageTitle = ({ pageTitle: { name, url, id } }: MonitorPageTitleProps) => (
-  <EuiFlexGroup alignItems="baseline">
-    <EuiFlexItem grow={false}>
-      <EuiTitle>
-        <h2 data-test-subj="monitor-page-title">{name ? name : url}</h2>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <h4>{id}</h4>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+interface MonitorPageTitleProps {
+  monitorId: string;
+}
+
+type Props = MonitorPageTitleProps & UptimeGraphQLQueryProps<MonitorPageTitleQueryResult>;
+
+export const MonitorPageTitleComponent = ({ data }: Props) =>
+  data && data.monitorPageTitle ? (
+    <EuiTitle size="xxs">
+      <EuiTextColor color="subdued">
+        <h4 data-test-subj="monitor-page-title">{data.monitorPageTitle.id}</h4>
+      </EuiTextColor>
+    </EuiTitle>
+  ) : (
+    <EuiLoadingSpinner size="xl" />
+  );
+
+export const MonitorPageTitle = withUptimeGraphQL<
+  MonitorPageTitleQueryResult,
+  MonitorPageTitleProps
+>(MonitorPageTitleComponent, monitorPageTitleQuery);

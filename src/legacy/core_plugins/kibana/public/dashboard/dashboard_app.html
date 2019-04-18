@@ -10,6 +10,7 @@
       <div ng-show="chrome.getVisible()" class="fullWidth" data-transclude-slot="bottomRow">
         <search-bar
           query="model.query"
+          screen-title="screenTitle"
           on-query-submit="updateQueryAndFetch"
           app-name="'dashboard'"
           index-patterns="indexPatterns"

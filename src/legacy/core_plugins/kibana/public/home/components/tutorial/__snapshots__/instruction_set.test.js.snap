@@ -12,7 +12,6 @@ exports[`render 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -96,7 +95,6 @@ exports[`statusCheckState checking status 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -182,6 +180,7 @@ exports[`statusCheckState checking status 1`] = `
                   iconSide="left"
                   isLoading={true}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   custom btn label
@@ -214,7 +213,6 @@ exports[`statusCheckState failed status check - error 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -300,6 +298,7 @@ exports[`statusCheckState failed status check - error 1`] = `
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   custom btn label
@@ -337,7 +336,6 @@ exports[`statusCheckState failed status check - no data 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -423,6 +421,7 @@ exports[`statusCheckState failed status check - no data 1`] = `
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   custom btn label
@@ -460,7 +459,6 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -546,6 +544,7 @@ exports[`statusCheckState initial state - no check has been attempted 1`] = `
                   iconSide="left"
                   isLoading={true}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   custom btn label
@@ -578,7 +577,6 @@ exports[`statusCheckState successful status check 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           title1
@@ -664,6 +662,7 @@ exports[`statusCheckState successful status check 1`] = `
                   iconSide="left"
                   isLoading={false}
                   onClick={[Function]}
+                  size="m"
                   type="button"
                 >
                   custom btn label

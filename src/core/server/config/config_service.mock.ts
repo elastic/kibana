@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { BehaviorSubject } from 'rxjs';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
 

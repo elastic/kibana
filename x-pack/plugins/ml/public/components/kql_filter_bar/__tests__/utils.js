@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { removeFilterFromQueryString, getQueryPattern } from '../utils';
 
 describe('ML - KqlFilterBar utils', () => {
@@ -70,6 +70,24 @@ describe('ML - KqlFilterBar utils', () => {
       const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
       expect(result).to.be(expectedOutput);
     });
+
+    it('removes selected fieldName/fieldValue correctly from  AND query string when it is the middle value', () => {
+      const currentQueryString = `http.response.status_code : "400" and http.response.status_code : "200"
+        and http.response.status_code : "300"`;
+      const expectedOutput = 'http.response.status_code : "400" and http.response.status_code : "300"';
+      const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
+      expect(result).to.be(expectedOutput);
+    });
+
+    it('removes selected fieldName/fieldValue correctly from OR query string when it is the middle value', () => {
+      const currentQueryString = `http.response.status_code : "400" or http.response.status_code : "200"
+        or http.response.status_code : "300"`;
+      const expectedOutput = 'http.response.status_code : "400" or http.response.status_code : "300"';
+      const result = removeFilterFromQueryString(currentQueryString, fieldName, fieldValue);
+      expect(result).to.be(expectedOutput);
+    });
+
+
 
   });
 

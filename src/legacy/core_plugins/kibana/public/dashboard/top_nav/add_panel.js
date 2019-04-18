@@ -21,6 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { uiCapabilities } from 'ui/capabilities';
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 
@@ -87,18 +88,20 @@ export class DashboardAddPanel extends React.Component {
             )}
           />
         </EuiFlyoutBody>
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={this.props.addNewVis} data-test-subj="addNewSavedObjectLink">
-                <FormattedMessage
-                  id="kbn.dashboard.topNav.addPanel.createNewVisualizationButtonLabel"
-                  defaultMessage="Create new visualization"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
+        { uiCapabilities.visualize.save ? (
+          <EuiFlyoutFooter>
+            <EuiFlexGroup justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <EuiButton fill onClick={this.props.addNewVis} data-test-subj="addNewSavedObjectLink">
+                  <FormattedMessage
+                    id="kbn.dashboard.topNav.addPanel.createNewVisualizationButtonLabel"
+                    defaultMessage="Create new visualization"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlyoutFooter>
+        ) : null }
       </EuiFlyout>
     );
   }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
@@ -91,7 +91,8 @@ export default function ({ getService, getPageObjects }) {
     await dashboardExpect.vegaTextsDoNotExist(['5,000']);
   };
 
-  describe('dashboard embeddable rendering', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/33504
+  describe.skip('dashboard embeddable rendering', function describeIndexTests() {
     before(async () => {
       await PageObjects.dashboard.clickNewDashboard();
 

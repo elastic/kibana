@@ -3,8 +3,11 @@
 exports[`Storyshots components/FontPicker default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
-  onClick={[Function]}
   onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
 >
   <div
     className="euiPopover__anchor euiSuperSelect__popoverAnchor"
@@ -76,8 +79,11 @@ exports[`Storyshots components/FontPicker default 1`] = `
 exports[`Storyshots components/FontPicker with value 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter euiSuperSelect"
-  onClick={[Function]}
   onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
 >
   <div
     className="euiPopover__anchor euiSuperSelect__popoverAnchor"

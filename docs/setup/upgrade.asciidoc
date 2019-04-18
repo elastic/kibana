@@ -1,45 +1,61 @@
 [[upgrade]]
-== Upgrading Kibana
+== Upgrading {kib}
+
 
 [IMPORTANT]
 ===========================================
-Before upgrading Kibana:
+Before upgrading {kib}:
 
 * Consult the <<breaking-changes,breaking changes>> docs.
 * Test upgrades in a dev environment before upgrading your production servers.
-* Backup your data using the Elasticsearch
-  {ref}/modules-snapshots.html[snapshots] feature.
+* Backup your data using the {es} {ref}/modules-snapshots.html[snapshots] feature.
   You **cannot roll back** to an earlier version unless you have a backup of
   your data.
 * If you are using custom plugins, check that a compatible version is
   available.
 ===========================================
 
-Depending on which version of Kibana you're upgrading from, the upgrade process
-will vary. Please consult the following table to determine which process you
-should follow:
+Depending on which version of {kib} you're upgrading from, the upgrade process to 7.0
+will vary. 
 
-[cols="1<m,1<m,3",options="header",]
-|=======================================================================
-|Upgrade From   |Upgrade To     |Supported Upgrade Type
-|3.x            |5.x            |<<upgrade-new-install,New installation>>
-|4.0 or 4.1     |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
-|4.x >= 4.2     |5.x            |<<upgrade-standard,Standard upgrade>>
-|5.0.0 pre GA   |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
-|5.x            |5.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
-|5.x            |6.x            |<<upgrade-standard,Standard upgrade>>
-// & <<migrating-6.0-index,Reindex transformation>>
-|6.x            |6.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
-|6.x            |7.x            |<<upgrade-standard,Standard upgrade>>
-|=======================================================================
+The recommended path is to upgrade to 6.7 before upgrading to 7.0. 
+This makes it easier to identify the changes you need to make to upgrade and enables 
+you to perform a rolling upgrade with no downtime. 
 
-NOTE: Saved searches, visualizations, and dashboards created in Kibana 4.x or 5.x
-can be generally imported into 6.x.
+Please see 
+*{stack-ref}/upgrading-elastic-stack.html[Upgrading the Elastic Stack]* for a 
+comprehensive overview of the upgrade process.
+
+[float]
+==== Upgrading from 5.x or earlier
+{es} can read indices created in the previous major version. If you have indices 
+created in 5.x or before, you must reindex or delete them before upgrading to 7.0.0.
+See {stack-ref}/upgrading-elastic-stack.html#oss-stack-upgrade[Upgrading the Elastic Stack] 
+for more information.
+
+Once your reindex is complete, you can follow the <<upgrade-standard, Standard upgrade>> 
+instructions. 
+
+[float]
+==== Upgrading from 6.x
+
+The recommended path is to upgrade to 6.7 before upgrading to 7.0. This makes it 
+easier to identify the required changes, and enables you to use the Upgrade Assistant
+to prepare for your upgrade to 7.0 (see below).
+
+*Note:* Saved searches, visualizations, and dashboards created in {kib} 6.x
+can be generally imported into 7.x.
+
+[float]
+==== Upgrading from 6.7
+6.7 includes an https://www.elastic.co/guide/en/kibana/6.7/upgrade-assistant.html[Upgrade Assistant] 
+to help you prepare for your upgrade to 7.0. To access the assistant, go to *Management > 7.0 Upgrade Assistant*. 
+
+After you have addressed any issues that were identified by the Upgrade Assistant, 
+<<upgrade-standard,upgrade to 7.0>>.
+
 
 include::upgrade/upgrade-standard.asciidoc[]
 
-include::upgrade/upgrade-standard-reindex.asciidoc[]
-
-include::upgrade/upgrade-new-install.asciidoc[]
-
 include::upgrade/upgrade-migrations.asciidoc[]
+

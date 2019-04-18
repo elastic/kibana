@@ -8,13 +8,9 @@ import _ from 'lodash';
 
 import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import {
-  fetchSearchSourceAndRecordWithInspector,
-  SearchSource,
-} from '../../../kibana_services';
 import { AggConfigs } from 'ui/vis/agg_configs';
-import { timefilter } from 'ui/timefilter/timefilter';
 import { i18n } from '@kbn/i18n';
+import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -79,6 +75,10 @@ export class ESJoinSource extends AbstractESSource {
     return  [this._descriptor.indexPatternId];
   }
 
+  getTerm() {
+    return this._descriptor.term;
+  }
+
   _formatMetricKey(metric) {
     const metricKey = metric.type !== 'count' ? `${metric.type}_of_${metric.field}` : metric.type;
     return `__kbnjoin__${metricKey}_groupby_${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
@@ -96,42 +96,14 @@ export class ESJoinSource extends AbstractESSource {
     }
 
     const indexPattern = await this._getIndexPattern();
-    const timeAware = await this.isTimeAware();
-
+    const searchSource  = await this._makeSearchSource(searchFilters, 0);
     const configStates = this._makeAggConfigs();
     const aggConfigs = new AggConfigs(indexPattern, configStates, aggSchemas.all);
+    searchSource.setField('aggs', aggConfigs.toDsl());
 
-    let rawEsData;
-    try {
-      const searchSource = new SearchSource();
-      searchSource.setField('index', indexPattern);
-      searchSource.setField('size', 0);
-      searchSource.setField('filter', () => {
-        const filters = [];
-        if (timeAware) {
-          filters.push(timefilter.createFilter(indexPattern, searchFilters.timeFilters));
-        }
-        return filters;
-      });
-      searchSource.setField('query', searchFilters.query);
-
-      const dsl = aggConfigs.toDsl();
-      searchSource.setField('aggs', dsl);
-      rawEsData = await fetchSearchSourceAndRecordWithInspector({
-        inspectorAdapters: this._inspectorAdapters,
-        searchSource,
-        requestName: `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`,
-        requestId: this._descriptor.id,
-        requestDesc: this.getJoinDescription(leftSourceName, leftFieldName),
-      });
-    } catch (error) {
-      throw new Error(i18n.translate('xpack.maps.source.esJoin.errorMessage', {
-        defaultMessage: `Elasticsearch search request failed, error: {message}`,
-        values: {
-          message: error.message
-        }
-      }));
-    }
+    const requestName = `${this._descriptor.indexPatternTitle}.${this._descriptor.term}`;
+    const requestDesc = this.getJoinDescription(leftSourceName, leftFieldName);
+    const rawEsData = await this._runEsQuery(requestName, searchSource, requestDesc);
 
     const metricPropertyNames = configStates
       .filter(configState => {
@@ -212,5 +184,17 @@ export class ESJoinSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+  }
+
+  async createESTooltipProperty(propertyName, rawValue) {
+    try {
+      const indexPattern = await this._getIndexPattern();
+      if (!indexPattern) {
+        return null;
+      }
+      return new ESTooltipProperty(propertyName, rawValue, indexPattern);
+    } catch (e) {
+      return null;
+    }
   }
 }

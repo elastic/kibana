@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -41,13 +40,14 @@ export const IGNORE_FILE_GLOBS = [
   '**/.*',
   '**/{webpackShims,__mocks__}/**/*',
   'x-pack/docs/**/*',
-  'src/dev/tslint/rules/*',
   'src/legacy/ui/public/assets/fonts/**/*',
+
+  // Files in this directory must match a pre-determined name in some cases.
+  'x-pack/plugins/canvas/.storybook/*',
 
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 ];
-
 
 /**
  * These patterns are matched against directories and indicate
@@ -55,11 +55,7 @@ export const IGNORE_FILE_GLOBS = [
  *
  * @type {Array}
  */
-export const KEBAB_CASE_DIRECTORY_GLOBS = [
-  'packages/*',
-  'x-pack',
-];
-
+export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
 
 /**
  * These patterns are matched against directories and indicate
@@ -89,7 +85,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'x-pack/dev-tools',
 ];
 
-
 /**
  * DO NOT ADD FILES TO THIS LIST!!
  *
@@ -107,7 +102,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
 export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
   'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/console/public/webpackShims/ui-bootstrap-custom.js',
   'src/legacy/core_plugins/kibana/public/assets/play-circle.svg',
   'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
   'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
@@ -123,8 +117,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/legacy/ui/public/angular-bootstrap/bindHtml/bindHtml.js',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-html-unsafe-popup.html',
   'src/legacy/ui/public/angular-bootstrap/tooltip/tooltip-popup.html',
-  'src/legacy/ui/public/angular-bootstrap/typeahead/typeahead-match.html',
-  'src/legacy/ui/public/angular-bootstrap/typeahead/typeahead-popup.html',
   'src/legacy/ui/public/assets/favicons/android-chrome-192x192.png',
   'src/legacy/ui/public/assets/favicons/android-chrome-256x256.png',
   'src/legacy/ui/public/assets/favicons/android-chrome-512x512.png',

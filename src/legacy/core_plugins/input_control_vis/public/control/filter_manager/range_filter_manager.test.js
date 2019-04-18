@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { RangeFilterManager } from './range_filter_manager';
 
 describe('RangeFilterManager', function () {

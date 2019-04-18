@@ -19,7 +19,8 @@ import {
 
 import routing from '../../../services/routing';
 import { extractQueryParams } from '../../../services/query_params';
-import { API_STATUS } from '../../../constants';
+import { trackUiMetric } from '../../../services/track_ui_metric';
+import { API_STATUS, UIM_FOLLOWER_INDEX_LIST_LOAD } from '../../../constants';
 import { SectionLoading, SectionError, SectionUnauthorized } from '../../../components';
 import { FollowerIndicesTable, DetailPanel } from './components';
 
@@ -57,6 +58,7 @@ export class FollowerIndicesList extends PureComponent {
   componentDidMount() {
     const { loadFollowerIndices, selectFollowerIndex, history } = this.props;
 
+    trackUiMetric(UIM_FOLLOWER_INDEX_LIST_LOAD);
     loadFollowerIndices();
 
     // Select the pattern in the URL query params
@@ -131,7 +133,7 @@ export class FollowerIndicesList extends PureComponent {
   }
 
   renderContent(isEmpty) {
-    const { apiError, isAuthorized } = this.props;
+    const { apiError, isAuthorized, apiStatus } = this.props;
 
     if (!isAuthorized) {
       return (
@@ -166,6 +168,10 @@ export class FollowerIndicesList extends PureComponent {
 
     if (isEmpty) {
       return this.renderEmpty();
+    }
+
+    if (apiStatus === API_STATUS.LOADING) {
+      return this.renderLoading();
     }
 
     return this.renderList();
@@ -206,7 +212,19 @@ export class FollowerIndicesList extends PureComponent {
             />
           </EuiButton>
         }
+        data-test-subj="ccrFollowerIndexEmptyPrompt"
       />
+    );
+  }
+
+  renderLoading() {
+    return (
+      <SectionLoading dataTestSubj="ccrFollowerIndexLoading">
+        <FormattedMessage
+          id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
+          defaultMessage="Loading follower indices..."
+        />
+      </SectionLoading>
     );
   }
 
@@ -214,21 +232,9 @@ export class FollowerIndicesList extends PureComponent {
     const {
       selectFollowerIndex,
       followerIndices,
-      apiStatus,
     } = this.props;
 
     const { isDetailPanelOpen } = this.state;
-
-    if (apiStatus === API_STATUS.LOADING) {
-      return (
-        <SectionLoading>
-          <FormattedMessage
-            id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
-            defaultMessage="Loading follower indices..."
-          />
-        </SectionLoading>
-      );
-    }
 
     return (
       <Fragment>

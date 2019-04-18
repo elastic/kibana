@@ -12,14 +12,14 @@ import {
   RouteProps,
   withRouter
 } from 'react-router-dom';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { StringMap } from '../../../../typings/common';
 
 type LocationMatch = Pick<
   RouteComponentProps<StringMap<string>>,
   'location' | 'match'
 >;
 
-export type BreadcrumbFunction = (props: LocationMatch) => string;
+type BreadcrumbFunction = (props: LocationMatch) => string;
 
 export interface BreadcrumbRoute extends RouteProps {
   breadcrumb: string | BreadcrumbFunction | null;
@@ -29,11 +29,11 @@ export interface Breadcrumb extends LocationMatch {
   value: string;
 }
 
-export interface RenderProps extends RouteComponentProps {
+interface RenderProps extends RouteComponentProps {
   breadcrumbs: Breadcrumb[];
 }
 
-export interface ProvideBreadcrumbsProps extends RouteComponentProps {
+interface ProvideBreadcrumbsProps extends RouteComponentProps {
   routes: BreadcrumbRoute[];
   render: (props: RenderProps) => React.ReactElement<any> | null;
 }

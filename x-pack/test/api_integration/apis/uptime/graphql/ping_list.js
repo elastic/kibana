@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { getPingsQueryString } from '../../../../../plugins/uptime/public/components/queries/ping_list/get_pings';
+import expect from '@kbn/expect';
+import { pingsQueryString } from '../../../../../plugins/uptime/public/queries';
 import pingList from './fixtures/ping_list';
 import pingListCount from './fixtures/ping_list_count';
 import pingListMonitorId from './fixtures/ping_list_monitor_id';
@@ -18,7 +18,7 @@ export default function ({ getService }) {
     it('returns a list of pings for the given date range and default size', async () => {
       const getPingsQuery = {
         operationName: 'PingList',
-        query: getPingsQueryString,
+        query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -41,7 +41,7 @@ export default function ({ getService }) {
       const SIZE = 50;
       const getPingsQuery = {
         operationName: 'PingList',
-        query: getPingsQueryString,
+        query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -66,7 +66,7 @@ export default function ({ getService }) {
       const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
       const getPingsQuery = {
         operationName: 'PingList',
-        query: getPingsQueryString,
+        query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -88,7 +88,7 @@ export default function ({ getService }) {
       const MONITOR_ID = 'auto-tcp-0X81440A68E839814C';
       const getPingsQuery = {
         operationName: 'PingList',
-        query: getPingsQueryString,
+        query: pingsQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',

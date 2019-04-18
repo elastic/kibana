@@ -7,10 +7,11 @@
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
+import _ from 'lodash';
 import React from 'react';
-import { TransactionDetailsChartsRequest } from '../../../store/reactReduxRequest/transactionDetailsCharts';
-import { TransactionDistributionRequest } from '../../../store/reactReduxRequest/transactionDistribution';
-import { WaterfallRequest } from '../../../store/reactReduxRequest/waterfall';
+import { useTransactionDetailsCharts } from '../../../hooks/useTransactionDetailsCharts';
+import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
+import { useWaterfall } from '../../../hooks/useWaterfall';
 import { IUrlParams } from '../../../store/urlParams';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
@@ -19,12 +20,18 @@ import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
 
 interface Props {
-  mlAvailable: boolean;
   urlParams: IUrlParams;
   location: Location;
 }
 
 export function TransactionDetailsView({ urlParams, location }: Props) {
+  const { data: distributionData } = useTransactionDistribution(urlParams);
+  const { data: transactionDetailsChartsData } = useTransactionDetailsCharts(
+    urlParams
+  );
+  const { data: waterfall } = useWaterfall(urlParams);
+  const transaction = waterfall.getTransactionById(urlParams.transactionId);
+
   return (
     <div>
       <EuiTitle size="l">
@@ -32,75 +39,51 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       </EuiTitle>
 
       <EuiSpacer />
-
       <FilterBar />
-
       <EuiSpacer size="s" />
 
-      <TransactionDetailsChartsRequest
+      <TransactionCharts
+        charts={transactionDetailsChartsData}
         urlParams={urlParams}
-        render={({ data }) => (
-          <TransactionCharts
-            charts={data}
-            urlParams={urlParams}
-            location={location}
-          />
-        )}
+        location={location}
       />
 
       <EuiSpacer />
 
       <EuiPanel>
-        <TransactionDistributionRequest
+        <TransactionDistribution
+          distribution={distributionData}
           urlParams={urlParams}
-          render={({ data }) => (
-            <TransactionDistribution
-              distribution={data}
-              urlParams={urlParams}
-              location={location}
-            />
-          )}
+          location={location}
         />
       </EuiPanel>
 
       <EuiSpacer size="l" />
-      <WaterfallRequest
-        urlParams={urlParams}
-        traceId={urlParams.traceId}
-        render={({ data: waterfall }) => {
-          const transaction = waterfall.getTransactionById(
-            urlParams.transactionId
-          );
-          if (!transaction) {
-            return (
-              <EmptyMessage
-                heading={i18n.translate(
-                  'xpack.apm.transactionDetails.noTransactionTitle',
-                  {
-                    defaultMessage: 'No transaction sample available.'
-                  }
-                )}
-                subheading={i18n.translate(
-                  'xpack.apm.transactionDetails.noTransactionDescription',
-                  {
-                    defaultMessage:
-                      'Try another time range, reset the search filter or select another bucket from the distribution histogram.'
-                  }
-                )}
-              />
-            );
-          }
 
-          return (
-            <Transaction
-              location={location}
-              transaction={transaction}
-              urlParams={urlParams}
-              waterfall={waterfall}
-            />
-          );
-        }}
-      />
+      {!transaction ? (
+        <EmptyMessage
+          heading={i18n.translate(
+            'xpack.apm.transactionDetails.noTransactionTitle',
+            {
+              defaultMessage: 'No transaction sample available.'
+            }
+          )}
+          subheading={i18n.translate(
+            'xpack.apm.transactionDetails.noTransactionDescription',
+            {
+              defaultMessage:
+                'Try another time range, reset the search filter or select another bucket from the distribution histogram.'
+            }
+          )}
+        />
+      ) : (
+        <Transaction
+          location={location}
+          transaction={transaction}
+          urlParams={urlParams}
+          waterfall={waterfall}
+        />
+      )}
     </div>
   );
 }

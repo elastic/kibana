@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { App } from '../../public/app';
+import { AppWithoutRouter } from '../../public/app';
 import { Provider } from 'react-redux';
 import { loadIndicesSuccess } from '../../public/store/actions';
 import { indexManagementStore } from '../../public/store';
@@ -123,7 +123,7 @@ describe('index table', () => {
     component = (
       <Provider store={store}>
         <MemoryRouter initialEntries={[`${BASE_PATH}indices`]}>
-          <App />
+          <AppWithoutRouter />
         </MemoryRouter>
       </Provider>
     );

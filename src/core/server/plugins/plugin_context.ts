@@ -22,12 +22,15 @@ import { Observable } from 'rxjs';
 import { ConfigWithSchema, EnvironmentMode } from '../config';
 import { CoreContext } from '../core_context';
 import { ClusterClient } from '../elasticsearch';
+import { HttpServiceSetup } from '../http';
 import { LoggerFactory } from '../logging';
-import { Plugin, PluginManifest } from './plugin';
-import { PluginsServiceStartDeps } from './plugins_service';
+import { PluginWrapper, PluginManifest } from './plugin';
+import { PluginsServiceSetupDeps } from './plugins_service';
 
 /**
  * Context that's available to plugins during initialization stage.
+ *
+ * @public
  */
 export interface PluginInitializerContext {
   env: { mode: EnvironmentMode };
@@ -43,12 +46,18 @@ export interface PluginInitializerContext {
 }
 
 /**
- * Context passed to the plugins `start` method.
+ * Context passed to the plugins `setup` method.
+ *
+ * @public
  */
-export interface PluginStartContext {
+export interface PluginSetupContext {
   elasticsearch: {
     adminClient$: Observable<ClusterClient>;
     dataClient$: Observable<ClusterClient>;
+  };
+  http: {
+    registerAuth: HttpServiceSetup['registerAuth'];
+    registerOnRequest: HttpServiceSetup['registerOnRequest'];
   };
 }
 
@@ -105,29 +114,44 @@ export function createPluginInitializerContext(
   };
 }
 
+// Added to improve http typings as make { http: Required<HttpSetup> }
+// Http service is disabled, when Kibana runs in optimizer mode or as dev cluster managed by cluster master.
+// In theory no plugins shouldn try to access http dependency in this case.
+function preventAccess() {
+  throw new Error('Cannot use http contract when http server not started');
+}
 /**
- * This returns a facade for `CoreContext` that will be exposed to the plugin `start` method.
- * This facade should be safe to use only within `start` itself.
+ * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
+ * This facade should be safe to use only within `setup` itself.
  *
- * This is called for each plugin when it's started, so each plugin gets its own
+ * This is called for each plugin when it's set up, so each plugin gets its own
  * version of these values.
  *
  * We should aim to be restrictive and specific in the APIs that we expose.
  *
  * @param coreContext Kibana core context
  * @param plugin The plugin we're building these values for.
- * @param deps Dependencies that Plugins services gets during start.
+ * @param deps Dependencies that Plugins services gets during setup.
  * @internal
  */
-export function createPluginStartContext<TPlugin, TPluginDependencies>(
+export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   coreContext: CoreContext,
-  deps: PluginsServiceStartDeps,
-  plugin: Plugin<TPlugin, TPluginDependencies>
-): PluginStartContext {
+  deps: PluginsServiceSetupDeps,
+  plugin: PluginWrapper<TPlugin, TPluginDependencies>
+): PluginSetupContext {
   return {
     elasticsearch: {
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
     },
+    http: deps.http
+      ? {
+          registerAuth: deps.http.registerAuth,
+          registerOnRequest: deps.http.registerOnRequest,
+        }
+      : {
+          registerAuth: preventAccess,
+          registerOnRequest: preventAccess,
+        },
   };
 }
