@@ -162,13 +162,26 @@ const requestNodeMetrics = async (
   );
 };
 
+// buckets can be InfraSnapshotNodeGroupByBucket[] or InfraSnapshotNodeMetricsBucket[]
+// but typing this in a way that makes TypeScript happy is unreadable (if possible at all)
+interface InfraSnapshotAggregationResponse {
+  nodes: {
+    buckets: any[];
+    after_key: { [id: string]: string };
+  };
+}
+
 const getAllCompositeAggregationData = async <BucketType>(
   framework: InfraBackendFrameworkAdapter,
   request: InfraFrameworkRequest,
   query: any,
   previousBuckets: BucketType[] = []
 ): Promise<BucketType[]> => {
-  const response = await framework.callWithRequest<any, any>(request, 'search', query);
+  const response = await framework.callWithRequest<{}, InfraSnapshotAggregationResponse>(
+    request,
+    'search',
+    query
+  );
 
   // Nothing available, return the previous buckets.
   if (response.hits.total.value === 0) {
@@ -203,18 +216,14 @@ const mergeNodeBuckets = (
   nodeMetricsBuckets: InfraSnapshotNodeMetricsBucket[],
   options: InfraSnapshotRequestOptions
 ): InfraSnapshotNode[] => {
-  const result: any[] = [];
   const nodeMetricsForLookup = getNodeMetricsForLookup(nodeMetricsBuckets);
 
-  nodeGroupByBuckets.forEach(node => {
-    const returnNode = {
+  return nodeGroupByBuckets.map(node => {
+    return {
       path: getNodePath(node, options),
       metric: getNodeMetrics(nodeMetricsForLookup[node.key.node], options),
     };
-    result.push(returnNode);
   });
-
-  return result;
 };
 
 const createQueryFilterClauses = (filterQuery: JsonObject | undefined) =>
