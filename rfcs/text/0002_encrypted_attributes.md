@@ -1,5 +1,5 @@
 - Start Date: 2019-03-22
-- RFC PR: https://github.com/elastic/kibana/pull/34526
+- RFC PR: [#33740](https://github.com/elastic/kibana/pull/33740)
 - Kibana Issue: (leave this empty)
 
 # Summary
@@ -17,8 +17,6 @@ Register saved object type with the `encrypted_saved_objects` plugin:
 server.plugins.encrypted_saved_objects.registerType({
   type: 'server-action',
   attributesToEncrypt: new Set(['credentials', 'apiKey']),
-  // Optional list of attributes that might not contain user specified data.
-  attributesToExcludeFromAAD: new Set(['temporaryState']),
 });
 ```
 
@@ -29,6 +27,7 @@ const savedObject = await server.savedObjects
   .getScopedSavedObjectsClient(request)
   .create('server-action', { 
     name: 'my-server-action',
+    data: { location: 'BBOX (100.0, ..., 0.0)', email: '<html>...</html>' },
     credentials: { username: 'some-user', password: 'some-password' },
     apiKey: 'dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvb'
   });
@@ -37,6 +36,7 @@ const savedObject = await server.savedObjects
 //   id: 'dd9750b9-ef0a-444c-8405-4dfcc2e9d670',
 //   type: 'server-action',
 //   name: 'my-server-action',
+//   data: { location: 'BBOX (100.0, ..., 0.0)', email: '<html>...</html>' },
 // };
 
 ```
@@ -53,6 +53,7 @@ const savedObject = await server.plugins.encrypted_saved_objects.getDecryptedAsI
 //   id: 'dd9750b9-ef0a-444c-8405-4dfcc2e9d670',
 //   type: 'server-action',
 //   name: 'my-server-action',
+//   data: { location: 'BBOX (100.0, ..., 0.0)', email: '<html>...</html>' },
 //   credentials: { username: 'some-user', password: 'some-password' },
 //   apiKey: 'dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvb',
 // };
@@ -84,6 +85,12 @@ simplifies implementation:
  "server-action": {
    "properties": {
      "name": { "type": "keyword" },
+     "data": { 
+       "properties": {
+          "location":  { "type": "geo_shape" },
+          "email": { "type": "text" }
+        }
+     },
      "credentials": { "type": "binary" },
      "apiKey": { "type": "binary" }
    }
@@ -95,10 +102,12 @@ simplifies implementation:
 server.plugins.encrypted_saved_objects.registerType({
   type: 'server-action',
   attributesToEncrypt: new Set(['credentials', 'apiKey']),
-  // Optional list of attributes that might not contain user specified data.
-  attributesToExcludeFromAAD: new Set(['temporaryState']),
+  attributesToExcludeFromAAD: new Set(['data']),
 });
 ```
+
+Notice the optional `attributesToExcludeFromAAD` property, it allows one to exclude some of the saved object attributes
+from Additional authenticated data (AAD), read more about that below in `Encryption and decryption` section.
 
 Since `encrypted_saved_objects` adds its own wrapper (`EncryptedSavedObjectsClientWrapper`) into `SavedObjectsClient`
 wrapper chain consumers will be able to create, update, delete and retrieve saved objects using standard Saved Objects API.
@@ -110,14 +119,17 @@ Two main responsibilities of the wrapper are:
 As noted above the wrapper is stripping encrypted attributes from saved objects returned from the API methods, that means
 that there is no way at all to retrieve encrypted attributes using standard Saved Objects API unless `encrypted_saved_objects`
 plugin is disabled. This potentially can lead to the situation when consumer retrieves saved object, updates its non-encrypted
-properties and passes that same object to the `update` Saved Objects API method without re-defining encrypted attributes.
-At this stage we consider this as a developer mistake and don't prevent it from happening in any way apart from logging
-this type of event.
+properties and passes that same object to the `update` Saved Objects API method without re-defining encrypted attributes. In
+this case only specified attributes will be updated and encrypted attributes will stay untouched. And if these updated 
+attributes are included into AAD, that is true by default for all attributes unless they are specifically excluded via 
+`attributesToExcludeFromAAD`, then it will be no longer possible to decrypt encrypted attributes. At this stage we consider
+this as a developer mistake and don't prevent it from happening in any way apart from logging this type of event. Partial 
+update of only attributes that are not the part of AAD will not cause this issue. 
 
-Saved object ID is an essential part of Additional authenticated data (AAD) used during encryption process and hence
-should be as hard to guess as possible. To fulfil this requirement wrapper generates highly random IDs (UUIDv4) for the
-saved objects that contain encrypted attributes and hence consumers are not allowed to specify ID when calling `create`
-or `bulkCreate` method and if they try to do so the error will be thrown.
+Saved object ID is an essential part of AAD used during encryption process and hence should be as hard to guess as possible.
+To fulfil this requirement wrapper generates highly random IDs (UUIDv4) for the saved objects that contain encrypted
+attributes and hence consumers are not allowed to specify ID when calling `create` or `bulkCreate` method and if they try
+to do so the error will be thrown.
 
 To reduce the risk of unintentional decryption and consequent leaking of the sensitive information there is only one way
 to retrieve saved object and decrypt its encrypted attributes and it's exposed only through `encrypted_saved_objects` plugin:
@@ -132,6 +144,7 @@ const savedObject = await server.plugins.encrypted_saved_objects.getDecryptedAsI
 //   id: 'dd9750b9-ef0a-444c-8405-4dfcc2e9d670',
 //   type: 'server-action',
 //   name: 'my-server-action',
+//   data: { location: 'BBOX (100.0, ..., 0.0)', email: '<html>...</html>' },
 //   credentials: { username: 'some-user', password: 'some-password' },
 //   apiKey: 'dGhpcyBpcyBub3QgYSByZWFsIHRva2VuIGJ1dCBpdCBpcyBvb',
 // };
@@ -158,7 +171,7 @@ recommended** to define this key in the [Kibana Keystore](https://www.elastic.co
 instead. The master key should be cryptographically safe and be equal or greater than 32 bytes.
 
 To prevent certain vectors of attacks where raw content of encrypted attributes of one saved object is copied to another
-saved object that would unconsciously allow to decrypt content that was not supposed to be decrypted we rely on Additional
+saved object which would unintentionally allow it to decrypt content that was not supposed to be decrypted we rely on Additional
 authenticated data (AAD) during encryption and decryption. AAD consists of the following components:
 
 * Saved object ID
@@ -166,11 +179,17 @@ authenticated data (AAD) during encryption and decryption. AAD consists of the f
 * Saved object attributes
  
 AAD does not include encrypted attributes themselves and attributes defined in optional `attributesToExcludeFromAAD` 
-parameter provided during saved object type registration with `encrypted_saved_objects` plugin.
+parameter provided during saved object type registration with `encrypted_saved_objects` plugin. There are a number of 
+reasons why one would want to exclude certain attributes from AAD:
+
+* if attribute contains large amount of data that can significantly slow down encryption and decryption, especially during
+bulk operations (e.g. large geo shape or arbitrary HTML document)
+* if attribute contains data that is supposed to be updated separately from encrypted attributes or attributes included
+into AAD (e.g some user defined content associated with the email action or alert)
 
 ## Audit
 
-Encrypted attributes will most likely contain a sensitive information and any attempt to access these should be properly
+Encrypted attributes will most likely contain sensitive information and any attempt to access these should be properly
 logged to allow any further audit procedures. The following events will be logged with Kibana audit log functionality:
 
 * Successful attempt to encrypt attributes (incl. saved object ID, type and attributes names)
@@ -189,17 +208,22 @@ on. The wrapper will follow all the security and spaces filtering of saved
 objects so that only users with appropriate permissions will be able to obtain
 the scrubbed objects or _save_ objects with encrypted attributes.
 
-* No explicit access to a method that takes in an encrypted string exists. And no
-access to the private key used is exposed through the plugin. If the type was not
-registered no decryption is possible. No need to handle the saved object with
-the encrypted attributes reducing the risk of accidentally returning it in a
+* No explicit access to a method that takes in an encrypted string exists. If the
+type was not registered no decryption is possible. No need to handle the saved object
+with the encrypted attributes reducing the risk of accidentally returning it in a
 handler.
 
 # Drawbacks
 
+* It isn't possible to decrypt existing encrypted attributes once encryption key changes
 * Possibly have a performance impact on Saved Objects API operations that require encryption/decryption
 * Will require non trivial tests to test functionality along with spaces and security
 * The attributes that are encrypted have to be defined and if they change they need to be migrated
+
+# Out of scope
+
+* Encryption key rotation mechanism, either regular or emergency
+* Mechanism that would detect and warn when Kibana does not use keystore to store encryption key
 
 # Alternatives
 
