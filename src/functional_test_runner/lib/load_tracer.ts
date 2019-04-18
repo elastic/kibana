@@ -17,7 +17,8 @@
  * under the License.
  */
 
-const globalLoadPath = [];
+const globalLoadPath: Array<{ ident: string; description: string }> = [];
+
 function getPath(startAt = 0) {
   return globalLoadPath
     .slice(startAt)
@@ -25,9 +26,15 @@ function getPath(startAt = 0) {
     .join(' -> ');
 }
 
-function addPathToMessage(message, startAt) {
+const errorsFromLoadTracer = new WeakSet();
+
+function addPathToMessage(message: string, startAt?: number) {
   const path = getPath(startAt);
-  if (!path) return message;
+
+  if (!path) {
+    return message;
+  }
+
   return `${message} -- from ${path}`;
 }
 
@@ -41,7 +48,7 @@ function addPathToMessage(message, startAt) {
  *  @param  {Function} load function that executes this step
  *  @return {Any} the value produced by load()
  */
-export function loadTracer(ident, description, load) {
+export function loadTracer(ident: any, description: string, load: () => Promise<void> | void) {
   const isCircular = globalLoadPath.find(step => step.ident === ident);
   if (isCircular) {
     throw new Error(addPathToMessage(`Circular reference to "${description}"`));
@@ -51,13 +58,13 @@ export function loadTracer(ident, description, load) {
     globalLoadPath.unshift({ ident, description });
     return load();
   } catch (err) {
-    if (err.__fromLoadTracer) {
+    if (errorsFromLoadTracer.has(err)) {
       throw err;
     }
 
     const wrapped = new Error(addPathToMessage(`Failure to load ${description}`, 1));
     wrapped.stack = `${wrapped.message}\n\n  Original Error: ${err.stack}`;
-    wrapped.__fromLoadTracer = true;
+    errorsFromLoadTracer.add(wrapped);
     throw wrapped;
   } finally {
     globalLoadPath.shift();
