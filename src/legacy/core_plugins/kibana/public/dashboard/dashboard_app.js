@@ -27,7 +27,8 @@ import { toastNotifications } from 'ui/notify';
 
 import 'ui/listen';
 import 'ui/search_bar';
-import 'ui/apply_filters';
+
+import 'plugins/data';
 
 import { panelActionsStore } from './store/panel_actions_store';
 

@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import './directive';
-
-export { ApplyFiltersPopover } from './apply_filters_popover';
+export { ApplyFiltersService } from './apply_filter_service';

@@ -18,22 +18,27 @@
  */
 
 import { IndexPatternsService } from './index_patterns';
+import { ApplyFiltersService } from './apply_filters';
 
 class DataService {
   private readonly indexPatterns: IndexPatternsService;
+  private readonly applyFilters: ApplyFiltersService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
+    this.applyFilters = new ApplyFiltersService();
   }
 
   public setup() {
     return {
       indexPatterns: this.indexPatterns.setup(),
+      ...this.applyFilters.setup(),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
+    this.applyFilters.stop();
   }
 }
 
