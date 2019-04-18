@@ -1,22 +1,21 @@
-
-.loggedOut {
+.secAuthenticationStatePage {
   @include kibanaFullScreenGraphics;
 }
 
-.loggedOut__header {
+.secAuthenticationStatePage__header {
   position: relative;
   padding: $euiSizeXL;
   z-index: 10;
 }
 
-.loggedOut__logo {
+.secAuthenticationStatePage__logo {
   @include kibanaCircleLogo;
   @include euiBottomShadowMedium;
 
   margin-bottom: $euiSizeXL;
 }
 
-.loggedOut__content {
+.secAuthenticationStatePage__content {
   position: relative;
   margin: auto;
   max-width: 460px;
