@@ -10,10 +10,7 @@ exports[`Relationships should render dashboards normally 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <EuiToolTip
           content="dashboard"
@@ -75,10 +72,12 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -115,10 +114,7 @@ exports[`Relationships should render errors 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <EuiToolTip
           content="dashboard"
@@ -164,10 +160,7 @@ exports[`Relationships should render index patterns normally 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <EuiToolTip
           content="index patterns"
@@ -223,10 +216,12 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -281,10 +276,12 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -318,10 +315,7 @@ exports[`Relationships should render searches normally 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <EuiToolTip
           content="search"
@@ -383,10 +377,12 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -447,10 +443,12 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -484,10 +482,7 @@ exports[`Relationships should render visualizations normally 1`] = `
   size="m"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <EuiToolTip
           content="visualization"
@@ -549,10 +544,12 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",

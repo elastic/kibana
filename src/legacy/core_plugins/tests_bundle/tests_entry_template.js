@@ -85,6 +85,24 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      uiCapabilities: {
+        navLinks: {
+          myLink: true,
+          notMyLink: true,
+        },
+        discover: {
+          showWriteControls: true
+        },
+        visualize: {
+          save: true
+        },
+        dashboard: {
+          showWriteControls: true
+        },
+        timelion: {
+          save: true
+        },
+      },
       interpreterConfig: {
         enableInVisualize: true
       }

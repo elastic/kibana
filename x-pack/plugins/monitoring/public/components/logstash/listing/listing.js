@@ -119,7 +119,7 @@ class ListingUI extends PureComponent {
       cpu_usage: get(item, 'process.cpu.percent', 'N/A'),
       load_average: get(item, 'os.cpu.load_average.1m', 'N/A'),
       jvm_heap_used: get(item, 'jvm.mem.heap_used_percent', 'N/A'),
-      events_ingested: get(item, 'events.out', 'N/A'),
+      events_out: get(item, 'events.out', 'N/A'),
       version: get(item, 'logstash.version', 'N/A'),
     }));
 

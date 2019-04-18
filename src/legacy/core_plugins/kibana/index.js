@@ -138,9 +138,61 @@ export default function (kibana) {
       },
 
       injectDefaultVars(server, options) {
+        const { savedObjects } = server;
+
         return {
           kbnIndex: options.index,
-          kbnBaseUrl
+          kbnBaseUrl,
+          uiCapabilities: {
+            discover: {
+              show: true,
+              createShortUrl: true,
+              save: true,
+            },
+            visualize: {
+              show: true,
+              createShortUrl: true,
+              delete: true,
+              save: true,
+            },
+            dashboard: {
+              createNew: true,
+              show: true,
+              showWriteControls: true,
+            },
+            catalogue: {
+              discover: true,
+              dashboard: true,
+              visualize: true,
+              console: true,
+              advanced_settings: true,
+              index_patterns: true,
+            },
+            advancedSettings: {
+              save: true
+            },
+            indexPatterns: {
+              createNew: true,
+            },
+            savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
+              ...acc,
+              [type]: {
+                delete: true,
+                edit: true,
+                read: true,
+              }
+            }), {}),
+            management: {
+              /*
+               * Management settings correspond to management section/link ids, and should not be changed
+               * without also updating those definitions.
+               */
+              kibana: {
+                settings: true,
+                index_patterns: true,
+              },
+            }
+          }
         };
       },
 

@@ -17,12 +17,14 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { ResponseObject, Server } from 'hapi';
 
-import { ConfigService } from '../../core/server/';
-import { ElasticsearchServiceSetup } from '../../core/server/';
-import { HttpServiceSetup } from '../../core/server/';
-import { PluginsServiceSetup } from '../../core/server/';
+import {
+  ElasticsearchServiceSetup,
+  HttpServiceSetup,
+  ConfigService,
+  PluginsServiceSetup,
+} from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -32,6 +34,10 @@ import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 export interface KibanaConfig {
   get<T>(key: string): T;
   has(key: string): boolean;
+}
+
+export interface UiApp {
+  getId(): string;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -49,12 +55,17 @@ declare module 'hapi' {
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
+    getHiddenUiAppById(appId: string): UiApp;
   }
 
   interface Request {
     getSavedObjectsClient(): SavedObjectsClient;
     getBasePath(): string;
     getUiSettingsService(): any;
+  }
+
+  interface ResponseToolkit {
+    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
   }
 }
 
@@ -66,6 +77,7 @@ export default class KbnServer {
     setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
+        http?: HttpServiceSetup;
       };
       plugins: PluginsServiceSetup;
     };

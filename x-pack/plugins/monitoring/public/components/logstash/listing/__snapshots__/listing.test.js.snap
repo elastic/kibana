@@ -60,7 +60,7 @@ exports[`Listing should render with certain data pieces missing 1`] = `
       Object {
         "availability": true,
         "cpu_usage": "N/A",
-        "events_ingested": "N/A",
+        "events_out": "N/A",
         "jvm_heap_used": "N/A",
         "load_average": "N/A",
         "name": "N/A",
@@ -156,7 +156,7 @@ exports[`Listing should render with expected props 1`] = `
         "events": Object {
           "out": 3505,
         },
-        "events_ingested": 3505,
+        "events_out": 3505,
         "jvm": Object {
           "mem": Object {
             "heap_used_percent": 27,
