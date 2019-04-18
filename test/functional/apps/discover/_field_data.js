@@ -100,8 +100,7 @@ export default function ({ getService, getPageObjects }) {
         await queryBar.submitQuery();
         const { message } = await toasts.getErrorToast();
         expect(message).to.contain(expectedError);
-        // TODO: once the notifications stay forever this needs to be uncommented
-        // await toasts.dismissToast();
+        await toasts.dismissToast();
       });
     });
   });
