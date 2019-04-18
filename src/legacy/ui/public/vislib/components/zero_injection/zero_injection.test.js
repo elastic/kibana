@@ -20,13 +20,12 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import ngMock from 'ng_mock';
-import { VislibComponentsZeroInjectionInjectZerosProvider } from '../../components/zero_injection/inject_zeros';
-import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../../components/zero_injection/ordered_x_keys';
-import { VislibComponentsZeroInjectionUniqKeysProvider } from '../../components/zero_injection/uniq_keys';
-import { VislibComponentsZeroInjectionFlattenDataProvider } from '../../components/zero_injection/flatten_data';
-import { VislibComponentsZeroInjectionZeroFilledArrayProvider } from '../../components/zero_injection/zero_filled_array';
-import { VislibComponentsZeroInjectionZeroFillDataArrayProvider } from '../../components/zero_injection/zero_fill_data_array';
+import { injectZeros } from './inject_zeros';
+import { orderXValues } from './ordered_x_keys';
+import { getUniqKeys } from './uniq_keys';
+import { flattenData } from './flatten_data';
+import { createZeroFilledArray } from './zero_filled_array';
+import { zeroFillDataArray } from './zero_fill_data_array';
 
 describe('Vislib Zero Injection Module Test Suite', function () {
   const dateHistogramRowsObj = {
@@ -154,18 +153,15 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   let notAValue;
 
   describe('Zero Injection (main)', function () {
-    let injectZeros;
     let sample1;
     let sample2;
     let sample3;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+    beforeEach(() => {
       sample1 = injectZeros(seriesData, seriesDataObj);
       sample2 = injectZeros(multiSeriesData, multiSeriesDataObj);
       sample3 = injectZeros(multiSeriesNumberedData, multiSeriesNumberedDataObj);
-    }));
+    });
 
     it('should be a function', function () {
       expect(_.isFunction(injectZeros)).to.be(true);
@@ -211,16 +207,13 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Order X Values', function () {
-    let orderXValues;
     let results;
     let numberedResults;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      orderXValues = Private(VislibComponentsZeroInjectionOrderedXKeysProvider);
+    beforeEach(() => {
       results = orderXValues(multiSeriesDataObj);
       numberedResults = orderXValues(multiSeriesNumberedDataObj);
-    }));
+    });
 
     it('should return a function', function () {
       expect(_.isFunction(orderXValues)).to.be(true);
@@ -293,43 +286,40 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Unique Keys', function () {
-    let uniqueKeys;
     let results;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      uniqueKeys = Private(VislibComponentsZeroInjectionUniqKeysProvider);
-      results = uniqueKeys(multiSeriesDataObj);
-    }));
+    beforeEach(() => {
+      results = getUniqKeys(multiSeriesDataObj);
+    });
 
     it('should throw an error if input is not an object', function () {
       expect(function () {
-        uniqueKeys(str);
+        getUniqKeys(str);
       }).to.throwError();
 
       expect(function () {
-        uniqueKeys(number);
+        getUniqKeys(number);
       }).to.throwError();
 
       expect(function () {
-        uniqueKeys(boolean);
+        getUniqKeys(boolean);
       }).to.throwError();
 
       expect(function () {
-        uniqueKeys(nullValue);
+        getUniqKeys(nullValue);
       }).to.throwError();
 
       expect(function () {
-        uniqueKeys(emptyArray);
+        getUniqKeys(emptyArray);
       }).to.throwError();
 
       expect(function () {
-        uniqueKeys(notAValue);
+        getUniqKeys(notAValue);
       }).to.throwError();
     });
 
     it('should return a function', function () {
-      expect(_.isFunction(uniqueKeys)).to.be(true);
+      expect(_.isFunction(getUniqKeys)).to.be(true);
     });
 
     it('should return an object', function () {
@@ -342,14 +332,11 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Flatten Data', function () {
-    let flattenData;
     let results;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      flattenData = Private(VislibComponentsZeroInjectionFlattenDataProvider);
+    beforeEach(() => {
       results = flattenData(multiSeriesDataObj);
-    }));
+    });
 
     it('should return a function', function () {
       expect(_.isFunction(flattenData)).to.be(true);
@@ -367,47 +354,44 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Zero Filled Array', function () {
-    let createZeroArray;
     const arr1 = [1, 2, 3, 4, 5];
     const arr2 = ['1', '2', '3', '4', '5'];
     let results1;
     let results2;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      createZeroArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
-      results1 = createZeroArray(arr1);
-      results2 = createZeroArray(arr2);
-    }));
+    beforeEach(() => {
+      results1 = createZeroFilledArray(arr1);
+      results2 = createZeroFilledArray(arr2);
+    });
 
     it('should throw an error if input is not an array', function () {
       expect(function () {
-        createZeroArray(str);
+        createZeroFilledArray(str);
       }).to.throwError();
 
       expect(function () {
-        createZeroArray(number);
+        createZeroFilledArray(number);
       }).to.throwError();
 
       expect(function () {
-        createZeroArray(boolean);
+        createZeroFilledArray(boolean);
       }).to.throwError();
 
       expect(function () {
-        createZeroArray(nullValue);
+        createZeroFilledArray(nullValue);
       }).to.throwError();
 
       expect(function () {
-        createZeroArray(emptyObject);
+        createZeroFilledArray(emptyObject);
       }).to.throwError();
 
       expect(function () {
-        createZeroArray(notAValue);
+        createZeroFilledArray(notAValue);
       }).to.throwError();
     });
 
     it('should return a function', function () {
-      expect(_.isFunction(createZeroArray)).to.be(true);
+      expect(_.isFunction(createZeroFilledArray)).to.be(true);
     });
 
     it('should return an array', function () {
@@ -448,51 +432,45 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Zero Filled Data Array', function () {
-    let zeroFillArray;
     const xValueArr = [1, 2, 3, 4, 5];
-    let createZeroArray;
     let arr1;
     const arr2 = [ { x: 3, y: 834 } ];
     let results;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      zeroFillArray = Private(VislibComponentsZeroInjectionZeroFillDataArrayProvider);
-      createZeroArray = Private(VislibComponentsZeroInjectionZeroFilledArrayProvider);
-      arr1 = createZeroArray(xValueArr);
-
+    beforeEach(() => {
+      arr1 = createZeroFilledArray(xValueArr);
       // Takes zero array as 1st arg and data array as 2nd arg
-      results = zeroFillArray(arr1, arr2);
-    }));
+      results = zeroFillDataArray(arr1, arr2);
+    });
 
     it('should throw an error if input are not arrays', function () {
       expect(function () {
-        zeroFillArray(str, str);
+        zeroFillDataArray(str, str);
       }).to.throwError();
 
       expect(function () {
-        zeroFillArray(number, number);
+        zeroFillDataArray(number, number);
       }).to.throwError();
 
       expect(function () {
-        zeroFillArray(boolean, boolean);
+        zeroFillDataArray(boolean, boolean);
       }).to.throwError();
 
       expect(function () {
-        zeroFillArray(nullValue, nullValue);
+        zeroFillDataArray(nullValue, nullValue);
       }).to.throwError();
 
       expect(function () {
-        zeroFillArray(emptyObject, emptyObject);
+        zeroFillDataArray(emptyObject, emptyObject);
       }).to.throwError();
 
       expect(function () {
-        zeroFillArray(notAValue, notAValue);
+        zeroFillDataArray(notAValue, notAValue);
       }).to.throwError();
     });
 
     it('should return a function', function () {
-      expect(_.isFunction(zeroFillArray)).to.be(true);
+      expect(_.isFunction(zeroFillDataArray)).to.be(true);
     });
 
     it('should return an array', function () {
@@ -514,14 +492,11 @@ describe('Vislib Zero Injection Module Test Suite', function () {
   });
 
   describe('Injected Zero values return in the correct order', function () {
-    let injectZeros;
     let results;
 
-    beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      injectZeros = Private(VislibComponentsZeroInjectionInjectZerosProvider);
+    beforeEach(() => {
       results = injectZeros(dateHistogramRows, dateHistogramRowsObj);
-    }));
+    });
 
     it('should return an array of objects', function () {
       results.forEach(function (row) {
