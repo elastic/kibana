@@ -33,7 +33,7 @@ function setup() {
 
   const chrome: any = {};
   const internals: any = {};
-  initChromeBadgeApi(chrome, internals);
+  initChromeBadgeApi(chrome);
   return { chrome, internals, getBadge$ };
 }
 
