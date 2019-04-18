@@ -61,7 +61,7 @@ export class NotificationsService {
       },
     });
 
-    const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nDep }) };
+    const notificationSetup = { toasts: this.toasts.setup({ i18n: i18nDep, uiSettings }) };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe(error => {
       notificationSetup.toasts.addDanger({

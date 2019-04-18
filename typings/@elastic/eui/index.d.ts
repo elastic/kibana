@@ -18,9 +18,16 @@
  */
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 
+import { Toast as OriginalToast } from '@elastic/eui';
+
 // TODO: Remove once typescript definitions are in EUI
 
 declare module '@elastic/eui' {
+
+  export interface Toast extends OriginalToast {
+    toastLifeTimeMs?: number;
+  }
+
   export const EuiWrappingPopover: React.SFC<any>;
   export const EuiCopy: React.SFC<any>;
   export const EuiOutsideClickDetector: React.SFC<any>;

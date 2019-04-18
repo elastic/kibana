@@ -21,6 +21,8 @@ import { take } from 'rxjs/operators';
 
 import { ToastsSetup } from './toasts_start';
 
+import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
+
 async function getCurrentToasts(toasts: ToastsSetup) {
   return await toasts
     .get$()
@@ -28,9 +30,26 @@ async function getCurrentToasts(toasts: ToastsSetup) {
     .toPromise();
 }
 
+function uiSettingsMock() {
+  const mock = uiSettingsServiceMock.createSetupContract();
+  (mock.get as jest.Mock<typeof mock['get']>).mockImplementation(() => (config: string) => {
+    switch (config) {
+      case 'notifications:lifetime:info':
+        return 5000;
+      case 'notifications:lifetime:warning':
+        return 10000;
+      case 'notification:lifetime:error':
+        return 30000;
+      default:
+        throw new Error(`Accessing ${config} is not supported in the mock.`);
+    }
+  });
+  return mock;
+}
+
 describe('#get$()', () => {
   it('returns observable that emits NEW toast list when something added or removed', () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const onToasts = jest.fn();
 
     toasts.get$().subscribe(onToasts);
@@ -57,7 +76,7 @@ describe('#get$()', () => {
   });
 
   it('does not emit a new toast list when unknown toast is passed to remove()', () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const onToasts = jest.fn();
 
     toasts.get$().subscribe(onToasts);
@@ -71,14 +90,14 @@ describe('#get$()', () => {
 
 describe('#add()', () => {
   it('returns toast objects with auto assigned id', () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.add({ title: 'foo' });
     expect(toast).toHaveProperty('id');
     expect(toast).toHaveProperty('title', 'foo');
   });
 
   it('adds the toast to toasts list', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.add({});
 
     const currentToasts = await getCurrentToasts(toasts);
@@ -87,27 +106,27 @@ describe('#add()', () => {
   });
 
   it('increments the toast ID for each additional toast', () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     expect(toasts.add({})).toHaveProperty('id', '0');
     expect(toasts.add({})).toHaveProperty('id', '1');
     expect(toasts.add({})).toHaveProperty('id', '2');
   });
 
   it('accepts a string, uses it as the title', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     expect(toasts.add('foo')).toHaveProperty('title', 'foo');
   });
 });
 
 describe('#remove()', () => {
   it('removes a toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     toasts.remove(toasts.add('Test'));
     expect(await getCurrentToasts(toasts)).toHaveLength(0);
   });
 
   it('ignores unknown toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     toasts.add('Test');
     toasts.remove({ id: 'foo' });
 
@@ -118,12 +137,12 @@ describe('#remove()', () => {
 
 describe('#addSuccess()', () => {
   it('adds a success toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     expect(toasts.addSuccess({})).toHaveProperty('color', 'success');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.addSuccess({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
@@ -132,12 +151,12 @@ describe('#addSuccess()', () => {
 
 describe('#addWarning()', () => {
   it('adds a warning toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     expect(toasts.addWarning({})).toHaveProperty('color', 'warning');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.addWarning({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
@@ -146,12 +165,12 @@ describe('#addWarning()', () => {
 
 describe('#addDanger()', () => {
   it('adds a danger toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     expect(toasts.addDanger({})).toHaveProperty('color', 'danger');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsSetup();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.addDanger({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
@@ -160,14 +179,14 @@ describe('#addDanger()', () => {
 
 describe('#addError', () => {
   it('adds an error toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
   });
 
   it('returns the created toast', async () => {
-    const toasts = new ToastsStart();
+    const toasts = new ToastsSetup(uiSettingsMock());
     const toast = toasts.addError(new Error('unexpected error'), { title: 'Something went wrong' });
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);

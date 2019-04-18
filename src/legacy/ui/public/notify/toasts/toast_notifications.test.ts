@@ -19,13 +19,31 @@
 
 import sinon from 'sinon';
 import { ToastsSetup } from '../../../../../core/public';
+import { uiSettingsServiceMock } from '../../../../../core/public/mocks';
 
 import { ToastNotifications } from './toast_notifications';
+
+function uiSettingsMock() {
+  const mock = uiSettingsServiceMock.createSetupContract();
+  (mock.get as jest.Mock<typeof mock['get']>).mockImplementation(() => (config: string) => {
+    switch (config) {
+      case 'notifications:lifetime:info':
+        return 5000;
+      case 'notifications:lifetime:warning':
+        return 10000;
+      case 'notification:lifetime:error':
+        return 30000;
+      default:
+        throw new Error(`Accessing ${config} is not supported in the mock.`);
+    }
+  });
+  return mock;
+}
 
 describe('ToastNotifications', () => {
   describe('interface', () => {
     function setup() {
-      return { toastNotifications: new ToastNotifications(new ToastsSetup()) };
+      return { toastNotifications: new ToastNotifications(new ToastsSetup(uiSettingsMock())) };
     }
 
     describe('add method', () => {

@@ -22,6 +22,7 @@ import React from 'react';
 import * as Rx from 'rxjs';
 
 import { ErrorToast } from './error_toast';
+import { UiSettingsSetup } from '../../ui_settings';
 
 /** @public */
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
@@ -55,6 +56,8 @@ export class ToastsSetup {
   private toasts$ = new Rx.BehaviorSubject<Toast[]>([]);
   private idCounter = 0;
 
+  constructor(private uiSettings: UiSettingsSetup) {}
+
   public get$() {
     return this.toasts$.asObservable();
   }
@@ -62,6 +65,7 @@ export class ToastsSetup {
   public add(toastOrTitle: ToastInput) {
     const toast: Toast = {
       id: String(this.idCounter++),
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:info'),
       ...normalizeToast(toastOrTitle),
     };
 
@@ -90,6 +94,7 @@ export class ToastsSetup {
     return this.add({
       color: 'warning',
       iconType: 'help',
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
     });
   }
@@ -98,17 +103,18 @@ export class ToastsSetup {
     return this.add({
       color: 'danger',
       iconType: 'alert',
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:warning'),
       ...normalizeToast(toastOrTitle),
     });
   }
 
   public addError(error: Error, options: ErrorToastOptions) {
-    // TODO: Those need a different timeout than the rest of the notification
     const message = options.toastMessage || error.message;
     return this.add({
       color: 'danger',
       iconType: 'alert',
       title: options.title,
+      toastLifeTimeMs: this.uiSettings.get('notifications:lifetime:error'),
       text: <ErrorToast error={error} title={options.title} toastMessage={message} />,
     });
   }

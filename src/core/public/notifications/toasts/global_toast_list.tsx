@@ -56,7 +56,7 @@ export class GlobalToastList extends React.Component<Props, State> {
         data-test-subj="globalToastList"
         toasts={this.state.toasts}
         dismissToast={this.props.dismissToast}
-        toastLifeTimeMs={6000}
+        toastLifeTimeMs={Infinity}
       />
     );
   }

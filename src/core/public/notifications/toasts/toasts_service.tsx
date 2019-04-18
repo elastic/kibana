@@ -23,6 +23,7 @@ import { Observable, Subscription } from 'rxjs';
 
 import { Toast } from '@elastic/eui';
 import { I18nSetup } from '../../i18n';
+import { UiSettingsSetup } from '../../ui_settings';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsSetup } from './toasts_start';
 
@@ -32,6 +33,7 @@ interface Params {
 
 interface Deps {
   i18n: I18nSetup;
+  uiSettings: UiSettingsSetup
 }
 
 export class ToastsService {
@@ -40,8 +42,8 @@ export class ToastsService {
 
   constructor(private readonly params: Params) {}
 
-  public setup({ i18n }: Deps) {
-    const toasts = new ToastsSetup();
+  public setup({ i18n, uiSettings }: Deps) {
+    const toasts = new ToastsSetup(uiSettings);
 
     this.domElemSubscription = this.params.targetDomElement$.subscribe({
       next: targetDomElement => {
