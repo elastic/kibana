@@ -9,7 +9,7 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-interface HeaderPageProps {
+export interface HeaderPageProps {
   children?: React.ReactNode;
   subtitle: string | React.ReactNode;
   title: string | React.ReactNode;

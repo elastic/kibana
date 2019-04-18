@@ -15,6 +15,7 @@ import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { getEmptyTagValue } from '../../components/empty_value';
 import { HeaderPage } from '../../components/header_page';
+import { PageHeadlineProps } from '../../components/header_page/smart';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { LastBeatDomain } from '../../components/page/network/last_beat_domain';
@@ -38,7 +39,7 @@ const KpiNetworkComponentManage = manageQuery(KpiNetworkComponent);
 interface NetworkComponentReduxProps {
   filterQuery: string;
   flowTarget: FlowTarget;
-  overviewStatIp: string | null;
+  overviewStatIp: string;
 }
 type NetworkComponentProps = NetworkComponentReduxProps;
 const NetworkComponent = pure<NetworkComponentProps>(
@@ -181,3 +182,9 @@ const makeMapStateToProps = () => {
 };
 
 export const Network = connect(makeMapStateToProps)(NetworkComponent);
+
+export const getPageHeadline = (): PageHeadlineProps => ({
+  subtitle: 'subtitle',
+  statType: 'overviewStatIp',
+  title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
+});

@@ -14,6 +14,7 @@ import { useFirstLastSeenHostQuery } from '../../../../containers/hosts/first_la
 import { getEmptyTagValue } from '../../../empty_value';
 import { PreferenceFormattedDate } from '../../../formatted_date';
 import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { LastSeenHost } from '../last_seen_host';
 
 export type FirstLastSeenHostType = 'first-seen' | 'last-seen';
 
@@ -43,6 +44,7 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
           const valueSeen = type === 'first-seen' ? firstSeen : lastSeen;
           return (
             <>
+              <LastSeenHost lastSeen={lastSeen} hostName={hostname} />
               {loading && <EuiLoadingSpinner size="m" />}
               {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
                 ? valueSeen

@@ -6,16 +6,14 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { get, getOr } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { getEmptyTagValue } from '../../components/empty_value';
-import { HeaderPage } from '../../components/header_page';
-import { LastBeatStat } from '../../components/last_beat_stat';
+import { PageHeadlineProps } from '../../components/header_page/smart';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
@@ -40,29 +38,16 @@ const UncommonProcessTableManage = manageQuery(UncommonProcessTable);
 
 interface HostsComponentReduxProps {
   filterQuery: string;
-  overviewStatHost: hostsModel.OverviewStatHostModel;
 }
 
 type HostsComponentProps = HostsComponentReduxProps;
 
-const HostsComponent = pure<HostsComponentProps>(({ filterQuery, overviewStatHost }) => (
+const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
   <WithSource sourceId="default" indexTypes={[IndexType.AUDITBEAT]}>
     {({ auditbeatIndicesExist, indexPattern }) =>
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
-          <HeaderPage
-            subtitle={
-              overviewStatHost.lastSeen ? (
-                <LastBeatStat lastSeen={overviewStatHost.lastSeen} />
-              ) : (
-                getEmptyTagValue()
-              )
-            }
-            title={<FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />}
-          >
-            {/* DEV NOTE: Date picker to be moved here */}
-          </HeaderPage>
           <GlobalTime>
             {({ poll, to, from, setQuery }) => (
               <>
@@ -89,7 +74,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, overviewStatHos
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           loadMore={loadMore}
                           type={hostsModel.HostsType.page}
-                          overviewStatHost={overviewStatHost}
                         />
                       </>
                     );
@@ -203,12 +187,15 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery, overviewStatHos
 
 const makeMapStateToProps = () => {
   const getHostsFilterQueryAsJson = hostsSelectors.hostsFilterQueryAsJson();
-  const getOverviewStatHost = hostsSelectors.overviewStatHost();
   const mapStateToProps = (state: State) => ({
     filterQuery: getHostsFilterQueryAsJson(state, hostsModel.HostsType.page) || '',
-    overviewStatHost: getOverviewStatHost(state) || {},
   });
   return mapStateToProps;
 };
 
 export const Hosts = connect(makeMapStateToProps)(HostsComponent);
+
+export const getPageHeadline = (): PageHeadlineProps => ({
+  statType: 'overviewStatHost',
+  title: <FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />,
+});

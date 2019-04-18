@@ -16,6 +16,7 @@ import chrome from 'ui/chrome';
 import { EmptyPage } from '../../components/empty_page';
 import { FlowTargetSelect } from '../../components/flow_controls/flow_target_select';
 import { HeaderPage } from '../../components/header_page';
+import { PageHeadlineProps } from '../../components/header_page/smart';
 import { LastBeatStat } from '../../components/last_beat_stat';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
 import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
@@ -191,3 +192,8 @@ export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
     text: decodeIpv6(ip),
   },
 ];
+
+export const getPageHeadline = (ip: string): PageHeadlineProps => ({
+  subtitle: 'subtitle',
+  title: decodeIpv6(ip),
+});

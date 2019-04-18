@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
@@ -12,11 +12,15 @@ import { pure } from 'recompose';
 import { getEmptyTagValue } from '../../components/empty_value';
 
 interface OwnProps {
-  lastSeen: string;
+  lastSeen: string | null;
+  isLoading?: boolean;
 }
 
-export const LastBeatStat = pure<OwnProps>(({ lastSeen }) =>
-  lastSeen != null ? (
+export const LastBeatStat = pure<OwnProps>(({ lastSeen, isLoading = false }) => {
+  if (isLoading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+  return lastSeen !== null ? (
     <EuiToolTip position="bottom" content={lastSeen}>
       <FormattedMessage
         id="xpack.siem.headerPage.pageSubtitle"
@@ -28,5 +32,5 @@ export const LastBeatStat = pure<OwnProps>(({ lastSeen }) =>
     </EuiToolTip>
   ) : (
     getEmptyTagValue()
-  )
-);
+  );
+});

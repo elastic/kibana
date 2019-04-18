@@ -24,6 +24,7 @@ import { AppSettings } from '../../components/app_settings';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
+import { PageHeadline } from '../../components/header_page/smart';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { SuperDatePicker } from '../../components/super_date_picker';
@@ -96,6 +97,7 @@ export const HomePage = pure(() => (
                   </FixEuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
+              <PageHeadline />
               <Switch>
                 <Redirect from="/" exact={true} to="/overview" />
                 <Route path="/overview" component={Overview} />

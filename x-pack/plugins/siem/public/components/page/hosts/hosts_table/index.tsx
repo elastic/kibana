@@ -16,6 +16,7 @@ import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { CountBadge } from '../../index';
+import { LastSeenHost } from '../last_seen_host';
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
@@ -25,7 +26,6 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
-  overviewStatHost: hostsModel.OverviewStatHostModel;
   startDate: number;
   totalCount: number;
   loadMore: (cursor: string) => void;
@@ -44,7 +44,6 @@ interface HostsTableDispatchProps {
     sort: HostsSortField;
     hostsType: hostsModel.HostsType;
   }>;
-  updateOverviewStatHost: ActionCreator<hostsModel.OverviewStatHostModel>;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
@@ -78,13 +77,6 @@ const Sup = styled.sup`
 `;
 
 class HostsTableComponent extends React.PureComponent<HostsTableProps> {
-  public componentWillReceiveProps(nextProps: Readonly<HostsTableProps>): void {
-    const lastSeen: string = get('[0]node.lastSeen', nextProps.data);
-    const hostName: string = get('[0]node.host.name', nextProps.data);
-    if (hostName && nextProps.overviewStatHost.hostName !== hostName) {
-      nextProps.updateOverviewStatHost({ hostName, lastSeen });
-    }
-  }
   public render() {
     const {
       data,
@@ -100,8 +92,11 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       sortField,
       type,
     } = this.props;
+    const lastSeen: string = get('[0]node.lastSeen', data);
+    const hostName: string = get('[0]node.host.name', data);
     return (
       <EuiPanel>
+        <LastSeenHost lastSeen={lastSeen} hostName={hostName} />
         <LoadMoreTable
           columns={getHostsColumns(startDate, type)}
           loadingTitle={i18n.HOSTS}
@@ -180,6 +175,5 @@ export const HostsTable = connect(
   {
     updateLimitPagination: hostsActions.updateHostsLimit,
     updateHostsSort: hostsActions.updateHostsSort,
-    updateOverviewStatHost: hostsActions.updateOverviewStatHost,
   }
 )(HostsTableComponent);
