@@ -172,7 +172,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           repositories={repositories}
           reload={reload}
           openSnapshotDetails={openSnapshotDetails}
-          filterToRepository={filteredRepository}
+          repositoryFilter={filteredRepository}
         />
       </Fragment>
     );

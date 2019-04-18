@@ -30,7 +30,7 @@ export interface RepositorySettingsValidation {
 
 export const validateRepository = (repository: Repository): RepositoryValidation => {
   const { name, type, settings } = repository;
-  const i18n = textService.i18n;
+  const { i18n } = textService;
   const validation: RepositoryValidation = {
     isValid: true,
     errors: {},

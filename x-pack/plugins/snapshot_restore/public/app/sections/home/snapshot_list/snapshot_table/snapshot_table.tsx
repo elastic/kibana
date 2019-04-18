@@ -18,7 +18,7 @@ interface Props {
   repositories: string[];
   reload: () => Promise<void>;
   openSnapshotDetails: (repositoryName: string, snapshotId: string) => void;
-  filterToRepository?: string;
+  repositoryFilter?: string;
 }
 
 export const SnapshotTable: React.FunctionComponent<Props> = ({
@@ -26,7 +26,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
   repositories,
   reload,
   openSnapshotDetails,
-  filterToRepository,
+  repositoryFilter,
 }) => {
   const {
     core: {
@@ -166,8 +166,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
         })),
       },
     ],
-    defaultQuery: filterToRepository
-      ? Query.parse(`repository:'${filterToRepository}'`, {
+    defaultQuery: repositoryFilter
+      ? Query.parse(`repository:'${repositoryFilter}'`, {
           schema: {
             ...searchSchema,
             strict: true,
