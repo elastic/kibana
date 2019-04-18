@@ -629,6 +629,7 @@ export const Explorer = injectI18n(
         noJobsFound,
         selectedCells,
         selectedJobs,
+        swimlaneViewByFieldName
       } = {
         ...this.state,
         ...stateUpdate
@@ -697,7 +698,7 @@ export const Explorer = injectI18n(
         );
       }
 
-      const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, this.state.swimlaneViewByFieldName);
+      const viewBySwimlaneOptions = getViewBySwimlaneOptions(selectedJobs, swimlaneViewByFieldName);
       Object.assign(stateUpdate, viewBySwimlaneOptions);
       if (selectedCells !== null && selectedCells.showTopFieldValues === true) {
         // this.setState({ viewBySwimlaneData: getDefaultViewBySwimlaneData(), viewBySwimlaneDataLoading: true });

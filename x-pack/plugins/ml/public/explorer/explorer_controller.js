@@ -88,7 +88,7 @@ module.controller('MlExplorerController', function (
 
   mlExplorerDashboardService.init();
 
-  function jobSelectionUpdate(action, { fullJobs, selectedCells, selectedJobIds }) {
+  function jobSelectionUpdate(action, { fullJobs, selectedCells, selectedJobIds, swimlaneViewByFieldName }) {
     const jobs = createJobs(fullJobs).map((job) => {
       job.selected = selectedJobIds.some((id) => job.id === id);
       return job;
@@ -107,6 +107,7 @@ module.controller('MlExplorerController', function (
         noJobsFound,
         selectedCells,
         selectedJobs,
+        swimlaneViewByFieldName
       });
     }
 
