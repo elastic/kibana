@@ -53,6 +53,7 @@ export class App extends Component {
     this.state = {
       isFetchingPermissions: false,
       fetchPermissionError: undefined,
+      isSecurityEnabled: false,
       hasPermission: false,
       missingClusterPrivileges: [],
     };
@@ -76,10 +77,11 @@ export class App extends Component {
     });
 
     try {
-      const { hasPermission, missingClusterPrivileges } = await loadPermissions();
+      const { isSecurityEnabled, hasPermission, missingClusterPrivileges } = await loadPermissions();
 
       this.setState({
         isFetchingPermissions: false,
+        isSecurityEnabled,
         hasPermission,
         missingClusterPrivileges,
       });
@@ -109,6 +111,7 @@ export class App extends Component {
     const {
       isFetchingPermissions,
       fetchPermissionError,
+      isSecurityEnabled,
       hasPermission,
       missingClusterPrivileges,
     } = this.state;
@@ -176,6 +179,31 @@ export class App extends Component {
 
           <EuiSpacer size="m" />
         </Fragment>
+      );
+    }
+
+    if (!isSecurityEnabled) {
+      return (
+        <EuiPageContent horizontalPosition="center">
+          <EuiEmptyPrompt
+            iconType="securityApp"
+            iconColor={null}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.app.securityDisabledTitle"
+                  defaultMessage="You don't have security enabled"
+                />
+              </h2>}
+            body={
+              <p>
+                <FormattedMessage
+                  id="xpack.crossClusterReplication.app.securityDisabledDescription"
+                  defaultMessage="To use Cross-Cluster Replication, you must enable security."
+                />
+              </p>}
+          />
+        </EuiPageContent>
       );
     }
 

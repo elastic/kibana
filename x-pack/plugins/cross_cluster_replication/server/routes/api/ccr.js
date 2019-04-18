@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import Boom from 'boom';
+
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
 import { wrapEsError, wrapUnknownError } from '../../lib/error_wrappers';
@@ -51,6 +54,29 @@ export const registerCcrRoutes = (server) => {
       pre: [ licensePreRouting ]
     },
     handler: async (request) => {
+      const xpackMainPlugin = server.plugins.xpack_main;
+      const xpackInfo = (xpackMainPlugin && xpackMainPlugin.info);
+
+      if (!xpackInfo) {
+        // xpackInfo is updated via poll, so it may not be available until polling has begun.
+        // In this rare situation, tell the client the service is temporarily unavailable.
+        throw new Boom('Security info unavailable', { statusCode: 503 });
+      }
+
+      // we assume that `xpack.isAvailable()` always returns `true` because we're inside x-pack
+      // if for whatever reason it returns `false`, `isSecurityDisabled()` would also return `false`
+      // which would result in follow-up behavior assuming security is enabled. This is intentional,
+      // because it results in more defensive behavior.
+      const securityInfo = (xpackInfo && xpackInfo.isAvailable() && xpackInfo.feature('security'));
+      if (!securityInfo || !securityInfo.isEnabled()) {
+        // If security isn't enabled, tell the user it's required.
+        return {
+          isSecurityEnabled: false,
+          hasPermission: false,
+          missingClusterPrivileges: [],
+        };
+      }
+
       const callWithRequest = callWithRequestFactory(server, request);
 
       try {
@@ -71,6 +97,7 @@ export const registerCcrRoutes = (server) => {
         }, []);
 
         return {
+          isSecurityEnabled: true,
           hasPermission,
           missingClusterPrivileges,
         };
