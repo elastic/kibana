@@ -7,11 +7,11 @@
 /* eslint-disable max-classes-per-file */
 
 import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { LoginAttempt } from '../login_attempt';
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * Utility class that knows how to decorate request with proper Basic authentication headers.
@@ -49,15 +49,6 @@ type RequestWithLoginAttempt = Request & {
 };
 
 /**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
-
-/**
  * The state supported by the provider.
  */
 interface ProviderState {
@@ -72,13 +63,7 @@ interface ProviderState {
 /**
  * Provider that supports request authentication via Basic HTTP Authentication.
  */
-export class BasicAuthenticationProvider {
-  /**
-   * Instantiates BasicAuthenticationProvider.
-   * @param options Provider options object.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class BasicAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs request authentication using Basic HTTP Authentication.
    * @param request HapiJS request instance.

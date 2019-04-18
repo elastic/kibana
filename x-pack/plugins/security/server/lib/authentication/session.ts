@@ -57,7 +57,7 @@ export class Session {
    * Retrieves session value from the session storage (e.g. cookie).
    * @param request HapiJS request instance.
    */
-  async get(request: Request) {
+  async get<T>(request: Request) {
     assertRequest(request);
 
     try {
@@ -65,12 +65,12 @@ export class Session {
 
       // If it's not an array, just return the session value
       if (!Array.isArray(session)) {
-        return session.value;
+        return session.value as T;
       }
 
       // If we have an array with one value, we're good also
       if (session.length === 1) {
-        return session[0].value;
+        return session[0].value as T;
       }
 
       // Otherwise, we have more than one and won't be authing the user because we don't

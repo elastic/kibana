@@ -5,21 +5,12 @@
  */
 
 import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { LoginAttempt } from '../login_attempt';
-
-/**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider.
@@ -64,13 +55,7 @@ function isAccessTokenExpiredError(err?: any) {
 /**
  * Provider that supports token-based request authentication.
  */
-export class TokenAuthenticationProvider {
-  /**
-   * Instantiates TokenAuthenticationProvider.
-   * @param options Options that may be needed by authentication provider.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs token-based request authentication
    * @param request HapiJS request instance.

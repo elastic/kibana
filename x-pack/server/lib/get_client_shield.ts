@@ -5,8 +5,10 @@
  */
 
 import { once } from 'lodash';
+import { Legacy } from 'kibana';
+// @ts-ignore
 import esShield from './esjs_shield_plugin';
 
-export const getClient = once((server) => {
+export const getClient = once((server: Legacy.Server) => {
   return server.plugins.elasticsearch.createCluster('security', { plugins: [esShield] });
 });

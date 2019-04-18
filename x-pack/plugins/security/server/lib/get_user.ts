@@ -5,7 +5,6 @@
  */
 
 import { Request } from 'hapi';
-// @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 
 export function getUserProvider(server: any) {

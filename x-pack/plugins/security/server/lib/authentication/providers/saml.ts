@@ -6,24 +6,12 @@
 
 import Boom from 'boom';
 import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-
-/**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -104,13 +92,7 @@ function isSAMLRequestQuery(query: any): query is SAMLRequestQuery {
 /**
  * Provider that supports SAML request authentication.
  */
-export class SAMLAuthenticationProvider {
-  /**
-   * Instantiates SAMLAuthenticationProvider.
-   * @param options Options that may be needed by authentication provider.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs SAML request authentication.
    * @param request HapiJS request instance.
