@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { getOr, isEmpty } from 'lodash/fp';
+import moment from 'moment';
 import React from 'react';
 
 import {
-  DomainsEdges,
-  DomainsNode,
+  DomainsItem,
+  DomainsNetworkField,
   FlowDirection,
   FlowTarget,
   NetworkDirectionEcs,
@@ -21,11 +23,12 @@ import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
 import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { PreferenceFormattedDate } from '../../../formatted_date';
 import { Columns } from '../../../load_more_table';
+import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
 import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
-import { FirstLastSeenDomain } from './first_last_seen';
 import * as i18n from './translations';
 
 export const getDomainsColumns = (
@@ -36,7 +39,7 @@ export const getDomainsColumns = (
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<DomainsEdges | ValueOf<DomainsNode>>> => [
+): Array<Columns<ValueOf<DomainsItem> | ValueOf<DomainsNetworkField>>> => [
   {
     field: `node.${flowTarget}.domainName`,
     name: i18n.DOMAIN_NAME,
@@ -146,40 +149,24 @@ export const getDomainsColumns = (
     },
   },
   {
-    name: i18n.FIRST_SEEN,
+    name: (
+      <EuiToolTip content={i18n.FIRST_LAST_SEEN_TOOLTIP}>
+        <>
+          {i18n.LAST_SEEN}
+          <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+        </>
+      </EuiToolTip>
+    ),
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const domainNameAttr = `${flowTarget}.domainName`;
-      const domainName = getOr(null, domainNameAttr, node);
-      if (domainName != null) {
+      const lastSeenAttr = `${flowTarget}.lastSeen`;
+      const lastSeen = getOr(null, lastSeenAttr, node);
+      if (lastSeen != null) {
         return (
-          <FirstLastSeenDomain
-            ip={ip}
-            domainName={domainName}
-            flowTarget={flowTarget}
-            type="first-seen"
-          />
-        );
-      }
-      return getEmptyTagValue();
-    },
-  },
-  {
-    name: i18n.LAST_SEEN,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const domainNameAttr = `${flowTarget}.domainName`;
-      const domainName = getOr(null, domainNameAttr, node);
-      if (domainName != null) {
-        return (
-          <FirstLastSeenDomain
-            ip={ip}
-            domainName={domainName}
-            flowTarget={flowTarget}
-            type="last-seen"
-          />
+          <LocalizedDateTooltip date={moment(new Date(lastSeen)).toDate()}>
+            <PreferenceFormattedDate value={new Date(lastSeen)} />
+          </LocalizedDateTooltip>
         );
       }
       return getEmptyTagValue();

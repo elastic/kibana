@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
@@ -22,11 +22,24 @@ export const FirstLastSeenHost = pure<{ hostname: string; type: FirstLastSeenHos
     return (
       <ApolloConsumer>
         {client => {
-          const { loading, firstSeen, lastSeen } = useFirstLastSeenHostQuery(
+          const { loading, firstSeen, lastSeen, errorMessage } = useFirstLastSeenHostQuery(
             hostname,
             'default',
             client
           );
+          if (errorMessage != null) {
+            return (
+              <EuiToolTip
+                position="top"
+                content={errorMessage}
+                data-test-subj="firstLastSeenErrorToolTip"
+                aria-label={`firstLastSeenError-${type}`}
+                id={`firstLastSeenError-${hostname}-${type}`}
+              >
+                <EuiIcon aria-describedby={`firstLastSeenError-${hostname}-${type}`} type="alert" />
+              </EuiToolTip>
+            );
+          }
           const valueSeen = type === 'first-seen' ? firstSeen : lastSeen;
           return (
             <>

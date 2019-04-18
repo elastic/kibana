@@ -64,7 +64,7 @@ interface BasicTableState {
 
 export interface Columns<T> {
   field?: string;
-  name: string;
+  name: string | React.ReactNode;
   isMobileHeader?: boolean;
   sortable?: boolean;
   truncateText?: boolean;

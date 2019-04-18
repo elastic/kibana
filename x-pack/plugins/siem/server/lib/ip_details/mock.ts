@@ -352,7 +352,12 @@ export const mockFormattedSource: DomainsEdges[] = [
         direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
         packets: 16946245,
       },
-      source: { domainName: 'example.com', uniqueIpCount: 805 },
+      source: {
+        domainName: 'example.com',
+        firstSeen: '2019-04-01T19:27:53.000Z',
+        lastSeen: '2019-04-10T18:28:39.000Z',
+        uniqueIpCount: 805,
+      },
     },
   },
 ];
@@ -362,7 +367,12 @@ export const mockFormattedDestination: DomainsEdges[] = [
     cursor: { tiebreaker: null, value: 'example.com' },
     node: {
       _id: 'example.com',
-      destination: { domainName: 'example.com', uniqueIpCount: 805 },
+      destination: {
+        domainName: 'example.com',
+        firstSeen: '2019-04-01T19:27:53.000Z',
+        lastSeen: '2019-04-10T18:28:39.000Z',
+        uniqueIpCount: 805,
+      },
       network: {
         bytes: 974964465,
         direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
