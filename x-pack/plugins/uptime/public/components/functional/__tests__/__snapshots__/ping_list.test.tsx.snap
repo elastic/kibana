@@ -23,7 +23,6 @@ exports[`PingList component renders sorted list without errors 1`] = `
           >
             <EuiTitle
               size="xs"
-              textTransform="none"
             >
               <h4>
                 <FormattedMessage

@@ -798,42 +798,51 @@ export function getUiSettingDefaults() {
         {
           from: 'now/d',
           to: 'now/d',
-          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.today', { defaultMessage: 'Today' }),
         },
         {
           from: 'now/w',
           to: 'now/w',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.thisWeek', { defaultMessage: 'This week' }),
         },
         {
-          from: 'now/M',
-          to: 'now/M',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisMonth', { defaultMessage: 'This month' })
-        },
-        {
-          from: 'now/y',
-          to: 'now/y',
-          display: i18n.translate('kbn.advancedSettings.timepicker.thisYear', { defaultMessage: 'This year' })
-        },
-        {
-          from: 'now/d',
+          from: 'now-15m',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.todaySoFar', { defaultMessage: 'Today so far' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last15Minutes', { defaultMessage: 'Last 15 minutes' }),
         },
         {
-          from: 'now/w',
+          from: 'now-30m',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.weekToDate', { defaultMessage: 'Week to date' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Minutes', { defaultMessage: 'Last 30 minutes' }) },
+        {
+          from: 'now-1h',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Hour', { defaultMessage: 'Last 1 hour' }),
         },
         {
-          from: 'now/M',
+          from: 'now-24h',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.monthToDate', { defaultMessage: 'Month to date' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last24Hours', { defaultMessage: 'Last 24 hours' }),
         },
         {
-          from: 'now/y',
+          from: 'now-7d',
           to: 'now',
-          display: i18n.translate('kbn.advancedSettings.timepicker.yearToDate', { defaultMessage: 'Year to date' })
+          display: i18n.translate('kbn.advancedSettings.timepicker.last7Days', { defaultMessage: 'Last 7 days' }),
+        },
+        {
+          from: 'now-30d',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last30Days', { defaultMessage: 'Last 30 days' }),
+        },
+        {
+          from: 'now-90d',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last90Days', { defaultMessage: 'Last 90 days' }),
+        },
+        {
+          from: 'now-1y',
+          to: 'now',
+          display: i18n.translate('kbn.advancedSettings.timepicker.last1Year', { defaultMessage: 'Last 1 year' }),
         },
       ], null, 2),
       type: 'json',
