@@ -3,11 +3,11 @@
 exports[`Breadcrumbs /:serviceName 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?kuery=myKuery",
+    "href": "#/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "opbeans-node",
   },
 ]
@@ -16,15 +16,15 @@ Array [
 exports[`Breadcrumbs /:serviceName/errors 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?kuery=myKuery",
+    "href": "#/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/errors?kuery=myKuery",
+    "href": "#/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "Errors",
   },
 ]
@@ -33,19 +33,19 @@ Array [
 exports[`Breadcrumbs /:serviceName/errors/:groupId 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?kuery=myKuery",
+    "href": "#/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/errors?kuery=myKuery",
+    "href": "#/opbeans-node/errors?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "Errors",
   },
   Object {
-    "href": "#/opbeans-node/errors/myGroupId?kuery=myKuery",
+    "href": "#/opbeans-node/errors/myGroupId?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "myGroupId",
   },
 ]
@@ -54,15 +54,15 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?kuery=myKuery",
+    "href": "#/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/transactions?kuery=myKuery",
+    "href": "#/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "Transactions",
   },
 ]
@@ -71,15 +71,15 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions/:transactionType 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?kuery=myKuery",
+    "href": "#/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/transactions?kuery=myKuery",
+    "href": "#/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "Transactions",
   },
 ]
@@ -88,19 +88,19 @@ Array [
 exports[`Breadcrumbs /:serviceName/transactions/:transactionType/:transactionName 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
   Object {
-    "href": "#/opbeans-node?kuery=myKuery",
+    "href": "#/opbeans-node?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "opbeans-node",
   },
   Object {
-    "href": "#/opbeans-node/transactions?kuery=myKuery",
+    "href": "#/opbeans-node/transactions?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "Transactions",
   },
   Object {
-    "href": "#/opbeans-node/transactions/request/my-transaction-name?kuery=myKuery",
+    "href": "#/opbeans-node/transactions/request/my-transaction-name?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "my-transaction-name",
   },
 ]
@@ -109,7 +109,7 @@ Array [
 exports[`Breadcrumbs Homepage 1`] = `
 Array [
   Object {
-    "href": "#/?kuery=myKuery",
+    "href": "#/?rangeFrom=now-24h&rangeTo=now&refreshPaused=true&refreshInterval=0&kuery=myKuery",
     "text": "APM",
   },
 ]

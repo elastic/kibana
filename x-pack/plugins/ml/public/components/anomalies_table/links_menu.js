@@ -399,7 +399,7 @@ export const LinksMenu = injectI18n(class LinksMenu extends Component {
       items.push(
         <EuiContextMenuItem
           key="view_series"
-          icon="popout"
+          icon="stats"
           onClick={() => { this.closePopover(); this.viewSeries(); }}
         >
           <FormattedMessage

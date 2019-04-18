@@ -71,11 +71,11 @@ describe('EsVersionPrecheck', () => {
     );
   });
 
-  it('throws a 426 message when nodes are not on same version', async () => {
+  it('throws a 426 message w/ allNodesUpgraded = false when nodes are not on same version', async () => {
     const fakeCallWithRequest = jest.fn().mockResolvedValue({
       nodes: {
         node1: { version: CURRENT_VERSION.raw },
-        node2: { version: CURRENT_VERSION.inc('major').raw },
+        node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
       },
     });
     const fakeGetCluster = jest.fn(() => ({ callWithRequest: fakeCallWithRequest }));
@@ -83,10 +83,29 @@ describe('EsVersionPrecheck', () => {
       server: { plugins: { elasticsearch: { getCluster: fakeGetCluster } } },
     } as any;
 
-    await expect(EsVersionPrecheck.method(fakeRequest, {} as any)).rejects.toHaveProperty(
-      'output.statusCode',
-      426
+    const result = EsVersionPrecheck.method(fakeRequest, {} as any);
+    await expect(result).rejects.toHaveProperty('output.statusCode', 426);
+    await expect(result).rejects.toHaveProperty(
+      'output.payload.attributes.allNodesUpgraded',
+      false
     );
+  });
+
+  it('throws a 426 message w/ allNodesUpgraded = true when nodes are on next version', async () => {
+    const fakeCallWithRequest = jest.fn().mockResolvedValue({
+      nodes: {
+        node1: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
+        node2: { version: new SemVer(CURRENT_VERSION.raw).inc('major').raw },
+      },
+    });
+    const fakeGetCluster = jest.fn(() => ({ callWithRequest: fakeCallWithRequest }));
+    const fakeRequest = {
+      server: { plugins: { elasticsearch: { getCluster: fakeGetCluster } } },
+    } as any;
+
+    const result = EsVersionPrecheck.method(fakeRequest, {} as any);
+    await expect(result).rejects.toHaveProperty('output.statusCode', 426);
+    await expect(result).rejects.toHaveProperty('output.payload.attributes.allNodesUpgraded', true);
   });
 
   it('returns true when nodes are on same version', async () => {

@@ -331,6 +331,11 @@ export async function FindProvider({ getService }) {
       log.debug(`Find.waitForElementStale with timeout=${timeout}`);
       await driver.wait(until.stalenessOf(element._webElement), timeout);
     }
+
+    async waitForElementHidden(element, timeout = defaultFindTimeout) {
+      log.debug(`Find.waitForElementHidden with timeout=${timeout}`);
+      await driver.wait(until.elementIsNotVisible(element._webElement), timeout);
+    }
   }
 
   return new Find();

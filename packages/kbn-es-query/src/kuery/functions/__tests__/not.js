@@ -23,7 +23,6 @@ import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
 
-
 let indexPattern;
 
 const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
@@ -31,7 +30,6 @@ const childNode = nodeTypes.function.buildNode('is', 'extension', 'jpg');
 describe('kuery functions', function () {
 
   describe('not', function () {
-
 
     beforeEach(() => {
       indexPattern = indexPatternResponse;
@@ -56,6 +54,7 @@ describe('kuery functions', function () {
         expect(result.bool).to.only.have.keys('must_not');
         expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern));
       });
+
     });
   });
 });

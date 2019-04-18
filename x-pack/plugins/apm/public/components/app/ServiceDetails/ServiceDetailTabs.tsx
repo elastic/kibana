@@ -23,12 +23,15 @@ export class ServiceDetailTabs extends React.Component<TabsProps> {
   public render() {
     const { transactionTypes, urlParams, location } = this.props;
     const { serviceName } = urlParams;
+    const headTransactionType = transactionTypes[0];
     const tabs = [
       {
         name: i18n.translate('xpack.apm.serviceDetails.transactionsTabLabel', {
           defaultMessage: 'Transactions'
         }),
-        path: `/${serviceName}/transactions/${transactionTypes[0]}`,
+        path: headTransactionType
+          ? `/${serviceName}/transactions/${headTransactionType}`
+          : `/${serviceName}/transactions`,
         routePath: `/${serviceName}/transactions/:transactionType?`,
         render: () => (
           <TransactionOverview

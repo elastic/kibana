@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 import { InfraContext } from '../lib/infra_types';
 import { GraphQLResolveInfo } from 'graphql';
 

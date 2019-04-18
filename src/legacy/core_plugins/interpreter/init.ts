@@ -37,7 +37,7 @@ export const registries = {
   serverFunctions: new FunctionsRegistry(),
 };
 
-export async function init(server: Legacy.Server /*options*/) {
+export async function init(server: Legacy.Server /* options */) {
   server.injectUiAppVars('canvas', () => {
     register(registries, {
       types,

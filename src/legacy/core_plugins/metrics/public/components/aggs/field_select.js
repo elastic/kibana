@@ -24,26 +24,39 @@ import {
 } from '@elastic/eui';
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 import { injectI18n } from '@kbn/i18n/react';
+import { isFieldEnabled } from '../../lib/check_ui_restrictions';
 
-function FieldSelectUi(props) {
-  const { type, fields, indexPattern, value, onChange, disabled, restrict, intl, ...rest } = props;
+function FieldSelectUi({
+  type,
+  fields,
+  indexPattern,
+  value,
+  onChange,
+  disabled,
+  restrict,
+  intl,
+  uiRestrictions,
+  ...rest
+}) {
+
   if (type === 'count') {
     return null;
   }
-  const options = (fields[indexPattern] || [])
-    .filter(generateByTypeFilter(restrict))
-    .map(field => {
-      return { label: field.name, value: field.name };
-    });
 
-  const selectedOption = options.find(option => {
-    return value === option.value;
-  });
+  const typeFilter = generateByTypeFilter(restrict);
+  const options = (fields[indexPattern] || [])
+    .filter(field => typeFilter(field) && isFieldEnabled(field.name, type, uiRestrictions))
+    .map(field => ({ label: field.name, value: field.name }));
+
+  const selectedOption = options.find(option => value === option.value);
   const selectedOptions = selectedOption ? [selectedOption] : [];
 
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({ id: 'tsvb.fieldSelect.selectFieldPlaceholder', defaultMessage: 'Select field…' })}
+      placeholder={intl.formatMessage({
+        id: 'tsvb.fieldSelect.selectFieldPlaceholder',
+        defaultMessage: 'Select field...',
+      })}
       isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}
@@ -57,7 +70,7 @@ function FieldSelectUi(props) {
 FieldSelectUi.defaultProps = {
   indexPattern: '*',
   disabled: false,
-  restrict: 'none'
+  restrict: 'none',
 };
 
 FieldSelectUi.propTypes = {
@@ -68,7 +81,8 @@ FieldSelectUi.propTypes = {
   onChange: PropTypes.func,
   restrict: PropTypes.string,
   type: PropTypes.string,
-  value: PropTypes.string
+  value: PropTypes.string,
+  uiRestrictions: PropTypes.object,
 };
 
 const FieldSelect = injectI18n(FieldSelectUi);

@@ -26,8 +26,8 @@ import { loadPluginBundle } from './plugin_loader';
  *
  * @public
  */
-export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = {}> {
-  setup: (core: PluginSetupContext, dependencies: TDependencies) => TSetup | Promise<TSetup>;
+export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
+  setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
   stop?: () => void;
 }
 
@@ -37,9 +37,9 @@ export interface Plugin<TSetup, TDependencies extends Record<string, unknown> = 
  *
  * @public
  */
-export type PluginInitializer<TSetup, TDependencies extends Record<string, unknown> = {}> = (
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (
   core: PluginInitializerContext
-) => Plugin<TSetup, TDependencies>;
+) => Plugin<TSetup, TPluginsSetup>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -49,14 +49,14 @@ export type PluginInitializer<TSetup, TDependencies extends Record<string, unkno
  */
 export class PluginWrapper<
   TSetup = unknown,
-  TDependenciesSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: DiscoveredPlugin['id'];
   public readonly configPath: DiscoveredPlugin['configPath'];
-  public readonly requiredDependencies: DiscoveredPlugin['requiredPlugins'];
-  public readonly optionalDependencies: DiscoveredPlugin['optionalPlugins'];
-  private initializer?: PluginInitializer<TSetup, TDependenciesSetup>;
-  private instance?: Plugin<TSetup, TDependenciesSetup>;
+  public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
+  public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
+  private initializer?: PluginInitializer<TSetup, TPluginsSetup>;
+  private instance?: Plugin<TSetup, TPluginsSetup>;
 
   constructor(
     readonly discoveredPlugin: DiscoveredPlugin,
@@ -64,8 +64,8 @@ export class PluginWrapper<
   ) {
     this.name = discoveredPlugin.id;
     this.configPath = discoveredPlugin.configPath;
-    this.requiredDependencies = discoveredPlugin.requiredPlugins;
-    this.optionalDependencies = discoveredPlugin.optionalPlugins;
+    this.requiredPlugins = discoveredPlugin.requiredPlugins;
+    this.optionalPlugins = discoveredPlugin.optionalPlugins;
   }
 
   /**
@@ -74,20 +74,20 @@ export class PluginWrapper<
    * @param addBasePath Function that adds the base path to a string for plugin bundle path.
    */
   public async load(addBasePath: (path: string) => string) {
-    this.initializer = await loadPluginBundle<TSetup, TDependenciesSetup>(addBasePath, this.name);
+    this.initializer = await loadPluginBundle<TSetup, TPluginsSetup>(addBasePath, this.name);
   }
 
   /**
    * Instantiates plugin and calls `setup` function exposed by the plugin initializer.
    * @param setupContext Context that consists of various core services tailored specifically
    * for the `setup` lifecycle event.
-   * @param dependencies The dictionary where the key is the dependency name and the value
+   * @param plugins The dictionary where the key is the dependency name and the value
    * is the contract returned by the dependency's `setup` function.
    */
-  public async setup(setupContext: PluginSetupContext, dependencies: TDependenciesSetup) {
+  public async setup(setupContext: PluginSetupContext, plugins: TPluginsSetup) {
     this.instance = await this.createPluginInstance();
 
-    return await this.instance.setup(setupContext, dependencies);
+    return await this.instance.setup(setupContext, plugins);
   }
 
   /**

@@ -101,7 +101,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             width={width}
           />
         ) : null}
-        {/*<g transform={`translate(${width * 0.5}, 0)`}>
+        {/* <g transform={`translate(${width * 0.5}, 0)`}>
           <SearchMarkers
             buckets={searchSummaryBuckets || []}
             start={minTime}
@@ -110,7 +110,7 @@ export class LogMinimap extends React.Component<LogMinimapProps> {
             height={height}
             jumpToTarget={jumpToTarget}
           />
-        </g>*/}
+        </g> */}
       </svg>
     );
   }

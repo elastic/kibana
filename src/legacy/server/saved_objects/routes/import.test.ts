@@ -77,6 +77,47 @@ describe('POST /api/saved_objects/_import', () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(0);
   });
 
+  test('defaults migrationVersion to empty object', async () => {
+    const request = {
+      method: 'POST',
+      url: '/api/saved_objects/_import',
+      payload: [
+        '--EXAMPLE',
+        'Content-Disposition: form-data; name="file"; filename="export.ndjson"',
+        'Content-Type: application/ndjson',
+        '',
+        '{"type":"index-pattern","id":"my-pattern","attributes":{"title":"my-pattern-*"}}',
+        '--EXAMPLE--',
+      ].join('\r\n'),
+      headers: {
+        'content-Type': 'multipart/form-data; boundary=EXAMPLE',
+      },
+    };
+    savedObjectsClient.find.mockResolvedValueOnce({ saved_objects: [] });
+    savedObjectsClient.bulkCreate.mockResolvedValueOnce({
+      saved_objects: [
+        {
+          type: 'index-pattern',
+          id: 'my-pattern',
+          attributes: {
+            title: 'my-pattern-*',
+          },
+        },
+      ],
+    });
+    const { payload, statusCode } = await server.inject(request);
+    const response = JSON.parse(payload);
+    expect(statusCode).toBe(200);
+    expect(response).toEqual({
+      success: true,
+      successCount: 1,
+    });
+    expect(savedObjectsClient.bulkCreate.mock.calls).toHaveLength(1);
+    const firstBulkCreateCallArray = savedObjectsClient.bulkCreate.mock.calls[0][0];
+    expect(firstBulkCreateCallArray).toHaveLength(1);
+    expect(firstBulkCreateCallArray[0].migrationVersion).toEqual({});
+  });
+
   test('imports an index pattern and dashboard', async () => {
     // NOTE: changes to this scenario should be reflected in the docs
     const request = {

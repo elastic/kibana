@@ -66,9 +66,9 @@ This outputs a `en.json` file inside the `translations` directory. To localize o
 Checking i18n does the following:
 
 * Checks all existing labels for violations.
-* Takes translations from .i18nrc.json and compares them to the messages extracted and validated at the step above and:
+* Takes translations from `.i18nrc.json` and compares them to the messages extracted and validated at the step above and:
 ** Checks for unused translations. If you remove a label that has a corresponding translation, you must also remove the label from the translations file.
-  * Checks for incompatible translations.  If you add or remove a new parameter from an existing string, you must also remove the label from the translations file.
+** Checks for incompatible translations.  If you add or remove a new parameter from an existing string, you must also remove the label from the translations file.
 
 To check your i18n translations, run the following command:
 
@@ -84,7 +84,9 @@ node scripts/i18n_check --fix --include-config ../kibana-extra/myPlugin/.i18nrc.
 Kibana relies on several UI frameworks (ReactJS and AngularJS) and
 requires localization in different environments (browser and NodeJS).
 The internationalization engine is framework agnostic and consumable in
-all parts of Kibana (ReactJS, AngularJS and NodeJS). In order to simplify
+all parts of Kibana (ReactJS, AngularJS and NodeJS). 
+
+To simplify
 internationalization in UI frameworks, additional abstractions are
 built around the I18n engine: `react-intl` for React and custom
 components for AngularJS. https://github.com/yahoo/react-intl[React-intl]
@@ -161,4 +163,4 @@ To learn more about i18n tooling, see {blob}src/dev/i18n/README.md[i18n dev tool
 To learn more about implementing i18n in the UI, follow the links below:
 
 * {blob}packages/kbn-i18n/README.md[i18n plugin]
-* {blob}packages/kbn-i18n/GUIDELINE.md[i18n Guidelines]
+* {blob}packages/kbn-i18n/GUIDELINE.md[i18n guidelines]

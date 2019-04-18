@@ -15,6 +15,7 @@ export type AgentName =
   | 'rum-js'
   | 'nodejs'
   | 'python'
+  | 'dotnet'
   | 'ruby';
 
 export interface Agent {

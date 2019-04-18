@@ -6,7 +6,7 @@
 
 import { TestInvoker } from '../../common/lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile }: TestInvoker) {
   describe('saved objects spaces only enabled', function() {
     this.tags('ciGroup1'); // DO NOT CHECK THIS BACK INTO MASTER -- THIS IS TEMP FROM ciGroup5 to ciGroup1 for siem to keep this running quickly

@@ -35,7 +35,6 @@ exports[`LayerPanel is rendered 1`] = `
       <EuiFlexItem>
         <EuiTitle
           size="s"
-          textTransform="none"
         >
           <h2>
             layer 1
@@ -57,7 +56,6 @@ exports[`LayerPanel is rendered 1`] = `
       >
         <EuiText
           color="subdued"
-          grow={true}
           size="s"
         >
           <EuiSpacer

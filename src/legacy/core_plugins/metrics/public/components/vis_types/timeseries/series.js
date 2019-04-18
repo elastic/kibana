@@ -41,7 +41,8 @@ const TimeseriesSeries = injectI18n(function (props) {
     selectedTab,
     onChange,
     visible,
-    intl
+    intl,
+    uiRestrictions
   } = props;
 
   const defaults = { label: '' };
@@ -78,6 +79,7 @@ const TimeseriesSeries = injectI18n(function (props) {
               fields={fields}
               panel={panel}
               model={model}
+              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -236,6 +238,7 @@ TimeseriesSeries.propTypes = {
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   togglePanelActivation: PropTypes.func,
+  uiRestrictions: PropTypes.object,
 };
 
 export default injectI18n(TimeseriesSeries);

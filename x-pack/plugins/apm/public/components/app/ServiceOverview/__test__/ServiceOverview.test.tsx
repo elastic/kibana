@@ -30,7 +30,7 @@ describe('Service Overview -> View', () => {
   });
 
   // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-  /* tslint:disable:no-console */
+  /* eslint-disable no-console */
   const originalError = console.error;
   beforeAll(() => {
     console.error = jest.fn();

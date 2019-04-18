@@ -8,22 +8,19 @@ export default function ({ loadTestFile }) {
   describe('apis', function () {
     this.tags('ciGroup6');
 
-    // These commented out tests are only for within the siem branch and should not be merged into master
-    // loadTestFile(require.resolve('./es'));
-    // loadTestFile(require.resolve('./security'));
-    // loadTestFile(require.resolve('./monitoring'));
-    // loadTestFile(require.resolve('./xpack_main'));
-    // loadTestFile(require.resolve('./logstash'));
-    // loadTestFile(require.resolve('./kibana'));
-    // loadTestFile(require.resolve('./infra'));
-
-    // Only running our siem test for now since we are working in our own branch
-    // TODO: Re add this whenever tests are working again
+    loadTestFile(require.resolve('./es'));
+    loadTestFile(require.resolve('./security'));
+    loadTestFile(require.resolve('./monitoring'));
+    loadTestFile(require.resolve('./xpack_main'));
+    loadTestFile(require.resolve('./logstash'));
+    loadTestFile(require.resolve('./kibana'));
+    loadTestFile(require.resolve('./infra'));
+    loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./console'));
+    loadTestFile(require.resolve('./management'));
+    loadTestFile(require.resolve('./uptime'));
+    loadTestFile(require.resolve('./maps'));
+    loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
-
-    // loadTestFile(require.resolve('./beats'));
-    // loadTestFile(require.resolve('./management'));
-    // loadTestFile(require.resolve('./uptime'));
-    // loadTestFile(require.resolve('./maps'));
   });
 }
