@@ -29,9 +29,8 @@ export const dropdownControl = () => ({
     },
     {
       name: 'filterGroup',
-      displayName: 'Filter Group Name',
-      help:
-        'This group name can be used to select specific filters via the filters function in the expression',
+      displayName: 'Filter group name',
+      help: "Apply the selected group name to an element's filters function to target this filter",
       argType: 'filterGroup',
     },
   ],

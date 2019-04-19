@@ -21,7 +21,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const [inputValue, setInputValue] = useState('');
   const [addMode, setAddMode] = useState(false);
 
-  const choices = [{ text: 'No Group', value: '' }].concat(filterGroups.map(f => ({ text: f })));
+  const choices = [{ text: 'No group', value: '' }].concat(filterGroups.map(f => ({ text: f })));
 
   const handleSelectGroup = ev => {
     const selected = ev.target.value;
@@ -56,7 +56,8 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiButtonEmpty color="danger" size="xs" onClick={() => setAddMode(!addMode)}>
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty color="danger" size="xs" onClick={() => setAddMode(!addMode)} flush="left">
         Cancel
       </EuiButtonEmpty>
     </form>
@@ -71,9 +72,9 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
         options={choices}
         onChange={handleSelectGroup}
       />
-      <EuiSpacer size="xs" />
-      <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)}>
-        Create New Group
+      <EuiSpacer size="s" />
+      <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)} flush="left">
+        Create new group
       </EuiButtonEmpty>
     </Fragment>
   );
