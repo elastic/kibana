@@ -58,10 +58,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
         pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
-        hash: `${appName}/${subUrl}`,
+        hash: `/${appName}/${subUrl}`,
       };
-
+      // console.log(`&&&&&&&&&&&&&&&&&&& appConfig = ${JSON.stringify(appConfig)}`);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      // console.log(`********************* appUrl = ${appUrl}`);
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
         await browser.get(appUrl, insertTimestamp);
