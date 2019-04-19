@@ -118,7 +118,7 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config, $inj
       scope.$watch('pageData.versions', versions => {
         controller.pipelineVersions = versions;
       });
-      scope.$watch('cluster.logstash.pipeline_count', pipelineCount => {
+      scope.$watch('pageData.clusterStatus.pipeline_count', pipelineCount => {
         controller.pipelineCount = pipelineCount;
       });
     }
