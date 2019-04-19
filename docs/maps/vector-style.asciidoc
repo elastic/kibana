@@ -9,7 +9,7 @@ For each property, you can specify whether to use a constant or dynamic value fo
 [[maps-vector-style-properties]]
 ==== Style properties
 
-You can configure the following properties:
+You can configure the following properties.
 
 *Fill color*:: The fill color of the vector features.
 +
