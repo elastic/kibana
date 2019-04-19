@@ -10,6 +10,7 @@ import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { GetOverviewHostQuery, OverviewHostData } from '../../../graphql/types';
+import { inputsModel } from '../../../store/inputs';
 import { createFilter } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
@@ -18,6 +19,8 @@ import { overviewHostQuery } from './index.gql_query';
 export interface OverviewHostArgs {
   id: string;
   overviewHost: OverviewHostData;
+  loading: boolean;
+  refetch: inputsModel.Refetch;
 }
 
 export interface OverviewHostProps extends QueryTemplateProps {
@@ -43,11 +46,13 @@ export const OverviewHostQuery = pure<OverviewHostProps>(
         filterQuery: createFilter(filterQuery),
       }}
     >
-      {({ data }) => {
+      {({ data, loading, refetch }) => {
         const overviewHost = getOr({}, `source.OverviewHost`, data);
         return children({
           id,
           overviewHost,
+          loading,
+          refetch,
         });
       }}
     </Query>

@@ -8,7 +8,7 @@ import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { NetworkTopNFlowDirection } from '../../../../graphql/types';
+import { FlowDirection } from '../../../../graphql/types';
 
 import { IsPtrIncluded } from './is_ptr_included';
 
@@ -26,7 +26,7 @@ describe('NetworkTopNFlow Select direction', () => {
   describe('Functionality work as expected', () => {
     test('when you click on bi-directional, you trigger onChange function', () => {
       const event = {
-        target: { name: 'switch-ptr-included', value: NetworkTopNFlowDirection.biDirectional },
+        target: { name: 'switch-ptr-included', value: FlowDirection.biDirectional },
       };
       const wrapper = mount(<IsPtrIncluded isPtrIncluded={false} onChange={mockOnChange} />);
 

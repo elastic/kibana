@@ -40,7 +40,7 @@ describe('authentications elasticsearch_adapter', () => {
           failures: 10,
           successes: 20,
           user: {
-            name: 'Evan',
+            name: ['Evan'],
           },
         },
       };
@@ -61,7 +61,7 @@ describe('authentications elasticsearch_adapter', () => {
           failures: 10,
           successes: 20,
           user: {
-            name: 'Evan',
+            name: ['Evan'],
           },
         },
       };
@@ -82,7 +82,7 @@ describe('authentications elasticsearch_adapter', () => {
           failures: 10,
           successes: 20,
           user: {
-            name: 'Evan',
+            name: ['Evan'],
           },
         },
       };
@@ -103,7 +103,7 @@ describe('authentications elasticsearch_adapter', () => {
           failures: 10,
           successes: 20,
           user: {
-            name: 'Evan',
+            name: ['Evan'],
           },
         },
       };
@@ -124,7 +124,7 @@ describe('authentications elasticsearch_adapter', () => {
           failures: 10,
           successes: 20,
           user: {
-            name: 'Evan',
+            name: ['Evan'],
           },
         },
       };

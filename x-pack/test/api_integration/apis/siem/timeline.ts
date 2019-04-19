@@ -111,7 +111,7 @@ const timelineTests: KbnTestProvider = ({ getService }) => {
           expect(timeline.edges.length).to.be(EDGE_LENGTH);
           expect(timeline.totalCount).to.be(TOTAL_COUNT);
           expect(timeline.edges[0].node.data.length).to.be(DATA_COUNT);
-          expect(timeline.edges[0]!.node.ecs.host!.name).to.be(HOST_NAME);
+          expect(timeline.edges[0]!.node.ecs.host!.name).to.eql([HOST_NAME]);
         });
     });
   });

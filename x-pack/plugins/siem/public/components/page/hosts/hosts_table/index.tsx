@@ -4,23 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiPanel, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
-import { get } from 'lodash/fp';
+import { EuiIconTip, EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
-import { pure } from 'recompose';
+import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { HostsEdges } from '../../../../graphql/types';
+import { Direction, HostsEdges, HostsFields, HostsSortField } from '../../../../graphql/types';
+import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue, getOrEmptyTag } from '../../../empty_value';
-import { HostDetailsLink } from '../../../links';
-import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
+import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
+import { CountBadge } from '../../index';
 
+import { getHostsColumns } from './columns';
 import * as i18n from './translations';
 
 interface OwnProps {
@@ -28,6 +24,7 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
+  startDate: number;
   totalCount: number;
   loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
@@ -35,10 +32,16 @@ interface OwnProps {
 
 interface HostsTableReduxProps {
   limit: number;
+  sortField: HostsFields;
+  direction: Direction;
 }
 
 interface HostsTableDispatchProps {
   updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateHostsSort: ActionCreator<{
+    sort: HostsSortField;
+    hostsType: hostsModel.HostsType;
+  }>;
 }
 
 type HostsTableProps = OwnProps & HostsTableReduxProps & HostsTableDispatchProps;
@@ -66,21 +69,31 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const HostsTableComponent = pure<HostsTableProps>(
-  ({
-    data,
-    hasNextPage,
-    limit,
-    loading,
-    loadMore,
-    totalCount,
-    nextCursor,
-    updateLimitPagination,
-    type,
-  }) => (
-    <EuiPanel>
+const Sup = styled.sup`
+  vertical-align: super;
+  padding: 0 5px;
+`;
+
+class HostsTableComponent extends React.PureComponent<HostsTableProps> {
+  public render() {
+    const {
+      data,
+      direction,
+      hasNextPage,
+      limit,
+      loading,
+      loadMore,
+      totalCount,
+      nextCursor,
+      updateLimitPagination,
+      startDate,
+      sortField,
+      type,
+    } = this.props;
+    return (
+      <EuiPanel>
       <LoadMoreTable
-        columns={getHostsColumns()}
+        columns={getHostsColumns(startDate, type)}
         loadingTitle={i18n.HOSTS}
         loading={loading}
         pageOfItems={data}
@@ -88,18 +101,58 @@ const HostsTableComponent = pure<HostsTableProps>(
         limit={limit}
         hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
-        updateLimitPagination={newLimit =>
+        onChange={this.onChange}updateLimitPagination={newLimit =>
           updateLimitPagination({ limit: newLimit, hostsType: type })
         }
-        title={
+        sorting={{ field: getNodeField(sortField), direction }}title={
           <h3>
-            {i18n.HOSTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
+            {i18n.HOSTS} <Sup>
+              <EuiIconTip content={i18n.TOOLTIP} position="right" />
+            </Sup>
+            <CountBadge color="hollow">{totalCount}</CountBadge>
           </h3>
         }
       />
     </EuiPanel>
-  )
-);
+    );
+  }
+
+  private onChange = (criteria: Criteria) => {
+    if (criteria.sort != null) {
+      const sort: HostsSortField = {
+        field: getSortField(criteria.sort.field),
+        direction: criteria.sort.direction,
+      };
+      if (sort.direction !== this.props.direction || sort.field !== this.props.sortField) {
+        this.props.updateHostsSort({
+          sort,
+          hostsType: this.props.type,
+        });
+      }
+    }
+  };
+}
+
+const getSortField = (field: string): HostsFields => {
+  switch (field) {
+    case 'node.host.name':
+      return HostsFields.hostName;
+    case 'node.lastSeen':
+      return HostsFields.lastSeen;
+    default:
+      return HostsFields.lastSeen;
+  }
+};
+
+const getNodeField = (field: HostsFields): string => {
+  switch (field) {
+    case HostsFields.hostName:
+      return 'node.host.name';
+    case HostsFields.lastSeen:
+      return 'node.lastSeen';
+  }
+  assertUnreachable(field);
+};
 
 const makeMapStateToProps = () => {
   const getHostsSelector = hostsSelectors.hostsSelector();
@@ -113,79 +166,6 @@ export const HostsTable = connect(
   makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateHostsLimit,
+    updateHostsSort: hostsActions.updateHostsSort,
   }
 )(HostsTableComponent);
-
-const getHostsColumns = (): Array<Columns<HostsEdges>> => [
-  {
-    name: i18n.NAME,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => {
-      const hostName: string | null = get('host.name', node);
-      const hostId: string | null = get('host.id', node);
-      if (hostName != null && hostId != null) {
-        const id = escapeDataProviderId(`hosts-table-${node._id}-hostName-${hostId}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              excluded: false,
-              id,
-              name: hostName,
-              kqlQuery: '',
-              queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: hostId,
-              },
-              queryDate: {
-                from: new Date(node.firstSeen!).valueOf(),
-                to: Date.now(),
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
-  },
-  {
-    name: i18n.FIRST_SEEN,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) =>
-      node.firstSeen && node.firstSeen !== '' ? (
-        <EuiToolTip position="bottom" content={node.firstSeen}>
-          <FormattedRelative value={node.firstSeen} />
-        </EuiToolTip>
-      ) : (
-        defaultToEmptyTag(node.firstSeen)
-      ),
-  },
-  {
-    name: i18n.OS,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag('host.os.name', node),
-  },
-  {
-    name: i18n.VERSION,
-    truncateText: false,
-    hideForMobile: false,
-    render: ({ node }) => getOrEmptyTag('host.os.version', node),
-  },
-];

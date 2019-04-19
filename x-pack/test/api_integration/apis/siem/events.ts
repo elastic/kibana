@@ -15,7 +15,7 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 
 // typical values that have to change after an update from "scripts/es_archiver"
 const HOST_NAME = 'suricata-sensor-amsterdam';
-const TOTAL_COUNT = 1747;
+const TOTAL_COUNT = 1751;
 const EDGE_LENGTH = 2;
 const CURSOR_ID = '1550608953561';
 
@@ -84,7 +84,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
 
           expect(events.edges.length).to.be(EDGE_LENGTH);
           expect(events.totalCount).to.be(TOTAL_COUNT);
-          expect(events.edges[0]!.node.host!.name).to.be(HOST_NAME);
+          expect(events.edges[0]!.node.host!.name).to.eql([HOST_NAME]);
         });
     });
   });

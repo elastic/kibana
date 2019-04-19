@@ -5,13 +5,9 @@
  */
 
 import { Direction, NetworkDnsFields, NetworkDnsSortField } from '../../graphql/types';
-import { createQueryFilterClauses } from '../../utils/build_query';
+import { assertUnreachable, createQueryFilterClauses } from '../../utils/build_query';
 
 import { NetworkDnsRequestOptions } from './index';
-
-const assertUnreachable = (x: never): never => {
-  throw new Error(`Unknown Field in switch statement ${x}`);
-};
 
 type QueryOrder =
   | { _count: Direction }

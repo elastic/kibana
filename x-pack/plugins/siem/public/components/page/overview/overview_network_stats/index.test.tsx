@@ -11,11 +11,37 @@ import * as React from 'react';
 import { OverviewNetworkStats } from '.';
 import { mockData } from './mock';
 
-describe('Overview Network Data', () => {
+describe('Overview Network Stat Data', () => {
   describe('rendering', () => {
     test('it renders the default OverviewNetworkStats', () => {
-      const wrapper = shallow(<OverviewNetworkStats data={mockData.OverviewNetwork} />);
+      const wrapper = shallow(
+        <OverviewNetworkStats data={mockData.OverviewNetwork} loading={false} />
+      );
       expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
+  describe('loading', () => {
+    test('it does not show loading indicator when not loading', () => {
+      const wrapper = shallow(
+        <OverviewNetworkStats data={mockData.OverviewNetwork} loading={false} />
+      );
+      const loadingWrapper = wrapper
+        .dive()
+        .find('[data-test-subj="stat-loader-description"]')
+        .first()
+        .childAt(0);
+      expect(loadingWrapper.prop('isLoading')).toBe(false);
+    });
+    test('it does show loading indicator when not loading', () => {
+      const wrapper = shallow(
+        <OverviewNetworkStats data={mockData.OverviewNetwork} loading={true} />
+      );
+      const loadingWrapper = wrapper
+        .dive()
+        .find('[data-test-subj="stat-loader-description"]')
+        .first()
+        .childAt(0);
+      expect(loadingWrapper.prop('isLoading')).toBe(true);
     });
   });
 });

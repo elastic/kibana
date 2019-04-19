@@ -10,11 +10,11 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import {
+  FlowDirection,
+  FlowTarget,
   GetNetworkTopNFlowQuery,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
   PageInfo,
 } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
@@ -40,9 +40,9 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface NetworkTopNFlowComponentReduxProps {
   limit: number;
-  topNFlowDirection: NetworkTopNFlowDirection;
+  flowDirection: FlowDirection;
   topNFlowSort: NetworkTopNFlowSortField;
-  topNFlowType: NetworkTopNFlowType;
+  flowTarget: FlowTarget;
 }
 
 type NetworkTopNFlowProps = OwnProps & NetworkTopNFlowComponentReduxProps;
@@ -62,9 +62,9 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
       endDate,
       limit,
       poll,
-      topNFlowDirection,
+      flowDirection,
       topNFlowSort,
-      topNFlowType,
+      flowTarget,
     } = this.props;
     return (
       <Query<GetNetworkTopNFlowQuery.Query, GetNetworkTopNFlowQuery.Variables>
@@ -79,9 +79,9 @@ class NetworkTopNFlowComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          direction: topNFlowDirection,
           sort: topNFlowSort,
-          type: topNFlowType,
+          flowDirection,
+          flowTarget,
           pagination: {
             limit,
             cursor: null,

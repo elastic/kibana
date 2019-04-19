@@ -12,7 +12,7 @@ import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { ElasticsearchNetworkAdapter } from './elasticsearch_adapter';
 import { mockOptions, mockRequest, mockResponse, mockResult } from './mock';
 
-describe('Network Top N flow elasticsearch_adapter with NetworkTopNFlowType=source and NetworkTopNFlowDirection=uniDirectional', () => {
+describe('Network Top N flow elasticsearch_adapter with FlowTarget=source and FlowDirection=uniDirectional', () => {
   describe('Happy Path - get Data', () => {
     const mockCallWithRequest = jest.fn();
     mockCallWithRequest.mockResolvedValue(mockResponse);

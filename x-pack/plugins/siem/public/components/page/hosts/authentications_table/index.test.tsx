@@ -18,6 +18,7 @@ import { mockData } from './mock';
 
 describe('Authentication Table Component', () => {
   const loadMore = jest.fn();
+  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
   const state: State = mockGlobalState;
 
   let store = createStore(state);
@@ -37,7 +38,7 @@ describe('Authentication Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </ReduxStoreProvider>

@@ -15,10 +15,7 @@ import { Ecs } from '../../../../../graphql/types';
 import { mockTimelineData, TestProviders } from '../../../../../mock';
 import { RowRenderer } from '../row_renderer';
 
-import {
-  createGenericAuditRowRenderer,
-  createGenericFileRowRenderer,
-} from './generic_row_renderer';
+import { createGenericAuditRowRenderer, createGenericFileRowRenderer } from '.';
 
 describe('GenericRowRenderer', () => {
   describe('#createGenericAuditRowRenderer', () => {
@@ -56,8 +53,8 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      auditd.event != null
-        ? (auditd.event.action = 'some other value')
+      auditd.event != null && auditd.event.action != null
+        ? (auditd.event.action[0] = 'some other value')
         : expect(auditd.event).toBeDefined();
       expect(connectedToRenderer.isInstance(auditd)).toBe(false);
     });
@@ -90,7 +87,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Session246alice@zeek-londonsome text/usr/bin/wgetwith resultsuccessDestination93.184.216.34:80'
+        'some children Session246alice@zeek-londonsome textwgetwith resultsuccessDestination93.184.216.34:80'
       );
     });
   });
@@ -132,8 +129,8 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      auditdFile.event != null
-        ? (auditdFile.event.action = 'some other value')
+      auditdFile.event != null && auditdFile.event.action != null
+        ? (auditdFile.event.action[0] = 'some other value')
         : expect(auditdFile.event).toBeDefined();
       expect(fileToRenderer.isInstance(auditdFile)).toBe(false);
     });
@@ -166,7 +163,7 @@ describe('GenericRowRenderer', () => {
         </TestProviders>
       );
       expect(wrapper.text()).toContain(
-        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusing/lib/systemd/systemd-journaldwith resultsuccess'
+        'some children Sessionunsetroot@zeek-londonin/some text/proc/15990/attr/currentusingsystemd-journalwith resultsuccess'
       );
     });
   });

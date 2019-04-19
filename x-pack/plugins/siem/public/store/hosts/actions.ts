@@ -6,6 +6,7 @@
 
 import actionCreatorFactory from 'typescript-fsa';
 
+import { HostsSortField } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 import { HostsType } from './model';
@@ -19,6 +20,11 @@ export const updateAuthenticationsLimit = actionCreator<{ limit: number; hostsTy
 export const updateHostsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
   'UPDATE_HOSTS_LIMIT'
 );
+
+export const updateHostsSort = actionCreator<{
+  sort: HostsSortField;
+  hostsType: HostsType;
+}>('UPDATE_HOSTS_SORT');
 
 export const updateEventsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
   'UPDATE_EVENTS_LIMIT'

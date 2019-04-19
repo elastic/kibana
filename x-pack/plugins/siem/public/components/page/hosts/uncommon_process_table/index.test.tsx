@@ -13,11 +13,12 @@ import { TestProviders } from '../../../../mock';
 import { hostsModel } from '../../../../store';
 import { getEmptyValue } from '../../../empty_value';
 
-import { UncommonProcessTable } from './index';
+import { getArgs, UncommonProcessTable } from '.';
 import { mockData } from './mock';
 
 describe('UncommonProcess Table Component', () => {
   const loadMore = jest.fn();
+  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
 
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
@@ -30,7 +31,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -49,7 +50,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -74,7 +75,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -100,7 +101,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -126,7 +127,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -151,7 +152,7 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={1546965070707}
+            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -164,6 +165,26 @@ describe('UncommonProcess Table Component', () => {
           .at(5)
           .text()
       ).toBe('Hostshello-world,\u00a0hello-world-2');
+    });
+  });
+
+  describe('#getArgs', () => {
+    test('it works with string array', () => {
+      const args = ['1', '2', '3'];
+      expect(getArgs(args)).toEqual('1 2 3');
+    });
+
+    test('it returns null if empty array', () => {
+      const args: string[] = [];
+      expect(getArgs(args)).toEqual(null);
+    });
+
+    test('it returns null if given null', () => {
+      expect(getArgs(null)).toEqual(null);
+    });
+
+    test('it returns null if given undefined', () => {
+      expect(getArgs(undefined)).toEqual(null);
     });
   });
 });

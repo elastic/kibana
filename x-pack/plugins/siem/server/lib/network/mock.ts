@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Direction,
-  NetworkTopNFlowDirection,
-  NetworkTopNFlowFields,
-  NetworkTopNFlowType,
-} from '../../graphql/types';
+import { Direction, FlowDirection, FlowTarget, NetworkTopNFlowFields } from '../../graphql/types';
 
 import { NetworkTopNFlowRequestOptions } from '.';
 
@@ -55,8 +50,8 @@ export const mockOptions: NetworkTopNFlowRequestOptions = {
     '__typename',
   ],
   networkTopNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-  networkTopNFlowType: NetworkTopNFlowType.source,
-  networkTopNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
+  flowTarget: FlowTarget.source,
+  flowDirection: FlowDirection.uniDirectional,
 };
 
 export const mockRequest = {
@@ -64,17 +59,17 @@ export const mockRequest = {
   payload: {
     operationName: 'GetNetworkTopNFlowQuery',
     variables: {
+      filterQuery: '',
+      flowDirection: FlowDirection.uniDirectional,
+      flowType: FlowTarget.source,
+      pagination: { limit: 10, cursor: null, tiebreaker: null },
       sourceId: 'default',
       timerange: { interval: '12h', from: 1549765830772, to: 1549852230772 },
-      type: NetworkTopNFlowType.source,
-      direction: NetworkTopNFlowDirection.uniDirectional,
-      pagination: { limit: 10, cursor: null, tiebreaker: null },
-      filterQuery: '',
     },
-    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $direction: NetworkTopNFlowDirection!, $sort: NetworkTopNFlowSortField!, $type: NetworkTopNFlowType!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
+    query: `query GetNetworkTopNFlowQuery($sourceId: ID!, $flowDirection: FlowDirection!, $sort: NetworkTopNFlowSortField!, $flowTarget: FlowTarget!, $timerange: TimerangeInput!, $pagination: PaginationInput!, $filterQuery: String) {
         source(id: $sourceId) {
           id
-          NetworkTopNFlow(direction: $direction, sort: $sort, type: $type, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+          NetworkTopNFlow(flowDirection: $flowDirection, sort: $sort, flowTarget: $flowTarget, timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
             totalCount
             edges {
               node {

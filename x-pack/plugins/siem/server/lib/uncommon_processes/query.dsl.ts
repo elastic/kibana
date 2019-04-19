@@ -77,12 +77,12 @@ export const buildQuery = ({
             },
             host_count: {
               cardinality: {
-                field: 'host.id',
+                field: 'host.name',
               },
             },
             hosts: {
               terms: {
-                field: 'host.id',
+                field: 'host.name',
               },
               aggregations: {
                 host: {

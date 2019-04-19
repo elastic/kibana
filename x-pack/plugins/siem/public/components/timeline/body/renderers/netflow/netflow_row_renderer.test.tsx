@@ -79,10 +79,6 @@ describe('netflowRowRenderer', () => {
       expect(eventActionMatches('netflow_flow')).toBe(true);
     });
 
-    test('it returns true when event.action is socket_opened', () => {
-      expect(eventActionMatches('socket_opened')).toBe(true);
-    });
-
     test('it returns false when event.action is NOT network_flow, netflow_flow, or socket_opened', () => {
       expect(eventActionMatches('another action')).toBe(false);
     });

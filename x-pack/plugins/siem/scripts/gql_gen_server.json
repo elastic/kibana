@@ -10,7 +10,13 @@
       " */",
       "",
       "import { SiemContext } from '../lib/types';"
-    ]
+    ],
+    "scalars": {
+      "ToStringArray": "string[] | string",
+      "ToNumberArray": "number[] | number",
+      "ToDateArray": "string[] | string",
+      "ToBooleanArray": "boolean[] | boolean"
+    }
   },
   "primitives": {
     "String": "string",

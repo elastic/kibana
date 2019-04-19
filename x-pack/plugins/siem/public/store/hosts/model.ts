@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Direction, HostsFields } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
 export enum HostsType {
@@ -15,9 +16,14 @@ export interface BasicQuery {
   limit: number;
 }
 
+export interface HostsQuery extends BasicQuery {
+  direction: Direction;
+  sortField: HostsFields;
+}
+
 interface Queries {
   authentications: BasicQuery;
-  hosts: BasicQuery;
+  hosts: HostsQuery;
   events: BasicQuery;
   uncommonProcesses: BasicQuery;
 }

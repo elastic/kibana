@@ -7,11 +7,11 @@
 import actionCreatorFactory from 'typescript-fsa';
 
 import {
-  IpOverviewType,
+  DomainsSortField,
+  FlowDirection,
+  FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -44,13 +44,12 @@ export const updateTopNFlowSort = actionCreator<{
   networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_SORT');
 
-export const updateTopNFlowType = actionCreator<{
-  topNFlowType: NetworkTopNFlowType;
-  networkType: NetworkType;
-}>('UPDATE_TOP_N_FLOW_TYPE');
+export const updateTopNFlowTarget = actionCreator<{
+  flowTarget: FlowTarget;
+}>('UPDATE_TOP_N_FLOW_TARGET');
 
 export const updateTopNFlowDirection = actionCreator<{
-  topNFlowDirection: NetworkTopNFlowDirection;
+  flowDirection: FlowDirection;
   networkType: NetworkType;
 }>('UPDATE_TOP_N_FLOW_DIRECTION');
 
@@ -64,7 +63,20 @@ export const applyNetworkFilterQuery = actionCreator<{
   networkType: NetworkType;
 }>('APPLY_NETWORK_FILTER_QUERY');
 
-// IP Overview Actions
-export const updateIpOverviewFlowType = actionCreator<{
-  flowType: IpOverviewType;
-}>('UPDATE_IP_OVERVIEW_FLOW_TYPE');
+// IP Details Actions
+export const updateIpDetailsFlowTarget = actionCreator<{
+  flowTarget: FlowTarget;
+}>('UPDATE_IP_DETAILS_TARGET');
+
+// Domains Table Actions
+export const updateDomainsLimit = actionCreator<{
+  limit: number;
+}>('UPDATE_DOMAINS_LIMIT');
+
+export const updateDomainsFlowDirection = actionCreator<{
+  flowDirection: FlowDirection;
+}>('UPDATE_DOMAINS_DIRECTION');
+
+export const updateDomainsSort = actionCreator<{
+  domainsSortField: DomainsSortField;
+}>('UPDATE_DOMAINS_SORT');

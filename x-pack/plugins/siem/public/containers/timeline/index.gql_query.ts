@@ -42,16 +42,44 @@ export const timelineQuery = gql`
               _id
               _index
               timestamp
+              message
+              system {
+                auth {
+                  ssh {
+                    signature
+                    method
+                  }
+                }
+                audit {
+                  package {
+                    arch
+                    entity_id
+                    name
+                    size
+                    summary
+                    version
+                  }
+                }
+              }
               event {
                 action
-                severity
-                module
                 category
-                id
+                created
                 dataset
                 duration
-                start
                 end
+                hash
+                id
+                kind
+                module
+                original
+                outcome
+                risk_score
+                risk_score_norm
+                severity
+                start
+                timezone
+                type
               }
               auditd {
                 result

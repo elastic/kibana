@@ -9,7 +9,6 @@ import React from 'react';
 import { Query } from 'react-apollo';
 
 import { DetailItem, GetTimelineDetailsQuery } from '../../../graphql/types';
-import { getDefaultFetchPolicy } from '../../helpers';
 
 import { timelineDetailsQuery } from './index.gql_query';
 
@@ -32,7 +31,7 @@ export class TimelineDetailsComponentQuery extends React.PureComponent<TimelineD
     return executeQuery ? (
       <Query<GetTimelineDetailsQuery.Query, GetTimelineDetailsQuery.Variables>
         query={timelineDetailsQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
+        fetchPolicy="network-only"
         notifyOnNetworkStatusChange
         variables={{ sourceId, indexName, eventId }}
       >

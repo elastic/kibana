@@ -3,84 +3,74 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { HostsEdges } from '../../graphql/types';
 
-import { formatHostsData } from './elasticsearch_adapter';
-import { hostsFieldsMap } from './query.dsl';
-import { HostHit } from './types';
+import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import { FrameworkAdapter, FrameworkRequest } from '../framework';
+
+import { ElasticsearchHostsAdapter, formatHostEdgesData } from './elasticsearch_adapter';
+import {
+  mockGetHostDetailsOptions,
+  mockGetHostDetailsRequest,
+  mockGetHostDetailsResponse,
+  mockGetHostDetailsResult,
+  mockGetHostLastFirstSeenOptions,
+  mockGetHostLastFirstSeenRequest,
+  mockGetHostLastFirstSeenResponse,
+  mockGetHostsOptions,
+  mockGetHostsRequest,
+  mockGetHostsResponse,
+  mockGetHostsResult,
+} from './mock';
+import { HostAggEsItem } from './types';
 
 describe('hosts elasticsearch_adapter', () => {
   describe('#formatHostsData', () => {
-    const hit: HostHit = {
-      _index: 'index-123',
-      _type: 'type-123',
-      _id: 'id-123',
-      _score: 10,
-      _source: {
-        '@timestamp': 'time-2',
-        host: {
-          name: 'host-name-1',
-          os: {
-            name: 'os-name-1',
-            version: 'version-1',
+    const buckets: HostAggEsItem = {
+      key: 'zeek-london',
+      host_os_version: {
+        buckets: [
+          {
+            key: '18.04.2 LTS (Bionic Beaver)',
+            doc_count: 1467783,
+            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
           },
-        },
+        ],
       },
-      firstSeen: 'time-1',
-      cursor: 'cursor-1',
-      sort: [0],
+      host_os_name: {
+        buckets: [
+          {
+            key: 'Ubuntu',
+            doc_count: 1467783,
+            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
+          },
+        ],
+      },
+      host_name: {
+        buckets: [
+          {
+            key: 'zeek-london',
+            doc_count: 1467783,
+            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
+          },
+        ],
+      },
+      host_id: {
+        buckets: [
+          {
+            key: '7c21f5ed03b04d0299569d221fe18bbc',
+            doc_count: 1467783,
+            timestamp: { value: 1554516350177, value_as_string: '2019-04-06T02:05:50.177Z' },
+          },
+        ],
+      },
     };
-
-    test('it formats a host with firstSeen correctly', () => {
-      const fields: ReadonlyArray<string> = ['firstSeen'];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
-      const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
-        node: {
-          firstSeen: 'time-1',
-          _id: 'id-123',
-        },
-      };
-
-      expect(data).toEqual(expected);
-    });
-
-    test('it formats a host with a source of lastBeat correctly', () => {
-      const fields: ReadonlyArray<string> = ['lastBeat'];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
-      const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
-        node: {
-          firstSeen: 'time-1',
-          lastBeat: 'time-2',
-          _id: 'id-123',
-        },
-      };
-
-      expect(data).toEqual(expected);
-    });
 
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
-        node: {
-          firstSeen: 'time-1',
-          host: {
-            name: 'host-name-1',
-          },
-          _id: 'id-123',
-        },
+        cursor: { tiebreaker: null, value: 'zeek-london' },
+        node: { host: { name: 'zeek-london' }, _id: 'zeek-london' },
       };
 
       expect(data).toEqual(expected);
@@ -88,21 +78,10 @@ describe('hosts elasticsearch_adapter', () => {
 
     test('it formats a host with a source of os correctly', () => {
       const fields: ReadonlyArray<string> = ['host.os.name'];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
-        node: {
-          firstSeen: 'time-1',
-          host: {
-            os: {
-              name: 'os-name-1',
-            },
-          },
-          _id: 'id-123',
-        },
+        cursor: { tiebreaker: null, value: 'zeek-london' },
+        node: { host: { os: { name: 'Ubuntu' } }, _id: 'zeek-london' },
       };
 
       expect(data).toEqual(expected);
@@ -110,21 +89,10 @@ describe('hosts elasticsearch_adapter', () => {
 
     test('it formats a host with a source of version correctly', () => {
       const fields: ReadonlyArray<string> = ['host.os.version'];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
-        node: {
-          firstSeen: 'time-1',
-          host: {
-            os: {
-              version: 'version-1',
-            },
-          },
-          _id: 'id-123',
-        },
+        cursor: { tiebreaker: null, value: 'zeek-london' },
+        node: { host: { os: { version: '18.04.2 LTS (Bionic Beaver)' } }, _id: 'zeek-london' },
       };
 
       expect(data).toEqual(expected);
@@ -132,48 +100,26 @@ describe('hosts elasticsearch_adapter', () => {
 
     test('it formats a host with a source of name correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
-        node: {
-          _id: 'id-123',
-          host: {
-            name: 'host-name-1',
-          },
-          firstSeen: 'time-1',
-        },
+        cursor: { tiebreaker: null, value: 'zeek-london' },
+        node: { _id: 'zeek-london', host: { name: 'zeek-london' } },
       };
 
       expect(data).toEqual(expected);
     });
 
     test('it formats a host with a source of name, lastBeat, os, and version correctly', () => {
-      const fields: ReadonlyArray<string> = [
-        'lastBeat',
-        'host.name',
-        'host.os.name',
-        'host.os.version',
-      ];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const fields: ReadonlyArray<string> = ['host.name', 'host.os.name', 'host.os.version'];
+      const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
-        cursor: {
-          tiebreaker: null,
-          value: 'cursor-1',
-        },
+        cursor: { tiebreaker: null, value: 'zeek-london' },
         node: {
-          _id: 'id-123',
+          _id: 'zeek-london',
           host: {
-            name: 'host-name-1',
-            os: {
-              name: 'os-name-1',
-              version: 'version-1',
-            },
+            name: 'zeek-london',
+            os: { name: 'Ubuntu', version: '18.04.2 LTS (Bionic Beaver)' },
           },
-          firstSeen: 'time-1',
-          lastBeat: 'time-2',
         },
       };
 
@@ -182,7 +128,7 @@ describe('hosts elasticsearch_adapter', () => {
 
     test('it formats a host without any data if fields are empty', () => {
       const fields: ReadonlyArray<string> = [];
-      const data = formatHostsData(fields, hit, hostsFieldsMap);
+      const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {
         cursor: {
           tiebreaker: null,
@@ -192,6 +138,75 @@ describe('hosts elasticsearch_adapter', () => {
       };
 
       expect(data).toEqual(expected);
+    });
+  });
+
+  describe('#getHosts', () => {
+    const mockCallWithRequest = jest.fn();
+    mockCallWithRequest.mockResolvedValue(mockGetHostsResponse);
+    const mockFramework: FrameworkAdapter = {
+      version: 'mock',
+      callWithRequest: mockCallWithRequest,
+      exposeStaticDir: jest.fn(),
+      registerGraphQLEndpoint: jest.fn(),
+      getIndexPatternsService: jest.fn(),
+    };
+    jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
+
+    test('Happy Path', async () => {
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const data: HostsData = await EsHosts.getHosts(
+        mockGetHostsRequest as FrameworkRequest,
+        mockGetHostsOptions
+      );
+      expect(data).toEqual(mockGetHostsResult);
+    });
+  });
+
+  describe('#getHostDetails', () => {
+    const mockCallWithRequest = jest.fn();
+    mockCallWithRequest.mockResolvedValue(mockGetHostDetailsResponse);
+    const mockFramework: FrameworkAdapter = {
+      version: 'mock',
+      callWithRequest: mockCallWithRequest,
+      exposeStaticDir: jest.fn(),
+      registerGraphQLEndpoint: jest.fn(),
+      getIndexPatternsService: jest.fn(),
+    };
+    jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
+
+    test('Happy Path', async () => {
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const data: HostItem = await EsHosts.getHostDetails(
+        mockGetHostDetailsRequest as FrameworkRequest,
+        mockGetHostDetailsOptions
+      );
+      expect(data).toEqual(mockGetHostDetailsResult);
+    });
+  });
+
+  describe('#getHostLastFirstSeen', () => {
+    const mockCallWithRequest = jest.fn();
+    mockCallWithRequest.mockResolvedValue(mockGetHostLastFirstSeenResponse);
+    const mockFramework: FrameworkAdapter = {
+      version: 'mock',
+      callWithRequest: mockCallWithRequest,
+      exposeStaticDir: jest.fn(),
+      registerGraphQLEndpoint: jest.fn(),
+      getIndexPatternsService: jest.fn(),
+    };
+    jest.doMock('../framework', () => ({ callWithRequest: mockCallWithRequest }));
+
+    test('Happy Path', async () => {
+      const EsHosts = new ElasticsearchHostsAdapter(mockFramework);
+      const data: FirstLastSeenHost = await EsHosts.getHostFirstLastSeen(
+        mockGetHostLastFirstSeenRequest as FrameworkRequest,
+        mockGetHostLastFirstSeenOptions
+      );
+      expect(data).toEqual({
+        firstSeen: '2019-02-22T03:41:32.826Z',
+        lastSeen: '2019-04-09T16:18:12.178Z',
+      });
     });
   });
 });

@@ -10,6 +10,7 @@ import { Query } from 'react-apollo';
 import { pure } from 'recompose';
 
 import { GetOverviewNetworkQuery, OverviewNetworkData } from '../../../graphql/types';
+import { inputsModel } from '../../../store/inputs';
 import { createFilter } from '../../helpers';
 import { QueryTemplateProps } from '../../query_template';
 
@@ -18,6 +19,8 @@ import { overviewNetworkQuery } from './index.gql_query';
 export interface OverviewNetworkArgs {
   id: string;
   overviewNetwork: OverviewNetworkData;
+  loading: boolean;
+  refetch: inputsModel.Refetch;
 }
 
 export interface OverviewNetworkProps extends QueryTemplateProps {
@@ -44,11 +47,13 @@ export const OverviewNetworkQuery = pure<OverviewNetworkProps>(
         filterQuery: createFilter(filterQuery),
       }}
     >
-      {({ data }) => {
+      {({ data, loading, refetch }) => {
         const overviewNetwork = getOr({}, `source.OverviewNetwork`, data);
         return children({
           id,
           overviewNetwork,
+          loading,
+          refetch,
         });
       }}
     </Query>

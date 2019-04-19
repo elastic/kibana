@@ -17,15 +17,15 @@ import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { HeaderPageProps } from '../../components/header_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
+import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostSummary } from '../../components/page/hosts/host_summary';
 import { manageQuery } from '../../components/page/manage_query';
-import { BreadcrumbItem } from '../../components/page/navigation/breadcrumb';
 import { AuthenticationsQuery } from '../../containers/authentications';
 import { EventsQuery } from '../../containers/events';
 import { GlobalTime } from '../../containers/global_time';
-import { HostsQuery } from '../../containers/hosts';
+import { HostDetailsByNameQuery } from '../../containers/hosts/details';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType } from '../../graphql/types';
@@ -52,7 +52,7 @@ type HostDetailsComponentProps = HostDetailsComponentReduxProps & HostComponentP
 const HostDetailsComponent = pure<HostDetailsComponentProps>(
   ({
     match: {
-      params: { hostId },
+      params: { hostName },
     },
     filterQueryExpression,
   }) => (
@@ -65,26 +65,23 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
             <GlobalTime>
               {({ poll, to, from, setQuery }) => (
                 <>
-                  <HostsQuery
-                    sourceId="default"
+                  <HostDetailsByNameQuery
+                    sourceId="default"hostName={hostName}
                     startDate={from}
                     endDate={to}
-                    poll={poll}
-                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
-                    type={type}
-                  >
-                    {({ hosts, loading, id, refetch, startDate, endDate }) => (
+                    >
+                  {({ hostDetails, loading, id, refetch }) => (
                       <HostSummaryManage
                         id={id}
                         refetch={refetch}
                         setQuery={setQuery}
-                        startDate={startDate}
-                        endDate={endDate}
-                        data={hosts}
+                        startDate={from}
+                        endDate={to}
+                        data={hostDetails}
                         loading={loading}
                       />
                     )}
-                  </HostsQuery>
+                  </HostDetailsByNameQuery>
 
                   <EuiSpacer />
 
@@ -93,7 +90,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     startDate={from}
                     endDate={to}
                     poll={poll}
-                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     type={type}
                   >
                     {({
@@ -128,7 +125,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     startDate={from}
                     endDate={to}
                     poll={poll}
-                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     type={type}
                   >
                     {({
@@ -160,7 +157,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
 
                   <EventsQuery
                     endDate={to}
-                    filterQuery={getFilterQuery(hostId, filterQueryExpression, indexPattern)}
+                    filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     poll={poll}
                     sourceId="default"
                     startDate={from}
@@ -220,14 +217,18 @@ export const getBreadcrumbs = (hostId: string): BreadcrumbItem[] => [
 ];
 
 const getFilterQuery = (
-  hostId: string,
+  hostName: string | null,
   filterQueryExpression: string,
   indexPattern: StaticIndexPattern
 ): ESTermQuery | string =>
   isEmpty(filterQueryExpression)
-    ? { term: { 'host.id': hostId } }
+    ? hostName
+      ? { term: { 'host.name': hostName } }
+      : ''
     : convertKueryToElasticSearchQuery(
-        `${filterQueryExpression} and host.id: ${escapeQueryValue(hostId)}`,
+        `${filterQueryExpression} ${
+          hostName ? `and host.name: ${escapeQueryValue(hostName)}` : ''
+        }`,
         indexPattern
       );
 

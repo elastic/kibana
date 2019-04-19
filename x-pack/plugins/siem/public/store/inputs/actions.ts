@@ -18,7 +18,8 @@ export const setAbsoluteRangeDatePicker = actionCreator<{
 
 export const setRelativeRangeDatePicker = actionCreator<{
   id: string;
-  option: string;
+  fromStr: string;
+  toStr: string;
   from: number;
   to: number;
 }>('SET_RELATIVE_RANGE_DATE_PICKER');
@@ -32,3 +33,5 @@ export const stopAutoReload = actionCreator<{ id: string }>('STOP_KQL_AUTO_RELOA
 export const setQuery = actionCreator<{ id: string; loading: boolean; refetch: Refetch }>(
   'SET_QUERY'
 );
+
+export const deleteAllQuery = actionCreator('DELETE_ALL_QUERY');

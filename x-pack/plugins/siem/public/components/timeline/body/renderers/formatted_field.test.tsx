@@ -12,7 +12,7 @@ import * as React from 'react';
 import { mockTimelineData } from '../../../../mock';
 import { getEmptyValue } from '../../../empty_value';
 
-import { FormattedFieldValue } from './formatted_field';
+import { FormattedFieldValue } from '.';
 
 describe('Events', () => {
   test('renders correctly against snapshot', () => {
@@ -82,7 +82,7 @@ describe('Events', () => {
         contextId="test"
         fieldName="event.module"
         fieldType="text"
-        value={get('event.module', mockTimelineData[0].ecs)}
+        value={get('event.module[0]', mockTimelineData[0].ecs)}
       />
     );
 

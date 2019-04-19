@@ -11,12 +11,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 import {
+  FlowDirection,
+  FlowTarget,
   NetworkDirectionEcs,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowEdges,
   NetworkTopNFlowItem,
-  NetworkTopNFlowType,
 } from '../../../../graphql/types';
+import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -25,29 +26,25 @@ import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
 import { IPDetailsLink } from '../../../links';
 import { Columns } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
+import { AddToKql } from '../../add_to_kql';
 
-import { AddToKql } from './add_to_kql';
 import * as i18n from './translations';
-
-type valueof<T> = T[keyof T];
 
 export const getNetworkTopNFlowColumns = (
   startDate: number,
-  topNFlowDirection: NetworkTopNFlowDirection,
-  topNFlowType: NetworkTopNFlowType,
+  flowDirection: FlowDirection,
+  flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<NetworkTopNFlowEdges | valueof<NetworkTopNFlowItem>>> => [
+): Array<Columns<NetworkTopNFlowEdges | ValueOf<NetworkTopNFlowItem>>> => [
   {
-    name: getIpTitle(topNFlowType),
+    name: getIpTitle(flowTarget),
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: { node: NetworkTopNFlowItem }) => {
-      const ipAttr = `${topNFlowType}.ip`;
+      const ipAttr = `${flowTarget}.ip`;
       const ip: string | null = get(ipAttr, node);
-      const id = escapeDataProviderId(
-        `${tableId}-table--${topNFlowType}-${topNFlowDirection}-ip-${ip}`
-      );
+      const id = escapeDataProviderId(`${tableId}-table--${flowTarget}-${flowDirection}-ip-${ip}`);
       if (ip != null) {
         return (
           <DraggableWrapper
@@ -83,15 +80,15 @@ export const getNetworkTopNFlowColumns = (
     truncateText: false,
     hideForMobile: false,
     render: ({ node }: { node: NetworkTopNFlowItem }) => {
-      const domainAttr = `${topNFlowType}.domain`;
-      const ipAttr = `${topNFlowType}.ip`;
+      const domainAttr = `${flowTarget}.domain`;
+      const ipAttr = `${flowTarget}.ip`;
       const domains: string[] = get(domainAttr, node);
       const ip: string | null = get(ipAttr, node);
 
       if (Array.isArray(domains) && domains.length > 0) {
         const domain = domains[0];
         const id = escapeDataProviderId(
-          `${tableId}-table-${ip}-${topNFlowType}-${topNFlowDirection}-domain-${domain}`
+          `${tableId}-table-${ip}-${flowTarget}-${flowDirection}-domain-${domain}`
         );
         return (
           <DraggableWrapper
@@ -158,10 +155,10 @@ export const getNetworkTopNFlowColumns = (
           directions.map((direction, index) => (
             <AddToKql
               key={escapeDataProviderId(
-                `${tableId}-table-${topNFlowType}-${topNFlowDirection}-direction-${direction}`
+                `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}
-              content={i18n.FILTER_TO_KQL}
               expression={`network.direction: ${escapeQueryValue(direction)}`}
+              componentFilterType="network"
               type={type}
             >
               <>
@@ -200,8 +197,8 @@ export const getNetworkTopNFlowColumns = (
     },
   },
   {
-    field: `node.${topNFlowType}.count`,
-    name: getUniqueTitle(topNFlowType),
+    field: `node.${flowTarget}.count`,
+    name: getUniqueTitle(flowTarget),
     truncateText: false,
     hideForMobile: false,
     sortable: true,
@@ -215,32 +212,32 @@ export const getNetworkTopNFlowColumns = (
   },
 ];
 
-// Xavier fix this stuff under DO NOT FORGET
-
-const getIpTitle = (topNFlowType: NetworkTopNFlowType) => {
-  if (topNFlowType === NetworkTopNFlowType.source) {
-    return i18n.SOURCE_IP;
-  } else if (topNFlowType === NetworkTopNFlowType.destination) {
-    return i18n.DESTINATION_IP;
-  } else if (topNFlowType === NetworkTopNFlowType.client) {
-    return i18n.CLIENT_IP;
-  } else if (topNFlowType === NetworkTopNFlowType.server) {
-    return i18n.SERVER_IP;
+const getIpTitle = (flowTarget: FlowTarget) => {
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return i18n.SOURCE_IP;
+    case FlowTarget.destination:
+      return i18n.DESTINATION_IP;
+    case FlowTarget.client:
+      return i18n.CLIENT_IP;
+    case FlowTarget.server:
+      return i18n.SERVER_IP;
   }
-  return '';
+  assertUnreachable(flowTarget);
 };
 
-const getUniqueTitle = (topNFlowType: NetworkTopNFlowType) => {
-  if (topNFlowType === NetworkTopNFlowType.source) {
-    return i18n.UNIQUE_DESTINATION_IP;
-  } else if (topNFlowType === NetworkTopNFlowType.destination) {
-    return i18n.UNIQUE_SOURCE_IP;
-  } else if (topNFlowType === NetworkTopNFlowType.client) {
-    return i18n.UNIQUE_SERVER_IP;
-  } else if (topNFlowType === NetworkTopNFlowType.server) {
-    return i18n.UNIQUE_CLIENT_IP;
+const getUniqueTitle = (flowTarget: FlowTarget) => {
+  switch (flowTarget) {
+    case FlowTarget.source:
+      return i18n.UNIQUE_DESTINATION_IP;
+    case FlowTarget.destination:
+      return i18n.UNIQUE_SOURCE_IP;
+    case FlowTarget.client:
+      return i18n.UNIQUE_SERVER_IP;
+    case FlowTarget.server:
+      return i18n.UNIQUE_CLIENT_IP;
   }
-  return '';
+  assertUnreachable(flowTarget);
 };
 
 const MoreDomains = styled(EuiIcon)`

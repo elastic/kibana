@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import dateMath from '@elastic/datemath';
 import { get } from 'lodash/fp';
-import moment from 'moment';
 import { Action } from 'redux';
 import { Epic } from 'redux-observable';
 import { timer } from 'rxjs';
@@ -38,27 +38,21 @@ export const createGlobalTimeEpic = <State>(): Epic<
   return action$.pipe(
     filter(startAutoReload.match),
     withLatestFrom(policy$, timerange$),
-    filter(([action, policy, timerange]) => timerange.kind === 'relative'),
+    filter(
+      ([action, policy, timerange]) =>
+        timerange.kind === 'relative' && timerange.toStr != null && timerange.toStr === 'now'
+    ),
     exhaustMap(([action, policy, timerange]) =>
       timer(0, policy.duration).pipe(
         map(() => {
-          const option = get('option', timerange);
-          if (option === 'quick-select') {
-            const diff = timerange.to - timerange.from;
-            return setRelativeRangeDatePicker({
-              id: 'global',
-              option,
-              to: Date.now(),
-              from: moment()
-                .subtract(diff, 'ms')
-                .valueOf(),
-            });
-          }
+          const fromStr = get('fromStr', timerange);
+          const momentDate = fromStr != null ? dateMath.parse(fromStr) : null;
           return setRelativeRangeDatePicker({
             id: 'global',
-            option,
+            fromStr: fromStr != null ? fromStr : '',
+            toStr: 'now',
             to: Date.now(),
-            from: timerange.from,
+            from: momentDate != null && momentDate.isValid() ? momentDate.valueOf() : 0,
           });
         }),
         takeUntil(action$.pipe(filter(stopAutoReload.match)))

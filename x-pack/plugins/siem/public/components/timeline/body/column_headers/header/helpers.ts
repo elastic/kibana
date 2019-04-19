@@ -5,6 +5,7 @@
  */
 
 import { Direction } from '../../../../../graphql/types';
+import { assertUnreachable } from '../../../../../lib/helpers';
 import { Sort, SortDirection } from '../../sort';
 import { ColumnHeader } from '../column_header';
 
@@ -12,10 +13,6 @@ interface GetNewSortDirectionOnClickParams {
   clickedHeader: ColumnHeader;
   currentSort: Sort;
 }
-
-const unhandledSortDirection = (x: never): never => {
-  throw new Error('Unhandled sort direction');
-};
 
 /** Given a `header`, returns the `SortDirection` applicable to it */
 export const getNewSortDirectionOnClick = ({
@@ -34,7 +31,7 @@ export const getNextSortDirection = (currentSort: Sort): Direction => {
     case 'none':
       return Direction.desc;
     default:
-      return unhandledSortDirection(currentSort.sortDirection);
+      return assertUnreachable(currentSort.sortDirection, 'Unhandled sort direction');
   }
 };
 

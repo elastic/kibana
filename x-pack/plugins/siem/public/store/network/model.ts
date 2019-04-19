@@ -5,11 +5,11 @@
  */
 
 import {
-  IpOverviewType,
+  DomainsSortField,
+  FlowDirection,
+  FlowTarget,
   NetworkDnsSortField,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowSortField,
-  NetworkTopNFlowType,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -24,9 +24,9 @@ export interface BasicQuery {
 
 // Network Page Models
 export interface TopNFlowQuery extends BasicQuery {
-  topNFlowType: NetworkTopNFlowType;
+  flowTarget: FlowTarget;
   topNFlowSort: NetworkTopNFlowSortField;
-  topNFlowDirection: NetworkTopNFlowDirection;
+  flowDirection: FlowDirection;
 }
 
 export interface DnsQuery extends BasicQuery {
@@ -46,17 +46,19 @@ export interface NetworkPageModel {
 }
 
 // IP Details Models
-export interface IpOverviewQuery {
-  flowType: IpOverviewType;
+export interface DomainsQuery extends BasicQuery {
+  flowDirection: FlowDirection;
+  domainsSortField: DomainsSortField;
 }
 
 interface IpOverviewQueries {
-  ipOverview: IpOverviewQuery;
+  domains: DomainsQuery;
 }
 
 export interface NetworkDetailsModel {
   filterQuery: SerializedFilterQuery | null;
   filterQueryDraft: KueryFilterQuery | null;
+  flowTarget: FlowTarget;
   queries: IpOverviewQueries;
 }
 

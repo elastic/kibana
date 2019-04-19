@@ -20,7 +20,6 @@ export const mockData: { Hosts: HostsData } = {
               version: '18.04.1 LTS (Bionic Beaver)',
             },
           },
-          firstSeen: '2018-12-06T15:40:53.319Z',
         },
         cursor: {
           value: '98966fa2013c396155c460d35c0902be',
@@ -36,7 +35,6 @@ export const mockData: { Hosts: HostsData } = {
               version: '9 (stretch)',
             },
           },
-          firstSeen: '2018-12-07T14:12:38.560Z',
         },
         cursor: {
           value: 'aa7ca589f1b8220002f2fc61c64cfbf1',

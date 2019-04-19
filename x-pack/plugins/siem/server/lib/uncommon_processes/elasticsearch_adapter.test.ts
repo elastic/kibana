@@ -29,8 +29,8 @@ describe('elasticsearch_adapter', () => {
                     _score: 0,
                     _source: {
                       host: {
-                        name: 'host-1',
-                        id: 'host-id-1',
+                        name: ['host-1'],
+                        id: ['host-id-1'],
                       },
                     },
                   },
@@ -69,8 +69,8 @@ describe('elasticsearch_adapter', () => {
                     _score: 0,
                     _source: {
                       host: {
-                        name: 'host-1',
-                        id: 'host-id-1',
+                        name: ['host-1'],
+                        id: ['host-id-1'],
                       },
                     },
                   },
@@ -92,8 +92,8 @@ describe('elasticsearch_adapter', () => {
                     _score: 0,
                     _source: {
                       host: {
-                        name: 'host-2',
-                        id: 'host-id-2',
+                        name: ['host-2'],
+                        id: ['host-id-2'],
                       },
                     },
                   },
@@ -117,12 +117,12 @@ describe('elasticsearch_adapter', () => {
 
     test('will return a single host correctly', () => {
       const hosts = getHosts(bucket1.hosts.buckets);
-      expect(hosts).toEqual([{ id: '123', name: 'host-1' }]);
+      expect(hosts).toEqual([{ id: ['123'], name: ['host-1'] }]);
     });
 
     test('will return two hosts correctly', () => {
       const hosts = getHosts(bucket2.hosts.buckets);
-      expect(hosts).toEqual([{ id: '123', name: 'host-1' }, { id: '345', name: 'host-2' }]);
+      expect(hosts).toEqual([{ id: ['123'], name: ['host-1'] }, { id: ['345'], name: ['host-2'] }]);
     });
 
     test('will return no hosts when given an empty array', () => {
@@ -141,12 +141,15 @@ describe('elasticsearch_adapter', () => {
         value: 100,
         relation: 'eq',
       },
-      host: [{ id: 'host-id-1', name: 'host-name-1' }, { id: 'host-id-1', name: 'host-name-1' }],
+      host: [
+        { id: ['host-id-1'], name: ['host-name-1'] },
+        { id: ['host-id-1'], name: ['host-name-1'] },
+      ],
       _source: {
         '@timestamp': 'time',
         process: {
-          name: 'process-1',
-          title: 'title-1',
+          name: ['process-1'],
+          title: ['title-1'],
         },
       },
       cursor: 'cursor-1',
@@ -161,11 +164,11 @@ describe('elasticsearch_adapter', () => {
         node: {
           _id: 'id-123',
           host: [
-            { id: 'host-id-1', name: 'host-name-1' },
-            { id: 'host-id-1', name: 'host-name-1' },
+            { id: ['host-id-1'], name: ['host-name-1'] },
+            { id: ['host-id-1'], name: ['host-name-1'] },
           ],
           process: {
-            name: 'process-1',
+            name: ['process-1'],
           },
           instances: 100,
         },
@@ -181,13 +184,13 @@ describe('elasticsearch_adapter', () => {
         node: {
           _id: 'id-123',
           host: [
-            { id: 'host-id-1', name: 'host-name-1' },
-            { id: 'host-id-1', name: 'host-name-1' },
+            { id: ['host-id-1'], name: ['host-name-1'] },
+            { id: ['host-id-1'], name: ['host-name-1'] },
           ],
           instances: 100,
           process: {
-            name: 'process-1',
-            title: 'title-1',
+            name: ['process-1'],
+            title: ['title-1'],
           },
         },
       };

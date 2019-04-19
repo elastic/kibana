@@ -5,7 +5,11 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
+import ApolloClient from 'apollo-client';
+import { ApolloLink } from 'apollo-link';
 import * as React from 'react';
+import { ApolloProvider } from 'react-apollo';
 import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-dnd';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { pure } from 'recompose';
@@ -27,6 +31,11 @@ interface Props {
   onDragEnd?: (result: DropResult, provided: ResponderProvided) => void;
 }
 
+const client = new ApolloClient({
+  cache: new Cache(),
+  link: new ApolloLink((o, f) => (f ? f(o) : null)),
+});
+
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProviders = pure<Props>(
   ({
@@ -35,12 +44,14 @@ export const TestProviders = pure<Props>(
     mockFramework = mockFrameworks.default_UTC,
     onDragEnd = jest.fn(),
   }) => (
-    <ReduxStoreProvider store={store}>
-      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-        <KibanaConfigContext.Provider value={mockFramework}>
-          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-        </KibanaConfigContext.Provider>
-      </ThemeProvider>
-    </ReduxStoreProvider>
+    <ApolloProvider client={client}>
+      <ReduxStoreProvider store={store}>
+        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+          <KibanaConfigContext.Provider value={mockFramework}>
+            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+          </KibanaConfigContext.Provider>
+        </ThemeProvider>
+      </ReduxStoreProvider>
+    </ApolloProvider>
   )
 );

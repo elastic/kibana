@@ -1,110 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericFileDetails rendering it renders the default GenericFileDetails 1`] = `
-<Component
-  intl={
-    Object {
-      "defaultFormats": Object {},
-      "defaultLocale": "en",
-      "formatDate": [Function],
-      "formatHTMLMessage": [Function],
-      "formatMessage": [Function],
-      "formatNumber": [Function],
-      "formatPlural": [Function],
-      "formatRelative": [Function],
-      "formatTime": [Function],
-      "formats": Object {
-        "date": Object {
-          "full": Object {
-            "day": "numeric",
-            "month": "long",
-            "weekday": "long",
-            "year": "numeric",
-          },
-          "long": Object {
-            "day": "numeric",
-            "month": "long",
-            "year": "numeric",
-          },
-          "medium": Object {
-            "day": "numeric",
-            "month": "short",
-            "year": "numeric",
-          },
-          "short": Object {
-            "day": "numeric",
-            "month": "numeric",
-            "year": "2-digit",
-          },
-        },
-        "number": Object {
-          "currency": Object {
-            "style": "currency",
-          },
-          "percent": Object {
-            "style": "percent",
-          },
-        },
-        "relative": Object {
-          "days": Object {
-            "units": "day",
-          },
-          "hours": Object {
-            "units": "hour",
-          },
-          "minutes": Object {
-            "units": "minute",
-          },
-          "months": Object {
-            "units": "month",
-          },
-          "seconds": Object {
-            "units": "second",
-          },
-          "years": Object {
-            "units": "year",
-          },
-        },
-        "time": Object {
-          "full": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "long": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-            "timeZoneName": "short",
-          },
-          "medium": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-            "second": "numeric",
-          },
-          "short": Object {
-            "hour": "numeric",
-            "minute": "numeric",
-          },
-        },
-      },
-      "formatters": Object {
-        "getDateTimeFormat": [Function],
-        "getMessageFormat": [Function],
-        "getNumberFormat": [Function],
-        "getPluralFormat": [Function],
-        "getRelativeFormat": [Function],
-      },
-      "locale": "en",
-      "messages": Object {},
-      "now": [Function],
-      "onError": [Function],
-      "textComponent": Symbol(react.fragment),
-      "timeZone": null,
-    }
-  }
->
+<Component>
   <pure(Component)
     browserFields={Object {}}
     contextId="contextid-123"
@@ -113,75 +10,129 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
         "_id": "28",
         "auditd": Object {
           "data": null,
-          "result": "success",
-          "session": "unset",
+          "result": Array [
+            "success",
+          ],
+          "session": Array [
+            "unset",
+          ],
           "summary": Object {
             "actor": Object {
-              "primary": "unset",
-              "secondary": "root",
+              "primary": Array [
+                "unset",
+              ],
+              "secondary": Array [
+                "root",
+              ],
             },
-            "how": "/lib/systemd/systemd-journald",
+            "how": Array [
+              "/lib/systemd/systemd-journald",
+            ],
             "message_type": null,
             "object": Object {
-              "primary": "/proc/15990/attr/current",
+              "primary": Array [
+                "/proc/15990/attr/current",
+              ],
               "secondary": null,
-              "type": "file",
+              "type": Array [
+                "file",
+              ],
             },
             "sequence": null,
           },
         },
         "destination": null,
         "event": Object {
-          "action": "opened-file",
-          "category": "audit-rule",
+          "action": Array [
+            "opened-file",
+          ],
+          "category": Array [
+            "audit-rule",
+          ],
           "dataset": null,
           "id": null,
-          "module": "auditd",
+          "module": Array [
+            "auditd",
+          ],
           "severity": null,
         },
         "file": Object {
           "ctime": null,
-          "device": "00:00",
+          "device": Array [
+            "00:00",
+          ],
           "extension": null,
-          "gid": "0",
-          "group": "root",
-          "inode": "27672309",
-          "mode": "0666",
+          "gid": Array [
+            "0",
+          ],
+          "group": Array [
+            "root",
+          ],
+          "inode": Array [
+            "27672309",
+          ],
+          "mode": Array [
+            "0666",
+          ],
           "mtime": null,
-          "owner": "root",
-          "path": "/proc/15990/attr/current",
+          "owner": Array [
+            "root",
+          ],
+          "path": Array [
+            "/proc/15990/attr/current",
+          ],
           "size": null,
           "target_path": null,
           "type": null,
-          "uid": "0",
+          "uid": Array [
+            "0",
+          ],
         },
         "geo": null,
         "host": Object {
-          "id": "7c21f5ed03b04d0299569d221fe18bbc",
+          "id": Array [
+            "7c21f5ed03b04d0299569d221fe18bbc",
+          ],
           "ip": Array [
             "46.101.3.136",
             "10.16.0.5",
             "fe80::4066:42ff:fe19:b3b9",
           ],
-          "name": "zeek-london",
+          "name": Array [
+            "zeek-london",
+          ],
         },
         "http": null,
         "network": null,
         "process": Object {
           "args": null,
-          "executable": "/lib/systemd/systemd-journald",
-          "name": "systemd-journal",
-          "pid": 27244,
-          "ppid": 1,
-          "title": "/lib/systemd/systemd-journald",
-          "working_directory": "/",
+          "executable": Array [
+            "/lib/systemd/systemd-journald",
+          ],
+          "name": Array [
+            "systemd-journal",
+          ],
+          "pid": Array [
+            27244,
+          ],
+          "ppid": Array [
+            1,
+          ],
+          "title": Array [
+            "/lib/systemd/systemd-journald",
+          ],
+          "working_directory": Array [
+            "/",
+          ],
         },
         "source": null,
         "suricata": null,
         "timestamp": "2019-03-26T22:12:18.609Z",
         "url": null,
         "user": Object {
-          "name": "root",
+          "name": Array [
+            "root",
+          ],
         },
         "zeek": null,
       }

@@ -14,12 +14,20 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "host": Array [],
             "instances": 93,
             "process": Object {
-              "name": "elrond.elstc.co",
-              "title": "Hello World",
+              "name": Array [
+                "elrond.elstc.co",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
-              "id": 0,
-              "name": "root",
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
             },
           },
         },
@@ -31,18 +39,30 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "_id": "cPsuhGcB0WOhS6qyTKC0",
             "host": Array [
               Object {
-                "id": "host-id-1",
-                "name": "hello-world",
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
               },
             ],
             "instances": 93,
             "process": Object {
-              "name": "elrond.elstc.co",
-              "title": "Hello World",
+              "name": Array [
+                "elrond.elstc.co",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
-              "id": 0,
-              "name": "root",
+              "id": Array [
+                "0",
+              ],
+              "name": Array [
+                "root",
+              ],
             },
           },
         },
@@ -54,22 +74,38 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             "_id": "KwQDiWcB0WOhS6qyXmrW",
             "host": Array [
               Object {
-                "id": "host-id-1",
-                "name": "hello-world",
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
               },
               Object {
-                "id": "host-id-2",
-                "name": "hello-world-2",
+                "id": Array [
+                  "host-id-2",
+                ],
+                "name": Array [
+                  "hello-world-2",
+                ],
               },
             ],
             "instances": 97,
             "process": Object {
-              "name": "siem-kibana",
-              "title": "Hello World",
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },
@@ -88,12 +124,20 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             ],
             "instances": 97,
             "process": Object {
-              "name": "siem-kibana",
-              "title": "Hello World",
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },
@@ -110,8 +154,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
                 ],
               },
               Object {
-                "id": "host-id-1",
-                "name": "hello-world",
+                "id": Array [
+                  "host-id-1",
+                ],
+                "name": Array [
+                  "hello-world",
+                ],
               },
               Object {
                 "ip": Array [
@@ -119,8 +167,12 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
                 ],
               },
               Object {
-                "id": "host-id-2",
-                "name": "hello-world-2",
+                "id": Array [
+                  "host-id-2",
+                ],
+                "name": Array [
+                  "hello-world-2",
+                ],
               },
               Object {
                 "ip": Array [
@@ -130,12 +182,20 @@ exports[`UncommonProcess Table Component rendering it renders the default Uncomm
             ],
             "instances": 97,
             "process": Object {
-              "name": "siem-kibana",
-              "title": "Hello World",
+              "name": Array [
+                "siem-kibana",
+              ],
+              "title": Array [
+                "Hello World",
+              ],
             },
             "user": Object {
-              "id": 1,
-              "name": "Evan",
+              "id": Array [
+                "1",
+              ],
+              "name": Array [
+                "Evan",
+              ],
             },
           },
         },

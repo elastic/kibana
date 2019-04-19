@@ -5,18 +5,10 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
 
-import { RowRenderer } from '.';
-
-const PlainRow = styled.div`
-  width: 100%;
-  &:hover {
-    background-color: ${props => props.theme.eui.euiTableHoverColor};
-  }
-`;
+import { Row, RowRenderer } from '.';
 
 export const plainRowRenderer: RowRenderer = {
   isInstance: _ => true,
-  renderRow: ({ children }) => <PlainRow>{children}</PlainRow>,
+  renderRow: ({ children }) => <Row>{children}</Row>,
 };

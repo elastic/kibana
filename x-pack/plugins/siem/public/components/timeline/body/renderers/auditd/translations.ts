@@ -22,10 +22,6 @@ export const SESSION = i18n.translate('xpack.siem.auditd.sessionDescription', {
   defaultMessage: 'Session',
 });
 
-export const IN = i18n.translate('xpack.siem.auditd.inDescription', {
-  defaultMessage: 'in',
-});
-
 export const WAS_AUTHORIZED_TO_USE = i18n.translate(
   'xpack.siem.auditd.wasAuthorizedToUseDescription',
   {
@@ -62,6 +58,7 @@ export const ATTEMPTED_LOGIN = i18n.translate('xpack.siem.auditd.attemptedLoginD
 export const WITH_RESULT = i18n.translate('xpack.siem.auditd.withResultDescription', {
   defaultMessage: 'with result',
 });
+
 export const EXECUTED = i18n.translate('xpack.siem.auditd.executedDescription', {
   defaultMessage: 'executed',
 });

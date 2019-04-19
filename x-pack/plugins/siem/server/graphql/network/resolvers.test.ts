@@ -8,10 +8,10 @@ import { clone } from 'lodash/fp';
 
 import {
   Direction,
+  FlowDirection,
+  FlowTarget,
   NetworkDnsFields,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
-  NetworkTopNFlowType,
   Source,
 } from '../../graphql/types';
 import { FrameworkRequest, internalFrameworkRequest } from '../../lib/framework';
@@ -101,8 +101,8 @@ describe('Test Source Resolvers', () => {
           cursor: null,
         },
         sort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
-        type: NetworkTopNFlowType.source,
-        direction: NetworkTopNFlowDirection.uniDirectional,
+        flowTarget: FlowTarget.source,
+        flowDirection: FlowDirection.uniDirectional,
       },
       context,
       {} as GraphQLResolveInfo

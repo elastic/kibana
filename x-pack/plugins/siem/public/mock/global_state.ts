@@ -7,11 +7,12 @@
 import { defaultWidth } from '../components/timeline/body';
 import {
   Direction,
-  IpOverviewType,
+  DomainsFields,
+  FlowDirection,
+  FlowTarget,
+  HostsFields,
   NetworkDnsFields,
-  NetworkTopNFlowDirection,
   NetworkTopNFlowFields,
-  NetworkTopNFlowType,
 } from '../graphql/types';
 import { State } from '../store';
 
@@ -29,7 +30,11 @@ export const mockGlobalState: State = {
     page: {
       queries: {
         authentications: { limit: 10 },
-        hosts: { limit: 10 },
+        hosts: {
+          limit: 10,
+          direction: Direction.desc,
+          sortField: HostsFields.lastSeen,
+        },
         events: { limit: 10 },
         uncommonProcesses: { limit: 10 },
       },
@@ -39,7 +44,11 @@ export const mockGlobalState: State = {
     details: {
       queries: {
         authentications: { limit: 10 },
-        hosts: { limit: 10 },
+        hosts: {
+          limit: 10,
+          direction: Direction.desc,
+          sortField: HostsFields.lastSeen,
+        },
         events: { limit: 10 },
         uncommonProcesses: { limit: 10 },
       },
@@ -52,8 +61,8 @@ export const mockGlobalState: State = {
       queries: {
         topNFlow: {
           limit: 10,
-          topNFlowType: NetworkTopNFlowType.source,
-          topNFlowDirection: NetworkTopNFlowDirection.uniDirectional,
+          flowTarget: FlowTarget.source,
+          flowDirection: FlowDirection.uniDirectional,
           topNFlowSort: { field: NetworkTopNFlowFields.bytes, direction: Direction.desc },
         },
         dns: {
@@ -68,16 +77,19 @@ export const mockGlobalState: State = {
     details: {
       filterQuery: null,
       filterQueryDraft: null,
+      flowTarget: FlowTarget.source,
       queries: {
-        ipOverview: {
-          flowType: IpOverviewType.source,
+        domains: {
+          limit: 10,
+          flowDirection: FlowDirection.uniDirectional,
+          domainsSortField: { field: DomainsFields.bytes, direction: Direction.desc },
         },
       },
     },
   },
   inputs: {
     global: {
-      timerange: { kind: 'absolute', from: 0, to: 1 },
+      timerange: { kind: 'relative', fromStr: 'now-24h', toStr: 'now', from: 0, to: 1 },
       query: [],
       policy: { kind: 'manual', duration: 5000 },
     },

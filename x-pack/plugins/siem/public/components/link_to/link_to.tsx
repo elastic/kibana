@@ -20,7 +20,7 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
   <Switch>
     <Route path={`${match.url}/overview`} component={RedirectToOverviewPage} />
     <Route exact path={`${match.url}/hosts`} component={RedirectToHostsPage} />
-    <Route path={`${match.url}/hosts/:hostId`} component={RedirectToHostsPage} />
+    <Route path={`${match.url}/hosts/:hostName`} component={RedirectToHostsPage} />
     <Route exact path={`${match.url}/network`} component={RedirectToNetworkPage} />
     <Route path={`${match.url}/network/ip/:ip`} component={RedirectToNetworkPage} />
     <Redirect to="/" />

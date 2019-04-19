@@ -16,7 +16,7 @@ import { isBoolean, isNumber, isObject } from 'lodash/fp';
  */
 
 export const toStringArrayScalar = new GraphQLScalarType({
-  name: 'DetailItemValue',
+  name: 'StringArray',
   description: 'Represents value in detail item from the timeline who wants to more than one type',
   serialize(value): string[] | null {
     if (value == null) {

@@ -7,13 +7,13 @@
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { ActionCreator } from 'typescript-fsa';
 
+import { FlowTarget } from '../../../../graphql/types';
 import { mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
-import { IpOverview, IpOverviewId } from './index';
+import { IpOverview } from './index';
 import { mockData } from './mock';
 
 describe('IP Overview Component', () => {
@@ -26,56 +26,25 @@ describe('IP Overview Component', () => {
   });
 
   describe('rendering', () => {
+    const mockProps = {
+      flowTarget: FlowTarget.source,
+      loading: false,
+      ip: '10.10.10.10',
+      data: mockData.IpOverview,
+      type: networkModel.NetworkType.details,
+      updateFlowTargetAction: (jest.fn() as unknown) as ActionCreator<{
+        flowTarget: FlowTarget;
+      }>,
+    };
+
     test('it renders the default IP Overview', () => {
       const wrapper = shallow(
-        <TestProviders>
-          <IpOverview
-            loading={false}
-            ip="10.10.10.10"
-            data={mockData.IpOverview}
-            type={networkModel.NetworkType.details}
-          />
+        <TestProviders store={store}>
+          <IpOverview {...mockProps} />
         </TestProviders>
       );
 
       expect(toJson(wrapper)).toMatchSnapshot();
-    });
-  });
-
-  describe('changing selected type', () => {
-    test('selecting destination from the type drop down', () => {
-      const wrapper = mountWithIntl(
-        <MockedProvider>
-          <TestProviders store={store}>
-            <IpOverview
-              loading={false}
-              ip="10.10.10.10"
-              data={mockData.complete}
-              type={networkModel.NetworkType.details}
-            />
-          </TestProviders>
-        </MockedProvider>
-      );
-
-      wrapper
-        .find(`[data-test-subj="${IpOverviewId}-select-type"] button`)
-        .first()
-        .simulate('click');
-
-      wrapper.update();
-
-      wrapper
-        .find(`button#${IpOverviewId}-select-type-destination`)
-        .first()
-        .simulate('click');
-
-      expect(
-        wrapper
-          .find(`[data-test-subj="${IpOverviewId}-select-type"] button`)
-          .first()
-          .text()
-          .toLocaleLowerCase()
-      ).toEqual('as destination');
     });
   });
 });

@@ -42,9 +42,15 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 // Scalars
 // ====================================================
 
+export type ToStringArray = string[] | string;
+
 export type Date = any;
 
-export type ToStringArray = any;
+export type ToNumberArray = number[] | number;
+
+export type ToDateArray = string[] | string;
+
+export type ToBooleanArray = boolean[] | boolean;
 
 export type EsValue = any;
 
@@ -77,7 +83,15 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
+  HostDetails: HostItem;
+
+  HostFirstLastSeen: FirstLastSeenHost;
+
   IpOverview?: IpOverviewData | null;
+
+  Domains: DomainsData;
+
+  DomainFirstLastSeen: FirstLastSeenDomain;
 
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -199,17 +213,17 @@ export interface AuthenticationItem {
 }
 
 export interface UserEcsFields {
-  id?: number | null;
+  id?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full_name?: string | null;
+  full_name?: ToStringArray | null;
 
-  email?: string | null;
+  email?: ToStringArray | null;
 
-  hash?: string | null;
+  hash?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 }
 
 export interface LastSourceHost {
@@ -221,69 +235,69 @@ export interface LastSourceHost {
 }
 
 export interface SourceEcsFields {
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToNumberArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface GeoEcsFields {
-  city_name?: string | null;
+  city_name?: ToStringArray | null;
 
-  continent_name?: string | null;
+  continent_name?: ToStringArray | null;
 
-  country_iso_code?: string | null;
+  country_iso_code?: ToStringArray | null;
 
-  country_name?: string | null;
+  country_name?: ToStringArray | null;
 
   location?: Location | null;
 
-  region_iso_code?: string | null;
+  region_iso_code?: ToStringArray | null;
 
-  region_name?: string | null;
+  region_name?: ToStringArray | null;
 }
 
 export interface Location {
-  lon?: number | null;
+  lon?: ToNumberArray | null;
 
-  lat?: number | null;
+  lat?: ToNumberArray | null;
 }
 
 export interface HostEcsFields {
-  architecture?: string | null;
+  architecture?: ToStringArray | null;
 
-  id?: string | null;
+  id?: ToStringArray | null;
 
-  ip?: (string | null)[] | null;
+  ip?: ToStringArray | null;
 
-  mac?: (string | null)[] | null;
+  mac?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
   os?: OsEcsFields | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface OsEcsFields {
-  platform?: string | null;
+  platform?: ToStringArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  full?: string | null;
+  full?: ToStringArray | null;
 
-  family?: string | null;
+  family?: ToStringArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 
-  kernel?: string | null;
+  kernel?: ToStringArray | null;
 }
 
 export interface CursorType {
@@ -351,33 +365,35 @@ export interface Ecs {
 
   timestamp?: Date | null;
 
-  message?: string[] | null;
+  message?: ToStringArray | null;
 
   user?: UserEcsFields | null;
 
   process?: ProcessEcsFields | null;
 
   file?: FileFields | null;
+
+  system?: SystemEcsField | null;
 }
 
 export interface AuditdEcsFields {
-  result?: string | null;
+  result?: ToStringArray | null;
 
-  session?: string | null;
+  session?: ToStringArray | null;
 
   data?: AuditdData | null;
 
   summary?: Summary | null;
 
-  sequence?: number | null;
+  sequence?: ToStringArray | null;
 }
 
 export interface AuditdData {
-  acct?: string | null;
+  acct?: ToStringArray | null;
 
-  terminal?: string | null;
+  terminal?: ToStringArray | null;
 
-  op?: string | null;
+  op?: ToStringArray | null;
 }
 
 export interface Summary {
@@ -385,69 +401,85 @@ export interface Summary {
 
   object?: PrimarySecondary | null;
 
-  how?: string | null;
+  how?: ToStringArray | null;
 
-  message_type?: string | null;
+  message_type?: ToStringArray | null;
 
-  sequence?: number | null;
+  sequence?: ToStringArray | null;
 }
 
 export interface PrimarySecondary {
-  primary?: string | null;
+  primary?: ToStringArray | null;
 
-  secondary?: string | null;
+  secondary?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 }
 
 export interface DestinationEcsFields {
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 
-  ip?: string | null;
+  ip?: ToStringArray | null;
 
-  port?: number | null;
+  port?: ToNumberArray | null;
 
-  domain?: string[] | null;
+  domain?: ToStringArray | null;
 
   geo?: GeoEcsFields | null;
 
-  packets?: number | null;
+  packets?: ToNumberArray | null;
 }
 
 export interface EventEcsFields {
-  category?: string | null;
+  action?: ToStringArray | null;
 
-  duration?: number | null;
+  category?: ToStringArray | null;
 
-  id?: number | null;
+  created?: ToDateArray | null;
 
-  module?: string | null;
+  dataset?: ToStringArray | null;
 
-  severity?: number | null;
+  duration?: ToNumberArray | null;
 
-  start?: Date | null;
+  end?: ToDateArray | null;
 
-  end?: Date | null;
+  hash?: ToStringArray | null;
 
-  action?: string | null;
+  id?: ToStringArray | null;
 
-  type?: string | null;
+  kind?: ToStringArray | null;
 
-  dataset?: string | null;
+  module?: ToStringArray | null;
+
+  original?: ToStringArray | null;
+
+  outcome?: ToStringArray | null;
+
+  risk_score?: ToNumberArray | null;
+
+  risk_score_norm?: ToNumberArray | null;
+
+  severity?: ToNumberArray | null;
+
+  start?: ToDateArray | null;
+
+  timezone?: ToStringArray | null;
+
+  type?: ToStringArray | null;
 }
 
 export interface NetworkEcsField {
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 
-  community_id?: string | null;
+  community_id?: ToStringArray | null;
 
-  direction?: string | null;
+  direction?: ToStringArray | null;
 
-  packets?: number | null;
+  packets?: ToNumberArray | null;
 
-  protocol?: string | null;
+  protocol?: ToStringArray | null;
 
-  transport?: string | null;
+  transport?: ToStringArray | null;
 }
 
 export interface SuricataEcsFields {
@@ -457,15 +489,15 @@ export interface SuricataEcsFields {
 export interface SuricataEveData {
   alert?: SuricataAlertData | null;
 
-  flow_id?: number | null;
+  flow_id?: ToNumberArray | null;
 
-  proto?: string | null;
+  proto?: ToStringArray | null;
 }
 
 export interface SuricataAlertData {
-  signature?: string | null;
+  signature?: ToStringArray | null;
 
-  signature_id?: number | null;
+  signature_id?: ToNumberArray | null;
 }
 
 export interface TlsEcsFields {
@@ -481,7 +513,7 @@ export interface TlsClientCertificateData {
 }
 
 export interface FingerprintData {
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 }
 
 export interface TlsFingerprintsData {
@@ -489,7 +521,7 @@ export interface TlsFingerprintsData {
 }
 
 export interface TlsJa3Data {
-  hash?: string | null;
+  hash?: ToStringArray | null;
 }
 
 export interface TlsServerCertificateData {
@@ -497,7 +529,7 @@ export interface TlsServerCertificateData {
 }
 
 export interface ZeekEcsFields {
-  session_id?: string | null;
+  session_id?: ToStringArray | null;
 
   connection?: ZeekConnectionData | null;
 
@@ -513,119 +545,119 @@ export interface ZeekEcsFields {
 }
 
 export interface ZeekConnectionData {
-  local_resp?: string | null;
+  local_resp?: ToBooleanArray | null;
 
-  local_orig?: string | null;
+  local_orig?: ToBooleanArray | null;
 
-  missed_bytes?: number | null;
+  missed_bytes?: ToNumberArray | null;
 
-  state?: string | null;
+  state?: ToStringArray | null;
 
-  history?: string | null;
+  history?: ToStringArray | null;
 }
 
 export interface ZeekNoticeData {
-  suppress_for?: number | null;
+  suppress_for?: ToNumberArray | null;
 
-  msg?: string | null;
+  msg?: ToStringArray | null;
 
-  note?: string | null;
+  note?: ToStringArray | null;
 
-  sub?: string | null;
+  sub?: ToStringArray | null;
 
-  dst?: string | null;
+  dst?: ToStringArray | null;
 
-  dropped?: boolean | null;
+  dropped?: ToBooleanArray | null;
 
-  peer_descr?: string | null;
+  peer_descr?: ToStringArray | null;
 }
 
 export interface ZeekDnsData {
-  AA?: boolean | null;
+  AA?: ToBooleanArray | null;
 
-  qclass_name?: string | null;
+  qclass_name?: ToStringArray | null;
 
-  RD?: boolean | null;
+  RD?: ToBooleanArray | null;
 
-  qtype_name?: string | null;
+  qtype_name?: ToStringArray | null;
 
-  rejected?: boolean | null;
+  rejected?: ToBooleanArray | null;
 
-  qtype?: number | null;
+  qtype?: ToStringArray | null;
 
-  query?: string | null;
+  query?: ToStringArray | null;
 
-  trans_id?: number | null;
+  trans_id?: ToNumberArray | null;
 
-  qclass?: number | null;
+  qclass?: ToStringArray | null;
 
-  RA?: boolean | null;
+  RA?: ToBooleanArray | null;
 
-  TC?: boolean | null;
+  TC?: ToBooleanArray | null;
 }
 
 export interface ZeekHttpData {
-  resp_mime_types?: string[] | null;
+  resp_mime_types?: ToStringArray | null;
 
-  trans_depth?: string | null;
+  trans_depth?: ToStringArray | null;
 
-  status_msg?: string | null;
+  status_msg?: ToStringArray | null;
 
-  resp_fuids?: string[] | null;
+  resp_fuids?: ToStringArray | null;
 
-  tags?: string[] | null;
+  tags?: ToStringArray | null;
 }
 
 export interface ZeekFileData {
-  session_ids?: string[] | null;
+  session_ids?: ToStringArray | null;
 
-  timedout?: boolean | null;
+  timedout?: ToBooleanArray | null;
 
-  local_orig?: boolean | null;
+  local_orig?: ToBooleanArray | null;
 
-  tx_host?: string | null;
+  tx_host?: ToStringArray | null;
 
-  source?: string | null;
+  source?: ToStringArray | null;
 
-  is_orig?: boolean | null;
+  is_orig?: ToBooleanArray | null;
 
-  overflow_bytes?: number | null;
+  overflow_bytes?: ToNumberArray | null;
 
-  sha1?: string | null;
+  sha1?: ToStringArray | null;
 
-  duration?: number | null;
+  duration?: ToNumberArray | null;
 
-  depth?: number | null;
+  depth?: ToNumberArray | null;
 
-  analyzers?: string[] | null;
+  analyzers?: ToStringArray | null;
 
-  mime_type?: string | null;
+  mime_type?: ToStringArray | null;
 
-  rx_host?: string | null;
+  rx_host?: ToStringArray | null;
 
-  total_bytes?: number | null;
+  total_bytes?: ToNumberArray | null;
 
-  fuid?: string | null;
+  fuid?: ToStringArray | null;
 
-  seen_bytes?: number | null;
+  seen_bytes?: ToNumberArray | null;
 
-  missing_bytes?: number | null;
+  missing_bytes?: ToNumberArray | null;
 
-  md5?: string | null;
+  md5?: ToStringArray | null;
 }
 
 export interface ZeekSslData {
-  cipher?: string | null;
+  cipher?: ToStringArray | null;
 
-  established?: boolean | null;
+  established?: ToBooleanArray | null;
 
-  resumed?: boolean | null;
+  resumed?: ToBooleanArray | null;
 
-  version?: string | null;
+  version?: ToStringArray | null;
 }
 
 export interface HttpEcsFields {
-  version?: string | null;
+  version?: ToStringArray | null;
 
   request?: HttpRequestData | null;
 
@@ -633,91 +665,125 @@ export interface HttpEcsFields {
 }
 
 export interface HttpRequestData {
-  method?: string | null;
+  method?: ToStringArray | null;
 
   body?: HttpBodyData | null;
 
-  referrer?: string | null;
+  referrer?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpBodyData {
-  content?: string | null;
+  content?: ToStringArray | null;
 
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface HttpResponseData {
-  status_code?: number | null;
+  status_code?: ToNumberArray | null;
 
   body?: HttpBodyData | null;
 
-  bytes?: number | null;
+  bytes?: ToNumberArray | null;
 }
 
 export interface UrlEcsFields {
-  domain?: string | null;
+  domain?: ToStringArray | null;
 
-  original?: string | null;
+  original?: ToStringArray | null;
 
-  username?: string | null;
+  username?: ToStringArray | null;
 
-  password?: string | null;
+  password?: ToStringArray | null;
 }
 
 export interface ProcessEcsFields {
-  pid?: number | null;
+  pid?: ToNumberArray | null;
 
-  name?: string | null;
+  name?: ToStringArray | null;
 
-  ppid?: number | null;
+  ppid?: ToNumberArray | null;
 
-  args?: (string | null)[] | null;
+  args?: ToStringArray | null;
 
-  executable?: string | null;
+  executable?: ToStringArray | null;
 
-  title?: string | null;
+  title?: ToStringArray | null;
 
   thread?: Thread | null;
 
-  working_directory?: string | null;
+  working_directory?: ToStringArray | null;
 }
 
 export interface Thread {
-  id?: number | null;
+  id?: ToNumberArray | null;
 
-  start?: string | null;
+  start?: ToStringArray | null;
 }
 
 export interface FileFields {
-  path?: string | null;
+  path?: ToStringArray | null;
 
-  target_path?: string | null;
+  target_path?: ToStringArray | null;
 
-  extension?: string | null;
+  extension?: ToStringArray | null;
 
-  type?: string | null;
+  type?: ToStringArray | null;
 
-  device?: string | null;
+  device?: ToStringArray | null;
 
-  inode?: string | null;
+  inode?: ToStringArray | null;
 
-  uid?: string | null;
+  uid?: ToStringArray | null;
 
-  owner?: string | null;
+  owner?: ToStringArray | null;
 
-  gid?: string | null;
+  gid?: ToStringArray | null;
 
-  group?: string | null;
+  group?: ToStringArray | null;
 
-  mode?: string | null;
+  mode?: ToStringArray | null;
 
-  size?: number | null;
+  size?: ToNumberArray | null;
 
-  mtime?: Date | null;
+  mtime?: ToDateArray | null;
 
-  ctime?: Date | null;
+  ctime?: ToDateArray | null;
+}
+
+export interface SystemEcsField {
+  audit?: AuditEcsFields | null;
+
+  auth?: AuthEcsFields | null;
+}
+
+export interface AuditEcsFields {
+  package?: PackageEcsFields | null;
+}
+
+export interface PackageEcsFields {
+  arch?: ToStringArray | null;
+
+  entity_id?: ToStringArray | null;
+
+  name?: ToStringArray | null;
+
+  size?: ToNumberArray | null;
+
+  summary?: ToStringArray | null;
+
+  version?: ToStringArray | null;
+}
+
+export interface AuthEcsFields {
+  ssh?: SshEcsFields | null;
+}
+
+export interface SshEcsFields {
+  method?: ToStringArray | null;
+
+  signature?: ToStringArray | null;
 }
 
 export interface TimelineData {
@@ -787,17 +853,55 @@ export interface HostsEdges {
 export interface HostItem {
   _id?: string | null;
 
+  lastSeen?: Date | null;
+
+  host?: HostFields | null;
+}
+
+export interface HostFields {
+  architecture?: string | null;
+
+  id?: string | null;
+
+  ip?: (string | null)[] | null;
+
+  mac?: (string | null)[] | null;
+
+  name?: string | null;
+
+  os?: OsFields | null;
+
+  type?: string | null;
+}
+
+export interface OsFields {
+  platform?: string | null;
+
+  name?: string | null;
+
+  full?: string | null;
+
+  family?: string | null;
+
+  version?: string | null;
+
+  kernel?: string | null;
+}
+
+export interface FirstLastSeenHost {
   firstSeen?: Date | null;
 
-  host?: HostEcsFields | null;
-
-  lastBeat?: Date | null;
+  lastSeen?: Date | null;
 }
 
 export interface IpOverviewData {
-  source?: Overview | null;
+  client?: Overview | null;
 
   destination?: Overview | null;
+
+  server?: Overview | null;
+
+  source?: Overview | null;
 }
 
 export interface Overview {
@@ -818,6 +922,62 @@ export interface AutonomousSystem {
   asn?: string | null;
 
   ip?: string | null;
+}
+
+export interface DomainsData {
+  edges: DomainsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface DomainsEdges {
+  node: DomainsNode;
+
+  cursor: CursorType;
+}
+
+export interface DomainsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  source?: DomainsItem | null;
+
+  destination?: DomainsItem | null;
+
+  client?: DomainsItem | null;
+
+  server?: DomainsItem | null;
+
+  network?: DomainsNetworkField | null;
+}
+
+export interface DomainsItem {
+  uniqueIpCount?: number | null;
+
+  domainName?: string | null;
+
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
+}
+
+export interface DomainsNetworkField {
+  bytes?: number | null;
+
+  packets?: number | null;
+
+  transport?: string | null;
+
+  direction?: NetworkDirectionEcs[] | null;
+}
+
+export interface FirstLastSeenDomain {
+  firstSeen?: Date | null;
+
+  lastSeen?: Date | null;
 }
 
 export interface KpiNetworkData {
@@ -999,6 +1159,18 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface HostsSortField {
+  field: HostsFields;
+
+  direction: Direction;
+}
+
+export interface DomainsSortField {
+  field: DomainsFields;
+
+  direction: Direction;
+}
+
 export interface NetworkTopNFlowSortField {
   field: NetworkTopNFlowFields;
 
@@ -1058,7 +1230,21 @@ export interface HostsSourceArgs {
 
   pagination: PaginationInput;
 
+  sort: HostsSortField;
+
   filterQuery?: string | null;
+}
+export interface HostDetailsSourceArgs {
+  id?: string | null;
+
+  hostName: string;
+
+  timerange: TimerangeInput;
+}
+export interface HostFirstLastSeenSourceArgs {
+  id?: string | null;
+
+  hostName: string;
 }
 export interface IpOverviewSourceArgs {
   id?: string | null;
@@ -1066,6 +1252,32 @@ export interface IpOverviewSourceArgs {
   filterQuery?: string | null;
 
   ip: string;
+}
+export interface DomainsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: DomainsSortField;
+
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
+}
+export interface DomainFirstLastSeenSourceArgs {
+  id?: string | null;
+
+  ip: string;
+
+  domainName: string;
+
+  flowTarget: FlowTarget;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1075,17 +1287,17 @@ export interface KpiNetworkSourceArgs {
   filterQuery?: string | null;
 }
 export interface NetworkTopNFlowSourceArgs {
-  direction: NetworkTopNFlowDirection;
+  id?: string | null;
 
   filterQuery?: string | null;
 
-  id?: string | null;
+  flowDirection: FlowDirection;
+
+  flowTarget: FlowTarget;
 
   pagination: PaginationInput;
 
   sort: NetworkTopNFlowSortField;
-
-  type: NetworkTopNFlowType;
 
   timerange: TimerangeInput;
 }
@@ -1144,18 +1356,25 @@ export enum Direction {
   desc = 'desc',
 }
 
-export enum NetworkTopNFlowDirection {
+export enum HostsFields {
+  hostName = 'hostName',
+  lastSeen = 'lastSeen',
+}
+
+export enum DomainsFields {
+  domainName = 'domainName',
+  direction = 'direction',
+  bytes = 'bytes',
+  packets = 'packets',
+  uniqueIpCount = 'uniqueIpCount',
+}
+
+export enum FlowDirection {
   uniDirectional = 'uniDirectional',
   biDirectional = 'biDirectional',
 }
 
-export enum NetworkTopNFlowFields {
-  bytes = 'bytes',
-  packets = 'packets',
-  ipCount = 'ipCount',
-}
-
-export enum NetworkTopNFlowType {
+export enum FlowTarget {
   client = 'client',
   destination = 'destination',
   server = 'server',
@@ -1173,17 +1392,18 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum NetworkTopNFlowFields {
+  bytes = 'bytes',
+  packets = 'packets',
+  ipCount = 'ipCount',
+}
+
 export enum NetworkDnsFields {
   dnsName = 'dnsName',
   queryCount = 'queryCount',
   uniqueDomains = 'uniqueDomains',
   dnsBytesIn = 'dnsBytesIn',
   dnsBytesOut = 'dnsBytesOut',
-}
-
-export enum IpOverviewType {
-  destination = 'destination',
-  source = 'source',
 }
 
 // ====================================================
@@ -1239,7 +1459,15 @@ export namespace SourceResolvers {
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
+    HostDetails?: HostDetailsResolver<HostItem, TypeParent, Context>;
+
+    HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, Context>;
+
     IpOverview?: IpOverviewResolver<IpOverviewData | null, TypeParent, Context>;
+
+    Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
+
+    DomainFirstLastSeen?: DomainFirstLastSeenResolver<FirstLastSeenDomain, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -1342,7 +1570,34 @@ export namespace SourceResolvers {
 
     pagination: PaginationInput;
 
+    sort: HostsSortField;
+
     filterQuery?: string | null;
+  }
+
+  export type HostDetailsResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    HostDetailsArgs
+  >;
+  export interface HostDetailsArgs {
+    id?: string | null;
+
+    hostName: string;
+
+    timerange: TimerangeInput;
+  }
+
+  export type HostFirstLastSeenResolver<
+    R = FirstLastSeenHost,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, HostFirstLastSeenArgs>;
+  export interface HostFirstLastSeenArgs {
+    id?: string | null;
+
+    hostName: string;
   }
 
   export type IpOverviewResolver<
@@ -1356,6 +1611,45 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
 
     ip: string;
+  }
+
+  export type DomainsResolver<R = DomainsData, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    DomainsArgs
+  >;
+  export interface DomainsArgs {
+    filterQuery?: string | null;
+
+    id?: string | null;
+
+    ip: string;
+
+    pagination: PaginationInput;
+
+    sort: DomainsSortField;
+
+    flowDirection: FlowDirection;
+
+    flowTarget: FlowTarget;
+
+    timerange: TimerangeInput;
+  }
+
+  export type DomainFirstLastSeenResolver<
+    R = FirstLastSeenDomain,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DomainFirstLastSeenArgs>;
+  export interface DomainFirstLastSeenArgs {
+    id?: string | null;
+
+    ip: string;
+
+    domainName: string;
+
+    flowTarget: FlowTarget;
   }
 
   export type KpiNetworkResolver<
@@ -1377,17 +1671,17 @@ export namespace SourceResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context, NetworkTopNFlowArgs>;
   export interface NetworkTopNFlowArgs {
-    direction: NetworkTopNFlowDirection;
+    id?: string | null;
 
     filterQuery?: string | null;
 
-    id?: string | null;
+    flowDirection: FlowDirection;
+
+    flowTarget: FlowTarget;
 
     pagination: PaginationInput;
 
     sort: NetworkTopNFlowSortField;
-
-    type: NetworkTopNFlowType;
 
     timerange: TimerangeInput;
   }
@@ -1802,46 +2096,46 @@ export namespace AuthenticationItemResolvers {
 
 export namespace UserEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = UserEcsFields> {
-    id?: IdResolver<number | null, TypeParent, Context>;
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    full_name?: FullNameResolver<string | null, TypeParent, Context>;
+    full_name?: FullNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    email?: EmailResolver<string | null, TypeParent, Context>;
+    email?: EmailResolver<ToStringArray | null, TypeParent, Context>;
 
-    hash?: HashResolver<string | null, TypeParent, Context>;
+    hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
 
-    group?: GroupResolver<string | null, TypeParent, Context>;
+    group?: GroupResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type IdResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FullNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EmailResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HashResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type GroupResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UserEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -1875,36 +2169,36 @@ export namespace LastSourceHostResolvers {
 
 export namespace SourceEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SourceEcsFields> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    port?: PortResolver<number | null, TypeParent, Context>;
+    port?: PortResolver<ToNumberArray | null, TypeParent, Context>;
 
-    domain?: DomainResolver<string[] | null, TypeParent, Context>;
+    domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -1914,7 +2208,7 @@ export namespace SourceEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = SourceEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -1922,38 +2216,38 @@ export namespace SourceEcsFieldsResolvers {
 
 export namespace GeoEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = GeoEcsFields> {
-    city_name?: CityNameResolver<string | null, TypeParent, Context>;
+    city_name?: CityNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    continent_name?: ContinentNameResolver<string | null, TypeParent, Context>;
+    continent_name?: ContinentNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    country_iso_code?: CountryIsoCodeResolver<string | null, TypeParent, Context>;
+    country_iso_code?: CountryIsoCodeResolver<ToStringArray | null, TypeParent, Context>;
 
-    country_name?: CountryNameResolver<string | null, TypeParent, Context>;
+    country_name?: CountryNameResolver<ToStringArray | null, TypeParent, Context>;
 
     location?: LocationResolver<Location | null, TypeParent, Context>;
 
-    region_iso_code?: RegionIsoCodeResolver<string | null, TypeParent, Context>;
+    region_iso_code?: RegionIsoCodeResolver<ToStringArray | null, TypeParent, Context>;
 
-    region_name?: RegionNameResolver<string | null, TypeParent, Context>;
+    region_name?: RegionNameResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type CityNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ContinentNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CountryIsoCodeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CountryNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -1963,12 +2257,12 @@ export namespace GeoEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RegionIsoCodeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RegionNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = GeoEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -1976,62 +2270,62 @@ export namespace GeoEcsFieldsResolvers {
 
 export namespace LocationResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = Location> {
-    lon?: LonResolver<number | null, TypeParent, Context>;
+    lon?: LonResolver<ToNumberArray | null, TypeParent, Context>;
 
-    lat?: LatResolver<number | null, TypeParent, Context>;
+    lat?: LatResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
-  export type LonResolver<R = number | null, Parent = Location, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type LatResolver<R = number | null, Parent = Location, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type LonResolver<
+    R = ToNumberArray | null,
+    Parent = Location,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LatResolver<
+    R = ToNumberArray | null,
+    Parent = Location,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace HostEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HostEcsFields> {
-    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+    architecture?: ArchitectureResolver<ToStringArray | null, TypeParent, Context>;
 
-    id?: IdResolver<string | null, TypeParent, Context>;
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
 
-    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+    ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
+    mac?: MacResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
     os?: OsResolver<OsEcsFields | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ArchitectureResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MacResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2041,7 +2335,7 @@ export namespace HostEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HostEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2049,46 +2343,46 @@ export namespace HostEcsFieldsResolvers {
 
 export namespace OsEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = OsEcsFields> {
-    platform?: PlatformResolver<string | null, TypeParent, Context>;
+    platform?: PlatformResolver<ToStringArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    full?: FullResolver<string | null, TypeParent, Context>;
+    full?: FullResolver<ToStringArray | null, TypeParent, Context>;
 
-    family?: FamilyResolver<string | null, TypeParent, Context>;
+    family?: FamilyResolver<ToStringArray | null, TypeParent, Context>;
 
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
 
-    kernel?: KernelResolver<string | null, TypeParent, Context>;
+    kernel?: KernelResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type PlatformResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FullResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FamilyResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type KernelResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = OsEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2235,13 +2529,15 @@ export namespace EcsResolvers {
 
     timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
 
-    message?: MessageResolver<string[] | null, TypeParent, Context>;
+    message?: MessageResolver<ToStringArray | null, TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
 
     process?: ProcessResolver<ProcessEcsFields | null, TypeParent, Context>;
 
     file?: FileResolver<FileFields | null, TypeParent, Context>;
+
+    system?: SystemResolver<SystemEcsField | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string, Parent = Ecs, Context = SiemContext> = Resolver<
@@ -2319,11 +2615,11 @@ export namespace EcsResolvers {
     Parent,
     Context
   >;
-  export type MessageResolver<R = string[] | null, Parent = Ecs, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type MessageResolver<
+    R = ToStringArray | null,
+    Parent = Ecs,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type UserResolver<
     R = UserEcsFields | null,
     Parent = Ecs,
@@ -2339,28 +2635,33 @@ export namespace EcsResolvers {
     Parent,
     Context
   >;
+  export type SystemResolver<
+    R = SystemEcsField | null,
+    Parent = Ecs,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace AuditdEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = AuditdEcsFields> {
-    result?: ResultResolver<string | null, TypeParent, Context>;
+    result?: ResultResolver<ToStringArray | null, TypeParent, Context>;
 
-    session?: SessionResolver<string | null, TypeParent, Context>;
+    session?: SessionResolver<ToStringArray | null, TypeParent, Context>;
 
     data?: DataResolver<AuditdData | null, TypeParent, Context>;
 
     summary?: SummaryResolver<Summary | null, TypeParent, Context>;
 
-    sequence?: SequenceResolver<number | null, TypeParent, Context>;
+    sequence?: SequenceResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ResultResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = AuditdEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SessionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = AuditdEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2375,7 +2676,7 @@ export namespace AuditdEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SequenceResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = AuditdEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2383,28 +2684,28 @@ export namespace AuditdEcsFieldsResolvers {
 
 export namespace AuditdDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = AuditdData> {
-    acct?: AcctResolver<string | null, TypeParent, Context>;
+    acct?: AcctResolver<ToStringArray | null, TypeParent, Context>;
 
-    terminal?: TerminalResolver<string | null, TypeParent, Context>;
+    terminal?: TerminalResolver<ToStringArray | null, TypeParent, Context>;
 
-    op?: OpResolver<string | null, TypeParent, Context>;
+    op?: OpResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type AcctResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = AuditdData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TerminalResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = AuditdData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type OpResolver<R = string | null, Parent = AuditdData, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type OpResolver<
+    R = ToStringArray | null,
+    Parent = AuditdData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace SummaryResolvers {
@@ -2413,11 +2714,11 @@ export namespace SummaryResolvers {
 
     object?: ObjectResolver<PrimarySecondary | null, TypeParent, Context>;
 
-    how?: HowResolver<string | null, TypeParent, Context>;
+    how?: HowResolver<ToStringArray | null, TypeParent, Context>;
 
-    message_type?: MessageTypeResolver<string | null, TypeParent, Context>;
+    message_type?: MessageTypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    sequence?: SequenceResolver<number | null, TypeParent, Context>;
+    sequence?: SequenceResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type ActorResolver<
@@ -2430,18 +2731,18 @@ export namespace SummaryResolvers {
     Parent = Summary,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HowResolver<R = string | null, Parent = Summary, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type HowResolver<
+    R = ToStringArray | null,
+    Parent = Summary,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type MessageTypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = Summary,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SequenceResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = Summary,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2449,25 +2750,25 @@ export namespace SummaryResolvers {
 
 export namespace PrimarySecondaryResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PrimarySecondary> {
-    primary?: PrimaryResolver<string | null, TypeParent, Context>;
+    primary?: PrimaryResolver<ToStringArray | null, TypeParent, Context>;
 
-    secondary?: SecondaryResolver<string | null, TypeParent, Context>;
+    secondary?: SecondaryResolver<ToStringArray | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type PrimaryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PrimarySecondary,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SecondaryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PrimarySecondary,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = PrimarySecondary,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2475,36 +2776,36 @@ export namespace PrimarySecondaryResolvers {
 
 export namespace DestinationEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = DestinationEcsFields> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    ip?: IpResolver<string | null, TypeParent, Context>;
+    ip?: IpResolver<ToStringArray | null, TypeParent, Context>;
 
-    port?: PortResolver<number | null, TypeParent, Context>;
+    port?: PortResolver<ToNumberArray | null, TypeParent, Context>;
 
-    domain?: DomainResolver<string[] | null, TypeParent, Context>;
+    domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
     geo?: GeoResolver<GeoEcsFields | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IpResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PortResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DomainResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2514,7 +2815,7 @@ export namespace DestinationEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = DestinationEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2522,74 +2823,130 @@ export namespace DestinationEcsFieldsResolvers {
 
 export namespace EventEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = EventEcsFields> {
-    category?: CategoryResolver<string | null, TypeParent, Context>;
+    action?: ActionResolver<ToStringArray | null, TypeParent, Context>;
 
-    duration?: DurationResolver<number | null, TypeParent, Context>;
+    category?: CategoryResolver<ToStringArray | null, TypeParent, Context>;
 
-    id?: IdResolver<number | null, TypeParent, Context>;
+    created?: CreatedResolver<ToDateArray | null, TypeParent, Context>;
 
-    module?: ModuleResolver<string | null, TypeParent, Context>;
+    dataset?: DatasetResolver<ToStringArray | null, TypeParent, Context>;
 
-    severity?: SeverityResolver<number | null, TypeParent, Context>;
+    duration?: DurationResolver<ToNumberArray | null, TypeParent, Context>;
 
-    start?: StartResolver<Date | null, TypeParent, Context>;
+    end?: EndResolver<ToDateArray | null, TypeParent, Context>;
 
-    end?: EndResolver<Date | null, TypeParent, Context>;
+    hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
 
-    action?: ActionResolver<string | null, TypeParent, Context>;
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    kind?: KindResolver<ToStringArray | null, TypeParent, Context>;
 
-    dataset?: DatasetResolver<string | null, TypeParent, Context>;
+    module?: ModuleResolver<ToStringArray | null, TypeParent, Context>;
+
+    original?: OriginalResolver<ToStringArray | null, TypeParent, Context>;
+
+    outcome?: OutcomeResolver<ToStringArray | null, TypeParent, Context>;
+
+    risk_score?: RiskScoreResolver<ToNumberArray | null, TypeParent, Context>;
+
+    risk_score_norm?: RiskScoreNormResolver<ToNumberArray | null, TypeParent, Context>;
+
+    severity?: SeverityResolver<ToNumberArray | null, TypeParent, Context>;
+
+    start?: StartResolver<ToDateArray | null, TypeParent, Context>;
+
+    timezone?: TimezoneResolver<ToStringArray | null, TypeParent, Context>;
+
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
   }
 
-  export type CategoryResolver<
-    R = string | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type DurationResolver<
-    R = number | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type IdResolver<
-    R = number | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type ModuleResolver<
-    R = string | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type SeverityResolver<
-    R = number | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type StartResolver<
-    R = Date | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type EndResolver<
-    R = Date | null,
-    Parent = EventEcsFields,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
   export type ActionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type TypeResolver<
-    R = string | null,
+  export type CategoryResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedResolver<
+    R = ToDateArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DatasetResolver<
-    R = string | null,
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DurationResolver<
+    R = ToNumberArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EndResolver<
+    R = ToDateArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HashResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IdResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KindResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ModuleResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OriginalResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OutcomeResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type RiskScoreResolver<
+    R = ToNumberArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type RiskScoreNormResolver<
+    R = ToNumberArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SeverityResolver<
+    R = ToNumberArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type StartResolver<
+    R = ToDateArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TimezoneResolver<
+    R = ToStringArray | null,
+    Parent = EventEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = ToStringArray | null,
     Parent = EventEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2597,46 +2954,46 @@ export namespace EventEcsFieldsResolvers {
 
 export namespace NetworkEcsFieldResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = NetworkEcsField> {
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    community_id?: CommunityIdResolver<string | null, TypeParent, Context>;
+    community_id?: CommunityIdResolver<ToStringArray | null, TypeParent, Context>;
 
-    direction?: DirectionResolver<string | null, TypeParent, Context>;
+    direction?: DirectionResolver<ToStringArray | null, TypeParent, Context>;
 
-    packets?: PacketsResolver<number | null, TypeParent, Context>;
+    packets?: PacketsResolver<ToNumberArray | null, TypeParent, Context>;
 
-    protocol?: ProtocolResolver<string | null, TypeParent, Context>;
+    protocol?: ProtocolResolver<ToStringArray | null, TypeParent, Context>;
 
-    transport?: TransportResolver<string | null, TypeParent, Context>;
+    transport?: TransportResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type BytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type CommunityIdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DirectionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PacketsResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ProtocolResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransportResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = NetworkEcsField,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2658,9 +3015,9 @@ export namespace SuricataEveDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataEveData> {
     alert?: AlertResolver<SuricataAlertData | null, TypeParent, Context>;
 
-    flow_id?: FlowIdResolver<number | null, TypeParent, Context>;
+    flow_id?: FlowIdResolver<ToNumberArray | null, TypeParent, Context>;
 
-    proto?: ProtoResolver<string | null, TypeParent, Context>;
+    proto?: ProtoResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type AlertResolver<
@@ -2669,12 +3026,12 @@ export namespace SuricataEveDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FlowIdResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = SuricataEveData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ProtoResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = SuricataEveData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2682,18 +3039,18 @@ export namespace SuricataEveDataResolvers {
 
 export namespace SuricataAlertDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = SuricataAlertData> {
-    signature?: SignatureResolver<string | null, TypeParent, Context>;
+    signature?: SignatureResolver<ToStringArray | null, TypeParent, Context>;
 
-    signature_id?: SignatureIdResolver<number | null, TypeParent, Context>;
+    signature_id?: SignatureIdResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type SignatureResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = SuricataAlertData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SignatureIdResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = SuricataAlertData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2747,11 +3104,11 @@ export namespace TlsClientCertificateDataResolvers {
 
 export namespace FingerprintDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = FingerprintData> {
-    sha1?: Sha1Resolver<string | null, TypeParent, Context>;
+    sha1?: Sha1Resolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type Sha1Resolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FingerprintData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2771,11 +3128,11 @@ export namespace TlsFingerprintsDataResolvers {
 
 export namespace TlsJa3DataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = TlsJa3Data> {
-    hash?: HashResolver<string | null, TypeParent, Context>;
+    hash?: HashResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type HashResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = TlsJa3Data,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2795,7 +3152,7 @@ export namespace TlsServerCertificateDataResolvers {
 
 export namespace ZeekEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekEcsFields> {
-    session_id?: SessionIdResolver<string | null, TypeParent, Context>;
+    session_id?: SessionIdResolver<ToStringArray | null, TypeParent, Context>;
 
     connection?: ConnectionResolver<ZeekConnectionData | null, TypeParent, Context>;
 
@@ -2811,7 +3168,7 @@ export namespace ZeekEcsFieldsResolvers {
   }
 
   export type SessionIdResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2849,39 +3206,39 @@ export namespace ZeekEcsFieldsResolvers {
 
 export namespace ZeekConnectionDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekConnectionData> {
-    local_resp?: LocalRespResolver<string | null, TypeParent, Context>;
+    local_resp?: LocalRespResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    local_orig?: LocalOrigResolver<string | null, TypeParent, Context>;
+    local_orig?: LocalOrigResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    missed_bytes?: MissedBytesResolver<number | null, TypeParent, Context>;
+    missed_bytes?: MissedBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    state?: StateResolver<string | null, TypeParent, Context>;
+    state?: StateResolver<ToStringArray | null, TypeParent, Context>;
 
-    history?: HistoryResolver<string | null, TypeParent, Context>;
+    history?: HistoryResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type LocalRespResolver<
-    R = string | null,
+    R = ToBooleanArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type LocalOrigResolver<
-    R = string | null,
+    R = ToBooleanArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MissedBytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type StateResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HistoryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekConnectionData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2889,53 +3246,53 @@ export namespace ZeekConnectionDataResolvers {
 
 export namespace ZeekNoticeDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekNoticeData> {
-    suppress_for?: SuppressForResolver<number | null, TypeParent, Context>;
+    suppress_for?: SuppressForResolver<ToNumberArray | null, TypeParent, Context>;
 
-    msg?: MsgResolver<string | null, TypeParent, Context>;
+    msg?: MsgResolver<ToStringArray | null, TypeParent, Context>;
 
-    note?: NoteResolver<string | null, TypeParent, Context>;
+    note?: NoteResolver<ToStringArray | null, TypeParent, Context>;
 
-    sub?: SubResolver<string | null, TypeParent, Context>;
+    sub?: SubResolver<ToStringArray | null, TypeParent, Context>;
 
-    dst?: DstResolver<string | null, TypeParent, Context>;
+    dst?: DstResolver<ToStringArray | null, TypeParent, Context>;
 
-    dropped?: DroppedResolver<boolean | null, TypeParent, Context>;
+    dropped?: DroppedResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    peer_descr?: PeerDescrResolver<string | null, TypeParent, Context>;
+    peer_descr?: PeerDescrResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type SuppressForResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MsgResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NoteResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SubResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DstResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DroppedResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PeerDescrResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekNoticeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -2943,81 +3300,81 @@ export namespace ZeekNoticeDataResolvers {
 
 export namespace ZeekDnsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekDnsData> {
-    AA?: AaResolver<boolean | null, TypeParent, Context>;
+    AA?: AaResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    qclass_name?: QclassNameResolver<string | null, TypeParent, Context>;
+    qclass_name?: QclassNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    RD?: RdResolver<boolean | null, TypeParent, Context>;
+    RD?: RdResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    qtype_name?: QtypeNameResolver<string | null, TypeParent, Context>;
+    qtype_name?: QtypeNameResolver<ToStringArray | null, TypeParent, Context>;
 
-    rejected?: RejectedResolver<boolean | null, TypeParent, Context>;
+    rejected?: RejectedResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    qtype?: QtypeResolver<number | null, TypeParent, Context>;
+    qtype?: QtypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    query?: QueryResolver<string | null, TypeParent, Context>;
+    query?: QueryResolver<ToStringArray | null, TypeParent, Context>;
 
-    trans_id?: TransIdResolver<number | null, TypeParent, Context>;
+    trans_id?: TransIdResolver<ToNumberArray | null, TypeParent, Context>;
 
-    qclass?: QclassResolver<number | null, TypeParent, Context>;
+    qclass?: QclassResolver<ToStringArray | null, TypeParent, Context>;
 
-    RA?: RaResolver<boolean | null, TypeParent, Context>;
+    RA?: RaResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    TC?: TcResolver<boolean | null, TypeParent, Context>;
+    TC?: TcResolver<ToBooleanArray | null, TypeParent, Context>;
   }
 
   export type AaResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QclassNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RdResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QtypeNameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RejectedResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QtypeResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QueryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransIdResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type QclassResolver<
-    R = number | null,
+    R = ToStringArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RaResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TcResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekDnsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3025,39 +3382,39 @@ export namespace ZeekDnsDataResolvers {
 
 export namespace ZeekHttpDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekHttpData> {
-    resp_mime_types?: RespMimeTypesResolver<string[] | null, TypeParent, Context>;
+    resp_mime_types?: RespMimeTypesResolver<ToStringArray | null, TypeParent, Context>;
 
-    trans_depth?: TransDepthResolver<string | null, TypeParent, Context>;
+    trans_depth?: TransDepthResolver<ToStringArray | null, TypeParent, Context>;
 
-    status_msg?: StatusMsgResolver<string | null, TypeParent, Context>;
+    status_msg?: StatusMsgResolver<ToStringArray | null, TypeParent, Context>;
 
-    resp_fuids?: RespFuidsResolver<string[] | null, TypeParent, Context>;
+    resp_fuids?: RespFuidsResolver<ToStringArray | null, TypeParent, Context>;
 
-    tags?: TagsResolver<string[] | null, TypeParent, Context>;
+    tags?: TagsResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type RespMimeTypesResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TransDepthResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type StatusMsgResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RespFuidsResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TagsResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekHttpData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3065,130 +3422,130 @@ export namespace ZeekHttpDataResolvers {
 
 export namespace ZeekFileDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekFileData> {
-    session_ids?: SessionIdsResolver<string[] | null, TypeParent, Context>;
+    session_ids?: SessionIdsResolver<ToStringArray | null, TypeParent, Context>;
 
-    timedout?: TimedoutResolver<boolean | null, TypeParent, Context>;
+    timedout?: TimedoutResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    local_orig?: LocalOrigResolver<boolean | null, TypeParent, Context>;
+    local_orig?: LocalOrigResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    tx_host?: TxHostResolver<string | null, TypeParent, Context>;
+    tx_host?: TxHostResolver<ToStringArray | null, TypeParent, Context>;
 
-    source?: SourceResolver<string | null, TypeParent, Context>;
+    source?: SourceResolver<ToStringArray | null, TypeParent, Context>;
 
-    is_orig?: IsOrigResolver<boolean | null, TypeParent, Context>;
+    is_orig?: IsOrigResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    overflow_bytes?: OverflowBytesResolver<number | null, TypeParent, Context>;
+    overflow_bytes?: OverflowBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    sha1?: Sha1Resolver<string | null, TypeParent, Context>;
+    sha1?: Sha1Resolver<ToStringArray | null, TypeParent, Context>;
 
-    duration?: DurationResolver<number | null, TypeParent, Context>;
+    duration?: DurationResolver<ToNumberArray | null, TypeParent, Context>;
 
-    depth?: DepthResolver<number | null, TypeParent, Context>;
+    depth?: DepthResolver<ToNumberArray | null, TypeParent, Context>;
 
-    analyzers?: AnalyzersResolver<string[] | null, TypeParent, Context>;
+    analyzers?: AnalyzersResolver<ToStringArray | null, TypeParent, Context>;
 
-    mime_type?: MimeTypeResolver<string | null, TypeParent, Context>;
+    mime_type?: MimeTypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    rx_host?: RxHostResolver<string | null, TypeParent, Context>;
+    rx_host?: RxHostResolver<ToStringArray | null, TypeParent, Context>;
 
-    total_bytes?: TotalBytesResolver<number | null, TypeParent, Context>;
+    total_bytes?: TotalBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    fuid?: FuidResolver<string | null, TypeParent, Context>;
+    fuid?: FuidResolver<ToStringArray | null, TypeParent, Context>;
 
-    seen_bytes?: SeenBytesResolver<number | null, TypeParent, Context>;
+    seen_bytes?: SeenBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    missing_bytes?: MissingBytesResolver<number | null, TypeParent, Context>;
+    missing_bytes?: MissingBytesResolver<ToNumberArray | null, TypeParent, Context>;
 
-    md5?: Md5Resolver<string | null, TypeParent, Context>;
+    md5?: Md5Resolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type SessionIdsResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TimedoutResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type LocalOrigResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TxHostResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SourceResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type IsOrigResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OverflowBytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type Sha1Resolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DurationResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DepthResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AnalyzersResolver<
-    R = string[] | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MimeTypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type RxHostResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TotalBytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type FuidResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SeenBytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type MissingBytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type Md5Resolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekFileData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3196,32 +3553,32 @@ export namespace ZeekFileDataResolvers {
 
 export namespace ZeekSslDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ZeekSslData> {
-    cipher?: CipherResolver<string | null, TypeParent, Context>;
+    cipher?: CipherResolver<ToStringArray | null, TypeParent, Context>;
 
-    established?: EstablishedResolver<boolean | null, TypeParent, Context>;
+    established?: EstablishedResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    resumed?: ResumedResolver<boolean | null, TypeParent, Context>;
+    resumed?: ResumedResolver<ToBooleanArray | null, TypeParent, Context>;
 
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type CipherResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type EstablishedResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ResumedResolver<
-    R = boolean | null,
+    R = ToBooleanArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ZeekSslData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3229,7 +3586,7 @@ export namespace ZeekSslDataResolvers {
 
 export namespace HttpEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpEcsFields> {
-    version?: VersionResolver<string | null, TypeParent, Context>;
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
 
     request?: RequestResolver<HttpRequestData | null, TypeParent, Context>;
 
@@ -3237,7 +3594,7 @@ export namespace HttpEcsFieldsResolvers {
   }
 
   export type VersionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3255,17 +3612,17 @@ export namespace HttpEcsFieldsResolvers {
 
 export namespace HttpRequestDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpRequestData> {
-    method?: MethodResolver<string | null, TypeParent, Context>;
+    method?: MethodResolver<ToStringArray | null, TypeParent, Context>;
 
     body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
 
-    referrer?: ReferrerResolver<string | null, TypeParent, Context>;
+    referrer?: ReferrerResolver<ToStringArray | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type MethodResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3275,12 +3632,12 @@ export namespace HttpRequestDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ReferrerResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = HttpRequestData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3288,18 +3645,18 @@ export namespace HttpRequestDataResolvers {
 
 export namespace HttpBodyDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpBodyData> {
-    content?: ContentResolver<string | null, TypeParent, Context>;
+    content?: ContentResolver<ToStringArray | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type ContentResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = HttpBodyData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = HttpBodyData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3307,15 +3664,15 @@ export namespace HttpBodyDataResolvers {
 
 export namespace HttpResponseDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HttpResponseData> {
-    status_code?: StatusCodeResolver<number | null, TypeParent, Context>;
+    status_code?: StatusCodeResolver<ToNumberArray | null, TypeParent, Context>;
 
     body?: BodyResolver<HttpBodyData | null, TypeParent, Context>;
 
-    bytes?: BytesResolver<number | null, TypeParent, Context>;
+    bytes?: BytesResolver<ToNumberArray | null, TypeParent, Context>;
   }
 
   export type StatusCodeResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = HttpResponseData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3325,7 +3682,7 @@ export namespace HttpResponseDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type BytesResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = HttpResponseData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3333,32 +3690,32 @@ export namespace HttpResponseDataResolvers {
 
 export namespace UrlEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = UrlEcsFields> {
-    domain?: DomainResolver<string | null, TypeParent, Context>;
+    domain?: DomainResolver<ToStringArray | null, TypeParent, Context>;
 
-    original?: OriginalResolver<string | null, TypeParent, Context>;
+    original?: OriginalResolver<ToStringArray | null, TypeParent, Context>;
 
-    username?: UsernameResolver<string | null, TypeParent, Context>;
+    username?: UsernameResolver<ToStringArray | null, TypeParent, Context>;
 
-    password?: PasswordResolver<string | null, TypeParent, Context>;
+    password?: PasswordResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type DomainResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type OriginalResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type UsernameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PasswordResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = UrlEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3366,50 +3723,50 @@ export namespace UrlEcsFieldsResolvers {
 
 export namespace ProcessEcsFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = ProcessEcsFields> {
-    pid?: PidResolver<number | null, TypeParent, Context>;
+    pid?: PidResolver<ToNumberArray | null, TypeParent, Context>;
 
-    name?: NameResolver<string | null, TypeParent, Context>;
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
 
-    ppid?: PpidResolver<number | null, TypeParent, Context>;
+    ppid?: PpidResolver<ToNumberArray | null, TypeParent, Context>;
 
-    args?: ArgsResolver<(string | null)[] | null, TypeParent, Context>;
+    args?: ArgsResolver<ToStringArray | null, TypeParent, Context>;
 
-    executable?: ExecutableResolver<string | null, TypeParent, Context>;
+    executable?: ExecutableResolver<ToStringArray | null, TypeParent, Context>;
 
-    title?: TitleResolver<string | null, TypeParent, Context>;
+    title?: TitleResolver<ToStringArray | null, TypeParent, Context>;
 
     thread?: ThreadResolver<Thread | null, TypeParent, Context>;
 
-    working_directory?: WorkingDirectoryResolver<string | null, TypeParent, Context>;
+    working_directory?: WorkingDirectoryResolver<ToStringArray | null, TypeParent, Context>;
   }
 
   export type PidResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type NameResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PpidResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ArgsResolver<
-    R = (string | null)[] | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ExecutableResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TitleResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3419,7 +3776,7 @@ export namespace ProcessEcsFieldsResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type WorkingDirectoryResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = ProcessEcsFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -3427,124 +3784,233 @@ export namespace ProcessEcsFieldsResolvers {
 
 export namespace ThreadResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = Thread> {
-    id?: IdResolver<number | null, TypeParent, Context>;
+    id?: IdResolver<ToNumberArray | null, TypeParent, Context>;
 
-    start?: StartResolver<string | null, TypeParent, Context>;
+    start?: StartResolver<ToStringArray | null, TypeParent, Context>;
   }
 
-  export type IdResolver<R = number | null, Parent = Thread, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type StartResolver<R = string | null, Parent = Thread, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type IdResolver<
+    R = ToNumberArray | null,
+    Parent = Thread,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type StartResolver<
+    R = ToStringArray | null,
+    Parent = Thread,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace FileFieldsResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = FileFields> {
-    path?: PathResolver<string | null, TypeParent, Context>;
+    path?: PathResolver<ToStringArray | null, TypeParent, Context>;
 
-    target_path?: TargetPathResolver<string | null, TypeParent, Context>;
+    target_path?: TargetPathResolver<ToStringArray | null, TypeParent, Context>;
 
-    extension?: ExtensionResolver<string | null, TypeParent, Context>;
+    extension?: ExtensionResolver<ToStringArray | null, TypeParent, Context>;
 
-    type?: TypeResolver<string | null, TypeParent, Context>;
+    type?: TypeResolver<ToStringArray | null, TypeParent, Context>;
 
-    device?: DeviceResolver<string | null, TypeParent, Context>;
+    device?: DeviceResolver<ToStringArray | null, TypeParent, Context>;
 
-    inode?: InodeResolver<string | null, TypeParent, Context>;
+    inode?: InodeResolver<ToStringArray | null, TypeParent, Context>;
 
-    uid?: UidResolver<string | null, TypeParent, Context>;
+    uid?: UidResolver<ToStringArray | null, TypeParent, Context>;
 
-    owner?: OwnerResolver<string | null, TypeParent, Context>;
+    owner?: OwnerResolver<ToStringArray | null, TypeParent, Context>;
 
-    gid?: GidResolver<string | null, TypeParent, Context>;
+    gid?: GidResolver<ToStringArray | null, TypeParent, Context>;
 
-    group?: GroupResolver<string | null, TypeParent, Context>;
+    group?: GroupResolver<ToStringArray | null, TypeParent, Context>;
 
-    mode?: ModeResolver<string | null, TypeParent, Context>;
+    mode?: ModeResolver<ToStringArray | null, TypeParent, Context>;
 
-    size?: SizeResolver<number | null, TypeParent, Context>;
+    size?: SizeResolver<ToNumberArray | null, TypeParent, Context>;
 
-    mtime?: MtimeResolver<Date | null, TypeParent, Context>;
+    mtime?: MtimeResolver<ToDateArray | null, TypeParent, Context>;
 
-    ctime?: CtimeResolver<Date | null, TypeParent, Context>;
+    ctime?: CtimeResolver<ToDateArray | null, TypeParent, Context>;
   }
 
   export type PathResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TargetPathResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ExtensionResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type TypeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DeviceResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type InodeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type UidResolver<R = string | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type UidResolver<
+    R = ToStringArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type OwnerResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type GidResolver<R = string | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type GidResolver<
+    R = ToStringArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type GroupResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type ModeResolver<
-    R = string | null,
+    R = ToStringArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type SizeResolver<
-    R = number | null,
+    R = ToNumberArray | null,
     Parent = FileFields,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type MtimeResolver<R = Date | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type CtimeResolver<R = Date | null, Parent = FileFields, Context = SiemContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
+  export type MtimeResolver<
+    R = ToDateArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CtimeResolver<
+    R = ToDateArray | null,
+    Parent = FileFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SystemEcsFieldResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SystemEcsField> {
+    audit?: AuditResolver<AuditEcsFields | null, TypeParent, Context>;
+
+    auth?: AuthResolver<AuthEcsFields | null, TypeParent, Context>;
+  }
+
+  export type AuditResolver<
+    R = AuditEcsFields | null,
+    Parent = SystemEcsField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthResolver<
+    R = AuthEcsFields | null,
+    Parent = SystemEcsField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuditEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AuditEcsFields> {
+    package?: PackageResolver<PackageEcsFields | null, TypeParent, Context>;
+  }
+
+  export type PackageResolver<
+    R = PackageEcsFields | null,
+    Parent = AuditEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PackageEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PackageEcsFields> {
+    arch?: ArchResolver<ToStringArray | null, TypeParent, Context>;
+
+    entity_id?: EntityIdResolver<ToStringArray | null, TypeParent, Context>;
+
+    name?: NameResolver<ToStringArray | null, TypeParent, Context>;
+
+    size?: SizeResolver<ToNumberArray | null, TypeParent, Context>;
+
+    summary?: SummaryResolver<ToStringArray | null, TypeParent, Context>;
+
+    version?: VersionResolver<ToStringArray | null, TypeParent, Context>;
+  }
+
+  export type ArchResolver<
+    R = ToStringArray | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EntityIdResolver<
+    R = ToStringArray | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = ToStringArray | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SizeResolver<
+    R = ToNumberArray | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SummaryResolver<
+    R = ToStringArray | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = ToStringArray | null,
+    Parent = PackageEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace AuthEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = AuthEcsFields> {
+    ssh?: SshResolver<SshEcsFields | null, TypeParent, Context>;
+  }
+
+  export type SshResolver<
+    R = SshEcsFields | null,
+    Parent = AuthEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SshEcsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SshEcsFields> {
+    method?: MethodResolver<ToStringArray | null, TypeParent, Context>;
+
+    signature?: SignatureResolver<ToStringArray | null, TypeParent, Context>;
+  }
+
+  export type MethodResolver<
+    R = ToStringArray | null,
+    Parent = SshEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SignatureResolver<
+    R = ToStringArray | null,
+    Parent = SshEcsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace TimelineDataResolvers {
@@ -3759,11 +4225,9 @@ export namespace HostItemResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = HostItem> {
     _id?: IdResolver<string | null, TypeParent, Context>;
 
-    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields | null, TypeParent, Context>;
-
-    lastBeat?: LastBeatResolver<Date | null, TypeParent, Context>;
+    host?: HostResolver<HostFields | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SiemContext> = Resolver<
@@ -3771,36 +4235,165 @@ export namespace HostItemResolvers {
     Parent,
     Context
   >;
-  export type FirstSeenResolver<
+  export type LastSeenResolver<
     R = Date | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
-    R = HostEcsFields | null,
+    R = HostFields | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type LastBeatResolver<
+}
+
+export namespace HostFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = HostFields> {
+    architecture?: ArchitectureResolver<string | null, TypeParent, Context>;
+
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    ip?: IpResolver<(string | null)[] | null, TypeParent, Context>;
+
+    mac?: MacResolver<(string | null)[] | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    os?: OsResolver<OsFields | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ArchitectureResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IdResolver<R = string | null, Parent = HostFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IpResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MacResolver<
+    R = (string | null)[] | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type OsResolver<
+    R = OsFields | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = HostFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace OsFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = OsFields> {
+    platform?: PlatformResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    full?: FullResolver<string | null, TypeParent, Context>;
+
+    family?: FamilyResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+
+    kernel?: KernelResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PlatformResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FullResolver<R = string | null, Parent = OsFields, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type FamilyResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KernelResolver<
+    R = string | null,
+    Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace FirstLastSeenHostResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenHost> {
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type FirstSeenResolver<
     R = Date | null,
-    Parent = HostItem,
+    Parent = FirstLastSeenHost,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = FirstLastSeenHost,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
 
 export namespace IpOverviewDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = IpOverviewData> {
-    source?: SourceResolver<Overview | null, TypeParent, Context>;
+    client?: ClientResolver<Overview | null, TypeParent, Context>;
 
     destination?: DestinationResolver<Overview | null, TypeParent, Context>;
+
+    server?: ServerResolver<Overview | null, TypeParent, Context>;
+
+    source?: SourceResolver<Overview | null, TypeParent, Context>;
   }
 
-  export type SourceResolver<
+  export type ClientResolver<
     R = Overview | null,
     Parent = IpOverviewData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type DestinationResolver<
+    R = Overview | null,
+    Parent = IpOverviewData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ServerResolver<
+    R = Overview | null,
+    Parent = IpOverviewData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceResolver<
     R = Overview | null,
     Parent = IpOverviewData,
     Context = SiemContext
@@ -3869,6 +4462,190 @@ export namespace AutonomousSystemResolvers {
   export type IpResolver<
     R = string | null,
     Parent = AutonomousSystem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsData> {
+    edges?: EdgesResolver<DomainsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<
+    R = DomainsEdges[],
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number,
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PageInfoResolver<
+    R = PageInfo,
+    Parent = DomainsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsEdges> {
+    node?: NodeResolver<DomainsNode, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<
+    R = DomainsNode,
+    Parent = DomainsEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CursorResolver<
+    R = CursorType,
+    Parent = DomainsEdges,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsNodeResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsNode> {
+    _id?: IdResolver<string | null, TypeParent, Context>;
+
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    source?: SourceResolver<DomainsItem | null, TypeParent, Context>;
+
+    destination?: DestinationResolver<DomainsItem | null, TypeParent, Context>;
+
+    client?: ClientResolver<DomainsItem | null, TypeParent, Context>;
+
+    server?: ServerResolver<DomainsItem | null, TypeParent, Context>;
+
+    network?: NetworkResolver<DomainsNetworkField | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = DomainsNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TimestampResolver<
+    R = Date | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SourceResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DestinationResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ClientResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ServerResolver<
+    R = DomainsItem | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NetworkResolver<
+    R = DomainsNetworkField | null,
+    Parent = DomainsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsItem> {
+    uniqueIpCount?: UniqueIpCountResolver<number | null, TypeParent, Context>;
+
+    domainName?: DomainNameResolver<string | null, TypeParent, Context>;
+
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type UniqueIpCountResolver<
+    R = number | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DomainNameResolver<
+    R = string | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FirstSeenResolver<
+    R = Date | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = DomainsItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DomainsNetworkFieldResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DomainsNetworkField> {
+    bytes?: BytesResolver<number | null, TypeParent, Context>;
+
+    packets?: PacketsResolver<number | null, TypeParent, Context>;
+
+    transport?: TransportResolver<string | null, TypeParent, Context>;
+
+    direction?: DirectionResolver<NetworkDirectionEcs[] | null, TypeParent, Context>;
+  }
+
+  export type BytesResolver<
+    R = number | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PacketsResolver<
+    R = number | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TransportResolver<
+    R = string | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DirectionResolver<
+    R = NetworkDirectionEcs[] | null,
+    Parent = DomainsNetworkField,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace FirstLastSeenDomainResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = FirstLastSeenDomain> {
+    firstSeen?: FirstSeenResolver<Date | null, TypeParent, Context>;
+
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type FirstSeenResolver<
+    R = Date | null,
+    Parent = FirstLastSeenDomain,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = FirstLastSeenDomain,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

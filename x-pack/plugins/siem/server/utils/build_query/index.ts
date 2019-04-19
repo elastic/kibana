@@ -7,3 +7,10 @@
 export * from './fields';
 export * from './filters';
 export * from './merge_fields_with_hits';
+
+export const assertUnreachable = (
+  x: never,
+  message: string = 'Unknown Field in switch statement'
+): never => {
+  throw new Error(`${message} ${x}`);
+};

@@ -4,10 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HostsData } from '../../graphql/types';
-import { FrameworkRequest, RequestOptions } from '../framework';
+import { FirstLastSeenHost, HostItem, HostsData } from '../../graphql/types';
+import { FrameworkRequest } from '../framework';
 
-import { HostsAdapter } from './types';
+import {
+  HostDetailsRequestOptions,
+  HostLastFirstSeenRequestOptions,
+  HostsAdapter,
+  HostsRequestOptions,
+} from './types';
 
 export * from './elasticsearch_adapter';
 export * from './types';
@@ -15,7 +20,21 @@ export * from './types';
 export class Hosts {
   constructor(private readonly adapter: HostsAdapter) {}
 
-  public async getHosts(req: FrameworkRequest, options: RequestOptions): Promise<HostsData> {
+  public async getHosts(req: FrameworkRequest, options: HostsRequestOptions): Promise<HostsData> {
     return await this.adapter.getHosts(req, options);
+  }
+
+  public async getHostDetails(
+    req: FrameworkRequest,
+    options: HostDetailsRequestOptions
+  ): Promise<HostItem> {
+    return await this.adapter.getHostDetails(req, options);
+  }
+
+  public async getHostFirstLastSeen(
+    req: FrameworkRequest,
+    options: HostLastFirstSeenRequestOptions
+  ): Promise<FirstLastSeenHost> {
+    return await this.adapter.getHostFirstLastSeen(req, options);
   }
 }

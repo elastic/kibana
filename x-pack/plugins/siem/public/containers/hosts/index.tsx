@@ -9,12 +9,17 @@ import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
-import { GetHostsTableQuery, GetHostSummaryQuery, HostsEdges, PageInfo } from '../../graphql/types';
+import {
+  Direction,
+  GetHostsTableQuery,
+  HostsEdges,
+  HostsFields,
+  PageInfo,
+} from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
-import { HostSummaryQuery } from './host_summary.gql_query';
 import { HostsTableQuery } from './hosts_table.gql_query';
 
 export { HostsFilter } from './filter';
@@ -34,37 +39,39 @@ export interface HostsArgs {
 export interface OwnProps extends QueryTemplateProps {
   children: (args: HostsArgs) => React.ReactNode;
   type: hostsModel.HostsType;
+  startDate: number;
+  endDate: number;
 }
 
 export interface HostsComponentReduxProps {
   limit: number;
+  sortField: HostsFields;
+  direction: Direction;
 }
 
 type HostsProps = OwnProps & HostsComponentReduxProps;
 
 class HostsComponentQuery extends QueryTemplate<
   HostsProps,
-  GetHostsTableQuery.Query | GetHostSummaryQuery.Query,
-  GetHostsTableQuery.Variables | GetHostSummaryQuery.Variables
+  GetHostsTableQuery.Query,
+  GetHostsTableQuery.Variables
 > {
   public render() {
     const {
       id = 'hostsQuery',
       children,
+      direction,
       filterQuery,
-      sourceId,
-      startDate,
       endDate,
       limit,
       poll,
-      type,
+      startDate,
+      sourceId,
+      sortField,
     } = this.props;
     return (
-      <Query<
-        GetHostsTableQuery.Query | GetHostSummaryQuery.Query,
-        GetHostsTableQuery.Variables | GetHostSummaryQuery.Variables
-      >
-        query={type === hostsModel.HostsType.page ? HostsTableQuery : HostSummaryQuery}
+      <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
+        query={HostsTableQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         pollInterval={poll}
         notifyOnNetworkStatusChange
@@ -72,8 +79,12 @@ class HostsComponentQuery extends QueryTemplate<
           sourceId,
           timerange: {
             interval: '12h',
-            from: startDate!,
-            to: endDate!,
+            from: startDate,
+            to: endDate,
+          },
+          sort: {
+            direction,
+            field: sortField,
           },
           pagination: {
             limit,
@@ -115,8 +126,8 @@ class HostsComponentQuery extends QueryTemplate<
             loading,
             totalCount: getOr(0, 'source.Hosts.totalCount', data),
             hosts,
-            startDate: startDate!,
-            endDate: endDate!,
+            startDate,
+            endDate,
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
             loadMore: this.wrappedLoadMore,
           });

@@ -4,27 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TestProviders } from '../../../../../mock';
 
-import { nilOrUnSet, PrimarySecondaryUserInfo } from './primary_secondary_user_info';
+import { nilOrUnSet, PrimarySecondaryUserInfo } from '.';
 
 describe('UserPrimarySecondary', () => {
   describe('rendering', () => {
     test('it renders the default PrimarySecondaryUserInfo', () => {
-      const wrapper = shallowWithIntl(
-        <TestProviders>
-          <PrimarySecondaryUserInfo
-            contextId="context-123"
-            eventId="event-123"
-            userName="user-name-1"
-            primary="primary-1"
-            secondary="secondary-1"
-          />
-        </TestProviders>
+      const wrapper = shallow(
+        <PrimarySecondaryUserInfo
+          contextId="context-123"
+          eventId="event-123"
+          userName="user-name-1"
+          primary="primary-1"
+          secondary="secondary-1"
+        />
       );
       expect(toJson(wrapper)).toMatchSnapshot();
     });

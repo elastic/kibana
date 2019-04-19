@@ -8,6 +8,7 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -21,6 +22,7 @@ import { getEmptyTagValue } from '../../../empty_value';
 
 interface OverviewNetworkProps {
   data: OverviewNetworkData;
+  loading: boolean;
 }
 
 const overviewNetworkStats = (data: OverviewNetworkData) => [
@@ -87,13 +89,20 @@ export const DescriptionListDescription = styled(EuiDescriptionListDescription)`
   text-align: right;
 `;
 
-export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data }) => (
+const StatValue = pure<{ isLoading: boolean; value: React.ReactNode | null | undefined }>(
+  ({ isLoading, value }) => (
+    <>{isLoading ? <EuiLoadingSpinner size="m" /> : value != null ? value : getEmptyTagValue()}</>
+  )
+);
+
+export const OverviewNetworkStats = pure<OverviewNetworkProps>(({ data, loading }) => (
   <EuiDescriptionList type="column">
     {overviewNetworkStats(data).map((item, index) => (
       <React.Fragment key={index}>
         <EuiDescriptionListTitle>{item.title}</EuiDescriptionListTitle>
-
-        <DescriptionListDescription>{item.description}</DescriptionListDescription>
+        <DescriptionListDescription data-test-subj="stat-loader-description">
+          <StatValue isLoading={loading} value={item.description} />
+        </DescriptionListDescription>
       </React.Fragment>
     ))}
   </EuiDescriptionList>

@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
 
 const APP_ID = 'siem';
+export const APP_NAME = 'SIEM';
 
 // tslint:disable-next-line:no-any
 export function siem(kibana: any) {
@@ -23,7 +24,7 @@ export function siem(kibana: any) {
         description: 'Explore your SIEM App',
         main: 'plugins/siem/app',
         euiIconType: 'securityAnalyticsApp',
-        title: 'SIEM',
+        title: APP_NAME,
         listed: false,
         url: `/app/${APP_ID}`,
       },
@@ -34,7 +35,7 @@ export function siem(kibana: any) {
           euiIconType: 'securityAnalyticsApp',
           id: 'siem',
           order: 9000,
-          title: 'SIEM',
+          title: APP_NAME,
           url: `/app/${APP_ID}`,
         },
       ],

@@ -16,7 +16,7 @@ import { AuthenticationsEdges } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
 import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue } from '../../../empty_value';
+import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
@@ -122,7 +122,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const userName: string | null = get('user.name', node);
+      const userName: string | null | undefined = get('user.name[0]', node);
       if (userName != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`);
         return (
@@ -164,7 +164,41 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     name: i18n.FAILURES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.failures),
+    render: ({ node }) => {
+      const id = escapeDataProviderId(
+        `authentications-table-${node._id}-node-failures-${node.failures}`
+      );
+      return (
+        <DraggableWrapper
+          key={id}
+          dataProvider={{
+            and: [],
+            enabled: true,
+            id,
+            name: 'authentication_failure',
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: 'event.type',
+              value: 'authentication_failure',
+            },
+            queryDate: {
+              from: startDate,
+              to: Date.now(),
+            },
+          }}
+          render={(dataProvider, _, snapshot) =>
+            snapshot.isDragging ? (
+              <DragEffects>
+                <Provider dataProvider={dataProvider} />
+              </DragEffects>
+            ) : (
+              node.failures
+            )
+          }
+        />
+      );
+    },
   },
   {
     name: i18n.LAST_FAILED_TIME,
@@ -184,7 +218,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const sourceIp: string | null = get('lastFailure.source.ip', node);
+      const sourceIp: string | null | undefined = get('lastFailure.source.ip[0]', node);
       if (sourceIp != null) {
         const id = escapeDataProviderId(
           `authentications-table-${node._id}-lastFailure-${sourceIp}`
@@ -229,8 +263,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('lastFailure.host.name', node);
-      const hostId: string | null = get('lastFailure.host.id', node);
+      const hostName: string | null | undefined = get('lastFailure.host.name[0]', node);
+      const hostId: string | null | undefined = get('lastFailure.host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostId}`);
         return (
@@ -244,15 +278,10 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: hostId,
+                field: 'host.name',
+                value: hostName,
               },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -260,7 +289,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
+                <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
               )
             }
           />
@@ -274,7 +303,41 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     name: i18n.SUCCESSES,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(node.successes),
+    render: ({ node }) => {
+      const id = escapeDataProviderId(
+        `authentications-table-${node._id}-node-successes-${node.successes}`
+      );
+      return (
+        <DraggableWrapper
+          key={id}
+          dataProvider={{
+            and: [],
+            enabled: true,
+            id,
+            name: 'authentication_success',
+            excluded: false,
+            kqlQuery: '',
+            queryMatch: {
+              field: 'event.type',
+              value: 'authentication_success',
+            },
+            queryDate: {
+              from: startDate,
+              to: Date.now(),
+            },
+          }}
+          render={(dataProvider, _, snapshot) =>
+            snapshot.isDragging ? (
+              <DragEffects>
+                <Provider dataProvider={dataProvider} />
+              </DragEffects>
+            ) : (
+              node.successes
+            )
+          }
+        />
+      );
+    },
   },
   {
     name: i18n.LAST_SUCCESSFUL_TIME,
@@ -294,7 +357,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const sourceIp: string | null = get('lastSuccess.source.ip', node);
+      const sourceIp: string | null | undefined = get('lastSuccess.source.ip[0]', node);
       if (sourceIp != null) {
         const id = escapeDataProviderId(
           `authentications-table-${node._id}-lastSuccess-${sourceIp}`
@@ -339,8 +402,8 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
     truncateText: false,
     hideForMobile: false,
     render: ({ node }) => {
-      const hostName: string | null = get('lastSuccess.host.name', node);
-      const hostId: string | null = get('lastSuccess.host.id', node);
+      const hostName: string | null | undefined = get('lastSuccess.host.name[0]', node);
+      const hostId: string | null | undefined = get('lastSuccess.host.id[0]', node);
       if (hostName != null && hostId != null) {
         const id = escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostId}`);
         return (
@@ -354,15 +417,10 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
               excluded: false,
               kqlQuery: '',
               queryMatch: {
-                displayField: 'host.name',
-                displayValue: hostName,
-                field: 'host.id',
-                value: hostId,
+                field: 'host.name',
+                value: hostName,
               },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
-              },
+              queryDate: { from: startDate, to: Date.now() },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -370,7 +428,7 @@ const getAuthenticationColumns = (startDate: number): Array<Columns<Authenticati
                   <Provider dataProvider={dataProvider} />
                 </DragEffects>
               ) : (
-                <HostDetailsLink hostId={hostId}>{hostName}</HostDetailsLink>
+                <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
               )
             }
           />

@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Domains Table Component Rendering it renders the default Domains table 1`] = `
+<Connect(DomainsTableComponent)
+  data={
+    Array [
+      Object {
+        "cursor": Object {
+          "value": "samsungtv-kitchen.iot.sr.local.example.com",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": "samsungtv-kitchen.iot.sr.local.example.com",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 96,
+          },
+          "network": Object {
+            "bytes": 1054651765,
+            "direction": Array [],
+            "packets": 707990,
+          },
+          "source": null,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "row.exmaple.com",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": ".row.exmaple.com",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 6,
+          },
+          "network": Object {
+            "bytes": 0,
+            "direction": Array [],
+            "packets": 0,
+          },
+          "source": null,
+        },
+      },
+      Object {
+        "cursor": Object {
+          "value": "10.10.10.10",
+        },
+        "node": Object {
+          "destination": Object {
+            "domainName": "10.10.10.10",
+            "firstSeen": null,
+            "lastSeen": null,
+            "uniqueIpCount": 1,
+          },
+          "network": Object {
+            "bytes": 0,
+            "direction": Array [],
+            "packets": 0,
+          },
+          "source": null,
+        },
+      },
+    ]
+  }
+  endDate={1549643470707}
+  flowTarget="source"
+  hasNextPage={false}
+  ip="10.10.10.10"
+  loadMore={[MockFunction]}
+  loading={false}
+  nextCursor="10"
+  startDate={1546965070707}
+  totalCount={1}
+  type="details"
+/>
+`;

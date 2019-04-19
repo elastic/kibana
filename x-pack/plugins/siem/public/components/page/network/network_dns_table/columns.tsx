@@ -8,6 +8,7 @@ import numeral from '@elastic/numeral';
 import React from 'react';
 
 import { NetworkDnsFields, NetworkDnsItem } from '../../../../graphql/types';
+import { ValueOf } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -18,12 +19,10 @@ import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 
-type valueof<T> = T[keyof T];
-
 export const getNetworkDnsColumns = (
   startDate: number,
   type: networkModel.NetworkType
-): Array<Columns<valueof<NetworkDnsItem>>> => [
+): Array<Columns<ValueOf<NetworkDnsItem>>> => [
   {
     field: `node.${NetworkDnsFields.dnsName}`,
     name: i18n.REGISTERED_DOMAIN,
