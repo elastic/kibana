@@ -388,7 +388,7 @@ export const buildVislibDimensions = async (
     const xAgg = vis.aggs.getResponseAggs()[dimensions.x.accessor];
     if (xAgg.type.name === 'date_histogram') {
       dimensions.x.params.date = true;
-      const { esUnit, esValue }  = xAgg.buckets.getInterval();
+      const { esUnit, esValue } = xAgg.buckets.getInterval();
       dimensions.x.params.interval = moment.duration(esValue, esUnit);
       dimensions.x.params.format = xAgg.buckets.getScaledDateFormat();
       dimensions.x.params.bounds = xAgg.buckets.getBounds();
