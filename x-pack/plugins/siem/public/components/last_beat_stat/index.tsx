@@ -50,7 +50,7 @@ export const LastBeatStat = pure<LastBeatStatProps>(({ hostName, indexKey, ip })
                   <EuiToolTip position="bottom" content={lastSeen}>
                     <FormattedMessage
                       id="xpack.siem.headerPage.pageSubtitle"
-                      defaultMessage="Last Beat: {beat}"
+                      defaultMessage="Last Event: {beat}"
                       values={{
                         beat: <FormattedRelative value={new Date(lastSeen)} />,
                       }}
