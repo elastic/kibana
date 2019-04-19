@@ -15,7 +15,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
     >
       <EuiTitle
         size="m"
-        textTransform="none"
       >
         <h2>
           <FormattedMessage
@@ -178,10 +177,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
               Array [
                 Object {
                   "disabled": false,
-                  "dropdownDisplay": <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  "dropdownDisplay": <EuiText>
                     <strong>
                       <FormattedMessage
                         defaultMessage="Custom"
@@ -197,10 +193,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                       />
                     </p>
                   </EuiText>,
-                  "inputDisplay": <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  "inputDisplay": <EuiText>
                     <FormattedMessage
                       defaultMessage="Custom"
                       id="xpack.security.management.editRole.spacePrivilegeForm.customPrivilegeDisplay"
@@ -211,10 +204,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                 },
                 Object {
                   "disabled": true,
-                  "dropdownDisplay": <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  "dropdownDisplay": <EuiText>
                     <strong>
                       <FormattedMessage
                         defaultMessage="Read"
@@ -230,10 +220,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                       />
                     </p>
                   </EuiText>,
-                  "inputDisplay": <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  "inputDisplay": <EuiText>
                     <FormattedMessage
                       defaultMessage="Read"
                       id="xpack.security.management.editRole.spacePrivilegeForm.readPrivilegeDisplay"
@@ -243,10 +230,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                   "value": "basePrivilege_read",
                 },
                 Object {
-                  "dropdownDisplay": <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  "dropdownDisplay": <EuiText>
                     <strong>
                       <FormattedMessage
                         defaultMessage="All"
@@ -262,10 +246,7 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
                       />
                     </p>
                   </EuiText>,
-                  "inputDisplay": <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  "inputDisplay": <EuiText>
                     <FormattedMessage
                       defaultMessage="All"
                       id="xpack.security.management.editRole.spacePrivilegeForm.allPrivilegeDisplay"
@@ -284,7 +265,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
         />
         <EuiTitle
           size="xxs"
-          textTransform="none"
         >
           <h3>
             Customize by feature
@@ -294,7 +274,6 @@ exports[`<PrivilegeSpaceForm> renders without crashing 1`] = `
           size="xs"
         />
         <EuiText
-          grow={true}
           size="s"
         >
           <p>
