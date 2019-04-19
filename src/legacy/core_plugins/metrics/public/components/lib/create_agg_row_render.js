@@ -41,7 +41,6 @@ export default function createAggRowRender(props) {
         series={model}
         siblings={items}
         uiRestrictions={uiRestrictions}
-        sortData={row.id}
       />
     );
   };

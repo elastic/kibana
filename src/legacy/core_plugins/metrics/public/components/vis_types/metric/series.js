@@ -24,10 +24,10 @@ import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
-import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import { SeriesDragHandler } from '../../series_drag_hanler';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
-import { createUpDownHandler } from '../../lib/sort_keyhandler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 function MetricSeriesUi(props) {
@@ -135,33 +135,10 @@ function MetricSeriesUi(props) {
     );
   }
 
-  let dragHandle;
-  if (!props.disableDelete) {
-    dragHandle = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={(<FormattedMessage
-            id="tsvb.metric.sort.dragToSortTooltip"
-            defaultMessage="Drag to sort"
-          />)}
-        >
-          <EuiButtonIcon
-            className="tvbSeries__sortHandle"
-            iconType="grab"
-            aria-label={intl.formatMessage({ id: 'tsvb.metric.sort.sortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
-            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
-
   return (
     <div
       className={`${props.className}`}
       style={props.style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
     >
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -185,7 +162,9 @@ function MetricSeriesUi(props) {
           />
         </EuiFlexItem>
 
-        { dragHandle }
+        { !props.disableDelete &&  (
+          <SeriesDragHandler dragHandleProps={props.dragHandleProps} />
+        )}
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
@@ -203,7 +182,6 @@ function MetricSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       { body }
     </div>
   );
@@ -221,20 +199,16 @@ MetricSeriesUi.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
-  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
 const MetricSeries = injectI18n(MetricSeriesUi);

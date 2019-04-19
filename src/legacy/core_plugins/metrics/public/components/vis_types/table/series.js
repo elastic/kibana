@@ -22,10 +22,10 @@ import PropTypes from 'prop-types';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import { EuiToolTip, EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
+import { SeriesDragHandler } from '../../series_drag_hanler';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
-import { createUpDownHandler } from '../../lib/sort_keyhandler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function TableSeries(props) {
@@ -106,33 +106,10 @@ function TableSeries(props) {
     );
   }
 
-  let dragHandle;
-  if (!props.disableDelete) {
-    dragHandle = (
-      <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={(<FormattedMessage
-            id="tsvb.table.dragToSortTooltip"
-            defaultMessage="Drag to sort"
-          />)}
-        >
-          <EuiButtonIcon
-            className="tvbSeries__sortHandle"
-            iconType="grab"
-            aria-label={intl.formatMessage({ id: 'tsvb.table.dragToSortAriaLabel', defaultMessage: 'Sort series by pressing up/down' })}
-            onKeyDown={createUpDownHandler(props.onShouldSortItem)}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
-    );
-  }
-
   return (
     <div
       className={`${props.className}`}
       style={props.style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
     >
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -155,8 +132,9 @@ function TableSeries(props) {
           />
         </EuiFlexItem>
 
-        { dragHandle }
-
+        { !props.disableDelete &&  (
+          <SeriesDragHandler dragHandleProps={props.dragHandleProps} />
+        )}
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             addTooltip={intl.formatMessage({ id: 'tsvb.table.addSeriesTooltip', defaultMessage: 'Add Series' })}
@@ -189,20 +167,16 @@ TableSeries.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
-  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
 export default injectI18n(TableSeries);

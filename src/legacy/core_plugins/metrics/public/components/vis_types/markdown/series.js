@@ -123,8 +123,6 @@ function MarkdownSeriesUi(props) {
     <div
       className={`${props.className}`}
       style={props.style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
     >
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -173,7 +171,6 @@ function MarkdownSeriesUi(props) {
       { body }
     </div>
   );
-
 }
 
 MarkdownSeriesUi.propTypes = {
@@ -187,19 +184,15 @@ MarkdownSeriesUi.propTypes = {
   onChange: PropTypes.func,
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onSortableItemMount: PropTypes.func,
-  onSortableItemReadyToMove: PropTypes.func,
-  onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
   selectedTab: PropTypes.string,
-  sortData: PropTypes.string,
   style: PropTypes.object,
   switchTab: PropTypes.func,
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
 const MarkdownSeries = injectI18n(MarkdownSeriesUi);
