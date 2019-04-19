@@ -5,10 +5,10 @@
  */
 
 import { Server } from 'hapi';
+import { get } from 'lodash';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
-import { convertSavedObjectToSpace } from '../routes/lib';
 
 /**
  *
@@ -24,21 +24,46 @@ async function getSpacesUsage(callCluster: any, server: Server, spacesAvailable:
 
   const knownFeatureIds = server.plugins.xpack_main.getFeatures().map(feature => feature.id);
 
-  const { getSavedObjectsRepository } = server.savedObjects;
+  const resp = await callCluster('transport.request', {
+    path: '/_search',
+    method: 'POST',
+    index: '.kibana',
+    body: {
+      track_total_hits: true,
+      query: {
+        term: {
+          type: {
+            value: 'space',
+          },
+        },
+      },
+      aggs: {
+        disabledFeatures: {
+          terms: {
+            field: 'space.disabledFeatures',
+            size: knownFeatureIds.length,
+          },
+        },
+      },
+      size: 0,
+    },
+  });
 
-  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+  const { hits, aggregations } = resp;
 
-  const { saved_objects: spaces } = await savedObjectsRepository.find({ type: 'space' });
+  const count = get(hits, 'total.value', 0);
+  const disabledFeatureBuckets = get(aggregations, 'disabledFeatures.buckets', []);
+
+  const disabledFeatures = disabledFeatureBuckets.reduce((acc, { key, doc_count }) => {
+    return {
+      ...acc,
+      [key]: doc_count,
+    };
+  }, knownFeatureIds.reduce((acc, featureId) => ({ ...acc, [featureId]: 0 }), {}));
 
   return {
-    count: spaces.length,
-    usesFeatureControls: spaces.some((spaceSavedObject: any) => {
-      const space = convertSavedObjectToSpace(spaceSavedObject);
-      return (
-        space.disabledFeatures &&
-        knownFeatureIds.some(knownId => space.disabledFeatures.includes(knownId))
-      );
-    }),
+    count,
+    disabledFeatures,
   } as UsageStats;
 }
 
@@ -46,7 +71,9 @@ export interface UsageStats {
   available: boolean;
   enabled: boolean;
   count?: number;
-  usesFeatureControls?: boolean;
+  disabledFeatures?: {
+    [featureId: string]: number;
+  };
 }
 /*
  * @param {Object} server
