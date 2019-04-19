@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './envs/on_prem';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
-import apmIndexPattern from '../../../../../../../x-pack/plugins/apm/common/index_pattern.json';
+import apmIndexPattern from './index_pattern.json';
 
 const apmIntro = i18n.translate('kbn.server.tutorials.apm.introduction', {
   defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
@@ -45,11 +45,10 @@ export function apmSpecProvider(server) {
       ...apmIndexPattern,
       attributes: {
         ...apmIndexPattern.attributes,
-        title: apmIndexPatternTitle
-      }
-    }
+        title: apmIndexPatternTitle,
+      },
+    },
   ];
-
 
   const artifacts = {
     dashboards: [

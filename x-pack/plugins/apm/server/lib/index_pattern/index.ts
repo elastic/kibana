@@ -5,7 +5,7 @@
  */
 import { CoreSetup } from 'src/core/server';
 import { getSavedObjectsClient } from '../helpers/saved_objects_client';
-import indexPattern from '../../../common/index_pattern.json';
+import indexPattern from '../../../../../../../src/legacy/core_plugins/kibana/server/tutorials/apm/index_pattern.json';
 
 export async function ensureIndexPatternExists(core: CoreSetup) {
   const { server } = core.http;
