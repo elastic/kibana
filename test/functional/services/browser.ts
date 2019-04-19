@@ -18,10 +18,9 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IKey, logging } from 'selenium-webdriver';
+import { IKey, logging, WebElement } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
-// @ts-ignore no support ts yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../ftr_provider_context';
@@ -240,10 +239,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async clickMouseButton(...args: unknown[]): Promise<void> {
       const mouse = (driver.actions() as any).mouse();
       const actions = (driver as any).actions({ bridge: true });
-      if (args[0] instanceof WebElementWrapper) {
+      const arg0 = args[0];
+      if (arg0 instanceof WebElementWrapper) {
         await actions
           .pause(mouse)
-          .move({ origin: (args[0] as any)._webElement })
+          .move({ origin: arg0._webElement })
           .click()
           .perform();
       } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
@@ -297,7 +297,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      *
      * @return {Promise<Buffer>}
      */
-    public async takeScreenshot(): Promise<string | Buffer> {
+    public async takeScreenshot(): Promise<string> {
       return await driver.takeScreenshot();
     }
 
@@ -373,10 +373,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param  {string|function} fn
      * @param  {...any[]} args
      */
-    public async execute<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
+    public async execute<A extends any[], R>(
+      fn: string | ((...args: A) => R),
+      ...args: A
+    ): Promise<R> {
       return await driver.executeScript(
         fn,
-        ...cloneDeep(args, arg => {
+        ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -384,10 +387,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public async executeAsync<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
+    public async executeAsync<A extends any[], R>(
+      fn: string | ((...args: A) => R),
+      ...args: A
+    ): Promise<R> {
       return await driver.executeAsyncScript(
         fn,
-        ...cloneDeep(args, arg => {
+        ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -395,29 +401,25 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       );
     }
 
-    public getScrollTop() {
-      return driver
-        .executeScript('return document.body.scrollTop')
-        .then((scrollSize: any) => parseInt(scrollSize, 10));
+    public async getScrollTop(): Promise<number> {
+      const scrollSize = await driver.executeScript<string>('return document.body.scrollTop');
+      return parseInt(scrollSize, 10);
     }
 
-    public getScrollLeft() {
-      return driver
-        .executeScript('return document.body.scrollLeft')
-        .then((scrollSize: any) => parseInt(scrollSize, 10));
+    public async getScrollLeft(): Promise<number> {
+      const scrollSize = await driver.executeScript<string>('return document.body.scrollLeft');
+      return parseInt(scrollSize, 10);
     }
 
     // return promise with REAL scroll position
-    public setScrollTop(scrollSize: number | string) {
-      return driver
-        .executeScript('document.body.scrollTop = ' + scrollSize)
-        .then(this.getScrollTop);
+    public async setScrollTop(scrollSize: number | string): Promise<number> {
+      await driver.executeScript('document.body.scrollTop = ' + scrollSize);
+      return this.getScrollTop();
     }
 
-    public setScrollLeft(scrollSize: number | string) {
-      return driver
-        .executeScript('document.body.scrollLeft = ' + scrollSize)
-        .then(this.getScrollLeft);
+    public async setScrollLeft(scrollSize: number | string) {
+      await driver.executeScript('document.body.scrollLeft = ' + scrollSize);
+      return this.getScrollLeft();
     }
   }
 
