@@ -37,6 +37,7 @@ function getServerMock(customization?: any) {
           },
           toJSON: () => ({ b: 1 }),
         },
+        getFeatures: jest.fn().mockReturnValue([{ id: 'feature-1' }, { id: 'feature-2' }]),
       },
     },
     expose: () => {
@@ -64,7 +65,20 @@ function getServerMock(customization?: any) {
         return {
           find() {
             return {
-              saved_objects: ['a', 'b'],
+              saved_objects: [
+                {
+                  id: 'space-1',
+                  attributes: {
+                    disabledFeatures: [],
+                  },
+                },
+                {
+                  id: 'space-2',
+                  attributes: {
+                    disabledFeatures: ['feature-1'],
+                  },
+                },
+              ],
             };
           },
         };
@@ -89,10 +103,11 @@ test('sets enabled to false when spaces is turned off', async () => {
   expect(usageStats.enabled).toBe(false);
 });
 
-describe('with a basic license', async () => {
+describe('with a basic license', () => {
+  let serverWithBasicLicenseMock: any;
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const serverWithBasicLicenseMock = getServerMock();
+    serverWithBasicLicenseMock = getServerMock();
     serverWithBasicLicenseMock.plugins.xpack_main.info.license.getType = jest
       .fn()
       .mockReturnValue('basic');
@@ -101,20 +116,35 @@ describe('with a basic license', async () => {
     usageStats = await getSpacesUsage(callClusterMock);
   });
 
-  test('sets enabled to true', async () => {
+  test('sets enabled to true', () => {
     expect(usageStats.enabled).toBe(true);
   });
 
-  test('sets available to true', async () => {
+  test('sets available to true', () => {
     expect(usageStats.available).toBe(true);
   });
 
-  test('sets the number of spaces', async () => {
+  test('sets the number of spaces', () => {
     expect(usageStats.count).toBe(2);
+  });
+
+  test('calculates feature control usage', () => {
+    expect(usageStats.usesFeatureControls).toBe(true);
+  });
+
+  test('calculates feature control usage with invalid features', async () => {
+    serverWithBasicLicenseMock.plugins.xpack_main.getFeatures.mockReturnValue([
+      { id: 'feature-3' },
+    ]);
+
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithBasicLicenseMock);
+    const callClusterMock = jest.fn();
+    usageStats = await getSpacesUsage(callClusterMock);
+    expect(usageStats.usesFeatureControls).toBe(false);
   });
 });
 
-describe('with no license', async () => {
+describe('with no license', () => {
   let usageStats: UsageStats;
   beforeAll(async () => {
     const serverWithNoLicenseMock = getServerMock();
@@ -124,23 +154,28 @@ describe('with no license', async () => {
     usageStats = await getSpacesUsage(callClusterMock);
   });
 
-  test('sets enabled to false', async () => {
+  test('sets enabled to false', () => {
     expect(usageStats.enabled).toBe(false);
   });
 
-  test('sets available to false', async () => {
+  test('sets available to false', () => {
     expect(usageStats.available).toBe(false);
   });
 
-  test('does not set the number of spaces', async () => {
+  test('does not set the number of spaces', () => {
     expect(usageStats.count).toBeUndefined();
+  });
+
+  test('does not set feature control usage', () => {
+    expect(usageStats.usesFeatureControls).toBeUndefined();
   });
 });
 
-describe('with platinum license', async () => {
+describe('with platinum license', () => {
+  let serverWithPlatinumLicenseMock: any;
   let usageStats: UsageStats;
   beforeAll(async () => {
-    const serverWithPlatinumLicenseMock = getServerMock();
+    serverWithPlatinumLicenseMock = getServerMock();
     serverWithPlatinumLicenseMock.plugins.xpack_main.info.license.getType = jest
       .fn()
       .mockReturnValue('platinum');
@@ -149,15 +184,30 @@ describe('with platinum license', async () => {
     usageStats = await getSpacesUsage(callClusterMock);
   });
 
-  test('sets enabled to true', async () => {
+  test('sets enabled to true', () => {
     expect(usageStats.enabled).toBe(true);
   });
 
-  test('sets available to true', async () => {
+  test('sets available to true', () => {
     expect(usageStats.available).toBe(true);
   });
 
-  test('sets the number of spaces', async () => {
+  test('sets the number of spaces', () => {
     expect(usageStats.count).toBe(2);
+  });
+
+  test('calculates feature control usage', () => {
+    expect(usageStats.usesFeatureControls).toBe(true);
+  });
+
+  test('calculates feature control usage with invalid features', async () => {
+    serverWithPlatinumLicenseMock.plugins.xpack_main.getFeatures.mockReturnValue([
+      { id: 'feature-3' },
+    ]);
+
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithPlatinumLicenseMock);
+    const callClusterMock = jest.fn();
+    usageStats = await getSpacesUsage(callClusterMock);
+    expect(usageStats.usesFeatureControls).toBe(false);
   });
 });

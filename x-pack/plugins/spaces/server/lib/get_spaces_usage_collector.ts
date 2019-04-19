@@ -3,22 +3,26 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { Server } from 'hapi';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
+import { convertSavedObjectToSpace } from '../routes/lib';
 
 /**
  *
  * @param callCluster
  * @param server
  * @param {boolean} spacesAvailable
- * @param withinDayRange
- * @return {ReportingUsageStats}
+ * @return {UsageStats}
  */
-async function getSpacesUsage(callCluster: any, server: any, spacesAvailable: boolean) {
+async function getSpacesUsage(callCluster: any, server: Server, spacesAvailable: boolean) {
   if (!spacesAvailable) {
-    return {};
+    return {} as UsageStats;
   }
+
+  const knownFeatureIds = server.plugins.xpack_main.getFeatures().map(feature => feature.id);
 
   const { getSavedObjectsRepository } = server.savedObjects;
 
@@ -28,13 +32,21 @@ async function getSpacesUsage(callCluster: any, server: any, spacesAvailable: bo
 
   return {
     count: spaces.length,
-  };
+    usesFeatureControls: spaces.some((spaceSavedObject: any) => {
+      const space = convertSavedObjectToSpace(spaceSavedObject);
+      return (
+        space.disabledFeatures &&
+        knownFeatureIds.some(knownId => space.disabledFeatures.includes(knownId))
+      );
+    }),
+  } as UsageStats;
 }
 
 export interface UsageStats {
   available: boolean;
   enabled: boolean;
   count?: number;
+  usesFeatureControls?: boolean;
 }
 /*
  * @param {Object} server
