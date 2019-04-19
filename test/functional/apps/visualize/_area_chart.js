@@ -235,16 +235,11 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectField('@timestamp');
         await PageObjects.visualize.setInterval('Yearly');
         await PageObjects.visualize.clickGo();
-        await inspector.open();
-        await inspector.setTablePageSize(10);
-        const tableData = await inspector.getTableData();
-        expect(tableData.length).toBe(7);
-        await inspector.close();
-        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
-        log.debug('actual chart data =     ' + paths);
         // This svg area is composed by 7 years (2013 - 2019).
         // 7 points are used to draw the upper line (usually called y1)
         // 7 points compose the lower line (usually called y0)
+        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        log.debug('actual chart data =     ' + paths);
         const numberOfSegments = 7 * 2;
         expect(paths.length).to.eql(numberOfSegments);
       });
