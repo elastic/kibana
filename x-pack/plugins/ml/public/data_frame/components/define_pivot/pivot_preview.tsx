@@ -4,20 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiInMemoryTable, EuiPanel, EuiProgress, EuiTitle, SortDirection } from '@elastic/eui';
-
-import { ml } from '../../../services/ml_api_service';
-
 import {
-  getDataFramePreviewRequest,
-  IndexPatternContext,
-  OptionsDataElement,
-  SimpleQuery,
-} from '../../common';
+  EuiCallOut,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiProgress,
+  EuiTitle,
+  SortDirection,
+} from '@elastic/eui';
+
+import { IndexPatternContext, OptionsDataElement, SimpleQuery } from '../../common';
+import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
 interface Props {
   aggs: OptionsDataElement[];
@@ -32,36 +33,70 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
     return null;
   }
 
-  const [loading, setLoading] = useState(false);
-  const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
-
-  useEffect(
-    () => {
-      if (aggs.length === 0) {
-        setDataFramePreviewData([]);
-        return;
-      }
-
-      setLoading(true);
-
-      const request = getDataFramePreviewRequest(indexPattern.title, query, groupBy, aggs);
-
-      ml.dataFrame
-        .getDataFrameTransformsPreview(request)
-        .then((resp: any) => {
-          setDataFramePreviewData(resp.preview);
-          setLoading(false);
-        })
-        .catch((resp: any) => {
-          setDataFramePreviewData([]);
-          setLoading(false);
-        });
-    },
-    [indexPattern.title, aggs, groupBy, query]
+  const { dataFramePreviewData, errorMessage, status } = usePivotPreviewData(
+    indexPattern,
+    query,
+    aggs,
+    groupBy
   );
 
+  if (status === PIVOT_PREVIEW_STATUS.ERROR) {
+    return (
+      <EuiPanel grow={false}>
+        <EuiTitle size="xs">
+          <span>
+            {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
+              defaultMessage: 'Data Frame Pivot Preview',
+            })}
+          </span>
+        </EuiTitle>
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewError',
+            {
+              defaultMessage: 'An error occurred loading the pivot preview.',
+            }
+          )}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{errorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
+
   if (dataFramePreviewData.length === 0) {
-    return null;
+    return (
+      <EuiPanel grow={false}>
+        <EuiTitle size="xs">
+          <span>
+            {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
+              defaultMessage: 'Data Frame Pivot Preview',
+            })}
+          </span>
+        </EuiTitle>
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutTitle',
+            {
+              defaultMessage: 'Pivot Preview not available',
+            }
+          )}
+          color="primary"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutBody',
+              {
+                defaultMessage:
+                  'Please make sure to choose at least one group-by field and aggregation.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
   }
 
   const columnKeys = Object.keys(dataFramePreviewData[0]);
@@ -104,8 +139,10 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
           })}
         </span>
       </EuiTitle>
-      {loading && <EuiProgress size="xs" color="accent" />}
-      {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
+      {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+      {status !== PIVOT_PREVIEW_STATUS.LOADING && (
+        <EuiProgress size="xs" color="accent" max={1} value={0} />
+      )}
       {dataFramePreviewData.length > 0 && (
         <EuiInMemoryTable
           items={dataFramePreviewData}

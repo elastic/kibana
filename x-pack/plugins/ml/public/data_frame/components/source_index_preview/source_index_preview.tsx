@@ -210,7 +210,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   }
 
   return (
-    <EuiPanel>
+    <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
