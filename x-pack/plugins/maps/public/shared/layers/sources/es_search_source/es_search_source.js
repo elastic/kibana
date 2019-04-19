@@ -14,6 +14,7 @@ import { CreateSourceEditor } from './create_source_editor';
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
+import { getTermsFields } from '../../../utils/get_terms_fields';
 
 const DEFAULT_LIMIT = 2048;
 
@@ -196,13 +197,11 @@ export class ESSearchSource extends AbstractESSource {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const indexPattern = await this._getIndexPattern();
-    const stringFields = indexPattern.fields.filter(field => {
-      return field.type === 'string';
-    });
-    return stringFields.map(stringField => {
-      return { name: stringField.name, label: stringField.name };
-    });
+    return getTermsFields(indexPattern.fields)
+      .map(field => {
+        return { name: field.name, label: field.name };
+      });
   }
 }
