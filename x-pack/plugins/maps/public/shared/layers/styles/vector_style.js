@@ -127,6 +127,47 @@ export class VectorStyle extends AbstractStyle {
     };
   }
 
+  getDescriptorWithDynamicRanges(dataRequests) {
+    const styles = this.getProperties();
+    const dynamicStyles = [];
+    Object.keys(styles).forEach(styleName => {
+      const { type, options } = styles[styleName];
+      if (type === VectorStyle.STYLE_TYPE.DYNAMIC
+        && options.field && options.field.name) {
+        dynamicStyles.push({
+          styleName,
+          fieldName: options.field.name
+        });
+      }
+    });
+
+    if (dynamicStyles.length === 0) {
+      return {
+        hasChanges: false,
+      };
+    }
+
+    for (let i = 0; i < dataRequests.length; i++) {
+      const { data } = dataRequests[i];
+      if (data && data.type === 'FeatureCollection') {
+        dynamicStyles.forEach(dynamicStyle => {
+          dynamicStyle.__range = VectorStyle.getMinMax(data.features, dynamicStyle.fieldName);
+        });
+        break;
+      }
+    }
+
+    const updatedStyles = { ...styles };
+    dynamicStyles.forEach(({ styleName, __range }) => {
+      updatedStyles[styleName] = { ...updatedStyles[styleName], __range };
+    });
+
+    return {
+      hasChanges: true,
+      nextStyleDescriptor: VectorStyle.createDescriptor(updatedStyles)
+    };
+  }
+
   getSourceFieldNames() {
     const properties = this.getProperties();
     const fieldNames = [];
@@ -206,6 +247,20 @@ export class VectorStyle extends AbstractStyle {
     return null;
   }
 
+  static getMinMax(features, fieldName) {
+    let min = Infinity;
+    let max = -Infinity;
+    features.forEach(feature => {
+      const newValue = parseFloat(feature.properties[fieldName]);
+      if (!isNaN(newValue)) {
+        min = Math.min(min, newValue);
+        max = Math.max(max, newValue);
+      }
+    });
+
+    return { min, max };
+  }
+
   static computeScaledValues(featureCollection, field) {
     const fieldName = field.name;
     const features = featureCollection.features;
@@ -213,31 +268,24 @@ export class VectorStyle extends AbstractStyle {
       return false;
     }
 
-    let min = Infinity;
-    let max = -Infinity;
-    for (let i = 0; i < features.length; i++) {
-      const newValue = parseFloat(features[i].properties[fieldName]);
-      if (!isNaN(newValue)) {
-        min = Math.min(min, newValue);
-        max = Math.max(max, newValue);
-      }
-    }
+    const { min, max } = VectorStyle.getMinMax(features, fieldName);
     const diff = max - min;
     const propName = VectorStyle.getComputedFieldName(fieldName);
 
     //scale to [0,1] domain
-    for (let i = 0; i < features.length; i++) {
-      const unscaledValue = parseFloat(features[i].properties[fieldName]);
+    features.forEach(feature => {
+      const unscaledValue = parseFloat(feature.properties[fieldName]);
       let scaledValue;
       if (isNaN(unscaledValue)) {//cannot scale
         scaledValue = -1;//put outside range
       } else if (diff === 0) {//values are identical
         scaledValue = 1;//snap to end of color range
       } else {
-        scaledValue = (features[i].properties[fieldName] - min) / diff;
+        scaledValue = (feature.properties[fieldName] - min) / diff;
       }
-      features[i].properties[propName] =  scaledValue;
-    }
+      feature.properties[propName] =  scaledValue;
+      feature.properties[fieldName] =  unscaledValue;
+    });
     featureCollection.computed.push(fieldName);
     return true;
   }

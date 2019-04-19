@@ -111,6 +111,10 @@ export class AbstractLayer {
     return this._descriptor.id;
   }
 
+  getRawDataRequests() {
+    return _.get(this._descriptor, '__dataRequests', []);
+  }
+
   getSource() {
     return this._source;
   }

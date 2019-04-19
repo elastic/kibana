@@ -395,12 +395,16 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
 }
 
 export function updateSourceDataRequest(layerId, newData) {
-  return ({
-    type: UPDATE_SOURCE_DATA_REQUEST,
-    dataId: SOURCE_DATA_ID_ORIGIN,
-    layerId,
-    newData
-  });
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_SOURCE_DATA_REQUEST,
+      dataId: SOURCE_DATA_ID_ORIGIN,
+      layerId,
+      newData
+    });
+
+    dispatch(setDynamicRanges(layerId));
+  };
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
@@ -414,10 +418,13 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
       meta,
       requestToken
     });
+
     //Clear any data-load errors when there is a succesful data return.
     //Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
     //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
     dispatch(setLayerDataLoadErrorStatus(layerId, null));
+
+    dispatch(setDynamicRanges(layerId));
   };
 }
 
@@ -603,6 +610,36 @@ export function updateLayerStyle(layerId, styleDescriptor) {
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(layerId));
+
+    // syncDataForLayer may short circuit if no re-fetch is required
+    // 1) if no re-fetch: setDynamicRanges required to update dynamic range from last request state
+    // 1) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
+    dispatch(setDynamicRanges(layerId));
+  };
+}
+
+export function setDynamicRanges(layerId) {
+  return (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+    const style = layer.getCurrentStyle();
+    if (!style) {
+      return;
+    }
+    const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithDynamicRanges(layer.getRawDataRequests());
+    if (hasChanges) {
+      // do not use updateLayerStyle action creator since that would create an infinite loop
+      // since each action creator calls one another
+      dispatch({
+        type: UPDATE_LAYER_STYLE,
+        layerId,
+        style: {
+          ...nextStyleDescriptor
+        },
+      });
+    }
   };
 }
 

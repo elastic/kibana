@@ -11,4 +11,10 @@ export class AbstractStyle {
       hasChanges: false,
     };
   }
+
+  getDescriptorWithDynamicRanges(/* dataRequests */) {
+    return {
+      hasChanges: false,
+    };
+  }
 }
