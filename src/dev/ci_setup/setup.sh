@@ -198,7 +198,7 @@ function checks-reporter-with-killswitch() {
   if [ "$CHECKS_REPORTER_ACTIVE" = true ] ; then
     yarn run github-checks-reporter "$@"
   else
-    "${@[@]:2}"
+    "${$@[@]:2}"
   fi
 }
 
