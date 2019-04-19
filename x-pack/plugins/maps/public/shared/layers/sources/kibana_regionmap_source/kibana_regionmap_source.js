@@ -89,7 +89,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     };
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const vectorFileMeta = await this._getVectorFileMeta();
     return vectorFileMeta.fields.map(f => {
       return { name: f.name, label: f.description };
