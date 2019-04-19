@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { CLIENT_DEFAULTS } from './client_defaults';
-export { INDEX_NAMES } from './index_names';
-export { PLUGIN } from './plugin';
-export { QUERY } from './query';
+export const CLIENT_DEFAULTS = {
+  // 60 seconds
+  AUTOREFRESH_INTERVAL: 60 * 1000,
+  // polling defaults to "on"
+  AUTOREFRESH_IS_PAUSED: false,
+  DATE_RANGE_START: 'now-15m',
+  DATE_RANGE_END: 'now',
+};
