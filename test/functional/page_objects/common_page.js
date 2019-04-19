@@ -66,6 +66,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
         await browser.get(appUrl, insertTimestamp);
+        log.debug('returned from get, calling refresh');
+        return browser.refresh();
 
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
