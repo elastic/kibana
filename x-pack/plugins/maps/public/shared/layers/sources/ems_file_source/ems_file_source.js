@@ -102,7 +102,7 @@ export class EMSFileSource extends AbstractVectorSource {
   }
 
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const emsVectorFileMeta = await this._getEmsVectorFileMeta();
     return emsVectorFileMeta.fields.map(f => {
       return { name: f.name, label: f.description };
