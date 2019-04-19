@@ -36,7 +36,7 @@ export async function getSAMLRequestId(urlWithSAMLRequestId) {
   return parsedSAMLRequest['saml2p:AuthnRequest'].$.ID;
 }
 
-export async function getSAMLResponse({ destination, inResponseTo, sessionIndex }) {
+export async function getSAMLResponse({ destination, inResponseTo, sessionIndex, username = 'a@b.c' } = {}) {
   const issueInstant = (new Date()).toISOString();
   const notOnOrAfter = (new Date(Date.now() + 3600 * 1000)).toISOString();
 
@@ -60,7 +60,7 @@ export async function getSAMLResponse({ destination, inResponseTo, sessionIndex 
       <saml:AttributeStatement xmlns:xs="http://www.w3.org/2001/XMLSchema"
                              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <saml:Attribute Name="urn:oid:0.0.7" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
-          <saml:AttributeValue xsi:type="xs:string">a@b.c</saml:AttributeValue>
+          <saml:AttributeValue xsi:type="xs:string">${username}</saml:AttributeValue>
         </saml:Attribute>
       </saml:AttributeStatement>
     </saml:Assertion>
