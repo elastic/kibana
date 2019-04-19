@@ -66,6 +66,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it('shows graph navlink', async () => {
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
+          'SIEM',
           'Graph',
           'Management',
         ]);
