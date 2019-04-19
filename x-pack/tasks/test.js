@@ -7,8 +7,8 @@
 import runSequence from 'run-sequence';
 import pluginHelpers from '@kbn/plugin-helpers';
 import { getEnabledPlugins } from './helpers/get_plugins';
-import { forPluginServerTests } from './helpers/globs';
 import { createAutoJUnitReporter } from '../../src/dev';
+import { forPluginServerTests } from './helpers/globs';
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',
@@ -29,7 +29,6 @@ export default (gulp, { mocha }) => {
     const globs = [
       'common/**/__tests__/**/*.js',
       'server/**/__tests__/**/*.js',
-      'plugins/code/**/__tests__/**/*.ts',
     ].concat(forPluginServerTests());
     return gulp.src(globs, { read: false })
       .pipe(mocha(MOCHA_OPTIONS));
