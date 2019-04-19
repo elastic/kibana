@@ -26,7 +26,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
       await testSubjects.click('createAdvancedWatchButton');
       await find.setValue('#id', watchName);
       await find.setValue('#watchName', name);
-      await testSubjects.click('btnSaveWatch');
+      await find.click('[type="submit"]');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
