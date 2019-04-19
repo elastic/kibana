@@ -17,5 +17,16 @@
  * under the License.
  */
 
-export { createFunctionalTestRunner } from './functional_test_runner';
-export { readConfigFile } from './lib';
+// @ts-ignore
+import { createTransform, Deprecations } from '../../../legacy/deprecation';
+
+type DeprecationTransformer = (
+  settings: object,
+  log: (msg: string) => void
+) => {
+  [key: string]: any;
+};
+
+export const transformDeprecations: DeprecationTransformer = createTransform([
+  Deprecations.unused('servers.webdriver'),
+]);

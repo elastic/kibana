@@ -4,6 +4,9 @@
     "types": [
       "node",
       "mocha"
+    ],
+    "lib": [
+      "esnext"
     ]
   },
   "include": [

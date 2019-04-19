@@ -20,22 +20,29 @@
 const INITIALIZING = Symbol('async instance initializing');
 const asyncInitFns = new WeakSet();
 
-export const isAsyncInstance = val => (
-  val && asyncInitFns.has(val.init)
-);
+type AsyncInstance<T> = {
+  init: () => Promise<T>;
+} & T;
 
-export const createAsyncInstance = (type, name, promiseForValue) => {
-  let instance = INITIALIZING;
+export const isAsyncInstance = <T = unknown>(val: any): val is AsyncInstance<T> =>
+  val && asyncInitFns.has(val.init);
 
-  const initPromise = promiseForValue.then(v => instance = v);
+export const createAsyncInstance = <T>(
+  type: string,
+  name: string,
+  promiseForValue: Promise<T>
+): AsyncInstance<T> => {
+  let instance: T | symbol = INITIALIZING;
+
+  const initPromise = promiseForValue.then(v => (instance = v));
   const loadingTarget = {
     init() {
       return initPromise;
-    }
+    },
   };
   asyncInitFns.add(loadingTarget.init);
 
-  const assertReady = desc => {
+  const assertReady = (desc: string) => {
     if (instance === INITIALIZING) {
       throw new Error(`
         ${type} \`${desc}\` is loaded asynchronously but isn't available yet. Either await the
@@ -52,81 +59,93 @@ export const createAsyncInstance = (type, name, promiseForValue) => {
   };
 
   return new Proxy(loadingTarget, {
-    apply(target, context, args) {
+    apply(_, context, args) {
       assertReady(`${name}()`);
-      return Reflect.apply(instance, context, args);
+      return Reflect.apply(instance as any, context, args);
     },
 
-    construct(target, args, newTarget) {
+    construct(_, args, newTarget) {
       assertReady(`new ${name}()`);
-      return Reflect.construct(instance, args, newTarget);
+      return Reflect.construct(instance as any, args, newTarget);
     },
 
-    defineProperty(target, prop, descriptor) {
-      assertReady(`${name}.${prop}`);
-      return Reflect.defineProperty(instance, prop, descriptor);
+    defineProperty(_, prop, descriptor) {
+      if (typeof prop !== 'symbol') {
+        assertReady(`${name}.${prop}`);
+      }
+      return Reflect.defineProperty(instance as any, prop, descriptor);
     },
 
-    deleteProperty(target, prop) {
-      assertReady(`${name}.${prop}`);
-      return Reflect.deleteProperty(instance, prop);
+    deleteProperty(_, prop) {
+      if (typeof prop !== 'symbol') {
+        assertReady(`${name}.${prop}`);
+      }
+      return Reflect.deleteProperty(instance as any, prop);
     },
 
-    get(target, prop, receiver) {
+    get(_, prop, receiver) {
       if (loadingTarget.hasOwnProperty(prop)) {
-        return Reflect.get(loadingTarget, prop, receiver);
+        return Reflect.get(loadingTarget as any, prop, receiver);
       }
 
-      assertReady(`${name}.${prop}`);
-      return Reflect.get(instance, prop, receiver);
+      if (typeof prop !== 'symbol') {
+        assertReady(`${name}.${prop}`);
+      }
+      return Reflect.get(instance as any, prop, receiver);
     },
 
-    getOwnPropertyDescriptor(target, prop) {
+    getOwnPropertyDescriptor(_, prop) {
       if (loadingTarget.hasOwnProperty(prop)) {
         return Reflect.getOwnPropertyDescriptor(loadingTarget, prop);
       }
 
-      assertReady(`${name}.${prop}`);
-      return Reflect.getOwnPropertyDescriptor(instance, prop);
+      if (typeof prop !== 'symbol') {
+        assertReady(`${name}.${prop}`);
+      }
+      return Reflect.getOwnPropertyDescriptor(instance as any, prop);
     },
 
     getPrototypeOf() {
       assertReady(`${name}`);
-      return Reflect.getPrototypeOf(instance);
+      return Reflect.getPrototypeOf(instance as any);
     },
 
-    has(target, prop) {
+    has(_, prop) {
       if (!loadingTarget.hasOwnProperty(prop)) {
         return Reflect.has(loadingTarget, prop);
       }
 
-      assertReady(`${name}.${prop}`);
-      return Reflect.has(instance, prop);
+      if (typeof prop !== 'symbol') {
+        assertReady(`${name}.${prop}`);
+      }
+      return Reflect.has(instance as any, prop);
     },
 
     isExtensible() {
       assertReady(`${name}`);
-      return Reflect.isExtensible(instance);
+      return Reflect.isExtensible(instance as any);
     },
 
     ownKeys() {
       assertReady(`${name}`);
-      return Reflect.ownKeys(instance);
+      return Reflect.ownKeys(instance as any);
     },
 
     preventExtensions() {
       assertReady(`${name}`);
-      return Reflect.preventExtensions(instance);
+      return Reflect.preventExtensions(instance as any);
     },
 
-    set(target, prop, value, receiver) {
-      assertReady(`${name}.${prop}`);
-      return Reflect.set(instance, prop, value, receiver);
+    set(_, prop, value, receiver) {
+      if (typeof prop !== 'symbol') {
+        assertReady(`${name}.${prop}`);
+      }
+      return Reflect.set(instance as any, prop, value, receiver);
     },
 
-    setPrototypeOf(target, prototype) {
+    setPrototypeOf(_, prototype) {
       assertReady(`${name}`);
-      return Reflect.setPrototypeOf(instance, prototype);
-    }
-  });
+      return Reflect.setPrototypeOf(instance as any, prototype);
+    },
+  }) as AsyncInstance<T>;
 };

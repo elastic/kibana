@@ -17,8 +17,5 @@
  * under the License.
  */
 
-import { createTransform, Deprecations } from '../../../legacy/deprecation';
-
-export const transformDeprecations = createTransform([
-  Deprecations.unused('servers.webdriver')
-]);
+export { Config } from './config';
+export { readConfigFile } from './read_config_file';

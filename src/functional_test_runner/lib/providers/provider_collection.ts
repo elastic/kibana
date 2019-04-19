@@ -17,52 +17,47 @@
  * under the License.
  */
 
+import { ToolingLog } from '@kbn/dev-utils';
+
 import { loadTracer } from '../load_tracer';
 import { createAsyncInstance, isAsyncInstance } from './async_instance';
+import { Providers } from './read_provider_spec';
 import { createVerboseInstance } from './verbose_instance';
 
 export class ProviderCollection {
-  constructor(log, providers) {
-    this._log = log;
-    this._instances = new Map();
-    this._providers = providers;
-  }
+  private readonly instances = new Map();
 
-  getService = name => (
-    this._getInstance('Service', name)
-  )
+  constructor(private readonly log: ToolingLog, private readonly providers: Providers) {}
 
-  hasService = name => (
-    Boolean(this._findProvider('Service', name))
-  )
+  public getService = (name: string) => this.getInstance('Service', name);
 
-  getPageObject = name => (
-    this._getInstance('PageObject', name)
-  )
+  public hasService = (name: string) => Boolean(this.findProvider('Service', name));
 
-  getPageObjects = names => {
-    const pageObjects = {};
-    names.forEach(name => pageObjects[name] = this.getPageObject(name));
+  public getPageObject = (name: string) => this.getInstance('PageObject', name);
+
+  public getPageObjects = (names: string[]) => {
+    const pageObjects: Record<string, any> = {};
+    names.forEach(name => (pageObjects[name] = this.getPageObject(name)));
     return pageObjects;
+  };
+
+  public loadExternalService(name: string, provider: (...args: any[]) => any) {
+    return this.getInstance('Service', name, provider);
   }
 
-  loadExternalService(name, provider) {
-    return this._getInstance('Service', name, provider);
-  }
-
-  async loadAll() {
-    const asyncInitFailures = [];
+  public async loadAll() {
+    const asyncInitFailures: string[] = [];
 
     await Promise.all(
-      this._providers.map(async ({ type, name }) => {
+      this.providers.map(async ({ type, name }) => {
         try {
-          const instance = this._getInstance(type, name);
+          const instance = this.getInstance(type, name);
           if (isAsyncInstance(instance)) {
             await instance.init();
           }
         } catch (err) {
-          this._log.warning('Failure loading service %j', name);
-          this._log.error(err);
+          this.log.warning('Failure loading service %j', name);
+          this.log.error(err);
           asyncInitFailures.push(name);
         }
       })
@@ -73,20 +68,20 @@ export class ProviderCollection {
     }
   }
 
-  _findProvider(type, name) {
-    return this._providers.find(p => p.type === type && p.name === name);
+  private findProvider(type: string, name: string) {
+    return this.providers.find(p => p.type === type && p.name === name);
   }
 
-  _getProvider(type, name) {
-    const providerDef = this._findProvider(type, name);
+  private getProvider(type: string, name: string) {
+    const providerDef = this.findProvider(type, name);
     if (!providerDef) {
       throw new Error(`Unknown ${type} "${name}"`);
     }
     return providerDef.fn;
   }
 
-  _getInstance(type, name, provider = this._getProvider(type, name)) {
-    const instances = this._instances;
+  private getInstance(type: string, name: string, provider = this.getProvider(type, name)) {
+    const instances = this.instances;
 
     return loadTracer(provider, `${type}(${name})`, () => {
       if (!provider) {
@@ -105,9 +100,15 @@ export class ProviderCollection {
           instance = createAsyncInstance(type, name, instance);
         }
 
-        if (name !== '__webdriver__' && name !== 'log' && name !== 'config' && instance && typeof instance === 'object') {
+        if (
+          name !== '__webdriver__' &&
+          name !== 'log' &&
+          name !== 'config' &&
+          instance &&
+          typeof instance === 'object'
+        ) {
           instance = createVerboseInstance(
-            this._log,
+            this.log,
             type === 'PageObject' ? `PageObjects.${name}` : name,
             instance
           );

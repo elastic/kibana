@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export { readConfigFile } from './read_config_file';
+export { createLifecycle, Lifecycle } from './lifecycle';
+export { readConfigFile, Config } from './config';
+export { readProviderSpec, ProviderCollection, Provider } from './providers';
+export { runTests, setupMocha } from './mocha';
