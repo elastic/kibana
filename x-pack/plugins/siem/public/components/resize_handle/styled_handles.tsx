@@ -29,6 +29,7 @@ export const ColumnHeaderResizeHandle = styled(CommonResizeHandle)`
 
 export const TimelineResizeHandle = styled(CommonResizeHandle)<{ height: number }>`
   border: ${TIMELINE_RESIZE_HANDLE_WIDTH}px solid ${props => props.theme.eui.euiColorLightShade};
+  z-index: 2;
   height: ${({ height }) => `${height}px`};
   position: absolute;
 `;
