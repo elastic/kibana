@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /* @notice
  * This product includes code that is based on facebookincubator/idx, which was
  * available under a "MIT" license.
@@ -286,6 +285,9 @@ module.exports = context => {
         .forEach(refPath => {
           if (refPath.node === idxBinding.node) {
             // Do nothing...
+          } else if (refPath.parentPath.isMemberExpression()) {
+            visitIdxCallExpression(refPath.parentPath.parentPath, state);
+            didTransform = true;
           } else if (refPath.parentPath.isCallExpression()) {
             visitIdxCallExpression(refPath.parentPath, state);
             didTransform = true;

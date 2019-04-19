@@ -17,7 +17,6 @@
  * under the License.
  */
 
-
 /* @notice
  * This product includes code that is based on facebookincubator/idx, which was
  * available under a "MIT" license.
@@ -432,6 +431,20 @@ describe('kbn-babel-plugin-apm-idx', () => {
     `);
   });
 
+  it('transforms idx calls when an idx is called as a member function on the binding in scope', () => {
+    expect(`
+      const elastic_idx = require("@kbn/elastic-idx");
+      const result = elastic_idx.idx(base, _ => _.a.b.c.d);
+    `).toTransformInto(`
+      const result = base != null &&
+        base.a != null &&
+        base.a.b != null &&
+        base.a.b.c != null ?
+        base.a.b.c.d :
+        undefined;
+    `);
+  });
+
   it('throws on base call expressions', () => {
     expect(`
       import { idx } from '@kbn/elastic-idx';
@@ -465,11 +478,13 @@ describe('kbn-babel-plugin-apm-idx', () => {
   });
 
   it('throws if there is a duplicate declaration', () => {
-    expect(() => transform(`
+    expect(() =>
+      transform(`
       let idx = require('@kbn/elastic-idx');
       idx(base, _ => _.b);
       function idx() {}
-    `)).toThrow();
+    `)
+    ).toThrow();
   });
 
   it('handles sibling scopes with unique idx', () => {
