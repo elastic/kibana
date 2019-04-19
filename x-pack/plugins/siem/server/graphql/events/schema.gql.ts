@@ -58,6 +58,10 @@ export const eventsSchema = gql`
     data: [DetailItem!]
   }
 
+  type LastEventTimeData {
+    lastSeen: Date
+  }
+
   extend type Source {
     "Gets events based on timerange and specified criteria, or all events in the timerange if no criteria is specified"
     Events(
@@ -74,5 +78,6 @@ export const eventsSchema = gql`
       filterQuery: String
     ): TimelineData!
     TimelineDetails(eventId: String!, indexName: String!): TimelineDetailsData!
+    LastEventTime(id: String, indexKey: String!): LastEventTimeData!
   }
 `;

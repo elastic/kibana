@@ -28,7 +28,7 @@ const overviewPageHeadline = {
 
 export const getHeaderForRoute = (pathname: string) => {
   const trailingPath = pathname.match(/.*\/(.*)$/);
-  const subtitle = <LastBeatStat isLoading={true} lastSeen={'2019-04-19T14:58:17.931Z'} />;
+  const subtitle = <LastBeatStat indexKey={'hosts'} />;
   if (trailingPath !== null) {
     const pathSegment = trailingPath[1];
     switch (pathSegment) {
