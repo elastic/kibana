@@ -61,8 +61,7 @@ image::maps/images/vector_style_dynamic.png[]
 [[maps-vector-style-class]]
 ==== Class styling
 
-Class styling symbolizes features by class.
-Class styling requires multiple layers.
+Class styling symbolizes features by class and requires multiple layers.
 Use <<maps-layer-based-filtering, layer filtering>> to define the class for each layer, and <<maps-vector-style-static, static styling>> to symbolize each class.
 
 The image below shows an example of class styling using the <<add-sample-data, Kibana sample web logs>> data set.
