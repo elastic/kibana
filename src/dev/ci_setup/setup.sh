@@ -195,7 +195,7 @@ function checks-reporter-with-killswitch() {
     yarn run github-checks-reporter "$@"
   else
     arguments=("$@");
-    ${arguments[@]:1};
+    "${arguments[@]:1}";
   fi
 }
 
