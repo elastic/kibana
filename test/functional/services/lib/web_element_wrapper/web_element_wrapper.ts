@@ -519,7 +519,7 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async parseDomContent(): Promise<any> {
-    const htmlContent = await this.getProperty('innerHTML');
+    const htmlContent: any = await this.getProperty('innerHTML');
     const $ = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,

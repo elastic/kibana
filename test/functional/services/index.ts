@@ -36,7 +36,7 @@ import { EmbeddingProvider } from './embedding';
 import { FailureDebuggingProvider } from './failure_debugging';
 // @ts-ignore not TS yet
 import { FilterBarProvider } from './filter_bar';
-import { FindProvider as find } from './find';
+import { FindProvider } from './find';
 // @ts-ignore not TS yet
 import { FlyoutProvider } from './flyout';
 // @ts-ignore not TS yet
@@ -66,7 +66,7 @@ export const services = {
   __webdriver__: RemoteProvider,
   filterBar: FilterBarProvider,
   queryBar: QueryBarProvider,
-  find,
+  find: FindProvider,
   testSubjects: TestSubjectsProvider,
   docTable: DocTableProvider,
   screenshots: ScreenshotsProvider,
