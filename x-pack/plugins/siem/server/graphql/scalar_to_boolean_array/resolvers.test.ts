@@ -68,10 +68,6 @@ describe('Test ToBooleanArray Scalar Resolver', () => {
       expect(toBooleanArrayScalar.serialize(['true'])).toEqual([true]);
     });
 
-    test('Test string with gibberish returning false', () => {
-      expect(toBooleanArrayScalar.serialize('some gibberish')).toEqual([false]);
-    });
-
     test('Test number with 0 returning false', () => {
       expect(toBooleanArrayScalar.serialize(0)).toEqual([false]);
     });

@@ -21,7 +21,7 @@ export const EVENTS_SELECT_WIDTH = 60; // px
 
 // SIDE EFFECT: the following `injectGlobal` overrides
 // the style of the select items
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line
 injectGlobal`
   .eventsSelectItem {
     width: 100% !important;

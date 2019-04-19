@@ -43,7 +43,7 @@ export function compose(): AppFrontendLibs {
     schema,
   });
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cache = new InMemoryCache((window as any).__APOLLO_CLIENT__);
 
   const apolloClient = new ApolloClient({

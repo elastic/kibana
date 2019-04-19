@@ -25,7 +25,7 @@ interface AutoSizerProps {
   content?: boolean;
   onResize?: (size: Measurements) => void;
   children: (
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     args: { measureRef: (instance: HTMLElement | null) => any } & Measurements
   ) => React.ReactNode;
 }

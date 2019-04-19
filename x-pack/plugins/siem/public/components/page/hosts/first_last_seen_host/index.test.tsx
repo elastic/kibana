@@ -24,10 +24,10 @@ describe('FirstLastSeen Component', async () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
   const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
 
-  // tslint:disable-next-line:no-console
+  // eslint-disable-next-line no-console
   const originalError = console.error;
   beforeAll(() => {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error = (...args: string[]) => {
       if (/Warning.*not wrapped in act/.test(args[0])) {
         return;
@@ -37,7 +37,7 @@ describe('FirstLastSeen Component', async () => {
   });
 
   afterAll(() => {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error = originalError;
   });
 

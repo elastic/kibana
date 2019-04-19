@@ -53,10 +53,13 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      auditd.event != null && auditd.event.action != null
-        ? (auditd.event.action[0] = 'some other value')
-        : expect(auditd.event).toBeDefined();
-      expect(connectedToRenderer.isInstance(auditd)).toBe(false);
+      if (auditd.event != null && auditd.event.action != null) {
+        auditd.event.action[0] = 'some other value';
+        expect(connectedToRenderer.isInstance(auditd)).toBe(false);
+      } else {
+        // will fail and give you an error if either is not defined as a mock
+        expect(auditd.event).toBeDefined();
+      }
     });
 
     test('should render children normally if it does not have a auditd object', () => {
@@ -129,10 +132,13 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      auditdFile.event != null && auditdFile.event.action != null
-        ? (auditdFile.event.action[0] = 'some other value')
-        : expect(auditdFile.event).toBeDefined();
-      expect(fileToRenderer.isInstance(auditdFile)).toBe(false);
+      if (auditdFile.event != null && auditdFile.event.action != null) {
+        auditdFile.event.action[0] = 'some other value';
+        expect(fileToRenderer.isInstance(auditdFile)).toBe(false);
+      } else {
+        // will fail and give you an error if either is not defined as a mock
+        expect(auditdFile.event).toBeDefined();
+      }
     });
 
     test('should render children normally if it does not have a auditd object', () => {

@@ -1,5 +1,0 @@
-extends: ../../tslint.yaml
-
-rules:
-  no-any: true
-  ordered-imports: [true, { 'grouped-imports': true }]

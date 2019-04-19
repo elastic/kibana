@@ -304,7 +304,7 @@ export const FixedEuiFieldSearch: React.SFC<
       inputRef?: (element: HTMLInputElement | null) => void;
       onSearch: (value: string) => void;
     }
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 > = EuiFieldSearch as any;
 
 const AutocompleteContainer = euiStyled.div`

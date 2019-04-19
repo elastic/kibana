@@ -17,7 +17,7 @@ export const DEFAULT_COLUMN_MIN_WIDTH = 180; // px
 /** The default minimum width of a column of type `date` */
 export const DEFAULT_DATE_COLUMN_MIN_WIDTH = 240; // px
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const omitTypenameAndEmpty = (k: string, v: any): any | undefined =>
   k !== '__typename' && v != null ? v : undefined;
 
@@ -27,7 +27,7 @@ export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
 
 export const getPinTooltip = ({
   isPinned,
-  // tslint:disable-next-line:no-shadowed-variable
+  // eslint-disable-next-line no-shadow
   eventHasNotes,
 }: {
   isPinned: boolean;

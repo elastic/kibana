@@ -12,7 +12,7 @@ import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kiban
 const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function siem(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,

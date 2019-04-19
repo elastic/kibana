@@ -76,7 +76,9 @@ export const FlowTargetSelect = pure<FlowTargetSelectProps>(
           : toggleTargetOptions(id, displayTextOverride)
       }
       valueOfSelected={selectedTarget}
-      onChange={newFlowTarget => onChangeTarget(newFlowTarget, updateFlowTargetAction)}
+      onChange={(newFlowTarget: FlowTarget) =>
+        onChangeTarget(newFlowTarget, updateFlowTargetAction)
+      }
       isLoading={isLoading}
     />
   )

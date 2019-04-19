@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IModule, IScope } from 'angular';
+import { IScope } from 'angular';
 import { NormalizedCacheObject } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import React from 'react';
@@ -29,16 +29,12 @@ export interface AppFrameworkAdapter {
   scaledDateFormat?: string;
   timezone?: string;
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setUISettings(key: string, value: any): void;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render(component: React.ReactElement<any>): void;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   renderBreadcrumbs(component: React.ReactElement<any>): void;
-}
-
-export interface AppFrameworkAdapterConstructible {
-  new (uiModule: IModule, timezoneProvider: AppTimezoneProvider): AppFrameworkAdapter;
 }
 
 export interface AppObservableApiPostParams<RequestBody extends {} = {}> {
@@ -58,16 +54,16 @@ export interface AppObservableApi {
 }
 
 export interface AppUiKibanaAdapterScope extends IScope {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   breadcrumbs: any[];
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   topNavMenu: any[];
 }
 
 export interface AppKibanaUIConfig {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(key: string): any;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   set(key: string, value: any): Promise<boolean>;
 }
 

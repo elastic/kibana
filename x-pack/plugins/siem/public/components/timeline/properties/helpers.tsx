@@ -53,6 +53,10 @@ export const StarIcon = pure<{
   timelineId: string;
   updateIsFavorite: UpdateIsFavorite;
 }>(({ isFavorite, timelineId: id, updateIsFavorite }) => (
+  // TODO: 1 error is: Visible, non-interactive elements with click handlers must have at least one keyboard listener
+  // TODO: 2 error is: Elements with the 'button' interactive role must be focusable
+  // TODO: Investigate this error
+  // eslint-disable-next-line
   <div role="button" onClick={() => updateIsFavorite({ id, isFavorite: !isFavorite })}>
     {isFavorite ? (
       <EuiToolTip data-test-subj="timeline-favorite-filled-star-tool-tip" content={i18n.FAVORITE}>

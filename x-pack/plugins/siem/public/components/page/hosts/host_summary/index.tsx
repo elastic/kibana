@@ -79,7 +79,7 @@ export const getEuiDescriptionList = (
       return (
         <React.Fragment key={`host-summary-${field}-${title}`}>
           <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-          {/*Using EuiDescriptionListDescription throws off sizing of Draggable*/}
+          {/* Using EuiDescriptionListDescription throws off sizing of Draggable */}
           <div>
             {loading ? (
               <EuiLoadingSpinner size="m" />

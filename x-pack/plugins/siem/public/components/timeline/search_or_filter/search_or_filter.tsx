@@ -28,7 +28,7 @@ import * as i18n from './translations';
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 
 // SIDE EFFECT: the following creates a global class selector
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line no-unused-expressions
 injectGlobal`
   .${timelineSelectModeItemsClassName} {
     width: 350px !important;

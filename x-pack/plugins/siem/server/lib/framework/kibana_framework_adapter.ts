@@ -36,12 +36,12 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
     this.version = hapiServer.plugins.kibana.status.plugin.version;
   }
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async callWithRequest(
     req: FrameworkRequest<Legacy.Request>,
     endpoint: string,
     params: CallWithRequestParams,
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...rest: any[]
   ) {
     const internalRequest = req[internalFrameworkRequest];
@@ -109,7 +109,7 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
       throw new Error('Failed to access indexPatternsService for the request');
     }
     return this.server.indexPatternsServiceFactory({
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       callCluster: async (method: string, args: [GenericParams], ...rest: any[]) => {
         const fieldCaps = await this.callWithRequest(
           request,
@@ -138,7 +138,7 @@ export function wrapRequest<InternalRequest extends WrappableRequest>(
 
 interface ServerWithIndexPatternsServiceFactory extends Server {
   indexPatternsServiceFactory(options: {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     callCluster: (...args: any[]) => any;
   }): FrameworkIndexPatternsService;
 }
@@ -146,5 +146,5 @@ interface ServerWithIndexPatternsServiceFactory extends Server {
 const isServerWithIndexPatternsServiceFactory = (
   server: Server
 ): server is ServerWithIndexPatternsServiceFactory =>
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   typeof (server as any).indexPatternsServiceFactory === 'function';

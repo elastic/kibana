@@ -58,7 +58,7 @@ const convertToDate = (value: object | number | boolean | string): string => {
   }
 };
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertArrayToDate = (values: any[]): string[] | string => {
   if (Array.isArray(values)) {
     return values.filter(item => item != null).map(item => convertArrayToDate(item)) as string[];

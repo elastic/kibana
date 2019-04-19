@@ -10,7 +10,7 @@ import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line no-unused-expressions
 injectGlobal`
   .euiPanel-loading-hide-border {
     border: none;

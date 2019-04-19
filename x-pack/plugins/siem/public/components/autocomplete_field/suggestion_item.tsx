@@ -107,7 +107,7 @@ const getEuiIconType = (suggestionType: string) => {
   }
 };
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getEuiIconColor = (theme: any, suggestionType: string): string => {
   switch (suggestionType) {
     case 'field':

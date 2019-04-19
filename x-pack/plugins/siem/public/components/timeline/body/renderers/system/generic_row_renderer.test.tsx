@@ -53,12 +53,15 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      system.event != null && system.event.action != null
-        ? (system.event.action[0] = 'some other value')
-        : expect(system.event).toBeDefined();
-      expect(connectedToRenderer.isInstance(system)).toBe(false);
+      if (system.event != null && system.event.action != null) {
+        system.event.action[0] = 'some other value';
+        expect(connectedToRenderer.isInstance(system)).toBe(false);
+      } else {
+        // if system.event or system.event.action is not defined in the mock
+        // then we will get an error here
+        expect(system.event).toBeDefined();
+      }
     });
-
     test('should render a system row', () => {
       const children = connectedToRenderer.renderRow({
         browserFields: mockBrowserFields,
@@ -114,10 +117,12 @@ describe('GenericRowRenderer', () => {
     });
 
     test('should return false when action is set to some other value', () => {
-      systemFile.event != null && systemFile.event.action != null
-        ? (systemFile.event.action[0] = 'some other value')
-        : expect(systemFile.event).toBeDefined();
-      expect(fileToRenderer.isInstance(systemFile)).toBe(false);
+      if (systemFile.event != null && systemFile.event.action != null) {
+        systemFile.event.action[0] = 'some other value';
+        expect(fileToRenderer.isInstance(systemFile)).toBe(false);
+      } else {
+        expect(systemFile.event).toBeDefined();
+      }
     });
 
     test('should render a system row', () => {

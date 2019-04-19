@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -32,9 +33,9 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
 
   private adapterService: KibanaAdapterServiceProvider;
   private timezoneProvider: AppTimezoneProvider;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private rootComponent: React.ReactElement<any> | null = null;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private breadcrumbsComponent: React.ReactElement<any> | null = null;
 
   constructor(uiModule: IModule, uiRoutes: KibanaUIRoutes, timezoneProvider: AppTimezoneProvider) {
@@ -43,19 +44,19 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
     this.register(uiModule, uiRoutes);
   }
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public setUISettings = (key: string, value: any) => {
     this.adapterService.callOrBuffer(({ config }) => {
       config.set(key, value);
     });
   };
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public render = (component: React.ReactElement<any>) => {
     this.adapterService.callOrBuffer(() => (this.rootComponent = component));
   };
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public renderBreadcrumbs = (component: React.ReactElement<any>) => {
     this.adapterService.callOrBuffer(() => (this.breadcrumbsComponent = component));
   };
@@ -125,7 +126,7 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
       kbnVersion: string,
       Private: <Provider>(provider: Provider) => Provider,
       // @ts-ignore: inject kibanaAdapter to force eager installation
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       kibanaAdapter: any
     ) => {
       this.timezone = Private(this.timezoneProvider)();
@@ -149,7 +150,6 @@ export class AppKibanaFrameworkAdapter implements AppFrameworkAdapter {
   };
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: AppKibanaAdapterServiceRefs | null = null;
   public bufferedCalls: Array<AppBufferedKibanaServiceCall<AppKibanaAdapterServiceRefs>> = [];

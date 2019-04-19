@@ -10,7 +10,7 @@ const LOGGING_TAGS = ['siem'];
 // https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/hapi/v16/index.d.ts#L318
 export type HapiLogger = (
   tags: string | string[],
-  // tslint:disable-next-line:ban-types
+  // eslint-disable-next-line
   data?: string | Object | Function,
   timestamp?: number
 ) => void;

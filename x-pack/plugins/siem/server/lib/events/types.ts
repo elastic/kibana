@@ -22,7 +22,7 @@ export interface EventsRequestOptions extends RequestOptions {
 }
 
 export interface EventSource {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [field: string]: any;
 }
 
@@ -30,7 +30,7 @@ export interface EventHit extends SearchHit {
   sort: string[];
   _source: EventSource;
   aggregations: {
-    // tslint:disable-next-line:no-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [agg: string]: any;
   };
 }

@@ -49,10 +49,10 @@ interface BasicTableProps<T> {
   loadMore: () => void;
   itemsPerRow?: ItemsPerRow[];
   onChange?: (criteria: Criteria) => void;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   sorting?: SortingBasicTable;
-  title: string | React.ReactNode;
+  title: string | React.ReactElement;
   updateLimitPagination: (limit: number) => void;
 }
 
@@ -165,7 +165,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
             />
           </>
         )}
-        <EuiTitle size="s">{title}</EuiTitle>
+        <EuiTitle size="s">
+          <>{title}</>
+        </EuiTitle>
         <EuiBasicTable
           items={pageOfItems}
           columns={columns}

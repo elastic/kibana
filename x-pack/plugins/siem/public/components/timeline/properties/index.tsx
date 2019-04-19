@@ -40,7 +40,7 @@ type UpdateDescription = ({ id, description }: { id: string; description: string
 
 // SIDE EFFECT: the following `injectGlobal` overrides `EuiPopover`
 // and `EuiToolTip` global styles:
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line no-unused-expressions
 injectGlobal`
   .euiPopover__panel.euiPopover__panel-isOpen {
     z-index: 9900 !important;
