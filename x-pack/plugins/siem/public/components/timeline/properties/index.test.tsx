@@ -30,7 +30,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -56,7 +56,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -83,7 +83,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={true}
           title=""
           description=""
@@ -112,7 +112,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title={title}
           description=""
@@ -144,7 +144,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -170,13 +170,13 @@ describe('Properties', () => {
     ).toEqual(true);
   });
 
-  test('it renders the lock icon when isLock is true', () => {
+  test('it renders the lock icon when isDatepickerLocked is true', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={true}
+          isDatepickerLocked={true}
           isFavorite={false}
           title=""
           description=""
@@ -201,13 +201,13 @@ describe('Properties', () => {
     ).toEqual(true);
   });
 
-  test('it renders the unlock icon when isLock is false', () => {
+  test('it renders the unlock icon when isDatepickerLocked is false', () => {
     const wrapper = mount(
       <ReduxStoreProvider store={store}>
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -241,7 +241,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description={description}
@@ -277,7 +277,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description={description}
@@ -311,7 +311,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -345,7 +345,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -377,7 +377,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""
@@ -406,7 +406,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title={title}
           description=""
@@ -433,7 +433,7 @@ describe('Properties', () => {
         <Properties
           associateNote={jest.fn()}
           createTimeline={jest.fn()}
-          isLock={false}
+          isDatepickerLocked={false}
           isFavorite={false}
           title=""
           description=""

@@ -95,3 +95,7 @@ export const Facet = styled.div`
   padding-right: 8px;
   user-select: none;
 `;
+
+export const LockIconContainer = styled(EuiFlexItem)`
+  margin-right: 2px;
+`;

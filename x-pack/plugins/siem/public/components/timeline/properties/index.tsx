@@ -24,7 +24,13 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { SuperDatePicker } from '../../super_date_picker';
 
 import { Description, Name, NewTimeline, NotesButton, StarIcon } from './helpers';
-import { DatePicker, PropertiesLeft, PropertiesRight, TimelineProperties } from './styles';
+import {
+  DatePicker,
+  PropertiesLeft,
+  PropertiesRight,
+  TimelineProperties,
+  LockIconContainer,
+} from './styles';
 import * as i18n from './translations';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
@@ -52,7 +58,7 @@ const Avatar = styled(EuiAvatar)`
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
-  isLock: boolean;
+  isDatepickerLocked: boolean;
   isFavorite: boolean;
   title: string;
   description: string;
@@ -74,6 +80,7 @@ interface State {
 }
 
 const rightGutter = 60; // px
+export const datePickerThreshold = 600;
 export const showNotesThreshold = 810;
 export const showDescriptionThreshold = 970;
 
@@ -117,7 +124,7 @@ export class Properties extends React.PureComponent<Props, State> {
       description,
       getNotesByIds,
       isFavorite,
-      isLock,
+      isDatepickerLocked,
       title,
       noteIds,
       timelineId,
@@ -184,30 +191,37 @@ export class Properties extends React.PureComponent<Props, State> {
               gutterSize="none"
               data-test-subj="timeline-date-picker-container"
             >
-              <EuiFlexItem grow={false}>
+              <LockIconContainer grow={false}>
                 <EuiToolTip
                   data-test-subj="timeline-date-picker-lock-tooltip"
                   position="top"
                   content={
-                    isLock
+                    isDatepickerLocked
                       ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
                       : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
                   }
                 >
                   <EuiButtonIcon
-                    data-test-subj={`timeline-date-picker-${isLock ? 'lock' : 'unlock'}-button`}
+                    data-test-subj={`timeline-date-picker-${
+                      isDatepickerLocked ? 'lock' : 'unlock'
+                    }-button`}
                     color="primary"
                     onClick={this.toggleLock}
-                    iconType={isLock ? 'lock' : 'lockOpen'}
+                    iconType={isDatepickerLocked ? 'lock' : 'lockOpen'}
                     aria-label={
-                      isLock
+                      isDatepickerLocked
                         ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
                         : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
                     }
                   />
                 </EuiToolTip>
-              </EuiFlexItem>
-              <DatePicker grow={1} width={datePickerWidth > 600 ? 600 : datePickerWidth}>
+              </LockIconContainer>
+              <DatePicker
+                grow={1}
+                width={
+                  datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
+                }
+              >
                 <SuperDatePicker id="timeline" />
               </DatePicker>
             </EuiFlexGroup>

@@ -36,7 +36,7 @@ interface StateReduxProps {
   description?: string;
   getNotesByIds: (noteIds: string[]) => Note[];
   isFavorite?: boolean;
-  isLock?: boolean;
+  isDatepickerLocked?: boolean;
   noteIds: string[];
   title?: string;
   width?: number;
@@ -76,7 +76,7 @@ const statefulFlyoutHeader = pure<Props>(
     description,
     getNotesByIds,
     isFavorite,
-    isLock,
+    isDatepickerLocked,
     title,
     width = defaultWidth,
     noteIds,
@@ -93,7 +93,7 @@ const statefulFlyoutHeader = pure<Props>(
       createTimeline={createTimeline!}
       description={description!}
       getNotesByIds={getNotesByIds}
-      isLock={isLock!}
+      isDatepickerLocked={isDatepickerLocked!}
       isFavorite={isFavorite!}
       title={title!}
       noteIds={noteIds}
@@ -133,7 +133,7 @@ const makeMapStateToProps = () => {
       getNotesByIds: getNotesByIds(state),
       history,
       isFavorite,
-      isLock: globalInput.linkTo.includes('timeline'),
+      isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
       title,
       width,
