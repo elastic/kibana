@@ -48,13 +48,11 @@ function createBadgeApi() {
       set(newBadge: Badge | undefined) {
         newPlatformChrome.setBadge(newBadge);
       },
-    }
+    },
   };
 }
 
-export function initChromeBadgeApi(
-  chrome: { [key: string]: any },
-) {
+export function initChromeBadgeApi(chrome: { [key: string]: any }) {
   const { badge } = createBadgeApi();
   chrome.badge = badge;
 }
