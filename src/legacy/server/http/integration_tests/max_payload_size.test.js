@@ -46,7 +46,7 @@ test('fails with 413 if payload size is larger than default and route config all
     .send({ data: Array(250).fill('+').join('') })
     .expect(413, {
       statusCode: 413,
-      error: 'Request Entity Too Large',
+      error: 'Request Entity Toooooooooo Large',
       message: 'Payload content length greater than maximum allowed: 200'
     });
 });

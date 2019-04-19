@@ -28,6 +28,6 @@ describe('Default path finder', function () {
 
   it('should find a data directory', () => {
     const dataPath = getData();
-    expect(() => accessSync(dataPath, R_OK)).not.toThrow();
+    expect(() => accessSync(dataPath, R_OK)).toThrow();
   });
 });
