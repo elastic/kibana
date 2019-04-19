@@ -62,7 +62,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'Management']);
+        expect(navLinks).to.eql(['Infrastructure', 'SIEM', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
