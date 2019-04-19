@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { metadata } from 'ui/metadata';
-const STACK_VERSION = metadata.branch;
-
-export const DROPPED_SPANS_DOCS = `https://www.elastic.co/guide/en/apm/get-started/${STACK_VERSION}/transaction-spans.html#dropped-spans`;
+export function getTermsFields(fields) {
+  return fields.filter(field => {
+    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+  });
+}
