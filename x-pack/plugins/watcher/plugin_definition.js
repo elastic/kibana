@@ -21,14 +21,8 @@ export const pluginDefinition = {
   publicDir: resolve(__dirname, 'public'),
   require: ['kibana', 'elasticsearch', 'xpack_main'],
   uiExports: {
-    managementSections: [
-      'plugins/watcher/sections/watch_detail',
-      'plugins/watcher/sections/watch_edit',
-      'plugins/watcher/sections/watch_list',
-      'plugins/watcher/sections/watch_history_item',
-    ],
-    styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    home: ['plugins/watcher/register_feature']
+    managementSections: ['plugins/watcher'],
+    home: ['plugins/watcher/register_feature'],
   },
   init: function (server) {
     registerLicenseChecker(server);
@@ -40,5 +34,5 @@ export const pluginDefinition = {
     registerSettingsRoutes(server);
     registerWatchesRoutes(server);
     registerWatchRoutes(server);
-  }
+  },
 };

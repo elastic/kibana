@@ -37,9 +37,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.watcher.createWatch(watchID, updatedName);
       const modal = await testSubjects.find('confirmModalBodyText');
       const modalText = await modal.getVisibleText();
-      expect(modalText).to.be(
-        `Watch with ID "${watchID}" (name: "${watchName}") already exists. Do you want to overwrite it?`
-      );
+      expect(modalText).to.be('Saving this watch will overwrite previous content.');
       await testSubjects.click('confirmModalConfirmButton');
       const watch = await PageObjects.watcher.getWatch(watchID);
       expect(watch.id).to.be(watchID);

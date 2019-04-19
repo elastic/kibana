@@ -12,8 +12,8 @@ import { isEqual } from 'lodash';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { loadWatch } from '../../../lib/api';
-import { JsonWatchEdit } from './json_watch_edit_component';
-import { ThresholdWatchEdit } from './threshold_watch_edit_component';
+import { JsonWatchEdit } from './json_watch_edit';
+import { ThresholdWatchEdit } from './threshold_watch_edit';
 import { WatchContext } from './watch_context';
 
 const getTitle = (watch: BaseWatch) => {
@@ -53,17 +53,16 @@ const watchReducer = (state: any, action: any) => {
 };
 
 export const WatchEdit = ({
-  watchId,
-  watchType,
-  savedObjectsClient,
-  urlService,
-  licenseService,
+  match: {
+    params: { id, type },
+  },
 }: {
-  watchId: string;
-  watchType: string;
-  savedObjectsClient: any;
-  urlService: any;
-  licenseService: any;
+  match: {
+    params: {
+      id: string | undefined;
+      type: string | undefined;
+    };
+  };
 }) => {
   // hooks
   const [watch, dispatch] = useReducer(watchReducer, null);
@@ -74,11 +73,11 @@ export const WatchEdit = ({
     dispatch({ command: 'addAction', payload: action });
   };
   const getWatch = async () => {
-    if (watchId) {
-      const theWatch = await loadWatch(watchId);
+    if (id) {
+      const theWatch = await loadWatch(id);
       dispatch({ command: 'setWatch', payload: theWatch });
-    } else {
-      const WatchType = Watch.getWatchTypes()[watchType];
+    } else if (type) {
+      const WatchType = Watch.getWatchTypes()[type];
       if (WatchType) {
         dispatch({ command: 'setWatch', payload: new WatchType() });
       }
@@ -99,12 +98,7 @@ export const WatchEdit = ({
   }
   return (
     <WatchContext.Provider value={{ watch, setWatchProperty, addAction }}>
-      <EditComponent
-        savedObjectsClient={savedObjectsClient}
-        pageTitle={pageTitle}
-        urlService={urlService}
-        licenseService={licenseService}
-      />
+      <EditComponent pageTitle={pageTitle} />
     </WatchContext.Provider>
   );
 };

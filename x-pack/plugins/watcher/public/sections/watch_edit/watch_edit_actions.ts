@@ -9,6 +9,7 @@ import { toastNotifications } from 'ui/notify';
 import { ACTION_TYPES } from '../../../common/constants';
 import { BaseWatch } from '../../../common/types/watch_types';
 import { createWatch, loadWatch } from '../../lib/api';
+import { goToWatchList } from '../../lib/navigation';
 
 /**
  * Get the type from an action where a key defines its type.
@@ -54,7 +55,7 @@ function createActionsForWatch(watchInstance: BaseWatch) {
   return watchInstance;
 }
 
-export async function saveWatch(watch: BaseWatch, urlService: any, licenseService: any) {
+export async function saveWatch(watch: BaseWatch, licenseService: any) {
   try {
     await createWatch(watch);
     toastNotifications.addSuccess(
@@ -65,7 +66,7 @@ export async function saveWatch(watch: BaseWatch, urlService: any, licenseServic
         },
       })
     );
-    urlService.change('/management/elasticsearch/watcher/watches', {});
+    goToWatchList();
   } catch (error) {
     return licenseService
       .checkValidity()
@@ -73,11 +74,7 @@ export async function saveWatch(watch: BaseWatch, urlService: any, licenseServic
   }
 }
 
-export async function validateActionsAndSaveWatch(
-  watch: BaseWatch,
-  urlService: any,
-  licenseService: any
-) {
+export async function validateActionsAndSaveWatch(watch: BaseWatch, licenseService: any) {
   const { warning } = watch.validate();
   if (warning) {
     return {
@@ -93,18 +90,14 @@ export async function validateActionsAndSaveWatch(
     };
   }
   // client validation passed, make request to create watch
-  saveWatch(watch, urlService, licenseService);
+  return saveWatch(watch, licenseService);
 }
 
-export async function onWatchSave(
-  watch: BaseWatch,
-  urlService: any,
-  licenseService: any
-): Promise<any> {
+export async function onWatchSave(watch: BaseWatch, licenseService: any): Promise<any> {
   const watchActions = watch.watch && watch.watch.actions;
   const watchData = watchActions ? createActionsForWatch(watch) : watch;
   if (!watchData.isNew) {
-    return validateActionsAndSaveWatch(watch, urlService, licenseService);
+    return validateActionsAndSaveWatch(watch, licenseService);
   }
   try {
     const existingWatch = await loadWatch(watchData.id);
@@ -137,7 +130,7 @@ export async function onWatchSave(
     // Confirms watcher does not already exist
     return licenseService.checkValidity().then(() => {
       if (error.status === 404) {
-        return validateActionsAndSaveWatch(watchData, urlService, licenseService);
+        return validateActionsAndSaveWatch(watchData, licenseService);
       }
       return toastNotifications.addDanger(error.data.message);
     });
