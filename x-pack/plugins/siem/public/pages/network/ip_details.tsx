@@ -5,8 +5,8 @@
  */
 
 import { EuiHorizontalRule, EuiLink, EuiSpacer } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -21,7 +21,6 @@ import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { IpOverview } from '../../components/page/network/ip_overview';
 import { DomainsQuery } from '../../containers/domains';
-import { IpOverviewTool } from '../../components/page/network/ip_overview/tool';
 import { GlobalTime } from '../../containers/global_time';
 import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
@@ -69,55 +68,57 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             <GlobalTime>
               {({ poll, to, from, setQuery }) => (
                 <>
-                      <IpOverviewQuery
-                  sourceId="default"
-                  filterQuery={filterQuery}
-                  type={networkModel.NetworkType.details}
-                  ip={decodeIpv6(ip)}
-                >
-                  {({ ipOverviewData, loading }) => (
-                    <IpOverview
-                      ip={decodeIpv6(ip)}
-                      data={ipOverviewData}
-                      loading={loading}
-                      type={networkModel.NetworkType.details}
-                    flowTarget={flowTarget}
-                            updateFlowTargetAction={updateIpDetailsFlowTarget}/>
-                  )}
-                </IpOverviewQuery><EuiSpacer size="s" />
-                      <EuiHorizontalRule margin="xs" />
-                      <EuiSpacer size="s" />
-
-                      <DomainsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
-                        flowTarget={flowTarget}
+                  <IpOverviewQuery
+                    sourceId="default"
+                    filterQuery={filterQuery}
+                    type={networkModel.NetworkType.details}
+                    ip={decodeIpv6(ip)}
+                  >
+                    {({ ipOverviewData, loading }) => (
+                      <IpOverview
                         ip={decodeIpv6(ip)}
-                        poll={poll}
-                        sourceId="default"
-                        startDate={from}
+                        data={ipOverviewData}
+                        loading={loading}
                         type={networkModel.NetworkType.details}
-                      >
-                        {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                          <DomainsTableManage
-                            data={domains}
-                            id={id}
-                            flowTarget={flowTarget}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            ip={ip}
-                            loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            startDate={from}
-                            endDate={to}
-                            totalCount={totalCount}
-                            type={networkModel.NetworkType.details}
-                          />
-                        )}
-                      </DomainsQuery>
-                    </>
+                        flowTarget={flowTarget}
+                        updateFlowTargetAction={updateIpDetailsFlowTarget}
+                      />
+                    )}
+                  </IpOverviewQuery>
+                  <EuiSpacer size="s" />
+                  <EuiHorizontalRule margin="xs" />
+                  <EuiSpacer size="s" />
+
+                  <DomainsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={decodeIpv6(ip)}
+                    poll={poll}
+                    sourceId="default"
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  >
+                    {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                      <DomainsTableManage
+                        data={domains}
+                        id={id}
+                        flowTarget={flowTarget}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        ip={ip}
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        startDate={from}
+                        endDate={to}
+                        totalCount={totalCount}
+                        type={networkModel.NetworkType.details}
+                      />
+                    )}
+                  </DomainsQuery>
+                </>
               )}
             </GlobalTime>
           </>
@@ -171,5 +172,4 @@ export const getPageHeadline = (ip: string): HeaderPageProps => ({
     />
   ),
   title: decodeIpv6(ip),
-  children: <IpOverviewTool />,
 });
