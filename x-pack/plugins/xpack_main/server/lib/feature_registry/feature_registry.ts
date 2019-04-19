@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { cloneDeep, difference, uniq } from 'lodash';
+import { get, cloneDeep, difference, uniq } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeatureKibanaPrivileges {
@@ -157,7 +157,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
     if (unknownAppEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
-        feature.id
+          feature.id
         }.${privilegeId} has unknown app entries: ${unknownAppEntries.join(', ')}`
       );
     }
@@ -166,7 +166,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
-        feature.id
+          feature.id
         }.${privilegeId} has unknown catalogue entries: ${unknownCatalogueEntries.join(', ')}`
       );
     }
@@ -176,7 +176,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
         if (!management[managementSectionId]) {
           throw new Error(
             `Feature privilege ${
-            feature.id
+              feature.id
             }.${privilegeId} has unknown management section: ${managementSectionId}`
           );
         }
@@ -186,7 +186,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
         if (unknownSectionEntries.length > 0) {
           throw new Error(
             `Feature privilege ${
-            feature.id
+              feature.id
             }.${privilegeId} has unknown management entries for section ${managementSectionId}: ${unknownSectionEntries.join(
               ', '
             )}`
@@ -198,31 +198,30 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
 }
 
 function applyAutomaticPrivilegeGrants(feature: Feature): Feature {
-  // Privilege definitions should always get these saved object grants.
-  const automaticSavedObjectGrants = {
-    all: ['telemetry'],
-    read: ['config'],
-  };
-
   const { all: allPrivilege, read: readPrivilege } = feature.privileges;
+  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : null;
 
-  if (allPrivilege) {
-    allPrivilege.savedObject.all = uniq([
-      ...allPrivilege.savedObject.all,
-      ...automaticSavedObjectGrants.all,
-    ]);
-    allPrivilege.savedObject.read = uniq([
-      ...allPrivilege.savedObject.read,
-      ...automaticSavedObjectGrants.read,
-    ]);
-  }
-
-  if (readPrivilege) {
-    readPrivilege.savedObject.read = uniq([
-      ...readPrivilege.savedObject.read,
-      ...automaticSavedObjectGrants.read,
-    ]);
-  }
+  applyAutomaticAllPrivilegeGrants(allPrivilege, reservedPrivilege);
+  applyAutomaticReadPrivilegeGrants(readPrivilege);
 
   return feature;
+}
+
+function applyAutomaticAllPrivilegeGrants(...allPrivileges: Array<FeatureKibanaPrivileges | null>) {
+  allPrivileges.forEach(allPrivilege => {
+    if (allPrivilege) {
+      allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
+      allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config']);
+    }
+  });
+}
+
+function applyAutomaticReadPrivilegeGrants(
+  ...readPrivileges: Array<FeatureKibanaPrivileges | null>
+) {
+  readPrivileges.forEach(readPrivilege => {
+    if (readPrivilege) {
+      readPrivilege.savedObject.read = uniq([...readPrivilege.savedObject.read, 'config']);
+    }
+  });
 }
