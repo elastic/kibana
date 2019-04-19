@@ -179,7 +179,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`does not allow navigation to advanced settings; redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToActualUrl('kibana', '/management/kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });

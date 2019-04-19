@@ -90,8 +90,9 @@ export function CommonPageProvider({ getService, getPageObjects }) {
         pathname: `${basePath}${config.get(['apps', appName]).pathname}`,
         hash,
       };
-
+      log.debug(`***************** appConfig=${JSON.stringify(appConfig)}`);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
+      log.debug(`***************** appUrl=${appUrl}`);
       await retry.try(async () => {
         log.debug(`navigateToActualUrl ${appUrl}`);
         await browser.get(appUrl, insertTimestamp);

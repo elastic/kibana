@@ -49,7 +49,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`allows settings to be changed`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        await PageObjects.common.navigateToActualUrl('kibana', '/management/kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
@@ -78,7 +78,9 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       });
 
       it(`redirects to Kibana home`, async () => {
-        await PageObjects.common.navigateToActualUrl('kibana', 'management/kibana/settings', {
+        // navigate away so we can test navigating back to disabled Advanced Settings
+        await PageObjects.common.navigateToApp('visualize');
+        await PageObjects.common.navigateToActualUrl('kibana', '/management/kibana/settings', {
           basePath: `/s/custom_space`,
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
