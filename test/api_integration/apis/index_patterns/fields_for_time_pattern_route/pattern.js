@@ -130,7 +130,6 @@ export default function ({ getService }) {
               {
                 name: 'meta1',
                 type: 'string',
-                esTypes: ['keyword'],
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
@@ -138,7 +137,6 @@ export default function ({ getService }) {
               {
                 name: 'meta2',
                 type: 'string',
-                esTypes: ['keyword'],
                 aggregatable: false,
                 searchable: false,
                 readFromDocValues: false,
