@@ -2,7 +2,7 @@
 [[vector-style]]
 === Vector styling
 
-When styling a vector layer, you can customize your data by properties such as size and color.
+When styling a vector layer, you can customize your data by property, such as size and color.
 For each property, you can specify whether to use a constant or dynamic value for the style.
 
 [float]
