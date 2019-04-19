@@ -52,7 +52,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async navigateToUrl(appName, subUrl, {
       basePath = '',
       ensureCurrentUrl = true,
-      shouldLoginIfPrompted = true
+      shouldLoginIfPrompted = true,
+      insertTimestamp = false
     } = {}) {
       // we onlt use the pathname from the appConfig and use the subUrl as the hash
       const appConfig = {
@@ -63,7 +64,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
         log.debug(`navigateToUrl ${appUrl}`);
-        await browser.get(appUrl);
+        await browser.get(appUrl, insertTimestamp);
 
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
@@ -80,7 +81,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     async navigateToActualUrl(appName, hash, {
       basePath = '',
       ensureCurrentUrl = true,
-      shouldLoginIfPrompted = true
+      shouldLoginIfPrompted = true,
+      insertTimestamp = false
     } = {}) {
       // we only use the apps config to get the application path
       const appConfig = {
@@ -91,7 +93,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       await retry.try(async () => {
         log.debug(`navigateToActualUrl ${appUrl}`);
-        await browser.get(appUrl);
+        await browser.get(appUrl, insertTimestamp);
 
         const currentUrl = shouldLoginIfPrompted ? await this.loginIfPrompted(appUrl) : await browser.getCurrentUrl();
 
@@ -123,16 +125,21 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       return currentUrl;
     }
 
-    navigateToApp(appName, { basePath = '', shouldLoginIfPrompted = true, hash = '' } = {}) {
+    navigateToApp(appName, {
+      basePath = '',
+      shouldLoginIfPrompted = true,
+      hash = '',
+      insertTimestamp = false
+    } = {}) {
       const self = this;
       const appConfig = config.get(['apps', appName]);
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), {
         pathname: `${basePath}${appConfig.pathname}`,
         hash: hash || appConfig.hash,
       });
-      log.debug('navigating to ' + appName + ' url: ' + appUrl);
+      log.debug('navigating to ' + appName + ' url: ' + appUrl + ' insertTimestamp: ' + insertTimestamp);
 
-      function navigateTo(url) {
+      function navigateTo(url, insertTimestamp) {
         return retry.try(function () {
           // since we're using hash URLs, always reload first to force re-render
           return kibanaServer.uiSettings.getDefaultIndex()
@@ -152,7 +159,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
             })
             .then(function () {
               log.debug('navigate to: ' + url);
-              return browser.get(url);
+              return browser.get(url, insertTimestamp);
             })
             .then(function () {
               return self.sleep(700);
@@ -204,7 +211,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       }
 
       return retry.tryForTime(defaultTryTimeout * 3, () => {
-        return navigateTo(appUrl)
+        return navigateTo(appUrl, insertTimestamp)
           .then(function (currentUrl) {
             let lastUrl = currentUrl;
             return retry.try(function () {

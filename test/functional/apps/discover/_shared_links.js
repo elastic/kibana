@@ -40,18 +40,18 @@ export default function ({ getService, getPageObjects }) {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';
 
-      // delete .kibana index and update configDoc
-      await kibanaServer.uiSettings.replace({
-        defaultIndex: 'logstash-*',
-      });
 
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
 
       await esArchiver.loadIfNeeded('logstash_functional');
+      // delete .kibana index and update configDoc
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
 
       log.debug('discover');
-      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.common.navigateToApp('discover', { insertTimestamp: true });
 
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 

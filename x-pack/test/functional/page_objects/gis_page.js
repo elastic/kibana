@@ -184,7 +184,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
+          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath, insertTimestamp: true });
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
