@@ -6,9 +6,7 @@
 
 import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
-import { withRouter, RouteComponentProps } from 'react-router';
-import { useUrlParams } from '../../hooks/useUrlParams';
-import { UptimePersistedState } from '../../uptime_app';
+import { useUrlParams } from '../../hooks';
 
 // TODO: when EUI exports types for this, this should be replaced
 interface SuperDateRangePickerRangeChangedEvent {
@@ -22,43 +20,19 @@ interface SuperDateRangePickerRefreshChangedEvent {
 }
 
 interface Props {
-  defaultDateRangeStart: string;
-  defaultDateRangeEnd: string;
-  defaultAutorefreshIsPaused: boolean;
-  defaultAutorefreshInterval: number;
   history: any;
   location: any;
   refreshApp: () => void;
-  setAutorefreshInterval: (value: number) => void;
-  setAutorefreshIsPaused: (value: boolean) => void;
-  setDateRangeStart: (value: string) => void;
-  setDateRangeEnd: (value: string) => void;
-  persistState: (state: UptimePersistedState) => void;
 }
 
 type UptimeDatePickerProps = Props;
 
 export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
-  const {
-    defaultDateRangeStart: dateRangeStart,
-    defaultDateRangeEnd: dateRangeEnd,
-    defaultAutorefreshIsPaused: autorefreshIsPaused,
-    defaultAutorefreshInterval: autorefreshInterval,
-    history,
-    location,
-    refreshApp,
-    setAutorefreshInterval,
-    setAutorefreshIsPaused,
-    setDateRangeStart,
-    setDateRangeEnd,
-    persistState,
-  } = props;
-  console.log(props);
-  console.log(history);
-  console.log(location);
-  const [currentUrlParams, updateUrl] = useUrlParams(history, location);
-  console.log(currentUrlParams);
-  console.log(updateUrl);
+  const { history, location, refreshApp } = props;
+  const [
+    { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
+    updateUrl,
+  ] = useUrlParams(history, location);
   return (
     <EuiSuperDatePicker
       start={dateRangeStart}
@@ -66,28 +40,16 @@ export const UptimeDatePicker = (props: UptimeDatePickerProps) => {
       isPaused={autorefreshIsPaused}
       refreshInterval={autorefreshInterval}
       onTimeChange={({ start, end }: SuperDateRangePickerRangeChangedEvent) => {
-        setDateRangeStart(start);
-        setDateRangeEnd(end);
-        persistState({
-          autorefreshInterval,
-          autorefreshIsPaused,
-          dateRangeStart,
-          dateRangeEnd,
-        });
+        updateUrl({ rangeFrom: start, rangeTo: end });
         refreshApp();
       }}
       // @ts-ignore onRefresh is not defined on EuiSuperDatePicker's type yet
       onRefresh={refreshApp}
       onRefreshChange={({ isPaused, refreshInterval }: SuperDateRangePickerRefreshChangedEvent) => {
-        setAutorefreshInterval(
-          refreshInterval === undefined ? autorefreshInterval : refreshInterval
-        );
-        setAutorefreshIsPaused(isPaused);
-        persistState({
-          autorefreshInterval,
-          autorefreshIsPaused,
-          dateRangeStart,
-          dateRangeEnd,
+        updateUrl({
+          autorefreshInterval:
+            refreshInterval === undefined ? autorefreshInterval : refreshInterval,
+          autorefreshPaused: isPaused,
         });
       }}
     />

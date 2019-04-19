@@ -12,8 +12,7 @@ import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
-import qs from 'querystring';
-import { useUrlParams } from '../hooks/useUrlParams';
+import { useUrlParams } from '../hooks';
 
 interface OverviewPageProps {
   basePath: string;
@@ -33,12 +32,14 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
-  const [currentFilterQueryObj, setFilterQueryObj] = useState<object | undefined>(undefined);
+  // WIP
+  // TODO: update/fix the below section to use the updated logic/architecture
+  const [, setFilterQueryObj] = useState<object | undefined>(undefined);
   // const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
 
   const [currentParams, updateUrl] = useUrlParams(history, location);
-  console.log(currentParams);
-  const currentFilterQuery = currentParams.search;
+  // console.log(currentParams);
+  // const currentFilterQuery = currentParams.search;
   // console.log(currentFilterQuery);
   // console.log(location);
 
@@ -54,7 +55,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     }
   }, []);
 
-  const sharedProps = { dateRangeStart, dateRangeEnd, currentFilterQuery };
+  const sharedProps = { dateRangeStart, dateRangeEnd, 'TODOTHISISTEST' };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
     try {
@@ -78,7 +79,6 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
-          currentQuery={''}
           updateQuery={updateQuery}
           variables={sharedProps}
         />

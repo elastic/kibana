@@ -31,6 +31,7 @@ import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
 import { UptimeDatePicker } from './components/functional/uptime_date_picker';
+import { useUrlParams } from './hooks';
 
 export interface UptimeAppColors {
   danger: string;
@@ -39,25 +40,13 @@ export interface UptimeAppColors {
   mean: string;
 }
 
-export interface UptimePersistedState {
-  autorefreshIsPaused: boolean;
-  autorefreshInterval: number;
-  dateRangeStart: string;
-  dateRangeEnd: string;
-}
-
 export interface UptimeAppProps {
   basePath: string;
   darkMode: boolean;
   client: UMGraphQLClient;
-  initialDateRangeStart: string;
-  initialDateRangeEnd: string;
-  initialAutorefreshInterval: number;
-  initialAutorefreshIsPaused: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;
-  persistState(state: UptimePersistedState): void;
   renderGlobalHelpControls(): void;
 }
 
@@ -66,11 +55,6 @@ const Application = (props: UptimeAppProps) => {
     basePath,
     client,
     darkMode,
-    initialAutorefreshIsPaused,
-    initialAutorefreshInterval,
-    initialDateRangeStart,
-    initialDateRangeEnd,
-    persistState,
     renderGlobalHelpControls,
     routerBasename,
     setBreadcrumbs,
@@ -93,14 +77,6 @@ const Application = (props: UptimeAppProps) => {
     };
   }
 
-  const [autorefreshIsPaused, setAutorefreshIsPaused] = useState<boolean>(
-    initialAutorefreshIsPaused
-  );
-  const [autorefreshInterval, setAutorefreshInterval] = useState<number>(
-    initialAutorefreshInterval
-  );
-  const [dateRangeStart, setDateRangeStart] = useState<string>(initialDateRangeStart);
-  const [dateRangeEnd, setDateRangeEnd] = useState<string>(initialDateRangeEnd);
   const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
   const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
@@ -118,79 +94,72 @@ const Application = (props: UptimeAppProps) => {
       <Router basename={routerBasename}>
         <Route
           path="/"
-          render={pppprrrrr => (
-            <ApolloProvider client={client}>
-              <UptimeSettingsContext.Provider
-                value={{
-                  autorefreshInterval,
-                  autorefreshIsPaused,
-                  basePath,
-                  dateRangeStart,
-                  dateRangeEnd,
-                  colors,
-                  refreshApp,
-                  setHeadingText,
-                }}
-              >
-                <UptimeRefreshContext.Provider value={{ lastRefresh }}>
-                  <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
-                    <div>
-                      <EuiFlexGroup
-                        alignItems="center"
-                        justifyContent="spaceBetween"
-                        gutterSize="s"
-                      >
-                        <EuiFlexItem grow={false}>
-                          <EuiTitle>
-                            <h2>{headingText}</h2>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                        <EuiFlexItem grow={false}>
-                          <UptimeDatePicker
-                            defaultDateRangeStart={dateRangeStart}
-                            defaultDateRangeEnd={dateRangeEnd}
-                            defaultAutorefreshIsPaused={autorefreshIsPaused}
-                            defaultAutorefreshInterval={autorefreshInterval}
-                            refreshApp={refreshApp}
-                            setAutorefreshInterval={setAutorefreshInterval}
-                            setAutorefreshIsPaused={setAutorefreshIsPaused}
-                            setDateRangeStart={setDateRangeStart}
-                            setDateRangeEnd={setDateRangeEnd}
-                            persistState={persistState}
-                            {...pppprrrrr}
+          render={rootRouteProps => {
+            const [
+              { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
+            ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);
+            return (
+              <ApolloProvider client={client}>
+                <UptimeSettingsContext.Provider
+                  value={{
+                    autorefreshInterval,
+                    autorefreshIsPaused,
+                    basePath,
+                    dateRangeStart,
+                    dateRangeEnd,
+                    colors,
+                    refreshApp,
+                    setHeadingText,
+                  }}
+                >
+                  <UptimeRefreshContext.Provider value={{ lastRefresh }}>
+                    <EuiPage className="app-wrapper-panel " data-test-subj="uptimeApp">
+                      <div>
+                        <EuiFlexGroup
+                          alignItems="center"
+                          justifyContent="spaceBetween"
+                          gutterSize="s"
+                        >
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle>
+                              <h2>{headingText}</h2>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <UptimeDatePicker refreshApp={refreshApp} {...rootRouteProps} />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                        <EuiSpacer size="s" />
+                        <Switch>
+                          <Route
+                            exact
+                            path="/"
+                            render={routerProps => (
+                              <OverviewPage
+                                basePath={basePath}
+                                setBreadcrumbs={setBreadcrumbs}
+                                {...routerProps}
+                              />
+                            )}
                           />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiSpacer size="s" />
-                      <Switch>
-                        <Route
-                          exact
-                          path="/"
-                          render={routerProps => (
-                            <OverviewPage
-                              basePath={basePath}
-                              setBreadcrumbs={setBreadcrumbs}
-                              {...routerProps}
-                            />
-                          )}
-                        />
-                        <Route
-                          path="/monitor/:id"
-                          render={routerProps => (
-                            <MonitorPage
-                              query={client.query}
-                              setBreadcrumbs={setBreadcrumbs}
-                              {...routerProps}
-                            />
-                          )}
-                        />
-                      </Switch>
-                    </div>
-                  </EuiPage>
-                </UptimeRefreshContext.Provider>
-              </UptimeSettingsContext.Provider>
-            </ApolloProvider>
-          )}
+                          <Route
+                            path="/monitor/:id"
+                            render={routerProps => (
+                              <MonitorPage
+                                query={client.query}
+                                setBreadcrumbs={setBreadcrumbs}
+                                {...routerProps}
+                              />
+                            )}
+                          />
+                        </Switch>
+                      </div>
+                    </EuiPage>
+                  </UptimeRefreshContext.Provider>
+                </UptimeSettingsContext.Provider>
+              </ApolloProvider>
+            );
+          }}
         />
       </Router>
     </I18nContext>
