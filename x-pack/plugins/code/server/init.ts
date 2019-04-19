@@ -77,6 +77,10 @@ async function getCodeNodeUuid(url: string, log: Logger) {
 }
 
 export function init(server: Server, options: any) {
+  if (!options.enabled) {
+    return;
+  }
+
   const log = new Logger(server);
   const serverOptions = new ServerOptions(options, server.config());
   const xpackMainPlugin: XPackMainPlugin = server.plugins.xpack_main;
@@ -140,6 +144,9 @@ async function initNonCodeNode(
 ) {
   log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
   redirectRoute(server, url, log);
+  server.expose('stop', () => {
+    // nothing to do
+  });
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
@@ -252,4 +259,10 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
+
+  server.expose('stop', () => {
+    indexScheduler.stop();
+    updateScheduler.stop();
+    queue.destroy();
+  });
 }

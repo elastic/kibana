@@ -7,11 +7,60 @@
 import getPort from 'get-port';
 import { resolve } from 'path';
 import { Root } from 'src/core/server/root';
+// @ts-ignore
+import * as wtf from 'wtfnode'
+
 import {
   createRootWithCorePlugins,
+  getKbnServer,
   request,
   startTestServers,
 } from '../../../../../src/test_utils/kbn_server';
+
+const xpackOption = {
+  upgrade_assistant: {
+    enabled: false,
+  },
+  security: {
+    enabled: false,
+  },
+  ccr: {
+    enabled: false,
+  },
+  monitoring: {
+    enabled: false,
+  },
+  beats: {
+    enabled: false,
+  },
+  ilm: {
+    enabled: false,
+  },
+  logstash: {
+    enabled: false,
+  },
+  rollup: {
+    enabled: false,
+  },
+  watcher: {
+    enabled: false,
+  },
+  remote_clusters: {
+    enabled: false,
+  },
+  reporting: {
+    enabled: false,
+  },
+  task_manager: {
+    enabled: false,
+  },
+  maps: {
+    enabled: false,
+  },
+  oss_telemetry: {
+    enabled: false,
+  },
+};
 
 describe('code in multiple nodes', () => {
   const codeNodeUuid = 'c4add484-0cba-4e05-86fe-4baa112d9e53';
@@ -20,13 +69,15 @@ describe('code in multiple nodes', () => {
   let nonCodePort: number;
   let codeNode: Root;
   let nonCodeNode: Root;
-
+  let codeKbnServer: any;
+  let nonCodeKbnServer: any;
   let servers: any;
   const pluginPaths = resolve(__dirname, '../../../../../x-pack');
 
   async function startServers() {
-    codePort = await getPort();
     nonCodePort = await getPort();
+    codePort = await getPort();
+
     servers = await startTestServers({
       adjustTimeout: t => {
         // @ts-ignore
@@ -39,18 +90,13 @@ describe('code in multiple nodes', () => {
             port: codePort,
           },
           plugins: { paths: [pluginPaths] },
-          xpack: {
-            upgrade_assistant: {
-              enabled: false,
-            },
-            security: {
-              enabled: false,
-            },
-          },
+          xpack: xpackOption,
         },
       },
     });
     codeNode = servers.root;
+    codeKbnServer = getKbnServer(codeNode);
+    await codeKbnServer.ready();
     await startNonCodeNodeKibana();
   }
 
@@ -62,17 +108,14 @@ describe('code in multiple nodes', () => {
       },
       plugins: { paths: [pluginPaths] },
       xpack: {
-        upgrade_assistant: {
-          enabled: false,
-        },
+        ...xpackOption,
         code: { codeNodeUrl: `http://localhost:${codePort}` },
-        security: {
-          enabled: false,
-        },
       },
     };
     nonCodeNode = createRootWithCorePlugins(setting);
     await nonCodeNode.setup();
+    nonCodeKbnServer = getKbnServer(nonCodeNode);
+    await codeKbnServer.ready();
   }
   // @ts-ignore
   before(startServers);
@@ -80,9 +123,14 @@ describe('code in multiple nodes', () => {
   // @ts-ignore
   after(async function() {
     // @ts-ignore
-    this.timeout(10000);
+    this.timeout(20000);
+    codeKbnServer = getKbnServer(codeNode);
+    codeKbnServer.server.plugins.code.stop();
+    nonCodeKbnServer.server.plugins.code.stop();
     await nonCodeNode.shutdown();
     await servers.stop();
+    await delay(10000);
+    wtf.dump();
   });
 
   function delay(ms: number) {
@@ -100,6 +148,7 @@ describe('code in multiple nodes', () => {
   });
 
   it('Non-code node setup should fail if code node is shutdown', async () => {
+    codeKbnServer.server.plugins.code.stop();
     await codeNode.shutdown();
     await delay(2000);
     await request.get(nonCodeNode, '/api/code/setup').expect(502);
