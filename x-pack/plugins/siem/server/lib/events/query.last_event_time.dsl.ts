@@ -5,6 +5,11 @@
  */
 
 import { LastEventTimeRequestOptions } from './types';
+
+interface EventIndicies {
+  [key: string]: string[];
+}
+
 export const buildLastEventTimeQuery = ({
   indexKey,
   sourceConfiguration: {
@@ -15,9 +20,13 @@ export const buildLastEventTimeQuery = ({
     winlogbeatAlias,
   },
 }: LastEventTimeRequestOptions) => {
+  const indicesToQuery: EventIndicies = {
+    hosts: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    network: [logAlias, packetbeatAlias],
+  }
   const dslQuery = {
     allowNoIndices: true,
-    index: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
+    index: indicesToQuery[indexKey],
     ignoreUnavailable: true,
     body: {
       aggregations: {
