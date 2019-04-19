@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { JsonUploadAndParse } from '../../../../../../file_upload/public';
-import { defaultSettings } from './default_index_settings';
 
 export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
@@ -20,7 +19,7 @@ export function ClientFileCreateSourceEditor({
       onFileUpload={previewGeojsonFile}
       onFileRemove={onRemove}
       boolIndexData={boolIndexData}
-      indexDescription={defaultSettings}
+      preIndexTransform={'geo'}
       onIndexAddSuccess={viewIndexedData}
     />
   );

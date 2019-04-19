@@ -9,25 +9,31 @@ import chrome from 'ui/chrome';
 import { chunk } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { indexPatternService } from '../../../maps/public/kibana_services';
+import { getGeoJsonIndexingDetails } from './geo_processing';
 
 const CHUNK_SIZE = 10000;
 const IMPORT_RETRIES = 5;
 const basePath = chrome.addBasePath('/api/fileupload');
 
-export async function triggerIndexing(parsedFile, indexingDetails) {
+export async function triggerIndexing(parsedFile, preIndexTransform, indexName, dataType) {
   if (!parsedFile) {
     throw('No file imported');
     return;
   }
-  const index = await checkIndex(indexingDetails.index);
+  const index = await checkIndex(indexName);
   let id;
+
+  // Perform any processing required on file prior to indexing
+  const indexingDetails = getIndexingDetails(preIndexTransform, parsedFile, dataType);
+
   if (index.exists) {
     id = index.id;
   } else {
     const createdIndex = await writeToIndex({
       id: undefined,
       data: [],
-      ...indexingDetails
+      index: indexName,
+      ...indexingDetails // Everything from the util file
     });
     id = createdIndex.id;
   }
@@ -35,12 +41,34 @@ export async function triggerIndexing(parsedFile, indexingDetails) {
   await populateIndex({
     id,
     data: parsedFile,
+    index: indexName,
     ...indexingDetails,
     settings: {},
     mappings: {},
   });
   //create index pattern
-  return await createIndexPattern('', indexingDetails.index);
+  return await createIndexPattern('', indexName);
+}
+
+function getIndexingDetails(processor, parsedFile, dataType) {
+  if (!processor) {
+    throw('No processor defined');
+    return;
+  }
+  let indexingDetails;
+  if (typeof processor === 'function') { // Custom processor
+    indexingDetails = processor(parsedFile);
+  } else {
+    switch(processor) {
+      case 'geo':
+        return getGeoJsonIndexingDetails(parsedFile, dataType);
+        break;
+      default:
+        console.error(`No handling defined for processor: ${processor}`);
+        return;
+    }
+  }
+  return indexingDetails;
 }
 
 function writeToIndex(indexingDetails) {

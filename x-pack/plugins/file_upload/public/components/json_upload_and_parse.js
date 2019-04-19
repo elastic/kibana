@@ -10,72 +10,72 @@ import PropTypes from 'prop-types';
 import {
   EuiFilePicker,
   EuiFormRow,
-  EuiFieldText,
-  EuiSpacer,
-  EuiCheckbox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseFile } from '../util/file_parser';
 import { triggerIndexing } from '../util/indexing_service';
+import { selectMappingsOptions } from '../util/geo_processing';
 import { IndexSettings } from './index_settings';
 import _ from 'lodash';
 
 export function JsonUploadAndParse(props) {
   const {
     boolIndexData = false,
-    indexDescription,
     onIndexAddSuccess,
-    onIndexAddError
+    onIndexAddError,
+    preIndexTransform,
   } = props;
-  const boolMappingsOptions = Array.isArray(indexDescription.mappings);
 
   // Local state for parsed and indexed files
   const [fileRef, setFileRef] = useState(null);
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
-  const [mappings, setMappings] = useState(boolMappingsOptions
-    ? indexDescription.mappings[0].value
-    : indexDescription.mappings);
-  const [index, setIndex] = useState('');
+  const [indexDataType, setIndexDataType] = useState('');
+  const [indexName, setIndexName] = useState('');
 
-  if (boolIndexData && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile, { ...indexDescription, mappings, index }).then(
-      resp => {
-        if (resp.success) {
-          setIndexedFile(parsedFile);
-          onIndexAddSuccess && onIndexAddSuccess(resp);
-        } else {
-          setIndexedFile(null);
-          onIndexAddError && onIndexAddError();
-        }
-      });
+  // If index flag set, index on update
+  if (boolIndexData && parsedFile && !_.isEqual(indexedFile, parsedFile)) {
+    triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType)
+      .then(
+        resp => {
+          if (resp.success) {
+            setIndexedFile(parsedFile);
+            onIndexAddSuccess && onIndexAddSuccess(resp);
+          } else {
+            setIndexedFile(null);
+            onIndexAddError && onIndexAddError();
+          }
+        });
+  }
+
+  // Determine index options
+  let mappingsOptions;
+  if (typeof preIndexTransform === 'object') {
+    mappingsOptions = preIndexTransform.options;
+  } else {
+    switch(preIndexTransform) {
+      case 'geo':
+        mappingsOptions = selectMappingsOptions;
+        break;
+      default:
+        throw(`Index options for ${preIndexTransform} not defined`);
+        return;
+    }
   }
 
   return (
     <Fragment>
       {
         renderFilePicker(
-          { ...props, fileRef, setFileRef, parsedFile, setParsedFile, setIndexedFile, mappings, index }
+          { ...props, fileRef, setFileRef, parsedFile, setParsedFile, setIndexedFile, indexName, preIndexTransform, indexDataType }
         )
       }
       <IndexSettings
-        index={index}
-        setIndex={setIndex}
-        setIndexType={boolMappingsOptions
-          ? ({ target }) => {
-            const selectedMappings = indexDescription.mappings
-              .find(({ name }) => name === target.value);
-            setMappings(selectedMappings.value);
-          }
-          : setMappings(indexDescription.mappings)
-        }
-        mappingsOptions={boolMappingsOptions
-          ? indexDescription.mappings.map(mappings => (
-            { text: mappings.name, value: mappings.name }
-          ))
-          : []
-        }
-        indexSelectionEnabled={boolMappingsOptions}
+        indexName={indexName}
+        setIndexName={setIndexName}
+        indexDataType={indexDataType}
+        setIndexDataType={setIndexDataType}
+        mappingsOptions={mappingsOptions}
       />
     </Fragment>
   );
@@ -94,10 +94,11 @@ function renderFilePicker({
   parsedFile,
   setParsedFile,
   setIndexedFile,
-  indexDescription,
-  mappings,
-  index
+  preIndexTransform,
+  indexName,
+  indexDataType,
 }) {
+
   return (
     <EuiFormRow
       label={(
@@ -127,20 +128,26 @@ function renderFilePicker({
             const parsedFileResult = await parseFile(
               file, onFileUpload, postParseJsonTransform
             );
+
+
+
             // Immediately index file if flag set
             if (file && boolIndexData) {
-              await triggerIndexing(parsedFile, {
-                ...indexDescription, mappings, index }).then(
-                resp => {
-                  if (resp.success) {
-                    setIndexedFile(parsedFile);
-                    onIndexAddSuccess && onIndexAddSuccess(resp);
-                  } else {
-                    setIndexedFile(null);
-                    onIndexAddError && onIndexAddError();
-                  }
-                });
+              await triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType)
+                .then(
+                  resp => {
+                    if (resp.success) {
+                      setIndexedFile(parsedFile);
+                      onIndexAddSuccess && onIndexAddSuccess(resp);
+                    } else {
+                      setIndexedFile(null);
+                      onIndexAddError && onIndexAddError();
+                    }
+                  });
             }
+
+
+
             // Save parsed result
             setParsedFile(parsedFileResult);
           } else { // TODO: Support multiple file upload?

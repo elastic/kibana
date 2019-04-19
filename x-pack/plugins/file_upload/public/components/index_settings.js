@@ -15,11 +15,11 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const IndexSettings = injectI18n(function IndexSettings({
-  index,
-  setIndex,
-  setIndexType,
+  indexName,
+  setIndexName,
+  indexDataType,
+  setIndexDataType,
   mappingsOptions,
-  indexSelectionEnabled,
   intl
 }) {
   const [indexError, setIndexError] = useState('');
@@ -30,25 +30,17 @@ export const IndexSettings = injectI18n(function IndexSettings({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameLabel"
+            id="xpack.file_upload.indexNameLabel"
             defaultMessage="Index type"
           />
         }
       >
-        { indexSelectionEnabled
-          ? (
-            <EuiSelect
-              options={mappingsOptions}
-              enabled={indexSelectionEnabled}
-              onChange={setIndexType}
-            />
-          )
-          : (
-            <EuiSelect
-              disabled
-            />
-          )
-        }
+        <EuiSelect
+          options={mappingsOptions}
+          onChange={({ target }) => {
+            setIndexDataType(target.value);
+          }}
+        />
       </EuiFormRow>
       <EuiSpacer size="s" />
       <EuiFormRow
@@ -66,9 +58,9 @@ export const IndexSettings = injectI18n(function IndexSettings({
             id: 'xpack.file_upload.indexNamePlaceholder',
             defaultMessage: 'index name'
           })}
-          value={index}
+          value={indexName}
           // disabled={(initialized === true)}
-          onChange={onIndexChange(setIndex, setIndexError)}
+          onChange={onIndexChange(setIndexName, setIndexError)}
           isInvalid={indexError !== ''}
           aria-label={intl.formatMessage({
             id: 'xpack.file_upload.indexNameAriaLabel',
