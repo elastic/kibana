@@ -147,7 +147,7 @@ expect.extend({
 describe('kbn-babel-plugin-apm-idx', () => {
   it('transforms member expressions', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _.b.c.d.e);
     `).toTransformInto(`
       base != null && base.b != null && base.b.c != null && base.b.c.d != null
@@ -158,14 +158,14 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws on call expressions', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _.b.c(...foo)().d(bar, null, [...baz]));
     `).toThrowTransformError('idx callbacks may only access properties on the callback parameter.');
   });
 
   it('transforms bracket notation', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _["b"][0][c + d]);
     `).toTransformInto(`
       base != null && base["b"] != null && base["b"][0] != null ? base["b"][0][c + d] : undefined;
@@ -174,14 +174,14 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws on bracket notation call expressions', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _["b"](...foo)()[0][c + d](bar, null, [...baz]));
     `).toThrowTransformError('idx callbacks may only access properties on the callback parameter.');
   });
 
   it('transforms combination of both member access notations', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _.a["b"].c[d[e[f]]].g);
     `).toTransformInto(`
       base != null && base.a != null && base.a["b"] != null && base.a["b"].c != null && base.a["b"].c[d[e[f]]] != null
@@ -192,7 +192,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('transforms if the base is an expression', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(this.props.base[5], _ => _.property);
     `).toTransformInto(`
       this.props.base[5] != null ? this.props.base[5].property : undefined;
@@ -201,7 +201,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws if the arrow function has more than one param', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, (a, b) => _.property);
     `).toThrowTransformError(
       'The arrow function supplied to `idx` must take exactly one parameter.'
@@ -210,7 +210,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws if the arrow function has an invalid base', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, a => b.property)
     `).toThrowTransformError(
       'The parameter of the arrow function supplied to `idx` must match the ' +
@@ -220,14 +220,14 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws if the arrow function expression has non-properties/methods', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => (_.a++).b.c);
     `).toThrowTransformError('idx callbacks may only access properties on the callback parameter.');
   });
 
   it('throws if the body of the arrow function is not an expression', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => {})
     `).toThrowTransformError(
       'The body of the arrow function supplied to `idx` must be a single ' +
@@ -237,38 +237,38 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('ignores non-function call idx', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       result = idx;
     `).toTransformInto(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       result = idx;
     `);
   });
 
   it('throws if idx is called with zero arguments', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx();
     `).toThrowTransformError('The `idx` function takes exactly two arguments.');
   });
 
   it('throws if idx is called with one argument', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(1);
     `).toThrowTransformError('The `idx` function takes exactly two arguments.');
   });
 
   it('throws if idx is called with three arguments', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(1, 2, 3);
     `).toThrowTransformError('The `idx` function takes exactly two arguments.');
   });
 
   it('transforms idx calls as part of another expressions', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       paddingStatement();
       a = idx(base, _ => _.b[c]);
     `).toTransformInto(`
@@ -279,7 +279,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('transforms nested idx calls', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(
         idx(
           idx(base, _ => _.a.b),
@@ -315,7 +315,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
     expect({
       plugins: [babelPluginIdx, transformAsyncToGenerator],
       code: `
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         async function f() {
           idx(base, _ => _.b.c.d.e);
         }
@@ -339,7 +339,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
     expect({
       plugins: [transformAsyncToGenerator, babelPluginIdx],
       code: `
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         async function f() {
           idx(base, _ => _.b.c.d.e);
         }
@@ -364,7 +364,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
     expect({
       plugins: [transformAsyncToGenerator, babelPluginIdx],
       code: `
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         class Foo {
           async bar() {
             idx(base, _ => _.b);
@@ -390,7 +390,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('transforms idx calls when an idx import binding is in scope', () => {
     expect(`
-      import idx from 'idx';
+      import idx from '@kbn/elastic-idx';
       idx(base, _ => _.b);
     `).toTransformInto(`
       base != null ? base.b : undefined;
@@ -399,7 +399,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('transforms idx calls when an idx const binding is in scope', () => {
     expect(`
-      const idx = require('idx');
+      const idx = require('@kbn/elastic-idx');
       idx(base, _ => _.b);
     `).toTransformInto(`
       base != null ? base.b : undefined;
@@ -408,7 +408,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('transforms deep idx calls when an idx import binding is in scope', () => {
     expect(`
-      import idx from 'idx';
+      import idx from '@kbn/elastic-idx';
       function f() {
         idx(base, _ => _.b);
       }
@@ -421,7 +421,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('transforms deep idx calls when an idx const binding is in scope', () => {
     expect(`
-      const idx = require('idx');
+      const idx = require('@kbn/elastic-idx');
       function f() {
         idx(base, _ => _.b);
       }
@@ -434,14 +434,14 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws on base call expressions', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _().b.c);
     `).toThrowTransformError('idx callbacks may only access properties on the callback parameter.');
   });
 
   it('transforms when the idx parent is a scope creating expression', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       (() => idx(base, _ => _.b));
     `).toTransformInto(`
       () => base != null ? base.b : undefined;
@@ -450,7 +450,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws if redefined before use', () => {
     expect(`
-      let idx = require('idx');
+      let idx = require('@kbn/elastic-idx');
       idx = null;
       idx(base, _ => _.b);
     `).toThrowTransformError('`idx` cannot be redefined.');
@@ -458,28 +458,28 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws if redefined after use', () => {
     expect(`
-      let idx = require('idx');
+      let idx = require('@kbn/elastic-idx');
       idx(base, _ => _.b);
       idx = null;
     `).toThrowTransformError('`idx` cannot be redefined.');
   });
 
   it('throws if there is a duplicate declaration', () => {
-    expect(`
-      let idx = require('idx');
+    expect(() => transform(`
+      let idx = require('@kbn/elastic-idx');
       idx(base, _ => _.b);
       function idx() {}
-    `).toThrowTransformError('Duplicate declaration "idx"');
+    `)).toThrow();
   });
 
   it('handles sibling scopes with unique idx', () => {
     expect(`
       function aaa() {
-        const idx = require('idx');
+        const idx = require('@kbn/elastic-idx');
         idx(base, _ => _.b);
       }
       function bbb() {
-        const idx = require('idx');
+        const idx = require('@kbn/elastic-idx');
         idx(base, _ => _.b);
       }
     `).toTransformInto(`
@@ -495,7 +495,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
   it('handles sibling scopes with and without idx', () => {
     expect(`
       function aaa() {
-        const idx = require('idx');
+        const idx = require('@kbn/elastic-idx');
         idx(base, _ => _.b);
       }
       function bbb() {
@@ -513,7 +513,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('handles nested scopes with shadowing', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _.b);
       function aaa() {
         idx(base, _ => _.b);
@@ -534,7 +534,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('handles named idx import', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
       idx(base, _ => _.b);
     `).toTransformInto(`
       base != null ? base.b : undefined;
@@ -543,30 +543,30 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
   it('throws on default plus named import', () => {
     expect(`
-      import idx, {foo} from 'idx';
+      import idx, {foo} from '@kbn/elastic-idx';
       idx(base, _ => _.b);
     `).toThrowTransformError('The idx import must be a single specifier.');
   });
 
   it('throws on default plus namespace import', () => {
     expect(`
-      import idx, * as foo from 'idx';
+      import idx, * as foo from '@kbn/elastic-idx';
       idx(base, _ => _.b);
     `).toThrowTransformError('The idx import must be a single specifier.');
   });
 
   it('throws on named default plus other import', () => {
     expect(`
-      import {default as idx, foo} from 'idx';
+      import {default as idx, foo} from '@kbn/elastic-idx';
       idx(base, _ => _.b);
     `).toThrowTransformError('The idx import must be a single specifier.');
   });
 
   it('unused idx import should be left alone', () => {
     expect(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
     `).toTransformInto(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
     `);
   });
 
@@ -585,14 +585,14 @@ describe('kbn-babel-plugin-apm-idx', () => {
   it('follows configuration of the import name', () => {
     expect({
       code: `
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         import { idx as i_d_x } from 'i_d_x';
         i_d_x(base, _ => _.b);
         idx(base, _ => _.c);
       `,
       options: { importName: 'i_d_x' },
     }).toTransformInto(`
-      import { idx } from 'idx';
+      import { idx } from '@kbn/elastic-idx';
 
       base != null ? base.b : undefined;
       idx(base, _ => _.c);
@@ -626,14 +626,14 @@ describe('kbn-babel-plugin-apm-idx', () => {
   it('follows configuration of the require name', () => {
     expect({
       code: `
-        const idx = require('idx');
+        const idx = require('@kbn/elastic-idx');
         const i_d_x = require('i_d_x');
         i_d_x(base, _ => _.b);
         idx(base, _ => _.c);
       `,
       options: { importName: 'i_d_x' },
     }).toTransformInto(`
-      const idx = require('idx');
+      const idx = require('@kbn/elastic-idx');
 
       base != null ? base.b : undefined;
       idx(base, _ => _.c);
@@ -643,7 +643,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
   describe('functional', () => {
     it('works with only properties', () => {
       expect(`
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         const base = {a: {b: {c: 2}}};
         idx(base, _ => _.a.b.c);
       `).toReturn(2);
@@ -651,7 +651,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
     it('works with missing properties', () => {
       expect(`
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         const base = {a: {b: {}}};
         idx(base, _ => _.a.b.c);
       `).toReturn(undefined);
@@ -659,7 +659,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
     it('works with null properties', () => {
       expect(`
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         const base = {a: {b: null}};
         idx(base, _ => _.a.b.c);
       `).toReturn(undefined);
@@ -667,7 +667,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
     it('works with nested idx calls', () => {
       expect(`
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         const base = {a: {b: {c: {d: {e: {f: 2}}}}}};
         idx(
           idx(
@@ -681,7 +681,7 @@ describe('kbn-babel-plugin-apm-idx', () => {
 
     it('works with nested idx calls with missing properties', () => {
       expect(`
-        import { idx } from 'idx';
+        import { idx } from '@kbn/elastic-idx';
         const base = {a: {b: {c: null}}};
         idx(
           idx(
