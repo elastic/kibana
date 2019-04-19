@@ -160,14 +160,12 @@ in some areas. Also, some zip codes have been deprecated and new ones have been 
 you could no longer create time-based interval index patterns, but they continued 
 to function as expected. In 7.0, functionality has changed such that {kib} will 
 automatically query a time-based interval index pattern as a wildcard index pattern.
-Support for time-based index patterns will be removed in 8.0.
+Support for time-based index patterns will be removed in 8.0. You can migrate your 
+time-based index patterns to a wildcard pattern to prepare for this change.
 
 *Impact:* If you query a time-based index pattern, that query will now be performed 
 on the root wildcard term. For example, a query on an index pattern such as 
-`[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`. 
-You can migrate your time-based index pattern to a wildcard pattern 
-
-
+`[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`.
 
 
 [float]
