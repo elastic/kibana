@@ -60,10 +60,7 @@ function geoJsonToEs(parsedGeojson, datatype) {
   } else if (datatype === 'geo_point') {
     return features.reduce((accu, shape) => {
       accu.push(JSON.stringify({
-        location: {
-          'type': shape.geometry.type.toLowerCase(),
-          'coordinates': shape.geometry.coordinates
-        },
+        location: shape.geometry.coordinates,
         name: _.get(shape, 'properties.name', '')
       }));
       return accu;
