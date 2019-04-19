@@ -25,7 +25,7 @@ export function WatcherPageProvider({ getPageObjects, getService }) {
     async createWatch(watchName, name) {
       await testSubjects.click('createAdvancedWatchButton');
       await find.setValue('#id', watchName);
-      await find.setValue('#name', name);
+      await find.setValue('#watchName', name);
       await testSubjects.click('btnSaveWatch');
       await PageObjects.header.waitUntilLoadingHasFinished();
     }

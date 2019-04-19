@@ -84,7 +84,7 @@ export const JsonWatchEditForm = () => {
         >
           <EuiFieldText
             fullWidth
-            id="name"
+            id="watchName"
             name="name"
             value={watch.name || ''}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
