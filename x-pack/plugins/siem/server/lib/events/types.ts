@@ -17,14 +17,11 @@ import { SearchHit } from '../types';
 
 export interface EventsAdapter {
   getEvents(req: FrameworkRequest, options: RequestOptions): Promise<EventsData>;
-
   getTimelineData(req: FrameworkRequest, options: EventsRequestOptions): Promise<TimelineData>;
-
   getTimelineDetails(
     req: FrameworkRequest,
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData>;
-
   getLastEventTimeData(
     req: FrameworkRequest,
     options: LastEventTimeRequestOptions

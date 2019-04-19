@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -13,7 +12,6 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPageProps } from '../../components/header_page';
 import { manageQuery } from '../../components/page/manage_query';
 import { KpiNetworkComponent, NetworkTopNFlowTable } from '../../components/page/network';
 import { NetworkDnsTable } from '../../components/page/network/network_dns_table';
@@ -144,16 +142,3 @@ const makeMapStateToProps = () => {
 };
 
 export const Network = connect(makeMapStateToProps)(NetworkComponent);
-
-export const getPageHeadline = (): HeaderPageProps => ({
-  subtitle: (
-    <FormattedMessage
-      id="xpack.siem.network.pageSubtitle"
-      defaultMessage="Last Beat: TODO from {beat}"
-      values={{
-        beat: <EuiLink href="#">TODO</EuiLink>,
-      }}
-    />
-  ),
-  title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
-});

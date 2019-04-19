@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -15,7 +14,6 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPageProps } from '../../components/header_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
 import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
@@ -66,11 +64,12 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
               {({ poll, to, from, setQuery }) => (
                 <>
                   <HostDetailsByNameQuery
-                    sourceId="default"hostName={hostName}
+                    sourceId="default"
+                    hostName={hostName}
                     startDate={from}
                     endDate={to}
-                    >
-                  {({ hostDetails, loading, id, refetch }) => (
+                  >
+                    {({ hostDetails, loading, id, refetch }) => (
                       <HostSummaryManage
                         id={id}
                         refetch={refetch}
@@ -231,16 +230,3 @@ const getFilterQuery = (
         }`,
         indexPattern
       );
-
-export const getPageHeadline = (hostId: string): HeaderPageProps => ({
-  subtitle: (
-    <FormattedMessage
-      id="xpack.siem.hostDetails.pageSubtitle"
-      defaultMessage="Last Beat: TODO from {beat}"
-      values={{
-        beat: <EuiLink href="#">TODO</EuiLink>,
-      }}
-    />
-  ),
-  title: hostId,
-});

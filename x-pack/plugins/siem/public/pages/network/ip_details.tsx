@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';

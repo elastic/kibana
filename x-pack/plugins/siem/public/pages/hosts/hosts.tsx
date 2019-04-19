@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLink, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -13,7 +12,6 @@ import { pure } from 'recompose';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
-import { HeaderPageProps } from '../../components/header_page';
 import { EventsTable, HostsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { manageQuery } from '../../components/page/manage_query';
@@ -65,7 +63,8 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       refetch={refetch}
                       setQuery={setQuery}
                       loading={loading}
-                      startDate={from}data={hosts}
+                      startDate={from}
+                      data={hosts}
                       totalCount={totalCount}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -189,16 +188,3 @@ const makeMapStateToProps = () => {
 };
 
 export const Hosts = connect(makeMapStateToProps)(HostsComponent);
-
-export const getPageHeadline = (): HeaderPageProps => ({
-  subtitle: (
-    <FormattedMessage
-      id="xpack.siem.hosts.pageSubtitle"
-      defaultMessage="Last Beat: TODO from {beat}"
-      values={{
-        beat: <EuiLink href="#">TODO</EuiLink>,
-      }}
-    />
-  ),
-  title: <FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />,
-});

@@ -53,13 +53,13 @@ export const getHeaderForRoute = (pathname: string) => {
         subtitle: <LastBeatStat indexKey={'hostDetails'} hostName={hostId} />,
         title: hostId,
       };
-    } else if (pathname.match(/network\/ip\/.*?/)) {
+    }
+    if (pathname.match(/network\/ip\/.*?/)) {
       const ip = decodeIpv6(pathSegment);
-      const children = <FlowTargetSelectConnected />;
       return {
         subtitle: <LastBeatStat indexKey={'ipDetails'} ip={ip} />,
         title: ip,
-        children,
+        children: <FlowTargetSelectConnected />,
       };
     }
   }
