@@ -5,7 +5,6 @@
  */
 
 import { flatten, mapValues, uniq } from 'lodash';
-import { cloneDeep } from 'lodash';
 import { Feature } from '../../../../../xpack_main/types';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from '../../../../common/model';
@@ -21,7 +20,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
 
   return {
     get() {
-      const features = xpackMainPlugin.getFeatures().map(applyAutomaticPrivilegeGrants);
+      const features = xpackMainPlugin.getFeatures();
 
       const allActions = uniq(
         flatten(
@@ -86,35 +85,4 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
       };
     },
   };
-}
-
-function applyAutomaticPrivilegeGrants(feature: Feature): Feature {
-  // Privilege definitions should always get these saved object grants.
-  const automaticSavedObjectGrants = {
-    all: ['telemetry'],
-    read: ['config'],
-  };
-
-  const copy = cloneDeep(feature);
-  const { all: allPrivilege, read: readPrivilege } = copy.privileges;
-
-  if (allPrivilege) {
-    allPrivilege.savedObject.all = uniq([
-      ...allPrivilege.savedObject.all,
-      ...automaticSavedObjectGrants.all,
-    ]);
-    allPrivilege.savedObject.read = uniq([
-      ...allPrivilege.savedObject.read,
-      ...automaticSavedObjectGrants.read,
-    ]);
-  }
-
-  if (readPrivilege) {
-    readPrivilege.savedObject.read = uniq([
-      ...readPrivilege.savedObject.read,
-      ...automaticSavedObjectGrants.read,
-    ]);
-  }
-
-  return copy as Feature;
 }
