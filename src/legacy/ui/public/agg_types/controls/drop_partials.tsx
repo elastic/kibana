@@ -18,23 +18,11 @@
  */
 
 import React from 'react';
-import { get } from 'lodash';
 import { EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
-import { AggConfig } from 'ui/vis';
-
-function shouldShow(agg: AggConfig): boolean {
-  const fieldName = get(agg, 'params.field.name');
-
-  return fieldName && fieldName === agg.getIndexPattern().timeFieldName;
-}
 
 function DropPartialsParamEditor({ agg, aggParam, value, setValue }: AggParamEditorProps<boolean>) {
-  if (!shouldShow(agg)) {
-    return null;
-  }
-
   const content = i18n.translate('common.ui.aggTypes.dropPartialBucketsTooltip', {
     defaultMessage:
       "Remove buckets that span time outside the time range so the histogram doesn't start and end with incomplete buckets.",
