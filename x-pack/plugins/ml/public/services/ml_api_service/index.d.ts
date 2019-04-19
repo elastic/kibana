@@ -26,6 +26,7 @@ declare interface Ml {
     stopDataFrameTransformsJob(jobId: string): Promise<any>;
   };
   esSearch: any;
+  getIndices: any;
 
   getTimeFieldRange(obj: object): Promise<any>;
 }
