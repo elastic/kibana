@@ -13,7 +13,7 @@ You can configure the following properties:
 
 *Fill color*:: The fill color of the vector features.
 +
-NOTE: *LineString* and *MultiLineString* geometries do not have fill and do not use fill color property.
+NOTE: *LineString* and *MultiLineString* geometries do not have fill and do not use the fill color property.
 Set border color to style line geometries.
 
 *Border color*:: The border color of the vector features.
