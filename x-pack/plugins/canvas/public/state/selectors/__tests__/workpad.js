@@ -280,10 +280,38 @@ describe('workpad selectors', () => {
           },
         },
       });
-      expect(filterGroups).to.be.an(Array);
-      expect(filterGroups).to.have.length(2);
-      expect(filterGroups).to.contain('one');
-      expect(filterGroups).to.contain('two');
+
+      // filters are alphabetical
+      expect(filterGroups).to.eql(['one', 'two']);
+    });
+
+    it('gets filter groups in filter function args', () => {
+      const filterGroups = selector.getGlobalFilterGroups({
+        persistent: {
+          workpad: {
+            pages: [
+              {
+                elements: [
+                  { filter: 'exactly filterGroup=one value=complete column=state' },
+                  { filter: 'timefilter column=timestamp from=now-15m to=now' },
+                  {
+                    expression: 'filters {string two} | demodata {filters three}',
+                    filter: 'exactly filterGroup=four value=pending column=state',
+                  },
+                  {
+                    expression: 'demodata {filters one}',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+      });
+
+      // {string two} is skipped, only primitive values are extracted
+      // filterGroup=one and {filters one} are de-duped
+      // filters are alphabetical
+      expect(filterGroups).to.eql(['four', 'one', 'three']);
     });
   });
 

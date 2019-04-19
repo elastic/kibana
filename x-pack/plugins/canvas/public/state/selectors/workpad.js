@@ -6,6 +6,7 @@
 
 import { get, omit } from 'lodash';
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
+
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 
@@ -125,6 +126,55 @@ export function getGlobalFilters(state) {
   }, []);
 }
 
+function buildGroupValues(args, onValue) {
+  const argNames = Object.keys(args);
+
+  return argNames.reduce((values, argName) => {
+    // we only care about group values
+    if (argName !== '_' && argName !== 'group') {
+      return values;
+    }
+
+    return args[argName].reduce((acc, argValue) => {
+      // delegate to passed function to buyld list
+      return acc.concat(onValue(argValue, argName, args) || []);
+    }, values);
+  }, []);
+}
+
+function extractFilterGroups(ast) {
+  if (ast.type !== 'expression') {
+    throw new Error('AST must be an expression');
+  }
+
+  return ast.chain.reduce((groups, item) => {
+    // TODO: we always get a function here, right?
+    const { function: fn, arguments: args } = item;
+
+    if (fn === 'filters') {
+      // we have a filter function, extract groups from args
+      return groups.concat(
+        buildGroupValues(args, argValue => {
+          // this only handles simple values
+          if (typeof argValue !== 'object') {
+            return argValue;
+          }
+        })
+      );
+    } else {
+      // dig into other functions, looking for filters function
+      return groups.concat(
+        buildGroupValues(args, argValue => {
+          // recursively collect filter groups
+          if (typeof argValue === 'object' && argValue.type === 'expression') {
+            return extractFilterGroups(argValue);
+          }
+        })
+      );
+    }
+  }, []);
+}
+
 export function getGlobalFilterGroups(state) {
   const filterGroups = getAllElements(state).reduce((acc, el) => {
     // check that a filter is defined
@@ -135,8 +185,19 @@ export function getGlobalFilterGroups(state) {
 
       // add any new group to the array
       if (filterGroup && filterGroup !== '' && !acc.includes(filterGroup)) {
-        return acc.concat(String(filterGroup));
+        acc.push(String(filterGroup));
       }
+    }
+
+    // extract groups from all expressions that use filters function
+    if (el.expression != null && el.expression.length) {
+      const expressionAst = fromExpression(el.expression);
+      const groups = extractFilterGroups(expressionAst);
+      groups.forEach(group => {
+        if (!acc.includes(group)) {
+          acc.push(group);
+        }
+      });
     }
 
     return acc;
