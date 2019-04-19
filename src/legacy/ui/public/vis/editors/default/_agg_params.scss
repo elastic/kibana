@@ -10,3 +10,12 @@
   color: $textColor;
   background-color: $backgroundColor;
 }
+
+.visEditorAggParam--inline {
+  display: inline-block;
+  width: 50%;
+}
+
+.visEditorAggParam--inline-size {
+  padding-left:  $vis-editor-agg-editor-spacing;
+}

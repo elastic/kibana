@@ -26,6 +26,7 @@ import { createFilterTerms } from './create_filter/terms';
 import orderAggTemplate from '../controls/order_agg.html';
 import { OrderParamEditor } from '../controls/order';
 import { SizeParamEditor } from '../controls/size';
+import { wrapWithInlineComp } from './_inline_comp_wrapper';
 import otherBucketTemplate from '../controls/other_bucket.html';
 import { i18n } from '@kbn/i18n';
 
@@ -239,7 +240,7 @@ export const termsBucketAgg = new BucketAggType({
       name: 'order',
       type: 'select',
       default: 'desc',
-      editorComponent: OrderParamEditor,
+      editorComponent: wrapWithInlineComp(OrderParamEditor),
       options: [
         {
           text: i18n.translate('common.ui.aggTypes.buckets.terms.orderDescendingTitle', {
@@ -258,7 +259,7 @@ export const termsBucketAgg = new BucketAggType({
     },
     {
       name: 'size',
-      editorComponent: SizeParamEditor,
+      editorComponent: wrapWithInlineComp(SizeParamEditor),
       default: 5
     },
     {
