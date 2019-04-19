@@ -38,11 +38,11 @@ interface Driver {
 }
 
 export class WebElementWrapper {
-  private _By: typeof By;
-  private _Keys: IKey;
-  private _LegacyAction: any;
-  private _driver: WebDriver;
-  public _webElement: WebElement;
+  private _By: typeof By = this._webDriver.By;
+  private _Keys: IKey = this._webDriver.Key;
+  private _LegacyAction: any = this._webDriver.LegacyActionSequence;
+  private _driver: WebDriver = this._webDriver.driver;
+  public _webElement: WebElement = this.webElement as WebElement;
 
   constructor(
     private webElement: Element,
@@ -54,11 +54,6 @@ export class WebElementWrapper {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
     }
-    this._webElement = webElement as WebElement;
-    this._driver = _webDriver.driver;
-    this._By = _webDriver.By;
-    this._Keys = _webDriver.Key;
-    this._LegacyAction = _webDriver.LegacyActionSequence;
   }
 
   private async _findWithCustomTimeout(findFunction: () => Promise<Element[]>, timeout?: number) {
@@ -201,7 +196,8 @@ export class WebElementWrapper {
    * @param  {string|string[]} keys
    * @return {Promise<void>}
    */
-  public async pressKeys<T extends IKey | string>(keys: T | T[]): Promise<void>;
+  public async pressKeys<T extends IKey>(keys: T | T[]): Promise<void>;
+  public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
     if (Array.isArray(keys)) {
       const chord = this._Keys.chord(keys);
@@ -273,7 +269,7 @@ export class WebElementWrapper {
    * @return {Promise<string>}
    */
   async getVisibleText(): Promise<string> {
-    return await (this._webElement as WebElement).getText();
+    return await this._webElement.getText();
   }
 
   /**
