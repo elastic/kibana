@@ -48,21 +48,21 @@ function geoJsonToEs(parsedGeojson, datatype) {
 
   if (datatype === 'geo_shape') {
     return features.reduce((accu, feature) => {
-      accu.push(JSON.stringify({
+      accu.push({
         location: {
           'type': feature.geometry.type.toLowerCase(),
           'coordinates': feature.geometry.coordinates
         },
         name: _.get(feature, 'properties.name', '')
-      }));
+      });
       return accu;
     }, []);
   } else if (datatype === 'geo_point') {
     return features.reduce((accu, shape) => {
-      accu.push(JSON.stringify({
+      accu.push({
         location: shape.geometry.coordinates,
         name: _.get(shape, 'properties.name', '')
-      }));
+      });
       return accu;
     }, []);
   } else {

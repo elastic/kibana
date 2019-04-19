@@ -62,6 +62,10 @@ export function JsonUploadAndParse(props) {
         return;
     }
   }
+  // Default to first
+  if (!indexDataType) {
+    setIndexDataType(mappingsOptions[0].value);
+  }
 
   return (
     <Fragment>
