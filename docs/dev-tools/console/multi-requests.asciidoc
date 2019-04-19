@@ -1,14 +1,11 @@
 [[multi-requests]]
-=== Multiple Requests Support
+=== Multiple requests support
 
-The Console editor allows writing multiple requests below each other. As shown in the <<console-kibana>> section, you
-can submit a request to Elasticsearch by positioning the cursor and using the <<action_menu,Action Menu>>. Similarly
-you can select multiple requests in one go:
+The Console editor allows writing multiple requests below each other. You can submit 
+a request to {es} by positioning the cursor and using the action menu image:dev-tools/console/images/wrench.png[]. 
+Similarly you can highlight multiple requests to be sent in one go. 
 
-.Selecting Multiple Requests
-image::images/multiple_requests.png[Multiple Requests]
-
-Console will send the request one by one to Elasticsearch and show the output on the right pane as Elasticsearch responds.
+Console will send the request one by one to {es} and show the output on the right pane as {es} responds.
 This is very handy when debugging an issue or trying query combinations in multiple scenarios.
 
 Selecting multiple requests also allows you to auto format and copy them as cURL in one go.

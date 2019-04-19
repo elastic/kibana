@@ -1,15 +1,24 @@
 [[console-kibana]]
 == Console
 
-The Console plugin provides a UI to interact with the REST API of Elasticsearch. Console has two main areas: the *editor*,
-where you compose requests to Elasticsearch, and the *response* pane, which displays the responses to the request.
+Console enables interaction with the REST API of {es}. *Note:* You cannot 
+interact with Kibana API endpoints via Console.
 
-NOTE: You cannot interact with Kibana API endpoints via the Console.
+Go to *Dev Tools > Console* to get started. 
 
-.The Console UI
-image::dev-tools/console/images/introduction_screen.png[Screenshot]
+Console has two main areas: 
 
-Console understands commands in a cURL-like syntax. For example the following Console command
+* The *editor* where you compose requests to send to {es} 
+* The *response* pane, which displays the responses to the request
+
+[role="screenshot"]
+image::dev-tools/console/images/console.png["Console"]
+
+[float]
+=== Console commands
+
+Console understands commands in a cURL-like syntax. 
+For example, the following is a `GET` request to {es}'s `_search API`. 
 
 [source,js]
 ----------------------------------
@@ -21,7 +30,7 @@ GET /_search
 }
 ----------------------------------
 
-is a simple `GET` request to Elasticsearch's `_search API`. Here is the equivalent command in cURL.
+Here is the equivalent command in cURL:
 
 [source,bash]
 ----------------------------------
@@ -33,38 +42,42 @@ curl -XGET "http://localhost:9200/_search" -d'
 }'
 ----------------------------------
 
-In fact, you can paste the above command into Console and it will automatically be converted into the Console syntax.
+In fact, you can paste the above command into Console and it will automatically 
+be converted into the Console syntax.
 
-When typing a command, Console will make context sensitive <<suggestions,suggestions>>. These suggestions can help
-you explore parameters for each API, or to just speed up typing. Console will suggest APIs, indexes and field
-names.
+When typing a command, Console will make context-sensitive suggestions. 
+These suggestions can help you explore parameters for each API, or to just speed up typing. 
+Console will suggest APIs, indexes and field names.
 
-[[suggestions]]
-.API suggestions
-image::dev-tools/console/images/introduction_suggestion.png["Suggestions",width=400,align="center"]
+[float]
+==== Submitting requests 
+Once you have typed a command in to the left pane, click the green triangle to submit it to {es}.
 
-Once you have typed a command in to the left pane, you can submit it to Elasticsearch by clicking the little green
-triangle that appears next to the URL line of the request. Notice that as you move the cursor around, the little
- triangle and wrench icons follow you around. We call this the <<action_menu,Action Menu>>. You can also select
- multiple requests and submit them all at once.
+From the action menu image:dev-tools/console/images/wrench.png[] you can also select
+<<multi-requests, multiple requests>> and submit them all at once.
 
-[[action_menu]]
-.The Action Menu
-image::dev-tools/console/images/introduction_action_menu.png["The Action Menu",width=400,align="center"]
 
-When the response come back, you should see it in the right hand panel:
+[float]
+[[console-settings]]
+=== Settings
+*Settings* allows you to modify the font size, and configure preferences for
+auto-complete.
 
-.The Output Pane
-image::dev-tools/console/images/introduction_output.png[Screenshot]
+[float]
+[[history]]
+=== History
+Console maintains a list of the last 500 requests that were successfully executed by {es}. 
+The history is available by clicking the clock icon on the top right side of the window. 
+The icons opens the history panel where you can see the old requests. 
+You can also select a request here and it will be added to the editor at
+the current cursor position.
+
+
 
 include::multi-requests.asciidoc[]
 
 include::auto-formatting.asciidoc[]
 
 include::keyboard-shortcuts.asciidoc[]
-
-include::history.asciidoc[]
-
-include::settings.asciidoc[]
 
 include::configuring-console.asciidoc[]

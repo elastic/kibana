@@ -1,7 +1,10 @@
 [[keyboard-shortcuts]]
 === Keyboard shortcuts
 
-Console comes with a set of nifty keyboard shortcuts making working with it even more efficient. Here is an overview:
+Console comes with a set of nifty keyboard shortcuts making working with it even more efficient. 
+You can access these shortcuts from the *Help* menu.
+
+Here is an overview:
 
 [float]
 ==== General editing
