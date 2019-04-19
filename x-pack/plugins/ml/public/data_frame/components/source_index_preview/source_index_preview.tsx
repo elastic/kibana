@@ -68,6 +68,20 @@ interface Sorting {
 
 type TableSorting = Sorting | boolean;
 
+interface SourceIndexPreviewTitle {
+  indexPatternTitle: string;
+}
+const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
+  <EuiTitle size="xs">
+    <span>
+      {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
+        defaultMessage: 'Source Index {indexPatternTitle}',
+        values: { indexPatternTitle },
+      })}
+    </span>
+  </EuiTitle>
+);
+
 interface Props {
   query: SimpleQuery;
   cellClick?(search: string): void;
@@ -120,14 +134,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
   if (status === SOURCE_INDEX_STATUS.ERROR) {
     return (
       <EuiPanel grow={false}>
-        <EuiTitle size="xs">
-          <span>
-            {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
-              defaultMessage: 'Source Index {indexPatternTitle}',
-              values: { indexPatternTitle: indexPattern.title },
-            })}
-          </span>
-        </EuiTitle>
+        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         <EuiCallOut
           title={i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternError', {
             defaultMessage: 'An error occurred loading the source index data.',
@@ -143,7 +150,28 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
     return (
-      <EuiEmptyPrompt title={<h2>No results</h2>} body={<p>Check the syntax of your query.</p>} />
+      <EuiPanel grow={false}>
+        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutTitle',
+            {
+              defaultMessage: 'Empty source index query result.',
+            }
+          )}
+          color="primary"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutBody',
+              {
+                defaultMessage:
+                  'The query for the source index returned no results. Please make sure the index contains documents and your query is not too limiting.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      </EuiPanel>
     );
   }
 
@@ -213,14 +241,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <span>
-              {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
-                defaultMessage: 'Source Index {indexPatternTitle}',
-                values: { indexPatternTitle: indexPattern.title },
-              })}
-            </span>
-          </EuiTitle>
+          <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center">

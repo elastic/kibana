@@ -20,6 +20,16 @@ import {
 import { IndexPatternContext, OptionsDataElement, SimpleQuery } from '../../common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
+const PreviewTitle = () => (
+  <EuiTitle size="xs">
+    <span>
+      {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
+        defaultMessage: 'Data Frame Pivot Preview',
+      })}
+    </span>
+  </EuiTitle>
+);
+
 interface Props {
   aggs: OptionsDataElement[];
   groupBy: string[];
@@ -43,13 +53,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
       <EuiPanel grow={false}>
-        <EuiTitle size="xs">
-          <span>
-            {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
-              defaultMessage: 'Data Frame Pivot Preview',
-            })}
-          </span>
-        </EuiTitle>
+        <PreviewTitle />
         <EuiCallOut
           title={i18n.translate(
             'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewError',
@@ -69,13 +73,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   if (dataFramePreviewData.length === 0) {
     return (
       <EuiPanel grow={false}>
-        <EuiTitle size="xs">
-          <span>
-            {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
-              defaultMessage: 'Data Frame Pivot Preview',
-            })}
-          </span>
-        </EuiTitle>
+        <PreviewTitle />
         <EuiCallOut
           title={i18n.translate(
             'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutTitle',
@@ -132,13 +130,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
 
   return (
     <EuiPanel>
-      <EuiTitle size="xs">
-        <span>
-          {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
-            defaultMessage: 'Data Frame Pivot Preview',
-          })}
-        </span>
-      </EuiTitle>
+      <PreviewTitle />
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
