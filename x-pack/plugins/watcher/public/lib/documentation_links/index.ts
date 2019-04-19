@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { documentationLinks } from './documentation_links';
+export * from './documentation_links';

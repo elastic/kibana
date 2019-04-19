@@ -31,7 +31,7 @@ import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
 import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
 import { ErrableFormRow } from '../../../components/form_errors';
 import { executeWatch } from '../../../lib/api';
-import { documentationLinks } from '../../../lib/documentation_links';
+import { executeWatchApiUrl } from '../../../lib/documentation_links';
 import { WatchContext } from '../../../sections/watch_edit/components/watch_context';
 import { timeUnits } from '../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
@@ -369,7 +369,7 @@ export const JsonWatchEditSimulate = ({
               defaultMessage="Allow the watch to execute or skip actions. {actionsLink}"
               values={{
                 actionsLink: (
-                  <EuiLink href={documentationLinks.watcher.executeWatchApi} target="_blank">
+                  <EuiLink href={executeWatchApiUrl} target="_blank">
                     {i18n.translate(
                       'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription.linkLabel',
                       {
