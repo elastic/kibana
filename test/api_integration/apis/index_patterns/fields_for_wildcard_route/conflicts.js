@@ -46,7 +46,7 @@ export default function ({ getService }) {
               {
                 name: 'number_conflict',
                 type: 'number',
-                esTypes: ['float', 'integer'],
+                esTypes: ['integer', 'float'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: true,
@@ -54,7 +54,7 @@ export default function ({ getService }) {
               {
                 name: 'string_conflict',
                 type: 'string',
-                esTypes: ['keyword', 'text'],
+                esTypes: ['text', 'keyword'],
                 aggregatable: true,
                 searchable: true,
                 readFromDocValues: false,
