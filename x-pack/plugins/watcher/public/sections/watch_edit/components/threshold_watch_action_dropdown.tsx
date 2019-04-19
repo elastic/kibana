@@ -44,7 +44,8 @@ export const WatchActionsDropdown: React.FunctionComponent = () => {
         typeName,
         iconClass,
         selectMessage,
-        isEnabled: settings.actionTypes[actionKey].enabled,
+        isEnabled: true, // TODO temp
+        // isEnabled: settings.actionTypes[actionKey].enabled,
       };
     });
     setActions(newActions);

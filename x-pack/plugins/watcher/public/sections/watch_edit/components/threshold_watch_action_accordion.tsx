@@ -23,10 +23,11 @@ import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { WatchAction } from '../../../../common/types/watch_types';
 import { ACTION_TYPES, ACTION_MODES } from '../../../../common/constants';
 import { WatchContext } from './watch_context';
-import { EmailActionFields } from './email_action_fields';
+import { WebhookActionFields } from './webhook_action_fields';
 import { LoggingActionFields } from './logging_action_fields';
-import { SlackActionFields } from './slack_action_fields';
 import { IndexActionFields } from './index_action_fields';
+import { SlackActionFields } from './slack_action_fields';
+import { EmailActionFields } from './email_action_fields';
 import { executeWatch } from '../../../lib/api';
 
 const ActionFieldsComponent = {
@@ -34,6 +35,7 @@ const ActionFieldsComponent = {
   [ACTION_TYPES.SLACK]: SlackActionFields,
   [ACTION_TYPES.EMAIL]: EmailActionFields,
   [ACTION_TYPES.INDEX]: IndexActionFields,
+  [ACTION_TYPES.WEBHOOK]: WebhookActionFields,
   // TODO add support for additional action types
 };
 

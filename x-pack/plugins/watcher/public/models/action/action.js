@@ -9,7 +9,7 @@ import { ACTION_TYPES } from 'plugins/watcher/../common/constants';
 import { EmailAction } from './email_action';
 import { LoggingAction } from './logging_action';
 import { SlackAction } from './slack_action';
-import { WebhookAction } from './webhook.action';
+import { WebhookAction } from './webhook_action';
 import { IndexAction } from './index_action';
 import { PagerDutyAction } from './pagerduty.action';
 import { JiraAction } from './jira.action';

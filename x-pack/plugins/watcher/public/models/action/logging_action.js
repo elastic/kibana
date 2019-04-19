@@ -84,5 +84,4 @@ export class LoggingAction extends BaseAction {
   static simulatePrompt = i18n.translate('xpack.watcher.models.loggingAction.simulateButtonLabel', {
     defaultMessage: 'Log a sample message now',
   });
-
 }

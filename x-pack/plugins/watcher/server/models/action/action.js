@@ -12,6 +12,7 @@ import { LoggingAction } from './logging_action';
 import { EmailAction } from './email_action';
 import { SlackAction } from './slack_action';
 import { IndexAction } from './index_action';
+import { WebhookAction } from './webhook_action';
 import { UnknownAction } from './unknown_action';
 import { i18n } from '@kbn/i18n';
 
@@ -20,6 +21,7 @@ set(ActionTypes, ACTION_TYPES.LOGGING, LoggingAction);
 set(ActionTypes, ACTION_TYPES.EMAIL, EmailAction);
 set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
 set(ActionTypes, ACTION_TYPES.INDEX, IndexAction);
+set(ActionTypes, ACTION_TYPES.WEBHOOK, WebhookAction);
 set(ActionTypes, ACTION_TYPES.UNKNOWN, UnknownAction);
 // TODO add additional actions
 
