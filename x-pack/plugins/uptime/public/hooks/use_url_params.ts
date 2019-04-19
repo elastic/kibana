@@ -5,6 +5,10 @@
  */
 
 import qs from 'querystring';
+import {
+  UptimeUrlParams,
+  getSupportedUrlParams,
+} from '../lib/helper/url_params/get_supported_url_params';
 
 interface Location {
   pathname: string;
@@ -14,9 +18,9 @@ interface Location {
 export const useUrlParams = (
   history: any,
   location: Location
-): [any, (updatedParams: any) => string] => {
+): [UptimeUrlParams, (updatedParams: any) => string] => {
   const { pathname, search } = location;
-  const currentParams = qs.parse(search[0] === '?' ? search.slice(1) : search);
+  const currentParams: any = qs.parse(search[0] === '?' ? search.slice(1) : search);
 
   const updateUrl = (updatedParams: any) => {
     const updatedSearch = qs.stringify({ ...currentParams, ...updatedParams });
@@ -28,5 +32,5 @@ export const useUrlParams = (
     return `${pathname}?${updatedSearch}`;
   };
 
-  return [currentParams, updateUrl];
+  return [getSupportedUrlParams(currentParams), updateUrl];
 };
