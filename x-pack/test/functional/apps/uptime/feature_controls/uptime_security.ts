@@ -118,7 +118,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Uptime', 'Management']);
+        expect(navLinks).to.eql(['Uptime', 'SIEM', 'Management']);
       });
 
       it('can navigate to Uptime app', async () => {

@@ -123,7 +123,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Graph', 'Management']);
+        expect(navLinks).to.eql(['SIEM', 'Graph', 'Management']);
       });
 
       it(`doesn't show save button`, async () => {
