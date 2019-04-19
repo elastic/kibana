@@ -14,7 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const find = getService('find');
   const appsMenu = getService('appsMenu');
 
-  describe('security feature controls', () => {
+  describe.skip('security feature controls', () => {
     before(async () => {
       await esArchiver.load('canvas/default');
     });
@@ -68,7 +68,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Canvas', 'SIEM', 'Management']);
+        expect(navLinks).to.eql(['Canvas', 'Management']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -142,7 +142,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Canvas', 'SIEM', 'Management']);
+        expect(navLinks).to.eql(['Canvas', 'Management']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {

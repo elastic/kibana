@@ -21,7 +21,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
 
-  describe('security', () => {
+  describe.skip('security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');
@@ -77,7 +77,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
           'Dashboard',
-          'SIEM',
           'Management',
         ]);
       });
@@ -212,7 +211,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Dashboard', 'SIEM', 'Management']);
+        expect(navLinks).to.eql(['Dashboard', 'Management']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {

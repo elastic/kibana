@@ -16,7 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  describe('infrastructure security', () => {
+  describe.skip('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
       before(async () => {
         await security.role.create('global_infrastructure_all_role', {
@@ -62,7 +62,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'SIEM', 'Management']);
+        expect(navLinks).to.eql(['Infrastructure', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {
@@ -167,7 +167,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Infrastructure', 'SIEM', 'Management']);
+        expect(navLinks).to.eql(['Infrastructure', 'Management']);
       });
 
       describe('infrastructure landing page without data', () => {

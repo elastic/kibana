@@ -28,7 +28,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
     await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
   }
 
-  describe('security', () => {
+  describe.skip('security', () => {
     before(async () => {
       await esArchiver.load('discover/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');

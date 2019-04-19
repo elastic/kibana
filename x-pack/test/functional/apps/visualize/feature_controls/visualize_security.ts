@@ -22,7 +22,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  describe('feature controls security', () => {
+  describe.skip('feature controls security', () => {
     before(async () => {
       await esArchiver.load('visualize/default');
       await esArchiver.loadIfNeeded('logstash_functional');
