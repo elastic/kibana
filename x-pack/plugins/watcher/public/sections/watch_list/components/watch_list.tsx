@@ -18,6 +18,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
@@ -222,27 +223,47 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       <EuiSpacer />
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="createThresholdAlertButton"
-            href="#/management/elasticsearch/watcher/watches/new-watch/threshold"
+          <EuiToolTip
+            position="top"
+            content={
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.createThresholdAlertButtonTooltip"
+                defaultMessage="Send an alert on a specific condition"
+              />
+            }
           >
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
-              defaultMessage="Create threshold alert"
-            />
-          </EuiButton>
+            <EuiButton
+              data-test-subj="createThresholdAlertButton"
+              href="#/management/elasticsearch/watcher/watches/new-watch/threshold"
+            >
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.createThresholdAlertButtonLabel"
+                defaultMessage="Create threshold alert"
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton
-            data-test-subj="createAdvancedWatchButton"
-            href="#/management/elasticsearch/watcher/watches/new-watch/json"
+          <EuiToolTip
+            position="top"
+            content={
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.createAdvancedWatchTooltip"
+                defaultMessage="Set up a custom watch in raw JSON"
+              />
+            }
           >
-            <FormattedMessage
-              id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
-              defaultMessage="Create advanced watch"
-            />
-          </EuiButton>
+            <EuiButton
+              data-test-subj="createAdvancedWatchButton"
+              href="#/management/elasticsearch/watcher/watches/new-watch/json"
+            >
+              <FormattedMessage
+                id="xpack.watcher.sections.watchList.createAdvancedWatchButtonLabel"
+                defaultMessage="Create advanced watch"
+              />
+            </EuiButton>
+          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />
