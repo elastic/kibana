@@ -52,7 +52,7 @@ export class WebElementWrapper {
     private _logger: ToolingLog
   ) {
     if (webElement instanceof WebElementWrapper) {
-      this._webElement = webElement._webElement;
+      return webElement;
     }
     this._webElement = webElement as WebElement;
     this._driver = _webDriver.driver;
