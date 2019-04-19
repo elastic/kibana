@@ -87,7 +87,7 @@ export class CodeFileTree extends React.Component<Props> {
   }
 
   public getItemRenderer = (node: Tree, forceOpen: boolean, flattenFrom?: Tree) => () => {
-    const className = 'codeFileTree__item';
+    const className = 'codeFileTree__item kbn-resetFocusState';
     let bg = null;
     if (this.props.match.params.path === node.path) {
       bg = <div ref={el => this.scrollIntoView(el)} className="codeFileTree__node--fullWidth" />;
