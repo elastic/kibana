@@ -38,6 +38,22 @@ export class TOCEntry extends React.Component {
     this._isMounted = false;
   }
 
+  componentDidUpdate() {
+    this._updateDisplayName();
+  }
+
+  _isLayerDetailsOpen = () => {
+    return this.props.openTOCDetails.includes(this.props.layer.getId());
+  }
+
+  _toggleLayerDetailsVisibility = () => {
+    if (this._isLayerDetailsOpen()) {
+      this.props.hideTOCDetails(this.props.layer.getId());
+    } else {
+      this.props.showTOCDetails(this.props.layer.getId());
+    }
+  }
+
   async _updateDisplayName() {
     const label = await this.props.layer.getDisplayName();
     if (this._isMounted) {
@@ -47,10 +63,6 @@ export class TOCEntry extends React.Component {
         });
       }
     }
-  }
-
-  componentDidUpdate() {
-    this._updateDisplayName();
   }
 
   _openLayerPanelWithCheck = () => {
@@ -116,7 +128,11 @@ export class TOCEntry extends React.Component {
   _renderLayerName() {
     return (
       <EuiText>
-        <div style={{ maxWidth: '19rem' }} className="eui-textTruncate eui-textLeft">
+        <div
+          style={{ maxWidth: '19rem' }}
+          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+          onClick={this._toggleLayerDetailsVisibility}
+        >
           {this.state.displayName}
         </div>
         {this._renderLayerIcons()}
@@ -195,7 +211,11 @@ export class TOCEntry extends React.Component {
     );
   }
 
-  _renderLayerDetails() {
+  _renderLayerDetails = () => {
+    if (!this._isLayerDetailsOpen()) {
+      return null;
+    }
+
     const tocDetails = this.props.layer.getTOCDetails();
     if (!tocDetails) {
       return null;

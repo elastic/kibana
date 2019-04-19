@@ -7,7 +7,14 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { getIsReadOnly, updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import {
+  getIsReadOnly,
+  updateFlyout,
+  FLYOUT_STATE,
+  getOpenTOCDetails,
+  hideTOCDetails,
+  showTOCDetails,
+} from '../../../../../store/ui';
 import {
   fitToLayerExtent,
   setSelectedLayer,
@@ -27,7 +34,8 @@ function mapStateToProps(state = {}) {
     },
     hasDirtyStateSelector: () => {
       return hasDirtyState(state);
-    }
+    },
+    openTOCDetails: getOpenTOCDetails(state),
   };
 }
 
@@ -46,7 +54,13 @@ function mapDispatchToProps(dispatch) {
     },
     cloneLayer: layerId => {
       dispatch(cloneLayer(layerId));
-    }
+    },
+    hideTOCDetails: layerId => {
+      dispatch(hideTOCDetails(layerId));
+    },
+    showTOCDetails: layerId => {
+      dispatch(showTOCDetails(layerId));
+    },
   });
 }
 
