@@ -180,3 +180,23 @@ if [ "$GIT_CHANGES" ]; then
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi
+
+###
+### github-checks-reporter kill switch. Remove to disable
+###
+export CHECKS_REPORTER_ACTIVE=true
+
+###
+### Implements github-checks-reporter kill switch when scripts are called from the command line
+### $@ - all arguments
+###
+function checks-reporter-with-killswitch() {
+  if [ "$CHECKS_REPORTER_ACTIVE" = true ] ; then
+    yarn run github-checks-reporter "$@"
+  else
+    arguments=("$@");
+    "${arguments[@]:1}";
+  fi
+}
+
+export -f checks-reporter-with-killswitch
