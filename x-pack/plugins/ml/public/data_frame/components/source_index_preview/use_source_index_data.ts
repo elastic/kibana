@@ -23,12 +23,18 @@ export enum SOURCE_INDEX_STATUS {
   ERROR,
 }
 
+export interface UseSourceIndexDataReturnType {
+  errorMessage: string;
+  status: SOURCE_INDEX_STATUS;
+  tableItems: EsDoc[];
+}
+
 export const useSourceIndexData = (
   indexPattern: IndexPatternContextValue,
   query: SimpleQuery,
   selectedFields: EsFieldName[],
   setSelectedFields: React.Dispatch<React.SetStateAction<EsFieldName[]>>
-) => {
+): UseSourceIndexDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(SOURCE_INDEX_STATUS.UNUSED);
   const [tableItems, setTableItems] = useState([] as EsDoc[]);
