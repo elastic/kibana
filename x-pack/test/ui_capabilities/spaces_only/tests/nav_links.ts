@@ -16,8 +16,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
   const uiCapabilitiesService: UICapabilitiesService = getService('uiCapabilities');
   const featuresService: FeaturesService = getService('features');
 
-  // DO NOT CHECK INTO MASTER, WE HAVE TO FIGURE OUT HOW TO ADD SIEM
-  describe.skip('navLinks', () => {
+  describe('navLinks', () => {
     let navLinksBuilder: NavLinksBuilder;
     before(async () => {
       const features = await featuresService.get();

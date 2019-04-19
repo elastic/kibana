@@ -15,7 +15,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
 
-  describe.skip('logs security', () => {
+  describe('logs security', () => {
     before(async () => {
       esArchiver.load('empty_kibana');
     });

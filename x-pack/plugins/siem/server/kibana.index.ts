@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import JoiNamespace from 'joi';
 
@@ -35,6 +36,37 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
   initServer(libs, { mocking, logger });
 
   logger.info('Plugin done initializing');
+
+  const xpackMainPlugin = kbnServer.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: APP_ID,
+    name: i18n.translate('xpack.siem.featureRegistry.linkSiemTitle', {
+      defaultMessage: 'SIEM',
+    }),
+    icon: 'securityAnalyticsApp',
+    navLinkId: 'siem',
+    app: ['siem', 'kibana'],
+    catalogue: ['siem'],
+    privileges: {
+      all: {
+        api: ['siem'],
+        savedObject: {
+          // Add your saveObject that user need to access
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show'],
+      },
+      read: {
+        api: ['siem'],
+        savedObject: {
+          all: [],
+          read: ['config'],
+        },
+        ui: ['show'],
+      },
+    },
+  });
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {

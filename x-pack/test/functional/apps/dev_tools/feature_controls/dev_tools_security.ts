@@ -16,7 +16,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const testSubjects = getService('testSubjects');
   const grokDebugger = getService('grokDebugger');
 
-  describe.skip('security', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('empty_kibana');
 
