@@ -7,6 +7,7 @@
 import {
   EventsData,
   LastEventTimeData,
+  LastTimeDetails,
   SourceConfiguration,
   TimelineData,
   TimelineDetailsData,
@@ -57,6 +58,7 @@ export interface LastEventTimeHit extends SearchHit {
 }
 export interface LastEventTimeRequestOptions {
   indexKey: string;
+  details: LastTimeDetails;
   sourceConfiguration: SourceConfiguration;
 }
 

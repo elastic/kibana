@@ -152,11 +152,6 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
       buildLastEventTimeQuery(options)
     );
 
-    console.log('ES Query2:');
-    console.log(JSON.stringify(buildLastEventTimeQuery(options), null, 2));
-    console.log('ES Response2:');
-    console.log(JSON.stringify(response, null, 2));
-
     return {
       lastSeen: getOr('', 'aggregations.last_seen_event.value_as_string', response),
     };

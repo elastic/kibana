@@ -29,26 +29,28 @@ export interface OwnProps extends QueryTemplateProps {
 
 export function useLastEventTimeQuery<TCache = object>(
   indexKey: string,
+  details: object,
   sourceId: string,
   apolloClient: ApolloClient<TCache>
 ) {
   const [loading, updateLoading] = useState(false);
   const [lastSeen, updateLastSeen] = useState(null);
   const [errorMessage, updateErrorMessage] = useState(null);
-
+  const [currentIndexKey, updateCurrentIndexKey] = useState(null);
   async function fetchLastEventTime() {
     updateLoading(true);
     return apolloClient
       .query<GetLastEventTimeQuery.Query, GetLastEventTimeQuery.Variables>({
         query: LastEventTimeGqlQuery,
         fetchPolicy: 'cache-first',
-        variables: { sourceId, indexKey },
+        variables: { sourceId, indexKey, details },
       })
       .then(
         result => {
           updateLoading(false);
           updateLastSeen(get('data.source.LastEventTime.lastSeen', result));
           updateErrorMessage(null);
+          updateCurrentIndexKey(currentIndexKey);
           return result;
         },
         error => {
@@ -59,14 +61,17 @@ export function useLastEventTimeQuery<TCache = object>(
       );
   }
 
-  useEffect(() => {
-    try {
-      fetchLastEventTime();
-    } catch (err) {
-      updateLastSeen(null);
-      updateErrorMessage(err.toString());
-    }
-  }, []);
+  useEffect(
+    () => {
+      try {
+        fetchLastEventTime();
+      } catch (err) {
+        updateLastSeen(null);
+        updateErrorMessage(err.toString());
+      }
+    },
+    [indexKey]
+  );
 
   return { lastSeen, loading, errorMessage };
 }

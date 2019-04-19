@@ -7,7 +7,6 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
-import { connect } from 'react-redux';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { pure } from 'recompose';
 
@@ -28,13 +27,12 @@ const overviewPageHeadline = {
 
 export const getHeaderForRoute = (pathname: string) => {
   const trailingPath = pathname.match(/.*\/(.*)$/);
-  const subtitle = <LastBeatStat indexKey={'hosts'} />;
   if (trailingPath !== null) {
     const pathSegment = trailingPath[1];
     switch (pathSegment) {
       case 'hosts': {
         return {
-          subtitle,
+          subtitle: <LastBeatStat indexKey={'hosts'} />,
           title: <FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />,
         };
       }
@@ -43,7 +41,7 @@ export const getHeaderForRoute = (pathname: string) => {
       }
       case 'network': {
         return {
-          subtitle,
+          subtitle: <LastBeatStat indexKey={'network'} />,
           title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
         };
       }
@@ -51,13 +49,16 @@ export const getHeaderForRoute = (pathname: string) => {
 
     if (pathname.match(/hosts\/.*?/)) {
       const hostId = pathSegment;
-      return { subtitle, title: hostId };
+      return {
+        subtitle: <LastBeatStat indexKey={'hostDetails'} hostName={hostId} />,
+        title: hostId,
+      };
     } else if (pathname.match(/network\/ip\/.*?/)) {
-      const title = decodeIpv6(pathSegment);
+      const ip = decodeIpv6(pathSegment);
       const children = <FlowTargetSelectConnected />;
       return {
-        subtitle,
-        title,
+        subtitle: <LastBeatStat indexKey={'ipDetails'} ip={ip} />,
+        title: ip,
         children,
       };
     }
@@ -67,20 +68,13 @@ export const getHeaderForRoute = (pathname: string) => {
 
 type PageHeadlineComponentProps = RouteComponentProps;
 
-const HeaderPageComponents = pure<PageHeadlineComponentProps>(({ location }) => (
-  <>
-    <PageHeadlineComponent {...getHeaderForRoute(location.pathname)} />
-    <EuiHorizontalRule />
-  </>
-));
+const HeaderPageComponents = pure<PageHeadlineComponentProps>(({ location }) => {
+  return (
+    <>
+      <PageHeadlineComponent {...getHeaderForRoute(location.pathname)} />
+      <EuiHorizontalRule />
+    </>
+  );
+});
 
-// const makeMapStateToProps = () => {
-//   const getIpDetailsFlowTargetSelector = networkSelectors.ipDetailsFlowTargetSelector();
-//   return (state: State) => {
-//     return {
-//       flowTarget: getIpDetailsFlowTargetSelector(state),
-//     };
-//   };
-// };
-
-export const PageHeadline = withRouter(connect(null)(HeaderPageComponents));
+export const PageHeadline = withRouter(HeaderPageComponents);

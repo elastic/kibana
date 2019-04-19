@@ -54,6 +54,11 @@ export const eventsSchema = gql`
     originalValue: EsValue
   }
 
+  input LastTimeDetails {
+    hostName: String
+    ip: String
+  }
+
   type TimelineDetailsData {
     data: [DetailItem!]
   }
@@ -78,6 +83,6 @@ export const eventsSchema = gql`
       filterQuery: String
     ): TimelineData!
     TimelineDetails(eventId: String!, indexName: String!): TimelineDetailsData!
-    LastEventTime(id: String, indexKey: String!): LastEventTimeData!
+    LastEventTime(id: String, indexKey: String!, details: LastTimeDetails!): LastEventTimeData!
   }
 `;

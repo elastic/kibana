@@ -1136,6 +1136,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface LastTimeDetails {
+  hostName?: string | null;
+
+  ip?: string | null;
+}
+
 export interface HostsSortField {
   field: HostsFields;
 
@@ -1204,6 +1210,8 @@ export interface LastEventTimeSourceArgs {
   id?: string | null;
 
   indexKey: string;
+
+  details: LastTimeDetails;
 }
 export interface HostsSourceArgs {
   id?: string | null;
@@ -1829,6 +1837,7 @@ export namespace GetLastEventTimeQuery {
   export type Variables = {
     sourceId: string;
     indexKey: string;
+    details: LastTimeDetails;
   };
 
   export type Query = {

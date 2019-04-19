@@ -7,10 +7,10 @@
 import gql from 'graphql-tag';
 
 export const LastEventTimeGqlQuery = gql`
-  query GetLastEventTimeQuery($sourceId: ID!, $indexKey: String!) {
+  query GetLastEventTimeQuery($sourceId: ID!, $indexKey: String!, $details: LastTimeDetails!) {
     source(id: $sourceId) {
       id
-      LastEventTime(indexKey: $indexKey) {
+      LastEventTime(indexKey: $indexKey, details: $details) {
         lastSeen
       }
     }

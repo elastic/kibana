@@ -44,7 +44,6 @@ export class Events {
     req: FrameworkRequest,
     options: LastEventTimeRequestOptions
   ): Promise<LastEventTimeData> {
-    console.log('INDEX adapter', this.adapter.getLastEventTimeData);
     return await this.adapter.getLastEventTimeData(req, options);
   }
 }

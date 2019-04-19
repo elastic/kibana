@@ -65,7 +65,11 @@ export const createEventsResolvers = (
       });
     },
     async LastEventTime(source, args, { req }) {
-      const options = { sourceConfiguration: source.configuration, indexKey: args.indexKey };
+      const options = {
+        sourceConfiguration: source.configuration,
+        indexKey: args.indexKey,
+        details: args.details,
+      };
       return libs.events.getLastEventTimeData(req, options);
     },
   },

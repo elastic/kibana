@@ -308,6 +308,16 @@
                   "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
                 },
                 "defaultValue": null
+              },
+              {
+                "name": "details",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "INPUT_OBJECT", "name": "LastTimeDetails", "ofType": null }
+                },
+                "defaultValue": null
               }
             ],
             "type": {
@@ -4573,6 +4583,29 @@
         "description": "",
         "fields": null,
         "inputFields": null,
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "LastTimeDetails",
+        "description": "",
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "hostName",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          },
+          {
+            "name": "ip",
+            "description": "",
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+            "defaultValue": null
+          }
+        ],
         "interfaces": null,
         "enumValues": null,
         "possibleTypes": null

@@ -12,13 +12,18 @@ import { pure } from 'recompose';
 
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
-
-export const LastBeatStat = pure<{ indexKey: string }>(({ indexKey }) => {
+interface LastBeatStatProps {
+  hostName?: string;
+  indexKey: string;
+  ip?: string;
+}
+export const LastBeatStat = pure<LastBeatStatProps>(({ hostName, indexKey, ip }) => {
   return (
     <ApolloConsumer>
       {client => {
         const { loading, lastSeen, errorMessage } = useLastEventTimeQuery(
           indexKey,
+          { hostName, ip },
           'default',
           client
         );
