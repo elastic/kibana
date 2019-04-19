@@ -6,6 +6,6 @@
 
 import uuid from 'uuid/v4';
 
-export function getId(type) {
+export function getId(type: string): string {
   return `${type}-${uuid()}`;
 }

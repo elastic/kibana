@@ -4,14 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment, FunctionComponent } from 'react';
+// @ts-ignore
 import { ElementConfig } from '../element_config';
+// @ts-ignore
 import { PageConfig } from '../page_config';
+// @ts-ignore
 import { WorkpadConfig } from '../workpad_config';
+// @ts-ignore
 import { SidebarSection } from './sidebar_section';
 
-export const GlobalConfig = () => (
-  <div className="canvasSidebar">
+export const GlobalConfig: FunctionComponent = () => (
+  <Fragment>
     <SidebarSection>
       <WorkpadConfig />
     </SidebarSection>
@@ -21,5 +25,5 @@ export const GlobalConfig = () => (
     <SidebarSection>
       <ElementConfig />
     </SidebarSection>
-  </div>
+  </Fragment>
 );

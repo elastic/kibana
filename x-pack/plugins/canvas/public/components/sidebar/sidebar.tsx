@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { workpad } from './workpad';
-import { esFields } from './es_fields';
-import { customElements } from './custom_elements';
+import React, { FunctionComponent } from 'react';
+// @ts-ignore
+import { SidebarContent } from './sidebar_content';
 
-export function routes(server) {
-  customElements(server);
-  esFields(server);
-  workpad(server);
-}
+export const Sidebar: FunctionComponent = () => (
+  <div className="canvasSidebar">
+    <SidebarContent />
+  </div>
+);
