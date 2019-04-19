@@ -60,7 +60,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Logs', 'Management']);
+        expect(navLinks).to.eql(['Logs', 'SIEM', 'Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -121,7 +121,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['Logs', 'Management']);
+        expect(navLinks).to.eql(['Logs', 'SIEM', 'Management']);
       });
 
       describe('logs landing page without data', () => {

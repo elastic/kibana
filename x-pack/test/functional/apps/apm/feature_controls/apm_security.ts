@@ -63,6 +63,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = await appsMenu.readLinks();
         expect(navLinks.map((link: Record<string, string>) => link.text)).to.eql([
           'APM',
+          'SIEM',
           'Management',
         ]);
       });
@@ -109,7 +110,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         const navLinks = (await appsMenu.readLinks()).map(
           (link: Record<string, string>) => link.text
         );
-        expect(navLinks).to.eql(['APM', 'Management']);
+        expect(navLinks).to.eql(['APM', 'SIEM', 'Management']);
       });
 
       it('can navigate to APM app', async () => {
