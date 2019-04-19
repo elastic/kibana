@@ -78,19 +78,5 @@ export const buildLastEventTimeQuery = ({
         },
       };
   }
-  const dslQuery = {
-    allowNoIndices: true,
-    index: indicesToQuery[indexKey],
-    ignoreUnavailable: true,
-    body: {
-      aggregations: {
-        last_seen_event: { max: { field: '@timestamp' } },
-      },
-      query: { match_all: {} },
-      size: 0,
-      track_total_hits: false,
-    },
-  };
-
-  return dslQuery;
+  return null;
 };
