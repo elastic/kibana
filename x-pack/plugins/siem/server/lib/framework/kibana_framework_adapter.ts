@@ -86,6 +86,9 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           schema,
         }),
         path: routePath,
+        route: {
+          tags: ['access:siem'],
+        },
       },
       plugin: graphqlHapi,
     });
@@ -97,6 +100,9 @@ export class KibanaBackendFrameworkAdapter implements FrameworkAdapter {
           passHeader: `'kbn-version': '${this.version}'`,
         },
         path: `${routePath}/graphiql`,
+        route: {
+          tags: ['access:siem'],
+        },
       },
       plugin: graphiqlHapi,
     });

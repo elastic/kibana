@@ -46,12 +46,11 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
           <PageContent data-test-subj="pageContent" panelPaddingSize="none">
             <PageContentBody data-test-subj="pane1ScrollContainer">
               <GlobalTime>
-                {({ poll, to, from, setQuery }) => (
+                {({ to, from, setQuery }) => (
                   <>
                     <KpiNetworkQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      poll={poll}
                       sourceId="default"
                       startDate={from}
                     >
@@ -69,7 +68,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                     <NetworkTopNFlowQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      poll={poll}
                       sourceId="default"
                       startDate={from}
                       type={networkModel.NetworkType.page}
@@ -92,7 +90,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           refetch={refetch}
                           setQuery={setQuery}
-                          startDate={from}
                           totalCount={totalCount}
                           type={networkModel.NetworkType.page}
                         />
@@ -102,7 +99,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                     <NetworkDnsQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      poll={poll}
                       sourceId="default"
                       startDate={from}
                       type={networkModel.NetworkType.page}
@@ -117,7 +113,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           refetch={refetch}
                           setQuery={setQuery}
-                          startDate={from}
                           totalCount={totalCount}
                           type={networkModel.NetworkType.page}
                         />

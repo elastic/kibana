@@ -9,5 +9,4 @@ import * as inputsModel from './model';
 import * as inputsSelectors from './selectors';
 
 export * from './reducer';
-export * from './epic';
 export { inputsActions, inputsModel, inputsSelectors };

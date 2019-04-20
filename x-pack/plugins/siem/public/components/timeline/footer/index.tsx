@@ -12,9 +12,12 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPopover,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
@@ -61,6 +64,7 @@ export const isCompactFooter = (width: number): boolean => width < 600;
 
 interface FooterProps {
   itemsCount: number;
+  isLive: boolean;
   isLoading: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
@@ -173,6 +177,7 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
   public render() {
     const {
       height,
+      isLive,
       isLoading,
       itemsCount,
       itemsPerPage,
@@ -247,12 +252,32 @@ export class Footer extends React.PureComponent<FooterProps, FooterState> {
             </EuiFlexItem>
 
             <EuiFlexItem data-test-subj="paging-control-container" grow={false}>
-              <PagingControl
-                data-test-subj="paging-control"
-                hasNextPage={hasNextPage}
-                isLoading={isLoading}
-                loadMore={this.loadMore}
-              />
+              {isLive ? (
+                <EuiText size="s" data-test-subj="is-live-on-message">
+                  <b>
+                    {i18n.AUTO_REFRESH_ACTIVE}
+                    <EuiIconTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.siem.footer.autoRefreshActiveTooltip"
+                          defaultMessage="While auto-refresh is enabled, timeline will show you the latest {numberOfItems} events that match your query."
+                          values={{
+                            numberOfItems: itemsCount,
+                          }}
+                        />
+                      }
+                      position="top"
+                    />
+                  </b>
+                </EuiText>
+              ) : (
+                <PagingControl
+                  data-test-subj="paging-control"
+                  hasNextPage={hasNextPage}
+                  isLoading={isLoading}
+                  loadMore={this.loadMore}
+                />
+              )}
             </EuiFlexItem>
 
             <EuiFlexItem data-test-subj="last-updated-container" grow={false}>

@@ -46,12 +46,7 @@ describe('Host Summary Component', () => {
     test('it renders the default Host Summary', () => {
       const wrapper = shallow(
         <TestProviders>
-          <HostSummary
-            loading={false}
-            data={mockData.Hosts.edges[0].node}
-            startDate={552204000000}
-            endDate={618472800000}
-          />
+          <HostSummary loading={false} data={mockData.Hosts.edges[0].node} />
         </TestProviders>
       );
 
@@ -61,13 +56,7 @@ describe('Host Summary Component', () => {
 
   describe('#createDraggable', () => {
     test('if it creates a draggable component', () => {
-      const draggable = createDraggable(
-        'debian',
-        'Platform',
-        552204000000,
-        618472800000,
-        'siem-kibana'
-      );
+      const draggable = createDraggable('debian', 'Platform', 'siem-kibana');
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe('debian');
     });
@@ -75,7 +64,7 @@ describe('Host Summary Component', () => {
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-            {createDraggable(null, 'firstSeen', 552204000000, 618472800000, 'kibana-siem')}
+            {createDraggable(null, 'firstSeen', 'kibana-siem')}
           </MockedProvider>
         </TestProviders>
       );
@@ -85,23 +74,17 @@ describe('Host Summary Component', () => {
       );
     });
     test('if it returns an empty value', () => {
-      const draggable = createDraggable(
-        null,
-        'Platform',
-        552204000000,
-        618472800000,
-        'siem-kibana'
-      );
+      const draggable = createDraggable(null, 'Platform', 'siem-kibana');
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(getEmptyValue());
     });
     test('if it returns a string placeholder with an empty string', () => {
-      const draggable = createDraggable('', 'Platform', 552204000000, 618472800000, 'siem-kibana');
+      const draggable = createDraggable('', 'Platform', 'siem-kibana');
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(getEmptyString());
     });
     test('if works with a string with a single space as a valid value and NOT an empty value', () => {
-      const draggable = createDraggable(' ', 'Platform', 552204000000, 618472800000, 'siem-kibana');
+      const draggable = createDraggable(' ', 'Platform', 'siem-kibana');
       const wrapper = mountWithIntl(<TestProviders>{draggable}</TestProviders>);
       expect(wrapper.text()).toBe(' ');
     });
@@ -114,7 +97,7 @@ describe('Host Summary Component', () => {
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-            {getEuiDescriptionList(myMockData, 552204000000, 618472800000, true)}
+            {getEuiDescriptionList(myMockData, true)}
           </MockedProvider>
         </TestProviders>
       );
@@ -127,7 +110,7 @@ describe('Host Summary Component', () => {
       const { container } = render(
         <TestProviders>
           <MockedProvider mocks={mockFirstLastSeenHostQuery} addTypename={false}>
-            {getEuiDescriptionList(myMockData, 552204000000, 618472800000, false)}
+            {getEuiDescriptionList(myMockData, false)}
           </MockedProvider>
         </TestProviders>
       );
@@ -135,7 +118,7 @@ describe('Host Summary Component', () => {
       expect(container).toMatchSnapshot();
     });
     test('if it creates an empty description list', () => {
-      const euiDescriptionList = getEuiDescriptionList(null, 552204000000, 618472800000, false);
+      const euiDescriptionList = getEuiDescriptionList(null, false);
       const wrapper = mountWithIntl(<TestProviders>{euiDescriptionList}</TestProviders>);
       expect(wrapper.text()).toBe(
         'Name--First Seen--Last Seen--Id--IP Address--MAC Addr--Type--Platform--OS Name--Family--Version--Architecture--'

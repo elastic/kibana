@@ -11,10 +11,11 @@ import { ActionCreator } from 'typescript-fsa';
 import { inputsActions, inputsModel, inputsSelectors, State } from '../../store';
 
 interface GlobalTimeArgs {
-  poll: number;
   from: number;
   to: number;
-  setQuery: ActionCreator<{ id: string; loading: boolean; refetch: inputsModel.Refetch }>;
+  setQuery: (
+    { id, loading, refetch }: { id: string; loading: boolean; refetch: inputsModel.Refetch }
+  ) => void;
 }
 
 interface OwnProps {
@@ -22,32 +23,36 @@ interface OwnProps {
 }
 
 interface GlobalTimeDispatch {
-  setQuery: ActionCreator<{ id: string; loading: boolean; refetch: inputsModel.Refetch }>;
-  deleteAllQuery: () => void;
+  setGlobalQuery: ActionCreator<{
+    inputId: inputsModel.InputsModelId;
+    id: string;
+    loading: boolean;
+    refetch: inputsModel.Refetch;
+  }>;
+  deleteAllQuery: ActionCreator<{ id: inputsModel.InputsModelId }>;
 }
 
 interface GlobalTimeReduxState {
   from: number;
   to: number;
-  poll: number;
 }
 
 type GlobalTimeProps = OwnProps & GlobalTimeReduxState & GlobalTimeDispatch;
 
 class GlobalTimeComponent extends React.PureComponent<GlobalTimeProps> {
   public componentDidMount() {
-    this.props.deleteAllQuery();
+    this.props.deleteAllQuery({ id: 'global' });
   }
 
   public render() {
-    const { children, poll, from, to, setQuery } = this.props;
+    const { children, from, to, setGlobalQuery } = this.props;
     return (
       <>
         {children({
-          poll,
           from,
           to,
-          setQuery,
+          setQuery: ({ id, loading, refetch }) =>
+            setGlobalQuery({ inputId: 'global', id, loading, refetch }),
         })}
       </>
     );
@@ -56,9 +61,7 @@ class GlobalTimeComponent extends React.PureComponent<GlobalTimeProps> {
 
 const mapStateToProps = (state: State) => {
   const timerange: inputsModel.TimeRange = inputsSelectors.globalTimeRangeSelector(state);
-  const policy: inputsModel.Policy = inputsSelectors.globalPolicySelector(state);
   return {
-    poll: policy.kind === 'interval' && timerange.kind === 'absolute' ? policy.duration : 0,
     from: timerange.from,
     to: timerange.to,
   };
@@ -68,6 +71,6 @@ export const GlobalTime = connect(
   mapStateToProps,
   {
     deleteAllQuery: inputsActions.deleteAllQuery,
-    setQuery: inputsActions.setQuery,
+    setGlobalQuery: inputsActions.setQuery,
   }
 )(GlobalTimeComponent);

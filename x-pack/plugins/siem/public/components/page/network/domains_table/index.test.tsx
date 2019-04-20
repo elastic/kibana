@@ -19,8 +19,6 @@ import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
 
 describe('Domains Table Component', () => {
-  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
-  const endDate = new Date('2019-02-08T16:31:10.707Z').valueOf();
   const loadMore = jest.fn();
   const ip = '10.10.10.10';
   const state: State = mockGlobalState;
@@ -44,8 +42,6 @@ describe('Domains Table Component', () => {
             flowTarget={FlowTarget.source}
             hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)!}
-            startDate={startDate}
-            endDate={endDate}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -69,8 +65,6 @@ describe('Domains Table Component', () => {
               flowTarget={FlowTarget.source}
               hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)!}
-              startDate={startDate}
-              endDate={endDate}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>

@@ -34,7 +34,6 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
-  startDate: number;
   type: networkModel.NetworkType;
 }
 
@@ -99,7 +98,6 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       totalCount,
       nextCursor,
       updateTopNFlowLimit,
-      startDate,
       flowDirection,
       topNFlowSort,
       flowTarget,
@@ -114,13 +112,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
 
     return (
       <LoadMoreTable
-        columns={getNetworkTopNFlowColumns(
-          startDate,
-          flowDirection,
-          flowTarget,
-          type,
-          NetworkTopNFlowTableId
-        )}
+        columns={getNetworkTopNFlowColumns(flowDirection, flowTarget, type, NetworkTopNFlowTableId)}
         loadingTitle={i18n.TOP_TALKERS}
         loading={loading}
         pageOfItems={data}

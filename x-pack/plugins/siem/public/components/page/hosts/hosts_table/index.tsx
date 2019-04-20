@@ -24,7 +24,6 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
-  startDate: number;
   totalCount: number;
   loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
@@ -86,13 +85,12 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       totalCount,
       nextCursor,
       updateLimitPagination,
-      startDate,
       sortField,
       type,
     } = this.props;
     return (
       <LoadMoreTable
-        columns={getHostsColumns(startDate, type)}
+        columns={getHostsColumns(type)}
         loadingTitle={i18n.HOSTS}
         loading={loading}
         pageOfItems={data}

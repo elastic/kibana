@@ -6,8 +6,9 @@
 
 import { mount } from 'enzyme';
 import * as React from 'react';
+import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockGlobalState, TestProviders } from '../../mock';
+import { mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
 
 import { SuperDatePicker } from '.';
@@ -18,20 +19,21 @@ describe('SIEM Super Date Picker', () => {
     let store = createStore(state);
 
     beforeEach(() => {
+      jest.clearAllMocks();
       store = createStore(state);
     });
 
     describe('Pick Relative Date', () => {
       let wrapper = mount(
-        <TestProviders store={store}>
+        <ReduxStoreProvider store={store}>
           <SuperDatePicker id="global" />
-        </TestProviders>
+        </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
-          <TestProviders store={store}>
+          <ReduxStoreProvider store={store}>
             <SuperDatePicker id="global" />
-          </TestProviders>
+          </ReduxStoreProvider>
         );
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
@@ -112,15 +114,15 @@ describe('SIEM Super Date Picker', () => {
 
     describe('Recently used date ranges', () => {
       let wrapper = mount(
-        <TestProviders store={store}>
+        <ReduxStoreProvider store={store}>
           <SuperDatePicker id="global" />
-        </TestProviders>
+        </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
-          <TestProviders store={store}>
+          <ReduxStoreProvider store={store}>
             <SuperDatePicker id="global" />
-          </TestProviders>
+          </ReduxStoreProvider>
         );
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
@@ -243,15 +245,15 @@ describe('SIEM Super Date Picker', () => {
 
     describe('Refresh Every', () => {
       let wrapper = mount(
-        <TestProviders store={store}>
+        <ReduxStoreProvider store={store}>
           <SuperDatePicker id="global" />
-        </TestProviders>
+        </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
-          <TestProviders store={store}>
+          <ReduxStoreProvider store={store}>
             <SuperDatePicker id="global" />
-          </TestProviders>
+          </ReduxStoreProvider>
         );
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
@@ -299,15 +301,15 @@ describe('SIEM Super Date Picker', () => {
 
     describe('Pick Absolute Date', () => {
       let wrapper = mount(
-        <TestProviders store={store}>
+        <ReduxStoreProvider store={store}>
           <SuperDatePicker id="global" />
-        </TestProviders>
+        </ReduxStoreProvider>
       );
       beforeEach(() => {
         wrapper = mount(
-          <TestProviders store={store}>
+          <ReduxStoreProvider store={store}>
             <SuperDatePicker id="global" />
-          </TestProviders>
+          </ReduxStoreProvider>
         );
         wrapper
           .find('[data-test-subj="superDatePickerShowDatesButton"]')

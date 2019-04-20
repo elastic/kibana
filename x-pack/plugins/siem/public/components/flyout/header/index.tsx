@@ -8,12 +8,16 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import {
   appActions,
   appSelectors,
+  inputsActions,
+  inputsModel,
+  inputsSelectors,
   State,
   timelineActions,
   timelineModel,
@@ -30,18 +34,17 @@ interface OwnProps {
 }
 
 interface StateReduxProps {
-  description?: string;
+  description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
-  history?: History[];
-  isFavorite?: boolean;
-  isLive?: boolean;
+  isFavorite: boolean;
+  isDatepickerLocked: boolean;
   noteIds: string[];
-  title?: string;
-  width?: number;
+  title: string;
+  width: number;
 }
 
 interface DispatchProps {
-  associateNote?: (noteId: string) => void;
+  associateNote: (noteId: string) => void;
   applyDeltaToWidth?: (
     {
       id,
@@ -57,12 +60,12 @@ interface DispatchProps {
       minWidthPixels: number;
     }
   ) => void;
-  createTimeline?: ({ id, show }: { id: string; show?: boolean }) => void;
-  updateDescription?: ({ id, description }: { id: string; description: string }) => void;
-  updateIsFavorite?: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-  updateIsLive?: ({ id, isLive }: { id: string; isLive: boolean }) => void;
-  updateNote?: UpdateNote;
-  updateTitle?: ({ id, title }: { id: string; title: string }) => void;
+  createTimeline: ActionCreator<{ id: string; show?: boolean }>;
+  toggleLock: ActionCreator<{ linkToId: inputsModel.InputsModelId }>;
+  updateDescription: ActionCreator<{ id: string; description: string }>;
+  updateIsFavorite: ActionCreator<{ id: string; isFavorite: boolean }>;
+  updateNote: UpdateNote;
+  updateTitle: ActionCreator<{ id: string; title: string }>;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
@@ -73,36 +76,34 @@ const statefulFlyoutHeader = pure<Props>(
     createTimeline,
     description,
     getNotesByIds,
-    history,
     isFavorite,
-    isLive,
+    isDatepickerLocked,
     title,
     width = defaultWidth,
     noteIds,
     timelineId,
+    toggleLock,
     updateDescription,
     updateIsFavorite,
-    updateIsLive,
     updateNote,
     updateTitle,
     usersViewing,
   }) => (
     <Properties
-      associateNote={associateNote!}
-      createTimeline={createTimeline!}
-      description={description!}
+      associateNote={associateNote}
+      createTimeline={createTimeline}
+      description={description}
       getNotesByIds={getNotesByIds}
-      history={history!}
-      isFavorite={isFavorite!}
-      isLive={isLive!}
-      title={title!}
+      isDatepickerLocked={isDatepickerLocked}
+      isFavorite={isFavorite}
+      title={title}
       noteIds={noteIds}
       timelineId={timelineId}
-      updateDescription={updateDescription!}
-      updateIsFavorite={updateIsFavorite!}
-      updateIsLive={updateIsLive!}
-      updateTitle={updateTitle!}
-      updateNote={updateNote!}
+      toggleLock={toggleLock}
+      updateDescription={updateDescription}
+      updateIsFavorite={updateIsFavorite}
+      updateTitle={updateTitle}
+      updateNote={updateNote}
       usersViewing={usersViewing}
       width={width}
     />
@@ -114,13 +115,13 @@ const emptyHistory: History[] = []; // stable reference
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getNotesByIds = appSelectors.notesByIdsSelector();
+  const getGlobalInput = inputsSelectors.globalSelector();
   const mapStateToProps = (state: State, { timelineId }: OwnProps) => {
     const timeline: timelineModel.TimelineModel = getTimeline(state, timelineId);
-
+    const globalInput: inputsModel.InputsRange = getGlobalInput(state);
     const {
       description = '',
       isFavorite = false,
-      isLive = false,
       title = '',
       noteIds = [],
       width = defaultWidth,
@@ -133,7 +134,7 @@ const makeMapStateToProps = () => {
       getNotesByIds: getNotesByIds(state),
       history,
       isFavorite,
-      isLive,
+      isDatepickerLocked: globalInput.linkTo.includes('timeline'),
       noteIds,
       title,
       width,
@@ -186,6 +187,9 @@ const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   },
   updateTitle: ({ id, title }: { id: string; title: string }) => {
     dispatch(timelineActions.updateTitle({ id, title }));
+  },
+  toggleLock: ({ linkToId }: { linkToId: inputsModel.InputsModelId }) => {
+    dispatch(inputsActions.toggleTimelineLinkTo({ linkToId }));
   },
 });
 

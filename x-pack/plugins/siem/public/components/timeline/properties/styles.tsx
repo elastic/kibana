@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFieldText, EuiFlexGroup, EuiIcon } from '@elastic/eui';
+import { EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import styled, { keyframes } from 'styled-components';
 
 const fadeInEffect = keyframes`
@@ -18,6 +18,10 @@ export const TimelineProperties = styled.div<{ width: number }>`
   flex-direction: row;
   justify-content: space-between;
   user-select: none;
+  width: ${({ width }) => `${width}px`};
+`;
+
+export const DatePicker = styled(EuiFlexItem)<{ width: number }>`
   width: ${({ width }) => `${width}px`};
 `;
 
@@ -40,7 +44,7 @@ export const NotesButtonLabel = styled.div`
 
 export const NotesIconContainer = styled.div`
   position: relative;
-  margin-left: 5px;
+  margin-left: 3px;
 `;
 
 export const PositionedNotesIcon = styled.div<{ size: 'l' | 's' }>`
@@ -59,17 +63,12 @@ export const ButtonContainer = styled.div<{ animate: boolean }>`
   animation: ${fadeInEffect} ${({ animate }) => (animate ? '0.3s' : '0s')};
 `;
 
-export const HistoryButtonLabel = styled.div`
-  align-items: center;
-  display: flex;
-`;
-
 export const LabelText = styled.div`
   margin-left: 10px;
 `;
 
 export const StyledStar = styled(EuiIcon)`
-  margin-right: 10px;
+  margin-right: 5px;
   cursor: pointer;
 `;
 
@@ -78,7 +77,7 @@ export const PropertiesLeft = styled(EuiFlexGroup)`
 `;
 
 export const PropertiesRight = styled(EuiFlexGroup)`
-  margin-left: 5px;
+  margin-right: 5px;
 `;
 
 export const Facet = styled.div`
@@ -95,4 +94,8 @@ export const Facet = styled.div`
   padding-left: 8px;
   padding-right: 8px;
   user-select: none;
+`;
+
+export const LockIconContainer = styled(EuiFlexItem)`
+  margin-right: 2px;
 `;

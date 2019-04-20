@@ -21,7 +21,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const panelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
 
-  describe.skip('security', () => {
+  describe('security', () => {
     before(async () => {
       await esArchiver.load('dashboard/feature_controls/security');
       await esArchiver.loadIfNeeded('logstash_functional');

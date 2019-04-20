@@ -49,14 +49,13 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
           <PageContent data-test-subj="pageContent" panelPaddingSize="none">
             <PageContentBody data-test-subj="pane1ScrollContainer">
               <GlobalTime>
-                {({ poll, to, from, setQuery }) => (
+                {({ to, from, setQuery }) => (
                   <>
                     <HostsQuery
                       endDate={to}
                       filterQuery={filterQuery}
                       sourceId="default"
                       startDate={from}
-                      poll={poll}
                       type={hostsModel.HostsType.page}
                     >
                       {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
@@ -65,7 +64,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
-                          startDate={from}
                           data={hosts}
                           totalCount={totalCount}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
@@ -78,7 +76,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                     <UncommonProcessesQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      poll={poll}
                       sourceId="default"
                       startDate={from}
                       type={hostsModel.HostsType.page}
@@ -97,7 +94,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
-                          startDate={from}
                           data={uncommonProcesses}
                           totalCount={totalCount}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -110,7 +106,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                     <AuthenticationsQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      poll={poll}
                       sourceId="default"
                       startDate={from}
                       type={hostsModel.HostsType.page}
@@ -129,7 +124,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}
-                          startDate={from}
                           data={authentications}
                           totalCount={totalCount}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -142,7 +136,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                     <EventsQuery
                       endDate={to}
                       filterQuery={filterQuery}
-                      poll={poll}
                       sourceId="default"
                       startDate={from}
                       type={hostsModel.HostsType.page}
@@ -154,7 +147,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                           setQuery={setQuery}
                           data={events!}
                           loading={loading}
-                          startDate={from}
                           totalCount={totalCount}
                           nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                           tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}

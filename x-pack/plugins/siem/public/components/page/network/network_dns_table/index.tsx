@@ -26,7 +26,6 @@ interface OwnProps {
   hasNextPage: boolean;
   nextCursor: string;
   loadMore: (cursor: string) => void;
-  startDate: number;
   totalCount: number;
   type: networkModel.NetworkType;
 }
@@ -89,14 +88,13 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
       loading,
       loadMore,
       nextCursor,
-      startDate,
       totalCount,
       type,
       updateDnsLimit,
     } = this.props;
     return (
       <LoadMoreTable
-        columns={getNetworkDnsColumns(startDate, type)}
+        columns={getNetworkDnsColumns(type)}
         loadingTitle={i18n.TOP_DNS_DOMAINS}
         loading={loading}
         pageOfItems={data}

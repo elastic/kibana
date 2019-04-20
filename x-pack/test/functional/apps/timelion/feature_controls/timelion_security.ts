@@ -14,7 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const find = getService('find');
   const appsMenu = getService('appsMenu');
 
-  describe.skip('feature controls security', () => {
+  describe('feature controls security', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('timelion/feature_controls');
       await esArchiver.loadIfNeeded('logstash_functional');

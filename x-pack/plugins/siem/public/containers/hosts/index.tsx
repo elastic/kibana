@@ -17,7 +17,7 @@ import {
   PageInfo,
 } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
-import { createFilter, getDefaultFetchPolicy } from '../helpers';
+import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { HostsTableQuery } from './hosts_table.gql_query';
@@ -64,7 +64,6 @@ class HostsComponentQuery extends QueryTemplate<
       filterQuery,
       endDate,
       limit,
-      poll,
       startDate,
       sourceId,
       sortField,
@@ -72,8 +71,7 @@ class HostsComponentQuery extends QueryTemplate<
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
         query={HostsTableQuery}
-        fetchPolicy={getDefaultFetchPolicy()}
-        pollInterval={poll}
+        fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
         variables={{
           sourceId,

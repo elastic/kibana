@@ -51,13 +51,11 @@ class AuthenticationsComponentQuery extends QueryTemplate<
       startDate,
       endDate,
       limit,
-      poll,
     } = this.props;
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
         query={authenticationsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
-        pollInterval={poll}
         notifyOnNetworkStatusChange
         variables={{
           sourceId,

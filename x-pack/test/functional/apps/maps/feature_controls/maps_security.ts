@@ -17,7 +17,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
 
   const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
 
-  describe.skip('security feature controls', () => {
+  describe('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');

@@ -16,7 +16,6 @@ export interface QueryTemplateProps {
   startDate?: number;
   endDate?: number;
   filterQuery?: ESQuery | string;
-  poll?: number;
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &

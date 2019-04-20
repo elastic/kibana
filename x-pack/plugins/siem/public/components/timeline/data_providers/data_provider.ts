@@ -4,11 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface QueryDate {
-  from: number;
-  to: number;
-}
-
 /** Represents the Timeline data providers */
 export interface DataProvider {
   /** Uniquely identifies a data provider */
@@ -38,7 +33,6 @@ export interface DataProvider {
     value: string | number;
     displayValue?: string | number;
   };
-  queryDate?: QueryDate;
   /**
    * Additional query clauses that are ANDed with this query to narrow results
    */

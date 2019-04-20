@@ -17,7 +17,6 @@ import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
 
-import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
@@ -25,7 +24,6 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import {
   ButtonContainer,
   DescriptionContainer,
-  HistoryButtonLabel,
   LabelText,
   NameField,
   NotesButtonLabel,
@@ -44,7 +42,6 @@ export const NOTES_PANEL_HEIGHT = 633;
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-type UpdateIsLive = ({ id, isLive }: { id: string; isLive: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
 
@@ -259,45 +256,4 @@ export const NotesButton = pure<NotesButtonProps>(
         />
       </EuiToolTip>
     )
-);
-
-export const HistoryButton = pure<{ history: History[] }>(({ history }) => (
-  <EuiToolTip data-test-subj="timeline-history-tool-tip" content={i18n.HISTORY_TOOL_TIP}>
-    <EuiButton
-      data-test-subj="timeline-history"
-      iconType="arrowDown"
-      iconSide="right"
-      isDisabled={true}
-      onClick={() => window.alert('Show history')}
-      size="l"
-    >
-      <HistoryButtonLabel>
-        <EuiBadge data-test-subj="history-count" color="hollow">
-          {history.length}
-        </EuiBadge>
-        <LabelText>{i18n.HISTORY}</LabelText>
-      </HistoryButtonLabel>
-    </EuiButton>
-  </EuiToolTip>
-));
-
-export const StreamLive = pure<{ isLive: boolean; timelineId: string; updateIsLive: UpdateIsLive }>(
-  ({ isLive, timelineId, updateIsLive }) => (
-    <EuiToolTip data-test-subj="timeline-stream-tool-tip" content={i18n.STREAM_LIVE_TOOL_TIP}>
-      <ButtonContainer animate={true}>
-        <EuiButton
-          data-test-subj="timeline-stream-live"
-          color={isLive ? 'secondary' : 'primary'}
-          fill={isLive ? true : false}
-          iconType="play"
-          iconSide="left"
-          isDisabled={true}
-          onClick={() => updateIsLive({ id: timelineId, isLive: !isLive })}
-          size="l"
-        >
-          {i18n.STREAM_LIVE}
-        </EuiButton>
-      </ButtonContainer>
-    </EuiToolTip>
-  )
 );

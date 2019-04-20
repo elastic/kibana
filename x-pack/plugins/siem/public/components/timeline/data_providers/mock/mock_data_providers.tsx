@@ -49,10 +49,6 @@ export const mockDataProviders: DataProvider[] = Object.keys(mockSourceNameToEve
       field: 'name',
       value: name,
     },
-    queryDate: {
-      from: 1521830963132,
-      to: 1521862432253,
-    },
     and: [],
   })
 );

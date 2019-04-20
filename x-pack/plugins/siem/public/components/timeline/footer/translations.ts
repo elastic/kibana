@@ -37,3 +37,10 @@ export const TOTAL_COUNT_OF_EVENTS = i18n.translate('xpack.siem.footer.totalCoun
 export const UPDATED = i18n.translate('xpack.siem.footer.updated', {
   defaultMessage: 'Updated',
 });
+
+export const AUTO_REFRESH_ACTIVE = i18n.translate(
+  'xpack.siem.footer.autoRefreshActiveDescription',
+  {
+    defaultMessage: 'Auto-Refresh Active',
+  }
+);

@@ -140,7 +140,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   loadMore={[MockFunction]}
   loading={false}
   nextCursor="10"
-  startDate={1546965070707}
   totalCount={80}
   type="page"
 />
