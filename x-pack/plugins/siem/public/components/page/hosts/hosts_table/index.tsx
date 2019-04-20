@@ -18,10 +18,12 @@ import { CountBadge } from '../../index';
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
+  indexPattern: StaticIndexPattern;
   hasNextPage: boolean;
   nextCursor: string;
   totalCount: number;
@@ -79,6 +81,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       data,
       direction,
       hasNextPage,
+      indexPattern,
       limit,
       loading,
       loadMore,
@@ -90,7 +93,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     } = this.props;
     return (
       <LoadMoreTable
-        columns={getHostsColumns(type)}
+        columns={getHostsColumns(type, indexPattern)}
         loadingTitle={i18n.HOSTS}
         loading={loading}
         pageOfItems={data}

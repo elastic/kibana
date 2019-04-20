@@ -9,6 +9,7 @@ import numeral from '@elastic/numeral';
 import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
   FlowDirection,
@@ -31,6 +32,7 @@ import { AddToKql } from '../../add_to_kql';
 import * as i18n from './translations';
 
 export const getNetworkTopNFlowColumns = (
+  indexPattern: StaticIndexPattern,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
@@ -151,6 +153,7 @@ export const getNetworkTopNFlowColumns = (
         : directions &&
           directions.map((direction, index) => (
             <AddToKql
+              indexPattern={indexPattern}
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
-import { ThemeProvider } from 'styled-components';
 
 import { Direction } from '../../graphql/types';
 
@@ -61,21 +59,21 @@ describe('Load More Table Component', () => {
 
     test('it renders the over loading panel after data has been in the table ', () => {
       const wrapper = mount(
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <LoadMoreTable
-            columns={getHostsColumns()}
-            loadingTitle="Hosts"
-            loading={true}
-            pageOfItems={mockData.Hosts.edges}
-            loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-            limit={1}
-            hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
-            itemsPerRow={rowItems}
-            updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-            title={<h3>Hosts</h3>}
-          />
-        </ThemeProvider>
+        <LoadMoreTable
+          columns={getHostsColumns()}
+          loadingTitle="Hosts"
+          loading={false}
+          pageOfItems={mockData.Hosts.edges}
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          limit={1}
+          hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          itemsPerRow={rowItems}
+          updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
+          title={<h3>Hosts</h3>}
+        />
       );
+      wrapper.setState({ paginationLoading: true, isEmptyTable: false });
+      wrapper.setProps({ loading: true });
 
       expect(wrapper.find('[data-test-subj="LoadingPanelLoadMoreTable"]').exists()).toBeTruthy();
     });
@@ -119,8 +117,9 @@ describe('Load More Table Component', () => {
           title={<h3>Hosts</h3>}
         />
       );
-      wrapper.setState({ paginationLoading: true, isEmptyTable: false });
+
       wrapper.setProps({ loading: true });
+
       expect(
         wrapper.find('[data-test-subj="InitialLoadingPanelLoadMoreTable"]').exists()
       ).toBeFalsy();

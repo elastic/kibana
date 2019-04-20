@@ -7,6 +7,7 @@
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import React from 'react';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { HostItem } from '../../../../graphql/types';
 import { ValueOf } from '../../../../lib/helpers';
@@ -24,7 +25,10 @@ import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
 
-export const getHostsColumns = (type: hostsModel.HostsType): Array<Columns<ValueOf<HostItem>>> => [
+export const getHostsColumns = (
+  type: hostsModel.HostsType,
+  indexPattern: StaticIndexPattern
+): Array<Columns<ValueOf<HostItem>>> => [
   {
     field: 'node.host.name',
     name: i18n.NAME,
@@ -53,6 +57,7 @@ export const getHostsColumns = (type: hostsModel.HostsType): Array<Columns<Value
                 </DragEffects>
               ) : (
                 <AddToKql
+                  indexPattern={indexPattern}
                   expression={`host.name: ${escapeQueryValue(hostName)}`}
                   componentFilterType="hosts"
                   type={type}
@@ -101,6 +106,7 @@ export const getHostsColumns = (type: hostsModel.HostsType): Array<Columns<Value
       if (hostOsName != null) {
         return (
           <AddToKql
+            indexPattern={indexPattern}
             expression={`host.os.name: ${escapeQueryValue(hostOsName)}`}
             componentFilterType="hosts"
             type={type}
@@ -122,6 +128,7 @@ export const getHostsColumns = (type: hostsModel.HostsType): Array<Columns<Value
       if (hostOsVersion != null) {
         return (
           <AddToKql
+            indexPattern={indexPattern}
             expression={`host.os.version: ${escapeQueryValue(hostOsVersion)}`}
             componentFilterType="hosts"
             type={type}

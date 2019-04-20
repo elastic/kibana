@@ -83,6 +83,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       }) => (
                         <NetworkTopNFlowTableManage
                           data={networkTopNFlow}
+                          indexPattern={indexPattern}
                           id={id}
                           hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                           loading={loading}

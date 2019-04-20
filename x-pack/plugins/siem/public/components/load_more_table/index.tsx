@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty, noop, getOr } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -79,19 +79,23 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     paginationLoading: false,
   };
 
+  static getDerivedStateFromProps(props: BasicTableProps<any>, state: BasicTableState) {
+    if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
+      return {
+        ...state,
+        isEmptyTable: false,
+      };
+    }
+    return null;
+  }
+
   public componentDidUpdate(prevProps: BasicTableProps<T>) {
-    const { paginationLoading, isEmptyTable } = this.state;
-    const { loading, pageOfItems } = this.props;
+    const { paginationLoading } = this.state;
+    const { loading } = this.props;
     if (paginationLoading && prevProps.loading && !loading) {
       this.setState({
         ...this.state,
         paginationLoading: false,
-      });
-    }
-    if (isEmpty(prevProps.pageOfItems) && !isEmpty(pageOfItems) && isEmptyTable) {
-      this.setState({
-        ...this.state,
-        isEmptyTable: false,
       });
     }
   }
@@ -149,10 +153,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           {item.text}
         </EuiContextMenuItem>
       ));
-
     return (
       <BasicTableContainer>
-        {!paginationLoading && loading && (
+        {paginationLoading && loading && (
           <>
             <BackgroundRefetch />
             <LoadingPanel
@@ -266,8 +269,12 @@ const FooterAction = styled.div`
   width: 100%;
 `;
 
+/*
+ *   The getOr is just there to simplify the test
+ *   So we do NOT need to wrap it around TestProvider
+ */
 const BackgroundRefetch = styled.div`
-  background-color: ${props => props.theme.eui.euiColorLightShade};
+  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
   margin: -5px;
   height: calc(100% + 10px);
   opacity: 0.7;

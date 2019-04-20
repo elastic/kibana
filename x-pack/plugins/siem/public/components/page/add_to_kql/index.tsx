@@ -12,13 +12,12 @@ import styled from 'styled-components';
 
 import { HostsFilter } from '../../../containers/hosts';
 import { NetworkFilter } from '../../../containers/network';
-import { WithSource } from '../../../containers/source';
-import { IndexType } from '../../../graphql/types';
 import { assertUnreachable } from '../../../lib/helpers';
 import { hostsModel, KueryFilterQuery, networkModel } from '../../../store';
 import { WithHoverActions } from '../../with_hover_actions';
 
 import * as i18n from './translations';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 interface Props {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
@@ -69,47 +68,44 @@ const HoverActionsContainer = styled(EuiPanel)`
 
 interface AddToKqlProps {
   children: JSX.Element;
+  indexPattern: StaticIndexPattern;
   expression: string;
   componentFilterType: 'network' | 'hosts';
   type: networkModel.NetworkType | hostsModel.HostsType;
 }
 
 export const AddToKql = pure<AddToKqlProps>(
-  ({ children, expression, type, componentFilterType }) => (
-    <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
-      {({ indexPattern }) => {
-        switch (componentFilterType) {
-          case 'hosts':
-            return (
-              <HostsFilter indexPattern={indexPattern} type={type as hostsModel.HostsType}>
-                {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
-                  <AddToKqlComponent
-                    applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-                    expression={expression}
-                    filterQueryDraft={filterQueryDraft}
-                  >
-                    {children}
-                  </AddToKqlComponent>
-                )}
-              </HostsFilter>
-            );
-          case 'network':
-            return (
-              <NetworkFilter indexPattern={indexPattern} type={type as networkModel.NetworkType}>
-                {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
-                  <AddToKqlComponent
-                    applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
-                    expression={expression}
-                    filterQueryDraft={filterQueryDraft}
-                  >
-                    {children}
-                  </AddToKqlComponent>
-                )}
-              </NetworkFilter>
-            );
-        }
-        assertUnreachable(componentFilterType, 'Unknown Filter Type in switch statement');
-      }}
-    </WithSource>
-  )
+  ({ children, expression, type, componentFilterType, indexPattern }) => {
+    switch (componentFilterType) {
+      case 'hosts':
+        return (
+          <HostsFilter indexPattern={indexPattern} type={type as hostsModel.HostsType}>
+            {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
+              <AddToKqlComponent
+                applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+                expression={expression}
+                filterQueryDraft={filterQueryDraft}
+              >
+                {children}
+              </AddToKqlComponent>
+            )}
+          </HostsFilter>
+        );
+      case 'network':
+        return (
+          <NetworkFilter indexPattern={indexPattern} type={type as networkModel.NetworkType}>
+            {({ applyFilterQueryFromKueryExpression, filterQueryDraft }) => (
+              <AddToKqlComponent
+                applyFilterQueryFromKueryExpression={applyFilterQueryFromKueryExpression}
+                expression={expression}
+                filterQueryDraft={filterQueryDraft}
+              >
+                {children}
+              </AddToKqlComponent>
+            )}
+          </NetworkFilter>
+        );
+    }
+    assertUnreachable(componentFilterType, 'Unknown Filter Type in switch statement');
+  }
 );

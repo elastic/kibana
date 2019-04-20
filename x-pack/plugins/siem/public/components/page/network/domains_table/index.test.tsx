@@ -12,7 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
-import { mockGlobalState, TestProviders } from '../../../../mock';
+import { mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { DomainsTable } from '.';
@@ -34,6 +34,7 @@ describe('Domains Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <DomainsTable
+            indexPattern={mockIndexPattern}
             ip={ip}
             totalCount={1}
             loading={false}
@@ -57,6 +58,7 @@ describe('Domains Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <DomainsTable
+              indexPattern={mockIndexPattern}
               ip={ip}
               totalCount={1}
               loading={false}
