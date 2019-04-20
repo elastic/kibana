@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import chrome from 'ui/chrome';
 import React, { PureComponent, Fragment } from 'react';
 import PropTypes from 'prop-types';

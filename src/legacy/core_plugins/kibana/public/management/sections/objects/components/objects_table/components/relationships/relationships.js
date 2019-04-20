@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { get } from 'lodash';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
