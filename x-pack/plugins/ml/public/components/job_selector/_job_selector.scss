@@ -4,14 +4,29 @@
 }
 
 .mlJobSelectorFlyoutHeader, .mlJobSelectorFlyoutFooter {
-  padding-bottom: $euiSizeS;
-  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeXS;
+  padding-top: $euiSizeXS;
 }
 
 .mlJobSelectorFlyoutBody > .euiFlyoutBody__overflow {
   padding-top: $euiSizeS;
 }
 
-.groupBadge {
-  width: $euiSizeM;
+.mlJobSelector__gantBar {
+  background-color: #79adda;
+  height: 14px;
+  border-radius: 2px;
+}
+
+.mlJobSelector__gantBarBackEdge {
+  height: 18px;
+  border-left: 1px solid #d6d6d6;
+  border-right: 1px solid #d6d6d6;
+  margin-bottom: -16px;
+  padding-top: 9px;
+}
+
+.mlJobSelector__gantBarDashed {
+  height: 1px;
+  border-top: 1px dashed #d6d6d6;
 }

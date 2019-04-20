@@ -10,24 +10,26 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 // import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 import { CustomSelectionTable } from './custom_selection_table';
-import { tabColor } from './job_selector';
+import { getBadge } from './job_selector';
+import { TimeRangeBar } from './timerange_bar';
+import { ml } from '../../services/ml_api_service';
 
 import {
-  EuiBadge,
   EuiLoadingSpinner,
   EuiTabbedContent,
-  EuiText,
 } from '@elastic/eui';
 
 import {
   LEFT_ALIGNMENT,
+  CENTER_ALIGNMENT,
   SortableProperties,
 } from '@elastic/eui/lib/services';
 // import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n/react';
 
 
-const DEFAULT_FILTER_FIELDS = ['job_id', 'groups'];
+const JOB_FILTER_FIELDS = ['job_id', 'groups'];
+const GROUP_FILTER_FIELDS = ['id'];
 
 export function JobSelectorTable({
   jobs,
@@ -36,6 +38,7 @@ export function JobSelectorTable({
   singleSelection
 }) {
   const [sortableProperties, setSortableProperties] = useState();
+  const [groupsList, setGroupsList] = useState([]);
 
   useEffect(() => {
     const sortableProps = new SortableProperties([{
@@ -55,25 +58,24 @@ export function JobSelectorTable({
   {
     id: 'Groups',
     name: 'Groups',
-    content: (
-      <Fragment>
-        <EuiText>
-          GROUPS STUFF.
-        </EuiText>
-      </Fragment>
-    ),
+    content: renderGroupsTable()
   }];
 
   function handleSelection(selectionFromTable) {
     onSelection(selectionFromTable);
   }
 
-  function getBadge(id) {
-    return (
-      <EuiBadge key={id} color={tabColor(id)}>
-        {id}
-      </EuiBadge>
-    );
+  function handleTabSelection({ id }) {
+    if (id === 'Groups') {
+      ml.jobs.groups()
+        .then((resp) => {// remove
+          setGroupsList(resp);
+        })
+        .catch((err) => {
+          console.log(err);
+          return [];
+        });
+    }
   }
 
   function renderJobsTable() {
@@ -96,24 +98,72 @@ export function JobSelectorTable({
         isSortable: true,
         alignment: LEFT_ALIGNMENT,
         render: ({ groups = [] }) => (
-          groups.map((group) => getBadge(group))
+          groups.map((group) => getBadge({ id: group, isGroup: true }))
         ),
       },
       {
         label: 'time range',
         id: 'timerange',
-        alignment: LEFT_ALIGNMENT
+        alignment: LEFT_ALIGNMENT,
+        render: ({ timeRange = {} }) => (
+          <TimeRangeBar timerange={timeRange} />
+        )
       }
     ];
 
     return (
       <CustomSelectionTable
         columns={columns}
-        filterDefaultFields={!singleSelection ? DEFAULT_FILTER_FIELDS : undefined}
+        filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
         items={jobs}
         onTableChange={handleSelection}
         selectedIds={selectedIds}
         sortableProperties={sortableProperties}
+      />
+    );
+  }
+
+  function renderGroupsTable() {
+    const groupColumns = [
+      {
+        id: 'checkbox',
+        isCheckbox: true,
+        textOnly: false,
+        width: '24px',
+      },
+      {
+        label: 'group ID',
+        id: 'id',
+        isSortable: true,
+        alignment: LEFT_ALIGNMENT,
+        render: ({ id }) => getBadge({ id, isGroup: true })
+      },
+      {
+        id: 'jobs in group',
+        label: 'jobs in group',
+        isSortable: false,
+        alignment: CENTER_ALIGNMENT,
+        render: ({ jobIds = [] }) => jobIds.length
+      },
+      {
+        label: 'time range',
+        id: 'timerange',
+        alignment: LEFT_ALIGNMENT,
+        render: ({ timeRange = {} }) => (
+          //<TimeRangeBar timerange={timeRange} />
+          <span>{timeRange.to}</span>
+        )
+      }
+    ];
+
+    return (
+      <CustomSelectionTable
+        columns={groupColumns}
+        filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
+        items={groupsList}
+        onTableChange={(selection) => { console.log('THE SELECTION FROM GROUPS', selection); }}//{handleSelection}
+        selectedIds={[]}//{selectedIds}
+        // sortableProperties={sortableProperties}
       />
     );
   }
@@ -124,7 +174,7 @@ export function JobSelectorTable({
         size="s"
         tabs={tabs}
         initialSelectedTab={tabs[0]}
-        onTabClick={(tab) => { console.log('clicked tab', tab); }}
+        onTabClick={(tab) => { handleTabSelection(tab); }}
       />
     );
   }

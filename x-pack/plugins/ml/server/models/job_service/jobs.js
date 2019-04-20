@@ -153,7 +153,8 @@ export function jobsProvider(callWithRequest) {
 
     if (results[JOBS] && results[JOBS].jobs) {
       results[JOBS].jobs.forEach((job) => {
-        job.timerange = {};
+        job.id = job.job_id;
+        job.timeRange = {};
 
         if (results[JOB_STATS] && results[JOB_STATS].jobs) {
           const jobStats = results[JOB_STATS].jobs.find(js => (js.job_id === job.job_id));
@@ -161,8 +162,8 @@ export function jobsProvider(callWithRequest) {
           if (jobStats !== undefined) {
             job.state = jobStats.state;
             if (jobStats.data_counts !== undefined) {
-              job.timerange.to = jobStats.data_counts.latest_record_timestamp;
-              job.timerange.from = jobStats.data_counts.earliest_record_timestamp;
+              job.timeRange.to = jobStats.data_counts.latest_record_timestamp;
+              job.timeRange.from = jobStats.data_counts.earliest_record_timestamp;
             }
           }
         }
@@ -170,7 +171,7 @@ export function jobsProvider(callWithRequest) {
         jobs.push(job);
       });
     }
-    // TODO: add timerange stuff to each job
+    // TODO: add timeRange stuff to each job
     return jobs;
   }
 

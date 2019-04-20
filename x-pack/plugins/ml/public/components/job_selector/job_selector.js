@@ -6,9 +6,10 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
+import d3 from 'd3';
 
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
@@ -51,7 +52,7 @@ const COLORS = [
 
 const colorMap = {};
 
-export function tabColor(name) {
+function tabColor(name) {
   if (colorMap[name] === undefined) {
     const n = stringHash(name);
     const color = COLORS[(n % COLORS.length)];
@@ -60,6 +61,85 @@ export function tabColor(name) {
   } else {
     return colorMap[name];
   }
+}
+
+export function getBadge({ id, icon, isGroup = false, removeId }) {
+  const color = isGroup ? tabColor(id) : 'hollow';
+  let props = { color };
+
+  if (icon === true) {
+    props = {
+      ...props,
+      iconType: 'cross',
+      iconSide: 'right',
+      onClick: () => removeId(id),
+      onClickAriaLabel: 'Remove id'
+    };
+  }
+
+  return (
+    <EuiBadge {...props} >
+      {id}
+    </EuiBadge>
+  );
+}
+
+export function loadGroups() {
+  return ml.jobs.groups()
+    .then((groups) => {
+      return groups.map(g => ({
+        value: g.id,
+        view: (
+          <Fragment>
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem key={g.id} grow={false}>
+                {getBadge({ id: g.id, isGroup: true })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.ml.jobSelector.filterBar.jobGroupTitle', {
+                  defaultMessage: `({jobsCount, plural, one {# job} other {# jobs}})`,
+                  values: { jobsCount: g.jobIds.length },
+                })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </Fragment>
+        )
+      }));
+    })
+    .catch((err) => {
+      console.log(err);
+      return [];
+    });
+}
+
+// TODO: move to server side if possible
+function normalizeTimes(jobs) {
+  const min = Math.min(...jobs.map(job => +job.timeRange.from));
+  const max = Math.max(...jobs.map(job => +job.timeRange.to));
+
+  const gantScale = d3.scale.linear().domain([min, max]).range([1, 299]);
+
+  jobs.forEach(job => {
+    if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
+      job.timeRange.fromPx = gantScale(job.timeRange.from);
+      job.timeRange.toPx = gantScale(job.timeRange.to);
+      job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
+
+      job.timeRange.toMoment = moment(job.timeRange.to);
+      job.timeRange.fromMoment = moment(job.timeRange.from);
+
+      const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
+      const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
+      job.timeRange.label = i18n.translate('xpack.ml.jobSelector.jobTimeRangeLabel', {
+        defaultMessage: '{fromString} to {toString}',
+        values: {
+          fromString,
+          toString,
+        }
+      });
+    }
+  });
+  return jobs;
 }
 
 export function JobSelector({
@@ -109,7 +189,8 @@ export function JobSelector({
 
     ml.jobs.jobsWithTimerange()
       .then((resp) => {
-        setJobs(resp);
+        const jobsWithTimerange = normalizeTimes(resp);
+        setJobs(jobsWithTimerange);
       })
       .catch((err) => {
         console.log('Error fetching jobs', err);
@@ -138,11 +219,11 @@ export function JobSelector({
       const times = [];
       jobs.forEach(job => {
         if (newSelection.includes(job.job_id)) {
-          if (job.timerange.from !== undefined) {
-            times.push(job.timerange.from);
+          if (job.timeRange.from !== undefined) {
+            times.push(job.timeRange.from);
           }
-          if (job.timerange.to !== undefined) {
-            times.push(job.timerange.to);
+          if (job.timeRange.to !== undefined) {
+            times.push(job.timeRange.to);
           }
         }
       });
@@ -179,34 +260,21 @@ export function JobSelector({
   function clearSelection() {
     setNewSelection([]);
   }
-
+  // check for groups here since this is all selected in job selector bar
   function renderIdBadges() {
-    return selectedIds.map(id => getBadge({ id }));
+    return selectedIds.map(id => (
+      <EuiFlexItem grow={false} key={id}>
+        {getBadge({ id })}
+      </EuiFlexItem>
+    ));
   }
 
   function renderNewSelectionIdBadges() {
-    return newSelection.map(id => getBadge({ id, icon: true }));
-  }
-
-  function getBadge({ id, icon }) {
-    let props = { color: 'hollow' };
-
-    if (icon === true) {
-      props = {
-        ...props,
-        iconType: 'cross',
-        iconSide: 'right',
-        onClick: () => removeId(id),
-        onClickAriaLabel: 'Remove id'
-      };
-    }
-    return (
+    return newSelection.map(id => (
       <EuiFlexItem grow={false} key={id}>
-        <EuiBadge {...props}>
-          {id}
-        </EuiBadge>
+        {getBadge({ id, icon: true, removeId })}
       </EuiFlexItem>
-    );
+    ));
   }
 
   function renderJobSelectionBar() {

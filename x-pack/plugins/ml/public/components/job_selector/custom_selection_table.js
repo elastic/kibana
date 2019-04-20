@@ -9,12 +9,10 @@
 import React, { Fragment, useState, useEffect } from 'react';
 // import { PropTypes } from 'prop-types';
 import {
-  EuiBadge,
   EuiCheckbox,
   EuiSearchBar,
   EuiFlexGroup,
   EuiFlexItem,
-  // EuiFormRow,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
@@ -25,14 +23,12 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
-  //  EuiTableSortMobile,
   EuiTableHeaderMobile,
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui/lib/services';
-import { ml } from '../../services/ml_api_service';
-import { tabColor } from './job_selector';
-import { i18n } from '@kbn/i18n';
+import { loadGroups } from './job_selector';
+// import { i18n } from '@kbn/i18n';
 
 
 const JOBS_PER_PAGE = 20;
@@ -85,9 +81,14 @@ export function CustomSelectionTable({
     }
   ];
 
+  useEffect(() => {
+    setCurrentItems(items);
+  }, [items]); // eslint-disable-line
+
   // When changes to selected ids made via badge removal - update selection in the table accordingly
   useEffect(() => {
     setItemIdToSelectedMap(getCurrentlySelectedItemIdsMap());
+    // setCurrentItems(items);
   }, [selectedIds]); // eslint-disable-line
 
   useEffect(() => {
@@ -98,43 +99,6 @@ export function CustomSelectionTable({
     });
     setPager(tablePager);
   }, [currentItems]); // eslint-disable-line
-
-  function getBadge(id) {
-    return (
-      <EuiBadge key={id} color={tabColor(id)}>
-        {id}
-      </EuiBadge>
-    );
-  }
-
-  // <div className="group-item">
-  function loadGroups() {
-    return ml.jobs.groups()
-      .then((groups) => {
-        return groups.map(g => ({
-          value: g.id,
-          view: (
-            <Fragment>
-              <EuiFlexGroup gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  {getBadge(g.id)}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {i18n.translate('xpack.ml.jobSelector.filterBar.jobGroupTitle', {
-                    defaultMessage: `({jobsCount, plural, one {# job} other {# jobs}})`,
-                    values: { jobsCount: g.jobIds.length },
-                  })}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </Fragment>
-          )
-        }));
-      })
-      .catch((err) => {
-        console.log(err);
-        return [];
-      });
-  }
 
   function getCurrentlySelectedItemIdsMap() {
     const selectedIdsMap = { 'all': false };
@@ -158,13 +122,12 @@ export function CustomSelectionTable({
         currentSelected = [];
       } else {
         // grab all id's
-        currentSelected = currentItems.map((item) => item.job_id);
+        currentSelected = currentItems.map((item) => item.id);
       }
     }
 
     onTableChange(currentSelected);
   }
-
 
   function handlePageChange(pageIndex) {
     pager.goToPageIndex(pageIndex);
@@ -190,7 +153,7 @@ export function CustomSelectionTable({
   }
 
   function areAllItemsSelected() {
-    const indexOfUnselectedItem = currentItems.findIndex(item => !isItemSelected(item.job_id));
+    const indexOfUnselectedItem = currentItems.findIndex(item => !isItemSelected(item.id));
     return indexOfUnselectedItem === -1;
   }
 
@@ -215,7 +178,7 @@ export function CustomSelectionTable({
   function toggleAll() {
     const allSelected = areAllItemsSelected() || itemIdToSelectedMap.all === true;
     const newItemIdToSelectedMap = {};
-    currentItems.forEach(item => newItemIdToSelectedMap[item.job_id] = !allSelected);
+    currentItems.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
     setItemIdToSelectedMap(newItemIdToSelectedMap);
     handleTableChange({ isSelected: !allSelected, itemId: 'all' });
   }
@@ -224,23 +187,6 @@ export function CustomSelectionTable({
     sortableProperties.sortOn(prop);
     setSortedColumn(prop);
   }
-
-  // function getTableMobileSortItems() {
-  //   const columnItems = [];
-  //   columns.forEach((column) => {
-  //     if (column.isCheckbox || !column.isSortable) {
-  //       return;
-  //     }
-  //     columnItems.push({
-  //       name: column.label,
-  //       key: column.id,
-  //       onSort: () => onSort(column.id),
-  //       isSorted: (sortedColumn === column.id),
-  //       isSortAscending: (sortableProperties ? sortableProperties.isAscendingByName(column.id) : true),
-  //     });
-  //   });
-  //   return columnItems.length ? columnItems : null;
-  // }
 
   function renderHeaderCells() {
     const headers = [];
@@ -286,9 +232,9 @@ export function CustomSelectionTable({
           return (
             <EuiTableRowCellCheckbox key={column.id}>
               <EuiCheckbox
-                id={`${item.job_id}-checkbox`}
-                checked={isItemSelected(item.job_id)}
-                onChange={() => toggleItem(item.job_id)}
+                id={`${item.id}-checkbox`}
+                checked={isItemSelected(item.id)}
+                onChange={() => toggleItem(item.id)}
                 type="inList"
               />
             </EuiTableRowCellCheckbox>
@@ -322,8 +268,8 @@ export function CustomSelectionTable({
 
       return (
         <EuiTableRow
-          key={item.job_id}
-          isSelected={isItemSelected(item.job_id)}
+          key={item.id}
+          isSelected={isItemSelected(item.id)}
           isSelectable={true}
           hasActions={true}
         >
@@ -372,11 +318,6 @@ export function CustomSelectionTable({
           <EuiFlexItem grow={false}>
             {renderSelectAll(true)}
           </EuiFlexItem>
-          {/* <EuiFlexItem grow={false}>
-            <EuiTableSortMobile
-              items={getTableMobileSortItems()}
-            />
-          </EuiFlexItem> */}
         </EuiFlexGroup>
       </EuiTableHeaderMobile>
       <EuiTable>
