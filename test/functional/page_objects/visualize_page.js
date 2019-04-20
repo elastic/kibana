@@ -682,10 +682,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const lastRow = await table.findByCssSelector('tr:last-child');
       const fromCell = await lastRow.findByCssSelector('td:first-child input');
       await fromCell.clearValue();
-      await fromCell.type(`${from}`);
+      await fromCell.type(`${from}`, { charByChar: true });
       const toCell = await lastRow.findByCssSelector('td:nth-child(2) input');
       await toCell.clearValue();
-      await toCell.type(`${to}`);
+      await toCell.type(`${to}`, { charByChar: true });
     }
 
     async clickYAxisOptions(axisId) {
