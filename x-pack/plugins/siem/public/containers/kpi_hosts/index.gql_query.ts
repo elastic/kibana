@@ -12,13 +12,11 @@ export const kpiHostsQuery = gql`
       id
       KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {
         hosts
-        installedPackages
-        processCount
-        authenticationAttempts
-        auditbeatEvents
-        winlogbeatEvents
-        filebeatEvents
-        sockets
+        agents
+        authentication {
+          success
+          failure
+        }
         uniqueSourceIps
         uniqueDestinationIps
       }

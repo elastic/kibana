@@ -11,13 +11,11 @@ import { KpiHostsData } from '../types';
 export const mockKpiHostsData: { KpiHosts: KpiHostsData } = {
   KpiHosts: {
     hosts: 0,
-    installedPackages: 0,
-    processCount: 0,
-    authenticationAttempts: 0,
-    auditbeatEvents: 0,
-    winlogbeatEvents: 0,
-    filebeatEvents: 0,
-    sockets: 0,
+    agents: 0,
+    authentication: {
+      success: 0,
+      failure: 0,
+    },
     uniqueSourceIps: 0,
     uniqueDestinationIps: 0,
   },

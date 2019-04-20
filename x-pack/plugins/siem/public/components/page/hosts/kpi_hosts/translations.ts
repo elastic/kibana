@@ -9,41 +9,26 @@ export const HOSTS = i18n.translate('xpack.siem.kpiHosts.source.hostsTitle', {
   defaultMessage: 'Hosts',
 });
 
-export const INSTALLED_PACKAGES = i18n.translate(
-  'xpack.siem.kpiHosts.source.installedPackagesTitle',
+export const AGENTS = i18n.translate('xpack.siem.kpiHosts.source.agentsTitle', {
+  defaultMessage: 'Agents',
+});
+
+export const AUTHENTICATION_SUCCESS = i18n.translate(
+  'xpack.siem.kpiHosts.source.authenticationSuccessTitle',
   {
-    defaultMessage: 'Packages',
+    defaultMessage: 'Authentication Success',
   }
 );
 
-export const PROCESS_COUNT = i18n.translate('xpack.siem.kpiHosts.source.processCountsTitle', {
-  defaultMessage: 'Processes',
-});
-
-export const AUTHENTICATION_ATTEMPTS = i18n.translate(
-  'xpack.siem.kpiHosts.source.authenticationAttemptsTitle',
+export const AUTHENTICATION_FAILURE = i18n.translate(
+  'xpack.siem.kpiHosts.source.authenticationFailureTitle',
   {
-    defaultMessage: 'Authentication Attempts',
+    defaultMessage: 'Authentication Failure',
   }
 );
 
-export const AUDITBEAT_EVENTS = i18n.translate('xpack.siem.kpiHosts.source.auditbeatEventsTitle', {
-  defaultMessage: 'Auditbeat Events',
-});
-
-export const WINLOGBEAT_EVENTS = i18n.translate(
-  'xpack.siem.kpiHosts.source.winlogbeatEventsTitle',
-  {
-    defaultMessage: 'Winlogbeat Events',
-  }
-);
-
-export const FILEBEAT_EVENTS = i18n.translate('xpack.siem.kpiHosts.source.filebeatEventsTitle', {
-  defaultMessage: 'Filebeat Events',
-});
-
-export const SOCKETS = i18n.translate('xpack.siem.kpiHosts.source.socketsTitle', {
-  defaultMessage: 'Sockets',
+export const ACTIVE_USERS = i18n.translate('xpack.siem.kpiHosts.source.activeUsersTitle', {
+  defaultMessage: 'Active Users',
 });
 
 export const UNIQUE_SOURCE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniqueSourceIpsTitle', {

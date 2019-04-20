@@ -39,19 +39,14 @@ export const buildGeneralQuery = ({
     },
     {
       aggregations: {
-        host: {
+        hosts: {
           cardinality: {
             field: 'host.name',
           },
         },
-        installedPackages: {
+        agents: {
           cardinality: {
-            field: 'system.audit.package.entity_id',
-          },
-        },
-        sockets: {
-          cardinality: {
-            field: 'socket.entity_id',
+            field: 'agent.id',
           },
         },
         unique_source_ips: {
@@ -71,7 +66,7 @@ export const buildGeneralQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   ];
 

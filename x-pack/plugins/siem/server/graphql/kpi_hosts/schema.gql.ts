@@ -7,20 +7,20 @@
 import gql from 'graphql-tag';
 
 export const kpiHostsSchema = gql`
+  type authenticationData {
+    success: Float
+    failure: Float
+  }
+
   type KpiHostsData {
     hosts: Float
-    installedPackages: Float
-    processCount: Float
-    authenticationAttempts: Float
-    auditbeatEvents: Float
-    winlogbeatEvents: Float
-    filebeatEvents: Float
-    sockets: Float
+    agents: Float
+    authentication: authenticationData!
     uniqueSourceIps: Float
     uniqueDestinationIps: Float
   }
 
   extend type Source {
-    KpiHosts(id: String, timerange: TimerangeInput!, filterQuery: String): KpiHostsData
+    KpiHosts(id: String, timerange: TimerangeInput!, filterQuery: String): KpiHostsData!
   }
 `;

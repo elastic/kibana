@@ -13,19 +13,16 @@ export interface KpiHostsAdapter {
 
 export interface KpiHostsHit extends SearchHit {
   aggregations: {
-    host: {
+    hosts: {
       value: number;
     };
-    installedPackages: {
+    agents: {
       value: number;
     };
-    processCount: {
+    unique_source_ips: {
       value: number;
     };
-    authenticationSuccess: {
-      value: number;
-    };
-    authenticationFailure: {
+    unique_destination_ips: {
       value: number;
     };
   };

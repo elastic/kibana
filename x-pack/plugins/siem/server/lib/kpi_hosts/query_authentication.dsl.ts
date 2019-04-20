@@ -66,11 +66,27 @@ export const buildAuthQuery = ({
               'event.type': 'authentication_success',
             },
           },
+          aggs: {
+            attempts_over_time: {
+              auto_date_histogram: {
+                field: '@timestamp',
+                buckets: 10,
+              },
+            },
+          },
         },
         authentication_failure: {
           filter: {
             term: {
               'event.type': 'authentication_failure',
+            },
+          },
+          aggs: {
+            attempts_over_time: {
+              auto_date_histogram: {
+                field: '@timestamp',
+                buckets: 10,
+              },
             },
           },
         },
@@ -81,7 +97,7 @@ export const buildAuthQuery = ({
         },
       },
       size: 0,
-      track_total_hits: true,
+      track_total_hits: false,
     },
   ];
 

@@ -73,7 +73,7 @@ export interface Source {
 
   KpiNetwork?: KpiNetworkData | null;
 
-  KpiHosts?: KpiHostsData | null;
+  KpiHosts: KpiHostsData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
 
@@ -1047,23 +1047,19 @@ export interface KpiNetworkData {
 export interface KpiHostsData {
   hosts?: number | null;
 
-  installedPackages?: number | null;
+  agents?: number | null;
 
-  processCount?: number | null;
-
-  authenticationAttempts?: number | null;
-
-  auditbeatEvents?: number | null;
-
-  winlogbeatEvents?: number | null;
-
-  filebeatEvents?: number | null;
-
-  sockets?: number | null;
+  authentication: AuthenticationData;
 
   uniqueSourceIps?: number | null;
 
   uniqueDestinationIps?: number | null;
+}
+
+export interface AuthenticationData {
+  success?: number | null;
+
+  failure?: number | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -2406,7 +2402,7 @@ export namespace GetKpiHostsQuery {
 
     id: string;
 
-    KpiHosts?: KpiHosts | null;
+    KpiHosts: KpiHosts;
   };
 
   export type KpiHosts = {
@@ -2414,23 +2410,21 @@ export namespace GetKpiHostsQuery {
 
     hosts?: number | null;
 
-    installedPackages?: number | null;
+    agents?: number | null;
 
-    processCount?: number | null;
-
-    authenticationAttempts?: number | null;
-
-    auditbeatEvents?: number | null;
-
-    winlogbeatEvents?: number | null;
-
-    filebeatEvents?: number | null;
-
-    sockets?: number | null;
+    authentication: Authentication;
 
     uniqueSourceIps?: number | null;
 
     uniqueDestinationIps?: number | null;
+  };
+
+  export type Authentication = {
+    __typename?: 'authenticationData';
+
+    success?: number | null;
+
+    failure?: number | null;
   };
 }
 

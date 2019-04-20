@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 
-import { CardItem, CardItems, CardItemsComponent } from '../../../../components/card_items';
+import { StatItem, StatItems, StatItemsComponent } from '../../../../components/stat_items';
 import { KpiNetworkData } from '../../../../graphql/types';
 
 import * as i18n from './translations';
@@ -19,7 +19,7 @@ interface KpiNetworkProps {
   loading: boolean;
 }
 
-const fieldTitleMapping: Readonly<CardItems[]> = [
+const fieldTitleMapping: Readonly<StatItems[]> = [
   {
     fields: [
       {
@@ -89,7 +89,7 @@ export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => 
   return (
     <EuiFlexGroup>
       {fieldTitleMapping.map(card => (
-        <CardItemsComponent
+        <StatItemsComponent
           key={`kpi-network-summary-${card.fields[0].description}`}
           isLoading={loading}
           description={card.description}
@@ -100,5 +100,5 @@ export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => 
   );
 });
 
-const addValueToFields = (fields: CardItem[], data: KpiNetworkData): CardItem[] =>
+const addValueToFields = (fields: StatItem[], data: KpiNetworkData): StatItem[] =>
   fields.map(field => ({ ...field, value: get(field.key, data) }));

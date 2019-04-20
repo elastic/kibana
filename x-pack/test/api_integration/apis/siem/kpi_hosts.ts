@@ -36,13 +36,9 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           .then(resp => {
             const kpiHosts = resp.data.source.KpiHosts;
             expect(kpiHosts!.hosts).to.be(1);
-            expect(kpiHosts!.installedPackages).to.be(0);
-            expect(kpiHosts!.processCount).to.equal(0);
-            expect(kpiHosts!.authenticationAttempts).to.equal(0);
-            expect(kpiHosts!.auditbeatEvents).to.equal(0);
-            expect(kpiHosts!.winlogbeatEvents).to.equal(0);
-            expect(kpiHosts!.filebeatEvents).to.equal(6157);
-            expect(kpiHosts!.sockets).to.equal(0);
+            expect(kpiHosts!.agents).to.be(1);
+            expect(kpiHosts!.authentication!.success).to.equal(0);
+            expect(kpiHosts!.authentication!.failure).to.equal(0);
             expect(kpiHosts!.uniqueSourceIps).to.equal(121);
             expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
           });
@@ -71,15 +67,10 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           })
           .then(resp => {
             const kpiHosts = resp.data.source.KpiHosts;
-
             expect(kpiHosts!.hosts).to.be(1);
-            expect(kpiHosts!.installedPackages).to.be(0);
-            expect(kpiHosts!.processCount).to.equal(0);
-            expect(kpiHosts!.authenticationAttempts).to.equal(0);
-            expect(kpiHosts!.auditbeatEvents).to.equal(0);
-            expect(kpiHosts!.winlogbeatEvents).to.equal(0);
-            expect(kpiHosts!.filebeatEvents).to.equal(6157);
-            expect(kpiHosts!.sockets).to.equal(0);
+            expect(kpiHosts!.agents).to.be(1);
+            expect(kpiHosts!.authentication!.success).to.equal(0);
+            expect(kpiHosts!.authentication!.failure).to.equal(0);
             expect(kpiHosts!.uniqueSourceIps).to.equal(121);
             expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
           });
@@ -88,5 +79,5 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
   });
 };
 
-// tslint:disable-next-line no-default-export
+// eslint-disable-next-line import/no-default-export
 export default kpiHostsTests;

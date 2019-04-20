@@ -25,10 +25,6 @@ export const mockOptions: RequestBasicOptions = {
   filterQuery: {},
 };
 
-export const mockMsearchOptions = {
-  body: [],
-};
-
 export const mockRequest = {
   params: {},
   payload: {
@@ -39,7 +35,7 @@ export const mockRequest = {
       filterQuery: '',
     },
     query:
-      'query GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {\n      hosts\n      installedPackages\n      processCount\n      authenticationAttempts\n      auditbeatEvents\n      winlogbeatEvents\n      filebeatEvents\n      sockets\n      uniqueSourceIps\n      uniqueDestinationIps\n      __typename\n    }\n    __typename\n  }\n}\n',
+      'query GetKpiHostsQuery($sourceId: ID!, $timerange: TimerangeInput!, $filterQuery: String) {\n  source(id: $sourceId) {\n    id\n    KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {\n      hosts\n      agents\n      authentication {\n        success\n        failure\n        __typename\n      }\n      uniqueSourceIps\n      uniqueDestinationIps\n      __typename\n    }\n    __typename\n  }\n}\n',
   },
   query: {},
 };
@@ -48,17 +44,17 @@ export const mockResponse = {
   took: 577,
   responses: [
     {
-      took: 577,
+      took: 2603,
       timed_out: false,
       _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
+        total: 67,
+        successful: 67,
+        skipped: 60,
         failed: 0,
       },
       hits: {
         total: {
-          value: 1225373,
+          value: 9665113,
           relation: 'eq',
         },
         max_score: null,
@@ -66,54 +62,32 @@ export const mockResponse = {
       },
       aggregations: {
         unique_source_ips: {
-          value: 7600,
+          value: 10503,
         },
-        host: {
-          value: 6,
+        hosts: {
+          value: 711,
         },
         unique_destination_ips: {
-          value: 1946,
+          value: 2380,
         },
-        sockets: {
-          value: 0,
-        },
-        installedPackages: {
-          value: 0,
+        agents: {
+          value: 23,
         },
       },
       status: 200,
     },
     {
-      took: 265,
+      took: 3884,
       timed_out: false,
       _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
+        total: 67,
+        successful: 67,
+        skipped: 60,
         failed: 0,
       },
       hits: {
         total: {
-          value: 11,
-          relation: 'eq',
-        },
-        max_score: null,
-        hits: [],
-      },
-      status: 200,
-    },
-    {
-      took: 243,
-      timed_out: false,
-      _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 27,
+          value: 661651,
           relation: 'eq',
         },
         max_score: null,
@@ -121,87 +95,11 @@ export const mockResponse = {
       },
       aggregations: {
         authentication_success: {
-          doc_count: 27,
+          doc_count: 2,
         },
         authentication_failure: {
-          doc_count: 0,
+          doc_count: 661649,
         },
-      },
-      status: 200,
-    },
-    {
-      took: 231,
-      timed_out: false,
-      _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 0,
-          relation: 'eq',
-        },
-        max_score: null,
-        hits: [],
-      },
-      status: 200,
-    },
-    {
-      took: 273,
-      timed_out: false,
-      _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 0,
-          relation: 'eq',
-        },
-        max_score: null,
-        hits: [],
-      },
-      status: 200,
-    },
-    {
-      took: 240,
-      timed_out: false,
-      _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 8787,
-          relation: 'eq',
-        },
-        max_score: null,
-        hits: [],
-      },
-      status: 200,
-    },
-    {
-      took: 231,
-      timed_out: false,
-      _shards: {
-        total: 47,
-        successful: 47,
-        skipped: 40,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 956933,
-          relation: 'eq',
-        },
-        max_score: null,
-        hits: [],
       },
       status: 200,
     },
@@ -209,15 +107,75 @@ export const mockResponse = {
 };
 
 export const mockResult = {
-  auditbeatEvents: 0,
-  authenticationFailure: 0,
-  authenticationAttempts: 27,
-  filebeatEvents: 956933,
-  hosts: 6,
-  installedPackages: 0,
-  processCount: 11,
-  sockets: 0,
-  uniqueDestinationIps: 1946,
-  uniqueSourceIps: 7600,
-  winlogbeatEvents: 8787,
+  hosts: 711,
+  agents: 23,
+  authentication: {
+    success: 2,
+    failure: 661649,
+  },
+  uniqueSourceIps: 10503,
+  uniqueDestinationIps: 2380,
+};
+
+export const mockGeneralQuery = [
+  {
+    index: ['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+  },
+  {
+    aggregations: {
+      hosts: { cardinality: { field: 'host.name' } },
+      agents: { cardinality: { field: 'agent.id' } },
+      unique_source_ips: { cardinality: { field: 'source.ip' } },
+      unique_destination_ips: { cardinality: { field: 'destination.ip' } },
+    },
+    query: {
+      bool: { filter: [{ range: { '@timestamp': { gte: 1549765606071, lte: 1549852006071 } } }] },
+    },
+    size: 0,
+    track_total_hits: false,
+  },
+];
+
+export const mockAuthQuery = [
+  {
+    index: ['filebeat-*', 'auditbeat-*', 'packetbeat-*', 'winlogbeat-*'],
+    allowNoIndices: true,
+    ignoreUnavailable: true,
+  },
+  {
+    aggs: {
+      authentication_success: {
+        filter: { term: { 'event.type': 'authentication_success' } },
+        aggs: { attempts_over_time: { auto_date_histogram: { field: '@timestamp', buckets: 10 } } },
+      },
+      authentication_failure: {
+        filter: { term: { 'event.type': 'authentication_failure' } },
+        aggs: { attempts_over_time: { auto_date_histogram: { field: '@timestamp', buckets: 10 } } },
+      },
+    },
+    query: {
+      bool: {
+        filter: [
+          {
+            bool: {
+              should: [
+                { match: { 'event.type': 'authentication_success' } },
+                { match: { 'event.type': 'authentication_failure' } },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+          { range: { '@timestamp': { gte: 1549765606071, lte: 1549852006071 } } },
+        ],
+      },
+    },
+    size: 0,
+    track_total_hits: true,
+  },
+];
+
+export const mockMsearchOptions = {
+  body: [...mockGeneralQuery, ...mockAuthQuery],
 };

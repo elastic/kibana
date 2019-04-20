@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Card Items rendering it renders loading icons 1`] = `
+exports[`Stat Items rendering it renders loading icons 1`] = `
 <Component
   fields={
     Array [
@@ -15,7 +15,7 @@ exports[`Card Items rendering it renders loading icons 1`] = `
 />
 `;
 
-exports[`Card Items rendering it renders the default widget 1`] = `
+exports[`Stat Items rendering it renders the default widget 1`] = `
 <Component
   fields={
     Array [

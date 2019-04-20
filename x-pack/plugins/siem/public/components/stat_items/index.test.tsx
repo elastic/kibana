@@ -6,18 +6,18 @@
 
 import {
   // @ts-ignore
-  EuiCard,
+  EuiStat,
 } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
-import { CardItemsComponent, CardItemsProps } from '.';
+import { StatItemsComponent, StatItemsProps } from '.';
 
-describe('Card Items', () => {
+describe('Stat Items', () => {
   describe('rendering', () => {
     test('it renders loading icons', () => {
-      const mockCardItemsData: CardItemsProps = {
+      const mockStatItemsData: StatItemsProps = {
         fields: [
           {
             key: 'networkEvents',
@@ -28,12 +28,12 @@ describe('Card Items', () => {
         isLoading: true,
         key: 'mock-key',
       };
-      const wrapper = shallow(<CardItemsComponent {...mockCardItemsData} />);
+      const wrapper = shallow(<StatItemsComponent {...mockStatItemsData} />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it renders the default widget', () => {
-      const mockCardItemsData: CardItemsProps = {
+      const mockStatItemsData: StatItemsProps = {
         fields: [
           {
             key: 'networkEvents',
@@ -44,12 +44,12 @@ describe('Card Items', () => {
         isLoading: false,
         key: 'mock-key',
       };
-      const wrapper = shallow(<CardItemsComponent {...mockCardItemsData} />);
+      const wrapper = shallow(<StatItemsComponent {...mockStatItemsData} />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     it('should handle multiple titles', () => {
-      const mockCardItemsData: CardItemsProps = {
+      const mockStatItemsData: StatItemsProps = {
         fields: [
           {
             key: 'uniqueSourcePrivateIps',
@@ -66,8 +66,8 @@ describe('Card Items', () => {
         isLoading: false,
         key: 'mock-keys',
       };
-      const wrapper = mount(<CardItemsComponent {...mockCardItemsData} />);
-      expect(wrapper.find(EuiCard).prop('title')).toHaveLength(2);
+      const wrapper = mount(<StatItemsComponent {...mockStatItemsData} />);
+      expect(wrapper.find(EuiStat).prop('title')).toHaveLength(2);
     });
   });
 });
