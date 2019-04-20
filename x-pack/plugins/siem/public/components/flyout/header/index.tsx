@@ -8,6 +8,7 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { Dispatch } from 'redux';
+import { ActionCreator } from 'typescript-fsa';
 
 import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
@@ -33,17 +34,17 @@ interface OwnProps {
 }
 
 interface StateReduxProps {
-  description?: string;
+  description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
-  isFavorite?: boolean;
-  isDatepickerLocked?: boolean;
+  isFavorite: boolean;
+  isDatepickerLocked: boolean;
   noteIds: string[];
-  title?: string;
-  width?: number;
+  title: string;
+  width: number;
 }
 
 interface DispatchProps {
-  associateNote?: (noteId: string) => void;
+  associateNote: (noteId: string) => void;
   applyDeltaToWidth?: (
     {
       id,
@@ -59,12 +60,12 @@ interface DispatchProps {
       minWidthPixels: number;
     }
   ) => void;
-  createTimeline?: ({ id, show }: { id: string; show?: boolean }) => void;
-  toggleLock?: ({ linkToId }: { linkToId: inputsModel.InputsModelId }) => void;
-  updateDescription?: ({ id, description }: { id: string; description: string }) => void;
-  updateIsFavorite?: ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-  updateNote?: UpdateNote;
-  updateTitle?: ({ id, title }: { id: string; title: string }) => void;
+  createTimeline: ActionCreator<{ id: string; show?: boolean }>;
+  toggleLock: ActionCreator<{ linkToId: inputsModel.InputsModelId }>;
+  updateDescription: ActionCreator<{ id: string; description: string }>;
+  updateIsFavorite: ActionCreator<{ id: string; isFavorite: boolean }>;
+  updateNote: UpdateNote;
+  updateTitle: ActionCreator<{ id: string; title: string }>;
 }
 
 type Props = OwnProps & StateReduxProps & DispatchProps;
@@ -89,20 +90,20 @@ const statefulFlyoutHeader = pure<Props>(
     usersViewing,
   }) => (
     <Properties
-      associateNote={associateNote!}
-      createTimeline={createTimeline!}
-      description={description!}
+      associateNote={associateNote}
+      createTimeline={createTimeline}
+      description={description}
       getNotesByIds={getNotesByIds}
-      isDatepickerLocked={isDatepickerLocked!}
-      isFavorite={isFavorite!}
-      title={title!}
+      isDatepickerLocked={isDatepickerLocked}
+      isFavorite={isFavorite}
+      title={title}
       noteIds={noteIds}
       timelineId={timelineId}
-      toggleLock={toggleLock!}
-      updateDescription={updateDescription!}
-      updateIsFavorite={updateIsFavorite!}
-      updateTitle={updateTitle!}
-      updateNote={updateNote!}
+      toggleLock={toggleLock}
+      updateDescription={updateDescription}
+      updateIsFavorite={updateIsFavorite}
+      updateTitle={updateTitle}
+      updateNote={updateNote}
       usersViewing={usersViewing}
       width={width}
     />

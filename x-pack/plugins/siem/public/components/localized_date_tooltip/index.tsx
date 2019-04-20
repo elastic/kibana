@@ -31,7 +31,6 @@ export const LocalizedDateTooltip = pure<{
           />
         </EuiFlexItem>
         <EuiFlexItem data-test-subj="with-day-of-week" grow={false}>
-          xavier
           {moment
             .utc(date)
             .local()

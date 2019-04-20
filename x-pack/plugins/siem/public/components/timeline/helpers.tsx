@@ -32,14 +32,13 @@ const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>
     }, '')
     .trim();
 
-export const buildGlobalQuery = (dataProviders: DataProvider[], start: number, end: number) =>
+export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
   dataProviders
     .reduce((query, dataProvider) => {
       const prepend = (q: string) => `${q !== '' ? `${q} or ` : ''}`;
       return dataProvider.enabled
         ? `${prepend(query)}(
         ${buildQueryMatch(dataProvider)}
-        and @timestamp >= ${start} and @timestamp <= ${end}
         ${
           dataProvider.and.length > 0 ? ` and ${buildQueryForAndProvider(dataProvider.and)}` : ''
         })`.trim()
@@ -59,19 +58,26 @@ export const combineQueries = (
     return null;
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
     return {
-      filterQuery: convertKueryToElasticSearchQuery(kqlQuery, indexPattern),
+      filterQuery: convertKueryToElasticSearchQuery(
+        `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`,
+        indexPattern
+      ),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return {
       filterQuery: convertKueryToElasticSearchQuery(
-        buildGlobalQuery(dataProviders, start, end),
+        `((${buildGlobalQuery(
+          dataProviders
+        )}) and @timestamp >= ${start} and @timestamp <= ${end})`,
         indexPattern
       ),
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  const globalQuery = `${buildGlobalQuery(dataProviders, start, end)}${postpend(kqlQuery)}`;
+  const globalQuery = `((${buildGlobalQuery(dataProviders)}${postpend(
+    kqlQuery
+  )}) and @timestamp >= ${start} and @timestamp <= ${end})`;
 
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),

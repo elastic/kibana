@@ -4,17 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Action,
-  AnyAction,
-  applyMiddleware,
-  compose,
-  createStore as createReduxStore,
-  Store,
-} from 'redux';
-import { createEpicMiddleware } from 'redux-observable';
+import { AnyAction, applyMiddleware, compose, createStore as createReduxStore, Store } from 'redux';
 
-import { createRootEpic, initialState, inputsSelectors, reducer, State } from '.';
+import { initialState, reducer, State } from '.';
 
 declare global {
   interface Window {
@@ -25,19 +17,7 @@ declare global {
 export const createStore = (state = initialState): Store<State, AnyAction> => {
   const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-  const middlewareDependencies = {
-    selectInputs: inputsSelectors.inpustSelector,
-  };
-
-  const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
-    {
-      dependencies: middlewareDependencies,
-    }
-  );
-
-  const store = createReduxStore(reducer, state, composeEnhancers(applyMiddleware(epicMiddleware)));
-
-  epicMiddleware.run(createRootEpic<State>());
+  const store = createReduxStore(reducer, state, composeEnhancers(applyMiddleware()));
 
   return store;
 };
