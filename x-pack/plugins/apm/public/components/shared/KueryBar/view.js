@@ -39,17 +39,25 @@ class KueryBarView extends Component {
     isLoadingSuggestions: false
   };
 
-  willUnmount = false;
+  mounted = false;
+  id = null;
 
   componentWillUnmount() {
-    this.willUnmount = true;
+    this.mounted = false;
   }
 
   async componentDidMount() {
+    this.mounted = true;
+    this.id = new Date().getTime();
     const indexPattern = await getAPMIndexPatternForKuery();
-    if (!this.willUnmount) {
+    // setTimeout:0 hack forces the state update to wait for next tick
+    // in case the component is mid-unmount :/
+    setTimeout(() => {
+      if (!this.mounted) {
+        return;
+      }
       this.setState({ indexPattern, isLoadingIndexPattern: false });
-    }
+    }, 0);
   }
 
   onChange = async (inputValue, selectionStart) => {

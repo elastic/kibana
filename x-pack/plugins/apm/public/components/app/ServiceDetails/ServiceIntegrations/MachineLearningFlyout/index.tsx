@@ -30,19 +30,26 @@ export class MachineLearningFlyout extends Component<Props, State> {
     isCreatingJob: false,
     hasIndexPattern: false
   };
-  public willUnmount = false;
+  public mounted = false;
 
   public componentWillUnmount() {
-    this.willUnmount = true;
+    this.mounted = false;
   }
 
   public async componentDidMount() {
+    this.mounted = true;
     const indexPattern = await getAPMIndexPattern();
-    if (!this.willUnmount) {
-      // TODO: this is causing warning from react because setState happens after
-      // the component has been unmounted - dispite of the checks
-      this.setState({ hasIndexPattern: !!indexPattern });
-    }
+
+    // setTimeout:0 hack forces the state update to wait for next tick
+    // in case the component is mid-unmount :/
+    setTimeout(() => {
+      if (!this.mounted) {
+        return;
+      }
+      this.setState({
+        hasIndexPattern: !!indexPattern
+      });
+    }, 0);
   }
 
   public onClickCreate = async () => {
