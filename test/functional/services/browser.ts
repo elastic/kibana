@@ -50,6 +50,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public readonly isW3CEnabled: Boolean = (driver as any).executor_.w3c === true;
 
+    public getActions(): any {
+      return this.isW3CEnabled ? (driver as any).actions() : (driver as any).actions({ bridge: true });
+    }
+
     /**
      * Retrieves the a rect describing the current top-level window's size and position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
@@ -137,16 +141,15 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           .move({ x: 10, y: 10, origin: element._webElement })
           .perform();
       } else {
-        const mouse = (driver.actions() as any).mouse();
         const actions = (driver as any).actions({ bridge: true });
         if (element instanceof WebElementWrapper) {
           await actions
-            .pause(mouse)
+            .pause(this.getActions().mouse())
             .move({ origin: element._webElement })
             .perform();
         } else if (isNaN(xOffset!) || isNaN(yOffset!) === false) {
           await actions
-            .pause(mouse)
+            .pause(this.getActions().mouse())
             .move({ origin: { x: xOffset, y: yOffset } })
             .perform();
         } else {
@@ -266,11 +269,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async pressKeys(keys: string | string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void> {
-      const actions = this.isW3CEnabled
-        ? driver.actions()
-        : (driver as any).actions({ bridge: true });
       const chord = this.keys.chord(...args);
-      await actions.sendKeys(chord).perform();
+      await this.getActions().sendKeys(chord).perform();
     }
 
     /**
@@ -286,18 +286,16 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async clickMouseButton(element: any, xOffset: number, yOffset: number): Promise<void>;
     public async clickMouseButton(element: WebElementWrapper): Promise<void>;
-    public async clickMouseButton(...args: unknown[]): Promise<void> {
-      const mouse = (driver.actions() as any).mouse();
-      const actions = (driver as any).actions({ bridge: true });
+    public async clickMouseButton(...args: unknown[]): Promise<void> {      
       if (args[0] instanceof WebElementWrapper) {
-        await actions
-          .pause(mouse)
+        await this.getActions()
+          .pause(this.getActions().mouse())
           .move({ origin: (args[0] as any)._webElement })
           .click()
           .perform();
       } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
-        await actions
-          .pause(mouse)
+        await this.getActions()
+          .pause(this.getActions().mouse())
           .move({ origin: { x: args[1], y: args[2] } })
           .click()
           .perform();
@@ -357,11 +355,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async doubleClick(element: WebElementWrapper): Promise<void> {
-      const actions = (driver as any).actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
-        await actions.doubleClick(element._webElement).perform();
+        await this.getActions().doubleClick(element._webElement).perform();
       } else {
-        await actions.doubleClick().perform();
+        await this.getActions().doubleClick().perform();
       }
     }
 
