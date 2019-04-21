@@ -4,50 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer } from 'react';
-import { useLocation } from './useLocation';
-import {
-  urlParamsReducer,
-  TimeRange,
-  refreshTimeRange,
-  resolveUrlParams,
-  IUrlParams
-} from '../store/urlParams';
+import { useContext } from 'react';
+import { UrlParamsContext } from '../context/UrlParamsContext';
 
-type RefreshTimeRangeFunction = (time: TimeRange) => void;
-
-export function useUrlParams(): [IUrlParams, RefreshTimeRangeFunction] {
-  const location = useLocation();
-  const [params, dispatch] = useReducer(
-    urlParamsReducer,
-    resolveUrlParams(location)
-  );
-
-  function refresh(time: TimeRange) {
-    dispatch(refreshTimeRange(time));
-  }
-
-  return [params, refresh];
-}
-
-interface ProviderProps {
-  children: (
-    {
-      urlParams,
-      refreshTimeRange
-    }: {
-      urlParams: IUrlParams;
-      refreshTimeRange: RefreshTimeRangeFunction;
-    }
-  ) => React.ReactNode;
-}
-
-// temporarily needed to provide URL params to class components
-export function ProvideUrlParams({ children: render }: ProviderProps) {
-  const [urlParams, refresh] = useUrlParams();
-  return (
-    <React.Fragment>
-      {render({ urlParams, refreshTimeRange: refresh })}
-    </React.Fragment>
-  );
+export function useUrlParams() {
+  return useContext(UrlParamsContext);
 }

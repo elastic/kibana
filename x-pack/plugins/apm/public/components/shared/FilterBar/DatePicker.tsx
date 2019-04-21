@@ -8,7 +8,7 @@ import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { fromQuery, toQuery } from '../Links/url_helpers';
-import { ProvideUrlParams } from '../../../hooks/useUrlParams';
+import { UrlParamsContext } from '../../../context/UrlParamsContext';
 
 export class DatePickerComponent extends React.Component<RouteComponentProps> {
   public updateUrl(nextQuery: {
@@ -43,7 +43,7 @@ export class DatePickerComponent extends React.Component<RouteComponentProps> {
 
   public render() {
     return (
-      <ProvideUrlParams>
+      <UrlParamsContext.Consumer>
         {({ urlParams, refreshTimeRange }) => {
           const {
             rangeFrom,
@@ -67,7 +67,7 @@ export class DatePickerComponent extends React.Component<RouteComponentProps> {
             />
           );
         }}
-      </ProvideUrlParams>
+      </UrlParamsContext.Consumer>
     );
   }
 }

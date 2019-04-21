@@ -12,6 +12,7 @@ import { CoreSetup } from 'src/core/public';
 import { Main } from '../components/app/Main';
 import { history } from '../components/shared/Links/url_helpers';
 import { LocationProvider } from '../context/LocationContext';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
 // @ts-ignore
 import configureStore from '../store/config/configureStore';
 
@@ -26,7 +27,9 @@ export class Plugin {
         <Provider store={store}>
           <Router history={history}>
             <LocationProvider history={history}>
-              <Main />
+              <UrlParamsProvider>
+                <Main />
+              </UrlParamsProvider>
             </LocationProvider>
           </Router>
         </Provider>
