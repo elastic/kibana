@@ -30,7 +30,7 @@ export class SearchBarService {
   public setup() {
     return {
       SearchBar,
-      loadLegacyDirectives: _.once(setupDirective)
+      loadLegacyDirectives: _.once(setupDirective),
     };
   }
 
