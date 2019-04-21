@@ -28,7 +28,8 @@ import { FilterBar } from 'ui/filter_bar';
 import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 
-import { QueryBar } from '../../query_bar';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query;
 
 interface Query {
   query: string;
