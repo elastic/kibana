@@ -25,16 +25,14 @@ class DataService {
   private readonly searchBar: SearchBarService;
 
   constructor() {
-    // debugger;
     this.indexPatterns = new IndexPatternsService();
     this.searchBar = new SearchBarService();
   }
 
   public setup() {
-    // debugger;
     return {
       indexPatterns: this.indexPatterns.setup(),
-      ...this.searchBar.setup(),
+      search: this.searchBar.setup(),
     };
   }
 
@@ -44,15 +42,7 @@ class DataService {
   }
 }
 
-/**
- * We temporarily export default here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-// eslint-disable-next-line import/no-default-export
-// debugger;
-const data = new DataService().setup();
-export { data };
+export const data = new DataService().setup();
 
 /** @public */
 export type DataSetup = ReturnType<DataService['setup']>;

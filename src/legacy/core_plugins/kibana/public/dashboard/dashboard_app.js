@@ -58,7 +58,8 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
-import 'plugins/data';
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

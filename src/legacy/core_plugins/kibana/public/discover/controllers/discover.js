@@ -69,8 +69,8 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
-import 'plugins/data';
-
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',

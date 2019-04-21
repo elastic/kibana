@@ -24,14 +24,13 @@ import { setupDirective } from './directive';
 
 /**
  * Search Bar Service
- * 
  * @internal
  */
 export class SearchBarService {
   public setup() {
-    setupDirective(); 
     return {
       SearchBar,
+      loadLegacyDirectives: _.once(setupDirective)
     };
   }
 
