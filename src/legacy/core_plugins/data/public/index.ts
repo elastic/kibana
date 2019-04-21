@@ -18,32 +18,30 @@
  */
 
 import { IndexPatternsService } from './index_patterns';
+import { QueryBarService } from './query_bar';
 
 class DataService {
   private readonly indexPatterns: IndexPatternsService;
+  private readonly queryBar: QueryBarService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
+    this.queryBar = new QueryBarService();
   }
 
   public setup() {
     return {
       indexPatterns: this.indexPatterns.setup(),
+      query: this.queryBar.setup(),
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
+    this.queryBar.stop();
   }
 }
 
-/**
- * We temporarily export default here so that users importing from 'plugins/data'
- * will automatically receive the response value of the `setup` contract, mimicking
- * the data that will eventually be injected by the new platform.
- */
-// eslint-disable-next-line import/no-default-export
-export default new DataService().setup();
-
+export const data = new DataService().setup();
 /** @public */
 export type DataSetup = ReturnType<DataService['setup']>;

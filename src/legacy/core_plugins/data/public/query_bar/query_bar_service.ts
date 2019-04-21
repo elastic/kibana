@@ -17,4 +17,34 @@
  * under the License.
  */
 
-export { QueryBar } from './components';
+import { QueryBar } from './components/query_bar';
+import { fromUser } from './lib/from_user';
+import { toUser } from './lib/to_user';
+
+// @ts-ignore
+import { setupDirective } from './directive';
+
+/**
+ * Query Bar Service
+ * 
+ * @internal
+ */
+export class QueryBarService {
+  public setup() {
+    return {
+      loadLegacyDirectives: _.once(setupDirective),
+      helpers: {
+        fromUser,
+        toUser,
+      },
+      QueryBar,
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type QueryBarSetup = ReturnType<QueryBarService['setup']>;
