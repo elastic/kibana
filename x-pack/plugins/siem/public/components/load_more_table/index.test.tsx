@@ -72,7 +72,7 @@ describe('Load More Table Component', () => {
           title={<h3>Hosts</h3>}
         />
       );
-      wrapper.setState({ paginationLoading: true, isEmptyTable: false });
+      wrapper.setState({ isEmptyTable: false });
       wrapper.setProps({ loading: true });
 
       expect(wrapper.find('[data-test-subj="LoadingPanelLoadMoreTable"]').exists()).toBeTruthy();

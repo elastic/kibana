@@ -89,17 +89,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     return null;
   }
 
-  public componentDidUpdate(prevProps: BasicTableProps<T>) {
-    const { paginationLoading } = this.state;
-    const { loading } = this.props;
-    if (paginationLoading && prevProps.loading && !loading) {
-      this.setState({
-        ...this.state,
-        paginationLoading: false,
-      });
-    }
-  }
-
   public render() {
     const {
       columns,
@@ -114,7 +103,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       title,
       updateLimitPagination,
     } = this.props;
-    const { isEmptyTable, paginationLoading } = this.state;
+    const { isEmptyTable } = this.state;
 
     if (loading && isEmptyTable) {
       return (
@@ -155,7 +144,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       ));
     return (
       <BasicTableContainer>
-        {paginationLoading && loading && (
+        {loading && (
           <>
             <BackgroundRefetch />
             <LoadingPanel
@@ -219,7 +208,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                     <EuiButton
                       data-test-subj="loadingMoreButton"
                       isLoading={loading}
-                      onClick={this.loadMore}
+                      onClick={this.props.loadMore}
                     >
                       {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
                     </EuiButton>
@@ -232,14 +221,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       </BasicTableContainer>
     );
   }
-
-  private loadMore = () => {
-    this.setState({
-      ...this.state,
-      paginationLoading: true,
-    });
-    this.props.loadMore();
-  };
 
   private onButtonClick = () => {
     this.setState({

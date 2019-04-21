@@ -34,7 +34,7 @@ interface AutocompleteFieldState {
   selectedIndex: number | null;
 }
 
-export class AutocompleteField extends React.Component<
+export class AutocompleteField extends React.PureComponent<
   AutocompleteFieldProps,
   AutocompleteFieldState
 > {

@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { HostsFilter } from '../../../containers/hosts';
 import { NetworkFilter } from '../../../containers/network';
@@ -17,7 +18,6 @@ import { hostsModel, KueryFilterQuery, networkModel } from '../../../store';
 import { WithHoverActions } from '../../with_hover_actions';
 
 import * as i18n from './translations';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 interface Props {
   applyFilterQueryFromKueryExpression: (expression: string) => void;
