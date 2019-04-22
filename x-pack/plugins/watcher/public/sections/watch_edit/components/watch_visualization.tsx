@@ -83,14 +83,12 @@ const loadWatchVisualizationData = debounce(async (watch: any, setWatchVisualiza
     timezone: getTimezone(),
   });
   const { visualizeData } = (await getWatchVisualizationData(watch, visualizeOptions)) as any;
-  const agg = aggTypes[watch.aggType].value;
-  const data = visualizeData[agg];
-  setWatchVisualizationData(data || []);
+  setWatchVisualizationData(visualizeData || {});
 }, 500);
 
 const WatchVisualizationUi = () => {
   const { watch } = useContext(WatchContext);
-  const [watchVisualizationData, setWatchVisualizationData] = useState<number[][]>([]);
+  const [watchVisualizationData, setWatchVisualizationData] = useState<any>({});
 
   useEffect(
     () => {
@@ -127,13 +125,18 @@ const WatchVisualizationUi = () => {
     },
   };
   const domain = getDomain(watch);
-
+  const watchVisualizationDataKeys = Object.keys(watchVisualizationData);
   return (
     <Fragment>
       <EuiSpacer size="m" />
-      {watchVisualizationData.length ? (
+      {watchVisualizationDataKeys.length ? (
         <Chart size={[800, 300]} renderer="canvas">
-          <Settings theme={theme} xDomain={domain} />
+          <Settings
+            theme={theme}
+            xDomain={domain}
+            showLegend={!!watch.termField}
+            legendPosition={Position.Bottom}
+          />
           <Axis
             id={getAxisId('bottom')}
             position={Position.Bottom}
@@ -141,15 +144,19 @@ const WatchVisualizationUi = () => {
             tickFormat={dateFormatter}
           />
           <Axis id={getAxisId('left')} title={aggLabel} position={Position.Left} />
-          <LineSeries
-            id={getSpecId(aggLabel)}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            data={watchVisualizationData}
-            xAccessor={0}
-            yAccessors={[1]}
-            timeZone={getTimezone()}
-          />
+          {watchVisualizationDataKeys.map((key: string) => {
+            return (
+              <LineSeries
+                id={getSpecId(key)}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                data={watchVisualizationData[key]}
+                xAccessor={0}
+                yAccessors={[1]}
+                timeZone={timezone}
+              />
+            );
+          })}
           <LineSeries
             id={getSpecId('threshold')}
             xScaleType={ScaleType.Time}
