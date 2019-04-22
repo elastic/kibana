@@ -32,7 +32,6 @@ describe('Flow Target Select Connected', () => {
       .simulate('click');
 
     wrapper.update();
-    // console.log('wrapper.debug', wrapper.debug())
     wrapper
       .find(`button#${IpOverviewId}-select-flow-target-destination`)
       .first()
