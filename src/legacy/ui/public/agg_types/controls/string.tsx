@@ -31,12 +31,6 @@ function StringParamEditor({
   setValue,
   setTouched,
 }: AggParamEditorProps<string>) {
-  if (aggParam.disabled && aggParam.disabled(agg)) {
-    // reset model value
-    setValue();
-    return null;
-  }
-
   useEffect(
     () => {
       if (aggParam.required) {

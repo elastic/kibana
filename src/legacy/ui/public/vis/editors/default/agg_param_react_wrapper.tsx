@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { AggParam } from '../../../agg_types';
 import { FieldParamType } from '../../../agg_types/param_types';
@@ -32,35 +32,34 @@ interface AggParamReactWrapperProps<T> {
   isInvalid: boolean;
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
   value: T;
-  onChange(value: T): void;
+  onChange(value?: T): void;
   setTouched(): void;
   setValidity(isValid: boolean): void;
 }
 
 function AggParamReactWrapper<T>(props: AggParamReactWrapperProps<T>) {
-  const {
-    agg,
-    aggParam,
-    editorConfig,
-    indexedFields,
-    isInvalid,
-    paramEditor: ParamEditor,
-    value,
-    onChange,
-    setValidity,
-    setTouched,
-  } = props;
+  const { agg, aggParam, paramEditor: ParamEditor, onChange, setValidity, ...rest } = props;
+
+  useEffect(
+    () => {
+      if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
+        setValidity(true);
+      }
+    },
+    [agg, agg.params.field]
+  );
+
+  if (aggParam.shouldShow && !aggParam.shouldShow(agg)) {
+    return null;
+  }
+
   return (
     <ParamEditor
       agg={agg}
       aggParam={aggParam}
-      editorConfig={editorConfig}
-      indexedFields={indexedFields}
-      isInvalid={isInvalid}
-      value={value}
-      setTouched={setTouched}
       setValidity={setValidity}
       setValue={onChange}
+      {...rest}
     />
   );
 }
