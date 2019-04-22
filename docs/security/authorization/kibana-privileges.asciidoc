@@ -2,30 +2,17 @@
 [[kibana-privileges]]
 === Kibana privileges
 
-Privileges have levels that you can use to manage which features users can access. Roles have privileges to determine whether users have write or read access.
+{kib} privileges grant users access to features within {kib}. Roles have privileges to determine whether users have write or read access.
 
-For more information and examples, consult the <<role-management-api-put, Role Management API>>.
+==== Base privileges
+Assigning a base privilege grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
 
-==== Privilege levels
+`all`:: Grants full read-write access.
+`read`:: Grants read-only access.
 
-You can assign privileges the following levels:
+==== Feature privileges
+Assigning a feature privilege grants access to a specific feature.
 
-[horizontal]
-`base`::
-Grants access to all available features in Kibana (Discover, Visualize, Dashboard, and so on).
+`all`:: Grants full read-write access.
+`read`:: Grants read-only access.
 
-`feature`::
-Grants access to a specific feature.
-
-
-==== Role privileges
-
-You can assign a role these privileges:
-
-[horizontal]
-[[kibana-privileges-all]]
-`all`::
-Grants full read-write access.
-
-`read`::
-Grants read-only access.
