@@ -116,8 +116,8 @@ export class VectorLayer extends AbstractLayer {
     return this._getBoundsBasedOnData();
   }
 
-  async getStringFields() {
-    return await this._source.getStringFields();
+  async getLeftJoinFields() {
+    return await this._source.getLeftJoinFields();
   }
 
   async getSourceName() {
