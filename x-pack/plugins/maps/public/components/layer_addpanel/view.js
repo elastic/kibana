@@ -178,8 +178,7 @@ export class AddLayerPanel extends Component {
       <EuiPanel>
         {
           GeojsonFileSource.renderEditor(
-            this._getEditorProperties(true),
-
+            this._getEditorProperties(true)
           )
         }
       </EuiPanel>

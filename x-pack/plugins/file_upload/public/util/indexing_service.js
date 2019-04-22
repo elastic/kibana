@@ -56,8 +56,8 @@ function getIndexingDetails(processor, parsedFile, dataType) {
     return;
   }
   let indexingDetails;
-  if (typeof processor === 'function') { // Custom processor
-    indexingDetails = processor(parsedFile);
+  if (typeof processor === 'object') { // Custom processor
+    indexingDetails = processor.getIndexDetails(parsedFile);
   } else {
     switch(processor) {
       case 'geo':
