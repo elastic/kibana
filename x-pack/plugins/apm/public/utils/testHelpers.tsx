@@ -72,3 +72,25 @@ export function delay(ms: number) {
 
 // Await this when you need to "flush" promises to immediately resolve or throw in tests
 export const tick = () => new Promise(resolve => setImmediate(resolve, 0));
+
+export function expectTextsNotInDocument(output: any, texts: string[]) {
+  texts.forEach(text => {
+    try {
+      output.getByText(text);
+    } catch (err) {
+      if (err.message.startsWith('Unable to find an element with the text:')) {
+        return;
+      } else {
+        throw err;
+      }
+    }
+
+    throw new Error(`Unexpected text found: ${text}`);
+  });
+}
+
+export function expectTextsInDocument(output: any, texts: string[]) {
+  texts.forEach(text => {
+    expect(output.getByText(text)).toBeInTheDocument();
+  });
+}
