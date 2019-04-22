@@ -39,7 +39,6 @@ interface Driver {
 export class WebElementWrapper {
   public _By: typeof By = this._webDriver.By;
   public _Keys: IKey = this._webDriver.Key;
-  // eslint-disable-next-line
   public _LegacyAction: any = this._webDriver.LegacyActionSequence;
   public _driver: WebDriver = this._webDriver.driver;
   public _webElement: WebElement = this.webElement as WebElement;
