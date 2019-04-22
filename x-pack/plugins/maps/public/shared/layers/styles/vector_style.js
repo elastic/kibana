@@ -199,37 +199,27 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
   }
 
-  getIcon= (() => {
-    const defaultStyle = {
-      stroke: 'grey',
+  getIcon = (isPointsOnly = false) => {
+    const { lineColor, fillColor } = this.getProperties();
+    const stroke = !this._isPropertyDynamic('lineColor')
+      ? lineColor.options.color
+      : 'grey';
+    const fill = !this._isPropertyDynamic('fillColor')
+      ? fillColor.options.color
+      : 'none';
+
+    const style = {
+      stroke,
       strokeWidth: '1px',
-      fill: 'none'
+      fill
     };
 
-    return (isPointsOnly = false) => {
-      let style = {
-        ...defaultStyle
-      };
-      const isDynamic = this._isPropertyDynamic('fillColor');
-      if (!isDynamic) {
-        const { fillColor, lineColor } = this._descriptor.properties;
-        const stroke = _.get(lineColor, 'options.color');
-        const fill = _.get(fillColor, 'options.color');
-
-        style = {
-          ...style,
-          ...stroke && { stroke },
-          ...fill && { fill },
-        };
-      }
-
-      return (
-        isPointsOnly
-          ? <FillableCircle style={style}/>
-          : <FillableVector style={style}/>
-      );
-    };
-  })();
+    return (
+      isPointsOnly
+        ? <FillableCircle style={style}/>
+        : <FillableVector style={style}/>
+    );
+  }
 
   getTOCDetails() {
     const styles = this.getProperties();
