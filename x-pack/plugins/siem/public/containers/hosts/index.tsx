@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
+import { get, getOr } from 'lodash/fp';
+import memoizeOne from 'memoize-one';
 import React from 'react';
 import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
@@ -56,6 +57,16 @@ class HostsComponentQuery extends QueryTemplate<
   GetHostsTableQuery.Query,
   GetHostsTableQuery.Variables
 > {
+  private memoizedHosts: (
+    variables: string,
+    data: GetHostsTableQuery.Source | undefined
+  ) => HostsEdges[];
+
+  constructor(props: HostsProps) {
+    super(props);
+    this.memoizedHosts = memoizeOne(this.getHosts);
+  }
+
   public render() {
     const {
       id = 'hostsQuery',
@@ -68,32 +79,32 @@ class HostsComponentQuery extends QueryTemplate<
       sourceId,
       sortField,
     } = this.props;
+    const variables: GetHostsTableQuery.Variables = {
+      sourceId,
+      timerange: {
+        interval: '12h',
+        from: startDate,
+        to: endDate,
+      },
+      sort: {
+        direction,
+        field: sortField,
+      },
+      pagination: {
+        limit,
+        cursor: null,
+        tiebreaker: null,
+      },
+      filterQuery: createFilter(filterQuery),
+    };
     return (
       <Query<GetHostsTableQuery.Query, GetHostsTableQuery.Variables>
         query={HostsTableQuery}
         fetchPolicy="cache-first"
         notifyOnNetworkStatusChange
-        variables={{
-          sourceId,
-          timerange: {
-            interval: '12h',
-            from: startDate,
-            to: endDate,
-          },
-          sort: {
-            direction,
-            field: sortField,
-          },
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
-          filterQuery: createFilter(filterQuery),
-        }}
+        variables={variables}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const hosts = getOr([], 'source.Hosts.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
@@ -123,7 +134,7 @@ class HostsComponentQuery extends QueryTemplate<
             refetch,
             loading,
             totalCount: getOr(0, 'source.Hosts.totalCount', data),
-            hosts,
+            hosts: this.memoizedHosts(JSON.stringify(variables), get('source', data)),
             startDate,
             endDate,
             pageInfo: getOr({}, 'source.Hosts.pageInfo', data),
@@ -133,6 +144,11 @@ class HostsComponentQuery extends QueryTemplate<
       </Query>
     );
   }
+
+  private getHosts = (
+    variables: string,
+    source: GetHostsTableQuery.Source | undefined
+  ): HostsEdges[] => getOr([], 'Hosts.edges', source);
 }
 
 const makeMapStateToProps = () => {

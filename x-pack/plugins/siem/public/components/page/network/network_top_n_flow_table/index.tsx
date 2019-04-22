@@ -10,6 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
   FlowDirection,
@@ -29,6 +30,7 @@ import * as i18n from './translations';
 
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
+  indexPattern: StaticIndexPattern;
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
@@ -92,6 +94,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     const {
       data,
       hasNextPage,
+      indexPattern,
       limit,
       loading,
       loadMore,
@@ -112,7 +115,13 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
 
     return (
       <LoadMoreTable
-        columns={getNetworkTopNFlowColumns(flowDirection, flowTarget, type, NetworkTopNFlowTableId)}
+        columns={getNetworkTopNFlowColumns(
+          indexPattern,
+          flowDirection,
+          flowTarget,
+          type,
+          NetworkTopNFlowTableId
+        )}
         loadingTitle={i18n.TOP_TALKERS}
         loading={loading}
         pageOfItems={data}

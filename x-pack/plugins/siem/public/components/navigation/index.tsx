@@ -17,6 +17,7 @@ export class SiemNavigationComponent extends React.Component<RouteComponentProps
     }
     return true;
   }
+
   public componentWillMount(): void {
     const { location } = this.props;
     if (location.pathname) {

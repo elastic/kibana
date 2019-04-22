@@ -102,6 +102,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
                           <DomainsTableManage
                             data={domains}
+                            indexPattern={indexPattern}
                             id={id}
                             flowTarget={flowTarget}
                             hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}

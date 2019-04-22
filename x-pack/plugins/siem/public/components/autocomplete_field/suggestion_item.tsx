@@ -18,7 +18,7 @@ interface SuggestionItemProps {
   suggestion: AutocompleteSuggestion;
 }
 
-export class SuggestionItem extends React.Component<SuggestionItemProps> {
+export class SuggestionItem extends React.PureComponent<SuggestionItemProps> {
   public static defaultProps: Partial<SuggestionItemProps> = {
     isSelected: false,
   };

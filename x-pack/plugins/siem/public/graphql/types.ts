@@ -2184,44 +2184,6 @@ export namespace GetIpOverviewQuery {
   };
 }
 
-export namespace GetKpiEventsQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: TimerangeInput;
-    filterQuery?: string | null;
-    pagination: PaginationInput;
-    sortField: SortField;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    Events: Events;
-  };
-
-  export type Events = {
-    __typename?: 'EventsData';
-
-    kpiEventType?: KpiEventType[] | null;
-  };
-
-  export type KpiEventType = {
-    __typename?: 'KpiItem';
-
-    value?: string | null;
-
-    count: number;
-  };
-}
-
 export namespace GetKpiNetworkQuery {
   export type Variables = {
     sourceId: string;
@@ -3438,29 +3400,5 @@ export namespace GetUncommonProcessesQuery {
     __typename?: 'CursorType';
 
     value: string;
-  };
-}
-
-export namespace WhoAmIQuery {
-  export type Variables = {
-    sourceId: string;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    whoAmI?: WhoAmI | null;
-  };
-
-  export type WhoAmI = {
-    __typename?: 'SayMyName';
-
-    appName: string;
   };
 }

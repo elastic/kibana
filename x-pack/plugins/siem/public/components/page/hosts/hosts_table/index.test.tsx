@@ -11,7 +11,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockFrameworks, mockGlobalState, TestProviders } from '../../../../mock';
+import { mockFrameworks, mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { KibanaConfigContext } from '../../../formatted_date';
 
@@ -34,6 +34,7 @@ describe('Load More Table Component', () => {
         <ReduxStoreProvider store={store}>
           <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
             <HostsTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
@@ -54,6 +55,7 @@ describe('Load More Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <HostsTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
@@ -71,6 +73,7 @@ describe('Load More Table Component', () => {
           <MockedProvider>
             <TestProviders store={store}>
               <HostsTable
+                indexPattern={mockIndexPattern}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}

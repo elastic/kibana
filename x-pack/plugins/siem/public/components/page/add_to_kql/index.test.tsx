@@ -9,7 +9,7 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 
 import { escapeQueryValue } from '../../../lib/keury';
-import { mockGlobalState, TestProviders } from '../../../mock';
+import { mockGlobalState, TestProviders, mockIndexPattern } from '../../../mock';
 import { createStore, hostsModel, networkModel, State } from '../../../store';
 
 import { AddToKql } from '.';
@@ -26,6 +26,7 @@ describe('AddToKql Component', async () => {
     const wrapper = shallow(
       <TestProviders store={store}>
         <AddToKql
+          indexPattern={mockIndexPattern}
           expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
           componentFilterType="hosts"
           type={hostsModel.HostsType.page}
@@ -42,6 +43,7 @@ describe('AddToKql Component', async () => {
     const wrapper = shallow(
       <TestProviders store={store}>
         <AddToKql
+          indexPattern={mockIndexPattern}
           expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
           componentFilterType="hosts"
           type={hostsModel.HostsType.page}
@@ -60,6 +62,7 @@ describe('AddToKql Component', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <AddToKql
+          indexPattern={mockIndexPattern}
           expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
           componentFilterType="hosts"
           type={hostsModel.HostsType.page}
@@ -112,6 +115,7 @@ describe('AddToKql Component', async () => {
     const wrapper = mount(
       <TestProviders store={store}>
         <AddToKql
+          indexPattern={mockIndexPattern}
           expression={`host.name: ${escapeQueryValue('siem-kibana')}`}
           componentFilterType="network"
           type={networkModel.NetworkType.page}

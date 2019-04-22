@@ -61,6 +61,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
                         <HostsTableManage
                           id={id}
+                          indexPattern={indexPattern}
                           refetch={refetch}
                           setQuery={setQuery}
                           loading={loading}

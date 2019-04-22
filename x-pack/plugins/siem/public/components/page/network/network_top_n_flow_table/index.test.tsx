@@ -12,7 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowDirection } from '../../../../graphql/types';
-import { mockGlobalState, TestProviders } from '../../../../mock';
+import { mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { NetworkTopNFlowTable, NetworkTopNFlowTableId } from '.';
@@ -33,6 +33,7 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
+            indexPattern={mockIndexPattern}
             loading={false}
             data={mockData.NetworkTopNFlow.edges}
             totalCount={mockData.NetworkTopNFlow.totalCount}
@@ -58,6 +59,7 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
@@ -91,6 +93,7 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
@@ -131,6 +134,7 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
