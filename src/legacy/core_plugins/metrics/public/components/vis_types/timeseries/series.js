@@ -22,7 +22,6 @@ import React from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
-import Sortable from 'react-anything-sortable';
 import { SeriesDragHandler } from '../../series_drag_hanler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import Split from '../../split';
@@ -57,22 +56,11 @@ const TimeseriesSeries = injectI18n(function (props) {
   let body = null;
   if (visible) {
     let seriesBody;
+
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
-        const metrics = data.map(id => model.metrics.find(m => m.id === id));
-        props.onChange({ metrics });
-      };
       seriesBody = (
         <div>
-          <Sortable
-            style={{ cursor: 'default' }}
-            dynamic={true}
-            direction="vertical"
-            onSort={handleSort}
-            sortHandle="tvbAggRow__sortHandle"
-          >
-            { aggs }
-          </Sortable>
+          { aggs }
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}

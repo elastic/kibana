@@ -17,8 +17,15 @@
  * under the License.
  */
 
-import basicAggs from '../../../../common/basic_aggs';
+// export this method from eui after updating to version > 10.0
+export const reorder = (
+  list,
+  startIndex,
+  endIndex,
+) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
 
-export function isSortable(metric) {
-  return basicAggs.includes(metric.type);
-}
+  return result;
+};

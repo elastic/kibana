@@ -21,7 +21,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import Sortable from 'react-anything-sortable';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
@@ -56,21 +55,9 @@ function MarkdownSeriesUi(props) {
   if (visible) {
     let seriesBody;
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
-        const metrics = data.map(id => model.metrics.find(m => m.id === id));
-        props.onChange({ metrics });
-      };
       seriesBody = (
         <div>
-          <Sortable
-            style={{ cursor: 'default' }}
-            dynamic={true}
-            direction="vertical"
-            onSort={handleSort}
-            sortHandle="tvbAggRow__sortHandle"
-          >
-            { aggs }
-          </Sortable>
+          { aggs }
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}

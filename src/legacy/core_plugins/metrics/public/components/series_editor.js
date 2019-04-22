@@ -27,7 +27,7 @@ import {
   handleChange,
 } from './lib/collection_actions';
 import newSeriesFn from './lib/new_series_fn';
-import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable, reorder } from '@elastic/eui';
 
 const DROPPABLE_ID = 'series_editor_dnd';
 
@@ -46,12 +46,10 @@ class SeriesEditor extends Component {
 
     if (canSort) {
       const series = [...this.props.model.series];
-      const changeWithElement = series[destination.index];
 
-      series[destination.index] = series[source.index];
-      series[source.index] = changeWithElement;
-
-      this.props.onChange({ series });
+      this.props.onChange({
+        series: reorder(series, source.index, destination.index),
+      });
     }
   };
 

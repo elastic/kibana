@@ -20,7 +20,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import aggToComponent from '../lib/agg_to_component';
-import { sortable } from 'react-anything-sortable';
 import { UnsupportedAgg } from './unsupported_agg';
 import { TemporaryUnsupportedAgg } from './temporary_unsupported_agg';
 
@@ -76,4 +75,4 @@ Agg.propTypes = {
   uiRestrictions: PropTypes.object,
 };
 
-export default sortable(Agg);
+export default Agg;
