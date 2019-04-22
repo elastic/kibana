@@ -12,11 +12,62 @@ import { styleOptionShapes } from '../style_option_shapes';
 import { rangeShape } from './vector_style_legend';
 import { VectorStyle } from '../../../vector_style';
 import { ColorGradient } from '../../../../../icons/color_gradient';
+import { FillableCircle } from '../../../../../icons/additional_layer_icons';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
 } from '@elastic/eui';
+
+function renderLineWidthHeader() {
+  function getStyle(strokeWidth) {
+    return {
+      stroke: 'grey',
+      strokeWidth,
+      fill: 'none',
+      width: '12px',
+    };
+  }
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <FillableCircle style={getStyle('1px')}/>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FillableCircle style={getStyle('2px')}/>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FillableCircle style={getStyle('3px')}/>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+function renderSymbolSizeHeader() {
+  function getStyle(width) {
+    return {
+      stroke: 'grey',
+      strokeWidth: 'none',
+      fill: 'grey',
+      width,
+    };
+  }
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>
+        <FillableCircle style={getStyle('4px')}/>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FillableCircle style={getStyle('8px')}/>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FillableCircle style={getStyle('12px')}/>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
 
 export function StylePropertyLegendRow({ name, type, options, range }) {
   if (type === VectorStyle.STYLE_TYPE.STATIC ||
@@ -27,6 +78,10 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
   let header;
   if (options.color) {
     header = <ColorGradient color={options.color}/>;
+  } else if (name === 'lineWidth') {
+    header = renderLineWidthHeader();
+  } else if (name === 'iconSize') {
+    header = renderSymbolSizeHeader();
   }
 
   return (
@@ -38,7 +93,7 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
             {_.get(range, 'min', '')}
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {options.field.label}
           </EuiText>
