@@ -14,7 +14,6 @@ import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
-import { ClusterSecurityFeatures } from '../cluster_security_features';
 
 // Mapping between provider key defined in the config and authentication
 // provider class that can handle specific authentication mechanism.
@@ -38,13 +37,9 @@ function assertRequest(request) {
 function getProviderOptions(server) {
   const config = server.config();
 
-  const clusterSecurityFeatures = new ClusterSecurityFeatures(server.plugins.xpack_main.usage);
-
   return {
     client: getClient(server),
     log: server.log.bind(server),
-
-    clusterSecurityFeatures,
 
     protocol: server.info.protocol,
     hostname: config.get('server.host'),

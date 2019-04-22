@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as Rx from 'rxjs';
+
 import { stub } from 'sinon';
 
 export function serverFixture() {
@@ -46,30 +46,6 @@ export function serverFixture() {
           license: {
             isOneOf: stub(),
           },
-        },
-        usage: {
-          getUsage$: () =>
-            Rx.of({
-              security: {
-                available: true,
-                enabled: true,
-                realms: {
-                  saml: {
-                    available: true,
-                    enabled: true,
-                  },
-                },
-                token_service: {
-                  enabled: true,
-                },
-                api_key_service: {
-                  enabled: true,
-                },
-                audit: {
-                  enabled: true,
-                },
-              },
-            }),
         },
       },
     },

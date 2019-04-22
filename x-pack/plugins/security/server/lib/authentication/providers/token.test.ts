@@ -3,40 +3,27 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import * as Rx from 'rxjs';
+
 import { errors } from 'elasticsearch';
 import sinon from 'sinon';
 import { requestFixture } from '../../__tests__/__fixtures__/request';
 import { LoginAttempt } from '../login_attempt';
 import { TokenAuthenticationProvider } from './token';
-import { XPackUsageResponse } from '../../../../../xpack_main/server/lib/xpack_usage';
-import { ClusterSecurityFeatures } from '../../cluster_security_features';
 
 describe('TokenAuthenticationProvider', () => {
   describe('`authenticate` method', () => {
     let provider: TokenAuthenticationProvider;
     let callWithRequest: sinon.SinonStub;
     let callWithInternalUser: sinon.SinonStub;
-    let xpackUsage$: Rx.BehaviorSubject<XPackUsageResponse | undefined>;
     beforeEach(() => {
       callWithRequest = sinon.stub();
       callWithInternalUser = sinon.stub();
-      xpackUsage$ = new Rx.BehaviorSubject<XPackUsageResponse | undefined>({
-        security: { token_service: { enabled: true } },
-      } as XPackUsageResponse);
-
       provider = new TokenAuthenticationProvider({
         client: { callWithRequest, callWithInternalUser },
         log() {
           // no-op
         },
         basePath: '/base-path',
-        clusterSecurityFeatures: new ClusterSecurityFeatures({
-          getUsage$: () => xpackUsage$,
-          refreshNow: () => {
-            throw new Error('should not be called via this test');
-          },
-        }),
       });
     });
 
@@ -47,16 +34,6 @@ describe('TokenAuthenticationProvider', () => {
         requestFixture({ headers: { 'kbn-xsrf': 'xsrf' } }),
         null
       );
-
-      expect(authenticationResult.notHandled()).toBe(true);
-    });
-
-    it('does not handle requests when the token service is disabled in elasticsearch.', async () => {
-      xpackUsage$.next({ security: { token_service: { enabled: false } } } as XPackUsageResponse);
-
-      const request = requestFixture();
-
-      const authenticationResult = await provider.authenticate(request);
 
       expect(authenticationResult.notHandled()).toBe(true);
     });
@@ -487,22 +464,14 @@ describe('TokenAuthenticationProvider', () => {
   describe('`deauthenticate` method', () => {
     let provider: TokenAuthenticationProvider;
     let callWithInternalUser: sinon.SinonStub;
-    let xpackUsage$: Rx.BehaviorSubject<undefined>;
     beforeEach(() => {
       callWithInternalUser = sinon.stub();
-      xpackUsage$ = new Rx.BehaviorSubject<undefined>(undefined);
       provider = new TokenAuthenticationProvider({
         client: { callWithInternalUser } as any,
         log() {
           // no-op
         },
         basePath: '/base-path',
-        clusterSecurityFeatures: new ClusterSecurityFeatures({
-          getUsage$: () => xpackUsage$,
-          refreshNow: () => {
-            throw new Error('should not be called via this test');
-          },
-        }),
       });
     });
 

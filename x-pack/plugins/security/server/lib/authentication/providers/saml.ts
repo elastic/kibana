@@ -12,7 +12,6 @@ import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import { ClusterSecurityFeatures } from '../../cluster_security_features';
 
 /**
  * Represents available provider options.
@@ -24,7 +23,6 @@ interface ProviderOptions {
   basePath: string;
   client: Cluster;
   log: (tags: string[], message: string) => void;
-  clusterSecurityFeatures: ClusterSecurityFeatures;
 }
 
 /**
@@ -120,14 +118,6 @@ export class SAMLAuthenticationProvider {
    */
   public async authenticate(request: Request, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
-
-    if (!this.options.clusterSecurityFeatures.isSAMLRealmEnabled()) {
-      this.options.log(
-        ['warning', 'security', 'saml'],
-        `SAML realm is not enabled in Elasticsearch.`
-      );
-      return AuthenticationResult.notHandled();
-    }
 
     let {
       authenticationResult,
