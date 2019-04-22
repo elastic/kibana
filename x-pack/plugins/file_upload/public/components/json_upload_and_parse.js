@@ -5,7 +5,10 @@
  */
 
 
-import React, { Fragment, useState } from 'react';
+import React, { useState } from 'react';
+import {
+  EuiForm,
+} from '@elastic/eui';
 import PropTypes from 'prop-types';
 import { triggerIndexing } from '../util/indexing_service';
 import { selectMappingsOptions } from '../util/geo_processing';
@@ -63,10 +66,18 @@ export function JsonUploadAndParse(props) {
   }
 
   return (
-    <Fragment>
+    <EuiForm>
       <JsonIndexFilePicker
-        {...{ ...props, fileRef, setFileRef, parsedFile, setParsedFile,
-          setIndexedFile, indexName, preIndexTransform, indexDataType
+        {...{
+          ...props,
+          fileRef,
+          setFileRef,
+          parsedFile,
+          setParsedFile,
+          setIndexedFile,
+          indexName,
+          preIndexTransform,
+          indexDataType
         }}
       />
       <IndexSettings
@@ -76,7 +87,7 @@ export function JsonUploadAndParse(props) {
         setIndexDataType={setIndexDataType}
         mappingsOptions={mappingsOptions}
       />
-    </Fragment>
+    </EuiForm>
   );
 }
 

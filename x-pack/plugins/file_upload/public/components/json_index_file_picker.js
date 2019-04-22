@@ -19,7 +19,6 @@ export function JsonIndexFilePicker({
   fileUploadMessage,
   onFileUpload,
   onFileRemove,
-  postParseJsonTransform,
   onIndexAddSuccess,
   onIndexAddError,
   fileRef,
@@ -59,7 +58,7 @@ export function JsonIndexFilePicker({
             setFileRef(file);
             // Parse file
             const parsedFileResult = await parseFile(
-              file, onFileUpload, postParseJsonTransform
+              file, onFileUpload, preIndexTransform
             );
 
             // Immediately index file if flag set
