@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useUrlParams } from '../useUrlParams';
+import { useUrlParams } from '../use_url_params';
 
 describe('useUrlParams', () => {
   it('returns the expected params and an update function', () => {
     const history: any[] = [];
     const location = { pathname: '/', search: '_g=()' };
     const [params, updateFunction] = useUrlParams(history, location);
-    expect(params).toEqual({ _g: '()' });
+    expect(params).toEqual({
+      autorefreshInterval: 60000,
+      autorefreshIsPaused: false,
+      dateRangeStart: 'now-15m',
+      dateRangeEnd: 'now',
+      search: '',
+      selectedPingStatus: 'down',
+    });
     expect(updateFunction).toBeInstanceOf(Function);
   });
 
