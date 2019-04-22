@@ -6,6 +6,7 @@
 
 import { getRouter } from '../../public/crud_app/services';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { JOBS } from './helpers/constants';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -35,44 +36,6 @@ jest.mock('../../public/crud_app/services', () => {
   };
 });
 
-const loadJobsMock = {
-  jobs: [{
-    config: {
-      id: 'my-rollup-job',
-      index_pattern: 'kibana_sample*',
-      rollup_index: 'rollup-index',
-      cron: '0 0 0 ? * 7',
-      groups: {
-        date_histogram: {
-          interval: '24h',
-          field: 'timestamp',
-          delay: '1d',
-          time_zone: 'UTC'
-        }
-      },
-      metrics: [],
-      timeout: '20s',
-      page_size: 1000
-    },
-    status: {
-      job_state: 'stopped',
-      upgraded_doc_id: true
-    },
-    stats: {
-      pages_processed: 0,
-      documents_processed: 0,
-      rollups_indexed: 0,
-      trigger_count: 0,
-      index_time_in_ms: 0,
-      index_total: 0,
-      index_failures: 0,
-      search_time_in_ms: 0,
-      search_total: 0,
-      search_failures: 0
-    }
-  }]
-};
-
 const { setup } = pageHelpers.jobList;
 
 describe('<JobList />', () => {
@@ -92,7 +55,7 @@ describe('<JobList />', () => {
     });
 
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadJobsResponse(loadJobsMock);
+      httpRequestsMockHelpers.setLoadJobsResponse(JOBS);
 
       ({ component, exists, table } = setup());
 
@@ -123,7 +86,7 @@ describe('<JobList />', () => {
         jobs: [{
           config: { id: jobId },
         }],
-      } = loadJobsMock;
+      } = JOBS;
       expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
     });
 
