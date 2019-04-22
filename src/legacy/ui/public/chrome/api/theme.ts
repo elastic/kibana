@@ -18,6 +18,9 @@
  */
 
 import * as Rx from 'rxjs';
+import { get } from 'lodash';
+import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 
 import { ChromeBrand, ChromeSetup } from '../../../../../core/public';
 
@@ -72,5 +75,13 @@ export function initChromeThemeApi(chrome: { [key: string]: any }) {
 
   chrome.getApplicationClasses = () => {
     return applicationClassesCache$.getValue().join(' ');
+  };
+
+  chrome.getEuiVariableForTheme = (euiVariableName: 'string'): string => {
+    if (chrome.getUiSettingsClient().get('theme:darkMode')) {
+      return get(euiDarkVars, euiVariableName);
+    } else {
+      return get(euiLightVars, euiVariableName);
+    }
   };
 }
