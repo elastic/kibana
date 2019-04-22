@@ -19,6 +19,7 @@
 
 import { writeFile } from 'fs';
 import os from 'os';
+import path from 'path';
 import Boom from 'boom';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import TerserPlugin from 'terser-webpack-plugin';
@@ -267,7 +268,7 @@ export default class BaseOptimizer {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+        devtoolModuleFilenameTemplate: info => `webpack:///${ path.relative(fromRoot('.'), info.absoluteResourcePath) }`,
 
         // When the entry point is loaded, assign it's exported `plugin`
         // value to a key on the global `__kbnBundles__` object.
