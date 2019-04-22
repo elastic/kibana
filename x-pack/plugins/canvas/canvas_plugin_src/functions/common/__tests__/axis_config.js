@@ -50,9 +50,9 @@ describe('axisConfig', () => {
         expect(result).to.have.property('position', 'bottom');
       });
 
-      it('defaults to an empty string if not provided', () => {
+      it('defaults to "left" if not provided', () => {
         const result = fn(testTable);
-        expect(result).to.have.property('position', '');
+        expect(result).to.have.property('position', 'left');
       });
 
       it('throws when given an invalid position', () => {

@@ -71,14 +71,17 @@ export const axisConfig: ContextFunctionFactory<
     const minVal = typeof min === 'string' ? moment.utc(min).valueOf() : min;
     const maxVal = typeof max === 'string' ? moment.utc(max).valueOf() : max;
 
-    if (minVal !== null && isNaN(minVal)) {
+    // This != check is not !== in order to handle NaN cases properly.
+    if (minVal != null && isNaN(minVal)) {
       throw new Error(
         `Invalid date string: '${
           args.min
         }'. 'min' must be a number, date in ms, or ISO8601 date string`
       );
     }
-    if (maxVal !== null && isNaN(maxVal)) {
+
+    // This != check is not !== in order to handle NaN cases properly.
+    if (maxVal != null && isNaN(maxVal)) {
       throw new Error(
         `Invalid date string: '${
           args.max

@@ -70,7 +70,7 @@ export const mapColumn: ContextFunctionFactory<
         type: 'datatable',
         columns,
         rows,
-      };
+      } as Datatable;
     });
   },
 });

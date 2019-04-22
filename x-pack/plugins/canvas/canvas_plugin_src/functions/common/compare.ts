@@ -49,22 +49,26 @@ export const compare: ContextFunctionFactory<'compare', Context, Arguments, bool
         return a !== b;
       case 'lt':
         if (typesMatch) {
-          return !!a && !!b && a < b;
+          // @ts-ignore #35433 This is a wonky comparison for nulls
+          return a < b;
         }
         return false;
       case 'lte':
         if (typesMatch) {
-          return !!a && !!b && a <= b;
+          // @ts-ignore #35433 This is a wonky comparison for nulls
+          return a <= b;
         }
         return false;
       case 'gt':
         if (typesMatch) {
-          return !!a && !!b && a > b;
+          // @ts-ignore #35433 This is a wonky comparison for nulls
+          return a > b;
         }
         return false;
       case 'gte':
         if (typesMatch) {
-          return !!a && !!b && a >= b;
+          // @ts-ignore #35433 This is a wonky comparison for nulls
+          return a >= b;
         }
         return false;
       default:

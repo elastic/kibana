@@ -43,7 +43,7 @@ interface StyleSpec {
   fontSize: string;
   fontStyle: string;
   fontWeight: Arguments['weight'];
-  lineHeight: string;
+  lineHeight: number | string;
   textAlign: Arguments['align'];
   textDecoration: string;
 }
@@ -135,7 +135,7 @@ export const font: NullContextFunctionFactory<'font', Arguments, Return> = () =>
 
     // the line height shouldn't ever be lower than the size, and apply as a
     // pixel setting
-    const lineHeight = args.lHeight ? `${args.lHeight}px` : '1';
+    const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
 
     const spec: StyleSpec = {
       fontFamily: args.family,

@@ -30,6 +30,7 @@ export const lt: ContextFunctionFactory<'lt', Context, Arguments, boolean> = () 
       return false;
     }
 
-    return context && value ? context < value : false;
+    // @ts-ignore #35433 This is a wonky comparison for nulls
+    return context < value;
   },
 });

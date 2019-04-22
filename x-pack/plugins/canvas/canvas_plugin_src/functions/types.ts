@@ -106,7 +106,7 @@ export interface DatatableColumn {
  */
 export interface Datatable {
   columns: DatatableColumn[];
-  rows: Array<{ [key: string]: any }>;
+  rows: any[];
   type: 'datatable';
 }
 
@@ -115,7 +115,7 @@ export interface Datatable {
  * @param datatable
  */
 export const isDatatable = (datatable: any): datatable is Datatable =>
-  datatable.type === 'datatable';
+  !!datatable && datatable.type === 'datatable';
 
 // ARGUMENTS
 // ---------

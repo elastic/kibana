@@ -34,32 +34,32 @@ export const columns: ContextFunctionFactory<'columns', Datatable, Arguments, Da
   },
   fn: (context, args) => {
     const { include, exclude } = args;
-
+    const { columns: contextColumns, rows: contextRows, ...rest } = context;
     let result = { ...context };
 
     if (exclude) {
       const fields = exclude.split(',').map(field => field.trim());
-      const excludedCols: DatatableColumn[] = result.columns.filter(
-        col => !fields.includes(col.name)
-      );
-      const rows = excludedCols.length > 0 ? result.rows.map(row => omit(row, fields)) : [];
+      const cols = contextColumns.filter(col => !fields.includes(col.name));
+      const rows = cols.length > 0 ? contextRows.map(row => omit(row, fields)) : [];
 
-      result = { ...result, rows, columns: excludedCols };
+      result = { rows, columns: cols, ...rest };
     }
 
     if (include) {
       const fields = include.split(',').map(field => field.trim());
       // const columns = result.columns.filter(col => fields.includes(col.name));
+
       // Include columns in the order the user specified
-      const includedCols: DatatableColumn[] = [];
+      const cols: DatatableColumn[] = [];
+
       fields.forEach(field => {
         const column = find(result.columns, { name: field });
         if (column) {
-          includedCols.push(column);
+          cols.push(column);
         }
       });
-      const rows = columns.length > 0 ? result.rows.map(row => pick(row, fields)) : [];
-      result = { ...result, rows, columns: includedCols };
+      const rows = cols.length > 0 ? result.rows.map(row => pick(row, fields)) : [];
+      result = { rows, columns: cols, ...rest };
     }
 
     return result;

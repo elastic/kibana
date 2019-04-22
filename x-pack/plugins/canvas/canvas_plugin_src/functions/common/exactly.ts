@@ -34,6 +34,7 @@ export const exactly: ContextFunctionFactory<'exactly', Filter, Arguments, Filte
     const { value, column } = args;
 
     const filter = {
+      type: 'exactly',
       value,
       column,
       and: [],

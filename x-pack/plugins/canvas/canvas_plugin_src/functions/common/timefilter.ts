@@ -61,11 +61,11 @@ export const timefilter: ContextFunctionFactory<'timefilter', Filter, Arguments,
       return moment.toISOString();
     }
 
-    if (to !== null) {
+    if (!!to) {
       (filter as any).to = parseAndValidate(to);
     }
 
-    if (from !== null) {
+    if (!!from) {
       (filter as any).from = parseAndValidate(from);
     }
 

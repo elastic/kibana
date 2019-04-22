@@ -101,7 +101,7 @@ export const ply: ContextFunctionFactory<'ply', Datatable, Arguments, Return> = 
         type: 'datatable',
         rows,
         columns,
-      };
+      } as Datatable;
     });
   },
 });

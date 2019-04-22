@@ -57,7 +57,7 @@ export const csv: NullContextFunctionFactory<'csv', Arguments, Datatable> = () =
     const output = Papa.parse(csvString, config);
     const { data, errors } = output;
 
-    if (errors) {
+    if (errors.length > 0) {
       throw new Error('Error parsing input CSV.');
     }
 

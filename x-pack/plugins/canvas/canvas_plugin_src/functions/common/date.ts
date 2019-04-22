@@ -44,7 +44,7 @@ export const date: NullContextFunctionFactory<'date', Arguments, number> = () =>
         : new Date();
 
     if (isNaN(outputDate.getTime())) {
-      throw new Error(`Invalid date input: ${date}`);
+      throw new Error(`Invalid date input: ${argDate}`);
     }
 
     return outputDate.valueOf();
