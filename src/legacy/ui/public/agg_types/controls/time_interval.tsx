@@ -126,7 +126,7 @@ function TimeIntervalParamEditor({
     >
       <EuiComboBox
         fullWidth={true}
-        data-test-subj={`visEditorInterval${agg.id}`}
+        data-test-subj="visEditorInterval"
         isInvalid={isInvalid}
         noSuggestions={!!timeBase}
         onChange={onChange}

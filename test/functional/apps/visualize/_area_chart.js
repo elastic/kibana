@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
       expect(fieldValues[0]).to.be('@timestamp');
       const intervalValue = await PageObjects.visualize.getInterval();
       log.debug('intervalValue = ' + intervalValue);
-      expect(intervalValue).to.be('Auto');
+      expect(intervalValue[0]).to.be('Auto');
       return PageObjects.visualize.clickGo();
     };
 

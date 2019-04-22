@@ -567,32 +567,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getInterval() {
-      const intervalOptions = await find.allByCssSelector('select[data-test-subj="visEditorInterval"] option');
-
-      for (const option of intervalOptions) {
-        try {
-          const isSelectedOption = await option.getProperty('selected');
-          if (isSelectedOption) {
-            return await option.getProperty('label');
-          }
-        } catch (err) {
-          throw new Error('No interval selected.');
-        }
-      }
+      return await comboBox.getComboBoxSelectedOptions('visEditorInterval');
     }
 
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
-      const input = await testSubjects.find('visEditorInterval');
-      const option = await input.findByCssSelector(`option[label="${newValue}"]`);
-      await option.click();
+      return await comboBox.set('visEditorInterval', newValue);
     }
 
     async setCustomInterval(newValue) {
-      await this.setInterval('Custom');
-      const input = await find.byCssSelector('input[name="customInterval"]');
-      await input.clearValue();
-      await input.type(newValue);
+      log.debug(`Visualize.setCustomInterval(${newValue})`);
+      return await comboBox.setCustom('visEditorInterval', newValue);
     }
 
     async setNumericInterval(newValue, { append } = {}) {
