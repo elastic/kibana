@@ -17,19 +17,17 @@
  * under the License.
  */
 
-import { get, find, filter } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import { get, find } from 'lodash';
+import React, { useEffect } from 'react';
 
 import { EuiFormRow, EuiIconTip, EuiComboBox, EuiComboBoxOptionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from '../../vis/editors/default';
-import { AggParamOption, AggParam } from '../agg_param';
+import { AggParamOption } from '../agg_param';
 import { parseInterval } from '../utils';
-import { AggConfig } from 'ui/vis';
 
-interface ComboOption {
-  label: string;
+interface ComboBoxOption extends EuiComboBoxOptionProps {
   key: string;
 }
 
@@ -37,32 +35,31 @@ function TimeIntervalParamEditor({
   agg,
   aggParam,
   editorConfig,
-  value,
+  value = '',
   setValue,
   isInvalid,
   setTouched,
   setValidity,
 }: AggParamEditorProps<string>) {
-  const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
-  const isTooManyBuckets = interval && interval.scaled && interval.scale <= 1;
-  const isTooLargeBuckets = interval && interval.scaled && interval.scale > 1;
-  const label = i18n.translate('common.ui.aggTypes.timeInterval.intervalLabel', {
+  const label = i18n.translate('common.ui.aggTypes.timeInterval.minimumIntervalLabel', {
     defaultMessage: 'Minimum interval',
   });
-  const scaledTooltip = isTooManyBuckets
-    ? tooManyBucketsTooltip
-    : isTooLargeBuckets
-    ? tooLargeBucketsTooltip
-    : null;
+  const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
+  const isScaled = interval && interval.scaled;
   const scaledHepText =
-    isTooManyBuckets || isTooLargeBuckets ? (
+    isScaled && !isInvalid ? (
       <label>
         <FormattedMessage
           id="common.ui.aggTypes.timeInterval.scaledHelpText"
           defaultMessage="Currently scaled to {bucketDescription}"
-          values={{ bucketDescription: interval ? interval.description : '' }}
+          values={{ bucketDescription: get(interval, 'description') || '' }}
         />{' '}
-        <EuiIconTip position="right" type="questionInCircle" color="text" content={scaledTooltip} />
+        <EuiIconTip
+          position="right"
+          type="questionInCircle"
+          color="text"
+          content={interval.scale <= 1 ? tooManyBucketsTooltip : tooLargeBucketsTooltip}
+        />
       </label>
     ) : null;
 
@@ -74,63 +71,69 @@ function TimeIntervalParamEditor({
   );
 
   const timeBase: string = get(editorConfig, 'interval.timeBase');
-  const options = timeBase
-    ? []
-    : (aggParam.options || []).reduce(
-        (filtered: ComboOption[], option: AggParamOption) => {
-          if (option.enabled ? option.enabled(agg) : true) {
-            filtered.push({ label: option.display, key: option.val });
-          }
-          return filtered;
-        },
-        [] as ComboOption[]
-      );
+  const options = (aggParam.options || []).reduce(
+    (filtered: ComboBoxOption[], option: AggParamOption) => {
+      if (option.enabled ? option.enabled(agg) : true) {
+        filtered.push({ label: option.display, key: option.val });
+      }
+      return filtered;
+    },
+    [] as ComboBoxOption[]
+  );
+  const definedOption = find(options, { key: value });
+  const selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
+  const errors = [];
+
+  if (isInvalid && value) {
+    errors.push(
+      i18n.translate('common.ui.aggTypes.timeInterval.invalidFormatErrorMessage', {
+        defaultMessage: 'Invalid intreval format.',
+      })
+    );
+  }
 
   const onCustomInterval = (customValue: string) => {
     const normalizedCustomValue = customValue.trim();
     const isValid = normalizedCustomValue ? parseInterval(normalizedCustomValue, timeBase) : false;
-
-    console.log('onCustomInterval ' + normalizedCustomValue);
 
     setValue(normalizedCustomValue);
     setValidity(isValid);
     setTouched();
   };
 
-  const onChange = (opts: ComboOption[]) => {
-    const selectedOpt: ComboOption = get(opts, '0');
-    console.log('onChange ' + selectedOpt.key);
-
-    setValue(selectedOpt.key);
+  const onChange = (opts: EuiComboBoxOptionProps[]) => {
+    const selectedOpt: ComboBoxOption = get(opts, '0');
+    setValidity(!!selectedOpt);
+    setValue(selectedOpt ? selectedOpt.key : selectedOpt);
     setTouched();
   };
 
   useEffect(
     () => {
-      setValidity(!!value);
+      setValidity(value ? (definedOption ? true : parseInterval(value, timeBase)) : false);
     },
     [value]
   );
 
   return (
     <EuiFormRow
-      label={label}
-      isInvalid={isInvalid}
-      fullWidth={true}
       className="visEditorSidebar__aggParamFormRow"
+      error={errors}
+      fullWidth={true}
       helpText={helpText}
+      isInvalid={isInvalid}
+      label={label}
     >
       <EuiComboBox
-        id={`visEditorInterval${agg.id}`}
-        options={options}
-        singleSelection={{ asPlainText: true }}
-        selectedOptions={getSelectedOption(value, options)}
+        fullWidth={true}
+        data-test-subj={`visEditorInterval${agg.id}`}
         isInvalid={isInvalid}
+        noSuggestions={!!timeBase}
         onChange={onChange}
         onCreateOption={onCustomInterval}
-        data-test-subj="visEditorInterval"
-        fullWidth={true}
-        noSuggestions={!!timeBase}
+        options={options}
+        selectedOptions={selectedOptions}
+        singleSelection={{ asPlainText: true }}
       />
     </EuiFormRow>
   );
@@ -145,7 +148,7 @@ const tooManyBucketsTooltip = (
 const tooLargeBucketsTooltip = (
   <FormattedMessage
     id="common.ui.aggTypes.timeInterval.createsTooLargeBucketsTooltip"
-    defaultMessage="TThis interval creates buckets that are too large to show in the selected time range, so it has been scaled up."
+    defaultMessage="This interval creates buckets that are too large to show in the selected time range, so it has been scaled up."
   />
 );
 const selectOptionHelpText = (
@@ -154,13 +157,5 @@ const selectOptionHelpText = (
     defaultMessage="Select an option or create a custom value. Examples: 30s, 20m, 24h, 2d, 1w, 1M"
   />
 );
-
-function getSelectedOption(key: string, availableOptions: ComboOption[]) {
-  if (!key) {
-    return [];
-  }
-  const intervalOption = find(availableOptions, { key });
-  return intervalOption ? [intervalOption] : [{ label: key, key: 'custom' }];
-}
 
 export { TimeIntervalParamEditor };

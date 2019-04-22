@@ -34,8 +34,7 @@ const detectedTimezone = moment.tz.guess();
 const tzOffset = moment().format('Z');
 
 function getInterval(agg) {
-  const interval = _.get(agg, ['params', 'interval']);
-  return interval;
+  return _.get(agg, ['params', 'interval']);
 }
 
 export function setBounds(agg, force) {

@@ -182,8 +182,7 @@ TimeBuckets.prototype.setInterval = function (input) {
   // if the value wasn't converted to a duration, and isn't
   // already a duration, we have a problem
   if (!moment.isDuration(interval)) {
-    return;
-    //throw new TypeError('"' + input + '" is not a valid interval.');
+    throw new TypeError('"' + input + '" is not a valid interval.');
   }
 
   this._i = interval;
