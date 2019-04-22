@@ -21,6 +21,7 @@ const columns = [
       defaultMessage: 'Name'
     }),
     field: 'name',
+    sortable: true,
     render: (name, instance) => (
       <EuiLink
         href={`#/apm/instances/${instance.uuid}`}
@@ -34,12 +35,14 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.outputEnabledTitle', {
       defaultMessage: 'Output Enabled'
     }),
+    sortable: true,
     field: 'output'
   },
   {
     name: i18n.translate('xpack.monitoring.apm.instances.totalEventsRateTitle', {
       defaultMessage: 'Total Events Rate'
     }),
+    sortable: true,
     field: 'total_events_rate',
     render: value => formatMetric(value, '', '/s')
   },
@@ -47,6 +50,7 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.bytesSentRateTitle', {
       defaultMessage: 'Bytes Sent Rate'
     }),
+    sortable: true,
     field: 'bytes_sent_rate',
     render: value => formatMetric(value, 'byte', '/s')
   },
@@ -54,6 +58,7 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.outputErrorsTitle', {
       defaultMessage: 'Output Errors'
     }),
+    sortable: true,
     field: 'errors',
     render: value => formatMetric(value, '0')
   },
@@ -61,6 +66,7 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.lastEventTitle', {
       defaultMessage: 'Last Event'
     }),
+    sortable: true,
     field: 'time_of_last_event',
     render: value => i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
       defaultMessage: '{timeOfLastEvent} ago',
@@ -73,6 +79,7 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.allocatedMemoryTitle', {
       defaultMessage: 'Allocated Memory'
     }),
+    sortable: true,
     field: 'memory',
     render: value => formatMetric(value, 'byte')
   },
@@ -80,6 +87,7 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.versionTitle', {
       defaultMessage: 'Version'
     }),
+    sortable: true,
     field: 'version'
   },
 ];
