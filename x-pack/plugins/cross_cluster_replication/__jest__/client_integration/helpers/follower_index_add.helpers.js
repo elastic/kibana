@@ -22,11 +22,11 @@ export const setup = (props) => {
 
   // User actions
   const clickSaveForm = () => {
-    testBed.find('ccrFollowerIndexFormSubmitButton').simulate('click');
+    testBed.find('submitButton').simulate('click');
   };
 
   const toggleAdvancedSettings = () => {
-    testBed.form.selectCheckBox('ccrFollowerIndexFormCustomAdvancedSettingsToggle');
+    testBed.form.selectCheckBox('advancedSettingsToggle');
   };
 
   return {

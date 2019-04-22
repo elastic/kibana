@@ -148,7 +148,7 @@ export class DetailPanel extends Component {
 
   renderIndicesPreview(prefix, suffix, leaderIndexPatterns) {
     return (
-      <section data-test-subj="previewSection">
+      <section data-test-subj="indicesPreviewSection">
         <AutoFollowPatternIndicesPreview
           prefix={prefix}
           suffix={suffix}

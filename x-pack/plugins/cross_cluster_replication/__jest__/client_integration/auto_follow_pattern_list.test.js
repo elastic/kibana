@@ -48,7 +48,7 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('should show a loading indicator on component', async () => {
-      expect(exists('ccrAutoFollowPatternLoading')).toBe(true);
+      expect(exists('autoFollowPatternLoading')).toBe(true);
     });
   });
 
@@ -64,11 +64,11 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('should display an empty prompt', async () => {
-      expect(exists('ccrAutoFollowPatternEmptyPrompt')).toBe(true);
+      expect(exists('emptyPrompt')).toBe(true);
     });
 
     test('should have a button to create a follower index', async () => {
-      expect(exists('ccrCreateAutoFollowPatternButton')).toBe(true);
+      expect(exists('createAutoFollowPatternButton')).toBe(true);
     });
   });
 
@@ -113,7 +113,7 @@ describe('<AutoFollowPatternList />', () => {
       component.update();
 
       // Read the index list table
-      ({ tableCellsValues, rows } = table.getMetaData('ccrAutoFollowPatternListTable'));
+      ({ tableCellsValues, rows } = table.getMetaData('autoFollowPatternListTable'));
     });
 
     afterEach(async () => {
@@ -123,11 +123,11 @@ describe('<AutoFollowPatternList />', () => {
     });
 
     test('should not display the empty prompt', () => {
-      expect(exists('ccrFollowerIndexEmptyPrompt')).toBe(false);
+      expect(exists('emptyPrompt')).toBe(false);
     });
 
     test('should have a button to create an auto-follow pattern', () => {
-      expect(exists('ccrCreateAutoFollowPatternButton')).toBe(true);
+      expect(exists('createAutoFollowPatternButton')).toBe(true);
     });
 
     test('should list the auto-follow patterns in the table', () => {
@@ -152,28 +152,28 @@ describe('<AutoFollowPatternList />', () => {
 
     describe('bulk delete button', () => {
       test('should be visible when an auto-follow pattern is selected', () => {
-        expect(exists('ccrAutoFollowPatternListBulkDeleteActionButton')).toBe(false);
+        expect(exists('bulkDeleteButton')).toBe(false);
 
         actions.selectAutoFollowPatternAt(0);
 
-        expect(exists('ccrAutoFollowPatternListBulkDeleteActionButton')).toBe(true);
+        expect(exists('bulkDeleteButton')).toBe(true);
       });
 
       test('should update the button label according to the number of patterns selected', () => {
         actions.selectAutoFollowPatternAt(0); // 1 auto-follow pattern selected
-        expect(find('ccrAutoFollowPatternListBulkDeleteActionButton').text()).toEqual('Delete auto-follow pattern');
+        expect(find('bulkDeleteButton').text()).toEqual('Delete auto-follow pattern');
 
         actions.selectAutoFollowPatternAt(1); // 2 auto-follow patterns selected
-        expect(find('ccrAutoFollowPatternListBulkDeleteActionButton').text()).toEqual('Delete auto-follow patterns');
+        expect(find('bulkDeleteButton').text()).toEqual('Delete auto-follow patterns');
       });
 
       test('should open a confirmation modal when clicking the delete button', () => {
-        expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(false);
+        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
 
         actions.selectAutoFollowPatternAt(0);
         actions.clickBulkDeleteButton();
 
-        expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(true);
+        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
       });
 
       test('should remove the auto-follow pattern from the table after delete is complete', async () => {
@@ -190,7 +190,7 @@ describe('<AutoFollowPatternList />', () => {
         await nextTick();
         component.update();
 
-        ({ rows } = table.getMetaData('ccrAutoFollowPatternListTable'));
+        ({ rows } = table.getMetaData('autoFollowPatternListTable'));
 
         expect(rows.length).toBe(1);
         expect(rows[0].columns[1].value).toEqual(autoFollowPattern2.name);
@@ -202,96 +202,94 @@ describe('<AutoFollowPatternList />', () => {
         const indexLastColumn = rows[0].columns.length - 1;
         const tableCellActions = rows[0].columns[indexLastColumn].reactWrapper;
 
-        const deleteButton = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListDeleteActionButton');
-        const editButton = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListEditActionButton');
+        const deleteButton = findTestSubject(tableCellActions, 'deleteButton');
+        const editButton = findTestSubject(tableCellActions, 'editButton');
 
         expect(deleteButton.length).toBe(1);
         expect(editButton.length).toBe(1);
       });
 
       test('should open a confirmation modal when clicking on "delete" button', async () => {
-        expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(false);
+        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
 
         actions.clickRowActionButtonAt(0, 'delete');
 
-        expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(true);
+        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
       });
     });
 
     describe('detail panel', () => {
       test('should open a detail panel when clicking on an auto-follow pattern', () => {
-        expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(false);
+        expect(exists('autoFollowPatternDetail')).toBe(false);
 
         actions.clickAutoFollowPatternAt(0);
 
-        expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(true);
+        expect(exists('autoFollowPatternDetail')).toBe(true);
       });
 
       test('should set the title the auto-follow pattern that has been selected', () => {
         actions.clickAutoFollowPatternAt(0); // Open the detail panel
-        expect(find('autoFollowPatternDetailsFlyoutTitle').text()).toEqual(autoFollowPattern1.name);
+        expect(find('autoFollowPatternDetail.title').text()).toEqual(autoFollowPattern1.name);
       });
 
       test('should have a "settings" section', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(find('ccrAutoFollowPatternDetailPanelSettingsSection').find('h3').text()).toEqual('Settings');
-        expect(exists('ccrAutoFollowPatternDetailPanelSettingsValues')).toBe(true);
+        expect(find('settingsSection').find('h3').text()).toEqual('Settings');
+        expect(exists('settingsValues')).toBe(true);
       });
 
       test('should set the correct auto-follow pattern settings values', () => {
         actions.clickAutoFollowPatternAt(0);
 
-        expect(find('ccrAutoFollowPatternDetailRemoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);
-        expect(find('ccrAutoFollowPatternDetailLeaderIndexPatterns').text()).toEqual(autoFollowPattern1.leaderIndexPatterns.join(', '));
-        expect(find('ccrAutoFollowPatternDetailPatternPrefix').text()).toEqual(testPrefix);
-        expect(find('ccrAutoFollowPatternDetailPatternSuffix').text()).toEqual(testSuffix);
+        expect(find('remoteCluster').text()).toEqual(autoFollowPattern1.remoteCluster);
+        expect(find('leaderIndexPatterns').text()).toEqual(autoFollowPattern1.leaderIndexPatterns.join(', '));
+        expect(find('patternPrefix').text()).toEqual(testPrefix);
+        expect(find('patternSuffix').text()).toEqual(testSuffix);
       });
 
       test('should have a default value when there are no prefix or no suffix', () => {
         actions.clickAutoFollowPatternAt(1); // Does not have prefix and suffix
 
-        expect(find('ccrAutoFollowPatternDetailPatternPrefix').text()).toEqual('No prefix');
-        expect(find('ccrAutoFollowPatternDetailPatternSuffix').text()).toEqual('No suffix');
+        expect(find('patternPrefix').text()).toEqual('No prefix');
+        expect(find('patternSuffix').text()).toEqual('No suffix');
       });
 
       test('should show a preview of the indices that might be generated by the auto-follow pattern', () => {
         actions.clickAutoFollowPatternAt(0);
-        const detailPanel = find('ccrAutoFollowPatternDetailsFlyout');
-        const indicesPreview = findTestSubject(detailPanel, 'ccrAutoFollowPatternIndexPreview');
 
-        expect(exists('ccrAutoFollowPatternDetailPanelIndicesPreviewSection')).toBe(true);
-        expect(indicesPreview.length).toBe(3);
+        expect(exists('indicesPreviewSection')).toBe(true);
+        expect(exists('indicesPreviewSection.indexPreview', 3)).toBe(true);
       });
 
       test('should have a link to view the indices in Index Management', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(exists('ccrAutoFollowPatternDetailsViewIndexManagementButton')).toBe(true);
-        expect(find('ccrAutoFollowPatternDetailsViewIndexManagementButton').text()).toBe('View your follower indices in Index Management');
+        expect(exists('viewIndexManagementLink')).toBe(true);
+        expect(find('viewIndexManagementLink').text()).toBe('View your follower indices in Index Management');
       });
 
       test('should have a "close", "delete" and "edit" button in the footer', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(exists('ccrAutoFollowPatternDetailsFlyoutCloseButton')).toBe(true);
-        expect(exists('ccrAutoFollowPatternDetailsDeleteActionButton')).toBe(true);
-        expect(exists('ccrAutoFollowPatternDetailsEditActionButton')).toBe(true);
+        expect(exists('autoFollowPatternDetail.closeFlyoutButton')).toBe(true);
+        expect(exists('autoFollowPatternDetail.deleteButton')).toBe(true);
+        expect(exists('autoFollowPatternDetail.editButton')).toBe(true);
       });
 
       test('should close the detail panel when clicking the "close" button', () => {
         actions.clickAutoFollowPatternAt(0); // open the detail panel
-        expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(true);
+        expect(exists('autoFollowPatternDetail')).toBe(true);
 
-        find('ccrAutoFollowPatternDetailsFlyoutCloseButton').simulate('click'); // close the detail panel
+        find('closeFlyoutButton').simulate('click'); // close the detail panel
 
-        expect(exists('ccrAutoFollowPatternDetailsFlyout')).toBe(false);
+        expect(exists('autoFollowPatternDetail')).toBe(false);
       });
 
       test('should open a confirmation modal when clicking the "delete" button', () => {
         actions.clickAutoFollowPatternAt(0);
-        expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(false);
+        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(false);
 
-        find('ccrAutoFollowPatternDetailsDeleteActionButton').simulate('click');
+        find('autoFollowPatternDetail.deleteButton').simulate('click');
 
-        expect(exists('ccrAutoFollowPatternDeleteConfirmationModal')).toBe(true);
+        expect(exists('deleteAutoFollowPatternConfirmation')).toBe(true);
       });
 
       test('should display the recent errors', async () => {
@@ -306,7 +304,7 @@ describe('<AutoFollowPatternList />', () => {
         httpRequestsMockHelpers.setAutoFollowStatsResponse({ recentAutoFollowErrors });
 
         actions.clickAutoFollowPatternAt(0);
-        expect(exists('ccrAutoFollowPatternDetailErrors')).toBe(false);
+        expect(exists('autoFollowPatternDetail.errors')).toBe(false);
 
         // We select the other auto-follow pattern because the stats are fetched
         // each time we change the auto-follow pattern selection
@@ -314,9 +312,9 @@ describe('<AutoFollowPatternList />', () => {
         await nextTick();
         component.update();
 
-        expect(exists('ccrAutoFollowPatternDetailErrors')).toBe(true);
-        expect(exists('ccrAutoFollowPatternDetailsTitleErrors')).toBe(true);
-        expect(find('ccrAutoFollowPatternDetailRecentError').map(error => error.text())).toEqual([message]);
+        expect(exists('autoFollowPatternDetail.errors')).toBe(true);
+        expect(exists('autoFollowPatternDetail.titleErrors')).toBe(true);
+        expect(find('autoFollowPatternDetail.recentError').map(error => error.text())).toEqual([message]);
       });
     });
   });

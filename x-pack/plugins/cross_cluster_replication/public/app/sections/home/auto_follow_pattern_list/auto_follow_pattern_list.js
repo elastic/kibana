@@ -177,7 +177,7 @@ export class AutoFollowPatternList extends PureComponent {
 
     if (apiStatus === API_STATUS.LOADING) {
       return (
-        <SectionLoading dataTestSubj="ccrAutoFollowPatternLoading">
+        <SectionLoading dataTestSubj="autoFollowPatternLoading">
           <FormattedMessage
             id="xpack.crossClusterReplication.autoFollowPatternList.loadingTitle"
             defaultMessage="Loading auto-follow patterns..."

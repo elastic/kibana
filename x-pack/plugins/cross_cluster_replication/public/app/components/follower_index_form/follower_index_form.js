@@ -379,7 +379,7 @@ export class FollowerIndexForm extends PureComponent {
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onIndexNameChange}
-        testSubj="ccrFollowerIndexFormFollowerIndexInput"
+        testSubj="followerIndexInput"
       />
     );
 
@@ -513,7 +513,7 @@ export class FollowerIndexForm extends PureComponent {
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onFieldsChange}
-        testSubj="ccrFollowerIndexFormLeaderIndexInput"
+        testSubj="leaderIndexInput"
       />
     );
 

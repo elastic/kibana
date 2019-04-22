@@ -25,31 +25,31 @@ export const setup = (props) => {
    */
 
   const selectAutoFollowPatternAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData('ccrAutoFollowPatternListTable');
+    const { rows } = testBed.table.getMetaData('autoFollowPatternListTable');
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
     checkBox.simulate('change', { target: { checked: true } });
   };
 
   const clickBulkDeleteButton = () => {
-    testBed.find('ccrAutoFollowPatternListBulkDeleteActionButton').simulate('click');
+    testBed.find('bulkDeleteButton').simulate('click');
   };
 
   const clickConfirmModalDeleteAutoFollowPattern = () => {
-    const modal = testBed.find('ccrAutoFollowPatternDeleteConfirmationModal');
+    const modal = testBed.find('deleteAutoFollowPatternConfirmation');
     findTestSubject(modal, 'confirmModalConfirmButton').simulate('click');
   };
 
   const clickRowActionButtonAt = (index = 0, action = 'delete') => {
-    const { rows } = testBed.table.getMetaData('ccrAutoFollowPatternListTable');
+    const { rows } = testBed.table.getMetaData('autoFollowPatternListTable');
     const indexLastColumn = rows[index].columns.length - 1;
     const tableCellActions = rows[index].columns[indexLastColumn].reactWrapper;
 
     let button;
     if (action === 'delete') {
-      button = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListDeleteActionButton');
+      button = findTestSubject(tableCellActions, 'deleteButton');
     } else if (action === 'edit') {
-      button = findTestSubject(tableCellActions, 'ccrAutoFollowPatternListEditActionButton');
+      button = findTestSubject(tableCellActions, 'editButton');
     }
 
     if (!button) {
@@ -60,8 +60,8 @@ export const setup = (props) => {
   };
 
   const clickAutoFollowPatternAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData('ccrAutoFollowPatternListTable');
-    const autoFollowPatternLink = findTestSubject(rows[index].reactWrapper, 'ccrAutoFollowPatternListPatternLink');
+    const { rows } = testBed.table.getMetaData('autoFollowPatternListTable');
+    const autoFollowPatternLink = findTestSubject(rows[index].reactWrapper, 'autoFollowPatternLink');
     autoFollowPatternLink.simulate('click');
   };
 

@@ -65,7 +65,7 @@ describe('Create Follower index', () => {
     });
 
     test('should have a link to the documentation', () => {
-      expect(exists('followerIndexDocsButton')).toBe(true);
+      expect(exists('docsButton')).toBe(true);
     });
   });
 
@@ -84,21 +84,21 @@ describe('Create Follower index', () => {
     });
 
     test('should display the Follower index form', async () => {
-      expect(exists('ccrFollowerIndexForm')).toBe(true);
+      expect(exists('followerIndexForm')).toBe(true);
     });
 
     test('should display errors and disable the save button when clicking "save" without filling the form', () => {
-      expect(exists('followerIndexFormError')).toBe(false);
-      expect(find('ccrFollowerIndexFormSubmitButton').props().disabled).toBe(false);
+      expect(exists('formError')).toBe(false);
+      expect(find('submitButton').props().disabled).toBe(false);
 
       actions.clickSaveForm();
 
-      expect(exists('followerIndexFormError')).toBe(true);
+      expect(exists('formError')).toBe(true);
       expect(form.getErrorsMessages()).toEqual([
         'Leader index is required.',
         'Name is required.'
       ]);
-      expect(find('ccrFollowerIndexFormSubmitButton').props().disabled).toBe(true);
+      expect(find('submitButton').props().disabled).toBe(true);
     });
   });
 
@@ -135,7 +135,7 @@ describe('Create Follower index', () => {
 
     describe('leader index', () => {
       test('should not allow spaces', () => {
-        form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', 'with space');
+        form.setInputValue('leaderIndexInput', 'with space');
         actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the leader index.');
       });
@@ -144,7 +144,7 @@ describe('Create Follower index', () => {
         actions.clickSaveForm(); // Make all errors visible
 
         const expectInvalidChar = (char) => {
-          form.setInputValue('ccrFollowerIndexFormLeaderIndexInput', `with${char}`);
+          form.setInputValue('leaderIndexInput', `with${char}`);
           expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your leader index.`);
         };
 
@@ -156,13 +156,13 @@ describe('Create Follower index', () => {
 
     describe('follower index', () => {
       test('should not allow spaces', () => {
-        form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', 'with space');
+        form.setInputValue('followerIndexInput', 'with space');
         actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
       test('should not allow a "." (period) as first character', () => {
-        form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', '.withDot');
+        form.setInputValue('followerIndexInput', '.withDot');
         actions.clickSaveForm();
         expect(form.getErrorsMessages()).toContain(`Name can't begin with a period.`);
       });
@@ -171,7 +171,7 @@ describe('Create Follower index', () => {
         actions.clickSaveForm(); // Make all errors visible
 
         const expectInvalidChar = (char) => {
-          form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', `with${char}`);
+          form.setInputValue('followerIndexInput', `with${char}`);
           expect(form.getErrorsMessages()).toContain(`Remove the characters ${char} from your name.`);
         };
 
@@ -188,7 +188,7 @@ describe('Create Follower index', () => {
           // Keep track of the request count made until this point
           const totalRequests = server.requests.length;
 
-          form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', 'index-name');
+          form.setInputValue('followerIndexInput', 'index-name');
           await nextTick(550); // we need to wait as there is a debounce of 500ms on the http validation
 
           expect(server.requests.length).toBe(totalRequests + 1);
@@ -199,7 +199,7 @@ describe('Create Follower index', () => {
           const indexName = 'index-name';
           httpRequestsMockHelpers.setGetClusterIndicesResponse([{ name: indexName }]);
 
-          form.setInputValue('ccrFollowerIndexFormFollowerIndexInput', indexName);
+          form.setInputValue('followerIndexInput', indexName);
           await nextTick(550);
           component.update();
 
@@ -210,43 +210,43 @@ describe('Create Follower index', () => {
 
     describe('advanced settings', () => {
       const advancedSettingsInputFields = {
-        ccrFollowerIndexFormMaxReadRequestOperationCountInput: {
+        maxReadRequestOperationCountInput: {
           default: 5120,
           type: 'number',
         },
-        ccrFollowerIndexFormMaxOutstandingReadRequestsInput: {
+        maxOutstandingReadRequestsInput: {
           default: 12,
           type: 'number',
         },
-        ccrFollowerIndexFormMaxReadRequestSizeInput: {
+        maxReadRequestSizeInput: {
           default: '32mb',
           type: 'string',
         },
-        ccrFollowerIndexFormMaxWriteRequestOperationCountInput: {
+        maxWriteRequestOperationCountInput: {
           default: 5120,
           type: 'number',
         },
-        ccrFollowerIndexFormMaxWriteRequestSizeInput: {
+        maxWriteRequestSizeInput: {
           default: '9223372036854775807b',
           type: 'string',
         },
-        ccrFollowerIndexFormMaxOutstandingWriteRequestsInput: {
+        maxOutstandingWriteRequestsInput: {
           default: 9,
           type: 'number',
         },
-        ccrFollowerIndexFormMaxWriteBufferCountInput: {
+        maxWriteBufferCountInput: {
           default: 2147483647,
           type: 'number',
         },
-        ccrFollowerIndexFormMaxWriteBufferSizeInput: {
+        maxWriteBufferSizeInput: {
           default: '512mb',
           type: 'string',
         },
-        ccrFollowerIndexFormMaxRetryDelayInput: {
+        maxRetryDelayInput: {
           default: '500ms',
           type: 'string',
         },
-        ccrFollowerIndexFormReadPollTimeoutInput: {
+        readPollTimeoutInput: {
           default: '1m',
           type: 'string',
         },

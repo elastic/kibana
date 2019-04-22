@@ -61,7 +61,7 @@ describe('Create Auto-follow pattern', () => {
     });
 
     test('should have a link to the documentation', () => {
-      expect(exists('autoFollowPatternDocsButton')).toBe(true);
+      expect(exists('docsButton')).toBe(true);
     });
   });
 

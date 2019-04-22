@@ -5,7 +5,7 @@
  */
 
 
-import { setupEnvironment, pageHelpers, nextTick, findTestSubject } from './helpers';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { FollowerIndexForm } from '../../public/app/components/follower_index_form/follower_index_form';
 import { FOLLOWER_INDEX_EDIT } from './helpers/constants';
 
@@ -83,19 +83,19 @@ describe('Edit Auto-follow pattern', () => {
 
     test('should populate the form fields with the values from the follower index loaded', () => {
       const inputToPropMap = {
-        ccrRemoteClusterInput: 'remoteCluster',
-        ccrFollowerIndexFormLeaderIndexInput: 'leaderIndex',
-        ccrFollowerIndexFormFollowerIndexInput: 'name',
-        ccrFollowerIndexFormMaxReadRequestOperationCountInput: 'maxReadRequestOperationCount',
-        ccrFollowerIndexFormMaxOutstandingReadRequestsInput: 'maxOutstandingReadRequests',
-        ccrFollowerIndexFormMaxReadRequestSizeInput: 'maxReadRequestSize',
-        ccrFollowerIndexFormMaxWriteRequestOperationCountInput: 'maxWriteRequestOperationCount',
-        ccrFollowerIndexFormMaxWriteRequestSizeInput: 'maxWriteRequestSize',
-        ccrFollowerIndexFormMaxOutstandingWriteRequestsInput: 'maxOutstandingWriteRequests',
-        ccrFollowerIndexFormMaxWriteBufferCountInput: 'maxWriteBufferCount',
-        ccrFollowerIndexFormMaxWriteBufferSizeInput: 'maxWriteBufferSize',
-        ccrFollowerIndexFormMaxRetryDelayInput: 'maxRetryDelay',
-        ccrFollowerIndexFormReadPollTimeoutInput: 'readPollTimeout',
+        remoteClusterInput: 'remoteCluster',
+        leaderIndexInput: 'leaderIndex',
+        followerIndexInput: 'name',
+        maxReadRequestOperationCountInput: 'maxReadRequestOperationCount',
+        maxOutstandingReadRequestsInput: 'maxOutstandingReadRequests',
+        maxReadRequestSizeInput: 'maxReadRequestSize',
+        maxWriteRequestOperationCountInput: 'maxWriteRequestOperationCount',
+        maxWriteRequestSizeInput: 'maxWriteRequestSize',
+        maxOutstandingWriteRequestsInput: 'maxOutstandingWriteRequests',
+        maxWriteBufferCountInput: 'maxWriteBufferCount',
+        maxWriteBufferSizeInput: 'maxWriteBufferSize',
+        maxRetryDelayInput: 'maxRetryDelay',
+        readPollTimeoutInput: 'readPollTimeout',
       };
 
       Object.entries(inputToPropMap).forEach(([input, prop]) => {
@@ -112,6 +112,7 @@ describe('Edit Auto-follow pattern', () => {
 
   describe('when the remote cluster is disconnected', () => {
     let find;
+    let exists;
     let component;
     let actions;
     let form;
@@ -119,26 +120,26 @@ describe('Edit Auto-follow pattern', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([{ name: 'new-york', seeds: ['localhost:123'], isConnected: false }]);
       httpRequestsMockHelpers.setGetFollowerIndexResponse(FOLLOWER_INDEX_EDIT);
-      ({ component, find, actions, form } = setup());
+      ({ component, find, exists, actions, form } = setup());
 
       await nextTick();
       component.update();
     });
 
     test('should display an error and have a button to edit the remote cluster', () => {
-      const error = find('remoteClusterFieldCallOutError');
+      const error = find('remoteClusterFormField.notConnectedError');
 
       expect(error.length).toBe(1);
       expect(error.find('.euiCallOutHeader__title').text())
         .toBe(`Can't edit follower index because remote cluster '${FOLLOWER_INDEX_EDIT.remoteCluster}' is not connected`);
-      expect(findTestSubject(error, 'ccrRemoteClusterEditButton').length).toBe(1);
+      expect(exists('remoteClusterFormField.notConnectedError.editButton')).toBe(true);
     });
 
     test('should prevent saving the form and display an error message for the required remote cluster', () => {
       actions.clickSaveForm();
 
       expect(form.getErrorsMessages()).toEqual(['A connected remote cluster is required.']);
-      expect(find('ccrFollowerIndexFormSubmitButton').props().disabled).toBe(true);
+      expect(find('submitButton').props().disabled).toBe(true);
     });
   });
 });
