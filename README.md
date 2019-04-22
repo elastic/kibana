@@ -36,7 +36,7 @@ OR
 npm install -g backport
 ```
 
-After installation you must update the [global config](https://github.com/sqren/backport/blob/master/docs/getting-started.md#new-user-create-user-config) in `~/.backport/config.json` with your Github username and a Github access token.
+After installation you must update the [global config](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson) in `~/.backport/config.json` with your Github username and a Github access token.
 
 ## Run via Docker
 
@@ -54,14 +54,14 @@ backport() {
 
 Where:
 
-- `BACKPORT_CONFIG_DIR`: This can be ANY empty folder on your local machine. Upon running the docker container for the first time, a [`config.json`](https://github.com/sqren/backport/blob/master/docs/getting-started.md#new-user-create-user-config) will be created automatically. This must be filled out with `username` and `accessToken` or these must be passed as CLI arguments: `backport --username <username> --accessToken <accessToken>`
+- `BACKPORT_CONFIG_DIR`: This can be ANY empty folder on your local machine. Upon running the docker container for the first time, a [`config.json`](https://github.com/sqren/backport/blob/master/docs/getting-started.md#global-config-backportconfigjson) will be created automatically. This must be filled out with `username` and `accessToken` or these must be passed as CLI arguments: `backport --username <username> --accessToken <accessToken>`
 - `GIT_CONFIG_FILE`: Must point to a local [`.gitconfig`](https://gist.github.com/sqren/618ab2f77ffb8b5388d675fe705ed6da) file that contains the user's name and email.
 
 You can now use `backport` as if it was installed locally.
 
 ## Usage
 
-Run the CLI in your project folder (must contain a [`.backportrc.json`](https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration) file):
+Run the CLI in your project folder (must contain a [`.backportrc.json`](https://github.com/sqren/backport/blob/master/docs/configuration.md#project-config-backportrcjson) file):
 
 ```
 > backport
@@ -75,7 +75,7 @@ or run this from anywhere:
 
 The above commands will start an interactive prompt. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed.
 
-### Options
+### CLI Arguments
 
 | Option        | Description                               | Accepts                  |
 | ------------- | ----------------------------------------- | ------------------------ |
@@ -90,9 +90,8 @@ The above commands will start an interactive prompt. You can use the `arrow keys
 | --help        | Show help                                 |                          |
 | -v, --version | Show version number                       |                          |
 
-### Documentation
+### Additional documentation
 
-- [Getting started guide](https://github.com/sqren/backport/blob/master/docs/getting-started.md)
 - [Configuration options](https://github.com/sqren/backport/blob/master/docs/configuration.md)
 
 ## Contributing

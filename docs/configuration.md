@@ -1,9 +1,13 @@
-# Configuration
+# Configuration files
 
-- [User configuration](#userglobal-configuration)
-- [Project configuration](#project-specific-configuration)
+`backport` reads options from two configuration files:
 
-### User/global configuration
+- [Global config](#global-config-backportconfigjson)
+- [Project config](#project-config-backportrcjson)
+
+All config options can additionally be provided and/or overriden via CLI options.
+
+## Global config (`.backport/config.json`)
 
 During installation `backport` will create an empty configuration file in `~/.backport/config.json`. You must update this file with your Github username and a [Github Access Token](https://github.com/settings/tokens/new)
 
@@ -16,27 +20,29 @@ Example:
 }
 ```
 
-##### `accessToken` (string) **required**
+#### `accessToken` **required**
 
-A personal access token can be created here: https://github.com/settings/tokens/new
+Personal access token.
+Access tokens can be created here: https://github.com/settings/tokens/new
 
 Please select the necessary access scopes:
 
-- **Private repository**
-  - repo:status
-  - repo_deployment
-  - public_repo
-  - repo:invite
-- **Public repository**
-  - public_repo
+- _repo:status (required for private repos)_
+- _repo_deployment (required for private repos)_
+- **public_repo (required)**
+- _repo:invite (required for private repos)_
 
-##### `username` (string) **required**
+CLI: `--accessToken myAccessToken`
 
-Your Github username
+#### `username` **required**
 
-### Project-specific configuration
+Github username
 
-`.backportrc.json` can be added to every project where you use `backport`. This is useful for sharing configuration options with other project contributors.
+CLI: `--username sqren`
+
+## Project config (`.backportrc.json`)
+
+A `.backportrc.json` config file should be added to the root of each project where `backport` is used. This is useful for sharing configuration options with other project contributors.
 
 Example:
 
@@ -44,22 +50,27 @@ Example:
 {
   "upstream": "elastic/kibana",
   "branches": [{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"],
-  "all": false,
-  "multipleCommits": false,
-  "multipleBranches": true,
   "labels": ["backport"]
 }
 ```
 
-##### `upstream` (string) **required**
+#### `upstream` **required**
 
 Github organization/user and repository name separated with forward slash.
 
-##### `branches` (string[] | object[])
+Example: "elastic/kibana"
 
-List of branches that will be available to backport to. The list can contain string and objects. If a string is given, it must be the name of a branch, if an object is given it must use the format `{"name": "<string>", "checked": <boolean>}` where `name` is the branch name and `"checked"` indicates whether the branch should be auto-selected. It is useful to auto-select branches you often backport to.
+CLI: `--upstream elastic/kibana`
 
-##### `all` (boolean)
+#### `branches` **required**
+
+List of branches that will be available to backport to. The array can contain branch names as strings or objects that also contains the field `checked` which indicates whether the branch should be pre-selected. It is useful to pre-select branches you often backport to.
+
+Example: `[{ "name": "6.x", "checked": true }, "6.3", "6.2", "6.1", "6.0"]`
+
+CLI: `--branches 6.1 --branches 6.0`
+
+#### `all`
 
 `true`: list all commits
 
@@ -67,7 +78,9 @@ List of branches that will be available to backport to. The list can contain str
 
 Default: `false`
 
-##### `multipleCommits` (boolean)
+CLI: `--all`
+
+#### `multipleCommits`
 
 `true`: you will be able to select multiple commits to backport. You will use `<space>` to select, and `<enter>` to confirm you selection.
 
@@ -75,7 +88,7 @@ Default: `false`
 
 Default: `false`
 
-##### `multipleBranches` (boolean)
+#### `multipleBranches`
 
 `true`: you will be able to select multiple branches to backport to. You will use `<space>` to select, and <enter> to confirm you selection.
 
@@ -83,6 +96,10 @@ Default: `false`
 
 Default: `true`
 
-##### `labels` (string[])
+#### `labels`
 
-List of labels that will be added to the backport pull request. These are often useful if you want to filter for backport PRs
+Labels that will be added to the backport pull request. These are often useful if you want to filter for backport PRs.
+
+Example: `["backport", "apm-team"]`
+
+CLI: `--labels myLabel --labels myOtherLabel`

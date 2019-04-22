@@ -1,4 +1,6 @@
 # Build command: `docker build -t sqren/backport .`
+# Publish: docker push sqren/backport
+
 FROM node:latest
 
 RUN mkdir /app

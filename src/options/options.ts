@@ -13,10 +13,10 @@ export async function getOptions(argv: typeof process.argv) {
 }
 
 const GLOBAL_CONFIG_DOCS_LINK =
-  'https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#userglobal-configuration';
+  'https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson';
 
 const PROJECT_CONFIG_DOCS_LINK =
-  'https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#project-specific-configuration';
+  'https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson';
 
 function getErrorMessage({
   field,
