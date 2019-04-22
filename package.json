@@ -160,6 +160,7 @@
     "h2o2": "^8.1.2",
     "handlebars": "4.0.13",
     "hapi": "^17.5.3",
+    "hapi-auth-cookie": "^9.0.0",
     "hjson": "3.1.0",
     "hoek": "^5.0.4",
     "http-proxy-agent": "^2.1.0",
