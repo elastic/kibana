@@ -18,7 +18,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { IKey, logging, WebElement } from 'selenium-webdriver';
+import { IKey, logging } from 'selenium-webdriver';
 
 import { modifyUrl } from '../../../src/core/utils';
 import { WebElementWrapper } from './lib/web_element_wrapper';

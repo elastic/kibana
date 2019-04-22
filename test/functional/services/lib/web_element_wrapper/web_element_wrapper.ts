@@ -18,7 +18,7 @@
  */
 
 import { delay } from 'bluebird';
-import { WebElement, WebDriver, By, IKey, Key, until } from 'selenium-webdriver';
+import { WebElement, WebDriver, By, IKey, until } from 'selenium-webdriver';
 // @ts-ignore not supported yet
 import { PNG } from 'pngjs';
 // @ts-ignore not supported yet
@@ -28,7 +28,6 @@ import { ToolingLog } from '@kbn/dev-utils';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 
-type Element = WebElementWrapper | WebElement;
 interface Driver {
   driver: WebDriver;
   By: typeof By;
@@ -38,14 +37,15 @@ interface Driver {
 }
 
 export class WebElementWrapper {
-  private _By: typeof By = this._webDriver.By;
-  private _Keys: IKey = this._webDriver.Key;
-  private _LegacyAction: any = this._webDriver.LegacyActionSequence;
-  private _driver: WebDriver = this._webDriver.driver;
+  public _By: typeof By = this._webDriver.By;
+  public _Keys: IKey = this._webDriver.Key;
+  // eslint-disable-next-line
+  public _LegacyAction: any = this._webDriver.LegacyActionSequence;
+  public _driver: WebDriver = this._webDriver.driver;
   public _webElement: WebElement = this.webElement as WebElement;
 
   constructor(
-    private webElement: Element,
+    private webElement: WebElementWrapper | WebElement,
     private _webDriver: Driver,
     private _timeout: number,
     private _fixedHeaderHeight: number,
@@ -56,7 +56,10 @@ export class WebElementWrapper {
     }
   }
 
-  private async _findWithCustomTimeout(findFunction: () => Promise<Element[]>, timeout?: number) {
+  private async _findWithCustomTimeout(
+    findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
+    timeout?: number
+  ) {
     if (timeout && timeout !== this._timeout) {
       await (this._driver.manage() as any).setTimeouts({ implicit: timeout });
     }
@@ -77,7 +80,7 @@ export class WebElementWrapper {
     );
   }
 
-  private _wrapAll(otherWebElements: Element[]) {
+  private _wrapAll(otherWebElements: Array<WebElement | WebElementWrapper>) {
     return otherWebElements.map(e => this._wrap(e));
   }
 
@@ -310,7 +313,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<void>}
    */
-  async moveMouseTo() {
+  public async moveMouseTo(): Promise<void> {
     await this.scrollIntoViewIfNecessary();
     const mouse = (this._driver.actions() as any).mouse();
     const actions = (this._webDriver as any).actions({ bridge: true });
