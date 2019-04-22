@@ -36,6 +36,7 @@ import { comparators } from '../comparators';
 import { timeUnits } from '../time_units';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
+import { WatchVisualization } from './watch_visualization';
 import { LicenseServiceContext } from '../../../license_service_context';
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
@@ -159,6 +160,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   const hasExpressionErrors = !!Object.keys(errors).find(
     errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
   );
+  const shouldShowThresholdExpression = watch.index && watch.index.length > 0 && watch.timeField;
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -359,7 +361,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
-        {watch.index && watch.index.length > 0 ? (
+        {shouldShowThresholdExpression ? (
           <Fragment>
             {hasExpressionErrors ? (
               <Fragment>
@@ -750,6 +752,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
+            {hasErrors ? null : <WatchVisualization />}
           </Fragment>
         ) : null}
         <EuiFlexGroup>

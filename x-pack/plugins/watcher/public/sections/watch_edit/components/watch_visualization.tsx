@@ -1,0 +1,178 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import '@elastic/charts/dist/style.css';
+import {
+  Axis,
+  CustomSeriesColorsMap,
+  DataSeriesColorsValues,
+  getAxisId,
+  getSpecId,
+  Chart,
+  LIGHT_THEME,
+  LineSeries,
+  Position,
+  ScaleType,
+  Settings,
+} from '@elastic/charts';
+import { debounce } from 'lodash';
+import { TimeBuckets } from 'ui/time_buckets';
+import dateMath from '@elastic/datemath';
+import chrome from 'ui/chrome';
+import moment from 'moment-timezone';
+import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
+import { VisualizeOptions } from '../../../models/visualize_options';
+import { getWatchVisualizationData } from '../../../lib/api';
+import { WatchContext } from './watch_context';
+import { aggTypes } from '../../../models/watch/agg_types';
+
+const getTimezone = () => {
+  const config = chrome.getUiSettingsClient();
+  const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
+  const isCustomTimezone = !config.isDefault(DATE_FORMAT_CONFIG_KEY);
+  if (isCustomTimezone) {
+    return config.get(DATE_FORMAT_CONFIG_KEY);
+  }
+
+  const detectedTimezone = moment.tz.guess();
+  if (detectedTimezone) {
+    return detectedTimezone;
+  }
+
+  const tzOffset = moment().format('Z');
+  return tzOffset;
+};
+
+const getDomain = (watch: any) => {
+  const VISUALIZE_TIME_WINDOW_MULTIPLIER = 5;
+  const fromExpression = `now-${watch.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
+    watch.timeWindowUnit
+  }`;
+  const toExpression = 'now';
+  const fromMoment = dateMath.parse(fromExpression);
+  const toMoment = dateMath.parse(toExpression);
+  const visualizeTimeWindowFrom = fromMoment ? fromMoment.valueOf() : undefined;
+  const visualizeTimeWindowTo = toMoment ? toMoment.valueOf() : undefined;
+  return {
+    min: visualizeTimeWindowFrom,
+    max: visualizeTimeWindowTo,
+  };
+};
+
+const getTimeBuckets = (watch: any) => {
+  const domain = getDomain(watch);
+  const timeBuckets = new TimeBuckets();
+  timeBuckets.setBounds(domain);
+  return timeBuckets;
+};
+
+const loadWatchVisualizationData = debounce(async (watch: any, setWatchVisualizationData: any) => {
+  const domain = getDomain(watch);
+  const timeBuckets = new TimeBuckets();
+  timeBuckets.setBounds(domain);
+  const interval = timeBuckets.getInterval().expression;
+  const visualizeOptions = new VisualizeOptions({
+    rangeFrom: domain.min,
+    rangeTo: domain.max,
+    interval,
+    timezone: getTimezone(),
+  });
+  const { visualizeData } = (await getWatchVisualizationData(watch, visualizeOptions)) as any;
+  const agg = aggTypes[watch.aggType].value;
+  const data = visualizeData[agg];
+  setWatchVisualizationData(data || []);
+}, 500);
+
+const WatchVisualizationUi = () => {
+  const { watch } = useContext(WatchContext);
+  const [watchVisualizationData, setWatchVisualizationData] = useState<number[][]>([]);
+
+  useEffect(
+    () => {
+      loadWatchVisualizationData(watch, setWatchVisualizationData);
+    },
+    [watch]
+  );
+
+  const timezone = getTimezone();
+  const dateFormatter = (d: number) => {
+    return moment(d)
+      .tz(timezone)
+      .format(getTimeBuckets(watch).getScaledDateFormat());
+  };
+  const aggLabel = aggTypes[watch.aggType].text;
+  const thresholdCustomSeriesColors: CustomSeriesColorsMap = new Map();
+  const thresholdDataSeriesColorValues: DataSeriesColorsValues = {
+    colorValues: [],
+    specId: getSpecId('threshold'),
+  };
+  thresholdCustomSeriesColors.set(thresholdDataSeriesColorValues, 'red');
+  const theme = {
+    ...LIGHT_THEME,
+    lineSeriesStyle: {
+      ...LIGHT_THEME.lineSeriesStyle,
+      line: {
+        ...LIGHT_THEME.lineSeriesStyle.line,
+        strokeWidth: 3,
+      },
+      point: {
+        ...LIGHT_THEME.lineSeriesStyle.point,
+        visible: false,
+      },
+    },
+  };
+  const domain = getDomain(watch);
+
+  return (
+    <Fragment>
+      <EuiSpacer size="m" />
+      {watchVisualizationData.length ? (
+        <Chart size={[800, 300]} renderer="canvas">
+          <Settings theme={theme} xDomain={domain} />
+          <Axis
+            id={getAxisId('bottom')}
+            position={Position.Bottom}
+            showOverlappingTicks={true}
+            tickFormat={dateFormatter}
+          />
+          <Axis id={getAxisId('left')} title={aggLabel} position={Position.Left} />
+          <LineSeries
+            id={getSpecId(aggLabel)}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            data={watchVisualizationData}
+            xAccessor={0}
+            yAccessors={[1]}
+            timeZone={getTimezone()}
+          />
+          <LineSeries
+            id={getSpecId('threshold')}
+            xScaleType={ScaleType.Time}
+            yScaleType={ScaleType.Linear}
+            data={[[domain.min, watch.threshold], [domain.max, watch.threshold]]}
+            xAccessor={0}
+            yAccessors={[1]}
+            timeZone={timezone}
+            yScaleToDataExtent={true}
+            customSeriesColors={thresholdCustomSeriesColors}
+          />
+        </Chart>
+      ) : (
+        <EuiCallOut title="No data" color="warning">
+          <FormattedMessage
+            id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
+            defaultMessage="Your index and condition did not return any data."
+          />
+        </EuiCallOut>
+      )}
+      <EuiSpacer size="m" />
+    </Fragment>
+  );
+};
+export const WatchVisualization = injectI18n(WatchVisualizationUi);
