@@ -315,7 +315,7 @@ export class WebElementWrapper {
   public async moveMouseTo(): Promise<void> {
     await this.scrollIntoViewIfNecessary();
     const mouse = (this._driver.actions() as any).mouse();
-    const actions = (this._webDriver as any).actions({ bridge: true });
+    const actions = (this._driver as any).actions({ bridge: true });
     await actions
       .pause(mouse)
       .move({ origin: this._webElement })

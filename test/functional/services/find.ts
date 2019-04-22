@@ -19,7 +19,6 @@
 
 import { WebDriver, WebElement } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
-// @ts-ignore not support yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function FindProvider({ getService }: FtrProviderContext) {
