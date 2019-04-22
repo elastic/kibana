@@ -7,7 +7,11 @@
 import expect from '@kbn/expect';
 
 import { eventsQuery } from '../../../../plugins/siem/public/containers/events/index.gql_query';
-import { Direction, GetEventsQuery } from '../../../../plugins/siem/public/graphql/types';
+import {
+  Direction,
+  GetEventsQuery,
+  GetLastEventTimeQuery,
+} from '../../../../plugins/siem/public/graphql/types';
 import { KbnTestProvider } from './types';
 
 const FROM = new Date('2000-01-01T00:00:00.000Z').valueOf();
@@ -85,6 +89,84 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
           expect(events.edges.length).to.be(EDGE_LENGTH);
           expect(events.totalCount).to.be(TOTAL_COUNT);
           expect(events.edges[0]!.node.host!.name).to.eql([HOST_NAME]);
+        });
+    });
+
+    it('Gets last event time - hosts', () => {
+      return client
+        .query<GetLastEventTimeQuery.Query>({
+          query: eventsQuery,
+          variables: {
+            sourceId: 'default',
+            indexKey: 'hosts',
+            details: {},
+          },
+        })
+        .then(resp => {
+          const lastEventTime = resp.data.source;
+          expect(lastEventTime).to.eql({
+            __typename: 'LastEventTime',
+            lastSeen: '2019-02-19T20:42:33.561Z',
+          });
+        });
+    });
+
+    it('Gets last event time - network', () => {
+      return client
+        .query<GetLastEventTimeQuery.Query>({
+          query: eventsQuery,
+          variables: {
+            sourceId: 'default',
+            indexKey: 'network',
+            details: {},
+          },
+        })
+        .then(resp => {
+          const lastEventTime = resp.data.source;
+          expect(lastEventTime).to.eql({
+            __typename: 'LastEventTime',
+            lastSeen: '2019-02-19T20:42:33.561Z',
+          });
+        });
+    });
+
+    it('Gets last event time - host details', () => {
+      return client
+        .query<GetLastEventTimeQuery.Query>({
+          query: eventsQuery,
+          variables: {
+            sourceId: 'default',
+            indexKey: 'hostDetails',
+            details: {
+              hostName: 'siem-es',
+            },
+          },
+        })
+        .then(resp => {
+          const lastEventTime = resp.data.source;
+          expect(lastEventTime).to.eql({
+            __typename: 'LastEventTime',
+            lastSeen: '2019-02-19T20:42:33.561Z',
+          });
+        });
+    });
+
+    it('Gets last event time - ip overview', () => {
+      return client
+        .query<GetLastEventTimeQuery.Query>({
+          query: eventsQuery,
+          variables: {
+            sourceId: 'default',
+            ipDetails: 'ipDetails',
+            details: { ip: '142.93.145.238' },
+          },
+        })
+        .then(resp => {
+          const lastEventTime = resp.data.source;
+          expect(lastEventTime).to.eql({
+            __typename: 'LastEventTime',
+            lastSeen: '2019-02-19T20:42:33.561Z',
+          });
         });
     });
   });
