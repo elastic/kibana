@@ -24,7 +24,7 @@ import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import euiLightVars from '@elastic/eui/dist/eui_theme_light.json';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
@@ -94,7 +94,7 @@ const Application = (props: UptimeAppProps) => {
       <Router basename={routerBasename}>
         <Route
           path="/"
-          render={rootRouteProps => {
+          render={(rootRouteProps: RouteComponentProps) => {
             const [
               { autorefreshInterval, autorefreshIsPaused, dateRangeStart, dateRangeEnd },
             ] = useUrlParams(rootRouteProps.history, rootRouteProps.location);

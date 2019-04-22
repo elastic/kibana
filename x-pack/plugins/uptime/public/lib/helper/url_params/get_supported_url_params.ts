@@ -14,6 +14,7 @@ export interface UptimeUrlParams {
   dateRangeStart: string;
   dateRangeEnd: string;
   search: string;
+  selectedPingStatus: string;
 }
 
 const {
@@ -22,12 +23,20 @@ const {
   DATE_RANGE_START,
   DATE_RANGE_END,
   SEARCH,
+  SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
 
 export const getSupportedUrlParams = (params: {
   [key: string]: string | undefined;
 }): UptimeUrlParams => {
-  const { autorefreshInterval, autorefreshIsPaused, rangeFrom, rangeTo, search } = params;
+  const {
+    autorefreshInterval,
+    autorefreshIsPaused,
+    rangeFrom,
+    rangeTo,
+    search,
+    selectedPingStatus,
+  } = params;
 
   return {
     autorefreshInterval: parseAutorefreshInterval(autorefreshInterval, AUTOREFRESH_INTERVAL),
@@ -35,5 +44,7 @@ export const getSupportedUrlParams = (params: {
     dateRangeStart: rangeFrom || DATE_RANGE_START,
     dateRangeEnd: rangeTo || DATE_RANGE_END,
     search: search || SEARCH,
+    selectedPingStatus:
+      selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,
   };
 };

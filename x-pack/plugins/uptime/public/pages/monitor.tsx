@@ -22,10 +22,11 @@ import {
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
+import { useUrlParams } from '../hooks';
 
 interface MonitorPageProps {
   history: { push: any };
-  location: { pathname: string };
+  location: { pathname: string; search: string };
   match: { params: { id: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
@@ -34,12 +35,14 @@ interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
+export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
-  const [selectedStatus, setSelectedStatus] = useState<string | null>('down');
-  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
+  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const [{ dateRangeStart, dateRangeEnd, selectedPingStatus }, updateUrlParams] = useUrlParams(
+    history,
+    location
   );
+
   useEffect(() => {
     query({
       query: gql`
@@ -73,13 +76,16 @@ export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProp
       <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
       <EuiSpacer size="s" />
       <PingList
-        onSelectedStatusUpdate={setSelectedStatus}
+        onSelectedStatusUpdate={(selectedStatus: string | null) =>
+          updateUrlParams({ selectedPingStatus: selectedStatus || '' })
+        }
         onUpdateApp={refreshApp}
+        selectedOption={selectedPingStatus}
         variables={{
           dateRangeStart,
           dateRangeEnd,
           monitorId,
-          status: selectedStatus,
+          status: selectedPingStatus,
         }}
       />
     </Fragment>

@@ -12,4 +12,5 @@ export const CLIENT_DEFAULTS = {
   DATE_RANGE_START: 'now-15m',
   DATE_RANGE_END: 'now',
   SEARCH: '',
+  SELECTED_PING_LIST_STATUS: 'down',
 };

@@ -35,6 +35,7 @@ interface PingListQueryResult {
 interface PingListProps {
   onUpdateApp: () => void;
   onSelectedStatusUpdate: (status: string | null) => void;
+  selectedOption: string;
 }
 
 type Props = UptimeGraphQLQueryProps<PingListQueryResult> & PingListProps;
@@ -44,8 +45,9 @@ export const PingListComponent = ({
   loading,
   onSelectedStatusUpdate,
   onUpdateApp,
+  selectedOption,
 }: Props) => {
-  const [statusOptions] = useState<EuiComboBoxOptionProps[]>([
+  const statusOptions: EuiComboBoxOptionProps[] = [
     {
       label: i18n.translate('xpack.uptime.pingList.statusOptions.allStatusOptionLabel', {
         defaultMessage: 'All',
@@ -64,8 +66,7 @@ export const PingListComponent = ({
       }),
       value: 'down',
     },
-  ]);
-  const [selectedOption, setSelectedOption] = useState<EuiComboBoxOptionProps>(statusOptions[2]);
+  ];
   const columns = [
     {
       field: 'monitor.status',
@@ -195,18 +196,17 @@ export const PingListComponent = ({
                 <EuiComboBox
                   isClearable={false}
                   singleSelection={{ asPlainText: true }}
-                  selectedOptions={[selectedOption || statusOptions[2]]}
+                  selectedOptions={[
+                    statusOptions.find(({ value }) => value === selectedOption) || statusOptions[2],
+                  ]}
                   options={statusOptions}
                   aria-label={i18n.translate('xpack.uptime.pingList.statusLabel', {
                     defaultMessage: 'Status',
                   })}
                   onChange={(selectedOptions: EuiComboBoxOptionProps[]) => {
-                    if (selectedOptions[0]) {
-                      setSelectedOption(selectedOptions[0]);
-                    }
                     if (typeof selectedOptions[0].value === 'string') {
-                      // @ts-ignore it's definitely a string
                       onSelectedStatusUpdate(
+                        // @ts-ignore it's definitely a string
                         selectedOptions[0].value !== '' ? selectedOptions[0].value : null
                       );
                     }
