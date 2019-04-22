@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Git from '@elastic/nodegit';
+import Git, { RemoteCallbacks } from '@elastic/nodegit';
 import del from 'del';
 import fs from 'fs';
 import mkdirp from 'mkdirp';
@@ -30,6 +30,8 @@ export class RepositoryService {
     private readonly credsPath: string,
     private log: Logger
   ) {}
+
+  private isProd = process.env.NODE_ENV === 'production';
 
   public async clone(repo: Repository, handler?: CloneProgressHandler): Promise<CloneWorkerResult> {
     if (!repo) {
@@ -102,14 +104,18 @@ export class RepositoryService {
     const localPath = RepositoryUtils.repositoryLocalPath(this.repoVolPath, uri);
     try {
       const repo = await Git.Repository.open(localPath);
-      await repo.fetchAll({
-        callbacks: {
-          credentials: this.credentialFunc(key),
-        },
-        certificateCheck: () => {
+      const cbs: RemoteCallbacks = {
+        credentials: this.credentialFunc(key),
+      };
+      // Ignore cert check on testing environment.
+      if (!this.isProd) {
+        cbs.certificateCheck = () => {
           // Ignore cert check failures.
-          return 1;
-        },
+          return 0;
+        };
+      }
+      await repo.fetchAll({
+        callbacks: cbs,
       });
       // TODO(mengwei): deal with the case when the default branch has changed.
       const currentBranch = await repo.getCurrentBranch();
@@ -172,39 +178,43 @@ export class RepositoryService {
     keyFile?: string
   ) {
     try {
+      const cbs: RemoteCallbacks = {
+        transferProgress: {
+          // Make the progress update less frequent to avoid too many
+          // concurrently update of git status in elasticsearch.
+          throttle: 1000,
+          callback: (stats: any) => {
+            if (handler) {
+              const progress =
+                (100 * (stats.receivedObjects() + stats.indexedObjects())) /
+                (stats.totalObjects() * 2);
+              const cloneProgress = {
+                isCloned: false,
+                receivedObjects: stats.receivedObjects(),
+                indexedObjects: stats.indexedObjects(),
+                totalObjects: stats.totalObjects(),
+                localObjects: stats.localObjects(),
+                totalDeltas: stats.totalDeltas(),
+                indexedDeltas: stats.indexedDeltas(),
+                receivedBytes: stats.receivedBytes(),
+              };
+              handler(progress, cloneProgress);
+            }
+          },
+        } as any,
+        credentials: this.credentialFunc(keyFile),
+      };
+      // Ignore cert check on testing environment.
+      if (!this.isProd) {
+        cbs.certificateCheck = () => {
+          // Ignore cert check failures.
+          return 0;
+        };
+      }
       const gitRepo = await Git.Clone.clone(repo.url, localPath, {
         bare: 1,
         fetchOpts: {
-          callbacks: {
-            transferProgress: {
-              // Make the progress update less frequent to avoid too many
-              // concurrently update of git status in elasticsearch.
-              throttle: 1000,
-              callback: (stats: any) => {
-                if (handler) {
-                  const progress =
-                    (100 * (stats.receivedObjects() + stats.indexedObjects())) /
-                    (stats.totalObjects() * 2);
-                  const cloneProgress = {
-                    isCloned: false,
-                    receivedObjects: stats.receivedObjects(),
-                    indexedObjects: stats.indexedObjects(),
-                    totalObjects: stats.totalObjects(),
-                    localObjects: stats.localObjects(),
-                    totalDeltas: stats.totalDeltas(),
-                    indexedDeltas: stats.indexedDeltas(),
-                    receivedBytes: stats.receivedBytes(),
-                  };
-                  handler(progress, cloneProgress);
-                }
-              },
-            } as any,
-            certificateCheck: () => {
-              // Ignore cert check failures.
-              return 1;
-            },
-            credentials: this.credentialFunc(keyFile),
-          },
+          callbacks: cbs,
         },
       });
       const headCommit = await gitRepo.getHeadCommit();
