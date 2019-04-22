@@ -55,7 +55,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     }
   }, []);
 
-  const sharedProps = { dateRangeStart, dateRangeEnd, 'TODOTHISISTEST' };
+  const sharedProps = { dateRangeStart, dateRangeEnd, query: 'TODOTHISISTEST' };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
     try {
