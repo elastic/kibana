@@ -10,13 +10,14 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { setBreadcrumbs } from './breadcrumbs';
 import { TabNavigation } from './tab_navigation';
 
-export class SiemNavigationComponent extends React.PureComponent<RouteComponentProps> {
+export class SiemNavigationComponent extends React.Component<RouteComponentProps> {
   public shouldComponentUpdate(nextProps: Readonly<RouteComponentProps>): boolean {
     if (this.props.location.pathname === nextProps.location.pathname) {
       return false;
     }
     return true;
   }
+
   public componentWillMount(): void {
     const { location } = this.props;
     if (location.pathname) {
