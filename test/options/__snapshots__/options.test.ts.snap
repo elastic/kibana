@@ -4,7 +4,7 @@ exports[`validateOptions should throw when accessToken is empty 1`] = `
 "Invalid option \\"accessToken\\"
 
 You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#userglobal-configuration
+ - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
  - CLI: \\"--accessToken myAccessToken\\""
 `;
 
@@ -12,7 +12,7 @@ exports[`validateOptions should throw when accessToken is missing 1`] = `
 "Invalid option \\"accessToken\\"
 
 You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#userglobal-configuration
+ - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
  - CLI: \\"--accessToken myAccessToken\\""
 `;
 
@@ -20,7 +20,7 @@ exports[`validateOptions should throw when both branches and branchChoices are m
 "Invalid option \\"branches\\"
 
 You can add it with either:
- - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#project-specific-configuration
+ - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson
  - CLI: \\"--branches 6.1\\""
 `;
 
@@ -28,7 +28,7 @@ exports[`validateOptions should throw when upstream is empty 1`] = `
 "Invalid option \\"upstream\\"
 
 You can add it with either:
- - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#project-specific-configuration
+ - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson
  - CLI: \\"--upstream elastic/kibana\\""
 `;
 
@@ -36,7 +36,7 @@ exports[`validateOptions should throw when upstream is missing 1`] = `
 "Invalid option \\"upstream\\"
 
 You can add it with either:
- - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#project-specific-configuration
+ - Config file: \\".backportrc.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#project-config-backportrcjson
  - CLI: \\"--upstream elastic/kibana\\""
 `;
 
@@ -44,7 +44,7 @@ exports[`validateOptions should throw when username is empty 1`] = `
 "Invalid option \\"username\\"
 
 You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#userglobal-configuration
+ - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
  - CLI: \\"--username sqren\\""
 `;
 
@@ -52,6 +52,6 @@ exports[`validateOptions should throw when username is missing 1`] = `
 "Invalid option \\"username\\"
 
 You can add it with either:
- - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/b9e2ec8e7a56bcbee96a8e9d38088ddd6ccaf65b/docs/configuration.md#userglobal-configuration
+ - Config file: \\"/myHomeDir/.backport/config.json\\". Read more: https://github.com/sqren/backport/blob/1bd66ad5705a8e80501290ac7456e04108cb34be/docs/configuration.md#global-config-backportconfigjson
  - CLI: \\"--username sqren\\""
 `;
