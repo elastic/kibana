@@ -3,10 +3,10 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import sinon from 'sinon';
+
 import moment from 'moment-timezone';
 
-import { initTestBed, mockServerResponses } from './job_create.test_helpers';
+import { setupEnvironment, pageHelpers } from './helpers';
 
 jest.mock('ui/index_patterns', () => {
   const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
@@ -21,32 +21,38 @@ jest.mock('ui/chrome', () => ({
 
 jest.mock('lodash/function/debounce', () => fn => fn);
 
+const { setup } = pageHelpers.jobCreate;
+
 describe('Create Rollup Job, step 2: Date histogram', () => {
   let server;
+  let httpRequestsMockHelpers;
   let find;
   let exists;
-  let userActions;
-  let form;
-  let mockIndexPatternValidityResponse;
-  let getEuiStepsHorizontalActive;
+  let actions;
   let goToStep;
+  let form;
+  let getEuiStepsHorizontalActive;
+
+  beforeAll(() => {
+    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+  });
+
+  afterAll(() => {
+    server.restore();
+  });
 
   beforeEach(() => {
-    server = sinon.fakeServer.create();
-    server.respondImmediately = true;
-    ({ mockIndexPatternValidityResponse } = mockServerResponses(server));
+    // Set "default" mock responses by not providing any arguments
+    httpRequestsMockHelpers.setIndexPatternValidityResponse();
+
     ({
       find,
       exists,
-      userActions,
+      actions,
       form,
       getEuiStepsHorizontalActive,
       goToStep,
-    } = initTestBed());
-  });
-
-  afterEach(() => {
-    server.restore();
+    } = setup());
   });
 
   describe('layout', () => {
@@ -73,7 +79,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     });
 
     it('should go to the "Logistics" step when clicking the back button', async () => {
-      userActions.clickPreviousStep();
+      actions.clickPreviousStep();
       expect(getEuiStepsHorizontalActive()).toContain('Logistics');
     });
   });
@@ -81,7 +87,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
   describe('Date field select', () => {
     it('should set the options value from the index pattern', async () => {
       const dateFields = ['field1', 'field2', 'field3'];
-      mockIndexPatternValidityResponse({ dateFields });
+      httpRequestsMockHelpers.setIndexPatternValidityResponse({ dateFields });
 
       await goToStep(2);
 
@@ -108,7 +114,7 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
     it('should display errors when clicking "next" without filling the form', () => {
       expect(exists('rollupJobCreateStepError')).toBeFalsy();
 
-      userActions.clickNextStep();
+      actions.clickNextStep();
 
       expect(exists('rollupJobCreateStepError')).toBeTruthy();
       expect(form.getErrorsMessages()).toEqual(['Interval is required.']);
@@ -122,13 +128,13 @@ describe('Create Rollup Job, step 2: Date histogram', () => {
 
       it('should validate the interval format', () => {
         form.setInputValue('rollupJobInterval', 'abc');
-        userActions.clickNextStep();
+        actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain('Invalid interval format.');
       });
 
       it('should validate the calendar format', () => {
         form.setInputValue('rollupJobInterval', '3y');
-        userActions.clickNextStep();
+        actions.clickNextStep();
         expect(form.getErrorsMessages()).toContain(`The 'y' unit only allows values of 1. Try 1y.`);
       });
     });
