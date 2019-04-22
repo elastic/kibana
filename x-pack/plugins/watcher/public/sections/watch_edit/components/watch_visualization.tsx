@@ -24,10 +24,9 @@ import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
-import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';
-import { VisualizeOptions } from '../../../models/visualize_options';
+import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { getWatchVisualizationData } from '../../../lib/api';
 import { WatchContext } from './watch_context';
 import { aggTypes } from '../../../models/watch/agg_types';
@@ -57,8 +56,8 @@ const getDomain = (watch: any) => {
   const toExpression = 'now';
   const fromMoment = dateMath.parse(fromExpression);
   const toMoment = dateMath.parse(toExpression);
-  const visualizeTimeWindowFrom = fromMoment ? fromMoment.valueOf() : undefined;
-  const visualizeTimeWindowTo = toMoment ? toMoment.valueOf() : undefined;
+  const visualizeTimeWindowFrom = fromMoment ? fromMoment.valueOf() : 0;
+  const visualizeTimeWindowTo = toMoment ? toMoment.valueOf() : 0;
   return {
     min: visualizeTimeWindowFrom,
     max: visualizeTimeWindowTo,
