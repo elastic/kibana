@@ -52,6 +52,9 @@ const loggingTimezone = (settings, log) => {
     set('logging.timezone', timezone);
     unset(settings, 'logging.useUTC');
     log(`Config key "logging.useUTC" is deprecated. It has been replaced with "logging.timezone"`);
+  }
+};
+
 const configPath = (settings, log) => {
   if (_.has(process, 'env.CONFIG_PATH')) {
     log(`Environment variable CONFIG_PATH is deprecated. It has been replaced with KIBANA_PATH_CONF pointing to a config folder`);
