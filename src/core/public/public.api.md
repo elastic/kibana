@@ -87,6 +87,8 @@ export interface CoreStart {
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
+    injectedMetadata: InjectedMetadataStart;
+    // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
     overlays: OverlayStart;
@@ -207,6 +209,9 @@ export interface InjectedMetadataSetup {
         plugin: DiscoveredPlugin;
     }>;
 }
+
+// @public (undocumented)
+export type InjectedMetadataStart = InjectedMetadataSetup;
 
 // @public (undocumented)
 export interface NotificationsSetup {
