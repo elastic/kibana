@@ -6,55 +6,15 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
+import { getStats } from '../collectors'
+import { CoreSetup } from 'src/core/server';
 
-import { getStats } from './get_stats';
-
-import {
-  HttpServiceSetup,
-} from '../../../../../src/core/server';
-
-
-export function registerRoutes(http: HttpServiceSetup) {
-  /**
-   * Change Telemetry Opt-In preference.
-   */
-  server.route({
-    method: 'POST',
-    path: '/api/telemetry/v1/optIn',
-    config: {
-      validate: {
-        payload: Joi.object({
-          enabled: Joi.bool().required()
-        })
-      }
-    },
-    handler: async (req, h) => {
-      const savedObjectsClient = req.getSavedObjectsClient();
-      try {
-        await savedObjectsClient.create('telemetry', {
-          enabled: req.payload.enabled
-        }, {
-          id: 'telemetry',
-          overwrite: true,
-        });
-      } catch (err) {
-        return boomify(err);
-      }
-      return h.response({}).code(200);
-    }
-  });
-
-
-  /**
-   * Telemetry Data
-   *
-   * This provides a mechanism for fetching minor details about all clusters, including details related to the rest of the
-   * stack (e.g., Kibana).
-   */
+export function registerTelemetryDataRoutes(core: CoreSetup) {
+  const { server } = core.http;
   server.route({
     method: 'POST',
     path: '/api/telemetry/v1/clusters/_stats',
-    config: {
+    options: {
       validate: {
         payload: Joi.object({
           timeRange: Joi.object({

@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../monitoring/common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../monitoring/common/constants';
 
 /**
  * Get statistics for all selected Elasticsearch clusters.

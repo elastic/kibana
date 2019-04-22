@@ -4,4 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { telemetryRoute } from './telemetry';
+// @ts-ignore
+export { getAllStats } from './monitoring';
+// @ts-ignore
+export { getLocalStats } from './local';
+export { getStats } from './get_stats';

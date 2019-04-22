@@ -13,31 +13,16 @@ import {
 import { mirrorPluginStatus } from '../../server/lib/mirror_plugin_status';
 import { replaceInjectedVars } from './server/lib/replace_injected_vars';
 import { setupXPackMain } from './server/lib/setup_xpack_main';
-import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
 import {
   xpackInfoRoute,
-  telemetryRoute,
   featuresRoute,
   settingsRoute,
 } from './server/routes/api/v1';
-import {
-  CONFIG_TELEMETRY,
-  getConfigTelemetryDesc,
-} from './common/constants';
-import mappings from './mappings.json';
 import { i18n } from '@kbn/i18n';
 
 export { callClusterFactory } from './server/lib/call_cluster_factory';
 import { registerOssFeatures } from './server/lib/register_oss_features';
-
-/**
- * Determine if Telemetry is enabled.
- *
- * @param {Object} config Kibana configuration object.
- */
-function isTelemetryEnabled(config) {
-  return config.get('xpack.xpack_main.telemetry.enabled');
-}
+import { getLocalizationUsageCollector } from './server/lib/get_localization_usage_collector';
 
 export const xpackMain = (kibana) => {
   return new kibana.Plugin({
@@ -64,14 +49,6 @@ export const xpackMain = (kibana) => {
     uiExports: {
       managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
-        [CONFIG_TELEMETRY]: {
-          name: i18n.translate('xpack.main.telemetry.telemetryConfigTitle', {
-            defaultMessage: 'Telemetry opt-in'
-          }),
-          description: getConfigTelemetryDesc(),
-          value: false,
-          readonly: true,
-        },
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
           name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {
             defaultMessage: 'Admin email'
@@ -85,25 +62,15 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
-      savedObjectSchemas: {
-        telemetry: {
-          isNamespaceAgnostic: true,
-        },
-      },
       injectDefaultVars(server) {
         const config = server.config();
         return {
-          telemetryUrl: config.get('xpack.xpack_main.telemetry.url'),
-          telemetryEnabled: isTelemetryEnabled(config),
-          telemetryOptedIn: null,
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
         };
       },
       hacks: [
         'plugins/xpack_main/hacks/check_xpack_info_change',
-        'plugins/xpack_main/hacks/telemetry_opt_in',
-        'plugins/xpack_main/hacks/telemetry_trigger',
       ],
       replaceInjectedVars,
       __webpackPluginProvider__(webpack) {
@@ -115,7 +82,6 @@ export const xpackMain = (kibana) => {
           raw: true,
         });
       },
-      mappings,
     },
 
     init(server) {
@@ -126,9 +92,10 @@ export const xpackMain = (kibana) => {
 
       // register routes
       xpackInfoRoute(server);
-      telemetryRoute(server);
       settingsRoute(server, this.kbnServer);
       featuresRoute(server);
+
+      // register collectors
       server.usage.collectorSet.register(getLocalizationUsageCollector(server));
     }
   });

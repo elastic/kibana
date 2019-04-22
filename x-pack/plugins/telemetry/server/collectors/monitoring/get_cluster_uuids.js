@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../monitoring/common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../monitoring/common/constants';
 
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.

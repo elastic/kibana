@@ -4,40 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Logger,
-  PluginInitializerContext,
-  PluginName,
-  CoreSetup,
-  HttpServiceSetup,
-} from '../../../../src/core/server';
-import { registerRoutes } from './routes'
+import { Plugin } from './plugin';
+import { PluginInitializerContext } from 'src/core/server';
+import * as constants from '../common/constants';
 
-class Plugin {
-  private readonly log: Logger;
-
-  constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.log = this.initializerContext.logger.get();
-  }
-
-  public setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
-    this.log.info(
-      `Setting up Telemetry with core contract [${Object.keys(core)}] and deps [${Object.keys(
-        deps
-      )}]`
-    );
-
-    registerRoutes(core.http);
-
-    return {
-
-    };
-  }
-
-  public stop() {
-    this.log.info(`Stopping Telemetry`);
-  }
-}
-
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new Plugin(initializerContext);
+export { getTelemetryOptIn } from './get_telemetry_opt_in'
+export const plugin = (initializerContext: PluginInitializerContext) => new Plugin();
+export { constants }

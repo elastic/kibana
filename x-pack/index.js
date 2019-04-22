@@ -33,14 +33,16 @@ import { taskManager } from './plugins/task_manager';
 import { rollup } from './plugins/rollup';
 import { remoteClusters } from './plugins/remote_clusters';
 import { crossClusterReplication } from './plugins/cross_cluster_replication';
-import { translations } from './plugins/translations';
+// import { translations } from './plugins/translations';
 import { upgradeAssistant } from './plugins/upgrade_assistant';
 import { uptime } from './plugins/uptime';
 import { ossTelemetry } from './plugins/oss_telemetry';
+import { telemetry } from './plugins/telemetry';
 
 module.exports = function (kibana) {
   return [
     xpackMain(kibana),
+    telemetry(kibana),
     graph(kibana),
     monitoring(kibana),
     reporting(kibana),
@@ -69,7 +71,7 @@ module.exports = function (kibana) {
     rollup(kibana),
     remoteClusters(kibana),
     crossClusterReplication(kibana),
-    translations(kibana),
+    // translations(kibana),
     upgradeAssistant(kibana),
     uptime(kibana),
     ossTelemetry(kibana),

@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getAllStats } from './monitoring';
-export { getLocalStats } from './local';
+import { registerRoutes } from './routes'
+import { CoreSetup } from 'src/core/server';
+
+export class Plugin {
+  public setup(core: CoreSetup) {
+    registerRoutes(core);
+  }
+}

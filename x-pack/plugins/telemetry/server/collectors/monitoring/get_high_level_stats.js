@@ -6,8 +6,8 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
-import { INDEX_PATTERN_KIBANA, INDEX_PATTERN_BEATS, INDEX_PATTERN_LOGSTASH } from '../../../../../monitoring/common/constants';
-import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import { INDEX_PATTERN_KIBANA, INDEX_PATTERN_BEATS, INDEX_PATTERN_LOGSTASH } from '../../../../monitoring/common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../..';
 
 /**
  * Update a counter associated with the {@code key}.

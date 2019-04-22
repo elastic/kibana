@@ -4,6 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { xpackInfoRoute } from './xpack_info';
-export { featuresRoute } from './features';
-export { settingsRoute } from './settings';
+export { TelemetryForm } from './telemetry/telemetry_form';
+export { OptInExampleFlyout } from './telemetry/opt_in_details_component';
