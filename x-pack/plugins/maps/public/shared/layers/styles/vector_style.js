@@ -8,17 +8,20 @@ import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
-import { ColorGradient } from '../../icons/color_gradient';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
+import { VectorStyleLegend } from './components/vector/legend';
 
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-  static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
+  static STYLE_TYPE = {
+    DYNAMIC: 'DYNAMIC',
+    STATIC: 'STATIC'
+  };
 
   static getComputedFieldName(fieldName) {
     return `__kbn__scaled(${fieldName})`;
@@ -228,23 +231,19 @@ export class VectorStyle extends AbstractStyle {
     };
   })();
 
-  getColorRamp() {
-    const color = _.get(this._descriptor, 'properties.fillColor.options.color');
-    return color && this._isPropertyDynamic('fillColor')
-      ? <ColorGradient color={color}/>
-      : null;
-  }
-
   getTOCDetails() {
-    const isDynamic = this._isPropertyDynamic('fillColor');
-    if (isDynamic) {
-      return (
-        <React.Fragment>
-          {this.getColorRamp()}
-        </React.Fragment>
-      );
-    }
-    return null;
+    const styles = this.getProperties();
+    const styleProperties = Object.keys(styles).map(styleName => {
+      const { type, options, __range } = styles[styleName];
+      return {
+        name: styleName,
+        type,
+        options,
+        range: __range,
+      };
+    });
+
+    return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
   static getMinMax(features, fieldName) {
