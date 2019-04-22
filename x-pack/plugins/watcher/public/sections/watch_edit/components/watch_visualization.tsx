@@ -30,7 +30,25 @@ import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { getWatchVisualizationData } from '../../../lib/api';
 import { WatchContext } from './watch_context';
 import { aggTypes } from '../../../models/watch/agg_types';
+const getChartTheme = () => {
+  const isDarkTheme = chrome.getUiSettingsClient().get('theme:darkMode');
+  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
 
+  return {
+    ...baseTheme,
+    lineSeriesStyle: {
+      ...baseTheme.lineSeriesStyle,
+      line: {
+        ...baseTheme.lineSeriesStyle.line,
+        strokeWidth: 3,
+      },
+      point: {
+        ...baseTheme.lineSeriesStyle.point,
+        visible: false,
+      },
+    },
+  };
+};
 const getTimezone = () => {
   const config = chrome.getUiSettingsClient();
   const DATE_FORMAT_CONFIG_KEY = 'dateFormat:tz';
@@ -43,7 +61,7 @@ const getTimezone = () => {
   if (detectedTimezone) {
     return detectedTimezone;
   }
-
+  // default to UTC if we can't figure out the timezone
   const tzOffset = moment().format('Z');
   return tzOffset;
 };
@@ -109,21 +127,7 @@ const WatchVisualizationUi = () => {
     colorValues: [],
     specId: getSpecId('threshold'),
   };
-  thresholdCustomSeriesColors.set(thresholdDataSeriesColorValues, 'red');
-  const theme = {
-    ...LIGHT_THEME,
-    lineSeriesStyle: {
-      ...LIGHT_THEME.lineSeriesStyle,
-      line: {
-        ...LIGHT_THEME.lineSeriesStyle.line,
-        strokeWidth: 3,
-      },
-      point: {
-        ...LIGHT_THEME.lineSeriesStyle.point,
-        visible: false,
-      },
-    },
-  };
+  thresholdCustomSeriesColors.set(thresholdDataSeriesColorValues, '#BD271E');
   const domain = getDomain(watch);
   const watchVisualizationDataKeys = Object.keys(watchVisualizationData);
   return (
@@ -132,7 +136,7 @@ const WatchVisualizationUi = () => {
       {watchVisualizationDataKeys.length ? (
         <Chart size={[800, 300]} renderer="canvas">
           <Settings
-            theme={theme}
+            theme={getChartTheme()}
             xDomain={domain}
             showLegend={!!watch.termField}
             legendPosition={Position.Bottom}
@@ -170,7 +174,15 @@ const WatchVisualizationUi = () => {
           />
         </Chart>
       ) : (
-        <EuiCallOut title="No data" color="warning">
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.watcher.thresholdPreviewChart.noDataTitle"
+              defaultMessage="No data"
+            />
+          }
+          color="warning"
+        >
           <FormattedMessage
             id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
             defaultMessage="Your index and condition did not return any data."
