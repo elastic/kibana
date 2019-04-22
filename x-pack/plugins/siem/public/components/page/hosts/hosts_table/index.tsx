@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { memoize } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -96,7 +95,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
 
   constructor(props: HostsTableProps) {
     super(props);
-    this.memoizedColumns = memoize(this.getMemoizeHostsColumns);
+    this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
     this.memoizedTitle = memoizeOne(this.getTitle);
     this.memoizedSorting = memoizeOne(this.getSorting);
   }
