@@ -17,35 +17,42 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export class SeriesDragHandler extends React.PureComponent {
+export class SeriesDragHandler extends PureComponent {
   render() {
-    const { dragHandleProps } = this.props;
+    const { dragHandleProps, hideDragHandler } = this.props;
 
     return (
       <EuiFlexItem grow={false}>
         <div {...dragHandleProps}>
-          <EuiToolTip
-            content={i18n.translate('tsvb.sort.dragToSortTooltip', {
-              defaultMessage: 'Drag to sort',
-            })}
-          >
-            <EuiIcon
-              className="tvbSeries__sortHandle"
-              type="grab"
-            />
-          </EuiToolTip>
+          {!hideDragHandler && (
+            <EuiToolTip
+              content={i18n.translate('tsvb.sort.dragToSortTooltip', {
+                defaultMessage: 'Drag to sort',
+              })}
+            >
+              <EuiIcon
+                className="tvbSeries__sortHandle"
+                type="grab"
+              />
+            </EuiToolTip>
+          )}
         </div>
       </EuiFlexItem>
     );
   }
 }
 
+SeriesDragHandler.defaultProps = {
+  hideDragHandler: true,
+};
+
 SeriesDragHandler.propTypes = {
   dragHandleProps: PropTypes.object.isRequired,
+  showDragHandler: PropTypes.boolean,
 };
 

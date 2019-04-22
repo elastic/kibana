@@ -46,9 +46,7 @@ function AggRowUi(props) {
           {props.children}
         </EuiFlexItem>
 
-        { !props.disableDelete &&  (
-          <SeriesDragHandler dragHandleProps={props.dragHandleProps} />
-        )}
+        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
 
         <EuiFlexItem grow={false}>
           <AddDeleteButtons

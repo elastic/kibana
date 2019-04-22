@@ -26,6 +26,7 @@ import createTextHandler from '../../lib/create_text_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
+import { SeriesDragHandler } from '../../series_drag_hanler';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -148,6 +149,8 @@ function MarkdownSeriesUi(props) {
           />
         </EuiFlexItem>
 
+        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={true} />
+
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             addTooltip={intl.formatMessage({ id: 'tsvb.markdown.editor.addSeriesTooltip', defaultMessage: 'Add series' })}
@@ -162,7 +165,6 @@ function MarkdownSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       { body }
     </div>
   );

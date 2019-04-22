@@ -18,7 +18,7 @@
  */
 
 import PropTypes from 'prop-types';
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import { assign, get } from 'lodash';
 
 import timeseries from './vis_types/timeseries/series';
@@ -89,7 +89,7 @@ class Series extends Component {
   }
 
   render() {
-    const { panel, dragHandleProps } = this.props;
+    const { panel } = this.props;
     const Component = lookup[panel.type];
 
     const params = {
@@ -114,18 +114,13 @@ class Series extends Component {
       dragHandleProps: this.props.dragHandleProps,
     };
 
-    return (
-      <Fragment>
-        {Boolean(Component) ?
-          (<Component {...params}/>) :
-          (<FormattedMessage
-            id="tsvb.seriesConfig.missingSeriesComponentDescription"
-            defaultMessage="Missing Series component for panel type: {panelType}"
-            values={{ panelType: panel.type }}
-          />)}
-        <p {...dragHandleProps} hidden/>
-      </Fragment>
-    );
+    return Boolean(Component) ?
+      (<Component {...params}/>) :
+      (<FormattedMessage
+        id="tsvb.seriesConfig.missingSeriesComponentDescription"
+        defaultMessage="Missing Series component for panel type: {panelType}"
+        values={{ panelType: panel.type }}
+      />);
   }
 
   componentWillUnmount() {

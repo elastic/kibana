@@ -130,9 +130,8 @@ function TableSeries(props) {
           />
         </EuiFlexItem>
 
-        { !props.disableDelete &&  (
-          <SeriesDragHandler dragHandleProps={props.dragHandleProps} />
-        )}
+        <SeriesDragHandler dragHandleProps={props.dragHandleProps} hideDragHandler={props.disableDelete} />
+
         <EuiFlexItem grow={false}>
           <AddDeleteButtons
             addTooltip={intl.formatMessage({ id: 'tsvb.table.addSeriesTooltip', defaultMessage: 'Add Series' })}

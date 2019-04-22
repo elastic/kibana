@@ -59,7 +59,6 @@ function Agg(props) {
         uiRestrictions={props.uiRestrictions}
         dragHandleProps={props.dragHandleProps}
       />
-      <p {...props.dragHandleProps} hidden/>
     </div>
   );
 }

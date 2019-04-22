@@ -17,58 +17,62 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 
 import { EuiDraggable, EuiDroppable } from '@elastic/eui';
 
 import Agg from './agg';
-import { handleAdd, handleDelete } from '../lib/collection_actions';
 import newMetricAggFn from '../lib/new_metric_agg_fn';
-
+import seriesChangeHandler from '../lib/series_change_handler';
+import { handleAdd, handleDelete } from '../lib/collection_actions';
 
 const DROPPABLE_ID = 'aggs_dnd';
 
-export const Aggs = (props) => {
-  const { panel, model, fields, uiRestrictions } = props;
-  const list = model.metrics;
+export class Aggs extends PureComponent {
 
-  return (
-    <EuiDroppable
-      droppableId={`${DROPPABLE_ID}:${model.id}`}
-      spacing="s"
-      type="MICRO"
-    >
-      {list.map((row, idx) => (
-        <EuiDraggable
-          spacing="s"
-          key={row.id}
-          index={idx}
-          customDragHandle={true}
-          draggableId={`${DROPPABLE_ID}:${model.id}:${row.id}`}
-        >
-          {provided => (
-            <Agg
-              key={row.id}
-              disableDelete={list.length < 2}
-              fields={fields}
-              model={row}
-              onAdd={handleAdd.bind(null, props, newMetricAggFn)}
-              onChange={() => {
-              }}
-              onDelete={handleDelete.bind(null, props, row)}
-              panel={panel}
-              series={model}
-              siblings={list}
-              uiRestrictions={uiRestrictions}
-              dragHandleProps={provided.dragHandleProps}
-            />
-          )}
-        </EuiDraggable>
-      ))}
-    </EuiDroppable>
-  );
-};
+  render() {
+    const { panel, model, fields, uiRestrictions } = this.props;
+    const list = model.metrics;
+
+    const onChange = seriesChangeHandler(this.props, list);
+
+    return (
+      <EuiDroppable
+        droppableId={`${DROPPABLE_ID}:${model.id}`}
+        type="MICRO"
+        spacing="s"
+      >
+        {list.map((row, idx) => (
+          <EuiDraggable
+            spacing="s"
+            key={row.id}
+            index={idx}
+            customDragHandle={true}
+            draggableId={`${DROPPABLE_ID}:${model.id}:${row.id}`}
+          >
+            {provided => (
+              <Agg
+                key={row.id}
+                disableDelete={list.length < 2}
+                fields={fields}
+                model={row}
+                onAdd={() => handleAdd(this.props, newMetricAggFn)}
+                onChange={onChange}
+                onDelete={() => handleDelete(this.props, row)}
+                panel={panel}
+                series={model}
+                siblings={list}
+                uiRestrictions={uiRestrictions}
+                dragHandleProps={provided.dragHandleProps}
+              />
+            )}
+          </EuiDraggable>
+        ))}
+      </EuiDroppable>
+    );
+  }
+}
 
 Aggs.propTypes = {
   name: PropTypes.string.isRequired,
