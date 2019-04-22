@@ -151,6 +151,7 @@ const WatchVisualizationUi = () => {
           {watchVisualizationDataKeys.map((key: string) => {
             return (
               <LineSeries
+                key={key}
                 id={getSpecId(key)}
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
