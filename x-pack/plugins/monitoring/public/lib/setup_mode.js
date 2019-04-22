@@ -119,7 +119,7 @@ export const initSetupModeState = (callback) => {
   callback && setupModeState.callbacks.push(callback);
 
   const globalState = angularState.injector.get('globalState');
-  if (true || globalState.inSetupMode) {
+  if (globalState.inSetupMode) {
     toggleSetupMode(true);
   }
 };
