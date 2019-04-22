@@ -14,6 +14,7 @@ import { SlackAction } from './slack_action';
 import { IndexAction } from './index_action';
 import { WebhookAction } from './webhook_action';
 import { PagerDutyAction } from './pagerduty_action';
+import { JiraAction } from './jira_action';
 import { UnknownAction } from './unknown_action';
 import { i18n } from '@kbn/i18n';
 
@@ -24,8 +25,8 @@ set(ActionTypes, ACTION_TYPES.SLACK, SlackAction);
 set(ActionTypes, ACTION_TYPES.INDEX, IndexAction);
 set(ActionTypes, ACTION_TYPES.WEBHOOK, WebhookAction);
 set(ActionTypes, ACTION_TYPES.PAGERDUTY, PagerDutyAction);
+set(ActionTypes, ACTION_TYPES.JIRA, JiraAction);
 set(ActionTypes, ACTION_TYPES.UNKNOWN, UnknownAction);
-// TODO add additional actions
 
 export class Action {
   static getActionTypes = () => {

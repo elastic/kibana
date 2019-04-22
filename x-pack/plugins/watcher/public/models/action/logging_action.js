@@ -80,7 +80,6 @@ export class LoggingAction extends BaseAction {
   static selectMessage = i18n.translate('xpack.watcher.models.loggingAction.selectMessageText', {
     defaultMessage: 'Add a new item to the logs.',
   });
-  static template = '<watch-logging-action></watch-logging-action>';
   static simulatePrompt = i18n.translate('xpack.watcher.models.loggingAction.simulateButtonLabel', {
     defaultMessage: 'Log a sample message now',
   });

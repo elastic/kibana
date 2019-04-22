@@ -29,6 +29,7 @@ import { IndexActionFields } from './index_action_fields';
 import { SlackActionFields } from './slack_action_fields';
 import { EmailActionFields } from './email_action_fields';
 import { PagerDutyActionFields } from './pagerduty_action_fields';
+import { JiraActionFields } from './jira_action_fields';
 import { executeWatch } from '../../../lib/api';
 
 const ActionFieldsComponent = {
@@ -38,7 +39,7 @@ const ActionFieldsComponent = {
   [ACTION_TYPES.INDEX]: IndexActionFields,
   [ACTION_TYPES.WEBHOOK]: WebhookActionFields,
   [ACTION_TYPES.PAGERDUTY]: PagerDutyActionFields,
-  // TODO add support for additional action types
+  [ACTION_TYPES.JIRA]: JiraActionFields,
 };
 
 export const WatchActionsAccordion: React.FunctionComponent = () => {

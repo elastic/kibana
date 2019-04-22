@@ -47,15 +47,10 @@ export class BaseAction {
     return this.constructor.simulatePrompt;
   }
 
-  get template() {
-    return this.constructor.template;
-  }
-
   static typeName = i18n.translate('xpack.watcher.models.baseAction.typeName', {
     defaultMessage: 'Action',
   });
-  static iconClass = 'fa-cog';
-  static template = '';
+  static iconClass = 'apps';
   static selectMessage = i18n.translate('xpack.watcher.models.baseAction.selectMessageText', {
     defaultMessage: 'Perform an action.',
   });

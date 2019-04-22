@@ -71,10 +71,10 @@ export class PagerDutyAction extends BaseAction {
     if (!json.pagerduty) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonPagerDutyPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonLogging} property',
+        message: i18n.translate('xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonPagerDuty} property',
           values: {
-            actionJsonLogging: 'actionJson.pagerduty'
+            actionJsonPagerDuty: 'actionJson.pagerduty'
           }
         }),
       });
@@ -85,10 +85,10 @@ export class PagerDutyAction extends BaseAction {
     if (!json.pagerduty.description) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
-        message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonPagerDutyDescriptionPropertyMissingBadRequestMessage', {
-          defaultMessage: 'json argument must contain an {actionJsonLoggingText} property',
+        message: i18n.translate('xpack.watcher.models.pagerDutyAction.actionJsonPagerDutyDescriptionPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {actionJsonPagerDutyText} property',
           values: {
-            actionJsonLoggingText: 'actionJson.pagerduty.description'
+            actionJsonPagerDutyText: 'actionJson.pagerduty.description'
           }
         }),
       });

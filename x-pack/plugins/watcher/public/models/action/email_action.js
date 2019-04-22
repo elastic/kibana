@@ -33,7 +33,7 @@ export class EmailAction extends BaseAction {
     }
     if (!this.subject) {
       errors.subject.push(
-        i18n.translate('xpack.watcher.watchActions.email.emailSubhectIsRequiredValidationMessage', {
+        i18n.translate('xpack.watcher.watchActions.email.emailSubjectIsRequiredValidationMessage', {
           defaultMessage: 'Subject is required.',
         })
       );
@@ -103,7 +103,6 @@ export class EmailAction extends BaseAction {
     defaultMessage: 'Email',
   });
   static iconClass = 'email';
-  static template = '<watch-email-action></watch-email-action>';
   static selectMessage = i18n.translate('xpack.watcher.models.emailAction.selectMessageText', {
     defaultMessage: 'Send out an email from your server.',
   });

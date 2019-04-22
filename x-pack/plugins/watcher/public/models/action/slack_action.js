@@ -134,7 +134,6 @@ export class SlackAction extends BaseAction {
     defaultMessage: 'Slack'
   });
   static iconClass = 'logoSlack';
-  static template = '<watch-slack-action></watch-slack-action>';
   static selectMessage = i18n.translate('xpack.watcher.models.slackAction.selectMessageText', {
     defaultMessage: 'Send a message to a Slack user or channel.'
   });

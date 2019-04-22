@@ -12,7 +12,7 @@ import { SlackAction } from './slack_action';
 import { WebhookAction } from './webhook_action';
 import { IndexAction } from './index_action';
 import { PagerDutyAction } from './pagerduty_action';
-import { JiraAction } from './jira.action';
+import { JiraAction } from './jira_action';
 import { UnknownAction } from './unknown_action';
 
 const ActionTypes = {};
