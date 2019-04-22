@@ -32,3 +32,8 @@ export const styleOptionShapes = [
   staticSizeShape,
   dynamicSizeShape
 ];
+
+export const rangeShape = PropTypes.shape({
+  min: PropTypes.number.isRequired,
+  max: PropTypes.number.isRequired,
+});

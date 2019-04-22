@@ -7,13 +7,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { styleOptionShapes } from '../style_option_shapes';
+import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { StylePropertyLegendRow } from './style_property_legend_row';
 
 export function VectorStyleLegend({ styleProperties }) {
   return styleProperties.map(styleProperty => {
     return (
       <StylePropertyLegendRow
+        key={styleProperty.name}
         name={styleProperty.name}
         type={styleProperty.type}
         options={styleProperty.options}
@@ -23,15 +24,10 @@ export function VectorStyleLegend({ styleProperties }) {
   });
 }
 
-export const rangeShape = PropTypes.shape({
-  min: PropTypes.number.isRequired,
-  max: PropTypes.number.isRequired,
-});
-
 const stylePropertyShape = PropTypes.shape({
   name: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
-  options: PropTypes.oneOf(styleOptionShapes).isRequired,
+  options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
 });
 

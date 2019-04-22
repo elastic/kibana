@@ -8,8 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { styleOptionShapes } from '../style_option_shapes';
-import { rangeShape } from './vector_style_legend';
+import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { VectorStyle } from '../../../vector_style';
 import { ColorGradient } from '../../../../../icons/color_gradient';
 import { FillableCircle } from '../../../../../icons/additional_layer_icons';
@@ -111,6 +110,6 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
 StylePropertyLegendRow.propTypes = {
   name: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
-  options: PropTypes.oneOf(styleOptionShapes).isRequired,
+  options: PropTypes.oneOfType(styleOptionShapes).isRequired,
   range: rangeShape,
 };
