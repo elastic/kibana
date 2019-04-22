@@ -67,30 +67,17 @@ describe('src/legacy/core_plugins/metrics/common/annotations.test.js', () => {
         },
       ],
     ];
-    annotations = {
-      'id1': [
-        {
-          key: 100,
-        },
-        {
-          key: 1000,
-        },
-        {
-          key: 10000,
-        }
-      ],
-      'id2': [
-        {
-          key: 100,
-        },
-        {
-          key: 1000,
-        },
-        {
-          key: 10000,
-        }
-      ],
-    };
+    annotations = [
+      {
+        key: 100,
+      },
+      {
+        key: 1000,
+      },
+      {
+        key: 10000,
+      }
+    ];
   });
 
   describe('getLastSeriesTimestamp()', () => {
@@ -131,24 +118,14 @@ describe('src/legacy/core_plugins/metrics/common/annotations.test.js', () => {
 
   describe('annotationFilter()', () => {
     test('should filter annotations by passed value correctly', () => {
-      const expectedResult = {
-        'id1': [
-          {
-            key: 100,
-          },
-          {
-            key: 1000,
-          },
-        ],
-        'id2': [
-          {
-            key: 100,
-          },
-          {
-            key: 1000,
-          },
-        ],
-      };
+      const expectedResult = [
+        {
+          key: 100,
+        },
+        {
+          key: 1000,
+        },
+      ];
 
       expect(annotationFilter(annotations, 1000)).toEqual(expectedResult);
     });

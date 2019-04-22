@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { reduce, last, head } from 'lodash';
+import { last, head } from 'lodash';
 
 /**
  * @param {Array} seriesGroup
@@ -73,23 +73,12 @@ export const makeFilter = by =>
     data => by(data, value);
 
 /**
- * @param {Object} annotations
- * {
- *   id1: [
- *    {key: 1555189200000, ...},
- *    {key: 1555263300000, ...},
- *    ...
- *   ]
- *   id2: [
- *    {key: 1555189200000, ...},
- *    {key: 1555263300000, ...},
- *    ...
- *   ]
- * }
+ * @param {Array} annotations
+ * [
+ *   {key: 1555189200000, ...},
+ *   {key: 1555263300000, ...},
+ * ]
  * @param {*} filterValue
- * @return {*} result
+ * @return {Array} filtered array
  */
-export const annotationFilter = (annotations, filterValue) => reduce(annotations, (acc, value, key) => {
-  acc[key] = value.filter(({ key }) => key <= filterValue);
-  return acc;
-}, {});
+export const annotationFilter = (annotations, filterValue) => annotations.filter(({ key }) => key <= filterValue);

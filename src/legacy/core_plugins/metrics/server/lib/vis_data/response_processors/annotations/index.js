@@ -17,15 +17,10 @@
  * under the License.
  */
 
-import { get } from 'lodash';
+import { flow } from 'lodash';
+import { makeFilter, annotationFilter } from '../../helpers/annotations';
+import { getAnnotationBuckets } from './buckets';
 
-export default function handleAnnotationResponse(resp, annotation) {
-  return get(resp, `aggregations.${annotation.id}.buckets`, [])
-    .filter(bucket => bucket.hits.hits.total)
-    .map((bucket) => {
-      return {
-        key: bucket.key,
-        docs: bucket.hits.hits.hits.map(doc => doc._source)
-      };
-    });
-}
+const filterAnnotations = makeFilter(annotationFilter);
+
+export const handleAnnotationResponse = timestamp => flow(getAnnotationBuckets, filterAnnotations(timestamp));

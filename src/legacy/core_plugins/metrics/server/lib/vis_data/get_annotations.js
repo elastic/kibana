@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import handleAnnotationResponse from './response_processors/annotations/handle_annotation_response';
+import { handleAnnotationResponse } from './response_processors/annotations/';
 import { getAnnotationRequestParams } from './annorations/get_request_params';
-import { makeFilter, getLastSeriesTimestamp, annotationFilter } from './helpers/annotations';
+import { getLastSeriesTimestamp } from './helpers/annotations';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&
@@ -29,14 +29,11 @@ function validAnnotation(annotation) {
     !annotation.hidden;
 }
 
-const filterAnnotations = makeFilter(annotationFilter);
-
 export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities, series) {
   const panelIndexPattern = panel.index_pattern;
   const searchRequest = searchStrategy.getSearchRequest(req, panelIndexPattern);
   const annotations = panel.annotations.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
-  const filterAnnotationsBy = filterAnnotations(lastSeriesTimestamp);
 
   const bodiesPromises = annotations.map(annotation => getAnnotationRequestParams(req, panel, annotation, esQueryConfig, capabilities));
   const body = (await Promise.all(bodiesPromises))
@@ -47,12 +44,12 @@ export async function getAnnotations(req, panel, esQueryConfig, searchStrategy, 
   try {
     const responses = await searchRequest.search({ body });
 
-    const handledAnnotations = annotations.reduce((acc, annotation, index) => {
-      acc[annotation.id] = handleAnnotationResponse(responses[index], annotation);
-      return acc;
-    }, {});
+    return annotations
+      .reduce((acc, annotation, index) => {
+        acc[annotation.id] = handleAnnotationResponse(lastSeriesTimestamp)(responses[index], annotation);
 
-    return filterAnnotationsBy(handledAnnotations);
+        return acc;
+      }, {});
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;
