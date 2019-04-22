@@ -31,9 +31,7 @@ const createSetupContractMock = () => {
 };
 
 // Start contract is identical to setup
-const createStartContractMock = () => {
-  return createSetupContractMock();
-};
+const createStartContractMock = createSetupContractMock;
 
 type I18nServiceContract = PublicMethodsOf<I18nService>;
 const createMock = () => {

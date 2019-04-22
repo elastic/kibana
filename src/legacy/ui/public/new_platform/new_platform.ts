@@ -29,7 +29,7 @@ const runtimeContext = {
   },
 };
 
-export function __newPlatformInitSetup__(core: CoreSetup) {
+export function __newPlatformSetup__(core: CoreSetup) {
   if (runtimeContext.setup.core) {
     throw new Error('New platform core api was already set up');
   }
@@ -37,7 +37,7 @@ export function __newPlatformInitSetup__(core: CoreSetup) {
   runtimeContext.setup.core = core;
 }
 
-export function __newPlatformInitStart__(core: CoreStart) {
+export function __newPlatformStart__(core: CoreStart) {
   if (runtimeContext.start.core) {
     throw new Error('New platform core api was already started');
   }

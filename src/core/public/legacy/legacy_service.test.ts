@@ -25,7 +25,7 @@ const mockUiMetadataInit = jest.fn();
 jest.mock('ui/metadata', () => {
   mockLoadOrder.push('ui/metadata');
   return {
-    __newPlatformInit__: mockUiMetadataInit,
+    __newPlatformSetup__: mockUiMetadataInit,
   };
 });
 
@@ -49,7 +49,7 @@ const mockI18nContextInit = jest.fn();
 jest.mock('ui/i18n', () => {
   mockLoadOrder.push('ui/i18n');
   return {
-    __newPlatformInit__: mockI18nContextInit,
+    __newPlatformSetup__: mockI18nContextInit,
   };
 });
 
@@ -57,7 +57,7 @@ const mockUICapabilitiesInit = jest.fn();
 jest.mock('ui/capabilities', () => {
   mockLoadOrder.push('ui/capabilities');
   return {
-    __newPlatformInit__: mockUICapabilitiesInit,
+    __newPlatformStart__: mockUICapabilitiesInit,
   };
 });
 
@@ -65,7 +65,7 @@ const mockFatalErrorInit = jest.fn();
 jest.mock('ui/notify/fatal_error', () => {
   mockLoadOrder.push('ui/notify/fatal_error');
   return {
-    __newPlatformInit__: mockFatalErrorInit,
+    __newPlatformSetup__: mockFatalErrorInit,
   };
 });
 
@@ -73,7 +73,7 @@ const mockNotifyToastsInit = jest.fn();
 jest.mock('ui/notify/toasts', () => {
   mockLoadOrder.push('ui/notify/toasts');
   return {
-    __newPlatformInit__: mockNotifyToastsInit,
+    __newPlatformSetup__: mockNotifyToastsInit,
   };
 });
 
@@ -81,7 +81,7 @@ const mockHttpInit = jest.fn();
 jest.mock('ui/chrome/api/loading_count', () => {
   mockLoadOrder.push('ui/chrome/api/loading_count');
   return {
-    __newPlatformInit__: mockHttpInit,
+    __newPlatformSetup__: mockHttpInit,
   };
 });
 
@@ -89,7 +89,7 @@ const mockBasePathInit = jest.fn();
 jest.mock('ui/chrome/api/base_path', () => {
   mockLoadOrder.push('ui/chrome/api/base_path');
   return {
-    __newPlatformInit__: mockBasePathInit,
+    __newPlatformSetup__: mockBasePathInit,
   };
 });
 
@@ -97,7 +97,7 @@ const mockUiSettingsInit = jest.fn();
 jest.mock('ui/chrome/api/ui_settings', () => {
   mockLoadOrder.push('ui/chrome/api/ui_settings');
   return {
-    __newPlatformInit__: mockUiSettingsInit,
+    __newPlatformSetup__: mockUiSettingsInit,
   };
 });
 
@@ -105,7 +105,7 @@ const mockInjectedVarsInit = jest.fn();
 jest.mock('ui/chrome/api/injected_vars', () => {
   mockLoadOrder.push('ui/chrome/api/injected_vars');
   return {
-    __newPlatformInit__: mockInjectedVarsInit,
+    __newPlatformSetup__: mockInjectedVarsInit,
   };
 });
 
@@ -113,7 +113,7 @@ const mockChromeControlsInit = jest.fn();
 jest.mock('ui/chrome/api/controls', () => {
   mockLoadOrder.push('ui/chrome/api/controls');
   return {
-    __newPlatformInit__: mockChromeControlsInit,
+    __newPlatformSetup__: mockChromeControlsInit,
   };
 });
 
@@ -121,7 +121,7 @@ const mockChromeHelpExtensionInit = jest.fn();
 jest.mock('ui/chrome/api/help_extension', () => {
   mockLoadOrder.push('ui/chrome/api/help_extension');
   return {
-    __newPlatformInit__: mockChromeHelpExtensionInit,
+    __newPlatformSetup__: mockChromeHelpExtensionInit,
   };
 });
 
@@ -129,7 +129,7 @@ const mockChromeThemeInit = jest.fn();
 jest.mock('ui/chrome/api/theme', () => {
   mockLoadOrder.push('ui/chrome/api/theme');
   return {
-    __newPlatformInit__: mockChromeThemeInit,
+    __newPlatformSetup__: mockChromeThemeInit,
   };
 });
 
@@ -137,7 +137,7 @@ const mockChromeBreadcrumbsInit = jest.fn();
 jest.mock('ui/chrome/api/breadcrumbs', () => {
   mockLoadOrder.push('ui/chrome/api/breadcrumbs');
   return {
-    __newPlatformInit__: mockChromeBreadcrumbsInit,
+    __newPlatformSetup__: mockChromeBreadcrumbsInit,
   };
 });
 
@@ -145,7 +145,7 @@ const mockGlobalNavStateInit = jest.fn();
 jest.mock('ui/chrome/services/global_nav_state', () => {
   mockLoadOrder.push('ui/chrome/services/global_nav_state');
   return {
-    __newPlatformInit__: mockGlobalNavStateInit,
+    __newPlatformSetup__: mockGlobalNavStateInit,
   };
 });
 

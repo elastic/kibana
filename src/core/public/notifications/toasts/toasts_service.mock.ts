@@ -30,13 +30,9 @@ const createToastsApiMock = () => {
   return api;
 };
 
-const createSetupContractMock = () => {
-  return createToastsApiMock();
-};
+const createSetupContractMock = createToastsApiMock;
 
-const createStartContractMock = () => {
-  return createToastsApiMock();
-};
+const createStartContractMock = createToastsApiMock;
 
 export const toastsServiceMock = {
   createSetupContract: createSetupContractMock,

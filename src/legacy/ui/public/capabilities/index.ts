@@ -23,7 +23,7 @@ export { UICapabilities };
 
 let uiCapabilities: UICapabilities = null!;
 
-export function __newPlatformInit__(capabililitiesService: CapabilitiesStart) {
+export function __newPlatformStart__(capabililitiesService: CapabilitiesStart) {
   if (uiCapabilities) {
     throw new Error('ui/capabilities already initialized with new platform apis');
   }

@@ -22,7 +22,7 @@ import { ToastNotifications } from './toast_notifications';
 
 export let toastNotifications: ToastNotifications;
 
-export function __newPlatformInit__(toasts: ToastsApi) {
+export function __newPlatformSetup__(toasts: ToastsApi) {
   if (toastNotifications) {
     throw new Error('ui/notify/toasts already initialized with new platform apis');
   }
