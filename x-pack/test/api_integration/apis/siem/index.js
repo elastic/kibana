@@ -6,19 +6,19 @@
 
 export default function ({ loadTestFile }) {
   describe('Siem GraphQL Endpoints', () => {
-    // loadTestFile(require.resolve('./authentications'));
-    // loadTestFile(require.resolve('./domains'));
+    loadTestFile(require.resolve('./authentications'));
+    loadTestFile(require.resolve('./domains'));
     loadTestFile(require.resolve('./events'));
-    // loadTestFile(require.resolve('./hosts'));
-    // loadTestFile(require.resolve('./kpi_events'));
-    // loadTestFile(require.resolve('./network_dns'));
-    // loadTestFile(require.resolve('./network_top_n_flow'));
-    // loadTestFile(require.resolve('./sources'));
-    // loadTestFile(require.resolve('./timeline'));
-    // loadTestFile(require.resolve('./timeline_details'));
-    // loadTestFile(require.resolve('./uncommon_processes'));
-    // loadTestFile(require.resolve('./kpi_network'));
-    // loadTestFile(require.resolve('./overview_network'));
-    // loadTestFile(require.resolve('./overview_host'));
+    loadTestFile(require.resolve('./hosts'));
+    loadTestFile(require.resolve('./kpi_events'));
+    loadTestFile(require.resolve('./kpi_network'));
+    loadTestFile(require.resolve('./network_dns'));
+    loadTestFile(require.resolve('./network_top_n_flow'));
+    loadTestFile(require.resolve('./overview_host'));
+    loadTestFile(require.resolve('./overview_network'));
+    loadTestFile(require.resolve('./sources'));
+    loadTestFile(require.resolve('./timeline'));
+    loadTestFile(require.resolve('./timeline_details'));
+    loadTestFile(require.resolve('./uncommon_processes'));
   });
 }
