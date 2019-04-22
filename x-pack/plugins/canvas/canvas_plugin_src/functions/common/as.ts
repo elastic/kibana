@@ -1,0 +1,48 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+// @ts-ignore
+import { getType } from '@kbn/interpreter/common';
+import { Datatable, FunctionFactory } from '../types';
+
+interface Arguments {
+  name: string;
+}
+
+type Context = string | boolean | number | null;
+
+export const asFn: FunctionFactory<'as', Context, Arguments, Datatable> = () => ({
+  name: 'as',
+  type: 'datatable',
+  context: {
+    types: ['string', 'boolean', 'number', 'null'],
+  },
+  help: 'Creates a datatable with a single value',
+  args: {
+    name: {
+      types: ['string'],
+      aliases: ['_'],
+      help: 'A name to give the column',
+      default: 'value',
+    },
+  },
+  fn: (context, args) => {
+    return {
+      type: 'datatable',
+      columns: [
+        {
+          name: args.name,
+          type: getType(context),
+        },
+      ],
+      rows: [
+        {
+          [args.name]: context,
+        },
+      ],
+    };
+  },
+});
