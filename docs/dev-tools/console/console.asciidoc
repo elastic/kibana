@@ -1,24 +1,25 @@
 [[console-kibana]]
 == Console
 
-Console enables interaction with the REST API of {es}. *Note:* You cannot 
-interact with Kibana API endpoints via Console.
+Console enables you to interact with the REST API of {es}. *Note:* You cannot 
+interact with {kib} API endpoints via Console.
 
 Go to *Dev Tools > Console* to get started. 
 
 Console has two main areas: 
 
-* The *editor* where you compose requests to send to {es} 
-* The *response* pane, which displays the responses to the request
+* The *editor*, where you compose requests to send to {es}.
+* The *response* pane, which displays the responses to the request.
 
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
 
 [float]
-=== Console commands
+[[console-api]]
+=== Writing requests
 
 Console understands commands in a cURL-like syntax. 
-For example, the following is a `GET` request to {es}'s `_search API`. 
+For example, the following is a `GET` request to the {es} `_search` API. 
 
 [source,js]
 ----------------------------------
@@ -42,39 +43,52 @@ curl -XGET "http://localhost:9200/_search" -d'
 }'
 ----------------------------------
 
-In fact, you can paste the above command into Console and it will automatically 
-be converted into the Console syntax.
+If you paste the above command into Console, {kib} automatically converts it
+to Console syntax.  Alternatively, if you want to want to see Console syntax in cURL, 
+click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*. 
 
-When typing a command, Console will make context-sensitive suggestions. 
-These suggestions can help you explore parameters for each API, or to just speed up typing. 
-Console will suggest APIs, indexes and field names.
-
-[float]
-==== Submitting requests 
-Once you have typed a command in to the left pane, click the green triangle to submit it to {es}.
-
-From the action menu image:dev-tools/console/images/wrench.png[] you can also select
-<<multi-requests, multiple requests>> and submit them all at once.
+For help with formatting requests, you can use Console's <<auto-formatting, auto formatting>> 
+feature.
 
 
 [float]
-[[console-settings]]
-=== Settings
-*Settings* allows you to modify the font size, and configure preferences for
-auto-complete.
+[[console-request]]
+=== Submitting requests 
+
+Once you enter a command in the editor, click the 
+green triangle to submit the request to {es}.
+
+You can select multiple requests and submit them together.
+Console sends the requests to {es} one by one and shows the output 
+in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query 
+combinations in multiple scenarios.
 
 [float]
-[[history]]
-=== History
-Console maintains a list of the last 500 requests that were successfully executed by {es}. 
-The history is available by clicking the clock icon on the top right side of the window. 
-The icons opens the history panel where you can see the old requests. 
-You can also select a request here and it will be added to the editor at
-the current cursor position.
+[[console-autocomplete]]
+=== Using autocomplete
+
+When typing a command, Console makes context-sensitive suggestions.
+These suggestions can help you explore parameters for each API and speed up typing. 
+To configure your preferences for autocomplete, go to 
+<<configuring-console, Settings>>. 
+
+[float]
+[[console-view-api]]
+=== Viewing API docs
+
+You can view the documentation for an API endpoint by clicking
+the action icon (image:dev-tools/console/images/wrench.png[]) and selecting
+*Open documentation*.
+
+[float]
+[[console-history]]
+=== Getting your request history
+
+Console maintains a list of the last 500 requests that {es} successfully executed. 
+To view your most recent requests, click *History*. If you select a request
+and click *Apply*, {kib} adds it to the editor at the current cursor position.
 
 
-
-include::multi-requests.asciidoc[]
 
 include::auto-formatting.asciidoc[]
 
