@@ -61,7 +61,6 @@ const columns = [
     name: i18n.translate('xpack.monitoring.apm.instances.lastEventTitle', {
       defaultMessage: 'Last Event'
     }),
-    sortable: true,
     field: 'time_of_last_event',
     render: value => i18n.translate('xpack.monitoring.apm.instances.lastEventValue', {
       defaultMessage: '{timeOfLastEvent} ago',
