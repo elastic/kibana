@@ -34,7 +34,7 @@ export interface TestBed<T> {
       input: T | ReactWrapper,
       value: string,
       isAsync?: boolean
-    ) => Promise<{}> | undefined;
+    ) => Promise<void> | void;
     selectCheckBox: (checkboxTestSubject: T, isChecked?: boolean) => void;
     toggleEuiSwitch: (switchTestSubject: T) => void;
     setComboBoxValue: (comboBoxTestSubject: T, value: string) => void;
