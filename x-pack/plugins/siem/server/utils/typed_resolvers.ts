@@ -53,7 +53,7 @@ export type SubsetResolverWithoutFields<R, ExcludedFields extends string> = R ex
 
 export type ResolverWithParent<Resolver_, Parent> = Resolver_ extends Resolver<
   infer Result,
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any,
   infer Context,
   infer Args
@@ -61,7 +61,7 @@ export type ResolverWithParent<Resolver_, Parent> = Resolver_ extends Resolver<
   ? Resolver<Result, Parent, Context, Args>
   : never;
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AppResolver<Result = any, Parent = any, Context = any, Args = any> = Resolver<
   AppResolverResult<Result>,
   Parent,

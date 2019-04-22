@@ -58,7 +58,7 @@ export class ElasticsearchSourceStatusAdapter implements SourceStatusAdapter {
 }
 
 const withDefaultIfNotFound = <DefaultValue>(defaultValue: DefaultValue) => (
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   error: any
 ): DefaultValue => {
   if (error && error.status === 404) {

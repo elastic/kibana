@@ -15,7 +15,7 @@ import {
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty, noop, getOr } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -49,10 +49,10 @@ interface BasicTableProps<T> {
   loadMore: () => void;
   itemsPerRow?: ItemsPerRow[];
   onChange?: (criteria: Criteria) => void;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   sorting?: SortingBasicTable;
-  title: string | React.ReactNode;
+  title: string | React.ReactElement;
   updateLimitPagination: (limit: number) => void;
 }
 
@@ -79,21 +79,14 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     paginationLoading: false,
   };
 
-  public componentDidUpdate(prevProps: BasicTableProps<T>) {
-    const { paginationLoading, isEmptyTable } = this.state;
-    const { loading, pageOfItems } = this.props;
-    if (paginationLoading && prevProps.loading && !loading) {
-      this.setState({
-        ...this.state,
-        paginationLoading: false,
-      });
-    }
-    if (isEmpty(prevProps.pageOfItems) && !isEmpty(pageOfItems) && isEmptyTable) {
-      this.setState({
-        ...this.state,
+  static getDerivedStateFromProps(props: BasicTableProps<any>, state: BasicTableState) {
+    if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
+      return {
+        ...state,
         isEmptyTable: false,
-      });
+      };
     }
+    return null;
   }
 
   public render() {
@@ -110,7 +103,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       title,
       updateLimitPagination,
     } = this.props;
-    const { isEmptyTable, paginationLoading } = this.state;
+    const { isEmptyTable } = this.state;
 
     if (loading && isEmptyTable) {
       return (
@@ -149,10 +142,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           {item.text}
         </EuiContextMenuItem>
       ));
-
     return (
       <BasicTableContainer>
-        {!paginationLoading && loading && (
+        {loading && (
           <>
             <BackgroundRefetch />
             <LoadingPanel
@@ -165,7 +157,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
             />
           </>
         )}
-        <EuiTitle size="s">{title}</EuiTitle>
+        <EuiTitle size="s">
+          <>{title}</>
+        </EuiTitle>
         <EuiBasicTable
           items={pageOfItems}
           columns={columns}
@@ -214,7 +208,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                     <EuiButton
                       data-test-subj="loadingMoreButton"
                       isLoading={loading}
-                      onClick={this.loadMore}
+                      onClick={this.props.loadMore}
                     >
                       {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
                     </EuiButton>
@@ -227,14 +221,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       </BasicTableContainer>
     );
   }
-
-  private loadMore = () => {
-    this.setState({
-      ...this.state,
-      paginationLoading: true,
-    });
-    this.props.loadMore();
-  };
 
   private onButtonClick = () => {
     this.setState({
@@ -264,8 +250,12 @@ const FooterAction = styled.div`
   width: 100%;
 `;
 
+/*
+ *   The getOr is just there to simplify the test
+ *   So we do NOT need to wrap it around TestProvider
+ */
 const BackgroundRefetch = styled.div`
-  background-color: ${props => props.theme.eui.euiColorLightShade};
+  background-color: ${props => getOr('#ffffff', 'theme.eui.euiColorLightShade', props)};
   margin: -5px;
   height: calc(100% + 10px);
   opacity: 0.7;

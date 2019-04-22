@@ -29,7 +29,6 @@ interface OwnProps {
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
-  startDate: number;
   type: hostsModel.HostsType;
 }
 
@@ -82,12 +81,11 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
-    startDate,
     type,
   }) => (
     <EuiPanel>
       <LoadMoreTable
-        columns={getUncommonColumns(startDate)}
+        columns={getUncommonColumns()}
         loadingTitle={i18n.UNCOMMON_PROCESSES}
         loading={loading}
         pageOfItems={data}
@@ -122,7 +120,7 @@ export const UncommonProcessTable = connect(
   }
 )(UncommonProcessTableComponent);
 
-const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesEdges>> => [
+const getUncommonColumns = (): Array<Columns<UncommonProcessesEdges>> => [
   {
     name: i18n.NAME,
     truncateText: false,
@@ -146,10 +144,6 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
               queryMatch: {
                 field: 'process.name',
                 value: processName,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -189,10 +183,6 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
               queryMatch: {
                 field: 'user.name',
                 value: userName,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>
@@ -258,7 +248,6 @@ const getUncommonColumns = (startDate: number): Array<Columns<UncommonProcessesE
                       field: 'host.name',
                       value: name[0],
                     },
-                    queryDate: { from: startDate, to: Date.now() },
                   }}
                   render={(dataProvider, _, snapshot) =>
                     snapshot.isDragging ? (

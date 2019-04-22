@@ -7,13 +7,13 @@
 import { createUsersAndRoles } from '../../common/lib/create_users_and_roles';
 import { TestInvoker } from '../../common/lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function({ loadTestFile, getService }: TestInvoker) {
   const es = getService('es');
   const supertest = getService('supertest');
 
   describe('spaces api with security', function() {
-    this.tags('ciGroup1'); // DO NOT CHECK THIS BACK INTO MASTER -- THIS IS TEMP FROM ciGroup5 to ciGroup1 for siem to keep this running quickly
+    this.tags('ciGroup5');
 
     before(async () => {
       await createUsersAndRoles(es, supertest);

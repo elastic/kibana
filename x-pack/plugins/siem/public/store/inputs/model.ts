@@ -20,6 +20,8 @@ interface RelativeTimeRange {
   to: number;
 }
 
+export type InputsModelId = 'global' | 'timeline';
+
 export type TimeRange = AbsoluteTimeRange | RelativeTimeRange;
 
 export interface Policy {
@@ -38,8 +40,10 @@ export interface InputsRange {
   timerange: TimeRange;
   policy: Policy;
   query: GlobalQuery[];
+  linkTo: InputsModelId[];
 }
 
 export interface InputsModel {
   global: InputsRange;
+  timeline: InputsRange;
 }

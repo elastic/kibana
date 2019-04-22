@@ -9,6 +9,7 @@ import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
   Direction,
@@ -31,12 +32,11 @@ interface OwnProps {
   flowTarget: FlowTarget;
   loading: boolean;
   hasNextPage: boolean;
+  indexPattern: StaticIndexPattern;
   ip: string;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
-  endDate: number;
-  startDate: number;
   type: networkModel.NetworkType;
 }
 
@@ -90,6 +90,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       data,
       domainsSortField,
       hasNextPage,
+      indexPattern,
       ip,
       limit,
       loading,
@@ -97,8 +98,6 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
       totalCount,
       nextCursor,
       updateDomainsLimit,
-      startDate,
-      endDate,
       flowDirection,
       flowTarget,
       type,
@@ -107,9 +106,8 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     return (
       <LoadMoreTable
         columns={getDomainsColumns(
+          indexPattern,
           ip,
-          startDate,
-          endDate,
           flowDirection,
           flowTarget,
           type,

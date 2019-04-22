@@ -11,7 +11,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { mockFrameworks, mockGlobalState, TestProviders } from '../../../../mock';
+import { mockFrameworks, mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, hostsModel, State } from '../../../../store';
 import { KibanaConfigContext } from '../../../formatted_date';
 
@@ -20,7 +20,6 @@ import { mockData } from './mock';
 
 describe('Load More Table Component', () => {
   const loadMore = jest.fn();
-  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
   const state: State = mockGlobalState;
 
   let store = createStore(state);
@@ -35,13 +34,13 @@ describe('Load More Table Component', () => {
         <ReduxStoreProvider store={store}>
           <KibanaConfigContext.Provider value={mockFrameworks.default_UTC}>
             <HostsTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={hostsModel.HostsType.page}
             />
           </KibanaConfigContext.Provider>
@@ -56,13 +55,13 @@ describe('Load More Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <HostsTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={hostsModel.HostsType.page}
             />
           </TestProviders>
@@ -74,13 +73,13 @@ describe('Load More Table Component', () => {
           <MockedProvider>
             <TestProviders store={store}>
               <HostsTable
+                indexPattern={mockIndexPattern}
                 loading={false}
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
                 hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
                 nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
                 loadMore={loadMore}
-                startDate={startDate}
                 type={hostsModel.HostsType.page}
               />
             </TestProviders>

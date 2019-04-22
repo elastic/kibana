@@ -10,6 +10,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
   FlowDirection,
@@ -29,12 +30,12 @@ import * as i18n from './translations';
 
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
+  indexPattern: StaticIndexPattern;
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
-  startDate: number;
   type: networkModel.NetworkType;
 }
 
@@ -93,13 +94,13 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
     const {
       data,
       hasNextPage,
+      indexPattern,
       limit,
       loading,
       loadMore,
       totalCount,
       nextCursor,
       updateTopNFlowLimit,
-      startDate,
       flowDirection,
       topNFlowSort,
       flowTarget,
@@ -116,7 +117,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
       <EuiPanel>
         <LoadMoreTable
           columns={getNetworkTopNFlowColumns(
-            startDate,
+            indexPattern,
             flowDirection,
             flowTarget,
             type,
@@ -150,16 +151,16 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
                   >
                     <FlowTargetSelect
                       id={NetworkTopNFlowTableId}
-                    isLoading={loading}
+                      isLoading={loading}
                       selectedDirection={flowDirection}
                       selectedTarget={flowTarget}
                       displayTextOverride={[
-                      i18n.BY_SOURCE_IP,
-                      i18n.BY_DESTINATION_IP,
-                      i18n.BY_CLIENT_IP,
-                      i18n.BY_SERVER_IP,
-                    ]}
-                    updateFlowTargetAction={updateTopNFlowTarget}
+                        i18n.BY_SOURCE_IP,
+                        i18n.BY_DESTINATION_IP,
+                        i18n.BY_CLIENT_IP,
+                        i18n.BY_SERVER_IP,
+                      ]}
+                      updateFlowTargetAction={updateTopNFlowTarget}
                     />
                   </SelectTypeItem>
                 </EuiFlexGroup>

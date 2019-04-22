@@ -71,7 +71,6 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       'search',
       buildLastFirstSeenHostQuery(options)
     );
-
     const aggregations: HostAggEsItem = get('aggregations', response) || {};
     return {
       firstSeen: get('firstSeen.value_as_string', aggregations),

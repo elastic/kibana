@@ -33,6 +33,7 @@ import {
 import { Footer, footerHeight } from './footer';
 import { TimelineHeader } from './header';
 import { calculateBodyHeight, combineQueries } from './helpers';
+import { TimelineRefetch } from './refetch_timeline';
 
 const WrappedByAutoSizer = styled.div`
   width: 100%;
@@ -50,10 +51,12 @@ interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeader[];
   dataProviders: DataProvider[];
+  end: number;
   flyoutHeaderHeight: number;
   flyoutHeight: number;
   id: string;
   indexPattern: StaticIndexPattern;
+  isLive: boolean;
   itemsPerPage: number;
   itemsPerPageOptions: number[];
   kqlMode: timelineModel.KqlMode;
@@ -65,6 +68,7 @@ interface Props {
   onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
+  start: number;
   sort: Sort;
 }
 
@@ -74,10 +78,12 @@ export const Timeline = pure<Props>(
     browserFields,
     columns,
     dataProviders,
+    end,
     flyoutHeaderHeight,
     flyoutHeight,
     id,
     indexPattern,
+    isLive,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
@@ -89,13 +95,16 @@ export const Timeline = pure<Props>(
     onToggleDataProviderEnabled,
     onToggleDataProviderExcluded,
     show,
+    start,
     sort,
   }) => {
     const combinedQueries = combineQueries(
       dataProviders,
       indexPattern,
       kqlQueryExpression,
-      kqlMode
+      kqlMode,
+      start,
+      end
     );
     const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
     return (
@@ -133,8 +142,8 @@ export const Timeline = pure<Props>(
                   direction: sort.sortDirection as Direction,
                 }}
               >
-                {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt }) => (
-                  <>
+                {({ events, loading, totalCount, pageInfo, loadMore, getUpdatedAt, refetch }) => (
+                  <TimelineRefetch loading={loading} id={id} refetch={refetch}>
                     <StatefulBody
                       browserFields={browserFields}
                       data={events}
@@ -153,6 +162,7 @@ export const Timeline = pure<Props>(
                       serverSideEventCount={totalCount}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       height={footerHeight}
+                      isLive={isLive}
                       isLoading={loading}
                       itemsCount={events.length}
                       itemsPerPage={itemsPerPage}
@@ -164,7 +174,7 @@ export const Timeline = pure<Props>(
                       getUpdatedAt={getUpdatedAt}
                       width={width}
                     />
-                  </>
+                  </TimelineRefetch>
                 )}
               </TimelineQuery>
             ) : null}

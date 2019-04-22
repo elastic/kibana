@@ -10,8 +10,6 @@ exports[`TruncatableText renders correctly against snapshot 1`] = `
 
 <EuiText
   className="c0"
-  grow={true}
-  size="m"
   width="50px"
 >
   Hiding in plain sight

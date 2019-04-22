@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './authentications_table';
 export * from './events_table';
 export * from './hosts_table';
-export * from './types_bar';
 export * from './uncommon_process_table';

@@ -44,12 +44,11 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
           <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
 
           <GlobalTime>
-            {({ poll, to, from, setQuery }) => (
+            {({ to, from, setQuery }) => (
               <>
                 <KpiNetworkQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  poll={poll}
                   sourceId="default"
                   startDate={from}
                 >
@@ -69,7 +68,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                 <NetworkTopNFlowQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  poll={poll}
                   sourceId="default"
                   startDate={from}
                   type={networkModel.NetworkType.page}
@@ -77,6 +75,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => (
                     <NetworkTopNFlowTableManage
                       data={networkTopNFlow}
+                      indexPattern={indexPattern}
                       id={id}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loading={loading}
@@ -84,7 +83,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       refetch={refetch}
                       setQuery={setQuery}
-                      startDate={from}
                       totalCount={totalCount}
                       type={networkModel.NetworkType.page}
                     />
@@ -96,7 +94,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                 <NetworkDnsQuery
                   endDate={to}
                   filterQuery={filterQuery}
-                  poll={poll}
                   sourceId="default"
                   startDate={from}
                   type={networkModel.NetworkType.page}
@@ -111,7 +108,6 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       refetch={refetch}
                       setQuery={setQuery}
-                      startDate={from}
                       totalCount={totalCount}
                       type={networkModel.NetworkType.page}
                     />

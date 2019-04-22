@@ -64,7 +64,7 @@ const convertToBoolean = (value: object | number | boolean | string): boolean =>
   }
 };
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const convertArrayToBoolean = (values: any[]): boolean[] | boolean => {
   if (Array.isArray(values)) {
     return values

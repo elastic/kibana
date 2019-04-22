@@ -33,6 +33,11 @@ export async function BrowserProvider({ getService }) {
     keys = Key;
 
     /**
+     * Is WebDriver instance W3C compatible
+     */
+    isW3CEnabled = (driver.executor_.w3c === true);
+
+    /**
      * Retrieves the a rect describing the current top-level window's size and position.
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
      *
@@ -182,7 +187,7 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<void>}
      */
     async pressKeys(...args) {
-      const actions = driver.actions({ bridge: true });
+      const actions = this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
       const chord = this.keys.chord(...args);
       await actions.sendKeys(chord).perform();
     }
@@ -230,10 +235,10 @@ export async function BrowserProvider({ getService }) {
      * @return {Promise<LogEntry[]>}
      */
     async getLogsFor(...args) {
-      //The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
-      //See: https://github.com/w3c/webdriver/issues/406
-      //See: https://w3c.github.io/webdriver/#endpoints
-      if (driver.executor_.w3c === true) {
+      // The logs endpoint has not been defined in W3C Spec browsers other than Chrome don't have access to this endpoint.
+      // See: https://github.com/w3c/webdriver/issues/406
+      // See: https://w3c.github.io/webdriver/#endpoints
+      if (this.isW3CEnabled) {
         return [];
       } else {
         return await driver.manage().logs().get(...args);

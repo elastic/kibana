@@ -74,15 +74,15 @@ export interface SearchResponse<T> {
       _version?: number;
       _explanation?: Explanation;
       fields?: string[];
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       highlight?: any;
-      // tslint:disable-next-line:no-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       inner_hits?: any;
       matched_queries?: string[];
       sort?: string[];
     }>;
   };
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations?: any;
 }
 

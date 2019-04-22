@@ -7,7 +7,7 @@
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render, waitForElement } from 'react-testing-library';
+import { render } from 'react-testing-library';
 
 import { mockFirstLastSeenHostQuery } from '../../../../containers/hosts/first_last_seen/mock';
 import { wait } from '../../../../lib/helpers';
@@ -24,10 +24,10 @@ describe('FirstLastSeen Component', async () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
   const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
 
-  // tslint:disable-next-line:no-console
+  // eslint-disable-next-line no-console
   const originalError = console.error;
   beforeAll(() => {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error = (...args: string[]) => {
       if (/Warning.*not wrapped in act/.test(args[0])) {
         return;
@@ -37,7 +37,7 @@ describe('FirstLastSeen Component', async () => {
   });
 
   afterAll(() => {
-    // tslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error = originalError;
   });
 
@@ -146,23 +146,5 @@ describe('FirstLastSeen Component', async () => {
     );
     await wait();
     expect(container.textContent).toBe('something-invalid');
-  });
-
-  test('Show error message', async () => {
-    const myErrorMock = cloneDeep(mockFirstLastSeenHostQuery);
-    delete myErrorMock[0].result;
-    myErrorMock[0].result = {
-      errors: [{ message: 'Error!' }],
-    };
-    const { container } = render(
-      <TestProviders>
-        <MockedProvider mocks={myErrorMock} addTypename={false}>
-          <FirstLastSeenHost hostname="kibana-siem" type="last-seen" />
-        </MockedProvider>
-      </TestProviders>
-    );
-    await wait();
-    const alertIcon = await waitForElement(() => container.querySelectorAll('svg'), { container });
-    expect(alertIcon.length).toBe(1);
   });
 });

@@ -61,7 +61,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
             <HostsKql indexPattern={indexPattern} type={type} />
 
             <GlobalTime>
-              {({ poll, to, from, setQuery }) => (
+              {({ to, from, setQuery }) => (
                 <>
                   <HostDetailsByNameQuery
                     sourceId="default"
@@ -74,8 +74,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         id={id}
                         refetch={refetch}
                         setQuery={setQuery}
-                        startDate={from}
-                        endDate={to}
                         data={hostDetails}
                         loading={loading}
                       />
@@ -88,7 +86,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     sourceId="default"
                     startDate={from}
                     endDate={to}
-                    poll={poll}
                     filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     type={type}
                   >
@@ -106,7 +103,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         loading={loading}
-                        startDate={from}
                         data={authentications}
                         totalCount={totalCount}
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -123,7 +119,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     sourceId="default"
                     startDate={from}
                     endDate={to}
-                    poll={poll}
                     filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     type={type}
                   >
@@ -141,7 +136,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         refetch={refetch}
                         setQuery={setQuery}
                         loading={loading}
-                        startDate={from}
                         data={uncommonProcesses}
                         totalCount={totalCount}
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -157,7 +151,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                   <EventsQuery
                     endDate={to}
                     filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
-                    poll={poll}
                     sourceId="default"
                     startDate={from}
                     type={type}
@@ -169,7 +162,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         setQuery={setQuery}
                         data={events!}
                         loading={loading}
-                        startDate={from}
                         totalCount={totalCount}
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                         tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}

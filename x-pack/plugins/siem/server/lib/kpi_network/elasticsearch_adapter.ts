@@ -7,7 +7,6 @@
 import { getOr } from 'lodash/fp';
 
 import { KpiNetworkData } from '../../graphql/types';
-// tslint:disable-next-line: prettier
 import { FrameworkAdapter, FrameworkRequest, RequestBasicOptions } from '../framework';
 import { TermAggregation } from '../types';
 

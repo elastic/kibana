@@ -54,7 +54,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
 
             <GlobalTime>
-              {({ poll, to, from, setQuery }) => (
+              {({ to, from, setQuery }) => (
                 <>
                   <IpOverviewQuery
                     sourceId="default"
@@ -81,7 +81,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     filterQuery={filterQuery}
                     flowTarget={flowTarget}
                     ip={decodeIpv6(ip)}
-                    poll={poll}
                     sourceId="default"
                     startDate={from}
                     type={networkModel.NetworkType.details}
@@ -89,6 +88,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
                       <DomainsTableManage
                         data={domains}
+                        indexPattern={indexPattern}
                         id={id}
                         flowTarget={flowTarget}
                         hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
@@ -98,8 +98,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                         refetch={refetch}
                         setQuery={setQuery}
-                        startDate={from}
-                        endDate={to}
                         totalCount={totalCount}
                         type={networkModel.NetworkType.details}
                       />

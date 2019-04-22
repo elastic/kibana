@@ -30,7 +30,6 @@ interface OwnProps {
   tiebreaker: string;
   totalCount: number;
   loadMore: (cursor: string, tiebreaker: string) => void;
-  startDate: number;
   type: hostsModel.HostsType;
 }
 
@@ -74,12 +73,11 @@ const EventsTableComponent = pure<EventsTableProps>(
     totalCount,
     nextCursor,
     updateLimitPagination,
-    startDate,
     type,
   }) => (
     <EuiPanel>
       <LoadMoreTable
-        columns={getEventsColumns(startDate)}
+        columns={getEventsColumns()}
         loadingTitle={i18n.EVENTS}
         loading={loading}
         pageOfItems={data}
@@ -115,7 +113,7 @@ export const EventsTable = connect(
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
+const getEventsColumns = (): Array<Columns<EcsEdges>> => [
   {
     name: i18n.HOST_NAME,
     sortable: true,
@@ -138,10 +136,6 @@ const getEventsColumns = (startDate: number): Array<Columns<EcsEdges>> => [
               queryMatch: {
                 field: 'host.name',
                 value: hostName,
-              },
-              queryDate: {
-                from: startDate,
-                to: Date.now(),
               },
             }}
             render={(dataProvider, _, snapshot) =>

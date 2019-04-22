@@ -22,7 +22,7 @@ export type OnResize = (
 export const resizeCursorStyle = 'col-resize';
 export const globalResizeCursorClassName = 'global-resize-cursor';
 
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line no-unused-expressions
 injectGlobal`
 .${globalResizeCursorClassName} {
   * {

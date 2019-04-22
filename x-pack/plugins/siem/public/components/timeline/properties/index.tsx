@@ -6,6 +6,8 @@
 
 import {
   EuiAvatar,
+  EuiButtonIcon,
+  EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
@@ -16,31 +18,30 @@ import {
 import * as React from 'react';
 import styled, { injectGlobal } from 'styled-components';
 
-import { History } from '../../../lib/history';
 import { Note } from '../../../lib/note';
+import { inputsModel } from '../../../store';
 import { AssociateNote, UpdateNote } from '../../notes/helpers';
+import { SuperDatePicker } from '../../super_date_picker';
 
+import { Description, Name, NewTimeline, NotesButton, StarIcon } from './helpers';
 import {
-  Description,
-  HistoryButton,
-  Name,
-  NewTimeline,
-  NotesButton,
-  StarIcon,
-  StreamLive,
-} from './helpers';
-import { PropertiesLeft, PropertiesRight, TimelineProperties } from './styles';
+  DatePicker,
+  PropertiesLeft,
+  PropertiesRight,
+  TimelineProperties,
+  LockIconContainer,
+} from './styles';
 import * as i18n from './translations';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
-type UpdateIsLive = ({ id, isLive }: { id: string; isLive: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
+type ToggleLock = ({ linkToId }: { linkToId: inputsModel.InputsModelId }) => void;
 
 // SIDE EFFECT: the following `injectGlobal` overrides `EuiPopover`
 // and `EuiToolTip` global styles:
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line no-unused-expressions
 injectGlobal`
   .euiPopover__panel.euiPopover__panel-isOpen {
     z-index: 9900 !important;
@@ -57,17 +58,16 @@ const Avatar = styled(EuiAvatar)`
 interface Props {
   associateNote: AssociateNote;
   createTimeline: CreateTimeline;
+  isDatepickerLocked: boolean;
   isFavorite: boolean;
-  isLive: boolean;
   title: string;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
   noteIds: string[];
-  history: History[];
   timelineId: string;
+  toggleLock: ToggleLock;
   updateDescription: UpdateDescription;
   updateIsFavorite: UpdateIsFavorite;
-  updateIsLive: UpdateIsLive;
   updateTitle: UpdateTitle;
   updateNote: UpdateNote;
   usersViewing: string[];
@@ -80,9 +80,15 @@ interface State {
 }
 
 const rightGutter = 60; // px
-export const showDescriptionThreshold = 610;
-export const showHistoryThreshold = 760;
-export const showStreamLiveThreshold = 900;
+export const datePickerThreshold = 600;
+export const showNotesThreshold = 810;
+export const showDescriptionThreshold = 970;
+
+const starIconWidth = 30;
+const nameWidth = 155;
+const descriptionWidth = 165;
+const noteWidth = 110;
+const settingsWidth = 50;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
 export class Properties extends React.PureComponent<Props, State> {
@@ -118,22 +124,29 @@ export class Properties extends React.PureComponent<Props, State> {
       description,
       getNotesByIds,
       isFavorite,
-      isLive,
-      history,
+      isDatepickerLocked,
       title,
       noteIds,
       timelineId,
       updateDescription,
       updateIsFavorite,
-      updateIsLive,
       updateTitle,
       updateNote,
       usersViewing,
       width,
     } = this.props;
 
+    const datePickerWidth =
+      width -
+      rightGutter -
+      starIconWidth -
+      nameWidth -
+      (width >= showDescriptionThreshold ? descriptionWidth : 0) -
+      noteWidth -
+      settingsWidth;
+
     return (
-      <TimelineProperties data-test-subj="timeline-properties" width={width - rightGutter}>
+      <TimelineProperties data-test-subj="timeline-properties" width={width}>
         <PropertiesLeft alignItems="center" data-test-subj="properties-left" gutterSize="s">
           <EuiFlexItem grow={false}>
             <StarIcon
@@ -146,7 +159,7 @@ export class Properties extends React.PureComponent<Props, State> {
           <Name timelineId={timelineId} title={title} updateTitle={updateTitle} />
 
           {width >= showDescriptionThreshold ? (
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem grow={2}>
               <Description
                 description={description}
                 timelineId={timelineId}
@@ -155,35 +168,67 @@ export class Properties extends React.PureComponent<Props, State> {
             </EuiFlexItem>
           ) : null}
 
-          <EuiFlexItem grow={false}>
-            <NotesButton
-              animate={true}
-              associateNote={associateNote}
-              getNotesByIds={getNotesByIds}
-              noteIds={noteIds}
-              showNotes={this.state.showNotes}
-              size="l"
-              text={i18n.NOTES}
-              toggleShowNotes={this.onToggleShowNotes}
-              toolTip={i18n.NOTES_TOOL_TIP}
-              updateNote={updateNote}
-            />
+          {width >= showNotesThreshold ? (
+            <EuiFlexItem grow={false}>
+              <NotesButton
+                animate={true}
+                associateNote={associateNote}
+                getNotesByIds={getNotesByIds}
+                noteIds={noteIds}
+                showNotes={this.state.showNotes}
+                size="l"
+                text={i18n.NOTES}
+                toggleShowNotes={this.onToggleShowNotes}
+                toolTip={i18n.NOTES_TOOL_TIP}
+                updateNote={updateNote}
+              />
+            </EuiFlexItem>
+          ) : null}
+
+          <EuiFlexItem grow={1}>
+            <EuiFlexGroup
+              alignItems="center"
+              gutterSize="none"
+              data-test-subj="timeline-date-picker-container"
+            >
+              <LockIconContainer grow={false}>
+                <EuiToolTip
+                  data-test-subj="timeline-date-picker-lock-tooltip"
+                  position="top"
+                  content={
+                    isDatepickerLocked
+                      ? i18n.LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
+                      : i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP
+                  }
+                >
+                  <EuiButtonIcon
+                    data-test-subj={`timeline-date-picker-${
+                      isDatepickerLocked ? 'lock' : 'unlock'
+                    }-button`}
+                    color="primary"
+                    onClick={this.toggleLock}
+                    iconType={isDatepickerLocked ? 'lock' : 'lockOpen'}
+                    aria-label={
+                      isDatepickerLocked
+                        ? i18n.UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA
+                        : i18n.LOCK_SYNC_MAIN_DATE_PICKER_ARIA
+                    }
+                  />
+                </EuiToolTip>
+              </LockIconContainer>
+              <DatePicker
+                grow={1}
+                width={
+                  datePickerWidth > datePickerThreshold ? datePickerThreshold : datePickerWidth
+                }
+              >
+                <SuperDatePicker id="timeline" />
+              </DatePicker>
+            </EuiFlexGroup>
           </EuiFlexItem>
         </PropertiesLeft>
 
         <PropertiesRight alignItems="center" data-test-subj="properties-right" gutterSize="s">
-          {width >= showHistoryThreshold ? (
-            <EuiFlexItem grow={false}>
-              <HistoryButton history={history} />
-            </EuiFlexItem>
-          ) : null}
-
-          {width >= showStreamLiveThreshold ? (
-            <EuiFlexItem grow={false}>
-              <StreamLive isLive={isLive} timelineId={timelineId} updateIsLive={updateIsLive} />
-            </EuiFlexItem>
-          ) : null}
-
           <EuiFlexItem grow={false}>
             <EuiPopover
               anchorPosition="downRight"
@@ -208,28 +253,29 @@ export class Properties extends React.PureComponent<Props, State> {
                   />
                 </EuiFormRow>
 
+                {width < showNotesThreshold ? (
+                  <EuiFormRow>
+                    <NotesButton
+                      animate={true}
+                      associateNote={associateNote}
+                      getNotesByIds={getNotesByIds}
+                      noteIds={noteIds}
+                      showNotes={this.state.showNotes}
+                      size="l"
+                      text={i18n.NOTES}
+                      toggleShowNotes={this.onToggleShowNotes}
+                      toolTip={i18n.NOTES_TOOL_TIP}
+                      updateNote={updateNote}
+                    />
+                  </EuiFormRow>
+                ) : null}
+
                 {width < showDescriptionThreshold ? (
                   <EuiFormRow label={i18n.DESCRIPTION}>
                     <Description
                       description={description}
                       timelineId={timelineId}
                       updateDescription={updateDescription}
-                    />
-                  </EuiFormRow>
-                ) : null}
-
-                {width < showHistoryThreshold ? (
-                  <EuiFormRow>
-                    <HistoryButton history={history} />
-                  </EuiFormRow>
-                ) : null}
-
-                {width < showStreamLiveThreshold ? (
-                  <EuiFormRow>
-                    <StreamLive
-                      isLive={isLive}
-                      timelineId={timelineId}
-                      updateIsLive={updateIsLive}
                     />
                   </EuiFormRow>
                 ) : null}
@@ -253,4 +299,8 @@ export class Properties extends React.PureComponent<Props, State> {
       </TimelineProperties>
     );
   }
+
+  private toggleLock = () => {
+    this.props.toggleLock({ linkToId: 'timeline' });
+  };
 }

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React, { Component } from 'react';
 
 import isEqual from 'react-fast-compare';
@@ -19,29 +18,95 @@ import { notify } from '../../lib/notify';
 
 export interface Props {
   pageId: string;
-  selectedElementIds: string[];
-  selectedElements: any[];
-  selectedPrimaryShapes: any[];
-  selectElement: (elementId: string) => void;
-  insertNodes: (pageId: string) => (selectedElements: any[]) => void;
-  removeElements: (pageId: string) => (selectedElementIds: string[]) => void;
-  elementLayer: (pageId: string, selectedElement: any, movement: any) => void;
-  groupElements: () => void;
-  ungroupElements: () => void;
-  forceUpdate: () => void;
+  selectedNodes: any[];
+  selectToplevelNodes: (...nodeIds: string[]) => void;
+  insertNodes: (pageId: string) => (selectedNodes: any[]) => void;
+  removeNodes: (pageId: string) => (selectedNodeIds: string[]) => void;
+  elementLayer: (pageId: string, selectedNode: any, movement: any) => void;
+  groupNodes: () => void;
+  ungroupNodes: () => void;
 }
+
+const id = (node: any): string => node.id;
+
+const keyMap = {
+  DELETE: function deleteNodes({ pageId, removeNodes, selectedNodes }: any): any {
+    // currently, handle the removal of one node, exploiting multiselect subsequently
+    if (selectedNodes.length) {
+      removeNodes(pageId)(selectedNodes.map(id));
+    }
+  },
+  COPY: function copyNodes({ selectedNodes }: any): any {
+    if (selectedNodes.length) {
+      setClipboardData({ selectedNodes });
+      notify.success('Copied element to clipboard');
+    }
+  },
+  CUT: function cutNodes({ pageId, removeNodes, selectedNodes }: any): any {
+    if (selectedNodes.length) {
+      setClipboardData({ selectedNodes });
+      removeNodes(pageId)(selectedNodes.map(id));
+      notify.success('Cut element to clipboard');
+    }
+  },
+  CLONE: function duplicateNodes({
+    insertNodes,
+    pageId,
+    selectToplevelNodes,
+    selectedNodes,
+  }: any): any {
+    // TODO: This is slightly different from the duplicateNodes function in sidebar/index.js. Should they be doing the same thing?
+    // This should also be abstracted.
+    const clonedNodes = selectedNodes && cloneSubgraphs(selectedNodes);
+    if (clonedNodes) {
+      insertNodes(pageId)(clonedNodes);
+      selectToplevelNodes(clonedNodes);
+    }
+  },
+  PASTE: function pasteNodes({ insertNodes, pageId, selectToplevelNodes }: any): any {
+    const { selectedNodes } = JSON.parse(getClipboardData()) || { selectedNodes: [] };
+    const clonedNodes = selectedNodes && cloneSubgraphs(selectedNodes);
+    if (clonedNodes) {
+      insertNodes(pageId)(clonedNodes); // first clone and persist the new node(s)
+      selectToplevelNodes(clonedNodes); // then select the cloned node(s)
+    }
+  },
+  BRING_FORWARD: function bringForward({ elementLayer, pageId, selectedNodes }: any): any {
+    // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
+    // Note: these layer actions only work when a single node is selected
+    if (selectedNodes.length === 1) {
+      elementLayer(pageId, selectedNodes[0], 1);
+    }
+  },
+  BRING_TO_FRONT: function bringToFront({ elementLayer, pageId, selectedNodes }: any): any {
+    if (selectedNodes.length === 1) {
+      elementLayer(pageId, selectedNodes[0], Infinity);
+    }
+  },
+  SEND_BACKWARD: function sendBackward({ elementLayer, pageId, selectedNodes }: any): any {
+    if (selectedNodes.length === 1) {
+      elementLayer(pageId, selectedNodes[0], -1);
+    }
+  },
+  SEND_TO_BACK: function sendToBack({ elementLayer, pageId, selectedNodes }: any): any {
+    if (selectedNodes.length === 1) {
+      elementLayer(pageId, selectedNodes[0], -Infinity);
+    }
+  },
+  GROUP: ({ groupNodes }: any): any => groupNodes(),
+  UNGROUP: ({ ungroupNodes }: any): any => ungroupNodes(),
+} as any;
 
 export class WorkpadShortcuts extends Component<Props> {
   public render() {
-    const { pageId, forceUpdate } = this.props;
     return (
       <Shortcuts
         name="ELEMENT"
         handler={(action: string, event: Event) => {
-          this._keyHandler(action, event);
-          forceUpdate();
+          event.preventDefault();
+          keyMap[action](this.props);
         }}
-        targetNodeSelector={`#${pageId}`}
+        targetNodeSelector={`#${this.props.pageId}`}
         global
       />
     );
@@ -49,165 +114,5 @@ export class WorkpadShortcuts extends Component<Props> {
 
   public shouldComponentUpdate(nextProps: Props) {
     return !isEqual(nextProps, this.props);
-  }
-
-  private _keyHandler(action: string, event: Event) {
-    event.preventDefault();
-    switch (action) {
-      case 'COPY':
-        this._copyElements();
-        break;
-      case 'CLONE':
-        this._duplicateElements();
-        break;
-      case 'CUT':
-        this._cutElements();
-        break;
-      case 'DELETE':
-        this._removeElements();
-        break;
-      case 'PASTE':
-        this._pasteElements();
-        break;
-      case 'BRING_FORWARD':
-        this._bringForward();
-        break;
-      case 'BRING_TO_FRONT':
-        this._bringToFront();
-        break;
-      case 'SEND_BACKWARD':
-        this._sendBackward();
-        break;
-      case 'SEND_TO_BACK':
-        this._sendToBack();
-        break;
-      case 'GROUP':
-        this.props.groupElements();
-        break;
-      case 'UNGROUP':
-        this.props.ungroupElements();
-        break;
-    }
-  }
-
-  private _removeElements() {
-    const { pageId, removeElements, selectedElementIds } = this.props;
-    // currently, handle the removal of one element, exploiting multiselect subsequently
-    if (selectedElementIds.length) {
-      removeElements(pageId)(selectedElementIds);
-    }
-  }
-
-  private _copyElements() {
-    const { selectedElements, selectedPrimaryShapes } = this.props;
-    if (selectedElements.length) {
-      setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
-      notify.success('Copied element to clipboard');
-    }
-  }
-
-  private _cutElements() {
-    const {
-      pageId,
-      removeElements,
-      selectedElements,
-      selectedElementIds,
-      selectedPrimaryShapes,
-    } = this.props;
-
-    if (selectedElements.length) {
-      setClipboardData({ selectedElements, rootShapes: selectedPrimaryShapes });
-      removeElements(pageId)(selectedElementIds);
-      notify.success('Copied element to clipboard');
-    }
-  }
-
-  // TODO: This is slightly different from the duplicateElements function in sidebar/index.js. Should they be doing the same thing?
-  // This should also be abstracted.
-  private _duplicateElements() {
-    const {
-      insertNodes,
-      pageId,
-      selectElement,
-      selectedElements,
-      selectedPrimaryShapes,
-    } = this.props;
-    const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
-
-    if (clonedElements) {
-      insertNodes(pageId)(clonedElements);
-      if (selectedPrimaryShapes.length) {
-        if (selectedElements.length > 1) {
-          // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
-          // new adHocGroup - todo)
-          selectElement(clonedElements[0].id);
-        } else {
-          // single element or single persistentGroup branch
-          selectElement(
-            clonedElements[selectedElements.findIndex(s => s.id === selectedPrimaryShapes[0])].id
-          );
-        }
-      }
-    }
-  }
-
-  private _pasteElements() {
-    const { insertNodes, pageId, selectElement } = this.props;
-    const { selectedElements, rootShapes } = JSON.parse(getClipboardData()) || {
-      selectedElements: [],
-      rootShapes: [],
-    };
-
-    const clonedElements = selectedElements && cloneSubgraphs(selectedElements);
-
-    if (clonedElements) {
-      // first clone and persist the new node(s)
-      insertNodes(pageId)(clonedElements);
-      // then select the cloned node
-      if (rootShapes.length) {
-        if (selectedElements.length > 1) {
-          // adHocGroup branch (currently, pasting will leave only the 1st element selected, rather than forming a
-          // new adHocGroup - todo)
-          selectElement(clonedElements[0].id);
-        } else {
-          // single element or single persistentGroup branch
-          selectElement(
-            clonedElements[
-              selectedElements.findIndex((s: { id: string }) => s.id === rootShapes[0])
-            ].id
-          );
-        }
-      }
-    }
-  }
-
-  // TODO: Same as above. Abstract these out. This is the same code as in sidebar/index.js
-  // Note: these layer actions only work when a single element is selected
-  private _bringForward() {
-    const { elementLayer, pageId, selectedElements } = this.props;
-    if (selectedElements.length === 1) {
-      elementLayer(pageId, selectedElements[0], 1);
-    }
-  }
-
-  private _bringToFront() {
-    const { elementLayer, pageId, selectedElements } = this.props;
-    if (selectedElements.length === 1) {
-      elementLayer(pageId, selectedElements[0], Infinity);
-    }
-  }
-
-  private _sendBackward() {
-    const { elementLayer, pageId, selectedElements } = this.props;
-    if (selectedElements.length === 1) {
-      elementLayer(pageId, selectedElements[0], -1);
-    }
-  }
-
-  private _sendToBack() {
-    const { elementLayer, pageId, selectedElements } = this.props;
-    if (selectedElements.length === 1) {
-      elementLayer(pageId, selectedElements[0], -Infinity);
-    }
   }
 }

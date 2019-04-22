@@ -9,12 +9,7 @@ import { SiemContext } from '../index';
 
 import { mockSourceData } from './source.mock';
 
-/* tslint:disable */
-export const sourcesDataMock =
-[
-  mockSourceData,
-];
-/* tslint:enable */
+export const sourcesDataMock = [mockSourceData];
 
 export const getAllSourcesQueryMock = (logger: Logger) => ({
   allSources: (root: unknown, args: unknown, context: SiemContext) => {

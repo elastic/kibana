@@ -11,6 +11,15 @@ import { JobList } from './job_list';
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+  }
 }));
 
 jest.mock('../../services', () => {

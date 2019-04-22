@@ -4,27 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIconTip, EuiPanel } from '@elastic/eui';
+import memoizeOne from 'memoize-one';
+import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Direction, HostsEdges, HostsFields, HostsSortField } from '../../../../graphql/types';
-import { assertUnreachable } from '../../../../lib/helpers';
+import {
+  Direction,
+  HostsEdges,
+  HostsFields,
+  HostsSortField,
+  HostItem,
+} from '../../../../graphql/types';
+import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
-import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { CountBadge } from '../../index';
+import {
+  Criteria,
+  ItemsPerRow,
+  LoadMoreTable,
+  Columns,
+  SortingBasicTable,
+} from '../../../load_more_table';
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
+import { TableTitle } from '../../table_title';
 
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
+  indexPattern: StaticIndexPattern;
   hasNextPage: boolean;
   nextCursor: string;
-  startDate: number;
   totalCount: number;
   loadMore: (cursor: string) => void;
   type: hostsModel.HostsType;
@@ -69,56 +82,76 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const Sup = styled.sup`
-  vertical-align: super;
-  padding: 0 5px;
-`;
-
 class HostsTableComponent extends React.PureComponent<HostsTableProps> {
+  private memoizedColumns: (
+    type: hostsModel.HostsType,
+    indexPattern: StaticIndexPattern
+  ) => Array<Columns<ValueOf<HostItem>>>;
+  private memoizedTitle: (totalCount: number) => JSX.Element;
+  private memoizedSorting: (
+    trigger: string,
+    sortField: HostsFields,
+    direction: Direction
+  ) => SortingBasicTable;
+
+  constructor(props: HostsTableProps) {
+    super(props);
+    this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
+    this.memoizedTitle = memoizeOne(this.getTitle);
+    this.memoizedSorting = memoizeOne(this.getSorting);
+  }
+
   public render() {
     const {
       data,
       direction,
       hasNextPage,
+      indexPattern,
       limit,
       loading,
-      loadMore,
       totalCount,
-      nextCursor,
-      updateLimitPagination,
-      startDate,
       sortField,
       type,
     } = this.props;
     return (
       <EuiPanel>
         <LoadMoreTable
-          columns={getHostsColumns(startDate, type)}
+          columns={this.memoizedColumns(type, indexPattern)}
           loadingTitle={i18n.HOSTS}
           loading={loading}
           pageOfItems={data}
-          loadMore={() => loadMore(nextCursor)}
+          loadMore={this.wrappedLoadMore}
           limit={limit}
           hasNextPage={hasNextPage}
           itemsPerRow={rowItems}
           onChange={this.onChange}
-          updateLimitPagination={newLimit =>
-            updateLimitPagination({ limit: newLimit, hostsType: type })
-          }
-          sorting={{ field: getNodeField(sortField), direction }}
-          title={
-            <h3>
-              {i18n.HOSTS}{' '}
-              <Sup>
-                <EuiIconTip content={i18n.TOOLTIP} position="right" />
-              </Sup>
-              <CountBadge color="hollow">{totalCount}</CountBadge>
-            </h3>
-          }
+          updateLimitPagination={this.wrappedUpdateLimitPagination}
+          sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
+          title={this.memoizedTitle(totalCount)}
         />
       </EuiPanel>
     );
   }
+
+  private getSorting = (
+    trigger: string,
+    sortField: HostsFields,
+    direction: Direction
+  ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
+
+  private getTitle = (totalCount: number): JSX.Element => (
+    <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
+  );
+
+  private wrappedUpdateLimitPagination = (newLimit: number) =>
+    this.props.updateLimitPagination({ limit: newLimit, hostsType: this.props.type });
+
+  private wrappedLoadMore = () => this.props.loadMore(this.props.nextCursor);
+
+  private getMemoizeHostsColumns = (
+    type: hostsModel.HostsType,
+    indexPattern: StaticIndexPattern
+  ): Array<Columns<ValueOf<HostItem>>> => getHostsColumns(type, indexPattern);
 
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {

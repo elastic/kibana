@@ -22,5 +22,11 @@ export { PluginsService, PluginsServiceSetup } from './plugins_service';
 /** @internal */
 export { isNewPlatformPlugin } from './discovery';
 /** @internal */
-export { DiscoveredPlugin, DiscoveredPluginInternal, PluginName } from './plugin';
+export {
+  DiscoveredPlugin,
+  DiscoveredPluginInternal,
+  Plugin,
+  PluginInitializer,
+  PluginName,
+} from './plugin';
 export { PluginInitializerContext, PluginSetupContext } from './plugin_context';

@@ -48,7 +48,6 @@ class EventsComponentQuery extends QueryTemplate<
       filterQuery,
       id = 'eventsQuery',
       limit,
-      poll,
       sourceId,
       startDate,
       endDate,
@@ -58,7 +57,6 @@ class EventsComponentQuery extends QueryTemplate<
         query={eventsQuery}
         fetchPolicy={getDefaultFetchPolicy()}
         notifyOnNetworkStatusChange
-        pollInterval={poll}
         variables={{
           filterQuery: createFilter(filterQuery),
           sourceId,

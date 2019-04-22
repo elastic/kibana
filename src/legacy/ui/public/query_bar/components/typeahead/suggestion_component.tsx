@@ -50,6 +50,7 @@ interface Props {
 
 export const SuggestionComponent: SFC<Props> = props => {
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/interactive-supports-focus
     <div
       className={classNames({
         kbnTypeahead__item: true,

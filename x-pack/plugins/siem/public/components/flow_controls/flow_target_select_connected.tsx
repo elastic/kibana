@@ -15,7 +15,7 @@ import { FlowDirection, FlowTarget } from '../../graphql/types';
 import { State } from '../../store';
 import { networkActions, networkSelectors } from '../../store/network';
 import { IpOverviewId } from '../page/network/ip_overview';
-import * as ip_i18n from '../page/network/ip_overview/translations';
+import * as i18nIp from '../page/network/ip_overview/translations';
 
 import { FlowTargetSelect } from './flow_target_select';
 
@@ -43,7 +43,7 @@ const FlowTargetSelectComponent = pure<FlowTargetSelectProps>(
         isLoading={!flowTarget}
         selectedDirection={FlowDirection.uniDirectional}
         selectedTarget={flowTarget}
-        displayTextOverride={[ip_i18n.AS_SOURCE, ip_i18n.AS_DESTINATION]}
+        displayTextOverride={[i18nIp.AS_SOURCE, i18nIp.AS_DESTINATION]}
         updateFlowTargetAction={updateIpDetailsFlowTarget}
       />
     </SelectTypeItem>

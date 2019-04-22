@@ -18,7 +18,6 @@ import { mockData } from './mock';
 
 describe('UncommonProcess Table Component', () => {
   const loadMore = jest.fn();
-  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
 
   describe('rendering', () => {
     test('it renders the default Uncommon process table', () => {
@@ -31,7 +30,6 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -50,7 +48,6 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -75,7 +72,6 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -101,7 +97,6 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -127,7 +122,6 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>
@@ -152,7 +146,6 @@ describe('UncommonProcess Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={hostsModel.HostsType.page}
           />
         </TestProviders>

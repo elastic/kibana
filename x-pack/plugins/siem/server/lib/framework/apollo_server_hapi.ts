@@ -32,8 +32,8 @@ export const graphqlHapi: Plugin<HapiGraphQLPluginOptions> = {
         try {
           const query =
             request.method === 'post'
-              ? (request.payload as Record<string, any>) // tslint:disable-line:no-any
-              : (request.query as Record<string, any>); // tslint:disable-line:no-any
+              ? (request.payload as Record<string, any>) // eslint-disable-line @typescript-eslint/no-explicit-any
+              : (request.query as Record<string, any>); // eslint-disable-line @typescript-eslint/no-explicit-any
 
           const gqlResponse = await runHttpQuery([request], {
             method: request.method.toUpperCase(),
@@ -87,7 +87,7 @@ export type HapiGraphiQLOptionsFunction = (
 export interface HapiGraphiQLPluginOptions {
   path: string;
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   route?: any;
 
   graphiqlOptions: GraphiQL.GraphiQLData | HapiGraphiQLOptionsFunction;

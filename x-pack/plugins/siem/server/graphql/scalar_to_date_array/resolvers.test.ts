@@ -36,7 +36,7 @@ describe('Test ToDateArray Scalar Resolver', () => {
       ]);
     });
 
-    test('Test Basic Date String in an array', () => {
+    test('Test Two Basic Date Strings in an array', () => {
       expect(
         toDateArrayScalar.serialize(['2019-04-16T03:14:13.704Z', '2019-05-16T03:14:13.704Z'])
       ).toEqual(['2019-04-16T03:14:13.704Z', '2019-05-16T03:14:13.704Z']);

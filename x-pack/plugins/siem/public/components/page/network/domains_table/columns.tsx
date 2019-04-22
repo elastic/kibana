@@ -9,6 +9,7 @@ import numeral from '@elastic/numeral';
 import { getOr, isEmpty } from 'lodash/fp';
 import moment from 'moment';
 import React from 'react';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
   DomainsItem,
@@ -32,9 +33,8 @@ import { AddToKql } from '../../add_to_kql';
 import * as i18n from './translations';
 
 export const getDomainsColumns = (
+  indexPattern: StaticIndexPattern,
   ip: string,
-  startDate: number,
-  endDate: number,
   flowDirection: FlowDirection,
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
@@ -63,7 +63,6 @@ export const getDomainsColumns = (
               excluded: false,
               kqlQuery: '',
               queryMatch: { field: domainNameAttr, value: domainName },
-              queryDate: { from: startDate, to: endDate },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -92,6 +91,7 @@ export const getDomainsColumns = (
         : directions &&
           directions.map((direction, index) => (
             <AddToKql
+              indexPattern={indexPattern}
               key={escapeDataProviderId(
                 `${tableId}-table-${flowTarget}-${flowDirection}-direction-${direction}`
               )}

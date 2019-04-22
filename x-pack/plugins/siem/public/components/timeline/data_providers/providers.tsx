@@ -149,7 +149,6 @@ export const Providers = pure<Props>(
                           toggleEnabledProvider={toggleEnabledProvider}
                           toggleExcludedProvider={toggleExcludedProvider}
                           providerId={dataProvider.id}
-                          queryDate={dataProvider.queryDate}
                           val={
                             dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value
                           }

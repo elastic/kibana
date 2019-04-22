@@ -12,7 +12,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ServiceListAPIResponse } from '../../../../../server/lib/services/get_services';
 import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
 
 interface Props {
@@ -34,7 +34,7 @@ function formatString(value?: string | null) {
   return value || NOT_AVAILABLE_LABEL;
 }
 
-const AppLink = styled(KibanaLink)`
+const AppLink = styled(APMLink)`
   font-size: ${fontSizes.large};
   ${truncate('100%')};
 `;
@@ -51,7 +51,7 @@ export const SERVICE_COLUMNS: Array<
     sortable: true,
     render: (serviceName: string) => (
       <EuiToolTip content={formatString(serviceName)} id="service-name-tooltip">
-        <AppLink hash={`/${serviceName}/transactions`}>
+        <AppLink path={`/${serviceName}/transactions`}>
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>

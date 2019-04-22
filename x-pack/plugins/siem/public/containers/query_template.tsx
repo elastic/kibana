@@ -16,18 +16,17 @@ export interface QueryTemplateProps {
   startDate?: number;
   endDate?: number;
   filterQuery?: ESQuery | string;
-  poll?: number;
 }
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type FetchMoreOptionsArgs<TData, TVariables> = FetchMoreQueryOptions<any, any> &
   FetchMoreOptions<TData, TVariables>;
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type PromiseApolloQueryResult = Promise<ApolloQueryResult<any>>;
 
 export class QueryTemplate<
   T extends QueryTemplateProps,
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   TData = any,
   TVariables = OperationVariables
 > extends React.PureComponent<T, TData, TVariables> {

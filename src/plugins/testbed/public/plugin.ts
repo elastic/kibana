@@ -21,7 +21,7 @@ import { Plugin, PluginSetupContext } from 'kibana/public';
 
 export class TestbedPlugin implements Plugin<TestbedPluginSetup> {
   public setup(core: PluginSetupContext, deps: {}) {
-    // tslint:disable-next-line no-console
+    // eslint-disable-next-line no-console
     console.log(`Testbed plugin loaded`);
   }
 }

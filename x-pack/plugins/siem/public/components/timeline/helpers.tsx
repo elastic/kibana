@@ -22,11 +22,6 @@ const buildQueryMatch = (dataProvider: DataProvider) =>
       : ''
   }`.trim();
 
-const buildQueryDate = (dataProvider: DataProvider) =>
-  dataProvider.queryDate
-    ? `@timestamp >= ${dataProvider.queryDate.from} and @timestamp <= ${dataProvider.queryDate.to}`
-    : '';
-
 const buildQueryForAndProvider = (dataAndProviders: DataProvider[]) =>
   dataAndProviders
     .reduce((andQuery, andDataProvider) => {
@@ -44,7 +39,6 @@ export const buildGlobalQuery = (dataProviders: DataProvider[]) =>
       return dataProvider.enabled
         ? `${prepend(query)}(
         ${buildQueryMatch(dataProvider)}
-        ${dataProvider.queryDate ? ` and ${buildQueryDate(dataProvider)}` : ''}
         ${
           dataProvider.and.length > 0 ? ` and ${buildQueryForAndProvider(dataProvider.and)}` : ''
         })`.trim()
@@ -56,22 +50,34 @@ export const combineQueries = (
   dataProviders: DataProvider[],
   indexPattern: StaticIndexPattern,
   kqlQuery: string,
-  kqlMode: string
+  kqlMode: string,
+  start: number,
+  end: number
 ): { filterQuery: string } | null => {
   if (isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return null;
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery)) {
     return {
-      filterQuery: convertKueryToElasticSearchQuery(kqlQuery, indexPattern),
+      filterQuery: convertKueryToElasticSearchQuery(
+        `(${kqlQuery}) and @timestamp >= ${start} and @timestamp <= ${end}`,
+        indexPattern
+      ),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
     return {
-      filterQuery: convertKueryToElasticSearchQuery(buildGlobalQuery(dataProviders), indexPattern),
+      filterQuery: convertKueryToElasticSearchQuery(
+        `((${buildGlobalQuery(
+          dataProviders
+        )}) and @timestamp >= ${start} and @timestamp <= ${end})`,
+        indexPattern
+      ),
     };
   }
   const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
-  const globalQuery = `${buildGlobalQuery(dataProviders)}${postpend(kqlQuery)}`;
+  const globalQuery = `((${buildGlobalQuery(dataProviders)}${postpend(
+    kqlQuery
+  )}) and @timestamp >= ${start} and @timestamp <= ${end})`;
 
   return {
     filterQuery: convertKueryToElasticSearchQuery(globalQuery, indexPattern),

@@ -25,7 +25,7 @@ const MainContainer = styled.div`
 export function Main() {
   return (
     <GlobalFetchIndicator>
-      <MainContainer>
+      <MainContainer data-test-subj="apmMainContainer">
         <UpdateBreadcrumbs />
         <Route component={ConnectRouterToRedux} />
         <Route component={ScrollToTopOnPathChange} />

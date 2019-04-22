@@ -511,9 +511,7 @@ exports[`Host Summary Component rendering it renders the default Host Summary 1`
         },
       }
     }
-    endDate={618472800000}
     loading={false}
-    startDate={552204000000}
   />
 </Component>
 `;

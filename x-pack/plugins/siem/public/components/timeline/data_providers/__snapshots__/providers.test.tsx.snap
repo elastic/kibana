@@ -14,10 +14,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 1",
           "kqlQuery": "",
           "name": "Provider 1",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 1",
@@ -30,10 +26,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 2",
           "kqlQuery": "",
           "name": "Provider 2",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 2",
@@ -46,10 +38,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 3",
           "kqlQuery": "",
           "name": "Provider 3",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 3",
@@ -62,10 +50,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 4",
           "kqlQuery": "",
           "name": "Provider 4",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 4",
@@ -78,10 +62,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 5",
           "kqlQuery": "",
           "name": "Provider 5",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 5",
@@ -94,10 +74,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 6",
           "kqlQuery": "",
           "name": "Provider 6",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 6",
@@ -110,10 +86,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 7",
           "kqlQuery": "",
           "name": "Provider 7",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 7",
@@ -126,10 +98,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 8",
           "kqlQuery": "",
           "name": "Provider 8",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 8",
@@ -142,10 +110,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 9",
           "kqlQuery": "",
           "name": "Provider 9",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 9",
@@ -158,10 +122,6 @@ exports[`Providers rendering renders correctly against snapshot 1`] = `
           "id": "id-Provider 10",
           "kqlQuery": "",
           "name": "Provider 10",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 10",

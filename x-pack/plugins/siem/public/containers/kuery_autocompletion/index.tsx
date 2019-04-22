@@ -33,7 +33,7 @@ interface KueryAutocompletionLifecycleState {
   suggestions: AutocompleteSuggestion[];
 }
 
-export class KueryAutocompletion extends React.Component<
+export class KueryAutocompletion extends React.PureComponent<
   KueryAutocompletionLifecycleProps,
   KueryAutocompletionLifecycleState
 > {

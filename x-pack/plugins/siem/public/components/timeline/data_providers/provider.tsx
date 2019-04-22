@@ -23,7 +23,6 @@ export const Provider = pure<OwnProps>(({ dataProvider }) => (
     isEnabled={dataProvider.enabled}
     isExcluded={dataProvider.excluded}
     providerId={dataProvider.id}
-    queryDate={dataProvider.queryDate}
     toggleEnabledProvider={noop}
     toggleExcludedProvider={noop}
     val={dataProvider.queryMatch.displayValue || dataProvider.queryMatch.value}

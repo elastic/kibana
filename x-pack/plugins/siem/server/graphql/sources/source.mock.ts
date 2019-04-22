@@ -7,7 +7,6 @@
 import { Logger } from '../../utils/logger';
 import { SiemContext } from '../index';
 
-/* tslint:disable */
 export const mockSourceData = {
   id: 'default',
   configuration: {
@@ -38,7 +37,6 @@ export const mockSourceData = {
     ],
   },
 };
-/* tslint:enable */
 
 export const getSourceQueryMock = (logger: Logger) => ({
   source: (root: unknown, args: unknown, context: SiemContext) => {

@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { injectGlobal } from 'styled-components';
 
 // SIDE EFFECT: the following `injectGlobal` overrides default styling in angular code that was not theme-friendly
-// tslint:disable-next-line:no-unused-expression
+// eslint-disable-next-line no-unused-expressions
 injectGlobal`
   div.app-wrapper {
     background-color: rgba(0,0,0,0);

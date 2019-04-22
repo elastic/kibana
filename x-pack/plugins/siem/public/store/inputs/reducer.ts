@@ -16,8 +16,10 @@ import {
   setRelativeRangeDatePicker,
   startAutoReload,
   stopAutoReload,
+  toggleTimelineLinkTo,
 } from './actions';
-import { InputsModel } from './model';
+import { toggleLockTimeline, updateInputTimerange } from './helpers';
+import { InputsModel, TimeRange } from './model';
 
 export type InputsState = InputsModel;
 const momentDate = dateMath.parse('now-24h');
@@ -33,48 +35,60 @@ export const initialInputsState: InputsState = {
     query: [],
     policy: {
       kind: 'manual',
-      duration: 5000,
+      duration: 300000,
     },
+    linkTo: ['timeline'],
+  },
+  timeline: {
+    timerange: {
+      kind: 'relative',
+      fromStr: 'now-24h',
+      toStr: 'now',
+      from: momentDate ? momentDate.valueOf() : 0,
+      to: Date.now(),
+    },
+    query: [],
+    policy: {
+      kind: 'manual',
+      duration: 300000,
+    },
+    linkTo: ['global'],
   },
 };
 
 export const inputsReducer = reducerWithInitialState(initialInputsState)
-  .case(setAbsoluteRangeDatePicker, (state, { id, from, to }) => ({
+  .case(setAbsoluteRangeDatePicker, (state, { id, from, to }) => {
+    const timerange: TimeRange = {
+      kind: 'absolute',
+      fromStr: undefined,
+      toStr: undefined,
+      from,
+      to,
+    };
+    return updateInputTimerange(id, timerange, state);
+  })
+  .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => {
+    const timerange: TimeRange = {
+      kind: 'relative',
+      fromStr,
+      toStr,
+      from,
+      to,
+    };
+    return updateInputTimerange(id, timerange, state);
+  })
+  .case(deleteAllQuery, (state, { id }) => ({
     ...state,
     [id]: {
       ...get(id, state),
-      timerange: {
-        kind: 'absolute',
-        from,
-        to,
-      },
-    },
-  }))
-  .case(setRelativeRangeDatePicker, (state, { id, fromStr, from, to, toStr }) => ({
-    ...state,
-    [id]: {
-      ...get(id, state),
-      timerange: {
-        kind: 'relative',
-        fromStr,
-        toStr,
-        from,
-        to,
-      },
-    },
-  }))
-  .case(deleteAllQuery, state => ({
-    ...state,
-    global: {
-      ...state.global,
       query: state.global.query.slice(state.global.query.length),
     },
   }))
-  .case(setQuery, (state, { id, loading, refetch }) => ({
+  .case(setQuery, (state, { inputId, id, loading, refetch }) => ({
     ...state,
-    global: {
-      ...state.global,
-      query: unionBy('id', [{ id, loading, refetch }], state.global.query),
+    [inputId]: {
+      ...get(inputId, state),
+      query: unionBy('id', [{ id, loading, refetch }], state[inputId].query),
     },
   }))
   .case(setDuration, (state, { id, duration }) => ({
@@ -107,4 +121,5 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
       },
     },
   }))
+  .case(toggleTimelineLinkTo, (state, { linkToId }) => toggleLockTimeline(linkToId, state))
   .build();

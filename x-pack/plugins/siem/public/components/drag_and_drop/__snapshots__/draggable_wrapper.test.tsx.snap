@@ -14,10 +14,6 @@ exports[`DraggableWrapper rendering it renders against the snapshot 1`] = `
           "id": "id-Provider 1",
           "kqlQuery": "",
           "name": "Provider 1",
-          "queryDate": Object {
-            "from": 1521830963132,
-            "to": 1521862432253,
-          },
           "queryMatch": Object {
             "field": "name",
             "value": "Provider 1",

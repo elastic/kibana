@@ -55,7 +55,7 @@ describe('events elasticsearch_adapter', () => {
     expect(merge2).toEqual({ node: { os: 'os-1', version: 'version-1' } });
   });
 
-  test('it should merge two fields correctly', () => {
+  test('it should merge two fields correctly with values', () => {
     const existing = { node: {} };
     const merge1 = mergeFieldsWithHit('level1.value1', existing, mockFieldMap, mockHits);
     const merge2 = mergeFieldsWithHit('level1.value2', merge1, mockFieldMap, mockHits);

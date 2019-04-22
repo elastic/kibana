@@ -129,6 +129,7 @@ declare module '@elastic/eui' {
     hasDividers?: boolean;
     itemLayoutAlign?: any;
     compressed?: boolean;
+    fullWidth?: any;
   };
 
   export const EuiSuperSelect: React.SFC<EuiSuperSelectProps>;

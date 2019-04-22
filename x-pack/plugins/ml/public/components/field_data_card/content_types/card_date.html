@@ -15,7 +15,7 @@
       i18n-id="xpack.ml.fieldDataCard.cardDate.earliestLabel"
       i18n-default-message="earliest {earliestCardStats}"
       i18n-values="{
-        earliestCardStats: (card.stats.earliest | moment),
+        earliestCardStats: (toMoment(card.stats.earliest)),
       }"
     ></div>
     <div
@@ -23,7 +23,7 @@
       i18n-id="xpack.ml.fieldDataCard.cardDate.latestLabel"
       i18n-default-message="latest {latestCardStats}"
       i18n-values="{
-        latestCardStats: (card.stats.latest | moment),
+        latestCardStats: (toMoment(card.stats.latest)),
       }"
     ></div>
   </div>

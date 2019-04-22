@@ -12,14 +12,13 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowDirection } from '../../../../graphql/types';
-import { mockGlobalState, TestProviders } from '../../../../mock';
+import { mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { NetworkTopNFlowTable, NetworkTopNFlowTableId } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
-  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
@@ -34,13 +33,13 @@ describe('NetworkTopNFlow Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <NetworkTopNFlowTable
+            indexPattern={mockIndexPattern}
             loading={false}
             data={mockData.NetworkTopNFlow.edges}
             totalCount={mockData.NetworkTopNFlow.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
@@ -60,13 +59,13 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
@@ -94,13 +93,13 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>
@@ -135,13 +134,13 @@ describe('NetworkTopNFlow Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <NetworkTopNFlowTable
+              indexPattern={mockIndexPattern}
               loading={false}
               data={mockData.NetworkTopNFlow.edges}
               totalCount={mockData.NetworkTopNFlow.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkTopNFlow.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.NetworkTopNFlow.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

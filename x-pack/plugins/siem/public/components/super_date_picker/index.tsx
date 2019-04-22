@@ -50,20 +50,24 @@ interface SuperDatePickerStateRedux {
 }
 
 interface SuperDatePickerDispatchProps {
-  setAbsoluteSuperDatePicker: ActionCreator<{ id: string; from: number; to: number }>;
+  setAbsoluteSuperDatePicker: ActionCreator<{
+    id: inputsModel.InputsModelId;
+    from: number;
+    to: number;
+  }>;
   setRelativeSuperDatePicker: ActionCreator<{
-    id: string;
+    id: inputsModel.InputsModelId;
     fromStr: string;
     from: number;
     to: number;
     toStr: string;
   }>;
-  startAutoReload: ActionCreator<{ id: string }>;
-  stopAutoReload: ActionCreator<{ id: string }>;
-  setDuration: ActionCreator<{ id: string; duration: number }>;
+  startAutoReload: ActionCreator<{ id: inputsModel.InputsModelId }>;
+  stopAutoReload: ActionCreator<{ id: inputsModel.InputsModelId }>;
+  setDuration: ActionCreator<{ id: inputsModel.InputsModelId; duration: number }>;
 }
 interface OwnProps {
-  id: string;
+  id: inputsModel.InputsModelId;
   disabled?: boolean;
 }
 
@@ -77,11 +81,8 @@ export type SuperDatePickerProps = OwnProps &
   SuperDatePickerStateRedux;
 
 export interface SuperDatePickerState {
-  isAutoRefreshOnly: boolean;
-  isPaused: boolean;
   isQuickSelection: boolean;
   recentlyUsedRanges: TimeArgs[];
-  refreshInterval: number;
   showUpdateButton: boolean;
 }
 
@@ -93,17 +94,14 @@ export const SuperDatePickerComponent = class extends Component<
     super(props);
 
     this.state = {
-      isAutoRefreshOnly: false,
-      isPaused: true,
       isQuickSelection: true,
       recentlyUsedRanges: [],
-      refreshInterval: 300000,
       showUpdateButton: true,
     };
   }
 
   public render() {
-    const { end, start, kind, fromStr, toStr, isLoading } = this.props;
+    const { duration, end, start, kind, fromStr, policy, toStr, isLoading } = this.props;
     const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
     const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
 
@@ -111,12 +109,12 @@ export const SuperDatePickerComponent = class extends Component<
       <MyEuiSuperDatePicker
         end={endDate}
         isLoading={isLoading}
-        isPaused={this.state.isPaused}
+        isPaused={policy === 'manual'}
         onTimeChange={this.onTimeChange}
         onRefreshChange={this.onRefreshChange}
         onRefresh={this.onRefresh}
         recentlyUsedRanges={this.state.recentlyUsedRanges}
-        refreshInterval={this.state.refreshInterval}
+        refreshInterval={duration}
         showUpdateButton={this.state.showUpdateButton}
         start={startDate}
       />
@@ -129,7 +127,16 @@ export const SuperDatePickerComponent = class extends Component<
       isQuickSelection: this.state.isQuickSelection,
       isInvalid: false,
     });
-    this.refetchQuery(this.props.refetch);
+    const currentStart = this.formatDate(start);
+    const currentEnd = this.state.isQuickSelection
+      ? this.formatDate(end, { roundUp: true })
+      : this.formatDate(end);
+    if (
+      !this.state.isQuickSelection ||
+      (this.props.start === currentStart && this.props.end === currentEnd)
+    ) {
+      this.refetchQuery(this.props.refetch);
+    }
   };
 
   private onRefreshChange = ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
@@ -151,11 +158,6 @@ export const SuperDatePickerComponent = class extends Component<
     ) {
       this.refetchQuery(this.props.refetch);
     }
-
-    this.setState({
-      ...this.state,
-      isPaused,
-    });
   };
 
   private refetchQuery = (query: inputsModel.Refetch[]) => {

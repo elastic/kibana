@@ -98,7 +98,7 @@ describe('hosts elasticsearch_adapter', () => {
       expect(data).toEqual(expected);
     });
 
-    test('it formats a host with a source of name correctly', () => {
+    test('it formats a host with a source of id correctly', () => {
       const fields: ReadonlyArray<string> = ['host.name'];
       const data = formatHostEdgesData(fields, buckets);
       const expected: HostsEdges = {

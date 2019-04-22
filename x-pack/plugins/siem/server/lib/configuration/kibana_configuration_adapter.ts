@@ -12,7 +12,7 @@ export class KibanaConfigurationAdapter<Configuration>
   implements ConfigurationAdapter<Configuration> {
   private readonly server: ServerWithConfig;
 
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(server: any) {
     if (!isServerWithConfig(server)) {
       throw new Error('Failed to find configuration on server.');
@@ -46,11 +46,11 @@ export class KibanaConfigurationAdapter<Configuration>
 }
 
 interface ServerWithConfig {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config(): any;
 }
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isServerWithConfig(maybeServer: any): maybeServer is ServerWithConfig {
   return (
     Joi.validate(
@@ -63,11 +63,11 @@ function isServerWithConfig(maybeServer: any): maybeServer is ServerWithConfig {
 }
 
 interface KibanaConfiguration {
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   get(key: string): any;
 }
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function isKibanaConfiguration(maybeConfiguration: any): maybeConfiguration is KibanaConfiguration {
   return (
     Joi.validate(

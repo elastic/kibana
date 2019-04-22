@@ -18,7 +18,6 @@ import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
 
 describe('NetworkTopNFlow Table Component', () => {
-  const startDate = new Date('2019-01-08T16:31:10.707Z').valueOf();
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
@@ -39,7 +38,6 @@ describe('NetworkTopNFlow Table Component', () => {
             hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
             nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)!}
             loadMore={loadMore}
-            startDate={startDate}
             type={networkModel.NetworkType.page}
           />
         </ReduxStoreProvider>
@@ -61,7 +59,6 @@ describe('NetworkTopNFlow Table Component', () => {
               hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
               nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)!}
               loadMore={loadMore}
-              startDate={startDate}
               type={networkModel.NetworkType.page}
             />
           </TestProviders>

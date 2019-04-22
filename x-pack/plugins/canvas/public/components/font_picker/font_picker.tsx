@@ -7,7 +7,7 @@
 // @ts-ignore (elastic/eui#1262) EuiSuperSelect is not exported yet
 import { EuiSuperSelect } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 import { fonts, FontValue } from '../../../common/lib/fonts';
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   value?: FontValue;
 }
 
-export const FontPicker: SFC<Props> = props => {
+export const FontPicker: FunctionComponent<Props> = props => {
   const { value, onSelect } = props;
 
   // While fonts are strongly-typed, we also support custom fonts someone might type in.

@@ -10,7 +10,14 @@ import { ActionCreator } from 'typescript-fsa';
 
 import { WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
-import { State, timelineActions, timelineModel, timelineSelectors } from '../../store';
+import {
+  inputsModel,
+  inputsSelectors,
+  State,
+  timelineActions,
+  timelineModel,
+  timelineSelectors,
+} from '../../store';
 
 import { ColumnHeader } from './body/column_headers/column_header';
 import { Sort } from './body/sort';
@@ -35,12 +42,15 @@ interface StateReduxProps {
   activePage?: number;
   columns: ColumnHeader[];
   dataProviders?: DataProvider[];
+  end: number;
+  isLive: boolean;
   itemsPerPage?: number;
   itemsPerPageOptions?: number[];
   kqlMode: timelineModel.KqlMode;
   kqlQueryExpression: string;
   pageCount?: number;
   sort?: Sort;
+  start: number;
   show?: boolean;
 }
 
@@ -107,14 +117,17 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
     const {
       columns,
       dataProviders,
+      end,
       flyoutHeight,
       flyoutHeaderHeight,
       id,
+      isLive,
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
       show,
+      start,
       sort,
     } = this.props;
 
@@ -126,9 +139,11 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             columns={columns}
             id={id}
             dataProviders={dataProviders!}
+            end={end}
             flyoutHeaderHeight={flyoutHeaderHeight}
             flyoutHeight={flyoutHeight}
             indexPattern={indexPattern}
+            isLive={isLive}
             itemsPerPage={itemsPerPage!}
             itemsPerPageOptions={itemsPerPageOptions!}
             kqlMode={kqlMode}
@@ -140,6 +155,7 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
             onToggleDataProviderEnabled={this.onToggleDataProviderEnabled}
             onToggleDataProviderExcluded={this.onToggleDataProviderExcluded}
             show={show!}
+            start={start}
             sort={sort!}
           />
         )}
@@ -189,8 +205,10 @@ class StatefulTimelineComponent extends React.PureComponent<Props> {
 const makeMapStateToProps = () => {
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
   const getKqlQueryTimeline = timelineSelectors.getKqlFilterQuerySelector();
+  const getInputsTimeline = inputsSelectors.getTimelineSelector();
   const mapStateToProps = (state: State, { id }: OwnProps) => {
     const timeline: timelineModel.TimelineModel = getTimeline(state, id);
+    const input: inputsModel.InputsRange = getInputsTimeline(state);
     const {
       columns,
       dataProviders,
@@ -205,12 +223,15 @@ const makeMapStateToProps = () => {
     return {
       columns,
       dataProviders,
+      end: input.timerange.to,
       id,
+      isLive: input.policy.kind === 'interval',
       itemsPerPage,
       itemsPerPageOptions,
       kqlMode,
       kqlQueryExpression,
       sort,
+      start: input.timerange.from,
       show,
     };
   };

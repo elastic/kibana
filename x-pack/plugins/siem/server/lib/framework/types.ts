@@ -41,14 +41,14 @@ export interface FrameworkAdapter {
   callWithRequest(
     req: FrameworkRequest,
     method: 'indices.getMapping',
-    options?: IndicesGetMappingParams
+    options?: IndicesGetMappingParams // eslint-disable-line
   ): Promise<MappingResponse>;
   callWithRequest(
     req: FrameworkRequest,
-    method: 'indices.getAlias' | 'indices.get',
+    method: 'indices.getAlias' | 'indices.get', // eslint-disable-line
     options?: object
   ): Promise<DatabaseGetIndicesResponse>;
-  // tslint:disable-next-line:no-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getIndexPatternsService(req: FrameworkRequest<any>): FrameworkIndexPatternsService;
 }
 
@@ -59,7 +59,7 @@ export interface FrameworkRequest<InternalRequest extends WrappableRequest = Wra
   query: InternalRequest['query'];
 }
 
-// tslint:disable-next-line:no-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface WrappableRequest<Payload = any, Params = any, Query = any> {
   payload: Payload;
   params: Params;
