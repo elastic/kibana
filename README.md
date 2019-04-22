@@ -17,45 +17,76 @@ Source: [https://en.wikipedia.org/wiki/Backporting](https://en.wikipedia.org/wik
 
 ## Who is this tool for?
 
-If your development workflow looks something like this:
+This tools is for anybody who are working on a codebase where they have to maintain multiple versions. If you manually cherry-pick commits from master, this tool might save you a lot of time.
 
-1.  Write some code, merge those changes to master (eg. using a pull request)
-2.  Cherry-pick one or more commits from master onto one or more branches
-3.  Push those branches and a create new backport pull requests
-
-Then `backport` might save you a lot of time and effort. The CLI will ask you which commit to backport, and to which branch and the cherry-pick the commit, and create a pull request towards the correct branch.
+`backport` is a CLI that will ask you which commit to backport, and to which branch and then cherry-pick the commit, and create a pull request towards the correct branch.
 
 ## Requirements
 
 - Node 8 or higher
+- git
 
-## Install
+OR
+
+- Docker
+
+## Install with Node
 
 ```
 npm install -g backport
 ```
 
-After installation you must update the global config in `~/.backport/config` with your Github username and a Github access token. More info [here](https://github.com/sqren/backport/blob/master/docs/getting-started.md#new-user-create-user-config)
+After installation you must update the [global config](https://github.com/sqren/backport/blob/master/docs/getting-started.md#new-user-create-user-config) in `~/.backport/config.json` with your Github username and a Github access token.
+
+## Run via Docker
+
+If you don't have Node.js or git installed locally, you can run `backport` via Docker.
+The easiest way is to add the following snippet to your bash profile:
+
+```sh
+backport() {
+    BACKPORT_CONFIG_DIR=~/.backport
+    GIT_CONFIG_FILE=~/.gitconfig
+
+    docker run -it --rm -v $(pwd):/app:ro -v $BACKPORT_CONFIG_DIR:/root/.backport -v $GIT_CONFIG_FILE:/etc/gitconfig sqren/backport "$@"
+}
+```
+
+Where:
+
+- `BACKPORT_CONFIG_DIR`: This can be ANY empty folder on your local machine. Upon running the docker container for the first time, a [`config.json`](https://github.com/sqren/backport/blob/master/docs/getting-started.md#new-user-create-user-config) will be created automatically. This must be filled out with `username` and `accessToken` or these must be passed as CLI arguments: `backport --username <username> --accessToken <accessToken>`
+- `GIT_CONFIG_FILE`: Must point to a local [`.gitconfig`](https://gist.github.com/sqren/618ab2f77ffb8b5388d675fe705ed6da) file that contains the user's name and email.
+
+You can now use `backport` as if it was installed locally.
 
 ## Usage
 
-Run the CLI in your project folder (eg. in the Kibana folder):
+Run the CLI in your project folder (must contain a [`.backportrc.json`](https://github.com/sqren/backport/blob/master/docs/configuration.md#project-specific-configuration) file):
 
 ```
-$ backport
+> backport
 ```
 
-Follow the steps. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed.
+or run this from anywhere:
+
+```
+> backport --upstream elastic/kibana
+```
+
+The above commands will start an interactive prompt. You can use the `arrow keys` to choose options, `<space>` to select checkboxes and `<enter>` to proceed.
 
 ### Options
 
 | Option        | Description                               | Accepts                  |
 | ------------- | ----------------------------------------- | ------------------------ |
+| --accessToken | Github access token                       | string                   |
 | --all         | Show all commits                          | boolean (default: false) |
-| --branch      | Branch to backport                        | array (default: [])      |
+| --branch      | Branch to backport to                     | string                   |
+| --labels      | Pull request labels                       | string                   |
 | --multiple    | Backport multiple commits and/or branches | boolean                  |
-| --upstream    | Name of repository                        | string                   |
 | --sha         | Commit sha to backport                    | string                   |
+| --upstream    | Name of repository                        | string                   |
+| --username    | Github username                           | string                   |
 | --help        | Show help                                 |                          |
 | -v, --version | Show version number                       |                          |
 

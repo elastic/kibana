@@ -1,7 +1,7 @@
 # Configuration
 
-* [User configuration](#userglobal-configuration)
-* [Project configuration](#project-specific-configuration)
+- [User configuration](#userglobal-configuration)
+- [Project configuration](#project-specific-configuration)
 
 ### User/global configuration
 
@@ -22,13 +22,13 @@ A personal access token can be created here: https://github.com/settings/tokens/
 
 Please select the necessary access scopes:
 
-* Private repository
-  * repo:status
-  * repo_deployment
-  * public_repo
-  * repo:invite
-* Public repository
-  * public_repo
+- **Private repository**
+  - repo:status
+  - repo_deployment
+  - public_repo
+  - repo:invite
+- **Public repository**
+  - public_repo
 
 ##### `username` (string) **required**
 

@@ -8,7 +8,7 @@
       "type": "node",
       "request": "launch",
       "name": "Start backport",
-      "program": "${workspaceRoot}/src/cli/index.ts",
+      "program": "${workspaceRoot}/src/index.ts",
       "runtimeArgs": ["-r", "ts-node/register"],
       "args": ["--branch=6.1", "--upstream=sqren/backport-demo"],
       "console": "integratedTerminal"

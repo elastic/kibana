@@ -1,5 +1,10 @@
 {
   "editor.formatOnSave": true,
+  "eslint.autoFixOnSave": true,
+  "eslint.validate": [
+    "javascript",
+    { "language": "typescript", "autoFix": true }
+  ],
   "files.exclude": {
     "yarn.lock": true,
     "coverage": true

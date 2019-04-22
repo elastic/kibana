@@ -1,7 +1,7 @@
 # Getting started
 
-* [Setup for new users](#new-user-create-user-config)
-* [Configure new project](#new-project-create-project-config)
+- [Setup for new users](#new-user-create-user-config)
+- [Configure new project](#new-project-create-project-config)
 
 ### New user: create user config
 
@@ -22,15 +22,18 @@ Edit `~/.backport/config.json`:
 
 **Create access token**
 
-You can create a new access token [here](https://github.com/settings/tokens/new). The minimum permissions depends on the type of repository:
+You can create a new access token [here](https://github.com/settings/tokens/new) (password required). The minimum permissions depends on whether the repository you want to access is private or public
 
-* Private repository
-  * repo:status
-  * repo_deployment
-  * public_repo
-  * repo:invite
-* Public repository
-  * public_repo
+- **Private repository**
+  - repo:status
+  - repo_deployment
+  - public_repo
+  - repo:invite
+- **Public repository**
+
+  - public_repo
+
+  Read more about [Github Access Tokens](https://help.github.com/en/articles/creating-a-personal-access-token-for-the-command-line)
 
 **Use `backport`**
 

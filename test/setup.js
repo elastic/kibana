@@ -3,4 +3,4 @@
 jest.mock('os');
 jest.mock('fs');
 jest.mock('child_process');
-jest.mock('../src/lib/logger');
+jest.mock('../src/services/logger');

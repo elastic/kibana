@@ -25,8 +25,4 @@ fs.chmod = callbackify((...args) => {
   return Promise.resolve('fs.chmod mock value');
 });
 
-fs.statSync = () => {
-  // console.log('Accessing directly statSync');
-};
-
 module.exports = fs;
