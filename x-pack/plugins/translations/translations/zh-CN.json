@@ -87,10 +87,7 @@
     "common.ui.aggTypes.buckets.dateHistogramLabel": "{fieldName}/{intervalDescription}",
     "common.ui.aggTypes.buckets.dateHistogramTitle": "日期直方图",
     "common.ui.aggTypes.buckets.dateRangeTitle": "日期范围",
-    "common.ui.aggTypes.buckets.filtersTitle": {
-      "text": "筛选",
-      "comment": "The name of an aggregation, that allows to specify multiple individual filters to group data by."
-    },
+    "common.ui.aggTypes.buckets.filtersTitle": "筛选",
     "common.ui.aggTypes.buckets.filterTitle": "筛选",
     "common.ui.aggTypes.buckets.geohashGridTitle": "Geohash",
     "common.ui.aggTypes.buckets.geotileGridTitle": "地理磁贴",
@@ -113,10 +110,7 @@
     "common.ui.aggTypes.buckets.significantTermsLabel": "{fieldName} 中排名前 {size} 的罕见词",
     "common.ui.aggTypes.buckets.significantTermsTitle": "重要词",
     "common.ui.aggTypes.buckets.terms.aggNotValidLabel": "- 聚合无效 -",
-    "common.ui.aggTypes.buckets.terms.missingBucketLabel": {
-      "text": "缺失",
-      "comment": "文档缺失特定字段时在文档图表内使用的默认标签。\n          使用词聚合创建图表并选择“显示缺失值”\n          复选框时可以看到。"
-    },
+    "common.ui.aggTypes.buckets.terms.missingBucketLabel": "缺失",
     "common.ui.aggTypes.buckets.terms.orderAscendingTitle": "升序",
     "common.ui.aggTypes.buckets.terms.orderDescendingTitle": "降序",
     "common.ui.aggTypes.buckets.terms.otherBucketDescription": "此请求计数不符合数据存储桶条件的文档数目。",
@@ -128,19 +122,13 @@
     "common.ui.aggTypes.customTimeIntervalAriaLabel": "定制时间间隔",
     "common.ui.aggTypes.dateRanges.acceptedDateFormatsLinkText": "已接受日期格式",
     "common.ui.aggTypes.dateRanges.addRangeButtonLabel": "添加范围",
-    "common.ui.aggTypes.dateRanges.fromColumnLabel": {
-      "text": "从",
-      "comment": "描述日期范围的开始，例如 *从* 2018-02-26 到 2018-02-28"
-    },
+    "common.ui.aggTypes.dateRanges.fromColumnLabel": "从",
     "common.ui.aggTypes.dateRanges.noCompatibleFieldsDescription": "“{indexPatternTitle}”索引模式不包含任何以下字段类型：",
     "common.ui.aggTypes.dateRanges.noCompatibleFieldsLabel": "无兼容字段：",
     "common.ui.aggTypes.dateRanges.removeRangeButtonAriaLabel": "移除此范围",
     "common.ui.aggTypes.dateRanges.requiredDateRangeDescription": "必须至少指定一个日期范围。",
     "common.ui.aggTypes.dateRanges.requiredDateRangeLabel": "必需：",
-    "common.ui.aggTypes.dateRanges.toColumnLabel": {
-      "text": "到",
-      "comment": "描述日期范围的结束，例如从 2018-02-26 *到* 2018-02-28"
-    },
+    "common.ui.aggTypes.dateRanges.toColumnLabel": "到",
     "common.ui.aggTypes.definiteMetricLabel": "指标：{safeMakeLabel}",
     "common.ui.aggTypes.dropPartialBucketsLabel": "丢弃部分存储桶",
     "common.ui.aggTypes.dropPartialBucketsTooltip": "移除超出时间范围的存储桶，以便直方图不以不完整的存储桶开始和结束。",
@@ -154,10 +142,7 @@
     "common.ui.aggTypes.field.fieldLabel": "字段",
     "common.ui.aggTypes.field.selectFieldPlaceholder": "选择字段",
     "common.ui.aggTypes.filters.addFilterButtonLabel": "添加筛选",
-    "common.ui.aggTypes.filters.definiteFilterLabel": {
-      "text": "筛选 {index} 标签",
-      "comment": "'Filter {index}' represents the name of the filter as a noun, similar to 'label for filter 1'."
-    },
+    "common.ui.aggTypes.filters.definiteFilterLabel": "筛选 {index} 标签",
     "common.ui.aggTypes.filters.filterLabel": "筛选 {index}",
     "common.ui.aggTypes.filters.filterPlaceholder": "Lucene 或查询 DSL",
     "common.ui.aggTypes.filters.labelPlaceholder": "标签",
@@ -247,10 +232,7 @@
     "common.ui.aggTypes.metrics.topHitTitle": "最高命中结果",
     "common.ui.aggTypes.metrics.uniqueCountLabel": "“{field}” 的唯一计数",
     "common.ui.aggTypes.metrics.uniqueCountTitle": "唯一计数",
-    "common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage": {
-      "text": "使用 “{type}” 指标聚合时，上一存储桶聚合必须是“Date Histogram”或“Histogram”！",
-      "comment": "Date Histogram and Histogram should not be translated"
-    },
+    "common.ui.aggTypes.metrics.wrongLastBucketTypeErrorMessage": "使用 “{type}” 指标聚合时，上一存储桶聚合必须是“Date Histogram”或“Histogram”！",
     "common.ui.aggTypes.minimumIntervalLabel": "最小时间间隔",
     "common.ui.aggTypes.minimumIntervalTooltip": "提供的值创建的存储桶数目大于“高级设置”的 {histogramMaxBars} 指定的数目时，将自动缩放时间间隔",
     "common.ui.aggTypes.onlyRequestDataAroundMapExtentLabel": "仅请求地图范围的数据",
@@ -337,10 +319,7 @@
     "common.ui.courier.savedObject.confirmModal.overwriteTitle": "覆盖“{name}”？",
     "common.ui.courier.savedObject.confirmModal.saveDuplicateButtonLabel": "保存“{name}”",
     "common.ui.courier.savedObject.confirmModal.saveDuplicateConfirmationMessage": "具有标题 “{title}” 的 “{name}” 已存在。是否确定要保存？",
-    "common.ui.courier.savedObject.howToSaveAsNewDescription": {
-      "text": "在 Kibana 的以前版本中，更改 {savedObjectName} 的名称将创建具有新名称的副本。使用“另存为新的 {savedObjectName}” 复选框可立即达到此目的。",
-      "comment": "'Save as a new {savedObjectName}' refers to common.ui.courier.savedObject.saveAsNewLabel and should be the same text."
-    },
+    "common.ui.courier.savedObject.howToSaveAsNewDescription": "在 Kibana 的以前版本中，更改 {savedObjectName} 的名称将创建具有新名称的副本。使用“另存为新的 {savedObjectName}” 复选框可立即达到此目的。",
     "common.ui.courier.savedObject.overwriteRejectedDescription": "已拒绝覆盖确认",
     "common.ui.courier.savedObject.saveAsNewLabel": "另存为新的 {savedObjectName}",
     "common.ui.courier.savedObject.saveDuplicateRejectedDescription": "已拒绝使用重复标题保存确认",
@@ -440,10 +419,7 @@
     "common.ui.fieldEditor.deleteField.savedHeader": "已保存 “{fieldName}”",
     "common.ui.fieldEditor.deleteFieldHeader": "删除字段 “{fieldName}”",
     "common.ui.fieldEditor.deleteFieldLabel": "您无法恢复已删除字段。{separator}确定要执行此操作？",
-    "common.ui.fieldEditor.disabledCallOutHeader": {
-      "text": "脚本已禁用",
-      "comment": "显示脚本在 Elasticsearch 中已禁用的状态。不是更新消息，其刚被禁用。"
-    },
+    "common.ui.fieldEditor.disabledCallOutHeader": "脚本已禁用",
     "common.ui.fieldEditor.disabledCallOutLabel": "所有内联脚本在 Elasticsearch 中已禁用。必须至少为一种语言启用内联脚本，才能在 Kibana 中使用脚本字段。",
     "common.ui.fieldEditor.duration.decimalPlacesLabel": "小数位数",
     "common.ui.fieldEditor.duration.inputFormatLabel": "输入格式",
@@ -473,10 +449,7 @@
     "common.ui.fieldEditor.namePlaceholder": "新建脚本字段",
     "common.ui.fieldEditor.number.documentationLabel": "文档",
     "common.ui.fieldEditor.number.numeralLabel": "Numeral.js 格式模式（默认值：{defaultPattern}）",
-    "common.ui.fieldEditor.popularityLabel": {
-      "text": "常用度",
-      "comment": "“常用度”是指 Kibana 度量字段常用情况的方式（例如其使用普遍性）。"
-    },
+    "common.ui.fieldEditor.popularityLabel": "常用度",
     "common.ui.fieldEditor.samples.inputHeader": "输入",
     "common.ui.fieldEditor.samples.outputHeader": "输出",
     "common.ui.fieldEditor.samplesHeader": "样例",
@@ -684,18 +657,9 @@
     "common.ui.queryBar.syntaxOptionsDescription": "{docsLink} (KQL) 提供简化查询语法并支持脚本字段。如果您具有基本许可或更高级别的许可，KQL 还提供自动填充功能。如果关闭 KQL，Kibana 将使用 Lucene。",
     "common.ui.queryBar.syntaxOptionsDescription.docsLinkText": "此处",
     "common.ui.queryBar.syntaxOptionsTitle": "语法选项",
-    "common.ui.savedObjectFinder.addNewItemButtonLabel": {
-      "text": "添加新的 {item}",
-      "comment": "{item} can be a type of object in Kibana, like 'visualization', 'dashboard', etc"
-    },
-    "common.ui.savedObjectFinder.manageItemsButtonLabel": {
-      "text": "管理 {items}",
-      "comment": "{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
-    },
-    "common.ui.savedObjectFinder.noMatchesFoundDescription": {
-      "text": "未找到任何匹配的 {items}。",
-      "comment": "{items} can be a type of object in Kibana, like 'visualizations', 'dashboards', etc"
-    },
+    "common.ui.savedObjectFinder.addNewItemButtonLabel": "添加新的 {item}",
+    "common.ui.savedObjectFinder.manageItemsButtonLabel": "管理 {items}",
+    "common.ui.savedObjectFinder.noMatchesFoundDescription": "未找到任何匹配的 {items}。",
     "common.ui.savedObjectFinder.pageItemsFromHitCountDescription": "{pageFirstItem}-{pageLastItem} 页，共 {hitCount} 页",
     "common.ui.savedObjectFinder.sortByButtonLabeAscendingScreenReaderOnly": "升序",
     "common.ui.savedObjectFinder.sortByButtonLabeDescendingScreenReaderOnly": "降序",
@@ -982,10 +946,7 @@
     "kbn.advancedSettings.context.tieBreakerFieldsText": "要在具有相同时间戳值的文档之间用于平分决胜的字段逗号分隔列表。将使用此列表上存在且在当前索引模式下可排序的第一个字段。",
     "kbn.advancedSettings.context.tieBreakerFieldsTitle": "平分决胜字段",
     "kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText": "请求首选项",
-    "kbn.advancedSettings.courier.customRequestPreferenceText": {
-      "text": "将 “{setRequestReferenceSetting} 设置为 {customSettingValue} 时，将使用 “{requestPreferenceLink}”。",
-      "comment": "Part of composite text: kbn.advancedSettings.courier.customRequestPreference.requestPreferenceLinkText + kbn.advancedSettings.courier.customRequestPreferenceText"
-    },
+    "kbn.advancedSettings.courier.customRequestPreferenceText": "将 “{setRequestReferenceSetting} 设置为 {customSettingValue} 时，将使用 “{requestPreferenceLink}”。",
     "kbn.advancedSettings.courier.customRequestPreferenceTitle": "定制请求首选项",
     "kbn.advancedSettings.courier.ignoreFilterText": "此配置增强对包含可视化的仪表板访问不同索引的支持。禁用时，将向所有可视化应用所有筛选。启用时，如果可视化的索引不包含筛选字段，则会为该可视化忽略筛选。",
     "kbn.advancedSettings.courier.ignoreFilterTitle": "忽略筛选",
@@ -1008,17 +969,11 @@
     "kbn.advancedSettings.dateFormat.dayOfWeekTitle": "周内日",
     "kbn.advancedSettings.dateFormat.optionsLinkText": "格式",
     "kbn.advancedSettings.dateFormat.scaled.intervalsLinkText": "ISO8601 时间间隔",
-    "kbn.advancedSettings.dateFormat.scaledText": {
-      "text": "定义在基于时间的数据按顺序呈现且格式化时间戳应适应度量时间间隔时所用格式的值。键是 {intervalsLink}。",
-      "comment": "Part of composite text: kbn.advancedSettings.dateFormat.scaledText + kbn.advancedSettings.dateFormat.scaled.intervalsLinkText"
-    },
+    "kbn.advancedSettings.dateFormat.scaledText": "定义在基于时间的数据按顺序呈现且格式化时间戳应适应度量时间间隔时所用格式的值。键是 {intervalsLink}。",
     "kbn.advancedSettings.dateFormat.scaledTitle": "缩放的日期格式",
     "kbn.advancedSettings.dateFormat.timezoneText": "应使用哪个时区。{defaultOption} 将使用您的浏览器检测到的时区。",
     "kbn.advancedSettings.dateFormat.timezoneTitle": "用于设置日期格式的时区",
-    "kbn.advancedSettings.dateFormatText": {
-      "text": "显示格式正确的日期时，请使用此{formatLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.dateFormatText + kbn.advancedSettings.dateFormat.optionsLinkText"
-    },
+    "kbn.advancedSettings.dateFormatText": "显示格式正确的日期时，请使用此{formatLink}",
     "kbn.advancedSettings.dateFormatTitle": "日期格式",
     "kbn.advancedSettings.defaultColumnsText": "“发现”选项卡中默认显示的列",
     "kbn.advancedSettings.defaultColumnsTitle": "默认列",
@@ -1041,36 +996,21 @@
     "kbn.advancedSettings.fieldsPopularLimitText": "要显示的排名前 N 最常见字段",
     "kbn.advancedSettings.fieldsPopularLimitTitle": "常见字段限制",
     "kbn.advancedSettings.format.bytesFormat.numeralFormatLinkText": "数值格式",
-    "kbn.advancedSettings.format.bytesFormatText": {
-      "text": "“字节”格式的默认{numeralFormatLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.format.bytesFormatText + kbn.advancedSettings.format.bytesFormat.numeralFormatLinkText"
-    },
+    "kbn.advancedSettings.format.bytesFormatText": "“字节”格式的默认{numeralFormatLink}",
     "kbn.advancedSettings.format.bytesFormatTitle": "字节格式",
     "kbn.advancedSettings.format.currencyFormat.numeralFormatLinkText": "数值格式",
-    "kbn.advancedSettings.format.currencyFormatText": {
-      "text": "“货币”格式的默认{numeralFormatLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.format.currencyFormatText + kbn.advancedSettings.format.currencyFormat.numeralFormatLinkText"
-    },
+    "kbn.advancedSettings.format.currencyFormatText": "“货币”格式的默认{numeralFormatLink}",
     "kbn.advancedSettings.format.currencyFormatTitle": "货币格式",
     "kbn.advancedSettings.format.defaultTypeMapText": "要默认用于每个字段类型的格式名称的映射。如果未显式提及字段类型，则将使用{defaultFormat}",
     "kbn.advancedSettings.format.defaultTypeMapTitle": "字段类型格式名称",
     "kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText": "数值语言",
-    "kbn.advancedSettings.format.formattingLocaleText": {
-      "text": "{numeralLanguageLink}区域设置",
-      "comment": "Part of composite text: kbn.advancedSettings.format.formattingLocale.numeralLanguageLinkText + kbn.advancedSettings.format.formattingLocaleText"
-    },
+    "kbn.advancedSettings.format.formattingLocaleText": "{numeralLanguageLink}区域设置",
     "kbn.advancedSettings.format.formattingLocaleTitle": "格式区域设置",
     "kbn.advancedSettings.format.numberFormat.numeralFormatLinkText": "数值格式",
-    "kbn.advancedSettings.format.numberFormatText": {
-      "text": "“数字”格式的默认{numeralFormatLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.format.numberFormatText + kbn.advancedSettings.format.numberFormat.numeralFormatLinkText"
-    },
+    "kbn.advancedSettings.format.numberFormatText": "“数字”格式的默认{numeralFormatLink}",
     "kbn.advancedSettings.format.numberFormatTitle": "数字格式",
     "kbn.advancedSettings.format.percentFormat.numeralFormatLinkText": "数值格式",
-    "kbn.advancedSettings.format.percentFormatText": {
-      "text": "“百分比”格式的默认{numeralFormatLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.format.percentFormatText + kbn.advancedSettings.format.percentFormat.numeralFormatLinkText"
-    },
+    "kbn.advancedSettings.format.percentFormatText": "“百分比”格式的默认{numeralFormatLink}",
     "kbn.advancedSettings.format.percentFormatTitle": "百分比格式",
     "kbn.advancedSettings.histogram.barTargetText": "在日期直方图中使用“auto”时尝试生成大约此数目的条形",
     "kbn.advancedSettings.histogram.barTargetTitle": "目标条形数",
@@ -1093,10 +1033,7 @@
     "kbn.advancedSettings.notifications.banner.markdownLinkText": "Markdown 受支持",
     "kbn.advancedSettings.notifications.bannerLifetimeText": "在屏幕上显示横幅通知的时间（毫秒）。设置为 {infinityValue} 将禁用倒计时。",
     "kbn.advancedSettings.notifications.bannerLifetimeTitle": "横幅通知生存时间",
-    "kbn.advancedSettings.notifications.bannerText": {
-      "text": "用于向所有用户发送临时通知的定制横幅。{markdownLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.notifications.bannerText + kbn.advancedSettings.notifications.banner.markdownLinkText"
-    },
+    "kbn.advancedSettings.notifications.bannerText": "用于向所有用户发送临时通知的定制横幅。{markdownLink}",
     "kbn.advancedSettings.notifications.bannerTitle": "定制横幅通知",
     "kbn.advancedSettings.notifications.errorLifetimeText": "在屏幕上显示错误通知的时间（毫秒）。设置为 {infinityValue} 将禁用。",
     "kbn.advancedSettings.notifications.errorLifetimeTitle": "错误通知生存时间",
@@ -1109,10 +1046,7 @@
     "kbn.advancedSettings.query.allowWildcardsText": "设置后，将允许 * 用作查询语句的第一个字符。当前仅在查询栏中启用实验性查询功能时才会应用。要在基本 lucene 查询中禁用前导通配符，请使用“{queryStringOptionsPattern}”。",
     "kbn.advancedSettings.query.allowWildcardsTitle": "在查询中允许前导通配符",
     "kbn.advancedSettings.query.queryStringOptions.optionsLinkText": "选项",
-    "kbn.advancedSettings.query.queryStringOptionsText": {
-      "text": "lucene 查询字符串分析器的{optionsLink}。仅将“{queryLanguage}”设置为 {luceneLanguage} 时才会使用。",
-      "comment": "Part of composite text: kbn.advancedSettings.query.queryStringOptions.optionsLinkText + kbn.advancedSettings.query.queryStringOptionsText"
-    },
+    "kbn.advancedSettings.query.queryStringOptionsText": "lucene 查询字符串分析器的{optionsLink}。仅将“{queryLanguage}”设置为 {luceneLanguage} 时才会使用。",
     "kbn.advancedSettings.query.queryStringOptionsTitle": "查询字符串选项",
     "kbn.advancedSettings.rollupIndexPatternsText": "启用捕获汇总索引的索引模式的创建，汇总索引然后会基于汇总数据启用可视化。刷新页面以应用更改。",
     "kbn.advancedSettings.rollupIndexPatternsTitle": "启用汇总索引模式",
@@ -1127,24 +1061,15 @@
     "kbn.advancedSettings.shortenFieldsText": "缩短长字段，例如，不显示 foo.bar.baz，而显示 f.b.baz",
     "kbn.advancedSettings.shortenFieldsTitle": "缩短字段",
     "kbn.advancedSettings.sortOptions.optionsLinkText": "选项",
-    "kbn.advancedSettings.sortOptionsText": {
-      "text": "Elasticsearch 排序参数的{optionsLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.sortOptions.optionsLinkText + kbn.advancedSettings.sortOptionsText"
-    },
+    "kbn.advancedSettings.sortOptionsText": "Elasticsearch 排序参数的{optionsLink}",
     "kbn.advancedSettings.sortOptionsTitle": "排序选项",
     "kbn.advancedSettings.storeUrlText": "URL 有时会变得过长，以使得某些浏览器无法处理。为此，我们正在测试将 URL 的各个组成部分存储在会话存储中是否会有帮助。请告知我们这样做的效果！",
     "kbn.advancedSettings.storeUrlTitle": "将 URL 存储在会话存储中",
     "kbn.advancedSettings.suggestFilterValuesText": "将此属性设置 false 以阻止筛选编辑器建议字段的值。",
-    "kbn.advancedSettings.suggestFilterValuesTitle": {
-      "text": "筛选编辑器建议值",
-      "comment": "“筛选编辑器”是指用于创建筛选的 UI。"
-    },
+    "kbn.advancedSettings.suggestFilterValuesTitle": "筛选编辑器建议值",
     "kbn.advancedSettings.timepicker.monthToDate": "本月迄今为止",
     "kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText": "接受的格式",
-    "kbn.advancedSettings.timepicker.quickRangesText": {
-      "text": "要在时间选取器的“速选”部分中显示的范围列表。这应该是对象数组，每个对象包含“from”、“to”（请参阅“{acceptedFormatsLink}”）和“display”（要显示的标题）。",
-      "comment": "Part of composite text: kbn.advancedSettings.timepicker.quickRangesText + kbn.advancedSettings.timepicker.quickRanges.acceptedFormatsLinkText"
-    },
+    "kbn.advancedSettings.timepicker.quickRangesText": "要在时间选取器的“速选”部分中显示的范围列表。这应该是对象数组，每个对象包含“from”、“to”（请参阅“{acceptedFormatsLink}”）和“display”（要显示的标题）。",
     "kbn.advancedSettings.timepicker.quickRangesTitle": "时间选取器的速选范围",
     "kbn.advancedSettings.timepicker.refreshIntervalDefaultsText": "时间筛选的默认刷新时间间隔",
     "kbn.advancedSettings.timepicker.refreshIntervalDefaultsTitle": "时间选取器刷新时间间隔",
@@ -1166,16 +1091,10 @@
     "kbn.advancedSettings.visualization.showRegionMapWarningsText": "词无法联接到地图上的形状时，区域地图是否显示警告。",
     "kbn.advancedSettings.visualization.showRegionMapWarningsTitle": "显示区域地图警告",
     "kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText": "单元格维度的解释",
-    "kbn.advancedSettings.visualization.tileMap.maxPrecisionText": {
-      "text": "在磁贴地图上显示的最大 geoHash 精确度：7 为高，10 为很高，12 为最大值。{cellDimensionsLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.visualization.tileMap.maxPrecisionText + kbn.advancedSettings.visualization.tileMap.maxPrecision.cellDimensionsLinkText"
-    },
+    "kbn.advancedSettings.visualization.tileMap.maxPrecisionText": "在磁贴地图上显示的最大 geoHash 精确度：7 为高，10 为很高，12 为最大值。{cellDimensionsLink}",
     "kbn.advancedSettings.visualization.tileMap.maxPrecisionTitle": "最大磁贴地图精确度",
     "kbn.advancedSettings.visualization.tileMap.wmsDefaults.propertiesLinkText": "属性",
-    "kbn.advancedSettings.visualization.tileMap.wmsDefaultsText": {
-      "text": "坐标地图中 WMS 地图服务器支持的默认{propertiesLink}",
-      "comment": "Part of composite text: kbn.advancedSettings.visualization.tileMap.wmsDefaultsText + kbn.advancedSettings.visualization.tileMap.wmsDefaults.propertiesLinkText"
-    },
+    "kbn.advancedSettings.visualization.tileMap.wmsDefaultsText": "坐标地图中 WMS 地图服务器支持的默认{propertiesLink}",
     "kbn.advancedSettings.visualization.tileMap.wmsDefaultsTitle": "默认 WMS 属性",
     "kbn.advancedSettings.visualizeEnableLabsText": "允许用户创建、查看和编辑实验性可视化。如果禁用，\n          仅被视为生产就绪的可视化可供用户使用。",
     "kbn.advancedSettings.visualizeEnableLabsTitle": "启用实验性可视化",
@@ -1418,18 +1337,9 @@
     "kbn.context.newerDocumentsDescription": "较新文档",
     "kbn.context.noSearchableTiebreakerFieldDescription": "索引模式 {indexPatternId} 中找不到任何可搜索的平分决胜字段。请更改高级设置“{tieBreakerFields}”以包括此索引模式的有效字段。",
     "kbn.context.olderDocumentsDescription": "较旧文档",
-    "kbn.context.reloadPageDescription.discoverLinkText": {
-      "text": "Discover",
-      "comment": "Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
-    },
-    "kbn.context.reloadPageDescription.reloadOrVisitTextMessage": {
-      "text": "请重新加载或访问",
-      "comment": "Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
-    },
-    "kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage": {
-      "text": "以选择有效地定位点文档。",
-      "comment": "Part of composite text kbn.context.reloadPageDescription.reloadOrVisitTextMessage + kbn.context.reloadPageDescription.discoverLinkText + kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage"
-    },
+    "kbn.context.reloadPageDescription.discoverLinkText": "Discover",
+    "kbn.context.reloadPageDescription.reloadOrVisitTextMessage": "请重新加载或访问",
+    "kbn.context.reloadPageDescription.selectValidAnchorDocumentTextMessage": "以选择有效地定位点文档。",
     "kbn.context.unableToLoadAnchorDocumentDescription": "无法加载该定位点文档",
     "kbn.context.unableToLoadDocumentDescription": "无法加载文档",
     "kbn.dashboard.addVisualizationDescription1": "单击上述菜单栏中的 ",
@@ -1469,10 +1379,7 @@
     "kbn.dashboard.listing.noDashboardsItemsMessage": "似乎您没有任何仪表板。",
     "kbn.dashboard.listing.noMatchedDashboardsMessage": "没有任何仪表板匹配您的搜索。",
     "kbn.dashboard.listing.searchBar.deleteSelectedButtonLabel": "删除选定",
-    "kbn.dashboard.listing.searchBar.searchFieldAriaLabel": {
-      "text": "筛选仪表板",
-      "comment": "\"Filter\" is used as a verb here, similar to \"search through dashboards\"."
-    },
+    "kbn.dashboard.listing.searchBar.searchFieldAriaLabel": "筛选仪表板",
     "kbn.dashboard.listing.searchBar.searchFieldPlaceholder": "搜索……",
     "kbn.dashboard.listing.table.actionsColumn.editLinkText": "编辑",
     "kbn.dashboard.listing.table.actionsColumnName": "操作",
@@ -2373,14 +2280,8 @@
     "kbn.visualize.listing.deleteVisualizations.confirmModalText": "您无法恢复已删除的可视化。",
     "kbn.visualize.listing.deleteVisualizations.confirmModalTitle": "是否删除所选的可视化？",
     "kbn.visualize.listing.deleteVisualizationsButtonAriaLabel": "删除所选的可视化",
-    "kbn.visualize.listing.listingLimitAdvancedSettingsLinkText": {
-      "text": "高级设置",
-      "comment": "Part of composite text kbn.visualize.listing.listingLimitHelpText + kbn.visualize.listing.listingLimitAdvancedSettingsLinkText"
-    },
-    "kbn.visualize.listing.listingLimitHelpText": {
-      "text": "您有 {totalItems} 个可视化，但“listingLimit”设置使得下表最多只能显示 {listingLimit} 个。此设置可在以下选项下更改：",
-      "comment": "Part of composite text kbn.visualize.listing.listingLimitHelpText + kbn.visualize.listing.listingLimitAdvancedSettingsLinkText"
-    },
+    "kbn.visualize.listing.listingLimitAdvancedSettingsLinkText": "高级设置",
+    "kbn.visualize.listing.listingLimitHelpText": "您有 {totalItems} 个可视化，但“listingLimit”设置使得下表最多只能显示 {listingLimit} 个。此设置可在以下选项下更改：",
     "kbn.visualize.listing.noVisualizations.createVisualizationButtonLabel": "创建可视化",
     "kbn.visualize.listing.noVisualizationsText": "看起来您还没有任何可视化。开始创建一些吧！",
     "kbn.visualize.newVisWizard.chooseSourceTitle": "选择源",
@@ -2622,10 +2523,7 @@
     "regionMap.visParams.displayWarningsLabel": "显示警告",
     "regionMap.visParams.joinFieldLabel": "联接字段",
     "regionMap.visParams.layerSettingsTitle": "图层设置",
-    "regionMap.visParams.outlineWeightLabel": {
-      "text": "轮廓粗细",
-      "comment": "描述地图上环绕国家/地区的线宽。"
-    },
+    "regionMap.visParams.outlineWeightLabel": "轮廓粗细",
     "regionMap.visParams.previewOnEMSLinkText": "在 EMS 上预览",
     "regionMap.visParams.previewOnEMSLinkTitle": "在 Elastic 地图服务上预览“{selectedLayerName}”",
     "regionMap.visParams.selectOptionLabel": "选择",
@@ -2789,16 +2687,10 @@
     "timelion.expressionSuggestions.arg.typesTitle": "接受的类型",
     "timelion.expressionSuggestions.func.description.chainableText": "{help}（可链接）",
     "timelion.expressionSuggestions.func.description.dataSourceText": "{help}（数据源）",
-    "timelion.fitFunctions.carry.downSampleErrorMessage": {
-      "text": "请勿使用“carry”拟合方法下采样，而是使用“scale”或“average”",
-      "comment": "\"carry\", \"scale\" and \"average\" are parameter values that must not be translated."
-    },
+    "timelion.fitFunctions.carry.downSampleErrorMessage": "请勿使用“carry”拟合方法下采样，而是使用“scale”或“average”",
     "timelion.fullscreen.exitAriaLabel": "退出全屏",
     "timelion.fullscreen.exitTooltip": "退出全屏",
-    "timelion.help.configuration.firstTimeConfigurationLinkText": {
-      "text": "首次配置",
-      "comment": "Part of composite text timelion.help.configuration.valid.paragraph1Part1 + timelion.help.configuration.firstTimeConfigurationLinkText + timelion.help.configuration.valid.paragraph1Part2"
-    },
+    "timelion.help.configuration.firstTimeConfigurationLinkText": "首次配置",
     "timelion.help.configuration.notValid.advancedSettingsPathText": "管理/Kibana/高级设置",
     "timelion.help.configuration.notValid.notValidSettingsErrorMessage": "无法验证 Elasticsearch 设置：{reason}。请检查您的高级设置，然后重试。({count})",
     "timelion.help.configuration.notValid.paragraph1": "如果使用的是 Logstash，则无需配置任何内容即可开始使用 Timelion 浏览日志数据。要搜索其他索引，请转到 {advancedSettingsPath}，然后配置 {esDefaultIndex} 和 {esTimefield} 设置以匹配您的索引。",
@@ -2806,50 +2698,26 @@
     "timelion.help.configuration.notValid.validateButtonLabel": "验证配置",
     "timelion.help.configuration.notValidTitle": "首次配置",
     "timelion.help.configuration.valid.advancedSettingsPathText": "管理/Kibana/高级设置",
-    "timelion.help.configuration.valid.intervalIsAutoText": {
-      "text": "全部准备就绪！",
-      "comment": "Part of composite text timelion.help.configuration.valid.intervalsTextPart1 + (timelion.help.configuration.valid.intervalIsAutoText || timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) + timelion.help.configuration.valid.intervalsTextPart2"
-    },
-    "timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText": {
-      "text": "将其设为 {auto} 以允许 Timelion 选择适当的间隔。",
-      "comment": "Part of composite text timelion.help.configuration.valid.intervalsTextPart1 + (timelion.help.configuration.valid.intervalIsAutoText || timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) + timelion.help.configuration.valid.intervalsTextPart2"
-    },
-    "timelion.help.configuration.valid.intervalsTextPart1": {
-      "text": "输入栏右侧的间隔选择器可让您控制采样频率。当前设为 {interval}。",
-      "comment": "Part of composite text timelion.help.configuration.valid.intervalsTextPart1 + (timelion.help.configuration.valid.intervalIsAutoText || timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText) + timelion.help.configuration.valid.intervalsTextPart2"
-    },
+    "timelion.help.configuration.valid.intervalIsAutoText": "全部准备就绪！",
+    "timelion.help.configuration.valid.intervals.content.intervalIsNotAutoText": "将其设为 {auto} 以允许 Timelion 选择适当的间隔。",
+    "timelion.help.configuration.valid.intervalsTextPart1": "输入栏右侧的间隔选择器可让您控制采样频率。当前设为 {interval}。",
     "timelion.help.configuration.valid.intervalsTextPart2": "如果 Timelion 认为您的时间范围和间隔组合生成的数据点过多，将引发一个错误。您可以通过在 {advancedSettingsPath} 中配置 {maxBuckets} 来调整该限制。",
     "timelion.help.configuration.valid.intervalsTitle": "间隔",
-    "timelion.help.configuration.valid.paragraph1Part1": {
-      "text": "我们已验证您的默认索引、时间字段及所有设置均正确无误。我们找到了范围介于 {statsMin} 到 {statsMax} 之间的数据。您大概已准备就绪。如果有错误，请参阅",
-      "comment": "Part of composite text timelion.help.configuration.valid.paragraph1Part1 + timelion.help.configuration.firstTimeConfigurationLinkText + timelion.help.configuration.valid.paragraph1Part2"
-    },
-    "timelion.help.configuration.valid.paragraph1Part2": {
-      "text": "，了解有关配置 Elasticsearch 数据源的信息。",
-      "comment": "Part of composite text timelion.help.configuration.valid.paragraph1Part1 + timelion.help.configuration.firstTimeConfigurationLinkText + timelion.help.configuration.valid.paragraph1Part2"
-    },
+    "timelion.help.configuration.valid.paragraph1Part1": "我们已验证您的默认索引、时间字段及所有设置均正确无误。我们找到了范围介于 {statsMin} 到 {statsMax} 之间的数据。您大概已准备就绪。如果有错误，请参阅",
+    "timelion.help.configuration.valid.paragraph1Part2": "，了解有关配置 Elasticsearch 数据源的信息。",
     "timelion.help.configuration.valid.paragraph2": "您应该能看到一个图表，但还需要做一些调整才能看到所有感兴趣的数据：",
     "timelion.help.configuration.valid.paragraph3": "现在，您应看到一个数据点计数随时间变化的折线图。",
     "timelion.help.configuration.valid.timeRangeText": "使用 Kibana 工具栏中的时间选择器，选择包含要可视化数据的时间段。请确保选择包含上述所示的全部或部分时间范围的时间段。",
     "timelion.help.configuration.valid.timeRangeTitle": "时间范围",
     "timelion.help.configuration.validTitle": "真棒，Elasticsearch 配置正确！",
-    "timelion.help.dataTransforming.functionReferenceLinkText": {
-      "text": "函数引用",
-      "comment": "Part of composite text timelion.help.dataTransforming.paragraph6Part1 + timelion.help.dataTransforming.functionReferenceLinkText + timelion.help.dataTransforming.paragraph6Part2"
-    },
+    "timelion.help.dataTransforming.functionReferenceLinkText": "函数引用",
     "timelion.help.dataTransforming.paragraph1": "至此，您已经掌握了基础知识，接下来开始体验 Timelion 的强大功能。让我们来计算一段时间内部分数据子集占整体数量的百分比。例如，我们的 Web 流量中有多少来自美国？",
     "timelion.help.dataTransforming.paragraph2": "首先，我们需要查找包含 US 的所有事件：{esUsQuery}。",
     "timelion.help.dataTransforming.paragraph3": "接下来，要计算 US 事件与所有事件之比。要将 {us} 除以总值，我们可以使用 {divide} 函数：{divideDataQuery}。",
     "timelion.help.dataTransforming.paragraph4": "还不错，但这是一个介于 0 到 1 之间的数字。要将其转换为百分比，只需乘以 100：{multiplyDataQuery}。",
     "timelion.help.dataTransforming.paragraph5": "现在，我们知道了其中美国流量所占的百分比，并且可以看到其随时间的变化情况！Timelion 具有很多内置算术函数，例如 {sum}、{subtract}、{multiply} 和 {divide}。其中很多函数可以采用一个序列或一个数字。此外，还有其他有用的数据转换函数，例如 {movingaverage}、{abs} 和 {derivative}。",
-    "timelion.help.dataTransforming.paragraph6Part1": {
-      "text": "现在您已熟悉了语法，然后，请参阅",
-      "comment": "Part of composite text timelion.help.dataTransforming.paragraph6Part1 + timelion.help.dataTransforming.functionReferenceLinkText + timelion.help.dataTransforming.paragraph6Part2"
-    },
-    "timelion.help.dataTransforming.paragraph6Part2": {
-      "text": "，了解如何使用所有可用的 Timelion 函数。您可以单击 Kibana 工具栏上的 \\{Docs\\}，随时查看参考资料。要返回此教程，请单击参考资料顶部的 \\{Tutorial\\} 链接。",
-      "comment": "Part of composite text timelion.help.dataTransforming.paragraph6Part1 + timelion.help.dataTransforming.functionReferenceLinkText + timelion.help.dataTransforming.paragraph6Part2"
-    },
+    "timelion.help.dataTransforming.paragraph6Part1": "现在您已熟悉了语法，然后，请参阅",
+    "timelion.help.dataTransforming.paragraph6Part2": "，了解如何使用所有可用的 Timelion 函数。您可以单击 Kibana 工具栏上的 \\{Docs\\}，随时查看参考资料。要返回此教程，请单击参考资料顶部的 \\{Tutorial\\} 链接。",
     "timelion.help.dataTransformingTitle": "转换您的数据：真正的乐趣所在！",
     "timelion.help.dontShowHelpButtonLabel": "不再显示此内容",
     "timelion.help.expressions.examples.customStylingDescription": "{descriptionTitle}将第一个序列着色为红色，并为第二个序列使用 1 像素宽的条。",
@@ -2860,17 +2728,11 @@
     "timelion.help.expressions.examples.namedArgumentsDescriptionTitle": "命名参数。",
     "timelion.help.expressions.examples.twoExpressionsDescription": "{descriptionTitle}同一个图表上的两个表达式。",
     "timelion.help.expressions.examples.twoExpressionsDescriptionTitle": "乐趣倍增。",
-    "timelion.help.expressions.functionReferenceLinkText": {
-      "text": "函数引用",
-      "comment": "Part of composite text timelion.help.expressions.paragraph4 + timelion.help.expressions.functionReferenceLinkText"
-    },
+    "timelion.help.expressions.functionReferenceLinkText": "函数引用",
     "timelion.help.expressions.paragraph1": "每个表达式都以一个数据源函数开头。接着，您可以对数据源附加新函数，以对其进行转换和增强。",
     "timelion.help.expressions.paragraph2": "对了，从现在开始，您可能比我们更了解自己的数据。可以随意将示例查询替换为更有意义的内容！",
     "timelion.help.expressions.paragraph3": "接下来我们开始进行实验，请单击 Kibana 工具栏中的 {strongAdd} 添加另一个或第三个图表。然后，选择一个图表，复制下列其中一个表达式，粘贴到输入栏，然后按 Enter 键。清除，再重复上述操作来尝试其他表达式。",
-    "timelion.help.expressions.paragraph4": {
-      "text": "Timelion 还提供了很多视图转换函数，可用于定制图表的外观。有关完整列表，请参阅",
-      "comment": "Part of composite text timelion.help.expressions.paragraph4 + timelion.help.expressions.functionReferenceLinkText"
-    },
+    "timelion.help.expressions.paragraph4": "Timelion 还提供了很多视图转换函数，可用于定制图表的外观。有关完整列表，请参阅",
     "timelion.help.expressions.strongAddText": "添加",
     "timelion.help.expressionsTitle": "使用表达式表达您自己",
     "timelion.help.functions.absHelpText": "返回序列列表中每个值的绝对值",
@@ -2899,22 +2761,13 @@
     "timelion.help.functions.derivativeHelpText": "绘制值随时间的变化。",
     "timelion.help.functions.divide.args.divisorHelpText": "要除以的数字或序列。具有多个序列的 seriesList 将按标签方式应用。",
     "timelion.help.functions.divideHelpText": "将 seriesList 中一个或多个序列的值除以输入 seriesList 的每个序列中的每个位置",
-    "timelion.help.functions.es.args.indexHelpText": {
-      "text": "要查询的索引，接受通配符。在提供 metrics、split 和 timefield 参数建议之前，请先提供脚本字段的索引模式名称和字段名称类型。",
-      "comment": "\"metrics\", \"split\" and \"timefield\" are referring to parameter names and should not be translated."
-    },
+    "timelion.help.functions.es.args.indexHelpText": "要查询的索引，接受通配符。在提供 metrics、split 和 timefield 参数建议之前，请先提供脚本字段的索引模式名称和字段名称类型。",
     "timelion.help.functions.es.args.intervalHelpText": "**DO NOT USE THIS**.调试拟合函数很有趣，但建议您应使用间隔选择器",
     "timelion.help.functions.es.args.kibanaHelpText": "在 Kibana 仪表板上使用筛选。仅当在 Kibana 仪表板上使用时才有效",
-    "timelion.help.functions.es.args.metricHelpText": {
-      "text": "Elasticsearch 指标汇总：avg、sum、min、max、percentiles 或 cardinality，后跟一个字段。例如，“sum:bytes”、“percentiles:bytes:95,99,99.9”，或仅“count”",
-      "comment": "avg, sum, min, max, percentiles and cardinality are keywords in the expression and must not be translated.此外，请勿翻译示例。"
-    },
+    "timelion.help.functions.es.args.metricHelpText": "Elasticsearch 指标汇总：avg、sum、min、max、percentiles 或 cardinality，后跟一个字段。例如，“sum:bytes”、“percentiles:bytes:95,99,99.9”，或仅“count”",
     "timelion.help.functions.es.args.qHelpText": "采用 lucene 查询字符串语法的查询",
     "timelion.help.functions.es.args.splitHelpText": "Elasticsearch 字段用于拆分序列和设置限制。例如，“{hostnameSplitArg}” 用于获取前 10 个主机名",
-    "timelion.help.functions.es.args.timefieldHelpText": {
-      "text": "用于 X 轴的“date”类型的字段",
-      "comment": "\"date\" is a field type and should not be translated."
-    },
+    "timelion.help.functions.es.args.timefieldHelpText": "用于 X 轴的“date”类型的字段",
     "timelion.help.functions.esHelpText": "从 Elasticsearch 实例拉取数据",
     "timelion.help.functions.firstHelpText": "这是内部函数，只返回输入 seriesList。请勿使用此选项",
     "timelion.help.functions.fit.args.modeHelpText": "用于将序列拟合到目标的算法。以下选项之一：{fitFunctions}",
@@ -2926,22 +2779,10 @@
     "timelion.help.functions.holt.args.alphaHelpText": "\n        平滑权重，0 到 1。\n        增加 alpha 值会使新序列更接近原始序列。\n        降低 alpha 值会使序列更平滑",
     "timelion.help.functions.holt.args.betaHelpText": "\n        趋势权重，0 到 1。\n        增加 beta 值会使上升/下降的线条继续上升/下降更长。\n        降低 beta 值会使函数更快地学习新趋势",
     "timelion.help.functions.holt.args.gammaHelpText": "季节性权重，0 到 1。您的数据是不是看起来像波形？\n        增加此值会使最近的季节更加重要，从而更快地改变波形。\n        降低此值会使新季节的重要性下降，使历史数据更加重要。",
-    "timelion.help.functions.holt.args.sampleHelpText": {
-      "text": "\n      在季节性序列中开始“预测”前要采样的季节数。\n      （仅适用于 gamma，默认值：all）",
-      "comment": "\"gamma\" and \"all\" are parameter names and values and must not be translated."
-    },
-    "timelion.help.functions.holt.args.seasonHelpText": {
-      "text": "季节的时长，例如，如果模式每周重复一次，则为 1w。（仅适用于 gamma）",
-      "comment": "\"1w\" is an expression value and should not be translated. \"gamma\" is a parameter name and should not be translated."
-    },
-    "timelion.help.functions.holtHelpText": {
-      "text": "\n    对序列开头采样，并通过多个可选参数用它来\n    预测后续事件。通常，此方法不会真正预测未来，\n    而是根据过去的数据预测当前会发生的事件，\n    这对于异常检测很有帮助。注意，将使用预测值填充 null 值。",
-      "comment": "\"null\" is a data value here and must not be translated."
-    },
-    "timelion.help.functions.label.args.labelHelpText": {
-      "text": "序列的图例值。您可以在字符串中使用 $1、$2 等来匹配正则表达式捕获组",
-      "comment": "\"$1\" and \"$2\" are part of the expression and must not be translated."
-    },
+    "timelion.help.functions.holt.args.sampleHelpText": "\n      在季节性序列中开始“预测”前要采样的季节数。\n      （仅适用于 gamma，默认值：all）",
+    "timelion.help.functions.holt.args.seasonHelpText": "季节的时长，例如，如果模式每周重复一次，则为 1w。（仅适用于 gamma）",
+    "timelion.help.functions.holtHelpText": "\n    对序列开头采样，并通过多个可选参数用它来\n    预测后续事件。通常，此方法不会真正预测未来，\n    而是根据过去的数据预测当前会发生的事件，\n    这对于异常检测很有帮助。注意，将使用预测值填充 null 值。",
+    "timelion.help.functions.label.args.labelHelpText": "序列的图例值。您可以在字符串中使用 $1、$2 等来匹配正则表达式捕获组",
     "timelion.help.functions.label.args.regexHelpText": "支持捕获组的正则表达式",
     "timelion.help.functions.labelHelpText": "更改序列标签。使用 %s 引用现有标签",
     "timelion.help.functions.legend.args.columnsHelpText": "要将图例划分为的列数",
@@ -2950,10 +2791,7 @@
     "timelion.help.functions.legend.args.position.suggestions.nwHelpText": "将图例放在西北角",
     "timelion.help.functions.legend.args.position.suggestions.seHelpText": "将图例放在东南角",
     "timelion.help.functions.legend.args.position.suggestions.swHelpText": "将图例放在西南角",
-    "timelion.help.functions.legend.args.positionHelpText": {
-      "text": "放置图例的角：nw、ne、se 或 sw。您还可以传递 false 来禁用图例",
-      "comment": "\"nw\", \"ne\", \"se\", \"sw\" and \"false\" are keywords and must not be translated."
-    },
+    "timelion.help.functions.legend.args.positionHelpText": "放置图例的角：nw、ne、se 或 sw。您还可以传递 false 来禁用图例",
     "timelion.help.functions.legend.args.showTimeHelpText": "悬停在图表上方时在图例中显示时间值。默认值：true",
     "timelion.help.functions.legend.args.timeFormatHelpText": "moment.js 格式模式。默认值：{defaultTimeFormat}",
     "timelion.help.functions.legendHelpText": "设置绘图上图例的位置和样式",
@@ -3044,34 +2882,16 @@
     "timelion.help.mainPageTitle": "帮助",
     "timelion.help.nextPageButtonLabel": "下一个",
     "timelion.help.previousPageButtonLabel": "上一页",
-    "timelion.help.querying.countMetricAggregationLinkText": {
-      "text": "Elasticsearch 指标聚合",
-      "comment": "Part of composite text timelion.help.querying.countTextPart1 + timelion.help.querying.countMetricAggregationLinkText + timelion.help.querying.countTextPart2"
-    },
-    "timelion.help.querying.countTextPart1": {
-      "text": "除了具有卓越的事件计数功能，Elasticsearch 数据源还支持任何返回单个值的",
-      "comment": "Part of composite text timelion.help.querying.countTextPart1 + timelion.help.querying.countMetricAggregationLinkText + timelion.help.querying.countTextPart2"
-    },
-    "timelion.help.querying.countTextPart2": {
-      "text": "。其中最有用是 {min}、{max}、{avg}、{sum} 和 {cardinality}。假设您需要 {srcIp} 字段的唯一计数。只需使用 {cardinality} 指标：{esCardinalityQuery}。如需获取 {bytes} 字段的平均值，则可以使用 {avg} 指标：{esAvgQuery}。",
-      "comment": "Part of composite text timelion.help.querying.countTextPart1 + timelion.help.querying.countMetricAggregationLinkText + timelion.help.querying.countTextPart2"
-    },
+    "timelion.help.querying.countMetricAggregationLinkText": "Elasticsearch 指标聚合",
+    "timelion.help.querying.countTextPart1": "除了具有卓越的事件计数功能，Elasticsearch 数据源还支持任何返回单个值的",
+    "timelion.help.querying.countTextPart2": "。其中最有用是 {min}、{max}、{avg}、{sum} 和 {cardinality}。假设您需要 {srcIp} 字段的唯一计数。只需使用 {cardinality} 指标：{esCardinalityQuery}。如需获取 {bytes} 字段的平均值，则可以使用 {avg} 指标：{esAvgQuery}。",
     "timelion.help.querying.countTitle": "不只是计数",
     "timelion.help.querying.esAsteriskQueryDescriptionText": "嗨 Elasticsearch，请在我的默认索引中查找所有内容",
     "timelion.help.querying.esIndexQueryDescriptionText": "使用 * 作为 logstash-* 索引的 q (query)",
-    "timelion.help.querying.luceneQueryLinkText": {
-      "text": "Lucene 查询字符串",
-      "comment": "Part of composite text timelion.help.querying.paragraph2Part1 + timelion.help.querying.luceneQueryLinkText + timelion.help.querying.paragraph2Part2"
-    },
+    "timelion.help.querying.luceneQueryLinkText": "Lucene 查询字符串",
     "timelion.help.querying.paragraph1": "至此，我们已验证您的 Elasticsearch 数据源工作正常，接下来，可以开始提交查询了。如果是初学者，请在输入栏中输入 {esPattern}，然后按 Enter 键。",
-    "timelion.help.querying.paragraph2Part1": {
-      "text": "这个意思是说 {esAsteriskQueryDescription}。如果要查找子集，可以输入 {htmlQuery} 之类的内容以算出与 {html} 匹配的事件个数，或输入 {bobQuery} 来查找在 {user} 字段中包含 {bob} 且 {bytes} 字段大于 100 的事件。注意，此查询需要用单引号引住，因为其包含空格。您可以输入任何",
-      "comment": "Part of composite text timelion.help.querying.paragraph2Part1 + timelion.help.querying.luceneQueryLinkText + timelion.help.querying.paragraph2Part2"
-    },
-    "timelion.help.querying.paragraph2Part2": {
-      "text": "作为 {esQuery} 函数的第一个参数。",
-      "comment": "Part of composite text timelion.help.querying.paragraph2Part1 + timelion.help.querying.luceneQueryLinkText + timelion.help.querying.paragraph2Part2"
-    },
+    "timelion.help.querying.paragraph2Part1": "这个意思是说 {esAsteriskQueryDescription}。如果要查找子集，可以输入 {htmlQuery} 之类的内容以算出与 {html} 匹配的事件个数，或输入 {bobQuery} 来查找在 {user} 字段中包含 {bob} 且 {bytes} 字段大于 100 的事件。注意，此查询需要用单引号引住，因为其包含空格。您可以输入任何",
+    "timelion.help.querying.paragraph2Part2": "作为 {esQuery} 函数的第一个参数。",
     "timelion.help.querying.passingArgumentsText": "Timelion 具有很多快捷键，可以轻松完成各种常见操作。对于不包含空格或特殊字符的简单参数，无需使用引号。而且很多函数都具有默认值。例如，{esEmptyQuery} 和 {esStarQuery} 作用相同。参数也有名称，您无需为其指定特定顺序。例如，可以输入 {esLogstashQuery} 告知 Elasticsearch 数据源 {esIndexQueryDescription}。",
     "timelion.help.querying.passingArgumentsTitle": "传递参数",
     "timelion.help.queryingTitle": "查询 Elasticsearch 数据源",
@@ -3157,10 +2977,7 @@
     "timelion.uiSettings.graphiteURLLabel": "Graphite URL",
     "timelion.uiSettings.maximumBucketsDescription": "单个数据源可以返回的最大存储桶数目",
     "timelion.uiSettings.maximumBucketsLabel": "最大存储桶数",
-    "timelion.uiSettings.minimumIntervalDescription": {
-      "text": "使用“自动”时将计算的最小时间间隔",
-      "comment": "\"auto\" is a technical value in that context, that should not be translated."
-    },
+    "timelion.uiSettings.minimumIntervalDescription": "使用“自动”时将计算的最小时间间隔",
     "timelion.uiSettings.minimumIntervalLabel": "最小时间间隔",
     "timelion.uiSettings.quandlKeyDescription": "{experimentalLabel} 来自 www.quandl.com 的 API 密钥",
     "timelion.uiSettings.quandlKeyLabel": "Quandl 密钥",
@@ -3283,20 +3100,11 @@
     "tsvb.colorRules.defaultSecondaryNameLabel": "文本",
     "tsvb.colorRules.greaterThanLabel": "> 大于",
     "tsvb.colorRules.greaterThanOrEqualLabel": ">= 大于等于",
-    "tsvb.colorRules.ifMetricIsLabel": {
-      "text": "如果指标",
-      "comment": "Part of a larger string:Set {primaryName} to {color} and {secondaryName} to {color} if metric is {greaterOrLessThan} {value}."
-    },
+    "tsvb.colorRules.ifMetricIsLabel": "如果指标",
     "tsvb.colorRules.lessThanLabel": "&lt; 小于",
     "tsvb.colorRules.lessThanOrEqualLabel": "&lt;= 小于等于",
-    "tsvb.colorRules.setPrimaryColorLabel": {
-      "text": "将 {primaryName} 设为",
-      "comment": "Part of a larger string:Set {primaryName} to {color} and {secondaryName} to {color} if metric is {greaterOrLessThan} {value}."
-    },
-    "tsvb.colorRules.setSecondaryColorLabel": {
-      "text": "并将 {secondaryName} 设为",
-      "comment": "Part of a larger string:Set {primaryName} to {color} and {secondaryName} to {color} if metric is {greaterOrLessThan} {value}."
-    },
+    "tsvb.colorRules.setPrimaryColorLabel": "将 {primaryName} 设为",
+    "tsvb.colorRules.setSecondaryColorLabel": "并将 {secondaryName} 设为",
     "tsvb.colorRules.valueAriaLabel": "Value（值）",
     "tsvb.cumulativeSum.aggregationLabel": "聚合",
     "tsvb.cumulativeSum.metricLabel": "指标",
@@ -3313,10 +3121,7 @@
     "tsvb.defaultDataFormatterLabel": "数据格式化程序",
     "tsvb.derivative.aggregationLabel": "聚合",
     "tsvb.derivative.metricLabel": "指标",
-    "tsvb.derivative.unitsLabel": {
-      "text": "单位（1s、1m 等）",
-      "comment": "1s and 1m are required values and must not be translated."
-    },
+    "tsvb.derivative.unitsLabel": "单位（1s、1m 等）",
     "tsvb.durationOptions.daysLabel": "天",
     "tsvb.durationOptions.hoursLabel": "小时",
     "tsvb.durationOptions.microsecondsLabel": "微秒",
@@ -3384,10 +3189,7 @@
     "tsvb.iconSelect.starLabel": "五角星",
     "tsvb.iconSelect.tagLabel": "标签",
     "tsvb.indexPattern.dropLastBucketLabel": "丢弃上一个桶？",
-    "tsvb.indexPattern.intervalHelpText": {
-      "text": "示例：auto、1m、1d、7d、1y、>=1m",
-      "comment": "auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated."
-    },
+    "tsvb.indexPattern.intervalHelpText": "示例：auto、1m、1d、7d、1y、>=1m",
     "tsvb.indexPattern.intervalLabel": "时间间隔",
     "tsvb.indexPattern.searchByDefaultIndex": "已使用默认索引模式。要查询所有索引，请使用 *",
     "tsvb.indexPattern.timeFieldLabel": "时间字段",
@@ -3499,10 +3301,7 @@
     "tsvb.seriesAgg.seriesAggIsNotCompatibleLabel": "序列聚合与表可视化不兼容。",
     "tsvb.seriesConfig.filterLabel": "筛选",
     "tsvb.seriesConfig.missingSeriesComponentDescription": "面板类型缺少序列组件：{panelType}",
-    "tsvb.seriesConfig.offsetSeriesTimeLabel": {
-      "text": "按 1m、1h、1w、1d 偏移序列时间",
-      "comment": "1m, 1h, 1w and 1d are required values and must not be translated."
-    },
+    "tsvb.seriesConfig.offsetSeriesTimeLabel": "按 1m、1h、1w、1d 偏移序列时间",
     "tsvb.seriesConfig.overrideIndexPatternLabel": "是否覆盖索引模式？",
     "tsvb.seriesConfig.templateHelpText": "例如，{templateExample}",
     "tsvb.seriesConfig.templateLabel": "模板",
@@ -3619,10 +3418,7 @@
     "tsvb.timeseries.legendPositionOptions.rightLabel": "右",
     "tsvb.timeSeries.lineLabel": "折线图",
     "tsvb.timeSeries.noneLabel": "无",
-    "tsvb.timeSeries.offsetSeriesTimeLabel": {
-      "text": "按 1m、1h、1w、1d 偏移序列时间",
-      "comment": "1m, 1h, 1w, 1d are required values and must not be translated."
-    },
+    "tsvb.timeSeries.offsetSeriesTimeLabel": "按 1m、1h、1w、1d 偏移序列时间",
     "tsvb.timeseries.optionsTab.axisMaxLabel": "轴最大值",
     "tsvb.timeseries.optionsTab.axisMinLabel": "轴最小值",
     "tsvb.timeseries.optionsTab.axisPositionLabel": "轴位置",
@@ -3725,10 +3521,7 @@
     "vega.mapView.minZoomAndMaxZoomHaveBeenSwappedWarningMessage": "已交换 {minZoomPropertyName} 和 {maxZoomPropertyName}",
     "vega.mapView.resettingPropertyToMaxValueWarningMessage": "将 {name} 重置为 {max}",
     "vega.mapView.resettingPropertyToMinValueWarningMessage": "将 {name} 重置为 {min}",
-    "vega.type.vegaDescription": {
-      "text": "使用 Vega 和 Vega-Lite 创建定制可视化",
-      "comment": "Vega and Vega-Lite are product names and should not be translated"
-    },
+    "vega.type.vegaDescription": "使用 Vega 和 Vega-Lite 创建定制可视化",
     "vega.urlParser.dataUrlRequiresUrlParameterInFormErrorMessage": "{dataUrlParam} 需要以 “{formLink}” 形式的 {urlParam} 参数",
     "vega.urlParser.urlShouldHaveQuerySubObjectWarningMessage": "使用 {urlObject} 应具有 {subObjectName} 子对象",
     "vega.vegaParser.baseView.externalUrlsAreNotEnabledErrorMessage": "未启用外部 URL。将 {enableExternalUrls} 添加到 {kibanaConfigFileName}",
@@ -5156,71 +4949,23 @@
     "xpack.infra.waffle.unableToSelectMetricErrorTitle": "无法选择指标选项或指标值。",
     "xpack.infra.waffleTime.autoRefreshButtonLabel": "自动刷新",
     "xpack.infra.waffleTime.stopRefreshingButtonLabel": "停止刷新",
-    "xpack.kueryAutocomplete.andOperatorDescription": {
-      "text": "需要{bothArguments}为 true",
-      "comment": "Full text:' Requires both arguments to be true'.See 'xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText' for 'both arguments' part."
-    },
-    "xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText": {
-      "text": "两个参数",
-      "comment": "Part of xpack.kueryAutocomplete.andOperatorDescription.Full text:'Requires both arguments to be true'"
-    },
-    "xpack.kueryAutocomplete.equalOperatorDescription": {
-      "text": "{equals}某一值",
-      "comment": "Full text: 'equals some value'.See 'xpack.kueryAutocomplete.equalOperatorDescription.equalsText' for 'equals' part."
-    },
-    "xpack.kueryAutocomplete.equalOperatorDescription.equalsText": {
-      "text": "等于",
-      "comment": "Part of xpack.kueryAutocomplete.equalOperatorDescription.Full text: 'equals some value'"
-    },
-    "xpack.kueryAutocomplete.existOperatorDescription": {
-      "text": "以任意形式{exists}",
-      "comment": "Full text: 'exists in any form'.See 'xpack.kueryAutocomplete.existOperatorDescription.existsText' for 'exists' part."
-    },
-    "xpack.kueryAutocomplete.existOperatorDescription.existsText": {
-      "text": "存在",
-      "comment": "Part of xpack.kueryAutocomplete.existOperatorDescription.Full text: 'exists in any form'"
-    },
+    "xpack.kueryAutocomplete.andOperatorDescription": "需要{bothArguments}为 true",
+    "xpack.kueryAutocomplete.andOperatorDescription.bothArgumentsText": "两个参数",
+    "xpack.kueryAutocomplete.equalOperatorDescription": "{equals}某一值",
+    "xpack.kueryAutocomplete.equalOperatorDescription.equalsText": "等于",
+    "xpack.kueryAutocomplete.existOperatorDescription": "以任意形式{exists}",
+    "xpack.kueryAutocomplete.existOperatorDescription.existsText": "存在",
     "xpack.kueryAutocomplete.filterResultsDescription": "筛选包含 {fieldName} 的结果",
-    "xpack.kueryAutocomplete.greaterThanOperatorDescription": {
-      "text": "{greaterThan}某一值",
-      "comment": "Full text: 'is greater than some value'.See 'xpack.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText' for 'greater than' part."
-    },
-    "xpack.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText": {
-      "text": "大于",
-      "comment": "Part of xpack.kueryAutocomplete.greaterThanOperatorDescription.Full text: 'is greater than some value'"
-    },
-    "xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription": {
-      "text": "{greaterThanOrEqualTo}某一值",
-      "comment": "Full text: 'is greater than or equal to some value'.See 'xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText' for 'greater than or equal to' part."
-    },
-    "xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText": {
-      "text": "大于或等于",
-      "comment": "Part of xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription.Full text: 'is greater than or equal to some value'"
-    },
-    "xpack.kueryAutocomplete.lessThanOperatorDescription": {
-      "text": "{lessThan}某一值",
-      "comment": "Full text: 'is less than some value'.See 'xpack.kueryAutocomplete.lessThanOperatorDescription.lessThanText' for 'less than' part."
-    },
-    "xpack.kueryAutocomplete.lessThanOperatorDescription.lessThanText": {
-      "text": "小于",
-      "comment": "Part of xpack.kueryAutocomplete.lessThanOperatorDescription.Full text: 'is less than some value'"
-    },
-    "xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription": {
-      "text": "{lessThanOrEqualTo}某一值",
-      "comment": "Full text: 'is less than or equal to some value'.See 'xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText' for 'less than or equal to' part."
-    },
-    "xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText": {
-      "text": "小于或等于",
-      "comment": "Part of xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription.Full text: 'is less than or equal to some value'"
-    },
-    "xpack.kueryAutocomplete.orOperatorDescription": {
-      "text": "需要{oneOrMoreArguments}为 true",
-      "comment": "Full text:'Requires one or more arguments to be true'.See 'xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText' for 'one or more arguments' part."
-    },
-    "xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText": {
-      "text": "一个或多个参数",
-      "comment": "Part of xpack.kueryAutocomplete.orOperatorDescription.Full text:'Requires one or more arguments to be true'"
-    },
+    "xpack.kueryAutocomplete.greaterThanOperatorDescription": "{greaterThan}某一值",
+    "xpack.kueryAutocomplete.greaterThanOperatorDescription.greaterThanText": "大于",
+    "xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription": "{greaterThanOrEqualTo}某一值",
+    "xpack.kueryAutocomplete.greaterThanOrEqualOperatorDescription.greaterThanOrEqualToText": "大于或等于",
+    "xpack.kueryAutocomplete.lessThanOperatorDescription": "{lessThan}某一值",
+    "xpack.kueryAutocomplete.lessThanOperatorDescription.lessThanText": "小于",
+    "xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription": "{lessThanOrEqualTo}某一值",
+    "xpack.kueryAutocomplete.lessThanOrEqualOperatorDescription.lessThanOrEqualToText": "小于或等于",
+    "xpack.kueryAutocomplete.orOperatorDescription": "需要{oneOrMoreArguments}为 true",
+    "xpack.kueryAutocomplete.orOperatorDescription.oneOrMoreArgumentsText": "一个或多个参数",
     "xpack.licenseMgmt.dashboard.breadcrumb": "许可管理",
     "xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseButtonLabel": "更新许可",
     "xpack.licenseMgmt.licenseDashboard.addLicense.updateLicenseTitle": "更新您的许可",
@@ -6584,14 +6329,8 @@
     "xpack.ml.newJob.simple.multiMetric.createJobButtonAriaLabel": "创建作业",
     "xpack.ml.newJob.simple.multiMetric.createJobButtonLabel": "创建作业",
     "xpack.ml.newJob.simple.multiMetric.dataSplitByLabel": "按 {splitFieldName} 分割数据",
-    "xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText": {
-      "text": "考虑使用",
-      "comment": "Part of composite text xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText + xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText"
-    },
-    "xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText": {
-      "text": "完整的 {indexPatternTitle} 数据",
-      "comment": "Part of composite text xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText + xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText"
-    },
+    "xpack.ml.newJob.simple.multiMetric.documentCountChart.considerUsingText": "考虑使用",
+    "xpack.ml.newJob.simple.multiMetric.documentCountChart.fullIndexPatternDataLinkText": "完整的 {indexPatternTitle} 数据",
     "xpack.ml.newJob.simple.multiMetric.documentCountChart.noResultsFoundTitle": "找不到结果",
     "xpack.ml.newJob.simple.multiMetric.documentCountLabel": "文档计数",
     "xpack.ml.newJob.simple.multiMetric.indexPatternPageTitle": "索引模式 {indexPatternTitle}",
@@ -6643,14 +6382,8 @@
     "xpack.ml.newJob.simple.population.couldNotStartDatafeedErrorMessage": "无法开始数据馈送：",
     "xpack.ml.newJob.simple.population.createJobButtonAriaLabel": "创建作业",
     "xpack.ml.newJob.simple.population.createJobButtonLabel": "创建作业",
-    "xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText": {
-      "text": "完整的 {indexPatternTitle} 数据",
-      "comment": "Part of composite text xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
-    },
-    "xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription": {
-      "text": "考虑使用",
-      "comment": "Part of composite text xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription + xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText"
-    },
+    "xpack.ml.newJob.simple.population.documentCountChart.fullIndexPatternDataLinkText": "完整的 {indexPatternTitle} 数据",
+    "xpack.ml.newJob.simple.population.documentCountChart.noResultsDescription": "考虑使用",
     "xpack.ml.newJob.simple.population.documentCountChart.noResultsFoundTitle": "找不到结果",
     "xpack.ml.newJob.simple.population.documentCountLabel": "文档计数",
     "xpack.ml.newJob.simple.population.indexPatternPageTitle": "索引模式 {indexPatternTitle}",
@@ -6792,10 +6525,7 @@
     "xpack.ml.newJob.simple.singleMetric.namePlaceholder": "作业 ID",
     "xpack.ml.newJob.simple.singleMetric.newJobFromTitle": "来自 {pageTitle} 的新作业",
     "xpack.ml.newJob.simple.singleMetric.noResultsFound.indexPatternLinkText": "完整的 {indexPatternTitle} 数据",
-    "xpack.ml.newJob.simple.singleMetric.noResultsFoundDescription": {
-      "text": "考虑使用",
-      "comment": "after this label we have a link containing index pattern"
-    },
+    "xpack.ml.newJob.simple.singleMetric.noResultsFoundDescription": "考虑使用",
     "xpack.ml.newJob.simple.singleMetric.noResultsFoundTitle": "{infoIcon} 找不到结果",
     "xpack.ml.newJob.simple.singleMetric.openJobErrorMessage": "无法打开作业：",
     "xpack.ml.newJob.simple.singleMetric.resetButtonAriaLabel": "重置",
@@ -6906,26 +6636,11 @@
     "xpack.ml.ruleEditor.lessThanOrEqualToOperatorTypeText": "小于或等于",
     "xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText": "编辑规则",
     "xpack.ml.ruleEditor.ruleActionPanel.ruleTitle": "规则",
-    "xpack.ml.ruleEditor.ruleDescription": {
-      "text": "当{conditions}{filters} 时，跳过{actions}",
-      "comment": "Composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText.（例如，当实际小于 1 AND ip 不含于 xxx 时，跳过模型更新）"
-    },
-    "xpack.ml.ruleEditor.ruleDescription.conditionsText": {
-      "text": "{appliesTo} {operator} {value}",
-      "comment": "Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText"
-    },
-    "xpack.ml.ruleEditor.ruleDescription.filtersText": {
-      "text": "{fieldName} 为 {filterType} {filterId}",
-      "comment": "Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText"
-    },
-    "xpack.ml.ruleEditor.ruleDescription.modelUpdateActionTypeText": {
-      "text": "模型更新",
-      "comment": "Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText + xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText"
-    },
-    "xpack.ml.ruleEditor.ruleDescription.resultActionTypeText": {
-      "text": "结果",
-      "comment": "Part of composite text: xpack.ml.ruleEditor.ruleDescription.[actionName]ActionTypeText +xpack.ml.ruleEditor.ruleDescription.conditionsText + xpack.ml.ruleEditor.ruleDescription.filtersText"
-    },
+    "xpack.ml.ruleEditor.ruleDescription": "当{conditions}{filters} 时，跳过{actions}",
+    "xpack.ml.ruleEditor.ruleDescription.conditionsText": "{appliesTo} {operator} {value}",
+    "xpack.ml.ruleEditor.ruleDescription.filtersText": "{fieldName} 为 {filterType} {filterId}",
+    "xpack.ml.ruleEditor.ruleDescription.modelUpdateActionTypeText": "模型更新",
+    "xpack.ml.ruleEditor.ruleDescription.resultActionTypeText": "结果",
     "xpack.ml.ruleEditor.ruleEditorFlyout.actionTitle": "操作",
     "xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageDescription": "注意，更改将仅对新结果有效。",
     "xpack.ml.ruleEditor.ruleEditorFlyout.addedItemToFilterListNotificationMessageTitle": "已将 {item} 添加到 {filterId}",
@@ -8316,10 +8031,7 @@
     "xpack.reporting.management.reportingTitle": "Reporting",
     "xpack.reporting.panelContent.copyUrlButtonLabel": "复制 POST URL",
     "xpack.reporting.panelContent.generateButtonLabel": "生成 {reportingType}",
-    "xpack.reporting.panelContent.generationTimeDescription": {
-      "text": "{reportingType} 可能会花费 1 或 2 分钟生成，取决于 {objectType} 的大小。",
-      "comment": "Here 'reportingType' can be 'PDF' or 'CSV'"
-    },
+    "xpack.reporting.panelContent.generationTimeDescription": "{reportingType} 可能会花费 1 或 2 分钟生成，取决于 {objectType} 的大小。",
     "xpack.reporting.panelContent.howToCallGenerationDescription": "或者，复制此 POST URL 以从 Kibana 外部或从 Watcher 调用生成。",
     "xpack.reporting.panelContent.noPermissionToGenerateReportDescription": "您无权生成此报告。",
     "xpack.reporting.panelContent.notification.cantReachServerDescription": "无法访问服务器。请重试。",
@@ -8900,10 +8612,7 @@
     "xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.calloutDetail": "使用 {snapshotRestoreDocsButton} 备份您的数据。",
     "xpack.upgradeAssistant.checkupTab.backUpCallout.calloutBody.snapshotRestoreDocsButtonLabel": "快照和还原 API",
     "xpack.upgradeAssistant.checkupTab.backUpCallout.calloutTitle": "立即备份索引",
-    "xpack.upgradeAssistant.checkupTab.changeFiltersShowMoreLabel": {
-      "text": "更改筛选以显示更多内容。",
-      "comment": "Explains how to show all deprecations if there are more available."
-    },
+    "xpack.upgradeAssistant.checkupTab.changeFiltersShowMoreLabel": "更改筛选以显示更多内容。",
     "xpack.upgradeAssistant.checkupTab.clusterTabLabel": "集群",
     "xpack.upgradeAssistant.checkupTab.controls.collapseAllButtonLabel": "折叠全部",
     "xpack.upgradeAssistant.checkupTab.controls.expandAllButtonLabel": "展开全部",
@@ -9021,10 +8730,7 @@
     "xpack.uptime.emptyState.loadingMessage": "正在加载……",
     "xpack.uptime.emptyState.noDataTitle": "没有可用的运行时间数据",
     "xpack.uptime.emptyStateError.title": "错误",
-    "xpack.uptime.emptyStatusBar.defaultMessage": {
-      "text": "未找到监测 ID {monitorId} 的数据",
-      "comment": "没有可用于运行时间监测的数据时，这是在状态栏中显示的默认消息。"
-    },
+    "xpack.uptime.emptyStatusBar.defaultMessage": "未找到监测 ID {monitorId} 的数据",
     "xpack.uptime.errorList.CountColumnLabel": "计数",
     "xpack.uptime.errorList.errorMessage": "错误 {message}",
     "xpack.uptime.errorList.errorTypeColumnLabel": "错误类型",
@@ -9044,10 +8750,7 @@
     "xpack.uptime.filterBar.options.schemeLabel": "方案",
     "xpack.uptime.filterBar.options.urlLabel": "URL",
     "xpack.uptime.header.helpLinkAriaLabel": "前往我们的讨论页",
-    "xpack.uptime.header.helpLinkText": {
-      "text": "提供运行时间反馈",
-      "comment": "该链接指向称作“讨论”的支持，在这里用户可以提交反馈。"
-    },
+    "xpack.uptime.header.helpLinkText": "提供运行时间反馈",
     "xpack.uptime.monitorCharts.checkStatus.series.downCountLabel": "关闭计数",
     "xpack.uptime.monitorCharts.checkStatus.series.upCountLabel": "运行计数",
     "xpack.uptime.monitorCharts.checkStatus.title": "检查状态",
@@ -9055,10 +8758,7 @@
     "xpack.uptime.monitorCharts.loadingMessage": "正在加载……",
     "xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel": "持续时间范围",
     "xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel": "平均持续时间",
-    "xpack.uptime.monitorCharts.monitorDuration.titleLabel": {
-      "text": "监测持续时间 (ms)",
-      "comment": "The 'ms' is an abbreviation for milliseconds."
-    },
+    "xpack.uptime.monitorCharts.monitorDuration.titleLabel": "监测持续时间 (ms)",
     "xpack.uptime.monitorList.downLineSeries.downLabel": "关闭",
     "xpack.uptime.monitorList.errorMessage": "错误 {message}",
     "xpack.uptime.monitorList.idColumnLabel": "ID",
@@ -9073,10 +8773,7 @@
     "xpack.uptime.monitorList.urlColumnLabel": "URL",
     "xpack.uptime.monitorStatusBar.durationTextAriaLabel": "监测持续时间（毫秒）",
     "xpack.uptime.monitorStatusBar.errorMessage": "错误 {message}",
-    "xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage": {
-      "text": "{duration}ms",
-      "comment": "“ms”是毫秒的缩写形式。"
-    },
+    "xpack.uptime.monitorStatusBar.healthStatus.durationInMillisecondsMessage": "{duration}ms",
     "xpack.uptime.monitorStatusBar.healthStatusMessage.downLabel": "关闭",
     "xpack.uptime.monitorStatusBar.healthStatusMessage.upLabel": "运行",
     "xpack.uptime.monitorStatusBar.healthStatusMessageAriaLabel": "监测状态",
@@ -9085,10 +8782,7 @@
     "xpack.uptime.monitorStatusBar.timestampFromNowTextAriaLabel": "自上次检查以来经过的时间",
     "xpack.uptime.pingList.checkHistoryTitle": "检查历史记录",
     "xpack.uptime.pingList.columns.errorMessageTooltipTitle": "错误消息",
-    "xpack.uptime.pingList.durationMsColumnLabel": {
-      "text": "持续时间 (ms)",
-      "comment": "The \"ms\" in the default message is an abbreviation for milliseconds"
-    },
+    "xpack.uptime.pingList.durationMsColumnLabel": "持续时间 (ms)",
     "xpack.uptime.pingList.errorMessage": "错误 {message}",
     "xpack.uptime.pingList.errorMessageColumnLabel": "错误消息",
     "xpack.uptime.pingList.errorTypeColumnLabel": "错误类型",
@@ -9103,10 +8797,7 @@
     "xpack.uptime.pingList.statusOptions.downStatusOptionLabel": "关闭",
     "xpack.uptime.pingList.statusOptions.upStatusOptionLabel": "运行",
     "xpack.uptime.pingList.timestampColumnLabel": "时间戳",
-    "xpack.uptime.pluginDescription": {
-      "text": "运行时间监测",
-      "comment": "The description text that will be shown to users in Kibana"
-    },
+    "xpack.uptime.pluginDescription": "运行时间监测",
     "xpack.uptime.snapshot.endpointStatusTitle": "终端节点状态",
     "xpack.uptime.snapshot.errorMessage": "错误 {message}",
     "xpack.uptime.snapshot.noDataDescription": "抱歉，没有可用于该直方图的数据",
