@@ -7,7 +7,7 @@
 // @ts-ignore EuiSearchBar missing
 import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
@@ -32,16 +32,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
   const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
     UptimeSettingsContext
   );
-  // WIP
-  // TODO: update/fix the below section to use the updated logic/architecture
-  const [, setFilterQueryObj] = useState<object | undefined>(undefined);
-  // const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
-
-  const [currentParams, updateUrl] = useUrlParams(history, location);
-  // console.log(currentParams);
-  // const currentFilterQuery = currentParams.search;
-  // console.log(currentFilterQuery);
-  // console.log(location);
+  const [{ search }, updateUrl] = useUrlParams(history, location);
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -55,23 +46,23 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     }
   }, []);
 
-  const sharedProps = { dateRangeStart, dateRangeEnd, query: 'TODOTHISISTEST' };
+  const filterQueryString = search || '';
+  const sharedProps = {
+    dateRangeStart,
+    dateRangeEnd,
+    filters: search ? JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString)) : undefined,
+  };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
     try {
-      let esQuery;
-      if (query && query.text) {
+      if (query && typeof query.text !== 'undefined') {
         updateUrl({ search: query.text });
-        esQuery = EuiSearchBar.Query.toESQuery(query);
       }
-      setFilterQueryObj(query);
-      // setCurrentFilterQuery(esQuery ? JSON.stringify(esQuery) : esQuery);
       if (refreshApp) {
         refreshApp();
       }
     } catch (e) {
-      setFilterQueryObj(undefined);
-      // setCurrentFilterQuery(undefined);
+      updateUrl({ search: '' });
     }
   };
 
@@ -79,6 +70,7 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
+          currentQuery={filterQueryString}
           updateQuery={updateQuery}
           variables={sharedProps}
         />

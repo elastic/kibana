@@ -20,7 +20,7 @@ interface FilterBarQueryResult {
 }
 
 interface FilterBarProps {
-  currentQuery?: object;
+  currentQuery?: string;
   updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 

@@ -11,4 +11,5 @@ export const CLIENT_DEFAULTS = {
   AUTOREFRESH_IS_PAUSED: false,
   DATE_RANGE_START: 'now-15m',
   DATE_RANGE_END: 'now',
+  SEARCH: '',
 };
