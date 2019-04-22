@@ -29,9 +29,23 @@ uiModules.get('kibana').run(($http: any) => {
   _http = $http;
 });
 
+function createErrorMessage(subject) {
+  const message = `trackUiMetric was called with ${subject}, which is not allowed to contain a colon. ` +
+    `Colons play a special role in how metrics are saved as stored objects`;
+  return new Error(message);
+}
+
 export function trackUiMetric(appName: string, metricType: string | string[]) {
   if (!getCanTrackUiMetrics()) {
     return;
+  }
+
+  if (appName.includes(':')) {
+    throw createErrorMessage(`app name '${appName}'`);
+  }
+
+  if (metricType.includes(':')) {
+    throw createErrorMessage(`metric type ${metricType}`);
   }
 
   const metricTypes = Array.isArray(metricType) ? metricType.join(',') : metricType;

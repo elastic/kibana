@@ -34,6 +34,12 @@ To track multiple metrics within a single request, provide an array of metric ty
 It's important that this request is sent via the `trackUiMetric` function, because it contains special
 logic for blocking the request if the user hasn't opted in to telemetry.
 
+### Disallowed characters
+
+The colon and comma characters (`,`, `:`) should not be used in app name or metric types. Colons play
+a sepcial role in how metrics are stored as saved objects, and the API endpoint uses commas to delimit
+multiple metric types in a single API request.
+
 ### Tracking timed interactions
 
 If you want to track how long it takes a user to do something, you'll need to implement the timing
@@ -67,3 +73,5 @@ These saved objects are automatically consumed by the stats API and surfaced und
 
 By storing these metrics and their counts as key-value pairs, we can add more metrics without having
 to worry about exceeding the 1000-field soft limit in Elasticsearch.
+
+// TODO: Clarify that colons are NOT allowed in metric names or app types possibly reject request in trackUiMetric; disallow commas too?
