@@ -24,7 +24,7 @@ import { uniqFilters } from './lib/uniq_filters';
 import { compareFilters } from './lib/compare_filters';
 import { EventsProvider } from '../events';
 import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
-import { getExtractTimeFilter } from './lib/extract_time_filter';
+import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
 export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope, getAppState, globalState, config) {
@@ -230,7 +230,7 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
-    const timeFilter = await getExtractTimeFilter(indexPatterns, filters);
+    const timeFilter = await extractTimeFilter(indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
     queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
   };
