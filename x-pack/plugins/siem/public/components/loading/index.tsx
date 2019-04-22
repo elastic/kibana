@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingChart, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel, EuiText } from '@elastic/eui';
 import * as React from 'react';
 import { pure } from 'recompose';
 import styled, { injectGlobal } from 'styled-components';
@@ -15,6 +15,10 @@ injectGlobal`
   .euiPanel-loading-hide-border {
     border: none;
   }
+`;
+
+const SpinnerFlexItem = styled(EuiFlexItem)`
+  margin-right: 5px;
 `;
 
 interface LoadingProps {
@@ -44,10 +48,15 @@ export const LoadingPanel = pure<LoadingProps>(
     >
       <LoadingStaticContentPanel>
         <EuiPanel className={showBorder ? '' : 'euiPanel-loading-hide-border'}>
-          <EuiLoadingChart size="m" />
-          <EuiText>
-            <p>{text}</p>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
+            <SpinnerFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </SpinnerFlexItem>
+
+            <EuiFlexItem grow={false}>
+              <EuiText>{text}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPanel>
       </LoadingStaticContentPanel>
     </LoadingStaticPanel>

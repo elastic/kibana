@@ -17,3 +17,7 @@ export const HOSTS = i18n.translate('xpack.siem.navigation.hosts', {
 export const NETWORK = i18n.translate('xpack.siem.navigation.network', {
   defaultMessage: 'Network',
 });
+
+export const TIMELINES = i18n.translate('xpack.siem.navigation.timelines', {
+  defaultMessage: 'Timelines',
+});

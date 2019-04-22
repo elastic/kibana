@@ -7,7 +7,7 @@ import { EuiTab, EuiTabs } from '@elastic/eui';
 import * as React from 'react';
 import styled from 'styled-components';
 
-import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
+import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 
 import * as i18n from '../translations';
 
@@ -39,6 +39,12 @@ const navTabs: NavTab[] = [
     id: 'network',
     name: i18n.NETWORK,
     href: getNetworkUrl(),
+    disabled: false,
+  },
+  {
+    id: 'timelines',
+    name: i18n.TIMELINES,
+    href: getTimelinesUrl(),
     disabled: false,
   },
 ];

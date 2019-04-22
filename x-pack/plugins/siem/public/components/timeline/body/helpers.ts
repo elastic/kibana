@@ -36,7 +36,7 @@ export const getPinTooltip = ({
 
 export interface IsPinnedParams {
   eventId: string;
-  pinnedEventIds: { [eventId: string]: boolean };
+  pinnedEventIds: Readonly<Record<string, boolean>>;
 }
 
 export const eventIsPinned = ({ eventId, pinnedEventIds }: IsPinnedParams): boolean =>
@@ -47,7 +47,7 @@ export interface GetPinOnClickParams {
   eventId: string;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: { [eventId: string]: boolean };
+  pinnedEventIds: Readonly<Record<string, boolean>>;
 }
 
 export const getPinOnClick = ({

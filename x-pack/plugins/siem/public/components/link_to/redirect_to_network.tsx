@@ -17,6 +17,4 @@ export const RedirectToNetworkPage = ({
   },
 }: NetworkComponentProps) => <Redirect to={ip ? `/network/ip/${ip}` : '/network'} />;
 
-export const getNetworkUrl = () => {
-  return '#/link-to/network';
-};
+export const getNetworkUrl = () => '#/link-to/network';

@@ -41,7 +41,7 @@ interface Props {
   height: number;
   id: string;
   isLoading: boolean;
-  eventIdToNoteIds: { [eventId: string]: string[] };
+  eventIdToNoteIds: Readonly<Record<string, string[]>>;
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
@@ -49,7 +49,7 @@ interface Props {
   onPinEvent: OnPinEvent;
   onRangeSelected: OnRangeSelected;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: { [eventId: string]: boolean };
+  pinnedEventIds: Readonly<Record<string, boolean>>;
   range: string;
   rowRenderers: RowRenderer[];
   sort: Sort;
@@ -78,7 +78,7 @@ const VerticalScrollContainer = styled.div<{
   min-width: ${({ minWidth }) => `${minWidth}px`};
 `;
 
-export const defaultWidth = 1090;
+export const DEFAULT_TIMELINE_WIDTH = 1100; // px
 
 /** Renders the timeline body */
 export const Body = pure<Props>(

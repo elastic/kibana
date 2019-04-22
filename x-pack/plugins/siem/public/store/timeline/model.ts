@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultWidth } from '../../components/timeline/body';
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { Sort } from '../../components/timeline/body/sort';
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
@@ -22,7 +22,7 @@ export interface TimelineModel {
   /** A summary of the events and notes in this timeline */
   description: string;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
-  eventIdToNoteIds: { [eventId: string]: string[] };
+  eventIdToNoteIds: Record<string, string[]>;
   /** The chronological history of actions related to this timeline */
   historyIds: string[];
   /** The chronological history of actions related to this timeline */
@@ -49,7 +49,7 @@ export interface TimelineModel {
   /** Notes added to the timeline itself. Notes added to events are stored (separately) in `eventIdToNote` */
   noteIds: string[];
   /** Events pinned to this timeline */
-  pinnedEventIds: { [eventId: string]: boolean };
+  pinnedEventIds: Record<string, boolean>;
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
   range: string;
   /** When true, show the timeline flyover */
@@ -108,5 +108,5 @@ export const timelineDefaults: Readonly<
     columnId: '@timestamp',
     sortDirection: Direction.desc,
   },
-  width: defaultWidth,
+  width: DEFAULT_TIMELINE_WIDTH,
 };

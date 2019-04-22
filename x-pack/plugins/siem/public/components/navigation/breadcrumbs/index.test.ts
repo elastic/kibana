@@ -8,6 +8,7 @@ import chrome from 'ui/chrome';
 import { encodeIpv6 } from '../../../lib/helpers';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
+import { TIMELINES_PAGE_NAME } from '../../link_to/redirect_to_timelines';
 
 import { getBreadcrumbsForRoute, rootBreadcrumbs, setBreadcrumbs } from '.';
 
@@ -30,20 +31,35 @@ describe('Navigation Breadcrumbs', () => {
   const ipv6Breadcrumbs = [...rootBreadcrumbs.overview, ...getIPDetailsBreadcrumbs(ipv6Encoded)];
   describe('getBreadcrumbsForRoute', () => {
     test('should return Host breadcrumbs when supplied link-to host pathname', () => {
-      const pathname = `/link-to/hosts`;
+      const pathname = '/link-to/hosts';
       const breadcrumbs = getBreadcrumbsForRoute(pathname);
       expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
     });
+
     test('should return Host breadcrumbs when supplied host pathname', () => {
-      const pathname = `/hosts`;
+      const pathname = '/hosts';
       const breadcrumbs = getBreadcrumbsForRoute(pathname);
       expect(breadcrumbs).toEqual(rootBreadcrumbs.hosts);
     });
+
     test('should return Network breadcrumbs when supplied network pathname', () => {
-      const pathname = `/network`;
+      const pathname = '/network';
       const breadcrumbs = getBreadcrumbsForRoute(pathname);
       expect(breadcrumbs).toEqual(rootBreadcrumbs.network);
     });
+
+    test('should return Timelines breadcrumbs when supplied link-to timelines pathname', () => {
+      const pathname = `/link-to/${TIMELINES_PAGE_NAME}`;
+      const breadcrumbs = getBreadcrumbsForRoute(pathname);
+      expect(breadcrumbs).toEqual(rootBreadcrumbs.timelines);
+    });
+
+    test('should return Timelines breadcrumbs when supplied timelines pathname', () => {
+      const pathname = '/timelines';
+      const breadcrumbs = getBreadcrumbsForRoute(pathname);
+      expect(breadcrumbs).toEqual(rootBreadcrumbs.timelines);
+    });
+
     test('should return Host Details breadcrumbs when supplied link-to pathname with hostName', () => {
       const pathname = `/link-to/hosts/${hostName}`;
       const breadcrumbs = getBreadcrumbsForRoute(pathname);
@@ -75,7 +91,7 @@ describe('Navigation Breadcrumbs', () => {
     });
   });
   describe('setBreadcrumbs()', () => {
-    test('should call chrome breadcrumb service with correct breadcrimbes', () => {
+    test('should call chrome breadcrumb service with correct breadcrumbs', () => {
       const pathname = `/hosts/${hostName}`;
       setBreadcrumbs(pathname);
       expect(chrome.breadcrumbs.set).toBeCalledWith(hostBreadcrumbs);

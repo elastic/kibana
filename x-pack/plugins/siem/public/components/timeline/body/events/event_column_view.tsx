@@ -25,7 +25,7 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   data: TimelineNonEcsData[];
-  eventIdToNoteIds: { [eventId: string]: string[] };
+  eventIdToNoteIds: Readonly<Record<string, string[]>>;
   expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   loading: boolean;
@@ -33,15 +33,13 @@ interface Props {
   onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: { [eventId: string]: boolean };
+  pinnedEventIds: Readonly<Record<string, boolean>>;
   showNotes: boolean;
   toggleShowNotes: () => void;
   updateNote: UpdateNote;
 }
 
 export const getNewNoteId = (): string => uuid.v4();
-
-export const defaultWidth = 1090;
 
 const emptyNotes: string[] = [];
 
