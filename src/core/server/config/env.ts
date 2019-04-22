@@ -115,6 +115,7 @@ export class Env {
 
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
+      resolve(this.homeDir, 'x-pack', 'plugins'),
       resolve(this.homeDir, 'plugins'),
       resolve(this.homeDir, '..', 'kibana-extra'),
     ];
