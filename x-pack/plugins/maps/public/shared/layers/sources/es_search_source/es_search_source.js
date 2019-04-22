@@ -16,6 +16,7 @@ import { ES_SEARCH } from '../../../../../common/constants';
 import { i18n } from '@kbn/i18n';
 import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 import { ESTooltipProperty } from '../../tooltips/es_tooltip_property';
+import { getTermsFields } from '../../../utils/get_terms_fields';
 
 import { DEFAULT_ES_DOC_LIMIT, DEFAULT_FILTER_BY_MAP_BOUNDS } from './constants';
 
@@ -188,13 +189,11 @@ export class ESSearchSource extends AbstractESSource {
     return _.get(this._descriptor, 'filterByMapBounds', false);
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     const indexPattern = await this._getIndexPattern();
-    const stringFields = indexPattern.fields.filter(field => {
-      return field.type === 'string' && field.subType !== 'multi';
-    });
-    return stringFields.map(stringField => {
-      return { name: stringField.name, label: stringField.name };
-    });
+    return getTermsFields(indexPattern.fields)
+      .map(field => {
+        return { name: field.name, label: field.name };
+      });
   }
 }
