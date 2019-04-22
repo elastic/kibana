@@ -210,7 +210,7 @@
           >
           </a>
           <a
-            ng-if="monitoringMain.instance"
+            ng-if="monitoringMain.instance && monitoringMain.pipelineCount > 0"
             kbn-href="#/logstash/node/{{ monitoringMain.resolver }}/pipelines"
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'pipelines'}"

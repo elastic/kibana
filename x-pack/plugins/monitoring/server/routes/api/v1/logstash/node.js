@@ -10,6 +10,7 @@ import { handleError } from '../../../../lib/errors';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSets } from './metric_set_node';
+import { getClusterStatus } from '../../../../lib/logstash/get_cluster_status';
 
 const { advanced: metricSetAdvanced, overview: metricSetOverview } = metricSets;
 
@@ -69,14 +70,16 @@ export function logstashNodeRoute(server) {
       }
 
       try {
-        const [ metrics, nodeSummary ] = await Promise.all([
+        const [ metrics, nodeSummary, clusterStatus ] = await Promise.all([
           getMetrics(req, lsIndexPattern, metricSet),
           getNodeInfo(req, lsIndexPattern, { clusterUuid, logstashUuid }),
+          getClusterStatus(req, lsIndexPattern, { clusterUuid }),
         ]);
 
         return {
           metrics,
           nodeSummary,
+          clusterStatus,
         };
       } catch(err) {
         throw handleError(err, req);
