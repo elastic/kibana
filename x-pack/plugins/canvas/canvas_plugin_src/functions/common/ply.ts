@@ -5,7 +5,7 @@
  */
 
 import { groupBy, flatten, pick, map } from 'lodash';
-import { FunctionFactory, Datatable, DatatableColumn } from '../types';
+import { ContextFunctionFactory, Datatable, DatatableColumn } from '../types';
 
 interface Arguments {
   by: string[];
@@ -14,7 +14,7 @@ interface Arguments {
 
 type Return = Datatable | Promise<Datatable>;
 
-export const ply: FunctionFactory<'ply', Datatable, Arguments, Return> = () => ({
+export const ply: ContextFunctionFactory<'ply', Datatable, Arguments, Return> = () => ({
   name: 'ply',
   type: 'datatable',
   help:

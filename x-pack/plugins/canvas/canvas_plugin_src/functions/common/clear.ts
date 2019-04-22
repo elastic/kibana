@@ -5,7 +5,7 @@
  */
 import { FunctionFactory } from '../types';
 
-export const clear: FunctionFactory<'clear', void, {}, null> = () => ({
+export const clear: FunctionFactory<'clear', {}, null> = () => ({
   name: 'clear',
   type: 'null',
   help: 'Clears context and returns null',

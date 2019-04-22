@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
-import { FunctionFactory, Render, Style } from '../types';
+import { ContextFunctionFactory, Render, Style } from '../types';
 
 type Shape =
   | 'gauge'
@@ -40,7 +40,12 @@ const shapes: Shape[] = [
   'wheel',
 ];
 
-export const progress: FunctionFactory<'progress', number, Arguments, Render<Arguments>> = () => ({
+export const progress: ContextFunctionFactory<
+  'progress',
+  number,
+  Arguments,
+  Render<Arguments>
+> = () => ({
   name: 'progress',
   aliases: [],
   type: 'render',

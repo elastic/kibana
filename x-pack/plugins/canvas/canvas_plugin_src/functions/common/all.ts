@@ -10,7 +10,7 @@ export interface Arguments {
   condition: boolean[] | null;
 }
 
-export const all: FunctionFactory<'all', void, Arguments, boolean> = () => ({
+export const all: FunctionFactory<'all', Arguments, boolean> = () => ({
   name: 'all',
   type: 'boolean',
   help: 'Return true if all of the conditions are true',

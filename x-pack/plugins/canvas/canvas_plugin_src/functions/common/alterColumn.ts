@@ -5,7 +5,7 @@
  */
 
 import { omit } from 'lodash';
-import { FunctionFactory, Datatable, DatatableColumn, DatatableColumnType } from '../types';
+import { ContextFunctionFactory, Datatable, DatatableColumn, DatatableColumnType } from '../types';
 
 interface Arguments {
   column: string;
@@ -13,7 +13,12 @@ interface Arguments {
   name: string;
 }
 
-export const alterColumn: FunctionFactory<'alterColumn', Datatable, Arguments, Datatable> = () => ({
+export const alterColumn: ContextFunctionFactory<
+  'alterColumn',
+  Datatable,
+  Arguments,
+  Datatable
+> = () => ({
   name: 'alterColumn',
   type: 'datatable',
   help: 'Converts between core types, eg string, number, null, boolean, date and rename columns',

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { NullContextFunctionFactory } from '../types';
 
 // @ts-ignore
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
@@ -24,7 +24,7 @@ interface Return {
 
 const modes: ImageMode[] = ['contain', 'cover', 'stretch'];
 
-export const image: FunctionFactory<'image', null, Arguments, Return> = () => ({
+export const image: NullContextFunctionFactory<'image', Arguments, Return> = () => ({
   name: 'image',
   aliases: [],
   type: 'image',

@@ -8,7 +8,7 @@
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore
 import { elasticOutline } from '../../lib/elastic_outline';
-import { FunctionFactory, Render } from '../types';
+import { ContextFunctionFactory, Render } from '../types';
 
 interface Arguments {
   image: string | null;
@@ -16,7 +16,7 @@ interface Arguments {
   origin: 'top' | 'left' | 'bottom' | 'right';
 }
 
-export const revealImage: FunctionFactory<
+export const revealImage: ContextFunctionFactory<
   'revealImage',
   number,
   Arguments,

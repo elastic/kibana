@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { FunctionFactory } from '../types';
+import { ContextFunctionFactory } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export const rounddate: FunctionFactory<'rounddate', number, Arguments, number> = () => ({
+export const rounddate: ContextFunctionFactory<'rounddate', number, Arguments, number> = () => ({
   name: 'rounddate',
   type: 'number',
   help: 'Round ms since epoch using a moment formatting string. Returns ms since epoch',

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, Datatable, Render, Style } from '../types';
+import { ContextFunctionFactory, Datatable, Render, Style } from '../types';
 
 interface Arguments {
   font: Style;
@@ -13,7 +13,12 @@ interface Arguments {
   showHeader: boolean;
 }
 
-export const table: FunctionFactory<'table', Datatable, Arguments, Render<Arguments>> = () => ({
+export const table: ContextFunctionFactory<
+  'table',
+  Datatable,
+  Arguments,
+  Render<Arguments>
+> = () => ({
   name: 'table',
   aliases: [],
   type: 'render',

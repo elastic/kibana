@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, ContainerStyle } from '../types';
+import { NullContextFunctionFactory, ContainerStyle } from '../types';
 // @ts-ignore
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -12,9 +12,8 @@ interface Return extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export const containerStyle: FunctionFactory<
+export const containerStyle: NullContextFunctionFactory<
   'containerStyle',
-  null,
   ContainerStyle,
   Return
 > = () => ({

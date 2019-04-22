@@ -5,7 +5,7 @@
  */
 
 import { uniq } from 'lodash';
-import { FunctionFactory, Datatable, Render } from '../types';
+import { ContextFunctionFactory, Datatable, Render } from '../types';
 
 interface Arguments {
   filterColumn: string;
@@ -17,7 +17,7 @@ interface Return {
   choices: any;
 }
 
-export const dropdownControl: FunctionFactory<
+export const dropdownControl: ContextFunctionFactory<
   'dropdownControl',
   Datatable,
   Arguments,

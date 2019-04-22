@@ -9,7 +9,7 @@ interface Arguments {
   fn: any[];
 }
 
-export const doFn: FunctionFactory<'do', any, Arguments, any> = () => ({
+export const doFn: FunctionFactory<'do', Arguments, any> = () => ({
   name: 'do',
   help:
     'Runs multiple sub-expressions. Returns the passed in context. Nice for running actions producing functions.',

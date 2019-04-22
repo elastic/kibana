@@ -9,7 +9,7 @@ interface Arguments {
   value: string[];
 }
 
-export const string: FunctionFactory<'string', void, Arguments, string> = () => ({
+export const string: FunctionFactory<'string', Arguments, string> = () => ({
   name: 'string',
   aliases: [],
   type: 'string',

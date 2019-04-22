@@ -5,7 +5,7 @@
  */
 
 import Papa from 'papaparse';
-import { Datatable, FunctionFactory } from '../types';
+import { Datatable, NullContextFunctionFactory } from '../types';
 
 interface Arguments {
   data: string;
@@ -13,7 +13,7 @@ interface Arguments {
   newline: string;
 }
 
-export const csv: FunctionFactory<'csv', void, Arguments, Datatable> = () => ({
+export const csv: NullContextFunctionFactory<'csv', Arguments, Datatable> = () => ({
   name: 'csv',
   type: 'datatable',
   context: {

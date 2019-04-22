@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory } from '../types';
+import { ContextFunctionFactory } from '../types';
 
 interface Arguments {
   pattern: string;
   flags: string;
   replacement: string;
 }
-export const replace: FunctionFactory<'replace', string, Arguments, string> = () => ({
+export const replace: ContextFunctionFactory<'replace', string, Arguments, string> = () => ({
   name: 'replace',
   type: 'string',
   help: 'Use a regular expression to replace parts of a string',

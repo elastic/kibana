@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, Case } from '../types';
+import { FunctionFactory, CaseType } from '../types';
 
 interface Arguments {
-  case: Case[];
+  case: CaseType[];
   default: () => any;
 }
 
-export const switchFn: FunctionFactory<'switch', any, Arguments, any> = () => ({
+export const switchFn: FunctionFactory<'switch', Arguments, any> = () => ({
   name: 'switch',
   help: 'Perform conditional logic with multiple conditions',
   args: {

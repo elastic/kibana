@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory, Datatable } from '../types';
+import { ContextFunctionFactory, Datatable } from '../types';
 
 interface Arguments {
   column: string;
   row: number;
 }
 
-export const getCell: FunctionFactory<'getCell', Datatable, Arguments, any> = () => ({
+export const getCell: ContextFunctionFactory<'getCell', Datatable, Arguments, any> = () => ({
   name: 'getCell',
   help: 'Fetch a single cell in a table',
   context: {

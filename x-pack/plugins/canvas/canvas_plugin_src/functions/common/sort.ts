@@ -5,14 +5,14 @@
  */
 
 import { sortBy } from 'lodash';
-import { FunctionFactory, Datatable } from '../types';
+import { ContextFunctionFactory, Datatable } from '../types';
 
 interface Arguments {
   by: string;
   reverse: boolean;
 }
 
-export const sort: FunctionFactory<'sort', Datatable, Arguments, Datatable> = () => ({
+export const sort: ContextFunctionFactory<'sort', Datatable, Arguments, Datatable> = () => ({
   name: 'sort',
   type: 'datatable',
   help: 'Sorts a datatable on a column',

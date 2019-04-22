@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { ContextFunctionFactory } from '../types';
 
 interface Arguments {
   op: 'eq' | 'ne' | 'lt' | 'gt' | 'lte' | 'gte';
@@ -12,7 +12,7 @@ interface Arguments {
 
 type Context = boolean | number | string | null;
 
-export const compare: FunctionFactory<'compare', Context, Arguments, boolean> = () => ({
+export const compare: ContextFunctionFactory<'compare', Context, Arguments, boolean> = () => ({
   name: 'compare',
   help:
     'Compare the input to something else to determine true or false. Usually used in combination with `{if}`. This only works with primitive types, such as number, string, and boolean.',

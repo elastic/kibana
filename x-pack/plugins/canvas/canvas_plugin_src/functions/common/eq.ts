@@ -11,7 +11,7 @@ interface Arguments {
 
 type Return = boolean | number | string | null;
 
-export const eq: FunctionFactory<'eq', any, Arguments, Return> = () => ({
+export const eq: FunctionFactory<'eq', Arguments, Return> = () => ({
   name: 'eq',
   type: 'boolean',
   help: 'Return if the context is equal to the argument',

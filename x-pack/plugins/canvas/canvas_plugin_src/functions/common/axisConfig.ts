@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { FunctionFactory, Datatable } from '../types';
+import { ContextFunctionFactory, Datatable } from '../types';
 
 interface Arguments {
   show: boolean;
@@ -21,7 +21,12 @@ interface AxisConfig extends Arguments {
 
 const VALID_POSITIONS = ['top', 'bottom', 'left', 'right', ''];
 
-export const axisConfig: FunctionFactory<'axisConfig', Datatable, Arguments, AxisConfig> = () => ({
+export const axisConfig: ContextFunctionFactory<
+  'axisConfig',
+  Datatable,
+  Arguments,
+  AxisConfig
+> = () => ({
   name: 'axisConfig',
   aliases: [],
   type: 'axisConfig',

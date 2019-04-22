@@ -5,13 +5,18 @@
  */
 
 import numeral from '@elastic/numeral';
-import { FunctionFactory } from '../types';
+import { ContextFunctionFactory } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export const formatnumber: FunctionFactory<'formatnumber', number, Arguments, string> = () => ({
+export const formatnumber: ContextFunctionFactory<
+  'formatnumber',
+  number,
+  Arguments,
+  string
+> = () => ({
   name: 'formatnumber',
   type: 'string',
   help: 'Turn a number into a string using a NumberJS format',

@@ -5,13 +5,13 @@
  */
 
 import { take } from 'lodash';
-import { FunctionFactory, Datatable } from '../types';
+import { ContextFunctionFactory, Datatable } from '../types';
 
 interface Arguments {
   count: number;
 }
 
-export const head: FunctionFactory<'head', Datatable, Arguments, Datatable> = () => ({
+export const head: ContextFunctionFactory<'head', Datatable, Arguments, Datatable> = () => ({
   name: 'head',
   aliases: [],
   type: 'datatable',

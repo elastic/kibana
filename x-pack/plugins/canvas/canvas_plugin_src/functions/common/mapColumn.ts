@@ -6,14 +6,14 @@
 
 // @ts-ignore
 import { getType } from '@kbn/interpreter/common';
-import { FunctionFactory, Datatable } from '../types';
+import { ContextFunctionFactory, Datatable } from '../types';
 
 interface Arguments {
   name: string;
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
 
-export const mapColumn: FunctionFactory<
+export const mapColumn: ContextFunctionFactory<
   'mapColumn',
   Datatable,
   Arguments,

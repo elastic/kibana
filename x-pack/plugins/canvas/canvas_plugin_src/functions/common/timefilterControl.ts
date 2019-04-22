@@ -4,15 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, Render } from '../types';
+import { NullContextFunctionFactory, Render } from '../types';
 
 interface Arguments {
   column: string;
   compact: boolean;
 }
-export const timefilterControl: FunctionFactory<
+export const timefilterControl: NullContextFunctionFactory<
   'timefilterControl',
-  null,
   Arguments,
   Render<Arguments>
 > = () => ({

@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { ContextFunctionFactory } from '../types';
 
-type Value = boolean | number | string | null;
+type Context = boolean | number | string | null;
 
 interface Arguments {
-  value: Value;
+  value: Context;
 }
 
-export const lt: FunctionFactory<'lt', any, Arguments, boolean> = () => ({
+export const lt: ContextFunctionFactory<'lt', Context, Arguments, boolean> = () => ({
   name: 'lt',
   type: 'boolean',
   help: 'Return if the context is less than the argument',

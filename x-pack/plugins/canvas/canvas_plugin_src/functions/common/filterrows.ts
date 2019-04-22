@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datatable, FunctionFactory } from '../types';
+import { Datatable, ContextFunctionFactory } from '../types';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
 }
 
-export const filterrows: FunctionFactory<
+export const filterrows: ContextFunctionFactory<
   'filterrows',
   Datatable,
   Arguments,

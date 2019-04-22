@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { palettes } from '../../../common/lib/palettes';
-import { FunctionFactory } from '../types';
+import { NullContextFunctionFactory } from '../types';
 
 interface Arguments {
   color: string[];
@@ -20,7 +20,7 @@ interface Return {
   gradient: boolean;
 }
 
-export const palette: FunctionFactory<'palette', null, Arguments, Return> = () => ({
+export const palette: NullContextFunctionFactory<'palette', Arguments, Return> = () => ({
   name: 'palette',
   aliases: [],
   type: 'palette',

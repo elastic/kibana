@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { NullContextFunctionFactory } from '../types';
 
 export type Shape =
   | 'arrow'
@@ -54,7 +54,7 @@ const OPTIONS: Shape[] = [
   'triangleRight',
 ];
 
-export const shape: FunctionFactory<'shape', null, Arguments, Return> = () => ({
+export const shape: NullContextFunctionFactory<'shape', Arguments, Return> = () => ({
   name: 'shape',
   aliases: [],
   type: 'shape',

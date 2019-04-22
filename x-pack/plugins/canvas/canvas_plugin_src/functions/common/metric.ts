@@ -5,7 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { FunctionFactory, Render, Style } from '../types';
+import { ContextFunctionFactory, Render, Style } from '../types';
 
 type Context = string | null;
 
@@ -15,7 +15,12 @@ interface Arguments {
   labelFont: Style;
 }
 
-export const metric: FunctionFactory<'metric', Context, Arguments, Render<Arguments>> = () => ({
+export const metric: ContextFunctionFactory<
+  'metric',
+  Context,
+  Arguments,
+  Render<Arguments>
+> = () => ({
   name: 'metric',
   aliases: [],
   type: 'render',

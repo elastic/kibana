@@ -8,16 +8,15 @@ import { functions } from '../functions/common';
 
 // COMMON TYPES
 // ------------
-
 type CanvasFunctionType =
   | 'boolean'
   | 'datatable'
   | 'filter'
+  | 'null'
   | 'number'
   | 'render'
   | 'string'
-  | 'style'
-  | 'null';
+  | 'style';
 
 /**
  * Utility type for converting a union of types into an intersection.
@@ -35,12 +34,18 @@ export type UnionToIntersection<U> =
  */
 export type ValuesOf<T extends any[]> = T[number];
 
+/**
+ * Represents an object that is intended to be rendered.
+ */
 export interface Render<T> {
   type: 'render';
   as: string;
   value: T;
 }
 
+/**
+ * Represents an object that is a Filter.
+ */
 export interface Filter {
   type?: string;
   value?: string;
@@ -50,6 +55,9 @@ export interface Filter {
   from?: string;
 }
 
+/**
+ * Represents an object that contains style information, typically CSS.
+ */
 export interface Style {
   spec: {
     fill: string;
@@ -57,6 +65,9 @@ export interface Style {
   };
 }
 
+/**
+ * Represents an object containing style information for a Container.
+ */
 export interface ContainerStyle {
   border: string | null;
   borderRadius: string | null;
@@ -69,7 +80,10 @@ export interface ContainerStyle {
   overflow: 'visible' | 'hidden' | 'scroll' | 'auto';
 }
 
-export type Case = () => Promise<{ matches: any; result: any }>;
+/**
+ * Represents a function called by the `case` Function.
+ */
+export type CaseType = () => Promise<{ matches: any; result: any }>;
 
 // DATATABLES
 // ----------
@@ -92,10 +106,14 @@ export interface DatatableColumn {
  */
 export interface Datatable {
   columns: DatatableColumn[];
-  rows: any[];
+  rows: Array<{ [key: string]: any }>;
   type: 'datatable';
 }
 
+/**
+ * A Utility function that Typescript can use to determine if an object is a Datatable.
+ * @param datatable
+ */
 export const isDatatable = (datatable: any): datatable is Datatable =>
   datatable.type === 'datatable';
 
@@ -104,11 +122,12 @@ export const isDatatable = (datatable: any): datatable is Datatable =>
 
 // Map the type of the generic to a Canvas string-based representation of the type.
 // prettier-ignore
-type PrimitiveToCanvasArgument<T> = 
+type TypeToCanvasArgument<T> = 
   T extends string ? 'string' : 
   T extends boolean ? 'boolean' : 
   T extends number ? 'number' :
-  T extends Case ? 'case' :
+  T extends Filter ? 'filter' :
+  T extends CaseType ? 'case' :
   T extends ContainerStyle ? 'containerStyle' :
   T extends Render<any> ? 'render' :
   T extends Style ? 'style' :
@@ -121,23 +140,20 @@ type PrimitiveToCanvasArgument<T> =
 //
 // `someArgument: Promise<boolean | string>` results in `types: ['boolean', 'string']`
 //
-// prettier-ignore
-type CanvasArgument<ElementType> = 
-  ElementType extends Promise<infer PromisedElementType> ? 
-    PrimitiveToCanvasArgument<PromisedElementType> : 
-    PrimitiveToCanvasArgument<ElementType>;
+type CanvasArgument<T> = T extends Promise<infer P>
+  ? TypeToCanvasArgument<P>
+  : TypeToCanvasArgument<T>;
 
 // Types used in Canvas Arguments that don't map to a primitive cleanly:
 //
 // `date` is typed as a number or string, and represents a date
-// `style` is typed as a string, and represents a CSS inline style
 //
-type UnmappedCanvasArgument = 'filter' | 'seriesStyle' | 'date' | 'null';
+type UnmappedCanvasArgument = 'date' | 'null';
 
 // Map the type within the the generic array to a Canvas string-based
 // representation of the type.
 // prettier-ignore
-type ArrayPrimitiveToCanvasArgument<T> = 
+type ArrayTypeToCanvasArgument<T> = 
   T extends Array<infer ElementType> ? CanvasArgument<ElementType> : 
   T extends null ? 'null' : 
   never;
@@ -145,18 +161,18 @@ type ArrayPrimitiveToCanvasArgument<T> =
 // Map the return type of the function within the generic to a Canvas
 // string-based representation of the return type.
 // prettier-ignore
-type UnresolvedPrimitiveToCanvasArgument<T> = 
+type UnresolvedTypeToCanvasArgument<T> = 
   T extends (...args: any) => infer ElementType ? CanvasArgument<ElementType> : 
-  T extends Case[] ? PrimitiveToCanvasArgument<Case> : // TODO: this is an escape hatch and may be a simplified
+  T extends CaseType[] ? TypeToCanvasArgument<CaseType> : // TODO: this is an escape hatch and may be a simplified
   T extends null ? 'null' : 
   never;
 
 // Map the array-based return type of the function within the generic to a
 // Canvas string-based representation of the return type.
 // prettier-ignore
-type UnresolvedArrayPrimitiveToCanvasArgument<T> = 
+type UnresolvedArrayTypeToCanvasArgument<T> = 
   T extends Array<(...args: any) => infer ElementType> ? CanvasArgument<ElementType> :
-  T extends (...args: any) => infer ElementType ? ArrayPrimitiveToCanvasArgument<ElementType> : 
+  T extends (...args: any) => infer ElementType ? ArrayTypeToCanvasArgument<ElementType> : 
   T extends null ? 'null' : 
   never;
 
@@ -178,7 +194,7 @@ interface BaseArgumentType<T> {
 type SingleArgumentType<T> = BaseArgumentType<T> & {
   multi?: false;
   resolve?: true;
-  types?: Array<PrimitiveToCanvasArgument<T> | UnmappedCanvasArgument>;
+  types?: Array<TypeToCanvasArgument<T> | UnmappedCanvasArgument>;
 };
 
 // If the `multi` property on the argument is true, the `types` array should
@@ -189,7 +205,7 @@ type SingleArgumentType<T> = BaseArgumentType<T> & {
 type MultipleArgumentType<T> = BaseArgumentType<T> & {
   multi: true;
   resolve?: true;
-  types?: Array<ArrayPrimitiveToCanvasArgument<T> | UnmappedCanvasArgument>;
+  types?: Array<ArrayTypeToCanvasArgument<T> | UnmappedCanvasArgument>;
 };
 
 // If the `resolve` property on the arugument is false, the `types` array, if
@@ -198,10 +214,10 @@ type MultipleArgumentType<T> = BaseArgumentType<T> & {
 //
 // `someArgument: () => string` results in `types: ['string']`
 //
-type UnresolvedArgumentType<T> = BaseArgumentType<T> & {
+type UnresolvedSingleArgumentType<T> = BaseArgumentType<T> & {
   options?: T[];
   resolve: false;
-  types?: Array<UnresolvedPrimitiveToCanvasArgument<T> | UnmappedCanvasArgument>;
+  types?: Array<UnresolvedTypeToCanvasArgument<T> | UnmappedCanvasArgument>;
 };
 
 // If the `resolve` property on the arugument is false, the `types` array, if
@@ -213,7 +229,7 @@ type UnresolvedArgumentType<T> = BaseArgumentType<T> & {
 type UnresolvedMultipleArgumentType<T> = BaseArgumentType<T> & {
   multi: true;
   resolve: false;
-  types?: Array<UnresolvedArrayPrimitiveToCanvasArgument<T> | UnmappedCanvasArgument>;
+  types?: Array<UnresolvedArrayTypeToCanvasArgument<T> | UnmappedCanvasArgument>;
 };
 
 /**
@@ -223,7 +239,7 @@ type UnresolvedMultipleArgumentType<T> = BaseArgumentType<T> & {
  */
 export type ArgumentType<T> =
   | UnresolvedMultipleArgumentType<T>
-  | UnresolvedArgumentType<T>
+  | UnresolvedSingleArgumentType<T>
   | MultipleArgumentType<T>
   | SingleArgumentType<T>;
 
@@ -231,40 +247,62 @@ export type ArgumentType<T> =
 // --------
 
 /**
- * Declare a Function Spec interface representing a Function. The generics for
- * `Name`, `ArgumentsSpec`, `Context` and `Errors` provide the interface with
- * information it needs to enforce those shapes:
- *
- * `Name`: string of the name of the Function within Canvas;
- * `Arguments`: a type containing Arguments and their types;
- * `Return`: a type indicating what `fn` will return;
- * `Context`: a type representing available incoming Context types;
+ * A basic Function specification; other Function specifications are based on
+ * this interface.  It assumes the Function accepts any Context provided to it.
  */
-interface FunctionSpec<Name, Context, Arguments, Return> {
+interface FunctionSpec<Name, Arguments, Return> {
   args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
-  context?: {
-    types: Array<PrimitiveToCanvasArgument<Context> | UnmappedCanvasArgument>;
-  };
-  fn(context: Context, args: Arguments): Return;
   help: string;
   name: Name;
   type?: CanvasFunctionType | Name;
+  fn(context: any, args: Arguments): Return;
+}
+
+/**
+ * A Function spec requires a Context be provided, of a specifict type.
+ */
+interface ContextualFunctionSpec<Name, Context, Arguments, Return>
+  extends FunctionSpec<Name, Arguments, Return> {
+  context?: {
+    types: Array<TypeToCanvasArgument<Context> | UnmappedCanvasArgument>;
+  };
+  fn(context: Context, args: Arguments): Return;
 }
 
 /**
  * A `FunctionFactory` defines the function that produces a named FunctionSpec.
  */
 // prettier-ignore
-export type FunctionFactory<Name extends string, Context, Arguments, Return> = 
-  () => FunctionSpec<Name, Context, Arguments, Return>;
+export type FunctionFactory<Name extends string, Arguments, Return> = 
+  () => FunctionSpec<Name, Arguments, Return>;
+
+/**
+ * A `ContextFunctionFactory` defines the function that produces a named FunctionSpec
+ * which includes a Context.
+ */
+// prettier-ignore
+export type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
+    () => ContextualFunctionSpec<Name, Context, Arguments, Return>;
+
+/**
+ * A `NullContextualFunctionFactory` defines the function that produces a named FunctionSpec
+ * which includes an always-null Context.
+ */
+// prettier-ignore
+export type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
+    () => ContextualFunctionSpec<Name, null, Arguments, Return>;
 
 /**
  * A type which infers all of the Function names.
  */
 // prettier-ignore
 export type AvailableFunctions<FnFactory> = 
-  FnFactory extends FunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
+  FnFactory extends ContextFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
     { name: Name, context: Context, arguments: Arguments, return: Return } :
+  FnFactory extends NullContextFunctionFactory<infer Name, infer Arguments, infer Return> ?
+    { name: Name, arguments: Arguments, return: Return } :
+  FnFactory extends FunctionFactory<infer Name, infer Arguments, infer Return> ?
+    { name: Name, arguments: Arguments, return: Return } :
     never;
 
 /**

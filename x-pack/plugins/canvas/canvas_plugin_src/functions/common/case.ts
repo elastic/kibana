@@ -17,7 +17,7 @@ interface Case {
   result: any;
 }
 
-export const caseFn: FunctionFactory<'case', void, Arguments, Promise<Case>> = () => ({
+export const caseFn: FunctionFactory<'case', Arguments, Promise<Case>> = () => ({
   name: 'case',
   type: 'case',
   help: 'Build a case (including a condition/result) to pass to the switch function',

@@ -5,14 +5,14 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { FunctionFactory, Datatable, DatatableColumn } from '../types';
+import { ContextFunctionFactory, Datatable, DatatableColumn } from '../types';
 
 interface Arguments {
   include: string | null;
   exclude: string | null;
 }
 
-export const columns: FunctionFactory<'columns', Datatable, Arguments, Datatable> = () => ({
+export const columns: ContextFunctionFactory<'columns', Datatable, Arguments, Datatable> = () => ({
   name: 'columns',
   type: 'datatable',
   help:

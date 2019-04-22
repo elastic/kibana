@@ -5,14 +5,14 @@
  */
 
 import moment from 'moment';
-import { FunctionFactory } from '../types';
+import { NullContextFunctionFactory } from '../types';
 
 interface Arguments {
   value: string | null;
   format: string;
 }
 
-export const date: FunctionFactory<'date', null, Arguments, number> = () => ({
+export const date: NullContextFunctionFactory<'date', Arguments, number> = () => ({
   name: 'date',
   type: 'number',
   context: {

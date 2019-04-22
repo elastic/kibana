@@ -6,7 +6,7 @@
 
 // @ts-ignore
 import { getType } from '@kbn/interpreter/common';
-import { Datatable, FunctionFactory } from '../types';
+import { Datatable, ContextFunctionFactory } from '../types';
 
 interface Arguments {
   name: string;
@@ -14,7 +14,7 @@ interface Arguments {
 
 type Context = string | boolean | number | null;
 
-export const asFn: FunctionFactory<'as', Context, Arguments, Datatable> = () => ({
+export const asFn: ContextFunctionFactory<'as', Context, Arguments, Datatable> = () => ({
   name: 'as',
   type: 'datatable',
   context: {

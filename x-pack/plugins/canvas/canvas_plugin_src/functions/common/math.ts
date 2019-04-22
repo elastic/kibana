@@ -8,7 +8,7 @@
 import { evaluate } from 'tinymath';
 // @ts-ignore
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { FunctionFactory, Datatable, isDatatable } from '../types';
+import { ContextFunctionFactory, Datatable, isDatatable } from '../types';
 
 interface Arguments {
   expression: string;
@@ -16,7 +16,7 @@ interface Arguments {
 
 type Context = number | Datatable;
 
-export const math: FunctionFactory<'math', Context, Arguments, number> = () => ({
+export const math: ContextFunctionFactory<'math', Context, Arguments, number> = () => ({
   name: 'math',
   type: 'number',
   help:

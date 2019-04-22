@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, Datatable } from '../types';
+import { ContextFunctionFactory, Datatable } from '../types';
 
-export const rowCount: FunctionFactory<'rowCount', Datatable, {}, number> = () => ({
+export const rowCount: ContextFunctionFactory<'rowCount', Datatable, {}, number> = () => ({
   name: 'rowCount',
   aliases: [],
   type: 'number',

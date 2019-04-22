@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { NullContextFunctionFactory } from '../types';
 
 const name = 'seriesStyle';
 
@@ -21,7 +21,7 @@ interface Return extends Arguments {
   type: 'seriesStyle';
 }
 
-export const seriesStyle: FunctionFactory<'seriesStyle', null, Arguments, Return> = () => ({
+export const seriesStyle: NullContextFunctionFactory<'seriesStyle', Arguments, Return> = () => ({
   name,
   help:
     'Creates an object used for describing the properties of a series on a chart.' +

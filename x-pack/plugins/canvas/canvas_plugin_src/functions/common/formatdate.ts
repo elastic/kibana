@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { FunctionFactory } from '../types';
+import { ContextFunctionFactory } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export const formatdate: FunctionFactory<'formatdate', number, Arguments, string> = () => ({
+export const formatdate: ContextFunctionFactory<'formatdate', number, Arguments, string> = () => ({
   name: 'formatdate',
   type: 'string',
   help: 'Output a ms since epoch number as a formatted string',

@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter, FunctionFactory } from '../types';
+import { Filter, ContextFunctionFactory } from '../types';
 
 interface Arguments {
   column: string;
   value: string;
 }
 
-export const exactly: FunctionFactory<'exactly', Filter, Arguments, Filter> = () => ({
+export const exactly: ContextFunctionFactory<'exactly', Filter, Arguments, Filter> = () => ({
   name: 'exactly',
   aliases: [],
   type: 'filter',

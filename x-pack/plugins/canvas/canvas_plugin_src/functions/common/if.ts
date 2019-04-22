@@ -11,7 +11,7 @@ interface Arguments {
   else: () => Promise<any>;
 }
 
-export const ifFn: FunctionFactory<'if', any, Arguments, any> = () => ({
+export const ifFn: FunctionFactory<'if', Arguments, any> = () => ({
   name: 'if',
   help: 'Perform conditional logic',
   args: {

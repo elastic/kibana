@@ -6,7 +6,7 @@
 
 import { FunctionFactory } from '../types';
 
-export const context: FunctionFactory<'context', any, {}, any> = () => ({
+export const context: FunctionFactory<'context', {}, any> = () => ({
   name: 'context',
   help:
     'Returns whatever you pass into it. This can be useful when you need to use context as argument to a function as a sub-expression',

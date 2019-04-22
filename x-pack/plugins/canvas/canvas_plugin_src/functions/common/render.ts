@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, Render, ContainerStyle } from '../types';
+import { ContextFunctionFactory, Render, ContainerStyle } from '../types';
 
 interface Arguments {
   as: string | null;
@@ -12,7 +12,12 @@ interface Arguments {
   containerStyle: ContainerStyle | null;
 }
 
-export const render: FunctionFactory<'render', Render<any>, Arguments, Render<Arguments>> = () => ({
+export const render: ContextFunctionFactory<
+  'render',
+  Render<any>,
+  Arguments,
+  Render<Arguments>
+> = () => ({
   name: 'render',
   aliases: [],
   type: 'render',

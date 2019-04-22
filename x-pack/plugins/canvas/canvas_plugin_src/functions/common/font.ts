@@ -7,7 +7,7 @@
 // @ts-ignore
 import inlineStyle from 'inline-style';
 import { openSans } from '../../../common/lib/fonts';
-import { FunctionFactory } from '../types';
+import { NullContextFunctionFactory } from '../types';
 
 type FontWeight =
   | 'normal'
@@ -71,7 +71,7 @@ const WEIGHTS: FontWeight[] = [
 
 const ALIGNMENTS: Alignment[] = ['center', 'left', 'right', 'justify'];
 
-export const font: FunctionFactory<'font', null, Arguments, Return> = () => ({
+export const font: NullContextFunctionFactory<'font', Arguments, Return> = () => ({
   name: 'font',
   aliases: [],
   type: 'style',

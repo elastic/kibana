@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { FunctionFactory, Filter } from '../types';
+import { ContextFunctionFactory, Filter } from '../types';
 
 interface Arguments {
   column: string;
@@ -13,7 +13,7 @@ interface Arguments {
   to: string | null;
 }
 
-export const timefilter: FunctionFactory<'timefilter', Filter, Arguments, Filter> = () => ({
+export const timefilter: ContextFunctionFactory<'timefilter', Filter, Arguments, Filter> = () => ({
   name: 'timefilter',
   aliases: [],
   type: 'filter',
