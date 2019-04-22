@@ -37,10 +37,10 @@ export class AddLayerPanel extends Component {
       return;
     }
 
-    const layerOptions = {};
-    if (this.state.layer) {
-      layerOptions.style = this.state.layer.getCurrentStyle().getDescriptor();
-    }
+
+    const layerOptions = this.state.layer
+      ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
+      : {};
     this.setState({
       layer: source.createDefaultLayer(layerOptions, this.props.mapColors)
     },
