@@ -26,13 +26,14 @@ import Split from '../../split';
 import { SeriesDragHandler } from '../../series_drag_hanler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
-import createAggRowRender from '../../lib/create_agg_row_render';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
 
 const TopNSeries = injectI18n(function (props) {
   const {
     panel,
     model,
+    name,
     fields,
     onAdd,
     onChange,
@@ -46,7 +47,6 @@ const TopNSeries = injectI18n(function (props) {
   } = props;
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -57,7 +57,15 @@ const TopNSeries = injectI18n(function (props) {
     if (selectedTab === 'metrics') {
       seriesBody = (
         <div>
-          { aggs }
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}

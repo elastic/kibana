@@ -22,10 +22,10 @@ import React from 'react';
 import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import Split from '../../split';
-import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -39,6 +39,7 @@ function MarkdownSeriesUi(props) {
     selectedTab,
     visible,
     intl,
+    name,
     uiRestrictions
   } = props;
 
@@ -46,7 +47,6 @@ function MarkdownSeriesUi(props) {
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -57,7 +57,15 @@ function MarkdownSeriesUi(props) {
     if (selectedTab === 'metrics') {
       seriesBody = (
         <div>
-          { aggs }
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}

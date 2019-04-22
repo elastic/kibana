@@ -24,24 +24,27 @@ import SeriesConfig from './config';
 import { SeriesDragHandler } from '../../series_drag_hanler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
-import createAggRowRender from '../../lib/create_agg_row_render';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
 
 function TableSeries(props) {
   const {
     model,
     onAdd,
+    name,
+    fields,
+    panel,
     onChange,
     onDelete,
     disableDelete,
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions,
   } = props;
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -52,7 +55,15 @@ function TableSeries(props) {
     if (selectedTab === 'metrics') {
       seriesBody = (
         <div>
-          { aggs }
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
         </div>
       );
     } else {

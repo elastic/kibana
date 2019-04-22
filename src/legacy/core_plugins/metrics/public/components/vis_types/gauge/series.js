@@ -25,15 +25,16 @@ import { SeriesConfig } from '../../series_config';
 import Split from '../../split';
 import { SeriesDragHandler } from '../../series_drag_hanler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
-import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Aggs } from '../../aggs/aggs';
 
 function GaugeSeriesUi(props) {
   const {
     panel,
     fields,
     onAdd,
+    name,
     onChange,
     onDelete,
     disableDelete,
@@ -48,7 +49,6 @@ function GaugeSeriesUi(props) {
   const model = { ...defaults, ...props.model };
 
   const handleChange = createTextHandler(onChange);
-  const aggs = model.metrics.map(createAggRowRender(props));
 
   let caretIcon = 'arrowDown';
   if (!visible) caretIcon = 'arrowRight';
@@ -59,7 +59,15 @@ function GaugeSeriesUi(props) {
     if (selectedTab === 'metrics') {
       seriesBody = (
         <div>
-          { aggs }
+          <Aggs
+            onChange={props.onChange}
+            fields={fields}
+            panel={panel}
+            model={model}
+            name={name}
+            uiRestrictions={uiRestrictions}
+            dragHandleProps={props.dragHandleProps}
+          />
           <div className="tvbAggRow tvbAggRow--split">
             <Split
               onChange={props.onChange}
@@ -122,7 +130,6 @@ function GaugeSeriesUi(props) {
       className={`${props.className}`}
       style={props.style}
     >
-
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
@@ -165,7 +172,6 @@ function GaugeSeriesUi(props) {
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       { body }
     </div>
   );
