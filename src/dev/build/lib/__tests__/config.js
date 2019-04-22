@@ -19,7 +19,7 @@
 
 import { resolve } from 'path';
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import pkg from '../../../../../package.json';
 import { getConfig } from '../config';

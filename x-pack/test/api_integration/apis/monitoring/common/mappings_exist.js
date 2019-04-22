@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { get } from 'lodash';
 import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
 import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';

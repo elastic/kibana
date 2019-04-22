@@ -10,13 +10,12 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import moment from 'moment';
 import React from 'react';
 import styled from 'styled-components';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
+import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import {
   fontFamilyCode,
   fontSizes,
   px,
   truncate,
-  unit,
   units
 } from '../../../style/variables';
 
@@ -47,15 +46,16 @@ const PropertyValueDimmed = styled.span`
   color: ${theme.euiColorMediumShade};
 `;
 
+const propertyValueLineHeight = 1.2;
 const PropertyValue = styled.div`
   display: inline-block;
-  line-height: ${px(unit)};
+  line-height: ${propertyValueLineHeight};
 `;
 PropertyValue.displayName = 'PropertyValue';
 
 const PropertyValueTruncated = styled.span`
   display: inline-block;
-  line-height: ${px(unit)};
+  line-height: ${propertyValueLineHeight};
   ${truncate('100%')};
 `;
 

@@ -39,7 +39,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { MultiMetricJobServiceProvider } from './create_job_service';
-import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
@@ -77,7 +76,6 @@ module
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const chartDataUtils = Private(ChartDataUtilsProvider);
     const mlMultiMetricJobService = Private(MultiMetricJobServiceProvider);
-    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
     $scope.addNewJobToRecentlyAccessed = addNewJobToRecentlyAccessed;
 
     const stateDefaults = {
@@ -114,8 +112,6 @@ module
     const {
       indexPattern,
       savedSearch,
-      query,
-      filters,
       combinedQuery } = createSearchItems();
 
     timeBasedIndexCheck(indexPattern, true);
@@ -232,8 +228,6 @@ module
       influencerFields: [],
       firstSplitFieldName: undefined,
       indexPattern,
-      query,
-      filters,
       combinedQuery,
       usesSavedSearch: (savedSearch.id !== undefined),
       jobId: '',
@@ -757,10 +751,6 @@ module
             formConfig.modelMemoryLimit = DEFAULT_MODEL_MEMORY_LIMIT;
           }
         });
-    };
-
-    $scope.setFullTimeRange = function () {
-      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     initAgg();

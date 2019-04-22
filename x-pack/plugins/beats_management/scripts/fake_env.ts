@@ -7,7 +7,7 @@ import Chance from 'chance'; // eslint-disable-line
 // @ts-ignore
 import request from 'request';
 import uuidv4 from 'uuid/v4';
-import { configBlockSchemas } from 'x-pack/plugins/beats_management/common/config_schemas';
+import { configBlockSchemas } from '../common/config_schemas';
 import { BeatTag } from '../common/domain_types';
 import { compose } from '../public/lib/compose/scripts';
 const args = process.argv.slice(2);
@@ -46,7 +46,7 @@ const enroll = async (kibanaURL: string, token: string) => {
     (error: any, response: any, body: any) => {
       const res = JSON.parse(body);
       if (res.message) {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.log(res.message);
       }
     }
@@ -61,7 +61,7 @@ const start = async (
 ) => {
   try {
     const libs = compose(kibanaURL);
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     console.error(`Enrolling ${numberOfBeats} fake beats...`);
 
     const enrollmentTokens = await libs.tokens.createEnrollmentTokens(numberOfBeats);
@@ -81,11 +81,11 @@ const start = async (
     process.stdout.write('\n');
 
     await sleep(2000);
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     console.error(`${numberOfBeats} fake beats are enrolled`);
     const beats = await libs.beats.getAll();
 
-    // tslint:disable-next-line
+    // eslint-disable-next-line
     console.error(`Creating tags, configs, and assigning them...`);
     process.stdout.write(`creating tags/configs for beat... 0 of ${numberOfBeats}`);
     count = 0;
@@ -137,16 +137,16 @@ Duo Reges: constructio interrete. Itaque his sapiens semper vacabit.`.substring(
     }
   } catch (e) {
     if (e.response && e.response.data && e.response.message) {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error(e.response.data.message);
     } else if (e.response && e.response.data && e.response.reason) {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error(e.response.data.reason);
     } else if (e.code) {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error(e.code);
     } else {
-      // tslint:disable-next-line
+      // eslint-disable-next-line
       console.error(e);
     }
   }

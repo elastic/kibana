@@ -15,7 +15,7 @@ import {
 } from '../../../graphql/types';
 import { InfraDateRangeAggregationBucket, InfraFrameworkRequest } from '../../adapters/framework';
 import { InfraSourceConfiguration, InfraSources } from '../../sources';
-import { builtinRules } from './builtin_rules';
+import { getBuiltinRules } from './builtin_rules';
 import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
 import { compileFormattingRules } from './message';
 
@@ -42,7 +42,7 @@ export class InfraLogEntriesDomain {
     }
 
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const formattingRules = compileFormattingRules(builtinRules);
+    const formattingRules = compileFormattingRules(getBuiltinRules(configuration.fields.message));
 
     const documentsBefore = await this.adapter.getAdjacentLogEntryDocuments(
       request,
@@ -90,7 +90,7 @@ export class InfraLogEntriesDomain {
     highlightQuery?: string
   ): Promise<InfraLogEntry[]> {
     const { configuration } = await this.libs.sources.getSourceConfiguration(request, sourceId);
-    const formattingRules = compileFormattingRules(builtinRules);
+    const formattingRules = compileFormattingRules(getBuiltinRules(configuration.fields.message));
     const documents = await this.adapter.getContainedLogEntryDocuments(
       request,
       configuration,
@@ -204,12 +204,12 @@ export interface LogEntryDocumentFields {
 
 const convertLogDocumentToEntry = (
   sourceId: string,
-  formatMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
+  formatLogMessage: (fields: LogEntryDocumentFields) => InfraLogMessageSegment[]
 ) => (document: LogEntryDocument): InfraLogEntry => ({
   key: document.key,
   gid: document.gid,
   source: sourceId,
-  message: formatMessage(document.fields),
+  message: formatLogMessage(document.fields),
 });
 
 const convertDateRangeBucketToSummaryBucket = (

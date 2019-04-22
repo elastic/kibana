@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import MockState from 'fixtures/mock_state';
 import { FilterBarQueryFilterProvider } from '../query_filter';

@@ -16,6 +16,8 @@ import {
 } from '@elastic/eui';
 
 import { Join } from './resources/join';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 export function JoinEditor({ joins, layer, onChange }) {
 
@@ -69,10 +71,30 @@ export function JoinEditor({ joins, layer, onChange }) {
     <div>
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
-          <EuiTitle size="xs"><h5>Term joins</h5></EuiTitle>
+          <EuiTitle size="xs">
+            <h5>
+              <FormattedMessage
+                id="xpack.maps.layerPanel.joinEditor.termJoinsTitle"
+                defaultMessage="Term joins"
+              />
+            </h5>
+          </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon iconType="plusInCircle" onClick={addJoin} aria-label="Add join" title="Add join" />
+
+          <EuiButtonIcon
+            iconType="plusInCircle"
+            onClick={addJoin}
+            aria-label={i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinAriaLabel', {
+              defaultMessage: 'Add join'
+            })
+            }
+            title={
+              i18n.translate('xpack.maps.layerPanel.joinEditor.addJoinButtonLabel', {
+                defaultMessage: 'Add join'
+              })
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 

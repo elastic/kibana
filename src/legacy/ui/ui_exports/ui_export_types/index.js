@@ -43,6 +43,7 @@ export {
   visResponseHandlers,
   visRequestHandlers,
   visEditorTypes,
+  interpreter,
   savedObjectTypes,
   embeddableFactories,
   fieldFormats,

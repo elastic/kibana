@@ -38,7 +38,7 @@ export const CleanClientModulesOnDLLTask = {
       `${baseDir}/src/cli`,
       `${baseDir}/src/cli_keystore`,
       `${baseDir}/src/cli_plugin`,
-      `${baseDir}/node_modules/x-pack`,
+      `${baseDir}/x-pack`,
       ...kbnWebpackLoaders.map(loader => `${baseDir}/node_modules/${loader}`)
     ];
     const discoveredLegacyCorePluginEntries = await globby([

@@ -47,7 +47,7 @@ export async function incrementFileDataVisualizerIndexCreationCount(server: Serv
 
   try {
     const { attributes } = await savedObjectsClient.get('telemetry', 'telemetry');
-    if (attributes.telemetry.enabled === false) {
+    if (attributes.enabled === false) {
       return;
     }
   } catch (error) {

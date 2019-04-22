@@ -18,7 +18,7 @@
  */
 
 import Promise from 'bluebird';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { VegaVisualizationProvider } from '../vega_visualization';
@@ -84,14 +84,14 @@ describe('VegaVisualizations', () => {
         const vegaParser = new VegaParser(vegaliteGraph, new SearchCache());
         await vegaParser.parseAsync();
 
-        await vegaVis.render(vegaParser, { data: true });
+        await vegaVis.render(vegaParser, vis.params, { data: true });
         const mismatchedPixels1 = await compareImage(vegaliteImage512);
         expect(mismatchedPixels1).to.be.lessThan(PIXEL_DIFF);
 
         domNode.style.width = '256px';
         domNode.style.height = '256px';
 
-        await vegaVis.render(vegaParser, { resize: true });
+        await vegaVis.render(vegaParser, vis.params, { resize: true });
         const mismatchedPixels2 = await compareImage(vegaliteImage256);
         expect(mismatchedPixels2).to.be.lessThan(PIXEL_DIFF);
 
@@ -110,7 +110,7 @@ describe('VegaVisualizations', () => {
         const vegaParser = new VegaParser(vegaGraph, new SearchCache());
         await vegaParser.parseAsync();
 
-        await vegaVis.render(vegaParser, { data: true });
+        await vegaVis.render(vegaParser, vis.params, { data: true });
         const mismatchedPixels = await compareImage(vegaImage512);
         expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
@@ -128,7 +128,7 @@ describe('VegaVisualizations', () => {
         vegaVis = new VegaVisualization(domNode, vis);
         const vegaParser = new VegaParser(vegaTooltipGraph, new SearchCache());
         await vegaParser.parseAsync();
-        await vegaVis.render(vegaParser, { data: true });
+        await vegaVis.render(vegaParser, vis.params, { data: true });
 
 
         const $el = $(domNode);
@@ -178,7 +178,7 @@ describe('VegaVisualizations', () => {
         domNode.style.width = '256px';
         domNode.style.height = '256px';
 
-        await vegaVis.render(vegaParser, { data: true });
+        await vegaVis.render(vegaParser, vis.params, { data: true });
         const mismatchedPixels = await compareImage(vegaMapImage256);
         expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
@@ -186,6 +186,49 @@ describe('VegaVisualizations', () => {
         vegaVis.destroy();
       }
 
+    });
+
+    it('should add a small subpixel value to the height of the canvas to avoid getting it set to 0', async () => {
+      let vegaVis;
+      try {
+
+        vegaVis = new VegaVisualization(domNode, vis);
+        const vegaParser = new VegaParser(`{
+            "$schema": "https://vega.github.io/schema/vega/v3.json",
+            "marks": [
+              {
+                "type": "text",
+                "encode": {
+                  "update": {
+                    "text": {
+                      "value": "Test"
+                    },
+                    "align": {"value": "center"},
+                    "baseline": {"value": "middle"},
+                    "xc": {"signal": "width/2"},
+                    "yc": {"signal": "height/2"}
+                    fontSize: {value: "14"}
+                  }
+                }
+              }
+            ]
+          }`, new SearchCache());
+        await vegaParser.parseAsync();
+
+        domNode.style.width = '256px';
+        domNode.style.height = '256px';
+
+        await vegaVis.render(vegaParser, vis.params, { data: true });
+        const vegaView = vegaVis._vegaView._view;
+        expect(vegaView.height()).to.be(250.00000001);
+
+        vegaView.height(250);
+        await vegaView.runAsync();
+        // as soon as this test fails, the workaround with the subpixel value can be removed.
+        expect(vegaView.height()).to.be(0);
+      } finally {
+        vegaVis.destroy();
+      }
     });
 
   });

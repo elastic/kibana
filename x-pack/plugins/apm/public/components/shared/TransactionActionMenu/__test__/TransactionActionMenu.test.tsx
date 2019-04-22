@@ -8,17 +8,12 @@ import { shallow } from 'enzyme';
 import 'jest-styled-components';
 import React from 'react';
 import { TransactionActionMenu } from '../TransactionActionMenu';
-import { props } from './transactionActionMenuProps';
+import { transaction } from './mockData';
 
 describe('TransactionActionMenu component', () => {
   it('should render with data', () => {
-    const transaction = props.transaction;
-    const location = props.location;
-
     expect(
-      shallow(
-        <TransactionActionMenu transaction={transaction} location={location} />
-      ).shallow()
+      shallow(<TransactionActionMenu transaction={transaction} />).shallow()
     ).toMatchSnapshot();
   });
 });

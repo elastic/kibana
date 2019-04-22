@@ -33,7 +33,7 @@ savedObjectManagementRegistry.register({
   title: 'searches'
 });
 
-module.service('savedSearches', function (Private, Promise, config, kbnIndex, createNotifier, SavedSearch, kbnUrl, $http, chrome) {
+module.service('savedSearches', function (Private, SavedSearch, kbnUrl, chrome) {
   const savedObjectClient = Private(SavedObjectsClientProvider);
   const savedSearchLoader = new SavedObjectLoader(SavedSearch, kbnUrl, chrome, savedObjectClient);
   // Customize loader properties since adding an 's' on type doesn't work for type 'search' .

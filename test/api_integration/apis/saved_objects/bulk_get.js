@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -54,9 +54,6 @@ export default function ({ getService }) {
               saved_objects: [
                 {
                   id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
-                  migrationVersion: {
-                    visualization: '7.0.0'
-                  },
                   type: 'visualization',
                   updated_at: '2017-09-21T18:51:23.794Z',
                   version: resp.body.saved_objects[0].version,
@@ -69,9 +66,7 @@ export default function ({ getService }) {
                     uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
                     kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta
                   },
-                  migrationVersion: {
-                    visualization: '7.0.0',
-                  },
+                  migrationVersion: resp.body.saved_objects[0].migrationVersion,
                   references: [{
                     name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
                     type: 'index-pattern',
@@ -99,6 +94,7 @@ export default function ({ getService }) {
                 }
               ]
             });
+            expect(resp.body.saved_objects[0].migrationVersion).to.be.ok();
           })
       ));
     });

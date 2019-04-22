@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from './common/constants';
 import { requireUIRoutes } from './server/routes';
 import { instantiateClient } from './server/es_client/instantiate_client';
@@ -54,6 +55,30 @@ export const init = (monitoringPlugin, server) => {
     }
   });
 
+  xpackMainPlugin.registerFeature({
+    id: 'monitoring',
+    name: i18n.translate('xpack.monitoring.featureRegistry.monitoringFeatureName', {
+      defaultMessage: 'Stack Monitoring',
+    }),
+    icon: 'monitoringApp',
+    navLinkId: 'monitoring',
+    app: ['monitoring', 'kibana'],
+    catalogue: ['monitoring'],
+    privileges: {},
+    reserved: {
+      privilege: {
+        savedObject: {
+          all: [],
+          read: ['config']
+        },
+        ui: [],
+      },
+      description: i18n.translate('xpack.monitoring.feature.reserved.description', {
+        defaultMessage: 'To grant users access, you should also assign the monitoring_user role.'
+      })
+    }
+  });
+
   const bulkUploader = initBulkUploader(kbnServer, server);
   const kibanaCollectionEnabled = config.get('xpack.monitoring.kibana.collection.enabled');
   const { info: xpackMainInfo } = xpackMainPlugin;
@@ -85,8 +110,6 @@ export const init = (monitoringPlugin, server) => {
       maxBucketSize: config.get('xpack.monitoring.max_bucket_size'),
       minIntervalSeconds: config.get('xpack.monitoring.min_interval_seconds'),
       kbnIndex: config.get('kibana.index'),
-      esApiVersion: config.get('elasticsearch.apiVersion'),
-      esShardTimeout: config.get('elasticsearch.shardTimeout'),
       showLicenseExpiration: config.get('xpack.monitoring.show_license_expiration'),
       showCgroupMetricsElasticsearch: config.get('xpack.monitoring.ui.container.elasticsearch.enabled'),
       showCgroupMetricsLogstash: config.get('xpack.monitoring.ui.container.logstash.enabled') // Note, not currently used, but see https://github.com/elastic/x-pack-kibana/issues/1559 part 2

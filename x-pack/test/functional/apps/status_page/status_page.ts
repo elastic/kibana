@@ -5,7 +5,7 @@
  */
 import { TestInvoker } from './lib/types';
 
-// tslint:disable:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default function statusPageFunctonalTests({ getService, getPageObjects }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const PageObjects = getPageObjects(['security', 'statusPage', 'home']);
@@ -15,6 +15,7 @@ export default function statusPageFunctonalTests({ getService, getPageObjects }:
     after(async () => await esArchiver.unload('empty_kibana'));
 
     it('allows user to navigate without authentication', async () => {
+      await PageObjects.security.logout();
       await PageObjects.statusPage.navigateToPage();
       await PageObjects.statusPage.expectStatusPage();
     });

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import relocatingShardsFixture from './fixtures/indices_shards_relocating';
 import relocationShardsAllFixture from './fixtures/indices_shards_relocating_all';
 import indicesRedClusterFixture from './fixtures/indices_red_cluster';

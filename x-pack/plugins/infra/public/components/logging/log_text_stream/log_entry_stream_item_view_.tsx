@@ -5,8 +5,8 @@
  */
 
 import * as React from 'react';
-import styled from 'styled-components';
 
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntry } from '../../../../common/log_entry';
 
 interface LogEntryStreamItemViewProps {
@@ -25,7 +25,7 @@ export class LogEntryStreamItemView extends React.PureComponent<LogEntryStreamIt
   }
 }
 
-const LogEntryDiv = styled.div`
+const LogEntryDiv = euiStyled.div`
   border-top: 1px solid red;
   border-bottom: 1px solid green;
 `;

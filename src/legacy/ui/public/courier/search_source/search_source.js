@@ -76,7 +76,6 @@ import { buildEsQuery, getEsQueryConfig, filterMatchesIndex } from '@kbn/es-quer
 import '../../promises';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { SearchRequestProvider } from '../fetch/request';
-import { SegmentedSearchRequestProvider } from '../fetch/request/segmented_search_request';
 
 import { searchRequestQueue } from '../search_request_queue';
 import { FetchSoonProvider } from '../fetch';
@@ -117,7 +116,6 @@ function isIndexPattern(val) {
 
 export function SearchSourceProvider(Promise, Private, config) {
   const SearchRequest = Private(SearchRequestProvider);
-  const SegmentedSearchRequest = Private(SegmentedSearchRequestProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
   const fetchSoon = Private(FetchSoonProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
@@ -387,26 +385,6 @@ export function SearchSourceProvider(Promise, Private, config) {
           request.abort();
         };
         self._createRequest({ defer, errorHandler });
-      });
-    }
-
-    onBeginSegmentedFetch(initFunction) {
-      const self = this;
-      return new Promise((resolve, reject) => {
-        function addRequest() {
-          const defer = Promise.defer();
-          const errorHandler = (request, error) => {
-            reject(error);
-            request.abort();
-          };
-          const req = new SegmentedSearchRequest({ source: self, defer, errorHandler, initFn: initFunction });
-
-          // Return promises created by the completion handler so that
-          // errors will bubble properly
-          return req.getCompletePromise().then(addRequest);
-        }
-
-        addRequest();
       });
     }
 

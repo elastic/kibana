@@ -48,6 +48,7 @@ function getColors(props) {
 function GaugeVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const colors = getColors(props);
+
   const series = _.get(visData, `${model.id}.series`, [])
     .filter(row => row)
     .map((row, i) => {

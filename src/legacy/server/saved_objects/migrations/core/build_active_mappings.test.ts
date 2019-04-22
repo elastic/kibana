@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { IndexMapping } from './../../../mappings';
 import { buildActiveMappings, diffMappings } from './build_active_mappings';
-import { IndexMapping } from './call_cluster';
 
 describe('buildActiveMappings', () => {
   test('combines all mappings and includes core mappings', () => {
@@ -39,7 +39,7 @@ describe('buildActiveMappings', () => {
   });
 
   test('disallows mappings with leading underscore', () => {
-    const properties = { _hm: 'You shall not pass!' };
+    const properties = { _hm: { type: 'keyword' } };
 
     expect(() => buildActiveMappings({ properties })).toThrow(
       /Invalid mapping \"_hm\"\. Mappings cannot start with _/
@@ -48,9 +48,9 @@ describe('buildActiveMappings', () => {
 
   test('generated hashes are stable', () => {
     const properties = {
-      aaa: { a: '...', b: '...', c: new Date('2019-01-02'), d: [{ hello: 'world' }] },
-      bbb: { c: new Date('2019-01-02'), d: [{ hello: 'world' }], a: '...', b: '...' },
-      ccc: { c: new Date('2020-01-02'), d: [{ hello: 'world' }], a: '...', b: '...' },
+      aaa: { type: 'keyword', fields: { a: { type: 'keyword' }, b: { type: 'text' } } },
+      bbb: { fields: { b: { type: 'text' }, a: { type: 'keyword' } }, type: 'keyword' },
+      ccc: { fields: { b: { type: 'text' }, a: { type: 'text' } }, type: 'keyword' },
     };
 
     const mappings = buildActiveMappings({ properties });
@@ -108,7 +108,7 @@ describe('diffMappings', () => {
       },
       dynamic: 'strict',
       properties: {
-        foo: 'bar',
+        foo: { type: 'keyword' },
       },
     };
     const expected: IndexMapping = {
@@ -117,7 +117,7 @@ describe('diffMappings', () => {
       },
       dynamic: 'strict',
       properties: {
-        foo: 'baz',
+        foo: { type: 'text' },
       },
     };
 

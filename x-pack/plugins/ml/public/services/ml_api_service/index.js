@@ -247,6 +247,13 @@ export const ml = {
     });
   },
 
+  listDataRecognizerModules() {
+    return http({
+      url: `${basePath}/modules/get_module`,
+      method: 'GET'
+    });
+  },
+
   getDataRecognizerModule(obj) {
     return http({
       url: `${basePath}/modules/get_module/${obj.moduleId}`,

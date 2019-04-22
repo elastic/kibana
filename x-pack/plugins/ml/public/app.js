@@ -13,6 +13,7 @@ import 'ui/courier';
 import 'ui/angular-bootstrap';
 import 'ui/persisted_log';
 import 'ui/autoload/all';
+import 'ui/kbn_top_nav';
 
 import 'plugins/ml/access_denied';
 import 'plugins/ml/lib/angular_bootstrap_patch';
@@ -30,6 +31,7 @@ import 'plugins/ml/components/nav_menu';
 import 'plugins/ml/components/loading_indicator';
 import 'plugins/ml/settings';
 import 'plugins/ml/file_datavisualizer';
+import 'uiExports/autocompleteProviders';
 
 import uiRoutes from 'ui/routes';
 

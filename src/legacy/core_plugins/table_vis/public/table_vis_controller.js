@@ -28,9 +28,9 @@ const module = uiModules.get('kibana/table_vis', ['kibana']);
 // tabular format that we can pass to the table directive
 module.controller('KbnTableVisController', function ($scope) {
   const uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
-  assign($scope.vis.params.sort, uiStateSort);
+  assign($scope.visParams.sort, uiStateSort);
 
-  $scope.sort = $scope.vis.params.sort;
+  $scope.sort = $scope.visParams.sort;
   $scope.$watchCollection('sort', function (newSort) {
     $scope.uiState.set('vis.params.sort', newSort);
   });
@@ -56,7 +56,7 @@ module.controller('KbnTableVisController', function ($scope) {
 
     $scope.hasSomeRows = hasSomeRows;
     if (hasSomeRows) {
-      $scope.dimensions = $scope.vis.params.dimensions;
+      $scope.dimensions = $scope.visParams.dimensions;
       $scope.tableGroups = tableGroups;
     }
     $scope.renderComplete();

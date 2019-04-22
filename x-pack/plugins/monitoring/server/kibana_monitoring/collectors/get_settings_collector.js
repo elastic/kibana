@@ -36,7 +36,6 @@ export async function getDefaultAdminEmail(config, callCluster, log) {
   const version = config.get('pkg.version');
   const uiSettingsDoc = await callCluster('get', {
     index,
-    type: 'doc',
     id: `config:${version}`,
     ignore: [400, 404] // 400 if the index is closed, 404 if it does not exist
   });

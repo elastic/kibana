@@ -22,6 +22,7 @@ import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import 'ui/filter_bar';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -36,6 +37,7 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
+import 'ui/capabilities/route_setup';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -54,7 +56,8 @@ function createNewDashboardCtrl($scope, i18n) {
 
 uiRoutes
   .defaults(/dashboard/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    requireUICapability: 'dashboard.show'
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
@@ -70,8 +73,11 @@ uiRoutes
       $scope.find = (search) => {
         return services.dashboards.find(search, $scope.listingLimit);
       };
-      $scope.edit = ({ id }) => {
-        kbnUrl.redirect(createDashboardEditUrl(id));
+      $scope.editItem = ({ id }) => {
+        kbnUrl.redirect(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);
+      };
+      $scope.getViewUrl = ({ id }) => {
+        return chrome.addBasePath(`#${createDashboardEditUrl(id)}`);
       };
       $scope.delete = (ids) => {
         return services.dashboards.delete(ids);
@@ -113,6 +119,7 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
+    requireUICapability: 'dashboard.createNew',
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()
@@ -126,7 +133,7 @@ uiRoutes
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
     resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, redirectWhenMissing, kbnUrl, AppState, i18n) {
+      dash: function (savedDashboards, $route, redirectWhenMissing, kbnUrl, AppState, i18n) {
         const id = $route.current.params.id;
 
         return savedDashboards.get(id)

@@ -6,24 +6,56 @@
 
 
 
-import expect from 'expect.js';
-import moment from 'moment';
+import expect from '@kbn/expect';
+import moment from 'moment-timezone';
 import { formatValue } from '../format_value';
 
 describe('ML - formatValue formatter', () => {
+  const timeOfWeekRecord = {
+    job_id: 'gallery_time_of_week',
+    result_type: 'record',
+    probability: 0.012818,
+    record_score: 53.55134,
+    bucket_span: 900,
+    detector_index: 0,
+    timestamp: 1530155700000,
+    by_field_name: 'clientip',
+    by_field_value: '65.55.215.39',
+    function: 'time_of_week',
+    function_description: 'time'
+  };
 
-  // Just check the return value is in the expected format, and
-  // not the exact value as this will be timezone specific.
+  const timeOfDayRecord = {
+    job_id: 'gallery_time_of_day',
+    result_type: 'record',
+    probability: 0.012818,
+    record_score: 97.94245,
+    bucket_span: 900,
+    detector_index: 0,
+    timestamp: 1517472900000,
+    by_field_name: 'clientip',
+    by_field_value: '157.56.93.83',
+    function: 'time_of_day',
+    function_description: 'time'
+  };
+
+  // Set timezone to US/Eastern for time_of_day and time_of_week tests.
+  beforeEach(() => {
+    moment.tz.setDefault('US/Eastern');
+  });
+
+  afterEach(() => {
+    moment.tz.setDefault('Browser');
+  });
+
+  // For time_of_day and time_of_week test values which are offsets in seconds
+  // from UTC start of week / day are formatted correctly using the test timezone.
   it('correctly formats time_of_week value from numeric input', () => {
-    const formattedValue = formatValue(1483228800, 'time_of_week');
-    const result = moment(formattedValue, 'ddd hh:mm', true).isValid();
-    expect(result).to.be(true);
+    expect(formatValue(359739, 'time_of_week', undefined, timeOfWeekRecord)).to.be('Wed 23:55');
   });
 
   it('correctly formats time_of_day value from numeric input', () => {
-    const formattedValue = formatValue(1483228800, 'time_of_day');
-    const result = moment(formattedValue, 'hh:mm', true).isValid();
-    expect(result).to.be(true);
+    expect(formatValue(73781, 'time_of_day', undefined, timeOfDayRecord)).to.be('15:29');
   });
 
   it('correctly formats number values from numeric input', () => {
@@ -37,15 +69,11 @@ describe('ML - formatValue formatter', () => {
   });
 
   it('correctly formats time_of_week value from array input', () => {
-    const formattedValue = formatValue([1483228800], 'time_of_week');
-    const result = moment(formattedValue, 'ddd hh:mm', true).isValid();
-    expect(result).to.be(true);
+    expect(formatValue([359739], 'time_of_week', undefined, timeOfWeekRecord)).to.be('Wed 23:55');
   });
 
   it('correctly formats time_of_day value from array input', () => {
-    const formattedValue = formatValue([1483228800], 'time_of_day');
-    const result = moment(formattedValue, 'hh:mm', true).isValid();
-    expect(result).to.be(true);
+    expect(formatValue([73781], 'time_of_day', undefined, timeOfDayRecord)).to.be('15:29');
   });
 
   it('correctly formats number values from array input', () => {

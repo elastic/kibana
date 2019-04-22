@@ -27,9 +27,9 @@ export function createFilterDateRange(agg, key) {
   const range = dateRange.parse(key, config.get('dateFormat'));
 
   const filter = {};
-  if (range.from) filter.gte = +range.from;
-  if (range.to) filter.lt = +range.to;
-  if (range.to && range.from) filter.format = 'epoch_millis';
+  if (range.from) filter.gte = range.from.toISOString();
+  if (range.to) filter.lt = range.to.toISOString();
+  if (range.to && range.from) filter.format = 'strict_date_optional_time';
 
   return buildRangeFilter(agg.params.field, filter, agg.getIndexPattern());
 }

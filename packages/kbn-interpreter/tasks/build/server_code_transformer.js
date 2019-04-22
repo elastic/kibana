@@ -19,7 +19,7 @@
 
 const { extname } = require('path');
 
-const { transform } = require('babel-core');
+const { transform } = require('@babel/core');
 
 exports.createServerCodeTransformer = (sourceMaps) => {
   return (content, path) => {

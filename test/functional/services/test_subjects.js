@@ -19,7 +19,6 @@
 
 import testSubjSelector from '@kbn/test-subj-selector';
 import {
-  filter as filterAsync,
   map as mapAsync,
 } from 'bluebird';
 
@@ -64,6 +63,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async append(selector, text) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.append(${selector}, ${text})`);
         const input = await this.find(selector);
         await input.click();
         await input.type(text);
@@ -71,7 +71,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async clickWhenNotDisabled(selector, { timeout = FIND_TIME } = {}) {
-      log.debug(`TestSubjects.click(${selector})`);
+      log.debug(`TestSubjects.clickWhenNotDisabled(${selector})`);
       await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
     }
 
@@ -81,23 +81,26 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async doubleClick(selector, timeout = FIND_TIME) {
-      log.debug(`TestSubjects.doubleClick(${selector})`);
       return await retry.try(async () => {
+        log.debug(`TestSubjects.doubleClick(${selector})`);
         const element = await this.find(selector, timeout);
-        await browser.moveMouseTo(element);
+        await element.moveMouseTo();
         await browser.doubleClick();
       });
     }
 
     async descendantExists(selector, parentElement) {
+      log.debug(`TestSubjects.descendantExists(${selector})`);
       return await find.descendantExistsByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async findDescendant(selector, parentElement) {
+      log.debug(`TestSubjects.findDescendant(${selector})`);
       return await find.descendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
     async findAllDescendant(selector, parentElement) {
+      log.debug(`TestSubjects.findAllDescendant(${selector})`);
       return await find.allDescendantDisplayedByCssSelector(testSubjSelector(selector), parentElement);
     }
 
@@ -107,18 +110,22 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async findAll(selector, timeout) {
-      log.debug(`TestSubjects.findAll(${selector})`);
-      const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
-      return await filterAsync(all, el => el.isDisplayed());
+      return await retry.try(async () => {
+        log.debug(`TestSubjects.findAll(${selector})`);
+        const all = await find.allByCssSelector(testSubjSelector(selector), timeout);
+        return await find.filterElementIsDisplayed(all);
+      });
     }
 
     async getPropertyAll(selector, property) {
+      log.debug(`TestSubjects.getPropertyAll(${selector}, ${property})`);
       return await this._mapAll(selector, async (element) => {
         return await element.getProperty(property);
       });
     }
 
     async getProperty(selector, property) {
+      log.debug(`TestSubjects.getProperty(${selector}, ${property})`);
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.getProperty(property);
@@ -126,6 +133,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async getAttributeAll(selector, attribute) {
+      log.debug(`TestSubjects.getAttributeAll(${selector}, ${attribute})`);
       return await this._mapAll(selector, async (element) => {
         return await element.getAttribute(attribute);
       });
@@ -133,6 +141,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async getAttribute(selector, attribute) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.getAttribute(${selector}, ${attribute})`);
         const element = await this.find(selector);
         return await element.getAttribute(attribute);
       });
@@ -140,6 +149,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async setValue(selector, text) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
         // in case the input element is actually a child of the testSubject, we
         // call clearValue() and type() on the element that is focused after
@@ -152,6 +162,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async isEnabled(selector) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.isEnabled(${selector})`);
         const element = await this.find(selector);
         return await element.isEnabled();
       });
@@ -159,6 +170,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async isDisplayed(selector) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.isDisplayed(${selector})`);
         const element = await this.find(selector);
         return await element.isDisplayed();
       });
@@ -166,12 +178,14 @@ export function TestSubjectsProvider({ getService }) {
 
     async isSelected(selector) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.isSelected(${selector})`);
         const element = await this.find(selector);
         return await element.isSelected();
       });
     }
 
     async isSelectedAll(selectorAll) {
+      log.debug(`TestSubjects.isSelectedAll(${selectorAll})`);
       return await this._mapAll(selectorAll, async (element) => {
         return await element.isSelected();
       });
@@ -179,12 +193,14 @@ export function TestSubjectsProvider({ getService }) {
 
     async getVisibleText(selector) {
       return await retry.try(async () => {
+        log.debug(`TestSubjects.getVisibleText(${selector})`);
         const element = await this.find(selector);
         return await element.getVisibleText();
       });
     }
 
     async getVisibleTextAll(selectorAll) {
+      log.debug(`TestSubjects.getVisibleTextAll(${selectorAll})`);
       return await this._mapAll(selectorAll, async (element) => {
         return await element.getVisibleText();
       });
@@ -195,8 +211,9 @@ export function TestSubjectsProvider({ getService }) {
       // have run into a case where the element becomes stale after the find succeeds, throwing an error during the
       // moveMouseTo function.
       await retry.try(async () => {
+        log.debug(`TestSubjects.moveMouseTo(${selector})`);
         const element = await this.find(selector);
-        await browser.moveMouseTo(element);
+        await element.moveMouseTo();
       });
     }
 
@@ -207,8 +224,12 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async waitForDeleted(selector) {
-      await find.waitForDeletedByCssSelector(testSubjSelector(selector));
+    async waitForDeleted(selectorOrElement) {
+      if (typeof (selectorOrElement) === 'string') {
+        await find.waitForDeletedByCssSelector(testSubjSelector(selectorOrElement));
+      } else {
+        await find.waitForElementStale(selectorOrElement);
+      }
     }
 
     async waitForAttributeToChange(selector, attribute, value) {

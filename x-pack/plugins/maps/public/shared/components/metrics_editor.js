@@ -6,6 +6,8 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import { i18n } from '@kbn/i18n';
+
 
 import {
   EuiFlexGroup,
@@ -60,7 +62,9 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
         fieldSelect = (
           <EuiFlexItem>
             <SingleFieldSelect
-              placeholder="Select field"
+              placeholder={i18n.translate('xpack.maps.metricsEditor.selectFieldPlaceholder', {
+                defaultMessage: 'Select field'
+              })}
               value={metric.field}
               onChange={onFieldChange}
               filterField={filterNumberFields}
@@ -77,8 +81,12 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
             <EuiButtonIcon
               iconType="trash"
               color="danger"
-              aria-label="Delete metric"
-              title="Delete metric"
+              aria-label={i18n.translate('xpack.maps.metricsEditor.deleteMetricAriaLabel', {
+                defaultMessage: 'Delete metric'
+              })}
+              title={i18n.translate('xpack.maps.metricsEditor.deleteMetricButtonLabel', {
+                defaultMessage: 'Delete metric'
+              })}
               onClick={onRemove}
             />
           </EuiFlexItem>
@@ -120,8 +128,12 @@ export function MetricsEditor({ fields, metrics, onChange, allowMultipleMetrics,
     return (<EuiButtonIcon
       iconType="plusInCircle"
       onClick={addMetric}
-      aria-label="Add metric"
-      title="Add metric"
+      aria-label={i18n.translate('xpack.maps.metricsEditor.addMetricAriaLabel', {
+        defaultMessage: 'Add metric'
+      })}
+      title={i18n.translate('xpack.maps.metricsEditor.addMetricButtonLabel', {
+        defaultMessage: 'Add metric'
+      })}
     />);
   }
 

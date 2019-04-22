@@ -26,7 +26,6 @@ exports[`it renders without crashing 1`] = `
       </span>
       <EuiTitle
         size="l"
-        textTransform="none"
       >
         <h1
           tabIndex={0}
@@ -40,7 +39,6 @@ exports[`it renders without crashing 1`] = `
       </EuiTitle>
       <EuiText
         color="subdued"
-        grow={true}
         size="s"
       >
         <p>
@@ -58,12 +56,8 @@ exports[`it renders without crashing 1`] = `
     >
       <EuiFlexGroup
         alignItems="center"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       />
       <EuiSpacer
         size="xl"
@@ -72,13 +66,9 @@ exports[`it renders without crashing 1`] = `
         onSpaceSelect={[Function]}
         spaces={Array []}
       />
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiText
         color="subdued"
-        grow={true}
-        size="m"
         textAlign="center"
       >
         <FormattedMessage

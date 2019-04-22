@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getHighlightRequest } from '../highlight_request';
 
 describe('getHighlightRequest', () => {

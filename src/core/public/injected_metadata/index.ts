@@ -20,5 +20,5 @@
 export {
   InjectedMetadataService,
   InjectedMetadataParams,
-  InjectedMetadataStartContract,
+  InjectedMetadataSetup,
 } from './injected_metadata_service';

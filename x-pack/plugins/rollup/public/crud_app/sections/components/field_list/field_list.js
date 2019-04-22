@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -18,6 +18,7 @@ export const FieldList = ({
   onRemoveField,
   addButton,
   emptyMessage,
+  dataTestSubj,
 }) => {
   let message;
 
@@ -64,17 +65,16 @@ export const FieldList = ({
   };
 
   return (
-    <Fragment>
-      <EuiInMemoryTable
-        items={fields}
-        itemId="name"
-        columns={extendedColumns}
-        search={search}
-        pagination={pagination}
-        sorting={true}
-        message={message}
-      />
-    </Fragment>
+    <EuiInMemoryTable
+      items={fields}
+      itemId="name"
+      columns={extendedColumns}
+      search={search}
+      pagination={pagination}
+      sorting={true}
+      message={message}
+      data-test-subj={dataTestSubj}
+    />
   );
 };
 
@@ -84,4 +84,5 @@ FieldList.propTypes = {
   onRemoveField: PropTypes.func,
   addButton: PropTypes.node,
   emptyMessage: PropTypes.node,
+  dataTestSubj: PropTypes.string,
 };

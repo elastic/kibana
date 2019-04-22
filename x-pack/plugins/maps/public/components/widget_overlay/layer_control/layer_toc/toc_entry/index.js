@@ -12,7 +12,8 @@ import {
   fitToLayerExtent,
   setSelectedLayer,
   toggleLayerVisible,
-  removeTransientLayer
+  removeTransientLayer,
+  cloneLayer,
 } from '../../../../../actions/store_actions';
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
@@ -40,8 +41,11 @@ function mapDispatchToProps(dispatch) {
     toggleVisible: layerId => {
       dispatch(toggleLayerVisible(layerId));
     },
-    fitToBounds: (layerId) => {
+    fitToBounds: layerId => {
       dispatch(fitToLayerExtent(layerId));
+    },
+    cloneLayer: layerId => {
+      dispatch(cloneLayer(layerId));
     }
   });
 }

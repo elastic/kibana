@@ -11,10 +11,6 @@ describe('getFilterFromMust', () => {
     const result = getFilterFromMust('start range', 'end range');
     expect(result).toMatchSnapshot();
   });
-  it('applies date range only for undefined filter string', () => {
-    const result = getFilterFromMust('start range', 'end range');
-    expect(result).toMatchSnapshot();
-  });
   it('applies filter clauses to output object', () => {
     const result = getFilterFromMust(
       'start range',

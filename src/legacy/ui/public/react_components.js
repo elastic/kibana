@@ -26,7 +26,6 @@ import {
 import {
   EuiConfirmModal,
   EuiIcon,
-  EuiColorPicker,
   EuiIconTip,
   EuiCallOut,
   EuiSuperDatePicker,
@@ -41,8 +40,6 @@ app.directive('toolBarSearchBox', reactDirective => reactDirective(KuiToolBarSea
 app.directive('confirmModal', reactDirective => reactDirective(EuiConfirmModal));
 
 app.directive('icon', reactDirective => reactDirective(EuiIcon));
-
-app.directive('colorPicker', reactDirective => reactDirective(EuiColorPicker));
 
 app.directive('iconTip', reactDirective => reactDirective(EuiIconTip, ['content', 'type', 'position', 'title', 'color']));
 

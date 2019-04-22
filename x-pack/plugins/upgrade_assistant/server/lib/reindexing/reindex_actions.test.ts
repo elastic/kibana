@@ -6,23 +6,20 @@
 
 import Boom from 'boom';
 import moment from 'moment';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
+
 import {
   IndexGroup,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
   ReindexStatus,
   ReindexStep,
-} from 'x-pack/plugins/upgrade_assistant/common/types';
-import {
-  CURRENT_MAJOR_VERSION,
-  PREV_MAJOR_VERSION,
-} from 'x-pack/plugins/upgrade_assistant/common/version';
+} from '../../../common/types';
+import { CURRENT_MAJOR_VERSION, PREV_MAJOR_VERSION } from '../../../common/version';
 import { LOCK_WINDOW, ReindexActions, reindexActionsFactory } from './reindex_actions';
 
 describe('ReindexActions', () => {
   let client: jest.Mocked<any>;
-  let callCluster: jest.Mock<CallCluster>;
+  let callCluster: jest.Mock;
   let actions: ReindexActions;
 
   const unimplemented = (name: string) => () =>

@@ -19,7 +19,7 @@
 
 const SenseEditor = require('../sense_editor/editor');
 
-import { useResizeChecker } from '../sense_editor_resize';
+import { applyResizeCheckerToEditors } from '../sense_editor_resize';
 
 require('ui/modules')
   .get('app/sense')
@@ -33,7 +33,7 @@ require('ui/modules')
         const viewer = new SenseEditor($el);
         viewer.setReadOnly(true);
         viewer.renderer.setShowPrintMargin(false);
-        useResizeChecker($scope, $el, viewer);
+        applyResizeCheckerToEditors($scope, $el, viewer);
         require('../settings').applyCurrentSettings(viewer);
 
         $scope.$watch('req', function (req) {

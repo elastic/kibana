@@ -7,12 +7,9 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  HistoryTabs,
-  IHistoryTab
-} from 'x-pack/plugins/apm/public/components/shared/HistoryTabs';
 // @ts-ignore
-import { KueryBar } from '../../shared/KueryBar';
+import { FilterBar } from '../../shared/FilterBar';
+import { HistoryTabs, IHistoryTab } from '../../shared/HistoryTabs';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceOverview } from '../ServiceOverview';
 import { TraceOverview } from '../TraceOverview';
@@ -50,7 +47,7 @@ export function Home() {
 
       <EuiSpacer />
 
-      <KueryBar />
+      <FilterBar />
       <HistoryTabs tabs={homeTabs} />
     </div>
   );

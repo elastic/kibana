@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';

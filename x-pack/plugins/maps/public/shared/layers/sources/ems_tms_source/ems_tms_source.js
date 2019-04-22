@@ -9,13 +9,19 @@ import { TileLayer } from '../../tile_layer';
 
 import { getEmsTMSServices } from '../../../../meta';
 import { EMSTMSCreateSourceEditor } from './create_source_editor';
+import { i18n } from '@kbn/i18n';
+import { getDataSourceLabel } from '../../../../../common/i18n_getters';
 
 
 export class EMSTMSSource extends AbstractTMSSource {
 
   static type = 'EMS_TMS';
-  static title = 'Tiles';
-  static description = 'Map tiles from Elastic Maps Service';
+  static title = i18n.translate('xpack.maps.source.emsTileTitle', {
+    defaultMessage: 'Tiles'
+  });
+  static description = i18n.translate('xpack.maps.source.emsTileDescription', {
+    defaultMessage: 'Map tiles from Elastic Maps Service'
+  });
   static icon = 'emsApp';
 
   static createDescriptor(serviceId) {
@@ -39,8 +45,16 @@ export class EMSTMSSource extends AbstractTMSSource {
 
   async getImmutableProperties() {
     return [
-      { label: 'Data source', value: EMSTMSSource.title },
-      { label: 'Tile service', value: this._descriptor.id }
+      {
+        label: getDataSourceLabel(),
+        value: EMSTMSSource.title
+      },
+      {
+        label: i18n.translate('xpack.maps.source.emsTile.serviceId', {
+          defaultMessage: `Tile service`,
+        }),
+        value: this._descriptor.id
+      }
     ];
   }
 
@@ -50,7 +64,10 @@ export class EMSTMSSource extends AbstractTMSSource {
       return service.id === this._descriptor.id;
     });
     if (!meta) {
-      throw new Error(`Unable to find EMS tile configuration for id: ${this._descriptor.id}`);
+      throw new Error(i18n.translate('xpack.maps.source.emsTile.errorMessage', {
+        defaultMessage: `Unable to find EMS tile configuration for id: {id}`,
+        values: { id: this._descriptor.id }
+      }));
     }
     return meta;
   }

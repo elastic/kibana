@@ -131,6 +131,15 @@ describe('getAggValue', () => {
     },
   };
 
+
+  describe('count', () => {
+    testAgg(
+      basicWithDerv,
+      { id: 'test', type: 'count' },
+      2
+    );
+  });
+
   describe('derivative', () => {
     testAgg(
       basicWithDerv,

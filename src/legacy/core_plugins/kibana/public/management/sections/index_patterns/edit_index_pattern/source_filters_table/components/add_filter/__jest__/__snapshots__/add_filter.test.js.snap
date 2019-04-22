@@ -1,17 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AddFilter should ignore strings with just spaces 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
+<EuiFlexGroup>
   <EuiFlexItem
-    component="div"
     grow={10}
   >
     <EuiFieldText
@@ -23,16 +14,14 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
       value=""
     />
   </EuiFlexItem>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiButton
       color="primary"
       fill={false}
       iconSide="left"
       isDisabled={true}
       onClick={[Function]}
+      size="m"
       type="button"
     >
       <FormattedMessage
@@ -46,17 +35,8 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
 `;
 
 exports[`AddFilter should render normally 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
+<EuiFlexGroup>
   <EuiFlexItem
-    component="div"
     grow={10}
   >
     <EuiFieldText
@@ -68,16 +48,14 @@ exports[`AddFilter should render normally 1`] = `
       value=""
     />
   </EuiFlexItem>
-  <EuiFlexItem
-    component="div"
-    grow={true}
-  >
+  <EuiFlexItem>
     <EuiButton
       color="primary"
       fill={false}
       iconSide="left"
       isDisabled={true}
       onClick={[Function]}
+      size="m"
       type="button"
     >
       <FormattedMessage

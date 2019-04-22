@@ -6,7 +6,8 @@
 
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 
 interface NoDataProps {
   titleText: string;
@@ -36,6 +37,6 @@ export const NoData: React.SFC<NoDataProps> = ({
   />
 );
 
-const CenteredEmptyPrompt = styled(EuiEmptyPrompt)`
+const CenteredEmptyPrompt = euiStyled(EuiEmptyPrompt)`
   align-self: center;
 `;

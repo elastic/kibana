@@ -5,9 +5,9 @@
  */
 
 import { isNumber, round, sortBy } from 'lodash';
-import { NOT_AVAILABLE_LABEL } from 'x-pack/plugins/apm/common/i18n';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import { Coordinate } from 'x-pack/plugins/apm/typings/timeseries';
+import { idx } from '@kbn/elastic-idx';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
+import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
 export interface ApmTimeSeriesResponse {
@@ -59,7 +59,7 @@ export function getTpmBuckets(
 ) {
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
-      const dataPoints = timeseries.buckets.slice(1, -1).map(bucket => {
+      const dataPoints = timeseries.buckets.map(bucket => {
         return {
           x: bucket.key,
           y: round(bucket.doc_count * (60 / bucketSize), 1)
@@ -82,7 +82,7 @@ export function getTpmBuckets(
 function getResponseTime(
   responseTimeBuckets: ESResponse['aggregations']['response_times']['buckets'] = []
 ) {
-  return responseTimeBuckets.slice(1, -1).reduce(
+  return responseTimeBuckets.reduce(
     (acc, bucket) => {
       const { '95.0': p95, '99.0': p99 } = bucket.pct.values;
 

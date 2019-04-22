@@ -2,6 +2,12 @@
 
 Core is a set of systems (frontend, backend etc.) that Kibana and its plugins are built on top of.
 
+## Plugin development
+Core Plugin API Documentation:
+ - [Core Public API](/docs/development/core/public/kibana-plugin-public.md)
+ - [Core Server API](/docs/development/core/server/kibana-plugin-server.md)
+ - [Migration guide for porting existing plugins](./MIGRATION.md)
+
 ## Integration with the "legacy" Kibana
 
 Most of the existing core functionality is still spread over "legacy" Kibana and it will take some time to upgrade it.
@@ -19,3 +25,17 @@ by the "legacy" Kibana may be rejected by the `core` now.
 
 Even though `core` has its own logging system it doesn't output log records directly (e.g. to file or terminal), but instead
 forward them to the "legacy" Kibana so that they look the same as the rest of the log records throughout Kibana.
+
+## Core API Review
+To provide a stable API for plugin developers, it is important that the Core Public and Server API's are stable and
+well documented. To reduce the chance of regressions, development on the Core API's includes an API signature review
+process described below. Changes to the API signature which have not been accepted will cause the build to fail.
+
+When changes to the Core API's signatures are made, the following process needs to be followed:
+1. After changes have been made, run `yarn core:acceptApiChanges` which performs the following:
+   - Recompiles all typescript typings files
+   - Updates the API review files `src/core/public/kibana.api.md` and `src/core/server/kibana.api.md`
+   - Updates the Core API documentation in `docs/development/core/`
+2. Review and commit the updated API Review files and documentation
+3. Clearly flag any breaking changes in your pull request
+

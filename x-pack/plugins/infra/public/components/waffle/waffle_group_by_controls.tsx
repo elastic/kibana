@@ -137,24 +137,7 @@ export const WaffleGroupByControls = injectI18n(
             .filter(o => o != null)
             // In this map the `o && o.field` is totally unnecessary but Typescript is
             // too stupid to realize that the filter above prevents the next map from being null
-            .map(o => (
-              <EuiBadge
-                key={o && o.field}
-                iconType="cross"
-                iconOnClick={this.handleRemove((o && o.field) || '')}
-                iconOnClickAriaLabel={intl.formatMessage(
-                  {
-                    id: 'xpack.infra.waffle.removeGroupingItemAriaLabel',
-                    defaultMessage: 'Remove {groupingItem} grouping',
-                  },
-                  {
-                    groupingItem: o && o.text,
-                  }
-                )}
-              >
-                {o && o.text}
-              </EuiBadge>
-            ))
+            .map(o => <EuiBadge key={o && o.field}>{o && o.text}</EuiBadge>)
         ) : (
           <FormattedMessage id="xpack.infra.waffle.groupByAllTitle" defaultMessage="All" />
         );

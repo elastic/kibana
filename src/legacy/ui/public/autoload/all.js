@@ -19,7 +19,5 @@
 
 import './accessibility';
 import './modules';
-import './directives';
-import './filters';
 import './settings';
 import './styles';

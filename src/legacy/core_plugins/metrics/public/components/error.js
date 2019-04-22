@@ -23,15 +23,21 @@ import React from 'react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 
+const guidPattern = /\[[[a-f\d-\\]{36}\]/g;
+
 function ErrorComponent(props) {
   const { error } = props;
   let additionalInfo;
-  const type = _.get(error, 'error.caused_by.type');
+  const type = _.get(error, 'error.caused_by.type') || _.get(error, 'error.type');
   let reason = _.get(error, 'error.caused_by.reason');
   const title = _.get(error, 'error.caused_by.title');
 
   if (!reason) {
     reason = _.get(error, 'message');
+  }
+
+  if (['runtime_exception', 'illegal_argument_exception'].includes(type)) {
+    reason = _.get(error, 'error.reason').replace(guidPattern, ``);
   }
 
   if (type === 'script_exception') {

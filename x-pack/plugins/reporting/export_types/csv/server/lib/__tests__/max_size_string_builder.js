@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { MaxSizeStringBuilder } from '../max_size_string_builder';
 
 describe('MaxSizeStringBuilder', function () {

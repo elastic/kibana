@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
 
-import { EntityCell } from './entity_cell';
+import { EntityCell } from '../entity_cell';
 import {
   getMultiBucketImpactLabel,
   getSeverity,
@@ -152,7 +152,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
         defaultMessage: 'actual',
       }),
-      description: formatValue(anomaly.actual, source.function)
+      description: formatValue(anomaly.actual, source.function, undefined, source)
     });
   }
 
@@ -161,7 +161,7 @@ function getDetailsItems(anomaly, examples, filter) {
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
         defaultMessage: 'typical',
       }),
-      description: formatValue(anomaly.typical, source.function)
+      description: formatValue(anomaly.typical, source.function, undefined, source)
     });
   }
 
@@ -215,6 +215,23 @@ function getDetailsItems(anomaly, examples, filter) {
 
   return items;
 }
+// anomalyInfluencers: [ {fieldName: fieldValue}, {fieldName: fieldValue}, ... ]
+function getInfluencersItems(anomalyInfluencers, influencerFilter, numToDisplay) {
+  const items = [];
+
+  for (let i = 0; i < numToDisplay; i++) {
+    Object.keys(anomalyInfluencers[i]).forEach((influencerFieldName) => {
+      const value = anomalyInfluencers[i][influencerFieldName];
+
+      items.push({
+        title: influencerFieldName,
+        description: getFilterEntity(influencerFieldName, value, influencerFilter)
+      });
+    });
+  }
+
+  return items;
+}
 
 export class AnomalyDetails extends Component {
   static propTypes = {
@@ -224,6 +241,7 @@ export class AnomalyDetails extends Component {
     isAggregatedData: PropTypes.bool,
     filter: PropTypes.func,
     influencersLimit: PropTypes.number,
+    influencerFilter: PropTypes.func,
     tabIndex: PropTypes.number.isRequired
   };
 
@@ -309,7 +327,7 @@ export class AnomalyDetails extends Component {
               {definition.terms}
             </EuiText>
           </EuiFlexItem>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
         </Fragment> }
         {(definition !== undefined && definition.regex) &&
           <Fragment>
@@ -341,7 +359,7 @@ export class AnomalyDetails extends Component {
                 {definition.regex}
               </EuiText>
             </EuiFlexItem>
-            <EuiSpacer size="l" />
+            <EuiSpacer size="xs" />
           </Fragment>}
 
         {examples.map((example, i) => {
@@ -476,7 +494,7 @@ export class AnomalyDetails extends Component {
 
   renderInfluencers() {
     const anomalyInfluencers = this.props.anomaly.influencers;
-    const listItems = [];
+    let listItems = [];
     let othersCount = 0;
     let numToDisplay = 0;
     if (anomalyInfluencers !== undefined) {
@@ -490,14 +508,7 @@ export class AnomalyDetails extends Component {
         othersCount = 0;
       }
 
-      for (let i = 0; i < numToDisplay; i++) {
-        Object.keys(anomalyInfluencers[i]).forEach((influencerFieldName) => {
-          listItems.push({
-            title: influencerFieldName,
-            description: anomalyInfluencers[i][influencerFieldName]
-          });
-        });
-      }
+      listItems = getInfluencersItems(anomalyInfluencers, this.props.influencerFilter, numToDisplay);
     }
 
     if (listItems.length > 0) {

@@ -61,16 +61,20 @@ export function VislibLibDataProvider(Private) {
           } else {
             newData[key] = data[key].map(seri => {
               const converter = getFormat(seri.format);
+              const zConverter = getFormat(seri.zFormat);
               return {
                 id: seri.id,
+                rawId: seri.rawId,
                 label: seri.label,
+                zLabel: seri.zLabel,
                 values: seri.values.map(val => {
                   const newVal = _.clone(val);
                   newVal.extraMetrics = val.extraMetrics;
                   newVal.series = val.series || seri.label;
                   return newVal;
                 }),
-                yAxisFormatter: val => converter.convert(val)
+                yAxisFormatter: val => converter.convert(val),
+                zAxisFormatter: val => zConverter.convert(val)
               };
             });
           }

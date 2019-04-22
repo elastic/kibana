@@ -11,6 +11,8 @@ import { isFullLicense } from '../../license/check_license';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
+import 'ui/directives/kbn_href';
+
 module.directive('mlNavMenu', function () {
   return {
     restrict: 'E',

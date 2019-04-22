@@ -31,7 +31,10 @@ import {
 export const INSTALLED_STATUS = 'installed';
 export const UNINSTALLED_STATUS = 'not_installed';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { SampleDataViewDataButton } from './sample_data_view_data_button';
 
 export class SampleDataSetCard extends React.Component {
 
@@ -63,6 +66,20 @@ export class SampleDataSetCard extends React.Component {
                 color="danger"
                 data-test-subj={`removeSampleDataSet${this.props.id}`}
                 flush="left"
+                aria-label={this.props.isProcessing
+                  ? i18n.translate('kbn.home.sampleDataSetCard.removingButtonAriaLabel', {
+                    defaultMessage: 'Removing {datasetName}',
+                    values: {
+                      datasetName: this.props.name,
+                    },
+                  })
+                  : i18n.translate('kbn.home.sampleDataSetCard.removeButtonAriaLabel', {
+                    defaultMessage: 'Remove {datasetName}',
+                    values: {
+                      datasetName: this.props.name,
+                    },
+                  })
+                }
               >
                 {this.props.isProcessing
                   ? <FormattedMessage
@@ -76,15 +93,12 @@ export class SampleDataSetCard extends React.Component {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                href={this.props.launchUrl}
-                data-test-subj={`launchSampleDataSet${this.props.id}`}
-              >
-                <FormattedMessage
-                  id="kbn.home.sampleDataSetCard.viewDataButtonLabel"
-                  defaultMessage="View data"
-                />
-              </EuiButton>
+              <SampleDataViewDataButton
+                id={this.props.id}
+                name={this.props.name}
+                overviewDashboard={this.props.overviewDashboard}
+                appLinks={this.props.appLinks}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -97,6 +111,20 @@ export class SampleDataSetCard extends React.Component {
                 isLoading={this.props.isProcessing}
                 onClick={this.install}
                 data-test-subj={`addSampleDataSet${this.props.id}`}
+                aria-label={this.props.isProcessing
+                  ? i18n.translate('kbn.home.sampleDataSetCard.addingButtonAriaLabel', {
+                    defaultMessage: 'Adding {datasetName}',
+                    values: {
+                      datasetName: this.props.name,
+                    },
+                  })
+                  : i18n.translate('kbn.home.sampleDataSetCard.addButtonAriaLabel', {
+                    defaultMessage: 'Add {datasetName}',
+                    values: {
+                      datasetName: this.props.name,
+                    }
+                  })
+                }
               >
                 {this.props.isProcessing
                   ? <FormattedMessage
@@ -132,6 +160,12 @@ export class SampleDataSetCard extends React.Component {
                 <EuiButton
                   isDisabled
                   data-test-subj={`addSampleDataSet${this.props.id}`}
+                  aria-label={i18n.translate('kbn.home.sampleDataSetCard.default.addButtonAriaLabel', {
+                    defaultMessage: 'Add {datasetName}',
+                    values: {
+                      datasetName: this.props.name,
+                    },
+                  })}
                 >
                   <FormattedMessage
                     id="kbn.home.sampleDataSetCard.default.addButtonLabel"
@@ -166,7 +200,12 @@ SampleDataSetCard.propTypes = {
   id: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  launchUrl: PropTypes.string.isRequired,
+  overviewDashboard: PropTypes.string.isRequired,
+  appLinks: PropTypes.arrayOf(PropTypes.shape({
+    path: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+  })).isRequired,
   status: PropTypes.oneOf([
     INSTALLED_STATUS,
     UNINSTALLED_STATUS,

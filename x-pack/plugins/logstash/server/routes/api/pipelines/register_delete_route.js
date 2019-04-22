@@ -6,14 +6,13 @@
 
 import { callWithRequestFactory } from '../../../lib/call_with_request_factory';
 import { wrapUnknownError } from '../../../lib/error_wrappers';
-import { INDEX_NAMES, TYPE_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES } from '../../../../common/constants';
 import { licensePreRoutingFactory } from'../../../lib/license_pre_routing_factory';
 
 function deletePipelines(callWithRequest, pipelineIds) {
   const deletePromises = pipelineIds.map(pipelineId => {
     return callWithRequest('delete', {
       index: INDEX_NAMES.PIPELINES,
-      type: TYPE_NAMES.PIPELINES,
       id: pipelineId,
       refresh: 'wait_for'
     })

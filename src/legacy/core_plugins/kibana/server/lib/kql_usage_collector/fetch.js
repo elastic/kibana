@@ -28,7 +28,6 @@ export function fetchProvider(index) {
     const [response, config] = await Promise.all([
       callCluster('get', {
         index,
-        type: 'doc',
         id: 'kql-telemetry:kql-telemetry',
         ignore: [404],
       }),

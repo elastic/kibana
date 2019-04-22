@@ -21,10 +21,10 @@ import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
 import { buildEsQuery } from '@kbn/es-query';
 
-export default function query(req, panel, annotation, esQueryConfig, indexPattern) {
+export default function query(req, panel, annotation, esQueryConfig, indexPattern, capabilities) {
   return next => doc => {
     const timeField = annotation.time_field;
-    const { bucketSize } = getBucketSize(req, 'auto');
+    const { bucketSize } = getBucketSize(req, 'auto', capabilities);
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
@@ -34,9 +34,9 @@ export default function query(req, panel, annotation, esQueryConfig, indexPatter
     const timerange = {
       range: {
         [timeField]: {
-          gte: from.valueOf(),
-          lte: to.valueOf() - bucketSize * 1000,
-          format: 'epoch_millis',
+          gte: from.toISOString(),
+          lte: to.subtract(bucketSize, 'seconds').toISOString(),
+          format: 'strict_date_optional_time',
         },
       },
     };

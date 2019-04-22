@@ -19,12 +19,7 @@
 
 import { format as formatUrl } from 'url';
 import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig } from '@kbn/test';
-import {
-  KibanaServerProvider,
-  EsProvider,
-  EsArchiverProvider,
-  RetryProvider,
-} from './services';
+import { services } from './services';
 
 export default function () {
   const servers = {
@@ -64,11 +59,6 @@ export default function () {
       ],
     },
 
-    services: {
-      kibanaServer: KibanaServerProvider,
-      retry: RetryProvider,
-      es: EsProvider,
-      esArchiver: EsArchiverProvider,
-    }
+    services
   };
 }
