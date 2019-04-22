@@ -17,13 +17,29 @@ const defaultOptions = {
   },
 };
 
+/**
+ * Register a new test bed to test a React Component.
+ *
+ * @param Component The component under test
+ * @param defaultProps The default props to pass to the component on each mount
+ * @param options An optional TestBedOptions object
+ * @param store An optional Redux store. It accepts a store or a function that returns a store
+ *
+ * @example
+ *
+ * const setup = registerTestBed(MyComponent, {}, undefined, myReduxStore);
+ * const { component } = setup(); // component is an Enzyme reactWrapper mounted and ready to be tested
+ */
 export const registerTestBed = <T extends string = string>(
   Component: ComponentType<any>,
   defaultProps: any = {},
   options: TestBedOptions = defaultOptions,
-  store: Store | null = null
+  store: (() => Store) | Store | null = null
 ): SetupFunc<T> => props => {
-  const component = mountComponent(Component, options, store, { ...defaultProps, ...props });
+  // If a function was provided to create the store, execute it
+  const storeToMount = typeof store === 'function' ? store() : store;
+
+  const component = mountComponent(Component, options, storeToMount, { ...defaultProps, ...props });
 
   /**
    * ----------------------------------------------------------------

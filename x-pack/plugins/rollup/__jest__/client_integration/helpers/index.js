@@ -5,6 +5,7 @@
  */
 
 import { setup as jobCreateSetup } from './job_create.helpers';
+import { setup as jobListSetup } from './job_list.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -12,4 +13,5 @@ export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
   jobCreate: { setup: jobCreateSetup },
+  jobList: { setup: jobListSetup },
 };

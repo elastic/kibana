@@ -4,16 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-import axios from 'axios';
+import { getRouter } from '../../public/crud_app/services';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 
-import { registerTestBed, nextTick } from '../../../../test_utils';
-import { createRollupJobsStore } from '../../public/crud_app/store';
-import { setHttp, registerRouter, getRouter } from '../../public/crud_app/services';
-import { JobList } from '../../public/crud_app/sections/job_list';
-
-// axios has a $http like interface so using it to simulate $http
-setHttp(axios.create());
+jest.mock('ui/index_patterns', () => {
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
+});
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path ? path : 'api/rollup',
@@ -76,38 +73,28 @@ const loadJobsMock = {
   }]
 };
 
+const { setup } = pageHelpers.jobList;
+
 describe('<JobList />', () => {
   describe('detail panel', () => {
     let server;
+    let httpRequestsMockHelpers;
     let component;
     let table;
     let exists;
 
-    const testBedOptions = {
-      memoryRouter: {
-        onRouter: (router) =>  {
-          // register our react memory router
-          registerRouter(router);
-        }
-      }
-    };
+    beforeAll(() => {
+      ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    });
+
+    afterAll(() => {
+      server.restore();
+    });
 
     beforeEach(async () => {
-      server = sinon.fakeServer.create();
-      server.respondImmediately = true;
+      httpRequestsMockHelpers.setLoadJobsResponse(loadJobsMock);
 
-      // Mock load job list
-      server.respondWith('GET', '/api/rollup/jobs', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify(loadJobsMock),
-      ]);
-
-      // Mock all other HTTP Requests
-      server.respondWith([200, {}, '']);
-
-      const initTestBed = registerTestBed(JobList, {}, createRollupJobsStore());
-      ({ component, exists, table } = initTestBed(undefined, testBedOptions));
+      ({ component, exists, table } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();

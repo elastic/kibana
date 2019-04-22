@@ -32,9 +32,18 @@ const registerHttpRequestMockHelpers = server => {
     ]);
   };
 
+  const setLoadJobsResponse = (response) => {
+    server.respondWith('GET', '/api/rollup/jobs', [
+      200,
+      { 'Content-Type': 'application/json' },
+      JSON.stringify(response),
+    ]);
+  };
+
   return {
     setIndexPatternValidityResponse,
-    setCreateJobResponse
+    setCreateJobResponse,
+    setLoadJobsResponse
   };
 };
 
