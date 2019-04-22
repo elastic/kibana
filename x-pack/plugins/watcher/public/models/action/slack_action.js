@@ -10,7 +10,7 @@ import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode, EuiLink } from '@elastic/eui';
-import { documentationLinks } from '../../lib/documentation_links';
+import { watchNotificationSettingsUrl } from '../../lib/documentation_links';
 
 export class SlackAction extends BaseAction {
   constructor(props = {}) {
@@ -34,7 +34,7 @@ export class SlackAction extends BaseAction {
           values={{
             ymlValue: <EuiCode transparentBackground>message_defaults</EuiCode>,
             link: (
-              <EuiLink href={documentationLinks.watcher.watchNotificationSettings} target="_blank">
+              <EuiLink href={watchNotificationSettingsUrl} target="_blank">
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.json.slackActionValidationWarningMessage.helpLinkText"
                   defaultMessage="Learn more."
