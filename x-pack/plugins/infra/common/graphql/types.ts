@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* tslint:disable */
 
 // ====================================================
 // START: Typescript template
@@ -38,6 +38,8 @@ export interface InfraSource {
   logItem: InfraLogItem;
   /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
   map?: InfraResponse | null;
+  /** A snapshot of nodes */
+  snapshot?: InfraSnapshotResponse | null;
 
   metrics: InfraMetricData[];
 }
@@ -223,6 +225,33 @@ export interface InfraNodeMetric {
   max: number;
 }
 
+export interface InfraSnapshotResponse {
+  /** Nodes of type host, container or pod grouped by 0, 1 or 2 terms */
+  nodes: InfraSnapshotNode[];
+}
+
+export interface InfraSnapshotNode {
+  path: InfraSnapshotNodePath[];
+
+  metric: InfraSnapshotNodeMetric;
+}
+
+export interface InfraSnapshotNodePath {
+  value: string;
+
+  label: string;
+}
+
+export interface InfraSnapshotNodeMetric {
+  name: InfraSnapshotMetricType;
+
+  value?: number | null;
+
+  avg?: number | null;
+
+  max?: number | null;
+}
+
 export interface InfraMetricData {
   id?: InfraMetric | null;
 
@@ -305,6 +334,18 @@ export interface InfraPathFilterInput {
 export interface InfraMetricInput {
   /** The type of metric */
   type: InfraMetricType;
+}
+
+export interface InfraSnapshotGroupbyInput {
+  /** The label to use in the results for the group by for the terms group by */
+  label?: string | null;
+  /** The field to group by from a terms aggregation, this is ignored by the filter type */
+  field?: string | null;
+}
+
+export interface InfraSnapshotMetricInput {
+  /** The type of metric */
+  type: InfraSnapshotMetricType;
 }
 /** The source to be created */
 export interface CreateSourceInput {
@@ -427,6 +468,11 @@ export interface MapInfraSourceArgs {
 
   filterQuery?: string | null;
 }
+export interface SnapshotInfraSourceArgs {
+  timerange: InfraTimerangeInput;
+
+  filterQuery?: string | null;
+}
 export interface MetricsInfraSourceArgs {
   nodeId: string;
 
@@ -443,6 +489,13 @@ export interface NodesInfraResponseArgs {
   path: InfraPathInput[];
 
   metric: InfraMetricInput;
+}
+export interface NodesInfraSnapshotResponseArgs {
+  type: InfraNodeType;
+
+  groupBy: InfraSnapshotGroupbyInput[];
+
+  metric: InfraSnapshotMetricInput;
 }
 export interface CreateSourceMutationArgs {
   /** The id of the source */
@@ -487,6 +540,16 @@ export enum InfraPathType {
 }
 
 export enum InfraMetricType {
+  count = 'count',
+  cpu = 'cpu',
+  load = 'load',
+  memory = 'memory',
+  tx = 'tx',
+  rx = 'rx',
+  logRate = 'logRate',
+}
+
+export enum InfraSnapshotMetricType {
   count = 'count',
   cpu = 'cpu',
   load = 'load',
@@ -718,6 +781,92 @@ export namespace MetricsQuery {
   };
 }
 
+export namespace CreateSourceConfigurationMutation {
+  export type Variables = {
+    sourceId: string;
+    sourceConfiguration: CreateSourceInput;
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    createSource: CreateSource;
+  };
+
+  export type CreateSource = {
+    __typename?: 'CreateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace SourceQuery {
+  export type Variables = {
+    sourceId?: string | null;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace UpdateSourceMutation {
+  export type Variables = {
+    sourceId?: string | null;
+    changes: UpdateSourceInput[];
+  };
+
+  export type Mutation = {
+    __typename?: 'Mutation';
+
+    updateSource: UpdateSource;
+  };
+
+  export type UpdateSource = {
+    __typename?: 'UpdateSourceResult';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
 export namespace WaffleNodesQuery {
   export type Variables = {
     sourceId: string;
@@ -774,62 +923,6 @@ export namespace WaffleNodesQuery {
 
     max: number;
   };
-}
-
-export namespace CreateSourceMutation {
-  export type Variables = {
-    sourceId: string;
-    sourceConfiguration: CreateSourceInput;
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    createSource: CreateSource;
-  };
-
-  export type CreateSource = {
-    __typename?: 'CreateSourceResult';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
-}
-
-export namespace SourceQuery {
-  export type Variables = {
-    sourceId?: string | null;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
-}
-
-export namespace UpdateSourceMutation {
-  export type Variables = {
-    sourceId?: string | null;
-    changes: UpdateSourceInput[];
-  };
-
-  export type Mutation = {
-    __typename?: 'Mutation';
-
-    updateSource: UpdateSource;
-  };
-
-  export type UpdateSource = {
-    __typename?: 'UpdateSourceResult';
-
-    source: Source;
-  };
-
-  export type Source = SourceFields.Fragment;
 }
 
 export namespace LogEntries {
@@ -910,31 +1003,17 @@ export namespace LogEntries {
   };
 }
 
-export namespace SourceFields {
+export namespace SourceConfigurationFields {
   export type Fragment = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    version?: string | null;
-
-    updatedAt?: number | null;
-
-    configuration: Configuration;
-
-    status: Status;
-  };
-
-  export type Configuration = {
     __typename?: 'InfraSourceConfiguration';
 
     name: string;
 
     description: string;
 
-    metricAlias: string;
-
     logAlias: string;
+
+    metricAlias: string;
 
     fields: Fields;
   };
@@ -954,8 +1033,10 @@ export namespace SourceFields {
 
     timestamp: string;
   };
+}
 
-  export type Status = {
+export namespace SourceStatusFields {
+  export type Fragment = {
     __typename?: 'InfraSourceStatus';
 
     indexFields: IndexFields[];
@@ -985,5 +1066,17 @@ export namespace InfraTimeKeyFields {
     time: number;
 
     tiebreaker: number;
+  };
+}
+
+export namespace InfraSourceFields {
+  export type Fragment = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    version?: string | null;
+
+    updatedAt?: number | null;
   };
 }

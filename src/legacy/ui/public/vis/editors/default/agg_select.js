@@ -27,13 +27,13 @@ uiModules
   .directive('visAggSelectReactWrapper', reactDirective => reactDirective(wrapInI18nContext(DefaultEditorAggSelect), [
     ['agg', { watchDepth: 'collection' }],
     ['aggTypeOptions', { watchDepth: 'collection' }],
-    ['setValue', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    'value',
-    'isSubAggregation',
+    ['setValue', { watchDepth: 'reference' }],
     'aggHelpLink',
-    'isSelectInvalid'
+    'isSelectInvalid',
+    'isSubAggregation',
+    'value',
   ]))
   .directive('visAggSelect', function () {
     return {
@@ -42,31 +42,50 @@ uiModules
       require: '^ngModel',
       template: function () {
         return `<vis-agg-select-react-wrapper
+            ng-if="setValidity"
             agg="agg"
-            value="paramValue"
-            set-value="onChange"
-            is-sub-aggregation="isSubAggregation"
             agg-help-link="aggHelpLink"
             agg-type-options="aggTypeOptions"
             is-select-invalid="isSelectInvalid"
-            set-touched="setTouched"
+            is-sub-aggregation="isSubAggregation"
+            value="paramValue"
             set-validity="setValidity"
+            set-value="onChange"
+            set-touched="setTouched"
           ></vis-agg-select-react-wrapper>`;
       },
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('agg', attr.agg);
-          $scope.$bind('isSubAggregation', attr.isSubAggregation);
           $scope.$bind('aggTypeOptions', attr.aggTypeOptions);
+          $scope.$bind('isSubAggregation', attr.isSubAggregation);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
+          let _isSelectInvalid = false;
+
           $scope.$watch('agg.type', (value) => {
             // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
             // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
             $scope.paramValue = value;
+
+            $scope.setValidity(true);
+            $scope.isSelectInvalid = false;
           });
 
+          $scope.$watch(() => {
+            // The model can become touched either onBlur event or when the form is submitted.
+            return ngModelCtrl.$touched;
+          }, (value) => {
+            if (value === true) {
+              showValidation();
+            }
+          }, true);
+
           $scope.onChange = (value) => {
+            if (!value) {
+              // We prevent to make the field empty.
+              return;
+            }
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onAggTypeChange($scope.agg, value);
@@ -76,15 +95,17 @@ uiModules
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();
-            $scope.isSelectInvalid = !$scope.paramValue;
+            showValidation();
           };
 
           $scope.setValidity = (isValid) => {
-            // The field will be marked as invalid when the value is empty and the field is touched.
-            $scope.isSelectInvalid = ngModelCtrl.$touched ? !isValid : false;
-            // Since aggType is required field, the form should become invalid when the aggregation field is set to empty.
+            _isSelectInvalid = !isValid;
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}`, isValid);
           };
+
+          function showValidation() {
+            $scope.isSelectInvalid = _isSelectInvalid;
+          }
         }
       }
     };

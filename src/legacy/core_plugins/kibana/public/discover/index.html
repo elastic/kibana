@@ -45,7 +45,6 @@
           is-refresh-paused="refreshInterval.pause"
           refresh-interval="refreshInterval.value"
           on-refresh-change="onRefreshChange"
-          watch-depth="reference"
         ></search-bar>
       </div>
     </div>
@@ -101,7 +100,7 @@
                 class="euiTitle euiTitle--small"
               ></h2>
               <div class="euiSpacer euiSpacer--m"></div>
-              <div class="euiLoadingSpinner euiLoadingSpinner--large"></div>
+              <div class="euiLoadingSpinner euiLoadingSpinner--large" data-test-subj="loadingSpinner"></div>
             </div>
           </div>
 
@@ -130,7 +129,7 @@
                   <span
                     tooltip="{{::'kbn.discover.howToChangeTheTimeTooltip' | i18n: {defaultMessage: 'To change the time, click the clock icon in the navigation bar'} }}"
                   >
-                    {{timeRange.from | moment}} - {{timeRange.to | moment}}
+                    {{toMoment(timeRange.from)}} - {{toMoment(timeRange.to)}}
                   </span>
 
                   &mdash;

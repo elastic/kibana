@@ -23,7 +23,7 @@ import { bindNodeCallback, from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
 import { CoreContext } from '../../core_context';
 import { Logger } from '../../logging';
-import { Plugin } from '../plugin';
+import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';
 import { PluginDiscoveryError } from './plugin_discovery_error';
@@ -67,9 +67,11 @@ export function discover(config: PluginsConfig, coreContext: CoreContext) {
   );
 
   return {
-    plugin$: discoveryResults$.pipe(filter((entry): entry is Plugin => entry instanceof Plugin)),
+    plugin$: discoveryResults$.pipe(
+      filter((entry): entry is PluginWrapper => entry instanceof PluginWrapper)
+    ),
     error$: discoveryResults$.pipe(
-      filter((entry): entry is PluginDiscoveryError => !(entry instanceof Plugin))
+      filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
     ),
   };
 }
@@ -115,7 +117,11 @@ function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
   return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
     map(manifest => {
       log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new Plugin(path, manifest, createPluginInitializerContext(coreContext, manifest));
+      return new PluginWrapper(
+        path,
+        manifest,
+        createPluginInitializerContext(coreContext, manifest)
+      );
     }),
     catchError(err => [err])
   );

@@ -15,6 +15,8 @@ declare interface Ml {
     deleteAnnotation(id: string | undefined): Promise<any>;
     indexAnnotation(annotation: Annotation): Promise<object>;
   };
+
+  getTimeFieldRange(obj: object): Promise<any>;
 }
 
 declare const ml: Ml;

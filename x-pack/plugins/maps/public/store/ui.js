@@ -6,6 +6,7 @@
 export const UPDATE_FLYOUT = 'UPDATE_FLYOUT';
 export const CLOSE_SET_VIEW = 'CLOSE_SET_VIEW';
 export const OPEN_SET_VIEW = 'OPEN_SET_VIEW';
+export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const SET_FILTERABLE = 'IS_FILTERABLE';
@@ -15,10 +16,13 @@ export const FLYOUT_STATE = {
   ADD_LAYER_WIZARD: 'ADD_LAYER_WIZARD'
 };
 
+export const DEFAULT_IS_LAYER_TOC_OPEN = true;
+
 const INITIAL_STATE = {
   flyoutDisplay: FLYOUT_STATE.NONE,
   isFullScreen: false,
   isReadOnly: false,
+  isLayerTOCOpen: DEFAULT_IS_LAYER_TOC_OPEN,
   isFilterable: false
 };
 
@@ -31,6 +35,8 @@ export function ui(state = INITIAL_STATE, action) {
       return { ...state, isSetViewOpen: false };
     case OPEN_SET_VIEW:
       return { ...state, isSetViewOpen: true };
+    case SET_IS_LAYER_TOC_OPEN:
+      return { ...state, isLayerTOCOpen: action.isLayerTOCOpen };
     case SET_FULL_SCREEN:
       return { ...state, isFullScreen: action.isFullScreen };
     case SET_READ_ONLY:
@@ -57,6 +63,12 @@ export function closeSetView() {
 export function openSetView() {
   return {
     type: OPEN_SET_VIEW,
+  };
+}
+export function setIsLayerTOCOpen(isLayerTOCOpen) {
+  return {
+    type: SET_IS_LAYER_TOC_OPEN,
+    isLayerTOCOpen
   };
 }
 export function exitFullScreen() {
@@ -89,6 +101,7 @@ export function setFilterable(isFilterable) {
 export const getFlyoutDisplay = ({ ui }) => ui && ui.flyoutDisplay
   || INITIAL_STATE.flyoutDisplay;
 export const getIsSetViewOpen = ({ ui }) => ui.isSetViewOpen;
+export const getIsLayerTOCOpen = ({ ui }) => ui.isLayerTOCOpen;
 export const getIsFullScreen = ({ ui }) => ui.isFullScreen;
 export const getIsReadOnly = ({ ui }) => ui.isReadOnly;
 export const getIsFilterable = ({ ui }) => ui.isFilterable;

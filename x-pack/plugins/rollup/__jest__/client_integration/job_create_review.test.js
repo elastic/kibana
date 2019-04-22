@@ -15,6 +15,7 @@ jest.mock('ui/index_patterns', () => {
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path,
   breadcrumbs: { set: () => {} },
+  getInjected: () => ({}),
 }));
 
 jest.mock('lodash/function/debounce', () => fn => fn);

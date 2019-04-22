@@ -22,7 +22,7 @@ exports[`PageLoading should show a simple page loading component 1`] = `
             <div
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
-              <div
+              <span
                 class="euiLoadingSpinner euiLoadingSpinner--xLarge"
               />
             </div>

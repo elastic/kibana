@@ -488,12 +488,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         .byCssSelector(`#visAggEditorParams${index} [data-test-subj="defaultEditorAggSelect"]`);
       await comboBox.setElement(aggSelect, agg);
 
-      const fieldSelect = await find
-        .byCssSelector(`#visAggEditorParams${index} > [agg-param="agg.type.params[0]"] > div > div > div.ui-select-match > span`);
-      // open field selection list
-      await fieldSelect.click();
+      const fieldSelect = await find.byCssSelector(`#visAggEditorParams${index} [data-test-subj="visDefaultEditorField"]`);
       // select our field
-      await testSubjects.click(field);
+      await comboBox.setElement(fieldSelect, field);
       // enter custom label
       await this.setCustomLabel(label, index);
     }
@@ -535,9 +532,7 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     }
 
     async getField() {
-      const field = await retry.try(
-        async () => await find.byCssSelector('.ng-valid-required[name="field"] .ui-select-match-text'));
-      return await field.getVisibleText();
+      return await comboBox.getComboBoxSelectedOptions('visDefaultEditorField');
     }
 
     async selectField(fieldValue, groupName = 'buckets', childAggregationType = null) {
@@ -546,12 +541,10 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         [group-name="${groupName}"]
         vis-editor-agg-params:not(.ng-hide)
         ${childAggregationType ? `vis-editor-agg-params[group-name="'${childAggregationType}'"]:not(.ng-hide)` : ''}
-        .field-select
+        [data-test-subj="visDefaultEditorField"]
       `;
-      await find.clickByCssSelector(selector);
-      await find.setValue(`${selector} input.ui-select-search`, fieldValue);
-      const input = await find.byCssSelector(`${selector} input.ui-select-search`);
-      await input.pressKeys(browser.keys.RETURN);
+      const fieldEl = await find.byCssSelector(selector);
+      await comboBox.setElement(fieldEl, fieldValue);
     }
 
     async selectFieldById(fieldValue, id) {
@@ -582,12 +575,8 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
     async setInterval(newValue) {
       log.debug(`Visualize.setInterval(${newValue})`);
       const input = await find.byCssSelector('select[ng-model="agg.params.interval"]');
-      await input.type(newValue);
-      // The interval element will only interpret space as "select this" if there
-      // was a long enough gap from the typing above to the space click.  Hence the
-      // need for the sleep.
-      await PageObjects.common.sleep(500);
-      await input.pressKeys(browser.keys.SPACE);
+      const option = await input.findByCssSelector(`option[label="${newValue}"]`);
+      await option.click();
     }
 
     async setCustomInterval(newValue) {
@@ -771,12 +760,9 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       ));
     }
 
-    async saveVisualizationExpectFail(vizName, { saveAsNew = false } = {}) {
-      await this.saveVisualization(vizName, { saveAsNew });
-      const errorToast = await testSubjects.exists('saveVisualizationError', {
-        timeout: defaultFindTimeout
-      });
-      expect(errorToast).to.be(true);
+    async expectNoSaveOption() {
+      const saveButtonExists = await testSubjects.exists('visualizeSaveButton');
+      expect(saveButtonExists).to.be(false);
     }
 
     async clickLoadSavedVisButton() {
@@ -898,18 +884,15 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       const chartTypes = await retry.try(
         async () => await find
           .allByCssSelector(`.visWrapper__chart circle[data-label="${dataLabel}"][fill-opacity="1"]`, defaultFindTimeout * 2));
-
-      // 5). for each chart element, find the green circle, then the cy position
-      async function getChartType(chart) {
+      // 4). for each chart element, find the green circle, then the cy position
+      const chartData = await Promise.all(chartTypes.map(async chart => {
         const cy = await chart.getAttribute('cy');
         // the point_series_options test has data in the billions range and
         // getting 11 digits of precision with these calculations is very hard
         return Math.round(((yAxisHeight - cy) * yAxisRatio).toPrecision(6));
-      }
+      }));
 
-      // 4). pass the chartTypes to the getChartType function
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
+      return chartData;
     }
 
     // this is ALMOST identical to DiscoverPage.getBarChartData
