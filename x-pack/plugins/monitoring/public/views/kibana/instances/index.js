@@ -25,7 +25,6 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.nameColumnTitle', {
       defaultMessage: 'Name'
     }),
-    sortable: true,
     field: 'name',
     render: (name, kibana) => (
       <EuiLink
@@ -44,7 +43,6 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.statusColumnTitle', {
       defaultMessage: 'Status'
     }),
-    sortable: true,
     field: 'status',
     render: (status, kibana) => (
       <div
@@ -65,7 +63,6 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.loadAverageColumnTitle', {
       defaultMessage: 'Load Average'
     }),
-    sortable: true,
     field: 'os.load.1m',
     render: value => (
       <span>
@@ -77,7 +74,6 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.memorySizeColumnTitle', {
       defaultMessage: 'Memory Size'
     }),
-    sortable: true,
     field: 'process.memory.resident_set_size_in_bytes',
     render: value => (
       <span>
@@ -89,7 +85,6 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.requestsColumnTitle', {
       defaultMessage: 'Requests'
     }),
-    sortable: true,
     field: 'requests.total',
     render: value => (
       <span>
@@ -101,7 +96,6 @@ const getColumns = (kbnUrl, scope) => ([
     name: i18n.translate('xpack.monitoring.kibana.listing.responseTimeColumnTitle', {
       defaultMessage: 'Response Times'
     }),
-    sortable: true,
     field: 'response_times.average',
     render: (value, kibana) => (
       <div>

@@ -21,7 +21,6 @@ class ListingUI extends PureComponent {
       {
         name: i18n.translate('xpack.monitoring.beats.instances.nameTitle', { defaultMessage: 'Name' }),
         field: 'name',
-        sortable: true,
         render: (name, beat) => (
           <EuiLink
             onClick={() => {
@@ -37,41 +36,34 @@ class ListingUI extends PureComponent {
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.typeTitle', { defaultMessage: 'Type' }),
-        sortable: true,
         field: 'type',
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.outputEnabledTitle', { defaultMessage: 'Output Enabled' }),
-        sortable: true,
         field: 'output'
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.totalEventsRateTitle', { defaultMessage: 'Total Events Rate' }),
-        sortable: true,
         field: 'total_events_rate',
         render: value => formatMetric(value, '', '/s')
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.bytesSentRateTitle', { defaultMessage: 'Bytes Sent Rate' }),
-        sortable: true,
         field: 'bytes_sent_rate',
         render: value => formatMetric(value, 'byte', '/s')
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.outputErrorsTitle', { defaultMessage: 'Output Errors' }),
-        sortable: true,
         field: 'errors',
         render: value => formatMetric(value, '0')
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.allocatedMemoryTitle', { defaultMessage: 'Allocated Memory' }),
-        sortable: true,
         field: 'memory',
         render: value => formatMetric(value, 'byte')
       },
       {
         name: i18n.translate('xpack.monitoring.beats.instances.versionTitle', { defaultMessage: 'Version' }),
-        sortable: true,
         field: 'version',
       },
     ];
