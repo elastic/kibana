@@ -30,6 +30,7 @@ export interface RouterRoute {
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
+/** @public */
 export class Router {
   public routes: Array<Readonly<RouterRoute>> = [];
 

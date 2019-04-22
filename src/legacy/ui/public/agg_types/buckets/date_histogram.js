@@ -20,7 +20,6 @@
 import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
-import '../../filters/field_type';
 import '../directives/validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
@@ -173,6 +172,10 @@ export const dateHistogramBucketAgg = new BucketAggType({
       default: false,
       write: _.noop,
       editorComponent: DropPartialsParamEditor,
+      shouldShow: agg => {
+        const field = agg.params.field;
+        return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
+      },
     },
 
     {

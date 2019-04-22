@@ -11,7 +11,7 @@
           input-focus
           disable-input-focus="disableAutoFocus"
           ng-model="filter"
-          ng-attr-placeholder="{{ finder.properties.nouns | label }} Filter..."
+          ng-attr-placeholder="{{ finder.getLabel() }} Filter..."
           ng-keydown="finder.filterKeyDown($event)"
           name="filter"
           type="text"
