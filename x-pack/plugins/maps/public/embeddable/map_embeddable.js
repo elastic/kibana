@@ -25,9 +25,11 @@ import {
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
   getIsLayerTOCOpen,
+  getOpenTOCDetails,
   setReadOnly,
   setFilterable,
-  setIsLayerTOCOpen
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
 } from '../store/ui';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { getMapCenter, getMapZoom } from '../selectors/map_selectors';
@@ -95,6 +97,13 @@ export class MapEmbeddable extends Embeddable {
     } else if (this._savedMap.uiStateJSON) {
       const uiState = JSON.parse(this._savedMap.uiStateJSON);
       this._store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
+    }
+
+    if (_.has(this._embeddableConfig, 'openTOCDetails')) {
+      this._store.dispatch(setOpenTOCDetails(this._embeddableConfig.openTOCDetails));
+    } else if (this._savedMap.uiStateJSON) {
+      const uiState = JSON.parse(this._savedMap.uiStateJSON);
+      this._store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
     if (this._embeddableConfig.mapCenter) {
@@ -166,10 +175,15 @@ export class MapEmbeddable extends Embeddable {
     }
 
     const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
-    if (!this._embeddableConfig.isLayerTOCOpen
-      || this._embeddableConfig.isLayerTOCOpen !== isLayerTOCOpen) {
+    if (this._embeddableConfig.isLayerTOCOpen !== isLayerTOCOpen) {
       embeddableConfigChanged = true;
       this._embeddableConfig.isLayerTOCOpen = isLayerTOCOpen;
+    }
+
+    const openTOCDetails = getOpenTOCDetails(this._store.getState());
+    if (!_.isEqual(this._embeddableConfig.openTOCDetails, openTOCDetails)) {
+      embeddableConfigChanged = true;
+      this._embeddableConfig.openTOCDetails = openTOCDetails;
     }
 
     if (embeddableConfigChanged) {

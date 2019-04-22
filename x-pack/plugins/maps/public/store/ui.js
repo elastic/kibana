@@ -10,6 +10,7 @@ export const SET_IS_LAYER_TOC_OPEN = 'SET_IS_LAYER_TOC_OPEN';
 export const SET_FULL_SCREEN = 'SET_FULL_SCREEN';
 export const SET_READ_ONLY = 'SET_READ_ONLY';
 export const SET_FILTERABLE = 'IS_FILTERABLE';
+export const SET_OPEN_TOC_DETAILS = 'SET_OPEN_TOC_DETAILS';
 export const SHOW_TOC_DETAILS = 'SHOW_TOC_DETAILS';
 export const HIDE_TOC_DETAILS = 'HIDE_TOC_DETAILS';
 
@@ -49,6 +50,8 @@ export function ui(state = INITIAL_STATE, action) {
       return { ...state, isReadOnly: action.isReadOnly };
     case SET_FILTERABLE:
       return { ...state, isFilterable: action.isFilterable };
+    case SET_OPEN_TOC_DETAILS:
+      return { ...state, openTOCDetails: action.layerIds };
     case SHOW_TOC_DETAILS:
       return {
         ...state,
@@ -115,6 +118,13 @@ export function setFilterable(isFilterable) {
   return {
     type: SET_FILTERABLE,
     isFilterable
+  };
+}
+
+export function setOpenTOCDetails(layerIds) {
+  return {
+    type: SET_OPEN_TOC_DETAILS,
+    layerIds
   };
 }
 

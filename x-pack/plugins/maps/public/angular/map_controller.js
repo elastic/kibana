@@ -34,7 +34,7 @@ import {
   FLYOUT_STATE,
   setReadOnly,
   setIsLayerTOCOpen,
-  showTOCDetails,
+  setOpenTOCDetails,
 } from '../store/ui';
 import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
@@ -148,9 +148,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     if (savedMap.uiStateJSON) {
       const uiState = JSON.parse(savedMap.uiStateJSON);
       store.dispatch(setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN)));
-      _.get(uiState, 'openTOCDetails', []).forEach(layerId => {
-        store.dispatch(showTOCDetails(layerId));
-      });
+      store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
     }
 
     const layerList = getInitialLayers(savedMap.layerListJSON);

@@ -611,9 +611,9 @@ export function updateLayerStyle(layerId, styleDescriptor) {
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(layerId));
 
-    // syncDataForLayer may short circuit if no re-fetch is required
+    // syncDataForLayer may short circuit if no re-fetch is required:
     // 1) if no re-fetch: setDynamicRanges required to update dynamic range from last request state
-    // 1) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
+    // 2) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
     dispatch(setDynamicRanges(layerId));
   };
 }
@@ -631,7 +631,7 @@ export function setDynamicRanges(layerId) {
     const { hasChanges, nextStyleDescriptor } = style.getDescriptorWithDynamicRanges(layer.getRawDataRequests());
     if (hasChanges) {
       // do not use updateLayerStyle action creator since that would create an infinite loop
-      // since each action creator calls one another
+      // since updateLayerStyle dispatches setDynamicRanges
       dispatch({
         type: UPDATE_LAYER_STYLE,
         layerId,
