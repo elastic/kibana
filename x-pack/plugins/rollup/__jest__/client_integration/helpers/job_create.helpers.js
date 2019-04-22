@@ -14,36 +14,37 @@ const initTestBed = registerTestBed(JobCreate, {}, undefined, rollupJobsStore);
 
 export const setup = (props) => {
   const testBed = initTestBed(props);
+  const { component, form } = testBed;
 
   // User actions
   const clickNextStep = () => {
     const button = testBed.find('rollupJobNextButton');
     button.simulate('click');
-    testBed.component.update();
+    component.update();
   };
 
   const clickPreviousStep = () => {
     const button = testBed.find('rollupJobBackButton');
     button.simulate('click');
-    testBed.component.update();
+    component.update();
   };
 
   const clickSave = () => {
     const button = testBed.find('rollupJobSaveButton');
     button.simulate('click');
-    testBed.component.update();
+    component.update();
   };
 
   // Forms
   const fillFormFields = async (step) => {
     switch (step) {
       case 'logistics':
-        testBed.form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
-        await testBed.form.setInputValue('rollupIndexPattern', JOB_TO_CREATE.indexPattern, true);
-        testBed.form.setInputValue('rollupIndexName', JOB_TO_CREATE.rollupIndex);
+        form.setInputValue('rollupJobName', JOB_TO_CREATE.id);
+        await form.setInputValue('rollupIndexPattern', JOB_TO_CREATE.indexPattern, true);
+        form.setInputValue('rollupIndexName', JOB_TO_CREATE.rollupIndex);
         break;
       case 'date-histogram':
-        testBed.form.setInputValue('rollupJobInterval', JOB_TO_CREATE.interval);
+        form.setInputValue('rollupJobInterval', JOB_TO_CREATE.interval);
         break;
       default:
         return;
@@ -68,7 +69,7 @@ export const setup = (props) => {
   };
 
   // Misc
-  const getEuiStepsHorizontalActive = () => testBed.component.find('.euiStepHorizontal-isSelected').text();
+  const getEuiStepsHorizontalActive = () => component.find('.euiStepHorizontal-isSelected').text();
 
   return {
     ...testBed,
