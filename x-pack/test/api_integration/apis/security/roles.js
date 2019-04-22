@@ -44,13 +44,8 @@ export default function ({ getService }) {
             kibana: [
               {
                 base: ['read'],
-                feature: {
-                  dashboard: ['read'],
-                  dev_tools: ['all'],
-                }
               },
               {
-                base: ['all'],
                 feature: {
                   dashboard: ['read'],
                   discover: ['all'],
@@ -81,12 +76,12 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['read'],
                 resources: ['*'],
               },
               {
                 application: 'kibana-.kibana',
-                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
                 resources: ['space:marketing', 'space:sales'],
               }
             ],
@@ -162,7 +157,6 @@ export default function ({ getService }) {
             },
             kibana: [
               {
-                base: ['read'],
                 feature: {
                   dashboard: ['read'],
                   dev_tools: ['all'],
@@ -171,11 +165,6 @@ export default function ({ getService }) {
               },
               {
                 base: ['all'],
-                feature: {
-                  dashboard: ['read'],
-                  discover: ['all'],
-                  ml: ['all']
-                },
                 spaces: ['marketing', 'sales']
               }
             ],
@@ -201,12 +190,12 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['feature_dashboard.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {
                 application: 'kibana-.kibana',
-                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: ['space_all'],
                 resources: ['space:marketing', 'space:sales'],
               },
               {
@@ -248,12 +237,12 @@ export default function ({ getService }) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['read', 'feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['read'],
                 resources: ['*'],
               },
               {
                 application: 'kibana-.kibana',
-                privileges: ['space_all', 'feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
                 resources: ['space:marketing', 'space:sales'],
               },
               {
@@ -299,14 +288,11 @@ export default function ({ getService }) {
             kibana: [
               {
                 base: ['read'],
-                feature: {
-                  dashboard: ['read'],
-                  dev_tools: ['all'],
-                },
+                feature: {},
                 spaces: ['*']
               },
               {
-                base: ['all'],
+                base: [],
                 feature: {
                   dashboard: ['read'],
                   discover: ['all'],
