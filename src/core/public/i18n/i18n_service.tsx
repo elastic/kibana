@@ -211,17 +211,17 @@ export class I18nService {
       'euiStepNumber.hasErrors': i18n.translate('core.euiStepNumber.hasErrors', {
         defaultMessage: 'has errors',
         description:
-          'Used as a the title attribute on an image or svg icon to indicate a given process step has errors',
+          'Used as the title attribute on an image or svg icon to indicate a given process step has errors',
       }),
       'euiStepNumber.hasWarnings': i18n.translate('core.euiStepNumber.hasWarnings', {
         defaultMessage: 'has warnings',
         description:
-          'Used as a the title attribute on an image or svg icon to indicate a given process step has warnings',
+          'Used as the title attribute on an image or svg icon to indicate a given process step has warnings',
       }),
       'euiStepNumber.isComplete': i18n.translate('core.euiStepNumber.isComplete', {
         defaultMessage: 'complete',
         description:
-          'Used as a the title attribute on an image or svg icon to indicate a given process step is complete',
+          'Used as the title attribute on an image or svg icon to indicate a given process step is complete',
       }),
       'euiSuperSelect.screenReaderAnnouncement': ({ optionsCount }: EuiValues) =>
         i18n.translate('core.euiSuperSelect.screenReaderAnnouncement', {
