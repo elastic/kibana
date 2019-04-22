@@ -53,6 +53,7 @@ export interface Filter {
   and: Filter[];
   to?: string;
   from?: string;
+  query?: string | null;
 }
 
 /**
@@ -184,6 +185,7 @@ interface BaseArgumentType<T> {
   required?: boolean;
   resolve?: boolean;
   types?: string[];
+  default?: T | string;
 }
 
 // The `types` array in a `FunctionSpec` should contain string
@@ -239,9 +241,13 @@ type UnresolvedMultipleArgumentType<T> = BaseArgumentType<T> & {
  */
 export type ArgumentType<T> =
   | UnresolvedMultipleArgumentType<T>
-  | UnresolvedSingleArgumentType<T>
   | MultipleArgumentType<T>
+  | UnresolvedSingleArgumentType<T>
   | SingleArgumentType<T>;
+
+interface FunctionHandlers {
+  [key: string]: (...args: any) => any;
+}
 
 // FUNCTIONS
 // --------
@@ -255,7 +261,7 @@ interface FunctionSpec<Name, Arguments, Return> {
   help: string;
   name: Name;
   type?: CanvasFunctionType | Name;
-  fn(context: any, args: Arguments): Return;
+  fn(context: any, args: Arguments, handlers: FunctionHandlers): Return;
 }
 
 /**
@@ -266,7 +272,7 @@ interface ContextualFunctionSpec<Name, Context, Arguments, Return>
   context?: {
     types: Array<TypeToCanvasArgument<Context> | UnmappedCanvasArgument>;
   };
-  fn(context: Context, args: Arguments): Return;
+  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
 }
 
 /**

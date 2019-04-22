@@ -22,7 +22,7 @@ interface Arguments {
   barColor: string;
   barWeight: number;
   font: Style;
-  label: string;
+  label: boolean | string;
   max: number;
   shape: Shape;
   valueColor: string;

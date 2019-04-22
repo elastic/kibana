@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const browser = () => ({
+import { FunctionFactory } from '../types';
+
+export const browser: FunctionFactory<'browser', {}, any> = () => ({
   name: 'browser',
   help: 'Force the interpreter to return to the browser',
   args: {},

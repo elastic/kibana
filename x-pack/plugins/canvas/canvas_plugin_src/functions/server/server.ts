@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { FunctionFactory } from '../types';
 
-export const server = () => ({
+export const server: FunctionFactory<'server', {}, any> = () => ({
   name: 'server',
   help: 'Force the interpreter to return to the server',
   args: {},

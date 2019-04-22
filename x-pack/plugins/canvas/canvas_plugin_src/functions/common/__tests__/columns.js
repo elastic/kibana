@@ -24,8 +24,6 @@ describe('columns', () => {
         exclude: 'price, quantity, fizz, buzz',
       });
 
-      console.log(testTable, result);
-
       expect(result.columns[0]).to.have.property('name', 'name');
       expect(result.rows[arbitraryRowIndex])
         .to.have.property('name', testTable.rows[arbitraryRowIndex].name)

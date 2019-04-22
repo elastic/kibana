@@ -4,9 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { buildESRequest } from '../../../server/lib/build_es_request';
+import { ContextFunctionFactory, Filter } from '../types';
 
-export const escount = () => ({
+interface Arguments {
+  index: string | null;
+  query: string;
+}
+
+export const escount: ContextFunctionFactory<'escount', Filter, Arguments, any> = () => ({
   name: 'escount',
   type: 'number',
   help: 'Query elasticsearch for a count of the number of hits matching a query',
@@ -31,6 +38,7 @@ export const escount = () => ({
       {
         type: 'luceneQueryString',
         query: args.query,
+        and: [],
       },
     ]);
 
@@ -48,6 +56,8 @@ export const escount = () => ({
       context
     );
 
-    return handlers.elasticsearchClient('count', esRequest).then(resp => resp.count);
+    return handlers
+      .elasticsearchClient('count', esRequest)
+      .then((resp: { count: number }) => resp.count);
   },
 });

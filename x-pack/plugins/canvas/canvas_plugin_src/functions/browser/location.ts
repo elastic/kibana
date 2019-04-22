@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { NullContextFunctionFactory } from '../types';
+
 const noop = () => {};
 
-export const location = () => ({
+export const location: NullContextFunctionFactory<'location', {}, void> = () => ({
   name: 'location',
   type: 'datatable',
   context: {
     types: ['null'],
   },
+  args: {},
   help:
     "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
   fn: () => {
     return new Promise(resolve => {
-      function createLocation(geoposition) {
+      function createLocation(geoposition: Position) {
         const { latitude, longitude } = geoposition.coords;
         return resolve({
           type: 'datatable',

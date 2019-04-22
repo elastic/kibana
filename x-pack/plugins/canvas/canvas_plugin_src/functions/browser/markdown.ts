@@ -4,9 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { Handlebars } from '../../../common/lib/handlebars';
+import { ContextFunctionFactory, Datatable, Render, Style } from '../types';
 
-export const markdown = () => ({
+type Context = Datatable | null;
+
+interface Arguments {
+  expression: string[];
+  font: Style;
+}
+
+interface Return {
+  content: string;
+  font: Style;
+}
+
+export const markdown: ContextFunctionFactory<
+  'markdown',
+  Context,
+  Arguments,
+  Render<Return>
+> = () => ({
   name: 'markdown',
   aliases: [],
   type: 'render',

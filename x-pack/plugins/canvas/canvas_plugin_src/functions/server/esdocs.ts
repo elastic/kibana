@@ -5,9 +5,20 @@
  */
 
 import squel from 'squel';
+// @ts-ignore
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
+import { ContextFunctionFactory, Filter } from '../types';
 
-export const esdocs = () => ({
+interface Arguments {
+  index: string | null;
+  query: string;
+  sort: string | null;
+  fields: string | null;
+  metaFields: string | null;
+  count: number;
+}
+
+export const esdocs: ContextFunctionFactory<'esdocs', Filter, Arguments, any> = () => ({
   name: 'esdocs',
   type: 'datatable',
   help:
@@ -47,36 +58,41 @@ export const esdocs = () => ({
     },
   },
   fn: (context, args, handlers) => {
+    const { count, index, fields, sort } = args;
+
     context.and = context.and.concat([
       {
         type: 'luceneQueryString',
         query: args.query,
+        and: [],
       },
     ]);
 
-    let query = squel
-      .select({
-        autoQuoteTableNames: true,
-        autoQuoteFieldNames: true,
-        autoQuoteAliasNames: true,
-        nameQuoteCharacter: '"',
-      })
-      .from(args.index.toLowerCase());
+    let query = squel.select({
+      autoQuoteTableNames: true,
+      autoQuoteFieldNames: true,
+      autoQuoteAliasNames: true,
+      nameQuoteCharacter: '"',
+    });
 
-    if (args.fields) {
-      const fields = args.fields.split(',').map(field => field.trim());
-      fields.forEach(field => (query = query.field(field)));
+    if (index) {
+      query.from(index.toLowerCase());
     }
 
-    if (args.sort) {
-      const [sortField, sortOrder] = args.sort.split(',').map(str => str.trim());
+    if (fields) {
+      const allFields = fields.split(',').map(field => field.trim());
+      allFields.forEach(field => (query = query.field(field)));
+    }
+
+    if (sort) {
+      const [sortField, sortOrder] = sort.split(',').map(str => str.trim());
       if (sortField) {
         query.order(`"${sortField}"`, sortOrder.toLowerCase() === 'asc');
       }
     }
 
     return queryEsSQL(handlers.elasticsearchClient, {
-      count: args.count,
+      count,
       query: query.toString(),
       filter: context.and,
     });

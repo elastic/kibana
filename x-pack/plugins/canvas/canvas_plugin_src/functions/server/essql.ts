@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
+import { ContextFunctionFactory, Filter } from '../types';
 
-export const essql = () => ({
+interface Arguments {
+  query: string;
+  count: number;
+  timezone: string;
+}
+
+export const essql: ContextFunctionFactory<'essql', Filter, Arguments, any> = () => ({
   name: 'essql',
   type: 'datatable',
   context: {
@@ -21,6 +29,7 @@ export const essql = () => ({
     },
     count: {
       types: ['number'],
+      help: 'The number of docs to pull back. Smaller numbers perform better',
       default: 1000,
     },
     timezone: {

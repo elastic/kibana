@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+// @ts-ignore
 import { demodata } from './demodata';
 import { escount } from './escount';
 import { esdocs } from './esdocs';
+// @ts-ignore
 import { pointseries } from './pointseries';
 import { server } from './server';
 import { essql } from './essql';

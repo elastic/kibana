@@ -9,8 +9,8 @@ import { ContextFunctionFactory, Datatable, DatatableColumn, DatatableColumnType
 
 interface Arguments {
   column: string;
-  type: 'null' | 'boolean' | 'number' | 'string';
-  name: string;
+  type: 'null' | 'boolean' | 'number' | 'string' | null;
+  name: string | null;
 }
 
 export const alterColumn: ContextFunctionFactory<
@@ -38,7 +38,7 @@ export const alterColumn: ContextFunctionFactory<
       options: ['null', 'boolean', 'number', 'string'],
     },
     name: {
-      types: ['string'],
+      types: ['string', 'null'],
       help: 'The resultant column name. Leave blank to not rename',
       default: null,
     },

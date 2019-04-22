@@ -5,8 +5,18 @@
  */
 
 import { parse } from 'url';
+import { NullContextFunctionFactory } from '../types';
 
-export const urlparam = () => ({
+interface Arguments {
+  param: string;
+  default: string;
+}
+
+export const urlparam: NullContextFunctionFactory<
+  'urlparam',
+  Arguments,
+  string | string[]
+> = () => ({
   name: 'urlparam',
   aliases: [],
   type: 'string',
@@ -28,7 +38,7 @@ export const urlparam = () => ({
       help: 'Return this string if the url parameter is not defined',
     },
   },
-  fn: (context, args) => {
+  fn: (_context, args) => {
     const query = parse(window.location.href, true).query;
     return query[args.param] || args.default;
   },
