@@ -88,6 +88,7 @@ If the saved search is associated with a different index pattern than is current
 selected, opening the saved search changes the selected index pattern. The query language
 used for the saved search will also be automatically selected.
 
+
 [[select-pattern]]
 === Changing Which Indices You're Searching
 When you submit a search request, the indices that match the currently-selected
