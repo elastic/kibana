@@ -237,7 +237,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
 
     private async _mapAll<T>(
       selectorAll: string,
-      mapFn: (element: WebElementWrapper, index?: number) => any
+      mapFn: (element: WebElementWrapper, index?: number, arrayLength?: number) => Promise<T>
     ): Promise<T[]> {
       return await retry.try(async () => {
         const elements = await this.findAll(selectorAll);
