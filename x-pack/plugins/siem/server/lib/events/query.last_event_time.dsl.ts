@@ -78,5 +78,5 @@ export const buildLastEventTimeQuery = ({
         },
       };
   }
-  return null;
+  return undefined;
 };

@@ -12,12 +12,12 @@ import { pure } from 'recompose';
 
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
-interface LastBeatStatProps {
+interface LastEventTimeProps {
   hostName?: string;
   indexKey: string;
   ip?: string;
 }
-export const LastBeatStat = pure<LastBeatStatProps>(({ hostName, indexKey, ip }) => {
+export const LastEventTime = pure<LastEventTimeProps>(({ hostName, indexKey, ip }) => {
   return (
     <ApolloConsumer>
       {client => {
@@ -32,11 +32,11 @@ export const LastBeatStat = pure<LastBeatStatProps>(({ hostName, indexKey, ip })
             <EuiToolTip
               position="top"
               content={errorMessage}
-              data-test-subj="lastBeatStatErrorToolTip"
-              aria-label={`lastBeatStatError`}
-              id={`lastBeatStatError-${indexKey}`}
+              data-test-subj="last_event_time_error"
+              aria-label="last_event_time_error"
+              id={`last_event_time_error-${indexKey}`}
             >
-              <EuiIcon aria-describedby={`lastBeatStatError-${indexKey}`} type="alert" />
+              <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="alert" />
             </EuiToolTip>
           );
         }
@@ -47,7 +47,7 @@ export const LastBeatStat = pure<LastBeatStatProps>(({ hostName, indexKey, ip })
               ? lastSeen
               : !loading &&
                 lastSeen != null && (
-                  <EuiToolTip position="bottom" content={lastSeen}>
+                  <EuiToolTip data-test-subj="last_event_time" position="bottom" content={lastSeen}>
                     <FormattedMessage
                       id="xpack.siem.headerPage.pageSubtitle"
                       defaultMessage="Last Event: {beat}"

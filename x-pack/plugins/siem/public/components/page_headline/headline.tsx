@@ -24,7 +24,7 @@ export const PageHeadlineComponent = pure<PageHeadlineProps>(({ children, subtit
   <FlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle size="l">
-        <h1>{title}</h1>
+        <h1 data-test-subj="page_headline_title">{title}</h1>
       </EuiTitle>
 
       <EuiText color="subdued" size="s">

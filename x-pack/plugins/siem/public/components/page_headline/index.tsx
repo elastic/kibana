@@ -12,9 +12,9 @@ import { pure } from 'recompose';
 
 import { decodeIpv6 } from '../../lib/helpers';
 import { FlowTargetSelectConnected } from '../flow_controls/flow_target_select_connected';
-import { LastBeatStat } from '../last_beat_stat';
+import { LastEventTime } from '../last_event_time';
 
-import { PageHeadlineComponent } from './component';
+import { PageHeadlineComponent } from './headline';
 const overviewPageHeadline = {
   subtitle: (
     <FormattedMessage
@@ -22,7 +22,7 @@ const overviewPageHeadline = {
       defaultMessage="Security Information & Event Management with the Elastic Stack"
     />
   ),
-  title: <FormattedMessage id="xpack.siem.overview.pageTitle" defaultMessage="Elastic SIEM" />,
+  title: <FormattedMessage id="xpack.siem.overview.pageTitle" defaultMessage="SIEM" />,
 };
 
 export const getHeaderForRoute = (pathname: string) => {
@@ -32,7 +32,7 @@ export const getHeaderForRoute = (pathname: string) => {
     switch (pathSegment) {
       case 'hosts': {
         return {
-          subtitle: <LastBeatStat indexKey={'hosts'} />,
+          subtitle: <LastEventTime indexKey={'hosts'} />,
           title: <FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />,
         };
       }
@@ -41,7 +41,7 @@ export const getHeaderForRoute = (pathname: string) => {
       }
       case 'network': {
         return {
-          subtitle: <LastBeatStat indexKey={'network'} />,
+          subtitle: <LastEventTime indexKey={'network'} />,
           title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
         };
       }
@@ -50,14 +50,14 @@ export const getHeaderForRoute = (pathname: string) => {
     if (pathname.match(/hosts\/.*?/)) {
       const hostId = pathSegment;
       return {
-        subtitle: <LastBeatStat indexKey={'hostDetails'} hostName={hostId} />,
+        subtitle: <LastEventTime indexKey={'hostDetails'} hostName={hostId} />,
         title: hostId,
       };
     }
     if (pathname.match(/network\/ip\/.*?/)) {
       const ip = decodeIpv6(pathSegment);
       return {
-        subtitle: <LastBeatStat indexKey={'ipDetails'} ip={ip} />,
+        subtitle: <LastEventTime indexKey={'ipDetails'} ip={ip} />,
         title: ip,
         children: <FlowTargetSelectConnected />,
       };
@@ -68,13 +68,16 @@ export const getHeaderForRoute = (pathname: string) => {
 
 type PageHeadlineComponentProps = RouteComponentProps;
 
-const HeaderPageComponents = pure<PageHeadlineComponentProps>(({ location }) => {
+export const PageHeadlineComponents = pure<PageHeadlineComponentProps>(({ location }) => {
   return (
     <>
-      <PageHeadlineComponent {...getHeaderForRoute(location.pathname)} />
+      <PageHeadlineComponent
+        data-test-subj="page_headline"
+        {...getHeaderForRoute(location.pathname)}
+      />
       <EuiHorizontalRule />
     </>
   );
 });
 
-export const PageHeadline = withRouter(HeaderPageComponents);
+export const PageHeadline = withRouter(PageHeadlineComponents);
