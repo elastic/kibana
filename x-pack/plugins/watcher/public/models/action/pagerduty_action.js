@@ -9,55 +9,43 @@ import { get } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 
-const requiredFields = ['description', 'type'];
-const optionalFields = [
-  'event_type',
-  'incident_key',
-  'client',
-  'client_url',
-  'attach_payload',
-  'contexts',
-  'proxy',
-  'href',
-  'src',
-];
-
-const allFields = [...requiredFields, ...optionalFields];
-
 export class PagerDutyAction extends BaseAction {
   constructor(props = {}) {
     super(props);
+    this.message = get(props, 'message');
+  }
 
-    this.fields = {};
-    allFields.forEach((field) => {
-      this.fields[field] = get(props, field);
-    });
+  validateAction() {
+    const errors = {
+      message: [],
+    };
+
+    if (!this.message) {
+      errors.message.push(
+        i18n.translate('xpack.watcher.watchActions.pagerduty.descriptionIsRequiredValidationMessage', {
+          defaultMessage: 'Description is required.',
+        })
+      );
+    }
+    return errors;
   }
 
   get upstreamJson() {
-    // Add all required fields to the request body
-    let result = requiredFields.reduce((acc, field) => {
-      acc[field] = this.fields[field];
-      return acc;
-    }, super.upstreamJson);
+    const result = super.upstreamJson;
 
-    // If optional fields have been set, add them to the body
-    result = optionalFields.reduce((acc, field) => {
-      if (this.fields[field]) {
-        acc[field] = this.fields[field];
+    Object.assign(result, {
+      description: this.message,
+      pagerduty: {
+        description: this.message,
       }
-      return acc;
-    }, result);
+    });
 
     return result;
   }
 
   get description() {
     return i18n.translate('xpack.watcher.models.pagerDutyAction.description', {
-      defaultMessage: '{description} will be sent to PagerDuty',
-      values: {
-        description: this.fields.description,
-      }
+      defaultMessage: 'A message will be sent to PagerDuty',
     });
   }
 
@@ -80,8 +68,15 @@ export class PagerDutyAction extends BaseAction {
   static typeName = i18n.translate('xpack.watcher.models.pagerDutyAction.typeName', {
     defaultMessage: 'PagerDuty',
   });
+  static iconClass = 'apps';
   static selectMessage = i18n.translate('xpack.watcher.models.pagerDutyAction.selectMessageText', {
     defaultMessage: 'Create events in PagerDuty.',
   });
+  static simulatePrompt = i18n.translate('xpack.watcher.models.pagerDutyAction.simulateButtonLabel', {
+    defaultMessage: 'Test fire a PagerDuty event'
+  });
+  static defaults = {
+    message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
+  };
 }
 

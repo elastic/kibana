@@ -21,7 +21,6 @@ export class WebhookAction extends BaseAction {
     this.fullPath = `${this.host}${this.port}${this.path}`;
   }
 
-
   validateAction() {
     const errors = {
       host: [],
