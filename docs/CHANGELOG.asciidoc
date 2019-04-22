@@ -130,7 +130,7 @@ Upgrade Assistant::
 * Shows different interstitial text when cluster is upgraded {pull}34762[#34762]
 * Specifies `allow_restricted_indices` for `_has_privileges` {pull}35125[#35125]
 Visualizations::
-* Fixes filtering on split bucket values in data table vis. {pull}33886[#33886]
+* Fixes filtering on split bucket values in data table visualization {pull}33886[#33886]
 * Changes sample data to use `auto_expand_replicas` of `0-1` {pull}33736[#33736]
 * Fixes time zone behavior in visualizations {pull}34795[#34795]
 * Fixes timepicker problem in Firefox {pull}35279[#35279]
