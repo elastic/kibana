@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const registerHttpRequestMockHelpers = server => {
+import sinon from 'sinon';
+
+// Register helpers to mock HTTP Requests
+const registerHttpRequestMockHelpers = server => {
   const mockResponse = (defaultResponse, response) => ([
     200,
     { 'Content-Type': 'application/json' },
@@ -94,5 +97,19 @@ export const registerHttpRequestMockHelpers = server => {
     setGetAutoFollowPatternResponse,
     setGetClusterIndicesResponse,
     setGetFollowerIndexResponse,
+  };
+};
+
+export const init = () => {
+  const server = sinon.fakeServer.create();
+  server.respondImmediately = true;
+
+  // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
+  // and we can mock them all with a 200 instead of mocking each one individually.
+  server.respondWith([200, {}, '']);
+
+  return {
+    server,
+    httpRequestsMockHelpers: registerHttpRequestMockHelpers(server)
   };
 };

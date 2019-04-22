@@ -297,7 +297,7 @@ export class FollowerIndicesTable extends PureComponent {
       toolsLeft: selectedItems.length ? (
         <ContextMenu
           followerIndices={selectedItems}
-          testSubj="ccrFollowerIndexListContextMenuButton"
+          testSubj="contextMenuButton"
         />
       ) : undefined,
       onChange: this.onSearch,
@@ -318,10 +318,10 @@ export class FollowerIndicesTable extends PureComponent {
           selection={selection}
           isSelectable={true}
           rowProps={() => ({
-            'data-test-subj': 'ccrFollowerIndexListTableRow'
+            'data-test-subj': 'row'
           })}
           cellProps={(item, column) => ({
-            'data-test-subj': `ccrFollowerIndexListTableCell-${column.field}`
+            'data-test-subj': `cell-${column.field}`
           })}
           data-test-subj="followerIndexListTable"
         />

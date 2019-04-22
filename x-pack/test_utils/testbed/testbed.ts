@@ -47,7 +47,11 @@ export const registerTestBed = <T extends string = string>(
     return testSubjectToArray.reduce((reactWrapper, subject, i) => {
       const target = findTestSubject(reactWrapper, subject);
       if (!target.length && i < testSubjectToArray.length - 1) {
-        throw new Error(`Can't access nested test subject of unknown node "${subject}"`);
+        throw new Error(
+          `Can't access nested test subject "${
+            testSubjectToArray[i + 1]
+          }" of unknown node "${subject}"`
+        );
       }
       return target;
     }, component);

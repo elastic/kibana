@@ -147,6 +147,7 @@ export class ContextMenu extends PureComponent {
               <EuiContextMenuItem
                 icon="pencil"
                 onClick={() => this.editFollowerIndex(followerIndexNames[0])}
+                data-test-subj="editButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndex.contextMenu.editLabel"

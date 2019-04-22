@@ -19,13 +19,14 @@ const initTestBed = registerTestBed(AutoFollowPatternList, {}, testBedOptions, c
 
 export const setup = (props) => {
   const testBed = initTestBed(props);
+  const EUI_TABLE = 'autoFollowPatternListTable';
 
   /**
    * User Actions
    */
 
   const selectAutoFollowPatternAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData('autoFollowPatternListTable');
+    const { rows } = testBed.table.getMetaData(EUI_TABLE);
     const row = rows[index];
     const checkBox = row.reactWrapper.find('input').hostNodes();
     checkBox.simulate('change', { target: { checked: true } });
@@ -41,7 +42,7 @@ export const setup = (props) => {
   };
 
   const clickRowActionButtonAt = (index = 0, action = 'delete') => {
-    const { rows } = testBed.table.getMetaData('autoFollowPatternListTable');
+    const { rows } = testBed.table.getMetaData(EUI_TABLE);
     const indexLastColumn = rows[index].columns.length - 1;
     const tableCellActions = rows[index].columns[indexLastColumn].reactWrapper;
 
@@ -60,7 +61,7 @@ export const setup = (props) => {
   };
 
   const clickAutoFollowPatternAt = (index = 0) => {
-    const { rows } = testBed.table.getMetaData('autoFollowPatternListTable');
+    const { rows } = testBed.table.getMetaData(EUI_TABLE);
     const autoFollowPatternLink = findTestSubject(rows[index].reactWrapper, 'autoFollowPatternLink');
     autoFollowPatternLink.simulate('click');
   };

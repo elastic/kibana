@@ -5,11 +5,10 @@
  */
 
 import axios from 'axios';
-import sinon from 'sinon';
 
 import { setHttpClient } from '../../../public/app/services/api';
 import routing from '../../../public/app/services/routing';
-import { registerHttpRequestMockHelpers } from './http_requests';
+import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
   // Mock React router
@@ -27,14 +26,7 @@ export const setupEnvironment = () => {
   // axios has a $http like interface so using it to simulate $http
   setHttpClient(axios.create(), $q);
 
-  const server = sinon.fakeServer.create();
-  server.respondImmediately = true;
-
-  // Mock all HTTP Requests that have not been handled previously
-  server.respondWith([200, {}, '']);
-
-  // Register helpers to mock Http Requests
-  const httpRequestsMockHelpers = registerHttpRequestMockHelpers(server);
+  const { server, httpRequestsMockHelpers } = initHttpRequests();
 
   return {
     server,

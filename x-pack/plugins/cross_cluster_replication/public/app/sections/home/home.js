@@ -38,7 +38,7 @@ export class CrossClusterReplicationHome extends PureComponent {
         defaultMessage="Follower indices"
       />
     ),
-    testSubj: 'ccrFollowerIndicesTab',
+    testSubj: 'followerIndicesTab',
   }, {
     id: 'auto_follow_patterns',
     name: (
@@ -47,7 +47,7 @@ export class CrossClusterReplicationHome extends PureComponent {
         defaultMessage="Auto-follow patterns"
       />
     ),
-    testSubj: 'ccrAutoFollowPatternsTab',
+    testSubj: 'autoFollowPatternsTab',
   }]
 
   componentDidMount() {
