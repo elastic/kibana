@@ -12,9 +12,10 @@ import { PropTypes } from 'prop-types';
 import { CustomSelectionTable } from './custom_selection_table';
 import { getBadge } from './job_selector';
 import { TimeRangeBar } from './timerange_bar';
-import { ml } from '../../services/ml_api_service';
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiTabbedContent,
 } from '@elastic/eui';
@@ -24,7 +25,7 @@ import {
   CENTER_ALIGNMENT,
   SortableProperties,
 } from '@elastic/eui/lib/services';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 // import { FormattedMessage } from '@kbn/i18n/react';
 
 
@@ -32,13 +33,13 @@ const JOB_FILTER_FIELDS = ['job_id', 'groups'];
 const GROUP_FILTER_FIELDS = ['id'];
 
 export function JobSelectorTable({
+  groupsList,
   jobs,
   onSelection,
   selectedIds,
   singleSelection
 }) {
   const [sortableProperties, setSortableProperties] = useState();
-  const [groupsList, setGroupsList] = useState([]);
 
   useEffect(() => {
     const sortableProps = new SortableProperties([{
@@ -61,21 +62,25 @@ export function JobSelectorTable({
     content: renderGroupsTable()
   }];
 
-  function handleSelection(selectionFromTable) {
-    onSelection(selectionFromTable);
-  }
-
-  function handleTabSelection({ id }) {
-    if (id === 'Groups') {
-      ml.jobs.groups()
-        .then((resp) => {// remove
-          setGroupsList(resp);
-        })
-        .catch((err) => {
-          console.log(err);
-          return [];
-        });
-    }
+  function loadGroups() {
+    return groupsList.map(g => ({
+      value: g.id,
+      view: (
+        <Fragment>
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem key={g.id} grow={false}>
+              {getBadge({ id: g.id, isGroup: true })}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {i18n.translate('xpack.ml.jobSelector.filterBar.jobGroupTitle', {
+                defaultMessage: `({jobsCount, plural, one {# job} other {# jobs}})`,
+                values: { jobsCount: g.jobIds.length },
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </Fragment>
+      )
+    }));
   }
 
   function renderJobsTable() {
@@ -111,12 +116,28 @@ export function JobSelectorTable({
       }
     ];
 
+    const filters = [
+      {
+        type: 'field_value_selection',
+        field: 'groups',
+        name: i18n.translate('xpack.ml.jobSelector.filterBar.groupLabel', {
+          defaultMessage: 'Group',
+        }),
+        loadingMessage: 'Loading...',
+        noOptionsMessage: 'No groups found.',
+        multiSelect: 'or',
+        cache: 10000,
+        options: loadGroups()
+      }
+    ];
+
     return (
       <CustomSelectionTable
         columns={columns}
+        filters={filters}
         filterDefaultFields={!singleSelection ? JOB_FILTER_FIELDS : undefined}
         items={jobs}
-        onTableChange={handleSelection}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
         sortableProperties={sortableProperties}
       />
@@ -150,8 +171,7 @@ export function JobSelectorTable({
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
         render: ({ timeRange = {} }) => (
-          //<TimeRangeBar timerange={timeRange} />
-          <span>{timeRange.to}</span>
+          <TimeRangeBar timerange={timeRange} />
         )
       }
     ];
@@ -161,7 +181,7 @@ export function JobSelectorTable({
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}
-        onTableChange={(selection) => { console.log('THE SELECTION FROM GROUPS', selection); }}//{handleSelection}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable, isGroup: true })}
         selectedIds={[]}//{selectedIds}
         // sortableProperties={sortableProperties}
       />
@@ -174,7 +194,7 @@ export function JobSelectorTable({
         size="s"
         tabs={tabs}
         initialSelectedTab={tabs[0]}
-        onTabClick={(tab) => { handleTabSelection(tab); }}
+        onTabClick={(tab) => { console.log('Tab -', tab); }} // handleTabSelection(tab);
       />
     );
   }

@@ -6,7 +6,7 @@
 
 
 
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
 import d3 from 'd3';
@@ -78,38 +78,10 @@ export function getBadge({ id, icon, isGroup = false, removeId }) {
   }
 
   return (
-    <EuiBadge {...props} >
+    <EuiBadge key={`${id}-id`} {...props} >
       {id}
     </EuiBadge>
   );
-}
-
-export function loadGroups() {
-  return ml.jobs.groups()
-    .then((groups) => {
-      return groups.map(g => ({
-        value: g.id,
-        view: (
-          <Fragment>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem key={g.id} grow={false}>
-                {getBadge({ id: g.id, isGroup: true })}
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.ml.jobSelector.filterBar.jobGroupTitle', {
-                  defaultMessage: `({jobsCount, plural, one {# job} other {# jobs}})`,
-                  values: { jobsCount: g.jobIds.length },
-                })}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </Fragment>
-        )
-      }));
-    })
-    .catch((err) => {
-      console.log(err);
-      return [];
-    });
 }
 
 // TODO: move to server side if possible
@@ -149,6 +121,8 @@ export function JobSelector({
   // timeseriesOnly
 }) {
   const [jobs, setJobs] = useState([]);
+  const [groups, setGroups] = useState([]);
+  // const [groupsMap, setGroupsMap] = useState([]);
   const [selectedIds, setSelectedIds] = useState(selectedJobIds);
   const [newSelection, setNewSelection] = useState(selectedJobIds);
   const [allJobs, setAllJobs] = useState(false);
@@ -189,8 +163,11 @@ export function JobSelector({
 
     ml.jobs.jobsWithTimerange()
       .then((resp) => {
-        const jobsWithTimerange = normalizeTimes(resp);
+        const jobsWithTimerange = normalizeTimes(resp.jobs);
+        const groupsWithTimerange = normalizeTimes(resp.groups);
         setJobs(jobsWithTimerange);
+        setGroups(groupsWithTimerange);
+        // setGroupsMap(resp.groupsMap);
       })
       .catch((err) => {
         console.log('Error fetching jobs', err);
@@ -202,10 +179,13 @@ export function JobSelector({
       });
   }
 
-  function handleNewSelection(selection) {
-    setNewSelection(selection);
+  function handleNewSelection({ selectionFromTable, isGroup = false }) {
+    console.log(isGroup); // remove
+    // if it's groups then we add the selected groups Ids
+    setNewSelection(selectionFromTable);
   }
 
+  // newSelection should always be the list of job ids - break down group selection into job-ids
   function applySelection() {
     closeFlyout();
     setSelectedIds(newSelection);
@@ -359,6 +339,7 @@ export function JobSelector({
             </EuiFlexGroup>
             <JobSelectorTable
               jobs={jobs}
+              groupsList={groups}
               onSelection={handleNewSelection}
               selectedIds={newSelection}
               singleSelection={singleSelection}

@@ -140,9 +140,11 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
-  async function jobsWithTimerange() {
+  async function jobsWithTimerange() { // TODO: rename to jobsAndGroupsWithTimerange
     const [JOBS, JOB_STATS] = [0, 1];
     const jobs = [];
+    const groups = {};
+    const groupsMap = {};
 
     const requests = [
       callWithRequest('ml.jobs'),
@@ -155,7 +157,7 @@ export function jobsProvider(callWithRequest) {
       results[JOBS].jobs.forEach((job) => {
         job.id = job.job_id;
         job.timeRange = {};
-
+        // Record stats for job
         if (results[JOB_STATS] && results[JOB_STATS].jobs) {
           const jobStats = results[JOB_STATS].jobs.find(js => (js.job_id === job.job_id));
 
@@ -167,12 +169,39 @@ export function jobsProvider(callWithRequest) {
             }
           }
         }
+        // Oraganize job by group
+        if (job.groups !== undefined) {
+          job.groups.forEach((g) => {
+            if (groups[g] === undefined) {
+              groups[g] = {
+                id: g,
+                jobIds: [job.job_id],
+                timeRange: {
+                  to: job.timeRange.to,
+                  from: job.timeRange.from
+                }
+              };
+
+              groupsMap[g] = { jobIds: [job.job_id] };
+            } else {
+              groups[g].jobIds.push(job.job_id);
+              groupsMap[g].jobIds.push(job.job_id);
+              // keep track of earliest 'from' / latest 'to' for group range
+              if (groups[g].timeRange.to === undefined || job.timeRange.to > groups[g].timeRange.to) {
+                groups[g].timeRange.to = job.timeRange.to;
+              }
+              if (groups[g].timeRange.from === undefined || job.timeRange.from < groups[g].timeRange.from) {
+                groups[g].timeRange.from = job.timeRange.from;
+              }
+            }
+          });
+        }
 
         jobs.push(job);
       });
     }
-    // TODO: add timeRange stuff to each job
-    return jobs;
+
+    return { jobs, groupsMap, groups: Object.keys(groups).map(g => groups[g]) };
   }
 
   async function createFullJobsList(jobIds = []) {

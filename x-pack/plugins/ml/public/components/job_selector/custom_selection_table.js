@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui/lib/services';
-import { loadGroups } from './job_selector';
 // import { i18n } from '@kbn/i18n';
 
 
@@ -47,7 +46,7 @@ const JOBS_PER_PAGE = 20;
 export function CustomSelectionTable({
   columns,
   filterDefaultFields,
-  // filters,
+  filters,
   items,
   onTableChange,
   selectedIds,
@@ -63,23 +62,6 @@ export function CustomSelectionTable({
   });
   const [query, setQuery] = useState(EuiSearchBar.Query.MATCH_ALL);
   const [error, setError] = useState(null); // eslint-disable-line
-
-  const filters = [
-    {
-      type: 'field_value_selection',
-      field: 'groups',
-      name: 'Group',
-      loadingMessage: 'Loading...',
-      noOptionsMessage: 'No groups found.',
-      // name: i18n.translate({
-      //   id: 'xpack.ml.jobSelector.filterBar.groupLabel',
-      //   defaultMessage: 'Group'
-      // }),
-      multiSelect: 'or',
-      cache: 10000,
-      options: () => loadGroups()
-    }
-  ];
 
   useEffect(() => {
     setCurrentItems(items);
@@ -294,7 +276,6 @@ export function CustomSelectionTable({
       <EuiSpacer size="s"/>
       <EuiFlexGroup direction="column">
         <EuiFlexItem grow={false}>
-          {filters !== undefined &&
           <EuiSearchBar
             defaultQuery={query}
             box={{
@@ -302,7 +283,7 @@ export function CustomSelectionTable({
             }}
             filters={filters}
             onChange={handleQueryChange}
-          />}
+          />
         </EuiFlexItem>
         {/* <EuiFlexItem style={{ maxHeight: '0px' }}>
           <p>{getError(error)}</p>
