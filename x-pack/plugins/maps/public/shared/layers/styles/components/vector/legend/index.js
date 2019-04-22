@@ -5,3 +5,5 @@
  */
 
 export { VectorStyleLegend } from './vector_style_legend';
+
+export { VectorIcon } from './vector_icon';

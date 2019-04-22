@@ -7,13 +7,12 @@
 import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FillableCircle, FillableVector } from '../../icons/additional_layer_icons';
 import { getHexColorRangeStrings } from '../../utils/color_utils';
 import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
-import { VectorStyleLegend } from './components/vector/legend';
+import { VectorIcon, VectorStyleLegend } from './components/vector/legend';
 
 export class VectorStyle extends AbstractStyle {
 
@@ -200,24 +199,13 @@ export class VectorStyle extends AbstractStyle {
   }
 
   getIcon = (isPointsOnly = false) => {
-    const { lineColor, fillColor } = this.getProperties();
-    const stroke = !this._isPropertyDynamic('lineColor')
-      ? lineColor.options.color
-      : 'grey';
-    const fill = !this._isPropertyDynamic('fillColor')
-      ? fillColor.options.color
-      : 'none';
-
-    const style = {
-      stroke,
-      strokeWidth: '1px',
-      fill
-    };
-
+    const styles = this.getProperties();
     return (
-      isPointsOnly
-        ? <FillableCircle style={style}/>
-        : <FillableVector style={style}/>
+      <VectorIcon
+        isPointsOnly={isPointsOnly}
+        fillColor={styles.fillColor}
+        lineColor={styles.lineColor}
+      />
     );
   }
 
