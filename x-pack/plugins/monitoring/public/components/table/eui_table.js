@@ -30,7 +30,7 @@ export class EuiMonitoringTable extends React.PureComponent {
       if (!column['data-test-subj']) {
         column['data-test-subj'] = 'monitoringTableHasData';
       }
-      console.log('...column:', column);
+
       if (!('sortable' in column)) {
         column.sortable = true;
       }
