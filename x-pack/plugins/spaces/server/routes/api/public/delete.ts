@@ -7,16 +7,17 @@
 import Boom from 'boom';
 import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
+import { PublicRouteDeps } from '.';
 
-export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
+export function initDeleteSpacesApi(deps: PublicRouteDeps) {
+  const { http, savedObjects, spacesService, routePreCheckLicenseFn } = deps;
+
+  http.server.route({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
     async handler(request: any, h: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+      const { SavedObjectsClient } = savedObjects;
+      const spacesClient: SpacesClient = spacesService.scopedClient(request);
 
       const id = request.params.id;
 
@@ -33,7 +34,7 @@ export function initDeleteSpacesApi(server: any, routePreCheckLicenseFn: any) {
 
       return h.response(result).code(204);
     },
-    config: {
+    options: {
       pre: [routePreCheckLicenseFn],
     },
   });

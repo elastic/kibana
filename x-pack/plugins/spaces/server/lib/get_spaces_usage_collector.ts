@@ -3,6 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 // @ts-ignore
 import { KIBANA_STATS_TYPE_MONITORING } from '../../../monitoring/common/constants';
 import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
@@ -15,12 +18,16 @@ import { KIBANA_SPACES_STATS_TYPE } from '../../common/constants';
  * @param withinDayRange
  * @return {ReportingUsageStats}
  */
-async function getSpacesUsage(callCluster: any, server: any, spacesAvailable: boolean) {
+async function getSpacesUsage(
+  callCluster: any,
+  savedObjects: SavedObjectsService,
+  spacesAvailable: boolean
+) {
   if (!spacesAvailable) {
     return {};
   }
 
-  const { getSavedObjectsRepository } = server.savedObjects;
+  const { getSavedObjectsRepository } = savedObjects;
 
   const savedObjectsRepository = getSavedObjectsRepository(callCluster);
 
@@ -36,22 +43,33 @@ export interface UsageStats {
   enabled: boolean;
   count?: number;
 }
+
+interface CollectorDeps {
+  config: any;
+  usage: { collectorSet: any };
+  savedObjects: SavedObjectsService;
+  xpackMain: XPackMainPlugin;
+}
+
 /*
  * @param {Object} server
  * @return {Object} kibana usage stats type collection object
  */
-export function getSpacesUsageCollector(server: any) {
-  const { collectorSet } = server.usage;
+export function getSpacesUsageCollector(deps: CollectorDeps) {
+  const { collectorSet } = deps.usage;
   return collectorSet.makeUsageCollector({
     type: KIBANA_SPACES_STATS_TYPE,
     fetch: async (callCluster: any) => {
-      const xpackInfo = server.plugins.xpack_main.info;
-      const config = server.config();
+      const xpackInfo = deps.xpackMain.info;
       const available = xpackInfo && xpackInfo.isAvailable(); // some form of spaces is available for all valid licenses
-      const enabled = config.get('xpack.spaces.enabled');
+      const enabled = deps.config.get('xpack.spaces.enabled');
       const spacesAvailableAndEnabled = available && enabled;
 
-      const usageStats = await getSpacesUsage(callCluster, server, spacesAvailableAndEnabled);
+      const usageStats = await getSpacesUsage(
+        callCluster,
+        deps.savedObjects,
+        spacesAvailableAndEnabled
+      );
 
       return {
         available,

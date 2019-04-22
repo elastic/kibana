@@ -12,6 +12,11 @@ import { Feature } from '../../../../xpack_main/types';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
+import { SpacesService } from '../../new_platform/spaces_service';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { SecurityPlugin } from '../../../../security';
+import { SpacesAuditLogger } from '../audit_logger';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
 describe('onPostAuthRequestInterceptor', () => {
   const sandbox = sinon.sandbox.create();
@@ -21,6 +26,7 @@ describe('onPostAuthRequestInterceptor', () => {
   };
   let server: any;
   let request: any;
+  let spacesService: SpacesServiceSetup;
 
   const serverBasePath = '/';
   const defaultRoute = '/app/custom-app';
@@ -77,9 +83,15 @@ describe('onPostAuthRequestInterceptor', () => {
       };
 
       server.plugins = {
+        elasticsearch: {
+          getCluster: jest.fn().mockReturnValue({
+            callWithInternalUser: jest.fn(),
+            callWithRequest: jest.fn(),
+          }),
+        },
         spaces: {
           spacesClient: {
-            getScopedClient: jest.fn(),
+            scopedClient: jest.fn(),
           },
         },
         xpack_main: {
@@ -115,11 +127,54 @@ describe('onPostAuthRequestInterceptor', () => {
         basePath = newPath;
       });
 
+      const log = {
+        log: jest.fn(),
+        trace: jest.fn(),
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        fatal: jest.fn(),
+      };
+
+      const service = new SpacesService(log, server.config());
+      spacesService = await service.setup({
+        elasticsearch: server.plugins.elasticsearch as ElasticsearchPlugin,
+        savedObjects: server.savedObjects,
+        security: {} as SecurityPlugin,
+        spacesAuditLogger: {} as SpacesAuditLogger,
+      });
+
+      spacesService.scopedClient = jest.fn().mockReturnValue({
+        getAll() {
+          return spaces.map(convertSavedObjectToSpace);
+        },
+        get(spaceId: string) {
+          const space = spaces.find(s => s.id === spaceId);
+          if (!space) {
+            throw new Error('space not found');
+          }
+          return convertSavedObjectToSpace(space);
+        },
+      });
+
       // The onRequest interceptor is also included here because the onPostAuth interceptor requires the onRequest
       // interceptor to parse out the space id and rewrite the request's URL. Rather than duplicating that logic,
       // we are including the already tested interceptor here in the test chain.
-      initSpacesOnRequestInterceptor(server);
-      initSpacesOnPostAuthRequestInterceptor(server);
+      initSpacesOnRequestInterceptor({
+        config: server.config(),
+        http: { server } as any,
+        log,
+        xpackMain: server.plugins.xpack_main,
+        spacesService,
+      });
+      initSpacesOnPostAuthRequestInterceptor({
+        config: server.config(),
+        http: { server } as any,
+        log,
+        xpackMain: server.plugins.xpack_main,
+        spacesService,
+      });
 
       server.route([
         {
@@ -146,19 +201,6 @@ describe('onPostAuthRequestInterceptor', () => {
       ]);
 
       teardowns.push(() => server.stop());
-
-      server.plugins.spaces.spacesClient.getScopedClient.mockReturnValue({
-        getAll() {
-          return spaces.map(convertSavedObjectToSpace);
-        },
-        get(spaceId: string) {
-          const space = spaces.find(s => s.id === spaceId);
-          if (!space) {
-            throw new Error('space not found');
-          }
-          return convertSavedObjectToSpace(space);
-        },
-      });
 
       await setupFn(server);
 
@@ -245,7 +287,7 @@ describe('onPostAuthRequestInterceptor', () => {
       expect(response.statusCode).toEqual(302);
       expect(response.headers.location).toEqual(`${serverBasePath}/s/a-space${defaultRoute}`);
 
-      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+      expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -273,7 +315,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       expect(response.statusCode).toEqual(302);
       expect(response.headers.location).toEqual(`${serverBasePath}${defaultRoute}`);
-      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+      expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -298,7 +340,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       expect(response.statusCode).toEqual(200);
 
-      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+      expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -323,7 +365,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       expect(response.statusCode).toEqual(200);
 
-      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+      expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -348,7 +390,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       expect(response.statusCode).toEqual(404);
 
-      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+      expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,
@@ -392,7 +434,7 @@ describe('onPostAuthRequestInterceptor', () => {
 
       expect(getHiddenUiAppHandler).toHaveBeenCalledTimes(1);
       expect(getHiddenUiAppHandler).toHaveBeenCalledWith('space_selector');
-      expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+      expect(spacesService.scopedClient).toHaveBeenCalledWith(
         expect.objectContaining({
           headers: expect.objectContaining({
             authorization: headers.authorization,

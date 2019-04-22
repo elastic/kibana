@@ -15,12 +15,12 @@ import {
   UpdateOptions,
 } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { SpacesService } from '../create_spaces_service';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
 interface SpacesSavedObjectsClientOptions {
   baseClient: SavedObjectsClient;
   request: any;
-  spacesService: SpacesService;
+  spacesService: SpacesServiceSetup;
   types: string[];
 }
 

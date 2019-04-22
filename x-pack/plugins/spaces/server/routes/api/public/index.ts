@@ -4,17 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpServiceSetup, Logger } from 'src/core/server';
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initDeleteSpacesApi } from './delete';
 import { initGetSpacesApi } from './get';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
+import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
 
-export function initPublicSpacesApi(server: any) {
-  const routePreCheckLicenseFn = routePreCheckLicense(server);
+type InterfaceExcept<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
-  initDeleteSpacesApi(server, routePreCheckLicenseFn);
-  initGetSpacesApi(server, routePreCheckLicenseFn);
-  initPostSpacesApi(server, routePreCheckLicenseFn);
-  initPutSpacesApi(server, routePreCheckLicenseFn);
+interface RouteDeps {
+  xpackMain: XPackMainPlugin;
+  http: HttpServiceSetup;
+  savedObjects: SavedObjectsService;
+  spacesService: SpacesServiceSetup;
+  log: Logger;
+}
+
+export interface PublicRouteDeps extends InterfaceExcept<RouteDeps, 'xpackMain'> {
+  routePreCheckLicenseFn: any;
+}
+
+export function initPublicSpacesApi({ xpackMain, ...rest }: RouteDeps) {
+  const routePreCheckLicenseFn = routePreCheckLicense({ xpackMain });
+
+  const deps: PublicRouteDeps = {
+    ...rest,
+    routePreCheckLicenseFn,
+  };
+
+  initDeleteSpacesApi(deps);
+  initGetSpacesApi(deps);
+  initPostSpacesApi(deps);
+  initPutSpacesApi(deps);
 }

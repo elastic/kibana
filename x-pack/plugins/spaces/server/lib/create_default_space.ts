@@ -5,16 +5,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 // @ts-ignore
-import { getClient } from '../../../../server/lib/get_client_shield';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
-export async function createDefaultSpace(server: any) {
-  const { callWithInternalUser: callCluster } = getClient(server);
+interface Deps {
+  elasticsearch: ElasticsearchPlugin;
+  savedObjects: SavedObjectsService;
+}
 
-  const { getSavedObjectsRepository, SavedObjectsClient } = server.savedObjects;
-
-  const savedObjectsRepository = getSavedObjectsRepository(callCluster);
+export async function createDefaultSpace({ elasticsearch, savedObjects }: Deps) {
+  const { getSavedObjectsRepository, SavedObjectsClient } = savedObjects;
+  const { callWithInternalUser } = elasticsearch.getCluster('admin');
+  const savedObjectsRepository = getSavedObjectsRepository(callWithInternalUser);
 
   const defaultSpaceExists = await doesDefaultSpaceExist(
     SavedObjectsClient,

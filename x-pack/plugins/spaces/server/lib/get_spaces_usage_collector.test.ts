@@ -84,7 +84,12 @@ test('sets enabled to false when spaces is turned off', async () => {
   });
   const serverMock = getServerMock({ config: () => ({ get: mockConfigGet }) });
   const callClusterMock = jest.fn();
-  const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverMock);
+  const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+    config: serverMock.config(),
+    savedObjects: serverMock.savedObjects,
+    usage: serverMock.usage,
+    xpackMain: serverMock.plugins.xpack_main,
+  });
   const usageStats: UsageStats = await getSpacesUsage(callClusterMock);
   expect(usageStats.enabled).toBe(false);
 });
@@ -97,7 +102,12 @@ describe('with a basic license', async () => {
       .fn()
       .mockReturnValue('basic');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithBasicLicenseMock);
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+      config: serverWithBasicLicenseMock.config(),
+      savedObjects: serverWithBasicLicenseMock.savedObjects,
+      usage: serverWithBasicLicenseMock.usage,
+      xpackMain: serverWithBasicLicenseMock.plugins.xpack_main,
+    });
     usageStats = await getSpacesUsage(callClusterMock);
   });
 
@@ -120,7 +130,12 @@ describe('with no license', async () => {
     const serverWithNoLicenseMock = getServerMock();
     serverWithNoLicenseMock.plugins.xpack_main.info.isAvailable = jest.fn().mockReturnValue(false);
     const callClusterMock = jest.fn(() => Promise.resolve({}));
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithNoLicenseMock);
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+      config: serverWithNoLicenseMock.config(),
+      savedObjects: serverWithNoLicenseMock.savedObjects,
+      usage: serverWithNoLicenseMock.usage,
+      xpackMain: serverWithNoLicenseMock.plugins.xpack_main,
+    });
     usageStats = await getSpacesUsage(callClusterMock);
   });
 
@@ -145,7 +160,12 @@ describe('with platinum license', async () => {
       .fn()
       .mockReturnValue('platinum');
     const callClusterMock = jest.fn(() => Promise.resolve({}));
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithPlatinumLicenseMock);
+    const { fetch: getSpacesUsage } = getSpacesUsageCollector({
+      config: serverWithPlatinumLicenseMock.config(),
+      savedObjects: serverWithPlatinumLicenseMock.savedObjects,
+      usage: serverWithPlatinumLicenseMock.usage,
+      xpackMain: serverWithPlatinumLicenseMock.plugins.xpack_main,
+    });
     usageStats = await getSpacesUsage(callClusterMock);
   });
 

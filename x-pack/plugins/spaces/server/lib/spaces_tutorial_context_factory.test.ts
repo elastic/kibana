@@ -5,8 +5,12 @@
  */
 
 import { DEFAULT_SPACE_ID } from '../../common/constants';
-import { createSpacesService } from './create_spaces_service';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
+import { SpacesService } from '../new_platform/spaces_service';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SecurityPlugin } from '../../../security';
+import { SpacesAuditLogger } from './audit_logger';
 
 const server = {
   config: () => {
@@ -21,14 +25,46 @@ const server = {
   },
 };
 
+const log = {
+  log: jest.fn(),
+  trace: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+  fatal: jest.fn(),
+};
+
+const service = new SpacesService(log, server.config());
+
 describe('createSpacesTutorialContextFactory', () => {
-  it('should create a valid context factory', () => {
-    const spacesService = createSpacesService(server);
+  it('should create a valid context factory', async () => {
+    const spacesService = await service.setup({
+      elasticsearch: ({
+        getCluster: jest.fn().mockReturnValue({
+          callWithRequest: jest.fn(),
+          callWithInternalUser: jest.fn(),
+        }),
+      } as unknown) as ElasticsearchPlugin,
+      savedObjects: {} as SavedObjectsService,
+      security: {} as SecurityPlugin,
+      spacesAuditLogger: {} as SpacesAuditLogger,
+    });
     expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
   });
 
-  it('should create context with the current space id for space my-space-id', () => {
-    const spacesService = createSpacesService(server);
+  it('should create context with the current space id for space my-space-id', async () => {
+    const spacesService = await service.setup({
+      elasticsearch: ({
+        getCluster: jest.fn().mockReturnValue({
+          callWithRequest: jest.fn(),
+          callWithInternalUser: jest.fn(),
+        }),
+      } as unknown) as ElasticsearchPlugin,
+      savedObjects: {} as SavedObjectsService,
+      security: {} as SecurityPlugin,
+      spacesAuditLogger: {} as SpacesAuditLogger,
+    });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
     const request = {
@@ -41,8 +77,18 @@ describe('createSpacesTutorialContextFactory', () => {
     });
   });
 
-  it('should create context with the current space id for the default space', () => {
-    const spacesService = createSpacesService(server);
+  it('should create context with the current space id for the default space', async () => {
+    const spacesService = await service.setup({
+      elasticsearch: ({
+        getCluster: jest.fn().mockReturnValue({
+          callWithRequest: jest.fn(),
+          callWithInternalUser: jest.fn(),
+        }),
+      } as unknown) as ElasticsearchPlugin,
+      savedObjects: {} as SavedObjectsService,
+      security: {} as SecurityPlugin,
+      spacesAuditLogger: {} as SpacesAuditLogger,
+    });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
     const request = {

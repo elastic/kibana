@@ -5,11 +5,11 @@
  */
 
 import { SavedObjectsClientWrapperFactory } from 'src/legacy/server/saved_objects';
-import { SpacesService } from '../create_spaces_service';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
 export function spacesSavedObjectsClientWrapperFactory(
-  spacesService: SpacesService,
+  spacesService: SpacesServiceSetup,
   types: string[]
 ): SavedObjectsClientWrapperFactory {
   return ({ client, request }) =>

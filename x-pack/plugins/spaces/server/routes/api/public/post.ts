@@ -8,32 +8,33 @@ import Boom from 'boom';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
+import { PublicRouteDeps } from '.';
 
-export function initPostSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
+export function initPostSpacesApi(deps: PublicRouteDeps) {
+  const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+
+  http.server.route({
     method: 'POST',
     path: '/api/spaces/space',
     async handler(request: any) {
-      server.log(['spaces', 'debug'], `Inside POST /api/spaces/space`);
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
+      log.debug(`Inside POST /api/spaces/space`);
+      const { SavedObjectsClient } = savedObjects;
+      const spacesClient: SpacesClient = spacesService.scopedClient(request);
 
       const space = request.payload;
 
       try {
-        server.log(['spaces', 'debug'], `Attempting to create space`);
+        log.debug(`Attempting to create space`);
         return await spacesClient.create(space);
       } catch (error) {
         if (SavedObjectsClient.errors.isConflictError(error)) {
           return Boom.conflict(`A space with the identifier ${space.id} already exists.`);
         }
-        server.log(['spaces', 'debug'], `Error creating space: ${error}`);
+        log.debug(`Error creating space: ${error}`);
         return wrapError(error);
       }
     },
-    config: {
+    options: {
       validate: {
         payload: spaceSchema,
       },

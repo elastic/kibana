@@ -11,6 +11,8 @@ import Boom from 'boom';
 // @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 
 let mockCallWithRequest;
 beforeEach(() => {
@@ -26,7 +28,7 @@ interface MockServerSettings {
   simulateConflict?: boolean;
   [invalidKeys: string]: any;
 }
-const createMockServer = (settings: MockServerSettings = {}) => {
+const createMockDeps = (settings: MockServerSettings = {}) => {
   const {
     defaultExists = false,
     simulateGetErrorCondition = false,
@@ -80,17 +82,26 @@ const createMockServer = (settings: MockServerSettings = {}) => {
     return settings[key];
   });
 
-  return mockServer;
+  return {
+    config: mockServer.config(),
+    savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsService,
+    elasticsearch: ({
+      getCluster: jest.fn().mockReturnValue({
+        callWithRequest: jest.fn(),
+        callWithInternalUser: jest.fn(),
+      }),
+    } as unknown) as ElasticsearchPlugin,
+  };
 };
 
 test(`it creates the default space when one does not exist`, async () => {
-  const server = createMockServer({
+  const deps = createMockDeps({
     defaultExists: false,
   });
 
-  await createDefaultSpace(server);
+  await createDefaultSpace(deps);
 
-  const repository = server.savedObjects.getSavedObjectsRepository();
+  const repository = deps.savedObjects.getSavedObjectsRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);
@@ -108,46 +119,46 @@ test(`it creates the default space when one does not exist`, async () => {
 });
 
 test(`it does not attempt to recreate the default space if it already exists`, async () => {
-  const server = createMockServer({
+  const deps = createMockDeps({
     defaultExists: true,
   });
 
-  await createDefaultSpace(server);
+  await createDefaultSpace(deps);
 
-  const repository = server.savedObjects.getSavedObjectsRepository();
+  const repository = deps.savedObjects.getSavedObjectsRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(0);
 });
 
 test(`it throws all other errors from the saved objects client when checking for the default space`, async () => {
-  const server = createMockServer({
+  const deps = createMockDeps({
     defaultExists: true,
     simulateGetErrorCondition: true,
   });
 
-  expect(createDefaultSpace(server)).rejects.toThrowErrorMatchingSnapshot();
+  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingSnapshot();
 });
 
 test(`it ignores conflict errors if the default space already exists`, async () => {
-  const server = createMockServer({
+  const deps = createMockDeps({
     defaultExists: false,
     simulateConflict: true,
   });
 
-  await createDefaultSpace(server);
+  await createDefaultSpace(deps);
 
-  const repository = server.savedObjects.getSavedObjectsRepository();
+  const repository = deps.savedObjects.getSavedObjectsRepository();
 
   expect(repository.get).toHaveBeenCalledTimes(1);
   expect(repository.create).toHaveBeenCalledTimes(1);
 });
 
 test(`it throws other errors if there is an error creating the default space`, async () => {
-  const server = createMockServer({
+  const deps = createMockDeps({
     defaultExists: false,
     simulateCreateErrorCondition: true,
   });
 
-  expect(createDefaultSpace(server)).rejects.toThrowErrorMatchingSnapshot();
+  expect(createDefaultSpace(deps)).rejects.toThrowErrorMatchingSnapshot();
 });

@@ -7,8 +7,14 @@
 // @ts-ignore
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
+import { HttpServiceSetup } from 'src/core/server';
+import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
+import { PublicRouteDeps } from '../public';
+import { SpacesService } from '../../../new_platform/spaces_service';
+import { SpacesAuditLogger } from '../../../lib/audit_logger';
+import { PrivateRouteDeps } from '../v1';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -47,7 +53,7 @@ const baseConfig: TestConfig = {
   'xpack.spaces.maxSpaces': 1000,
 };
 
-export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: any) => void) {
+export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRouteDeps) => void) {
   const teardowns: TeardownFn[] = [];
 
   const spaces = createSpaces();
@@ -86,8 +92,6 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
     };
 
     server.decorate('server', 'config', jest.fn<any, any>(() => mockConfig));
-
-    initApiFn(server, pre);
 
     server.decorate('request', 'getBasePath', jest.fn());
     server.decorate('request', 'setBasePath', jest.fn());
@@ -133,21 +137,55 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       },
     };
 
-    server.plugins.spaces = {
-      spacesClient: {
-        getScopedClient: jest.fn((req: any) => {
-          return new SpacesClient(
-            null as any,
-            () => null,
-            null,
-            mockSavedObjectsRepository,
-            mockConfig,
-            mockSavedObjectsRepository,
-            req
-          );
-        }),
-      },
+    server.plugins.elasticsearch = {
+      createCluster: jest.fn(),
+      waitUntilReady: jest.fn(),
+      getCluster: jest.fn().mockReturnValue({
+        callWithRequest: jest.fn(),
+        callWithInternalUser: jest.fn(),
+      }),
     };
+
+    const log = {
+      log: jest.fn(),
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+    };
+
+    const service = new SpacesService(log, server.config());
+    const spacesService = await service.setup({
+      elasticsearch: server.plugins.elasticsearch,
+      savedObjects: server.savedObjects,
+      security: {} as SecurityPlugin,
+      spacesAuditLogger: {} as SpacesAuditLogger,
+    });
+
+    spacesService.scopedClient = jest.fn((req: any) => {
+      return new SpacesClient(
+        null as any,
+        () => null,
+        null,
+        mockSavedObjectsRepository,
+        mockConfig,
+        mockSavedObjectsRepository,
+        req
+      );
+    });
+
+    initApiFn({
+      http: ({
+        server,
+      } as unknown) as HttpServiceSetup,
+      routePreCheckLicenseFn: pre,
+      savedObjects: server.savedObjects,
+      spacesService,
+      log,
+      config: mockConfig,
+    });
 
     teardowns.push(() => server.stop());
 
@@ -170,7 +208,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
       }
 
       if (expectSpacesClientCall) {
-        expect(server.plugins.spaces.spacesClient.getScopedClient).toHaveBeenCalledWith(
+        expect(spacesService.scopedClient).toHaveBeenCalledWith(
           expect.objectContaining({
             headers: expect.objectContaining({
               authorization: headers.authorization,
@@ -178,7 +216,7 @@ export function createTestHandler(initApiFn: (server: any, preCheckLicenseImpl: 
           })
         );
       } else {
-        expect(server.plugins.spaces.spacesClient.getScopedClient).not.toHaveBeenCalled();
+        expect(spacesService.scopedClient).not.toHaveBeenCalled();
       }
 
       return response;

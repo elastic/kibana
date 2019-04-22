@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Server } from 'hapi';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { getSpaceIdFromPath } from '../spaces_url_parser';
+import { InterceptorDeps } from '.';
 
-export function initSpacesOnRequestInterceptor(server: Server) {
-  const serverBasePath: string = server.config().get('server.basePath');
+export function initSpacesOnRequestInterceptor({ config, http }: InterceptorDeps) {
+  const serverBasePath: string = config.get('server.basePath');
 
-  server.ext('onRequest', async function spacesOnRequestHandler(request: any, h: any) {
+  http.server.ext('onRequest', async function spacesOnRequestHandler(request: any, h: any) {
     const path = request.path;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,

@@ -7,27 +7,49 @@
 import { resolve } from 'path';
 
 import { SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { PluginInitializerContext, HttpServiceSetup } from 'src/core/server';
+// @ts-ignore
+import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
 import { watchStatusAndLicenseToInitialize } from '../../server/lib/watch_status_and_license_to_initialize';
 import mappings from './mappings.json';
-import { SpacesAuditLogger } from './server/lib/audit_logger';
-import { checkLicense } from './server/lib/check_license';
-import { createDefaultSpace } from './server/lib/create_default_space';
-import { createSpacesService } from './server/lib/create_spaces_service';
 import { wrapError } from './server/lib/errors';
 import { getActiveSpace } from './server/lib/get_active_space';
 import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
-import { getSpacesUsageCollector } from './server/lib/get_spaces_usage_collector';
 import { migrateToKibana660 } from './server/lib/migrations';
-import { initSpacesRequestInterceptors } from './server/lib/request_inteceptors';
-import { spacesSavedObjectsClientWrapperFactory } from './server/lib/saved_objects_client/saved_objects_client_wrapper_factory';
-import { SpacesClient } from './server/lib/spaces_client';
-import { createSpacesTutorialContextFactory } from './server/lib/spaces_tutorial_context_factory';
 import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
-import { initPublicSpacesApi } from './server/routes/api/public';
-import { initPrivateApis } from './server/routes/api/v1';
+import { plugin } from './server/new_platform';
+import { XPackMainPlugin } from '../xpack_main/xpack_main';
+import { SecurityPlugin } from '../security';
+import { SpacesPlugin } from './types';
+
+export interface SpacesCoreSetup {
+  http: HttpServiceSetup;
+  xpackMain: XPackMainPlugin;
+  security: SecurityPlugin;
+  savedObjects: SavedObjectsService;
+  spaces: SpacesPlugin;
+  elasticsearch: ElasticsearchPlugin;
+  usage: {
+    collectorSet: {
+      register: (collector: any) => void;
+    };
+  };
+  tutorial: {
+    addScopedTutorialContextFactory: (factory: any) => void;
+  };
+}
+
+export interface SpacesConfig {
+  get: (key: string) => string;
+}
+
+export interface SpacesInitializerContext extends PluginInitializerContext {
+  legacyConfig: SpacesConfig;
+}
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -86,7 +108,7 @@ export const spaces = (kibana: Record<string, any>) =>
         request: Record<string, any>,
         server: Record<string, any>
       ) {
-        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        const spacesClient = server.plugins.spaces.spacesClient.scopedClient(request);
         try {
           vars.activeSpace = {
             valid: true,
@@ -116,69 +138,40 @@ export const spaces = (kibana: Record<string, any>) =>
       },
     },
 
-    async init(server: any) {
-      const thisPlugin = this;
-      const xpackMainPlugin = server.plugins.xpack_main;
-
-      watchStatusAndLicenseToInitialize(xpackMainPlugin, thisPlugin, async () => {
-        await createDefaultSpace(server);
-      });
-
-      // Register a function that is called whenever the xpack info changes,
-      // to re-compute the license check results for this plugin.
-      xpackMainPlugin.info
-        .feature(thisPlugin.id)
-        .registerLicenseCheckResultsGenerator(checkLicense);
-
-      const spacesService = createSpacesService(server);
-      server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
-
-      const config = server.config();
-
-      const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
-
-      server.expose('spacesClient', {
-        getScopedClient: (request: Record<string, any>) => {
-          const adminCluster = server.plugins.elasticsearch.getCluster('admin');
-          const { callWithRequest, callWithInternalUser } = adminCluster;
-          const callCluster = (...args: any[]) => callWithRequest(request, ...args);
-          const { savedObjects } = server;
-          const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
-          const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
-          const authorization = server.plugins.security
-            ? server.plugins.security.authorization
-            : null;
-          return new SpacesClient(
-            spacesAuditLogger,
-            (message: string) => {
-              server.log(['spaces', 'debug'], message);
-            },
-            authorization,
-            callWithRequestRepository,
-            server.config(),
-            internalRepository,
-            request
-          );
+    async init(server: Server) {
+      const kbnServer = (server as unknown) as KbnServer;
+      const initializerContext = ({
+        legacyConfig: server.config(),
+        logger: {
+          get: (context: string) => ({
+            debug: (message: any) => server.log([context, 'debug'], message),
+            info: (message: any) => server.log([context, 'info'], message),
+            warning: (message: any) => server.log([context, 'warning'], message),
+            error: (message: any) => server.log([context, 'error'], message),
+          }),
         },
-      });
+      } as unknown) as SpacesInitializerContext;
 
-      const {
-        addScopedSavedObjectsClientWrapperFactory,
-        types,
-      } = server.savedObjects as SavedObjectsService;
-      addScopedSavedObjectsClientWrapperFactory(
-        Number.MAX_VALUE,
-        spacesSavedObjectsClientWrapperFactory(spacesService, types)
-      );
+      const core = {
+        http: kbnServer.newPlatform.setup.core.http,
+        elasticsearch: server.plugins.elasticsearch,
+        xpackMain: server.plugins.xpack_main,
+        spaces: this,
+        security: server.plugins.security,
+        savedObjects: server.savedObjects,
+        usage: (server as any).usage,
+        tutorial: {
+          addScopedTutorialContextFactory: (server as any).addScopedTutorialContextFactory,
+        },
+      } as SpacesCoreSetup;
 
-      server.addScopedTutorialContextFactory(createSpacesTutorialContextFactory(spacesService));
+      // Need legacy because of `setup_base_path_provider`
+      // (request.getBasePath and request.setBasePath)
+      core.http.server = kbnServer as any;
 
-      initPrivateApis(server);
-      initPublicSpacesApi(server);
+      const { spacesService } = await plugin(initializerContext).setup(core);
 
-      initSpacesRequestInterceptors(server);
-
-      // Register a function with server to manage the collection of usage stats
-      server.usage.collectorSet.register(getSpacesUsageCollector(server));
+      server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
+      server.expose('spacesClient', spacesService);
     },
   });

@@ -8,6 +8,12 @@ import { Server } from 'hapi';
 import sinon from 'sinon';
 
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
+import { SpacesService } from '../../new_platform/spaces_service';
+import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { SecurityPlugin } from '../../../../security';
+import { SpacesAuditLogger } from '../audit_logger';
+import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
 describe('onRequestInterceptor', () => {
   const sandbox = sinon.sandbox.create();
@@ -67,14 +73,48 @@ describe('onRequestInterceptor', () => {
       };
 
       server.plugins = {
+        elasticsearch: {
+          getCluster: jest.fn().mockReturnValue({
+            callWithInternalUser: jest.fn(),
+            callWithRequest: jest.fn(),
+          }),
+        },
         spaces: {
           spacesClient: {
-            getScopedClient: jest.fn(),
+            scopedClient: jest.fn(),
           },
         },
       };
 
-      initSpacesOnRequestInterceptor(server);
+      const log = {
+        log: jest.fn(),
+        trace: jest.fn(),
+        debug: jest.fn(),
+        info: jest.fn(),
+        warn: jest.fn(),
+        error: jest.fn(),
+        fatal: jest.fn(),
+      };
+
+      const spacesService = new SpacesService(log, server.config());
+      await spacesService.setup({
+        elasticsearch: server.plugins.elasticsearch as ElasticsearchPlugin,
+        savedObjects: server.savedObjects,
+        security: {} as SecurityPlugin,
+        spacesAuditLogger: {} as SpacesAuditLogger,
+      });
+
+      initSpacesOnRequestInterceptor({
+        config: server.config(),
+        http: { server } as any,
+        log,
+        xpackMain: {} as XPackMainPlugin,
+        spacesService: {
+          scopedClient: jest.fn(),
+          getSpaceId: jest.fn(),
+          isInDefaultSpace: jest.fn(),
+        } as SpacesServiceSetup,
+      });
 
       server.route([
         {

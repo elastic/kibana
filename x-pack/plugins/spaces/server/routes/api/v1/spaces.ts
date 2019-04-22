@@ -10,17 +10,17 @@ import { wrapError } from '../../../lib/errors';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { addSpaceIdToPath } from '../../../lib/spaces_url_parser';
 import { getSpaceById } from '../../lib';
+import { PrivateRouteDeps } from '.';
 
-export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
-  server.route({
+export function initPrivateSpacesApi(deps: PrivateRouteDeps) {
+  const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
+
+  http.server.route({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any) {
-      const { SavedObjectsClient } = server.savedObjects;
-      const spacesClient: SpacesClient = server.plugins.spaces.spacesClient.getScopedClient(
-        request
-      );
-
+      const { SavedObjectsClient } = savedObjects;
+      const spacesClient: SpacesClient = spacesService.scopedClient(request);
       const id = request.params.id;
 
       try {
@@ -33,8 +33,6 @@ export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
           return Boom.notFound();
         }
 
-        const config = server.config();
-
         return {
           location: addSpaceIdToPath(
             config.get('server.basePath'),
@@ -46,7 +44,7 @@ export function initPrivateSpacesApi(server: any, routePreCheckLicenseFn: any) {
         return wrapError(error);
       }
     },
-    config: {
+    options: {
       pre: [routePreCheckLicenseFn],
     },
   });
