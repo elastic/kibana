@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import {
   MAX_CONTEXT_SIZE,

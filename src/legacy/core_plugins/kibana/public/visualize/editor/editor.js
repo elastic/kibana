@@ -34,7 +34,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
-import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { FilterBarQueryFilterProvider } from 'ui/filter_manager/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { migrateAppState } from './lib';
 import uiRoutes from 'ui/routes';
