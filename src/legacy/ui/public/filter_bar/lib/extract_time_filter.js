@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-export async function getExtractTimeFilter(indexPatterns, filters) {
+export async function extractTimeFilter(indexPatterns, filters) {
   // Assume all the index patterns are the same since they will be added
   // from the same visualization.
   const id = _.get(filters, '[0].meta.index');
