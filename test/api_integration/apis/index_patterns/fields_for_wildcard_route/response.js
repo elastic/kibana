@@ -139,7 +139,6 @@ export default function ({ getService }) {
               readFromDocValues: false,
               searchable: false,
               type: 'string',
-              esTypes: ['keyword'],
             },
             {
               type: 'number',
