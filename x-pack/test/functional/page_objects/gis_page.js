@@ -19,6 +19,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
   class GisPage {
 
+    constructor() {
+      this.basePath = '';
+    }
+
+    setBasePath(basePath) {
+      this.basePath = basePath;
+    }
+
     async setAbsoluteRange(start, end) {
       await PageObjects.timePicker.setAbsoluteRange(start, end);
       await this.waitForLayersToLoad();
@@ -176,7 +184,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/');
+          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
