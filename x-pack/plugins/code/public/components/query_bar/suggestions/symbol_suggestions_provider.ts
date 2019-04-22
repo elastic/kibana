@@ -88,9 +88,9 @@ export class SymbolSuggestionsProvider extends AbstractSuggestionsProvider {
       case 1: // File
         return 'tokenFile';
       case 2: // Module
-        return 'tokenElement';
+        return 'tokenModule';
       case 3: // Namespace
-        return 'tokenElement';
+        return 'tokenNamespace';
       case 4: // Package
         return 'tokenPackage';
       case 5: // Class

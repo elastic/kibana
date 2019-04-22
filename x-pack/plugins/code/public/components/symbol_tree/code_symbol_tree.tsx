@@ -47,10 +47,9 @@ export class CodeSymbolTree extends React.PureComponent<Props, { activePath?: st
     path: string = ''
   ) => () => {
     let tokenType = 'tokenFile';
-    if (kind !== SymbolKind.Module) {
-      // @ts-ignore
-      tokenType = `token${Object.keys(SymbolKind).find(k => SymbolKind[k] === kind)}`;
-    }
+
+    // @ts-ignore
+    tokenType = `token${Object.keys(SymbolKind).find(k => SymbolKind[k] === kind)}`;
     let bg = null;
     if (this.state.activePath === path) {
       bg = <div className="code-full-width-node" />;
