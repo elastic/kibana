@@ -27,7 +27,8 @@ import {
   handleChange,
 } from './lib/collection_actions';
 import newSeriesFn from './lib/new_series_fn';
-import { EuiDragDropContext, EuiDroppable, EuiDraggable, reorder } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, EuiDraggable } from '@elastic/eui';
+import { reorder } from './lib/reorder';
 
 const DROPPABLE_ID = 'series_editor_dnd';
 
@@ -41,14 +42,11 @@ class SeriesEditor extends Component {
 
   sortSeries = ({ destination, source }) => {
     const canSort = destination && source &&
-      source.droppableId === DROPPABLE_ID && destination.droppableId === DROPPABLE_ID &&
       source.index !== destination.index;
 
     if (canSort) {
-      const series = [...this.props.model.series];
-
       this.props.onChange({
-        series: reorder(series, source.index, destination.index),
+        series: reorder([...this.props.model.series], source.index, destination.index),
       });
     }
   };
@@ -63,6 +61,7 @@ class SeriesEditor extends Component {
         <EuiDroppable
           droppableId={DROPPABLE_ID}
           spacing="l"
+          type="MACRO"
         >
           {list.map((row, idx) => (
             <EuiDraggable
@@ -70,7 +69,8 @@ class SeriesEditor extends Component {
               key={row.id}
               index={idx}
               customDragHandle={true}
-              draggableId={row.id}
+              draggableId={`${DROPPABLE_ID}${row.id}`}
+              disableInteractiveElementBlocking
             >
               {provided => (
                 <Series

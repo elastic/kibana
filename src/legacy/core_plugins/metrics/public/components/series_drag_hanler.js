@@ -27,23 +27,20 @@ export class SeriesDragHandler extends React.PureComponent {
     const { dragHandleProps } = this.props;
 
     return (
-      <div {...dragHandleProps}>
-        <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false}>
+        <div {...dragHandleProps}>
           <EuiToolTip
-            content={i18n.translate('tsvb.gauge.sort.dragToSortTooltip', {
+            content={i18n.translate('tsvb.sort.dragToSortTooltip', {
               defaultMessage: 'Drag to sort',
             })}
           >
             <EuiIcon
               className="tvbSeries__sortHandle"
               type="grab"
-              aria-label={i18n.translate('tsvb.gauge.sort.sortAriaLabel', {
-                defaultMessage: 'Sort series by pressing up/down',
-              })}
             />
           </EuiToolTip>
-        </EuiFlexItem>
-      </div>
+        </div>
+      </EuiFlexItem>
     );
   }
 }

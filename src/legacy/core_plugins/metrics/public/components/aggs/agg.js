@@ -57,7 +57,9 @@ function Agg(props) {
         series={props.series}
         siblings={props.siblings}
         uiRestrictions={props.uiRestrictions}
+        dragHandleProps={props.dragHandleProps}
       />
+      <p {...props.dragHandleProps} hidden/>
     </div>
   );
 }
@@ -73,6 +75,7 @@ Agg.propTypes = {
   series: PropTypes.object,
   siblings: PropTypes.array,
   uiRestrictions: PropTypes.object,
+  dragHandleProps: PropTypes.object,
 };
 
 export default Agg;

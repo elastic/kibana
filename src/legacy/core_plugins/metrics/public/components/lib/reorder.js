@@ -16,8 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-// export this method from eui after updating to version > 10.0
 export const reorder = (
   list,
   startIndex,
