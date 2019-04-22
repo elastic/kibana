@@ -8,6 +8,7 @@ import { Server } from 'hapi';
 import { countBy } from 'lodash';
 import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import { isAgentName } from '../../../common/agent_name';
+import { getSavedObjectsClient } from '../helpers/saved_objects_client';
 
 export const APM_TELEMETRY_DOC_ID = 'apm-telemetry';
 
@@ -30,13 +31,4 @@ export function storeApmTelemetry(
     id: APM_TELEMETRY_DOC_ID,
     overwrite: true
   });
-}
-
-export function getSavedObjectsClient(server: Server) {
-  const { SavedObjectsClient, getSavedObjectsRepository } = server.savedObjects;
-  const { callWithInternalUser } = server.plugins.elasticsearch.getCluster(
-    'admin'
-  );
-  const internalRepository = getSavedObjectsRepository(callWithInternalUser);
-  return new SavedObjectsClient(internalRepository);
 }
