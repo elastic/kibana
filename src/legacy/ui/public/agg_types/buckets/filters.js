@@ -25,7 +25,7 @@ import { createFilterFilters } from './create_filter/filters';
 import { decorateQuery, luceneStringToDsl } from '@kbn/es-query';
 import '../directives/click_focus';
 import '../directives/parse_query';
-import filtersTemplate from '../controls/filters.html';
+import { FiltersParamEditor } from '../controls/filters';
 import { i18n } from '@kbn/i18n';
 
 import chrome from 'ui/chrome';
@@ -41,8 +41,8 @@ export const filtersBucketAgg = new BucketAggType({
   params: [
     {
       name: 'filters',
-      editor: filtersTemplate,
-      default: [ { input: {}, label: '' } ],
+      editorComponent: FiltersParamEditor,
+      default: [ { input: { query: '' }, label: '' } ],
       write: function (aggConfig, output) {
         const inFilters = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
