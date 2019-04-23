@@ -381,7 +381,7 @@ export class WebElementWrapper {
    */
   public async findAllByClassName(
     className: string,
-    timeout: number
+    timeout?: number
   ): Promise<WebElementWrapper[]> {
     return this._wrapAll(
       await this._findWithCustomTimeout(
@@ -416,13 +416,13 @@ export class WebElementWrapper {
    */
   public async findAllByTagName<T extends keyof HTMLElementTagNameMap>(
     tagName: T,
-    timeout: number
+    timeout?: number
   ): Promise<WebElementWrapper[]>;
   public async findAllByTagName<T extends string>(
     tagName: T,
-    timeout: number
+    timeout?: number
   ): Promise<WebElementWrapper[]>;
-  public async findAllByTagName(tagName: string, timeout: number): Promise<WebElementWrapper[]> {
+  public async findAllByTagName(tagName: string, timeout?: number): Promise<WebElementWrapper[]> {
     return this._wrapAll(
       await this._findWithCustomTimeout(
         async () => await this._webElement.findElements(this.By.tagName(tagName)),
@@ -450,7 +450,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByXpath(selector: string, timeout: number): Promise<WebElementWrapper[]> {
+  public async findAllByXpath(selector: string, timeout?: number): Promise<WebElementWrapper[]> {
     return this._wrapAll(
       await this._findWithCustomTimeout(
         async () => await this._webElement.findElements(this.By.xpath(selector)),
@@ -478,7 +478,7 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  public async findAllByPartialLinkText(linkText: string, timeout: number) {
+  public async findAllByPartialLinkText(linkText: string, timeout?: number) {
     return this._wrapAll(
       await this._findWithCustomTimeout(
         async () => await this._webElement.findElements(this.By.partialLinkText(linkText)),
