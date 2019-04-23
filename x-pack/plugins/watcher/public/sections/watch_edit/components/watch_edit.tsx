@@ -52,13 +52,13 @@ const watchReducer = (state: any, action: any) => {
       if (isEqual(watch[property], value)) {
         return state;
       } else {
-        return new (Watch.getWatchTypes())[watch.type]({
+        return {
           ...state,
-          watch: {
+          watch: new (Watch.getWatchTypes())[watch.type]({
             ...watch,
             [property]: value,
-          },
-        });
+          }),
+        };
       }
 
     case 'addAction':
