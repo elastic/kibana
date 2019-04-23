@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export { JobDetailsForm, getDefaultJobDetailsState } from './job_details_form';
 
-
-import './form_filter_input_directive';
+export { JobDetailsSummary } from './job_details_summary';

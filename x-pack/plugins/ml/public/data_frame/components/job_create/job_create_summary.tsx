@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { SFC } from 'react';
 
-
-import './form_filter_input_directive';
+export const JobCreateSummary: SFC = React.memo(() => {
+  return null;
+});

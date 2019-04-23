@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './form_filter_input_directive';
+export enum FIELD_TYPE {
+  IP = 'ip',
+  NUMBER = 'number',
+  STRING = 'string',
+}
