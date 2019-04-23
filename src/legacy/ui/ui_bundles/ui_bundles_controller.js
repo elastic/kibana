@@ -171,7 +171,7 @@ export class UiBundlesController {
 
   getCacheDirectory(...subPath) {
     return this.resolvePath(
-      '../../built_assets/.ui_bundles_cache',
+      '../../built_assets/.cache/ui_bundles',
       !IS_KIBANA_DISTRIBUTABLE ? this.hashBundleEntries() : '',
       ...subPath
     );
