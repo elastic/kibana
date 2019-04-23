@@ -17,13 +17,13 @@ export TEST_BROWSER_HEADLESS=1
 
 echo " -> Running mocha tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Mocha" yarn test
+yarn test
 echo ""
 echo ""
 
 echo " -> Running jest tests"
 cd "$XPACK_DIR"
-checks-reporter-with-killswitch "X-Pack Jest" node scripts/jest --ci --no-cache --verbose
+node scripts/jest --ci --no-cache --verbose
 echo ""
 echo ""
 
