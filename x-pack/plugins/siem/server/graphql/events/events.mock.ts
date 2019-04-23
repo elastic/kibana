@@ -8,7 +8,7 @@ import { FieldNode } from 'graphql';
 
 import { Logger } from '../../utils/logger';
 import { SiemContext } from '../index';
-import { EventsData, TimelineData, TimelineDetailsData } from '../types';
+import { EventsData, LastEventTimeData, TimelineData, TimelineDetailsData } from '../types';
 
 export const mockEventsData: { Events: EventsData } = {
   Events: {
@@ -270,6 +270,12 @@ export const mockTimelineDetailsData: { TimelineDetails: TimelineDetailsData } =
         values: ['10.100.7.196'],
       },
     ],
+  },
+};
+
+export const mockLastEventTimeData: { LastEventTime: LastEventTimeData } = {
+  LastEventTime: {
+    lastSeen: '2019-01-07T16:31:44.036Z',
   },
 };
 

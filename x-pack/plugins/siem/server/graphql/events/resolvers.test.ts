@@ -18,6 +18,7 @@ import { mockSourcesAdapter, mockSourceStatusAdapter } from '../sources/resolver
 import {
   mockEventsData,
   mockEventsFields,
+  mockLastEventTimeData,
   mockTimelineData,
   mockTimelineDetailsData,
 } from './events.mock';
@@ -41,6 +42,12 @@ mockGetTimeline.mockResolvedValue({
     ...mockTimelineData.Timeline,
   },
 });
+const mockGetLastEventTime = jest.fn();
+mockGetLastEventTime.mockResolvedValue({
+  LastEventTime: {
+    ...mockLastEventTimeData.LastEventTime,
+  },
+});
 const mockGetTimelineDetails = jest.fn();
 mockGetTimelineDetails.mockResolvedValue({
   TimelineDetails: {
@@ -51,6 +58,7 @@ const mockEventsAdapter: EventsAdapter = {
   getEvents: mockGetEvents,
   getTimelineDetails: mockGetTimelineDetails,
   getTimelineData: mockGetTimeline,
+  getLastEventTimeData: mockGetLastEventTime,
 };
 
 const mockEventsLibs: EventsResolversDeps = {
