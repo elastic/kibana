@@ -28,10 +28,13 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
 
     UserScenarios.forEach(scenario => {
       it(`${scenario.fullName}`, async () => {
-        const uiCapabilities = await uiCapabilitiesService.get({
-          username: scenario.username,
-          password: scenario.password,
-        });
+        const uiCapabilities = await uiCapabilitiesService.getWithNavLinks(
+          {
+            username: scenario.username,
+            password: scenario.password,
+          },
+          navLinksBuilder.all()
+        );
         switch (scenario.username) {
           case 'superuser':
             expect(uiCapabilities.success).to.be(true);

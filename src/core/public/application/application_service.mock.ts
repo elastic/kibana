@@ -17,25 +17,29 @@
  * under the License.
  */
 
-import { ApplicationService, ApplicationServiceSetup } from './application_service';
+import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+import { ApplicationService, ApplicationSetup, ApplicationStart } from './application_service';
 
 type ApplicationServiceContract = PublicMethodsOf<ApplicationService>;
 
-const createSetupContractMock = (): jest.Mocked<ApplicationServiceSetup> => ({
-  mount: jest.fn(),
+const createSetupContractMock = (): jest.Mocked<ApplicationSetup> => ({
+  registerApp: jest.fn(),
+  registerLegacyApp: jest.fn(),
 });
-const createMock = (): jest.Mocked<ApplicationServiceContract> => {
-  const mocked = {
-    setup: jest.fn(),
-    stop: jest.fn(),
-  };
 
-  mocked.setup.mockReturnValue(createSetupContractMock());
+const createStartContractMock = (): jest.Mocked<ApplicationStart> => ({
+  mount: jest.fn(),
+  ...capabilitiesServiceMock.createStartContract(),
+});
 
-  return mocked;
-};
+const createMock = (): jest.Mocked<ApplicationServiceContract> => ({
+  setup: jest.fn().mockReturnValue(createSetupContractMock()),
+  start: jest.fn().mockReturnValue(createStartContractMock()),
+  stop: jest.fn(),
+});
 
 export const applicationServiceMock = {
   create: createMock,
   createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
 };

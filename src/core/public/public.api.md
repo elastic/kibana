@@ -6,9 +6,27 @@
 
 import * as CSS from 'csstype';
 import { default } from 'react';
+import { Observable } from 'rxjs';
 import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
+
+// @public (undocumented)
+export interface ApplicationSetup {
+    registerApp(app: App): void;
+    // @internal
+    registerLegacyApp(app: LegacyApp): void;
+}
+
+// @public (undocumented)
+export interface ApplicationStart {
+    // (undocumented)
+    availableApps: CapabilitiesStart['availableApps'];
+    // (undocumented)
+    capabilities: CapabilitiesStart['capabilities'];
+    // (undocumented)
+    mount: (mountHandler: Function) => void;
+}
 
 // @public
 export interface BasePathSetup {
@@ -18,6 +36,9 @@ export interface BasePathSetup {
 }
 
 // @public
+export type BasePathStart = BasePathSetup;
+
+// @public
 export interface Capabilities {
     [key: string]: Record<string, boolean | Record<string, boolean>>;
     catalogue: Record<string, boolean>;
@@ -25,11 +46,6 @@ export interface Capabilities {
         [sectionId: string]: Record<string, boolean>;
     };
     navLinks: Record<string, boolean>;
-}
-
-// @public
-export interface CapabilitiesStart {
-    getCapabilities: () => Capabilities;
 }
 
 // @public (undocumented)
@@ -63,6 +79,8 @@ export interface CoreContext {
 // @public
 export interface CoreSetup {
     // (undocumented)
+    application: ApplicationSetup;
+    // (undocumented)
     basePath: BasePathSetup;
     // (undocumented)
     chrome: ChromeSetup;
@@ -83,7 +101,9 @@ export interface CoreSetup {
 // @public (undocumented)
 export interface CoreStart {
     // (undocumented)
-    capabilities: CapabilitiesStart;
+    application: ApplicationStart;
+    // (undocumented)
+    basePath: BasePathStart;
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
@@ -154,7 +174,7 @@ export interface InjectedMetadataParams {
             app: unknown;
             translations: unknown;
             bundleId: string;
-            nav: unknown;
+            nav: LegacyNavLink[];
             version: string;
             branch: string;
             buildNum: number;
@@ -191,7 +211,7 @@ export interface InjectedMetadataSetup {
         app: unknown;
         translations: unknown;
         bundleId: string;
-        nav: unknown;
+        nav: LegacyNavLink[];
         version: string;
         branch: string;
         buildNum: number;
@@ -212,6 +232,22 @@ export interface InjectedMetadataSetup {
 
 // @public (undocumented)
 export type InjectedMetadataStart = InjectedMetadataSetup;
+
+// @public (undocumented)
+export interface LegacyNavLink {
+    // (undocumented)
+    euiIconType?: string;
+    // (undocumented)
+    icon?: string;
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    order: number;
+    // (undocumented)
+    title: string;
+    // (undocumented)
+    url: string;
+}
 
 // @public (undocumented)
 export interface NotificationsSetup {
@@ -251,11 +287,15 @@ export interface PluginInitializerContext {
 // @public
 export interface PluginSetupContext {
     // (undocumented)
+    application: Pick<ApplicationSetup, 'registerApp'>;
+    // (undocumented)
     basePath: BasePathSetup;
     // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
+    // (undocumented)
+    http: HttpSetup;
     // (undocumented)
     i18n: I18nSetup;
     // (undocumented)

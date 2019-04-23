@@ -30,6 +30,7 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
+import { CapabilitiesProvider } from './capabilities';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -54,8 +55,13 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
+    usage: { collectorSet: any };
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
+    registerCapabilitiesProvider: (provider: CapabilitiesProvider) => void;
+    addScopedTutorialContextFactory: (
+      scopedTutorialContextFactory: (...args: any[]) => any
+    ) => void;
   }
 
   interface Request {

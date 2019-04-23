@@ -7,6 +7,7 @@
 import { resolve } from 'path';
 
 import { SavedObjectsService } from 'src/legacy/server/saved_objects';
+import { Request, Server } from 'hapi';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -116,7 +117,7 @@ export const spaces = (kibana: Record<string, any>) =>
       },
     },
 
-    async init(server: any) {
+    async init(server: Server) {
       const thisPlugin = this;
       const xpackMainPlugin = server.plugins.xpack_main;
 
@@ -138,10 +139,10 @@ export const spaces = (kibana: Record<string, any>) =>
       const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
 
       server.expose('spacesClient', {
-        getScopedClient: (request: Record<string, any>) => {
+        getScopedClient: (request: Request) => {
           const adminCluster = server.plugins.elasticsearch.getCluster('admin');
           const { callWithRequest, callWithInternalUser } = adminCluster;
-          const callCluster = (...args: any[]) => callWithRequest(request, ...args);
+          const callCluster = callWithRequest.bind(null, request);
           const { savedObjects } = server;
           const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
           const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
@@ -180,5 +181,21 @@ export const spaces = (kibana: Record<string, any>) =>
 
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getSpacesUsageCollector(server));
+
+      server.registerCapabilitiesProvider(async (request, uiCapabilities) => {
+        const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
+        try {
+          const activeSpace = await getActiveSpace(
+            spacesClient,
+            request.getBasePath(),
+            server.config().get('server.basePath')
+          );
+
+          const features = server.plugins.xpack_main.getFeatures();
+          return toggleUICapabilities(features, uiCapabilities, activeSpace);
+        } catch (e) {
+          return uiCapabilities;
+        }
+      });
     },
   });

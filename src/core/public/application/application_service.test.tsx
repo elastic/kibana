@@ -17,19 +17,57 @@
  * under the License.
  */
 
+import { basePathServiceMock } from '../base_path/base_path_service.mock';
+import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { MockCapabilitiesService } from './application_service.test.mocks';
 import { ApplicationService } from './application_service';
 
-describe('#setup()', () => {
-  it('exposes mounting interface', () => {
-    const applicationService = new ApplicationService();
-    const satupApplicationService = applicationService.setup();
+describe('#start()', () => {
+  it('exposes available apps from capabilities', async () => {
+    const service = new ApplicationService();
+    const setup = service.setup();
+    setup.registerApp({ id: 'app1' } as any);
+    setup.registerLegacyApp({ id: 'app2' } as any);
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const basePath = basePathServiceMock.createStartContract();
+    expect((await service.start({ basePath, injectedMetadata })).availableApps)
+      .toMatchInlineSnapshot(`
+Array [
+  Object {
+    "id": "app1",
+  },
+  Object {
+    "id": "app2",
+  },
+]
+`);
+  });
 
-    expect(satupApplicationService).toHaveProperty('mount');
+  it('passes registered applications to capabilities', async () => {
+    const service = new ApplicationService();
+    const setup = service.setup();
+    setup.registerApp({ id: 'app1' } as any);
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const basePath = basePathServiceMock.createStartContract();
+    await service.start({ basePath, injectedMetadata });
+    expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
+      apps: [{ id: 'app1' }],
+      basePath,
+      injectedMetadata,
+    });
+  });
 
-    const mountHandler = jest.fn();
-
-    satupApplicationService.mount(mountHandler);
-
-    expect(mountHandler).toHaveBeenCalled();
+  it('passes registered legacy applications to capabilities', async () => {
+    const service = new ApplicationService();
+    const setup = service.setup();
+    setup.registerLegacyApp({ id: 'legacyApp1' } as any);
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    const basePath = basePathServiceMock.createStartContract();
+    await service.start({ basePath, injectedMetadata });
+    expect(MockCapabilitiesService.start).toHaveBeenCalledWith({
+      apps: [{ id: 'legacyApp1' }],
+      basePath,
+      injectedMetadata,
+    });
   });
 });

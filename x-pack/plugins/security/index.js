@@ -242,5 +242,22 @@ export const security = (kibana) => new kibana.Plugin({
         }
       };
     });
+
+    server.registerCapabilitiesProvider((request, uiCapabilities) => {
+      // if we have a license which doesn't enable security, or we're a legacy user
+      // we shouldn't disable any ui capabilities
+      const { authorization } = server.plugins.security;
+      if (!authorization.mode.useRbacForRequest(request)) {
+        return uiCapabilities;
+      }
+
+      const disableUICapabilites = disableUICapabilitesFactory(server, request);
+      // if we're an anonymous route, we disable all ui capabilities
+      if (request.route.settings.auth === false) {
+        return disableUICapabilites.all(uiCapabilities);
+      }
+
+      return disableUICapabilites.usingPrivileges(uiCapabilities);
+    });
   }
 });

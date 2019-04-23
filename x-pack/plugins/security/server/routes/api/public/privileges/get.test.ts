@@ -4,23 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Boom from 'boom';
-import { PluginProperties, Server } from 'hapi';
+import { Server } from 'hapi';
 import { RawKibanaPrivileges } from '../../../../../common/model';
+import { SecurityPlugin } from '../../../../..';
 import { initGetPrivilegesApi } from './get';
-
-interface KibanaPluginProperties extends PluginProperties {
-  security: {
-    authorization: {
-      privileges: {
-        get: () => RawKibanaPrivileges;
-      };
-    };
-  };
-}
-
-interface KibanaServer extends Server {
-  plugins: KibanaPluginProperties;
-}
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
   return {
@@ -48,7 +35,7 @@ const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
 };
 
 const createMockServer = () => {
-  const mockServer: KibanaServer = new Server({ debug: false, port: 8080 }) as KibanaServer;
+  const mockServer: Server = new Server({ debug: false, port: 8080 }) as Server;
 
   mockServer.plugins.security = {
     authorization: {
@@ -57,8 +44,8 @@ const createMockServer = () => {
           return createRawKibanaPrivileges();
         }),
       },
-    },
-  };
+    } as any,
+  } as SecurityPlugin;
   return mockServer;
 };
 

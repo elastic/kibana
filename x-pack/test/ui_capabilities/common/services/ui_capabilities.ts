@@ -47,16 +47,12 @@ export class UICapabilitiesService {
   ): Promise<GetUICapabilitiesResult> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
-    const requestHeaders = credentials
+    const requestOptions = credentials
       ? {
-          Authorization: `Basic ${Buffer.from(
-            `${credentials.username}:${credentials.password}`
-          ).toString('base64')}`,
+          auth: credentials,
         }
       : {};
-    const response = await this.axios.get(`${spaceUrlPrefix}/app/kibana`, {
-      headers: requestHeaders,
-    });
+    const response = await this.axios.get(`${spaceUrlPrefix}/app/kibana`, requestOptions);
 
     if (response.status === 302 && response.headers.location === '/') {
       return {
@@ -99,6 +95,61 @@ export class UICapabilitiesService {
         `Unable to parse JSON from the kbn-injected-metadata data attribute: ${dataAttrJson}`
       );
     }
+  }
+
+  public async getWithNavLinks(
+    credentials: BasicCredentials | null,
+    navLinks: Record<string, boolean> = {},
+    spaceId?: string
+  ): Promise<GetUICapabilitiesResult> {
+    // Get the base capabilities
+    const { success, failureReason, value: baseCapabilities } = await this.get(
+      credentials,
+      spaceId
+    );
+    if (!success || !baseCapabilities) {
+      return { success, failureReason };
+    }
+
+    const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
+    this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
+    const requestOptions = credentials
+      ? {
+          auth: credentials,
+        }
+      : {};
+    const response = await this.axios.post(
+      `${spaceUrlPrefix}/api/capabilities`,
+      { capabilities: { ...baseCapabilities, navLinks } },
+      requestOptions
+    );
+
+    if (response.status === 302 && response.headers.location === '/') {
+      return {
+        success: false,
+        failureReason: GetUICapabilitiesFailureReason.RedirectedToRoot,
+      };
+    }
+
+    if (response.status === 404) {
+      return {
+        success: false,
+        failureReason: GetUICapabilitiesFailureReason.NotFound,
+      };
+    }
+
+    if (response.status !== 200) {
+      throw new Error(
+        `Expected status code of 200, received ${response.status} ${
+          response.statusText
+        }: ${util.inspect(response.data)}`
+      );
+    }
+
+    return {
+      success: true,
+      value: response.data.capabilities,
+    };
   }
 }
 

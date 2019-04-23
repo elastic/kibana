@@ -35,8 +35,20 @@ import 'custom-event-polyfill';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill';
 import 'childnode-remove-polyfill';
+import sinon from 'sinon';
 
-import { CoreSystem } from '__kibanaCore__'
+import { CoreSystem } from '__kibanaCore__';
+
+// Stub fetch for CoreSystem calls.
+const fetchStub = sinon.stub(window, 'fetch');
+fetchStub.callsFake((url, options) => {
+  if (url !== '/api/capabilities') {
+    console.warn('Stubbed window.fetch does not support this request.');
+    return Promise.resolve(new window.Response('Resource not found', { status: 404 }));
+  }
+
+  return Promise.resolve(new window.Response(options.body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+});
 
 // render the core system in a child of the body as the default children of the body
 // in the browser tests are needed for mocha and other test components to work
@@ -48,6 +60,7 @@ const coreSystem = new CoreSystem({
     version: '1.2.3',
     buildNumber: 1234,
     legacyMetadata: {
+      nav: [],
       version: '1.2.3',
       buildNum: 1234,
       devMode: true,

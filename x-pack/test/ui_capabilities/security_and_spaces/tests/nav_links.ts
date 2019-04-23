@@ -30,8 +30,9 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
       it(`${scenario.id}`, async () => {
         const { user, space } = scenario;
 
-        const uiCapabilities = await uiCapabilitiesService.get(
+        const uiCapabilities = await uiCapabilitiesService.getWithNavLinks(
           { username: user.username, password: user.password },
+          navLinksBuilder.all(),
           space.id
         );
         switch (scenario.id) {
