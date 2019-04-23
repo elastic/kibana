@@ -16,18 +16,18 @@
 
 Basic authentication requires a username and password to successfully log in to {kib}. It is enabled by default and based on the Native security realm provided by {es}. The basic authentication provider uses a Kibana provided login form, and supports authentication using the `Authorization` request header's `Basic` scheme.
 
-The session cookies which are issued by the basic authentication provider are stateless. Therefore, logging out of Kibana when using the basic authentication provider clears the session cookies from the browser but does not invalidate the session cookie for reuse.
+The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of Kibana when using the basic authentication provider clears the session cookies from the browser but does not invalidate the session cookie for reuse.
 
 For more information about basic authentication and built-in users, see {xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
 
 [[token-authentication]]
 ==== Token Authentication
 
-Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built upon {es}'s token APIs, and the bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
+Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built on {es}'s token APIs. The bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
 
-The session cookies which are issued by the Token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse.
+The session cookies that are issued by the token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse.
 
-Prior to configuring Kibana, ensure token support is enabled in Elasticsearch, see the {ref}/security-api-get-token.html#_description_86[Elasticsearch token API] documentation for more information.
+Prior to configuring Kibana, ensure token support is enabled in Elasticsearch. See the {ref}/security-api-get-token.html#_description_86[Elasticsearch token API] documentation for more information.
 
 To enable the token authentication provider in Kibana, set the following value in your `kibana.yml`:
 
@@ -36,7 +36,7 @@ To enable the token authentication provider in Kibana, set the following value i
 xpack.security.authProviders: [token]
 --------------------------------------------------------------------------------
 
-It's also possible to enable both the token authentication provider in addition to the basic authentication provider. Whichever provider is specified first will be used by the Kibana provided login form and the subsequent authentication provider will only be used when the `Authorization` request header's scheme matches the provider.
+The token authentication provider that the login form uses can also support the `Authorization` request header with the `Basic` scheme. This enables applications like `curl`. Set the following in your `kibana.yml`:
 
 To make the token authentication provider used by the login form, but also add support for the `Authorization` request header with the `Basic` scheme to enable applications like `curl`, set the following in your `kibana.yml`:
 
