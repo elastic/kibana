@@ -64,7 +64,7 @@ describe('AggParams class', function () {
       expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
-    it('Uses the SelectParamType class for params of type "optioned"', function () {
+    it('Uses the SelectParamType class for params of type "select"', function () {
       const params = [
         {
           name: 'order',

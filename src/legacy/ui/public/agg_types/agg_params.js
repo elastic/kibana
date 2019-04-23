@@ -28,7 +28,7 @@ import { createLegacyClass } from '../utils/legacy_class';
 
 const paramTypeMap = {
   field: FieldParamType,
-  // todo: remove optioned type and use select instead;
+  // todo: remove select type and update optioned type after EUIfication of all components;
   optioned: (OptionedParamType),
   select: SelectParamType,
   string: (StringParamType),
