@@ -18,38 +18,11 @@ import { formatDateTimeLocal } from '../../../../common/formatting';
 
 export function getKibanaInstructions(product, {
   doneWithMigration,
-  kibanaUrl,
   esMonitoringUrl,
   checkForMigrationStatus,
   checkingMigrationStatus,
   hasCheckedMigrationStatus
 }) {
-  const enableCollectionStep = {
-    title: 'Enable monitoring collection',
-    children: (
-      <Fragment>
-        <p>
-          Set the xpack.monitoring.collection.enabled setting to true on each node in the production cluster.
-          By default, it is disabled (false).
-        </p>
-        <EuiSpacer size="s"/>
-        <EuiCodeBlock
-          isCopyable
-          language="curl"
-        >
-          {`
-PUT _cluster/settings
-{
-  "persistent": {
-    "xpack.monitoring.collection.enabled": true
-  }
-}
-          `}
-        </EuiCodeBlock>
-      </Fragment>
-    )
-  };
-
   const disableInternalCollectionStep = {
     title: 'Disable the default collection of Kibana monitoring metrics',
     children: (
@@ -71,11 +44,14 @@ PUT _cluster/settings
   };
 
   const installMetricbeatStep = {
-    title: 'Install Metricbeat on the same node as Kibana',
+    title: 'Install Metricbeat on the same server as Kibana',
     children: (
       <Fragment>
         <p>
-          Follow <EuiLink href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html" target="_blank">the instructions here</EuiLink>
+          Follow
+          <EuiLink href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html" target="_blank">
+            the instructions here
+          </EuiLink>
         </p>
       </Fragment>
     )
@@ -90,23 +66,14 @@ PUT _cluster/settings
           isCopyable
           language="bash"
         >
-          metricbeat modules enable kibana
+          metricbeat modules enable kibana-xpack
         </EuiCodeBlock>
         <EuiSpacer size="s"/>
-        <p>Then, configure the module</p>
-        <EuiSpacer size="s"/>
-        <EuiCodeBlock
-          isCopyable
-        >
-          {`
-- module: kibana
-  metricsets:
-    - stats
-  period: 10s
-  hosts: ["${kibanaUrl}"]
-  xpack.enabled: true
-`}
-        </EuiCodeBlock>
+        <p>
+          By default the module will collect Kibana monitoring metrics from http://localhost:5601.
+          If the local Kibana instance has a different address,
+          you must specify it via the hosts setting in the modules.d/kibana-xpack.yml file.
+        </p>
       </Fragment>
     )
   };
@@ -229,7 +196,6 @@ output.elasticsearch:
   }
 
   return [
-    enableCollectionStep,
     disableInternalCollectionStep,
     installMetricbeatStep,
     enableMetricbeatModuleStep,

@@ -69,7 +69,6 @@ export const toggleSetupMode = inSetupMode => {
   const globalState = angularState.injector.get('globalState');
   angularState.scope.$evalAsync(async () => {
     setupModeState.enabled = inSetupMode;
-    angularState.scope.setupModeEnabled = inSetupMode;
     globalState.inSetupMode = inSetupMode;
     globalState.save();
     setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define

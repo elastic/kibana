@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, Component } from 'react';
-import chrome from 'ui/chrome';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -15,15 +14,13 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiButton,
-  EuiPanel,
   EuiSteps,
-  EuiStepsHorizontal
+  EuiFlyoutFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
-
-function getKibanaUrl() {
-  return chrome.getAppUrl().replace('/app/monitoring', '');
-}
 
 export class Flyout extends Component {
   constructor(props) {
@@ -51,19 +48,17 @@ export class Flyout extends Component {
         return (
           <EuiForm>
             <EuiFormRow
+              fullWidth
               label="Monitoring cluster URL"
-              helpText="The running metricbeat instance will need to be able to react this location."
+              helpText={`This is typically a single instance, but if you have multiple, enter all of instance urls comma-separated.
+              Keep in mind that the running metricbeat instance will need to be able to communicate with these Elasticsearch nodes.`}
             >
-              <EuiFieldText value={esMonitoringUrl} onChange={e => this.setState({ esMonitoringUrl: e.target.value })}/>
+              <EuiFieldText
+                value={esMonitoringUrl}
+                placeholder="http://localhost:9200"
+                onChange={e => this.setState({ esMonitoringUrl: e.target.value })}
+              />
             </EuiFormRow>
-            <EuiButton
-              type="submit"
-              fill
-              isDisabled={esMonitoringUrl.length === 0}
-              onClick={() => this.setState({ activeStep: 2 })}
-            >
-              Next
-            </EuiButton>
           </EuiForm>
         );
       case 2:
@@ -71,7 +66,6 @@ export class Flyout extends Component {
           doneWithMigration: async () => {
             onClose();
           },
-          kibanaUrl: getKibanaUrl(),
           esMonitoringUrl,
           checkForMigrationStatus: async () => {
             this.setState({ checkingMigrationStatus: true });
@@ -82,22 +76,10 @@ export class Flyout extends Component {
           hasCheckedMigrationStatus,
         });
 
-        const migrationLabel = product.isFullyMigrated
-          ? null
-          : (
-            <Fragment>
-              <p>To migrate, following the following instructions:</p>
-              <EuiSpacer size="m"/>
-            </Fragment>
-          );
-
         return (
           <Fragment>
             <EuiSpacer size="m"/>
-            {migrationLabel}
-            <EuiPanel>
-              <EuiSteps steps={instructionSteps}/>
-            </EuiPanel>
+            <EuiSteps steps={instructionSteps}/>
           </Fragment>
         );
     }
@@ -105,23 +87,29 @@ export class Flyout extends Component {
     return null;
   }
 
+  renderActiveStepNextButton() {
+    const { activeStep, esMonitoringUrl } = this.state;
+
+    if (activeStep === 1) {
+      return (
+        <EuiButton
+          type="submit"
+          fill
+          iconType="sortRight"
+          iconSide="right"
+          isDisabled={esMonitoringUrl.length === 0}
+          onClick={() => this.setState({ activeStep: 2 })}
+        >
+          Next
+        </EuiButton>
+      );
+    }
+
+    return null;
+  }
+
   render() {
-    const { onClose, productName } = this.props;
-    const { activeStep } = this.state;
-    const horizontalSteps = [
-      {
-        title: 'Configure monitoring cluster',
-        isComplete: activeStep > 1,
-        onClick: () => this.setState({ activeStep: 1 }),
-      },
-      {
-        title: `Setup ${productName}`,
-        isComplete: activeStep > 2,
-        onClick: () => {
-          this.setState({ activeStep: 2 });
-        }
-      }
-    ];
+    const { onClose } = this.props;
 
     return (
       <EuiFlyout
@@ -136,12 +124,24 @@ export class Flyout extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          <EuiStepsHorizontal
-            steps={horizontalSteps}
-          />
-          <EuiSpacer size="m"/>
           {this.renderActiveStep()}
         </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                iconType="cross"
+                onClick={onClose}
+                flush="left"
+              >
+                Close
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {this.renderActiveStepNextButton()}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       </EuiFlyout>
     );
   }

@@ -23,32 +23,6 @@ export function getElasticsearchInstructions(product, {
   checkingMigrationStatus,
   hasCheckedMigrationStatus
 }) {
-  const enableCollectionStep = {
-    title: 'Enable monitoring collection',
-    children: (
-      <Fragment>
-        <p>
-          Set the xpack.monitoring.collection.enabled setting to true on each node in the production cluster.
-          By default, it is disabled (false).
-        </p>
-        <EuiSpacer size="s"/>
-        <EuiCodeBlock
-          isCopyable
-          language="curl"
-        >
-          {`
-PUT _cluster/settings
-{
-  "persistent": {
-    "xpack.monitoring.collection.enabled": true
-  }
-}
-          `}
-        </EuiCodeBlock>
-      </Fragment>
-    )
-  };
-
   const disableInternalCollectionStep = {
     title: 'Disable the default collection of Elasticsearch monitoring metrics',
     children: (
@@ -76,7 +50,7 @@ PUT _cluster/settings
   };
 
   const installMetricbeatStep = {
-    title: 'Install Metricbeat on the same node as Elasticsearch',
+    title: 'Install Metricbeat on the same server as Elasticsearch',
     children: (
       <Fragment>
         <p>
@@ -95,30 +69,14 @@ PUT _cluster/settings
           isCopyable
           language="bash"
         >
-            metricbeat modules enable elasticsearch
+            metricbeat modules enable elasticsearch-xpack
         </EuiCodeBlock>
         <EuiSpacer size="s"/>
-        <p>Then, configure the module</p>
-        <EuiSpacer size="s"/>
-        <EuiCodeBlock
-          isCopyable
-        >
-          {`
-- module: elasticsearch
-  metricsets:
-    - ccr
-    - cluster_stats
-    - index
-    - index_recovery
-    - index_summary
-    - ml_job
-    - node_stats
-    - shard
-  period: 10s
-  hosts: ["${esMonitoringUrl}"]
-  xpack.enabled: true
-`}
-        </EuiCodeBlock>
+        <p>
+          By default the module will collect Elasticsearch monitoring metrics from http://localhost:9200.
+          If the local Elasticsearch node has a different address,
+          you must specify it via the hosts setting in the modules.d/elasticsearch-xpack.yml file.
+        </p>
       </Fragment>
     )
   };
@@ -195,7 +153,7 @@ output.elasticsearch:
 
     migrationStatusStep = {
       title: 'Migration status',
-      status: 'incomplete',
+      status: status ? 'warning' : 'incomplete',
       children: (
         <Fragment>
           <EuiFlexGroup alignItems="center">
@@ -241,7 +199,6 @@ output.elasticsearch:
   }
 
   return [
-    enableCollectionStep,
     disableInternalCollectionStep,
     installMetricbeatStep,
     enableMetricbeatModuleStep,
