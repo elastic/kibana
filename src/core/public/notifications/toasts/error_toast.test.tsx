@@ -48,7 +48,7 @@ it('renders matching snapshot', () => {
 
 it('should open a modal when clicking button', () => {
   const wrapper = mountWithIntl(render());
-  expect(wrapper.exists('[data-test-subj="fullErrorModal"]')).toBe(false);
+  expect(document.body.querySelector('[data-test-subj="fullErrorModal"]')).toBeFalsy();
   wrapper.find('button').simulate('click');
-  expect(wrapper.exists('[data-test-subj="fullErrorModal"]')).toBe(true);
+  expect(document.body.querySelector('[data-test-subj="fullErrorModal"]')).toBeTruthy();
 });
