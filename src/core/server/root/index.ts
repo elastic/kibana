@@ -57,18 +57,18 @@ export class Root {
   }
 
   public async setup() {
-    const newPlatformPluginDefinitions = await this.discoverPlugins();
-    const schemas = this.getSchemas(newPlatformPluginDefinitions);
-
-    this.configService = new ConfigService(this.config$, this.env, this.logger, schemas);
-
-    await this.configService.validateAll();
-
-    this.server = new Server(this.configService, this.logger, this.env);
-
-    this.log.debug('setting up root');
-
     try {
+      const newPlatformPluginDefinitions = await this.discoverPlugins();
+      const schemas = this.getSchemas(newPlatformPluginDefinitions);
+
+      this.configService = new ConfigService(this.config$, this.env, this.logger, schemas);
+
+      await this.configService.validateAll();
+
+      this.server = new Server(this.configService, this.logger, this.env);
+
+      this.log.debug('setting up root');
+
       await this.setupLogging();
       await this.server.setup(newPlatformPluginDefinitions);
     } catch (e) {
