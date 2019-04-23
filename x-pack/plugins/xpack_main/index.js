@@ -47,7 +47,6 @@ export const xpackMain = (kibana) => {
     },
 
     uiExports: {
-      managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
         [XPACK_DEFAULT_ADMIN_EMAIL_UI_SETTING]: {
           name: i18n.translate('xpack.main.uiSettings.adminEmailTitle', {

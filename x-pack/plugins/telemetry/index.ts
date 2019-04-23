@@ -41,7 +41,7 @@ export const telemetry = (kibana: any) => {
     },
 
     uiExports: {
-      managementSections: ['plugins/xpack_main/views/management'],
+      managementSections: ['plugins/telemetry/views/management'],
       uiSettingDefaults: {
         [CONFIG_TELEMETRY]: {
           name: i18n.translate('xpack.telemetry.telemetryConfigTitle', {
@@ -68,8 +68,8 @@ export const telemetry = (kibana: any) => {
         };
       },
       hacks: [
-        'plugins/xpack_main/hacks/telemetry_opt_in',
-        'plugins/xpack_main/hacks/telemetry_trigger',
+        'plugins/telemerty/hacks/telemetry_opt_in',
+        'plugins/telemerty/hacks/telemetry_trigger',
       ],
       mappings,
     },
