@@ -63,9 +63,7 @@ export class HeaderBadge extends Component<Props, State> {
     }
 
     return (
-      <div
-        className="chrHeaderBadge__wrapper"
-      >
+      <div className="chrHeaderBadge__wrapper">
         <EuiBetaBadge
           data-test-subj="headerBadge"
           data-test-badge-label={this.state.badge.text}
