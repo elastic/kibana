@@ -5,7 +5,11 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { InfraSnapshotMetricInput, InfraNodeType, InfraSnapshotGroupbyInput } from '../../../graphql/types';
+import {
+  InfraSnapshotMetricInput,
+  InfraNodeType,
+  InfraSnapshotGroupbyInput,
+} from '../../../graphql/types';
 import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_options');

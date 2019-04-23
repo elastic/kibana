@@ -14,7 +14,11 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
-import { InfraSnapshotMetricInput, InfraSnapshotMetricType, InfraNodeType } from '../../graphql/types';
+import {
+  InfraSnapshotMetricInput,
+  InfraSnapshotMetricType,
+  InfraNodeType,
+} from '../../graphql/types';
 
 interface Props {
   nodeType: InfraNodeType;

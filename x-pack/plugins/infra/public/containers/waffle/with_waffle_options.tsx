@@ -167,11 +167,7 @@ const isInfraSnapshotGroupbyInput = (subject: any): subject is InfraSnapshotGrou
 };
 
 const isInfraGroupByOption = (subject: any): subject is InfraGroupByOptions => {
-  return (
-    subject != null &&
-    subject.text != null &&
-    subject.field != null
-  );
+  return subject != null && subject.text != null && subject.field != null;
 };
 
 const mapToMetricUrlState = (subject: any) => {
@@ -179,7 +175,9 @@ const mapToMetricUrlState = (subject: any) => {
 };
 
 const mapToGroupByUrlState = (subject: any) => {
-  return subject && Array.isArray(subject) && subject.every(isInfraSnapshotGroupbyInput) ? subject : undefined;
+  return subject && Array.isArray(subject) && subject.every(isInfraSnapshotGroupbyInput)
+    ? subject
+    : undefined;
 };
 
 const mapToNodeTypeUrlState = (subject: any) => {
