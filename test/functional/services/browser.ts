@@ -307,7 +307,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
-    public async doubleClick(element: WebElementWrapper): Promise<void> {
+    public async doubleClick(element?: WebElementWrapper): Promise<void> {
       const actions = (driver as any).actions({ bridge: true });
       if (element instanceof WebElementWrapper) {
         await actions.doubleClick(element._webElement).perform();
