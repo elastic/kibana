@@ -28,8 +28,9 @@ import { setupDirective } from './directive';
  * @internal
  */
 export class ApplyFiltersService {
+  private setupDirectives: any;
   public setup() {
-    setupDirective(); 
+    this.setupDirectives = _.once(setupDirective);
     return {
       ApplyFiltersPopover,
     };
@@ -37,6 +38,10 @@ export class ApplyFiltersService {
 
   public stop() {
     // nothing to do here yet
+  }
+
+  public loadLegacyDirectives() {
+    this.setupDirectives();
   }
 }
 

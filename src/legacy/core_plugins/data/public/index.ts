@@ -33,11 +33,16 @@ class DataService {
   }
 
   public setup() {
+
     return {
       indexPatterns: this.indexPatterns.setup(),
       filter: {
+        loadLegacyDirectives: () => {
+          this.applyFilters.loadLegacyDirectives();
+          this.filterBar.loadLegacyDirectives();
+        },
         ...this.applyFilters.setup(),
-        // ...this.filterBar.setup(),
+        ...this.filterBar.setup(),
       }
     };
   }

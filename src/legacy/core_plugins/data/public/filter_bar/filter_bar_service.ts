@@ -29,16 +29,21 @@ import { setupDirective } from './directive';
  * @internal
  */
 export class FilterBarService {
+  private setupDirectives: any;
+
   public setup() {
-    setupDirective(); 
+    this.setupDirectives = _.once(setupDirective);
     return {
       FilterBar,
-      loadLegacyDirectives: _.once(setupDirective),
     };
   }
 
   public stop() {
     // nothing to do here yet
+  }
+  
+  public loadLegacyDirectives() {
+    this.setupDirectives();
   }
 }
 

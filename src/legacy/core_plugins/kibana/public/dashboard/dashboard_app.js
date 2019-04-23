@@ -28,7 +28,8 @@ import { toastNotifications } from 'ui/notify';
 import 'ui/listen';
 import 'ui/search_bar';
 
-import 'plugins/data';
+import  data from 'plugins/data';
+data.filter.loadLegacyDirectives();
 
 import { panelActionsStore } from './store/panel_actions_store';
 

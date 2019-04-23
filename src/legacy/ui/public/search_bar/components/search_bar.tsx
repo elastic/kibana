@@ -24,10 +24,12 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { FilterBar } from 'ui/filter_bar';
 import { IndexPattern } from 'ui/index_patterns';
 import { QueryBar } from 'ui/query_bar';
 import { Storage } from 'ui/storage';
+
+import data from 'plugins/data';
+const { FilterBar } = data.filter;
 
 interface Query {
   query: string;
