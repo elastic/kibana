@@ -9,7 +9,6 @@ exports[`AttributionControl is rendered 1`] = `
 >
   <EuiText
     color="subdued"
-    grow={true}
     size="xs"
   >
     <small>

@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { idx } from '../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { DiscoverTransactionLink } from '../Links/DiscoverLinks/DiscoverTransactionLink';
 import { InfraLink } from '../Links/InfraLink';

@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
@@ -269,7 +269,7 @@ app.controller('timelion', function (
       testId: 'timelionDocsButton',
     };
 
-    if (uiCapabilities.timelion.save) {
+    if (capabilities.get().timelion.save) {
       return [newSheetAction, addSheetAction, saveSheetAction, deleteSheetAction, openSheetAction, optionsAction, helpAction];
     }
     return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];
@@ -379,12 +379,13 @@ app.controller('timelion', function (
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       if (id) {
-        toastNotifications.addSuccess(
-          i18n('timelion.saveSheet.successNotificationText', {
+        toastNotifications.addSuccess({
+          title: i18n('timelion.saveSheet.successNotificationText', {
             defaultMessage: `Saved sheet '{title}'`,
             values: { title: savedSheet.title },
-          })
-        );
+          }),
+          'data-test-subj': 'timelionSaveSuccessToast',
+        });
 
         if (savedSheet.id !== $routeParams.id) {
           kbnUrl.change('/{{id}}', { id: savedSheet.id });

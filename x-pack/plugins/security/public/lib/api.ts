@@ -5,14 +5,13 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { Role } from '../../common/model/role';
-import { User } from '../../common/model/user';
+import { AuthenticatedUser, Role, User } from '../../common/model';
 
 const usersUrl = '/api/security/v1/users';
 const rolesUrl = '/api/security/role';
 
 export class UserAPIClient {
-  public static async getCurrentUser(): Promise<User> {
+  public static async getCurrentUser(): Promise<AuthenticatedUser> {
     return await kfetch({ pathname: `/api/security/v1/me` });
   }
 

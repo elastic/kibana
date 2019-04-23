@@ -17,9 +17,6 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-import { take } from 'rxjs/operators';
-
 import {
   BasePathServiceConstructor,
   ChromeServiceConstructor,
@@ -42,6 +39,7 @@ import {
   NotificationServiceConstructor,
   OverlayServiceConstructor,
   UiSettingsServiceConstructor,
+  MockCapabilitiesService,
 } from './core_system.test.mocks';
 
 import { CoreSystem } from './core_system';
@@ -110,18 +108,8 @@ describe('constructor', () => {
 
     expect(LegacyPlatformServiceConstructor).toHaveBeenCalledTimes(1);
     expect(LegacyPlatformServiceConstructor).toHaveBeenCalledWith({
-      targetDomElement: expect.any(HTMLElement),
       requireLegacyFiles,
       useLegacyTestHarness,
-    });
-  });
-
-  it('passes a dom element to NotificationsService', () => {
-    createCoreSystem();
-
-    expect(NotificationServiceConstructor).toHaveBeenCalledTimes(1);
-    expect(NotificationServiceConstructor).toHaveBeenCalledWith({
-      targetDomElement$: expect.any(Observable),
     });
   });
 
@@ -157,7 +145,121 @@ describe('constructor', () => {
   });
 });
 
-describe('#stop', () => {
+describe('#setup()', () => {
+  function setupCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
+    const core = createCoreSystem({
+      ...defaultCoreSystemParams,
+      rootDomElement,
+    });
+
+    return core.setup();
+  }
+
+  it('calls injectedMetadata#setup()', async () => {
+    await setupCore();
+    expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls http#setup()', async () => {
+    await setupCore();
+    expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls basePath#setup()', async () => {
+    await setupCore();
+    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls uiSettings#setup()', async () => {
+    await setupCore();
+    expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls i18n#setup()', async () => {
+    await setupCore();
+    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls fatalErrors#setup()', async () => {
+    await setupCore();
+    expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls notifications#setup()', async () => {
+    await setupCore();
+    expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls chrome#setup()', async () => {
+    await setupCore();
+    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls plugin#setup()', async () => {
+    await setupCore();
+    expect(MockPluginsService.setup).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#start()', () => {
+  async function startCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
+    const core = createCoreSystem({
+      ...defaultCoreSystemParams,
+      rootDomElement,
+    });
+
+    await core.setup();
+    await core.start();
+  }
+
+  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', async () => {
+    const root = document.createElement('div');
+    root.innerHTML = '<p>foo bar</p>';
+    await startCore(root);
+    expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
+  });
+
+  it('calls capabilities#start()', async () => {
+    await startCore();
+    expect(MockCapabilitiesService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls i18n#start()', async () => {
+    await startCore();
+    expect(MockI18nService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls injectedMetadata#start()', async () => {
+    await startCore();
+    expect(MockInjectedMetadataService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls notifications#start() with a dom element', async () => {
+    await startCore();
+    expect(MockNotificationsService.start).toHaveBeenCalledTimes(1);
+    expect(MockNotificationsService.start).toHaveBeenCalledWith({
+      i18n: expect.any(Object),
+      targetDomElement: expect.any(HTMLElement),
+    });
+  });
+
+  it('calls plugins#start()', async () => {
+    await startCore();
+    expect(MockPluginsService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls legacyPlatform#start()', async () => {
+    await startCore();
+    expect(MockLegacyPlatformService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls overlays#start()', async () => {
+    await startCore();
+    expect(MockOverlayService.start).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('#stop()', () => {
   it('calls legacyPlatform.stop()', () => {
     const coreSystem = createCoreSystem();
 
@@ -212,126 +314,50 @@ describe('#stop', () => {
     });
 
     await coreSystem.setup();
+    await coreSystem.start();
     expect(rootDomElement.innerHTML).not.toBe('');
     await coreSystem.stop();
     expect(rootDomElement.innerHTML).toBe('');
   });
 });
 
-describe('#setup()', () => {
-  function setupCore(rootDomElement = defaultCoreSystemParams.rootDomElement) {
-    const core = createCoreSystem({
-      ...defaultCoreSystemParams,
-      rootDomElement,
-    });
-
-    return core.setup();
-  }
-
-  it('clears the children of the rootDomElement and appends container for legacyPlatform and notifications', async () => {
-    const root = document.createElement('div');
-    root.innerHTML = '<p>foo bar</p>';
-    await setupCore(root);
-    expect(root.innerHTML).toBe('<div></div><div></div><div></div>');
-  });
-
-  it('calls injectedMetadata#setup()', async () => {
-    await setupCore();
-    expect(MockInjectedMetadataService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls http#setup()', async () => {
-    await setupCore();
-    expect(MockHttpService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls basePath#setup()', async () => {
-    await setupCore();
-    expect(MockBasePathService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls uiSettings#setup()', async () => {
-    await setupCore();
-    expect(MockUiSettingsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls i18n#setup()', async () => {
-    await setupCore();
-    expect(MockI18nService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls fatalErrors#setup()', async () => {
-    await setupCore();
-    expect(MockFatalErrorsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls notifications#setup()', async () => {
-    await setupCore();
-    expect(MockNotificationsService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls chrome#setup()', async () => {
-    await setupCore();
-    expect(MockChromeService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls overlays#setup()', () => {
-    setupCore();
-    expect(MockOverlayService.setup).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls plugin#setup()', async () => {
-    await setupCore();
-    expect(MockPluginsService.setup).toHaveBeenCalledTimes(1);
-  });
-});
-
 describe('LegacyPlatform targetDomElement', () => {
-  it('only mounts the element when set up, before setting up the legacyPlatformService', async () => {
+  it('only mounts the element when start, after setting up the legacyPlatformService', async () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
     });
 
-    let targetDomElementParentInSetup: HTMLElement;
-    MockLegacyPlatformService.setup.mockImplementation(() => {
-      targetDomElementParentInSetup = targetDomElement.parentElement;
+    let targetDomElementParentInStart: HTMLElement | null;
+    MockLegacyPlatformService.start.mockImplementation(async ({ targetDomElement }) => {
+      targetDomElementParentInStart = targetDomElement.parentElement;
     });
-
-    // targetDomElement should not have a parent element when the LegacyPlatformService is constructed
-    const [[{ targetDomElement }]] = LegacyPlatformServiceConstructor.mock.calls;
-    expect(targetDomElement).toHaveProperty('parentElement', null);
 
     // setting up the core system should mount the targetDomElement as a child of the rootDomElement
     await core.setup();
-    expect(targetDomElementParentInSetup!).toBe(rootDomElement);
+    await core.start();
+    expect(targetDomElementParentInStart!).toBe(rootDomElement);
   });
 });
 
 describe('Notifications targetDomElement', () => {
-  it('only mounts the element when set up, before setting up the notificationsService', async () => {
+  it('only mounts the element when started, after setting up the notificationsService', async () => {
     const rootDomElement = document.createElement('div');
     const core = createCoreSystem({
       rootDomElement,
     });
 
-    const [[{ targetDomElement$ }]] = NotificationServiceConstructor.mock.calls;
-
-    let targetDomElementParentInSetup: HTMLElement | null;
-    MockNotificationsService.setup.mockImplementation(
-      (): any => {
-        (targetDomElement$ as Observable<HTMLElement>).pipe(take(1)).subscribe({
-          next: targetDomElement => {
-            // The targetDomElement should already be a child once it's received by the NotificationsService
-            expect(targetDomElement.parentElement).not.toBeNull();
-            targetDomElementParentInSetup = targetDomElement.parentElement;
-          },
-        });
+    let targetDomElementParentInStart: HTMLElement | null;
+    MockNotificationsService.start.mockImplementation(
+      ({ targetDomElement }): any => {
+        expect(targetDomElement.parentElement).not.toBeNull();
+        targetDomElementParentInStart = targetDomElement.parentElement;
       }
     );
 
-    // setting up the core system should mount the targetDomElement as a child of the rootDomElement
+    // setting up and starting the core system should mount the targetDomElement as a child of the rootDomElement
     await core.setup();
-    expect(targetDomElementParentInSetup!).toBe(rootDomElement);
+    await core.start();
+    expect(targetDomElementParentInStart!).toBe(rootDomElement);
   });
 });
