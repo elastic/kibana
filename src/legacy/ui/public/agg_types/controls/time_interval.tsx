@@ -70,15 +70,17 @@ function TimeIntervalParamEditor({
   );
 
   const timeBase: string = get(editorConfig, 'interval.timeBase');
-  const options = (aggParam.options || []).reduce(
-    (filtered: ComboBoxOption[], option: AggParamOption) => {
-      if (option.enabled ? option.enabled(agg) : true) {
-        filtered.push({ label: option.display, key: option.val });
-      }
-      return filtered;
-    },
-    [] as ComboBoxOption[]
-  );
+  const options = timeBase
+    ? []
+    : (aggParam.options || []).reduce(
+        (filtered: ComboBoxOption[], option: AggParamOption) => {
+          if (option.enabled ? option.enabled(agg) : true) {
+            filtered.push({ label: option.display, key: option.val });
+          }
+          return filtered;
+        },
+        [] as ComboBoxOption[]
+      );
   const definedOption = find(options, { key: value });
   const selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
   const errors = [];
