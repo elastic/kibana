@@ -284,7 +284,7 @@ class CodeContent extends React.PureComponent<Props> {
               repoUri={repoUri}
               header={
                 <React.Fragment>
-                  <EuiTitle className="codeMargin__title">
+                  <EuiTitle size="s" className="codeMargin__title">
                     <h3>Recent Commits</h3>
                   </EuiTitle>
                   <EuiButton
