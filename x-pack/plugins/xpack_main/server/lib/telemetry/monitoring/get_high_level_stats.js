@@ -160,6 +160,20 @@ function getIndexPatternForStackProduct(product) {
 }
 
 /**
+ * Returns additional, product-specific, query filters
+ *
+ * @param {*} product The product id, which should be in the constants file
+ * @param {Array} array of filter clauses
+ */
+function getFiltersForStackProduct(product) {
+  switch (product) {
+    case KIBANA_SYSTEM_ID:
+      return [ { exists: { field: 'kibana_stats.usage.index' } } ];
+  }
+  return [];
+}
+
+/**
  * Get statistics about selected Elasticsearch clusters, for the selected {@code product}.
  *
  * @param {Object} server The server instance
@@ -167,7 +181,7 @@ function getIndexPatternForStackProduct(product) {
  * @param {Array} clusterUuids The string Cluster UUIDs to fetch details for
  * @param {Date} start Start time to limit the stats
  * @param {Date} end End time to limit the stats
- * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
+ * @param {String} product The product to limit to ('kibana', 'logstash', 'beats')
  * @return {Promise} Object keyed by the cluster UUIDs to make grouping easier.
  */
 export function getHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
@@ -184,7 +198,7 @@ export function getHighLevelStats(server, callCluster, clusterUuids, start, end,
  * @param {Array} clusterUuids Cluster UUIDs to limit the request against
  * @param {Date} start Start time to limit the stats
  * @param {Date} end End time to limit the stats
- * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
+ * @param {String} product The product to limit to ('kibana', 'logstash', 'beats')
  * @return {Promise} Response for the instances to fetch detailed for the product.
  */
 export function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
@@ -212,7 +226,7 @@ export function fetchHighLevelStats(server, callCluster, clusterUuids, start, en
         type: `${product}_stats`,
         filters: [
           { terms: { cluster_uuid: clusterUuids } },
-          { exists: { field: 'kibana_stats.usage.index' } }
+          ...getFiltersForStackProduct(product)
         ]
       }),
       collapse: {
