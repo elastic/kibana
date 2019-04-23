@@ -45,7 +45,6 @@ import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
 // @ts-ignore not TS yet
 import { QueryBarProvider } from './query_bar';
-// @ts-ignore not TS yet
 import { RemoteProvider } from './remote';
 // @ts-ignore not TS yet
 import { RenderableProvider } from './renderable';
@@ -55,7 +54,6 @@ import { ScreenshotsProvider } from './screenshots';
 import { SnapshotsProvider } from './snapshots';
 // @ts-ignore not TS yet
 import { TableProvider } from './table';
-// @ts-ignore not TS yet
 import { TestSubjectsProvider } from './test_subjects';
 // @ts-ignore not TS yet
 import { PieChartProvider } from './visualizations';

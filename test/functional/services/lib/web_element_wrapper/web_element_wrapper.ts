@@ -36,19 +36,23 @@ interface Driver {
   LegacyActionSequence: any;
 }
 
+interface TypeOptions {
+  charByChar: boolean;
+}
+
 export class WebElementWrapper {
-  public _By: typeof By = this._webDriver.By;
-  public _Keys: IKey = this._webDriver.Key;
-  public _LegacyAction: any = this._webDriver.LegacyActionSequence;
-  public _driver: WebDriver = this._webDriver.driver;
+  private By: typeof By = this.webDriver.By;
+  private Keys: IKey = this.webDriver.Key;
+  private driver: WebDriver = this.webDriver.driver;
   public _webElement: WebElement = this.webElement as WebElement;
+  public LegacyAction: any = this.webDriver.LegacyActionSequence;
 
   constructor(
     private webElement: WebElementWrapper | WebElement,
-    private _webDriver: Driver,
-    private _timeout: number,
-    private _fixedHeaderHeight: number,
-    private _logger: ToolingLog
+    private webDriver: Driver,
+    private timeout: number,
+    private fixedHeaderHeight: number,
+    private logger: ToolingLog
   ) {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -59,12 +63,12 @@ export class WebElementWrapper {
     findFunction: () => Promise<Array<WebElement | WebElementWrapper>>,
     timeout?: number
   ) {
-    if (timeout && timeout !== this._timeout) {
-      await (this._driver.manage() as any).setTimeouts({ implicit: timeout });
+    if (timeout && timeout !== this.timeout) {
+      await (this.driver.manage() as any).setTimeouts({ implicit: timeout });
     }
     const elements = await findFunction();
-    if (timeout && timeout !== this._timeout) {
-      await (this._driver.manage() as any).setTimeouts({ implicit: this._timeout });
+    if (timeout && timeout !== this.timeout) {
+      await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
     }
     return elements;
   }
@@ -72,10 +76,10 @@ export class WebElementWrapper {
   private _wrap(otherWebElement: WebElement | WebElementWrapper) {
     return new WebElementWrapper(
       otherWebElement,
-      this._webDriver,
-      this._timeout,
-      this._fixedHeaderHeight,
-      this._logger
+      this.webDriver,
+      this.timeout,
+      this.fixedHeaderHeight,
+      this.logger
     );
   }
 
@@ -142,25 +146,26 @@ export class WebElementWrapper {
   async clearValue() {
     // https://bugs.chromium.org/p/chromedriver/issues/detail?id=2702
     // await this._webElement.clear();
-    await this._driver.executeScript(`arguments[0].value=''`, this._webElement);
+    await this.driver.executeScript(`arguments[0].value=''`, this._webElement);
   }
 
   /**
    * Clear the value of this element using Keyboard
-   * @param { charByChar: false } options
+   * @param {{ charByChar: boolean }} options
+   * @default { charByChar: false }
    */
-  async clearValueWithKeyboard(options = { charByChar: false }): Promise<void> {
+  async clearValueWithKeyboard(options: TypeOptions = { charByChar: false }): Promise<void> {
     if (options.charByChar === true) {
       const value = await this.getAttribute('value');
       for (let i = 1; i <= value.length; i++) {
-        await this.pressKeys(this._Keys.BACK_SPACE);
+        await this.pressKeys(this.Keys.BACK_SPACE);
         await delay(100);
       }
     } else {
-      const selectionKey = this._Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+      const selectionKey = this.Keys[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
       await this.pressKeys([selectionKey, 'a']);
-      await this.pressKeys(this._Keys.NULL); // Release modifier keys
-      await this.pressKeys(this._Keys.BACK_SPACE); // Delete all content
+      await this.pressKeys(this.Keys.NULL); // Release modifier keys
+      await this.pressKeys(this.Keys.BACK_SPACE); // Delete all content
     }
   }
 
@@ -180,7 +185,10 @@ export class WebElementWrapper {
    * @param {charByChar: boolean} options
    * @return {Promise<void>}
    */
-  public async type(value: string | string[], options = { charByChar: false }): Promise<void> {
+  public async type(
+    value: string | string[],
+    options: TypeOptions = { charByChar: false }
+  ): Promise<void> {
     if (options.charByChar) {
       for (const char of value) {
         await this._webElement.sendKeys(char);
@@ -202,7 +210,7 @@ export class WebElementWrapper {
   public async pressKeys<T extends string>(keys: T | T[]): Promise<void>;
   public async pressKeys(keys: string): Promise<void> {
     if (Array.isArray(keys)) {
-      const chord = this._Keys.chord(keys);
+      const chord = this.Keys.chord(keys);
       await this._webElement.sendKeys(chord);
     } else {
       await this._webElement.sendKeys(keys);
@@ -270,7 +278,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<string>}
    */
-  async getVisibleText(): Promise<string> {
+  public async getVisibleText(): Promise<string> {
     return await this._webElement.getText();
   }
 
@@ -280,7 +288,9 @@ export class WebElementWrapper {
    *
    * @return {Promise<string>}
    */
-  async getTagName(): Promise<string> {
+  public async getTagName<T extends keyof HTMLElementTagNameMap>(): Promise<T>;
+  public async getTagName<T extends string>(): Promise<T>;
+  public async getTagName(): Promise<string> {
     return await this._webElement.getTagName();
   }
 
@@ -291,7 +301,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
-  async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
+  public async getPosition(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await (this._webElement as any).getRect();
   }
 
@@ -302,7 +312,7 @@ export class WebElementWrapper {
    *
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
-  async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
+  public async getSize(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await (this._webElement as any).getRect();
   }
 
@@ -314,8 +324,8 @@ export class WebElementWrapper {
    */
   public async moveMouseTo(): Promise<void> {
     await this.scrollIntoViewIfNecessary();
-    const mouse = (this._driver.actions() as any).mouse();
-    const actions = (this._driver as any).actions({ bridge: true });
+    const mouse = (this.driver.actions() as any).mouse();
+    const actions = (this.driver as any).actions({ bridge: true });
     await actions
       .pause(mouse)
       .move({ origin: this._webElement })
@@ -329,8 +339,8 @@ export class WebElementWrapper {
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
    */
-  async findByCssSelector(selector: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this._By.css(selector)));
+  public async findByCssSelector(selector: string): Promise<WebElementWrapper> {
+    return this._wrap(await this._webElement.findElement(this.By.css(selector)));
   }
 
   /**
@@ -341,10 +351,10 @@ export class WebElementWrapper {
    * @param {number} timeout
    * @return {Promise<WebElementWrapper[]>}
    */
-  async findAllByCssSelector(selector: string, timeout: number) {
+  public async findAllByCssSelector(selector: string, timeout?: number) {
     return this._wrapAll(
       await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this._By.css(selector)),
+        async () => await this._webElement.findElements(this.By.css(selector)),
         timeout
       )
     );
@@ -357,8 +367,8 @@ export class WebElementWrapper {
    * @param {string} className
    * @return {Promise<WebElementWrapper>}
    */
-  async findByClassName(className: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this._By.className(className)));
+  public async findByClassName(className: string): Promise<WebElementWrapper> {
+    return this._wrap(await this._webElement.findElement(this.By.className(className)));
   }
 
   /**
@@ -375,7 +385,7 @@ export class WebElementWrapper {
   ): Promise<WebElementWrapper[]> {
     return this._wrapAll(
       await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this._By.className(className)),
+        async () => await this._webElement.findElements(this.By.className(className)),
         timeout
       )
     );
@@ -393,7 +403,7 @@ export class WebElementWrapper {
   ): Promise<WebElementWrapper>;
   public async findByTagName<T extends string>(tagName: T): Promise<WebElementWrapper>;
   public async findByTagName(tagName: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this._By.tagName(tagName)));
+    return this._wrap(await this._webElement.findElement(this.By.tagName(tagName)));
   }
 
   /**
@@ -415,7 +425,7 @@ export class WebElementWrapper {
   public async findAllByTagName(tagName: string, timeout: number): Promise<WebElementWrapper[]> {
     return this._wrapAll(
       await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this._By.tagName(tagName)),
+        async () => await this._webElement.findElements(this.By.tagName(tagName)),
         timeout
       )
     );
@@ -429,7 +439,7 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper>}
    */
   async findByXpath(selector: string): Promise<WebElementWrapper> {
-    return this._wrap(await this._webElement.findElement(this._By.xpath(selector)));
+    return this._wrap(await this._webElement.findElement(this.By.xpath(selector)));
   }
 
   /**
@@ -443,7 +453,7 @@ export class WebElementWrapper {
   public async findAllByXpath(selector: string, timeout: number): Promise<WebElementWrapper[]> {
     return this._wrapAll(
       await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this._By.xpath(selector)),
+        async () => await this._webElement.findElements(this.By.xpath(selector)),
         timeout
       )
     );
@@ -457,7 +467,7 @@ export class WebElementWrapper {
    * @return {Promise<WebElementWrapper[]>}
    */
   public async findByPartialLinkText(linkText: string): Promise<WebElementWrapper> {
-    return await this._wrap(await this._webElement.findElement(this._By.partialLinkText(linkText)));
+    return await this._wrap(await this._webElement.findElement(this.By.partialLinkText(linkText)));
   }
 
   /**
@@ -471,7 +481,7 @@ export class WebElementWrapper {
   public async findAllByPartialLinkText(linkText: string, timeout: number) {
     return this._wrapAll(
       await this._findWithCustomTimeout(
-        async () => await this._webElement.findElements(this._By.partialLinkText(linkText)),
+        async () => await this._webElement.findElements(this.By.partialLinkText(linkText)),
         timeout
       )
     );
@@ -484,16 +494,16 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async waitForDeletedByCssSelector(selector: string): Promise<void> {
-    await (this._driver.manage() as any).setTimeouts({ implicit: 1000 });
-    await this._driver.wait(
+    await (this.driver.manage() as any).setTimeouts({ implicit: 1000 });
+    await this.driver.wait(
       async () => {
-        const found = await this._webElement.findElements(this._By.css(selector));
+        const found = await this._webElement.findElements(this.By.css(selector));
         return found.length === 0;
       },
-      this._timeout,
-      `The element with ${selector} selector was still present after ${this._timeout} sec.`
+      this.timeout,
+      `The element with ${selector} selector was still present after ${this.timeout} sec.`
     );
-    await (this._driver.manage() as any).setTimeouts({ implicit: this._timeout });
+    await (this.driver.manage() as any).setTimeouts({ implicit: this.timeout });
   }
 
   /**
@@ -503,10 +513,10 @@ export class WebElementWrapper {
    * @return {Promise<void>}
    */
   public async scrollIntoViewIfNecessary(): Promise<void> {
-    await this._driver.executeScript(
+    await this.driver.executeScript(
       scrollIntoViewIfNecessary,
       this._webElement,
-      this._fixedHeaderHeight
+      this.fixedHeaderHeight
     );
   }
 
@@ -518,7 +528,7 @@ export class WebElementWrapper {
    */
   public async parseDomContent(): Promise<any> {
     const htmlContent: any = await this.getProperty('innerHTML');
-    const $ = cheerio.load(htmlContent, {
+    const $: any = cheerio.load(htmlContent, {
       normalizeWhitespace: true,
       xmlMode: true,
     });
@@ -544,7 +554,7 @@ export class WebElementWrapper {
    * @returns {Promise<void>}
    */
   public async takeScreenshot(): Promise<void> {
-    const screenshot = await this._driver.takeScreenshot();
+    const screenshot = await this.driver.takeScreenshot();
     const buffer = Buffer.from(screenshot.toString(), 'base64');
     const { width, height, x, y } = await this.getPosition();
     const src = PNG.sync.read(buffer);

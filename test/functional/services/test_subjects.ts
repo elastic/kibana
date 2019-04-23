@@ -19,7 +19,6 @@
 
 import testSubjSelector from '@kbn/test-subj-selector';
 import { map as mapAsync } from 'bluebird';
-// @ts-ignore not support yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -67,7 +66,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       }
     }
 
-    public async append(selector: string, text: string | number): Promise<void> {
+    public async append(selector: string, text: string): Promise<void> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.append(${selector}, ${text})`);
         const input = await this.find(selector);
@@ -138,7 +137,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
     public async getPropertyAll(selector: string, property: string): Promise<string[]> {
       log.debug(`TestSubjects.getPropertyAll(${selector}, ${property})`);
       return await this._mapAll(selector, async (element: WebElementWrapper) => {
-        return await element.getProperty(property);
+        return (await element.getProperty(property)) as string;
       });
     }
 
@@ -146,7 +145,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       log.debug(`TestSubjects.getProperty(${selector}, ${property})`);
       return await retry.try(async () => {
         const element = await this.find(selector);
-        return await element.getProperty(property);
+        return (await element.getProperty(property)) as string;
       });
     }
 
@@ -165,7 +164,7 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async setValue(selector: string, text: string | number): Promise<void> {
+    public async setValue(selector: string, text: string): Promise<void> {
       return await retry.try(async () => {
         log.debug(`TestSubjects.setValue(${selector}, ${text})`);
         await this.click(selector);
