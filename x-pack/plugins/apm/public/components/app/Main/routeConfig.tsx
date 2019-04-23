@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { legacyDecodeURIComponent } from '../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
@@ -103,8 +104,6 @@ export const routes: BreadcrumbRoute[] = [
     path: '/:serviceName/transactions/:transactionType/:transactionName',
     component: TransactionDetails,
     breadcrumb: ({ match }) =>
-      match.params.transactionName
-        ? decodeURIComponent(match.params.transactionName)
-        : ''
+      legacyDecodeURIComponent(match.params.transactionName) || ''
   }
 ];

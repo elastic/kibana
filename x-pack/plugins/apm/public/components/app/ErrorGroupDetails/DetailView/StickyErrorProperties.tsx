@@ -19,6 +19,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
 import { APMLink } from '../../../shared/Links/APMLink';
+import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { StickyProperties } from '../../../shared/StickyProperties';
 
 interface Props {
@@ -40,9 +41,11 @@ function TransactionLink({
     return <Fragment>{transaction.transaction.id}</Fragment>;
   }
 
-  const path = `/${transaction.service.name}/transactions/${encodeURIComponent(
+  const path = `/${
+    transaction.service.name
+  }/transactions/${legacyEncodeURIComponent(
     transaction.transaction.type
-  )}/${encodeURIComponent(transaction.transaction.name)}`;
+  )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
 
   return (
     <APMLink

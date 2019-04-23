@@ -20,6 +20,7 @@ import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { IUrlParams } from '../../../store/urlParams';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
+import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
 
@@ -95,7 +96,7 @@ export function TransactionOverviewView({
             }))}
             value={transactionType}
             onChange={event => {
-              const type = encodeURIComponent(event.target.value);
+              const type = legacyEncodeURIComponent(event.target.value);
               history.push({
                 ...location,
                 pathname: `/${urlParams.serviceName}/transactions/${type}`

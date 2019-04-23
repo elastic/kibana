@@ -8,7 +8,12 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { uniqueId, startsWith } from 'lodash';
 import { EuiCallOut } from '@elastic/eui';
-import { history, fromQuery, toQuery } from '../Links/url_helpers';
+import {
+  history,
+  fromQuery,
+  toQuery,
+  legacyEncodeURIComponent
+} from '../Links/url_helpers';
 import { KibanaLink } from '../Links/KibanaLink';
 import { Typeahead } from './Typeahead';
 import chrome from 'ui/chrome';
@@ -89,7 +94,7 @@ class KueryBarView extends Component {
         ...location,
         search: fromQuery({
           ...toQuery(this.props.location.search),
-          kuery: inputValue && encodeURIComponent(inputValue.trim())
+          kuery: legacyEncodeURIComponent(inputValue.trim())
         })
       });
     } catch (e) {

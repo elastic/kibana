@@ -7,6 +7,7 @@
 import React from 'react';
 import { Transaction } from '../../../../typings/es_schemas/ui/Transaction';
 import { APMLink } from './APMLink';
+import { legacyEncodeURIComponent } from './url_helpers';
 
 interface TransactionLinkProps {
   transaction?: Transaction;
@@ -25,7 +26,7 @@ export const TransactionLink: React.SFC<TransactionLinkProps> = ({
   const traceId = transaction.trace.id;
   const transactionId = transaction.transaction.id;
   const name = transaction.transaction.name;
-  const encodedName = encodeURIComponent(name);
+  const encodedName = legacyEncodeURIComponent(name);
 
   return (
     <APMLink

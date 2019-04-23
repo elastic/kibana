@@ -7,7 +7,10 @@
 import datemath from '@elastic/datemath';
 import { Location } from 'history';
 import { compact, pick } from 'lodash';
-import { toQuery } from '../components/shared/Links/url_helpers';
+import {
+  legacyDecodeURIComponent,
+  toQuery
+} from '../components/shared/Links/url_helpers';
 import { LOCATION_UPDATE } from './location';
 import { IReduxState } from './rootReducer';
 
@@ -118,13 +121,13 @@ export function urlParamsReducer(
         detailTab: toString(detailTab),
         flyoutDetailTab: toString(flyoutDetailTab),
         spanId: toNumber(spanId),
-        kuery: kuery && decodeURIComponent(kuery),
+        kuery: legacyDecodeURIComponent(kuery),
 
         // path params
         processorEvent,
         serviceName,
-        transactionType: transactionType && decodeURIComponent(transactionType),
-        transactionName: transactionName && decodeURIComponent(transactionName),
+        transactionType: legacyDecodeURIComponent(transactionType),
+        transactionName: legacyDecodeURIComponent(transactionName),
         errorGroupId
       });
     }
