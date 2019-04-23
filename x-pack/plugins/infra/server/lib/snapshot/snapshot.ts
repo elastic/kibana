@@ -221,7 +221,7 @@ const mergeNodeBuckets = (
   return nodeGroupByBuckets.map(node => {
     return {
       path: getNodePath(node, options),
-      metric: getNodeMetrics(nodeMetricsForLookup[node.key.node], options),
+      metric: getNodeMetrics(nodeMetricsForLookup[node.key.id], options),
     };
   });
 };

@@ -6,19 +6,23 @@
 
 import { metricAggregationCreators } from './metric_aggregation_creators';
 import { InfraSnapshotRequestOptions } from './snapshot';
+import { NAME_FIELDS } from '../constants';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
   const sources = options.groupBy.map(gb => {
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
-    node: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },
+    id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },
+  });
+  sources.push({
+    name: { terms: { field: NAME_FIELDS[options.nodeType] } },
   });
   return sources;
 };
 
 export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
-  return [{ node: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } } }];
+  return [{ id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } } }];
 };
 
 export const getMetricsAggregations = (options: InfraSnapshotRequestOptions) => {
