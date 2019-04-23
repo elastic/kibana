@@ -28,6 +28,7 @@ uiModules
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],
+    ['editorConfig', { watchDepth: 'collection' }],
     ['indexedFields', { watchDepth: 'collection' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
@@ -58,6 +59,7 @@ uiModules
             agg="agg"
             agg-params="agg.params"
             agg-param="aggParam"
+            editor-config="editorConfig"
             indexed-fields="indexedFields"
             is-invalid="isInvalid"
             value="paramValue"

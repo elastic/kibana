@@ -27,6 +27,7 @@ import { AggConfig } from '../../agg_config';
 export interface AggParamEditorProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
+  editorConfig: any;
   indexedFields?: any[];
   isInvalid: boolean;
   value: T;
