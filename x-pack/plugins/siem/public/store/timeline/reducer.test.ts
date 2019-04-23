@@ -61,8 +61,10 @@ const timelineByIdMock: TimelineById = {
     highlightedDropAndProviderId: '',
     historyIds: [],
     id: 'foo',
+    savedObjectId: null,
     isFavorite: false,
     isLive: false,
+    isLoading: false,
     itemsPerPage: 25,
     itemsPerPageOptions: [10, 25, 50],
     kqlMode: 'filter',
@@ -70,13 +72,19 @@ const timelineByIdMock: TimelineById = {
     title: '',
     noteIds: [],
     pinnedEventIds: {},
-    range: '1 Day',
+    pinnedEventsSaveObject: {},
+    dateRange: {
+      start: 0,
+      end: 0,
+    },
     show: true,
     sort: {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
     },
     width: DEFAULT_TIMELINE_WIDTH,
+    isSaving: false,
+    version: null,
   },
 };
 
@@ -840,7 +848,8 @@ describe('Timeline', () => {
     test('should return a new reference and not the same reference', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        range: '1 Month',
+        start: 23,
+        end: 33,
         timelineById: timelineByIdMock,
       });
       expect(update).not.toBe(timelineByIdMock);
@@ -849,10 +858,20 @@ describe('Timeline', () => {
     test('should update the timeline range', () => {
       const update = updateTimelineRange({
         id: 'foo',
-        range: '1 Month',
+        start: 23,
+        end: 33,
         timelineById: timelineByIdMock,
       });
-      expect(update).toEqual(set('foo.range', '1 Month', timelineByIdMock));
+      expect(update).toEqual(
+        set(
+          'foo.dateRange',
+          {
+            start: 23,
+            end: 33,
+          },
+          timelineByIdMock
+        )
+      );
     });
   });
 
@@ -919,6 +938,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -940,20 +960,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -982,6 +1009,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1015,20 +1043,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1114,7 +1149,6 @@ describe('Timeline', () => {
       const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
         indexProvider
       ].and.concat({
-        and: [],
         id: '456',
         name: 'new and data provider',
         enabled: true,
@@ -1176,6 +1210,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1197,20 +1232,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1239,6 +1281,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1272,20 +1315,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1371,7 +1421,6 @@ describe('Timeline', () => {
       const multiAndDataProvider = timelineByIdwithAndMock.foo.dataProviders[
         indexProvider
       ].and.concat({
-        and: [],
         id: '456',
         name: 'new and data provider',
         enabled: true,
@@ -1421,6 +1470,7 @@ describe('Timeline', () => {
       const expected: TimelineById = {
         foo: {
           id: 'foo',
+          savedObjectId: null,
           columns: [],
           dataProviders: [
             {
@@ -1443,20 +1493,27 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 50,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1503,21 +1560,29 @@ describe('Timeline', () => {
           historyIds: [],
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           id: 'foo',
+          savedObjectId: null,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [100, 200, 300], // updated
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);
@@ -1586,22 +1651,30 @@ describe('Timeline', () => {
           highlightedDropAndProviderId: '',
           historyIds: [],
           id: 'foo',
+          savedObjectId: null,
           isFavorite: false,
           isLive: false,
+          isLoading: false,
           kqlMode: 'filter',
           kqlQuery: { filterQuery: null, filterQueryDraft: null },
           title: '',
           noteIds: [],
-          range: '1 Day',
+          dateRange: {
+            start: 0,
+            end: 0,
+          },
           show: true,
           sort: {
             columnId: '@timestamp',
             sortDirection: Direction.desc,
           },
           pinnedEventIds: {},
+          pinnedEventsSaveObject: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
           width: DEFAULT_TIMELINE_WIDTH,
+          isSaving: false,
+          version: null,
         },
       };
       expect(update).toEqual(expected);

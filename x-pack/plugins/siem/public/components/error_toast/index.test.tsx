@@ -9,17 +9,17 @@ import toJson from 'enzyme-to-json';
 import * as React from 'react';
 import { Provider } from 'react-redux';
 
-import { mockGlobalState } from '../../mock';
+import { apolloClientObservable, mockGlobalState } from '../../mock';
 import { createStore, State } from '../../store';
 
 import { ErrorToast } from '.';
 
 describe('Error Toast', () => {
   const state: State = mockGlobalState;
-  let store = createStore(state);
+  let store = createStore(state, apolloClientObservable);
 
   beforeEach(() => {
-    store = createStore(state);
+    store = createStore(state, apolloClientObservable);
   });
 
   describe('rendering', () => {

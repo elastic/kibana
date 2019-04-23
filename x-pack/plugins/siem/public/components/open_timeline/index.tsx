@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 
+import { SortFieldTimeline } from '../../../server/graphql/types';
 import { OpenTimeline } from './open_timeline';
 import { OPEN_TIMELINE_CLASS_NAME } from './helpers';
 import { OpenTimelineModal } from './open_timeline_modal/open_timeline_modal';
@@ -21,9 +22,12 @@ import {
   OnTableChangeParams,
   OpenTimelineProps,
   OnToggleOnlyFavorites,
-  TimelineResult,
+  OpenTimelineResult,
   OnToggleShowNotes,
+  OnDeleteOneTimeline,
 } from './types';
+import { AllTimelinesQuery } from '../../containers/timeline/all';
+import { Direction } from '../../graphql/types';
 
 export const DEFAULT_SORT_FIELD = 'updated';
 export const DEFAULT_SORT_DIRECTION = 'desc';
@@ -40,7 +44,7 @@ interface State {
   /** The current search criteria */
   search: string;
   /** The currently-selected timelines in the table */
-  selectedItems: TimelineResult[];
+  selectedItems: OpenTimelineResult[];
   /** The requested sort direction of the query results */
   sortDirection: 'asc' | 'desc';
   /** The requested field to sort on */
@@ -54,15 +58,10 @@ type Props = Pick<OpenTimelineProps, 'defaultPageSize' | 'title'> & {
   deleteTimelines?: DeleteTimelines;
   /** Invoked when the user clicks on the name of a timeline to open it */
   openTimeline: OnOpenTimeline;
-  /**
-   * TODO: remove this prop (used for testing) when the results of executing
-   * a search are provided by the GraphQL query
-   */
-  searchResults: TimelineResult[];
 };
 
 /** Returns a collection of selected timeline ids */
-export const getSelectedTimelineIds = (selectedItems: TimelineResult[]): string[] =>
+export const getSelectedTimelineIds = (selectedItems: OpenTimelineResult[]): string[] =>
   selectedItems.reduce<string[]>(
     (validSelections, timelineResult) =>
       timelineResult.savedObjectId != null
@@ -98,7 +97,6 @@ export class StatefulOpenTimeline extends React.PureComponent<Props, State> {
       deleteTimelines,
       defaultPageSize,
       openTimeline,
-      searchResults,
       title,
     } = this.props;
     const {
@@ -112,65 +110,75 @@ export class StatefulOpenTimeline extends React.PureComponent<Props, State> {
       sortField,
     } = this.state;
 
-    {
-      // TODO: wrap `OpenTimeline` below with the GraphQL query, and pass
-      // `isLoading`, `searchResults`, `totalSearchResultsCount`, etc:
-      return deleteTimelines != null ? (
-        <OpenTimeline
-          deleteTimelines={deleteTimelines}
-          defaultPageSize={defaultPageSize}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onAddTimelinesToFavorites={
-            addTimelinesToFavorites != null ? this.onAddTimelinesToFavorites : undefined
-          }
-          onDeleteSelected={deleteTimelines != null ? this.onDeleteSelected : undefined}
-          onlyFavorites={onlyFavorites}
-          onOpenTimeline={openTimeline}
-          onQueryChange={this.onQueryChange}
-          onSelectionChange={this.onSelectionChange}
-          onTableChange={this.onTableChange}
-          onToggleOnlyFavorites={this.onToggleOnlyFavorites}
-          onToggleShowNotes={this.onToggleShowNotes}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          query={query}
-          searchResults={searchResults.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}
-          selectedItems={selectedItems}
-          sortDirection={sortDirection}
-          sortField={sortField}
-          title={title}
-          totalSearchResultsCount={searchResults.length}
-        />
-      ) : (
-        <OpenTimelineModal
-          deleteTimelines={deleteTimelines}
-          defaultPageSize={defaultPageSize}
-          isLoading={false}
-          itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
-          onAddTimelinesToFavorites={
-            addTimelinesToFavorites != null ? this.onAddTimelinesToFavorites : undefined
-          }
-          onDeleteSelected={deleteTimelines != null ? this.onDeleteSelected : undefined}
-          onlyFavorites={onlyFavorites}
-          onOpenTimeline={openTimeline}
-          onQueryChange={this.onQueryChange}
-          onSelectionChange={this.onSelectionChange}
-          onTableChange={this.onTableChange}
-          onToggleOnlyFavorites={this.onToggleOnlyFavorites}
-          onToggleShowNotes={this.onToggleShowNotes}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          query={query}
-          searchResults={searchResults.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize)}
-          selectedItems={selectedItems}
-          sortDirection={sortDirection}
-          sortField={sortField}
-          title={title}
-          totalSearchResultsCount={searchResults.length}
-        />
-      );
-    }
+    return (
+      <AllTimelinesQuery
+        search={query}
+        pageInfo={{
+          pageIndex: pageIndex + 1,
+          pageSize,
+        }}
+        sort={{ sortField: sortField as SortFieldTimeline, sortOrder: sortDirection as Direction }}
+        onlyUserFavorite={onlyFavorites}
+      >
+        {({ timelines, loading, totalCount }) => {
+          return deleteTimelines != null ? (
+            <OpenTimeline
+              deleteTimelines={this.onDeleteOneTimeline}
+              defaultPageSize={defaultPageSize}
+              isLoading={loading}
+              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              onAddTimelinesToFavorites={
+                addTimelinesToFavorites != null ? this.onAddTimelinesToFavorites : undefined
+              }
+              onDeleteSelected={this.onDeleteSelected}
+              onlyFavorites={onlyFavorites}
+              onOpenTimeline={openTimeline}
+              onQueryChange={this.onQueryChange}
+              onSelectionChange={this.onSelectionChange}
+              onTableChange={this.onTableChange}
+              onToggleOnlyFavorites={this.onToggleOnlyFavorites}
+              onToggleShowNotes={this.onToggleShowNotes}
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              query={query}
+              searchResults={timelines}
+              selectedItems={selectedItems}
+              sortDirection={sortDirection}
+              sortField={sortField}
+              title={title}
+              totalSearchResultsCount={totalCount}
+            />
+          ) : (
+            <OpenTimelineModal
+              deleteTimelines={this.onDeleteOneTimeline}
+              defaultPageSize={defaultPageSize}
+              isLoading={loading}
+              itemIdToExpandedNotesRowMap={itemIdToExpandedNotesRowMap}
+              onAddTimelinesToFavorites={
+                addTimelinesToFavorites != null ? this.onAddTimelinesToFavorites : undefined
+              }
+              onDeleteSelected={deleteTimelines != null ? this.onDeleteSelected : undefined}
+              onlyFavorites={onlyFavorites}
+              onOpenTimeline={openTimeline}
+              onQueryChange={this.onQueryChange}
+              onSelectionChange={this.onSelectionChange}
+              onTableChange={this.onTableChange}
+              onToggleOnlyFavorites={this.onToggleOnlyFavorites}
+              onToggleShowNotes={this.onToggleShowNotes}
+              pageIndex={pageIndex}
+              pageSize={pageSize}
+              query={query}
+              searchResults={timelines}
+              selectedItems={selectedItems}
+              sortDirection={sortDirection}
+              sortField={sortField}
+              title={title}
+              totalSearchResultsCount={totalCount}
+            />
+          );
+        }}
+      </AllTimelinesQuery>
+    );
   }
 
   /** Invoked when the user presses enters to submit the text in the search input */
@@ -205,13 +213,43 @@ export class StatefulOpenTimeline extends React.PureComponent<Props, State> {
     }
   };
 
+  private onDeleteOneTimeline: OnDeleteOneTimeline = (timelineIds: string[]) => {
+    const { deleteTimelines } = this.props;
+    const { onlyFavorites, pageIndex, pageSize, search, sortDirection, sortField } = this.state;
+    if (deleteTimelines != null) {
+      deleteTimelines(timelineIds, {
+        search,
+        pageInfo: {
+          pageIndex: pageIndex + 1,
+          pageSize,
+        },
+        sort: {
+          sortField: sortField as SortFieldTimeline,
+          sortOrder: sortDirection as Direction,
+        },
+        onlyUserFavorite: onlyFavorites,
+      });
+    }
+  };
+
   /** Invoked when the user clicks the action to delete the selected timelines */
   private onDeleteSelected: OnDeleteSelected = () => {
     const { deleteTimelines } = this.props;
-    const { selectedItems } = this.state;
+    const { selectedItems, onlyFavorites } = this.state;
 
     if (deleteTimelines != null) {
-      deleteTimelines(getSelectedTimelineIds(selectedItems));
+      deleteTimelines(getSelectedTimelineIds(selectedItems), {
+        search: this.state.search,
+        pageInfo: {
+          pageIndex: this.state.pageIndex + 1,
+          pageSize: this.state.pageSize,
+        },
+        sort: {
+          sortField: this.state.sortField as SortFieldTimeline,
+          sortOrder: this.state.sortDirection as Direction,
+        },
+        onlyUserFavorite: onlyFavorites,
+      });
 
       // NOTE: we clear the selection state below, but if the server fails to
       // delete a timeline, it will remain selected in the table:
@@ -222,7 +260,7 @@ export class StatefulOpenTimeline extends React.PureComponent<Props, State> {
   };
 
   /** Invoked when the user selects (or de-selects) timelines */
-  private onSelectionChange: OnSelectionChange = (selectedItems: TimelineResult[]) => {
+  private onSelectionChange: OnSelectionChange = (selectedItems: OpenTimelineResult[]) => {
     this.setState({ selectedItems }); // <-- this is NOT passed down as props to the table: https://github.com/elastic/eui/issues/1077
   };
 

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TimelineResult } from '../components/open_timeline/types';
+import { OpenTimelineResult } from '../components/open_timeline/types';
 
 /** Mocks results of a query run by the `OpenTimeline` component */
-export const mockTimelineResults: TimelineResult[] = [
+export const mockTimelineResults: OpenTimelineResult[] = [
   {
     created: 1553700736 * 1000,
     description: '6 pinned events, 4 notes (event1 [2] + event2 [1] + global [1]), is a favorite',

@@ -40,8 +40,8 @@ export const getHostsColumns = (
     hideForMobile: false,
     sortable: true,
     render: hostName => {
-      if (hostName != null) {
-        const id = escapeDataProviderId(`hosts-table-hostName-${hostName}`);
+      if (hostName != null && hostName.length > 0) {
+        const id = escapeDataProviderId(`hosts-table-hostName-${hostName[0]}`);
         return (
           <DraggableWrapper
             key={id}
@@ -50,9 +50,9 @@ export const getHostsColumns = (
               enabled: true,
               excluded: false,
               id,
-              name: hostName,
+              name: hostName[0],
               kqlQuery: '',
-              queryMatch: { field: 'host.name', value: hostName },
+              queryMatch: { field: 'host.name', value: hostName[0] },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -62,11 +62,11 @@ export const getHostsColumns = (
               ) : (
                 <AddToKql
                   indexPattern={indexPattern}
-                  expression={`host.name: ${escapeQueryValue(hostName)}`}
+                  expression={`host.name: ${escapeQueryValue(hostName[0])}`}
                   componentFilterType="hosts"
                   type={type}
                 >
-                  <HostDetailsLink hostName={hostName} />
+                  <HostDetailsLink hostName={hostName[0]} />
                 </AddToKql>
               )
             }

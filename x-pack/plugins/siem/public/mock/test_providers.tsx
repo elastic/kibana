@@ -15,6 +15,7 @@ import { DragDropContext, DropResult, ResponderProvided } from 'react-beautiful-
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { pure } from 'recompose';
 import { Store } from 'redux';
+import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
 
 import { KibanaConfigContext } from '../components/formatted_date';
@@ -37,11 +38,13 @@ const client = new ApolloClient({
   link: new ApolloLink((o, f) => (f ? f(o) : null)),
 });
 
+export const apolloClientObservable = new BehaviorSubject(client);
+
 /** A utility for wrapping children in the providers required to run most tests */
 export const TestProviders = pure<Props>(
   ({
     children,
-    store = createStore(state),
+    store = createStore(state, apolloClientObservable),
     mockFramework = mockFrameworks.default_UTC,
     onDragEnd = jest.fn(),
   }) => (

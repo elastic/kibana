@@ -47,5 +47,7 @@ export interface DataProvider {
   /**
    * Additional query clauses that are ANDed with this query to narrow results
    */
-  and: DataProvider[];
+  and: DataProvidersAnd[];
 }
+
+export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

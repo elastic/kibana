@@ -65,7 +65,6 @@ export class EventColumnView extends React.PureComponent<Props> {
       toggleShowNotes,
       updateNote,
     } = this.props;
-
     return (
       <EuiFlexGroup data-test-subj="event-column-view" gutterSize="none">
         <EuiFlexItem data-test-subj="actions-column-item" grow={false}>

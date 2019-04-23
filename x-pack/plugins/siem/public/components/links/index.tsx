@@ -13,7 +13,7 @@ import { encodeIpv6 } from '../../lib/helpers';
 // Internal Links
 export const HostDetailsLink = pure<{ children?: React.ReactNode; hostName: string }>(
   ({ children, hostName }) => (
-    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostName)}`}>
+    <EuiLink href={`#/link-to/hosts/${encodeURIComponent(hostName)}?timelineId=1234`}>
       {children ? children : hostName}
     </EuiLink>
   )

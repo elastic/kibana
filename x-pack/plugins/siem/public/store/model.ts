@@ -21,6 +21,10 @@ export interface KueryFilterQuery {
 }
 
 export interface SerializedFilterQuery {
+<<<<<<< HEAD
   query: KueryFilterQuery | null;
+=======
+  kuery: KueryFilterQuery;
+>>>>>>> persistence of a timeline
   serializedQuery: string;
 }

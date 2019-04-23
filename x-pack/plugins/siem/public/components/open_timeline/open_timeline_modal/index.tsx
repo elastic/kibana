@@ -71,7 +71,6 @@ export class OpenTimelineModalButton extends React.PureComponent<Props, State> {
                 <StatefulOpenTimeline
                   openTimeline={this.openTimeline}
                   defaultPageSize={DEFAULT_SEARCH_RESULTS_PER_PAGE}
-                  searchResults={[]}
                   title={i18n.OPEN_TIMELINE_TITLE}
                 />
               </EuiModal>

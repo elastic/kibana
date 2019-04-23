@@ -6,7 +6,9 @@
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body/helpers';
 import {
+  addTimeline,
   addHistory,
   addNote,
   addNoteToEvent,
@@ -22,6 +24,7 @@ import {
   setKqlFilterQueryDraft,
   showTimeline,
   unPinEvent,
+  updateAutoSaveMsg,
   updateColumns,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
@@ -30,6 +33,7 @@ import {
   updateHighlightedDropAndProviderId,
   updateIsFavorite,
   updateIsLive,
+  updateIsSaving,
   updateItemsPerPage,
   updateItemsPerPageOptions,
   updateKqlMode,
@@ -37,8 +41,10 @@ import {
   updateProviders,
   updateRange,
   updateSort,
+  updateTimeline,
   updateTitle,
   upsertColumn,
+  updateIsLoading,
 } from './actions';
 import {
   addNewTimeline,
@@ -81,20 +87,55 @@ export interface TimelineById {
   [id: string]: TimelineModel;
 }
 
+export interface AutoSavedWarningMsg {
+  timelineId: string | null;
+  newTimelineModel: TimelineModel | null;
+}
+
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
+  autoSavedWarningMsg: AutoSavedWarningMsg;
 }
 
 const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
+  autoSavedWarningMsg: {
+    timelineId: null,
+    newTimelineModel: null,
+  },
 };
 
 /** The reducer for all timeline actions  */
 export const timelineReducer = reducerWithInitialState(initialTimelineState)
-  .case(createTimeline, (state, { columns, id, show }) => ({
+  .case(addTimeline, (state, { id, timeline }) => ({
+    ...state,
+    timelineById: {
+      // As right now, We are not managing multiple timeline
+      // for now simplification, we do not need the line below
+      // ...state.timelineById,
+      [id]: {
+        ...timeline,
+        highlightedDropAndProviderId: '',
+        historyIds: [],
+        isLive: false,
+        isLoading: true,
+        itemsPerPage: 25,
+        itemsPerPageOptions: [10, 25, 50, 100],
+        id: timeline.savedObjectId || '',
+        dateRange: {
+          start: 0,
+          end: 0,
+        },
+        show: true,
+        width: DEFAULT_TIMELINE_WIDTH,
+        isSaving: false,
+      },
+    },
+  }))
+  .case(createTimeline, (state, { id, show, columns }) => ({
     ...state,
     timelineById: addNewTimeline({ columns, id, show, timelineById: state.timelineById }),
   }))
@@ -178,6 +219,33 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       andProviderId,
     }),
   }))
+  .case(updateIsSaving, (state, { id, isSaving }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isSaving,
+      },
+    },
+  }))
+  .case(updateIsLoading, (state, { id, isLoading }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        isLoading,
+      },
+    },
+  }))
+  .case(updateTimeline, (state, { id, timeline }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: timeline,
+    },
+  }))
   .case(unPinEvent, (state, { id, eventId }) => ({
     ...state,
     timelineById: unPinTimelineEvent({ id, eventId, timelineById: state.timelineById }),
@@ -214,9 +282,9 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineProviders({ id, providers, timelineById: state.timelineById }),
   }))
-  .case(updateRange, (state, { id, range }) => ({
+  .case(updateRange, (state, { id, start, end }) => ({
     ...state,
-    timelineById: updateTimelineRange({ id, range, timelineById: state.timelineById }),
+    timelineById: updateTimelineRange({ id, start, end, timelineById: state.timelineById }),
   }))
   .case(updateSort, (state, { id, sort }) => ({
     ...state,
@@ -300,5 +368,12 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       providerId,
       timelineById: state.timelineById,
     }),
+  }))
+  .case(updateAutoSaveMsg, (state, { timelineId, newTimelineModel }) => ({
+    ...state,
+    autoSavedWarningMsg: {
+      timelineId,
+      newTimelineModel,
+    },
   }))
   .build();

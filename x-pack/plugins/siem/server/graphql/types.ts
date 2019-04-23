@@ -60,10 +60,69 @@ export type EsValue = any;
 // ====================================================
 
 export interface Query {
+  getNote: NoteResult;
+
+  getNotesByTimelineId: NoteResult[];
+
+  getNotesByEventId: NoteResult[];
+
+  getAllNotes: ResponseNotes;
+
+  getAllPinnedEventsByTimelineId: PinnedEvent[];
   /** Get a security data source by id */
   source: Source;
   /** Get a list of all security data sources */
   allSources: Source[];
+
+  getOneTimeline: TimelineResult;
+
+  getAllTimeline: ResponseTimelines;
+}
+
+export interface NoteResult {
+  eventId?: string | null;
+
+  note?: string | null;
+
+  timelineId?: string | null;
+
+  noteId: string;
+
+  created?: number | null;
+
+  createdBy?: string | null;
+
+  timelineVersion?: string | null;
+
+  updated?: number | null;
+
+  updatedBy?: string | null;
+
+  version?: string | null;
+}
+
+export interface ResponseNotes {
+  notes: NoteResult[];
+
+  totalCount?: number | null;
+}
+
+export interface PinnedEvent {
+  pinnedEventId: string;
+
+  eventId?: string | null;
+
+  timelineId?: string | null;
+
+  created?: number | null;
+
+  createdBy?: string | null;
+
+  updated?: number | null;
+
+  updatedBy?: string | null;
+
+  version?: string | null;
 }
 
 export interface Source {
@@ -1204,6 +1263,185 @@ export interface SayMyName {
   appName: string;
 }
 
+export interface TimelineResult {
+  savedObjectId: string;
+
+  columns?: ColumnHeaderResult[] | null;
+
+  dataProviders?: DataProviderResult[] | null;
+
+  dateRange?: DateRangePickerResult | null;
+
+  description?: string | null;
+
+  eventIdToNoteIds?: NoteResult[] | null;
+
+  favorite?: FavoriteTimelineResult[] | null;
+
+  kqlMode?: string | null;
+
+  kqlQuery?: SerializedFilterQueryResult | null;
+
+  notes?: NoteResult[] | null;
+
+  noteIds?: string[] | null;
+
+  pinnedEventIds?: string[] | null;
+
+  pinnedEventsSaveObject?: PinnedEvent[] | null;
+
+  title?: string | null;
+
+  sort?: SortTimelineResult | null;
+
+  created?: number | null;
+
+  createdBy?: string | null;
+
+  updated?: number | null;
+
+  updatedBy?: string | null;
+
+  version: string;
+}
+
+export interface ColumnHeaderResult {
+  aggregatable?: boolean | null;
+
+  category?: string | null;
+
+  columnHeaderType?: string | null;
+
+  description?: string | null;
+
+  example?: string | null;
+
+  indexes?: string[] | null;
+
+  id?: string | null;
+
+  name?: string | null;
+
+  placeholder?: string | null;
+
+  searchable?: boolean | null;
+
+  type?: string | null;
+}
+
+export interface DataProviderResult {
+  id?: string | null;
+
+  name?: string | null;
+
+  enabled?: boolean | null;
+
+  excluded?: boolean | null;
+
+  kqlQuery?: string | null;
+
+  queryMatch?: QueryMatchResult | null;
+
+  and?: DataProviderResult[] | null;
+}
+
+export interface QueryMatchResult {
+  field?: string | null;
+
+  displayField?: string | null;
+
+  value?: string | null;
+
+  displayValue?: string | null;
+}
+
+export interface DateRangePickerResult {
+  start?: number | null;
+
+  end?: number | null;
+}
+
+export interface FavoriteTimelineResult {
+  fullName?: string | null;
+
+  userName?: string | null;
+
+  favoriteDate?: number | null;
+}
+
+export interface SerializedFilterQueryResult {
+  filterQuery?: SerializedKueryQueryResult | null;
+}
+
+export interface SerializedKueryQueryResult {
+  kuery?: KueryFilterQueryResult | null;
+
+  serializedQuery?: string | null;
+}
+
+export interface KueryFilterQueryResult {
+  kind?: string | null;
+
+  expression?: string | null;
+}
+
+export interface SortTimelineResult {
+  columnId?: string | null;
+
+  sortDirection?: string | null;
+}
+
+export interface ResponseTimelines {
+  timeline: (TimelineResult | null)[];
+
+  totalCount?: number | null;
+}
+
+export interface Mutation {
+  /** Persists a note */
+  persistNote: ResponseNote;
+
+  deleteNote?: boolean | null;
+
+  deleteNoteByTimelineId?: boolean | null;
+  /** Persists a pinned event in a timeline */
+  persistPinnedEventOnTimeline?: PinnedEvent | null;
+  /** Remove a pinned events in a timeline */
+  deletePinnedEventOnTimeline: boolean;
+  /** Remove all pinned events in a timeline */
+  deleteAllPinnedEventsOnTimeline: boolean;
+  /** Persists a timeline */
+  persistTimeline: ResponseTimeline;
+
+  persistFavorite: ResponseFavoriteTimeline;
+
+  deleteTimeline: boolean;
+}
+
+export interface ResponseNote {
+  code?: number | null;
+
+  message?: string | null;
+
+  note: NoteResult;
+}
+
+export interface ResponseTimeline {
+  code?: number | null;
+
+  message?: string | null;
+
+  timeline: TimelineResult;
+}
+
+export interface ResponseFavoriteTimeline {
+  savedObjectId: string;
+
+  version: string;
+
+  favorite?: FavoriteTimelineResult[] | null;
+}
+
 export interface OsFields {
   platform?: string | null;
 
@@ -1237,6 +1475,18 @@ export interface HostFields {
 // ====================================================
 // InputTypes
 // ====================================================
+
+export interface PageInfoNote {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortNote {
+  sortField: string;
+
+  sortOrder: Direction;
+}
 
 export interface TimerangeInput {
   /** The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan. */
@@ -1304,13 +1554,168 @@ export interface NetworkDnsSortField {
   direction: Direction;
 }
 
+export interface PageInfoTimeline {
+  pageIndex: number;
+
+  pageSize: number;
+}
+
+export interface SortTimeline {
+  sortField: SortFieldTimeline;
+
+  sortOrder: Direction;
+}
+
+export interface NoteInput {
+  eventId?: string | null;
+
+  note?: string | null;
+
+  timelineId?: string | null;
+}
+
+export interface TimelineInput {
+  columns?: ColumnHeaderInput[] | null;
+
+  dataProviders?: DataProviderInput[] | null;
+
+  description?: string | null;
+
+  kqlMode?: string | null;
+
+  kqlQuery?: SerializedFilterQueryInput | null;
+
+  title?: string | null;
+
+  dateRange?: DateRangePickerInput | null;
+
+  sort?: SortTimelineInput | null;
+}
+
+export interface ColumnHeaderInput {
+  aggregatable?: boolean | null;
+
+  category?: string | null;
+
+  columnHeaderType?: string | null;
+
+  description?: string | null;
+
+  example?: string | null;
+
+  indexes?: string[] | null;
+
+  id?: string | null;
+
+  name?: string | null;
+
+  placeholder?: string | null;
+
+  searchable?: boolean | null;
+
+  type?: string | null;
+}
+
+export interface DataProviderInput {
+  id?: string | null;
+
+  name?: string | null;
+
+  enabled?: boolean | null;
+
+  excluded?: boolean | null;
+
+  kqlQuery?: string | null;
+
+  queryMatch?: QueryMatchInput | null;
+
+  and?: DataProviderInput[] | null;
+}
+
+export interface QueryMatchInput {
+  field?: string | null;
+
+  displayField?: string | null;
+
+  value?: string | null;
+
+  displayValue?: string | null;
+}
+
+export interface SerializedFilterQueryInput {
+  filterQuery?: SerializedKueryQueryInput | null;
+}
+
+export interface SerializedKueryQueryInput {
+  kuery?: KueryFilterQueryInput | null;
+
+  serializedQuery?: string | null;
+}
+
+export interface KueryFilterQueryInput {
+  kind?: string | null;
+
+  expression?: string | null;
+}
+
+export interface DateRangePickerInput {
+  start?: number | null;
+
+  end?: number | null;
+}
+
+export interface SortTimelineInput {
+  columnId?: string | null;
+
+  sortDirection?: string | null;
+}
+
+export interface FavoriteTimelineInput {
+  fullName?: string | null;
+
+  userName?: string | null;
+
+  favoriteDate?: number | null;
+}
+
 // ====================================================
 // Arguments
 // ====================================================
 
+export interface GetNoteQueryArgs {
+  id: string;
+}
+export interface GetNotesByTimelineIdQueryArgs {
+  timelineId: string;
+}
+export interface GetNotesByEventIdQueryArgs {
+  eventId: string;
+}
+export interface GetAllNotesQueryArgs {
+  pageInfo?: PageInfoNote | null;
+
+  search?: string | null;
+
+  sort?: SortNote | null;
+}
+export interface GetAllPinnedEventsByTimelineIdQueryArgs {
+  timelineId: string;
+}
 export interface SourceQueryArgs {
   /** The id of the source */
   id: string;
+}
+export interface GetOneTimelineQueryArgs {
+  id: string;
+}
+export interface GetAllTimelineQueryArgs {
+  pageInfo?: PageInfoTimeline | null;
+
+  search?: string | null;
+
+  sort?: SortTimeline | null;
+
+  onlyUserFavorite?: boolean | null;
 }
 export interface AuthenticationsSourceArgs {
   timerange: TimerangeInput;
@@ -1546,6 +1951,49 @@ export interface IndicesExistSourceStatusArgs {
 export interface IndexFieldsSourceStatusArgs {
   defaultIndex: string[];
 }
+export interface PersistNoteMutationArgs {
+  noteId?: string | null;
+
+  version?: string | null;
+
+  note: NoteInput;
+}
+export interface DeleteNoteMutationArgs {
+  id: string[];
+
+  version?: string | null;
+}
+export interface DeleteNoteByTimelineIdMutationArgs {
+  timelineId: string;
+
+  version?: string | null;
+}
+export interface PersistPinnedEventOnTimelineMutationArgs {
+  pinnedEventId?: string | null;
+
+  eventId: string;
+
+  timelineId: string;
+}
+export interface DeletePinnedEventOnTimelineMutationArgs {
+  id: string[];
+}
+export interface DeleteAllPinnedEventsOnTimelineMutationArgs {
+  timelineId: string;
+}
+export interface PersistTimelineMutationArgs {
+  id?: string | null;
+
+  version?: string | null;
+
+  timeline: TimelineInput;
+}
+export interface PersistFavoriteMutationArgs {
+  timelineId?: string | null;
+}
+export interface DeleteTimelineMutationArgs {
+  id: string[];
+}
 
 // ====================================================
 // Enums
@@ -1622,6 +2070,13 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
+export enum SortFieldTimeline {
+  title = 'title',
+  description = 'description',
+  updated = 'updated',
+  created = 'created',
+}
+
 // ====================================================
 // END: Typescript template
 // ====================================================
@@ -1632,10 +2087,77 @@ export enum NetworkDnsFields {
 
 export namespace QueryResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = never> {
+    getNote?: GetNoteResolver<NoteResult, TypeParent, Context>;
+
+    getNotesByTimelineId?: GetNotesByTimelineIdResolver<NoteResult[], TypeParent, Context>;
+
+    getNotesByEventId?: GetNotesByEventIdResolver<NoteResult[], TypeParent, Context>;
+
+    getAllNotes?: GetAllNotesResolver<ResponseNotes, TypeParent, Context>;
+
+    getAllPinnedEventsByTimelineId?: GetAllPinnedEventsByTimelineIdResolver<
+      PinnedEvent[],
+      TypeParent,
+      Context
+    >;
     /** Get a security data source by id */
     source?: SourceResolver<Source, TypeParent, Context>;
     /** Get a list of all security data sources */
     allSources?: AllSourcesResolver<Source[], TypeParent, Context>;
+
+    getOneTimeline?: GetOneTimelineResolver<TimelineResult, TypeParent, Context>;
+
+    getAllTimeline?: GetAllTimelineResolver<ResponseTimelines, TypeParent, Context>;
+  }
+
+  export type GetNoteResolver<R = NoteResult, Parent = never, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    GetNoteArgs
+  >;
+  export interface GetNoteArgs {
+    id: string;
+  }
+
+  export type GetNotesByTimelineIdResolver<
+    R = NoteResult[],
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, GetNotesByTimelineIdArgs>;
+  export interface GetNotesByTimelineIdArgs {
+    timelineId: string;
+  }
+
+  export type GetNotesByEventIdResolver<
+    R = NoteResult[],
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, GetNotesByEventIdArgs>;
+  export interface GetNotesByEventIdArgs {
+    eventId: string;
+  }
+
+  export type GetAllNotesResolver<
+    R = ResponseNotes,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, GetAllNotesArgs>;
+  export interface GetAllNotesArgs {
+    pageInfo?: PageInfoNote | null;
+
+    search?: string | null;
+
+    sort?: SortNote | null;
+  }
+
+  export type GetAllPinnedEventsByTimelineIdResolver<
+    R = PinnedEvent[],
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, GetAllPinnedEventsByTimelineIdArgs>;
+  export interface GetAllPinnedEventsByTimelineIdArgs {
+    timelineId: string;
   }
 
   export type SourceResolver<R = Source, Parent = never, Context = SiemContext> = Resolver<
@@ -1654,6 +2176,184 @@ export namespace QueryResolvers {
     Parent,
     Context
   >;
+  export type GetOneTimelineResolver<
+    R = TimelineResult,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, GetOneTimelineArgs>;
+  export interface GetOneTimelineArgs {
+    id: string;
+  }
+
+  export type GetAllTimelineResolver<
+    R = ResponseTimelines,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, GetAllTimelineArgs>;
+  export interface GetAllTimelineArgs {
+    pageInfo?: PageInfoTimeline | null;
+
+    search?: string | null;
+
+    sort?: SortTimeline | null;
+
+    onlyUserFavorite?: boolean | null;
+  }
+}
+
+export namespace NoteResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = NoteResult> {
+    eventId?: EventIdResolver<string | null, TypeParent, Context>;
+
+    note?: NoteResolver<string | null, TypeParent, Context>;
+
+    timelineId?: TimelineIdResolver<string | null, TypeParent, Context>;
+
+    noteId?: NoteIdResolver<string, TypeParent, Context>;
+
+    created?: CreatedResolver<number | null, TypeParent, Context>;
+
+    createdBy?: CreatedByResolver<string | null, TypeParent, Context>;
+
+    timelineVersion?: TimelineVersionResolver<string | null, TypeParent, Context>;
+
+    updated?: UpdatedResolver<number | null, TypeParent, Context>;
+
+    updatedBy?: UpdatedByResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+  }
+
+  export type EventIdResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NoteResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TimelineIdResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NoteIdResolver<R = string, Parent = NoteResult, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CreatedResolver<
+    R = number | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedByResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TimelineVersionResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedResolver<
+    R = number | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedByResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = NoteResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ResponseNotesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = ResponseNotes> {
+    notes?: NotesResolver<NoteResult[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number | null, TypeParent, Context>;
+  }
+
+  export type NotesResolver<
+    R = NoteResult[],
+    Parent = ResponseNotes,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number | null,
+    Parent = ResponseNotes,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace PinnedEventResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = PinnedEvent> {
+    pinnedEventId?: PinnedEventIdResolver<string, TypeParent, Context>;
+
+    eventId?: EventIdResolver<string | null, TypeParent, Context>;
+
+    timelineId?: TimelineIdResolver<string | null, TypeParent, Context>;
+
+    created?: CreatedResolver<number | null, TypeParent, Context>;
+
+    createdBy?: CreatedByResolver<string | null, TypeParent, Context>;
+
+    updated?: UpdatedResolver<number | null, TypeParent, Context>;
+
+    updatedBy?: UpdatedByResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string | null, TypeParent, Context>;
+  }
+
+  export type PinnedEventIdResolver<
+    R = string,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EventIdResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TimelineIdResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedResolver<
+    R = number | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedByResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedResolver<
+    R = number | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedByResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string | null,
+    Parent = PinnedEvent,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace SourceResolvers {
@@ -5703,6 +6403,664 @@ export namespace SayMyNameResolvers {
     Parent,
     Context
   >;
+}
+
+export namespace TimelineResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelineResult> {
+    savedObjectId?: SavedObjectIdResolver<string, TypeParent, Context>;
+
+    columns?: ColumnsResolver<ColumnHeaderResult[] | null, TypeParent, Context>;
+
+    dataProviders?: DataProvidersResolver<DataProviderResult[] | null, TypeParent, Context>;
+
+    dateRange?: DateRangeResolver<DateRangePickerResult | null, TypeParent, Context>;
+
+    description?: DescriptionResolver<string | null, TypeParent, Context>;
+
+    eventIdToNoteIds?: EventIdToNoteIdsResolver<NoteResult[] | null, TypeParent, Context>;
+
+    favorite?: FavoriteResolver<FavoriteTimelineResult[] | null, TypeParent, Context>;
+
+    kqlMode?: KqlModeResolver<string | null, TypeParent, Context>;
+
+    kqlQuery?: KqlQueryResolver<SerializedFilterQueryResult | null, TypeParent, Context>;
+
+    notes?: NotesResolver<NoteResult[] | null, TypeParent, Context>;
+
+    noteIds?: NoteIdsResolver<string[] | null, TypeParent, Context>;
+
+    pinnedEventIds?: PinnedEventIdsResolver<string[] | null, TypeParent, Context>;
+
+    pinnedEventsSaveObject?: PinnedEventsSaveObjectResolver<
+      PinnedEvent[] | null,
+      TypeParent,
+      Context
+    >;
+
+    title?: TitleResolver<string | null, TypeParent, Context>;
+
+    sort?: SortResolver<SortTimelineResult | null, TypeParent, Context>;
+
+    created?: CreatedResolver<number | null, TypeParent, Context>;
+
+    createdBy?: CreatedByResolver<string | null, TypeParent, Context>;
+
+    updated?: UpdatedResolver<number | null, TypeParent, Context>;
+
+    updatedBy?: UpdatedByResolver<string | null, TypeParent, Context>;
+
+    version?: VersionResolver<string, TypeParent, Context>;
+  }
+
+  export type SavedObjectIdResolver<
+    R = string,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ColumnsResolver<
+    R = ColumnHeaderResult[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DataProvidersResolver<
+    R = DataProviderResult[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DateRangeResolver<
+    R = DateRangePickerResult | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DescriptionResolver<
+    R = string | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EventIdToNoteIdsResolver<
+    R = NoteResult[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FavoriteResolver<
+    R = FavoriteTimelineResult[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KqlModeResolver<
+    R = string | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KqlQueryResolver<
+    R = SerializedFilterQueryResult | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NotesResolver<
+    R = NoteResult[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NoteIdsResolver<
+    R = string[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PinnedEventIdsResolver<
+    R = string[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PinnedEventsSaveObjectResolver<
+    R = PinnedEvent[] | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TitleResolver<
+    R = string | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SortResolver<
+    R = SortTimelineResult | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedResolver<
+    R = number | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CreatedByResolver<
+    R = string | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedResolver<
+    R = number | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UpdatedByResolver<
+    R = string | null,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string,
+    Parent = TimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ColumnHeaderResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = ColumnHeaderResult> {
+    aggregatable?: AggregatableResolver<boolean | null, TypeParent, Context>;
+
+    category?: CategoryResolver<string | null, TypeParent, Context>;
+
+    columnHeaderType?: ColumnHeaderTypeResolver<string | null, TypeParent, Context>;
+
+    description?: DescriptionResolver<string | null, TypeParent, Context>;
+
+    example?: ExampleResolver<string | null, TypeParent, Context>;
+
+    indexes?: IndexesResolver<string[] | null, TypeParent, Context>;
+
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    placeholder?: PlaceholderResolver<string | null, TypeParent, Context>;
+
+    searchable?: SearchableResolver<boolean | null, TypeParent, Context>;
+
+    type?: TypeResolver<string | null, TypeParent, Context>;
+  }
+
+  export type AggregatableResolver<
+    R = boolean | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CategoryResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ColumnHeaderTypeResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DescriptionResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ExampleResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IndexesResolver<
+    R = string[] | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type IdResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type PlaceholderResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SearchableResolver<
+    R = boolean | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TypeResolver<
+    R = string | null,
+    Parent = ColumnHeaderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DataProviderResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DataProviderResult> {
+    id?: IdResolver<string | null, TypeParent, Context>;
+
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    enabled?: EnabledResolver<boolean | null, TypeParent, Context>;
+
+    excluded?: ExcludedResolver<boolean | null, TypeParent, Context>;
+
+    kqlQuery?: KqlQueryResolver<string | null, TypeParent, Context>;
+
+    queryMatch?: QueryMatchResolver<QueryMatchResult | null, TypeParent, Context>;
+
+    and?: AndResolver<DataProviderResult[] | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = string | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NameResolver<
+    R = string | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EnabledResolver<
+    R = boolean | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ExcludedResolver<
+    R = boolean | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KqlQueryResolver<
+    R = string | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type QueryMatchResolver<
+    R = QueryMatchResult | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AndResolver<
+    R = DataProviderResult[] | null,
+    Parent = DataProviderResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace QueryMatchResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = QueryMatchResult> {
+    field?: FieldResolver<string | null, TypeParent, Context>;
+
+    displayField?: DisplayFieldResolver<string | null, TypeParent, Context>;
+
+    value?: ValueResolver<string | null, TypeParent, Context>;
+
+    displayValue?: DisplayValueResolver<string | null, TypeParent, Context>;
+  }
+
+  export type FieldResolver<
+    R = string | null,
+    Parent = QueryMatchResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DisplayFieldResolver<
+    R = string | null,
+    Parent = QueryMatchResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ValueResolver<
+    R = string | null,
+    Parent = QueryMatchResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DisplayValueResolver<
+    R = string | null,
+    Parent = QueryMatchResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace DateRangePickerResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = DateRangePickerResult> {
+    start?: StartResolver<number | null, TypeParent, Context>;
+
+    end?: EndResolver<number | null, TypeParent, Context>;
+  }
+
+  export type StartResolver<
+    R = number | null,
+    Parent = DateRangePickerResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type EndResolver<
+    R = number | null,
+    Parent = DateRangePickerResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace FavoriteTimelineResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = FavoriteTimelineResult> {
+    fullName?: FullNameResolver<string | null, TypeParent, Context>;
+
+    userName?: UserNameResolver<string | null, TypeParent, Context>;
+
+    favoriteDate?: FavoriteDateResolver<number | null, TypeParent, Context>;
+  }
+
+  export type FullNameResolver<
+    R = string | null,
+    Parent = FavoriteTimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UserNameResolver<
+    R = string | null,
+    Parent = FavoriteTimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FavoriteDateResolver<
+    R = number | null,
+    Parent = FavoriteTimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SerializedFilterQueryResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SerializedFilterQueryResult> {
+    filterQuery?: FilterQueryResolver<SerializedKueryQueryResult | null, TypeParent, Context>;
+  }
+
+  export type FilterQueryResolver<
+    R = SerializedKueryQueryResult | null,
+    Parent = SerializedFilterQueryResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SerializedKueryQueryResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SerializedKueryQueryResult> {
+    kuery?: KueryResolver<KueryFilterQueryResult | null, TypeParent, Context>;
+
+    serializedQuery?: SerializedQueryResolver<string | null, TypeParent, Context>;
+  }
+
+  export type KueryResolver<
+    R = KueryFilterQueryResult | null,
+    Parent = SerializedKueryQueryResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SerializedQueryResolver<
+    R = string | null,
+    Parent = SerializedKueryQueryResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace KueryFilterQueryResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = KueryFilterQueryResult> {
+    kind?: KindResolver<string | null, TypeParent, Context>;
+
+    expression?: ExpressionResolver<string | null, TypeParent, Context>;
+  }
+
+  export type KindResolver<
+    R = string | null,
+    Parent = KueryFilterQueryResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ExpressionResolver<
+    R = string | null,
+    Parent = KueryFilterQueryResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace SortTimelineResultResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = SortTimelineResult> {
+    columnId?: ColumnIdResolver<string | null, TypeParent, Context>;
+
+    sortDirection?: SortDirectionResolver<string | null, TypeParent, Context>;
+  }
+
+  export type ColumnIdResolver<
+    R = string | null,
+    Parent = SortTimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type SortDirectionResolver<
+    R = string | null,
+    Parent = SortTimelineResult,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ResponseTimelinesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = ResponseTimelines> {
+    timeline?: TimelineResolver<(TimelineResult | null)[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number | null, TypeParent, Context>;
+  }
+
+  export type TimelineResolver<
+    R = (TimelineResult | null)[],
+    Parent = ResponseTimelines,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TotalCountResolver<
+    R = number | null,
+    Parent = ResponseTimelines,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace MutationResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = never> {
+    /** Persists a note */
+    persistNote?: PersistNoteResolver<ResponseNote, TypeParent, Context>;
+
+    deleteNote?: DeleteNoteResolver<boolean | null, TypeParent, Context>;
+
+    deleteNoteByTimelineId?: DeleteNoteByTimelineIdResolver<boolean | null, TypeParent, Context>;
+    /** Persists a pinned event in a timeline */
+    persistPinnedEventOnTimeline?: PersistPinnedEventOnTimelineResolver<
+      PinnedEvent | null,
+      TypeParent,
+      Context
+    >;
+    /** Remove a pinned events in a timeline */
+    deletePinnedEventOnTimeline?: DeletePinnedEventOnTimelineResolver<boolean, TypeParent, Context>;
+    /** Remove all pinned events in a timeline */
+    deleteAllPinnedEventsOnTimeline?: DeleteAllPinnedEventsOnTimelineResolver<
+      boolean,
+      TypeParent,
+      Context
+    >;
+    /** Persists a timeline */
+    persistTimeline?: PersistTimelineResolver<ResponseTimeline, TypeParent, Context>;
+
+    persistFavorite?: PersistFavoriteResolver<ResponseFavoriteTimeline, TypeParent, Context>;
+
+    deleteTimeline?: DeleteTimelineResolver<boolean, TypeParent, Context>;
+  }
+
+  export type PersistNoteResolver<
+    R = ResponseNote,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, PersistNoteArgs>;
+  export interface PersistNoteArgs {
+    noteId?: string | null;
+
+    version?: string | null;
+
+    note: NoteInput;
+  }
+
+  export type DeleteNoteResolver<
+    R = boolean | null,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DeleteNoteArgs>;
+  export interface DeleteNoteArgs {
+    id: string[];
+
+    version?: string | null;
+  }
+
+  export type DeleteNoteByTimelineIdResolver<
+    R = boolean | null,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DeleteNoteByTimelineIdArgs>;
+  export interface DeleteNoteByTimelineIdArgs {
+    timelineId: string;
+
+    version?: string | null;
+  }
+
+  export type PersistPinnedEventOnTimelineResolver<
+    R = PinnedEvent | null,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, PersistPinnedEventOnTimelineArgs>;
+  export interface PersistPinnedEventOnTimelineArgs {
+    pinnedEventId?: string | null;
+
+    eventId: string;
+
+    timelineId: string;
+  }
+
+  export type DeletePinnedEventOnTimelineResolver<
+    R = boolean,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DeletePinnedEventOnTimelineArgs>;
+  export interface DeletePinnedEventOnTimelineArgs {
+    id: string[];
+  }
+
+  export type DeleteAllPinnedEventsOnTimelineResolver<
+    R = boolean,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, DeleteAllPinnedEventsOnTimelineArgs>;
+  export interface DeleteAllPinnedEventsOnTimelineArgs {
+    timelineId: string;
+  }
+
+  export type PersistTimelineResolver<
+    R = ResponseTimeline,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, PersistTimelineArgs>;
+  export interface PersistTimelineArgs {
+    id?: string | null;
+
+    version?: string | null;
+
+    timeline: TimelineInput;
+  }
+
+  export type PersistFavoriteResolver<
+    R = ResponseFavoriteTimeline,
+    Parent = never,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, PersistFavoriteArgs>;
+  export interface PersistFavoriteArgs {
+    timelineId?: string | null;
+  }
+
+  export type DeleteTimelineResolver<R = boolean, Parent = never, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    DeleteTimelineArgs
+  >;
+  export interface DeleteTimelineArgs {
+    id: string[];
+  }
+}
+
+export namespace ResponseNoteResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = ResponseNote> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
+    note?: NoteResolver<NoteResult, TypeParent, Context>;
+  }
+
+  export type CodeResolver<
+    R = number | null,
+    Parent = ResponseNote,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = ResponseNote,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NoteResolver<R = NoteResult, Parent = ResponseNote, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace ResponseTimelineResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = ResponseTimeline> {
+    code?: CodeResolver<number | null, TypeParent, Context>;
+
+    message?: MessageResolver<string | null, TypeParent, Context>;
+
+    timeline?: TimelineResolver<TimelineResult, TypeParent, Context>;
+  }
+
+  export type CodeResolver<
+    R = number | null,
+    Parent = ResponseTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MessageResolver<
+    R = string | null,
+    Parent = ResponseTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TimelineResolver<
+    R = TimelineResult,
+    Parent = ResponseTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace ResponseFavoriteTimelineResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = ResponseFavoriteTimeline> {
+    savedObjectId?: SavedObjectIdResolver<string, TypeParent, Context>;
+
+    version?: VersionResolver<string, TypeParent, Context>;
+
+    favorite?: FavoriteResolver<FavoriteTimelineResult[] | null, TypeParent, Context>;
+  }
+
+  export type SavedObjectIdResolver<
+    R = string,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type VersionResolver<
+    R = string,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type FavoriteResolver<
+    R = FavoriteTimelineResult[] | null,
+    Parent = ResponseFavoriteTimeline,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
 }
 
 export namespace OsFieldsResolvers {
