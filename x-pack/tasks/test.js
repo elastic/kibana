@@ -7,8 +7,8 @@
 import runSequence from 'run-sequence';
 import pluginHelpers from '@kbn/plugin-helpers';
 import { getEnabledPlugins } from './helpers/get_plugins';
-import { createAutoJUnitReporter } from '../../src/dev';
 import { forPluginServerTests } from './helpers/globs';
+import { createAutoJUnitReporter } from '../../src/dev';
 
 const MOCHA_OPTIONS = {
   ui: 'bdd',

@@ -157,7 +157,6 @@
     "tree-kill": "^1.1.0",
     "typescript": "^3.3.3333",
     "vinyl-fs": "^3.0.2",
-    "wtfnode": "^0.8.0",
     "xml-crypto": "^0.10.1",
     "yargs": "4.8.1"
   },
