@@ -183,12 +183,6 @@ export const getUniqueIndexPatternIds = createSelector(
   }
 );
 
-
-
-
-
-
-
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some(layerDescriptor => {
     const currentState = copyPersistentState(layerDescriptor);

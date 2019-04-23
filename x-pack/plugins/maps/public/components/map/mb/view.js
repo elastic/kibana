@@ -358,9 +358,9 @@ export class MBMapContainer extends React.Component {
   _syncDrawControl() {
     if (this.props.drawState.type !== DRAW_STATE_TYPE.ACTIVE) {
       this._removeDrawControl();
-      return;
+    } else {
+      this._updateDrawControl();
     }
-    this._updateDrawControl();
   }
 
   _syncMbMapWithMapState = () => {
