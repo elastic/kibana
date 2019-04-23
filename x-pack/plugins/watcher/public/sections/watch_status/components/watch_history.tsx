@@ -238,7 +238,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
               <FormattedMessage
                 id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
                 defaultMessage="Executed on {date}"
-                values={{ date: watchHistoryDetails.startTime}}
+                values={{ date: watchHistoryDetails.startTime }}
               />
             </h3>
           </EuiTitle>
