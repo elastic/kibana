@@ -30,6 +30,7 @@ import { IndexPatternProvider } from '../_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
+import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 import { SavedObjectsClientProvider } from '../../saved_objects';
 
@@ -45,7 +46,7 @@ describe('index pattern', function () {
   let indexPattern;
   let indexPatternsApiClient;
 
-  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.module('kibana', StubIndexPatternsApiClientModule));
 
   beforeEach(ngMock.inject(function (Private) {
     mockLogstashFields = Private(FixturesLogstashFieldsProvider);
@@ -92,7 +93,6 @@ describe('index pattern', function () {
         expect(indexPattern).to.have.property('popularizeField');
         expect(indexPattern).to.have.property('getScriptedFields');
         expect(indexPattern).to.have.property('getNonScriptedFields');
-        expect(indexPattern).to.have.property('getInterval');
         expect(indexPattern).to.have.property('addScriptedField');
         expect(indexPattern).to.have.property('removeScriptedField');
         expect(indexPattern).to.have.property('toString');
