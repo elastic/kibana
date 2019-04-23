@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { mkdirp } from '../lib';
+import { mkdirp, write } from '../lib';
 
 export const CreateEmptyDirsAndFilesTask = {
   description: 'Creating some empty directories and files to prevent file-permission issues',
@@ -26,6 +26,7 @@ export const CreateEmptyDirsAndFilesTask = {
     await Promise.all([
       mkdirp(build.resolvePath('plugins')),
       mkdirp(build.resolvePath('data')),
+      write(build.resolvePath('optimize/.babel_register_cache.json'), '{}'),
     ]);
   },
 };
