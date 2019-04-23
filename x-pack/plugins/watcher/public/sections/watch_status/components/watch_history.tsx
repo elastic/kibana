@@ -289,7 +289,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
 
           <EuiSpacer size="s" />
 
-          <EuiCodeBlock language="javascript">{executionDetail}</EuiCodeBlock>
+          <EuiCodeBlock language="json">{executionDetail}</EuiCodeBlock>
         </EuiFlyoutBody>
       </EuiFlyout>
     );
@@ -367,9 +367,9 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
+
       <EuiInMemoryTable
         items={history}
-        itemId="id"
         columns={columns}
         pagination={pagination}
         sorting={true}
