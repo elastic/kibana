@@ -260,6 +260,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('editLayerButton');
     }
 
+    async getLayerTOCDetails(layerName) {
+      const escapedLayerName = layerName.replace(' ', '_');
+      return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapedLayerName}`);
+    }
+
     async doesLayerExist(layerName) {
       layerName = layerName.replace(' ', '_');
       log.debug(`Open layer panel, layer: ${layerName}`);

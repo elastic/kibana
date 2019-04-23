@@ -11,7 +11,7 @@ const EXPECTED_JOIN_VALUES = {
   alpha: 10,
   bravo: 3,
   charlie: 12,
-  tango: undefined
+  tango: null
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
@@ -45,17 +45,22 @@ export default function ({ getPageObjects, getService }) {
       expect(beforeRefreshTimerTimestamp).not.to.equal(afterRefreshTimerTimestamp);
     });
 
+    it('should show dynamic data range in legend', async () => {
+      const layerTOCDetails = await PageObjects.maps.getLayerTOCDetails('geo_shapes*');
+      const split = layerTOCDetails.trim().split('\n');
+
+      const min = split[0];
+      expect(min).to.equal('3');
+
+      const max = split[2];
+      expect(max).to.equal('12');
+    });
+
     it('should decorate feature properties with join property', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
-        if (properties.name === 'tango') {
-          //left join, which means we won't rescale joins that do not match
-          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
-        } else {
-          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
-        }
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
       });
     });

@@ -221,7 +221,17 @@ export class TOCEntry extends React.Component {
       return null;
     }
 
-    return tocDetails;
+    const escapedLayerName = this.state.displayName
+      ? this.state.displayName.replace(' ', '_')
+      : '';
+
+    return (
+      <div
+        data-test-subj={`mapLayerTOCDetails${escapedLayerName}`}
+      >
+        {tocDetails}
+      </div>
+    );
   }
 
   render() {

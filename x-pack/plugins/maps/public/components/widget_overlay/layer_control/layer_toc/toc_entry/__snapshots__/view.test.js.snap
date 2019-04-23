@@ -197,8 +197,12 @@ exports[`TOCEntry props should display layer details when layer id is in openTOC
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <div>
-    TOC details mock
+  <div
+    data-test-subj="mapLayerTOCDetailslayer_1"
+  >
+    <div>
+      TOC details mock
+    </div>
   </div>
 </div>
 `;
