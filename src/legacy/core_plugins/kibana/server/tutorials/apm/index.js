@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { onPremInstructions } from './envs/on_prem';
 import { createElasticCloudInstructions } from './envs/elastic_cloud';
-import { getSavedObjects } from './saved_objects/get_saved_objects';
+import apmIndexPattern from './index_pattern.json';
 
 const apmIntro = i18n.translate('kbn.server.tutorials.apm.introduction', {
   defaultMessage: 'Collect in-depth performance metrics and errors from inside your applications.',
@@ -39,6 +39,16 @@ function isEnabled(config) {
 export function apmSpecProvider(server) {
   const config = server.config();
   const apmIndexPatternTitle = config.get('apm_oss.indexPattern');
+
+  const savedObjects = [
+    {
+      ...apmIndexPattern,
+      attributes: {
+        ...apmIndexPattern.attributes,
+        title: apmIndexPatternTitle,
+      },
+    },
+  ];
 
   const artifacts = {
     dashboards: [
@@ -83,11 +93,11 @@ It allows you to monitor the performance of thousands of applications in real ti
       },
     }),
     euiIconType: 'logoAPM',
-    artifacts: artifacts,
+    artifacts,
     onPrem: onPremInstructions(config),
     elasticCloud: createElasticCloudInstructions(config),
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm.png',
-    savedObjects: getSavedObjects(apmIndexPatternTitle),
+    savedObjects,
     savedObjectsInstallMsg: i18n.translate(
       'kbn.server.tutorials.apm.specProvider.savedObjectsInstallMsg',
       {

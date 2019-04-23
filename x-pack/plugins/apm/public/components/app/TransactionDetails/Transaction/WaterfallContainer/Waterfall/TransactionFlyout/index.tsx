@@ -5,78 +5,51 @@
  */
 
 import {
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
-  EuiLink,
   EuiPortal,
+  EuiSpacer,
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React from 'react';
-import { idx } from '../../../../../../../../common/idx';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../../../../store/urlParams';
-import { DROPPED_SPANS_DOCS } from '../../../../../../../utils/documentation/apm-get-started';
 import { TransactionActionMenu } from '../../../../../../shared/TransactionActionMenu/TransactionActionMenu';
 import { StickyTransactionProperties } from '../../../StickyTransactionProperties';
-import { TransactionPropertiesTableForFlyout } from '../../../TransactionPropertiesTableForFlyout';
 import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
 import { ResponsiveFlyout } from '../ResponsiveFlyout';
+import { TransactionMetadata } from '../../../../../../shared/MetadataTable/TransactionMetadata';
+import { DroppedSpansWarning } from './DroppedSpansWarning';
 
 interface Props {
   onClose: () => void;
   transaction?: Transaction;
-  location: Location;
-  urlParams: IUrlParams;
   errorCount: number;
   traceRootDuration?: number;
 }
 
-function DroppedSpansWarning({
-  transactionDoc
+function TransactionPropertiesTable({
+  transaction
 }: {
-  transactionDoc: Transaction;
+  transaction: Transaction;
 }) {
-  const dropped = idx(transactionDoc, _ => _.transaction.span_count.dropped);
-  if (!dropped) {
-    return null;
-  }
-
   return (
-    <React.Fragment>
-      <EuiCallOut size="s">
-        {i18n.translate(
-          'xpack.apm.transactionDetails.transFlyout.callout.agentDroppedSpansMessage',
-          {
-            defaultMessage:
-              'The APM agent that reported this transaction dropped {dropped} spans or more based on its configuration.',
-            values: { dropped }
-          }
-        )}{' '}
-        <EuiLink href={DROPPED_SPANS_DOCS} target="_blank">
-          {i18n.translate(
-            'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
-            {
-              defaultMessage: 'Learn more about dropped spans.'
-            }
-          )}
-        </EuiLink>
-      </EuiCallOut>
-      <EuiHorizontalRule />
-    </React.Fragment>
+    <div>
+      <EuiTitle size="s">
+        <h4>Metadata</h4>
+      </EuiTitle>
+      <EuiSpacer />
+      <TransactionMetadata transaction={transaction} />
+    </div>
   );
 }
 
 export function TransactionFlyout({
   transaction: transactionDoc,
   onClose,
-  location,
-  urlParams,
   errorCount,
   traceRootDuration
 }: Props) {
@@ -117,11 +90,7 @@ export function TransactionFlyout({
           />
           <EuiHorizontalRule />
           <DroppedSpansWarning transactionDoc={transactionDoc} />
-          <TransactionPropertiesTableForFlyout
-            transaction={transactionDoc}
-            location={location}
-            urlParams={urlParams}
-          />
+          <TransactionPropertiesTable transaction={transactionDoc} />
         </EuiFlyoutBody>
       </ResponsiveFlyout>
     </EuiPortal>

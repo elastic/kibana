@@ -41,14 +41,21 @@ export class AddLayerPanel extends Component {
       return;
     }
 
+
+    const layerOptions = this.state.layer
+      ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
+      : {};
     this.setState({
-      layer: source.createDefaultLayer({}, this.props.mapColors)
+      layer: source.createDefaultLayer(layerOptions, this.props.mapColors)
     },
     () => this.props.viewLayer(this.state.layer, temp));
   };
 
   _clearSource = () => {
-    this.setState({ sourceType: null });
+    this.setState({
+      layer: null,
+      sourceType: null
+    });
     this.props.removeTransientLayer();
   }
 
