@@ -18,7 +18,7 @@
  */
 
 import { BasePathSetup } from './base_path';
-import { Capabilities, CapabilitiesSetup } from './capabilities';
+import { Capabilities, CapabilitiesStart } from './capabilities';
 import {
   ChromeBadge,
   ChromeBrand,
@@ -28,10 +28,20 @@ import {
 } from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
-import { I18nSetup } from './i18n';
-import { InjectedMetadataParams, InjectedMetadataSetup } from './injected_metadata';
-import { NotificationsSetup, Toast, ToastInput, ToastsSetup } from './notifications';
-import { FlyoutRef, OverlaySetup } from './overlays';
+import { I18nSetup, I18nStart } from './i18n';
+import {
+  InjectedMetadataParams,
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from './injected_metadata';
+import {
+  NotificationsSetup,
+  Toast,
+  ToastInput,
+  ToastsApi,
+  NotificationsStart,
+} from './notifications';
+import { FlyoutRef, OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
@@ -59,40 +69,52 @@ export interface CoreSetup {
   http: HttpSetup;
   /** {@link BasePathSetup} */
   basePath: BasePathSetup;
-  /** {@link CapabilitiesSetup} */
-  capabilities: CapabilitiesSetup;
   /** {@link UiSettingsSetup} */
   uiSettings: UiSettingsSetup;
   /** {@link ChromeSetup} */
   chrome: ChromeSetup;
-  /** {@link OverlaySetup} */
-  overlays: OverlaySetup;
+}
+
+export interface CoreStart {
+  /** {@link CapabilitiesStart} */
+  capabilities: CapabilitiesStart;
+  /** {@link I18nStart} */
+  i18n: I18nStart;
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
+  /** {@link NotificationsStart} */
+  notifications: NotificationsStart;
+  /** {@link OverlayStart} */
+  overlays: OverlayStart;
 }
 
 export {
   BasePathSetup,
   HttpSetup,
   FatalErrorsSetup,
-  CapabilitiesSetup,
   Capabilities,
+  CapabilitiesStart,
   ChromeSetup,
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,
   I18nSetup,
+  I18nStart,
   InjectedMetadataSetup,
+  InjectedMetadataStart,
   InjectedMetadataParams,
   Plugin,
   PluginInitializer,
   PluginInitializerContext,
   PluginSetupContext,
   NotificationsSetup,
-  OverlaySetup,
+  NotificationsStart,
+  OverlayStart,
   FlyoutRef,
   Toast,
   ToastInput,
-  ToastsSetup,
+  ToastsApi,
   UiSettingsClient,
   UiSettingsState,
   UiSettingsSetup,

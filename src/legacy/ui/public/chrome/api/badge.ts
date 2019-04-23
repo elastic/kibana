@@ -23,7 +23,7 @@ export type Badge = ChromeBadge;
 export type BadgeApi = ReturnType<typeof createBadgeApi>['badge'];
 
 let newPlatformChrome: ChromeSetup;
-export function __newPlatformInit__(instance: ChromeSetup) {
+export function __newPlatformSetup__(instance: ChromeSetup) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/badge is already initialized');
   }

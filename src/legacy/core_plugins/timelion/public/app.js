@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
@@ -284,7 +284,7 @@ app.controller('timelion', function (
       testId: 'timelionDocsButton',
     };
 
-    if (uiCapabilities.timelion.save) {
+    if (capabilities.get().timelion.save) {
       return [newSheetAction, addSheetAction, saveSheetAction, deleteSheetAction, openSheetAction, optionsAction, helpAction];
     }
     return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];

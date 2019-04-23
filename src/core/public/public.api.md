@@ -7,7 +7,6 @@
 import * as CSS from 'csstype';
 import { default } from 'react';
 import { IconType } from '@elastic/eui';
-import { Observable } from 'rxjs';
 import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
@@ -30,7 +29,7 @@ export interface Capabilities {
 }
 
 // @public
-export interface CapabilitiesSetup {
+export interface CapabilitiesStart {
     getCapabilities: () => Capabilities;
 }
 
@@ -77,8 +76,6 @@ export interface CoreSetup {
     // (undocumented)
     basePath: BasePathSetup;
     // (undocumented)
-    capabilities: CapabilitiesSetup;
-    // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
@@ -91,9 +88,21 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
-    overlays: OverlaySetup;
-    // (undocumented)
     uiSettings: UiSettingsSetup;
+}
+
+// @public (undocumented)
+export interface CoreStart {
+    // (undocumented)
+    capabilities: CapabilitiesStart;
+    // (undocumented)
+    i18n: I18nStart;
+    // (undocumented)
+    injectedMetadata: InjectedMetadataStart;
+    // (undocumented)
+    notifications: NotificationsStart;
+    // (undocumented)
+    overlays: OverlayStart;
 }
 
 // @internal
@@ -103,6 +112,8 @@ export class CoreSystem {
     setup(): Promise<{
         fatalErrors: import(".").FatalErrorsSetup;
     } | undefined>;
+    // (undocumented)
+    start(): Promise<void>;
     // (undocumented)
     stop(): void;
     }
@@ -129,6 +140,9 @@ export interface I18nSetup {
         children: default.ReactNode;
     }) => JSX.Element;
 }
+
+// @public (undocumented)
+export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InjectedMetadataParams {
@@ -208,10 +222,19 @@ export interface InjectedMetadataSetup {
 }
 
 // @public (undocumented)
-export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+export type InjectedMetadataStart = InjectedMetadataSetup;
 
 // @public (undocumented)
-export interface OverlaySetup {
+export interface NotificationsSetup {
+    // (undocumented)
+    toasts: ToastsApi;
+}
+
+// @public (undocumented)
+export type NotificationsStart = NotificationsSetup;
+
+// @public (undocumented)
+export interface OverlayStart {
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
@@ -220,15 +243,17 @@ export interface OverlaySetup {
 }
 
 // @public
-export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
+export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
     // (undocumented)
     setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
@@ -256,7 +281,7 @@ export { Toast }
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
 
 // @public (undocumented)
-export class ToastsSetup {
+export class ToastsApi {
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
     // (undocumented)
@@ -287,6 +312,7 @@ export class UiSettingsClient {
         newValue: any;
         oldValue: any;
     }>;
+    getUpdateErrors$(): Rx.Observable<Error>;
     isCustom(key: string): boolean;
     isDeclared(key: string): boolean;
     isDefault(key: string): boolean;
