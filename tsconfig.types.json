@@ -8,7 +8,6 @@
     "declarationMap": true
   },
   "include": [
-    "typings/**/*",
     "src/core/server/index.ts",
     "src/core/public/index.ts"
   ]
