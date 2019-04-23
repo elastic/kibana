@@ -89,7 +89,6 @@ export class LegacyService implements CoreService {
             await this.createClusterManager(config);
             return;
           }
-
           return await this.createKbnServer(config, deps);
         })
       )
@@ -148,6 +147,7 @@ export class LegacyService implements CoreService {
             }
           : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
+      http,
       elasticsearch,
       plugins,
     });

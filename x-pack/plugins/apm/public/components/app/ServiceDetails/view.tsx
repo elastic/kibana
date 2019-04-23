@@ -14,6 +14,7 @@ import { IUrlParams } from '../../../store/urlParams';
 import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
+import { isRumAgentName } from '../../../../common/agent_name';
 
 interface Props {
   urlParams: IUrlParams;
@@ -30,6 +31,8 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
   if (!serviceDetailsData) {
     return null;
   }
+
+  const isRumAgent = isRumAgentName(serviceDetailsData.agentName || '');
 
   return (
     <React.Fragment>
@@ -55,6 +58,7 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
         location={location}
         urlParams={urlParams}
         transactionTypes={serviceDetailsData.types}
+        isRumAgent={isRumAgent}
       />
     </React.Fragment>
   );
