@@ -268,7 +268,7 @@ export default class BaseOptimizer {
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
-        devtoolModuleFilenameTemplate: info => `webpack:///${ path.relative(fromRoot('.'), info.absoluteResourcePath) }`,
+        devtoolModuleFilenameTemplate: info => `${ path.relative(fromRoot('.'), info.absoluteResourcePath) }`,
 
         // When the entry point is loaded, assign it's exported `plugin`
         // value to a key on the global `__kbnBundles__` object.
