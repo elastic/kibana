@@ -44,6 +44,8 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   // hooks
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
+  // Filter out deleted watches on the client, because the API will return 200 even though some watches
+  // may not really be deleted until after they're done firing and this could take some time.
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
 
   useEffect(() => {
@@ -208,7 +210,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       <DeleteWatchesModal
         callback={(deleted?: string[]) => {
           if (deleted) {
-            setDeletedWatches(watchesToDelete);
+            setDeletedWatches([...deletedWatches, ...watchesToDelete]);
           }
           setWatchesToDelete([]);
         }}
