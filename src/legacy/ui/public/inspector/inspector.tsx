@@ -73,7 +73,7 @@ function open(adapters: Adapters, options: InspectorOptions = {}): InspectorSess
       if an inspector can be shown.`);
   }
 
-  return getNewPlatform().setup.core.overlays.openFlyout(
+  return getNewPlatform().start.core.overlays.openFlyout(
     <InspectorPanel views={views} adapters={adapters} title={options.title} />,
     {
       'data-test-subj': 'inspectorPanel',
