@@ -161,6 +161,22 @@ export class LayerTocActions extends Component {
 
     if (!this.props.isReadOnly) {
       actionItems.push({
+        name: i18n.translate('xpack.maps.layerTocActions.editLayerTitle', {
+          defaultMessage: 'Edit layer',
+        }),
+        icon: (
+          <EuiIcon
+            type="pencil"
+            size="m"
+          />
+        ),
+        'data-test-subj': 'editLayerButton',
+        onClick: () => {
+          this._closePopover();
+          this.props.editLayer();
+        }
+      });
+      actionItems.push({
         name: i18n.translate('xpack.maps.layerTocActions.cloneLayerTitle', {
           defaultMessage: 'Clone layer',
         }),

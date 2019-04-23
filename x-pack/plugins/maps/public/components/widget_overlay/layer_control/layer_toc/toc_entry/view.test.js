@@ -9,8 +9,10 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { TOCEntry } from './view';
 
+const LAYER_ID = '1';
+
 const mockLayer = {
-  getId: () => { return '1'; },
+  getId: () => { return LAYER_ID; },
   getTOCDetails: () => { return (<div>TOC details mock</div>); },
   getDisplayName: () => { return 'layer 1'; },
   isVisible: () => { return true; },
@@ -26,6 +28,7 @@ const defaultProps = {
   getSelectedLayerSelector: () => {},
   hasDirtyStateSelector: () => {},
   zoom: 0,
+  openTOCDetails: [],
 };
 
 describe('TOCEntry', () => {
@@ -51,6 +54,23 @@ describe('TOCEntry', () => {
         <TOCEntry
           {...defaultProps}
           isReadOnly={true}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      expect(component)
+        .toMatchSnapshot();
+    });
+
+    test('should display layer details when layer id is in openTOCDetails', async () => {
+      const component = shallowWithIntl(
+        <TOCEntry
+          {...defaultProps}
+          openTOCDetails={[LAYER_ID]}
         />
       );
 

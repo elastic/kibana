@@ -256,7 +256,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
-      await testSubjects.click(`mapOpenLayerButton${layerName}`);
+      await this.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('editLayerButton');
     }
 
     async doesLayerExist(layerName) {

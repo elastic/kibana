@@ -55,6 +55,15 @@ exports[`LayerTocActions is rendered 1`] = `
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -127,6 +136,15 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -196,6 +214,15 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
                 type="eye"
               />,
               "name": "Hide layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
               "onClick": [Function],
             },
             Object {
@@ -341,6 +368,15 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
               "onClick": [Function],
             },
             Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
+              "onClick": [Function],
+            },
+            Object {
               "data-test-subj": "cloneLayerButton",
               "icon": <EuiIcon
                 size="m"
@@ -410,6 +446,15 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
                 type="eyeClosed"
               />,
               "name": "Show layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
               "onClick": [Function],
             },
             Object {
@@ -486,6 +531,15 @@ exports[`LayerTocActions should show warning when layer has errors 1`] = `
                 type="eye"
               />,
               "name": "Hide layer",
+              "onClick": [Function],
+            },
+            Object {
+              "data-test-subj": "editLayerButton",
+              "icon": <EuiIcon
+                size="m"
+                type="pencil"
+              />,
+              "name": "Edit layer",
               "onClick": [Function],
             },
             Object {

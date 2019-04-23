@@ -18,6 +18,7 @@ exports[`TOCEntry is rendered 1`] = `
       <LayerTocActions
         cloneLayer={[Function]}
         displayName="layer 1"
+        editLayer={[Function]}
         fitToBounds={[Function]}
         layer={
           Object {
@@ -36,7 +37,8 @@ exports[`TOCEntry is rendered 1`] = `
     <EuiFlexItem>
       <EuiText>
         <div
-          className="eui-textTruncate eui-textLeft"
+          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+          onClick={[Function]}
           style={
             Object {
               "maxWidth": "19rem",
@@ -68,12 +70,6 @@ exports[`TOCEntry is rendered 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  />
-  <div>
-    TOC details mock
-  </div>
 </div>
 `;
 
@@ -95,6 +91,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       <LayerTocActions
         cloneLayer={[Function]}
         displayName="layer 1"
+        editLayer={[Function]}
         fitToBounds={[Function]}
         isReadOnly={true}
         layer={
@@ -114,7 +111,8 @@ exports[`TOCEntry props isReadOnly 1`] = `
     <EuiFlexItem>
       <EuiText>
         <div
-          className="eui-textTruncate eui-textLeft"
+          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+          onClick={[Function]}
           style={
             Object {
               "maxWidth": "19rem",
@@ -126,9 +124,79 @@ exports[`TOCEntry props isReadOnly 1`] = `
       </EuiText>
     </EuiFlexItem>
   </EuiFlexGroup>
-  <EuiSpacer
-    size="s"
-  />
+</div>
+`;
+
+exports[`TOCEntry props should display layer details when layer id is in openTOCDetails 1`] = `
+<div
+  className="mapTocEntry"
+  data-layerid="1"
+  id="1"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    className="mapTocEntry-visible"
+    gutterSize="none"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <LayerTocActions
+        cloneLayer={[Function]}
+        displayName="layer 1"
+        editLayer={[Function]}
+        fitToBounds={[Function]}
+        layer={
+          Object {
+            "getDisplayName": [Function],
+            "getId": [Function],
+            "getTOCDetails": [Function],
+            "hasErrors": [Function],
+            "isVisible": [Function],
+            "showAtZoomLevel": [Function],
+          }
+        }
+        toggleVisible={[Function]}
+        zoom={0}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiText>
+        <div
+          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+          onClick={[Function]}
+          style={
+            Object {
+              "maxWidth": "19rem",
+            }
+          }
+        >
+          layer 1
+        </div>
+        <span
+          className="mapTocEntry__layerIcons"
+        >
+          <EuiButtonIcon
+            aria-label="Edit layer"
+            color="primary"
+            iconSize="m"
+            iconType="pencil"
+            onClick={[Function]}
+            title="Edit layer"
+            type="button"
+          />
+          <span
+            className="mapTocEntry__grab"
+          >
+            <EuiIcon
+              type="grab"
+            />
+          </span>
+        </span>
+      </EuiText>
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <div>
     TOC details mock
   </div>

@@ -200,6 +200,7 @@ export class TOCEntry extends React.Component {
             cloneLayer={() => {
               cloneLayer(layer.getId());
             }}
+            editLayer={this._openLayerPanelWithCheck}
             isReadOnly={isReadOnly}
           />
         </EuiFlexItem>
