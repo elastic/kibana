@@ -9,6 +9,7 @@ import '@elastic/charts/dist/style.css';
 import {
   Axis,
   CustomSeriesColorsMap,
+  DARK_THEME,
   DataSeriesColorsValues,
   getAxisId,
   getSpecId,
