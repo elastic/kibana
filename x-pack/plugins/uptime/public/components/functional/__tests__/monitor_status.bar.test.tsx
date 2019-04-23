@@ -18,7 +18,6 @@ describe('MonitorStatusBar component', () => {
       {
         timestamp: moment(new Date())
           .subtract(15, 'm')
-          .valueOf()
           .toString(),
         monitor: {
           duration: {
