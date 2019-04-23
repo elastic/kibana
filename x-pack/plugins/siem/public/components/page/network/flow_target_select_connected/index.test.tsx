@@ -7,9 +7,9 @@
 import { mount } from 'enzyme';
 import * as React from 'react';
 
-import { mockGlobalState, TestProviders } from '../../mock';
-import { createStore, State } from '../../store';
-import { IpOverviewId } from '../page/network/ip_overview';
+import { mockGlobalState, TestProviders } from '../../../../mock';
+import { createStore, State } from '../../../../store';
+import { IpOverviewId } from '../ip_overview';
 
 import { FlowTargetSelectConnected } from './index';
 describe('Flow Target Select Connected', () => {
