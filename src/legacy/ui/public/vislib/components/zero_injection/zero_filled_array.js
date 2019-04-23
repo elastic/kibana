@@ -23,7 +23,7 @@
 */
 export function createZeroFilledArray(arr, label) {
   if (!Array.isArray(arr)) {
-    throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
+    throw new Error('createZeroFilledArray expects an array of strings or numbers');
   }
 
   const zeroFilledArray = [];

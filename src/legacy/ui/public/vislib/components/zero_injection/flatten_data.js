@@ -27,7 +27,7 @@ export function flattenData(obj) {
   let charts;
 
   if (!_.isObject(obj) || !obj.rows && !obj.columns && !obj.series) {
-    throw new TypeError('FlattenDataObjUtilService expects an object with a series, rows, or columns key');
+    throw new TypeError('flattenData expects an object with a series, rows, or columns key');
   }
 
   if (!obj.series) {

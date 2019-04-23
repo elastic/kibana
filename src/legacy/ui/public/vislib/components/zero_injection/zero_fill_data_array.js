@@ -27,7 +27,7 @@ import _ from 'lodash';
 
 export function zeroFillDataArray(arr1, arr2) {
   if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
-    throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
+    throw new TypeError('zeroFillDataArray expects 2 arrays');
   }
 
   let i;

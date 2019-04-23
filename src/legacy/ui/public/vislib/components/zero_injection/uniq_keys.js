@@ -28,7 +28,7 @@ import { flattenData } from './flatten_data';
   */
 export function getUniqKeys(obj) {
   if (!isObject(obj)) {
-    throw new TypeError('UniqueXValuesUtilService expects an object');
+    throw new TypeError('getUniqKeys expects an object');
   }
 
   const flattenedData = flattenData(obj);
