@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiInMemoryTable,
   EuiLink,
@@ -232,31 +233,54 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         aria-labelledby="indexDetailsFlyoutTitle"
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m">
-            <h2>Watch history detail</h2>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
+                defaultMessage="Executed on {date}"
+                values={{ date: watchHistoryDetails.startTime}}
+              />
+            </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem>
-            <EuiInMemoryTable
-              items={(watchHistoryDetails.watchStatus as any).actionStatuses}
-              itemId="id"
-              columns={detailColumns}
-              message={
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
-                  defaultMessage="No current status to show"
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem>
-            <EuiCodeBlock language="javascript">{executionDetail}</EuiCodeBlock>
-            <EuiSpacer />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
+        <EuiFlyoutBody>
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTitle"
+                defaultMessage="Actions"
+              />
+            </h4>
+          </EuiTitle>
+
+          <EuiInMemoryTable
+            items={(watchHistoryDetails.watchStatus as any).actionStatuses}
+            itemId="id"
+            columns={detailColumns}
+            message={
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
+                defaultMessage="No current status to show"
+              />
+            }
+          />
+
+          <EuiSpacer />
+
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.jsonTitle"
+                defaultMessage="JSON"
+              />
+            </h4>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          <EuiCodeBlock language="javascript">{executionDetail}</EuiCodeBlock>
+        </EuiFlyoutBody>
       </EuiFlyout>
     );
   }
@@ -287,12 +311,12 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
-            <h1>
+            <h2>
               <FormattedMessage
                 id="xpack.watcher.sections.watchHistory.header"
-                defaultMessage="Watch history"
+                defaultMessage="Execution history"
               />
-            </h1>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
