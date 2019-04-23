@@ -40,6 +40,9 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectForbidden) {
         await retry.try(async () => {
+          if (await find.existsByCssSelector('a[id=rawdata-tab]')) {
+            await find.clickByCssSelector('a[id=rawdata-tab]');
+          }
           await PageObjects.error.expectForbidden();
         });
         log.debug(`Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`);

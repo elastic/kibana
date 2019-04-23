@@ -359,7 +359,10 @@ export function CommonPageProvider({ getService, getPageObjects }) {
     }
 
     async getBodyText() {
-      const el = await find.byCssSelector('body>pre');
+      if (await find.existsByCssSelector('a[id=rawdata-tab]')) {
+        await find.clickByCssSelector('a[id=rawdata-tab]');
+      }
+      const el = await find.byCssSelector('body pre');
       return await el.getVisibleText();
     }
   }
