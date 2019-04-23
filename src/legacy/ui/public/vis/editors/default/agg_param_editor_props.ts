@@ -19,6 +19,7 @@
 
 import { AggParam } from '../../../agg_types';
 import { AggConfig } from '../../agg_config';
+import { EditorConfig } from '../config/types';
 
 // NOTE: we cannot export the interface with export { InterfaceName }
 // as there is currently a bug on babel typescript transform plugin for it
@@ -27,7 +28,7 @@ import { AggConfig } from '../../agg_config';
 export interface AggParamEditorProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
-  editorConfig: any;
+  editorConfig: EditorConfig;
   indexedFields?: any[];
   isInvalid: boolean;
   value: T;
