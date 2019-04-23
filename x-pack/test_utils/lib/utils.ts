@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-export const nextTick = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));
+export const nextTick = (time = 0) => new Promise(resolve => setTimeout(resolve, time));
