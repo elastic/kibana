@@ -1210,7 +1210,7 @@ export interface TimelineDetailsSourceArgs {
 export interface LastEventTimeSourceArgs {
   id?: string | null;
 
-  indexKey: string;
+  indexKey: LastEventIndexKey;
 
   details: LastTimeDetails;
 }
@@ -1345,6 +1345,13 @@ export enum IndexType {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum LastEventIndexKey {
+  hostDetails = 'hostDetails',
+  hosts = 'hosts',
+  ipDetails = 'ipDetails',
+  network = 'network',
 }
 
 export enum HostsFields {
@@ -1837,7 +1844,7 @@ export namespace GetEventsQuery {
 export namespace GetLastEventTimeQuery {
   export type Variables = {
     sourceId: string;
-    indexKey: string;
+    indexKey: LastEventIndexKey;
     details: LastTimeDetails;
   };
 

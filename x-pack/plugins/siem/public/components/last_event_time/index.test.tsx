@@ -9,6 +9,7 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { render } from 'react-testing-library';
 
+import { LastEventIndexKey } from '../../graphql/types';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 import { wait } from '../../lib/helpers';
 import { TestProviders } from '../../mock';
@@ -42,7 +43,7 @@ describe('Last Event Time Stat', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={mockLastEventTimeQuery} addTypename={false}>
-          <LastEventTime indexKey={'hosts'} />
+          <LastEventTime indexKey={LastEventIndexKey.hosts} />
         </MockedProvider>
       </TestProviders>
     );
@@ -54,7 +55,7 @@ describe('Last Event Time Stat', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={mockLastEventTimeQuery} addTypename={false}>
-          <LastEventTime indexKey={'hosts'} />
+          <LastEventTime indexKey={LastEventIndexKey.hosts} />
         </MockedProvider>
       </TestProviders>
     );
@@ -70,7 +71,7 @@ describe('Last Event Time Stat', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={badDateTime} addTypename={false}>
-          <LastEventTime indexKey={'hosts'} />
+          <LastEventTime indexKey={LastEventIndexKey.hosts} />
         </MockedProvider>
       </TestProviders>
     );
@@ -84,7 +85,7 @@ describe('Last Event Time Stat', async () => {
     const { container } = render(
       <TestProviders>
         <MockedProvider mocks={nullDateTime} addTypename={false}>
-          <LastEventTime indexKey={'hosts'} />
+          <LastEventTime indexKey={LastEventIndexKey.hosts} />
         </MockedProvider>
       </TestProviders>
     );

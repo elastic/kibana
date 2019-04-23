@@ -7,7 +7,11 @@
 import gql from 'graphql-tag';
 
 export const LastEventTimeGqlQuery = gql`
-  query GetLastEventTimeQuery($sourceId: ID!, $indexKey: String!, $details: LastTimeDetails!) {
+  query GetLastEventTimeQuery(
+    $sourceId: ID!
+    $indexKey: LastEventIndexKey!
+    $details: LastTimeDetails!
+  ) {
     source(id: $sourceId) {
       id
       LastEventTime(indexKey: $indexKey, details: $details) {

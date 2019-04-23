@@ -10,11 +10,12 @@ import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
 import { pure } from 'recompose';
 
+import { LastEventIndexKey } from '../../graphql/types';
 import { useLastEventTimeQuery } from '../../containers/events/last_event_time';
 import { getEmptyTagValue } from '../empty_value';
 interface LastEventTimeProps {
   hostName?: string;
-  indexKey: string;
+  indexKey: LastEventIndexKey;
   ip?: string;
 }
 export const LastEventTime = pure<LastEventTimeProps>(({ hostName, indexKey, ip }) => {

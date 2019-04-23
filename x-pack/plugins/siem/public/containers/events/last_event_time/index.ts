@@ -8,7 +8,7 @@ import ApolloClient from 'apollo-client';
 import { get } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
 
-import { GetLastEventTimeQuery } from '../../../graphql/types';
+import { GetLastEventTimeQuery, LastEventIndexKey, LastTimeDetails } from '../../../graphql/types';
 import { inputsModel } from '../../../store';
 import { QueryTemplateProps } from '../../query_template';
 
@@ -24,12 +24,12 @@ export interface LastEventTimeArgs {
 
 export interface OwnProps extends QueryTemplateProps {
   children: (args: LastEventTimeArgs) => React.ReactNode;
-  indexKey: string;
+  indexKey: LastEventIndexKey;
 }
 
 export function useLastEventTimeQuery<TCache = object>(
-  indexKey: string,
-  details: object,
+  indexKey: LastEventIndexKey,
+  details: LastTimeDetails,
   sourceId: string,
   apolloClient: ApolloClient<TCache>
 ) {
@@ -70,7 +70,7 @@ export function useLastEventTimeQuery<TCache = object>(
         updateErrorMessage(err.toString());
       }
     },
-    [indexKey]
+    [indexKey, details.hostName, details.ip]
   );
 
   return { lastSeen, loading, errorMessage };

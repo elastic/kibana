@@ -9,7 +9,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { pure } from 'recompose';
-
+import { LastEventIndexKey } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { FlowTargetSelectConnected } from '../page/network/flow_target_select_connected';
 import { LastEventTime } from '../last_event_time';
@@ -32,7 +32,7 @@ export const getHeaderForRoute = (pathname: string) => {
     switch (pathSegment) {
       case 'hosts': {
         return {
-          subtitle: <LastEventTime indexKey={'hosts'} />,
+          subtitle: <LastEventTime indexKey={LastEventIndexKey.hosts} />,
           title: <FormattedMessage id="xpack.siem.hosts.pageTitle" defaultMessage="Hosts" />,
         };
       }
@@ -41,7 +41,7 @@ export const getHeaderForRoute = (pathname: string) => {
       }
       case 'network': {
         return {
-          subtitle: <LastEventTime indexKey={'network'} />,
+          subtitle: <LastEventTime indexKey={LastEventIndexKey.network} />,
           title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
         };
       }
@@ -50,14 +50,14 @@ export const getHeaderForRoute = (pathname: string) => {
     if (pathname.match(/hosts\/.*?/)) {
       const hostId = pathSegment;
       return {
-        subtitle: <LastEventTime indexKey={'hostDetails'} hostName={hostId} />,
+        subtitle: <LastEventTime indexKey={LastEventIndexKey.hostDetails} hostName={hostId} />,
         title: hostId,
       };
     }
     if (pathname.match(/network\/ip\/.*?/)) {
       const ip = decodeIpv6(pathSegment);
       return {
-        subtitle: <LastEventTime indexKey={'ipDetails'} ip={ip} />,
+        subtitle: <LastEventTime indexKey={LastEventIndexKey.ipDetails} ip={ip} />,
         title: ip,
         children: <FlowTargetSelectConnected />,
       };

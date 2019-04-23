@@ -305,7 +305,7 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
+                  "ofType": { "kind": "ENUM", "name": "LastEventIndexKey", "ofType": null }
                 },
                 "defaultValue": null
               },
@@ -4585,6 +4585,31 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "ENUM",
+        "name": "LastEventIndexKey",
+        "description": "",
+        "fields": null,
+        "inputFields": null,
+        "interfaces": null,
+        "enumValues": [
+          {
+            "name": "hostDetails",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "hosts", "description": "", "isDeprecated": false, "deprecationReason": null },
+          {
+            "name": "ipDetails",
+            "description": "",
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          { "name": "network", "description": "", "isDeprecated": false, "deprecationReason": null }
+        ],
         "possibleTypes": null
       },
       {

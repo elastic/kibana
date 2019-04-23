@@ -5,8 +5,10 @@
  */
 
 import { LastEventTimeRequestOptions } from './types';
+import { LastEventIndexKey } from '../../graphql/types';
+import { assertUnreachable } from '../../../public/lib/helpers';
 
-interface EventIndicies {
+interface EventIndices {
   [key: string]: string[];
 }
 
@@ -21,7 +23,7 @@ export const buildLastEventTimeQuery = ({
     winlogbeatAlias,
   },
 }: LastEventTimeRequestOptions) => {
-  const indicesToQuery: EventIndicies = {
+  const indicesToQuery: EventIndices = {
     hosts: [logAlias, auditbeatAlias, packetbeatAlias, winlogbeatAlias],
     network: [logAlias, packetbeatAlias],
   };
@@ -30,56 +32,60 @@ export const buildLastEventTimeQuery = ({
     { term: { 'source.ip': ip } },
     { term: { 'destination.ip': ip } },
   ];
-  switch (indexKey) {
-    case 'ipDetails':
-      if (details.ip) {
+  const getQuery = (eventIndexKey: LastEventIndexKey) => {
+    switch (eventIndexKey) {
+      case LastEventIndexKey.ipDetails:
+        if (details.ip) {
+          return {
+            allowNoIndices: true,
+            index: indicesToQuery.network,
+            ignoreUnavailable: true,
+            body: {
+              aggregations: {
+                last_seen_event: { max: { field: '@timestamp' } },
+              },
+              query: { bool: { should: getIpDetailsFilter(details.ip) } },
+              size: 0,
+              track_total_hits: false,
+            },
+          };
+        }
+        throw new Error('buildLastEventTimeQuery - no IP argument provided');
+      case LastEventIndexKey.hostDetails:
+        if (details.hostName) {
+          return {
+            allowNoIndices: true,
+            index: indicesToQuery.hosts,
+            ignoreUnavailable: true,
+            body: {
+              aggregations: {
+                last_seen_event: { max: { field: '@timestamp' } },
+              },
+              query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
+              size: 0,
+              track_total_hits: false,
+            },
+          };
+        }
+        throw new Error('buildLastEventTimeQuery - no hostName argument provided');
+      case LastEventIndexKey.hosts:
+      case LastEventIndexKey.network:
         return {
           allowNoIndices: true,
-          index: indicesToQuery.network,
+          index: indicesToQuery[indexKey],
           ignoreUnavailable: true,
           body: {
             aggregations: {
               last_seen_event: { max: { field: '@timestamp' } },
             },
-            query: { bool: { should: getIpDetailsFilter(details.ip) } },
+            query: { match_all: {} },
             size: 0,
             track_total_hits: false,
           },
         };
-      }
-      throw new Error('buildLastEventTimeQuery - no IP argument provided');
-    case 'hostDetails':
-      if (details.hostName) {
-        return {
-          allowNoIndices: true,
-          index: indicesToQuery.hosts,
-          ignoreUnavailable: true,
-          body: {
-            aggregations: {
-              last_seen_event: { max: { field: '@timestamp' } },
-            },
-            query: { bool: { filter: getHostDetailsFilter(details.hostName) } },
-            size: 0,
-            track_total_hits: false,
-          },
-        };
-      }
-      throw new Error('buildLastEventTimeQuery - no hostName argument provided');
-    case 'hosts':
-    case 'network':
-      return {
-        allowNoIndices: true,
-        index: indicesToQuery[indexKey],
-        ignoreUnavailable: true,
-        body: {
-          aggregations: {
-            last_seen_event: { max: { field: '@timestamp' } },
-          },
-          query: { match_all: {} },
-          size: 0,
-          track_total_hits: false,
-        },
-      };
-  }
-  throw new Error('buildLastEventTimeQuery - invalid indexKey');
+      default:
+        return assertUnreachable(eventIndexKey);
+    }
+  };
+  return getQuery(indexKey);
 };
