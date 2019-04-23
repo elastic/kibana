@@ -61,7 +61,7 @@ function updateObjectsTable($scope, $injector) {
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
           uiCapabilities={uiCapabilites}
-          goEditObject={object => {
+          goInspectObject={object => {
             if (object.meta.editUrl) {
               kbnUrl.change(object.meta.editUrl);
               $scope.$apply();

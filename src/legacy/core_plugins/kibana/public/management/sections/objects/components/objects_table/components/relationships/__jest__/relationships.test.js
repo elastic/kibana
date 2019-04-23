@@ -53,7 +53,7 @@ describe('Relationships', () => {
 
   it('should render index patterns normally', async () => {
     const props = {
-      goEditObject: () => {},
+      goInspectObject: () => {},
       getRelationships: jest.fn().mockImplementation(() => ([
         {
           type: 'search',
@@ -120,7 +120,7 @@ describe('Relationships', () => {
 
   it('should render searches normally', async () => {
     const props = {
-      goEditObject: () => {},
+      goInspectObject: () => {},
       getRelationships: jest.fn().mockImplementation(() => ([
         {
           type: 'index-pattern',
@@ -187,7 +187,7 @@ describe('Relationships', () => {
 
   it('should render visualizations normally', async () => {
     const props = {
-      goEditObject: () => {},
+      goInspectObject: () => {},
       getRelationships: jest.fn().mockImplementation(() => ([
         {
           type: 'dashboard',
@@ -254,7 +254,7 @@ describe('Relationships', () => {
 
   it('should render dashboards normally', async () => {
     const props = {
-      goEditObject: () => {},
+      goInspectObject: () => {},
       getRelationships: jest.fn().mockImplementation(() => ([
         {
           type: 'visualization',
@@ -321,7 +321,7 @@ describe('Relationships', () => {
 
   it('should render errors', async () => {
     const props = {
-      goEditObject: () => {},
+      goInspectObject: () => {},
       getRelationships: jest.fn().mockImplementation(() => {
         throw new Error('foo');
       }),

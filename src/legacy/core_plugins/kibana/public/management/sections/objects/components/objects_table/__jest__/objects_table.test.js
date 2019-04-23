@@ -116,7 +116,7 @@ const allSavedObjects = [
 const $http = () => {};
 $http.post = jest.fn().mockImplementation(() => ([]));
 const defaultProps = {
-  goEditObject: () => {},
+  goInspectObject: () => {},
   savedObjectsClient: {
     find: jest.fn(),
     bulkGet: jest.fn(),

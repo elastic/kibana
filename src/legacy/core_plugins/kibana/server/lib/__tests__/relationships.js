@@ -63,7 +63,7 @@ const savedObjectsSchema = getSchemaMock({
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/index_patterns/${obj.id}`;
+      return encodeURIComponent(`/management/kibana/index_patterns/${obj.id}`);
     },
     getInAppUrl(obj) {
       return {
@@ -79,7 +79,7 @@ const savedObjectsSchema = getSchemaMock({
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/objects/savedVisualizations/${obj.id}`;
+      return encodeURIComponent(`/management/kibana/objects/savedVisualizations/${obj.id}`);
     },
     getInAppUrl(obj) {
       return {
@@ -95,7 +95,7 @@ const savedObjectsSchema = getSchemaMock({
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/objects/savedSearches/${obj.id}`;
+      return encodeURIComponent(`/management/kibana/objects/savedSearches/${obj.id}`);
     },
     getInAppUrl(obj) {
       return {
@@ -111,7 +111,7 @@ const savedObjectsSchema = getSchemaMock({
       return obj.attributes.title;
     },
     getEditUrl(obj) {
-      return `/management/kibana/objects/savedDashboards/${obj.id}`;
+      return encodeURIComponent(`/management/kibana/objects/savedDashboards/${obj.id}`);
     },
     getInAppUrl(obj) {
       return {

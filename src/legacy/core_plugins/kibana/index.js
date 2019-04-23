@@ -136,7 +136,7 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `/management/kibana/index_patterns/${obj.id}`;
+            return encodeURIComponent(`/management/kibana/index_patterns/${obj.id}`);
           },
           getInAppUrl(obj) {
             return {
@@ -152,7 +152,7 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `/management/kibana/objects/savedVisualizations/${obj.id}`;
+            return encodeURIComponent(`/management/kibana/objects/savedVisualizations/${obj.id}`);
           },
           getInAppUrl(obj) {
             return {
@@ -168,7 +168,7 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `/management/kibana/objects/savedSearches/${obj.id}`;
+            return encodeURIComponent(`/management/kibana/objects/savedSearches/${obj.id}`);
           },
           getInAppUrl(obj) {
             return {
@@ -184,7 +184,7 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return `/management/kibana/objects/savedDashboards/${obj.id}`;
+            return encodeURIComponent(`/management/kibana/objects/savedDashboards/${obj.id}`);
           },
           getInAppUrl(obj) {
             return {
@@ -199,9 +199,6 @@ export default function (kibana) {
             return obj.attributes.url;
           },
         },
-        'kql-telemetry': {
-          isNamespaceAgnostic: true,
-        },
         'sample-data-telemetry': {
           isNamespaceAgnostic: true,
           isImportableAndExportable: false,
@@ -210,6 +207,7 @@ export default function (kibana) {
           isImportableAndExportable: false,
         },
         'kql-telemetry': {
+          isNamespaceAgnostic: true,
           isImportableAndExportable: false,
         },
         config: {

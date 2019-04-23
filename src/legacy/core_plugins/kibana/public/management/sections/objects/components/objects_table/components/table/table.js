@@ -50,7 +50,7 @@ class TableUI extends PureComponent {
     canDeleteSavedObjectTypes: PropTypes.array.isRequired,
     onDelete: PropTypes.func.isRequired,
     onExport: PropTypes.func.isRequired,
-    goEditObject: PropTypes.func.isRequired,
+    goInspectObject: PropTypes.func.isRequired,
 
     pageIndex: PropTypes.number.isRequired,
     pageSize: PropTypes.number.isRequired,
@@ -126,7 +126,7 @@ class TableUI extends PureComponent {
       onDelete,
       selectedSavedObjects,
       onTableChange,
-      goEditObject,
+      goInspectObject,
       onShowRelationships,
       intl,
     } = this.props;
@@ -209,17 +209,17 @@ class TableUI extends PureComponent {
         actions: [
           {
             name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.table.columnActions.editActionName',
-              defaultMessage: 'Edit'
+              id: 'kbn.management.objects.objectsTable.table.columnActions.inspectActionName',
+              defaultMessage: 'Inspect'
             }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.table.columnActions.editActionDescription',
-                defaultMessage: 'Edit this saved object'
+                id: 'kbn.management.objects.objectsTable.table.columnActions.inspectActionDescription',
+                defaultMessage: 'Inspect this saved object'
               }),
             type: 'icon',
             icon: 'inspect',
-            onClick: object => goEditObject(object),
+            onClick: object => goInspectObject(object),
             available: object => !!object.meta.editUrl,
           },
           {

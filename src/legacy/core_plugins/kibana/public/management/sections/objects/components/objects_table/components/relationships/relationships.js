@@ -43,7 +43,7 @@ class RelationshipsUI extends Component {
     getRelationships: PropTypes.func.isRequired,
     savedObject: PropTypes.object.isRequired,
     close: PropTypes.func.isRequired,
-    goEditObject: PropTypes.func.isRequired,
+    goInspectObject: PropTypes.func.isRequired,
     canGoInApp: PropTypes.func.isRequired,
   };
 
@@ -100,7 +100,7 @@ class RelationshipsUI extends Component {
   }
 
   renderRelationships() {
-    const { intl, goEditObject, savedObject } = this.props;
+    const { intl, goInspectObject, savedObject } = this.props;
     const { relationships, isLoading, error } = this.state;
 
     if (error) {
@@ -207,17 +207,17 @@ class RelationshipsUI extends Component {
         actions: [
           {
             name: intl.formatMessage({
-              id: 'kbn.management.objects.objectsTable.relationships.columnActions.editActionName',
-              defaultMessage: 'Edit',
+              id: 'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionName',
+              defaultMessage: 'Inspect',
             }),
             description:
               intl.formatMessage({
-                id: 'kbn.management.objects.objectsTable.relationships.columnActions.editActionDescription',
-                defaultMessage: 'Edit this saved object',
+                id: 'kbn.management.objects.objectsTable.relationships.columnActions.inspectActionDescription',
+                defaultMessage: 'Inspect this saved object',
               }),
             type: 'icon',
             icon: 'inspect',
-            onClick: object => goEditObject(object),
+            onClick: object => goInspectObject(object),
             available: object => !!object.meta.editUrl,
           },
         ],
