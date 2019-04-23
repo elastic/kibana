@@ -58,7 +58,7 @@ function ExtendedBoundsParamEditor({ value, setValue, setValidity }: AggParamEdi
     <>
       <FormattedMessage
         id="common.ui.aggTypes.extendedBoundsLabel"
-        defaultMessage="Extended Bounds"
+        defaultMessage="Extended bounds"
       />{' '}
       <EuiIconTip
         position="right"
