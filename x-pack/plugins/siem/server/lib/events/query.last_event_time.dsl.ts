@@ -26,7 +26,7 @@ export const buildLastEventTimeQuery = ({
     network: [logAlias, packetbeatAlias],
   };
   const getHostDetailsFilter = (hostName: string) => [{ term: { 'host.name': hostName } }];
-  const getIpDetailsFilter = (ip: string) => [{ term: { 'source.ip': ip } }];
+  const getIpDetailsFilter = (ip: string) => [{ term: { 'source.ip': ip } }, { term: { 'destination.ip': ip } }];
   switch (indexKey) {
     case 'ipDetails':
       if (details.ip) {
@@ -38,7 +38,7 @@ export const buildLastEventTimeQuery = ({
             aggregations: {
               last_seen_event: { max: { field: '@timestamp' } },
             },
-            query: { bool: { filter: getIpDetailsFilter(details.ip) } },
+            query: { bool: { should: getIpDetailsFilter(details.ip) } },
             size: 0,
             track_total_hits: false,
           },
