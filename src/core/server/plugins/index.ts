@@ -20,7 +20,7 @@
 export { PluginsService, PluginsServiceSetup } from './plugins_service';
 export { configDefinition } from './plugins_config';
 /** @internal */
-export { isNewPlatformPlugin } from './discovery';
+export { isNewPlatformPlugin, discover, DiscoveredPluginsDefinitions } from './discovery';
 /** @internal */
 export {
   DiscoveredPlugin,

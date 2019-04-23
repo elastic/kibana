@@ -23,7 +23,7 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpConfig, HttpService, HttpServiceSetup, Router } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
-import { PluginsService } from './plugins';
+import { PluginsService, DiscoveredPluginsDefinitions } from './plugins';
 
 export class Server {
   private readonly elasticsearch: ElasticsearchService;
@@ -50,7 +50,7 @@ export class Server {
     this.elasticsearch = new ElasticsearchService(core);
   }
 
-  public async setup() {
+  public async setup(newPlatformPluginDefinitions: DiscoveredPluginsDefinitions) {
     this.log.debug('setting up server');
 
     // We shouldn't set up http service in two cases:
@@ -68,10 +68,13 @@ export class Server {
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup();
 
-    const pluginsSetup = await this.plugins.setup({
-      elasticsearch: elasticsearchServiceSetup,
-      http: httpSetup,
-    });
+    const pluginsSetup = await this.plugins.setup(
+      {
+        elasticsearch: elasticsearchServiceSetup,
+        http: httpSetup,
+      },
+      newPlatformPluginDefinitions
+    );
 
     await this.legacy.setup({
       elasticsearch: elasticsearchServiceSetup,

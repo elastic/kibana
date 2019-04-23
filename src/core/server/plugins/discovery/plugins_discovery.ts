@@ -16,113 +16,146 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import fs from 'fs';
+import path from 'path';
+import { promisify } from 'util';
+import { flatten } from 'lodash';
 
-import { readdir, stat } from 'fs';
-import { resolve } from 'path';
-import { bindNodeCallback, from, merge } from 'rxjs';
-import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
-import { CoreContext } from '../../core_context';
-import { Logger } from '../../logging';
-import { PluginWrapper } from '../plugin';
-import { createPluginInitializerContext } from '../plugin_context';
-import { PluginsConfig } from '../plugins_config';
-import { PluginDiscoveryError } from './plugin_discovery_error';
+import { Type } from '@kbn/config-schema';
+import { Env } from '../../config';
+import { LoggerFactory, Logger } from '../../logging';
 import { parseManifest } from './plugin_manifest_parser';
+import { PluginDiscoveryError } from './plugin_discovery_error';
+import { PluginManifest } from '../plugin';
 
-const fsReadDir$ = bindNodeCallback(readdir);
-const fsStat$ = bindNodeCallback(stat);
+const fsReaddirAsync = promisify(fs.readdir);
+const fsStatAsync = promisify(fs.stat);
+
+export interface PluginDefinition {
+  path: string;
+  manifest: PluginManifest;
+  schema?: Type<unknown>;
+}
+
+export interface DiscoveredPluginsDefinitions {
+  pluginDefinitions: ReadonlyArray<PluginDefinition>;
+  errors: ReadonlyArray<PluginDiscoveryError>;
+  searchPaths: ReadonlyArray<string>;
+  devPluginPaths: ReadonlyArray<string>;
+}
+
+async function isDirExists(aPath: string) {
+  try {
+    return (await fsStatAsync(aPath)).isDirectory();
+  } catch (e) {
+    return false;
+  }
+}
+
+function readSchemaMaybe(pluginPath: string, manifest: PluginManifest, log: Logger) {
+  if (!manifest.server) return;
+  const pluginPathServer = path.join(pluginPath, 'server');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const pluginDefinition = require(pluginPathServer);
+
+  if (!('configDefinition' in pluginDefinition)) {
+    log.debug(`"${pluginPathServer}" does not export "configDefinition".`);
+    return;
+  }
+
+  const configSchema: Type<unknown> | undefined = pluginDefinition.configDefinition.schema;
+  if (configSchema && typeof configSchema.validate === 'function') {
+    return configSchema;
+  }
+
+  throw PluginDiscoveryError.invalidConfigSchema(
+    pluginPathServer,
+    new Error(
+      'The config definition for plugin did not contain "schema" field, which is required for config validation'
+    )
+  );
+}
+
+type PluginPathEither = string | PluginDiscoveryError;
+const isPluginDiscoveryError = (candidate: PluginPathEither): candidate is PluginDiscoveryError =>
+  candidate instanceof PluginDiscoveryError;
+
+async function findSubFolders(folderPath: string): Promise<PluginPathEither[]> {
+  const result = [];
+  try {
+    const subFolderNames = await fsReaddirAsync(folderPath);
+    for (const name of subFolderNames) {
+      const subFolderPath = path.join(folderPath, name);
+      try {
+        if (await isDirExists(subFolderPath)) {
+          result.push(subFolderPath);
+        }
+      } catch (error) {
+        result.push(PluginDiscoveryError.invalidSearchPath(subFolderPath, error));
+      }
+    }
+  } catch (error) {
+    result.push(PluginDiscoveryError.invalidSearchPath(folderPath, error));
+  }
+  return result;
+}
 
 /**
- * Tries to discover all possible plugins based on the provided plugin config.
- * Discovery result consists of two separate streams, the one (`plugin$`) is
- * for the successfully discovered plugins and the other one (`error$`) is for
- * all the errors that occurred during discovery process.
- *
- * @param config Plugin config instance.
- * @param coreContext Kibana core values.
  * @internal
+ * Iterates over every plugin search path, try to read plugin directories
+ * to gather collection of plugin definitions.
+ * If directory cannot be read the errors are accumulated in error collection.
+ * Returns lists of plugin definitions & discovery errors.
+ *
+ * @param searchPaths - list of paths to plugin folders.
+ * @param devPluginPaths - list of paths to plugins available on dev mode only.
+ * @param env - Runtime environment configuration
+ * @param logger - Logger factory
  */
-export function discover(config: PluginsConfig, coreContext: CoreContext) {
-  const log = coreContext.logger.get('plugins-discovery');
-  log.debug('Discovering plugins...');
-
-  if (config.additionalPluginPaths.length) {
+export async function discover(
+  searchPaths: ReadonlyArray<string>,
+  devPluginPaths: ReadonlyArray<string>,
+  env: Env,
+  logger: LoggerFactory
+): Promise<DiscoveredPluginsDefinitions> {
+  const log = logger.get('discovery');
+  if (devPluginPaths.length > 0) {
     log.warn(
-      `Explicit plugin paths [${
-        config.additionalPluginPaths
-      }] are only supported in development. Relative imports will not work in production.`
+      `Explicit plugin paths [${devPluginPaths}] are only supported in development. Relative imports will not work in production.`
     );
   }
 
-  const discoveryResults$ = merge(
-    from(config.additionalPluginPaths),
-    processPluginSearchPaths$(config.pluginSearchPaths, log)
-  ).pipe(
-    mergeMap(pluginPathOrError => {
-      return typeof pluginPathOrError === 'string'
-        ? createPlugin$(pluginPathOrError, log, coreContext)
-        : [pluginPathOrError];
-    }),
-    shareReplay()
-  );
+  const pluginSearchPaths = await Promise.all(searchPaths.map(findSubFolders));
+  const pluginFolderPaths = flatten<PluginPathEither>([...pluginSearchPaths, ...devPluginPaths]);
 
-  return {
-    plugin$: discoveryResults$.pipe(
-      filter((entry): entry is PluginWrapper => entry instanceof PluginWrapper)
-    ),
-    error$: discoveryResults$.pipe(
-      filter((entry): entry is PluginDiscoveryError => !(entry instanceof PluginWrapper))
-    ),
-  };
-}
+  const pluginDefinitions: PluginDefinition[] = [];
+  const errors: PluginDiscoveryError[] = [];
 
-/**
- * Iterates over every plugin search path and returns a merged stream of all
- * sub-directories. If directory cannot be read or it's impossible to get stat
- * for any of the nested entries then error is added into the stream instead.
- * @param pluginDirs List of the top-level directories to process.
- * @param log Plugin discovery logger instance.
- */
-function processPluginSearchPaths$(pluginDirs: ReadonlyArray<string>, log: Logger) {
-  return from(pluginDirs).pipe(
-    mergeMap(dir => {
-      log.debug(`Scanning "${dir}" for plugin sub-directories...`);
-
-      return fsReadDir$(dir).pipe(
-        mergeMap((subDirs: string[]) => subDirs.map(subDir => resolve(dir, subDir))),
-        mergeMap(path =>
-          fsStat$(path).pipe(
-            // Filter out non-directory entries from target directories, it's expected that
-            // these directories may contain files (e.g. `README.md` or `package.json`).
-            // We shouldn't silently ignore the entries we couldn't get stat for though.
-            mergeMap(pathStat => (pathStat.isDirectory() ? [path] : [])),
-            catchError(err => [PluginDiscoveryError.invalidPluginPath(path, err)])
-          )
-        ),
-        catchError(err => [PluginDiscoveryError.invalidSearchPath(dir, err)])
-      );
-    })
-  );
-}
-
-/**
- * Tries to load and parse the plugin manifest file located at the provided plugin
- * directory path and produces an error result if it fails to do so or plugin manifest
- * isn't valid.
- * @param path Path to the plugin directory where manifest should be loaded from.
- * @param log Plugin discovery logger instance.
- * @param coreContext Kibana core context.
- */
-function createPlugin$(path: string, log: Logger, coreContext: CoreContext) {
-  return from(parseManifest(path, coreContext.env.packageInfo)).pipe(
-    map(manifest => {
-      log.debug(`Successfully discovered plugin "${manifest.id}" at "${path}"`);
-      return new PluginWrapper(
-        path,
-        manifest,
-        createPluginInitializerContext(coreContext, manifest)
-      );
-    }),
-    catchError(err => [err])
-  );
+  for (const pluginPath of pluginFolderPaths) {
+    if (isPluginDiscoveryError(pluginPath)) {
+      errors.push(pluginPath);
+    } else {
+      try {
+        const manifest = await parseManifest(pluginPath, env.packageInfo);
+        const schema = readSchemaMaybe(pluginPath, manifest, log);
+        pluginDefinitions.push({
+          path: pluginPath,
+          manifest,
+          schema,
+        });
+      } catch (error) {
+        if (isPluginDiscoveryError(error)) {
+          errors.push(error);
+        } else {
+          throw error;
+        }
+      }
+    }
+  }
+  return Object.freeze({
+    pluginDefinitions,
+    errors,
+    searchPaths,
+    devPluginPaths,
+  });
 }
