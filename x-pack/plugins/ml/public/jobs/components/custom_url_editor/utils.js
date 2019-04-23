@@ -175,18 +175,18 @@ function buildDashboardUrlFromSettings(settings) {
         // which includes the ID of the index holding the field used in the filter.
 
         // So for simplicity, put entities in the query, replacing any query which is there already.
-        // e.g. query:(language:lucene,query:'region:us-east-1%20AND%20instance:i-20d061fa')
+        // e.g. query:(language:kuery,query:'region:us-east-1%20and%20instance:i-20d061fa')
         if (queryFieldNames !== undefined && queryFieldNames.length > 0) {
           let queryString = '';
           queryFieldNames.forEach((fieldName, index) => {
             if (index > 0) {
-              queryString += ' AND ';
+              queryString += ' and ';
             }
             queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
           });
 
           query = {
-            language: 'lucene',
+            language: 'kuery',
             query: queryString
           };
         }
@@ -247,18 +247,18 @@ function buildDiscoverUrlFromSettings(settings) {
   // which includes the ID of the index holding the field used in the filter.
 
   // So for simplicity, put entities in the query, replacing any query which is there already.
-  // e.g. query:(language:lucene,query:'region:us-east-1%20AND%20instance:i-20d061fa')
+  // e.g. query:(language:kuery,query:'region:us-east-1%20and%20instance:i-20d061fa')
   if (queryFieldNames !== undefined && queryFieldNames.length > 0) {
     let queryString = '';
     queryFieldNames.forEach((fieldName, i) => {
       if (i > 0) {
-        queryString += ' AND ';
+        queryString += ' and ';
       }
       queryString += `${escapeForElasticsearchQuery(fieldName)}:"$${fieldName}$"`;
     });
 
     appState.query = {
-      language: 'lucene',
+      language: 'kuery',
       query: queryString
     };
   }
