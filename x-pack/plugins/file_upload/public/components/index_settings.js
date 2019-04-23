@@ -15,6 +15,7 @@ import {
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 export const IndexSettings = injectI18n(function IndexSettings({
+  disabled,
   indexName,
   setIndexName,
   indexDataType,
@@ -36,6 +37,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
         }
       >
         <EuiSelect
+          disabled={disabled}
           options={mappingsOptions}
           onChange={({ target }) => {
             setIndexDataType(target.value);

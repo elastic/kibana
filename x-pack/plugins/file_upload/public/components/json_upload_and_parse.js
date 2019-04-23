@@ -81,6 +81,7 @@ export function JsonUploadAndParse(props) {
         }}
       />
       <IndexSettings
+        disabled={!fileRef}
         indexName={indexName}
         setIndexName={setIndexName}
         indexDataType={indexDataType}

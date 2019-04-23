@@ -62,6 +62,13 @@ export function JsonIndexFilePicker({
             ).catch(e => {
               toastNotifications.addDanger(`Unable to parse file: ${e}`);
             });
+            if (!parsedFileResult) {
+              if (fileRef) {
+                onFileRemove && onFileRemove(fileRef);
+                setFileRef(null);
+              }
+              return;
+            }
             setFileRef(file);
             // Save parsed result
             setParsedFile(parsedFileResult);
