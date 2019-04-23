@@ -7,7 +7,8 @@
 import { Location } from 'history';
 import { combineReducers } from 'redux';
 import { locationReducer } from './location';
-import { IUrlParams, urlParamsReducer } from './urlParams';
+import { urlParamsReducer } from '../context/UrlParamsContext';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 
 export interface IReduxState {
   location: Location;

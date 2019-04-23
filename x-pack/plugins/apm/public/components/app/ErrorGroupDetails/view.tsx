@@ -25,7 +25,7 @@ import {
   loadErrorDistribution,
   loadErrorGroupDetails
 } from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 // @ts-ignore
 import { FilterBar } from '../../shared/FilterBar';

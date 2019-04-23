@@ -13,7 +13,7 @@ import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceList } from '../../../services/rest/apm/services';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 

@@ -12,7 +12,7 @@ import React from 'react';
 import { useTransactionDetailsCharts } from '../../../hooks/useTransactionDetailsCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { FilterBar } from '../../shared/FilterBar';

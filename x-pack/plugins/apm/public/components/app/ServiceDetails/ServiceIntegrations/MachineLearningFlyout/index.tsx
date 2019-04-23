@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { startMLJob } from '../../../../../services/rest/ml';
 import { getAPMIndexPattern } from '../../../../../services/rest/savedObjects';
-import { IUrlParams } from '../../../../../store/urlParams';
+import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
 

@@ -21,7 +21,7 @@ import {
   asPercent,
   tpmUnit
 } from '../../utils/formatters';
-import { IUrlParams } from '../urlParams';
+import { IUrlParams } from '../../context/UrlParamsContext/types';
 
 export const getEmptySerie = memoize(
   (

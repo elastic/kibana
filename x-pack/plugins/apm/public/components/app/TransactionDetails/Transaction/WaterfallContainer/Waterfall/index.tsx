@@ -9,7 +9,7 @@ import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
-import { IUrlParams } from '../../../../../../store/urlParams';
+import { IUrlParams } from '../../../../../../context/UrlParamsContext/types';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
 import {

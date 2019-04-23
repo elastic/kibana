@@ -13,7 +13,7 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { ErrorGroupListAPIResponse } from '../../../../../server/lib/errors/get_error_groups';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import {
   fontFamilyCode,
   fontSizes,

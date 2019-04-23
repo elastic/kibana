@@ -12,7 +12,7 @@ import { queryByLabelText, render } from 'react-testing-library';
 import { TransactionOverview } from '..';
 // @ts-ignore
 import configureStore from '../../../../store/config/configureStore';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
 /* eslint-disable no-console */

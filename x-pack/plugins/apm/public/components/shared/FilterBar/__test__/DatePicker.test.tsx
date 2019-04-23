@@ -9,7 +9,7 @@ import { LocationProvider } from '../../../../context/LocationContext';
 import { UrlParamsContext } from '../../../../context/UrlParamsContext';
 import { tick } from '../../../../utils/testHelpers';
 import { DatePicker } from '../DatePicker';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { history } from '../../../../utils/history';
 import { mount } from 'enzyme';
 import { EuiSuperDatePicker } from '@elastic/eui';

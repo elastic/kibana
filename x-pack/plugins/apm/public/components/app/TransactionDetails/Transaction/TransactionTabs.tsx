@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';

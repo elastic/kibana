@@ -12,7 +12,7 @@ import {
   getCPUSeries,
   getMemorySeries
 } from '../store/selectors/chartSelectors';
-import { IUrlParams } from '../store/urlParams';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const memory: MemoryChartAPIResponse = {

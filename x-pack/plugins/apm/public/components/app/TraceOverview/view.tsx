@@ -8,7 +8,7 @@ import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { loadTraceList } from '../../../services/rest/apm/traces';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TraceList } from './TraceList';
 
 interface Props {

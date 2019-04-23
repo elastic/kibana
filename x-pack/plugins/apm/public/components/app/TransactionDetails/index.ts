@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import { IReduxState } from '../../../store/rootReducer';
-import { getUrlParams } from '../../../store/urlParams';
+import { getUrlParams } from '../../../context/UrlParamsContext';
 import { TransactionDetailsView } from './view';
 
 function mapStateToProps(state = {} as IReduxState) {

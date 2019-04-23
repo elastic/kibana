@@ -9,7 +9,7 @@ import { Location } from 'history';
 import React from 'react';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceDetails } from '../../../services/rest/apm/services';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 // @ts-ignore
 import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
