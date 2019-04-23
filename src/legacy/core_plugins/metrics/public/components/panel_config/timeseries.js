@@ -41,6 +41,10 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+/*
+QueryBarInput will be the text input, the language switcher, and autocomplete.
+import { QueryBarInput } from 'ui/query_bar';
+*/
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
@@ -85,9 +89,12 @@ class TimeseriesPanelConfigUi extends Component {
       show_grid: 1,
     };
     const model = { ...defaults, ...this.props.model };
+    console.log('TimeSeriesPanelConfigUi model:', model);
     const { selectedTab } = this.state;
+    console.log('TimeSeriesPanelConfigUi { selectedTab }:', { selectedTab });
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    console.log('TimeSeriesPanelConfigUi handleTextChange:', handleTextChange);
     const htmlId = htmlIdGenerator();
     const { intl } = this.props;
 
@@ -386,6 +393,7 @@ class TimeseriesPanelConfigUi extends Component {
         </div>
       );
     }
+    console.log('TimeSeriesPanelConfigUi view:', view);
     return (
       <div>
         <EuiTabs size="s">
