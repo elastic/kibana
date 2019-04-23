@@ -22,14 +22,13 @@ import { timezoneProvider } from 'ui/vis/lib/timezone';
 import { timefilter } from 'ui/timefilter';
 import { kfetch } from 'ui/kfetch';
 
-const MetricsRequestHandlerProvider = function (Private, Notifier, config, i18n) {
-  const notify = new Notifier({ location: i18n('tsvb.requestHandler.notifier.locationNameTitle', { defaultMessage: 'Metrics' }) });
+const MetricsRequestHandlerProvider = function (Private, config) {
   const timezone = Private(timezoneProvider)();
 
   return {
     name: 'metrics',
 
-    handler: ({ uiState, timeRange, filters, query, visParams }) => {
+    handler: async ({ uiState, timeRange, filters, query, visParams }) => {
       const uiStateObj = uiState.get(visParams.type, {});
       const parsedTimeRange = timefilter.calculateBounds(timeRange);
       const scaledDataFormat = config.get('dateFormat:scaled');
@@ -41,8 +40,8 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, i18n)
 
           validateInterval(parsedTimeRange, visParams, maxBuckets);
 
-          return kfetch({
-            pathname: '../api/metrics/vis/data',
+          const resp = await kfetch({
+            pathname: '/api/metrics/vis/data',
             method: 'POST',
             body: JSON.stringify({
               timerange: {
@@ -54,16 +53,16 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, i18n)
               panels: [visParams],
               state: uiStateObj,
             }),
-          })
-            .then(resp => ({
-              dateFormat,
-              scaledDataFormat,
-              timezone,
-              ...resp,
-            }))
-            .catch(error => notify.error(error));
+          });
+
+          return {
+            dateFormat,
+            scaledDataFormat,
+            timezone,
+            ...resp,
+          };
         } catch (error) {
-          error && notify.error(error);
+          return Promise.reject(error);
         }
       }
     },

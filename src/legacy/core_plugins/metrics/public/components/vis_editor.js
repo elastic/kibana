@@ -180,6 +180,12 @@ class VisEditor extends Component {
   componentDidUpdate() {
     this.props.renderComplete();
   }
+
+  componentWillUnmount() {
+    if (this.updateVisState.cancel) {
+      this.updateVisState.cancel();
+    }
+  }
 }
 
 VisEditor.defaultProps = {
