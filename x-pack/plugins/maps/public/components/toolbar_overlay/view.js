@@ -33,7 +33,7 @@ export class ToolbarOverlay extends React.Component {
     drawType: null
   };
 
-  _onClick = () => {
+  _openToolbar = () => {
     if (!this._isMounted) {
       return;
     }
@@ -62,7 +62,17 @@ export class ToolbarOverlay extends React.Component {
     });
   };
 
-  _showIndexPatternSelection = (drawType) => {
+  _activateDrawForFirstIndexPattern = (drawType) => {
+    if (!this._isMounted) {
+      return;
+    }
+    const indexPattern = this.state.uniqueIndexPatternsAndGeoFields[0];
+    this.setState(RESET_STATE, () => {
+      this.props.initiateDraw({ drawType: drawType, ...indexPattern });
+    });
+  };
+
+  _showIndexPatternSelection =  (drawType) => {
     if (!this._isMounted) {
       return;
     }
@@ -111,42 +121,48 @@ export class ToolbarOverlay extends React.Component {
   }
 
   _getDrawActionsPanel() {
-    const actionItems = [
-      {
-        name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
-          defaultMessage: 'Draw shape',
-        }),
-        toolTipContent: i18n.translate('xpack.maps.toolbarOverlay.drawShapeTooltip', {
-          defaultMessage: 'Draw shape to filter data from index pattern',
-        }),
-        panel: this._getIndexPatternSelectionPanel(1),
-        onClick: () => this._showIndexPatternSelection(DRAW_STATE_DRAW_TYPE.POLYGON)
-      },
-      {
-        name: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabel', {
-          defaultMessage: 'Draw bounds',
-        }),
-        toolTipContent: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsTooltip', {
-          defaultMessage: 'Draw bounds to filter data from index pattern',
-        }),
-        panel: this._getIndexPatternSelectionPanel(2),
-        onClick: () => this._showIndexPatternSelection(DRAW_STATE_DRAW_TYPE.BOUNDS)
-      }
-    ];
+
+    const drawPolygonAction =       {
+      name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
+        defaultMessage: 'Draw shape',
+      }),
+      toolTipContent: i18n.translate('xpack.maps.toolbarOverlay.drawShapeTooltip', {
+        defaultMessage: 'Draw shape to filter data from index pattern',
+      })
+    };
+
+    const drawBoundsAction =      {
+      name: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabel', {
+        defaultMessage: 'Draw bounds',
+      }),
+      toolTipContent: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsTooltip', {
+        defaultMessage: 'Draw bounds to filter data from index pattern',
+      })
+    };
+
+    if (this.state.uniqueIndexPatternsAndGeoFields.length === 1) {
+      drawPolygonAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_STATE_DRAW_TYPE.POLYGON);
+      drawBoundsAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_STATE_DRAW_TYPE.BOUNDS);
+    } else {
+      drawPolygonAction.panel = this._getIndexPatternSelectionPanel(1);
+      drawPolygonAction.onClick = () => this._showIndexPatternSelection(DRAW_STATE_DRAW_TYPE.POLYGON);
+      drawBoundsAction.panel = this._getIndexPatternSelectionPanel(2);
+      drawBoundsAction.onClick = () => this._showIndexPatternSelection(DRAW_STATE_DRAW_TYPE.BOUNDS);
+    }
 
     return flattenPanelTree({
       id: 0,
-      title: i18n.translate('xpack.maps.toolbarOverlay.toolvbarTitle', {
+      title: i18n.translate('xpack.maps.toolbarOverlay.toolbarTitle', {
         defaultMessage: 'Tools',
       }),
-      items: actionItems
+      items: [drawPolygonAction, drawBoundsAction]
     });
   }
 
   _getIndexPatternSelectionPanel(id) {
     const options = this.state.uniqueIndexPatternsAndGeoFields.map((indexPatternAndGeoField) => {
       return {
-        inputDisplay: <EuiText><p>{`${indexPatternAndGeoField.indexPatternTitle} . ${indexPatternAndGeoField.geoField}`}</p></EuiText>,
+        inputDisplay: <EuiText><p>{`${indexPatternAndGeoField.indexPatternTitle} : ${indexPatternAndGeoField.geoField}`}</p></EuiText>,
         value: indexPatternAndGeoField
       };
     });
@@ -171,14 +187,17 @@ export class ToolbarOverlay extends React.Component {
     return (
       <EuiButtonIcon
         iconType="wrench"
-        onClick={this._onClick}
+        onClick={this._openToolbar}
       />
     );
   }
 
   render() {
 
-    if (!this.props.isReadOnly) {
+    if (
+      !this.props.isReadOnly ||
+      !this.state.uniqueIndexPatternsAndGeoFields.length
+    ) {
       return null;
     }
 
