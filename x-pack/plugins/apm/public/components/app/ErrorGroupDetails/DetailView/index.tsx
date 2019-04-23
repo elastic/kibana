@@ -17,7 +17,7 @@ import { Location } from 'history';
 import React from 'react';
 import styled from 'styled-components';
 import { first } from 'lodash';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { IUrlParams } from '../../../../store/urlParams';
