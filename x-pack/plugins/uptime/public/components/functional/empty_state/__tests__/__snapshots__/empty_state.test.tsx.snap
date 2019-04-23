@@ -142,7 +142,7 @@ exports[`EmptyState component doesn't render child components when count is fals
                 <EuiLoadingSpinner
                   size="xl"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--xLarge"
                   />
                 </EuiLoadingSpinner>
@@ -852,7 +852,7 @@ exports[`EmptyState component renders loading state if no errors or doc count 1`
                 <EuiLoadingSpinner
                   size="xl"
                 >
-                  <div
+                  <span
                     className="euiLoadingSpinner euiLoadingSpinner--xLarge"
                   />
                 </EuiLoadingSpinner>

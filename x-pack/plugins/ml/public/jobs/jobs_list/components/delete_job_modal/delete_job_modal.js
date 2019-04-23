@@ -109,6 +109,7 @@ export const DeleteJobModal = injectI18n(class extends Component {
       modal = (
         <EuiOverlayMask>
           <EuiConfirmModal
+            data-test-subj="mlDeleteJobConfirmModal"
             ref={this.setEL}
             title={title}
             onCancel={this.closeModal}

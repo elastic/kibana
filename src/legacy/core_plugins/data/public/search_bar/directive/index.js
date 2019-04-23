@@ -28,11 +28,34 @@ export function setupDirective() {
   app.directive('searchBar', (reactDirective, localStorage) => {
     return reactDirective(
       wrapInI18nContext(SearchBar),
-      undefined,
+      [
+        ['query', { watchDepth: 'reference' }],
+        ['store', { watchDepth: 'reference' }],
+        ['intl', { watchDepth: 'reference' }],
+
+        ['onQuerySubmit', { watchDepth: 'reference' }],
+        ['onFiltersUpdated', { watchDepth: 'reference' }],
+        ['onRefreshChange', { watchDepth: 'reference' }],
+
+        ['indexPatterns', { watchDepth: 'collection' }],
+        ['filters', { watchDepth: 'collection' }],
+
+        'appName',
+        'screenTitle',
+        'showFilterBar',
+        'showQueryBar',
+        'showDatePicker',
+        'dateRangeFrom',
+        'dateRangeTo',
+        'isRefreshPaused',
+        'refreshInterval',
+        'disableAutoFocus',
+        'showAutoRefreshOnly',
+      ],
       {},
       {
         store: localStorage,
-      }
+      },
     );
   });
 }
