@@ -58,12 +58,6 @@ export function TransactionOverviewView({
 }: TransactionOverviewProps) {
   const { serviceName, transactionType } = urlParams;
 
-  // TODO: improve urlParams typings.
-  // `serviceName` will never be undefined here, and this check should not be needed
-  if (!serviceName || !transactionType) {
-    return null;
-  }
-
   // redirect to first transaction type
   useRedirect(
     history,
@@ -77,6 +71,12 @@ export function TransactionOverviewView({
   const { data: transactionOverviewCharts } = useTransactionOverviewCharts(
     urlParams
   );
+
+  // TODO: improve urlParams typings.
+  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
+  if (!serviceName || !transactionType) {
+    return null;
+  }
 
   const { data: transactionListData } = useTransactionList(urlParams);
   const { data: hasMLJob = false } = useFetcher(
