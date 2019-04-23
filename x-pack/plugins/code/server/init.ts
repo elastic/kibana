@@ -144,9 +144,6 @@ async function initNonCodeNode(
 ) {
   log.info(`Initializing Code plugin as non-code node, redirecting all code requests to ${url}`);
   redirectRoute(server, url, log);
-  server.expose('stop', () => {
-    // nothing to do
-  });
 }
 
 async function initCodeNode(server: Server, serverOptions: ServerOptions, log: Logger) {
@@ -260,7 +257,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
 
-  server.expose('stop', () => {
+  server.events.on('stop', () => {
     indexScheduler.stop();
     updateScheduler.stop();
     queue.destroy();
