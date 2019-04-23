@@ -97,6 +97,10 @@ export class ESGeoGridSource extends AbstractESSource {
     );
   }
 
+  supportsDrawFilter() {
+    return true;
+  }
+
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {
@@ -176,9 +180,7 @@ export class ESGeoGridSource extends AbstractESSource {
   }
 
   async getGeoJsonWithMeta(layerName, searchFilters) {
-
     const featureCollection = await this.getGeoJsonPoints(layerName, searchFilters);
-
     return {
       data: featureCollection,
       meta: {

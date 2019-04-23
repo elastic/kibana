@@ -51,6 +51,17 @@ export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
+export const UPDATE_DRAW_STATE = 'UPDATE_DRAWMODE';
+
+export const DRAW_STATE_TYPE = {
+  NONE: 'NONE',
+  ACTIVE: 'ACTIVE'
+};
+
+export const DRAW_STATE_DRAW_TYPE = {
+  BOUNDS: 'BOUNDS',
+  POLYGON: 'POLYGON'
+};
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -626,5 +637,20 @@ export function setJoinsForLayer(layer, joins) {
 
     await dispatch(clearMissingStyleProperties(layer.getId()));
     dispatch(syncDataForLayer(layer.getId()));
+  };
+}
+
+export function updateDrawStateWithOptions(type, options) {
+  return async (dispatch) => {
+    if (type === DRAW_STATE_TYPE.ACTIVE) {
+      await dispatch(setTooltipState(null));//tooltips just get in the way
+    }
+    dispatch({
+      type: UPDATE_DRAW_STATE,
+      drawState: {
+        type: type,
+        ...options
+      }
+    });
   };
 }

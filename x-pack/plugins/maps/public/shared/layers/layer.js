@@ -80,6 +80,10 @@ export class AbstractLayer {
     return await this._source.supportsFitToBounds();
   }
 
+  supportsDrawFilter() {
+    return false;
+  }
+
   async getDisplayName() {
     if (this._descriptor.label) {
       return this._descriptor.label;
@@ -264,6 +268,11 @@ export class AbstractLayer {
 
   async getOrdinalFields() {
     return [];
+  }
+
+  async getIndexPatternsAndGeofields() {
+    const config = await this._source.getIndexPatternAndGeofield();
+    return config ? [config] : [];
   }
 
 }

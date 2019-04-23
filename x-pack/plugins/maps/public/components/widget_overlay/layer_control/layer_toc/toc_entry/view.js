@@ -143,17 +143,9 @@ export class TOCEntry extends React.Component {
   }
 
   _renderLayerHeader() {
-    const {
-      cloneLayer,
-      isReadOnly,
-      layer,
-      zoom,
-      toggleVisible,
-      fitToBounds
-    } = this.props;
 
     let sortIcon;
-    if (!isReadOnly) {
+    if (!this.props.isReadOnly) {
       sortIcon = (
         <EuiFlexItem grow={false}>
           <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
@@ -169,25 +161,29 @@ export class TOCEntry extends React.Component {
         alignItems="center"
         responsive={false}
         className={
-          layer.isVisible() && layer.showAtZoomLevel(zoom)
-            && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
+          this.props.layer.isVisible() && this.props.layer.showAtZoomLevel(this.props.zoom)
+            && !this.props.layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
         }
       >
         <EuiFlexItem grow={false}>
           <LayerTocActions
-            layer={layer}
+            layer={this.props.layer}
             fitToBounds={() => {
-              fitToBounds(layer.getId());
+              this.props.fitToBounds(this.props.layer.getId());
             }}
-            zoom={zoom}
+            zoom={this.props.zoom}
             toggleVisible={() => {
-              toggleVisible(layer.getId());
+              this.props.toggleVisible(this.props.layer.getId());
+            }}
+            initiateDraw={() => {
+              this.props.initiateDraw(this.props.layer.getId());
             }}
             displayName={this.state.displayName}
             cloneLayer={() => {
-              cloneLayer(layer.getId());
+              this.props.cloneLayer(this.props.layer.getId());
             }}
             isReadOnly={this.props.isReadOnly}
+            drawStateType={this.props.drawState.type}
           />
         </EuiFlexItem>
         <EuiFlexItem>

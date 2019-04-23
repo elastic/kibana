@@ -14,6 +14,7 @@ import { ViewControl } from './view_control';
 import { AttributionControl } from './attribution_control';
 
 export function WidgetOverlay() {
+
   return (
     <EuiFlexGroup className="mapWidgetOverlay" responsive={false} direction="column" alignItems="flexEnd" gutterSize="s">
       <EuiFlexItem>

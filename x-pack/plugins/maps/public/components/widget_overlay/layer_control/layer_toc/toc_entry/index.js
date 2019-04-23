@@ -16,11 +16,16 @@ import {
   cloneLayer,
 } from '../../../../../actions/store_actions';
 
-import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
+import {
+  hasDirtyState,
+  getSelectedLayer,
+  getDrawState
+} from '../../../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {
     isReadOnly: getIsReadOnly(state),
+    drawState: getDrawState(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
     getSelectedLayerSelector: () => {
       return getSelectedLayer(state);

@@ -13,6 +13,7 @@ import {
 import { createExtentFilter } from '../../../elasticsearch_geo_utils';
 import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
+import { DECIMAL_DEGREES_PRECISION } from '../../../../common/constants';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
 import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
@@ -34,6 +35,18 @@ export class AbstractESSource extends AbstractVectorSource {
 
   isQueryAware() {
     return true;
+  }
+
+  async getIndexPatternAndGeofield() {
+    const indexPattern = await this._getIndexPattern();
+    if (!indexPattern) {
+      return null;
+    }
+    return {
+      indexPatternId: this._descriptor.indexPatternId,
+      indexPatternTitle: indexPattern.title,
+      geoField: this._descriptor.geoField
+    };
   }
 
   getIndexPatternIds() {
@@ -268,6 +281,24 @@ export class AbstractESSource extends AbstractVectorSource {
       // Unable to load index pattern, just return id as display name
       return this._descriptor.indexPatternId;
     }
+  }
+
+  async createShapeFilter(geojsonPolygon) {
+    //take outer
+    const points  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+      return {
+        lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
+        lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
+      };
+    });
+    const indexPatternName = this._descriptor.indexPatternId;
+    const field = this._descriptor.geoField;
+    const filter = { meta: { negate: false, index: indexPatternName } };
+    filter.geo_polygon = { ignore_unmapped: true };
+    filter.geo_polygon[field] = {
+      points: points
+    };
+    return filter;
   }
 
   isBoundsAware() {

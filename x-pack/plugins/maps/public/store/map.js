@@ -36,7 +36,8 @@ import {
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
-  SET_TOOLTIP_STATE
+  SET_TOOLTIP_STATE,
+  UPDATE_DRAW_STATE, DRAW_STATE_TYPE
 } from '../actions/store_actions';
 
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -99,17 +100,28 @@ const INITIAL_STATE = {
     filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
+    drawState: {
+      type: DRAW_STATE_TYPE.NONE
+    }
   },
   selectedLayerId: null,
   __transientLayerId: null,
   layerList: [],
-  waitingForMapReadyLayerList: [],
+  waitingForMapReadyLayerList: []
 };
 
 
 
 export function map(state = INITIAL_STATE, action) {
   switch (action.type) {
+    case UPDATE_DRAW_STATE:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          drawState: action.drawState
+        }
+      };
     case REMOVE_TRACKED_LAYER_STATE:
       return removeTrackedLayerState(state, action.layerId);
     case TRACK_CURRENT_LAYER_STATE:

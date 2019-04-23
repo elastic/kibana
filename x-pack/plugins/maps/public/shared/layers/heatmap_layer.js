@@ -54,6 +54,10 @@ export class HeatmapLayer extends AbstractLayer {
     return [this._getMbLayerId()];
   }
 
+  supportsDrawFilter() {
+    return true;
+  }
+
   syncLayerWithMB(mbMap) {
 
     const mbSource = mbMap.getSource(this.getId());

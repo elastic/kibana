@@ -16,10 +16,6 @@ export class AbstractSource {
     throw new Error('Must implement Source.createDescriptor');
   }
 
-  static renderDropdownDisplayOption() {
-    throw new Error('Must implement Source.renderDropdownDisplayOption');
-  }
-
   constructor(descriptor, inspectorAdapters) {
     this._descriptor = descriptor;
     this._inspectorAdapters = inspectorAdapters;
@@ -33,6 +29,10 @@ export class AbstractSource {
 
   async supportsFitToBounds() {
     return true;
+  }
+
+  async getIndexPatternAndGeofield() {
+    return null;
   }
 
   /**

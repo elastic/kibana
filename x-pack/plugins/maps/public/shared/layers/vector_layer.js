@@ -81,6 +81,21 @@ export class VectorLayer extends AbstractLayer {
     return [VectorStyle];
   }
 
+  supportsDrawFilter() {
+    //todo:
+    //this is wrong. _source should take into a account weather the source is geo_shape or geo_point. spatial filters are not supported by geo_shape backed index-patterns.
+    return this._source.supportsDrawFilter();
+  }
+
+
+  /**
+   * this should only be called if the source supports shape filter creation.
+   * @return {*|Promise<void>}
+   */
+  async createShapeFilter(geojsonPolygon) {
+    return await this._source.createShapeFilter(geojsonPolygon);
+  }
+
   getIcon() {
     const isPointsOnly = this._isPointsOnly();
     return this._style.getIcon(isPointsOnly);
@@ -562,6 +577,17 @@ export class VectorLayer extends AbstractLayer {
     return featureCollection.features.find((feature) => {
       return feature.properties[FEATURE_ID_PROPERTY_NAME] === id;
     });
+  }
+
+  async getIndexPatternsAndGeofields() {
+    let configs = await super.getIndexPatternsAndGeofields();
+    const validJoins = this.getValidJoins();
+    for (let i = 0; i < validJoins.length; i++) {
+      const source = validJoins[i].getJoinSource();
+      const configsFromJoins = await source.getIndexPatternAndGeofield();
+      configs = configs.concat(configsFromJoins);
+    }
+    return configs;
   }
 
 }

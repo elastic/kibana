@@ -11,8 +11,16 @@ import { ResizeChecker } from 'ui/resize_checker';
 import { syncLayerOrder, removeOrphanedSourcesAndLayers, createMbMapInstance } from './utils';
 import { DECIMAL_DEGREES_PRECISION, FEATURE_ID_PROPERTY_NAME, ZOOM_PRECISION } from '../../../../common/constants';
 import mapboxgl from 'mapbox-gl';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
+import { DRAW_STATE_DRAW_TYPE, DRAW_STATE_TYPE } from '../../../actions/store_actions';
+import { filterBarQueryFilter } from '../../../kibana_services';
+import { createShapeFilter } from '../../../index_pattern_util';
 
+
+const mbDrawModes = MapboxDraw.modes;
+mbDrawModes.draw_rectangle = DrawRectangle;
 
 const TOOLTIP_TYPE = {
   HOVER: 'HOVER',
@@ -29,21 +37,57 @@ export class MBMapContainer extends React.Component {
       closeButton: false,
       closeOnClick: false,
     });
+    this._mbDrawControl = new MapboxDraw({
+      displayControlsDefault: false,
+      modes: mbDrawModes
+    });
+    this._mbDrawControlAdded = false;
   }
 
   _onTooltipClose = () => {
     this.props.setTooltipState(null);
   };
 
+  _onPolygonSelectionChange = async (e) => {
+
+    if (e.features.length) {
+      //when the user deselects, the filter gets applied.
+      return;
+    }
+    const featureCollection = this._mbDrawControl.getAll();
+    const geoField = this.props.drawState.geoField;
+    const indexPatternId = this.props.drawState.indexPatternId;
+    this.props.disableDrawState();
+
+
+    if (!featureCollection.features.length) {
+      return;
+    }
+
+    //todo: should change filter-type based on drawmodetype and underlying index pattern/geofield combo
+    const geoPolygonFilter = createShapeFilter(featureCollection.features[0].geometry, indexPatternId, geoField);
+    if (!geoPolygonFilter) {
+      return;
+    }
+    filterBarQueryFilter.addFilters([geoPolygonFilter]);
+
+  };
+
   _debouncedSync = _.debounce(() => {
     if (this._isMounted) {
       this._syncMbMapWithLayerList();
       this._syncMbMapWithInspector();
+      this._syncDrawControl();
     }
   }, 256);
 
 
   _lockTooltip =  (e) => {
+
+    if (this.props.drawState.type === DRAW_STATE_TYPE.ACTIVE) {
+      //ignore click events when in draw mode
+      return;
+    }
 
     this._updateHoverTooltipState.cancel();//ignore any possible moves
 
@@ -54,7 +98,7 @@ export class MBMapContainer extends React.Component {
     }
 
     const targetFeature = features[0];
-    const layer = this._getLayer(targetFeature.layer.id);
+    const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
     this.props.setTooltipState({
       type: TOOLTIP_TYPE.LOCKED,
@@ -65,6 +109,11 @@ export class MBMapContainer extends React.Component {
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
+
+    if (this.props.drawState.type === DRAW_STATE_TYPE.ACTIVE) {
+      //ignore hover events when in draw mode
+      return;
+    }
 
     if (this.props.tooltipState && this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED) {
       //ignore hover events when tooltip is locked
@@ -85,7 +134,7 @@ export class MBMapContainer extends React.Component {
       }
     }
 
-    const layer = this._getLayer(targetFeature.layer.id);
+    const layer = this._getLayerByMbLayerId(targetFeature.layer.id);
     const popupAnchorLocation = this._justifyAnchorLocation(e.lngLat, targetFeature);
 
     this.props.setTooltipState({
@@ -96,6 +145,7 @@ export class MBMapContainer extends React.Component {
     });
 
   }, 100);
+
 
   _justifyAnchorLocation(mbLngLat, targetFeature) {
     let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location
@@ -195,10 +245,30 @@ export class MBMapContainer extends React.Component {
     this.props.onMapDestroyed();
   }
 
+  _removeDrawControl() {
+    if (!this._mbDrawControlAdded) {
+      return;
+    }
+    this._mbMap.off('draw.selectionchange', this._onPolygonSelectionChange);
+    this._mbMap.removeControl(this._mbDrawControl);
+    this._mbDrawControlAdded = false;
+  }
+
+  _updateDrawControl() {
+    if (!this._mbDrawControlAdded) {
+      this._mbMap.addControl(this._mbDrawControl);
+      this._mbMap.on('draw.selectionchange', this._onPolygonSelectionChange);
+      this._mbDrawControlAdded = true;
+    }
+
+    const mbDrawMode = this.props.drawState.drawType === DRAW_STATE_DRAW_TYPE.POLYGON ?
+      this._mbDrawControl.modes.DRAW_POLYGON : 'draw_rectangle';
+    this._mbDrawControl.changeMode(mbDrawMode);
+  }
+
   async _initializeMap() {
 
     this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
-
     if (!this._isMounted) {
       return;
     }
@@ -285,6 +355,14 @@ export class MBMapContainer extends React.Component {
     }
   }
 
+  _syncDrawControl() {
+    if (this.props.drawState.type !== DRAW_STATE_TYPE.ACTIVE) {
+      this._removeDrawControl();
+      return;
+    }
+    this._updateDrawControl();
+  }
+
   _syncMbMapWithMapState = () => {
     const {
       isMapReady,
@@ -318,7 +396,13 @@ export class MBMapContainer extends React.Component {
 
   };
 
-  _getLayer(mbLayerId) {
+  _getLayerById(layerId) {
+    return this.props.layerList.find((layer) => {
+      return layer.getId() === layerId;
+    });
+  }
+
+  _getLayerByMbLayerId(mbLayerId) {
     return this.props.layerList.find((layer) => {
       const mbLayerIds = layer.getMbLayerIds();
       return mbLayerIds.indexOf(mbLayerId) > -1;

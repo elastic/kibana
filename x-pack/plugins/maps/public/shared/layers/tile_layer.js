@@ -57,6 +57,10 @@ export class TileLayer extends AbstractLayer {
     return [this._getMbLayerId()];
   }
 
+  supportsDrawFilter() {
+    return false;
+  }
+
   syncLayerWithMB(mbMap) {
 
     const source = mbMap.getSource(this.getId());
