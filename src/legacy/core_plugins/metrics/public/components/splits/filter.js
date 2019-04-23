@@ -50,18 +50,20 @@ export const SplitByFilter = props => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiFormRow
-          id={htmlId('query')}
-          label={(<FormattedMessage
-            id="tsvb.splits.filter.queryStringLabel"
-            defaultMessage="Query string"
-          />)}
-        >
-          <EuiFieldText
-            value={model.filter}
-            onChange={handleTextChange('filter')}
-          />
-        </EuiFormRow>
+        <div style={{ border: '1px solid blue' }}>
+          <EuiFormRow
+            id={htmlId('query')}
+            label={(<FormattedMessage
+              id="tsvb.splits.filter.queryStringLabel"
+              defaultMessage="Query string"
+            />)}
+          >
+            <EuiFieldText
+              value={model.filter}
+              onChange={handleTextChange('filter')}
+            />
+          </EuiFormRow>
+        </div>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
