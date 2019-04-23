@@ -38,8 +38,6 @@ xpack.security.authProviders: [token]
 
 The token authentication provider that the login form uses can also support the `Authorization` request header with the `Basic` scheme. This enables applications like `curl`. Set the following in your `kibana.yml`:
 
-To make the token authentication provider used by the login form, but also add support for the `Authorization` request header with the `Basic` scheme to enable applications like `curl`, set the following in your `kibana.yml`:
-
 [source,yaml]
 --------------------------------------------------------------------------------
 xpack.security.authProviders: [token, basic]
