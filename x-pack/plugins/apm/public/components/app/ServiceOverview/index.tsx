@@ -13,13 +13,9 @@ import { toastNotifications } from 'ui/notify';
 import url from 'url';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { loadServiceList } from '../../../services/rest/apm/services';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
-
-interface Props {
-  urlParams: IUrlParams;
-}
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 const initalData = {
   items: [],
@@ -29,7 +25,8 @@ const initalData = {
 
 let hasDisplayedToast = false;
 
-export function ServiceOverview({ urlParams }: Props) {
+export function ServiceOverview() {
+  const { urlParams } = useUrlParams();
   const { start, end, kuery } = urlParams;
   const { data = initalData } = useFetcher(
     () => loadServiceList({ start, end, kuery }),

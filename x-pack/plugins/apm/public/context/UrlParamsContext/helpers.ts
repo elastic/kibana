@@ -48,7 +48,7 @@ export function toBoolean(value?: string) {
   return value === 'true';
 }
 
-export function getPathAsArray(pathname: string) {
+export function getPathAsArray(pathname: string = '') {
   return compact(pathname.split('/'));
 }
 
@@ -56,7 +56,7 @@ export function removeUndefinedProps<T>(obj: T): Partial<T> {
   return pick(obj, value => value !== undefined);
 }
 
-export function getPathParams(pathname: string) {
+export function getPathParams(pathname: string = '') {
   const paths = getPathAsArray(pathname);
   const pageName = paths[1];
 
