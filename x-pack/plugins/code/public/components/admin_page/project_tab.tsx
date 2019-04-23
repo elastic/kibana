@@ -28,7 +28,7 @@ import {
 import moment from 'moment';
 import React, { ChangeEvent } from 'react';
 import { connect } from 'react-redux';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { Repository } from '../../../model';
 import { closeToast, importRepo } from '../../actions';
 import { RepoStatus, RootState } from '../../reducers';
@@ -200,7 +200,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
         project={repo}
         showStatus={true}
         status={status[repo.uri]}
-        enableManagement={uiCapabilities.code.admin as boolean}
+        enableManagement={capabilities.get().code.admin as boolean}
       />
     ));
 
@@ -238,7 +238,7 @@ class CodeProjectTab extends React.PureComponent<Props, State> {
           <EuiFlexItem grow />
           <EuiFlexItem grow />
           <EuiFlexItem>
-            {(uiCapabilities.code.admin as boolean) && (
+            {(capabilities.get().code.admin as boolean) && (
               // @ts-ignore
               <EuiButton
                 className="codeButton__projectImport"
