@@ -32,9 +32,7 @@ interface TimeRangeRefreshAction {
   time: TimeRange;
 }
 
-type RefreshTimeRangeFunction = (time: TimeRange) => void;
-
-const defaultRefresh = (() => null) as RefreshTimeRangeFunction;
+const defaultRefresh = (time: TimeRange) => {};
 
 export function urlParamsReducer(
   state: IUrlParams = {},
