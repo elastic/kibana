@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -23,8 +23,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+
 import { REFRESH_INTERVALS, WATCH_STATES } from '../../../../common/constants';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
+import { listBreadcrumb } from '../../../lib/breadcrumbs';
 import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { loadWatches } from '../../../lib/api';
 
@@ -41,6 +45,10 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   const [selection, setSelection] = useState([]);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
+
+  useEffect(() => {
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+  }, []);
 
   const { isLoading: isWatchesLoading, data: watches, error } = loadWatches(
     REFRESH_INTERVALS.WATCH_LIST

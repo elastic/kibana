@@ -4,46 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
 import { i18n } from '@kbn/i18n';
 
-import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+export const listBreadcrumb = {
+  text: i18n.translate('xpack.watcher.breadcrumb.listLabel', {
+    defaultMessage: 'Watcher'
+  }),
+  href: '#/management/elasticsearch/watcher/watches/',
+};
 
-const uiSettings = chrome.getUiSettingsClient();
+export const createBreadcrumb = {
+  text: i18n.translate('xpack.watcher.breadcrumb.createLabel', {
+    defaultMessage: 'Create',
+  }),
+};
 
-export function getWatchListBreadcrumbs() {
-  return [
-    MANAGEMENT_BREADCRUMB,
-    {
-      text: i18n.translate('xpack.watcher.list.breadcrumb', {
-        defaultMessage: 'Watcher'
-      }),
-      href: '#/management/elasticsearch/watcher/watches/'
-    }
-  ];
-}
+export const editBreadcrumb = {
+  text: i18n.translate('xpack.watcher.breadcrumb.editLabel', {
+    defaultMessage: 'Edit',
+  }),
+};
 
-export function getWatchDetailBreadcrumbs($route) {
-  const watch = $route.current.locals.watch || $route.current.locals.xpackWatch;
-
-  return [
-    ...getWatchListBreadcrumbs(),
-    {
-      text: !watch.isNew
-        ? watch.name
-        : i18n.translate('xpack.watcher.create.breadcrumb', { defaultMessage: 'Create' }),
-      href: '#/management/elasticsearch/watcher/watches/watch/23eebf28-94fd-47e9-ac44-6fee6e427c33'
-    }
-  ];
-}
-
-export function getWatchHistoryBreadcrumbs($route) {
-  const { watchHistoryItem } = $route.current.locals;
-
-  return [
-    ...getWatchDetailBreadcrumbs($route),
-    {
-      text: watchHistoryItem.startTime.format(uiSettings.get('dateFormat'))
-    }
-  ];
-}
+export const statusBreadcrumb = {
+  text: i18n.translate('xpack.watcher.breadcrumb.statusLabel', {
+    defaultMessage: 'Status',
+  }),
+};

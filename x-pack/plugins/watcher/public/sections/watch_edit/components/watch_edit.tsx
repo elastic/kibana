@@ -9,11 +9,15 @@ import { isEqual } from 'lodash';
 
 import { EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+
 import { Watch } from 'plugins/watcher/models/watch';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
 import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { loadWatch } from '../../../lib/api';
+import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';
 import { ThresholdWatchEdit } from './threshold_watch_edit';
 import { WatchContext } from './watch_context';
@@ -119,6 +123,10 @@ export const WatchEdit = ({
   useEffect(() => {
     getWatch();
   }, []);
+
+  useEffect(() => {
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, id ? editBreadcrumb : createBreadcrumb ]);
+  }, [id]);
 
   const errorCode = getPageErrorCode(loadError);
   if (errorCode) {
