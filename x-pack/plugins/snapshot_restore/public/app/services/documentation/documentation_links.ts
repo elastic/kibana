@@ -20,7 +20,7 @@ class DocumentationLinksService {
     return `${this.esPluginDocBasePath}${REPOSITORY_DOC_PATHS.plugins}`;
   }
 
-  public getRepositoryTypeDocUrl(type: RepositoryType) {
+  public getRepositoryTypeDocUrl(type?: RepositoryType) {
     switch (type) {
       case REPOSITORY_TYPES.fs:
         return `${this.esDocBasePath}${REPOSITORY_DOC_PATHS.fs}`;

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { REPOSITORY_TYPES } from '../../../../common/constants';
-import { RepositoryType } from '../../../../common/types';
 
 class TextService {
   public breadcrumbs: { [key: string]: string } = {};
@@ -61,8 +60,8 @@ class TextService {
     };
   }
 
-  public getRepositoryTypeName(type: RepositoryType, delegateType?: RepositoryType) {
-    const getTypeName = (repositoryType: RepositoryType): string => {
+  public getRepositoryTypeName(type: string, delegateType?: string) {
+    const getTypeName = (repositoryType: string): string => {
       return this.repositoryTypeNames[repositoryType] || type || '';
     };
 
@@ -70,7 +69,7 @@ class TextService {
       return this.i18n.translate(
         'xpack.snapshotRestore.repositoryType.sourceTypeWithDelegateName',
         {
-          defaultMessage: 'Source Only ({delegateType})',
+          defaultMessage: '{delegateType} (Source Only)',
           values: {
             delegateType: getTypeName(delegateType),
           },

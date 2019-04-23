@@ -8,6 +8,9 @@ import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
 import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiPageBody,
   EuiPageContent,
   EuiSpacer,
@@ -23,6 +26,7 @@ import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
+import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
   section: Section;
@@ -76,12 +80,25 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     <EuiPageBody>
       <EuiPageContent>
         <EuiTitle size="l">
-          <h1>
-            <FormattedMessage
-              id="xpack.snapshotRestore.home.snapshotRestoreTitle"
-              defaultMessage="Snapshot and Restore"
-            />
-          </h1>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.home.snapshotRestoreTitle"
+                  defaultMessage="Snapshot and Restore"
+                />
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={documentationLinksService.getRepositoryTypeDocUrl()}
+                target="_blank"
+                iconType="help"
+              >
+                Snapshot and Restore docs
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiTitle size="s">
@@ -89,7 +106,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             <FormattedMessage
               id="xpack.snapshotRestore.home.snapshotRestoreDescription"
               defaultMessage="Snapshot and restore allows you to create snapshots of individual indices or an entire cluster,
-                 store them on a shared filesystem or remote repository, and restore them into a running cluster."
+                store them on a shared filesystem or remote repository, and restore them into a running cluster."
             />
           </EuiText>
         </EuiTitle>
