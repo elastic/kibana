@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Store } from 'redux';
 import { ReactWrapper } from 'enzyme';
 
 export type SetupFunc<T> = (props?: any) => TestBed<T>;
@@ -44,7 +45,13 @@ export interface TestBed<T> {
   };
 }
 
-export interface TestBedOptions {
+export interface TestBedConfig {
+  defaultProps: Record<string, any>;
+  options: TestBedOptions;
+  store: (() => Store) | Store | null;
+}
+
+interface TestBedOptions {
   memoryRouter: {
     wrapComponent: boolean;
     initialEntries?: string[];

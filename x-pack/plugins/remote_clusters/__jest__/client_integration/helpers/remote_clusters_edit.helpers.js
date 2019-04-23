@@ -22,4 +22,4 @@ const testBedOptions = {
   }
 };
 
-export const setup = registerTestBed(RemoteClusterEdit, {}, testBedOptions, createRemoteClustersStore);
+export const setup = registerTestBed(RemoteClusterEdit, { options: testBedOptions, store: createRemoteClustersStore });

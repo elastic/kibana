@@ -18,4 +18,4 @@ const testBedOptions = {
   }
 };
 
-export const setup = registerTestBed(CrossClusterReplicationHome, {}, testBedOptions, ccrStore);
+export const setup = registerTestBed(CrossClusterReplicationHome, { options: testBedOptions, store: ccrStore });

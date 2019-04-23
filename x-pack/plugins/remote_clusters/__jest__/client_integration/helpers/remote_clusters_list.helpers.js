@@ -15,7 +15,7 @@ const testBedOptions = {
   }
 };
 
-const initTestBed = registerTestBed(RemoteClusterList, {}, testBedOptions, createRemoteClustersStore);
+const initTestBed = registerTestBed(RemoteClusterList, { options: testBedOptions, store: createRemoteClustersStore });
 
 export const setup = (props) => {
   const testBed = initTestBed(props);

@@ -22,7 +22,7 @@ const testBedOptions = {
   }
 };
 
-const initTestBed = registerTestBed(AutoFollowPatternEdit, {}, testBedOptions, ccrStore);
+const initTestBed = registerTestBed(AutoFollowPatternEdit, { options: testBedOptions, store: ccrStore });
 
 export const setup = (props) => {
   const testBed = initTestBed(props);

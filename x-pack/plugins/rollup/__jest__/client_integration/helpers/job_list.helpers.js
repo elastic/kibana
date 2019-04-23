@@ -19,4 +19,4 @@ const testBedOptions = {
   }
 };
 
-export const setup = registerTestBed(JobList, {}, testBedOptions, createRollupJobsStore);
+export const setup = registerTestBed(JobList, { options: testBedOptions, store: createRollupJobsStore });

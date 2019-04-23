@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Store } from 'redux';
-
 import { ComponentType, ReactWrapper } from 'enzyme';
 import { findTestSubject } from '../find_test_subject';
 import { reactRouterMock } from '../router_helpers';
 import { mountComponent, getJSXComponentWithProps } from './mount_component';
-import { TestBedOptions, TestBed, SetupFunc } from './types';
+import { TestBedConfig, TestBed, SetupFunc } from './types';
 
 const defaultOptions = {
   memoryRouter: {
@@ -33,9 +31,7 @@ const defaultOptions = {
  */
 export const registerTestBed = <T extends string = string>(
   Component: ComponentType<any>,
-  defaultProps: any = {},
-  options: TestBedOptions = defaultOptions,
-  store: (() => Store) | Store | null = null
+  { defaultProps = {}, options = defaultOptions, store = null }: TestBedConfig
 ): SetupFunc<T> => {
   /**
    * In some cases, component have some logic that interacts with the react router

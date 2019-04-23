@@ -37,7 +37,7 @@ const defaultProps = {
   openDetailPanel: jest.fn(),
 };
 
-const initTestBed = registerTestBed(DetailPanel, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(DetailPanel, { defaultProps, store: rollupJobsStore });
 
 describe('<DetailPanel />', () => {
   describe('layout', () => {

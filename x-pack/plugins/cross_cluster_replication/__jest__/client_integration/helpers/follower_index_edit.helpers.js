@@ -22,7 +22,7 @@ const testBedOptions = {
   }
 };
 
-const initTestBed = registerTestBed(FollowerIndexEdit, {}, testBedOptions, ccrStore);
+const initTestBed = registerTestBed(FollowerIndexEdit, { options: testBedOptions, store: ccrStore });
 
 export const setup = (props) => {
   const testBed = initTestBed(props);
