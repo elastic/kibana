@@ -22,18 +22,18 @@ import { RootState } from '../../reducers';
 
 const steps = [
   {
-    title: 'Configure Kibana Code Instance',
+    title: 'Configure Kibana Code Instance for Multiple Kibana Nodes',
     children: (
       <EuiText>
         <p>
-          You need to configure 1 Kibana instance as Code instance to continue. Please add the
-          following lines of code into your kibana.yml file for the instance that you want to use as
-          your Code instance:
+          If you are using multiple Kibana nodes, then you need to configure 1 Kibana instance as
+          Code instance. Please add the following line of code into your kibana.yml file for every
+          instance to indicate your Code instance:
         </p>
         <pre>
-          <code>xpack.code.codeNode: true</code>
+          <code>xpack.code.codeNodeUrl: 'http://$YourCodeNodeAddress'</code>
         </pre>
-        <p>Then, restart that Kibana instance.</p>
+        <p>Then, restart every Kibana instance.</p>
       </EuiText>
     ),
   },
