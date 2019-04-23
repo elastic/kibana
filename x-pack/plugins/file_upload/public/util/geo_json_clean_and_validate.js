@@ -27,7 +27,7 @@ export function geoJsonCleanAndValidate(parsedFile) {
   // JSTS does not enforce winding order, wind in clockwise order
   return rewind({
     type: 'FeatureCollection',
-    features: features,
+    features,
   }, false);
 }
 

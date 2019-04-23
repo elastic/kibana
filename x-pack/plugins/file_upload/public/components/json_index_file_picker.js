@@ -13,6 +13,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseFile } from '../util/file_parser';
 import { triggerIndexing } from '../util/indexing_service';
+import { toastNotifications } from 'ui/notify';
 
 export function JsonIndexFilePicker({
   boolIndexData = false,
@@ -55,11 +56,15 @@ export function JsonIndexFilePicker({
             onFileRemove && onFileRemove(fileRef);
           } else if (fileList.length === 1) { // Parse & index file
             const file = fileList[0];
-            setFileRef(file);
             // Parse file
             const parsedFileResult = await parseFile(
               file, onFileUpload, preIndexTransform
-            );
+            ).catch(e => {
+              toastNotifications.addDanger(`Unable to parse file: ${e}`);
+            });
+            setFileRef(file);
+            // Save parsed result
+            setParsedFile(parsedFileResult);
 
             // Immediately index file if flag set
             if (file && boolIndexData) {
@@ -75,9 +80,6 @@ export function JsonIndexFilePicker({
                     }
                   });
             }
-
-            // Save parsed result
-            setParsedFile(parsedFileResult);
           } else { // TODO: Support multiple file upload?
             console.warn('Multiple file upload not currently supported');
           }

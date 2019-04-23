@@ -31,6 +31,9 @@ export async function parseFile(file, previewCallback = null, preIndexTransform,
         const parsedJson = JSON.parse(result);
         // Clean & validate
         const cleanAndValidJson = cleanAndValidate(parsedJson);
+        if (!cleanAndValidJson) {
+          return;
+        }
         if (previewCallback) {
           const defaultName = _.get(cleanAndValidJson, 'name', 'fileToImport');
           previewCallback(cleanAndValidJson, defaultName);
