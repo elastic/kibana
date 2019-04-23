@@ -83,7 +83,7 @@
               ng-model="migration.newTitle"
             />
           </form>
-          <button ng-disabled="migration.isMigrating" class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="migrate()">
+          <button ng-disabled="migration.isMigrating || !migration.newTitle.trim()" class="kuiButton kuiButton--primary kuiButton--iconText" ng-click="migrate()">
             <span ng-if="migration.isMigrating" class="euiLoadingSpinner euiLoadingSpinner--medium" />
             Migrate
           </button>
