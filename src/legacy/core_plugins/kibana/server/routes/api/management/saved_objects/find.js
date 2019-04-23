@@ -73,11 +73,11 @@ export function registerFind(server) {
       const savedObjectsSchema = server.getSavedObjectsSchema();
       const importAndExportableTypes = searchTypes.filter(type => savedObjectsSchema.isImportAndExportable(type));
 
-      // Accumulate "titleSearchField" attributes from savedObjectSchemas. Unfortunately
+      // Accumulate "defaultSearchField" attributes from savedObjectSchemas. Unfortunately
       // search fields apply to all types of saved objects, the sum of these fields will
       // be searched on for each object.
       for (const type of importAndExportableTypes) {
-        const searchField = savedObjectsSchema.getTitleSearchField(type);
+        const searchField = savedObjectsSchema.getDefaultSearchField(type);
         if (searchField) {
           searchFields.add(searchField);
         }

@@ -36,7 +36,7 @@ export function canvas(kibana) {
       savedObjectSchemas: {
         [CANVAS_TYPE]: {
           icon: 'canvasApp',
-          titleSearchField: 'name',
+          defaultSearchField: 'name',
           getTitle(obj) {
             return obj.attributes.name;
           },

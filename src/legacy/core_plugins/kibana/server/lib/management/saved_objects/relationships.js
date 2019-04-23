@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { pick } from 'lodash';
 import { injectMetaAttributes } from './inject_meta_attributes';
 
 export async function findRelationships(type, id, options = {}) {
@@ -30,10 +31,9 @@ export async function findRelationships(type, id, options = {}) {
   const { references = [] } = await savedObjectsClient.get(type, id);
 
   // Use a map to avoid duplicates, it does happen but have a different "name" in the reference
-  const referencedToBulkGetOpts = new Map();
-  for (const { type, id } of references) {
-    referencedToBulkGetOpts.set(`${type}:${id}`, { id, type });
-  }
+  const referencedToBulkGetOpts = new Map(
+    references.map(({ type, id }) => [`${type}:${id}`, { id, type }])
+  );
 
   const [referencedObjects, referencedResponse] = await Promise.all([
     referencedToBulkGetOpts.size > 0
@@ -65,9 +65,5 @@ export async function findRelationships(type, id, options = {}) {
 }
 
 function extractCommonProperties(savedObject) {
-  return {
-    id: savedObject.id,
-    type: savedObject.type,
-    meta: savedObject.meta,
-  };
+  return pick(savedObject, ['id', 'type', 'meta']);
 }

@@ -55,7 +55,7 @@ export function maps(kibana) {
       savedObjectSchemas: {
         'map': {
           icon: APP_ICON,
-          titleSearchField: 'title',
+          defaultSearchField: 'title',
           getTitle(obj) {
             return obj.attributes.title;
           },

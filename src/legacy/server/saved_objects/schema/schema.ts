@@ -23,7 +23,7 @@ interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
   isImportableAndExportable?: boolean;
-  titleSearchField?: string;
+  defaultSearchField?: string;
   icon?: string;
   getTitle?: (savedObject: SavedObject) => string;
   getEditUrl?: (savedObject: SavedObject) => string;
@@ -71,9 +71,9 @@ export class SavedObjectsSchema {
     return true;
   }
 
-  public getTitleSearchField(type: string) {
+  public getDefaultSearchField(type: string) {
     if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].titleSearchField;
+      return this.definition[type].defaultSearchField;
     }
   }
 

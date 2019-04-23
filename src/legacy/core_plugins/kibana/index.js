@@ -131,7 +131,7 @@ export default function (kibana) {
       savedObjectSchemas: {
         'index-pattern': {
           icon: 'indexPatternApp',
-          titleSearchField: 'title',
+          defaultSearchField: 'title',
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -147,7 +147,7 @@ export default function (kibana) {
         },
         visualization: {
           icon: 'visualizeApp',
-          titleSearchField: 'title',
+          defaultSearchField: 'title',
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -163,7 +163,7 @@ export default function (kibana) {
         },
         search: {
           icon: 'search',
-          titleSearchField: 'title',
+          defaultSearchField: 'title',
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -179,7 +179,7 @@ export default function (kibana) {
         },
         dashboard: {
           icon: 'dashboardApp',
-          titleSearchField: 'title',
+          defaultSearchField: 'title',
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -194,7 +194,7 @@ export default function (kibana) {
           },
         },
         url: {
-          titleSearchField: 'url',
+          defaultSearchField: 'url',
           getTitle(obj) {
             return obj.attributes.url;
           },

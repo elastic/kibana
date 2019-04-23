@@ -25,7 +25,7 @@ const createSchemaMock = () => {
     isHiddenType: jest.fn().mockReturnValue(false),
     isNamespaceAgnostic: jest.fn((type: string) => type === 'global'),
     isImportAndExportable: jest.fn().mockReturnValue(true),
-    getTitleSearchField: jest.fn(),
+    getDefaultSearchField: jest.fn(),
     getIcon: jest.fn(),
     getTitle: jest.fn(),
     getEditUrl: jest.fn(),

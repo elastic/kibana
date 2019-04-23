@@ -24,8 +24,8 @@ function getSchemaMock(savedObjectSchemas) {
     isImportAndExportable(type) {
       return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
     },
-    getTitleSearchField(type) {
-      return savedObjectSchemas[type] && savedObjectSchemas[type].titleSearchField;
+    getDefaultSearchField(type) {
+      return savedObjectSchemas[type] && savedObjectSchemas[type].defaultSearchField;
     },
     getIcon(type) {
       return savedObjectSchemas[type] && savedObjectSchemas[type].icon;

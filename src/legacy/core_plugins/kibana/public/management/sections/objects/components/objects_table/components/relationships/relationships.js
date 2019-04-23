@@ -224,14 +224,16 @@ class RelationshipsUI extends Component {
       },
     ];
 
-    const filterTypesMap = new Map();
-    for (const relationship of relationships) {
-      filterTypesMap.set(relationship.type, {
-        value: relationship.type,
-        name: relationship.type,
-        view: relationship.type,
-      });
-    }
+    const filterTypesMap = new Map(
+      relationships.map(relationship => [
+        relationship.type,
+        {
+          value: relationship.type,
+          name: relationship.type,
+          view: relationship.type,
+        },
+      ])
+    );
 
     const search = {
       filters: [

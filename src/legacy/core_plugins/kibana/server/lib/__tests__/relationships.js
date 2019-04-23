@@ -25,8 +25,8 @@ function getSchemaMock(savedObjectSchemas) {
     isImportAndExportable(type) {
       return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
     },
-    getTitleSearchField(type) {
-      return savedObjectSchemas[type] && savedObjectSchemas[type].titleSearchField;
+    getDefaultSearchField(type) {
+      return savedObjectSchemas[type] && savedObjectSchemas[type].defaultSearchField;
     },
     getIcon(type) {
       return savedObjectSchemas[type] && savedObjectSchemas[type].icon;
@@ -58,7 +58,7 @@ function getSchemaMock(savedObjectSchemas) {
 const savedObjectsSchema = getSchemaMock({
   'index-pattern': {
     icon: 'indexPatternApp',
-    titleSearchField: 'title',
+    defaultSearchField: 'title',
     getTitle(obj) {
       return obj.attributes.title;
     },
@@ -74,7 +74,7 @@ const savedObjectsSchema = getSchemaMock({
   },
   visualization: {
     icon: 'visualizeApp',
-    titleSearchField: 'title',
+    defaultSearchField: 'title',
     getTitle(obj) {
       return obj.attributes.title;
     },
@@ -90,7 +90,7 @@ const savedObjectsSchema = getSchemaMock({
   },
   search: {
     icon: 'search',
-    titleSearchField: 'title',
+    defaultSearchField: 'title',
     getTitle(obj) {
       return obj.attributes.title;
     },
@@ -106,7 +106,7 @@ const savedObjectsSchema = getSchemaMock({
   },
   dashboard: {
     icon: 'dashboardApp',
-    titleSearchField: 'title',
+    defaultSearchField: 'title',
     getTitle(obj) {
       return obj.attributes.title;
     },
