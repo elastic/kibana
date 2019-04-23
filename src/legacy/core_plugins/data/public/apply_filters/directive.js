@@ -31,7 +31,7 @@ export function setupDirective() {
     return reactDirective(wrapInI18nContext(ApplyFiltersPopover));
   });
 
-  app.directive('applyFiltersPopover', (indexPatterns) => {
+  app.directive('applyFiltersPopover', (indexPatterns, $rootScope) => {
     return {
       template,
       restrict: 'E',
@@ -52,6 +52,8 @@ export function setupDirective() {
               filters: mappedFilters,
               key: Date.now(),
             };
+
+            $rootScope.$digest();
           });
         });
       }

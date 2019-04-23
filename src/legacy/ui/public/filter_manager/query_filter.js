@@ -90,6 +90,8 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
         }
 
         filterState.filters = filterState.filters.concat(filters);
+
+        $rootScope.$digest();
       });
   };
 
@@ -226,6 +228,8 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
         });
         globalState.filters = globalFilters;
         if (appState) appState.filters = appFilters;
+
+        $rootScope.$digest();
       });
   };
 
@@ -233,6 +237,7 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
     const timeFilter = await extractTimeFilter(indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
     queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
+    $rootScope.$digest();
   };
 
   initWatchers();
