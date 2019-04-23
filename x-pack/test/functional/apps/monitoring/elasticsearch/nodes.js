@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should sort by memory', async () => {
+      it.skip('should sort by memory', async () => {
         await nodesList.clickMemoryCol();
         await nodesList.clickMemoryCol();
 

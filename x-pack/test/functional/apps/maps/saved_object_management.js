@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }) {
         expect(kibanaRefreshConfig.isPaused).to.equal(true);
       });
 
-      it('should set map location to value stored with map', async () => {
+      it.skip('should set map location to value stored with map', async () => {
         const { lat, lon, zoom } = await PageObjects.maps.getView();
         expect(lat).to.equal(-0.04647);
         expect(lon).to.equal(77.33426);
