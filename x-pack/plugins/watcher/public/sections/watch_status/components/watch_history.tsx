@@ -250,7 +250,17 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     );
   }
 
-  const activationButtonText = isActivated ? 'Deactivate watch' : 'Activate watch';
+  const activationButtonText = isActivated ? (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchHistory.watchTable.deactivateWatchLabel"
+      defaultMessage="Deactivate watch"
+    />
+  ) : (
+     <FormattedMessage
+      id="xpack.watcher.sections.watchHistory.watchTable.activateWatchLabel"
+      defaultMessage="Activate watch"
+    />
+  );
 
   return (
     <Fragment>
@@ -281,7 +291,9 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                 options={watchHistoryTimeSpanOptions}
                 value={watchHistoryTimeSpan}
                 onChange={onTimespanChange}
-                aria-label="Change timespan of watch history"
+                aria-label={i18n.translate('xpack.watcher.sections.watchHistory.changeTimespanSelectAriaLabel', {
+                  defaultMessage: 'Change timespan of watch history',
+                })}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
