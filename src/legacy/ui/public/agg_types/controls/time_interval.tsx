@@ -87,7 +87,7 @@ function TimeIntervalParamEditor({
   if (isInvalid && value) {
     errors.push(
       i18n.translate('common.ui.aggTypes.timeInterval.invalidFormatErrorMessage', {
-        defaultMessage: 'Invalid intreval format.',
+        defaultMessage: 'Invalid interval format.',
       })
     );
   }
@@ -96,8 +96,8 @@ function TimeIntervalParamEditor({
     const normalizedCustomValue = customValue.trim();
     const isValid = normalizedCustomValue ? parseInterval(normalizedCustomValue, timeBase) : false;
 
-    setValue(normalizedCustomValue);
     setValidity(isValid);
+    setValue(normalizedCustomValue);
     setTouched();
   };
 

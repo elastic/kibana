@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import { cloneDeep, get, omit, has } from 'lodash';
+import { cloneDeep, get, omit, has, flow } from 'lodash';
 
-const executeMigrations = (fns, doc) => {
-  return fns.reduce((newDoc, migrateFn) => migrateFn(newDoc), doc);
-};
 
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
@@ -128,6 +125,8 @@ const migrateDateHistogramAggregation = doc => {
   }
   return doc;
 };
+
+const executeMigrations710 = flow(migratePercentileRankAggregation, migrateDateHistogramAggregation);
 
 function removeDateHistogramTimeZones(doc) {
   const visStateJSON = get(doc, 'attributes.visState');
@@ -257,10 +256,7 @@ export const migrations = {
       }
     },
     '7.0.1': removeDateHistogramTimeZones,
-    '7.1.0': doc => executeMigrations([
-      migratePercentileRankAggregation,
-      migrateDateHistogramAggregation
-    ], doc)
+    '7.1.0': doc => executeMigrations710(doc)
   },
   dashboard: {
     '7.0.0': (doc) => {
