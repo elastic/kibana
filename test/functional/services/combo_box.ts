@@ -16,28 +16,43 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { FtrProviderContext } from '../ftr_provider_context';
+import { WebElementWrapper } from './lib/web_element_wrapper';
 
-export function ComboBoxProvider({ getService, getPageObjects }) {
+export function ComboBoxProvider({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common']);
+  const { common } = getPageObjects(['common']);
 
-  const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
+  const WAIT_FOR_EXISTS_TIME: number = config.get('timeouts.waitForExists');
 
   // wrapper around EuiComboBox interactions
   class ComboBox {
-
-    async set(comboBoxSelector, value) {
+    /**
+     * set value for combobox
+     *
+     * @param {string} comboBoxSelector data-test-subj selector
+     * @param {string} value
+     * @memberof ComboBox
+     */
+    public async set(comboBoxSelector: string, value: string): Promise<void> {
       log.debug(`comboBox.set, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
       await this.setElement(comboBox, value);
     }
 
-    async setElement(comboBoxElement, value) {
+    /**
+     * set value inside combobox
+     *
+     * @param {WebElementWrapper} comboBoxElement
+     * @param {string} value
+     * @memberof ComboBox
+     */
+    public async setElement(comboBoxElement: WebElementWrapper, value: string): Promise<void> {
       log.debug(`comboBox.setElement, value: ${value}`);
       await this._filterOptionsList(comboBoxElement, value);
       await this.openOptionsList(comboBoxElement);
@@ -65,25 +80,30 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
      * This method set custom value to comboBox.
      * It applies changes by pressing Enter key. Sometimes it may lead to auto-submitting a form.
      *
-     * @param {string} comboBoxSelector
+     * @param {string} comboBoxSelector test subject selector
      * @param {string} value
      */
-    async setCustom(comboBoxSelector, value) {
+    async setCustom(comboBoxSelector: string, value: string) {
       log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
       const comboBoxElement = await testSubjects.find(comboBoxSelector);
       await this._filterOptionsList(comboBoxElement, value);
-      await PageObjects.common.pressEnterKey();
+      await common.pressEnterKey();
       await this.closeOptionsList(comboBoxElement);
     }
 
-    async filterOptionsList(comboBoxSelector, filterValue) {
-      log.debug(`comboBox.filterOptionsList, comboBoxSelector: ${comboBoxSelector}, filter: ${filterValue}`);
+    async filterOptionsList(comboBoxSelector: string, filterValue: string) {
+      log.debug(
+        `comboBox.filterOptionsList, comboBoxSelector: ${comboBoxSelector}, filter: ${filterValue}`
+      );
       const comboBox = await testSubjects.find(comboBoxSelector);
       await this._filterOptionsList(comboBox, filterValue);
       await this.closeOptionsList(comboBox);
     }
 
-    async _filterOptionsList(comboBoxElement, filterValue) {
+    private async _filterOptionsList(
+      comboBoxElement: WebElementWrapper,
+      filterValue: string
+    ): Promise<void> {
       const input = await comboBoxElement.findByTagName('input');
       await input.clearValue();
       await this._waitForOptionsListLoading(comboBoxElement);
@@ -91,11 +111,11 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
       await this._waitForOptionsListLoading(comboBoxElement);
     }
 
-    async _waitForOptionsListLoading(comboBoxElement) {
+    private async _waitForOptionsListLoading(comboBoxElement: WebElementWrapper): Promise<void> {
       await comboBoxElement.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 
-    async getOptionsList(comboBoxSelector) {
+    public async getOptionsList(comboBoxSelector: string): Promise<string> {
       log.debug(`comboBox.getOptionsList, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
       const menu = await retry.try(async () => {
@@ -112,28 +132,42 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
       return optionsText;
     }
 
-    async doesComboBoxHaveSelectedOptions(comboBoxSelector) {
+    public async doesComboBoxHaveSelectedOptions(comboBoxSelector: string): Promise<boolean> {
       log.debug(`comboBox.doesComboBoxHaveSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
-      const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill', WAIT_FOR_EXISTS_TIME);
+      const selectedOptions = await comboBox.findAllByClassName(
+        'euiComboBoxPill',
+        WAIT_FOR_EXISTS_TIME
+      );
       return selectedOptions.length > 0;
     }
 
-    async getComboBoxSelectedOptions(comboBoxSelector) {
+    public async getComboBoxSelectedOptions(comboBoxSelector: string): Promise<string[]> {
       log.debug(`comboBox.getComboBoxSelectedOptions, comboBoxSelector: ${comboBoxSelector}`);
       return await retry.try(async () => {
         const comboBox = await testSubjects.find(comboBoxSelector);
-        const selectedOptions = await comboBox.findAllByClassName('euiComboBoxPill', WAIT_FOR_EXISTS_TIME);
+        const selectedOptions = await comboBox.findAllByClassName(
+          'euiComboBoxPill',
+          WAIT_FOR_EXISTS_TIME
+        );
         if (selectedOptions.length === 0) {
           return [];
         }
-        return Promise.all(selectedOptions.map(async (optionElement) => {
-          return await optionElement.getVisibleText();
-        }));
+        return Promise.all(
+          selectedOptions.map(async optionElement => {
+            return await optionElement.getVisibleText();
+          })
+        );
       });
     }
 
-    async clear(comboBoxSelector) {
+    /**
+     * clearing value from combobox
+     *
+     * @param {string} comboBoxSelector data-test-subj selector
+     * @memberof ComboBox
+     */
+    public async clear(comboBoxSelector: string): Promise<void> {
       log.debug(`comboBox.clear, comboBoxSelector:${comboBoxSelector}`);
       const comboBox = await testSubjects.find(comboBoxSelector);
       await retry.try(async () => {
@@ -154,7 +188,7 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
       await this.closeOptionsList(comboBox);
     }
 
-    async doesClearButtonExist(comboBoxElement) {
+    public async doesClearButtonExist(comboBoxElement: WebElementWrapper): Promise<boolean> {
       const found = await comboBoxElement.findAllByCssSelector(
         '[data-test-subj="comboBoxClearButton"]',
         WAIT_FOR_EXISTS_TIME
@@ -162,7 +196,13 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
       return found.length > 0;
     }
 
-    async closeOptionsList(comboBoxElement) {
+    /**
+     * closing option list for combobox
+     *
+     * @param {WebElementWrapper} comboBoxElement
+     * @memberof ComboBox
+     */
+    public async closeOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (isOptionsListOpen) {
         const input = await comboBoxElement.findByTagName('input');
@@ -170,14 +210,21 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
       }
     }
 
-    async openOptionsList(comboBoxElement) {
+    /**
+     * opened list of options for combobox
+     *
+     * @param {WebElementWrapper} comboBoxElement
+     * @memberof ComboBox
+     */
+    public async openOptionsList(comboBoxElement: WebElementWrapper): Promise<void> {
       const isOptionsListOpen = await testSubjects.exists('comboBoxOptionsList');
       if (!isOptionsListOpen) {
-        const toggleBtn = await comboBoxElement.findByCssSelector('[data-test-subj="comboBoxToggleListButton"]');
+        const toggleBtn = await comboBoxElement.findByCssSelector(
+          '[data-test-subj="comboBoxToggleListButton"]'
+        );
         await toggleBtn.click();
       }
     }
-
   }
 
   return new ComboBox();
