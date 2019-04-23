@@ -5,7 +5,6 @@
  */
 
 import memoizeOne from 'memoize-one';
-import { EuiPanel } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'typescript-fsa';
@@ -114,22 +113,20 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       type,
     } = this.props;
     return (
-      <EuiPanel>
-        <LoadMoreTable
-          columns={this.memoizedColumns(type, indexPattern)}
-          loadingTitle={i18n.HOSTS}
-          loading={loading}
-          pageOfItems={data}
-          loadMore={this.wrappedLoadMore}
-          limit={limit}
-          hasNextPage={hasNextPage}
-          itemsPerRow={rowItems}
-          onChange={this.onChange}
-          updateLimitPagination={this.wrappedUpdateLimitPagination}
-          sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
-          title={this.memoizedTitle(totalCount)}
-        />
-      </EuiPanel>
+      <LoadMoreTable
+        columns={this.memoizedColumns(type, indexPattern)}
+        loadingTitle={i18n.HOSTS}
+        loading={loading}
+        pageOfItems={data}
+        loadMore={this.wrappedLoadMore}
+        limit={limit}
+        hasNextPage={hasNextPage}
+        itemsPerRow={rowItems}
+        onChange={this.onChange}
+        updateLimitPagination={this.wrappedUpdateLimitPagination}
+        sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
+        title={this.memoizedTitle(totalCount)}
+      />
     );
   }
 

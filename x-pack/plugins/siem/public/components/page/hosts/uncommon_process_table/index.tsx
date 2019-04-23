@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiPanel } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -83,26 +83,24 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     updateLimitPagination,
     type,
   }) => (
-    <EuiPanel>
-      <LoadMoreTable
-        columns={getUncommonColumns()}
-        loadingTitle={i18n.UNCOMMON_PROCESSES}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
-        hasNextPage={hasNextPage}
-        itemsPerRow={rowItems}
-        updateLimitPagination={newLimit =>
-          updateLimitPagination({ limit: newLimit, hostsType: type })
-        }
-        title={
-          <h3>
-            {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
-          </h3>
-        }
-      />
-    </EuiPanel>
+    <LoadMoreTable
+      columns={getUncommonColumns()}
+      loadingTitle={i18n.UNCOMMON_PROCESSES}
+      loading={loading}
+      pageOfItems={data}
+      loadMore={() => loadMore(nextCursor)}
+      limit={limit}
+      hasNextPage={hasNextPage}
+      itemsPerRow={rowItems}
+      updateLimitPagination={newLimit =>
+        updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
+      title={
+        <h3>
+          {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
+        </h3>
+      }
+    />
   )
 );
 

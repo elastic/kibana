@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiPopover,
   EuiTitle,
 } from '@elastic/eui';
@@ -107,12 +108,14 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
 
     if (loading && isEmptyTable) {
       return (
-        <LoadingPanel
-          height="auto"
-          width="100%"
-          text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
-          data-test-subj="InitialLoadingPanelLoadMoreTable"
-        />
+        <EuiPanel>
+          <LoadingPanel
+            height="auto"
+            width="100%"
+            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+            data-test-subj="InitialLoadingPanelLoadMoreTable"
+          />
+        </EuiPanel>
       );
     }
 
@@ -143,82 +146,87 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
         </EuiContextMenuItem>
       ));
     return (
-      <BasicTableContainer>
-        {loading && (
-          <>
-            <BackgroundRefetch />
-            <LoadingPanel
-              height="100%"
-              width="100%"
-              text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
-              position="absolute"
-              zIndex={3}
-              data-test-subj="LoadingPanelLoadMoreTable"
-            />
-          </>
-        )}
-        <EuiTitle size="s">
-          <>{title}</>
-        </EuiTitle>
-        <EuiBasicTable
-          items={pageOfItems}
-          columns={columns}
-          onChange={onChange}
-          sorting={
-            sorting
-              ? {
-                  sort: {
-                    field: sorting.field,
-                    direction: sorting.direction,
-                  },
-                }
-              : null
-          }
-        />
-        {hasNextPage && (
-          <FooterAction>
-            <EuiFlexGroup
-              gutterSize="none"
-              alignItems="flexStart"
-              justifyContent="flexStart"
-              direction="row"
-            >
-              <EuiFlexItem grow={false}>
-                {!isEmpty(itemsPerRow) && (
-                  <EuiPopover
-                    id="customizablePagination"
-                    data-test-subj="loadingMoreSizeRowPopover"
-                    button={button}
-                    isOpen={this.state.isPopoverOpen}
-                    closePopover={this.closePopover}
-                    panelPaddingSize="none"
-                  >
-                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
-                  </EuiPopover>
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup
-                  gutterSize="none"
-                  alignItems="flexStart"
-                  justifyContent="center"
-                  direction="row"
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="loadingMoreButton"
-                      isLoading={loading}
-                      onClick={this.props.loadMore}
+      <EuiPanel>
+        <BasicTableContainer>
+          {loading && (
+            <>
+              <BackgroundRefetch />
+              <LoadingPanel
+                height="100%"
+                width="100%"
+                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+                position="absolute"
+                zIndex={3}
+                data-test-subj="LoadingPanelLoadMoreTable"
+              />
+            </>
+          )}
+          <EuiTitle size="s">
+            <>{title}</>
+          </EuiTitle>
+          <EuiBasicTable
+            items={pageOfItems}
+            columns={columns}
+            onChange={onChange}
+            sorting={
+              sorting
+                ? {
+                    sort: {
+                      field: sorting.field,
+                      direction: sorting.direction,
+                    },
+                  }
+                : null
+            }
+          />
+          {hasNextPage && (
+            <FooterAction>
+              <EuiFlexGroup
+                gutterSize="none"
+                alignItems="flexStart"
+                justifyContent="flexStart"
+                direction="row"
+              >
+                <EuiFlexItem grow={false}>
+                  {!isEmpty(itemsPerRow) && (
+                    <EuiPopover
+                      id="customizablePagination"
+                      data-test-subj="loadingMoreSizeRowPopover"
+                      button={button}
+                      isOpen={this.state.isPopoverOpen}
+                      closePopover={this.closePopover}
+                      panelPaddingSize="none"
                     >
-                      {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </FooterAction>
-        )}
-      </BasicTableContainer>
+                      <EuiContextMenuPanel
+                        items={rowItems}
+                        data-test-subj="loadingMorePickSizeRow"
+                      />
+                    </EuiPopover>
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup
+                    gutterSize="none"
+                    alignItems="flexStart"
+                    justifyContent="center"
+                    direction="row"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="loadingMoreButton"
+                        isLoading={loading}
+                        onClick={this.props.loadMore}
+                      >
+                        {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </FooterAction>
+          )}
+        </BasicTableContainer>
+      </EuiPanel>
     );
   }
 

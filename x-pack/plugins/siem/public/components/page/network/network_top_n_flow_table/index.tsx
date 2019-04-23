@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -114,68 +114,66 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
         : `node.network.${topNFlowSort.field}`;
 
     return (
-      <EuiPanel>
-        <LoadMoreTable
-          columns={getNetworkTopNFlowColumns(
-            indexPattern,
-            flowDirection,
-            flowTarget,
-            type,
-            NetworkTopNFlowTableId
-          )}
-          loadingTitle={i18n.TOP_TALKERS}
-          loading={loading}
-          pageOfItems={data}
-          loadMore={() => loadMore(nextCursor)}
-          limit={limit}
-          hasNextPage={hasNextPage}
-          itemsPerRow={rowItems}
-          onChange={this.onChange}
-          updateLimitPagination={newLimit =>
-            updateTopNFlowLimit({ limit: newLimit, networkType: type })
-          }
-          sorting={{ field, direction: topNFlowSort.direction }}
-          title={
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <h3>
-                      {i18n.TOP_TALKERS}
-                      <CountBadge color="hollow">{totalCount}</CountBadge>
-                    </h3>
-                  </EuiFlexItem>
-                  <SelectTypeItem
-                    grow={false}
-                    data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
-                  >
-                    <FlowTargetSelect
-                      id={NetworkTopNFlowTableId}
-                      isLoading={loading}
-                      selectedDirection={flowDirection}
-                      selectedTarget={flowTarget}
-                      displayTextOverride={[
-                        i18n.BY_SOURCE_IP,
-                        i18n.BY_DESTINATION_IP,
-                        i18n.BY_CLIENT_IP,
-                        i18n.BY_SERVER_IP,
-                      ]}
-                      updateFlowTargetAction={updateTopNFlowTarget}
-                    />
-                  </SelectTypeItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <FlowDirectionSelect
-                  id={NetworkTopNFlowTableId}
-                  selectedDirection={flowDirection}
-                  onChangeDirection={this.onChangeTopNFlowDirection}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-        />
-      </EuiPanel>
+      <LoadMoreTable
+        columns={getNetworkTopNFlowColumns(
+          indexPattern,
+          flowDirection,
+          flowTarget,
+          type,
+          NetworkTopNFlowTableId
+        )}
+        loadingTitle={i18n.TOP_TALKERS}
+        loading={loading}
+        pageOfItems={data}
+        loadMore={() => loadMore(nextCursor)}
+        limit={limit}
+        hasNextPage={hasNextPage}
+        itemsPerRow={rowItems}
+        onChange={this.onChange}
+        updateLimitPagination={newLimit =>
+          updateTopNFlowLimit({ limit: newLimit, networkType: type })
+        }
+        sorting={{ field, direction: topNFlowSort.direction }}
+        title={
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem grow={false}>
+                  <h3>
+                    {i18n.TOP_TALKERS}
+                    <CountBadge color="hollow">{totalCount}</CountBadge>
+                  </h3>
+                </EuiFlexItem>
+                <SelectTypeItem
+                  grow={false}
+                  data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
+                >
+                  <FlowTargetSelect
+                    id={NetworkTopNFlowTableId}
+                    isLoading={loading}
+                    selectedDirection={flowDirection}
+                    selectedTarget={flowTarget}
+                    displayTextOverride={[
+                      i18n.BY_SOURCE_IP,
+                      i18n.BY_DESTINATION_IP,
+                      i18n.BY_CLIENT_IP,
+                      i18n.BY_SERVER_IP,
+                    ]}
+                    updateFlowTargetAction={updateTopNFlowTarget}
+                  />
+                </SelectTypeItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <FlowDirectionSelect
+                id={NetworkTopNFlowTableId}
+                selectedDirection={flowDirection}
+                onChangeDirection={this.onChangeTopNFlowDirection}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
     );
   }
 
