@@ -11,56 +11,69 @@ import { __await } from 'tslib';
 import chrome from 'ui/chrome';
 import { ROUTES } from '../../common/constants';
 import { BaseWatch, ExecutedWatchDetails } from '../../common/types/watch_types';
+import { useRequest } from './use_request';
 
 let httpClient: ng.IHttpService;
+
 export const setHttpClient = (anHttpClient: ng.IHttpService) => {
   httpClient = anHttpClient;
 };
+
 export const getHttpClient = () => {
   return httpClient;
 };
+
 let savedObjectsClient: any;
+
 export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
   savedObjectsClient = aSavedObjectsClient;
 };
+
 export const getSavedObjectsClient = () => {
   return savedObjectsClient;
 };
+
 const basePath = chrome.addBasePath(ROUTES.API_ROOT);
-export const fetchWatches = async () => {
-  const {
-    data: { watches },
-  } = await getHttpClient().get(`${basePath}/watches`);
-  return watches.map((watch: any) => {
-    return Watch.fromUpstreamJson(watch);
+
+export const loadWatches = (interval: number) => {
+  return useRequest({
+    path: `${basePath}/watches`,
+    method: 'get',
+    interval,
+    processData: ({ watches }: { watches: any }) =>
+      watches.map((watch: any) => Watch.fromUpstreamJson(watch)),
   });
 };
 
-export const fetchWatchDetail = async (id: string) => {
-  const {
-    data: { watch },
-  } = await getHttpClient().get(`${basePath}/watch/${id}`);
-  return Watch.fromUpstreamJson(watch);
+export const loadWatchDetail = (id: string) => {
+  return useRequest({
+    path: `${basePath}/watch/${id}`,
+    method: 'get',
+    processData: ({ watch }: { watch: any }) => Watch.fromUpstreamJson(watch),
+  });
 };
 
-export const fetchWatchHistoryDetail = async (id: string) => {
-  const {
-    data: { watchHistoryItem },
-  } = await getHttpClient().get(`${basePath}/history/${id}`);
-  const item = WatchHistoryItem.fromUpstreamJson(watchHistoryItem);
-  return item;
-};
+export const loadWatchHistory = (id: string, startTime: string) => {
+  let path = `${basePath}/watch/${id}/history`;
 
-export const fetchWatchHistory = async (id: string, startTime: string) => {
-  let url = `${basePath}/watch/${id}/history`;
   if (startTime) {
-    url += `?startTime=${startTime}`;
+    path += `?startTime=${startTime}`;
   }
-  const result: any = await getHttpClient().get(url);
-  const items: any = result.data.watchHistoryItems;
-  return items.map((historyItem: any) => {
-    const item = WatchHistoryItem.fromUpstreamJson(historyItem);
-    return item;
+
+  return useRequest({
+    path,
+    method: 'get',
+    processData: ({ watchHistoryItems: items }: { watchHistoryItems: any }) =>
+      items.map((historyItem: any) => WatchHistoryItem.fromUpstreamJson(historyItem)),
+  });
+};
+
+export const loadWatchHistoryDetail = (id: string | undefined) => {
+  return useRequest({
+    path: !id ? undefined : `${basePath}/history/${id}`,
+    method: 'get',
+    processData: ({ watchHistoryItem }: { watchHistoryItem: any }) =>
+      WatchHistoryItem.fromUpstreamJson(watchHistoryItem),
   });
 };
 
@@ -97,10 +110,12 @@ export const fetchWatch = async (watchId: string) => {
   } = await getHttpClient().post(`${basePath}/watches/`, body);
   return results;
 };
+
 export const loadWatch = async (id: string) => {
   const { data: watch } = await getHttpClient().get(`${basePath}/watch/${id}`);
   return Watch.fromUpstreamJson(watch.watch);
 };
+
 export const getMatchingIndices = async (pattern: string) => {
   if (!pattern.startsWith('*')) {
     pattern = `*${pattern}`;
@@ -113,16 +128,19 @@ export const getMatchingIndices = async (pattern: string) => {
   } = await getHttpClient().post(`${basePath}/indices`, { pattern });
   return indices;
 };
+
 export const fetchFields = async (indexes: string[]) => {
   const {
     data: { fields },
   } = await getHttpClient().post(`${basePath}/fields`, { indexes });
   return fields;
 };
+
 export const createWatch = async (watch: BaseWatch) => {
   const { data } = await getHttpClient().put(`${basePath}/watch/${watch.id}`, watch.upstreamJson);
   return data;
 };
+
 export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, watch: BaseWatch) => {
   const { data } = await getHttpClient().put(`${basePath}/watch/execute`, {
     executeDetails: executeWatchDetails.upstreamJson,
@@ -130,6 +148,7 @@ export const executeWatch = async (executeWatchDetails: ExecutedWatchDetails, wa
   });
   return data;
 };
+
 export const loadIndexPatterns = async () => {
   const { savedObjects } = await getSavedObjectsClient().find({
     type: 'index-pattern',

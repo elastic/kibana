@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,16 +16,10 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { Fragment, useEffect, useState } from 'react';
-import { fetchWatchDetail } from '../../../lib/api';
+import { loadWatchDetail } from '../../../lib/api';
 import { WatchActionStatus } from './watch_action_status';
 
 const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
-  const [isWatchesLoading, setIsWatchesLoading] = useState<boolean>(true);
-  const [actions, setWatchActions] = useState([]);
-
   const pagination = {
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
@@ -60,15 +58,11 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
       },
     },
   ];
-  const loadWatchActions = async () => {
-    const loadedWatchActions = await fetchWatchDetail(watchId);
-    setWatchActions(loadedWatchActions.watchStatus.actionStatuses);
-    setIsWatchesLoading(false);
-  };
-  useEffect(() => {
-    loadWatchActions();
-    // only run the first time the component loads
-  }, []);
+
+  const {
+    data: watchDetail,
+    isLoading,
+  } = loadWatchDetail(watchId);
 
   return (
     <Fragment>
@@ -82,12 +76,12 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
       </EuiTitle>
       <EuiSpacer size="s" />
       <EuiInMemoryTable
-        items={actions}
+        items={watchDetail ? watchDetail.actions : []}
         itemId="id"
         columns={columns}
         pagination={pagination}
         sorting={true}
-        loading={isWatchesLoading}
+        loading={isLoading}
         message={
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.watchTable.noWatchesMessage"
