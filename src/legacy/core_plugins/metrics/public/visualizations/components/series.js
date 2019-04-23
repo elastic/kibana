@@ -38,7 +38,8 @@ export const Series = ({
   bars,
   lines,
   color,
-  stack
+  stack,
+  hideInLegend
 }) => {
   const { fill: barFill, show: isBarSeries } = bars;
   const { fill: lineFill, steps } = lines;
@@ -69,14 +70,9 @@ export const Series = ({
       yScaleToDataExtent={false}
       customSeriesColors={customSeriesColors}
       curve={steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
+      hideInLegend={hideInLegend}
     />
   );
-};
-
-Series.defaultProps = {
-  yScaleType: ScaleType.Linear,
-  bars: {},
-  lines: {},
 };
 
 Series.propTypes = {
@@ -89,4 +85,11 @@ Series.propTypes = {
   bars: PropTypes.object,
   lines: PropTypes.object,
   color: PropTypes.string,
+};
+
+Series.defaultProps = {
+  yScaleType: ScaleType.Linear,
+  bars: {},
+  lines: {},
+  hideInLegend: false,
 };
