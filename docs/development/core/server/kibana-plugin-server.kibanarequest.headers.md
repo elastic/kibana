@@ -1,0 +1,9 @@
+[Home](./index) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [KibanaRequest](./kibana-plugin-server.kibanarequest.md) &gt; [headers](./kibana-plugin-server.kibanarequest.headers.md)
+
+## KibanaRequest.headers property
+
+<b>Signature:</b>
+
+```typescript
+readonly headers: Headers;
+```

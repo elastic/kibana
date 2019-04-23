@@ -27,7 +27,7 @@ class Interactive extends React.Component<{}, { hasButtons: boolean; value: stri
         />
         <p style={{ marginTop: 20 }}>
           <label>
-            {/* tslint:disable-next-line:react-a11y-input-elements*/}
+            {/* eslint-disable-next-line react-a11y-input-elements */}
             <input
               aria-checked={this.state.hasButtons}
               type="checkbox"

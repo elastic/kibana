@@ -16,10 +16,12 @@ import {
   setTooltipState
 } from '../../../actions/store_actions';
 import { getTooltipState, getLayerList, getMapReady, getGoto } from '../../../selectors/map_selectors';
+import { getIsFilterable } from '../../../store/ui';
 import { getInspectorAdapters } from '../../../store/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
+    isFilterable: getIsFilterable(state),
     isMapReady: getMapReady(state),
     layerList: getLayerList(state),
     goto: getGoto(state),
@@ -53,7 +55,6 @@ function mapDispatchToProps(dispatch) {
     setTooltipState(tooltipState) {
       dispatch(setTooltipState(tooltipState));
     }
-
   };
 }
 

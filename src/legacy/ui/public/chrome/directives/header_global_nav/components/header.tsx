@@ -50,17 +50,19 @@ import {
   EuiShowFor,
 } from '@elastic/eui';
 
-import { HeaderBreadcrumbs } from './header_breadcrumbs';
-import { HeaderHelpMenu } from './header_help_menu';
-import { HeaderNavControls } from './header_nav_controls';
-
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { UICapabilities } from 'ui/capabilities';
 import chrome, { NavLink } from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
+
+import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderHelpMenu } from './header_help_menu';
+import { HeaderNavControls } from './header_nav_controls';
+
 import { NavControlSide } from '../';
 import { ChromeBreadcrumb } from '../../../../../../../core/public';
 
@@ -75,6 +77,7 @@ interface Props {
   helpExtension$: Rx.Observable<HelpExtension>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
+  uiCapabilities: UICapabilities;
 }
 
 // Providing a buffer between the limit and the cut off index
@@ -211,7 +214,15 @@ class HeaderUI extends Component<Props, State> {
   }
 
   public render() {
-    const { appTitle, breadcrumbs$, isVisible, navControls, helpExtension$, intl } = this.props;
+    const {
+      appTitle,
+      breadcrumbs$,
+      isVisible,
+      navControls,
+      helpExtension$,
+      intl,
+      uiCapabilities,
+    } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
     if (!isVisible) {
@@ -222,7 +233,7 @@ class HeaderUI extends Component<Props, State> {
     const rightNavControls = navControls.bySide[NavControlSide.Right];
 
     let navLinksArray = navLinks.map(navLink =>
-      navLink.hidden
+      navLink.hidden || !uiCapabilities.navLinks[navLink.id]
         ? null
         : {
             key: navLink.id,

@@ -223,7 +223,14 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
           const progress = _.get(resp, ['stats', 'forecast_progress'], previousProgress);
           const status = _.get(resp, ['stats', 'forecast_status']);
 
-          this.setState({ forecastProgress: Math.round(100 * progress) });
+          // The requests for forecast stats can get routed to different shards,
+          // and if these operate at different speeds there is a chance that a
+          // previous request could arrive later.
+          // The progress reported by the back-end should never go down, so
+          // to be on the safe side, only update state if progress has increased.
+          if (progress > previousProgress) {
+            this.setState({ forecastProgress: Math.round(100 * progress) });
+          }
 
           // Display any messages returned in the request stats.
           let messages =  _.get(resp, ['stats', 'forecast_messages'], []);
@@ -286,7 +293,12 @@ export const ForecastingModal = injectI18n(class ForecastingModal extends Compon
               }
 
             } else {
-              previousProgress = progress;
+              if (progress > previousProgress) {
+                previousProgress = progress;
+              }
+
+              // Reset the 'no progress' check value.
+              noProgressMs = 0;
             }
           }
 

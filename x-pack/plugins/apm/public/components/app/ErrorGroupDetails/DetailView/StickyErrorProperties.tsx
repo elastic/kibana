@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { isBoolean } from 'lodash';
 import React, { Fragment } from 'react';
+import { idx } from '@kbn/elastic-idx';
 import {
   ERROR_EXC_HANDLED,
   HTTP_REQUEST_METHOD,
@@ -15,10 +16,9 @@ import {
   USER_ID
 } from '../../../../../common/elasticsearch_fieldnames';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { idx } from '../../../../../common/idx';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { legacyEncodeURIComponent } from '../../../shared/Links/url_helpers';
 import { StickyProperties } from '../../../shared/StickyProperties';
 
@@ -48,15 +48,16 @@ function TransactionLink({
   )}/${legacyEncodeURIComponent(transaction.transaction.name)}`;
 
   return (
-    <KibanaLink
-      hash={path}
+    <APMLink
+      path={path}
       query={{
         transactionId: transaction.transaction.id,
-        traceId: transaction.trace.id
+        traceId: transaction.trace.id,
+        banana: 'ok'
       }}
     >
       {transaction.transaction.id}
-    </KibanaLink>
+    </APMLink>
   );
 }
 

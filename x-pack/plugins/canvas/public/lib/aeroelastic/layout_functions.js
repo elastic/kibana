@@ -37,7 +37,6 @@ import {
   mean,
   not,
   removeDuplicates,
-  shallowEqual,
 } from './functional';
 
 import { getId as rawGetId } from './../../lib/get_id';
@@ -136,34 +135,18 @@ export const getMouseTransformGesture = tuple =>
     .filter(tpl => tpl.transform)
     .map(({ transform, cumulativeTransform }) => ({ transform, cumulativeTransform }));
 
-export const getRestateShapesEvent = action => {
-  if (!action || action.type !== 'restateShapesEvent') {
-    return null;
+export const getLocalTransformMatrix = shapes => shape => {
+  if (!shape.parent) {
+    return shape.transformMatrix;
   }
-  const shapes = action.payload.newShapes;
-  const local = shape => {
-    if (!shape.parent) {
-      return shape.transformMatrix;
-    }
-    return multiply(
-      invert(shapes.find(s => s.id === shape.parent).transformMatrix),
-      shape.transformMatrix
-    );
-  };
-  const newShapes = shapes.map(s => ({ ...s, localTransformMatrix: local(s) }));
-  return { newShapes, uid: action.payload.uid };
-}; // is selected, as otherwise selection is driven by gestures and knowledge of element positions
+  return multiply(
+    invert(shapes.find(s => s.id === shape.parent).transformMatrix),
+    shape.transformMatrix
+  );
+};
 
-export const getDirectSelect = action =>
-  action && action.type === 'shapeSelect' ? action.payload : null;
-
-export const getSelectedShapeObjects = scene => scene.selectedShapeObjects || []; // returns true if the shape is not a child of one of the shapes
-
-// fixme put it into geometry.js
-// broken.
-// is the composition of the baseline (previously absorbed transforms) and the cumulative (ie. ongoing interaction)
-const reselectShapes = (allShapes, shapes) =>
-  shapes.map(id => allShapes.find(shape => shape.id === id));
+export const getSelectedShapeObjects = (scene, shapes) =>
+  (scene.selectedShapes || []).map(s => shapes.find(ss => ss.id === s));
 
 const contentShape = allShapes => shape =>
   shape.type === 'annotation'
@@ -1201,44 +1184,24 @@ export const getCursor = (config, shape, draggedPrimaryShape) => {
   }
 };
 
-export const getSelectedShapesPrev = scene =>
-  scene.selectionState || {
-    shapes: [],
-    uid: null,
-    depthIndex: 0,
-    down: false,
-  };
+export const getSelectedShapesPrev = scene => scene.selectionState;
 
-export const getSelectionState = (
+export const getSelectionStateFull = (
   prev,
   config,
   selectedShapeObjects,
   hoveredShapes,
   { down, uid },
   metaHeld,
-  multiselect,
-  directSelect,
-  allShapes
+  multiselect
 ) => {
   const uidUnchanged = uid === prev.uid;
   const mouseButtonUp = !down;
-  const updateFromDirectSelect =
-    directSelect &&
-    directSelect.shapes &&
-    !shallowEqual(directSelect.shapes, selectedShapeObjects.map(shape => shape.id));
-  if (updateFromDirectSelect) {
-    return {
-      shapes: reselectShapes(allShapes, directSelect.shapes),
-      uid: directSelect.uid,
-      depthIndex: prev.depthIndex,
-      down: prev.down,
-    };
-  }
   if (selectedShapeObjects) {
     prev.shapes = selectedShapeObjects.slice();
   }
   // take action on mouse down only, and if the uid changed (except with directSelect), ie. bail otherwise
-  if (mouseButtonUp || (uidUnchanged && !directSelect)) {
+  if (mouseButtonUp || uidUnchanged) {
     return { ...prev, down, uid, metaHeld };
   }
   const selectFunction = config.singleSelect || !multiselect ? singleSelect : multiSelect;
@@ -1246,6 +1209,8 @@ export const getSelectionState = (
 };
 
 export const getSelectedShapes = selectionTuple => selectionTuple.shapes;
+
+export const getSelectionState = ({ uid, depthIndex, down }) => ({ uid, depthIndex, down });
 
 export const getSelectedPrimaryShapeIds = shapes => shapes.map(primaryShape);
 
@@ -1275,15 +1240,6 @@ export const getTransformIntents = (
   ),
   ...resizeAnnotationManipulation(config, transformGestures, directShapes, shapes, manipulator),
 ];
-
-export const getNextShapes = (preexistingShapes, restated) => {
-  if (restated && restated.newShapes) {
-    return restated.newShapes;
-  }
-
-  // this is the per-shape model update at the current PoC level
-  return preexistingShapes;
-};
 
 export const getDraggedPrimaryShape = (shapes, draggedShape) =>
   draggedShape && shapes.find(shape => shape.id === primaryShape(draggedShape));
@@ -1418,9 +1374,9 @@ export const getAnnotatedShapes = (
 }; // collection of shapes themselves
 
 export const getNextScene = (
-  config,
+  configuration,
   hoveredShape,
-  selectedShapeIds,
+  selectedShapes,
   selectedPrimaryShapes,
   shapes,
   gestureEnd,
@@ -1428,34 +1384,20 @@ export const getNextScene = (
   cursor,
   selectionState,
   mouseTransformState,
-  selectedShapes,
   gestureState
-) => {
-  const selectedLeafShapes = getLeafs(
-    shape => shape.type === config.groupName,
-    shapes,
-    selectionState.shapes
-      .map(s => (s.type === 'annotation' ? shapes.find(ss => ss.id === s.parent) : s))
-      .filter(identity)
-  )
-    .filter(shape => shape.type !== 'annotation')
-    .map(s => s.id);
-  return {
-    configuration: config,
-    hoveredShape,
-    selectedShapes: selectedShapeIds,
-    selectedLeafShapes,
-    selectedPrimaryShapes,
-    shapes,
-    gestureEnd,
-    draggedShape,
-    cursor,
-    selectionState,
-    gestureState,
-    mouseTransformState,
-    selectedShapeObjects: selectedShapes,
-  };
-};
+) => ({
+  configuration,
+  hoveredShape,
+  selectedShapes,
+  selectedPrimaryShapes,
+  shapes,
+  gestureEnd,
+  draggedShape,
+  cursor,
+  selectionState,
+  mouseTransformState,
+  gestureState,
+});
 
 export const updaterFun = (nextScene, primaryUpdate) => ({
   primaryUpdate,

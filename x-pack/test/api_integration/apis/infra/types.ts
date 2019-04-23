@@ -12,10 +12,19 @@ export interface EsArchiver {
   unload(name: string): void;
 }
 
+interface InfraOpsGraphQLClientFactoryOptions {
+  username: string;
+  password: string;
+  basePath: string;
+}
+
 export interface KbnTestProviderOptions {
   getService(name: string): any;
   getService(name: 'esArchiver'): EsArchiver;
   getService(name: 'infraOpsGraphQLClient'): ApolloClient<InMemoryCache>;
+  getService(
+    name: 'infraOpsGraphQLClientFactory'
+  ): (options: InfraOpsGraphQLClientFactoryOptions) => ApolloClient<InMemoryCache>;
 }
 
 export type KbnTestProvider = (options: KbnTestProviderOptions) => void;

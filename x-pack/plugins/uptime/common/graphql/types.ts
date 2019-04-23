@@ -1,4 +1,4 @@
-/* tslint:disable */
+/* eslint-disable */
 
 // ====================================================
 // START: Typescript template

@@ -20,7 +20,12 @@
 import { EuiComboBoxOptionProps } from '@elastic/eui';
 import { AggType } from 'ui/agg_types';
 
+// NOTE: we cannot export the interface with export { InterfaceName }
+// as there is currently a bug on babel typescript transform plugin for it
+// https://github.com/babel/babel/issues/7641
+//
 export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
+  label: string;
   value?: AggType;
   options?: ComboBoxGroupedOption[];
 };
@@ -30,12 +35,14 @@ export type ComboBoxGroupedOption = EuiComboBoxOptionProps & {
  *
  * @param aggs An array of aggregations that will be grouped.
  * @param groupBy A field name which aggregations is grouped by.
+ * @param labelName A name of a property which value will be displayed.
  *
  * @returns An array of grouped and sorted alphabetically `aggs` that are compatible with EuiComboBox options. If `aggs` is not an array, the function returns an ampry array.
  */
 function groupAggregationsBy(
   aggs: AggType[],
-  groupBy: string = 'type'
+  groupBy: string = 'type',
+  labelName = 'title'
 ): ComboBoxGroupedOption[] | [] {
   if (!Array.isArray(aggs)) {
     return [];
@@ -44,7 +51,7 @@ function groupAggregationsBy(
   const groupedOptions: ComboBoxGroupedOption[] = aggs.reduce((array: AggType[], type: AggType) => {
     const group = array.find(element => element.label === type[groupBy]);
     const option = {
-      label: type.title,
+      label: type[labelName],
       value: type,
     };
 
@@ -72,7 +79,7 @@ function groupAggregationsBy(
   return groupedOptions;
 }
 
-function sortByLabel(a: { label: string }, b: { label: string }) {
+function sortByLabel(a: ComboBoxGroupedOption, b: ComboBoxGroupedOption) {
   return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
 }
 

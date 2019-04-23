@@ -14,6 +14,7 @@ import { IUrlParams } from '../../../store/urlParams';
 import { FilterBar } from '../../shared/FilterBar';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 import { ServiceIntegrations } from './ServiceIntegrations';
+import { isRumAgentName } from '../../../../common/agent_name';
 
 interface Props {
   urlParams: IUrlParams;
@@ -31,6 +32,8 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
     return null;
   }
 
+  const isRumAgent = isRumAgentName(serviceDetailsData.agentName || '');
+
   return (
     <React.Fragment>
       <EuiFlexGroup justifyContent="spaceBetween">
@@ -42,7 +45,6 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
         <EuiFlexItem grow={false}>
           <ServiceIntegrations
             transactionTypes={serviceDetailsData.types}
-            location={location}
             urlParams={urlParams}
           />
         </EuiFlexItem>
@@ -56,6 +58,7 @@ export function ServiceDetailsView({ urlParams, location }: Props) {
         location={location}
         urlParams={urlParams}
         transactionTypes={serviceDetailsData.types}
+        isRumAgent={isRumAgent}
       />
     </React.Fragment>
   );
