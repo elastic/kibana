@@ -5,7 +5,6 @@
  */
 
 import { ReactWrapper } from 'enzyme';
-import { MemoryRouter } from 'react-router-dom';
 
 export type SetupFunc<T> = (props?: any) => TestBed<T>;
 
@@ -51,6 +50,6 @@ export interface TestBedOptions {
     initialEntries?: string[];
     initialIndex?: number;
     componentRoutePath?: string;
-    onRouter?: (router: MemoryRouter) => void;
+    onRouter?: (router: any) => void;
   };
 }

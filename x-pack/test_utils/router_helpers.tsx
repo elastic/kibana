@@ -7,6 +7,7 @@
 import React, { Component, ComponentType } from 'react';
 import PropTypes from 'prop-types';
 import { MemoryRouter, Route } from 'react-router-dom';
+import * as H from 'history';
 
 export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex: number = 0) => (
   WrappedComponent: ComponentType
@@ -38,4 +39,32 @@ export const WithRoute = (componentRoutePath = '/', onRouter = (router: MemoryRo
       );
     }
   };
+};
+
+interface Router {
+  history: Partial<H.History>;
+  route: {
+    location: H.Location;
+  };
+}
+
+export const reactRouterMock: Router = {
+  history: {
+    push: () => {},
+    createHref: location => location.pathname!,
+    location: {
+      pathname: '',
+      search: '',
+      state: '',
+      hash: '',
+    },
+  },
+  route: {
+    location: {
+      pathname: '',
+      search: '',
+      state: '',
+      hash: '',
+    },
+  },
 };

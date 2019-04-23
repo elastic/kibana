@@ -7,20 +7,9 @@
 import axios from 'axios';
 
 import { setHttpClient } from '../../../public/app/services/api';
-import routing from '../../../public/app/services/routing';
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
-  // Mock React router
-  const reactRouter = {
-    history: {
-      push: () => {},
-      createHref: (location) => location.pathname,
-      location: ''
-    }
-  };
-
-  routing.reactRouter = reactRouter;
   // Mock Angular $q
   const $q = { defer: () => ({ resolve() {} }) };
   // axios has a $http like interface so using it to simulate $http
