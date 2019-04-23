@@ -6,26 +6,26 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const listBreadcrumb = {
+export const listBreadcrumb: any = {
   text: i18n.translate('xpack.watcher.breadcrumb.listLabel', {
     defaultMessage: 'Watcher'
   }),
   href: '#/management/elasticsearch/watcher/watches/',
 };
 
-export const createBreadcrumb = {
+export const createBreadcrumb: any = {
   text: i18n.translate('xpack.watcher.breadcrumb.createLabel', {
     defaultMessage: 'Create',
   }),
 };
 
-export const editBreadcrumb = {
+export const editBreadcrumb: any = {
   text: i18n.translate('xpack.watcher.breadcrumb.editLabel', {
     defaultMessage: 'Edit',
   }),
 };
 
-export const statusBreadcrumb = {
+export const statusBreadcrumb: any = {
   text: i18n.translate('xpack.watcher.breadcrumb.statusLabel', {
     defaultMessage: 'Status',
   }),
