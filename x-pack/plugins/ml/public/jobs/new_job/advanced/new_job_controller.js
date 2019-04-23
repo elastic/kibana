@@ -405,22 +405,22 @@ module.controller('MlNewJob',
           ml.getFieldCaps({ index })
             .then((resp) => {
               $scope.ui.fieldsUpToDate = true;
-              _.each(resp, (fieldList) => {
-                _.each(fieldList, (field, fieldName) => {
+              if (resp.fields !== undefined) {
+                _.each(resp.fields, (field, fieldName) => {
                   _.each(field, (type) => {
                     if (fieldsToIgnore.indexOf(fieldName) === -1) {
 
                       let addField = true;
                       if (fieldName.match(/\.keyword$/)) {
-                        // if this is a keyword version of a field, check to see whether a non-keyword
-                        // version has already been added. if so, delete it.
+                      // if this is a keyword version of a field, check to see whether a non-keyword
+                      // version has already been added. if so, delete it.
                         const keywordLess = fieldName.replace('.keyword');
                         if ($scope.fields[keywordLess] !== undefined) {
                           delete $scope.fields[keywordLess];
                         }
                       } else if ($scope.fields[`${fieldName}.keyword`] !== undefined) {
-                        // if this is not a keyword version of a field, but a keyword version has already been
-                        // added, don't add this field.
+                      // if this is not a keyword version of a field, but a keyword version has already been
+                      // added, don't add this field.
                         addField = false;
                       }
 
@@ -440,7 +440,7 @@ module.controller('MlNewJob',
                     }
                   });
                 });
-              });
+              }
 
               // Add script fields from the job configuration to $scope.fields
               // so they're available from within the dropdown in the detector modal.
