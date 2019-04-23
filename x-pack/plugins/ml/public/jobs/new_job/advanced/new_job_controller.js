@@ -412,15 +412,15 @@ module.controller('MlNewJob',
 
                       let addField = true;
                       if (fieldName.match(/\.keyword$/)) {
-                      // if this is a keyword version of a field, check to see whether a non-keyword
-                      // version has already been added. if so, delete it.
+                        // if this is a keyword version of a field, check to see whether a non-keyword
+                        // version has already been added. if so, delete it.
                         const keywordLess = fieldName.replace('.keyword');
                         if ($scope.fields[keywordLess] !== undefined) {
                           delete $scope.fields[keywordLess];
                         }
                       } else if ($scope.fields[`${fieldName}.keyword`] !== undefined) {
-                      // if this is not a keyword version of a field, but a keyword version has already been
-                      // added, don't add this field.
+                        // if this is not a keyword version of a field, but a keyword version has already been
+                        // added, don't add this field.
                         addField = false;
                       }
 
