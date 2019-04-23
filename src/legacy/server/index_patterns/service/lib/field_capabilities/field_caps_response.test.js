@@ -40,7 +40,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         expect(fields).toHaveLength(22);
       });
 
-      it('includes only name, type, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, parent, ' +
+      it('includes only name, type, esTypes, searchable, aggregatable, readFromDocValues, and maybe conflictDescriptions, parent, ' +
         'and subType of each field', () => {
         const responseClone = cloneDeep(esResponse);
         // try to trick it into including an extra field
@@ -53,6 +53,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           expect(Object.keys(fieldWithoutOptionalKeys)).toEqual([
             'name',
             'type',
+            'esTypes',
             'searchable',
             'aggregatable',
             'readFromDocValues'
@@ -76,6 +77,14 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
         });
       });
 
+      it('should include the original ES types found for each field across indices', () => {
+        const fields = readFieldCapsResponse(esResponse);
+        fields.forEach((field) => {
+          const fixtureTypes = Object.keys(esResponse.fields[field.name]);
+          expect(field.esTypes).toEqual(fixtureTypes);
+        });
+      });
+
       it('returns fields with multiple types as conflicts', () => {
         const fields = readFieldCapsResponse(esResponse);
         const conflicts = fields.filter(f => f.type === 'conflict');
@@ -83,6 +92,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
           {
             name: 'success',
             type: 'conflict',
+            esTypes: ['boolean', 'keyword'],
             searchable: true,
             aggregatable: true,
             readFromDocValues: false,

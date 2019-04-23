@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const STATUS = {
-  FAILURE: 'FAILURE',
-  SUCCESS: 'SUCCESS',
-  LOADING: 'LOADING'
-};
+export { JobDetailsForm, getDefaultJobDetailsState } from './job_details_form';
+
+export { JobDetailsSummary } from './job_details_summary';
