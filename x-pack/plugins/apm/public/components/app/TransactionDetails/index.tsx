@@ -6,25 +6,22 @@
 
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import _ from 'lodash';
 import React from 'react';
 import { useTransactionDetailsCharts } from '../../../hooks/useTransactionDetailsCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { EmptyMessage } from '../../shared/EmptyMessage';
 import { FilterBar } from '../../shared/FilterBar';
 import { TransactionDistribution } from './Distribution';
 import { Transaction } from './Transaction';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
-interface Props {
-  urlParams: IUrlParams;
-  location: Location;
-}
-
-export function TransactionDetailsView({ urlParams, location }: Props) {
+export function TransactionDetails() {
+  const location = useLocation();
+  const { urlParams } = useUrlParams();
   const { data: distributionData } = useTransactionDistribution(urlParams);
   const { data: transactionDetailsChartsData } = useTransactionDetailsCharts(
     urlParams
