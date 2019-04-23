@@ -27,24 +27,28 @@ import { GroupByList } from '../../components/group_by_list/list';
 import { SourceIndexPreview } from '../../components/source_index_preview';
 import { PivotPreview } from './pivot_preview';
 
-import { Dictionary } from '../../../../common/types/common';
 import {
   DropDownLabel,
   DropDownOption,
   getPivotQuery,
+  IndexPatternContext,
   Label,
-  OptionsDataElement,
+  PivotAggsConfig,
+  PivotAggsConfigDict,
+  PivotGroupByConfig,
+  PivotGroupByConfigDict,
   pivotSupportedAggs,
   PIVOT_SUPPORTED_AGGS,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
-import { IndexPatternContext } from '../../common';
 import { FIELD_TYPE } from './common';
 
 export interface DefinePivotExposedState {
   aggList: Label[];
-  aggs: OptionsDataElement[];
-  groupBy: Label[];
+  aggs: PivotAggsConfig[];
+  groupByList: Label[];
+  groupBy: PivotGroupByConfig[];
   search: string;
   valid: boolean;
 }
@@ -55,8 +59,9 @@ const emptySearch = '';
 export function getDefaultPivotState(): DefinePivotExposedState {
   return {
     aggList: [] as Label[],
-    aggs: [] as OptionsDataElement[],
-    groupBy: [] as Label[],
+    aggs: [] as PivotAggsConfig[],
+    groupByList: [] as Label[],
+    groupBy: [] as PivotGroupByConfig[],
     search: defaultSearch,
     valid: false,
   };
@@ -94,17 +99,17 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   };
 
   // The list of selected group by fields
-  const [groupBy, setGroupBy] = useState(defaults.groupBy as Label[]);
+  const [groupByList, setGroupByList] = useState(defaults.groupByList as Label[]);
 
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
-    const newList = uniq([...groupBy, label]);
-    setGroupBy(newList);
+    const newList = uniq([...groupByList, label]);
+    setGroupByList(newList);
   };
 
   const deleteGroupBy = (label: Label) => {
-    const newList = groupBy.filter(l => l !== label);
-    setGroupBy(newList);
+    const newList = groupByList.filter(l => l !== label);
+    setGroupByList(newList);
   };
 
   // The list of selected aggregations
@@ -121,19 +126,52 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setAggList(newList);
   };
 
-  // The available fields for group by
+  // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
-  fields.forEach(field => {
-    const o: DropDownLabel = { label: field.name };
-    groupByOptions.push(o);
-  });
+  const groupByOptionsData: PivotGroupByConfigDict = {};
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
-  const aggOptionsData: Dictionary<OptionsDataElement> = {};
+  const aggOptionsData: PivotAggsConfigDict = {};
 
   fields.forEach(field => {
-    const o: DropDownOption = { label: field.name, options: [] };
+    // group by
+    if (field.type === FIELD_TYPE.STRING) {
+      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
+      const groupByOption: DropDownLabel = { label };
+      groupByOptions.push(groupByOption);
+      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}_${field.name}`;
+      groupByOptionsData[label] = {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+        field: field.name,
+        formRowLabel,
+      };
+    } else if (field.type === FIELD_TYPE.NUMBER) {
+      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
+      const groupByOption: DropDownLabel = { label };
+      groupByOptions.push(groupByOption);
+      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}_${field.name}`;
+      groupByOptionsData[label] = {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+        field: field.name,
+        formRowLabel,
+        interval: '10',
+      };
+    } else if (field.type === FIELD_TYPE.DATE) {
+      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
+      const groupByOption: DropDownLabel = { label };
+      groupByOptions.push(groupByOption);
+      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}_${field.name}`;
+      groupByOptionsData[label] = {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+        field: field.name,
+        formRowLabel,
+        interval: '1m',
+      };
+    }
+
+    // aggregations
+    const aggOption: DropDownOption = { label: field.name, options: [] };
     pivotSupportedAggs.forEach(agg => {
       if (
         (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
@@ -141,28 +179,29 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
         (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
       ) {
         const label = `${agg}(${field.name})`;
-        o.options.push({ label });
+        aggOption.options.push({ label });
         const formRowLabel = `${agg}_${field.name}`;
         aggOptionsData[label] = { agg, field: field.name, formRowLabel };
       }
     });
-    aggOptions.push(o);
+    aggOptions.push(aggOption);
   });
 
   const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupBy;
+  const pivotGroupBy = groupByList.map(l => groupByOptionsData[l]);
   const pivotQuery = getPivotQuery(search);
 
   const valid = pivotGroupBy.length > 0 && aggList.length > 0;
 
   useEffect(
     () => {
-      onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
+      onChange({ aggList, aggs: pivotAggs, groupByList, groupBy: pivotGroupBy, search, valid });
     },
     [
       aggList,
       pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
-      pivotGroupBy,
+      groupByList,
+      pivotGroupBy.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
       search,
       valid,
     ]
@@ -194,7 +233,11 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             })}
           >
             <Fragment>
-              <GroupByList list={pivotGroupBy} deleteHandler={deleteGroupBy} />
+              <GroupByList
+                list={groupByList}
+                optionsData={groupByOptionsData}
+                deleteHandler={deleteGroupBy}
+              />
               <DropDown
                 changeHandler={addGroupBy}
                 options={groupByOptions}

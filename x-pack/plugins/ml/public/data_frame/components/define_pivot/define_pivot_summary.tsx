@@ -21,16 +21,17 @@ import { AggListSummary } from '../../components/aggregation_list';
 import { GroupByList } from '../../components/group_by_list/list';
 import { PivotPreview } from './pivot_preview';
 
-import { Dictionary } from '../../../../common/types/common';
 import {
   DropDownLabel,
   DropDownOption,
+  getPivotQuery,
   IndexPatternContext,
   Label,
-  OptionsDataElement,
+  PivotAggsConfigDict,
+  PivotGroupByConfigDict,
   PIVOT_SUPPORTED_AGGS,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
   pivotSupportedAggs,
-  SimpleQuery,
 } from '../../common';
 import { FIELD_TYPE } from './common';
 
@@ -39,11 +40,11 @@ const emptySearch = '';
 
 interface Props {
   search: string;
-  groupBy: Label[];
+  groupByList: Label[];
   aggList: Label[];
 }
 
-export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => {
+export const DefinePivotSummary: SFC<Props> = ({ search, groupByList, aggList }) => {
   const indexPattern = useContext(IndexPatternContext);
 
   if (indexPattern === null) {
@@ -54,19 +55,52 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
 
-  // The available fields for group by
+  // The available group by options
   const groupByOptions: EuiComboBoxOptionProps[] = [];
-  fields.forEach(field => {
-    const o: DropDownLabel = { label: field.name };
-    groupByOptions.push(o);
-  });
+  const groupByOptionsData: PivotGroupByConfigDict = {};
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
-  const aggOptionsData: Dictionary<OptionsDataElement> = {};
+  const aggOptionsData: PivotAggsConfigDict = {};
 
   fields.forEach(field => {
-    const o: DropDownOption = { label: field.name, options: [] };
+    // group by
+    if (field.type === FIELD_TYPE.STRING) {
+      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
+      const groupByOption: DropDownLabel = { label };
+      groupByOptions.push(groupByOption);
+      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}_${field.name}`;
+      groupByOptionsData[label] = {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+        field: field.name,
+        formRowLabel,
+      };
+    } else if (field.type === FIELD_TYPE.NUMBER) {
+      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
+      const groupByOption: DropDownLabel = { label };
+      groupByOptions.push(groupByOption);
+      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}_${field.name}`;
+      groupByOptionsData[label] = {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+        field: field.name,
+        formRowLabel,
+        interval: '10',
+      };
+    } else if (field.type === FIELD_TYPE.DATE) {
+      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
+      const groupByOption: DropDownLabel = { label };
+      groupByOptions.push(groupByOption);
+      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}_${field.name}`;
+      groupByOptionsData[label] = {
+        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+        field: field.name,
+        formRowLabel,
+        interval: '1m',
+      };
+    }
+
+    // aggregations
+    const aggOption: DropDownOption = { label: field.name, options: [] };
     pivotSupportedAggs.forEach(agg => {
       if (
         (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
@@ -74,23 +108,17 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
         (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
       ) {
         const label = `${agg}(${field.name})`;
-        o.options.push({ label });
+        aggOption.options.push({ label });
         const formRowLabel = `${agg}_${field.name}`;
         aggOptionsData[label] = { agg, field: field.name, formRowLabel };
       }
     });
-    aggOptions.push(o);
+    aggOptions.push(aggOption);
   });
 
   const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupBy;
-
-  const pivotQuery: SimpleQuery = {
-    query_string: {
-      query: search,
-      default_operator: 'AND',
-    },
-  };
+  const pivotGroupBy = groupByList.map(l => groupByOptionsData[l]);
+  const pivotQuery = getPivotQuery(search);
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
 
@@ -111,7 +139,7 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupBy, aggList }) => 
               defaultMessage: 'Group by',
             })}
           >
-            <GroupByList list={pivotGroupBy} />
+            <GroupByList list={groupByList} optionsData={groupByOptionsData} />
           </EuiFormRow>
 
           <EuiFormRow

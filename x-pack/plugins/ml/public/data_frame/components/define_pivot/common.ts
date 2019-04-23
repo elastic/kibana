@@ -5,6 +5,7 @@
  */
 
 export enum FIELD_TYPE {
+  DATE = 'date',
   IP = 'ip',
   NUMBER = 'number',
   STRING = 'string',

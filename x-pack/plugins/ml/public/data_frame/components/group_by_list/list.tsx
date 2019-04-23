@@ -8,34 +8,39 @@ import React, { Fragment } from 'react';
 
 import { EuiListGroup, EuiListGroupItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 
+import { PivotGroupByConfigDict } from '../../common';
+
 interface ListProps {
   list: string[];
+  optionsData: PivotGroupByConfigDict;
   deleteHandler?(l: string): void;
 }
 
-export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list }) => (
+export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
   <EuiListGroup flush={true}>
-    {list.map((fieldName: string) => (
-      <Fragment key={fieldName}>
-        <EuiPanel paddingSize="s">
-          <EuiListGroupItem
-            iconType="string"
-            label={fieldName}
-            extraAction={
-              (deleteHandler && {
-                onClick: () => deleteHandler(fieldName),
-                iconType: 'cross',
-                iconSize: 's',
-                'aria-label': fieldName,
-                alwaysShow: false,
-              }) ||
-              undefined
-            }
-            style={{ padding: 0 }}
-          />
-        </EuiPanel>
-        {list.length > 0 && <EuiSpacer size="s" />}
-      </Fragment>
-    ))}
+    {list.map((optionsDataId: string) => {
+      return (
+        <Fragment key={optionsDataId}>
+          <EuiPanel paddingSize="s">
+            <EuiListGroupItem
+              iconType="string"
+              label={optionsDataId}
+              extraAction={
+                (deleteHandler && {
+                  onClick: () => deleteHandler(optionsDataId),
+                  iconType: 'cross',
+                  iconSize: 's',
+                  'aria-label': optionsDataId,
+                  alwaysShow: false,
+                }) ||
+                undefined
+              }
+              style={{ padding: 0 }}
+            />
+          </EuiPanel>
+          {list.length > 0 && <EuiSpacer size="s" />}
+        </Fragment>
+      );
+    })}
   </EuiListGroup>
 );

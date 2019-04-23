@@ -12,6 +12,10 @@ import { Dictionary } from '../../../common/types/common';
 
 import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
 
+import { PivotGroupByConfig } from '../common';
+
+import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
+
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
 
@@ -29,13 +33,13 @@ export interface DropDownOption {
 // The internal representation of an aggregation definition.
 type AggName = string;
 type FieldName = string;
-export interface OptionsDataElement {
+export interface PivotAggsConfig {
   agg: PivotAggSupportedAggs;
   field: FieldName;
   formRowLabel: AggName;
 }
 
-export type OptionsDataElementDict = Dictionary<OptionsDataElement>;
+export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
 
 export interface SimpleQuery {
   query_string: {
@@ -45,12 +49,27 @@ export interface SimpleQuery {
 }
 
 // DataFramePreviewRequest
-type PivotGroupBySupportedAggs = 'terms';
-type PivotGroupBy = {
-  [key in PivotGroupBySupportedAggs]: {
-    field: string;
-  }
-};
+interface TermsAgg {
+  terms: {
+    field: FieldName;
+  };
+}
+
+interface HistogramAgg {
+  histogram: {
+    field: FieldName;
+    interval: string;
+  };
+}
+
+interface DateHistogramAgg {
+  date_histogram: {
+    field: FieldName;
+    interval: string;
+  };
+}
+
+type PivotGroupBy = TermsAgg | HistogramAgg | DateHistogramAgg;
 type PivotGroupByDict = Dictionary<PivotGroupBy>;
 
 export enum PIVOT_SUPPORTED_AGGS {
@@ -119,8 +138,8 @@ export function getPivotQuery(search: string): SimpleQuery {
 export function getDataFramePreviewRequest(
   indexPatternTitle: StaticIndexPattern['title'],
   query: SimpleQuery,
-  groupBy: string[],
-  aggs: OptionsDataElement[]
+  groupBy: PivotGroupByConfig[],
+  aggs: PivotAggsConfig[]
 ): DataFramePreviewRequest {
   const request: DataFramePreviewRequest = {
     source: {
@@ -134,11 +153,30 @@ export function getDataFramePreviewRequest(
   };
 
   groupBy.forEach(g => {
-    request.pivot.group_by[g] = {
-      terms: {
-        field: g,
-      },
-    };
+    if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS) {
+      const termsAgg: TermsAgg = {
+        terms: {
+          field: g.field,
+        },
+      };
+      request.pivot.group_by[g.formRowLabel] = termsAgg;
+    } else if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
+      const histogramAgg: HistogramAgg = {
+        histogram: {
+          field: g.field,
+          interval: g.interval,
+        },
+      };
+      request.pivot.group_by[g.formRowLabel] = histogramAgg;
+    } else if (g.agg === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
+      const dateHistogramAgg: DateHistogramAgg = {
+        date_histogram: {
+          field: g.field,
+          interval: g.interval,
+        },
+      };
+      request.pivot.group_by[g.formRowLabel] = dateHistogramAgg;
+    }
   });
 
   aggs.forEach(agg => {
@@ -173,3 +211,4 @@ export function getDataFrameRequest(
 }
 
 export * from './index_pattern_context';
+export * from './pivot_group_by';

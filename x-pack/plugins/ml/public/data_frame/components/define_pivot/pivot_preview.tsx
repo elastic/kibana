@@ -17,7 +17,13 @@ import {
   SortDirection,
 } from '@elastic/eui';
 
-import { IndexPatternContext, OptionsDataElement, SimpleQuery } from '../../common';
+import {
+  IndexPatternContext,
+  PivotAggsConfig,
+  PivotGroupByConfig,
+  SimpleQuery,
+} from '../../common';
+
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
 const PreviewTitle = () => (
@@ -31,8 +37,8 @@ const PreviewTitle = () => (
 );
 
 interface Props {
-  aggs: OptionsDataElement[];
-  groupBy: string[];
+  aggs: PivotAggsConfig[];
+  groupBy: PivotGroupByConfig[];
   query: SimpleQuery;
 }
 
@@ -99,13 +105,13 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   const columnKeys = Object.keys(dataFramePreviewData[0]);
   columnKeys.sort((a, b) => {
     // make sure groupBy fields are always most left columns
-    if (groupBy.some(d => d === a) && groupBy.some(d => d === b)) {
+    if (groupBy.some(d => d.formRowLabel === a) && groupBy.some(d => d.formRowLabel === b)) {
       return a.localeCompare(b);
     }
-    if (groupBy.some(d => d === a)) {
+    if (groupBy.some(d => d.formRowLabel === a)) {
       return -1;
     }
-    if (groupBy.some(d => d === b)) {
+    if (groupBy.some(d => d.formRowLabel === b)) {
       return 1;
     }
     return a.localeCompare(b);
