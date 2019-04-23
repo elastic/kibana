@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
+  EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiInMemoryTable,
   EuiLink,
@@ -119,7 +120,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     {
       field: 'startTime',
       name: i18n.translate('xpack.watcher.sections.watchList.watchTable.startTimeHeader', {
-        defaultMessage: 'Trigger Time',
+        defaultMessage: 'Trigger time',
       }),
       sortable: true,
       truncateText: true,
@@ -220,7 +221,16 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         sortable: true,
         truncateText: true,
         render: (state: string) => {
-          return <EuiText>{state}</EuiText>;
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <WatchActionStatus watchState={state} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} className="watchState__message">
+                <EuiText>{state}</EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
         },
       },
     ];
@@ -230,33 +240,57 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         data-test-subj="indexDetailFlyout"
         onClose={() => setDetailWatchId(undefined)}
         aria-labelledby="indexDetailsFlyoutTitle"
+        maxWidth={600}
       >
         <EuiFlyoutHeader>
-          <EuiTitle size="m">
-            <h2>Watch history detail</h2>
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.title"
+                defaultMessage="Executed on {date}"
+                values={{ date: watchHistoryDetails.startTime }}
+              />
+            </h3>
           </EuiTitle>
         </EuiFlyoutHeader>
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem>
-            <EuiInMemoryTable
-              items={(watchHistoryDetails.watchStatus as any).actionStatuses}
-              itemId="id"
-              columns={detailColumns}
-              message={
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
-                  defaultMessage="No current status to show"
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup gutterSize="xs" alignItems="center">
-          <EuiFlexItem>
-            <EuiCodeBlock language="javascript">{executionDetail}</EuiCodeBlock>
-            <EuiSpacer />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+
+        <EuiFlyoutBody>
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.actionsTitle"
+                defaultMessage="Actions"
+              />
+            </h4>
+          </EuiTitle>
+
+          <EuiInMemoryTable
+            items={(watchHistoryDetails.watchStatus as any).actionStatuses}
+            itemId="id"
+            columns={detailColumns}
+            message={
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchTable.noWatchesMessage"
+                defaultMessage="No current status to show"
+              />
+            }
+          />
+
+          <EuiSpacer />
+
+          <EuiTitle size="xs">
+            <h4>
+              <FormattedMessage
+                id="xpack.watcher.sections.watchHistory.watchHistoryDetail.jsonTitle"
+                defaultMessage="JSON"
+              />
+            </h4>
+          </EuiTitle>
+
+          <EuiSpacer size="s" />
+
+          <EuiCodeBlock language="json">{executionDetail}</EuiCodeBlock>
+        </EuiFlyoutBody>
       </EuiFlyout>
     );
   }
@@ -284,15 +318,15 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         }}
         watchesToDelete={watchesToDelete}
       />
-      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="m">
-            <h1>
+          <EuiTitle size="s">
+            <h2>
               <FormattedMessage
                 id="xpack.watcher.sections.watchHistory.header"
-                defaultMessage="Watch history"
+                defaultMessage="Execution history"
               />
-            </h1>
+            </h2>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -333,9 +367,9 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       </EuiFlexGroup>
 
       <EuiSpacer size="s" />
+
       <EuiInMemoryTable
         items={history}
-        itemId="id"
         columns={columns}
         pagination={pagination}
         sorting={true}

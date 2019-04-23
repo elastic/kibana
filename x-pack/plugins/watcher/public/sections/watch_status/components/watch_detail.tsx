@@ -73,11 +73,25 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
         <h1>
           <FormattedMessage
             id="xpack.watcher.sections.watchDetail.header"
-            defaultMessage="Current status"
+            defaultMessage="Current status for '{watchId}'"
+            values={{ watchId }}
           />
         </h1>
       </EuiTitle>
+
       <EuiSpacer size="s" />
+
+      <EuiTitle size="s">
+        <h2>
+          <FormattedMessage
+            id="xpack.watcher.sections.watchDetail.actionsTitle"
+            defaultMessage="Actions"
+          />
+        </h2>
+      </EuiTitle>
+
+      <EuiSpacer size="s" />
+
       <EuiInMemoryTable
         items={watchDetail ? watchDetail.actions : []}
         itemId="id"
