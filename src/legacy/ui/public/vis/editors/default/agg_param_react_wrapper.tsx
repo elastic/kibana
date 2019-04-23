@@ -23,11 +23,12 @@ import { AggParam } from '../../../agg_types';
 import { FieldParamType } from '../../../agg_types/param_types';
 import { AggConfig } from '../../agg_config';
 import { AggParamEditorProps } from './agg_param_editor_props';
+import { EditorConfig } from '../config/types';
 
 interface AggParamReactWrapperProps<T> {
   agg: AggConfig;
   aggParam: AggParam;
-  editorConfig: any;
+  editorConfig: EditorConfig;
   indexedFields: FieldParamType[];
   isInvalid: boolean;
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;

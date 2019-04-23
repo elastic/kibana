@@ -75,7 +75,6 @@ uiModules
           $scope.$bind('aggParam', attr.aggParam);
           $scope.$bind('agg', attr.agg);
           $scope.$bind('editorComponent', attr.editorComponent);
-          $scope.$bind('editorConfig', attr.editorConfig);
           $scope.$bind('indexedFields', attr.indexedFields);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
