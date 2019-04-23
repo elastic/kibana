@@ -22,6 +22,7 @@ import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { FilterRow } from './filter';
+import { toUser, fromUser } from '../../query_bar/lib';
 
 const generateId = htmlIdGenerator();
 
@@ -50,7 +51,7 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
         filter.id === id
           ? {
               ...filter,
-              input: { query },
+              input: { query: fromUser(query) },
               label,
             }
           : filter
@@ -65,7 +66,8 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
           id={id}
           arrayIndex={arrayIndex}
           customLabel={label}
-          value={input.query}
+          value={toUser(input.query)}
+          autoFocus={arrayIndex === filters.length - 1}
           disableRemove={arrayIndex === 0 && filters.length === 1}
           dataTestSubj={`visEditorFilterInput_${agg.id}_${arrayIndex}`}
           onChangeValue={onChangeValue}

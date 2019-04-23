@@ -33,6 +33,7 @@ interface FilterRowProps {
   arrayIndex: number;
   customLabel: string;
   value: string;
+  autoFocus: boolean;
   disableRemove: boolean;
   dataTestSubj: string;
   onChangeValue(id: string, query: string, label: string): void;
@@ -44,6 +45,7 @@ function FilterRow({
   arrayIndex,
   customLabel,
   value,
+  autoFocus,
   disableRemove,
   dataTestSubj,
   onChangeValue,
@@ -100,6 +102,7 @@ function FilterRow({
           data-test-subj={dataTestSubj}
           onChange={ev => onChangeValue(id, ev.target.value, customLabel)}
           fullWidth={true}
+          autoFocus={autoFocus}
         />
       </EuiFormRow>
       {showCustomLabel ? (
