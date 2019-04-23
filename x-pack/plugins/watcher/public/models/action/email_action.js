@@ -18,10 +18,9 @@ export class EmailAction extends BaseAction {
     this.body = get(props, 'body');
   }
 
-  validateAction() {
+  validate() {
     const errors = {
       to: [],
-      subject: [],
       body: [],
     };
     if (!this.to || this.to.length === 0) {
@@ -31,17 +30,10 @@ export class EmailAction extends BaseAction {
         })
       );
     }
-    if (!this.subject) {
-      errors.subject.push(
-        i18n.translate('xpack.watcher.watchActions.email.emailSubjectIsRequiredValidationMessage', {
-          defaultMessage: 'Subject is required.',
-        })
-      );
-    }
     if (!this.body) {
       errors.body.push(
         i18n.translate('xpack.watcher.watchActions.email.emailBodyIsRequiredValidationMessage', {
-          defaultMessage: 'Body is required.',
+          defaultMessage: 'Email body is required.',
         })
       );
     }
@@ -56,23 +48,11 @@ export class EmailAction extends BaseAction {
       subject: this.subject,
       body: this.body,
       email: {
-        to: this.to.length ? this.to : undefined,
+        to: this.to && this.to.length ? this.to : undefined,
       }
     });
 
     return result;
-  }
-
-  get description() {
-    const toList = this.to.join(', ');
-    const subject = this.subject || '';
-    return i18n.translate('xpack.watcher.models.emailAction.description', {
-      defaultMessage: '"{subject}" will be sent to {toList}',
-      values: {
-        subject,
-        toList
-      }
-    });
   }
 
   get simulateMessage() {

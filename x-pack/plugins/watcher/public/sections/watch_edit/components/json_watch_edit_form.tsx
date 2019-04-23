@@ -27,11 +27,25 @@ import { LicenseServiceContext } from '../../../license_service_context';
 
 export const JsonWatchEditForm = () => {
   const { watch, setWatchProperty } = useContext(WatchContext);
-  // hooks
-  const [modal, setModal] = useState<{ title: string; message: string } | null>(null);
+  const licenseService = useContext(LicenseServiceContext);
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
-  const licenseService = useContext(LicenseServiceContext);
+  const [validationResult, setValidationResult] = useState<{
+    type: string;
+    title: string;
+    message: string;
+  } | null>(null);
+  const hasActionErrors = !!validationResult && validationResult.type === 'error';
+  const invalidActionMessage = i18n.translate(
+    'xpack.watcher.sections.watchEdit.json.form.actionValidationErrorMessage',
+    {
+      defaultMessage: 'Invalid watch actions',
+    }
+  );
+  const jsonErrors = {
+    ...errors,
+    json: hasActionErrors ? [...errors.json, invalidActionMessage] : [...errors.json],
+  };
 
   if (errors.json.length === 0) {
     setWatchProperty('watch', JSON.parse(watch.watchString));
@@ -39,16 +53,21 @@ export const JsonWatchEditForm = () => {
 
   return (
     <Fragment>
-      <ConfirmWatchesModal
-        modalOptions={modal}
-        callback={async isConfirmed => {
-          if (isConfirmed) {
-            saveWatch(watch, licenseService);
-          }
-          setModal(null);
-        }}
-      />
-      <EuiForm>
+      {validationResult && validationResult.type === 'warning' && (
+        <ConfirmWatchesModal
+          modalOptions={validationResult}
+          callback={async isConfirmed => {
+            if (isConfirmed) {
+              saveWatch(watch, licenseService);
+            }
+            setValidationResult(null);
+          }}
+        />
+      )}
+      <EuiForm
+        isInvalid={!!validationResult && validationResult.type === 'error'}
+        error={validationResult && validationResult.message ? validationResult.message : []}
+      >
         <ErrableFormRow
           id="watchId"
           label={i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchIDLabel', {
@@ -114,9 +133,9 @@ export const JsonWatchEditForm = () => {
             </Fragment>
           }
           errorKey="json"
-          isShowingErrors={hasErrors}
+          isShowingErrors={hasErrors || hasActionErrors}
           fullWidth
-          errors={errors}
+          errors={jsonErrors}
         >
           <EuiCodeEditor
             fullWidth
@@ -131,6 +150,9 @@ export const JsonWatchEditForm = () => {
             )}
             value={watch.watchString}
             onChange={(json: string) => {
+              if (validationResult && validationResult.type === 'error') {
+                setValidationResult(null);
+              }
               setWatchProperty('watchString', json);
             }}
           />
@@ -144,8 +166,8 @@ export const JsonWatchEditForm = () => {
               isDisabled={hasErrors}
               onClick={async () => {
                 const savedWatch = await onWatchSave(watch, licenseService);
-                if (savedWatch && savedWatch.error) {
-                  return setModal(savedWatch.error);
+                if (savedWatch && savedWatch.validationError) {
+                  return setValidationResult(savedWatch.validationError);
                 }
               }}
             >

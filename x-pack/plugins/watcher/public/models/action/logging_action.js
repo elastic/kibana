@@ -15,7 +15,7 @@ export class LoggingAction extends BaseAction {
     this.text = get(props, 'text');
   }
 
-  validateAction() {
+  validate() {
     const errors = {
       text: [],
     };
@@ -41,16 +41,6 @@ export class LoggingAction extends BaseAction {
     });
 
     return result;
-  }
-
-  get description() {
-    const text = this.text || '';
-    return i18n.translate('xpack.watcher.models.loggingAction.description', {
-      defaultMessage: 'Log message \'{text}\'',
-      values: {
-        text
-      }
-    });
   }
 
   get simulateMessage() {

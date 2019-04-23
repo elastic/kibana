@@ -8,16 +8,22 @@ import React, { Fragment } from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/form_errors';
+import { JiraAction } from '../../../../common/types/action_types';
 
 interface Props {
-  action: {};
+  action: JiraAction;
   editAction: (changedProperty: { key: string; value: any }) => void;
+  errors: { [key: string]: string[] };
+  hasErrors: boolean;
 }
 
-export const JiraActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
+export const JiraActionFields: React.FunctionComponent<Props> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+}) => {
   const { account, projectKey, issueType, summary } = action;
-  const errors = action.validateAction();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   return (
     <Fragment>

@@ -17,7 +17,7 @@ export class JiraAction extends BaseAction {
     this.summary = get(props, 'summary');
   }
 
-  validateAction() {
+  validate() {
     const errors = {
       projectKey: [],
       issueType: [],
@@ -26,21 +26,21 @@ export class JiraAction extends BaseAction {
     if (!this.projectKey) {
       errors.projectKey.push(
         i18n.translate('xpack.watcher.watchActions.jira.projectKeyIsRequiredValidationMessage', {
-          defaultMessage: 'Project key is required.',
+          defaultMessage: 'Jira project key is required.',
         })
       );
     }
     if (!this.issueType) {
       errors.issueType.push(
         i18n.translate('xpack.watcher.watchActions.jira.issueTypeNameIsRequiredValidationMessage', {
-          defaultMessage: 'Issue type is required.',
+          defaultMessage: 'Jira issue type is required.',
         })
       );
     }
     if (!this.summary) {
       errors.summary.push(
         i18n.translate('xpack.watcher.watchActions.jira.summaryIsRequiredValidationMessage', {
-          defaultMessage: 'Summary is required.',
+          defaultMessage: 'Jira summary is required.',
         })
       );
     }
@@ -70,15 +70,6 @@ export class JiraAction extends BaseAction {
     });
 
     return result;
-  }
-
-  get description() {
-    return i18n.translate('xpack.watcher.models.jiraAction.description', {
-      defaultMessage: '{issueType} will be created in Jira',
-      values: {
-        issueType: this.issueType,
-      }
-    });
   }
 
   get simulateMessage() {

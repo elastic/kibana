@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
-import { ACTION_TYPES } from '../../../common/constants';
+import { ACTION_TYPES, WATCH_TYPES } from '../../../common/constants';
 import { BaseWatch } from '../../../common/types/watch_types';
 import { createWatch, loadWatch } from '../../lib/api';
 import { goToWatchList } from '../../lib/navigation';
@@ -75,21 +75,30 @@ export async function saveWatch(watch: BaseWatch, licenseService: any) {
 }
 
 export async function validateActionsAndSaveWatch(watch: BaseWatch, licenseService: any) {
-  const { warning } = watch.validate();
-  if (warning) {
-    return {
-      error: {
-        title: i18n.translate(
-          'xpack.watcher.sections.watchEdit.json.saveConfirmModal.errorValidationTitleText',
-          {
-            defaultMessage: 'Save watch?',
-          }
-        ),
-        message: warning.message,
-      },
-    };
+  if (watch.type === WATCH_TYPES.JSON) {
+    const actionsErrors = watch.actions.reduce((actionsErrorsAcc: any, action: any) => {
+      if (action.validate) {
+        const errors = action.validate();
+        const errorKeys = Object.keys(errors);
+        const hasErrors = !!errorKeys.find(errorKey => errors[errorKey].length >= 1);
+        if (!hasErrors) {
+          return actionsErrorsAcc;
+        }
+        const newErrors = errorKeys.map(errorKey => errors[errorKey]).flat();
+        return [...actionsErrorsAcc, ...newErrors];
+      }
+      return actionsErrorsAcc;
+    }, []);
+    if (actionsErrors.length > 0) {
+      return {
+        validationError: {
+          type: 'error',
+          message: actionsErrors,
+        },
+      };
+    }
+    return saveWatch(watch, licenseService);
   }
-  // client validation passed, make request to create watch
   return saveWatch(watch, licenseService);
 }
 
@@ -103,7 +112,8 @@ export async function onWatchSave(watch: BaseWatch, licenseService: any): Promis
     const existingWatch = await loadWatch(watchData.id);
     if (existingWatch) {
       return {
-        error: {
+        validationError: {
+          type: 'warning',
           title: i18n.translate(
             'xpack.watcher.sections.watchEdit.json.saveConfirmModal.existingWatchTitleText',
             {

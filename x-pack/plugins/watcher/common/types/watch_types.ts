@@ -55,15 +55,3 @@ export interface BaseWatch {
     };
   };
 }
-
-export interface WatchAction {
-  id: string;
-  type: 'email' | 'webhook' | 'index' | 'logging' | 'slack' | 'jira' | 'pagerduty';
-  typeName: string;
-  iconClass: 'loggingApp' | 'logoWebhook' | 'logoSlack' | 'apps' | 'email' | 'indexOpen';
-  simulateMessage: string;
-  simulateFailMessage: string;
-  simulatePrompt: string;
-  selectMessage: string;
-  text?: string;
-}

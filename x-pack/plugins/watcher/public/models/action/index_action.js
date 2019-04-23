@@ -16,14 +16,14 @@ export class IndexAction extends BaseAction {
     this.index = get(props, 'index');
   }
 
-  validateAction() {
+  validate() {
     const errors = {
       index: [],
     };
     if (!this.index) {
       errors.index.push(
         i18n.translate('xpack.watcher.watchActions.index.indexIsRequiredValidationMessage', {
-          defaultMessage: 'Index is required.',
+          defaultMessage: 'Index name is required.',
         })
       );
     }
@@ -41,16 +41,6 @@ export class IndexAction extends BaseAction {
     });
 
     return result;
-  }
-
-  get description() {
-    const index = this.index || '';
-    return i18n.translate('xpack.watcher.models.indexAction.description', {
-      defaultMessage: 'The {index} will be indexed',
-      values: {
-        index,
-      }
-    });
   }
 
   get simulateMessage() {

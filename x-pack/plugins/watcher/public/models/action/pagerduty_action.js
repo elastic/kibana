@@ -12,18 +12,18 @@ import { i18n } from '@kbn/i18n';
 export class PagerDutyAction extends BaseAction {
   constructor(props = {}) {
     super(props);
-    this.message = get(props, 'message');
+    this.description = get(props, 'description');
   }
 
-  validateAction() {
+  validate() {
     const errors = {
-      message: [],
+      description: [],
     };
 
-    if (!this.message) {
-      errors.message.push(
+    if (!this.description) {
+      errors.description.push(
         i18n.translate('xpack.watcher.watchActions.pagerduty.descriptionIsRequiredValidationMessage', {
-          defaultMessage: 'Description is required.',
+          defaultMessage: 'PagerDuty description is required.',
         })
       );
     }
@@ -34,19 +34,13 @@ export class PagerDutyAction extends BaseAction {
     const result = super.upstreamJson;
 
     Object.assign(result, {
-      description: this.message,
+      description: this.description,
       pagerduty: {
-        description: this.message,
+        description: this.description,
       }
     });
 
     return result;
-  }
-
-  get description() {
-    return i18n.translate('xpack.watcher.models.pagerDutyAction.description', {
-      defaultMessage: 'A message will be sent to PagerDuty',
-    });
   }
 
   get simulateMessage() {
@@ -76,7 +70,7 @@ export class PagerDutyAction extends BaseAction {
     defaultMessage: 'Test fire a PagerDuty event'
   });
   static defaults = {
-    message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
+    description: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
   };
 }
 

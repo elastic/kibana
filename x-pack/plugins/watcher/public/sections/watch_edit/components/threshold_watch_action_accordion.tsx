@@ -20,7 +20,7 @@ import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_d
 import { Action } from 'plugins/watcher/models/action';
 import { toastNotifications } from 'ui/notify';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
-import { WatchAction } from '../../../../common/types/watch_types';
+import { ActionType } from '../../../../common/types/action_types';
 import { ACTION_TYPES, ACTION_MODES } from '../../../../common/constants';
 import { WatchContext } from './watch_context';
 import { WebhookActionFields } from './webhook_action_fields';
@@ -83,8 +83,11 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
   );
 
   if (actions && actions.length >= 1) {
-    return actions.map((action: WatchAction) => {
+    return actions.map((action: any) => {
       const FieldsComponent = ActionFieldsComponent[action.type];
+      const errors = action.validate();
+      const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
       return (
         <EuiAccordion
           initialIsOpen
@@ -97,7 +100,7 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
             <DeleteIcon
               onDelete={() => {
                 const updatedActions = actions.filter(
-                  (actionItem: WatchAction) => actionItem.id !== action.id
+                  (actionItem: ActionType) => actionItem.id !== action.id
                 );
                 setWatchProperty('actions', updatedActions);
               }}
@@ -108,13 +111,15 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
           <EuiForm>
             <FieldsComponent
               action={action}
-              editAction={changedProperty => {
-                const updatedActions = actions.map((actionItem: WatchAction) => {
+              errors={errors}
+              hasErrors={hasErrors}
+              editAction={(changedProperty: { key: string; value: string }) => {
+                const updatedActions = actions.map((actionItem: ActionType) => {
                   if (actionItem.id === action.id) {
                     const ActionTypes = Action.getActionTypes();
-                    const ActionType = ActionTypes[action.type];
+                    const ActionTypeModel = ActionTypes[action.type];
                     const { key, value } = changedProperty;
-                    return new ActionType({ ...action, [key]: value });
+                    return new ActionTypeModel({ ...action, [key]: value });
                   }
                   return actionItem;
                 });
@@ -124,9 +129,9 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
             <EuiButton
               fill
               type="submit"
-              isDisabled={false}
+              isDisabled={hasErrors}
               onClick={async () => {
-                const actionModes = watch.actions.reduce((acc: any, actionItem: WatchAction) => {
+                const actionModes = watch.actions.reduce((acc: any, actionItem: ActionType) => {
                   acc[action.id] =
                     action === actionItem ? ACTION_MODES.FORCE_EXECUTE : ACTION_MODES.SKIP;
                   return acc;
@@ -143,7 +148,7 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
                   );
                   const actionStatuses = executeResults.watchStatus.actionStatuses;
                   const actionStatus = actionStatuses.find(
-                    (actionItem: WatchAction) => actionItem.id === action.id
+                    (actionItem: ActionType) => actionItem.id === action.id
                   );
 
                   if (actionStatus.lastExecutionSuccessful === false) {

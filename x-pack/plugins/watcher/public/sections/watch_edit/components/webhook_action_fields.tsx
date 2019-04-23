@@ -5,26 +5,25 @@
  */
 import React, { Fragment } from 'react';
 
-import {
-  EuiCodeEditor,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFormRow,
-  EuiSelect,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiCodeEditor, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/form_errors';
+import { WebhookAction } from '../../../../common/types/action_types';
 
 interface Props {
-  action: {};
+  action: WebhookAction;
   editAction: (changedProperty: { key: string; value: any }) => void;
+  errors: { [key: string]: string[] };
+  hasErrors: boolean;
 }
 
-export const WebhookActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
+export const WebhookActionFields: React.FunctionComponent<Props> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+}) => {
   const { method, host, port, path, body } = action;
-  const errors = action.validateAction();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
   return (
     <Fragment>

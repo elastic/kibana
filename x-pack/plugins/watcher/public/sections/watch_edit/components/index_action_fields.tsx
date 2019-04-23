@@ -7,16 +7,22 @@ import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/form_errors';
+import { IndexAction } from '../../../../common/types/action_types';
 
 interface Props {
-  action: { text?: string };
+  action: IndexAction;
   editAction: (changedProperty: { key: string; value: string }) => void;
+  errors: { [key: string]: string[] };
+  hasErrors: boolean;
 }
 
-export const IndexActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
+export const IndexActionFields: React.FunctionComponent<Props> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+}) => {
   const { index } = action;
-  const errors = action.validateAction();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
   return (
     <Fragment>
       <ErrableFormRow

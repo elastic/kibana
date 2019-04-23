@@ -108,7 +108,7 @@ export class WebhookAction extends BaseAction {
   static validateJson(json) {
     const errors = [];
 
-    if (!json.webhook.host) { // TODO this is broken when called from the client
+    if (!json.webhook.host) {
       errors.push({
         code: ERROR_CODES.ERR_PROP_MISSING,
         message: i18n.translate('xpack.watcher.models.loggingAction.actionJsonWebhookHostPropertyMissingBadRequestMessage', {

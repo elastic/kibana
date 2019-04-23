@@ -4,13 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCode, EuiLink } from '@elastic/eui';
-import { documentationLinks } from '../../lib/documentation_links';
 
 export class SlackAction extends BaseAction {
   constructor(props = {}) {
@@ -20,57 +16,26 @@ export class SlackAction extends BaseAction {
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
     this.text = props.text;
   }
-  validateAction() {
+  validate() {
     const errors = {
       to: [],
       text: []
     };
-    if (!this.to || this.to.length === 0) {
+    if (!this.to || !this.to.length) {
       errors.to.push(
         i18n.translate('xpack.watcher.watchActions.slack.slackRecipientIsRequiredValidationMessage', {
-          defaultMessage: 'Recipient is required.',
+          defaultMessage: 'Slack recipient is required.',
         })
       );
     }
     if (!this.text) {
       errors.text.push(
         i18n.translate('xpack.watcher.watchActions.slack.slackMessageIsRequiredValidationMessage', {
-          defaultMessage: 'Message is required.',
+          defaultMessage: 'Slack message is required.',
         })
       );
     }
     return errors;
-  }
-
-  validate() {
-    const errors = [];
-
-    if (!this.to || !this.to.length) {
-      const message = (
-        <FormattedMessage
-          id="xpack.watcher.sections.watchEdit.json.slackActionValidationWarningMessage"
-          defaultMessage="This watch has a Slack {ymlValue} setting without a 'to' property.
-            If this property is already set in your elasticsearch.yml file, you're all set.
-            Otherwise, you can include it here in the watch JSON. {link}"
-          values={{
-            ymlValue: <EuiCode transparentBackground>message_defaults</EuiCode>,
-            link: (
-              <EuiLink href={documentationLinks.watcher.watchNotificationSettings} target="_blank">
-                <FormattedMessage
-                  id="xpack.watcher.sections.watchEdit.json.slackActionValidationWarningMessage.helpLinkText"
-                  defaultMessage="Learn more."
-                />
-              </EuiLink>
-            )
-          }}
-        />
-      );
-      errors.push({
-        message
-      });
-    }
-
-    return { errors: errors.length ? errors : null };
   }
 
   get upstreamJson() {
@@ -90,16 +55,6 @@ export class SlackAction extends BaseAction {
     });
 
     return result;
-  }
-
-  get description() {
-    const toList = this.to.join(', ');
-    return i18n.translate('xpack.watcher.models.slackAction.description', {
-      defaultMessage: 'Slack message will be sent to {toList}',
-      values: {
-        toList
-      }
-    });
   }
 
   get simulateMessage() {

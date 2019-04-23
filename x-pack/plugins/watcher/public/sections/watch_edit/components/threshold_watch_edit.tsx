@@ -764,8 +764,8 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               isDisabled={hasErrors}
               onClick={async () => {
                 const savedWatch = await onWatchSave(watch, licenseService);
-                if (savedWatch && savedWatch.error) {
-                  return setModal(savedWatch.error);
+                if (savedWatch && savedWatch.validationError) {
+                  return setModal(savedWatch.validationError);
                 }
               }}
             >

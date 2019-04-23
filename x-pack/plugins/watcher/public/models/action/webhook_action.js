@@ -21,7 +21,7 @@ export class WebhookAction extends BaseAction {
     this.fullPath = `${this.host}${this.port}${this.path}`;
   }
 
-  validateAction() {
+  validate() {
     const errors = {
       host: [],
       port: [],
@@ -31,18 +31,18 @@ export class WebhookAction extends BaseAction {
     if (!this.host) {
       errors.host.push(
         i18n.translate('xpack.watcher.watchActions.webhook.hostIsRequiredValidationMessage', {
-          defaultMessage: 'Host is required.',
+          defaultMessage: 'Webhook host is required.',
         })
       );
     }
     if (!this.port) {
       errors.port.push(
         i18n.translate('xpack.watcher.watchActions.webhook.portIsRequiredValidationMessage', {
-          defaultMessage: 'Port is required.',
+          defaultMessage: 'Webhook port is required.',
         })
       );
     }
-    if (this.body || this.body !== '') {
+    if (typeof this.body === 'string' && this.body !== '') {
       try {
         const parsedJson = JSON.parse(this.body);
         if (parsedJson && typeof parsedJson !== 'object') {
@@ -75,16 +75,6 @@ export class WebhookAction extends BaseAction {
     });
 
     return result;
-  }
-
-  get description() {
-    return i18n.translate('xpack.watcher.models.webhookAction.description', {
-      defaultMessage: 'Webhook will trigger a {method} request on {fullPath}',
-      values: {
-        method: this.method,
-        fullPath: this.fullPath
-      }
-    });
   }
 
   get simulateMessage() {

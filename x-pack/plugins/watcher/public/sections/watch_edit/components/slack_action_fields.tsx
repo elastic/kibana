@@ -3,20 +3,39 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
-import { EuiFieldText, EuiTextArea } from '@elastic/eui';
+import React, { Fragment, useState, useEffect } from 'react';
+import { EuiComboBox, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/form_errors';
+import { SlackAction } from '../../../../common/types/action_types';
 
 interface Props {
-  action: {};
+  action: SlackAction;
   editAction: (changedProperty: { key: string; value: any }) => void;
+  errors: { [key: string]: string[] };
+  hasErrors: boolean;
 }
 
-export const SlackActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
+export const SlackActionFields: React.FunctionComponent<Props> = ({
+  action,
+  editAction,
+  errors,
+  hasErrors,
+}) => {
   const { text, to } = action;
-  const errors = action.validateAction();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const [toOptions, setToOptions] = useState<Array<{ label: string }>>([]);
+
+  useEffect(() => {
+    if (to && to.length > 0) {
+      const toOptionsList = to.map(toItem => {
+        return {
+          label: toItem,
+        };
+      });
+      setToOptions(toOptionsList);
+    }
+  }, []);
+
   return (
     <Fragment>
       <ErrableFormRow
@@ -32,19 +51,21 @@ export const SlackActionFields: React.FunctionComponent<Props> = ({ action, edit
           }
         )}
       >
-        <EuiFieldText
+        <EuiComboBox
+          noSuggestions
           fullWidth
-          name="to"
-          value={Array.isArray(to) ? to.join(', ') : ''}
-          onChange={e => {
-            const toValues = e.target.value;
-            const toArray = (toValues || '').split(',').map(toVal => toVal.trim());
-            editAction({ key: 'to', value: toArray.join(', ') });
+          selectedOptions={toOptions}
+          onCreateOption={(searchValue: string) => {
+            const newOptions = [...toOptions, { label: searchValue }];
+            setToOptions(newOptions);
+            editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
           }}
-          onBlur={() => {
-            if (!to) {
-              editAction({ key: 'to', value: [] });
-            }
+          onChange={(selectedOptions: Array<{ label: string }>) => {
+            setToOptions(selectedOptions);
+            editAction({
+              key: 'to',
+              value: selectedOptions.map(selectedOption => selectedOption.label),
+            });
           }}
         />
       </ErrableFormRow>

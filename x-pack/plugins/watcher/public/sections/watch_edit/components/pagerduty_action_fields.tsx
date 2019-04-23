@@ -7,24 +7,30 @@ import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../components/form_errors';
+import { PagerDutyAction } from '../../../../common/types/action_types';
 
 interface Props {
-  action: { text?: string };
+  action: PagerDutyAction;
   editAction: (changedProperty: { key: string; value: string }) => void;
+  errors: { [key: string]: string[] };
+  hasErrors: boolean;
 }
 
-export const PagerDutyActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
-  const { message } = action;
-  const errors = action.validateAction();
-  const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
+  errors,
+  hasErrors,
+  action,
+  editAction,
+}) => {
+  const { description } = action;
   return (
     <Fragment>
       <ErrableFormRow
-        id="pagerDutyMessage"
-        errorKey="message"
+        id="pagerDutyDescription"
+        errorKey="description"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && message !== undefined}
+        isShowingErrors={hasErrors && description !== undefined}
         label={i18n.translate(
           'xpack.watcher.sections.watchEdit.threshold.pagerDutyAction.descriptionFieldLabel',
           {
@@ -34,14 +40,14 @@ export const PagerDutyActionFields: React.FunctionComponent<Props> = ({ action, 
       >
         <EuiFieldText
           fullWidth
-          name="message"
-          value={message || ''}
+          name="description"
+          value={description || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction({ key: 'message', value: e.target.value });
+            editAction({ key: 'description', value: e.target.value });
           }}
           onBlur={() => {
-            if (!message) {
-              editAction({ key: 'message', value: '' });
+            if (!description) {
+              editAction({ key: 'description', value: '' });
             }
           }}
         />
