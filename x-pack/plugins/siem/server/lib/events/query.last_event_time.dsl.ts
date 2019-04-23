@@ -79,5 +79,4 @@ export const buildLastEventTimeQuery = ({
       };
   }
   throw new Error('buildLastEventTimeQuery - invalid indexKey');
-
 };
