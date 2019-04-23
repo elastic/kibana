@@ -17,23 +17,22 @@
  * under the License.
  */
 
-import { createKfetch, KFetchKibanaOptions, KFetchOptions } from './kfetch';
-export { addInterceptor, KFetchOptions, KFetchQuery } from './kfetch';
+import { HttpHandler, HttpFetchOptions, AbortablePromise } from './types';
 
-import { HttpSetup } from '../../../../core/public';
+export function abortable<T>(handler: HttpHandler<T>) {
+  return (path: string, options: HttpFetchOptions = {}): AbortablePromise<T> => {
+    const controller = options.signal
+      ? new AbortController()
+      : { signal: options.signal, abort: Function.prototype };
+    const promise = new Promise<T>((resolve, reject) => {
+      handler(path, { ...options, signal: controller.signal }).then(resolve, reject);
+    });
 
-let http: HttpSetup;
-let kfetchInstance: (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => any;
-
-export function __newPlatformSetup__(httpSetup: HttpSetup) {
-  if (http) {
-    throw new Error('ui/kfetch already initialized with New Platform APIs');
-  }
-
-  http = httpSetup;
-  kfetchInstance = createKfetch(http);
+    return Object.assign(promise, {
+      abort() {
+        controller.abort();
+        return promise;
+      },
+    });
+  };
 }
-
-export const kfetch = (options: KFetchOptions, kfetchOptions?: KFetchKibanaOptions) => {
-  return kfetchInstance(options, kfetchOptions);
-};

@@ -28,19 +28,91 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { FatalErrorsSetup } from '../fatal_errors';
+import { merge } from 'lodash';
+import { format } from 'url';
 
-interface Deps {
-  fatalErrors: FatalErrorsSetup;
-}
+import { Deps, HttpFetchOptions, HttpBody } from './types';
+import { abortable } from './abortable';
+import { HttpFetchError } from './http_fetch_error';
+
+const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
+const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
 
 /** @internal */
 export class HttpService {
   private readonly loadingCount$ = new Rx.BehaviorSubject(0);
   private readonly stop$ = new Rx.Subject();
 
-  public setup({ fatalErrors }: Deps) {
+  public setup({ basePath, injectedMetadata, fatalErrors }: Deps) {
+    const defaults: HttpFetchOptions = {
+      method: 'GET',
+      credentials: 'same-origin',
+      prependBasePath: true,
+      headers: {
+        'Content-Type': 'application/json',
+        'kbn-version': injectedMetadata.getKibanaVersion(),
+      },
+    };
+
+    async function fetch(path: string, options: HttpFetchOptions = {}): Promise<HttpBody> {
+      const { query, prependBasePath, ...fetchOptions } = merge({}, defaults, options);
+      const url = format({
+        pathname: prependBasePath ? basePath.addToPath(path) : path,
+        query,
+      });
+
+      let response;
+      let body = null;
+
+      try {
+        response = await window.fetch(url, fetchOptions);
+      } catch (err) {
+        throw new HttpFetchError(err.message);
+      }
+
+      const contentType = response.headers.get('Content-Type') || '';
+
+      try {
+        if (NDJSON_CONTENT.test(contentType)) {
+          body = await response.blob();
+        } else if (JSON_CONTENT.test(contentType)) {
+          body = await response.json();
+        } else {
+          body = await response.text();
+        }
+      } catch (err) {
+        throw new HttpFetchError(err.message, response, body);
+      }
+
+      if (!response.ok) {
+        throw new HttpFetchError(response.statusText, response, body);
+      }
+
+      return body;
+    }
+
+    async function get(path: string, options: HttpFetchOptions = {}) {
+      return fetch(path, { ...options, method: 'GET' });
+    }
+
+    async function post(path: string, options: HttpFetchOptions = {}) {
+      return fetch(path, { ...options, method: 'POST' });
+    }
+
+    async function put(path: string, options: HttpFetchOptions = {}) {
+      return fetch(path, { ...options, method: 'PUT' });
+    }
+
+    async function del(path: string, options: HttpFetchOptions = {}) {
+      return fetch(path, { ...options, method: 'DELETE' });
+    }
+
     return {
+      fetch: abortable<HttpBody>(fetch),
+      get: abortable<HttpBody>(get),
+      post: abortable<HttpBody>(post),
+      put: abortable<HttpBody>(put),
+      del: abortable<HttpBody>(del),
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
           .pipe(

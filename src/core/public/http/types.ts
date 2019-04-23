@@ -17,23 +17,25 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost/myBase/${path}`,
-}));
+import { BasePathSetup } from '../base_path';
+import { InjectedMetadataSetup } from '../injected_metadata';
+import { FatalErrorsSetup } from '../fatal_errors';
 
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
-import { kfetchAbortable } from './kfetch_abortable';
-
-describe('kfetchAbortable', () => {
-  it('should return an object with a fetching promise and an abort callback', () => {
-    const { fetching, abort } = kfetchAbortable({ pathname: 'my/path' });
-    expect(typeof fetching.then).toBe('function');
-    expect(typeof fetching.catch).toBe('function');
-    expect(typeof abort).toBe('function');
-  });
-});
+export interface Deps {
+  basePath: BasePathSetup;
+  injectedMetadata: InjectedMetadataSetup;
+  fatalErrors: FatalErrorsSetup;
+}
+export interface HttpFetchQuery {
+  [key: string]: string | number | boolean | undefined;
+}
+export interface HttpFetchOptions extends RequestInit {
+  query?: HttpFetchQuery;
+  prependBasePath?: boolean;
+}
+export interface Abortable<T> {
+  abort: () => Promise<T>;
+}
+export type AbortablePromise<T> = Promise<T> & Abortable<T>;
+export type HttpHandler<T> = (path: string, options?: HttpFetchOptions) => Promise<T>;
+export type HttpBody = BodyInit | null;

@@ -16,25 +16,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { HttpService, HttpSetup } from './http_service';
 
-const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<HttpSetup> = {
-    addLoadingCount: jest.fn(),
-    getLoadingCount$: jest.fn(),
-  };
-  return setupContract;
-};
-
-type HttpServiceContract = PublicMethodsOf<HttpService>;
-const createMock = () => {
-  const mocked: jest.Mocked<HttpServiceContract> = {
-    setup: jest.fn(),
-    stop: jest.fn(),
-  };
-  mocked.setup.mockReturnValue(createSetupContractMock());
-  return mocked;
-};
+const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
+  fetch: jest.fn(),
+  get: jest.fn(),
+  post: jest.fn(),
+  put: jest.fn(),
+  del: jest.fn(),
+  addLoadingCount: jest.fn(),
+  getLoadingCount$: jest.fn(),
+});
+const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
+  setup: jest.fn().mockReturnValue(createSetupContractMock()),
+  stop: jest.fn(),
+});
 
 export const httpServiceMock = {
   create: createMock,

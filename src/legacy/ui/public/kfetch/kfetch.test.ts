@@ -17,28 +17,37 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: (path: string) => `http://localhost/myBase/${path}`,
-}));
-
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import {
-  addInterceptor,
-  Interceptor,
-  kfetch,
-  resetInterceptors,
-  withDefaultOptions,
-} from './kfetch';
+import { __newPlatformSetup__, addInterceptor, kfetch, KFetchOptions } from '.';
+import { Interceptor, resetInterceptors, withDefaultOptions } from './kfetch';
 import { KFetchError } from './kfetch_error';
 
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { HttpService } from '../../../../core/public/http';
+import { fatalErrorsServiceMock } from '../../../../core/public/fatal_errors/fatal_errors_service.mock';
+import { injectedMetadataServiceMock } from '../../../../core/public/injected_metadata/injected_metadata_service.mock';
+import { BasePathService } from '../../../../core/public/base_path';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
+
+function setupService() {
+  const httpService = new HttpService();
+  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+
+  injectedMetadata.getBasePath.mockReturnValue('http://localhost/myBase');
+
+  const basePath = new BasePathService().setup({ injectedMetadata });
+  const http = httpService.setup({ basePath, fatalErrors, injectedMetadata });
+
+  return { httpService, fatalErrors, http };
+}
+
 describe('kfetch', () => {
+  beforeAll(() => {
+    __newPlatformSetup__(setupService().http);
+  });
+
   afterEach(() => {
     fetchMock.restore();
     resetInterceptors();
@@ -46,13 +55,13 @@ describe('kfetch', () => {
 
   it('should use supplied request method', async () => {
     fetchMock.post('*', {});
-    await kfetch({ pathname: 'my/path', method: 'POST' });
+    await kfetch({ pathname: '/my/path', method: 'POST' });
     expect(fetchMock.lastOptions()!.method).toBe('POST');
   });
 
   it('should use supplied Content-Type', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path', headers: { 'Content-Type': 'CustomContentType' } });
+    await kfetch({ pathname: '/my/path', headers: { 'Content-Type': 'CustomContentType' } });
     expect(fetchMock.lastOptions()!.headers).toMatchObject({
       'Content-Type': 'CustomContentType',
     });
@@ -60,65 +69,74 @@ describe('kfetch', () => {
 
   it('should use supplied pathname and querystring', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path', query: { a: 'b' } });
+    await kfetch({ pathname: '/my/path', query: { a: 'b' } });
     expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path?a=b');
   });
 
   it('should use supplied headers', async () => {
     fetchMock.get('*', {});
     await kfetch({
-      pathname: 'my/path',
+      pathname: '/my/path',
       headers: { myHeader: 'foo' },
     });
 
     expect(fetchMock.lastOptions()!.headers).toEqual({
       'Content-Type': 'application/json',
-      'kbn-version': 'my-version',
+      'kbn-version': 'kibanaVersion',
       myHeader: 'foo',
     });
   });
 
   it('should return response', async () => {
     fetchMock.get('*', { foo: 'bar' });
-    const res = await kfetch({ pathname: 'my/path' });
+    const res = await kfetch({ pathname: '/my/path' });
     expect(res).toEqual({ foo: 'bar' });
   });
 
   it('should prepend url with basepath by default', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path' });
+    await kfetch({ pathname: '/my/path' });
     expect(fetchMock.lastUrl()).toBe('http://localhost/myBase/my/path');
   });
 
   it('should not prepend url with basepath when disabled', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path' }, { prependBasePath: false });
+    await kfetch({ pathname: '/my/path' }, { prependBasePath: false });
     expect(fetchMock.lastUrl()).toBe('/my/path');
   });
 
   it('should make request with defaults', async () => {
     fetchMock.get('*', {});
-    await kfetch({ pathname: 'my/path' });
+    await kfetch({ pathname: '/my/path' });
 
-    expect(fetchMock.lastOptions()!).toEqual({
+    expect(fetchMock.lastOptions()!).toMatchObject({
       method: 'GET',
       credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
-        'kbn-version': 'my-version',
+        'kbn-version': 'kibanaVersion',
       },
     });
   });
 
   it('should reject on network error', async () => {
     expect.assertions(1);
-    fetchMock.get('*', { throws: new Error('Network issue') });
+    fetchMock.get('*', { status: 500 });
 
     try {
-      await kfetch({ pathname: 'my/path' });
+      await kfetch({ pathname: '/my/path' });
     } catch (e) {
-      expect(e.message).toBe('Network issue');
+      expect(e.message).toBe('Internal Server Error');
     }
+  });
+
+  it('should return an abortable promise', () => {
+    const abortable = kfetch({ pathname: '/my/path' });
+
+    expect(typeof abortable.then).toBe('function');
+    expect(typeof abortable.catch).toBe('function');
+    expect(typeof abortable.abort).toBe('function');
+    expect(abortable.abort()).toBe(abortable);
   });
 
   describe('when throwing response error (KFetchError)', async () => {
@@ -126,7 +144,7 @@ describe('kfetch', () => {
     beforeEach(async () => {
       fetchMock.get('*', { status: 404, body: { foo: 'bar' } });
       try {
-        await kfetch({ pathname: 'my/path' });
+        await kfetch({ pathname: '/my/path' });
       } catch (e) {
         error = e;
       }
@@ -154,7 +172,7 @@ describe('kfetch', () => {
       fetchMock.get('*', { foo: 'bar' });
 
       interceptorCalls = mockInterceptorCalls([{}, {}, {}]);
-      resp = await kfetch({ pathname: 'my/path' });
+      resp = await kfetch({ pathname: '/my/path' });
     });
 
     it('should call interceptors in correct order', () => {
@@ -185,12 +203,12 @@ describe('kfetch', () => {
       fetchMock.get('*', { foo: 'bar' });
 
       interceptorCalls = mockInterceptorCalls([
-        { requestError: () => ({}) },
+        { requestError: () => ({ pathname: '/my/path' } as KFetchOptions) },
         { request: () => Promise.reject(new Error('Error in request')) },
         {},
       ]);
 
-      resp = await kfetch({ pathname: 'my/path' });
+      resp = await kfetch({ pathname: '/my/path' });
     });
 
     it('should call interceptors in correct order', () => {
@@ -227,7 +245,7 @@ describe('kfetch', () => {
       ]);
 
       try {
-        await kfetch({ pathname: 'my/path' });
+        await kfetch({ pathname: '/my/path' });
       } catch (e) {
         error = e;
       }
@@ -267,7 +285,7 @@ describe('kfetch', () => {
       ]);
 
       try {
-        await kfetch({ pathname: 'my/path' });
+        await kfetch({ pathname: '/my/path' });
       } catch (e) {
         error = e;
       }
@@ -313,7 +331,7 @@ describe('kfetch', () => {
         {},
       ]);
 
-      resp = await kfetch({ pathname: 'my/path' });
+      resp = await kfetch({ pathname: '/my/path' });
     });
 
     it('should call in correct order', () => {
@@ -351,7 +369,7 @@ describe('kfetch', () => {
         }),
       });
 
-      resp = await kfetch({ pathname: 'my/path' });
+      resp = await kfetch({ pathname: '/my/path' });
     });
 
     it('should modify request', () => {
@@ -386,7 +404,7 @@ describe('kfetch', () => {
           }),
       });
 
-      resp = await kfetch({ pathname: 'my/path' });
+      resp = await kfetch({ pathname: '/my/path' });
     });
 
     it('should modify request', () => {
@@ -453,6 +471,7 @@ function mockInterceptorCalls(interceptors: Interceptor[]) {
 describe('withDefaultOptions', () => {
   it('should remove undefined query params', () => {
     const { query } = withDefaultOptions({
+      pathname: '/withDefaultOptions',
       query: {
         foo: 'bar',
         param1: (undefined as any) as string,
@@ -464,9 +483,10 @@ describe('withDefaultOptions', () => {
   });
 
   it('should add default options', () => {
-    expect(withDefaultOptions({})).toEqual({
+    expect(withDefaultOptions({ pathname: '/addDefaultOptions' })).toEqual({
+      pathname: '/addDefaultOptions',
       credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json', 'kbn-version': 'my-version' },
+      headers: { 'Content-Type': 'application/json' },
       method: 'GET',
     });
   });
