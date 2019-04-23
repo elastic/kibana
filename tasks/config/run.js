@@ -20,9 +20,6 @@
 import { resolve } from 'path';
 import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
-const { version } = require('../../package.json');
-const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
-
 module.exports = function (grunt) {
 
   function createKbnServerTask({ runBuild, flags = [] }) {
@@ -229,7 +226,6 @@ module.exports = function (grunt) {
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     }),
 
@@ -241,7 +237,6 @@ module.exports = function (grunt) {
         '--config', 'test/interpreter_functional/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     }),
 
@@ -253,7 +248,6 @@ module.exports = function (grunt) {
         '--config', 'test/plugin_functional/config.js',
         '--bail',
         '--debug',
-        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     }),
 
@@ -280,8 +274,6 @@ module.exports = function (grunt) {
     test_browser_ci:
       gruntTaskWithGithubChecks('Browser tests', 'test:browser-ci'),
 
-    ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR
-    })
+    ...getFunctionalTestGroupRunConfigs()
   };
 };

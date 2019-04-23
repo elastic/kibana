@@ -15,8 +15,6 @@ trap report EXIT
 
 "$(FORCE_COLOR=0 yarn bin)/grunt" functionalTests:ensureAllTestsInCiGroup;
 
-node scripts/build --debug --oss;
-
 export TEST_BROWSER_HEADLESS=1
 
 checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" yarn run grunt "run:functionalTests_ciGroup${CI_GROUP}";
