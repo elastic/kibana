@@ -235,7 +235,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <EuiFormHelpText style={{ maxWidth: '320px' }}>
               {i18n.translate('xpack.ml.dataframe.definePivotForm.formHelp', {
                 defaultMessage:
-                  'Data frame fransforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
+                  'Data frame transforms are scalable and automated processes for pivoting. Choose at least one group-by and aggregation to get started.',
               })}
             </EuiFormHelpText>
           )}
