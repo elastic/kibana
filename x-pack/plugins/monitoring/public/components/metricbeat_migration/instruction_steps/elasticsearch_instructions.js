@@ -80,7 +80,7 @@ PUT _cluster/settings
     children: (
       <Fragment>
         <p>
-          Follow <EuiLink to="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html">the instructions here</EuiLink>
+          Follow <EuiLink href="https://www.elastic.co/guide/en/beats/metricbeat/current/metricbeat-installation.html" target="_blank">the instructions here</EuiLink>
         </p>
       </Fragment>
     )

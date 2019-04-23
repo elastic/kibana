@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment, Component } from 'react';
+import chrome from 'ui/chrome';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -20,6 +21,10 @@ import {
 } from '@elastic/eui';
 import { getInstructionSteps } from '../instruction_steps';
 
+function getKibanaUrl() {
+  return chrome.getAppUrl().replace('/app/monitoring', '');
+}
+
 export class Flyout extends Component {
   constructor(props) {
     super(props);
@@ -31,16 +36,6 @@ export class Flyout extends Component {
       checkingMigrationStatus: false,
     };
   }
-
-  // shouldComponentUpdate(nextProps, nextState) {
-  //   const productChanged = nextProps.product !== this.props.product;
-  //   const stateChanged = nextState !== this.state;
-
-  //   if (productChanged || stateChanged) {
-  //     return true;
-  //   }
-  //   return false;
-  // }
 
   renderActiveStep() {
     const { product, updateProduct, productName, onClose } = this.props;
@@ -76,7 +71,7 @@ export class Flyout extends Component {
           doneWithMigration: async () => {
             onClose();
           },
-          kibanaUrl: '',
+          kibanaUrl: getKibanaUrl(),
           esMonitoringUrl,
           checkForMigrationStatus: async () => {
             this.setState({ checkingMigrationStatus: true });
