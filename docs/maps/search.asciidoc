@@ -21,7 +21,19 @@ You can create a layer that requests data from {es} from the following:
 image::maps/images/global_search_bar.png[]
 
 
-[float]
+[role="xpack"]
+[[maps-layer-based-filtering]]
+=== Filtering a single layer
+
+You can apply a search request to individual layers by setting `Filters` in the layer details panel.
+Click the *Add filter* button to add a filter to a layer.
+
+
+[role="screenshot"]
+image::maps/images/layer_search.png[]
+
+[role="xpack"]
+[[maps-search-across-multiple-indices]]
 === Searching across multiple indices
 
 Your map might contain multiple {es} indices.
