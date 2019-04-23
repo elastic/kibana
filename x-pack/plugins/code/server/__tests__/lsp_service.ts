@@ -95,6 +95,11 @@ describe('lsp_service tests', () => {
     await prepareProject(tmpRepo);
     await Git.Clone.clone(`file://${tmpRepo}`, path.join(serverOptions.repoPath, repoUri), {
       bare: 1,
+      fetchOpts: {
+        callbacks: {
+          certificateCheck: () => 0,
+        },
+      },
     });
   });
 

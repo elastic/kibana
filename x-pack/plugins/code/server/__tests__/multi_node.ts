@@ -7,8 +7,6 @@
 import getPort from 'get-port';
 import { resolve } from 'path';
 import { Root } from 'src/core/server/root';
-// @ts-ignore
-import * as wtf from 'wtfnode'
 
 import {
   createRootWithCorePlugins,
@@ -115,7 +113,7 @@ describe('code in multiple nodes', () => {
     nonCodeNode = createRootWithCorePlugins(setting);
     await nonCodeNode.setup();
     nonCodeKbnServer = getKbnServer(nonCodeNode);
-    await codeKbnServer.ready();
+    await nonCodeKbnServer.ready();
   }
   // @ts-ignore
   before(startServers);
@@ -123,14 +121,8 @@ describe('code in multiple nodes', () => {
   // @ts-ignore
   after(async function() {
     // @ts-ignore
-    this.timeout(20000);
-    codeKbnServer = getKbnServer(codeNode);
-    codeKbnServer.server.plugins.code.stop();
-    nonCodeKbnServer.server.plugins.code.stop();
     await nonCodeNode.shutdown();
     await servers.stop();
-    await delay(10000);
-    wtf.dump();
   });
 
   function delay(ms: number) {
@@ -148,12 +140,12 @@ describe('code in multiple nodes', () => {
   });
 
   it('Non-code node setup should fail if code node is shutdown', async () => {
-    codeKbnServer.server.plugins.code.stop();
     await codeNode.shutdown();
     await delay(2000);
     await request.get(nonCodeNode, '/api/code/setup').expect(502);
     await codeNode.setup();
-    await delay(2000);
+    codeKbnServer = getKbnServer(codeNode);
+    await codeKbnServer.ready();
     await request.get(nonCodeNode, '/api/code/setup').expect(200);
     // @ts-ignore
   }).timeout(20000);
