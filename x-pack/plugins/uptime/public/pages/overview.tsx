@@ -13,6 +13,7 @@ import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../comp
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
+import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface OverviewPageProps {
   basePath: string;
@@ -29,10 +30,9 @@ type Props = OverviewPageProps;
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
 export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
-  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
-  const [{ search }, updateUrl] = useUrlParams(history, location);
+  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const [params, updateUrl] = useUrlParams(history, location);
+  const { dateRangeStart, dateRangeEnd, search } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -66,6 +66,8 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
     }
   };
 
+  const linkParameters = stringifyUrlParams(params);
+
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
@@ -77,9 +79,13 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
         <EuiSpacer size="s" />
         <Snapshot colors={colors} variables={sharedProps} />
         <EuiSpacer size="s" />
-        <MonitorList dangerColor={colors.danger} variables={sharedProps} />
+        <MonitorList
+          dangerColor={colors.danger}
+          linkParameters={linkParameters}
+          variables={sharedProps}
+        />
         <EuiSpacer size="s" />
-        <ErrorList variables={sharedProps} />
+        <ErrorList linkParameters={linkParameters} variables={sharedProps} />
       </EmptyState>
     </Fragment>
   );

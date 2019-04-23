@@ -23,6 +23,7 @@ import {
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
+import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface MonitorPageProps {
   history: { push: any };
@@ -38,32 +39,33 @@ interface MonitorPageProps {
 export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
-  const [{ dateRangeStart, dateRangeEnd, selectedPingStatus }, updateUrlParams] = useUrlParams(
-    history,
-    location
-  );
+  const [params, updateUrlParams] = useUrlParams(history, location);
+  const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
 
-  useEffect(() => {
-    query({
-      query: gql`
-        query MonitorPageTitle($monitorId: String!) {
-          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-            id
-            url
-            name
+  useEffect(
+    () => {
+      query({
+        query: gql`
+          query MonitorPageTitle($monitorId: String!) {
+            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+              id
+              url
+              name
+            }
           }
+        `,
+        variables: { monitorId },
+      }).then((result: any) => {
+        const { name, url, id } = result.data.monitorPageTitle;
+        const heading: string = name || url || id;
+        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+        if (setHeadingText) {
+          setHeadingText(heading);
         }
-      `,
-      variables: { monitorId },
-    }).then((result: any) => {
-      const { name, url, id } = result.data.monitorPageTitle;
-      const heading: string = name || url || id;
-      setBreadcrumbs(getMonitorPageBreadcrumb(heading));
-      if (setHeadingText) {
-        setHeadingText(heading);
-      }
-    });
-  }, []);
+      });
+    },
+    [params]
+  );
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />

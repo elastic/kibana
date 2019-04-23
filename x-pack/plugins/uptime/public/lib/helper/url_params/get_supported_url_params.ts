@@ -32,8 +32,8 @@ export const getSupportedUrlParams = (params: {
   const {
     autorefreshInterval,
     autorefreshIsPaused,
-    rangeFrom,
-    rangeTo,
+    dateRangeStart,
+    dateRangeEnd,
     search,
     selectedPingStatus,
   } = params;
@@ -41,8 +41,8 @@ export const getSupportedUrlParams = (params: {
   return {
     autorefreshInterval: parseAutorefreshInterval(autorefreshInterval, AUTOREFRESH_INTERVAL),
     autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
-    dateRangeStart: rangeFrom || DATE_RANGE_START,
-    dateRangeEnd: rangeTo || DATE_RANGE_END,
+    dateRangeStart: dateRangeStart || DATE_RANGE_START,
+    dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,

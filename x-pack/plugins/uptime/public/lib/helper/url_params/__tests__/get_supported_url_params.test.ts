@@ -12,8 +12,8 @@ describe('getSupportedUrlParams', () => {
     const customValues = {
       autorefreshInterval: '23',
       autorefreshIsPaused: 'false',
-      rangeFrom: 'foo',
-      rangeTo: 'bar',
+      dateRangeStart: 'foo',
+      dateRangeEnd: 'bar',
       search: 'monitor.status: down',
       selectedPingStatus: 'up',
     };

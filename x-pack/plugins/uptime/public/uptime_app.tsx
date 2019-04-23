@@ -26,7 +26,7 @@ import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { I18nContext } from 'ui/i18n';
-import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
+import { UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBreadcrumbs } from './lib/lib';
 import { MonitorPage, OverviewPage } from './pages';
 import { UptimeRefreshContext, UptimeSettingsContext } from './contexts';
@@ -81,7 +81,6 @@ const Application = (props: UptimeAppProps) => {
   const [headingText, setHeadingText] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    setBreadcrumbs([overviewBreadcrumb]);
     renderGlobalHelpControls();
   }, []);
 
