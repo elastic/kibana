@@ -66,3 +66,101 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
     });
   });
 });
+
+describe('getDescriptorWithDynamicRanges', () => {
+  const dataRequests = [
+    {
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            properties: {
+              myDynamicField: 1
+            }
+          },
+          {
+            properties: {
+              myDynamicField: 10
+            }
+          }
+        ],
+      }
+    }
+  ];
+
+  it('Should not have changes when there are no dynamic properties', () => {
+    const vectorStyle = new VectorStyle({
+      properties: {
+        fillColor: {
+          type: VectorStyle.STYLE_TYPE.STATIC,
+          options: {}
+        }
+      }
+    });
+
+    const { hasChanges } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
+    expect(hasChanges).toBe(false);
+  });
+
+  it('Should not have changes when no valid range found for dynamic property', () => {
+    const vectorStyle = new VectorStyle({
+      properties: {
+        fillColor: {
+          type: VectorStyle.STYLE_TYPE.DYNAMIC,
+          options: {
+            field: {
+              name: 'myDynamicFieldWithNoValues'
+            }
+          }
+        }
+      }
+    });
+
+    const { hasChanges } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
+    expect(hasChanges).toBe(false);
+  });
+
+  it('Should not have changes when no range is identical to previous range for dynamic property', () => {
+    const vectorStyle = new VectorStyle({
+      properties: {
+        fillColor: {
+          type: VectorStyle.STYLE_TYPE.DYNAMIC,
+          options: {
+            field: {
+              name: 'myDynamicField'
+            }
+          },
+          __range: {
+            min: 1,
+            max: 10
+          }
+        }
+      }
+    });
+
+    const { hasChanges } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
+    expect(hasChanges).toBe(false);
+  });
+
+  it('Should add range to style descriptor for dynamic property', () => {
+    const vectorStyle = new VectorStyle({
+      properties: {
+        fillColor: {
+          type: VectorStyle.STYLE_TYPE.DYNAMIC,
+          options: {
+            field: {
+              name: 'myDynamicField'
+            }
+          }
+        }
+      }
+    });
+
+    const { hasChanges, nextStyleDescriptor } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
+    expect(hasChanges).toBe(true);
+    expect(nextStyleDescriptor.properties.fillColor.__range).toEqual({
+      max: 10,
+      min: 1
+    });
+  });
+});

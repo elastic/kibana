@@ -159,13 +159,18 @@ export class VectorStyle extends AbstractStyle {
       }
     }
 
+    let hasChanges = false;
     const updatedStyles = { ...styles };
     dynamicStyles.forEach(({ styleName, __range }) => {
-      updatedStyles[styleName] = { ...updatedStyles[styleName], __range };
+      const prevRange = updatedStyles[styleName].__range;
+      if (__range.min !== Infinity && __range.max !== -Infinity && !_.isEqual(prevRange, __range)) {
+        hasChanges = true;
+        updatedStyles[styleName] = { ...updatedStyles[styleName], __range };
+      }
     });
 
     return {
-      hasChanges: true,
+      hasChanges,
       nextStyleDescriptor: VectorStyle.createDescriptor(updatedStyles)
     };
   }
