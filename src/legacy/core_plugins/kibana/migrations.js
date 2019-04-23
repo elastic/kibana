@@ -19,7 +19,6 @@
 
 import { cloneDeep, get, omit, has, flow } from 'lodash';
 
-
 function migrateIndexPattern(doc) {
   const searchSourceJSON = get(doc, 'attributes.kibanaSavedObjectMeta.searchSourceJSON');
   if (typeof searchSourceJSON !== 'string') {

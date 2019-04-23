@@ -45,9 +45,8 @@ function TimeIntervalParamEditor({
     defaultMessage: 'Minimum interval',
   });
   const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
-  const isScaled = interval && interval.scaled;
   const scaledHepText =
-    isScaled && !isInvalid ? (
+    interval && interval.scaled && !isInvalid ? (
       <label>
         <FormattedMessage
           id="common.ui.aggTypes.timeInterval.scaledHelpText"
