@@ -5,8 +5,8 @@
  */
 
 import { isNumber, round, sortBy } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
-import { idx } from '../../../../../common/idx';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { ESResponse } from './fetcher';
 
