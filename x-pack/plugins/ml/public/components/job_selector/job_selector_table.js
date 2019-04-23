@@ -39,16 +39,39 @@ export function JobSelectorTable({
   singleSelection
 }) {
   const [sortableProperties, setSortableProperties] = useState();
+  const [currentTab, setCurrentTab] = useState('Jobs');
 
   useEffect(() => {
-    const sortableProps = new SortableProperties([{
-      name: 'job_id',
-      getValue: item => item.job_id.toLowerCase(),
-      isAscending: true,
-    }], 'job_id');
+    let sortablePropertyItems = [];
+    let defaultSortProperty = 'job_id';
+
+    if (currentTab === 'Jobs' || singleSelection) {
+      sortablePropertyItems = [
+        {
+          name: 'job_id',
+          getValue: item => item.job_id.toLowerCase(),
+          isAscending: true,
+        },
+        {
+          name: 'groups',
+          getValue: item => (item.groups ? item.groups[0].toLowerCase() : ''),
+          isAscending: true,
+        }
+      ];
+    } else if (currentTab === 'Groups') {
+      defaultSortProperty = 'id';
+      sortablePropertyItems = [
+        {
+          name: 'id',
+          getValue: item => item.id.toLowerCase(),
+          isAscending: true,
+        }
+      ];
+    }
+    const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
 
     setSortableProperties(sortableProps);
-  }, [jobs]); // eslint-disable-line
+  }, [jobs, currentTab]); // eslint-disable-line
 
   const tabs = [{
     id: 'Jobs',
@@ -138,6 +161,7 @@ export function JobSelectorTable({
         items={jobs}
         onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
+        singleSelection={singleSelection}
         sortableProperties={sortableProperties}
       />
     );
@@ -182,7 +206,7 @@ export function JobSelectorTable({
         items={groupsList}
         onTableChange={(selectionFromTable) => onSelection({ selectionFromTable, isGroup: true })}
         selectedIds={selectedIds}
-        // sortableProperties={sortableProperties}
+        sortableProperties={sortableProperties}
       />
     );
   }
@@ -193,7 +217,7 @@ export function JobSelectorTable({
         size="s"
         tabs={tabs}
         initialSelectedTab={tabs[0]}
-        onTabClick={(tab) => { console.log('Tab -', tab); }} // handleTabSelection(tab);
+        onTabClick={(tab) => { setCurrentTab(tab.id); }}
       />
     );
   }

@@ -13,6 +13,8 @@ import {
   EuiSearchBar,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
+  EuiRadio,
   EuiSpacer,
   EuiTable,
   EuiTableBody,
@@ -27,21 +29,21 @@ import {
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui/lib/services';
-// import { i18n } from '@kbn/i18n';
+import { i18n } from '@kbn/i18n';
 
 
 const JOBS_PER_PAGE = 20;
 
-// function getError(error) {
-//   if (error !== null) {
-//     return i18n.translate('xpack.ml.jobSelector.filterBar.invalidSearchErrorMessage', {
-//       defaultMessage: `Invalid search: {errorMessage}`,
-//       values: { errorMessage: error.message },
-//     });
-//   }
+function getError(error) {
+  if (error !== null) {
+    return i18n.translate('xpack.ml.jobSelector.filterBar.invalidSearchErrorMessage', {
+      defaultMessage: `Invalid search: {errorMessage}`,
+      values: { errorMessage: error.message },
+    });
+  }
 
-//   return '';
-// }
+  return '';
+}
 
 export function CustomSelectionTable({
   columns,
@@ -50,10 +52,12 @@ export function CustomSelectionTable({
   items,
   onTableChange,
   selectedIds,
+  singleSelection,
   sortableProperties,
 }) {
   const [itemIdToSelectedMap, setItemIdToSelectedMap] = useState(getCurrentlySelectedItemIdsMap());
   const [currentItems, setCurrentItems] = useState(items);
+  const [lastSelected, setLastSelected] = useState(selectedIds);
   const [sortedColumn, setSortedColumn] = useState('');
   const [pager, setPager] = useState();
   const [firstAndLastIndex, setFirstAndLastIndex] = useState({
@@ -70,7 +74,6 @@ export function CustomSelectionTable({
   // When changes to selected ids made via badge removal - update selection in the table accordingly
   useEffect(() => {
     setItemIdToSelectedMap(getCurrentlySelectedItemIdsMap());
-    // setCurrentItems(items);
   }, [selectedIds]); // eslint-disable-line
 
   useEffect(() => {
@@ -80,12 +83,16 @@ export function CustomSelectionTable({
       lastItemIndex: tablePager.getLastItemIndex()
     });
     setPager(tablePager);
-  }, [currentItems]); // eslint-disable-line
+  }, [currentItems]);
 
   function getCurrentlySelectedItemIdsMap() {
     const selectedIdsMap = { 'all': false };
     selectedIds.forEach(id => { selectedIdsMap[id] = true; });
     return selectedIdsMap;
+  }
+
+  function handleSingleSelectionTableChange(itemId) {
+    onTableChange([itemId]);
   }
 
   function handleTableChange({ isSelected, itemId }) {
@@ -120,9 +127,9 @@ export function CustomSelectionTable({
     });
   }
 
-  function handleQueryChange({ query, err }) { // eslint-disable-line
-    if (err) {
-      setError(err);
+  function handleQueryChange({ query, error }) { // eslint-disable-line
+    if (error) {
+      setError(error);
     } else {
       setError(null);
       setCurrentItems(EuiSearchBar.Query.execute(query, items, { defaultFields: filterDefaultFields }));
@@ -152,9 +159,18 @@ export function CustomSelectionTable({
   }
 
   function toggleItem(itemId) {
-    const isSelected = !itemIdToSelectedMap[itemId];
-    setItemIdToSelectedMap({ ...itemIdToSelectedMap, [itemId]: isSelected });
-    handleTableChange({ isSelected, itemId });
+    // If enforcing singleSelection select incoming and deselect the last selected
+    if (singleSelection) {
+      const lastId = lastSelected[0];
+      // deselect last selected and select incoming id
+      setItemIdToSelectedMap({ ...itemIdToSelectedMap, [lastId]: false, [itemId]: true });
+      handleSingleSelectionTableChange(itemId);
+      setLastSelected([itemId]);
+    } else {
+      const isSelected = !itemIdToSelectedMap[itemId];
+      setItemIdToSelectedMap({ ...itemIdToSelectedMap, [itemId]: isSelected });
+      handleTableChange({ isSelected, itemId });
+    }
   }
 
   function toggleAll() {
@@ -167,6 +183,8 @@ export function CustomSelectionTable({
 
   function onSort(prop) {
     sortableProperties.sortOn(prop);
+    const sortedItems = sortableProperties.sortItems(currentItems);
+    setCurrentItems(sortedItems);
     setSortedColumn(prop);
   }
 
@@ -174,7 +192,7 @@ export function CustomSelectionTable({
     const headers = [];
 
     columns.forEach((column, columnIndex) => {
-      if (column.isCheckbox) {
+      if (column.isCheckbox && !singleSelection) {
         headers.push(
           <EuiTableHeaderCellCheckbox
             key={column.id}
@@ -191,7 +209,7 @@ export function CustomSelectionTable({
             width={column.width}
             onSort={column.isSortable ? () => onSort(column.id) : undefined}
             isSorted={sortedColumn === column.id}
-            isSortAscending={true}//{sortableProperties.isAscendingByName(column.id)}
+            isSortAscending={sortableProperties ? sortableProperties.isAscendingByName(column.id) : true}
             mobileOptions={column.mobileOptions}
           >
             {column.label}
@@ -213,23 +231,27 @@ export function CustomSelectionTable({
         if (column.isCheckbox) {
           return (
             <EuiTableRowCellCheckbox key={column.id}>
+              {!singleSelection &&
               <EuiCheckbox
                 id={`${item.id}-checkbox`}
                 checked={isItemSelected(item.id)}
                 onChange={() => toggleItem(item.id)}
                 type="inList"
-              />
+              />}
+              {singleSelection &&
+              <EuiRadio
+                id={item.id}
+                checked={isItemSelected(item.id)}
+                onChange={() => toggleItem(item.id)}
+              />}
             </EuiTableRowCellCheckbox>
           );
         }
 
         if (column.render) {
           child = column.render(item);
-          // } else if (cell.truncateText) {
-          //   child = cell.value;
         } else {
-          // child = cell;
-          child = <p>{cell && cell.to ? cell.to : cell}</p>;
+          child = cell;
         }
 
         return (
@@ -284,10 +306,15 @@ export function CustomSelectionTable({
             filters={filters}
             onChange={handleQueryChange}
           />
+          <EuiFormRow
+            fullWidth
+            isInvalid={(error !== null)}
+            error={getError(error)}
+            style={{ maxHeight: '0px' }}
+          >
+            <Fragment />
+          </EuiFormRow>
         </EuiFlexItem>
-        {/* <EuiFlexItem style={{ maxHeight: '0px' }}>
-          <p>{getError(error)}</p>
-        </EuiFlexItem>  */}
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiTableHeaderMobile>

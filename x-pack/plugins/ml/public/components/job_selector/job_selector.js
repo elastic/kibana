@@ -21,7 +21,6 @@ import { toastNotifications } from 'ui/notify';
 import {
   EuiBadge,
   EuiButtonEmpty,
-  EuiCheckbox,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFlyout,
@@ -127,8 +126,6 @@ export function JobSelector({
   const [groupsMap, setGroupsMap] = useState([]);
   const [selectedIds, setSelectedIds] = useState(selectedJobIds);
   const [newSelection, setNewSelection] = useState(selectedJobIds);
-  const [allJobs, setAllJobs] = useState(false);
-  const [allGroups, setAllGroups] = useState(false);
   const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -145,6 +142,14 @@ export function JobSelector({
           // TODO: broadcast that there are no jobs. Explorer updates with noJobsSelected
         });
     }
+    // listen for changes from Single Metric Viewer
+    const subscription = jobSelectService.subscribe((selection) => {
+      setSelectedIds(selection);
+    });
+
+    return function cleanup() {
+      subscription.unsubscribe();
+    };
   }, []); // eslint-disable-line
 
   // Ensure current selected ids always show up in flyout
@@ -241,17 +246,6 @@ export function JobSelector({
     setApplyTimeRange(!applyTimeRange);
   }
 
-  function handleAllJobsToggle() {
-    const allJobsSelected = !allJobs;
-    setAllJobs(allJobsSelected);
-    const selected = (allJobsSelected ? jobs.map((job) => job.job_id) : []);
-    setNewSelection(selected);
-  }
-
-  function handleAllGroupsToggle() {
-    setAllGroups(!allGroups);
-  }
-
   function removeId(id) {
     setNewSelection(newSelection.filter((item) => item !== id));
   }
@@ -321,30 +315,15 @@ export function JobSelector({
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="row" responsive={false}>
+                <EuiFlexGroup direction="row" justifyContent="spaceBetween" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="allGroups"
-                      label="Select all groups"
-                      checked={allGroups}
-                      onChange={handleAllGroupsToggle}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiCheckbox
-                      id="allJobs"
-                      label="Select all jobs"
-                      checked={allJobs}
-                      onChange={handleAllJobsToggle}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
+                    {!singleSelection &&
                     <EuiButtonEmpty
                       onClick={clearSelection}
                       size="xs"
                     >
                       Clear all
-                    </EuiButtonEmpty>
+                    </EuiButtonEmpty>}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
