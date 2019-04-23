@@ -22,7 +22,8 @@ import {
   unit
 } from '../../../../style/variables';
 import { APMLink } from '../../../shared/Links/APMLink';
-import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
 
 function paginateItems({
   items,

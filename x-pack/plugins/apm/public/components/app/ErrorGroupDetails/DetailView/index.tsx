@@ -23,7 +23,8 @@ import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 import { IUrlParams } from '../../../../store/urlParams';
 import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
-import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import {

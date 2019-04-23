@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiSuperDatePicker, EuiSuperDatePickerProps } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 import React from 'react';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { history } from '../../../utils/history';
