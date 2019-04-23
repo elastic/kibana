@@ -34,7 +34,7 @@ export const WatchStatus = ({
   return (
     <EuiPageContent>
       <WatchDetail watchId={id} />
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="m" />
       <WatchHistory watchId={id} />
     </EuiPageContent>
   );
