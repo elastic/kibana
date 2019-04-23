@@ -67,12 +67,9 @@ class TimeseriesPanelConfigUi extends Component {
       show_grid: 1
     };
     const model = { ...defaults, ...this.props.model };
-    console.log('TimeSeriesPanelConfigUi model:', model);
     const { selectedTab } = this.state;
-    console.log('TimeSeriesPanelConfigUi { selectedTab }:', { selectedTab });
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    console.log('TimeSeriesPanelConfigUi handleTextChange:', handleTextChange);
     const htmlId = htmlIdGenerator();
     const { intl } = this.props;
 
@@ -152,7 +149,6 @@ class TimeseriesPanelConfigUi extends Component {
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
-
             <IndexPattern
               fields={this.props.fields}
               model={this.props.model}
@@ -160,10 +156,9 @@ class TimeseriesPanelConfigUi extends Component {
             />
 
             <EuiHorizontalRule />
-
-            <EuiFlexGroup responsive={false} wrap={true}>
-              <EuiFlexItem>
-                <div style={{ border: '1px solid purple' }}>
+            <div style={{ 'border': '1px solid blue' }}>
+              <EuiFlexGroup responsive={false} wrap={true}>
+                <EuiFlexItem>
                   <EuiFormRow
                     id={htmlId('panelFilter')}
                     label={(<FormattedMessage
@@ -178,23 +173,23 @@ class TimeseriesPanelConfigUi extends Component {
                       fullWidth
                     />
                   </EuiFormRow>
-                </div>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiFormLabel>
-                  <FormattedMessage
-                    id="tsvb.timeseries.optionsTab.ignoreGlobalFilterLabel"
-                    defaultMessage="Ignore global filter?"
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiFormLabel>
+                    <FormattedMessage
+                      id="tsvb.timeseries.optionsTab.ignoreGlobalFilterLabel"
+                      defaultMessage="Ignore global filter?"
+                    />
+                  </EuiFormLabel>
+                  <EuiSpacer size="s" />
+                  <YesNo
+                    value={model.ignore_global_filter}
+                    name="ignore_global_filter"
+                    onChange={this.props.onChange}
                   />
-                </EuiFormLabel>
-                <EuiSpacer size="s" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </div>
           </EuiPanel>
 
           <EuiSpacer />
@@ -346,7 +341,6 @@ class TimeseriesPanelConfigUi extends Component {
         </div>
       );
     }
-    console.log('TimeSeriesPanelConfigUi view:', view);
     return (
       <div>
         <EuiTabs size="s">

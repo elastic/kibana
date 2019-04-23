@@ -67,6 +67,7 @@ class VisEditor extends Component {
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   handleChange = async (partialModel) => {
+    console.log('handleChange with partialModel as input:', partialModel);
     if (isEmpty(partialModel)) {
       return;
     }
