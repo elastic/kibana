@@ -186,7 +186,7 @@ module.directive('vislibValueAxes', function () {
       };
 
       $scope.$watch(() => {
-        return $scope.visualizeEditor.$valid && $scope.editorState.aggs.map(agg => {
+        return $scope.editorState.aggs.map(agg => {
           return agg.makeLabel();
         }).join();
       }, () => {

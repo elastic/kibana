@@ -48,7 +48,7 @@ module.directive('vislibSeries', function () {
 
       $scope.series = $scope.editorState.params.seriesParams;
       $scope.$watch(() => {
-        return $scope.visualizeEditor.$valid && $scope.editorState.aggs.map(agg => {
+        return $scope.editorState.aggs.map(agg => {
           return agg.makeLabel();
         }).join();
       }, () => {

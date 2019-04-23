@@ -133,8 +133,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
         setBounds(agg, true);
       },
       write: function (agg, output, aggs) {
-        setBounds(agg, true);
-        agg.buckets.setInterval(getInterval(agg));
+        try {
+          setBounds(agg, true);
+          agg.buckets.setInterval(getInterval(agg));
+        } catch (e) {
+          // if interval is invalid, we don't write it in output
+          return;
+        }
         const { useNormalizedEsInterval } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;
