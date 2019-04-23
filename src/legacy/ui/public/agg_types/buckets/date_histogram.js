@@ -54,7 +54,13 @@ export const dateHistogramBucketAgg = new BucketAggType({
     date: true
   },
   makeLabel: function (agg) {
-    const output = this.params.write(agg);
+    let output = '';
+    try {
+      output = this.params.write(agg);
+    } catch (e) {
+      // if interval is invalid, return empty string
+      return '';
+    }
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
@@ -133,13 +139,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
         setBounds(agg, true);
       },
       write: function (agg, output, aggs) {
-        try {
-          setBounds(agg, true);
-          agg.buckets.setInterval(getInterval(agg));
-        } catch (e) {
-          // if interval is invalid, we don't write it in output
-          return;
-        }
+        setBounds(agg, true);
+        agg.buckets.setInterval(getInterval(agg));
         const { useNormalizedEsInterval } = agg.params;
         const interval = agg.buckets.getInterval(useNormalizedEsInterval);
         output.bucketInterval = interval;

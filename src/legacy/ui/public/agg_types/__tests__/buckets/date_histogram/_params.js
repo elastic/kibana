@@ -68,9 +68,8 @@ describe('params', function () {
       expect(output.params).to.have.property('interval', '1d');
     });
 
-    it('does not write invalid intervals', function () {
-      const output = writeInterval('foo');
-      expect(output.params).not.to.have.property('interval');
+    it('throws error when interval is invalid', function () {
+      expect(() => writeInterval('foo')).to.throw('TypeError: "foo" is not a valid interval.');
     });
 
     it('automatically picks an interval', function () {
