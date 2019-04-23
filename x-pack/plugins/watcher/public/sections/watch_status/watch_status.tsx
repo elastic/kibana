@@ -24,9 +24,12 @@ export const WatchStatus = ({
     };
   };
 }) => {
-  useEffect(() => {
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb ]);
-  }, [id]);
+  useEffect(
+    () => {
+      chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb, statusBreadcrumb]);
+    },
+    [id]
+  );
 
   return (
     <EuiPageContent>

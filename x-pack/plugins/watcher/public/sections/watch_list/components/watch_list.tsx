@@ -49,7 +49,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
 
   useEffect(() => {
-    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
   }, []);
 
   const { isLoading: isWatchesLoading, data: watches, error } = loadWatches(
