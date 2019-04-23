@@ -16,26 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { CoreSetup } from '../../../../core/public';
+import { CoreSetup, CoreStart } from '../../../../core/public';
 
 const runtimeContext = {
   setup: {
     core: (null as unknown) as CoreSetup,
     plugins: {},
   },
+  start: {
+    core: (null as unknown) as CoreStart,
+    plugins: {},
+  },
 };
 
-export function __newPlatformInit__(core: CoreSetup) {
+export function __newPlatformSetup__(core: CoreSetup) {
   if (runtimeContext.setup.core) {
-    throw new Error('New platform core api was already initialized');
+    throw new Error('New platform core api was already set up');
   }
 
   runtimeContext.setup.core = core;
 }
 
+export function __newPlatformStart__(core: CoreStart) {
+  if (runtimeContext.start.core) {
+    throw new Error('New platform core api was already started');
+  }
+
+  runtimeContext.start.core = core;
+}
+
 export function getNewPlatform() {
-  if (runtimeContext.setup.core === null) {
+  if (runtimeContext.setup.core === null || runtimeContext.start.core === null) {
     throw new Error('runtimeContext is not initialized yet');
   }
+
   return runtimeContext;
 }

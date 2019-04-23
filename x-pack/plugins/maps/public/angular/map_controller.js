@@ -10,7 +10,7 @@ import 'ui/listen';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
@@ -127,7 +127,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     // clear old UI state
     store.dispatch(setSelectedLayer(null));
     store.dispatch(updateFlyout(FLYOUT_STATE.NONE));
-    store.dispatch(setReadOnly(!uiCapabilities.maps.save));
+    store.dispatch(setReadOnly(!capabilities.get().maps.save));
 
     handleStoreChanges(store);
     unsubscribe = store.subscribe(() => {
@@ -297,7 +297,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       const inspectorAdapters = getInspectorAdapters(store.getState());
       Inspector.open(inspectorAdapters, {});
     }
-  }, ...(uiCapabilities.maps.save ? [{
+  }, ...(capabilities.get().maps.save ? [{
     key: i18n.translate('xpack.maps.mapController.saveMapButtonLabel', {
       defaultMessage: `save`
     }),
