@@ -219,7 +219,7 @@ export default class BaseOptimizer {
           options: {
             cacheContext: fromRoot('.'),
             cacheDirectory: this.uiBundles.getCacheDirectory(cacheName),
-            readOnly: process.env.FORCE_WRITABLE_CACHE ? false : IS_KIBANA_DISTRIBUTABLE
+            readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
           }
         },
         ...loaders

@@ -92,7 +92,7 @@ function generateDLL(config) {
                 options: {
                   cacheContext: fromRoot('.'),
                   cacheDirectory: babelLoaderCacheDirPath,
-                  readOnly: process.env.FORCE_WRITABLE_CACHE ? false : IS_KIBANA_DISTRIBUTABLE
+                  readOnly: process.env.KBN_CACHE_LOADER_WRITABLE ? false : IS_KIBANA_DISTRIBUTABLE
                 }
               },
               ...loaders
