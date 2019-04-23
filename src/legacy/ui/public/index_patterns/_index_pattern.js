@@ -23,7 +23,7 @@ import angular from 'angular';
 import { fieldFormats } from '../registry/field_formats';
 import UtilsMappingSetupProvider from '../utils/mapping_setup';
 import { Notifier, toastNotifications } from '../notify';
-import { EuiLink } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { getComputedFields } from './_get_computed_fields';
@@ -118,12 +118,15 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     if (indexPattern.isUnsupportedTimePattern()) {
       const warningTitle = i18n.translate('common.ui.indexPattern.warningTitle', {
-        defaultMessage: 'Support for time intervals was removed',
+        defaultMessage: 'Support for time interval index patterns removed',
       });
 
       const warningText = i18n.translate('common.ui.indexPattern.warningText', {
-        defaultMessage: 'You are now querying all indices matching {index}. For more information, view the index pattern in management:',
+        defaultMessage: 'Instead of querying indices only matching the pattern {title}, you are now querying all indices ' +
+          'matching {index}. This index pattern should be migrated to a wildcard-based index pattern. To do so, edit the ' +
+          'index pattern in Management.',
         values: {
+          title: indexPattern.title,
           index: indexPattern.getIndex()
         }
       });
@@ -132,8 +135,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
         title: warningTitle,
         text: (
           <div>
-            <div>{warningText}</div>
-            <div><EuiLink href={kbnUrl.getRouteHref(indexPattern, 'edit')}>{indexPattern.title}</EuiLink></div>
+            <p>{warningText}</p>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton size="s" href={kbnUrl.getRouteHref(indexPattern, 'edit')}>
+                  Edit index pattern
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </div>
         ),
       });
