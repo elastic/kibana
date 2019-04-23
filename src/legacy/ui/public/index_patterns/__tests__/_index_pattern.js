@@ -262,4 +262,39 @@ describe('index pattern', function () {
       });
     });
   });
+
+  describe('getIndex', () => {
+    it('should return the title when there is no intervalName', () => {
+      expect(indexPattern.getIndex()).to.be(indexPattern.title);
+    });
+
+    it('should convert time-based intervals to wildcards', () => {
+      const oldTitle = indexPattern.title;
+      indexPattern.intervalName = 'daily';
+
+      indexPattern.title = '[logstash-]YYYY.MM.DD';
+      expect(indexPattern.getIndex()).to.be('logstash-*');
+
+      indexPattern.title = 'YYYY.MM.DD[-logstash]';
+      expect(indexPattern.getIndex()).to.be('*-logstash');
+
+      indexPattern.title = 'YYYY[-logstash-]YYYY.MM.DD';
+      expect(indexPattern.getIndex()).to.be('*-logstash-*');
+
+      indexPattern.title = 'YYYY[-logstash-]YYYY[-foo-]MM.DD';
+      expect(indexPattern.getIndex()).to.be('*-logstash-*-foo-*');
+
+      indexPattern.title = 'YYYY[-logstash-]YYYY[-foo-]MM.DD[-bar]';
+      expect(indexPattern.getIndex()).to.be('*-logstash-*-foo-*-bar');
+
+      indexPattern.title = '[logstash-]YYYY[-foo-]MM.DD[-bar]';
+      expect(indexPattern.getIndex()).to.be('logstash-*-foo-*-bar');
+
+      indexPattern.title = '[logstash]';
+      expect(indexPattern.getIndex()).to.be('logstash');
+
+      indexPattern.title = oldTitle;
+      delete indexPattern.intervalName;
+    });
+  });
 });
