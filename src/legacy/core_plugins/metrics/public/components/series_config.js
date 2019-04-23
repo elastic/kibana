@@ -107,11 +107,13 @@ export const SeriesConfig = props => {
             )}
             fullWidth
           >
-            <EuiFieldText
-              onChange={handleTextChange('value_template')}
-              value={model.value_template}
-              fullWidth
-            />
+            <div style={{ 'border': '1px solid blue' }}>
+              <EuiFieldText
+                onChange={handleTextChange('value_template')}
+                value={model.value_template}
+                fullWidth
+              />
+            </div>
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

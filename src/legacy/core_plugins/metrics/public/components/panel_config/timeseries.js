@@ -89,12 +89,9 @@ class TimeseriesPanelConfigUi extends Component {
       show_grid: 1,
     };
     const model = { ...defaults, ...this.props.model };
-    console.log('TimeSeriesPanelConfigUi model:', model);
     const { selectedTab } = this.state;
-    console.log('TimeSeriesPanelConfigUi { selectedTab }:', { selectedTab });
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
-    console.log('TimeSeriesPanelConfigUi handleTextChange:', handleTextChange);
     const htmlId = htmlIdGenerator();
     const { intl } = this.props;
 
@@ -236,12 +233,6 @@ class TimeseriesPanelConfigUi extends Component {
                     defaultMessage="Ignore global filter?"
                   />
                 </EuiFormLabel>
-                <EuiSpacer size="s" />
-                <YesNo
-                  value={model.ignore_global_filter}
-                  name="ignore_global_filter"
-                  onChange={this.props.onChange}
-                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -393,7 +384,6 @@ class TimeseriesPanelConfigUi extends Component {
         </div>
       );
     }
-    console.log('TimeSeriesPanelConfigUi view:', view);
     return (
       <div>
         <EuiTabs size="s">
