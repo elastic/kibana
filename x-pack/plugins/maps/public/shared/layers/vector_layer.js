@@ -81,13 +81,6 @@ export class VectorLayer extends AbstractLayer {
     return [VectorStyle];
   }
 
-  supportsDrawFilter() {
-    //todo:
-    //this is wrong. _source should take into a account weather the source is geo_shape or geo_point. spatial filters are not supported by geo_shape backed index-patterns.
-    return this._source.supportsDrawFilter();
-  }
-
-
   /**
    * this should only be called if the source supports shape filter creation.
    * @return {*|Promise<void>}

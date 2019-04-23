@@ -29,23 +29,21 @@ export class LayerTocActions extends Component {
   state = {
     isPopoverOpen: false,
     supportsFitToBounds: false,
-    supportsDrawFilter: false
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadSupportedActions();
+    this._loadSupportsFitToBounds();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadSupportedActions() {
+  async _loadSupportsFitToBounds() {
     const supportsFitToBounds = await this.props.layer.supportsFitToBounds();
-    const supportsDrawFilter = this.props.layer.supportsDrawFilter();
     if (this._isMounted) {
-      this.setState({ supportsFitToBounds, supportsDrawFilter });
+      this.setState({ supportsFitToBounds });
     }
   }
 
@@ -121,7 +119,9 @@ export class LayerTocActions extends Component {
     }
     return smallLegendIcon;
   }
-  _getItems() {
+
+  _getPanels() {
+
     const visibilityToggle = this._getVisbilityIcon();
     const actionItems = [
       {
@@ -202,7 +202,7 @@ export class LayerTocActions extends Component {
       >
         <EuiContextMenu
           initialPanelId={0}
-          panels={this._getItems()}
+          panels={this._getPanels()}
           data-test-subj={`layerTocActionsPanel${cleanDisplayName(this.props.displayName)}`}
         />
       </EuiPopover>);

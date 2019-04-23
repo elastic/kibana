@@ -97,10 +97,6 @@ export class ESGeoGridSource extends AbstractESSource {
     );
   }
 
-  supportsDrawFilter() {
-    return true;
-  }
-
   async getImmutableProperties() {
     let indexPatternTitle = this._descriptor.indexPatternId;
     try {

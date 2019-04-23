@@ -66,10 +66,6 @@ export class AbstractVectorSource extends AbstractSource {
     });
   }
 
-  supportsDrawFilter() {
-    return false;
-  }
-
   isFilterByMapBounds() {
     return false;
   }

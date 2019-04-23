@@ -45,10 +45,6 @@ export class ESSearchSource extends AbstractESSource {
     };
     return (<CreateSourceEditor onSelect={onSelect}/>);
   }
-  supportsDrawFilter() {
-    //todo. not quite right. only if source is geo_point
-    return true;
-  }
 
   constructor(descriptor, inspectorAdapters) {
     super({
