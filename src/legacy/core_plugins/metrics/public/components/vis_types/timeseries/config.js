@@ -307,22 +307,22 @@ const TimeseriesConfig = injectI18n(function (props) {
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
-
-      <EuiFormRow
-        id={htmlId('series_filter')}
-        label={(<FormattedMessage
-          id="tsvb.timeSeries.filterLabel"
-          defaultMessage="Filter"
-        />)}
-        fullWidth
-      >
-        <EuiFieldText
-          onChange={handleTextChange('filter')}
-          value={model.filter}
+      <div style={{ border: '1px solid blue' }}>
+        <EuiFormRow
+          id={htmlId('series_filter')}
+          label={(<FormattedMessage
+            id="tsvb.timeSeries.filterLabel"
+            defaultMessage="Filter"
+          />)}
           fullWidth
-        />
-      </EuiFormRow>
-
+        >
+          <EuiFieldText
+            onChange={handleTextChange('filter')}
+            value={model.filter}
+            fullWidth
+          />
+        </EuiFormRow>
+      </div>
       <EuiHorizontalRule margin="s" />
 
       { type }
