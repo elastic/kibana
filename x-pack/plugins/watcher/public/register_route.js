@@ -11,7 +11,6 @@ import { management } from 'ui/management';
 import template from './app.html';
 import { App } from './app';
 import 'plugins/watcher/services/license';
-import { getWatchListBreadcrumbs } from './lib/breadcrumbs';
 import { setHttpClient, setSavedObjectsClient } from './lib/api';
 import { I18nContext } from 'ui/i18n';
 import { manageAngularLifecycle } from './lib/manage_angular_lifecycle';
@@ -49,8 +48,6 @@ routes.when('/management/elasticsearch/watcher/:param1?/:param2?/:param3?/:param
     }
   },
   controllerAs: 'watchRoute',
-  //TODO: fix breadcrumbs
-  k7Breadcrumbs: getWatchListBreadcrumbs,
 });
 
 routes.defaults(/\/management/, {

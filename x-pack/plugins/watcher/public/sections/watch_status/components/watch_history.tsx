@@ -4,10 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { Fragment, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
-import React, { Fragment, useEffect, useState } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { toastNotifications } from 'ui/notify';
 import {
   EuiButton,
@@ -23,82 +24,96 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { goToWatchList } from '../../../lib/navigation';
-import { fetchWatchDetail } from '../../../lib/api';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
+import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { WatchActionStatus } from './watch_action_status';
 import {
   activateWatch,
   deactivateWatch,
-  fetchWatchHistory,
-  fetchWatchHistoryDetail,
+  loadWatchDetail,
+  loadWatchHistory,
+  loadWatchHistoryDetail,
 } from '../../../lib/api';
 
-const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isActivated, setIsActivated] = useState<boolean>(true);
-  const [history, setWatchHistory] = useState([]);
-  const [isDetailVisible, setIsDetailVisible] = useState<boolean>(true);
+const watchHistoryTimeSpanOptions = [
+  {
+    value: 'now-1h',
+    text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.1h', {
+      defaultMessage: 'Last one hour',
+    }),
+  },
+  {
+    value: 'now-24h',
+    text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.24h', {
+      defaultMessage: 'Last 24 hours',
+    }),
+  },
+  {
+    value: 'now-7d',
+    text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.7d', {
+      defaultMessage: 'Last 7 days',
+    }),
+  },
+  {
+    value: 'now-30d',
+    text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.30d', {
+      defaultMessage: 'Last 30 days',
+    }),
+  },
+  {
+    value: 'now-6M',
+    text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.6M', {
+      defaultMessage: 'Last 6 months',
+    }),
+  },
+  {
+    value: 'now-1y',
+    text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.1y', {
+      defaultMessage: 'Last 1 year',
+    }),
+  },
+];
+
+const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
+  const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
+  const [detailWatchId, setDetailWatchId] = useState<string | undefined>(undefined);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
-  const [itemDetail, setItemDetail] = useState<{
-    id?: string;
-    details?: any;
-    watchId?: string;
-    watchStatus?: { actionStatuses?: any };
-  }>({});
-  const [executionDetail, setExecutionDetail] = useState<string>('');
+
+  const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
+    watchHistoryTimeSpanOptions[0].value
+  );
+
+  const { error: watchDetailError, data: loadedWatch } = loadWatchDetail(watchId);
+
+  if (loadedWatch && isActivated === undefined) {
+    // Set initial value for isActivated based on the watch we just loaded.
+    setIsActivated(loadedWatch.watchStatus.isActive);
+  }
+
+  const { error: historyError, data: history, isLoading } = loadWatchHistory(
+    watchId,
+    watchHistoryTimeSpan
+  );
+
+  const { error: watchHistoryDetailsError, data: watchHistoryDetails } = loadWatchHistoryDetail(
+    detailWatchId
+  );
+
+  const executionDetail = watchHistoryDetails
+    ? JSON.stringify(watchHistoryDetails.details, null, 2)
+    : '';
+
+  const errorCode = getPageErrorCode([watchDetailError, historyError, watchHistoryDetailsError]);
+  if (errorCode) {
+    return <PageError errorCode={errorCode} id={watchId} />;
+  }
 
   const pagination = {
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
   };
-
-  const loadWatch = async () => {
-    const loadedWatch = await fetchWatchDetail(watchId);
-    setIsActivated(loadedWatch.watchStatus.isActive);
-  };
-
-  const watchHistoryTimeSpanOptions = [
-    {
-      value: 'now-1h',
-      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.1h', {
-        defaultMessage: 'Last one hour',
-      }),
-    },
-    {
-      value: 'now-24h',
-      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.24h', {
-        defaultMessage: 'Last 24 hours',
-      }),
-    },
-    {
-      value: 'now-7d',
-      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.7d', {
-        defaultMessage: 'Last 7 days',
-      }),
-    },
-    {
-      value: 'now-30d',
-      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.30d', {
-        defaultMessage: 'Last 30 days',
-      }),
-    },
-    {
-      value: 'now-6M',
-      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.6M', {
-        defaultMessage: 'Last 6 months',
-      }),
-    },
-    {
-      value: 'now-1y',
-      text: i18n.translate('xpack.watcher.sections.watchHistory.timeSpan.1y', {
-        defaultMessage: 'Last 1 year',
-      }),
-    },
-  ];
-  const [watchHistoryTimeSpan, setWatchHistoryTimeSpan] = useState<string>(
-    watchHistoryTimeSpanOptions[0].value
-  );
 
   const columns = [
     {
@@ -114,7 +129,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
           <EuiLink
             className="indTable__link euiTableCellContent"
             data-test-subj={`watchIdColumn-${formattedDate}`}
-            onClick={() => showDetailFlyout(item)}
+            onClick={() => setDetailWatchId(item.id)}
           >
             {formattedDate}
           </EuiLink>
@@ -157,24 +172,6 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   const onTimespanChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const timespan = e.target.value;
     setWatchHistoryTimeSpan(timespan);
-    loadWatchHistory(timespan);
-  };
-  const loadWatchHistory = async (timespan: string) => {
-    const loadedWatchHistory = await fetchWatchHistory(watchId, timespan);
-    setWatchHistory(loadedWatchHistory);
-    setIsLoading(false);
-  };
-
-  const hideDetailFlyout = async () => {
-    setItemDetail({});
-    return setIsDetailVisible(false);
-  };
-
-  const showDetailFlyout = async (item: { id: string }) => {
-    const watchHistoryItemDetail = await fetchWatchHistoryDetail(item.id);
-    setItemDetail(watchHistoryItemDetail);
-    setExecutionDetail(JSON.stringify(watchHistoryItemDetail.details, null, 2));
-    return setIsDetailVisible(true);
   };
 
   const toggleWatchActivation = async () => {
@@ -184,6 +181,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       } else {
         await activateWatch(watchId);
       }
+
       setIsActivated(!isActivated);
     } catch (e) {
       if (e.data.statusCode !== 200) {
@@ -199,15 +197,9 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     }
   };
 
-  useEffect(() => {
-    loadWatchHistory(watchHistoryTimeSpan);
-    loadWatch();
-    // only run the first time the component loads
-  }, []);
-
   let flyout;
 
-  if (isDetailVisible && Object.keys(itemDetail).length !== 0) {
+  if (detailWatchId !== undefined && watchHistoryDetails !== undefined) {
     const detailColumns = [
       {
         field: 'id',
@@ -236,7 +228,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     flyout = (
       <EuiFlyout
         data-test-subj="indexDetailFlyout"
-        onClose={hideDetailFlyout}
+        onClose={() => setDetailWatchId(undefined)}
         aria-labelledby="indexDetailsFlyoutTitle"
       >
         <EuiFlyoutHeader>
@@ -247,7 +239,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem>
             <EuiInMemoryTable
-              items={(itemDetail.watchStatus as any).actionStatuses}
+              items={(watchHistoryDetails.watchStatus as any).actionStatuses}
               itemId="id"
               columns={detailColumns}
               message={
@@ -268,7 +260,19 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       </EuiFlyout>
     );
   }
-  const activationButtonText = isActivated ? 'Deactivate watch' : 'Activate watch';
+
+  const activationButtonText = isActivated ? (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchHistory.watchTable.deactivateWatchLabel"
+      defaultMessage="Deactivate watch"
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.watcher.sections.watchHistory.watchTable.activateWatchLabel"
+      defaultMessage="Activate watch"
+    />
+  );
+
   return (
     <Fragment>
       <DeleteWatchesModal
@@ -298,7 +302,12 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                 options={watchHistoryTimeSpanOptions}
                 value={watchHistoryTimeSpan}
                 onChange={onTimespanChange}
-                aria-label="Change timespan of watch history"
+                aria-label={i18n.translate(
+                  'xpack.watcher.sections.watchHistory.changeTimespanSelectAriaLabel',
+                  {
+                    defaultMessage: 'Change timespan of watch history',
+                  }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -343,4 +352,4 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   );
 };
 
-export const WatchHistory = injectI18n(WatchHistoryUI);
+export const WatchHistory = injectI18n(WatchHistoryUi);
