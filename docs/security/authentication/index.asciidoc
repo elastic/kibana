@@ -21,7 +21,11 @@ For more information about basic authentication and built-in users, see {xpack-r
 
 ==== Token Authentication
 
-Token authentication allows users to login using the same Kibana provided login form as basic authentication, and supports authentication using the `Authorization` request header's `Bearer` scheme. The token authentication provider is built upon {es}'s {ref}/security-api-get-token.html[token APIs]. The session cookies which are issued by the Token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse. See {ref}/security-api-get-token.html#_description_86[Elasticsearch's token API] documentation to ensure token support is enabled.
+Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built upon {es}'s token APIs, and the bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
+
+The session cookies which are issued by the Token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse.
+
+Prior to configuring Kibana, ensure token support is enabled in Elasticsearch, see the {ref}/security-api-get-token.html#_description_86[Elasticsearch token API] documentation for more information.
 
 To enable the token authentication provider in Kibana, set the following value in your `kibana.yml`:
 
