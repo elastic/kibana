@@ -328,7 +328,7 @@ class CodeContent extends React.PureComponent<Props> {
         }
         if (fileLanguage === LANG_MD) {
           return (
-            <div className="markdown-body code-markdown-container">
+            <div className="markdown-body code-markdown-container kbnMarkdown__body">
               <Markdown source={fileContent} escapeHtml={true} skipHtml={true} />
             </div>
           );
