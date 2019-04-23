@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 export const listBreadcrumb: any = {
   text: i18n.translate('xpack.watcher.breadcrumb.listLabel', {
-    defaultMessage: 'Watcher'
+    defaultMessage: 'Watcher',
   }),
   href: '#/management/elasticsearch/watcher/watches/',
 };
