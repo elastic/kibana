@@ -76,8 +76,7 @@ export async function getHasMLJob({
   transactionType
 }: {
   serviceName: string;
-  transactionType?: string;
-  anomalyName?: string;
+  transactionType: string;
 }) {
   try {
     await callApi<MLJobApiResponse>({

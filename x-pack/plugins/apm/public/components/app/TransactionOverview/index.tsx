@@ -60,7 +60,7 @@ export function TransactionOverviewView({
 
   // TODO: improve urlParams typings.
   // `serviceName` will never be undefined here, and this check should not be needed
-  if (!serviceName) {
+  if (!serviceName || !transactionType) {
     return null;
   }
 
@@ -83,11 +83,6 @@ export function TransactionOverviewView({
     () => getHasMLJob({ serviceName, transactionType }),
     [serviceName, transactionType]
   );
-
-  // filtering by type is currently required
-  if (!serviceName || !transactionType) {
-    return null;
-  }
 
   return (
     <React.Fragment>
