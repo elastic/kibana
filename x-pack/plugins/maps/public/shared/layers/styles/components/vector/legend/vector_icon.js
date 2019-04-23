@@ -6,6 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
 import { ColorGradient } from '../../../../../icons/color_gradient';
@@ -14,9 +15,12 @@ import { VectorStyle } from '../../../vector_style';
 
 export function VectorIcon({ fillColor, lineColor, isPointsOnly }) {
   if (fillColor && fillColor.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
+    const classes = classNames('mapColorGradientIcon', {
+      mapColorGradientIcon__pointsOnly: isPointsOnly
+    });
     return (
       <ColorGradient
-        className="mapColorGradientIcon"
+        className={classes}
         color={fillColor.options.color}
       />
     );
