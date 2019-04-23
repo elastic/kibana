@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
 
 export interface ErrorTab {
