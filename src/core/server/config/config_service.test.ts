@@ -34,9 +34,17 @@ const emptyArgv = getEnvOptions();
 const defaultEnv = new Env('/kibana', emptyArgv);
 const logger = loggingServiceMock.create();
 
+class ExampleClassWithStringSchema {
+  public static schema = schema.string();
+
+  constructor(readonly value: string) {}
+}
+
+const stringSchemaFor = (key: string) => new Map([[key, ExampleClassWithStringSchema.schema]]);
+
 test('returns config at path as observable', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'foo' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
   const exampleConfig = await configs.pipe(first()).toPromise();
@@ -49,7 +57,7 @@ test('throws if config at path does not match schema', async () => {
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 123 }));
 
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
 
   try {
@@ -61,7 +69,12 @@ test('throws if config at path does not match schema', async () => {
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: 'bar' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(
+    config$,
+    defaultEnv,
+    logger,
+    stringSchemaFor('unique-name')
+  );
 
   const configs = configService.optionalAtPath('unique-name', ExampleClassWithStringSchema);
   const exampleConfig = await configs.pipe(first()).toPromise();
@@ -71,7 +84,7 @@ test("returns undefined if fetching optional config at a path that doesn't exist
 
 test('returns observable config at optional path if it exists', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ value: 'bar' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('value'));
 
   const configs = configService.optionalAtPath('value', ExampleClassWithStringSchema);
   const exampleConfig: any = await configs.pipe(first()).toPromise();
@@ -82,7 +95,7 @@ test('returns observable config at optional path if it exists', async () => {
 
 test("does not push new configs when reloading if config at path hasn't changed", async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const valuesReceived: any[] = [];
   configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
@@ -96,7 +109,7 @@ test("does not push new configs when reloading if config at path hasn't changed"
 
 test('pushes new config when reloading and config at path has changed', async () => {
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, stringSchemaFor('key'));
 
   const valuesReceived: any[] = [];
   configService.atPath('key', ExampleClassWithStringSchema).subscribe(config => {
@@ -108,13 +121,13 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(valuesReceived).toEqual(['value', 'new value']);
 });
 
-test("throws error if config class does not implement 'schema'", async () => {
+test("throws error if 'schema' is not defined for a key", async () => {
   expect.assertions(1);
 
   class ExampleClass {}
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ key: 'value' }));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, new Map());
 
   const configs = configService.atPath('key', ExampleClass as any);
 
@@ -147,7 +160,7 @@ test('tracks unhandled paths', async () => {
   };
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, new Map());
 
   configService.atPath('foo', createClassWithSchema(schema.string()));
   configService.atPath(
@@ -178,28 +191,30 @@ test('correctly passes context', async () => {
   const env = new Env('/kibana', getEnvOptions());
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter({ foo: {} }));
-  const configService = new ConfigService(config$, env, logger);
-  const configs = configService.atPath(
-    'foo',
-    createClassWithSchema(
-      schema.object({
-        branchRef: schema.string({
-          defaultValue: schema.contextRef('branch'),
-        }),
-        buildNumRef: schema.number({
-          defaultValue: schema.contextRef('buildNum'),
-        }),
-        buildShaRef: schema.string({
-          defaultValue: schema.contextRef('buildSha'),
-        }),
-        devRef: schema.boolean({ defaultValue: schema.contextRef('dev') }),
-        prodRef: schema.boolean({ defaultValue: schema.contextRef('prod') }),
-        versionRef: schema.string({
-          defaultValue: schema.contextRef('version'),
-        }),
-      })
-    )
+  const schemaDefinition = schema.object({
+    branchRef: schema.string({
+      defaultValue: schema.contextRef('branch'),
+    }),
+    buildNumRef: schema.number({
+      defaultValue: schema.contextRef('buildNum'),
+    }),
+    buildShaRef: schema.string({
+      defaultValue: schema.contextRef('buildSha'),
+    }),
+    devRef: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+    prodRef: schema.boolean({ defaultValue: schema.contextRef('prod') }),
+    versionRef: schema.string({
+      defaultValue: schema.contextRef('version'),
+    }),
+  });
+  const configService = new ConfigService(
+    config$,
+    env,
+    logger,
+    new Map([['foo', schemaDefinition]])
   );
+
+  const configs = configService.atPath('foo', createClassWithSchema(schemaDefinition));
 
   expect(await configs.pipe(first()).toPromise()).toMatchSnapshot();
 });
@@ -213,7 +228,7 @@ test('handles enabled path, but only marks the enabled path as used', async () =
   };
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, new Map());
 
   const isEnabled = await configService.isEnabledAtPath('pid');
   expect(isEnabled).toBe(true);
@@ -231,7 +246,7 @@ test('handles enabled path when path is array', async () => {
   };
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, new Map());
 
   const isEnabled = await configService.isEnabledAtPath(['pid']);
   expect(isEnabled).toBe(true);
@@ -249,7 +264,7 @@ test('handles disabled path and marks config as used', async () => {
   };
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, new Map());
 
   const isEnabled = await configService.isEnabledAtPath('pid');
   expect(isEnabled).toBe(false);
@@ -262,7 +277,7 @@ test('treats config as enabled if config path is not present in config', async (
   const initialConfig = {};
 
   const config$ = new BehaviorSubject(new ObjectToConfigAdapter(initialConfig));
-  const configService = new ConfigService(config$, defaultEnv, logger);
+  const configService = new ConfigService(config$, defaultEnv, logger, new Map());
 
   const isEnabled = await configService.isEnabledAtPath('pid');
   expect(isEnabled).toBe(true);
@@ -277,10 +292,4 @@ function createClassWithSchema(s: Type<any>) {
 
     constructor(readonly value: TypeOf<typeof s>) {}
   };
-}
-
-class ExampleClassWithStringSchema {
-  public static schema = schema.string();
-
-  constructor(readonly value: string) {}
 }

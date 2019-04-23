@@ -19,7 +19,7 @@
 
 import { loggingServiceMock } from '../logging/logging_service.mock';
 export const logger = loggingServiceMock.create();
-jest.doMock('../logging', () => ({
+jest.doMock('../logging/logging_service', () => ({
   LoggingService: jest.fn(() => logger),
 }));
 

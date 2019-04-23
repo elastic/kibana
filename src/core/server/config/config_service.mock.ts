@@ -25,6 +25,7 @@ import { ConfigService } from './config_service';
 type ConfigSericeContract = PublicMethodsOf<ConfigService>;
 const createConfigServiceMock = () => {
   const mocked: jest.Mocked<ConfigSericeContract> = {
+    validateAll: jest.fn(),
     atPath: jest.fn(),
     getConfig$: jest.fn(),
     optionalAtPath: jest.fn(),
