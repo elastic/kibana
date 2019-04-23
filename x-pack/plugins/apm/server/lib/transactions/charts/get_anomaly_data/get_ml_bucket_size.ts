@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { getMlIndex } from '../../../../../common/ml_job_constants';
 import { Setup } from '../../../helpers/setup_request';
 
