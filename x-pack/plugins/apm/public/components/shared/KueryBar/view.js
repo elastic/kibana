@@ -40,7 +40,6 @@ class KueryBarView extends Component {
   };
 
   mounted = false;
-  id = null;
 
   componentWillUnmount() {
     this.mounted = false;
@@ -48,10 +47,10 @@ class KueryBarView extends Component {
 
   async componentDidMount() {
     this.mounted = true;
-    this.id = new Date().getTime();
     const indexPattern = await getAPMIndexPatternForKuery();
     // setTimeout:0 hack forces the state update to wait for next tick
     // in case the component is mid-unmount :/
+    // TODO: Remove this in favor of function component + hooks ASAP
     setTimeout(() => {
       if (!this.mounted) {
         return;
