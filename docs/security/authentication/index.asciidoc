@@ -36,7 +36,7 @@ To enable the token authentication provider in Kibana, set the following value i
 xpack.security.authProviders: [token]
 --------------------------------------------------------------------------------
 
-The token authentication provider that the login form uses can also support the `Authorization` request header with the `Basic` scheme. This enables applications like `curl`. Set the following in your `kibana.yml`:
+The token authentication provider can be used in conjuction with the basic authentication provider. The login form will continue to use the token authentication provider, while enabling applications like `curl` to use the `Authorization` request header with the `Basic` scheme. Set the following in your `kibana.yml`, maintaining the order of the auth providers:
 
 [source,yaml]
 --------------------------------------------------------------------------------
