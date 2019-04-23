@@ -17,6 +17,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { loadWatchDetail } from '../../../lib/api';
+import { getPageErrorCode } from '../../../components/page_error';
 import { WatchActionStatus } from './watch_action_status';
 
 const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
@@ -61,8 +62,8 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
 
   const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
 
-  // Another part of the UI will surface the no-permissions error.
-  if (error && error.status === 403) {
+  // Another part of the UI will surface the error.
+  if (getPageErrorCode(error)) {
     return null;
   }
 

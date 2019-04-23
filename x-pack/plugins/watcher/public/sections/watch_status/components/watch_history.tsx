@@ -27,7 +27,7 @@ import {
 
 import { goToWatchList } from '../../../lib/navigation';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
-import { NoPermissionsError } from '../../../components/no_permissions_error';
+import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { WatchActionStatus } from './watch_action_status';
 import {
   activateWatch,
@@ -105,12 +105,9 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     ? JSON.stringify(watchHistoryDetails.details, null, 2)
     : '';
 
-  if (
-    (watchDetailError && watchDetailError.status === 403) ||
-    (historyError && historyError.status === 403) ||
-    (watchHistoryDetailsError && watchHistoryDetailsError.status === 403)
-  ) {
-    return <NoPermissionsError />;
+  const errorCode = getPageErrorCode([watchDetailError, historyError, watchHistoryDetailsError]);
+  if (errorCode) {
+    return <PageError errorCode={errorCode} id={watchId} />;
   }
 
   const pagination = {

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { Watch } from 'plugins/watcher/models/watch';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
-import { NoPermissionsError } from '../../../components/no_permissions_error';
+import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { loadWatch } from '../../../lib/api';
 import { JsonWatchEdit } from './json_watch_edit';
 import { ThresholdWatchEdit } from './threshold_watch_edit';
@@ -120,10 +120,11 @@ export const WatchEdit = ({
     getWatch();
   }, []);
 
-  if (loadError && loadError.status === 403) {
+  const errorCode = getPageErrorCode(loadError);
+  if (errorCode) {
     return (
       <EuiPageContent>
-        <NoPermissionsError />
+        <PageError errorCode={errorCode} id={id} />
       </EuiPageContent>
     );
   }

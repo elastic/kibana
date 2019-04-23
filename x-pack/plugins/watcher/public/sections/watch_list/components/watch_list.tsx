@@ -25,7 +25,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import { REFRESH_INTERVALS, WATCH_STATES } from '../../../../common/constants';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
-import { NoPermissionsError } from '../../../components/no_permissions_error';
+import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { loadWatches } from '../../../lib/api';
 
 const stateToIcon: { [key: string]: JSX.Element } = {
@@ -52,10 +52,10 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
     [watches, deletedWatches]
   );
 
-  if (error && error.status === 403) {
+  if (getPageErrorCode(error)) {
     return (
       <EuiPageContent>
-        <NoPermissionsError />
+        <PageError />
       </EuiPageContent>
     );
   }

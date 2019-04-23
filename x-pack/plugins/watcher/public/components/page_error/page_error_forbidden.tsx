@@ -9,18 +9,18 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function NoPermissionsError() {
+export function PageErrorForbidden() {
   return (
     <EuiEmptyPrompt
       iconType="securityApp"
       iconColor={undefined}
       title={
-        <h2>
+        <h1>
           <FormattedMessage
-            id="xpack.watcher.noPermissionsError.deniedPermissionTitle"
+            id="xpack.watcher.pageErrorForbidden.title"
             defaultMessage="You don't have privileges to use Watcher"
           />
-        </h2>
+        </h1>
       }
     />
   );
