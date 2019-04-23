@@ -3,11 +3,5 @@
   name="beats"
   data-test-subj="beatsListingPage"
 >
-  <monitoring-beats-listing
-    page-index="beats.pageIndex"
-    sort-key="beats.sortKey"
-    sort-order="beats.sortOrder"
-    on-new-state="beats.onNewState"
-    data="beats.data"
-  ></monitoring-beats-listing>
+  <div id="monitoringBeatsInstancesApp" ng-init="beats.renderComponent()"></div>
 </monitoring-main>
