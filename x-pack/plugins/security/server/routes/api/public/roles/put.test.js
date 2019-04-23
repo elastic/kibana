@@ -198,6 +198,33 @@ describe('PUT role', () => {
       },
     });
 
+    putRoleTest(`doesn't allow both base and feature in the same entry`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            base: ['all'],
+            feature: {
+              foo: ['foo']
+            }
+          }
+        ]
+      },
+      asserts: {
+        statusCode: 400,
+        result: {
+          error: 'Bad Request',
+          //eslint-disable-next-line max-len
+          message: `child \"kibana\" fails because [\"kibana\" at position 0 fails because [\"base\" conflict with forbidden peer \"feature\"]]`,
+          statusCode: 400,
+          validation: {
+            keys: ['kibana.0.base'],
+            source: 'payload',
+          },
+        },
+      },
+    });
+
     describe('global', () => {
       putRoleTest(`only allows known Kibana global base privileges`, {
         name: 'foo-role',
@@ -499,6 +526,90 @@ describe('PUT role', () => {
       },
     });
 
+    putRoleTest(`allows base with empty array and feature in the same entry`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            base: [],
+            feature: {
+              foo: ['foo']
+            }
+          }
+        ]
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => { }],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'feature_foo.foo',
+                    ],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                ],
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: null,
+      },
+    });
+
+    putRoleTest(`allows base and feature with empty object in the same entry`, {
+      name: 'foo-role',
+      payload: {
+        kibana: [
+          {
+            base: ['all'],
+            feature: {}
+          }
+        ]
+      },
+      preCheckLicenseImpl: defaultPreCheckLicenseImpl,
+      callWithRequestImpls: [async () => ({}), async () => { }],
+      asserts: {
+        callWithRequests: [
+          ['shield.getRole', { name: 'foo-role', ignore: [404] }],
+          [
+            'shield.putRole',
+            {
+              name: 'foo-role',
+              body: {
+                cluster: [],
+                indices: [],
+                run_as: [],
+                applications: [
+                  {
+                    application,
+                    privileges: [
+                      'all',
+                    ],
+                    resources: [GLOBAL_RESOURCE],
+                  },
+                ],
+              },
+            },
+          ],
+        ],
+        statusCode: 204,
+        result: null,
+      },
+    });
+
     putRoleTest(`creates role with everything`, {
       name: 'foo-role',
       payload: {
@@ -523,21 +634,13 @@ describe('PUT role', () => {
         kibana: [
           {
             base: ['all', 'read'],
-            feature: {
-              foo: ['foo-privilege-1', 'foo-privilege-2'],
-              bar: ['bar-privilege-1', 'bar-privilege-2']
-            },
             spaces: ['*'],
           },
           {
             base: ['all', 'read'],
-            feature: {
-              bar: ['bar-privilege-1', 'bar-privilege-2']
-            },
             spaces: ['test-space-1', 'test-space-2']
           },
           {
-            base: ['all', 'read'],
             feature: {
               foo: ['foo-privilege-1', 'foo-privilege-2'],
             },
@@ -561,10 +664,6 @@ describe('PUT role', () => {
                     privileges: [
                       'all',
                       'read',
-                      'feature_foo.foo-privilege-1',
-                      'feature_foo.foo-privilege-2',
-                      'feature_bar.bar-privilege-1',
-                      'feature_bar.bar-privilege-2',
                     ],
                     resources: [GLOBAL_RESOURCE],
                   },
@@ -573,16 +672,12 @@ describe('PUT role', () => {
                     privileges: [
                       'space_all',
                       'space_read',
-                      'feature_bar.bar-privilege-1',
-                      'feature_bar.bar-privilege-2',
                     ],
                     resources: ['space:test-space-1', 'space:test-space-2']
                   },
                   {
                     application,
                     privileges: [
-                      'space_all',
-                      'space_read',
                       'feature_foo.foo-privilege-1',
                       'feature_foo.foo-privilege-2',
                     ],
@@ -638,7 +733,6 @@ describe('PUT role', () => {
         },
         kibana: [
           {
-            base: ['all'],
             feature: {
               foo: ['foo-privilege-1'],
               bar: ['bar-privilege-1']
@@ -647,13 +741,9 @@ describe('PUT role', () => {
           },
           {
             base: ['all'],
-            feature: {
-              foo: ['foo-privilege-2']
-            },
             spaces: ['test-space-1', 'test-space-2']
           },
           {
-            base: ['read'],
             feature: {
               bar: ['bar-privilege-2']
             },
@@ -707,9 +797,8 @@ describe('PUT role', () => {
                   {
                     application,
                     privileges: [
-                      'all',
                       'feature_foo.foo-privilege-1',
-                      'feature_bar.bar-privilege-1'
+                      'feature_bar.bar-privilege-1',
                     ],
                     resources: [GLOBAL_RESOURCE],
                   },
@@ -717,14 +806,12 @@ describe('PUT role', () => {
                     application,
                     privileges: [
                       'space_all',
-                      'feature_foo.foo-privilege-2'
                     ],
                     resources: ['space:test-space-1', 'space:test-space-2']
                   },
                   {
                     application,
                     privileges: [
-                      'space_read',
                       'feature_bar.bar-privilege-2',
                     ],
                     resources: ['space:test-space-3']
