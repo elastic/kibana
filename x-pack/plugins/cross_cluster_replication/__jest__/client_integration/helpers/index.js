@@ -10,6 +10,7 @@ import { setup as autoFollowPatternEditSetup } from './auto_follow_pattern_edit.
 import { setup as followerIndexListSetup } from './follower_index_list.helpers';
 import { setup as followerIndexAddSetup } from './follower_index_add.helpers';
 import { setup as followerIndexEditSetup } from './follower_index_edit.helpers';
+import { setup as homeSetup } from './home.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -22,4 +23,5 @@ export const pageHelpers = {
   followerIndexList: { setup: followerIndexListSetup },
   followerIndexAdd: { setup: followerIndexAddSetup },
   followerIndexEdit: { setup: followerIndexEditSetup },
+  home: { setup: homeSetup },
 };
