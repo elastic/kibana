@@ -60,9 +60,15 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
   ];
 
   const {
+    error,
     data: watchDetail,
     isLoading,
   } = loadWatchDetail(watchId);
+
+  // Another part of the UI will surface the no-permissions error.
+  if (error && error.status === 403) {
+    return null;
+  }
 
   return (
     <Fragment>

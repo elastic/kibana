@@ -27,6 +27,7 @@ import {
 
 import { goToWatchList } from '../../../lib/navigation';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
+import { NoPermissionsError } from '../../../components/no_permissions_error';
 import { WatchActionStatus } from './watch_action_status';
 import {
   activateWatch,
@@ -75,7 +76,7 @@ const watchHistoryTimeSpanOptions = [
   },
 ];
 
-const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
+const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
   const [isActivated, setIsActivated] = useState<boolean | undefined>(undefined);
   const [detailWatchId, setDetailWatchId] = useState<string | undefined>(undefined);
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
@@ -84,7 +85,7 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     watchHistoryTimeSpanOptions[0].value
   );
 
-  const { data: loadedWatch } = loadWatchDetail(watchId);
+  const { error: watchDetailError, data: loadedWatch } = loadWatchDetail(watchId);
 
   if (loadedWatch && isActivated === undefined) {
     // Set initial value for isActivated based on the watch we just loaded.
@@ -92,12 +93,25 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   }
 
   const {
+    error: historyError,
     data: history,
     isLoading,
   } = loadWatchHistory(watchId, watchHistoryTimeSpan);
 
-  const { data: watchHistoryDetails } = loadWatchHistoryDetail(detailWatchId);
+  const {
+    error: watchHistoryDetailsError,
+    data: watchHistoryDetails,
+  } = loadWatchHistoryDetail(detailWatchId);
+
   const executionDetail = watchHistoryDetails ? JSON.stringify(watchHistoryDetails.details, null, 2) : '';
+
+  if (
+    watchDetailError && watchDetailError.status === 403
+    || historyError && historyError.status === 403
+    || watchHistoryDetailsError && watchHistoryDetailsError.status === 403
+  ) {
+    return <NoPermissionsError />;
+  }
 
   const pagination = {
     initialPageSize: 10,
@@ -338,4 +352,4 @@ const WatchHistoryUI = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
   );
 };
 
-export const WatchHistory = injectI18n(WatchHistoryUI);
+export const WatchHistory = injectI18n(WatchHistoryUi);

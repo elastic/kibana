@@ -25,6 +25,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
 import { REFRESH_INTERVALS, WATCH_STATES } from '../../../../common/constants';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
+import { NoPermissionsError } from '../../../components/no_permissions_error';
 import { loadWatches } from '../../../lib/api';
 
 const stateToIcon: { [key: string]: JSX.Element } = {
@@ -44,11 +45,20 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   const {
     isLoading: isWatchesLoading,
     data: watches,
+    error,
   } = loadWatches(REFRESH_INTERVALS.WATCH_LIST);
 
   const availableWatches = useMemo(() => (
     watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined
   ), [watches, deletedWatches]);
+
+  if (error && error.status === 403) {
+    return (
+      <EuiPageContent>
+        <NoPermissionsError />
+      </EuiPageContent>
+    );
+  }
 
   const columns = [
     {
@@ -291,4 +301,5 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
     </EuiPageContent>
   );
 };
+
 export const WatchList = injectI18n(WatchListUi);
