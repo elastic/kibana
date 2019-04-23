@@ -100,7 +100,7 @@ export const RepositoryForm: React.FunctionComponent<Props> = ({
 
   const renderStepTwo = () => (
     <RepositoryFormStepTwo
-      repository={repository}
+      repository={repository as Repository}
       isEditing={isEditing}
       isSaving={isSaving}
       onSave={saveRepository}

@@ -5,6 +5,7 @@
  */
 import { API_BASE_PATH } from '../../../../common/constants';
 import { Repository, EmptyRepository } from '../../../../common/types';
+import { MINIMUM_TIMEOUT_MS } from '../../constants';
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -13,6 +14,7 @@ export const loadRepositories = () => {
     path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
     initialData: [],
+    timeout: MINIMUM_TIMEOUT_MS,
   });
 };
 

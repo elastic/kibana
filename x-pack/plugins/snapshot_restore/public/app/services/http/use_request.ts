@@ -42,9 +42,10 @@ export const sendRequest = async ({
 interface UseRequest extends SendRequest {
   interval?: number;
   initialData?: any;
+  timeout?: number;
 }
 
-export const useRequest = ({ path, method, body, interval, initialData }: UseRequest) => {
+export const useRequest = ({ path, method, body, interval, initialData, timeout }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [data, setData] = useState<any>(initialData);
@@ -57,19 +58,30 @@ export const useRequest = ({ path, method, body, interval, initialData }: UseReq
     setData(initialData);
     setLoading(true);
 
-    const { data: responseData, error: responseError } = await sendRequest({
+    const requestBody = {
       path,
       method,
       body,
-    });
+    };
+
+    let response;
+
+    if (timeout) {
+      [response] = await Promise.all([
+        sendRequest(requestBody),
+        new Promise(resolve => setTimeout(resolve, timeout)),
+      ]);
+    } else {
+      response = await sendRequest(requestBody);
+    }
 
     // Don't update state if an outdated request has resolved.
     if (isOutdatedRequest) {
       return;
     }
 
-    setError(responseError);
-    setData(responseData);
+    setError(response.error);
+    setData(response.data);
     setLoading(false);
   };
 

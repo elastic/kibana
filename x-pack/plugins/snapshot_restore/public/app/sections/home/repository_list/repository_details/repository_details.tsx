@@ -173,7 +173,10 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
               target="_blank"
               iconType="help"
             >
-              Type docs
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryDetails.repositoryTypeDocLink"
+                defaultMessage="Type docs"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>

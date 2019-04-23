@@ -9,20 +9,22 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiDescribedFormGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
-import { Repository, EmptyRepository } from '../../../../common/types';
+import { Repository } from '../../../../common/types';
+import { REPOSITORY_TYPES } from '../../../../common/constants';
 import { useAppDependencies } from '../../index';
 import { RepositoryValidation } from '../../services/validation';
+import { documentationLinksService } from '../../services/documentation';
 import { TypeSettings } from './type_settings';
+import { textService } from '../../services/text';
 
 interface Props {
-  repository: Repository | EmptyRepository;
+  repository: Repository;
   isEditing?: boolean;
   isSaving: boolean;
   onSave: () => void;
@@ -49,12 +51,17 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
   } = useAppDependencies();
 
   const hasValidationErrors: boolean = !validation.isValid;
+  const {
+    type,
+    settings: { delegateType },
+  } = repository;
+  const typeForDocs = type === REPOSITORY_TYPES.source ? delegateType : type;
 
   const renderSettings = () => (
     <Fragment>
       {/* Repository settings title */}
-      <EuiDescribedFormGroup
-        title={
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
           <EuiTitle size="m">
             <h2>
               <FormattedMessage
@@ -63,11 +70,26 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
               />
             </h2>
           </EuiTitle>
-        }
-        fullWidth
-      >
-        <Fragment /> {/* Avoid missing children warning */}
-      </EuiDescribedFormGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            flush="right"
+            href={documentationLinksService.getRepositoryTypeDocUrl(typeForDocs)}
+            target="_blank"
+            iconType="help"
+          >
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.repositoryTypeDocLink"
+              defaultMessage="{repositoryType} docs"
+              values={{
+                repositoryType: textService.getRepositoryTypeName(type, delegateType),
+              }}
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
 
       {/* Repository settings fields */}
       <TypeSettings

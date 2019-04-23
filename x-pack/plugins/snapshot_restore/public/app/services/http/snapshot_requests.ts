@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { API_BASE_PATH } from '../../../../common/constants';
+import { MINIMUM_TIMEOUT_MS } from '../../constants';
 import { httpService } from './http';
 import { useRequest } from './use_request';
 
@@ -12,6 +13,7 @@ export const loadSnapshots = () =>
     path: httpService.addBasePath(`${API_BASE_PATH}snapshots`),
     method: 'get',
     initialData: [],
+    timeout: MINIMUM_TIMEOUT_MS,
   });
 
 export const loadSnapshot = (repositoryName: string, snapshotId: string) =>

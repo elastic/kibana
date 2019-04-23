@@ -40,7 +40,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const {
     error,
-    loading,
+    loading = true,
     data: { snapshots = [], repositories = [], errors = {} },
     request: reload,
   } = loadSnapshots();
