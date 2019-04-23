@@ -4,32 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore no @typed def
 import inlineStyle from 'inline-style';
 import { openSans } from '../../../common/lib/fonts';
-import { NullContextFunctionFactory } from '../types';
-
-type FontWeight =
-  | 'normal'
-  | 'bold'
-  | 'bolder'
-  | 'lighter'
-  | '100'
-  | '200'
-  | '300'
-  | '400'
-  | '500'
-  | '600'
-  | '700'
-  | '800'
-  | '900';
-
-type Alignment = 'center' | 'left' | 'right' | 'justify';
+import {
+  CSSStyle,
+  FontFamily,
+  FontWeight,
+  NullContextFunctionFactory,
+  Style,
+  TextAlignment,
+  FONT_WEIGHTS,
+  TEXT_ALIGNMENTS,
+} from '../types';
 
 interface Arguments {
-  align: Alignment;
+  align: TextAlignment;
   color: string | null;
-  family: string;
+  family: FontFamily;
   italic: boolean;
   lHeight: number;
   size: number;
@@ -37,41 +29,7 @@ interface Arguments {
   weight: FontWeight;
 }
 
-interface StyleSpec {
-  color?: string;
-  fontFamily: Arguments['family'];
-  fontSize: string;
-  fontStyle: string;
-  fontWeight: Arguments['weight'];
-  lineHeight: number | string;
-  textAlign: Arguments['align'];
-  textDecoration: string;
-}
-interface Return {
-  css: string;
-  spec: StyleSpec;
-  type: 'style';
-}
-
-const WEIGHTS: FontWeight[] = [
-  'normal',
-  'bold',
-  'bolder',
-  'lighter',
-  '100',
-  '200',
-  '300',
-  '400',
-  '500',
-  '600',
-  '700',
-  '800',
-  '900',
-];
-
-const ALIGNMENTS: Alignment[] = ['center', 'left', 'right', 'justify'];
-
-export const font: NullContextFunctionFactory<'font', Arguments, Return> = () => ({
+export const font: NullContextFunctionFactory<'font', Arguments, Style> = () => ({
   name: 'font',
   aliases: [],
   type: 'style',
@@ -83,7 +41,7 @@ export const font: NullContextFunctionFactory<'font', Arguments, Return> = () =>
     align: {
       default: 'left',
       help: 'Horizontal text alignment',
-      options: ALIGNMENTS,
+      options: TEXT_ALIGNMENTS,
       types: ['string'],
     },
     color: {
@@ -121,15 +79,15 @@ export const font: NullContextFunctionFactory<'font', Arguments, Return> = () =>
       default: 'normal',
       help:
         'Set the font weight, e.g. normal, bold, bolder, lighter, 100, 200, 300, 400, 500, 600, 700, 800, 900',
-      options: WEIGHTS,
+      options: FONT_WEIGHTS,
       types: ['string'],
     },
   },
   fn: (_context, args) => {
-    if (!WEIGHTS.includes(args.weight)) {
+    if (!FONT_WEIGHTS.includes(args.weight)) {
       throw new Error(`Invalid font weight: '${args.weight}'`);
     }
-    if (!ALIGNMENTS.includes(args.align)) {
+    if (!TEXT_ALIGNMENTS.includes(args.align)) {
       throw new Error(`Invalid text alignment: '${args.align}'`);
     }
 
@@ -137,7 +95,7 @@ export const font: NullContextFunctionFactory<'font', Arguments, Return> = () =>
     // pixel setting
     const lineHeight = args.lHeight ? `${args.lHeight}px` : 1;
 
-    const spec: StyleSpec = {
+    const spec: CSSStyle = {
       fontFamily: args.family,
       fontWeight: args.weight,
       fontStyle: args.italic ? 'italic' : 'normal',

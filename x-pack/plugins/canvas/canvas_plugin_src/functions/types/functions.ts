@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { ArgumentType, TypeToCanvasArgument } from './arguments';
+import { functions as commonFunctions } from '../../functions/common';
+import { functions as browserFunctions } from '../../functions/browser';
+import { functions as serverFunctions } from '../../functions/server';
+
+/**
+ * A `FunctionFactory` defines the function that produces a named FunctionSpec.
+ */
+// prettier-ignore
+export type FunctionFactory<Name extends string, Arguments, Return> = 
+  () => FunctionSpec<Name, Arguments, Return>;
+
+/**
+ * A `ContextFunctionFactory` defines the function that produces a named FunctionSpec
+ * which includes a Context.
+ */
+// prettier-ignore
+export type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
+    () => ContextFunctionSpec<Name, Context, Arguments, Return>;
+
+/**
+ * A `NullContextualFunctionFactory` defines the function that produces a named FunctionSpec
+ * which includes an always-null Context.
+ */
+// prettier-ignore
+export type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
+    () => ContextFunctionSpec<Name, null, Arguments, Return>;
+
+/**
+ * A type which infers all of the Function names.
+ */
+// prettier-ignore
+export type AvailableFunctions<FnFactory> = 
+  FnFactory extends ContextFunctionFactory<infer Name, infer Context, infer Arguments, infer Return> ?
+    { name: Name, context: Context, arguments: Arguments, return: Return } :
+  FnFactory extends NullContextFunctionFactory<infer Name, infer Arguments, infer Return> ?
+    { name: Name, arguments: Arguments, return: Return } :
+  FnFactory extends FunctionFactory<infer Name, infer Arguments, infer Return> ?
+    { name: Name, arguments: Arguments, return: Return } :
+    never;
+
+/**
+ * A type containing all of the Function names available to Canvas, formally exported.
+ */
+// prettier-ignore
+export type AvailableFunctionNames = 
+  AvailableFunctions<typeof commonFunctions[number]>['name'] &
+  AvailableFunctions<typeof browserFunctions[number]>['name'] &
+  AvailableFunctions<typeof serverFunctions[number]>['name'];
+
+// A union of strings representing Canvas Function "types". This is used in the `type` field
+// of the Function specification.  We may refactor this to be a known type, rather than a
+// union of strings.
+type CanvasFunctionType =
+  | 'boolean'
+  | 'datatable'
+  | 'filter'
+  | 'null'
+  | 'number'
+  | 'render'
+  | 'string'
+  | 'style';
+
+// Handlers can be passed to the `fn` property of the Function.  At the moment, these Functions
+// are not strongly-defined.
+interface FunctionHandlers {
+  [key: string]: (...args: any) => any;
+}
+
+// A basic Function specification; other Function specifications are based on
+// this interface.  It assumes the Function accepts any Context provided to it.
+interface FunctionSpec<Name, Arguments, Return> {
+  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
+  help: string;
+  name: Name;
+  type?: CanvasFunctionType | Name;
+  fn(context: any, args: Arguments, handlers: FunctionHandlers): Return;
+}
+
+// A Function spec requires a Context be provided, of a specific type.
+interface ContextFunctionSpec<Name, Context, Arguments, Return>
+  extends FunctionSpec<Name, Arguments, Return> {
+  context?: {
+    types: Array<TypeToCanvasArgument<Context>>;
+  };
+  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
+}

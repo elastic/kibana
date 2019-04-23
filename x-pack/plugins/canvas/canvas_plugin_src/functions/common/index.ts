@@ -37,7 +37,6 @@ import { math } from './math';
 import { metric } from './metric';
 import { neq } from './neq';
 import { palette } from './palette';
-// @ts-ignore This one will take work
 import { pie } from './pie';
 // @ts-ignore
 import { plot } from './plot';

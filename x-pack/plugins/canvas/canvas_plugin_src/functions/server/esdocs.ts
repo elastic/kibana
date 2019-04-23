@@ -5,7 +5,7 @@
  */
 
 import squel from 'squel';
-// @ts-ignore
+// @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 import { ContextFunctionFactory, Filter } from '../types';
 

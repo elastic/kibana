@@ -61,7 +61,6 @@
     "@types/json-stable-stringify": "^1.0.32",
     "@types/jsonwebtoken": "^7.2.7",
     "@types/lodash": "^3.10.1",
-    "@types/lodash.keyby": "^4.6.6",
     "@types/mime": "^2.0.1",
     "@types/mocha": "^5.2.6",
     "@types/object-hash": "^1.2.0",

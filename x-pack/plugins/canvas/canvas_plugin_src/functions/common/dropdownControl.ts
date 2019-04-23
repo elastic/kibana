@@ -32,11 +32,11 @@ export const dropdownControl: ContextFunctionFactory<
   help: 'Configure a drop down filter control element',
   args: {
     filterColumn: {
-      type: ['string'],
+      types: ['string'],
       help: 'The column or field to attach the filter to',
     },
     valueColumn: {
-      type: ['string'],
+      types: ['string'],
       help: 'The datatable column from which to extract the unique values for the drop down',
     },
   },

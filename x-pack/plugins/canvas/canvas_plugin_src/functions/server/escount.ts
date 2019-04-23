@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
 import { ContextFunctionFactory, Filter } from '../types';
 

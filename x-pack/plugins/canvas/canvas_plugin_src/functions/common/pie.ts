@@ -4,12 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import keyBy from 'lodash.keyby';
 import { get, map, groupBy } from 'lodash';
+// @ts-ignore lodash.keyby imports invalid member from @types/lodash
+import keyBy from 'lodash.keyby';
+// @ts-ignore untyped local
 import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palette';
+// @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
+import {
+  ContextFunctionFactory,
+  Legend,
+  Palette,
+  Pie,
+  PieData,
+  PointSeries,
+  Render,
+  SeriesStyle,
+  Style,
+} from '../types';
 
-export const pie = () => ({
+interface Arguments {
+  palette: Palette | null;
+  seriesStyle: SeriesStyle[] | null;
+  radius: number | 'auto';
+  hole: number;
+  labels: boolean;
+  labelRadius: number;
+  font: Style;
+  legend: Legend | false;
+  tilt: number;
+}
+
+export const pie: ContextFunctionFactory<'pie', PointSeries, Arguments, Render<Pie>> = () => ({
   name: 'pie',
   aliases: [],
   type: 'render',
@@ -67,19 +93,20 @@ export const pie = () => ({
     },
   },
   fn: (context, args) => {
-    const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
+    const { tilt, radius, labelRadius, labels, hole, legend, palette, font, seriesStyle } = args;
+    const seriesStyles = keyBy(seriesStyle || [], 'label') || {};
 
-    const data = map(groupBy(context.rows, 'color'), (series, label) => {
-      const item = {
-        label: label,
+    const data: PieData[] = map(groupBy(context.rows, 'color'), (series, label = '') => {
+      const item: PieData = {
+        label,
         data: series.map(point => point.size || 1),
       };
 
-      const seriesStyle = seriesStyles[label];
+      const style = seriesStyles[label];
 
       // append series style, if there is a match
-      if (seriesStyle) {
-        item.color = get(seriesStyle, 'color');
+      if (style) {
+        item.color = get(style, 'color');
       }
 
       return item;
@@ -89,28 +116,28 @@ export const pie = () => ({
       type: 'render',
       as: 'pie',
       value: {
-        font: args.font,
+        font,
         data,
         options: {
           canvas: false,
-          colors: getColorsFromPalette(args.palette, data.length),
-          legend: getLegendConfig(args.legend, data.length),
+          colors: getColorsFromPalette(palette, data.length),
+          legend: getLegendConfig(legend, data.length),
           grid: {
             show: false,
           },
           series: {
             pie: {
               show: true,
-              innerRadius: Math.max(args.hole, 0) / 100,
+              innerRadius: Math.max(hole, 0) / 100,
               stroke: {
                 width: 0,
               },
               label: {
-                show: args.labels,
-                radius: (args.labelRadius >= 0 ? args.labelRadius : 100) / 100,
+                show: labels,
+                radius: (labelRadius >= 0 ? labelRadius : 100) / 100,
               },
-              tilt: args.tilt,
-              radius: args.radius,
+              tilt,
+              radius,
             },
             bubbles: {
               show: false,

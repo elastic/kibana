@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
 import { NullContextFunctionFactory } from '../types';
 

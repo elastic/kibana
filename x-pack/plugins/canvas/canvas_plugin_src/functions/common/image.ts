@@ -5,9 +5,9 @@
  */
 import { NullContextFunctionFactory } from '../types';
 
-// @ts-ignore
+// @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
-// @ts-ignore
+// @ts-ignore .png file
 import { elasticLogo } from '../../lib/elastic_logo';
 
 type ImageMode = 'contain' | 'cover' | 'stretch';

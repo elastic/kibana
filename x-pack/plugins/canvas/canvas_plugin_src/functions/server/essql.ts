@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
 import { ContextFunctionFactory, Filter } from '../types';
 

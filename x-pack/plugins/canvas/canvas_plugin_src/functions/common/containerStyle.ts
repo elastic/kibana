@@ -5,7 +5,7 @@
  */
 
 import { NullContextFunctionFactory, ContainerStyle } from '../types';
-// @ts-ignore
+// @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
 interface Return extends ContainerStyle {

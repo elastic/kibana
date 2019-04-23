@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, CaseType } from '../types';
+import { FunctionFactory, Case } from '../types';
 
 interface Arguments {
-  case: CaseType[];
+  case: Array<() => Promise<Case>>;
   default: () => any;
 }
 

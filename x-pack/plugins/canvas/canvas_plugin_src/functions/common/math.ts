@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore no @typed def; Elastic library
 import { evaluate } from 'tinymath';
-// @ts-ignore
+// @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
 import { ContextFunctionFactory, Datatable, isDatatable } from '../types';
 
