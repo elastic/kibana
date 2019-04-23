@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { CoreSetup } from 'src/core/public';
 import { Main } from '../components/app/Main';
-import { history } from '../components/shared/Links/url_helpers';
+import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 // @ts-ignore
