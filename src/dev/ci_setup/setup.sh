@@ -184,7 +184,7 @@ fi
 ###
 ### github-checks-reporter kill switch. Remove to disable
 ###
-export CHECKS_REPORTER_ACTIVE=true
+export CHECKS_REPORTER_ACTIVE=false
 
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
