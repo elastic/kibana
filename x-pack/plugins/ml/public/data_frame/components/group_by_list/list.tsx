@@ -6,9 +6,34 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiListGroup, EuiListGroupItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
 
-import { PivotGroupByConfigDict } from '../../common';
+import { PivotGroupByConfig, PivotGroupByConfigDict } from '../../common';
+
+interface GroupByLabelProps {
+  item: PivotGroupByConfig;
+  optionsDataId: string;
+}
+
+const GroupByLabel: React.SFC<GroupByLabelProps> = ({ item, optionsDataId }) => {
+  return 'interval' in item ? (
+    <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>{optionsDataId}</EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ color: '#999' }}>
+        {item.interval}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ) : (
+    <Fragment>{optionsDataId}</Fragment>
+  );
+};
 
 interface ListProps {
   list: string[];
@@ -23,8 +48,9 @@ export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list, options
         <Fragment key={optionsDataId}>
           <EuiPanel paddingSize="s">
             <EuiListGroupItem
-              iconType="string"
-              label={optionsDataId}
+              label={
+                <GroupByLabel item={optionsData[optionsDataId]} optionsDataId={optionsDataId} />
+              }
               extraAction={
                 (deleteHandler && {
                   onClick: () => deleteHandler(optionsDataId),
@@ -35,7 +61,7 @@ export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list, options
                 }) ||
                 undefined
               }
-              style={{ padding: 0 }}
+              style={{ padding: 0, display: 'block', width: '100%' }}
             />
           </EuiPanel>
           {list.length > 0 && <EuiSpacer size="s" />}
