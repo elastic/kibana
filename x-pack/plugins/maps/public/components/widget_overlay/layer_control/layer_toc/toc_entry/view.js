@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiSpacer,
   EuiOverlayMask,
   EuiModal,
   EuiModalBody,
@@ -221,12 +220,7 @@ export class TOCEntry extends React.Component {
       return null;
     }
 
-    return (
-      <Fragment>
-        <EuiSpacer size="s"/>
-        {tocDetails}
-      </Fragment>
-    );
+    return tocDetails;
   }
 
   render() {

@@ -12,10 +12,13 @@ import { styleOptionShapes, rangeShape } from '../style_option_shapes';
 import { VectorStyle } from '../../../vector_style';
 import { ColorGradient } from '../../../../../icons/color_gradient';
 import { FillableCircle } from '../../../../../icons/additional_layer_icons';
+import { getVectorStyleLabel } from '../get_vector_style_label';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 
 function renderLineWidthHeader() {
@@ -29,7 +32,7 @@ function renderLineWidthHeader() {
   }
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <FillableCircle style={getStyle('1px')}/>
       </EuiFlexItem>
@@ -54,7 +57,7 @@ function renderSymbolSizeHeader() {
   }
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <FillableCircle style={getStyle('4px')}/>
       </EuiFlexItem>
@@ -85,17 +88,28 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
 
   return (
     <div>
+      <EuiSpacer size="xs"/>
       {header}
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
             {_.get(range, 'min', '')}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            {options.field.label}
-          </EuiText>
+          <EuiToolTip
+            position="top"
+            title={getVectorStyleLabel(name)}
+            content={options.field.label}
+          >
+            <EuiText
+              className="eui-textTruncate"
+              size="xs"
+              style={{ maxWidth: '180px' }}
+            >
+              {options.field.label}
+            </EuiText>
+          </EuiToolTip>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs">
