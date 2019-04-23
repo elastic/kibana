@@ -47,7 +47,8 @@ export class DeleteWorker extends AbstractWorker {
     const repoService = this.repoServiceFactory.newInstance(
       this.serverOptions.repoPath,
       this.serverOptions.credsPath,
-      this.log
+      this.log,
+      this.serverOptions.security.enableGitCertCheck
     );
     const deleteRepoPromise = this.deletePromiseWrapper(repoService.remove(uri), 'git data', uri);
 

@@ -32,6 +32,7 @@ const TEST_OPTIONS = {
     enableMavenImport: true,
     enableGradleImport: true,
     installNodeDependency: true,
+    enableGitCertCheck: false,
   },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server

@@ -29,7 +29,7 @@ describe('repository service test', () => {
   after(() => {
     return rimraf.sync(baseDir);
   });
-  const service = new RepositoryService(repoDir, credsDir, log);
+  const service = new RepositoryService(repoDir, credsDir, log, false /* enableGitCertCheck */);
 
   it('can not clone a repo by ssh without a key', async () => {
     const repo = RepositoryUtils.buildRepository(

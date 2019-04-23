@@ -19,6 +19,7 @@ export interface SecurityOptions {
   installNodeDependency: boolean;
   gitHostWhitelist: string[];
   gitProtocolWhitelist: string[];
+  enableGitCertCheck: boolean;
 }
 
 export class ServerOptions {
