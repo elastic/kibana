@@ -13,17 +13,26 @@ import {
   EuiSelect
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { getExistingIndices } from '../util/indexing_service';
 
 export const IndexSettings = injectI18n(function IndexSettings({
   disabled,
   indexName,
   setIndexName,
-  indexDataType,
   setIndexDataType,
   mappingsOptions,
   intl
 }) {
-  const [indexError, setIndexError] = useState('');
+  const [indexNameError, setIndexNameError] = useState('');
+  const [indexNames, setIndexNames] = useState(null);
+
+  if (!indexNames) {
+    getExistingIndices().then(indices => {
+      setIndexNames(indices
+        ? indices.map(({ name }) => name)
+        : []);
+    });
+  }
 
   return (
     <Fragment>
@@ -52,18 +61,18 @@ export const IndexSettings = injectI18n(function IndexSettings({
             defaultMessage="Index name"
           />
         }
-        // isInvalid={indexNameError !== ''}
-        // error={[indexNameError]}
+        isInvalid={indexNameError !== ''}
+        error={[indexNameError]}
       >
         <EuiFieldText
+          disabled={disabled}
           placeholder={intl.formatMessage({
             id: 'xpack.file_upload.indexNamePlaceholder',
             defaultMessage: 'index name'
           })}
           value={indexName}
-          // disabled={(initialized === true)}
-          onChange={onIndexChange(setIndexName, setIndexError)}
-          isInvalid={indexError !== ''}
+          onChange={onIndexChange(setIndexName, setIndexNameError, indexNames)}
+          isInvalid={indexNameError !== ''}
           aria-label={intl.formatMessage({
             id: 'xpack.file_upload.indexNameAriaLabel',
             defaultMessage: 'Index name, required field'
@@ -80,11 +89,11 @@ export const IndexSettings = injectI18n(function IndexSettings({
             defaultMessage="Index pattern name"
           />
         }
-        // disabled={(createIndexPattern === false || initialized === true)}
         // isInvalid={indexPatternNameError !== ''}
         // error={[indexPatternNameError]}
       >
         <EuiFieldText
+          disabled={disabled}
           // disabled={(createIndexPattern === false || initialized === true)}
           // placeholder={(createIndexPattern === true) ? index : ''}
           // value={indexPattern}
@@ -97,11 +106,12 @@ export const IndexSettings = injectI18n(function IndexSettings({
   );
 });
 
-function onIndexChange(setIndex, setIndexError) {
+function onIndexChange(setIndex, setIndexNameError, indexNames) {
   return ({ target }) => {
     const name = target.value;
+    const errorMessage = isIndexNameValid(name, indexNames);
+    setIndexNameError(errorMessage);
     setIndex(name);
-    // setIndexError(isIndexNameValid);
   };
 }
 
@@ -109,7 +119,7 @@ function isIndexNameValid(name, indexNames) {
   if (indexNames.find(i => i === name)) {
     return (
       <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameAlreadyExistsErrorMessage"
+        id="xpack.file_upload.indexNameAlreadyExistsErrorMessage"
         defaultMessage="Index name already exists"
       />
     );
@@ -124,7 +134,7 @@ function isIndexNameValid(name, indexNames) {
   ) {
     return (
       <FormattedMessage
-        id="xpack.ml.fileDatavisualizer.importView.indexNameContainsIllegalCharactersErrorMessage"
+        id="xpack.file_upload.indexNameContainsIllegalCharactersErrorMessage"
         defaultMessage="Index name contains illegal characters"
       />
     );

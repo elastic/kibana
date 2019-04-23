@@ -206,11 +206,7 @@ async function getIndexPatternId(name) {
 
 
 async function checkIndex(name) {
-  const basePath = chrome.addBasePath('/api');
-  const indices = await http({
-    url: `${basePath}/index_management/indices`,
-    method: 'GET',
-  });
+  const indices = await getExistingIndices();
   const existingIndex = indices.find(el => el.name === name);
   return existingIndex
     ? {
@@ -221,4 +217,12 @@ async function checkIndex(name) {
       exists: false,
       id: null
     };
+}
+
+export async function getExistingIndices() {
+  const basePath = chrome.addBasePath('/api');
+  return await http({
+    url: `${basePath}/index_management/indices`,
+    method: 'GET',
+  });
 }

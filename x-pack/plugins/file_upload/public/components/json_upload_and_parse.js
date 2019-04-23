@@ -84,7 +84,6 @@ export function JsonUploadAndParse(props) {
         disabled={!fileRef}
         indexName={indexName}
         setIndexName={setIndexName}
-        indexDataType={indexDataType}
         setIndexDataType={setIndexDataType}
         mappingsOptions={mappingsOptions}
       />
