@@ -19,6 +19,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
+import moment from 'moment';
 import {
   Axis,
   Chart,
@@ -27,10 +28,23 @@ import {
   getAxisId,
   getGroupId,
   DARK_THEME,
-  LIGHT_THEME
+  LIGHT_THEME,
+  getAnnotationId,
+  AnnotationDomainTypes,
+  LineAnnotation
 } from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
 import { Series } from './series';
 import { GRID_LINE_CONFIG } from '../lib/config';
+import { ICON_TYPES_MAP } from '../constants/icons';
+
+function generateAnnotationData(values) {
+  return values.map((value) => ({
+    dataValue: value[0],
+    details: value[1][0],
+    header: moment(value[0]).format('MMM DD, YYYY hh:mm A')
+  }));
+}
 
 export const TimeSeries = ({
   isDarkMode,
@@ -41,7 +55,8 @@ export const TimeSeries = ({
   series,
   yaxes,
   onBrush,
-  xAxisFormatter
+  xAxisFormatter,
+  annotations
 }) => {
   return (
     <Chart renderer="canvas" className="tvbVisTimeSeries" >
@@ -52,6 +67,22 @@ export const TimeSeries = ({
         animateData={false}
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
       />
+
+      { annotations.map(({ id, series, icon, color }) => {
+        const dataValues = generateAnnotationData(series);
+        const style = { line: { stroke: color, } };
+
+        return (
+          <LineAnnotation
+            key={id}
+            annotationId={getAnnotationId(id)}
+            domainType={AnnotationDomainTypes.XDomain}
+            dataValues={dataValues}
+            marker={<EuiIcon type={ICON_TYPES_MAP[icon]} />}
+            style={style}
+          />
+        );})
+      }
 
       { series.map(s => (
         <Series
@@ -101,4 +132,5 @@ TimeSeries.propTypes = {
   yaxes: PropTypes.array,
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
+  annotations: PropTypes.array,
 };
