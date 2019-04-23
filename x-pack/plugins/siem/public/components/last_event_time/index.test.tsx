@@ -92,19 +92,4 @@ describe('Last Event Time Stat', async () => {
 
     expect(container.innerHTML).toBe('--');
   });
-  test('Error', async () => {
-    const errorTime = cloneDeep(mockLastEventTimeQuery);
-    errorTime[0].result.errors! = [{ message: 'OMG AN ERROR' }];
-    errorTime[0].result.data!.source.LastEventTime.errorMessage = 'OMG AN ERROR';
-    const { container } = render(
-      <TestProviders>
-        <MockedProvider mocks={errorTime} addTypename={false}>
-          <LastEventTime indexKey={'hosts'} />
-        </MockedProvider>
-      </TestProviders>
-    );
-    await wait();
-
-    expect(container.innerHTML).toBe('--');
-  });
 });

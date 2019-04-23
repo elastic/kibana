@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';
@@ -28,7 +28,17 @@ export const LastEventTime = pure<LastEventTimeProps>(({ hostName, indexKey, ip 
           client
         );
         if (errorMessage != null) {
-          return getEmptyTagValue();
+          return (
+            <EuiToolTip
+              position="top"
+              content={errorMessage}
+              data-test-subj="last_event_time_error"
+              aria-label="last_event_time_error"
+              id={`last_event_time_error-${indexKey}`}
+            >
+              <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="alert" />
+            </EuiToolTip>
+          );
         }
         return (
           <>

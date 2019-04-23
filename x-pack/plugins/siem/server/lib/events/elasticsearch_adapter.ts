@@ -153,7 +153,7 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
     );
 
     return {
-      lastSeen: getOr('', 'aggregations.last_seen_event.value_as_string', response),
+      lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response),
     };
   }
 }
