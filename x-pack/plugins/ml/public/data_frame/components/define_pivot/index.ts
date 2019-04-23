@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export {
+  DefinePivotExposedState,
+  DefinePivotForm,
+  getDefaultPivotState,
+} from './define_pivot_form';
 
-
-import './form_filter_input_directive';
+export { DefinePivotSummary } from './define_pivot_summary';

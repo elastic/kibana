@@ -4,6 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './form_filter_input_directive';
+export { SourceIndexPreview } from './source_index_preview';

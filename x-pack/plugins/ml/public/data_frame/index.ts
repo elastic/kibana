@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
-
-import './form_filter_input_directive';
+import './pages/job_management/directive';
+import './pages/job_management/route';
+import './pages/data_frame_new_pivot/directive';
+import './pages/data_frame_new_pivot/route';
