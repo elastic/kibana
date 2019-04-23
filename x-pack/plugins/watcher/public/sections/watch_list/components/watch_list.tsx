@@ -42,15 +42,15 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
 
-  const {
-    isLoading: isWatchesLoading,
-    data: watches,
-    error,
-  } = loadWatches(REFRESH_INTERVALS.WATCH_LIST);
+  const { isLoading: isWatchesLoading, data: watches, error } = loadWatches(
+    REFRESH_INTERVALS.WATCH_LIST
+  );
 
-  const availableWatches = useMemo(() => (
-    watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined
-  ), [watches, deletedWatches]);
+  const availableWatches = useMemo(
+    () =>
+      watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined,
+    [watches, deletedWatches]
+  );
 
   if (error && error.status === 403) {
     return (

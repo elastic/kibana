@@ -92,23 +92,23 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
     setIsActivated(loadedWatch.watchStatus.isActive);
   }
 
-  const {
-    error: historyError,
-    data: history,
-    isLoading,
-  } = loadWatchHistory(watchId, watchHistoryTimeSpan);
+  const { error: historyError, data: history, isLoading } = loadWatchHistory(
+    watchId,
+    watchHistoryTimeSpan
+  );
 
-  const {
-    error: watchHistoryDetailsError,
-    data: watchHistoryDetails,
-  } = loadWatchHistoryDetail(detailWatchId);
+  const { error: watchHistoryDetailsError, data: watchHistoryDetails } = loadWatchHistoryDetail(
+    detailWatchId
+  );
 
-  const executionDetail = watchHistoryDetails ? JSON.stringify(watchHistoryDetails.details, null, 2) : '';
+  const executionDetail = watchHistoryDetails
+    ? JSON.stringify(watchHistoryDetails.details, null, 2)
+    : '';
 
   if (
-    watchDetailError && watchDetailError.status === 403
-    || historyError && historyError.status === 403
-    || watchHistoryDetailsError && watchHistoryDetailsError.status === 403
+    (watchDetailError && watchDetailError.status === 403) ||
+    (historyError && historyError.status === 403) ||
+    (watchHistoryDetailsError && watchHistoryDetailsError.status === 403)
   ) {
     return <NoPermissionsError />;
   }
@@ -270,7 +270,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       defaultMessage="Deactivate watch"
     />
   ) : (
-     <FormattedMessage
+    <FormattedMessage
       id="xpack.watcher.sections.watchHistory.watchTable.activateWatchLabel"
       defaultMessage="Activate watch"
     />
@@ -305,9 +305,12 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
                 options={watchHistoryTimeSpanOptions}
                 value={watchHistoryTimeSpan}
                 onChange={onTimespanChange}
-                aria-label={i18n.translate('xpack.watcher.sections.watchHistory.changeTimespanSelectAriaLabel', {
-                  defaultMessage: 'Change timespan of watch history',
-                })}
+                aria-label={i18n.translate(
+                  'xpack.watcher.sections.watchHistory.changeTimespanSelectAriaLabel',
+                  {
+                    defaultMessage: 'Change timespan of watch history',
+                  }
+                )}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

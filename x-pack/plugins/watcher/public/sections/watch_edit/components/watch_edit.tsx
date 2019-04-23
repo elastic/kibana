@@ -72,7 +72,7 @@ const watchReducer = (state: any, action: any) => {
     case 'setError':
       return {
         ...state,
-        error: payload,
+        loadError: payload,
       };
   }
 };
@@ -90,7 +90,7 @@ export const WatchEdit = ({
   };
 }) => {
   // hooks
-  const [{ watch, error }, dispatch] = useReducer(watchReducer, { watch: null });
+  const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
 
   const setWatchProperty = (property: string, value: any) => {
     dispatch({ command: 'setProperty', payload: { property, value } });
@@ -120,7 +120,7 @@ export const WatchEdit = ({
     getWatch();
   }, []);
 
-  if (error && error.status === 403) {
+  if (loadError && loadError.status === 403) {
     return (
       <EuiPageContent>
         <NoPermissionsError />
