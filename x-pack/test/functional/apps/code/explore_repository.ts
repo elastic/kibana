@@ -138,6 +138,16 @@ export default function exploreRepositoryFunctonalTests({
         });
         log.info('src-doc folder opened');
 
+        // Click breadcrumb does not affect file tree
+        await testSubjects.click('codeFileBreadcrumb-src');
+        await retry.try(async () => {
+          // should only close src folder
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
+
         // click src again to close this folder
         await testSubjects.click('codeFileTreeNode-Directory-src');
 
