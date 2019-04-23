@@ -8,11 +8,7 @@ import moment from 'moment';
 import React from 'react';
 
 import { InfraSnapshotMetricType } from '../graphql/types';
-import {
-  InfraFormatterType,
-  InfraOptions,
-  InfraWaffleMapLegendMode,
-} from '../lib/lib';
+import { InfraFormatterType, InfraOptions, InfraWaffleMapLegendMode } from '../lib/lib';
 import { RendererFunction } from '../utils/typed_react';
 
 const initialState = {
@@ -29,7 +25,7 @@ const initialState = {
       formatter: InfraFormatterType.percent,
       formatTemplate: '{{value}}',
       metric: { type: InfraSnapshotMetricType.cpu },
-      groupby: [],
+      groupBy: [],
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
         rules: [

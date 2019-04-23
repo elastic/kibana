@@ -12,13 +12,13 @@ export const waffleNodesQuery = gql`
     $timerange: InfraTimerangeInput!
     $filterQuery: String
     $metric: InfraSnapshotMetricInput!
-    $groupby: [InfraSnapshotGroupbyInput!]!
+    $groupBy: [InfraSnapshotGroupbyInput!]!
     $type: InfraNodeType!
   ) {
     source(id: $sourceId) {
       id
       snapshot(timerange: $timerange, filterQuery: $filterQuery) {
-        nodes(groupby: $groupby, metric: $metric, type: $type) {
+        nodes(groupBy: $groupBy, metric: $metric, type: $type) {
           path {
             value
             label

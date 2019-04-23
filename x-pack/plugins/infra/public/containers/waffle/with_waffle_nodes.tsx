@@ -49,7 +49,7 @@ export const WithWaffleNodes = ({
     variables={{
       sourceId,
       metric,
-      groupby: [...groupBy],
+      groupBy: [...groupBy],
       type: nodeType,
       timerange,
       filterQuery,

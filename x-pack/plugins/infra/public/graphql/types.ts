@@ -785,7 +785,7 @@ export namespace WaffleNodesQuery {
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
     metric: InfraSnapshotMetricInput;
-    groupby: InfraSnapshotGroupbyInput[];
+    groupBy: InfraSnapshotGroupbyInput[];
     type: InfraNodeType;
   };
 
