@@ -18,7 +18,7 @@
  */
 
 import React, { useEffect } from 'react';
-
+import { isUndefined } from 'lodash';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +29,7 @@ function SizeParamEditor({
   isInvalid,
   setValidity,
   setTouched,
-}: AggParamEditorProps<string>) {
+}: AggParamEditorProps<number | ''>) {
   const label = i18n.translate('common.ui.aggTypes.sizeLabel', {
     defaultMessage: 'Size',
   });
@@ -49,8 +49,8 @@ function SizeParamEditor({
       className="visEditorSidebar__aggParamFormRow"
     >
       <EuiFieldNumber
-        value={value === '' ? '' : Number(value)}
-        onChange={ev => setValue(ev.target.value)}
+        value={isUndefined(value) ? '' : value}
+        onChange={ev => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value))}
         fullWidth={true}
         isInvalid={isInvalid}
         onBlur={setTouched}
