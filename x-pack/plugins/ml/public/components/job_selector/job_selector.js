@@ -16,6 +16,7 @@ import { ml } from '../../services/ml_api_service';
 import { JobSelectorTable } from './job_selector_table';
 import { timefilter } from 'ui/timefilter';
 import { stringHash } from '../../../common/util/string_utils';
+import { setGlobalState } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiBadge,
@@ -115,6 +116,7 @@ function normalizeTimes(jobs) {
 }
 
 export function JobSelector({
+  globalState,
   jobSelectService,
   selectedJobIds,
   singleSelection,
@@ -122,7 +124,7 @@ export function JobSelector({
 }) {
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
-  // const [groupsMap, setGroupsMap] = useState([]);
+  const [groupsMap, setGroupsMap] = useState([]);
   const [selectedIds, setSelectedIds] = useState(selectedJobIds);
   const [newSelection, setNewSelection] = useState(selectedJobIds);
   const [allJobs, setAllJobs] = useState(false);
@@ -167,7 +169,7 @@ export function JobSelector({
         const groupsWithTimerange = normalizeTimes(resp.groups);
         setJobs(jobsWithTimerange);
         setGroups(groupsWithTimerange);
-        // setGroupsMap(resp.groupsMap);
+        setGroupsMap(resp.groupsMap);
       })
       .catch((err) => {
         console.log('Error fetching jobs', err);
@@ -180,25 +182,42 @@ export function JobSelector({
   }
 
   function handleNewSelection({ selectionFromTable, isGroup = false }) {
-    console.log(isGroup); // remove
+    console.log('IS GROUP', isGroup); // TODO: isGroup still needed?
     // if it's groups then we add the selected groups Ids
     setNewSelection(selectionFromTable);
   }
 
-  // newSelection should always be the list of job ids - break down group selection into job-ids
   function applySelection() {
     closeFlyout();
+
+    const allNewSelection = [];
+    // const groupIds = [];
+    // if it is a group - grab all the jobIds for it
+    newSelection.forEach((id) => {
+      if (groupsMap[id] !== undefined) {
+        // groupIds.push(id);
+        allNewSelection.push(...groupsMap[id].jobIds);
+      } else {
+        allNewSelection.push(id);
+      }
+    });
+    // create a Set to remove duplicate values
+    const allNewSelectionUnique = Array.from(new Set(allNewSelection));
+
     setSelectedIds(newSelection);
-    applyTimeRangeFromSelection();
-    jobSelectService.next(newSelection);
     setNewSelection([]);
+    applyTimeRangeFromSelection(allNewSelectionUnique);
+    jobSelectService.next(allNewSelectionUnique);
+
+    // save selection in global state
+    setGlobalState(globalState, allNewSelectionUnique);
   }
 
-  function applyTimeRangeFromSelection() {
+  function applyTimeRangeFromSelection(selection) {
     if (applyTimeRange && jobs.length > 0) {
       const times = [];
       jobs.forEach(job => {
-        if (newSelection.includes(job.job_id)) {
+        if (selection.includes(job.job_id)) {
           if (job.timeRange.from !== undefined) {
             times.push(job.timeRange.from);
           }
@@ -244,7 +263,7 @@ export function JobSelector({
   function renderIdBadges() {
     return selectedIds.map(id => (
       <EuiFlexItem grow={false} key={id}>
-        {getBadge({ id })}
+        {getBadge({ id, isGroup: (groupsMap[id] !== undefined) })}
       </EuiFlexItem>
     ));
   }
@@ -252,7 +271,7 @@ export function JobSelector({
   function renderNewSelectionIdBadges() {
     return newSelection.map(id => (
       <EuiFlexItem grow={false} key={id}>
-        {getBadge({ id, icon: true, removeId })}
+        {getBadge({ id, icon: true, removeId, isGroup: (groupsMap[id] !== undefined) })}
       </EuiFlexItem>
     ));
   }

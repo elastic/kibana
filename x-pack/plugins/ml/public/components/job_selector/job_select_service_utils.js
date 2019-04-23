@@ -32,6 +32,13 @@ function getInvalidJobIds(ids) {
   });
 }
 
+function checkGlobalState(globalState) {
+  if (globalState.ml === undefined) {
+    globalState.ml = {};
+    globalState.save();
+  }
+}
+
 function loadJobIdsFromGlobalState(globalState) {
   const jobIds = [];
   if (globalState.ml && globalState.ml.jobIds) {
@@ -73,6 +80,12 @@ function loadJobIdsFromGlobalState(globalState) {
     }
   }
   return jobIds;
+}
+
+export function setGlobalState(globalState, selectedIds) {
+  checkGlobalState(globalState);
+  globalState.ml.jobIds = selectedIds;
+  globalState.save();
 }
 
 // called externally to retrieve the selected jobs ids.

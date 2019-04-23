@@ -26,7 +26,6 @@ import {
   SortableProperties,
 } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
-// import { FormattedMessage } from '@kbn/i18n/react';
 
 
 const JOB_FILTER_FIELDS = ['job_id', 'groups'];
@@ -62,7 +61,7 @@ export function JobSelectorTable({
     content: renderGroupsTable()
   }];
 
-  function loadGroups() {
+  function getGroupOptions() {
     return groupsList.map(g => ({
       value: g.id,
       view: (
@@ -127,7 +126,7 @@ export function JobSelectorTable({
         noOptionsMessage: 'No groups found.',
         multiSelect: 'or',
         cache: 10000,
-        options: loadGroups()
+        options: getGroupOptions()
       }
     ];
 
@@ -182,7 +181,7 @@ export function JobSelectorTable({
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}
         onTableChange={(selectionFromTable) => onSelection({ selectionFromTable, isGroup: true })}
-        selectedIds={[]}//{selectedIds}
+        selectedIds={selectedIds}
         // sortableProperties={sortableProperties}
       />
     );

@@ -32,6 +32,7 @@ module
       }
 
       const props = {
+        globalState,
         jobSelectService: mlJobSelectService,
         selectedJobIds,
         timeseriesOnly: attrs.timeseriesonly,
