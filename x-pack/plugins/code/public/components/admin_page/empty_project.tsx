@@ -8,12 +8,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import { EuiButton, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 
 import { ImportProject } from './import_project';
 
 export const EmptyProject = () => {
-  const isAdmin = uiCapabilities.code.admin as boolean;
+  const isAdmin = capabilities.get().code.admin as boolean;
   return (
     <div className="codeTab__projects">
       <EuiSpacer size="xl" />
