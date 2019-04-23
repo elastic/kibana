@@ -8,7 +8,7 @@ import React, { Fragment, useState, useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { parse } from 'querystring';
 
-import { EuiButton, EuiCallOut, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiIcon, EuiLink, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 
 import { SectionError, SectionLoading } from '../../../components';
 import { BASE_PATH } from '../../../constants';
@@ -109,24 +109,41 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.emptyPromptDescription"
-                defaultMessage="Use snapshots to back up your Elasticsearch clusters."
+                defaultMessage="A snapshot is a backup taken from a running Elasticsearch cluster. They are stored in a shared filesystem or remote repository."
               />
             </p>
+            {repositories.length === 0 ? (
+              <p>
+                <EuiButton
+                  href={history.createHref({
+                    pathname: `${BASE_PATH}/add_repository`,
+                  })}
+                  fill
+                  iconType="plusInCircle"
+                  data-test-subj="srSnapshotsEmptyPromptAddRepositoryButton"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.snapshotList.noRepositoriesAddButton"
+                    defaultMessage="Register your first repository"
+                  />
+                </EuiButton>
+              </p>
+            ) : (
+              <p>
+                <EuiLink
+                  href={documentationLinksService.getSnapshotDocUrl()}
+                  target="_blank"
+                  data-test-subj="srSnapshotsEmptyPromptDocLink"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.emptyPromptDocLinkLabel"
+                    defaultMessage="Learn about creating snapshots"
+                  />{' '}
+                  <EuiIcon type="link" />
+                </EuiLink>
+              </p>
+            )}
           </Fragment>
-        }
-        actions={
-          <EuiButton
-            href={documentationLinksService.getSnapshotDocUrl()}
-            target="_blank"
-            fill
-            iconType="questionInCircle"
-            data-test-subj="srSnapshotsEmptyPromptAddButton"
-          >
-            <FormattedMessage
-              id="xpack.snapshotRestore.addSnapshotButtonLabel"
-              defaultMessage="Learn about creating snapshots"
-            />
-          </EuiButton>
         }
       />
     );

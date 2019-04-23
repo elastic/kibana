@@ -9,10 +9,11 @@
 
   &:not(.ssrRepositoryFormTypeCard--selected) {
     cursor: pointer;
-
-    &:hover {
-      @include euiBottomShadowMedium;
-      transform: translateY(-2px);
-    }
   }
+}
+
+.ssrRepositoryFormTypeCardWrapper:focus .ssrRepositoryFormTypeCard:not(.ssrRepositoryFormTypeCard--selected),
+.ssrRepositoryFormTypeCard:not(.ssrRepositoryFormTypeCard--selected):hover {
+  @include euiBottomShadowMedium;
+  transform: translateY(-2px);
 }

@@ -138,6 +138,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                   options={schemeOptions}
                   value={selectedScheme}
                   onChange={e => selectScheme(e.target.value)}
+                  aria-controls="readonlyRepositoryUrlHelp"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -151,7 +152,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                   />
                 }
                 fullWidth
-                describedByIds={['readonlyRepositoryUrlDescription']}
+                describedByIds={['readonlyRepositoryUrlDescription readonlyRepositoryUrlHelp']}
                 isInvalid={Boolean(hasErrors && settingErrors.url)}
                 error={settingErrors.url}
               >
@@ -168,7 +169,9 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiFormHelpText>{getSchemeHelpText(selectedScheme)}</EuiFormHelpText>
+          <EuiFormHelpText id="readonlyRepositoryUrlHelp" aria-live="polite">
+            {getSchemeHelpText(selectedScheme)}
+          </EuiFormHelpText>
         </div>
       </EuiDescribedFormGroup>
     </Fragment>

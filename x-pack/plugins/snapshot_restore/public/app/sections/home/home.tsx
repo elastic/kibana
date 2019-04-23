@@ -7,7 +7,15 @@
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
@@ -75,8 +83,18 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
             />
           </h1>
         </EuiTitle>
-
         <EuiSpacer size="s" />
+        <EuiTitle size="s">
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.snapshotRestore.home.snapshotRestoreDescription"
+              defaultMessage="Snapshot and restore allows you to create snapshots of individual indices or an entire cluster,
+                 store them on a shared filesystem or remote repository, and restore them into a running cluster."
+            />
+          </EuiText>
+        </EuiTitle>
+
+        <EuiSpacer size="m" />
 
         <EuiTabs>
           {tabs.map(tab => (

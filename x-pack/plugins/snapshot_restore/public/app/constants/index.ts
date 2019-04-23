@@ -5,6 +5,7 @@
  */
 
 export const BASE_PATH = '/management/elasticsearch/snapshot_restore';
+export const DEFAULT_SECTION: Section = 'snapshots';
 export type Section = 'repositories' | 'snapshots';
 
 export enum REPOSITORY_DOC_PATHS {

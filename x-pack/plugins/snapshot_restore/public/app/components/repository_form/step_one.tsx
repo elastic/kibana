@@ -7,13 +7,11 @@ import React, { Fragment } from 'react';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiCard,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFlexGrid,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiLink,
@@ -23,7 +21,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import { Repository, RepositoryType } from '../../../../common/types';
+import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 
 import { useAppDependencies } from '../../index';
@@ -35,7 +33,7 @@ import { SectionError } from '../section_error';
 import { SectionLoading } from '../section_loading';
 
 interface Props {
-  repository: Repository;
+  repository: Repository | EmptyRepository;
   onNext: () => void;
   updateRepository: (updatedFields: any) => void;
   validation: RepositoryValidation;
@@ -128,22 +126,29 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
       (repository.type === REPOSITORY_TYPES.source
         ? repository.settings.delegateType
         : repository.type) === type;
+    const displayName = textService.getRepositoryTypeName(type);
 
     return (
       <EuiFlexItem
+        className="ssrRepositoryFormTypeCardWrapper"
         key={index}
         tabIndex={0}
         onClick={() => onTypeChange(type)}
-        onKeyDown={() => onTypeChange(type)}
+        onKeyDown={({ key }) => {
+          if (key === 'Enter') {
+            onTypeChange(type);
+          }
+        }}
         grow={1}
       >
         <EuiCard
           className={`ssrRepositoryFormTypeCard
             ${isSelectedType ? 'ssrRepositoryFormTypeCard--selected' : ''}`}
-          title={textService.getRepositoryTypeName(type)}
+          title={displayName}
           description={
             <EuiLink
               onClick={e => e.stopPropagation()}
+              onKeyDown={(e: any) => e.stopPropagation()}
               href={documentationLinksService.getRepositoryTypeDocUrl(type)}
               target="_blank"
             >
