@@ -54,12 +54,12 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    const { plugins, elasticsearch, serverOptions, handledConfigPaths } = core;
-
+    const { plugins, http, elasticsearch, serverOptions, handledConfigPaths } = core;
     this.newPlatform = {
       setup: {
         core: {
           elasticsearch,
+          http,
         },
         plugins,
       },
