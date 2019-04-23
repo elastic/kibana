@@ -24,7 +24,7 @@ import { setupDirective } from './directive';
 
 /**
  * Search Bar Service
- * 
+ *
  * @internal
  */
 export class ApplyFiltersService {

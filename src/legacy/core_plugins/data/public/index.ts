@@ -33,7 +33,6 @@ class DataService {
   }
 
   public setup() {
-
     return {
       indexPatterns: this.indexPatterns.setup(),
       filter: {
@@ -43,7 +42,7 @@ class DataService {
         },
         ...this.applyFilters.setup(),
         ...this.filterBar.setup(),
-      }
+      },
     };
   }
 

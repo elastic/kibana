@@ -1,4 +1,3 @@
-
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
  * license agreements. See the NOTICE file distributed with
@@ -25,7 +24,7 @@ import { setupDirective } from './directive';
 
 /**
  * Search Bar Service
- * 
+ *
  * @internal
  */
 export class FilterBarService {
@@ -41,7 +40,7 @@ export class FilterBarService {
   public stop() {
     // nothing to do here yet
   }
-  
+
   public loadLegacyDirectives() {
     this.setupDirectives();
   }
