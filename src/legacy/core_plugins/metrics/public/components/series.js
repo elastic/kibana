@@ -52,6 +52,7 @@ class Series extends Component {
   }
 
   switchTab = (selectedTab) => {
+    console.log('selectedTab in src/legacy/core_plugins/metrics/public/components/series.js:', selectedTab);
     this.setState({ selectedTab });
   };
 

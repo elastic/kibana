@@ -41,6 +41,10 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+/*
+QueryBarInput will be the text input, the language switcher, and autocomplete.
+import { QueryBarInput } from 'ui/query_bar';
+*/
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 class TimeseriesPanelConfigUi extends Component {
@@ -63,9 +67,12 @@ class TimeseriesPanelConfigUi extends Component {
       show_grid: 1
     };
     const model = { ...defaults, ...this.props.model };
+    console.log('TimeSeriesPanelConfigUi model:', model);
     const { selectedTab } = this.state;
+    console.log('TimeSeriesPanelConfigUi { selectedTab }:', { selectedTab });
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    console.log('TimeSeriesPanelConfigUi handleTextChange:', handleTextChange);
     const htmlId = htmlIdGenerator();
     const { intl } = this.props;
 
@@ -156,20 +163,22 @@ class TimeseriesPanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.timeseries.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
+                <div style={{ border: '1px solid purple' }}>
+                  <EuiFormRow
+                    id={htmlId('panelFilter')}
+                    label={(<FormattedMessage
+                      id="tsvb.timeseries.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />)}
                     fullWidth
-                  />
-                </EuiFormRow>
+                  >
+                    <EuiFieldText
+                      onChange={handleTextChange('filter')}
+                      value={model.filter}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -337,6 +346,7 @@ class TimeseriesPanelConfigUi extends Component {
         </div>
       );
     }
+    console.log('TimeSeriesPanelConfigUi view:', view);
     return (
       <div>
         <EuiTabs size="s">
