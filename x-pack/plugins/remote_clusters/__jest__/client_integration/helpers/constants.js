@@ -4,6 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
+
+export const REMOTE_CLUSTER_EDIT = {
+  name: REMOTE_CLUSTER_EDIT_NAME,
+  seeds: ['localhost:9400'],
+  skipUnavailable: true,
+};
+
 export const NON_ALPHA_NUMERIC_CHARS = [
   '#', '@', '.', '$', '*', '(', ')', '+', ';', '~', ':', '\'', '/', '%', '?', ',', '=', '&', '!', '-', '_'
 ];

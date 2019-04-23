@@ -5,6 +5,7 @@
  */
 
 import { setup as remoteClustersAddSetup } from './remote_clusters_add.helpers';
+import { setup as remoteClustersEditSetup } from './remote_clusters_edit.helpers';
 
 export { nextTick, getRandomString, findTestSubject } from '../../../../../test_utils';
 
@@ -12,4 +13,5 @@ export { setupEnvironment } from './setup_environment';
 
 export const pageHelpers = {
   remoteClustersAdd: { setup: remoteClustersAddSetup },
+  remoteClustersEdit: { setup: remoteClustersEditSetup },
 };

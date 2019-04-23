@@ -7,7 +7,6 @@
 import axios from 'axios';
 
 import { setHttpClient } from '../../../public/services/api';
-
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
