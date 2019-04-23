@@ -138,6 +138,8 @@ For more information about working with sub aggregations, see
 https://www.elastic.co/blog/kibana-aggregation-execution-order-and-you[Kibana,
 Aggregation Execution Order, and You].
 
+include::visualize/saving.asciidoc[]
+
 include::visualize/xychart.asciidoc[]
 
 include::visualize/controls.asciidoc[]
