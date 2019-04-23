@@ -64,6 +64,7 @@ export const code = (kibana: any) =>
           gitProtocolWhitelist: Joi.array()
             .items(Joi.string())
             .default(['https', 'git', 'ssh']),
+          enableGitCertCheck: Joi.boolean().default(true),
         }).default(),
         maxWorkspace: Joi.number().default(5), // max workspace folder for each language server
         disableIndexScheduler: Joi.boolean().default(true), // Temp option to disable index scheduler.

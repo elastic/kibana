@@ -66,7 +66,11 @@ test('Execute delete job.', async () => {
     esQueue as Esqueue,
     log,
     esClient as EsClient,
-    {} as ServerOptions,
+    {
+      security: {
+        enableGitCertCheck: false,
+      },
+    } as ServerOptions,
     (cancellationService as any) as CancellationSerivce,
     (lspService as any) as LspService,
     (repoServiceFactory as any) as RepositoryServiceFactory

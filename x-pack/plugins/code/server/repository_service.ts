@@ -28,10 +28,9 @@ export class RepositoryService {
   constructor(
     private readonly repoVolPath: string,
     private readonly credsPath: string,
-    private log: Logger
+    private readonly log: Logger,
+    private readonly enableGitCertCheck: boolean
   ) {}
-
-  private isProd = process.env.NODE_ENV === 'production';
 
   public async clone(repo: Repository, handler?: CloneProgressHandler): Promise<CloneWorkerResult> {
     if (!repo) {
@@ -108,7 +107,7 @@ export class RepositoryService {
         credentials: this.credentialFunc(key),
       };
       // Ignore cert check on testing environment.
-      if (!this.isProd) {
+      if (!this.enableGitCertCheck) {
         cbs.certificateCheck = () => {
           // Ignore cert check failures.
           return 0;
@@ -205,7 +204,7 @@ export class RepositoryService {
         credentials: this.credentialFunc(keyFile),
       };
       // Ignore cert check on testing environment.
-      if (!this.isProd) {
+      if (!this.enableGitCertCheck) {
         cbs.certificateCheck = () => {
           // Ignore cert check failures.
           return 0;

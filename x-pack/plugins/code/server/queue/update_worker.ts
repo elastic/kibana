@@ -31,7 +31,8 @@ export class UpdateWorker extends AbstractGitWorker {
     const repoService = this.repoServiceFactory.newInstance(
       this.serverOptions.repoPath,
       this.serverOptions.credsPath,
-      this.log
+      this.log,
+      this.serverOptions.security.enableGitCertCheck
     );
     return await repoService.update(repo);
   }
