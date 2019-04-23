@@ -18,8 +18,8 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
+import { idx } from '@kbn/elastic-idx';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { idx } from '../../../../common/idx';
 import { useFetcher } from '../../../hooks/useFetcher';
 import {
   loadErrorDistribution,
