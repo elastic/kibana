@@ -189,6 +189,8 @@ export function getHighLevelStats(server, callCluster, clusterUuids, start, end,
  */
 export function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
   const config = server.config();
+  const isKibanaIndex = product === KIBANA_SYSTEM_ID;
+
   const params = {
     index: getIndexPatternForStackProduct(product),
     size: config.get('xpack.monitoring.max_bucket_size'),
@@ -212,7 +214,7 @@ export function fetchHighLevelStats(server, callCluster, clusterUuids, start, en
         type: `${product}_stats`,
         filters: [
           { terms: { cluster_uuid: clusterUuids } },
-          { exists: { field: 'kibana_stats.usage.index' } }
+          ...(isKibanaIndex ? [{ exists: { field: 'kibana_stats.usage.index' } }] : []),
         ]
       }),
       collapse: {
