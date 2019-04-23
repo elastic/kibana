@@ -54,14 +54,14 @@ export function maps(kibana) {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'map': {
-          icon: 'gisApp',
+          icon: APP_ICON,
           titleSearchField: 'title',
           getTitle(obj) {
             return obj.attributes.title;
           },
           getInAppUrl(obj) {
             return {
-              path: `/app/maps#/map/${obj.id}`,
+              path: createMapPath(obj.id),
               uiCapabilitiesPath: 'maps.show',
             };
           },
