@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import React from 'react';
 import { ApolloConsumer } from 'react-apollo';

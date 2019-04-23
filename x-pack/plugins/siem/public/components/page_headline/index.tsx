@@ -11,7 +11,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { pure } from 'recompose';
 
 import { decodeIpv6 } from '../../lib/helpers';
-import { FlowTargetSelectConnected } from '../flow_controls/flow_target_select_connected';
+import { FlowTargetSelectConnected } from '../page/network/flow_target_select_connected';
 import { LastEventTime } from '../last_event_time';
 
 import { PageHeadlineComponent } from './headline';

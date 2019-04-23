@@ -11,7 +11,7 @@ import { mockGlobalState, TestProviders } from '../../mock';
 import { createStore, State } from '../../store';
 import { IpOverviewId } from '../page/network/ip_overview';
 
-import { FlowTargetSelectConnected } from './flow_target_select_connected';
+import { FlowTargetSelectConnected } from './index';
 describe('Flow Target Select Connected', () => {
   const state: State = mockGlobalState;
   let store = createStore(state);

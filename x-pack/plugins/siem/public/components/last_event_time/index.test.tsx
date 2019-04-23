@@ -7,7 +7,7 @@
 import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
-import { render, waitForElement } from 'react-testing-library';
+import { render } from 'react-testing-library';
 
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
 import { wait } from '../../lib/helpers';

@@ -11,13 +11,13 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
-import { FlowDirection, FlowTarget } from '../../graphql/types';
-import { State } from '../../store';
-import { networkActions, networkSelectors } from '../../store/network';
-import { IpOverviewId } from '../page/network/ip_overview';
-import * as i18nIp from '../page/network/ip_overview/translations';
+import { FlowDirection, FlowTarget } from '../../../../graphql/types';
+import { State } from '../../../../store';
+import { networkActions, networkSelectors } from '../../../../store/network';
+import { IpOverviewId } from '../ip_overview';
+import * as i18nIp from '../ip_overview/translations';
 
-import { FlowTargetSelect } from './flow_target_select';
+import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
