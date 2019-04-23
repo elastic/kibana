@@ -62,7 +62,8 @@ export class EditorComponent extends React.Component<IProps> {
     const { file } = this.props;
     if (file && file.content) {
       const { uri, path, revision } = file.payload;
-      this.loadText(file.content, uri, path, file.lang!, revision).then(() => {
+      const qs = this.props.location.search;
+      this.loadText(file.content, uri, path, file.lang!, revision, qs).then(() => {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
@@ -73,7 +74,7 @@ export class EditorComponent extends React.Component<IProps> {
     }
   }
 
-  public componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: IProps) {
     const { file } = this.props;
     const { uri, path, revision } = file.payload;
     const {
@@ -84,8 +85,9 @@ export class EditorComponent extends React.Component<IProps> {
       path: routePath,
     } = this.props.match.params;
     const prevContent = prevProps.file && prevProps.file.content;
-    if (prevContent !== file.content) {
-      this.loadText(file.content!, uri, path, file.lang!, revision).then(() => {
+    const qs = this.props.location.search;
+    if (prevContent !== file.content || qs !== prevProps.location.search) {
+      this.loadText(file.content!, uri, path, file.lang!, revision, qs).then(() => {
         if (this.props.revealPosition) {
           this.revealPosition(this.props.revealPosition);
         }
@@ -168,13 +170,20 @@ export class EditorComponent extends React.Component<IProps> {
     this.blameWidgets = null;
   }
 
-  private async loadText(text: string, repo: string, file: string, lang: string, revision: string) {
+  private async loadText(
+    text: string,
+    repo: string,
+    file: string,
+    lang: string,
+    revision: string,
+    qs: string
+  ) {
     if (this.monaco) {
       this.editor = await this.monaco.loadFile(repo, file, text, lang, revision);
       this.editor.onMouseDown((e: editorInterfaces.IEditorMouseEvent) => {
         if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
           const uri = `${repo}/blob/${encodeRevisionString(revision)}/${file}`;
-          history.push(`/${uri}!L${e.target.position.lineNumber}:0`);
+          history.push(`/${uri}!L${e.target.position.lineNumber}:0${qs}`);
         }
         this.monaco!.container.focus();
       });
