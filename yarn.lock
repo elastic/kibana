@@ -7123,10 +7123,10 @@ chrome-trace-event@^1.0.0:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@2.46.0:
-  version "2.46.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-2.46.0.tgz#3d78e7eb9bb65dd804fe327a6bf76fced12be053"
-  integrity sha512-dLtKIJW3y/PuFrPmcw6Mb8Nh+HwSqgVrK1rWgTARXhHfWvV822X2VRkx2meU/tg2+YQL6/nNgT6n5qWwIDHbwg==
+chromedriver@73.0.0:
+  version "73.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-73.0.0.tgz#1bb987c82735d0bc08eb179ea0792462f2e7eaf3"
+  integrity sha512-RnZOTgAa3prPmA1QDHtrsEhppDGiosND5O/0ukWwGuU+EglCBHvYl1x3Mh/YypMIkmydRyq50XPrNYZadsM6rQ==
   dependencies:
     del "^3.0.0"
     extract-zip "^1.6.7"
