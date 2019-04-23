@@ -260,15 +260,16 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('editLayerButton');
     }
 
+    escapeLayerName(layerName) {
+      return layerName.replace(' ', '_');
+    }
+
     async getLayerTOCDetails(layerName) {
-      const escapedLayerName = layerName.replace(' ', '_');
-      return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapedLayerName}`);
+      return await testSubjects.getVisibleText(`mapLayerTOCDetails${this.escapeLayerName(layerName)}`);
     }
 
     async doesLayerExist(layerName) {
-      layerName = layerName.replace(' ', '_');
-      log.debug(`Open layer panel, layer: ${layerName}`);
-      return await testSubjects.exists(`mapOpenLayerButton${layerName}`);
+      return await testSubjects.exists(`mapLayerTOCDisplayName${this.escapeLayerName(layerName)}`);
     }
 
     /*

@@ -21,6 +21,12 @@ import {
 import { LayerTocActions } from '../../../../../shared/components/layer_toc_actions';
 import { i18n } from '@kbn/i18n';
 
+function escapeLayerName(name) {
+  return name
+    ? name.replace(' ', '_')
+    : '';
+}
+
 export class TOCEntry extends React.Component {
 
   state = {
@@ -131,6 +137,7 @@ export class TOCEntry extends React.Component {
           style={{ maxWidth: '19rem' }}
           className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
           onClick={this._toggleLayerDetailsVisibility}
+          data-test-subj={`mapLayerTOCDisplayName${escapeLayerName(this.state.displayName)}`}
         >
           {this.state.displayName}
         </div>
@@ -221,13 +228,9 @@ export class TOCEntry extends React.Component {
       return null;
     }
 
-    const escapedLayerName = this.state.displayName
-      ? this.state.displayName.replace(' ', '_')
-      : '';
-
     return (
       <div
-        data-test-subj={`mapLayerTOCDetails${escapedLayerName}`}
+        data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
       >
         {tocDetails}
       </div>
