@@ -182,9 +182,7 @@ class VisEditor extends Component {
   }
 
   componentWillUnmount() {
-    if (this.updateVisState.cancel) {
-      this.updateVisState.cancel();
-    }
+    this.updateVisState.cancel();
   }
 }
 
