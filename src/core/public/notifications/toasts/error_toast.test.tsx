@@ -52,3 +52,8 @@ it('should open a modal when clicking button', () => {
   wrapper.find('button').simulate('click');
   expect(document.body.querySelector('[data-test-subj="fullErrorModal"]')).toBeTruthy();
 });
+
+afterAll(() => {
+  // Cleanup document.body to cleanup any modals which might be left over from tests.
+  document.body.innerHTML = '';
+});
