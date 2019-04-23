@@ -13,18 +13,23 @@ import {
   EuiSelect
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
-import { getExistingIndices } from '../util/indexing_service';
+import { getExistingIndices, getExistingIndexPatterns }
+  from '../util/indexing_service';
 
 export const IndexSettings = injectI18n(function IndexSettings({
   disabled,
   indexName,
   setIndexName,
+  indexPattern,
+  setIndexPattern,
   setIndexDataType,
   mappingsOptions,
   intl
 }) {
-  const [indexNameError, setIndexNameError] = useState('');
   const [indexNames, setIndexNames] = useState(null);
+  const [indexNameError, setIndexNameError] = useState('');
+  const [indexPatterns, setIndexPatterns] = useState(null);
+  const [indexPatternError, setIndexPatternError] = useState('');
 
   if (!indexNames) {
     getExistingIndices().then(indices => {
@@ -32,6 +37,12 @@ export const IndexSettings = injectI18n(function IndexSettings({
         ? indices.map(({ name }) => name)
         : []);
     });
+  }
+
+  if (!indexPatterns) {
+    getExistingIndexPatterns().then(
+      indexPatterns => setIndexPatterns(indexPatterns)
+    );
   }
 
   return (
@@ -85,23 +96,23 @@ export const IndexSettings = injectI18n(function IndexSettings({
       <EuiFormRow
         label={
           <FormattedMessage
-            id="xpack.file_upload.indexPatternNameLabel"
-            defaultMessage="Index pattern name"
+            id="xpack.file_upload.indexPatternLabel"
+            defaultMessage="Index pattern"
           />
         }
-        // isInvalid={indexPatternNameError !== ''}
-        // error={[indexPatternNameError]}
+        isInvalid={indexPatternError !== ''}
+        error={[indexPatternError]}
       >
         <EuiFieldText
-          disabled={disabled}
-          // disabled={(createIndexPattern === false || initialized === true)}
-          // placeholder={(createIndexPattern === true) ? index : ''}
-          // value={indexPattern}
-          // onChange={onIndexPatternChange}
-          // isInvalid={indexPatternNameError !== ''}
+          disabled={disabled || !indexName}
+          placeholder={indexName}
+          value={indexPattern}
+          onChange={onIndexPatternChange(
+            setIndexPattern, setIndexPatternError, indexPatterns, indexName
+          )}
+          isInvalid={indexPatternError !== ''}
         />
       </EuiFormRow>
-
     </Fragment>
   );
 });
@@ -112,6 +123,17 @@ function onIndexChange(setIndex, setIndexNameError, indexNames) {
     const errorMessage = isIndexNameValid(name, indexNames);
     setIndexNameError(errorMessage);
     setIndex(name);
+  };
+}
+
+function onIndexPatternChange(
+  setIndexPattern, setIndexPatternError, indexPatterns, indexName
+) {
+  return ({ target }) => {
+    const pattern = target.value;
+    const errorMessage = isIndexPatternValid(pattern, indexPatterns, indexName);
+    setIndexPatternError(errorMessage);
+    setIndexPattern(pattern);
   };
 }
 
@@ -139,5 +161,38 @@ function isIndexNameValid(name, indexNames) {
       />
     );
   }
+  return '';
+}
+
+function isIndexPatternValid(name, indexPatterns, index) {
+  // if a blank name is entered, the index name will be used so avoid validation
+  if (name === '') {
+    return '';
+  }
+
+  if (indexPatterns.find(i => i === name)) {
+    return (
+      <FormattedMessage
+        id="xpack.file_upload.indexPatternNameAlreadyExistsErrorMessage"
+        defaultMessage="Index pattern name already exists"
+      />
+    );
+  }
+
+  // escape . and + to stop the regex matching more than it should.
+  let newName = name.replace(/\./g, '\\.');
+  newName = newName.replace(/\+/g, '\\+');
+  // replace * with .* to make the wildcard match work.
+  newName = newName.replace(/\*/g, '.*');
+  const reg = new RegExp(`^${newName}$`);
+  if (index.match(reg) === null) { // name should match index
+    return (
+      <FormattedMessage
+        id="xpack.file_upload.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
+        defaultMessage="Index pattern does not match index name"
+      />
+    );
+  }
+
   return '';
 }

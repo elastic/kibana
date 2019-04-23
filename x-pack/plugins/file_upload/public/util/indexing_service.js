@@ -226,3 +226,14 @@ export async function getExistingIndices() {
     method: 'GET',
   });
 }
+
+export async function getExistingIndexPatterns() {
+  const savedObjectsClient = chrome.getSavedObjectsClient();
+  return savedObjectsClient.find({
+    type: 'index-pattern',
+    fields: ['id', 'title', 'type', 'fields'],
+    perPage: 10000
+  }).then(({ savedObjects }) =>
+    savedObjects.map(savedObject => savedObject.get('title'))
+  );
+}

@@ -30,6 +30,7 @@ export function JsonUploadAndParse(props) {
   const [indexedFile, setIndexedFile] = useState(null);
   const [indexDataType, setIndexDataType] = useState('');
   const [indexName, setIndexName] = useState('');
+  const [indexPattern, setIndexPattern] = useState('');
 
   // If index flag set, index on update
   if (boolIndexData && parsedFile && !_.isEqual(indexedFile, parsedFile)) {
@@ -84,6 +85,8 @@ export function JsonUploadAndParse(props) {
         disabled={!fileRef}
         indexName={indexName}
         setIndexName={setIndexName}
+        indexPattern={indexPattern}
+        setIndexPattern={setIndexPattern}
         setIndexDataType={setIndexDataType}
         mappingsOptions={mappingsOptions}
       />
