@@ -20,11 +20,11 @@ describe('Last Event Time Stat', async () => {
   // fixes this: https://github.com/facebook/react/pull/14853
   // For us that mean we need to upgrade to 16.9.0
   // and we will be able to do that when we are in master
-  // eslint:disable-next-line:no-console
+  // eslint-disable-next-line no-console
   const originalError = console.error;
 
   beforeAll(() => {
-    // eslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error = (...args: string[]) => {
       if (/Warning.*not wrapped in act/.test(args[0])) {
         return;
@@ -34,7 +34,7 @@ describe('Last Event Time Stat', async () => {
   });
 
   afterAll(() => {
-    // eslint:disable-next-line:no-console
+    // eslint-disable-next-line no-console
     console.error = originalError;
   });
 

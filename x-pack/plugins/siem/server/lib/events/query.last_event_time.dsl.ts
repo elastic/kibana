@@ -44,7 +44,7 @@ export const buildLastEventTimeQuery = ({
           },
         };
       }
-      return null;
+      throw new Error('buildLastEventTimeQuery - no IP argument provided');
     case 'hostDetails':
       if (details.hostName) {
         return {
@@ -61,7 +61,7 @@ export const buildLastEventTimeQuery = ({
           },
         };
       }
-      return null;
+      throw new Error('buildLastEventTimeQuery - no hostName argument provided');
     case 'hosts':
     case 'network':
       return {
@@ -78,5 +78,6 @@ export const buildLastEventTimeQuery = ({
         },
       };
   }
-  return undefined;
+  throw new Error('buildLastEventTimeQuery - invalid indexKey');
+
 };
