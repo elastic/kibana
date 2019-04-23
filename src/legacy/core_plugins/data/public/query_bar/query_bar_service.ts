@@ -26,7 +26,7 @@ import { setupDirective } from './directive';
 
 /**
  * Query Bar Service
- * 
+ *
  * @internal
  */
 export class QueryBarService {
