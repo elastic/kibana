@@ -146,20 +146,22 @@ class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
-                  id={htmlId('queryString')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.queryStringLabel"
-                    defaultMessage="Query string"
-                  />)}
-                  fullWidth
-                >
-                  <EuiFieldText
-                    onChange={this.handleChange(model, 'query_string')}
-                    value={model.query_string}
+                <div style={{ border: '1px solid blue' }}>
+                  <EuiFormRow
+                    id={htmlId('queryString')}
+                    label={(<FormattedMessage
+                      id="tsvb.annotationsEditor.queryStringLabel"
+                      defaultMessage="Query string"
+                    />)}
                     fullWidth
-                  />
-                </EuiFormRow>
+                  >
+                    <EuiFieldText
+                      onChange={this.handleChange(model, 'query_string')}
+                      value={model.query_string}
+                      fullWidth
+                    />
+                  </EuiFormRow>
+                </div>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
