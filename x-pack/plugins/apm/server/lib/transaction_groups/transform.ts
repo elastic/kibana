@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { idx } from '../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { ESResponse } from './fetcher';
 
 function calculateRelativeImpacts(transactionGroups: ITransactionGroup[]) {
