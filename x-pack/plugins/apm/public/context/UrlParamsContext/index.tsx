@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { createContext, useReducer } from 'react';
+import React, { createContext, useReducer, useEffect } from 'react';
 import { Location } from 'history';
 import { useLocation } from '../../hooks/useLocation';
 import { IUrlParams } from './types';
@@ -72,6 +72,13 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
   function refreshTimeRange(time: TimeRange) {
     dispatch({ type: TIME_RANGE_REFRESH, time });
   }
+
+  useEffect(
+    () => {
+      dispatch({ type: LOCATION_UPDATE, location });
+    },
+    [location]
+  );
 
   return (
     <UrlParamsContext.Provider
