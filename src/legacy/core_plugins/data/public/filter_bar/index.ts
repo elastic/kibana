@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import './directive';
-
-export { FilterBar } from './filter_bar';
+export { FilterBarService } from './filter_bar_service';

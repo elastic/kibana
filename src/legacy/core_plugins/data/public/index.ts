@@ -19,26 +19,33 @@
 
 import { IndexPatternsService } from './index_patterns';
 import { ApplyFiltersService } from './apply_filters';
+import { FilterBarService } from './filter_bar';
 
 class DataService {
   private readonly indexPatterns: IndexPatternsService;
   private readonly applyFilters: ApplyFiltersService;
+  private readonly filterBar: FilterBarService;
 
   constructor() {
     this.indexPatterns = new IndexPatternsService();
     this.applyFilters = new ApplyFiltersService();
+    this.filterBar = new FilterBarService();
   }
 
   public setup() {
     return {
       indexPatterns: this.indexPatterns.setup(),
-      ...this.applyFilters.setup(),
+      filter: {
+        ...this.applyFilters.setup(),
+        // ...this.filterBar.setup(),
+      }
     };
   }
 
   public stop() {
     this.indexPatterns.stop();
     this.applyFilters.stop();
+    this.filterBar.stop();
   }
 }
 

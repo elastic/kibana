@@ -33,7 +33,7 @@ import {
 import { Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { getFilterDisplayText } from 'ui/filter_bar/filter_view';
+import { getFilterDisplayText } from '../filter_bar/filter_view';
 
 interface Props {
   filters: Filter[];
