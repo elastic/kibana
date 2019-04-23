@@ -16,6 +16,7 @@ import {
 import { Repository, S3Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: S3Repository;
@@ -269,7 +270,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.chunkSizeDescription"
             defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+              The chunk size can be specified in bytes or by using size value notation."
           />
         }
         idAria="s3RepositoryChunkSizeDescription"
@@ -286,6 +287,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}

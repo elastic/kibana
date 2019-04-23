@@ -17,6 +17,7 @@ import {
 import { AzureRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: AzureRepository;
@@ -247,7 +248,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.chunkSizeDescription"
             defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+              The chunk size can be specified in bytes or by using size value notation."
           />
         }
         idAria="azureRepositoryChunkSizeDescription"
@@ -264,6 +265,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           describedByIds={['azureRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -271,52 +273,6 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             onChange={e => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
-              });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
-      {/* Readonly field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyTitle"
-                defaultMessage="Readonly"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyDescription"
-            defaultMessage="Makes repository read-only."
-          />
-        }
-        idAria="azureRepositoryReadonlyDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          hasEmptyLabelSpace={true}
-          fullWidth
-          describedByIds={['azureRepositoryReadonlyDescription']}
-          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
-          error={settingErrors.readonly}
-        >
-          <EuiSwitch
-            disabled={locationMode === locationModeOptions[1].value}
-            label={
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
-                defaultMessage="Enable readonly"
-              />
-            }
-            checked={!!readonly}
-            onChange={e => {
-              updateRepositorySettings({
-                readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
               });
             }}
           />
@@ -369,6 +325,52 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
               });
             }}
             fullWidth
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Readonly field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyTitle"
+                defaultMessage="Readonly"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyDescription"
+            defaultMessage="Makes repository read-only."
+          />
+        }
+        idAria="azureRepositoryReadonlyDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace={true}
+          fullWidth
+          describedByIds={['azureRepositoryReadonlyDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
+          error={settingErrors.readonly}
+        >
+          <EuiSwitch
+            disabled={locationMode === locationModeOptions[1].value}
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
+                defaultMessage="Enable readonly"
+              />
+            }
+            checked={!!readonly}
+            onChange={e => {
+              updateRepositorySettings({
+                readonly: locationMode === locationModeOptions[1].value ? true : e.target.checked,
+              });
+            }}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

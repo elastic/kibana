@@ -265,12 +265,32 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         </EuiTitle>
       }
       description={
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescription"
-          defaultMessage="A source repository enables you to create minimal,
-            source-only snapshots that take up to 50% less space on disk.
-            Source only snapshots contain stored fields and index metadata."
-        />
+        <Fragment>
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescription"
+            defaultMessage="A source repository enables you to create minimal,
+              source-only snapshots that take up to 50% less space on disk.
+              Source only snapshots contain stored fields and index metadata."
+          />
+          <EuiSpacer size="m" />
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyLearnMore"
+            defaultMessage="Learn more about {sourceOnlyDocLink}"
+            values={{
+              sourceOnlyDocLink: (
+                <EuiLink
+                  href={documentationLinksService.getRepositoryTypeDocUrl(REPOSITORY_TYPES.source)}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyLearnMoreLink"
+                    defaultMessage="Source Only repositories"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </Fragment>
       }
       idAria="sourceOnlyDescription"
       fullWidth

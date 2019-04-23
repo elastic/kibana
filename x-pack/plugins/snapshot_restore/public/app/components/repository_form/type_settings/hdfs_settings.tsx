@@ -19,6 +19,7 @@ import {
 import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: HDFSRepository | SourceRepository<HDFSRepository>;
@@ -263,7 +264,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.chunkSizeDescription"
             defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+              The chunk size can be specified in bytes or by using size value notation."
           />
         }
         idAria="hdfsRepositoryChunkSizeDescription"
@@ -280,6 +281,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['hdfsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}

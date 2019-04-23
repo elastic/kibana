@@ -9,7 +9,7 @@ import { RepositoryType } from '../../../../common/types';
 class TextService {
   public breadcrumbs: { [key: string]: string } = {};
   public i18n: any;
-  private repositoryTypeNames: { [key in RepositoryType]: string } = {};
+  private repositoryTypeNames: { [key: string]: string } = {};
 
   public init(i18n: any): void {
     this.i18n = i18n;
@@ -79,6 +79,18 @@ class TextService {
     }
 
     return getTypeName(type);
+  }
+
+  public getSizeNotationHelpText() {
+    return this.i18n.translate('xpack.snapshotRestore.repositoryForm.sizeNotationPlaceholder', {
+      defaultMessage: 'Example sizes: {example1}, {example2}, {example3}, {example4}',
+      values: {
+        example1: '1024',
+        example2: '1g',
+        example3: '10mb',
+        example4: '5k',
+      },
+    });
   }
 }
 

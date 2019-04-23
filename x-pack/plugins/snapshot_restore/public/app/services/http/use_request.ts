@@ -47,7 +47,7 @@ interface UseRequest extends SendRequest {
 
 export const useRequest = ({ path, method, body, interval, initialData, timeout }: UseRequest) => {
   const [error, setError] = useState<null | any>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [data, setData] = useState<any>(initialData);
 
   // Tied to every render and bound to each request.

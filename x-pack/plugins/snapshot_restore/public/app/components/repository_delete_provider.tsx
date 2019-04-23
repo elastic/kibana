@@ -149,12 +149,19 @@ export const RepositoryDeleteProvider: React.FunctionComponent<Props> = ({ child
           buttonColor="danger"
           data-test-subj="srDeleteRepositoryConfirmationModal"
         >
-          {!isSingle && (
+          {isSingle ? (
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteSingleDescription"
+                defaultMessage="Snapshots stored in this repository not be deleted, however Elasticsearch will no longer be able to access them."
+              />
+            </p>
+          ) : (
             <Fragment>
               <p>
                 <FormattedMessage
                   id="xpack.snapshotRestore.deleteRepository.confirmModal.deleteMultipleDescription"
-                  defaultMessage="You are about to remove these repositories:"
+                  defaultMessage="You are about to remove the following repositories. Snapshots stored in these repositories not be deleted, however Elasticsearch will no longer be able to access them."
                 />
               </p>
               <ul>

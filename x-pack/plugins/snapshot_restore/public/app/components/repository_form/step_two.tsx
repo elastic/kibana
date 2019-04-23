@@ -81,9 +81,9 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
           >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.repositoryTypeDocLink"
-              defaultMessage="{repositoryType} docs"
+              defaultMessage="{repositoryType} repository docs"
               values={{
-                repositoryType: textService.getRepositoryTypeName(type, delegateType),
+                repositoryType: textService.getRepositoryTypeName(typeForDocs),
               }}
             />
           </EuiButtonEmpty>

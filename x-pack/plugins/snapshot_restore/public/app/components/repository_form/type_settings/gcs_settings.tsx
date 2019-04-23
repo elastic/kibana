@@ -9,6 +9,7 @@ import { EuiDescribedFormGroup, EuiFieldText, EuiFormRow, EuiSwitch, EuiTitle } 
 import { GCSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: GCSRepository;
@@ -234,7 +235,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.chunkSizeDescription"
             defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+              The chunk size can be specified in bytes or by using size value notation."
           />
         }
         idAria="gcsRepositoryChunkSizeDescription"
@@ -251,6 +252,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['gcsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}

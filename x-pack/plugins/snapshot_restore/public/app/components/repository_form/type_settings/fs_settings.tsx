@@ -17,6 +17,7 @@ import {
 import { FSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: FSRepository;
@@ -33,10 +34,9 @@ export const FSSettings: React.FunctionComponent<Props> = ({
   settingErrors,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const {
     settings: {
       location,
@@ -169,7 +169,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.chunkSizeDescription"
             defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+              The chunk size can be specified in bytes or by using size value notation."
           />
         }
         idAria="fsRepositoryChunkSizeDescription"
@@ -186,6 +186,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -231,6 +232,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryMaxRestoreBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
           error={settingErrors.maxRestoreBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={maxRestoreBytesPerSec || ''}
@@ -276,6 +278,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
