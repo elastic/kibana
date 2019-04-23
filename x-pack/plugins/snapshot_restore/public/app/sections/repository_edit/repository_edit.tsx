@@ -7,8 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { REPOSITORY_TYPES } from '../../../../common/constants';
-import { Repository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError, SectionLoading } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
@@ -38,9 +37,9 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   }, []);
 
   // Repository state with default empty repository
-  const [repository, setRepository] = useState<Repository>({
+  const [repository, setRepository] = useState<Repository | EmptyRepository>({
     name: '',
-    type: REPOSITORY_TYPES.fs,
+    type: null,
     settings: {},
   });
 
@@ -63,23 +62,19 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
 
   // Saving repository states
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [errors, setErrors] = useState<any>({});
+  const [saveError, setSaveError] = useState<any>(null);
 
   // Save repository
-  const onSave = async (editedRepository: Repository) => {
+  const onSave = async (editedRepository: Repository | EmptyRepository) => {
     setIsSaving(true);
-    setErrors({ ...errors, save: null });
+    setSaveError(null);
     const { error } = await editRepository(editedRepository);
     setIsSaving(false);
     if (error) {
-      setErrors({ ...errors, save: error });
+      setSaveError(error);
     } else {
       history.push(`${BASE_PATH}/${section}/${name}`);
     }
-  };
-
-  const onCancel = () => {
-    history.push(`${BASE_PATH}/${section}`);
   };
 
   const renderLoading = () => {
@@ -121,7 +116,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
   };
 
   const renderSaveError = () => {
-    return errors.save ? (
+    return saveError ? (
       <SectionError
         title={
           <FormattedMessage
@@ -129,9 +124,13 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
             defaultMessage="Error saving repository details"
           />
         }
-        error={errors.save}
+        error={saveError}
       />
     ) : null;
+  };
+
+  const clearSaveError = () => {
+    setSaveError(null);
   };
 
   const renderContent = () => {
@@ -148,8 +147,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         isEditing={true}
         isSaving={isSaving}
         saveError={renderSaveError()}
+        clearSaveError={clearSaveError}
         onSave={onSave}
-        onCancel={onCancel}
       />
     );
   };

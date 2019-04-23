@@ -30,10 +30,10 @@ export enum REPOSITORY_TYPES {
   gcs = 'gcs',
 }
 
+// Deliberately do not include `source` as a default repository since we treat it as a flag
 export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
   REPOSITORY_TYPES.fs,
   REPOSITORY_TYPES.url,
-  REPOSITORY_TYPES.source,
 ];
 
 export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [

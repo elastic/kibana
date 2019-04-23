@@ -5,6 +5,7 @@
  */
 import { camelCase, snakeCase } from 'lodash';
 import { flatten } from '../../common/lib';
+import { cleanSettings } from './clean_settings';
 
 interface RepositorySettings {
   [key: string]: any;
@@ -50,5 +51,5 @@ export const serializeRepositorySettings = (settings: RepositorySettings): Repos
     }
   });
 
-  return serializedSettings;
+  return cleanSettings(serializedSettings);
 };

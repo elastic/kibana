@@ -7,8 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { REPOSITORY_TYPES } from '../../../../common/constants';
-import { Repository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
 
 import { RepositoryForm, SectionError } from '../../components';
 import { BASE_PATH, Section } from '../../constants';
@@ -24,38 +23,34 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
   } = useAppDependencies();
   const section = 'repositories' as Section;
   const [isSaving, setIsSaving] = useState<boolean>(false);
-  const [errors, setErrors] = useState<any>({});
+  const [saveError, setSaveError] = useState<any>(null);
 
   // Set breadcrumb
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('repositoryAdd');
   }, []);
 
-  const onSave = async (newRepository: Repository) => {
+  const onSave = async (newRepository: Repository | EmptyRepository) => {
     setIsSaving(true);
-    setErrors({ ...errors, save: null });
+    setSaveError(null);
     const { name } = newRepository;
     const { error } = await addRepository(newRepository);
     setIsSaving(false);
     if (error) {
-      setErrors({ ...errors, save: error });
+      setSaveError(error);
     } else {
       history.push(`${BASE_PATH}/${section}/${name}`);
     }
   };
 
-  const onCancel = () => {
-    history.push(`${BASE_PATH}/${section}`);
-  };
-
   const emptyRepository = {
     name: '',
-    type: REPOSITORY_TYPES.fs,
+    type: null,
     settings: {},
   };
 
   const renderSaveError = () => {
-    return errors.save ? (
+    return saveError ? (
       <SectionError
         title={
           <FormattedMessage
@@ -63,9 +58,13 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
             defaultMessage="Error registering new repository"
           />
         }
-        error={errors.save}
+        error={saveError}
       />
     ) : null;
+  };
+
+  const clearSaveError = () => {
+    setSaveError(null);
   };
 
   return (
@@ -84,8 +83,8 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
           repository={emptyRepository}
           isSaving={isSaving}
           saveError={renderSaveError()}
+          clearSaveError={clearSaveError}
           onSave={onSave}
-          onCancel={onCancel}
         />
       </EuiPageContent>
     </EuiPageBody>

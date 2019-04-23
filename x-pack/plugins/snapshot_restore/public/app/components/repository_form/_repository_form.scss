@@ -1,0 +1,18 @@
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+.ssrRepositoryFormTypeCard {
+  transition: all $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &--selected {
+    background: $euiColorLightShade;
+  }
+
+  &:not(.ssrRepositoryFormTypeCard--selected) {
+    cursor: pointer;
+
+    &:hover {
+      @include euiBottomShadowMedium;
+      transform: translateY(-2px);
+    }
+  }
+}

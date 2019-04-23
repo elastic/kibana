@@ -9,3 +9,4 @@ export {
   serializeRepositorySettings,
 } from './repository_serialization';
 export { deserializeSnapshotDetails } from './snapshot_serialization';
+export { cleanSettings } from './clean_settings';
