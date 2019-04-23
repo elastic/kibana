@@ -58,4 +58,4 @@ Utilizing the formatting functions `.title()`, `.label()`, `.color()`, `.lines()
 image::images/timelion-math06.png[]
 {nbsp}
 
-Save your changes and continue on to the next section to learn about conditional logic and tracking trends.
+Continue on to the next section to learn about conditional logic and tracking trends.

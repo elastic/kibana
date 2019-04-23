@@ -59,4 +59,4 @@ Now that you have thresholds and a moving average, let's format the visualizatio
 image::images/timelion-conditional04.png[]
 {nbsp}
 
-Save your Timelion sheet and continue on to the next section to add these new visualizations to your dashboard.
+Continue on to the next section to learn how to save your timelion sheet and add an expression to your dashboard.

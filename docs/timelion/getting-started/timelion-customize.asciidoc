@@ -50,4 +50,4 @@ Last but not least, adjust the legend so that it takes up as little space as pos
 image::images/timelion-customize04.png[]
 {nbsp}
 
-Save your changes and continue on to the next section to learn about mathematical functions.
+Continue on to the next section to learn about mathematical functions.
