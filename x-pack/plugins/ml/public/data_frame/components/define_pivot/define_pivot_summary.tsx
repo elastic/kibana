@@ -18,33 +18,25 @@ import {
 } from '@elastic/eui';
 
 import { AggListSummary } from '../../components/aggregation_list';
-import { GroupByList } from '../../components/group_by_list/list';
+import { GroupByListSummary } from '../../components/group_by_list';
 import { PivotPreview } from './pivot_preview';
 
 import {
-  DropDownLabel,
   DropDownOption,
   getPivotQuery,
   IndexPatternContext,
-  Label,
   PivotAggsConfigDict,
   PivotGroupByConfigDict,
   PIVOT_SUPPORTED_AGGS,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
   pivotSupportedAggs,
 } from '../../common';
 import { FIELD_TYPE } from './common';
+import { DefinePivotExposedState } from './define_pivot_form';
 
 const defaultSearch = '*';
 const emptySearch = '';
 
-interface Props {
-  search: string;
-  groupByList: Label[];
-  aggList: Label[];
-}
-
-export const DefinePivotSummary: SFC<Props> = ({ search, groupByList, aggList }) => {
+export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({ search, groupBy, aggList }) => {
   const indexPattern = useContext(IndexPatternContext);
 
   if (indexPattern === null) {
@@ -56,49 +48,18 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupByList, aggList })
     .map(field => ({ name: field.name, type: field.type }));
 
   // The available group by options
-  const groupByOptions: EuiComboBoxOptionProps[] = [];
   const groupByOptionsData: PivotGroupByConfigDict = {};
+
+  groupBy.forEach(gb => {
+    const label = `${gb.agg}(${gb.field})`;
+    groupByOptionsData[label] = gb;
+  });
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
   const aggOptionsData: PivotAggsConfigDict = {};
 
   fields.forEach(field => {
-    // group by
-    if (field.type === FIELD_TYPE.STRING) {
-      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}(${field.name})`;
-      const groupByOption: DropDownLabel = { label };
-      groupByOptions.push(groupByOption);
-      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS}_${field.name}`;
-      groupByOptionsData[label] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
-        field: field.name,
-        formRowLabel,
-      };
-    } else if (field.type === FIELD_TYPE.NUMBER) {
-      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label };
-      groupByOptions.push(groupByOption);
-      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM}_${field.name}`;
-      groupByOptionsData[label] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
-        field: field.name,
-        formRowLabel,
-        interval: '10',
-      };
-    } else if (field.type === FIELD_TYPE.DATE) {
-      const label = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}(${field.name})`;
-      const groupByOption: DropDownLabel = { label };
-      groupByOptions.push(groupByOption);
-      const formRowLabel = `${PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM}_${field.name}`;
-      groupByOptionsData[label] = {
-        agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
-        field: field.name,
-        formRowLabel,
-        interval: '1m',
-      };
-    }
-
     // aggregations
     const aggOption: DropDownOption = { label: field.name, options: [] };
     pivotSupportedAggs.forEach(agg => {
@@ -117,7 +78,7 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupByList, aggList })
   });
 
   const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupByList.map(l => groupByOptionsData[l]);
+  const pivotGroupBy = groupBy;
   const pivotQuery = getPivotQuery(search);
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
@@ -139,7 +100,10 @@ export const DefinePivotSummary: SFC<Props> = ({ search, groupByList, aggList })
               defaultMessage: 'Group by',
             })}
           >
-            <GroupByList list={groupByList} optionsData={groupByOptionsData} />
+            <GroupByListSummary
+              list={Object.keys(groupByOptionsData)}
+              optionsData={groupByOptionsData}
+            />
           </EuiFormRow>
 
           <EuiFormRow

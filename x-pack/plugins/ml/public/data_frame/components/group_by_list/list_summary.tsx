@@ -24,14 +24,16 @@ interface GroupByLabelProps {
 
 const GroupByLabel: React.SFC<GroupByLabelProps> = ({ item, optionsDataId }) => {
   return 'interval' in item ? (
-    <EuiFlexGroup justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>{optionsDataId}</EuiFlexItem>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
       <EuiFlexItem grow={false} style={{ color: '#999' }}>
         {item.interval}
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (
-    <Fragment>{optionsDataId}</Fragment>
+    <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -41,7 +43,7 @@ interface ListProps {
   deleteHandler?(l: string): void;
 }
 
-export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list, optionsData }) => (
+export const GroupByListSummary: React.SFC<ListProps> = ({ list, optionsData }) => (
   <EuiListGroup flush={true}>
     {list.map((optionsDataId: string) => {
       return (
@@ -50,16 +52,6 @@ export const GroupByList: React.SFC<ListProps> = ({ deleteHandler, list, options
             <EuiListGroupItem
               label={
                 <GroupByLabel item={optionsData[optionsDataId]} optionsDataId={optionsDataId} />
-              }
-              extraAction={
-                (deleteHandler && {
-                  onClick: () => deleteHandler(optionsDataId),
-                  iconType: 'cross',
-                  iconSize: 's',
-                  'aria-label': optionsDataId,
-                  alwaysShow: false,
-                }) ||
-                undefined
               }
               style={{ padding: 0, display: 'block', width: '100%' }}
             />

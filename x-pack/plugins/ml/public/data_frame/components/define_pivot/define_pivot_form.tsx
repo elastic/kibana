@@ -23,7 +23,7 @@ import {
 
 import { DropDown } from '../../components/aggregation_dropdown/dropdown';
 import { AggListForm } from '../../components/aggregation_list';
-import { GroupByList } from '../../components/group_by_list/list';
+import { GroupByListForm } from '../../components/group_by_list';
 import { SourceIndexPreview } from '../../components/source_index_preview';
 import { PivotPreview } from './pivot_preview';
 
@@ -100,6 +100,17 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   // The list of selected group by fields
   const [groupByList, setGroupByList] = useState(defaults.groupByList as Label[]);
+  const defaultGroupByInterval: PivotGroupByConfigDict = {};
+  defaults.groupBy.forEach(gb => {
+    const label = `${gb.agg}(${gb.field})`;
+    defaultGroupByInterval[label] = gb;
+  });
+  const [groupByInterval, setGroupByInterval] = useState(defaultGroupByInterval);
+
+  const addGroupByInterval = (label: Label, item: PivotGroupByConfig) => {
+    groupByInterval[label] = item;
+    setGroupByInterval({ ...groupByInterval });
+  };
 
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
@@ -110,6 +121,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const deleteGroupBy = (label: Label) => {
     const newList = groupByList.filter(l => l !== label);
     setGroupByList(newList);
+    delete groupByInterval[label];
+    setGroupByInterval(groupByInterval);
   };
 
   // The list of selected aggregations
@@ -188,11 +201,10 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   });
 
   const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupByList.map(l => groupByOptionsData[l]);
+  const pivotGroupBy = groupByList.map(l => groupByInterval[l] || groupByOptionsData[l]);
   const pivotQuery = getPivotQuery(search);
 
   const valid = pivotGroupBy.length > 0 && aggList.length > 0;
-
   useEffect(
     () => {
       onChange({ aggList, aggs: pivotAggs, groupByList, groupBy: pivotGroupBy, search, valid });
@@ -201,7 +213,9 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       aggList,
       pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
       groupByList,
-      pivotGroupBy.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
+      pivotGroupBy
+        .map(d => `${d.agg} ${d.field} ${'interval' in d ? d.interval : ''} ${d.formRowLabel}`)
+        .join(' '),
       search,
       valid,
     ]
@@ -233,8 +247,10 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             })}
           >
             <Fragment>
-              <GroupByList
+              <GroupByListForm
+                intervalData={groupByInterval}
                 list={groupByList}
+                onChange={addGroupByInterval}
                 optionsData={groupByOptionsData}
                 deleteHandler={deleteGroupBy}
               />
