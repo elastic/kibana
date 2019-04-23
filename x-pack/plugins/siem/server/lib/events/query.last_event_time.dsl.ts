@@ -26,7 +26,10 @@ export const buildLastEventTimeQuery = ({
     network: [logAlias, packetbeatAlias],
   };
   const getHostDetailsFilter = (hostName: string) => [{ term: { 'host.name': hostName } }];
-  const getIpDetailsFilter = (ip: string) => [{ term: { 'source.ip': ip } }, { term: { 'destination.ip': ip } }];
+  const getIpDetailsFilter = (ip: string) => [
+    { term: { 'source.ip': ip } },
+    { term: { 'destination.ip': ip } },
+  ];
   switch (indexKey) {
     case 'ipDetails':
       if (details.ip) {

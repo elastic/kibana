@@ -104,7 +104,7 @@ describe('Last Event Time Stat', async () => {
       </TestProviders>
     );
     await wait();
-    const alertIcon = await waitForElement(() => container.querySelectorAll('svg'), { container });
-    expect(alertIcon.length).toBe(1);
+
+    expect(container.innerHTML).toBe('--');
   });
 });

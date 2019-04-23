@@ -28,17 +28,7 @@ export const LastEventTime = pure<LastEventTimeProps>(({ hostName, indexKey, ip 
           client
         );
         if (errorMessage != null) {
-          return (
-            <EuiToolTip
-              position="top"
-              content={errorMessage}
-              data-test-subj="last_event_time_error"
-              aria-label="last_event_time_error"
-              id={`last_event_time_error-${indexKey}`}
-            >
-              <EuiIcon aria-describedby={`last_event_time_error-${indexKey}`} type="alert" />
-            </EuiToolTip>
-          );
+          return getEmptyTagValue();
         }
         return (
           <>
