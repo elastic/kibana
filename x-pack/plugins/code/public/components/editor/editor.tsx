@@ -128,12 +128,7 @@ export class EditorComponent extends React.Component<IProps> {
           macModifier={[Modifier.meta]}
           winModifier={[Modifier.ctrl]}
         />
-        <div
-          tabIndex={0}
-          className="codeContainer__editor"
-          id="mainEditor"
-          style={{ paddingLeft: this.props.showBlame ? 300 : 0 }}
-        />
+        <div tabIndex={0} className="codeContainer__editor" id="mainEditor" />
         {this.renderReferences()}
       </EuiFlexItem>
     );
