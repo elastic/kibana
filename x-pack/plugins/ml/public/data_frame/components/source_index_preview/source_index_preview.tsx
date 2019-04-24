@@ -13,7 +13,6 @@ import {
   EuiButtonIcon,
   EuiCallOut,
   EuiCheckbox,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
