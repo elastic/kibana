@@ -160,7 +160,7 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
     const spacesService = await service.setup({
       elasticsearch: server.plugins.elasticsearch,
       savedObjects: server.savedObjects,
-      security: {} as SecurityPlugin,
+      getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
     });
 

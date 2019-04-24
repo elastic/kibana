@@ -47,7 +47,7 @@ describe('createSpacesTutorialContextFactory', () => {
         }),
       } as unknown) as ElasticsearchPlugin,
       savedObjects: {} as SavedObjectsService,
-      security: {} as SecurityPlugin,
+      getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
     });
     expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
@@ -62,7 +62,7 @@ describe('createSpacesTutorialContextFactory', () => {
         }),
       } as unknown) as ElasticsearchPlugin,
       savedObjects: {} as SavedObjectsService,
-      security: {} as SecurityPlugin,
+      getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
@@ -86,7 +86,7 @@ describe('createSpacesTutorialContextFactory', () => {
         }),
       } as unknown) as ElasticsearchPlugin,
       savedObjects: {} as SavedObjectsService,
-      security: {} as SecurityPlugin,
+      getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);

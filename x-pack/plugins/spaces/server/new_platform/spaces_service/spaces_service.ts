@@ -29,7 +29,7 @@ interface CacheEntry {
 interface SpacesServiceDeps {
   elasticsearch: ElasticsearchPlugin;
   savedObjects: SavedObjectsService;
-  security: SecurityPlugin;
+  getSecurity: () => SecurityPlugin;
   spacesAuditLogger: any;
 }
 
@@ -47,7 +47,7 @@ export class SpacesService {
   public async setup({
     elasticsearch,
     savedObjects,
-    security,
+    getSecurity,
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
     const adminClient = elasticsearch.getCluster('admin');
@@ -71,10 +71,13 @@ export class SpacesService {
         const { callWithRequest, callWithInternalUser } = adminClient;
 
         const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
-        const callWithRequestRepository = savedObjects.getSavedObjectsRepository(
-          (endpoint: string, params: any, options?: any) =>
-            callWithRequest(request, endpoint, params, options)
-        );
+
+        const callCluster = (endpoint: string, ...args: any[]) =>
+          callWithRequest(request, endpoint, ...args);
+
+        const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
+
+        const security = getSecurity();
         const authorization = security ? security.authorization : null;
 
         return new SpacesClient(

@@ -29,7 +29,7 @@ import { SpacesPlugin } from './types';
 export interface SpacesCoreSetup {
   http: HttpServiceSetup;
   xpackMain: XPackMainPlugin;
-  security: SecurityPlugin;
+  getSecurity: () => SecurityPlugin;
   savedObjects: SavedObjectsService;
   spaces: SpacesPlugin;
   elasticsearch: ElasticsearchPlugin;
@@ -157,7 +157,7 @@ export const spaces = (kibana: Record<string, any>) =>
         elasticsearch: server.plugins.elasticsearch,
         xpackMain: server.plugins.xpack_main,
         spaces: this,
-        security: server.plugins.security,
+        getSecurity: () => server.plugins.security,
         savedObjects: server.savedObjects,
         usage: (server as any).usage,
         tutorial: {

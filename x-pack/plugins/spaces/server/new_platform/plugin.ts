@@ -56,7 +56,7 @@ export class Plugin {
     const spacesService = await service.setup({
       elasticsearch: core.elasticsearch,
       savedObjects: core.savedObjects,
-      security: core.security,
+      getSecurity: core.getSecurity,
       spacesAuditLogger,
     });
 

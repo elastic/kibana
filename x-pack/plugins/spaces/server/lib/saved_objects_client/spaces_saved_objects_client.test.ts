@@ -67,7 +67,7 @@ const createSpacesService = async () => {
       }),
     } as unknown) as ElasticsearchPlugin,
     savedObjects: {} as SavedObjectsService,
-    security: {} as SecurityPlugin,
+    getSecurity: () => ({} as SecurityPlugin),
     spacesAuditLogger: {} as SpacesAuditLogger,
   });
 };

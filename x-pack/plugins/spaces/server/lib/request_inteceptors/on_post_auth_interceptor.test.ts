@@ -141,7 +141,7 @@ describe('onPostAuthRequestInterceptor', () => {
       spacesService = await service.setup({
         elasticsearch: server.plugins.elasticsearch as ElasticsearchPlugin,
         savedObjects: server.savedObjects,
-        security: {} as SecurityPlugin,
+        getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,
       });
 
