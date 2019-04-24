@@ -41,6 +41,7 @@ const addBasePath = (path: string) => path;
 beforeEach(() => {
   mockPluginLoader.mockClear();
   mockPlugin.setup.mockClear();
+  mockPlugin.start.mockClear();
   mockPlugin.stop.mockClear();
   plugin = new PluginWrapper(createManifest('plugin-a'), initializerContext);
 });
@@ -58,10 +59,18 @@ describe('PluginWrapper', () => {
   });
 
   test('`setup` fails if plugin.setup is not a function', async () => {
-    mockInitializer.mockReturnValueOnce({ stop: jest.fn() } as any);
+    mockInitializer.mockReturnValueOnce({ start: jest.fn() } as any);
     await plugin.load(addBasePath);
     await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Instance of plugin \\"plugin-a\\" does not define \\"setup\\" function."`
+    );
+  });
+
+  test('`setup` fails if plugin.start is not a function', async () => {
+    mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
+    await plugin.load(addBasePath);
+    await expect(plugin.setup({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Instance of plugin \\"plugin-a\\" does not define \\"start\\" function."`
     );
   });
 
@@ -79,6 +88,22 @@ describe('PluginWrapper', () => {
     expect(mockPlugin.setup).toHaveBeenCalledWith(context, deps);
   });
 
+  test('`start` fails if setup is not called first', async () => {
+    await plugin.load(addBasePath);
+    await expect(plugin.start({} as any, {} as any)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Plugin \\"plugin-a\\" can't be started since it isn't set up."`
+    );
+  });
+
+  test('`start` calls plugin.start with context and dependencies', async () => {
+    await plugin.load(addBasePath);
+    await plugin.setup({} as any, {} as any);
+    const context = { any: 'thing' } as any;
+    const deps = { otherDep: 'value' };
+    await plugin.start(context, deps);
+    expect(mockPlugin.start).toHaveBeenCalledWith(context, deps);
+  });
+
   test('`stop` fails if plugin is not setup up', async () => {
     expect(() => plugin.stop()).toThrowErrorMatchingInlineSnapshot(
       `"Plugin \\"plugin-a\\" can't be stopped since it isn't set up."`
@@ -93,7 +118,7 @@ describe('PluginWrapper', () => {
   });
 
   test('`stop` does not fail if plugin.stop does not exist', async () => {
-    mockInitializer.mockReturnValueOnce({ setup: jest.fn() } as any);
+    mockInitializer.mockReturnValueOnce({ setup: jest.fn(), start: jest.fn() } as any);
     await plugin.load(addBasePath);
     await plugin.setup({} as any, {} as any);
     expect(() => plugin.stop()).not.toThrow();

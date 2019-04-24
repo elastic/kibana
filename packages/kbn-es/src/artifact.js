@@ -73,7 +73,7 @@ exports.Artifact = class Artifact {
    * @param {string} version
    * @param {ToolingLog} log
    */
-  static async get(license, version, log) {
+  static async getSnapshot(license, version, log) {
     const urlVersion = `${encodeURIComponent(version)}-SNAPSHOT`;
     const urlBuild = encodeURIComponent(TEST_ES_SNAPSHOT_VERSION);
     const url = `${V1_VERSIONS_API}/${urlVersion}/builds/${urlBuild}/projects/elasticsearch`;
@@ -134,6 +134,24 @@ exports.Artifact = class Artifact {
           `  options: ${filenames.join(',')}`
       );
     }
+
+    return new Artifact(artifactSpec, log);
+  }
+
+  /**
+   * Fetch an Artifact from the Elasticsearch past releases url
+   * @param {string} url
+   * @param {ToolingLog} log
+   */
+  static async getArchive(url, log) {
+    const shaUrl = `${url}.sha512`;
+
+    const artifactSpec = {
+      url: url,
+      filename: path.basename(url),
+      checksumUrl: shaUrl,
+      checksumType: getChecksumType(shaUrl),
+    };
 
     return new Artifact(artifactSpec, log);
   }

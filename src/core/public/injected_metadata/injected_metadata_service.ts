@@ -105,6 +105,10 @@ export class InjectedMetadataService {
     };
   }
 
+  public start(): InjectedMetadataStart {
+    return this.setup();
+  }
+
   public getKibanaVersion() {
     return this.state.version;
   }
@@ -154,3 +158,6 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
 }
+
+/** @public */
+export type InjectedMetadataStart = InjectedMetadataSetup;
