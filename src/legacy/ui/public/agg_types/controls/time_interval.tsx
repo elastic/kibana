@@ -102,13 +102,16 @@ function TimeIntervalParamEditor({
     setValidity(isValid);
     setValue(normalizedCustomValue);
     setTouched();
+    if (isValid) agg.write();
   };
 
   const onChange = (opts: EuiComboBoxOptionProps[]) => {
     const selectedOpt: ComboBoxOption = get(opts, '0');
+
     setValidity(!!selectedOpt);
     setValue(selectedOpt ? selectedOpt.key : selectedOpt);
     setTouched();
+    if (selectedOpt) agg.write();
   };
 
   useEffect(
