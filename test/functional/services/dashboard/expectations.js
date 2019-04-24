@@ -41,7 +41,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       log.debug('Checking all visualisations are present on dashsboard');
       let notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
       // TODO: Determine issue occasionally preventing 'geo map' from loading
-      notLoaded = notLoaded.filter(x => x !== 'geo map');
+      notLoaded = notLoaded.filter(x => x !== 'Rendering Test: geo map');
       expect(notLoaded).to.be.empty();
     }
 
