@@ -7,21 +7,25 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['maps', 'common']);
   const inspector = getService('inspector');
+  const retry = getService('retry');
 
   describe('elasticsearch document layer', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('document example');
+      await PageObjects.common.sleep(5000);
     });
 
     async function getRequestTimestamp() {
-      await inspector.open();
-      await inspector.openInspectorRequestsView();
-      const requestStats = await inspector.getTableData();
-      const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
-      await inspector.close();
-      return requestTimestamp;
+      return retry.try(async () => {
+        await inspector.open();
+        await inspector.openInspectorRequestsView();
+        const requestStats = await inspector.getTableData();
+        const requestTimestamp =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Request timestamp');
+        await inspector.close();
+        return requestTimestamp;
+      }, async () => await inspector.close());
     }
 
     async function getHits() {

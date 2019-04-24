@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }) {
           });
         });
 
-        it('should sort by cpu', async () => {
+        it.skip('should sort by cpu', async () => {
           await nodesList.clickCpuCol();
           await nodesList.clickCpuCol();
 
