@@ -25,7 +25,7 @@ import { uiModules } from 'ui/modules';
 import { I18nSetup } from '../../../../core/public';
 
 export let I18nContext: I18nSetup['Context'] = null!;
-export function __newPlatformInit__(context: typeof I18nContext) {
+export function __newPlatformSetup__(context: typeof I18nContext) {
   if (I18nContext) {
     throw new Error('ui/i18n already initialized with new platform apis');
   }
