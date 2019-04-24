@@ -35,7 +35,7 @@ export async function parseFile(file, previewCallback = null, preIndexTransform,
           return;
         }
         if (previewCallback) {
-          const defaultName = _.get(cleanAndValidJson, 'name', 'fileToImport');
+          const defaultName = _.get(cleanAndValidJson, 'name', 'Import File');
           previewCallback(cleanAndValidJson, defaultName);
         }
         resolve(cleanAndValidJson);
