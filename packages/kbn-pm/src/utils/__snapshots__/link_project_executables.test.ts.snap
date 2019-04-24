@@ -14,6 +14,7 @@ Object {
       "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
     ],
   ],
+  "isSymlink": Array [],
   "mkdirp": Array [],
   "readFile": Array [],
   "unlink": Array [],
@@ -54,6 +55,7 @@ Object {
       "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
     ],
   ],
+  "isSymlink": Array [],
   "mkdirp": Array [
     Array [
       "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin",

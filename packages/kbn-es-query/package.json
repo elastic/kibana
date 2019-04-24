@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
-    "moment-timezone": "^0.5.14"
+    "moment-timezone": "^0.5.14",
+    "@kbn/i18n": "1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -25,7 +26,7 @@
     "@kbn/dev-utils": "1.0.0",
     "@kbn/expect": "1.0.0",
     "del": "^3.0.0",
-    "getopts": "^2.2.3",
+    "getopts": "^2.2.4",
     "supports-color": "^6.1.0",
     "typescript": "^3.3.3333"
   }

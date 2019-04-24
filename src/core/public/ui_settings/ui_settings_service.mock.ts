@@ -32,6 +32,7 @@ const createSetupContractMock = () => {
     overrideLocalDefault: jest.fn(),
     getUpdate$: jest.fn(),
     getSaved$: jest.fn(),
+    getUpdateErrors$: jest.fn(),
     stop: jest.fn(),
   };
   // we have to suppress type errors until decide how to mock es6 class

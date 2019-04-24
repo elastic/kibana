@@ -95,10 +95,7 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <p>
         <FormattedMessage
           defaultMessage="Select which types to export."
@@ -220,6 +217,7 @@ exports[`ObjectsTable import should show the flyout 1`] = `
 
 exports[`ObjectsTable relationships should show the flyout 1`] = `
 <InjectIntl(RelationshipsUI)
+  canGoInApp={[Function]}
   close={[Function]}
   getEditUrl={[Function]}
   getRelationships={[Function]}
@@ -245,6 +243,8 @@ exports[`ObjectsTable should render normally 1`] = `
     size="xs"
   />
   <InjectIntl(TableUI)
+    canDeleteSavedObjectTypes={Array []}
+    canGoInApp={[Function]}
     filterOptions={
       Array [
         Object {

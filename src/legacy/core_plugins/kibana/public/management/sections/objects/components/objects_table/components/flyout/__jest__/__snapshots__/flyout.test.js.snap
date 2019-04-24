@@ -10,10 +10,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
   size="s"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
@@ -282,10 +279,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
   size="s"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
@@ -492,10 +486,7 @@ exports[`Flyout should render import step 1`] = `
   size="s"
 >
   <EuiFlyoutHeader>
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         <FormattedMessage
           defaultMessage="Import saved objects"
