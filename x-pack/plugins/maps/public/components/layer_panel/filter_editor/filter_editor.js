@@ -120,19 +120,26 @@ export class FilterEditor extends Component {
   }
 
   _renderQuery() {
+    if (!this.props.layer.getSource().supportsElasticsearchFilters()) {
+      return null;
+    }
+
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
-        <EuiText>
-          <p>
-            <EuiTextColor color="subdued">
-              <FormattedMessage
-                id="xpack.maps.layerPanel.filterEditor.emptyState.description"
-                defaultMessage="Add a filter to narrow the layer data."
-              />
-            </EuiTextColor>
-          </p>
-        </EuiText>
+        <Fragment>
+          <EuiText>
+            <p>
+              <EuiTextColor color="subdued">
+                <FormattedMessage
+                  id="xpack.maps.layerPanel.filterEditor.emptyState.description"
+                  defaultMessage="Add a filter to narrow the layer data."
+                />
+              </EuiTextColor>
+            </p>
+          </EuiText>
+          {this._renderQueryPopover()}
+        </Fragment>
       );
     }
 
@@ -142,6 +149,7 @@ export class FilterEditor extends Component {
           {query.query}
         </EuiCodeBlock>
         <EuiSpacer size="m" />
+        {this._renderQueryPopover()}
       </Fragment>
     );
   }
@@ -204,7 +212,6 @@ export class FilterEditor extends Component {
 
         {this._renderQuery()}
 
-        {this._renderQueryPopover()}
       </Fragment>
     );
   }
