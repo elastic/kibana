@@ -49,7 +49,9 @@ const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
 
 jest.mock('ui/chrome', () => mockChromeFactory());
-// jest.mock('../../chrome', () => mockChromeFactory());
+jest.mock('ui/kfetch', () => ({
+  kfetch: () => {},
+}));
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
