@@ -142,7 +142,8 @@ export class AbstractESSource extends AbstractVectorSource {
   async _makeSearchSource(searchFilters, limit) {
     const indexPattern = await this._getIndexPattern();
     const isTimeAware = await this.isTimeAware();
-    const allFilters = [...searchFilters.filters];
+    const globalFilters = searchFilters.ignoreGlobalQuery ? [] : searchFilters.filters;
+    const allFilters = [...globalFilters];
     if (this.isFilterByMapBounds() && searchFilters.buffer) {//buffer can be empty
       const geoField = await this._getGeoField();
       allFilters.push(createExtentFilter(searchFilters.buffer, geoField.name, geoField.type));
@@ -155,7 +156,9 @@ export class AbstractESSource extends AbstractVectorSource {
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    searchSource.setField('query', searchFilters.query);
+    if (!searchFilters.ignoreGlobalQuery) {
+      searchSource.setField('query', searchFilters.query);
+    }
 
     if (searchFilters.layerQuery) {
       const layerSearchSource = new SearchSource();

@@ -511,6 +511,19 @@ export function setLayerQuery(id, query) {
   };
 }
 
+export function setLayerIgnoreGlobalQuery(id, ignoreGlobalQuery) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'ignoreGlobalQuery',
+      newValue: ignoreGlobalQuery,
+    });
+
+    dispatch(syncDataForLayer(id));
+  };
+}
+
 export function removeSelectedLayer() {
   return (dispatch, getState) => {
     const state = getState();

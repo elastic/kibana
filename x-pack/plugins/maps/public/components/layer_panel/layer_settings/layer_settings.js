@@ -131,7 +131,7 @@ export function LayerSettings(props) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiSpacer margin="m"/>
+        <EuiSpacer size="m"/>
 
         {renderLabel()}
 

@@ -15,6 +15,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -76,6 +77,10 @@ export class FilterEditor extends Component {
   _onQueryChange = ({ query }) => {
     this.props.setLayerQuery(this.props.layer.getId(), query);
     this._close();
+  }
+
+  _onIgnoreChange = event => {
+    this.props.setLayerIgnoreGlobalQuery(this.props.layer.getId(), event.target.checked);
   }
 
   _renderQueryPopover() {
@@ -163,6 +168,21 @@ export class FilterEditor extends Component {
     );
   }
 
+  _renderIgnoreGlobalQuery() {
+    return (
+      <EuiSwitch
+        label={
+          i18n.translate('xpack.maps.layerPanel.filterEditor.ignoreGlobalQueryLabel', {
+            defaultMessage: `Ignore global query bar and filter pills.`
+          })
+
+        }
+        checked={this.props.layer.ignoreGlobalQuery()}
+        onChange={this._onIgnoreChange}
+      />
+    );
+  }
+
   render() {
     return (
       <Fragment>
@@ -174,7 +194,15 @@ export class FilterEditor extends Component {
             />
           </h5>
         </EuiTitle>
+
+        <EuiSpacer size="m"/>
+
+        {this._renderIgnoreGlobalQuery()}
+
+        <EuiSpacer/>
+
         {this._renderQuery()}
+
         {this._renderQueryPopover()}
       </Fragment>
     );

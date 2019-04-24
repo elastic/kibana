@@ -207,10 +207,12 @@ export class VectorLayer extends AbstractLayer {
     let updateDueToQuery = false;
     let updateDueToFilters = false;
     let updateDueToLayerQuery = false;
+    let updateDueToIgnoreGlobalQuery = false;
     if (isQueryAware) {
       updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
       updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
       updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+      updateDueToIgnoreGlobalQuery = meta.ignoreGlobalQuery !== searchFilters.ignoreGlobalQuery;
     }
 
     let updateDueToPrecisionChange = false;
@@ -227,6 +229,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToQuery
       && !updateDueToFilters
       && !updateDueToLayerQuery
+      && !updateDueToIgnoreGlobalQuery
       && !updateDueToPrecisionChange;
   }
 
@@ -289,7 +292,8 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      layerQuery: this.getQuery()
+      layerQuery: this.getQuery(),
+      ignoreGlobalQuery: this.ignoreGlobalQuery(),
     };
   }
 

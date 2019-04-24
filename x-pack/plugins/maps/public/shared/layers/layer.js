@@ -42,7 +42,9 @@ export class AbstractLayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
+    layerDescriptor.ignoreGlobalQuery = _.get(options, 'ignoreGlobalQuery', false);
     layerDescriptor.style = _.get(options, 'style',  {});
+
     return layerDescriptor;
   }
 
@@ -142,6 +144,10 @@ export class AbstractLayer {
 
   getQuery() {
     return this._descriptor.query;
+  }
+
+  ignoreGlobalQuery() {
+    return this._descriptor.ignoreGlobalQuery;
   }
 
   getZoomConfig() {
