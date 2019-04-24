@@ -156,6 +156,15 @@ export function addLayer(layerDescriptor) {
   };
 }
 
+// Do not use when rendering a map. Method exists to enable selectors for getLayerList when
+// rendering is not needed.
+export function addLayerWithoutDataSync(layerDescriptor) {
+  return {
+    type: ADD_LAYER,
+    layer: layerDescriptor,
+  };
+}
+
 function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
