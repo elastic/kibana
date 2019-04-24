@@ -120,6 +120,7 @@ declare module '@elastic/eui' {
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 
   type EuiSuperSelectProps = CommonProps & {
+    style?: any;
     options?: any;
     valueOfSelected?: any;
     onChange?: (value: any) => void;

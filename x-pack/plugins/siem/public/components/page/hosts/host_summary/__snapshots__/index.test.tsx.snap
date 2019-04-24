@@ -11,7 +11,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Name
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -21,7 +21,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       First Seen
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -31,7 +31,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Last Seen
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -41,7 +41,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Id
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -51,7 +51,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       IP Address
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -61,7 +61,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       MAC Addr
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -71,7 +71,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Type
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -81,7 +81,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Platform
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -91,7 +91,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       OS Name
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -101,7 +101,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Family
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -111,7 +111,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Version
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
@@ -121,7 +121,7 @@ exports[`Host Summary Component #getEuiDescriptionList All item in description l
       Architecture
     </dt>
     <div>
-      <div
+      <span
         class="euiLoadingSpinner euiLoadingSpinner--medium"
       />
     </div>
