@@ -250,7 +250,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               const lastEventTime = resp.data.source.LastEventTime;
               expect(lastEventTime).to.eql({
                 __typename: 'LastEventTimeData',
-                lastSeen: '2019-02-09T16:45:06.867Z',
+                lastSeen: '2019-02-09T16:45:34.135Z',
               });
             });
         });
