@@ -74,16 +74,15 @@ export async function loadAction({ name, skipExisting, client, dataDir, log, kib
 
   const result = stats.toJSON();
 
-  const indicesToRefresh = Object
-    .entries(result)
-    .filter(([, stats]) => !stats.deleted)
-    .map(([index, { docs }]) => {
+  for (const [index, { docs }] of Object.entries(result)) {
+    if (!docs && docs.indexed > 0) {
       log.info('[%s] Indexed %d docs into %j', name, docs.indexed, index);
-      return index;
-    });
+    }
+  }
 
   await client.indices.refresh({
-    index: indicesToRefresh
+    index: '_all',
+    allowNoIndices: true,
   });
 
   // If we affected the Kibana index, we need to ensure it's migrated...

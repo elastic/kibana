@@ -83,7 +83,7 @@ export class AbstractVectorSource extends AbstractSource {
     return [];
   }
 
-  async getStringFields() {
+  async getLeftJoinFields() {
     return [];
   }
 
