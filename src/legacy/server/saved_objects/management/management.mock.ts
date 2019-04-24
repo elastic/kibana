@@ -17,26 +17,21 @@
  * under the License.
  */
 
-import { registerUserActionRoute } from './server/routes/api/ui_metric';
-import { registerUiMetricUsageCollector } from './server/usage/index';
+import { SavedObjectsManagement } from './management';
 
-export default function (kibana) {
-  return new kibana.Plugin({
-    id: 'ui_metric',
-    require: ['kibana', 'elasticsearch'],
+type Management = PublicMethodsOf<SavedObjectsManagement>;
+const createManagementMock = () => {
+  const mocked: jest.Mocked<Management> = {
+    isImportAndExportable: jest.fn().mockReturnValue(true),
+    getDefaultSearchField: jest.fn(),
+    getIcon: jest.fn(),
+    getTitle: jest.fn(),
+    getEditUrl: jest.fn(),
+    getInAppUrl: jest.fn(),
+  };
+  return mocked;
+};
 
-    uiExports: {
-      mappings: require('./mappings.json'),
-      savedObjectsManagement: {
-        'ui-metric': {
-          isImportableAndExportable: false,
-        },
-      },
-    },
-
-    init: function (server) {
-      registerUserActionRoute(server);
-      registerUiMetricUsageCollector(server);
-    }
-  });
-}
+export const managementMock = {
+  create: createManagementMock,
+};

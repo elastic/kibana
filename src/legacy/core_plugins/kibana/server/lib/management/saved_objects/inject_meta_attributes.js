@@ -17,17 +17,17 @@
  * under the License.
  */
 
-export function injectMetaAttributes(savedObject, savedObjectsSchema) {
+export function injectMetaAttributes(savedObject, savedObjectsManagement) {
   const result = {
     ...savedObject,
     meta: savedObject.meta || {},
   };
 
   // Add extra meta information
-  result.meta.icon = savedObjectsSchema.getIcon(savedObject.type);
-  result.meta.title = savedObjectsSchema.getTitle(savedObject);
-  result.meta.editUrl = savedObjectsSchema.getEditUrl(savedObject);
-  result.meta.inAppUrl = savedObjectsSchema.getInAppUrl(savedObject);
+  result.meta.icon = savedObjectsManagement.getIcon(savedObject.type);
+  result.meta.title = savedObjectsManagement.getTitle(savedObject);
+  result.meta.editUrl = savedObjectsManagement.getEditUrl(savedObject);
+  result.meta.inAppUrl = savedObjectsManagement.getInAppUrl(savedObject);
 
   return result;
 }

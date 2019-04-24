@@ -33,7 +33,7 @@ export function canvas(kibana) {
       home: ['plugins/canvas/register_feature'],
       mappings,
       migrations,
-      savedObjectSchemas: {
+      savedObjectsManagement: {
         [CANVAS_TYPE]: {
           icon: 'canvasApp',
           defaultSearchField: 'name',

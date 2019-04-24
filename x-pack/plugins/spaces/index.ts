@@ -63,10 +63,14 @@ export const spaces = (kibana: Record<string, any>) =>
           '6.6.0': migrateToKibana660,
         },
       },
+      savedObjectsManagement: {
+        space: {
+          isImportableAndExportable: false,
+        },
+      },
       savedObjectSchemas: {
         space: {
           isNamespaceAgnostic: true,
-          isImportableAndExportable: false,
         },
       },
       home: ['plugins/spaces/register_feature'],

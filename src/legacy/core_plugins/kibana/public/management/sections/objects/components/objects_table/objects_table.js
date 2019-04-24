@@ -176,7 +176,7 @@ class ObjectsTableUI extends Component {
     const { activeQuery: query, page, perPage } = this.state;
     const { queryText, visibleTypes } = parseQuery(query);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
-    // The API extracts the fields from each uiExports.savedObjectSchemas "defaultSearchField" attribute
+    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
     const findOptions = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,

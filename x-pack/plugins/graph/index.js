@@ -30,7 +30,7 @@ export function graph(kibana) {
       home: ['plugins/graph/register_feature'],
       mappings,
       migrations,
-      savedObjectSchemas: {
+      savedObjectsManagement: {
         'graph-workspace': {
           isImportableAndExportable: false,
         },

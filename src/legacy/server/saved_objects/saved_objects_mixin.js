@@ -26,6 +26,7 @@ import {
   ScopedSavedObjectsClientProvider,
 } from './service';
 import { getRootPropertiesObjects } from '../mappings';
+import { SavedObjectsManagement } from './management';
 
 import {
   createBulkCreateRoute,
@@ -42,10 +43,11 @@ import {
 } from './routes';
 
 function getImportableAndExportableTypes({ kbnServer, visibleTypes }) {
-  const { savedObjectSchemas = {} } = kbnServer.uiExports;
+  const { savedObjectsManagement = {} } = kbnServer.uiExports;
   return visibleTypes.filter(
     type =>
-      !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false
+      !savedObjectsManagement[type] ||
+      savedObjectsManagement[type].isImportableAndExportable !== false
   );
 }
 
@@ -60,8 +62,8 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'kibanaMigrator', migrator);
   server.decorate(
     'server',
-    'getSavedObjectsSchema',
-    () => new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
+    'getSavedObjectsManagement',
+    () => new SavedObjectsManagement(kbnServer.uiExports.savedObjectsManagement)
   );
 
   const warn = message => server.log(['warning', 'saved-objects'], message);

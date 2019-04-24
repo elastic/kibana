@@ -128,7 +128,7 @@ export default function (kibana) {
         },
       ],
 
-      savedObjectSchemas: {
+      savedObjectsManagement: {
         'index-pattern': {
           icon: 'indexPatternApp',
           defaultSearchField: 'title',
@@ -200,14 +200,12 @@ export default function (kibana) {
           },
         },
         'sample-data-telemetry': {
-          isNamespaceAgnostic: true,
           isImportableAndExportable: false,
         },
         server: {
           isImportableAndExportable: false,
         },
         'kql-telemetry': {
-          isNamespaceAgnostic: true,
           isImportableAndExportable: false,
         },
         config: {
@@ -220,7 +218,16 @@ export default function (kibana) {
           getEditUrl() {
             return `/management/kibana/settings`;
           },
-        }
+        },
+      },
+
+      savedObjectSchemas: {
+        'sample-data-telemetry': {
+          isNamespaceAgnostic: true,
+        },
+        'kql-telemetry': {
+          isNamespaceAgnostic: true,
+        },
       },
 
       injectDefaultVars(server, options) {

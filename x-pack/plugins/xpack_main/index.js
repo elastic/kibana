@@ -85,10 +85,14 @@ export const xpackMain = (kibana) => {
           value: null
         }
       },
+      savedObjectsManagement: {
+        telemetry: {
+          isImportableAndExportable: false,
+        },
+      },
       savedObjectSchemas: {
         telemetry: {
           isNamespaceAgnostic: true,
-          isImportableAndExportable: false,
         },
       },
       injectDefaultVars(server) {

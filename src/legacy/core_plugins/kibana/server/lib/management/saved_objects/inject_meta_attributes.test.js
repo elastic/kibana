@@ -19,7 +19,7 @@
 
 import { injectMetaAttributes } from './inject_meta_attributes';
 
-function getSchemaMock(savedObjectSchemas) {
+function getManagementMock(savedObjectSchemas) {
   return {
     isImportAndExportable(type) {
       return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
@@ -56,8 +56,8 @@ function getSchemaMock(savedObjectSchemas) {
 
 test('works when no schema is defined for the type', () => {
   const savedObject = { type: 'a' };
-  const savedObjectsSchema = getSchemaMock({});
-  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
+  const savedObjectsManagement = getManagementMock({});
+  const result = injectMetaAttributes(savedObject, savedObjectsManagement);
   expect(result).toEqual({ type: 'a', meta: {} });
 });
 
@@ -65,12 +65,12 @@ test('inject icon into meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectsSchema = getSchemaMock({
+  const savedObjectsManagement = getManagementMock({
     a: {
       icon: 'my-icon',
     },
   });
-  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
+  const result = injectMetaAttributes(savedObject, savedObjectsManagement);
   expect(result).toEqual({
     type: 'a',
     meta: {
@@ -83,14 +83,14 @@ test('injects title into meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectsSchema = getSchemaMock({
+  const savedObjectsManagement = getManagementMock({
     a: {
       getTitle() {
         return 'my-title';
       },
     },
   });
-  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
+  const result = injectMetaAttributes(savedObject, savedObjectsManagement);
   expect(result).toEqual({
     type: 'a',
     meta: {
@@ -103,14 +103,14 @@ test('injects editUrl into meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectsSchema = getSchemaMock({
+  const savedObjectsManagement = getManagementMock({
     a: {
       getEditUrl() {
         return 'my-edit-url';
       },
     },
   });
-  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
+  const result = injectMetaAttributes(savedObject, savedObjectsManagement);
   expect(result).toEqual({
     type: 'a',
     meta: {
@@ -123,7 +123,7 @@ test('injects inAppUrl meta attribute', () => {
   const savedObject = {
     type: 'a',
   };
-  const savedObjectsSchema = getSchemaMock({
+  const savedObjectsManagement = getManagementMock({
     a: {
       getInAppUrl() {
         return {
@@ -133,7 +133,7 @@ test('injects inAppUrl meta attribute', () => {
       },
     },
   });
-  const result = injectMetaAttributes(savedObject, savedObjectsSchema);
+  const result = injectMetaAttributes(savedObject, savedObjectsManagement);
   expect(result).toEqual({
     type: 'a',
     meta: {

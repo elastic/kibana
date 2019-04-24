@@ -17,17 +17,9 @@
  * under the License.
  */
 
-import { SavedObject } from '../service';
-
 interface SavedObjectsSchemaTypeDefinition {
   isNamespaceAgnostic: boolean;
   hidden?: boolean;
-  isImportableAndExportable?: boolean;
-  defaultSearchField?: string;
-  icon?: string;
-  getTitle?: (savedObject: SavedObject) => string;
-  getEditUrl?: (savedObject: SavedObject) => string;
-  getInAppUrl?: (savedObject: SavedObject) => { path: string; uiCapabilitiesPath: string };
 }
 
 export interface SavedObjectsSchemaDefinition {
@@ -60,56 +52,5 @@ export class SavedObjectsSchema {
       return false;
     }
     return Boolean(typeSchema.isNamespaceAgnostic);
-  }
-
-  public isImportAndExportable(type: string) {
-    // import and exportable by default unless isImportableAndExportable set explicitly to false
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].isImportableAndExportable !== false;
-    }
-
-    return true;
-  }
-
-  public getDefaultSearchField(type: string) {
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].defaultSearchField;
-    }
-  }
-
-  public getIcon(type: string) {
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].icon;
-    }
-  }
-
-  public getTitle(savedObject: SavedObject) {
-    const { type } = savedObject;
-    if (this.definition && this.definition.hasOwnProperty(type) && this.definition[type].getTitle) {
-      const { getTitle } = this.definition[type];
-      if (getTitle) {
-        return getTitle(savedObject);
-      }
-    }
-  }
-
-  public getEditUrl(savedObject: SavedObject) {
-    const { type } = savedObject;
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      const { getEditUrl } = this.definition[type];
-      if (getEditUrl) {
-        return getEditUrl(savedObject);
-      }
-    }
-  }
-
-  public getInAppUrl(savedObject: SavedObject) {
-    const { type } = savedObject;
-    if (this.definition && this.definition.hasOwnProperty(type)) {
-      const { getInAppUrl } = this.definition[type];
-      if (getInAppUrl) {
-        return getInAppUrl(savedObject);
-      }
-    }
   }
 }

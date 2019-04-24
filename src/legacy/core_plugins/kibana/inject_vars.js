@@ -28,8 +28,8 @@ export function injectVars(server) {
 
   // Get types that are import and exportable, by default yes unless isImportableAndExportable is set to false
   const { types: allTypes } = server.savedObjects;
-  const savedObjectsSchema = server.getSavedObjectsSchema();
-  const importAndExportableTypes = allTypes.filter(type => savedObjectsSchema.isImportAndExportable(type));
+  const savedObjectsManagement = server.getSavedObjectsManagement();
+  const importAndExportableTypes = allTypes.filter(type => savedObjectsManagement.isImportAndExportable(type));
 
   return {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),

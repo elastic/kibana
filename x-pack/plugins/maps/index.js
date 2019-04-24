@@ -53,6 +53,11 @@ export function maps(kibana) {
       home: ['plugins/maps/register_feature'],
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
+        'maps-telemetry': {
+          isNamespaceAgnostic: true,
+        }
+      },
+      savedObjectsManagement: {
         'map': {
           icon: APP_ICON,
           defaultSearchField: 'title',
@@ -67,7 +72,6 @@ export function maps(kibana) {
           },
         },
         'maps-telemetry': {
-          isNamespaceAgnostic: true,
           isImportableAndExportable: false,
         }
       },

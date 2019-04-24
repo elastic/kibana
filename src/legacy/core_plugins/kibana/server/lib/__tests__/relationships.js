@@ -20,7 +20,7 @@
 import expect from '@kbn/expect';
 import { findRelationships } from '../management/saved_objects/relationships';
 
-function getSchemaMock(savedObjectSchemas) {
+function getManagementaMock(savedObjectSchemas) {
   return {
     isImportAndExportable(type) {
       return !savedObjectSchemas[type] || savedObjectSchemas[type].isImportableAndExportable !== false;
@@ -55,7 +55,7 @@ function getSchemaMock(savedObjectSchemas) {
   };
 }
 
-const savedObjectsSchema = getSchemaMock({
+const savedObjectsManagement = getManagementaMock({
   'index-pattern': {
     icon: 'indexPatternApp',
     defaultSearchField: 'title',
@@ -180,7 +180,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectsSchema,
+        savedObjectsManagement,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -307,7 +307,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectsSchema,
+        savedObjectsManagement,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -426,7 +426,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectsSchema,
+        savedObjectsManagement,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -562,7 +562,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectsSchema,
+        savedObjectsManagement,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );
@@ -653,7 +653,7 @@ describe('findRelationships', () => {
       {
         size,
         savedObjectsClient,
-        savedObjectsSchema,
+        savedObjectsManagement,
         savedObjectTypes: ['dashboard', 'visualization', 'search', 'index-pattern'],
       },
     );

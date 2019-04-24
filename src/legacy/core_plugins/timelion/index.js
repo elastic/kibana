@@ -73,7 +73,7 @@ export default function (kibana) {
           }
         };
       },
-      savedObjectSchemas: {
+      savedObjectsManagement: {
         'timelion-sheet': {
           // Timelion objects are saved as visualizations now and
           // don't save objects as `timelion` type.

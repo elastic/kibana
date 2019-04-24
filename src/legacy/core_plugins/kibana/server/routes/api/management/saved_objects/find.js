@@ -70,14 +70,14 @@ export function registerFind(server) {
       const searchFields = new Set();
       const searchTypes = request.query.type;
       const savedObjectsClient = request.getSavedObjectsClient();
-      const savedObjectsSchema = server.getSavedObjectsSchema();
-      const importAndExportableTypes = searchTypes.filter(type => savedObjectsSchema.isImportAndExportable(type));
+      const savedObjectsManagement = server.getSavedObjectsManagement();
+      const importAndExportableTypes = searchTypes.filter(type => savedObjectsManagement.isImportAndExportable(type));
 
-      // Accumulate "defaultSearchField" attributes from savedObjectSchemas. Unfortunately
+      // Accumulate "defaultSearchField" attributes from savedObjectsManagement. Unfortunately
       // search fields apply to all types of saved objects, the sum of these fields will
       // be searched on for each object.
       for (const type of importAndExportableTypes) {
-        const searchField = savedObjectsSchema.getDefaultSearchField(type);
+        const searchField = savedObjectsManagement.getDefaultSearchField(type);
         if (searchField) {
           searchFields.add(searchField);
         }
@@ -91,7 +91,7 @@ export function registerFind(server) {
       return {
         ...findResponse,
         saved_objects: findResponse.saved_objects
-          .map(obj => injectMetaAttributes(obj, savedObjectsSchema))
+          .map(obj => injectMetaAttributes(obj, savedObjectsManagement))
           .map(obj => {
             const result = { ...obj, attributes: {} };
             for (const field of request.query.fields || []) {
