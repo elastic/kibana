@@ -41,10 +41,6 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-/*
-QueryBarInput will be the text input, the language switcher, and autocomplete.
-import { QueryBarInput } from 'ui/query_bar';
-*/
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
@@ -78,6 +74,9 @@ class TimeseriesPanelConfigUi extends Component {
   }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
+  }
+  handleSubmit = (query) => {
+    this.props.onChange({ filter: query.query.query });
   }
 
   render() {
