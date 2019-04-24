@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
+import { ElasticsearchServiceSetup } from 'src/core/server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
@@ -158,7 +160,14 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
 
     const service = new SpacesService(log, server.config());
     const spacesService = await service.setup({
-      elasticsearch: server.plugins.elasticsearch,
+      elasticsearch: ({
+        adminClient$: Rx.of({
+          callAsInternalUser: jest.fn(),
+          asScoped: jest.fn(req => ({
+            callWithRequest: jest.fn(),
+          })),
+        }),
+      } as unknown) as ElasticsearchServiceSetup,
       savedObjects: server.savedObjects,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
@@ -185,7 +194,7 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
       savedObjects: server.savedObjects,
       spacesService,
       log,
-      config: mockConfig,
+      config: mockConfig as KibanaConfig,
     });
 
     teardowns.push(() => server.stop());

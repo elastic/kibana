@@ -6,13 +6,13 @@
 jest.mock('../../../../server/lib/get_client_shield', () => ({
   getClient: jest.fn(),
 }));
-
+import * as Rx from 'rxjs';
 import Boom from 'boom';
 // @ts-ignore
 import { getClient } from '../../../../server/lib/get_client_shield';
 import { createDefaultSpace } from './create_default_space';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 
 let mockCallWithRequest;
 beforeEach(() => {
@@ -86,11 +86,10 @@ const createMockDeps = (settings: MockServerSettings = {}) => {
     config: mockServer.config(),
     savedObjects: (mockServer.savedObjects as unknown) as SavedObjectsService,
     elasticsearch: ({
-      getCluster: jest.fn().mockReturnValue({
-        callWithRequest: jest.fn(),
-        callWithInternalUser: jest.fn(),
+      dataClient$: Rx.of({
+        callAsInternalUser: jest.fn(),
       }),
-    } as unknown) as ElasticsearchPlugin,
+    } as unknown) as ElasticsearchServiceSetup,
   };
 };
 

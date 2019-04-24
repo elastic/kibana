@@ -15,7 +15,7 @@ import { PrivateRouteDeps } from '.';
 export function initPrivateSpacesApi(deps: PrivateRouteDeps) {
   const { http, config, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.server.route({
+  http.route({
     method: 'POST',
     path: '/api/spaces/v1/space/{id}/select',
     async handler(request: any) {

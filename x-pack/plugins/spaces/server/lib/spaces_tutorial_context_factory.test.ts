@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../new_platform/spaces_service';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../security';
 import { SpacesAuditLogger } from './audit_logger';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 
 const server = {
   config: () => {
@@ -35,17 +37,19 @@ const log = {
   fatal: jest.fn(),
 };
 
-const service = new SpacesService(log, server.config());
+const service = new SpacesService(log, server.config() as KibanaConfig);
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
     const spacesService = await service.setup({
       elasticsearch: ({
-        getCluster: jest.fn().mockReturnValue({
-          callWithRequest: jest.fn(),
-          callWithInternalUser: jest.fn(),
+        adminClient$: Rx.of({
+          callAsInternalUser: jest.fn(),
+          asScoped: jest.fn(req => ({
+            callWithRequest: jest.fn(),
+          })),
         }),
-      } as unknown) as ElasticsearchPlugin,
+      } as unknown) as ElasticsearchServiceSetup,
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
@@ -56,11 +60,13 @@ describe('createSpacesTutorialContextFactory', () => {
   it('should create context with the current space id for space my-space-id', async () => {
     const spacesService = await service.setup({
       elasticsearch: ({
-        getCluster: jest.fn().mockReturnValue({
-          callWithRequest: jest.fn(),
-          callWithInternalUser: jest.fn(),
+        adminClient$: Rx.of({
+          callAsInternalUser: jest.fn(),
+          asScoped: jest.fn(req => ({
+            callWithRequest: jest.fn(),
+          })),
         }),
-      } as unknown) as ElasticsearchPlugin,
+      } as unknown) as ElasticsearchServiceSetup,
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
@@ -80,11 +86,13 @@ describe('createSpacesTutorialContextFactory', () => {
   it('should create context with the current space id for the default space', async () => {
     const spacesService = await service.setup({
       elasticsearch: ({
-        getCluster: jest.fn().mockReturnValue({
-          callWithRequest: jest.fn(),
-          callWithInternalUser: jest.fn(),
+        adminClient$: Rx.of({
+          callAsInternalUser: jest.fn(),
+          asScoped: jest.fn(req => ({
+            callWithRequest: jest.fn(),
+          })),
         }),
-      } as unknown) as ElasticsearchPlugin,
+      } as unknown) as ElasticsearchServiceSetup,
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,

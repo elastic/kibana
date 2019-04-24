@@ -3,15 +3,15 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { SpacesService } from '../../new_platform/spaces_service';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 
 const config: any = {
   'server.basePath': '/',
@@ -37,7 +37,7 @@ const log = {
   fatal: jest.fn(),
 };
 
-const service = new SpacesService(log, server.config());
+const service = new SpacesService(log, server.config() as KibanaConfig);
 
 const createMockRequest = (space: Partial<Space>) => ({
   getBasePath: () => (space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : ''),
@@ -61,11 +61,13 @@ const createMockClient = () => {
 const createSpacesService = async () => {
   return service.setup({
     elasticsearch: ({
-      getCluster: jest.fn().mockReturnValue({
-        callWithRequest: jest.fn(),
-        callWithInternalUser: jest.fn(),
+      adminClient$: Rx.of({
+        callAsInternalUser: jest.fn(),
+        asScoped: jest.fn(req => ({
+          callWithRequest: jest.fn(),
+        })),
       }),
-    } as unknown) as ElasticsearchPlugin,
+    } as unknown) as ElasticsearchServiceSetup,
     savedObjects: {} as SavedObjectsService,
     getSecurity: () => ({} as SecurityPlugin),
     spacesAuditLogger: {} as SpacesAuditLogger,

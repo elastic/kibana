@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, HttpServiceSetup, PluginInitializerContext } from 'src/core/server';
+import {
+  Logger,
+  HttpServiceSetup,
+  PluginInitializerContext,
+  ElasticsearchServiceSetup,
+} from 'src/core/server';
 import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { ServerRoute } from 'hapi';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
@@ -31,7 +35,7 @@ export interface SpacesHttpServiceSetup extends HttpServiceSetup {
 export interface SpacesCoreSetup {
   http: SpacesHttpServiceSetup;
   savedObjects: SavedObjectsService;
-  elasticsearch: ElasticsearchPlugin;
+  elasticsearch: ElasticsearchServiceSetup;
   usage: {
     collectorSet: {
       register: (collector: any) => void;

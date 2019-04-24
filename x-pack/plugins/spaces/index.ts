@@ -134,7 +134,7 @@ export const spaces = (kibana: Record<string, any>) =>
 
       const core: SpacesCoreSetup = {
         http: spacesHttpService,
-        elasticsearch: server.plugins.elasticsearch,
+        elasticsearch: kbnServer.newPlatform.setup.core.elasticsearch,
         savedObjects: server.savedObjects,
         usage: (server as any).usage,
         tutorial: {
@@ -147,13 +147,6 @@ export const spaces = (kibana: Record<string, any>) =>
         getSecurity: () => server.plugins.security,
         spaces: this,
       };
-
-      // Need legacy because of `setup_base_path_provider`
-      // (request.getBasePath and request.setBasePath)
-      // core.http.server = kbnServer as any;
-
-      // @ts-ignore core.http.route does not exist yet.
-      core.http.route = server.route;
 
       const { spacesService, log } = await plugin(initializerContext).setup(core, plugins);
 

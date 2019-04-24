@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Request } from 'hapi';
-import { Logger } from 'src/core/server';
+import { Logger, ElasticsearchServiceSetup } from 'src/core/server';
 import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { first } from 'rxjs/operators';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
@@ -26,7 +26,7 @@ interface CacheEntry {
 }
 
 interface SpacesServiceDeps {
-  elasticsearch: ElasticsearchPlugin;
+  elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
   getSecurity: () => SecurityPlugin;
   spacesAuditLogger: any;
@@ -49,7 +49,7 @@ export class SpacesService {
     getSecurity,
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
-    const adminClient = elasticsearch.getCluster('admin');
+    const adminClient = await elasticsearch.adminClient$.pipe(first()).toPromise();
     return {
       getSpaceId: (request: Record<string, any>) => {
         if (!this.contextCache.has(request)) {
@@ -67,12 +67,12 @@ export class SpacesService {
         return this.contextCache.get(request)!.isInDefaultSpace;
       },
       scopedClient: (request: Request) => {
-        const { callWithRequest, callWithInternalUser } = adminClient;
+        const { asScoped, callAsInternalUser } = adminClient;
 
-        const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
+        const internalRepository = savedObjects.getSavedObjectsRepository(callAsInternalUser);
 
         const callCluster = (endpoint: string, ...args: any[]) =>
-          callWithRequest(request, endpoint, ...args);
+          asScoped(request).callAsCurrentUser(endpoint, ...args);
 
         const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 

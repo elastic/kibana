@@ -6,17 +6,17 @@
 
 import { Server } from 'hapi';
 import sinon from 'sinon';
-
+import * as Rx from 'rxjs';
 import { SavedObject } from 'src/legacy/server/saved_objects';
 import { Feature } from '../../../../xpack_main/types';
 import { convertSavedObjectToSpace } from '../../routes/lib';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { SpacesService } from '../../new_platform/spaces_service';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 
 describe('onPostAuthRequestInterceptor', () => {
   const sandbox = sinon.sandbox.create();
@@ -139,7 +139,14 @@ describe('onPostAuthRequestInterceptor', () => {
 
       const service = new SpacesService(log, server.config());
       spacesService = await service.setup({
-        elasticsearch: server.plugins.elasticsearch as ElasticsearchPlugin,
+        elasticsearch: ({
+          adminClient$: Rx.of({
+            callAsInternalUser: jest.fn(),
+            asScoped: jest.fn(req => ({
+              callWithRequest: jest.fn(),
+            })),
+          }),
+        } as unknown) as ElasticsearchServiceSetup,
         savedObjects: server.savedObjects,
         getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,

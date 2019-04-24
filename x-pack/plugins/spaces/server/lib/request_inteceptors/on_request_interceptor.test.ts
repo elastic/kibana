@@ -6,7 +6,7 @@
 
 import { Server } from 'hapi';
 import sinon from 'sinon';
-
+import * as Rx from 'rxjs';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { SpacesService } from '../../new_platform/spaces_service';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
@@ -14,6 +14,7 @@ import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
+import { ElasticsearchServiceSetup } from 'src/core/server';
 
 describe('onRequestInterceptor', () => {
   const sandbox = sinon.sandbox.create();
@@ -98,7 +99,14 @@ describe('onRequestInterceptor', () => {
 
       const spacesService = new SpacesService(log, server.config());
       await spacesService.setup({
-        elasticsearch: server.plugins.elasticsearch as ElasticsearchPlugin,
+        elasticsearch: ({
+          adminClient$: Rx.of({
+            callAsInternalUser: jest.fn(),
+            asScoped: jest.fn(req => ({
+              callWithRequest: jest.fn(),
+            })),
+          }),
+        } as unknown) as ElasticsearchServiceSetup,
         savedObjects: server.savedObjects,
         getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,
