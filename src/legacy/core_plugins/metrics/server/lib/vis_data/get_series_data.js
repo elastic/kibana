@@ -48,7 +48,14 @@ export async function getSeriesData(req, panel) {
     let annotations = null;
 
     if (panel.annotations && panel.annotations.length) {
-      annotations = await getAnnotations(req, panel, esQueryConfig, searchStrategy, capabilities, series);
+      annotations = await getAnnotations({
+        req,
+        esQueryConfig,
+        searchStrategy,
+        panel,
+        capabilities,
+        series
+      });
     }
 
     return {

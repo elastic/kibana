@@ -45,11 +45,7 @@ export function getLastSeriesTimestamp(seriesGroup = []) {
     series.forEach(({ data }) => {
       const dataLastTimestamp = head(last(data));
 
-      if (lastTimestamp === null) {
-        lastTimestamp = dataLastTimestamp;
-      } else if (lastTimestamp < dataLastTimestamp) {
-        lastTimestamp = dataLastTimestamp;
-      }
+      lastTimestamp  = Math.max(...[lastTimestamp, dataLastTimestamp]);
     });
   });
 
@@ -82,3 +78,8 @@ export const makeFilter = by =>
  * @return {Array} filtered array
  */
 export const annotationFilter = (annotations, filterValue) => annotations.filter(({ key }) => key <= filterValue);
+
+/**
+ * @type {Function}
+ */
+export const filterAnnotations = makeFilter(annotationFilter);
