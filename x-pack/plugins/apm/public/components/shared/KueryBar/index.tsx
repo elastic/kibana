@@ -12,6 +12,7 @@ import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
+import { StaticIndexPattern } from 'ui/index_patterns';
 import {
   fromQuery,
   toQuery,
@@ -30,7 +31,6 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 const Container = styled.div`
   margin-bottom: 10px;
