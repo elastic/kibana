@@ -24,7 +24,7 @@ const PreviewTitle = () => (
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewTitle', {
-        defaultMessage: 'Data Frame Pivot Preview',
+        defaultMessage: 'Data frame pivot preview',
       })}
     </span>
   </EuiTitle>
@@ -78,7 +78,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
           title={i18n.translate(
             'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutTitle',
             {
-              defaultMessage: 'Pivot Preview not available',
+              defaultMessage: 'Pivot preview not available',
             }
           )}
           color="primary"

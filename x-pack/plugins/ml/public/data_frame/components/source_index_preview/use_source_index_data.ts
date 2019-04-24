@@ -47,7 +47,6 @@ export const useSourceIndexData = (
       try {
         const resp: SearchResponse<any> = await ml.esSearch({
           index: indexPattern.title,
-          rest_total_hits_as_int: true,
           size: SEARCH_SIZE,
           body: { query },
         });

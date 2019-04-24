@@ -32,9 +32,6 @@ export function getDefaultJobDetailsState(): JobDetailsExposedState {
   };
 }
 
-interface EsIndex {
-  name: string;
-}
 interface Props {
   overrides?: JobDetailsExposedState;
   onChange(s: JobDetailsExposedState): void;
@@ -46,7 +43,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const [jobId, setJobId] = useState(defaults.jobId);
   const [targetIndex, setTargetIndex] = useState(defaults.targetIndex);
   const [jobIds, setJobIds] = useState([]);
-  const [indexNames, setIndexNames] = useState([]);
+  const [indexNames, setIndexNames] = useState([] as string[]);
 
   // fetch existing job IDs and indices once for form validation
   useEffect(() => {
@@ -68,7 +65,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
       }
 
       try {
-        setIndexNames((await ml.getIndices()).map((index: EsIndex) => index.name));
+        setIndexNames((await ml.getIndices()).map(index => index.name));
       } catch (e) {
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobDetailsForm.errorGettingDataFrameIndexNames', {

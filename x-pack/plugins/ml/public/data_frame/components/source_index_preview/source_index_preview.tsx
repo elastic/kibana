@@ -74,7 +74,7 @@ const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatt
   <EuiTitle size="xs">
     <span>
       {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
-        defaultMessage: 'Source Index {indexPatternTitle}',
+        defaultMessage: 'Source index {indexPatternTitle}',
         values: { indexPatternTitle },
       })}
     </span>
