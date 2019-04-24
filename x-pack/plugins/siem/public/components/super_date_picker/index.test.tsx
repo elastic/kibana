@@ -347,11 +347,11 @@ describe('SIEM Super Date Picker', () => {
           .simulate('click');
         wrapper.update();
       });
-      test('Make sure it is an absolute Date', () => {
+      test.skip('Make sure it is an absolute Date', () => {
         expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
       });
 
-      test('Make sure that the date in store match with the one selected', () => {
+      test.skip('Make sure that the date in store match with the one selected', () => {
         const selectedDate =
           wrapper.find('input[data-test-subj="superDatePickerAbsoluteDateInput"]').props().value ||
           '';
