@@ -48,7 +48,7 @@ describe('Last Event Time Stat', async () => {
       </TestProviders>
     );
     expect(container.innerHTML).toBe(
-      '<div class="euiLoadingSpinner euiLoadingSpinner--medium"></div>'
+      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
     );
   });
   test('Last seen', async () => {
