@@ -76,8 +76,6 @@ Creates a filter (`RangeFilter`) where the value for the given field is in the g
 
 This folder contains the code corresponding to generating Elasticsearch queries using the Kibana query language.
 
-It also contains code corresponding to the original implementation of Kuery (released in 6.0) which should be removed at some point (see legacy_kuery.js, legacy_kuery.peg).
-
 In general, you will only need to worry about the following functions from the `ast` folder:
 
 ```javascript
