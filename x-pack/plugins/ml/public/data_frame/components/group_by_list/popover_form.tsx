@@ -23,6 +23,20 @@ type supportedIntervalTypes =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 
+export function isIntervalValid(interval: string, intervalType: supportedIntervalTypes) {
+  let valid = true;
+
+  valid = interval !== '';
+
+  if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
+    valid = /^[0-9]+((\.)?[0-9]+)?$/.test(interval);
+  } else if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
+    valid = /^[0-9]+(ms|s|m|h|d|w|M|q|y)$/.test(interval);
+  }
+
+  return valid;
+}
+
 interface Props {
   defaultInterval: string;
   intervalType: supportedIntervalTypes;
@@ -32,15 +46,7 @@ interface Props {
 export const PopoverForm: React.SFC<Props> = ({ defaultInterval, intervalType, onChange }) => {
   const [interval, setInterval] = useState(defaultInterval);
 
-  let valid = true;
-
-  valid = interval !== '';
-
-  if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
-    valid = /^[0-9]+(\.)?[0-9]*$/.test(interval);
-  } else if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
-    valid = /^[0-9][ms|s|m|h|d|w|M|q|y]$/.test(interval);
-  }
+  const valid = isIntervalValid(interval, intervalType);
 
   return (
     <EuiForm>
