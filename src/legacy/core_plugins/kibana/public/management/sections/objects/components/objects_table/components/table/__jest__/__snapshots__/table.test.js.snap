@@ -152,9 +152,9 @@ exports[`Table restricts which saved objects can be deleted based on type 1`] = 
             "actions": Array [
               Object {
                 "available": [Function],
-                "description": "Edit this saved object",
+                "description": "Inspect this saved object",
                 "icon": "inspect",
-                "name": "Edit",
+                "name": "Inspect",
                 "onClick": [Function],
                 "type": "icon",
               },
@@ -367,9 +367,9 @@ exports[`Table should render normally 1`] = `
             "actions": Array [
               Object {
                 "available": [Function],
-                "description": "Edit this saved object",
+                "description": "Inspect this saved object",
                 "icon": "inspect",
-                "name": "Edit",
+                "name": "Inspect",
                 "onClick": [Function],
                 "type": "icon",
               },

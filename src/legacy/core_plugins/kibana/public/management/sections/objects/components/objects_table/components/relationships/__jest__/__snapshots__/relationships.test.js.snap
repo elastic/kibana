@@ -71,9 +71,9 @@ exports[`Relationships should render dashboards normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
-                  "description": "Edit this saved object",
+                  "description": "Inspect this saved object",
                   "icon": "inspect",
-                  "name": "Edit",
+                  "name": "Inspect",
                   "onClick": [Function],
                   "type": "icon",
                 },
@@ -278,9 +278,9 @@ exports[`Relationships should render index patterns normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
-                  "description": "Edit this saved object",
+                  "description": "Inspect this saved object",
                   "icon": "inspect",
-                  "name": "Edit",
+                  "name": "Inspect",
                   "onClick": [Function],
                   "type": "icon",
                 },
@@ -444,9 +444,9 @@ exports[`Relationships should render searches normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
-                  "description": "Edit this saved object",
+                  "description": "Inspect this saved object",
                   "icon": "inspect",
-                  "name": "Edit",
+                  "name": "Inspect",
                   "onClick": [Function],
                   "type": "icon",
                 },
@@ -610,9 +610,9 @@ exports[`Relationships should render visualizations normally 1`] = `
               "actions": Array [
                 Object {
                   "available": [Function],
-                  "description": "Edit this saved object",
+                  "description": "Inspect this saved object",
                   "icon": "inspect",
-                  "name": "Edit",
+                  "name": "Inspect",
                   "onClick": [Function],
                   "type": "icon",
                 },

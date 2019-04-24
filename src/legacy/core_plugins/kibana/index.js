@@ -140,7 +140,7 @@ export default function (kibana) {
           },
           getInAppUrl(obj) {
             return {
-              path: `/app/kibana#/management/kibana/index_patterns/${obj.id}`,
+              path: encodeURIComponent(`/app/kibana#/management/kibana/index_patterns/${obj.id}`),
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             };
           },
@@ -156,7 +156,7 @@ export default function (kibana) {
           },
           getInAppUrl(obj) {
             return {
-              path: `/app/kibana#/visualize/edit/${obj.id}`,
+              path: encodeURIComponent(`/app/kibana#/visualize/edit/${obj.id}`),
               uiCapabilitiesPath: 'visualize.show',
             };
           },
@@ -172,7 +172,7 @@ export default function (kibana) {
           },
           getInAppUrl(obj) {
             return {
-              path: `/app/kibana#/discover/${obj.id}`,
+              path: encodeURIComponent(`/app/kibana#/discover/${obj.id}`),
               uiCapabilitiesPath: 'discover.show',
             };
           },
@@ -188,7 +188,7 @@ export default function (kibana) {
           },
           getInAppUrl(obj) {
             return {
-              path: `/app/kibana#/dashboard/${obj.id}`,
+              path: encodeURIComponent(`/app/kibana#/dashboard/${obj.id}`),
               uiCapabilitiesPath: 'dashboard.show',
             };
           },
