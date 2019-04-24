@@ -313,13 +313,15 @@ const LineChart: VisualizationExtension = {
         </>);
     },
     getAlternatives(datasource, spec) {
-        // check whether the current spec makes sense with this chart
+        // check whether the current spec makes sense for this chart
         // this could also use an elaborate suggestion mechanism like compassql
         const isSuitable = checkInOrder(
-            () => spec.length === 1,
+            () => spec.length === 1 || spec.length === 2,
             () => spec[0].columns.length === 2,
             () => spec[0].columns[0].isSegment,
-            () => spec[0].columns[1].isMetric
+            () => spec[0].columns[1].isMetric,
+            () => !spec[1] || spec[1].columns.length === 1,
+            () => !spec[1] || spec[1].columns[0].isMetric && spec[1].columns[0].dataType === spec[0].columns[0].dataType,
         );
         
         if (!isSuitable) {
@@ -329,14 +331,15 @@ const LineChart: VisualizationExtension = {
         return [{
             tableSpec: spec,
             privateState: { type: 'line' },
-            title: 'Basic line chart'
+            title: spec.length === 1 ? 'Basic line chart' : 'Line chart with annotations'
         }];
     },
     getSuggestionsForField(datasource, spec, field) {
-        // check whether the current spec makes sense with this chart
-        // this could also use an elaborate suggestion mechanism like compassql
+        // check whether the current spec + the new field makes sense for this chart
+        // this could also use an elaborate suggestion mechanism like compassql or chris' matching engine
         const isSuitable = checkInOrder(
             () => spec.length === 1,
+            () => spec[0].datasourceRef === field.datasourceRef,
             () => spec[0].columns.length === 1,
             () => spec[0].columns[0].isMetric
         );
