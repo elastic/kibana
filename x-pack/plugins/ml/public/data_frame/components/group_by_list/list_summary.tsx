@@ -38,27 +38,27 @@ const GroupByLabel: React.SFC<GroupByLabelProps> = ({ item, optionsDataId }) => 
 };
 
 interface ListProps {
-  list: string[];
-  optionsData: PivotGroupByConfigDict;
+  list: PivotGroupByConfigDict;
   deleteHandler?(l: string): void;
 }
 
-export const GroupByListSummary: React.SFC<ListProps> = ({ list, optionsData }) => (
-  <EuiListGroup flush={true}>
-    {list.map((optionsDataId: string) => {
-      return (
-        <Fragment key={optionsDataId}>
-          <EuiPanel paddingSize="s">
-            <EuiListGroupItem
-              label={
-                <GroupByLabel item={optionsData[optionsDataId]} optionsDataId={optionsDataId} />
-              }
-              style={{ padding: 0, display: 'block', width: '100%' }}
-            />
-          </EuiPanel>
-          {list.length > 0 && <EuiSpacer size="s" />}
-        </Fragment>
-      );
-    })}
-  </EuiListGroup>
-);
+export const GroupByListSummary: React.SFC<ListProps> = ({ list }) => {
+  const listKeys = Object.keys(list);
+  return (
+    <EuiListGroup flush={true}>
+      {listKeys.map((optionsDataId: string) => {
+        return (
+          <Fragment key={optionsDataId}>
+            <EuiPanel paddingSize="s">
+              <EuiListGroupItem
+                label={<GroupByLabel item={list[optionsDataId]} optionsDataId={optionsDataId} />}
+                style={{ padding: 0, display: 'block', width: '100%' }}
+              />
+            </EuiPanel>
+            {listKeys.length > 0 && <EuiSpacer size="s" />}
+          </Fragment>
+        );
+      })}
+    </EuiListGroup>
+  );
+};

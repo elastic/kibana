@@ -6,10 +6,16 @@
 
 import { useEffect, useState } from 'react';
 
+import { dictionaryToArray } from '../../../../common/types/common';
 import { ml } from '../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../common/types/common';
-import { getDataFramePreviewRequest, OptionsDataElement, SimpleQuery } from '../../common';
+import {
+  getDataFramePreviewRequest,
+  PivotAggsConfig,
+  PivotGroupByConfigDict,
+  SimpleQuery,
+} from '../../common';
 import { IndexPatternContextValue } from '../../common/index_pattern_context';
 
 export enum PIVOT_PREVIEW_STATUS {
@@ -28,16 +34,18 @@ export interface UsePivotPreviewDataReturnType {
 export const usePivotPreviewData = (
   indexPattern: IndexPatternContextValue,
   query: SimpleQuery,
-  aggs: OptionsDataElement[],
-  groupBy: string[]
+  aggs: PivotAggsConfig[],
+  groupBy: PivotGroupByConfigDict
 ): UsePivotPreviewDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(PIVOT_PREVIEW_STATUS.UNUSED);
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
 
   if (indexPattern !== null) {
+    const groupByArr = dictionaryToArray(groupBy);
+
     const getDataFramePreviewData = async () => {
-      if (aggs.length === 0 || groupBy.length === 0) {
+      if (aggs.length === 0 || groupByArr.length === 0) {
         setDataFramePreviewData([]);
         return;
       }
@@ -45,7 +53,7 @@ export const usePivotPreviewData = (
       setErrorMessage('');
       setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
-      const request = getDataFramePreviewRequest(indexPattern.title, query, groupBy, aggs);
+      const request = getDataFramePreviewRequest(indexPattern.title, query, groupByArr, aggs);
 
       try {
         const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(request);
@@ -62,7 +70,14 @@ export const usePivotPreviewData = (
       () => {
         getDataFramePreviewData();
       },
-      [indexPattern.title, aggs, groupBy, query]
+      [
+        indexPattern.title,
+        aggs.map(a => `${a.agg} ${a.field} ${a.formRowLabel}`).join(' '),
+        groupByArr
+          .map(g => `${g.agg} ${g.field} ${g.formRowLabel} ${'interval' in g ? g.interval : ''}`)
+          .join(' '),
+        query.query_string.query,
+      ]
     );
   }
   return { errorMessage, status, dataFramePreviewData };

@@ -34,7 +34,7 @@ const PopoverForm: React.SFC<PopoverFormProps> = ({ interval, onChange }) => {
     <EuiForm>
       <EuiFlexGroup>
         <EuiFlexItem grow={false} style={{ width: 100 }}>
-          <EuiFormRow label="Interval" compressed={true}>
+          <EuiFormRow label="Interval">
             <EuiFieldText
               defaultValue={editedInterval}
               onChange={e => setInterval(e.target.value)}
@@ -42,10 +42,8 @@ const PopoverForm: React.SFC<PopoverFormProps> = ({ interval, onChange }) => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace compressed={true}>
-            <EuiButton size="s" onClick={() => onChange(editedInterval)}>
-              Save
-            </EuiButton>
+          <EuiFormRow hasEmptyLabelSpace>
+            <EuiButton onClick={() => onChange(editedInterval)}>Save</EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -84,7 +82,7 @@ const GroupByLabel: React.SFC<GroupByLabelProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
-          id="inlineFormPopover"
+          id="mlIntervalFormPopover"
           ownFocus
           button={
             <EuiButtonIcon
@@ -128,23 +126,16 @@ const GroupByLabel: React.SFC<GroupByLabelProps> = ({
 };
 
 interface ListProps {
-  intervalData: PivotGroupByConfigDict;
-  list: string[];
-  optionsData: PivotGroupByConfigDict;
+  list: PivotGroupByConfigDict;
   deleteHandler(l: string): void;
   onChange(id: string, item: PivotGroupByConfig): void;
 }
 
-export const GroupByListForm: React.SFC<ListProps> = ({
-  deleteHandler,
-  intervalData,
-  list,
-  onChange,
-  optionsData,
-}) => {
+export const GroupByListForm: React.SFC<ListProps> = ({ deleteHandler, list, onChange }) => {
+  const listKeys = Object.keys(list);
   return (
     <EuiListGroup flush={true}>
-      {list.map((optionsDataId: string) => {
+      {listKeys.map((optionsDataId: string) => {
         return (
           <Fragment key={optionsDataId}>
             <EuiPanel paddingSize="s">
@@ -152,7 +143,7 @@ export const GroupByListForm: React.SFC<ListProps> = ({
                 label={
                   <GroupByLabel
                     deleteHandler={deleteHandler}
-                    item={intervalData[optionsDataId] || optionsData[optionsDataId]}
+                    item={list[optionsDataId]}
                     onChange={onChange}
                     optionsDataId={optionsDataId}
                   />
@@ -160,7 +151,7 @@ export const GroupByListForm: React.SFC<ListProps> = ({
                 style={{ padding: 0, display: 'block', width: '100%' }}
               />
             </EuiPanel>
-            {list.length > 0 && <EuiSpacer size="s" />}
+            {listKeys.length > 0 && <EuiSpacer size="s" />}
           </Fragment>
         );
       })}

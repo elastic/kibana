@@ -26,7 +26,6 @@ import {
   getPivotQuery,
   IndexPatternContext,
   PivotAggsConfigDict,
-  PivotGroupByConfigDict,
   PIVOT_SUPPORTED_AGGS,
   pivotSupportedAggs,
 } from '../../common';
@@ -36,7 +35,11 @@ import { DefinePivotExposedState } from './define_pivot_form';
 const defaultSearch = '*';
 const emptySearch = '';
 
-export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({ search, groupBy, aggList }) => {
+export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
+  search,
+  groupByList,
+  aggList,
+}) => {
   const indexPattern = useContext(IndexPatternContext);
 
   if (indexPattern === null) {
@@ -46,14 +49,6 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({ search, group
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)
     .map(field => ({ name: field.name, type: field.type }));
-
-  // The available group by options
-  const groupByOptionsData: PivotGroupByConfigDict = {};
-
-  groupBy.forEach(gb => {
-    const label = `${gb.agg}(${gb.field})`;
-    groupByOptionsData[label] = gb;
-  });
 
   // The available aggregations
   const aggOptions: EuiComboBoxOptionProps[] = [];
@@ -78,7 +73,7 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({ search, group
   });
 
   const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupBy;
+  const pivotGroupBy = groupByList;
   const pivotQuery = getPivotQuery(search);
 
   const displaySearch = search === defaultSearch ? emptySearch : search;
@@ -100,10 +95,7 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({ search, group
               defaultMessage: 'Group by',
             })}
           >
-            <GroupByListSummary
-              list={Object.keys(groupByOptionsData)}
-              optionsData={groupByOptionsData}
-            />
+            <GroupByListSummary list={groupByList} />
           </EuiFormRow>
 
           <EuiFormRow

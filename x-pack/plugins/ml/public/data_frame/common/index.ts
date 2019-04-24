@@ -8,7 +8,7 @@ import { DefaultOperator } from 'elasticsearch';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { Dictionary } from '../../../common/types/common';
+import { Dictionary, dictionaryToArray } from '../../../common/types/common';
 
 import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
 
@@ -199,7 +199,7 @@ export function getDataFrameRequest(
     ...getDataFramePreviewRequest(
       indexPatternTitle,
       getPivotQuery(pivotState.search),
-      pivotState.groupBy,
+      dictionaryToArray(pivotState.groupByList),
       pivotState.aggs
     ),
     dest: {
