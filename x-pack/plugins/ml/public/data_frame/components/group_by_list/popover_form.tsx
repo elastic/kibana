@@ -23,7 +23,7 @@ import {
   PIVOT_SUPPORTED_GROUP_BY_AGGS,
 } from '../../common';
 
-type supportedIntervalTypes =
+export type supportedIntervalTypes =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 

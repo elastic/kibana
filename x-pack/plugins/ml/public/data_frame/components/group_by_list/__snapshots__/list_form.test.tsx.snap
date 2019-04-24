@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <GroupByListForm /> Minimal initialization 1`] = `
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="s"
+  >
+    <GroupByLabelForm
+      deleteHandler={[Function]}
+      item={
+        Object {
+          "agg": "terms",
+          "field": "the-group-by-field",
+          "formRowLabel": "the-group-by-label",
+        }
+      }
+      onChange={[Function]}
+      optionsDataId="the-options-data-id"
+    />
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
+`;

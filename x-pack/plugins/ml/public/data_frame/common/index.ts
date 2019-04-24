@@ -11,6 +11,7 @@ import { StaticIndexPattern } from 'ui/index_patterns';
 import { Dictionary, dictionaryToArray } from '../../../common/types/common';
 
 import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
+import { JobDetailsExposedState } from '../components/job_details/job_details_form';
 
 import { PivotGroupByConfig } from '../common';
 
@@ -206,7 +207,7 @@ export function getDataFramePreviewRequest(
 export function getDataFrameRequest(
   indexPatternTitle: StaticIndexPattern['title'],
   pivotState: DefinePivotExposedState,
-  jobDetailsState: any
+  jobDetailsState: JobDetailsExposedState
 ): DataFrameRequest {
   const request: DataFrameRequest = {
     ...getDataFramePreviewRequest(

@@ -19,7 +19,7 @@ import {
 
 import { PivotAggsConfigDict } from '../../common';
 
-interface ListProps {
+export interface ListProps {
   list: string[];
   optionsData: PivotAggsConfigDict;
   deleteHandler?(l: string): void;

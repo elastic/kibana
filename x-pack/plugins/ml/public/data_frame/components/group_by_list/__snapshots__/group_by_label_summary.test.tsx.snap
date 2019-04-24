@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <GroupByLabelSummary /> Minimal initialization 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    the-options-data-id
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

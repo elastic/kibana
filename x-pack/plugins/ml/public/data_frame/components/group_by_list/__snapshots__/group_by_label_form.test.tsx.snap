@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <GroupByLabelForm /> Minimal initialization 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    the-options-data-id
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete item"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
