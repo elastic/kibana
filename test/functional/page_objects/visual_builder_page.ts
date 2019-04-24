@@ -37,6 +37,8 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       await PageObjects.common.navigateToUrl('visualize', 'create?type=metrics');
       log.debug('Set absolute time range from "' + fromTime + '" to "' + toTime + '"');
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      // TSVB bug: https://github.com/elastic/kibana/issues/35468
+      await PageObjects.common.sleep(5000);
     }
 
     public async checkTabIsLoaded(testSubj: string, name: string) {
