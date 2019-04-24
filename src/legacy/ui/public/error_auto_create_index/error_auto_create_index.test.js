@@ -17,20 +17,37 @@
  * under the License.
  */
 
-jest.mock('../chrome', () => ({
-  addBasePath: path => `myBase/${path}`,
-}));
-jest.mock('../metadata', () => ({
-  metadata: {
-    version: 'my-version',
-  },
-}));
-
+// @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
-import { kfetch } from 'ui/kfetch';
+import { __newPlatformSetup__, kfetch } from '../kfetch';
+
+/* eslint-disable @kbn/eslint/no-restricted-paths */
+import { HttpService } from '../../../../core/public/http';
+import { fatalErrorsServiceMock } from '../../../../core/public/fatal_errors/fatal_errors_service.mock';
+import { injectedMetadataServiceMock } from '../../../../core/public/injected_metadata/injected_metadata_service.mock';
+import { BasePathService } from '../../../../core/public/base_path';
+/* eslint-enable @kbn/eslint/no-restricted-paths */
+
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
+function setupService() {
+  const httpService = new HttpService();
+  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+
+  injectedMetadata.getBasePath.mockReturnValue('http://localhost/myBase');
+
+  const basePath = new BasePathService().setup({ injectedMetadata });
+  const http = httpService.setup({ basePath, fatalErrors, injectedMetadata });
+
+  return { httpService, fatalErrors, http };
+}
+
 describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
+  beforeAll(() => {
+    __newPlatformSetup__(setupService().http);
+  });
+
   describe('404', () => {
     beforeEach(() => {
       fetchMock.post({
@@ -45,7 +62,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return false', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
@@ -66,7 +83,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return false', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(false);
       }
@@ -90,7 +107,7 @@ describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch'
     test('should return true', async () => {
       expect.assertions(1);
       try {
-        await kfetch({ method: 'POST', pathname: 'my/path' });
+        await kfetch({ method: 'POST', pathname: '/my/path' });
       } catch (kfetchError) {
         expect(isAutoCreateIndexError(kfetchError)).toBe(true);
       }
