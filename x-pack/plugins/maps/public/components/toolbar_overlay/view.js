@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiButtonIcon,
   EuiPopover,
   EuiContextMenu,
-  EuiSuperSelect
+  EuiSelectable,
+  EuiHighlight,
+  EuiTextColor,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
@@ -124,20 +125,14 @@ export class ToolbarOverlay extends React.Component {
 
     const drawPolygonAction =       {
       name: i18n.translate('xpack.maps.toolbarOverlay.drawShapeLabel', {
-        defaultMessage: 'Draw shape',
+        defaultMessage: 'Draw shape to filter data',
       }),
-      toolTipContent: i18n.translate('xpack.maps.toolbarOverlay.drawShapeTooltip', {
-        defaultMessage: 'Draw shape to filter data from index pattern',
-      })
     };
 
     const drawBoundsAction =      {
       name: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsLabel', {
-        defaultMessage: 'Draw bounds',
+        defaultMessage: 'Draw bounds to filter data',
       }),
-      toolTipContent: i18n.translate('xpack.maps.toolbarOverlay.drawBoundsTooltip', {
-        defaultMessage: 'Draw bounds to filter data from index pattern',
-      })
     };
 
     if (this.state.uniqueIndexPatternsAndGeoFields.length === 1) {
@@ -162,16 +157,53 @@ export class ToolbarOverlay extends React.Component {
   _getIndexPatternSelectionPanel(id) {
     const options = this.state.uniqueIndexPatternsAndGeoFields.map((indexPatternAndGeoField) => {
       return {
-        inputDisplay: <EuiText><p>{`${indexPatternAndGeoField.indexPatternTitle} : ${indexPatternAndGeoField.geoField}`}</p></EuiText>,
+        label: `${indexPatternAndGeoField.indexPatternTitle} : ${indexPatternAndGeoField.geoField}`,
         value: indexPatternAndGeoField
       };
     });
 
+    const renderGeoField = (option, searchValue) => {
+      return (
+        <Fragment>
+          <EuiTextColor color="subdued">
+            <small>
+              <EuiHighlight search={searchValue}>{option.value.indexPatternTitle}</EuiHighlight>
+            </small>
+          </EuiTextColor>
+          <br />
+          <EuiHighlight search={searchValue}>
+            {option.value.geoField}
+          </EuiHighlight>
+        </Fragment>
+      );
+    };
+
     const indexPatternSelection = (
-      <EuiSuperSelect
+      <EuiSelectable
+        searchable
+        searchProps={{
+          placeholder: 'Filter list',
+          compressed: true,
+        }}
         options={options}
+        /**
+         * *TODO*: FIX this handler as EuiSelectable passes back the full options
+         * list with the selected option set with `checked: 'on'`
+         */
         onChange={this._onIndexPatternSelection}
-      />
+        renderOption={renderGeoField}
+        listProps={{
+          rowHeight: 50,
+          showIcons: false,
+        }}
+      >
+        {(list, search) => (
+          <div>
+            {search}
+            {list}
+          </div>
+        )}
+      </EuiSelectable>
     );
 
     return {
@@ -186,8 +218,16 @@ export class ToolbarOverlay extends React.Component {
   _renderToolbarButton() {
     return (
       <EuiButtonIcon
+        className="mapToolbarOverlay__button"
+        color="text"
         iconType="wrench"
         onClick={this._openToolbar}
+        aria-label={i18n.translate('xpack.maps.toolbarOverlay.toolbarIconTitle', {
+          defaultMessage: 'Tools',
+        })}
+        title={i18n.translate('xpack.maps.toolbarOverlay.toolbarIconTitle', {
+          defaultMessage: 'Tools',
+        })}
       />
     );
   }
@@ -202,7 +242,7 @@ export class ToolbarOverlay extends React.Component {
     }
 
     return (
-      <EuiFlexGroup className="toolbarOverlay" responsive={false} direction="row" alignItems="flexEnd" gutterSize="s">
+      <EuiFlexGroup className="mapToolbarOverlay" responsive={false} direction="row" alignItems="flexEnd" gutterSize="s">
         <EuiFlexItem>
           <EuiPopover
             id="contextMenu"
