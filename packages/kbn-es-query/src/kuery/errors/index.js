@@ -34,7 +34,7 @@ export class KQLSyntaxError extends Error {
       value: i18n.translate('kbnESQuery.kql.errors.valueText', {
         defaultMessage: 'value',
       }),
-      literal: i18n.translate('kbnESQuery.kql.errors.LiteralText', {
+      literal: i18n.translate('kbnESQuery.kql.errors.literalText', {
         defaultMessage: 'literal',
       }),
       whitespace: i18n.translate('kbnESQuery.kql.errors.whitespaceText', {
