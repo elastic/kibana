@@ -8,10 +8,7 @@ import { useMemo } from 'react';
 import { MetricsChartAPIResponse } from '../../server/lib/metrics/get_all_metrics_chart_data';
 import { MemoryChartAPIResponse } from '../../server/lib/metrics/get_memory_chart_data';
 import { loadMetricsChartDataForService } from '../services/rest/apm/metrics';
-import {
-  getCPUSeries,
-  getMemorySeries
-} from '../store/selectors/chartSelectors';
+import { getCPUSeries, getMemorySeries } from '../selectors/chartSelectors';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 

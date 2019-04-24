@@ -6,7 +6,7 @@
 
 import { useMemo } from 'react';
 import { loadTransactionOverviewCharts } from '../services/rest/apm/transaction_groups';
-import { getTransactionCharts } from '../store/selectors/chartSelectors';
+import { getTransactionCharts } from '../selectors/chartSelectors';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 

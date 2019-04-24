@@ -10,18 +10,13 @@ import d3 from 'd3';
 import { difference, memoize, zipObject } from 'lodash';
 import mean from 'lodash.mean';
 import { rgba } from 'polished';
-import { MetricsChartAPIResponse } from '../../../server/lib/metrics/get_all_metrics_chart_data';
-import { TimeSeriesAPIResponse } from '../../../server/lib/transactions/charts';
-import { ApmTimeSeriesResponse } from '../../../server/lib/transactions/charts/get_timeseries_data/transform';
-import { StringMap } from '../../../typings/common';
-import { Coordinate, RectCoordinate } from '../../../typings/timeseries';
-import {
-  asDecimal,
-  asMillis,
-  asPercent,
-  tpmUnit
-} from '../../utils/formatters';
-import { IUrlParams } from '../../context/UrlParamsContext/types';
+import { MetricsChartAPIResponse } from '../../server/lib/metrics/get_all_metrics_chart_data';
+import { TimeSeriesAPIResponse } from '../../server/lib/transactions/charts';
+import { ApmTimeSeriesResponse } from '../../server/lib/transactions/charts/get_timeseries_data/transform';
+import { StringMap } from '../../typings/common';
+import { Coordinate, RectCoordinate } from '../../typings/timeseries';
+import { asDecimal, asMillis, asPercent, tpmUnit } from '../utils/formatters';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 
 export const getEmptySerie = memoize(
   (
