@@ -5,9 +5,10 @@
  */
 
 import { Logger } from 'src/core/server';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
-import { SpacesCoreSetup, SpacesInitializerContext, SpacesConfig } from '../../index';
+import { SpacesCoreSetup, SpacesInitializerContext, PluginsSetup } from '../../index';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
 // @ts-ignore
@@ -25,7 +26,7 @@ import { SpacesService } from './spaces_service';
 export class Plugin {
   private readonly pluginId = 'spaces';
 
-  private config: SpacesConfig;
+  private config: KibanaConfig;
 
   private log: Logger;
 
@@ -34,9 +35,9 @@ export class Plugin {
     this.log = initializerContext.logger.get('spaces');
   }
 
-  public async setup(core: SpacesCoreSetup) {
-    const xpackMainPlugin: XPackMainPlugin = core.xpackMain;
-    watchStatusAndLicenseToInitialize(xpackMainPlugin, core.spaces, async () => {
+  public async setup(core: SpacesCoreSetup, plugins: PluginsSetup) {
+    const xpackMainPlugin: XPackMainPlugin = plugins.xpackMain;
+    watchStatusAndLicenseToInitialize(xpackMainPlugin, plugins.spaces, async () => {
       await createDefaultSpace({
         elasticsearch: core.elasticsearch,
         savedObjects: core.savedObjects,
@@ -56,7 +57,7 @@ export class Plugin {
     const spacesService = await service.setup({
       elasticsearch: core.elasticsearch,
       savedObjects: core.savedObjects,
-      getSecurity: core.getSecurity,
+      getSecurity: plugins.getSecurity,
       spacesAuditLogger,
     });
 

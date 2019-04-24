@@ -9,7 +9,7 @@ import { resolve } from 'path';
 import { SavedObjectsService } from 'src/legacy/server/saved_objects';
 import { PluginInitializerContext, HttpServiceSetup } from 'src/core/server';
 // @ts-ignore
-import KbnServer, { Server } from 'src/legacy/server/kbn_server';
+import KbnServer, { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
@@ -24,14 +24,11 @@ import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { plugin } from './server/new_platform';
 import { XPackMainPlugin } from '../xpack_main/xpack_main';
 import { SecurityPlugin } from '../security';
-import { SpacesPlugin } from './types';
+import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
 
 export interface SpacesCoreSetup {
   http: HttpServiceSetup;
-  xpackMain: XPackMainPlugin;
-  getSecurity: () => SecurityPlugin;
   savedObjects: SavedObjectsService;
-  spaces: SpacesPlugin;
   elasticsearch: ElasticsearchPlugin;
   usage: {
     collectorSet: {
@@ -43,12 +40,19 @@ export interface SpacesCoreSetup {
   };
 }
 
-export interface SpacesConfig {
-  get: (key: string) => string;
+export interface PluginsSetup {
+  getSecurity: () => SecurityPlugin;
+  xpackMain: XPackMainPlugin;
+  // TODO: this is temporary for `watchLicenseAndStatusToInitialize`
+  spaces: any;
+}
+
+export interface SpacesPluginSetup {
+  spacesService: SpacesServiceSetup;
 }
 
 export interface SpacesInitializerContext extends PluginInitializerContext {
-  legacyConfig: SpacesConfig;
+  legacyConfig: KibanaConfig;
 }
 
 export const spaces = (kibana: Record<string, any>) =>
@@ -155,9 +159,6 @@ export const spaces = (kibana: Record<string, any>) =>
       const core = {
         http: kbnServer.newPlatform.setup.core.http,
         elasticsearch: server.plugins.elasticsearch,
-        xpackMain: server.plugins.xpack_main,
-        spaces: this,
-        getSecurity: () => server.plugins.security,
         savedObjects: server.savedObjects,
         usage: (server as any).usage,
         tutorial: {
@@ -165,11 +166,17 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       } as SpacesCoreSetup;
 
+      const plugins = {
+        xpackMain: server.plugins.xpack_main,
+        getSecurity: () => server.plugins.security,
+        spaces: this,
+      };
+
       // Need legacy because of `setup_base_path_provider`
       // (request.getBasePath and request.setBasePath)
       core.http.server = kbnServer as any;
 
-      const { spacesService } = await plugin(initializerContext).setup(core);
+      const { spacesService } = await plugin(initializerContext).setup(core, plugins);
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
       server.expose('spacesClient', spacesService);

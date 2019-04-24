@@ -5,11 +5,10 @@
  */
 import { Request } from 'hapi';
 import { Logger } from 'src/core/server';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
-import { SpacesConfig } from '../../..';
 import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 
@@ -38,7 +37,7 @@ export class SpacesService {
 
   private readonly contextCache: WeakMap<any, CacheEntry>;
 
-  constructor(private readonly log: Logger, private readonly config: SpacesConfig) {
+  constructor(private readonly log: Logger, private readonly config: KibanaConfig) {
     this.serverBasePath = config.get('server.basePath');
 
     this.contextCache = new WeakMap();

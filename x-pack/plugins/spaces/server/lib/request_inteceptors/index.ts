@@ -5,14 +5,14 @@
  */
 
 import { HttpServiceSetup, Logger } from 'src/core/server';
-import { SpacesConfig } from '../../..';
+import { KibanaConfig } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { initSpacesOnPostAuthRequestInterceptor } from './on_post_auth_interceptor';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 
 export interface InterceptorDeps {
-  config: SpacesConfig;
+  config: KibanaConfig;
   http: HttpServiceSetup;
   xpackMain: XPackMainPlugin;
   spacesService: SpacesServiceSetup;
