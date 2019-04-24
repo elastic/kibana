@@ -179,7 +179,9 @@ export function VislibAxisScaleProvider() {
       let scaleType = scaleTypeArg || 'linear';
       if (scaleType === 'square root') scaleType = 'sqrt';
 
-      if (this.axisConfig.isTimeDomain()) return d3.time.scale.utc(); // allow time scale
+      if (this.axisConfig.isTimeDomain()) {
+        return d3.time.scale.utc(); // allow time scale
+      }
       if (this.axisConfig.isOrdinal()) return d3.scale.ordinal();
       if (typeof d3.scale[scaleType] !== 'function') {
         return this.throwCustomError(`Axis.getScaleType: ${scaleType} is not a function`);
@@ -201,6 +203,7 @@ export function VislibAxisScaleProvider() {
       const padding = config.get('style.rangePadding');
       const outerPadding = config.get('style.rangeOuterPadding');
       this.scale = scale.domain(domain);
+
       if (config.isOrdinal()) {
         this.scale.rangeBands(range, padding, outerPadding);
       } else {
@@ -212,6 +215,19 @@ export function VislibAxisScaleProvider() {
       if (this.scale.clamp) this.scale.clamp(true);
 
       this.validateScale(this.scale);
+
+      if (this.axisConfig.isTimeDomain()) {
+        // on a time domain shift it to have the buckets start at nice points in time (e.g. at the start of the day) in UTC
+        // then shift the calculated tick positions back into the real domain to have a nice tick position in the actual
+        // time zone. This is necessary because the d3 time scale doesn't provide a function to get nice time positions in
+        // a configurable time zone directly.
+        const offset = moment(domain[0]).utcOffset();
+        const shiftedDomain = domain.map(val => moment(val).add(offset, 'minute'));
+        this.tickScale = scale.copy().domain(shiftedDomain);
+        this.scale.timezoneCorrectedTicks = (n) => this.tickScale.ticks(n).map((d) => {
+          return moment(d).subtract(offset, 'minute').valueOf();
+        });
+      }
 
       return this.scale;
     }

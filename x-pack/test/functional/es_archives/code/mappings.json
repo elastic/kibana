@@ -1,0 +1,243 @@
+{
+  "type": "index",
+  "value": {
+    "index": ".code-document-github.com-microsoft-typescript-node-starter-1",
+    "settings": {
+      "index": {
+        "number_of_shards": "1",
+        "number_of_replicas": "1",
+        "analysis": {
+          "analyzer": {
+            "lowercase_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "type": "custom",
+              "tokenizer": "keyword"
+            },
+            "path_hierarchy_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "type": "custom",
+              "tokenizer": "path_hierarchy_tokenizer"
+            },
+            "content_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "char_filter": [
+                "content_char_filter"
+              ],
+              "tokenizer": "standard"
+            },
+            "qname_path_hierarchy_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "type": "custom",
+              "tokenizer": "qname_path_hierarchy_tokenizer"
+            },
+            "path_analyzer": {
+              "filter": [
+                "lowercase"
+              ],
+              "type": "custom",
+              "tokenizer": "path_tokenizer"
+            }
+          },
+          "char_filter": {
+            "content_char_filter": {
+              "pattern": "[.]",
+              "type": "pattern_replace",
+              "replacement": " "
+            }
+          },
+          "tokenizer": {
+            "path_hierarchy_tokenizer": {
+              "reverse": "true",
+              "type": "path_hierarchy",
+              "delimiter": "/"
+            },
+            "path_tokenizer": {
+              "pattern": "[\\\\./]",
+              "type": "pattern"
+            },
+            "qname_path_hierarchy_tokenizer": {
+              "reverse": "true",
+              "type": "path_hierarchy",
+              "delimiter": "."
+            }
+          }
+        }
+      }
+    },
+    "mappings": {
+      "document": {
+        "_meta": {
+          "version": 1
+        },
+        "dynamic_templates": [
+          {
+            "fieldDefaultNotAnalyzed": {
+              "match": "*",
+              "mapping": {
+                "index": false,
+                "norms": false
+              }
+            }
+          }
+        ],
+        "properties": {
+          "content": {
+            "type": "text",
+            "analyzer": "content_analyzer"
+          },
+          "language": {
+            "type": "keyword"
+          },
+          "path": {
+            "type": "text",
+            "fields": {
+              "hierarchy": {
+                "type": "text",
+                "analyzer": "path_hierarchy_analyzer"
+              }
+            },
+            "analyzer": "path_analyzer"
+          },
+          "qnames": {
+            "type": "text",
+            "analyzer": "qname_path_hierarchy_analyzer"
+          },
+          "repoUri": {
+            "type": "keyword"
+          },
+          "repository": {
+            "properties": {
+              "defaultBranch": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "text"
+              },
+              "org": {
+                "type": "text"
+              },
+              "revision": {
+                "type": "keyword"
+              },
+              "uri": {
+                "type": "text"
+              },
+              "url": {
+                "type": "text",
+                "index": false
+              }
+            }
+          },
+          "repository_config": {
+            "properties": {
+              "disableGo": {
+                "type": "boolean"
+              },
+              "disableJava": {
+                "type": "boolean"
+              },
+              "disableTypescript": {
+                "type": "boolean"
+              },
+              "uri": {
+                "type": "text"
+              }
+            }
+          },
+          "repository_delete_status": {
+            "properties": {
+              "progress": {
+                "type": "integer"
+              },
+              "revision": {
+                "type": "keyword"
+              },
+              "timestamp": {
+                "type": "date"
+              },
+              "uri": {
+                "type": "text"
+              }
+            }
+          },
+          "repository_git_status": {
+            "properties": {
+              "cloneProgress": {
+                "properties": {
+                  "indexedDeltas": {
+                    "type": "integer"
+                  },
+                  "indexedObjects": {
+                    "type": "integer"
+                  },
+                  "isCloned": {
+                    "type": "boolean"
+                  },
+                  "localObjects": {
+                    "type": "integer"
+                  },
+                  "receivedBytes": {
+                    "type": "integer"
+                  },
+                  "receivedObjects": {
+                    "type": "integer"
+                  },
+                  "totalDeltas": {
+                    "type": "integer"
+                  },
+                  "totalObjects": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "progress": {
+                "type": "integer"
+              },
+              "revision": {
+                "type": "keyword"
+              },
+              "timestamp": {
+                "type": "date"
+              },
+              "uri": {
+                "type": "text"
+              }
+            }
+          },
+          "repository_lsp_index_status": {
+            "properties": {
+              "progress": {
+                "type": "integer"
+              },
+              "revision": {
+                "type": "keyword"
+              },
+              "timestamp": {
+                "type": "date"
+              },
+              "uri": {
+                "type": "text"
+              }
+            }
+          },
+          "sha1": {
+            "type": "text",
+            "index": false,
+            "norms": false
+          }
+        }
+      }
+    },
+    "aliases": {
+      ".code-document-github.com-microsoft-typescript-node-starter": {}
+    }
+  }
+}
