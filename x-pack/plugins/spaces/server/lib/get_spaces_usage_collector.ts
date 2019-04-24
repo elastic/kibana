@@ -26,9 +26,7 @@ async function getSpacesUsage(callCluster: any, server: Server, spacesAvailable:
 
   const knownFeatureIds = server.plugins.xpack_main.getFeatures().map(feature => feature.id);
 
-  const resp = await callCluster('transport.request', {
-    path: '/_search',
-    method: 'POST',
+  const resp = await callCluster('search', {
     index,
     body: {
       track_total_hits: true,
