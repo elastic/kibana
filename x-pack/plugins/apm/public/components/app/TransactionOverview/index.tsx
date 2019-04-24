@@ -18,7 +18,7 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
