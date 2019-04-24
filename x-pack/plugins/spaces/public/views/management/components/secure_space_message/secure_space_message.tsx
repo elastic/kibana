@@ -7,10 +7,10 @@
 import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 
 export const SecureSpaceMessage = ({}) => {
-  if (uiCapabilities.spaces.manage) {
+  if (capabilities.get().spaces.manage) {
     return (
       <Fragment>
         <EuiHorizontalRule />

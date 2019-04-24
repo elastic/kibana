@@ -7,7 +7,7 @@
 import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
