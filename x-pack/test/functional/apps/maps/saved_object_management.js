@@ -44,7 +44,7 @@ export default function ({ getPageObjects, getService }) {
         expect(zoom).to.equal(3.02);
       });
 
-      it('should load map layers stored with map', async () => {
+      it.skip('should load map layers stored with map', async () => {
         const layerExists = await PageObjects.maps.doesLayerExist('geo_shapes*');
         expect(layerExists).to.equal(true);
       });
