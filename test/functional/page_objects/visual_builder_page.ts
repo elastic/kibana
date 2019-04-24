@@ -18,6 +18,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context.d';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -110,7 +111,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getMarkdownTableVariables(): Promise<
-      Array<{ key: string; value: string; selector: any }>
+      Array<{ key: string; value: string; selector: WebElementWrapper }>
     > {
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
@@ -119,10 +120,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         log.debug('variable list is empty');
         return [];
       }
-      const variables: any[] = await testTableVariables.findAllByCssSelector(variablesSelector);
+      const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
       const variablesKeyValueSelectorMap = await Promise.all(
-        variables.map(async (variable: any) => {
+        variables.map(async variable => {
           const subVars = await variable.findAllByCssSelector('td');
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();
@@ -152,7 +153,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @returns {Promise<any[]>}
      * @memberof VisualBuilderPage
      */
-    public async getSubTabs() {
+    public async getSubTabs(): Promise<WebElementWrapper[]> {
       return await find.allByCssSelector('[data-test-subj$="-subtab"]');
     }
 
