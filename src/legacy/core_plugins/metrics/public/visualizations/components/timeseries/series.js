@@ -30,35 +30,36 @@ import {
   BarSeries,
 } from '@elastic/charts';
 
-import { calculateFillColor } from '../../lib/calculate_fill_color';
-
 const isBarSeries = props => get(props, 'bars.show', false);
 const getComponent = isBar => isBar ? BarSeries : AreaSeries;
 const getFillStyles = (isBar, props) => isBarSeries(props) ? props.bars : props.lines;
 
-const calculateCustomSeriesColors = (color, specId, { fill }) => {
+const calculateCustomSeriesColors = (color, specId) => {
   const map = new Map();
-  const { fillColor } = calculateFillColor(color, fill);
 
   map.set(
     {
       specId,
       colorValues: [],
     },
-    fillColor,
+    color,
   );
 
   return map;
 };
 
-const calculateLineSeriesStyles = (isBar, { lineWidth }) => {
+const calculateLineSeriesStyles = (isBar, fillStyles, color) => {
   return {
     [isBar ? 'barSeriesStyle' : 'areaSeriesStyle']: {
       line: {
         stroke: '',
-        strokeWidth: lineWidth || 0,
-        visible: Boolean(lineWidth),
-        opacity: 1,
+        strokeWidth: fillStyles.lineWidth || 0,
+        visible: Boolean(fillStyles.lineWidth),
+      },
+      area: {
+        fill: color,
+        opacity: fillStyles.fill,
+        visible: true,
       },
       border: {
         stroke: '',
@@ -96,8 +97,8 @@ export const Series = (props) => {
     yScaleToDataExtent: false,
     curve: fillStyles.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
     hideInLegend: props.hideInLegend,
-    customSeriesColors: calculateCustomSeriesColors(props.color, id, fillStyles),
-    ...calculateLineSeriesStyles(isBar, fillStyles),
+    customSeriesColors: calculateCustomSeriesColors(props.color, id),
+    ...calculateLineSeriesStyles(isBar, fillStyles, props.color),
   };
 
   return (
