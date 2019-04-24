@@ -65,7 +65,7 @@ export default function ({ getPageObjects, getService }) {
           expect(appState).to.equal('_a=(query:(language:kuery,query:%27machine.os.raw%20:%20%22ios%22%27))');
         });
 
-        it('should apply query stored with map', async () => {
+        it.skip('should apply query stored with map', async () => {
           await inspector.open();
           await inspector.openInspectorRequestsView();
           const requestStats = await inspector.getTableData();
