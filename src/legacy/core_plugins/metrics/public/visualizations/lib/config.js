@@ -26,5 +26,5 @@ export const COLORS =  {
 };
 
 export const GRID_LINE_CONFIG = {
-  stroke: 'rgba(0,0,0,0.2)',
+  stroke: 'rgba(125,125,125,0.1)',
 };

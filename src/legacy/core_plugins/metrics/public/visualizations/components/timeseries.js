@@ -68,7 +68,7 @@ export const TimeSeries = ({
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
       />
 
-      { annotations.map(({ id, series, icon, color }) => {
+      { (annotations || []).map(({ id, series, icon, color }) => {
         const dataValues = generateAnnotationData(series);
         const style = { line: { stroke: color, } };
 

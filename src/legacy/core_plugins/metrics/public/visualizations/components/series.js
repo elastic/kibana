@@ -56,6 +56,27 @@ export const Series = ({
     calculateFillColor(color, isBarSeries ? barFill : lineFill).fillColor
   );
 
+  const lineSeriesStyle1 = {
+    line: {
+      stroke: '',
+      strokeWidth: 10,
+      visible: true,
+      opacity: 1,
+    },
+    border: {
+      stroke: 'gray',
+      strokeWidth: 2,
+      visible: false,
+    },
+    point: {
+      visible: true,
+      radius: 0.5,
+      opacity: 0.1,
+      stroke: '',
+      strokeWidth: 0.5,
+    },
+  };
+
   return (
     <Component
       id={specId}
@@ -71,6 +92,7 @@ export const Series = ({
       customSeriesColors={customSeriesColors}
       curve={steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
       hideInLegend={hideInLegend}
+      areaSeriesStyle={lineSeriesStyle1}
     />
   );
 };
