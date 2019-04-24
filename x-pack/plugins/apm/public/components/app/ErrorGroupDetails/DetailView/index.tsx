@@ -17,13 +17,14 @@ import { Location } from 'history';
 import React from 'react';
 import styled from 'styled-components';
 import { first } from 'lodash';
-import { idx } from '../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
 import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
-import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
 import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import {
