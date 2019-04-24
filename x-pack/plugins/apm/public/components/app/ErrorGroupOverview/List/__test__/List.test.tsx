@@ -10,8 +10,6 @@ import createHistory from 'history/createHashHistory';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-// @ts-ignore
-import { createMockStore } from 'redux-test-utils';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
 import { ErrorGroupList } from '../index';
 import props from './props.json';
@@ -52,12 +50,10 @@ export function mountWithRouterAndStore(
   Component: React.ReactElement,
   storeState = {}
 ) {
-  const store = createMockStore(storeState);
   const history = createHistory();
 
   const options = {
     context: {
-      store,
       router: {
         history,
         route: {

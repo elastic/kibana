@@ -12,11 +12,6 @@ import { LOCATION_UPDATE, TIME_RANGE_REFRESH } from './constants';
 import { getParsedDate } from './helpers';
 import { resolveUrlParams } from './resolveUrlParams';
 
-// TODO: Remove this selector once all its uses are converted to the hook or context
-export function getUrlParams(state: any) {
-  return state.urlParams;
-}
-
 interface TimeRange {
   rangeFrom: string;
   rangeTo: string;
