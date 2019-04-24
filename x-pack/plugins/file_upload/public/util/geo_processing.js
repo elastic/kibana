@@ -11,19 +11,13 @@ const DEFAULT_SETTINGS = {
 };
 
 const DEFAULT_GEO_SHAPE_MAPPINGS = {
-  'name': {
-    'type': 'keyword'
-  },
-  'location': {
+  'coordinates': {
     'type': 'geo_shape'
   }
 };
 
 const DEFAULT_GEO_POINT_MAPPINGS = {
-  'name': {
-    'type': 'keyword'
-  },
-  'location': {
+  'coordinates': {
     'type': 'geo_point'
   }
 };
@@ -52,20 +46,22 @@ function geoJsonToEs(parsedGeojson, datatype) {
 
   if (datatype === 'geo_shape') {
     return features.reduce((accu, feature) => {
+      const properties = _.get(feature, 'properties');
       accu.push({
-        location: {
+        coordinates: {
           'type': feature.geometry.type.toLowerCase(),
           'coordinates': feature.geometry.coordinates
         },
-        name: _.get(feature, 'properties.name', '')
+        ...(!_.isEmpty(properties) ? { ...properties } : {})
       });
       return accu;
     }, []);
   } else if (datatype === 'geo_point') {
-    return features.reduce((accu, shape) => {
+    return features.reduce((accu, feature) => {
+      const properties = _.get(feature, 'properties');
       accu.push({
-        location: shape.geometry.coordinates,
-        name: _.get(shape, 'properties.name', '')
+        coordinates: feature.geometry.coordinates,
+        ...(!_.isEmpty(properties) ? { ...properties } : {})
       });
       return accu;
     }, []);
