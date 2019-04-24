@@ -86,8 +86,14 @@ function buildKibanaUrl(urlConfig, record) {
     }
 
     if (tokenValue !== null && !(name === 'earliest' || name === 'latest')) {
-      // Escape the value for correct use in the query.
-      tokenValue = `${escapeForElasticsearchQuery(tokenValue)}`;
+
+      if (urlValue.includes('language:lucene') === true) {
+        // Escape reserved characters if the query language is lucene (default was switched to KQL in 7.1).
+        tokenValue = `${escapeForElasticsearchQuery(tokenValue)}`;
+      } else {
+        // Escape any double quotes in the value for correct use in KQL.
+        tokenValue = tokenValue.replace(/\"/g, '\\"');
+      }
 
       // Kibana URLs used rison encoding, so escape with ! any ! or ' characters
       tokenValue = tokenValue.replace(/[!']/g, '!$&');
