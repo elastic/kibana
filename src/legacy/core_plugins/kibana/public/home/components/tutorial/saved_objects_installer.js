@@ -85,7 +85,7 @@ class SavedObjectsInstallerUi extends React.Component {
     }
 
     const errors = resp.savedObjects.filter(savedObject => {
-      return savedObject.hasOwnProperty('error');
+      return savedObject.hasOwnProperty('error') && savedObject.error !== undefined;
     });
 
     const overwriteErrors = errors.filter(savedObject => {
