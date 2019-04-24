@@ -67,12 +67,12 @@ export class SpacesService {
         return this.contextCache.get(request)!.isInDefaultSpace;
       },
       scopedClient: (request: Request) => {
-        const { asScoped, callAsInternalUser } = adminClient;
-
-        const internalRepository = savedObjects.getSavedObjectsRepository(callAsInternalUser);
+        const internalRepository = savedObjects.getSavedObjectsRepository(
+          adminClient.callAsInternalUser
+        );
 
         const callCluster = (endpoint: string, ...args: any[]) =>
-          asScoped(request).callAsCurrentUser(endpoint, ...args);
+          adminClient.asScoped(request).callAsCurrentUser(endpoint, ...args);
 
         const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);
 
