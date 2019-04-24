@@ -55,6 +55,7 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
       },
     ]
   }
+  initialPageSize={50}
   initialSort={
     Object {
       "direction": "asc",
@@ -105,6 +106,7 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
       },
     ]
   }
+  initialPageSize={50}
   initialSort={
     Object {
       "direction": "asc",
