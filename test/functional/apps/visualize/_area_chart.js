@@ -216,5 +216,56 @@ export default function ({ getService, getPageObjects }) {
         expect(labels).to.eql(expectedLabels);
       });
     });
+    describe('date histogram with long time range', () => {
+      // that dataset spans from Oct 26, 2013 @ 06:10:17.855	to Apr 18, 2019 @ 11:38:12.790
+      const fromTime = '2013-01-01 00:00:00.000';
+      const toTime = '2020-01-01 00:00:00.000';
+      it('should render a yearly area with 12 svg paths', async () => {
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickAreaChart');
+        await PageObjects.visualize.clickAreaChart();
+        log.debug('clickNewSearch');
+        await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Click X-Axis');
+        await PageObjects.visualize.clickBucket('X-Axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visualize.selectAggregation('Date Histogram');
+        await PageObjects.visualize.selectField('@timestamp');
+        await PageObjects.visualize.setInterval('Yearly');
+        await PageObjects.visualize.clickGo();
+        // This svg area is composed by 7 years (2013 - 2019).
+        // 7 points are used to draw the upper line (usually called y1)
+        // 7 points compose the lower line (usually called y0)
+        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        log.debug('actual chart data =     ' + paths);
+        const numberOfSegments = 7 * 2;
+        expect(paths.length).to.eql(numberOfSegments);
+      });
+      it('should render monthly areas with 168 svg paths', async () => {
+        log.debug('navigateToApp visualize');
+        await PageObjects.visualize.navigateToNewVisualization();
+        log.debug('clickAreaChart');
+        await PageObjects.visualize.clickAreaChart();
+        log.debug('clickNewSearch');
+        await PageObjects.visualize.clickNewSearch('long-window-logstash-*');
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        log.debug('Click X-Axis');
+        await PageObjects.visualize.clickBucket('X-Axis');
+        log.debug('Click Date Histogram');
+        await PageObjects.visualize.selectAggregation('Date Histogram');
+        await PageObjects.visualize.selectField('@timestamp');
+        await PageObjects.visualize.setInterval('Monthly');
+        await PageObjects.visualize.clickGo();
+        // This svg area is composed by 67 months 3 (2013) + 5 * 12 + 4 (2019)
+        // 67 points are used to draw the upper line (usually called y1)
+        // 67 points compose the lower line (usually called y0)
+        const numberOfSegments = 67 * 2;
+        const paths = await PageObjects.visualize.getAreaChartPaths('Count');
+        log.debug('actual chart data =     ' + paths);
+        expect(paths.length).to.eql(numberOfSegments);
+      });
+    });
   });
 }
