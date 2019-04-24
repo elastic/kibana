@@ -18,7 +18,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { loadErrorDistribution } from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { SyncChartGroup } from '../../shared/charts/SyncChartGroup';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
