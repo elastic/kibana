@@ -56,15 +56,27 @@ async function getSpacesUsage(callCluster: any, server: Server, spacesAvailable:
   const count = get(hits, 'total.value', 0);
   const disabledFeatureBuckets = get(aggregations, 'disabledFeatures.buckets', []);
 
-  const disabledFeatures = disabledFeatureBuckets.reduce((acc, { key, doc_count }) => {
-    return {
-      ...acc,
-      [key]: doc_count,
-    };
-  }, knownFeatureIds.reduce((acc, featureId) => ({ ...acc, [featureId]: 0 }), {}));
+  const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
+    (acc, { key, doc_count }) => {
+      if (!acc.hasOwnProperty(key)) {
+        return acc;
+      }
+
+      return {
+        ...acc,
+        [key]: doc_count,
+      };
+    },
+    knownFeatureIds.reduce((acc, featureId) => ({ ...acc, [featureId]: 0 }), {})
+  );
+
+  const usesFeatureControls = Object.values(disabledFeatures).some(
+    disabledSpaceCount => disabledSpaceCount > 0
+  );
 
   return {
     count,
+    usesFeatureControls,
     disabledFeatures,
   } as UsageStats;
 }
@@ -73,6 +85,7 @@ export interface UsageStats {
   available: boolean;
   enabled: boolean;
   count?: number;
+  usesFeatureControls?: boolean;
   disabledFeatures?: {
     [featureId: string]: number;
   };
