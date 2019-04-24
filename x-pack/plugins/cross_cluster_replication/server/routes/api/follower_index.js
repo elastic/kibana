@@ -89,13 +89,13 @@ export const registerFollowerIndexRoutes = (server) => {
 
         const followerIndexInfo = followerIndices && followerIndices[0];
 
-        if(!followerIndexInfo) {
+        if (!followerIndexInfo) {
           const error = Boom.notFound(`The follower index "${id}" does not exist.`);
-          throw(error);
+          throw error;
         }
 
         // If this follower is paused, skip call to ES stats api since it will return 404
-        if(followerIndexInfo.status === 'paused') {
+        if (followerIndexInfo.status === 'paused') {
           return deserializeFollowerIndex({
             ...followerIndexInfo
           });
@@ -154,19 +154,35 @@ export const registerFollowerIndexRoutes = (server) => {
     },
     handler: async (request) => {
       const callWithRequest = callWithRequestFactory(server, request);
-      const { id: _id } = request.params;
-      const { isPaused = false } = request.payload;
-      const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
+      const { id } = request.params;
+
+      async function isFollowerIndexPaused() {
+        const {
+          follower_indices: followerIndices
+        }  = await callWithRequest('ccr.info', { id });
+
+        const followerIndexInfo = followerIndices && followerIndices[0];
+
+        if (!followerIndexInfo) {
+          const error = Boom.notFound(`The follower index "${id}" does not exist.`);
+          throw error;
+        }
+
+        return followerIndexInfo.status === 'paused';
+      }
 
       // We need to first pause the follower and then resume it passing the advanced settings
       try {
+        // Retrieve paused state instead of pulling it from the payload to ensure it's not stale.
+        const isPaused = await isFollowerIndexPaused();
         // Pause follower if not already paused
-        if(!isPaused) {
-          await callWithRequest('ccr.pauseFollowerIndex', { id: _id });
+        if (!isPaused) {
+          await callWithRequest('ccr.pauseFollowerIndex', { id });
         }
 
         // Resume follower
-        return await callWithRequest('ccr.resumeFollowerIndex', { id: _id, body });
+        const body = removeEmptyFields(serializeAdvancedSettings(request.payload));
+        return await callWithRequest('ccr.resumeFollowerIndex', { id, body });
       } catch(err) {
         if (isEsError(err)) {
           throw wrapEsError(err);

@@ -37,6 +37,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'ml',
             'apm',
             'canvas',
+            'code',
             'infrastructure',
             'logs',
             'maps',

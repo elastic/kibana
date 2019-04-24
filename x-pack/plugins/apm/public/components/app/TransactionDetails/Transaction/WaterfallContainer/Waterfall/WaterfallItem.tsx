@@ -7,7 +7,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-import { EuiIcon, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiTitle, EuiToolTip } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { isRumAgentName } from '../../../../../../../common/agent_name';
 import { px, unit, units } from '../../../../../../style/variables';
@@ -108,6 +108,26 @@ function PrefixIcon({ item }: { item: IWaterfallItem }) {
   return <EuiIcon type="merge" />;
 }
 
+interface SpanActionToolTipProps {
+  item?: IWaterfallItem;
+}
+
+const SpanActionToolTip: React.SFC<SpanActionToolTipProps> = ({
+  item,
+  children
+}) => {
+  if (item && item.docType === 'span') {
+    return (
+      <EuiToolTip
+        content={`${item.span.span.subtype}.${item.span.span.action}`}
+      >
+        <>{children}</>
+      </EuiToolTip>
+    );
+  }
+  return <>{children}</>;
+};
+
 function Duration({ item }: { item: IWaterfallItem }) {
   return (
     <EuiText color="subdued" size="xs">
@@ -173,7 +193,9 @@ export function WaterfallItem({
       <ItemText // using inline styles instead of props to avoid generating a css class for each item
         style={{ minWidth: `${Math.max(100 - left, 0)}%` }}
       >
-        <PrefixIcon item={item} />
+        <SpanActionToolTip item={item}>
+          <PrefixIcon item={item} />
+        </SpanActionToolTip>
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
         {errorCount > 0 && item.docType === 'transaction' ? (
