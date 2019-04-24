@@ -1,0 +1,11 @@
+{
+  "id": "spaces",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "configPath": [
+    "xpack",
+    "spaces"
+  ],
+  "server": true,
+  "ui": true
+}
