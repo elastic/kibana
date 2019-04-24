@@ -50,9 +50,7 @@ function loadJobIdsFromGlobalState(globalState) {
       tempJobIds = globalState.ml.jobIds;
     }
     tempJobIds = tempJobIds.map(id => String(id));
-    // check if ids valid if jobs loaded
-    // TODO: Do we need this from the first load? Might need to move this validity check
-    // to the explorer controller or to the job selector component
+
     if (mlJobService.jobs.length > 0) {
       const invalidIds = getInvalidJobIds(tempJobIds);
       warnAboutInvalidJobIds(invalidIds);

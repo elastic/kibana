@@ -20,6 +20,7 @@ import { setGlobalState } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiBadge,
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
@@ -27,9 +28,10 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiButton,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSwitch,
+  EuiText,
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -63,9 +65,10 @@ function tabColor(name) {
   }
 }
 
-export function getBadge({ id, icon, isGroup = false, removeId }) {
+export function getBadge({ id, icon, isGroup = false, removeId, numJobs }) {
   const color = isGroup ? tabColor(id) : 'hollow';
   let props = { color };
+  let jobCount;
 
   if (icon === true) {
     props = {
@@ -77,9 +80,16 @@ export function getBadge({ id, icon, isGroup = false, removeId }) {
     };
   }
 
+  if (numJobs !== undefined) {
+    jobCount = i18n.translate('xpack.ml.jobSelector.selectedGroupJobs', {
+      defaultMessage: `({jobsCount, plural, one {# job} other {# jobs}})`,
+      values: { jobsCount: numJobs },
+    });
+  }
+
   return (
     <EuiBadge key={`${id}-id`} {...props} >
-      {id}
+      {`${id}${jobCount ? jobCount : ''}`}
     </EuiBadge>
   );
 }
@@ -114,18 +124,21 @@ function normalizeTimes(jobs) {
   return jobs;
 }
 
+const BADGE_LIMIT = 10;
+
 export function JobSelector({
   globalState,
   jobSelectService,
   selectedJobIds,
   singleSelection,
-  // timeseriesOnly
+  timeseriesOnly
 }) {
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [groupsMap, setGroupsMap] = useState([]);
+  const [maps, setMaps] = useState({ groupsMap: {}, jobsMap: {} });
   const [selectedIds, setSelectedIds] = useState(selectedJobIds);
   const [newSelection, setNewSelection] = useState(selectedJobIds);
+  const [showAllBadges, setShowAllBadges] = useState(false);
   const [applyTimeRange, setApplyTimeRange] = useState(true);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
@@ -137,14 +150,16 @@ export function JobSelector({
           if (resp.jobs.length) {
             selected = [resp.jobs[0].job_id];
             setSelectedIds(selected);
-            jobSelectService.next(selected);
+            jobSelectService.next({ selection: selected });
           }
           // TODO: broadcast that there are no jobs. Explorer updates with noJobsSelected
         });
     }
-    // listen for changes from Single Metric Viewer
-    const subscription = jobSelectService.subscribe((selection) => {
-      setSelectedIds(selection);
+    // listen for update from Single Metric Viewer
+    const subscription = jobSelectService.subscribe(({ selection, resetSelection }) => {
+      if (resetSelection === true) {
+        setSelectedIds(selection);
+      }
     });
 
     return function cleanup() {
@@ -174,7 +189,7 @@ export function JobSelector({
         const groupsWithTimerange = normalizeTimes(resp.groups);
         setJobs(jobsWithTimerange);
         setGroups(groupsWithTimerange);
-        setGroupsMap(resp.groupsMap);
+        setMaps({ groupsMap: resp.groupsMap, jobsMap: resp.jobsMap });
       })
       .catch((err) => {
         console.log('Error fetching jobs', err);
@@ -194,14 +209,11 @@ export function JobSelector({
 
   function applySelection() {
     closeFlyout();
-
     const allNewSelection = [];
-    // const groupIds = [];
-    // if it is a group - grab all the jobIds for it
+
     newSelection.forEach((id) => {
-      if (groupsMap[id] !== undefined) {
-        // groupIds.push(id);
-        allNewSelection.push(...groupsMap[id].jobIds);
+      if (maps.groupsMap[id] !== undefined) {
+        allNewSelection.push(...maps.groupsMap[id].jobIds);
       } else {
         allNewSelection.push(id);
       }
@@ -212,7 +224,7 @@ export function JobSelector({
     setSelectedIds(newSelection);
     setNewSelection([]);
     applyTimeRangeFromSelection(allNewSelectionUnique);
-    jobSelectService.next(allNewSelectionUnique);
+    jobSelectService.next({ selection: allNewSelectionUnique });
 
     // save selection in global state
     setGlobalState(globalState, allNewSelectionUnique);
@@ -253,38 +265,98 @@ export function JobSelector({
   function clearSelection() {
     setNewSelection([]);
   }
-  // check for groups here since this is all selected in job selector bar
+
   function renderIdBadges() {
-    return selectedIds.map(id => (
-      <EuiFlexItem grow={false} key={id}>
-        {getBadge({ id, isGroup: (groupsMap[id] !== undefined) })}
-      </EuiFlexItem>
-    ));
+    const badges = [];
+    const currentGroups = [];
+    // Create group badges. Skip job ids here.
+    for (let i = 0; i < selectedIds.length; i++) {
+      const currentId = selectedIds[i];
+      if (maps.groupsMap[currentId] !== undefined) {
+        currentGroups.push(currentId);
+
+        badges.push((
+          <EuiFlexItem grow={false} key={currentId}>
+            {getBadge({ id: currentId, isGroup: true, numJobs: maps.groupsMap[currentId].jobIds.length })}
+          </EuiFlexItem>
+        ));
+      } else {
+        continue;
+      }
+    }
+    // Create jobId badges for jobs with no groups or with groups not selected
+    for (let i = 0; i < selectedIds.length; i++) {
+      const currentId = selectedIds[i];
+      if (maps.groupsMap[currentId] === undefined) {
+        const jobGroups = maps.jobsMap[currentId] || [];
+
+        if (jobGroups.some(g => currentGroups.includes(g)) === false) {
+          badges.push((
+            <EuiFlexItem grow={false} key={currentId}>
+              {getBadge({ id: currentId })}
+            </EuiFlexItem>
+          ));
+        } else {
+          continue;
+        }
+      } else {
+        continue;
+      }
+    }
+
+    return badges;
   }
 
   function renderNewSelectionIdBadges() {
-    return newSelection.map(id => (
-      <EuiFlexItem grow={false} key={id}>
-        {getBadge({ id, icon: true, removeId, isGroup: (groupsMap[id] !== undefined) })}
-      </EuiFlexItem>
-    ));
+    const badges = [];
+
+    for (let i = 0; i < newSelection.length; i++) {
+      if (i > BADGE_LIMIT && showAllBadges === false) {
+        break;
+      }
+
+      badges.push(
+        <EuiFlexItem grow={false} key={newSelection[i]}>
+          {getBadge({
+            id: newSelection[i],
+            icon: true,
+            removeId,
+            isGroup: (maps.groupsMap[newSelection[i]] !== undefined)
+          })}
+        </EuiFlexItem>
+      );
+    }
+
+    if (showAllBadges === false && newSelection.length > BADGE_LIMIT) {
+      badges.push(
+        <EuiLink
+          key="more-badges-link"
+          onClick={() => setShowAllBadges(!showAllBadges)}
+        >
+          <EuiText grow={false} size="xs">
+            {`And ${newSelection.length - BADGE_LIMIT} more`}
+          </EuiText>
+        </EuiLink>);
+    }
+
+    return badges;
   }
 
   function renderJobSelectionBar() {
     return (
-      <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+      <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup wrap responsive={false} gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={handleJobSelectionClick}
-              >
-                Job Selection
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+          <EuiButtonEmpty
+            onClick={handleJobSelectionClick}
+          >
+            Job Selection
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+            {renderIdBadges()}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {renderIdBadges()}
       </EuiFlexGroup>
     );
   }
@@ -341,6 +413,7 @@ export function JobSelector({
               onSelection={handleNewSelection}
               selectedIds={newSelection}
               singleSelection={singleSelection}
+              timeseriesOnly={timeseriesOnly}
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter className="mlJobSelectorFlyoutFooter">

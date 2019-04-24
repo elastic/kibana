@@ -150,7 +150,7 @@ module.controller('MlExplorerController', function (
         .then((resp) => {
           if (resp.jobs.length > 0) {
             // Select any jobs set in the global state (i.e. passed in the URL).
-            const selectedJobIds = mlJobSelectService.getValue();
+            const selectedJobIds = mlJobSelectService.getValue().selection;
             let selectedCells;
             let filterData = {};
 
@@ -206,10 +206,10 @@ module.controller('MlExplorerController', function (
   //   $scope.jobSelectionUpdateInProgress = true;
   //   jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
   // });
-  mlJobSelectService.subscribe((selectedIds) => {
-    if (selectedIds !== undefined) {
+  mlJobSelectService.subscribe(({ selection }) => {
+    if (selection !== undefined) {
       $scope.jobSelectionUpdateInProgress = true;
-      jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selectedIds });
+      jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds: selection });
     }
   });
 

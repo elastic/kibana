@@ -143,6 +143,7 @@ export function jobsProvider(callWithRequest) {
   async function jobsWithTimerange() { // TODO: rename to jobsAndGroupsWithTimerange
     const [JOBS, JOB_STATS] = [0, 1];
     const jobs = [];
+    const jobsMap = {};
     const groups = {};
     const groupsMap = {};
 
@@ -155,6 +156,7 @@ export function jobsProvider(callWithRequest) {
 
     if (results[JOBS] && results[JOBS].jobs) {
       results[JOBS].jobs.forEach((job) => {
+        jobsMap[job.job_id] = job.groups || [];
         job.id = job.job_id;
         job.timeRange = {};
         // Record stats for job
@@ -201,7 +203,7 @@ export function jobsProvider(callWithRequest) {
       });
     }
 
-    return { jobs, groupsMap, groups: Object.keys(groups).map(g => groups[g]) };
+    return { jobs, jobsMap, groupsMap, groups: Object.keys(groups).map(g => groups[g]) };
   }
 
   async function createFullJobsList(jobIds = []) {

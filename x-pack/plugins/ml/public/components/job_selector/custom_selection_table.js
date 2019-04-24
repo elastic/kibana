@@ -30,6 +30,7 @@ import {
 
 import { Pager } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 
 
 const JOBS_PER_PAGE = 20;
@@ -54,6 +55,7 @@ export function CustomSelectionTable({
   selectedIds,
   singleSelection,
   sortableProperties,
+  timeseriesOnly
 }) {
   const [itemIdToSelectedMap, setItemIdToSelectedMap] = useState(getCurrentlySelectedItemIdsMap());
   const [currentItems, setCurrentItems] = useState(items);
@@ -243,6 +245,7 @@ export function CustomSelectionTable({
                 id={item.id}
                 checked={isItemSelected(item.id)}
                 onChange={() => toggleItem(item.id)}
+                disabled={timeseriesOnly && isTimeSeriesViewJob(item) === false}
               />}
             </EuiTableRowCellCheckbox>
           );

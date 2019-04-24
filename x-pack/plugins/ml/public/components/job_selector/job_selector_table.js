@@ -36,7 +36,8 @@ export function JobSelectorTable({
   jobs,
   onSelection,
   selectedIds,
-  singleSelection
+  singleSelection,
+  timeseriesOnly
 }) {
   const [sortableProperties, setSortableProperties] = useState();
   const [currentTab, setCurrentTab] = useState('Jobs');
@@ -163,6 +164,7 @@ export function JobSelectorTable({
         selectedIds={selectedIds}
         singleSelection={singleSelection}
         sortableProperties={sortableProperties}
+        timeseriesOnly={timeseriesOnly}
       />
     );
   }

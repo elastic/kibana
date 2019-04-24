@@ -177,7 +177,7 @@ module.controller('MlTimeSeriesExplorerController', function (
                   defaultMessage: 'You can only view one job at a time in this dashboard'
                 })
               );
-              mlJobSelectService.next([selectedJobIds[0]]);
+              mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
             } else {
             // if a group has been loaded
               if (selectedJobIds.length > 0) {
@@ -188,11 +188,11 @@ module.controller('MlTimeSeriesExplorerController', function (
                   })
                 );
                 // mlJobSelectService.setJobIds([selectedJobIds[0]]);
-                mlJobSelectService.next([selectedJobIds[0]]);
+                mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
               } else if ($scope.jobs.length > 0) {
               // if there are no valid jobs in the group but there are valid jobs
               // in the list of all jobs, select the first
-                mlJobSelectService.next([$scope.jobs[0].id]);
+                mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
               } else {
               // if there are no valid jobs left.
                 $scope.loading = false;
@@ -201,7 +201,7 @@ module.controller('MlTimeSeriesExplorerController', function (
           } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
           // if some ids have been filtered out because they were invalid.
           // refresh the URL with the first valid id
-            mlJobSelectService.next([selectedJobIds[0]]);
+            mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
           } else if (selectedJobIds.length > 0) {
           // normal behavior. a job ID has been loaded from the URL
             loadForJobId(selectedJobIds[0]);
@@ -209,7 +209,7 @@ module.controller('MlTimeSeriesExplorerController', function (
             if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
             // no jobs were loaded from the URL, so add the first job
             // from the full jobs list.
-              mlJobSelectService.next([$scope.jobs[0].id]);
+              mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
             } else {
             // Jobs exist, but no time series jobs.
               $scope.loading = false;
@@ -691,16 +691,16 @@ module.controller('MlTimeSeriesExplorerController', function (
   const severitySub = severity$.subscribe(tableControlsListener);
   const annotationsRefreshSub = annotationsRefresh$.subscribe($scope.refresh);
   // Listen for changes to job selection.
-  const jobSelectServiceSub = mlJobSelectService.subscribe((selections) => {
+  const jobSelectServiceSub = mlJobSelectService.subscribe(({ selection }) => {
     // Clear the detectorIndex, entities and forecast info.
-    if (selections.length > 0 && $scope.appState !== undefined) {
+    if (selection.length > 0 && $scope.appState !== undefined) {
       delete $scope.appState.mlTimeSeriesExplorer.detectorIndex;
       delete $scope.appState.mlTimeSeriesExplorer.entities;
       delete $scope.appState.mlTimeSeriesExplorer.forecastId;
       $scope.appState.save();
 
       $scope.showForecastCheckbox = false;
-      loadForJobId(selections[0]);
+      loadForJobId(selection[0]);
     }
   });
 

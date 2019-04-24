@@ -25,10 +25,10 @@ module
 
     function link(scope, element, attrs) {
       const selectedJobIds = getSelectedJobIds(globalState);
-      const oldSelectedJobIds = mlJobSelectService.getValue();
+      const oldSelectedJobIds = mlJobSelectService.getValue().selection;
 
       if (selectedJobIds && !(_.isEqual(oldSelectedJobIds, selectedJobIds))) {
-        mlJobSelectService.next(selectedJobIds);
+        mlJobSelectService.next({ selection: selectedJobIds });
       }
 
       const props = {
@@ -57,5 +57,5 @@ module
   .service('mlJobSelectService', function ($injector) {
     const globalState = $injector.get('globalState');
     const initialSelectedJobIds = getSelectedJobIds(globalState);
-    return new BehaviorSubject(initialSelectedJobIds);
+    return new BehaviorSubject({ selection: initialSelectedJobIds, resetSelection: false });
   });
