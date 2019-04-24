@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiLoadingSpinner } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { Watch } from 'plugins/watcher/models/watch';
 import React, { useEffect, useReducer } from 'react';
 import { isEqual } from 'lodash';
+
+import { EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+
+import { Watch } from 'plugins/watcher/models/watch';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
+import { getPageErrorCode, PageError } from '../../../components/page_error';
 import { loadWatch } from '../../../lib/api';
+import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';
 import { ThresholdWatchEdit } from './threshold_watch_edit';
 import { WatchContext } from './watch_context';
@@ -33,23 +39,46 @@ const getTitle = (watch: BaseWatch) => {
     });
   }
 };
+
 const watchReducer = (state: any, action: any) => {
   const { command, payload } = action;
+  const { watch } = state;
+
   switch (command) {
     case 'setWatch':
-      return payload;
+      return {
+        ...state,
+        watch: payload,
+      };
+
     case 'setProperty':
       const { property, value } = payload;
-      if (isEqual(state[property], value)) {
+      if (isEqual(watch[property], value)) {
         return state;
       } else {
-        return new (Watch.getWatchTypes())[state.type]({ ...state, [property]: value });
+        return {
+          ...state,
+          watch: new (Watch.getWatchTypes())[watch.type]({
+            ...watch,
+            [property]: value,
+          }),
+        };
       }
+
     case 'addAction':
       const { type, defaults } = payload;
-      const newWatch = new (Watch.getWatchTypes())[state.type](state);
+      const newWatch = new (Watch.getWatchTypes())[watch.type](watch);
       newWatch.createAction(type, defaults);
-      return newWatch;
+      return {
+        ...state,
+        watch: newWatch,
+      };
+
+    case 'setError':
+      return {
+        ...state,
+        loadError: payload,
+      };
   }
 };
 
@@ -66,17 +95,24 @@ export const WatchEdit = ({
   };
 }) => {
   // hooks
-  const [watch, dispatch] = useReducer(watchReducer, null);
+  const [{ watch, loadError }, dispatch] = useReducer(watchReducer, { watch: null });
+
   const setWatchProperty = (property: string, value: any) => {
     dispatch({ command: 'setProperty', payload: { property, value } });
   };
+
   const addAction = (action: any) => {
     dispatch({ command: 'addAction', payload: action });
   };
+
   const getWatch = async () => {
     if (id) {
-      const theWatch = await loadWatch(id);
-      dispatch({ command: 'setWatch', payload: theWatch });
+      try {
+        const loadedWatch = await loadWatch(id);
+        dispatch({ command: 'setWatch', payload: loadedWatch });
+      } catch (error) {
+        dispatch({ command: 'setError', payload: error });
+      }
     } else if (type) {
       const WatchType = Watch.getWatchTypes()[type];
       if (WatchType) {
@@ -84,19 +120,45 @@ export const WatchEdit = ({
       }
     }
   };
+
   useEffect(() => {
     getWatch();
   }, []);
+
+  useEffect(
+    () => {
+      chrome.breadcrumbs.set([
+        MANAGEMENT_BREADCRUMB,
+        listBreadcrumb,
+        id ? editBreadcrumb : createBreadcrumb,
+      ]);
+    },
+    [id]
+  );
+
+  const errorCode = getPageErrorCode(loadError);
+  if (errorCode) {
+    return (
+      <EuiPageContent>
+        <PageError errorCode={errorCode} id={id} />
+      </EuiPageContent>
+    );
+  }
+
   if (!watch) {
     return <EuiLoadingSpinner />;
   }
+
   const pageTitle = getTitle(watch);
+
   let EditComponent = null;
+
   if (watch.type === WATCH_TYPES.THRESHOLD) {
     EditComponent = ThresholdWatchEdit;
   } else {
     EditComponent = JsonWatchEdit;
   }
+
   return (
     <WatchContext.Provider value={{ watch, setWatchProperty, addAction }}>
       <EditComponent pageTitle={pageTitle} />

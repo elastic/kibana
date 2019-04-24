@@ -20,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../components/form_errors';
-import { documentationLinks } from '../../../lib/documentation_links';
+import { putWatchApiUrl } from '../../../lib/documentation_links';
 import { onWatchSave, saveWatch } from '../watch_edit_actions';
 import { WatchContext } from './watch_context';
 import { LicenseServiceContext } from '../../../license_service_context';
@@ -124,7 +124,7 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Watch JSON',
               })}{' '}
               (
-              <EuiLink href={documentationLinks.watcher.putWatchApi} target="_blank">
+              <EuiLink href={putWatchApiUrl} target="_blank">
                 {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonDocLink', {
                   defaultMessage: 'Syntax',
                 })}

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './xpack_watcher_timezone_service.factory';
+export { getPageErrorCode, PageError } from './page_error';

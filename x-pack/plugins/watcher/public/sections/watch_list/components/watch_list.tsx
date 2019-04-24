@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -23,9 +23,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { Moment } from 'moment';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
+
 import { REFRESH_INTERVALS, WATCH_STATES } from '../../../../common/constants';
 import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
-import { fetchWatches } from '../../../lib/api';
+import { listBreadcrumb } from '../../../lib/breadcrumbs';
+import { getPageErrorCode, PageError } from '../../../components/page_error';
+import { loadWatches } from '../../../lib/api';
 
 const stateToIcon: { [key: string]: JSX.Element } = {
   [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
@@ -37,22 +42,34 @@ const stateToIcon: { [key: string]: JSX.Element } = {
 
 const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   // hooks
-  const [isWatchesLoading, setIsWatchesLoading] = useState<boolean>(true);
-  const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
-  const [watches, setWatches] = useState([]);
   const [selection, setSelection] = useState([]);
-  const loadWatches = async () => {
-    const loadedWatches = await fetchWatches();
-    setWatches(loadedWatches);
-    setIsWatchesLoading(false);
-  };
+  const [watchesToDelete, setWatchesToDelete] = useState<string[]>([]);
+  // Filter out deleted watches on the client, because the API will return 200 even though some watches
+  // may not really be deleted until after they're done firing and this could take some time.
+  const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
+
   useEffect(() => {
-    loadWatches();
-    const refreshIntervalId = setInterval(loadWatches, REFRESH_INTERVALS.WATCH_LIST);
-    return () => {
-      clearInterval(refreshIntervalId);
-    };
+    chrome.breadcrumbs.set([MANAGEMENT_BREADCRUMB, listBreadcrumb]);
   }, []);
+
+  const { isLoading: isWatchesLoading, data: watches, error } = loadWatches(
+    REFRESH_INTERVALS.WATCH_LIST
+  );
+
+  const availableWatches = useMemo(
+    () =>
+      watches ? watches.filter((watch: any) => !deletedWatches.includes(watch.id)) : undefined,
+    [watches, deletedWatches]
+  );
+
+  if (getPageErrorCode(error)) {
+    return (
+      <EuiPageContent>
+        <PageError />
+      </EuiPageContent>
+    );
+  }
+
   const columns = [
     {
       field: 'id',
@@ -157,13 +174,16 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       ],
     },
   ];
+
   const selectionConfig = {
     onSelectionChange: setSelection,
   };
+
   const pagination = {
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
   };
+
   const searchConfig = {
     box: {
       incremental: true,
@@ -184,21 +204,19 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
       </EuiButton>
     ),
   };
+
   return (
     <EuiPageContent>
       <DeleteWatchesModal
         callback={(deleted?: string[]) => {
           if (deleted) {
-            setWatches(
-              watches.filter((watch: any) => {
-                return !deleted.includes(watch.id);
-              })
-            );
+            setDeletedWatches([...deletedWatches, ...watchesToDelete]);
           }
           setWatchesToDelete([]);
         }}
         watchesToDelete={watchesToDelete}
       />
+
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiTitle size="m">
@@ -209,7 +227,9 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
               />
             </h1>
           </EuiTitle>
+
           <EuiSpacer size="s" />
+
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
@@ -220,7 +240,9 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer />
+
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiToolTip
@@ -266,9 +288,11 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
+
       <EuiSpacer />
+
       <EuiInMemoryTable
-        items={watches}
+        items={availableWatches}
         itemId="id"
         columns={columns}
         search={searchConfig}
@@ -287,4 +311,5 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
     </EuiPageContent>
   );
 };
+
 export const WatchList = injectI18n(WatchListUi);

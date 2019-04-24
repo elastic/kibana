@@ -3,12 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+declare module 'plugins/watcher/models/visualize_options' {
+  export const VisualizeOptions: any;
+}
+
 declare module 'plugins/watcher/models/watch' {
   export const Watch: any;
 }
+
 declare module 'plugins/watcher/models/watch/threshold_watch' {
   export const ThresholdWatch: any;
 }
+
 declare module 'plugins/watcher/models/watch/json_watch' {
   export const JsonWatch: any;
 }
@@ -36,4 +42,8 @@ declare module '@elastic/eui' {
   export const EuiCodeEditor: React.SFC<any>;
   export const EuiDescribedFormGroup: React.SFC<any>;
   export const EuiSuperSelect: React.SFC<any>;
+}
+
+declare module 'ui/time_buckets' {
+  export const TimeBuckets: any;
 }
