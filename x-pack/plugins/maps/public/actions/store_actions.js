@@ -511,13 +511,13 @@ export function setLayerQuery(id, query) {
   };
 }
 
-export function setLayerIgnoreGlobalQuery(id, ignoreGlobalQuery) {
+export function setLayerApplyGlobalQuery(id, applyGlobalQuery) {
   return (dispatch) => {
     dispatch({
       type: UPDATE_LAYER_PROP,
       id,
-      propName: 'ignoreGlobalQuery',
-      newValue: ignoreGlobalQuery,
+      propName: 'applyGlobalQuery',
+      newValue: applyGlobalQuery,
     });
 
     dispatch(syncDataForLayer(id));

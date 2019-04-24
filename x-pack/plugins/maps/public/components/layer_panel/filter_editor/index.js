@@ -7,7 +7,7 @@
 import { connect } from 'react-redux';
 import { FilterEditor } from './filter_editor';
 import { getSelectedLayer } from '../../../selectors/map_selectors';
-import { setLayerQuery, setLayerIgnoreGlobalQuery } from '../../../actions/store_actions';
+import { setLayerQuery, setLayerApplyGlobalQuery } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   return {
@@ -20,8 +20,8 @@ function mapDispatchToProps(dispatch) {
     setLayerQuery: (layerId, query) => {
       dispatch(setLayerQuery(layerId, query));
     },
-    setLayerIgnoreGlobalQuery: (layerId, ignoreGlobalQuery) => {
-      dispatch(setLayerIgnoreGlobalQuery(layerId, ignoreGlobalQuery));
+    setLayerApplyGlobalQuery: (layerId, applyGlobalQuery) => {
+      dispatch(setLayerApplyGlobalQuery(layerId, applyGlobalQuery));
     }
   };
 }

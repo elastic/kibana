@@ -42,7 +42,7 @@ export class AbstractLayer {
     layerDescriptor.maxZoom = _.get(options, 'maxZoom', 24);
     layerDescriptor.alpha = _.get(options, 'alpha', 0.75);
     layerDescriptor.visible = _.get(options, 'visible', true);
-    layerDescriptor.ignoreGlobalQuery = _.get(options, 'ignoreGlobalQuery', false);
+    layerDescriptor.applyGlobalQuery = _.get(options, 'applyGlobalQuery', true);
     layerDescriptor.style = _.get(options, 'style',  {});
 
     return layerDescriptor;
@@ -146,8 +146,8 @@ export class AbstractLayer {
     return this._descriptor.query;
   }
 
-  ignoreGlobalQuery() {
-    return this._descriptor.ignoreGlobalQuery;
+  applyGlobalQuery() {
+    return this._descriptor.applyGlobalQuery;
   }
 
   getZoomConfig() {
@@ -266,6 +266,14 @@ export class AbstractLayer {
 
   getIndexPatternIds() {
     return  [];
+  }
+
+  getQueryableIndexPatternIds() {
+    if (this.applyGlobalQuery()) {
+      return this.getIndexPatternIds();
+    }
+
+    return [];
   }
 
   async getOrdinalFields() {

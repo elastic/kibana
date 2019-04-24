@@ -79,8 +79,8 @@ export class FilterEditor extends Component {
     this._close();
   }
 
-  _onIgnoreChange = event => {
-    this.props.setLayerIgnoreGlobalQuery(this.props.layer.getId(), event.target.checked);
+  _onApplyGlobalQueryChange = event => {
+    this.props.setLayerApplyGlobalQuery(this.props.layer.getId(), event.target.checked);
   }
 
   _renderQueryPopover() {
@@ -168,17 +168,17 @@ export class FilterEditor extends Component {
     );
   }
 
-  _renderIgnoreGlobalQuery() {
+  _renderApplyGlobalQuery() {
     return (
       <EuiSwitch
         label={
-          i18n.translate('xpack.maps.layerPanel.filterEditor.ignoreGlobalQueryLabel', {
-            defaultMessage: `Ignore global query bar and filter pills.`
+          i18n.translate('xpack.maps.layerPanel.filterEditor.applyGlobalQueryLabel', {
+            defaultMessage: `Apply global query.`
           })
 
         }
-        checked={this.props.layer.ignoreGlobalQuery()}
-        onChange={this._onIgnoreChange}
+        checked={this.props.layer.applyGlobalQuery()}
+        onChange={this._onApplyGlobalQueryChange}
       />
     );
   }
@@ -197,7 +197,7 @@ export class FilterEditor extends Component {
 
         <EuiSpacer size="m"/>
 
-        {this._renderIgnoreGlobalQuery()}
+        {this._renderApplyGlobalQuery()}
 
         <EuiSpacer/>
 

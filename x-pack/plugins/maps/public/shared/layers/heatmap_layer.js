@@ -45,7 +45,6 @@ export class HeatmapLayer extends AbstractLayer {
     return metricfields[0].propertyKey;
   }
 
-
   _getMbLayerId() {
     return this.getId() + '_heatmap';
   }
