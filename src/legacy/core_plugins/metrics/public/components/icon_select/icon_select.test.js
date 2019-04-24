@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { IconSelect, IconView, ICONS, DEFAULT_ICON } from './icon_select';
+import { IconSelect, IconView, ICONS } from './icon_select';
 
 describe('src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js', () => {
   describe('<IconSelect />', () => {
@@ -32,7 +32,7 @@ describe('src/legacy/core_plugins/metrics/public/components/icon_select/icon_sel
     test('should put the default value if the passed one does\'t match with icons collection', () => {
       const wrapper = shallow(<IconSelect onChange={jest.fn()} value="unknown" />);
 
-      expect(wrapper.prop('selectedOptions')).toEqual([DEFAULT_ICON]);
+      expect(wrapper.prop('selectedOptions')).toEqual([ICONS[0]]);
     });
   });
 

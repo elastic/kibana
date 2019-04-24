@@ -22,9 +22,8 @@ import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const DEFAULT_ICON = 'fa-asterisk';
 export const ICONS = [
-  { value: DEFAULT_ICON, label: i18n.translate('tsvb.iconSelect.asteriskLabel', { defaultMessage: 'Asterisk' }) },
+  { value: 'fa-asterisk', label: i18n.translate('tsvb.iconSelect.asteriskLabel', { defaultMessage: 'Asterisk' }) },
   { value: 'fa-bell', label: i18n.translate('tsvb.iconSelect.bellLabel', { defaultMessage: 'Bell' }) },
   { value: 'fa-bolt', label: i18n.translate('tsvb.iconSelect.boltLabel', { defaultMessage: 'Bolt' }) },
   { value: 'fa-comment', label: i18n.translate('tsvb.iconSelect.commentLabel', { defaultMessage: 'Comment' }) },
@@ -58,14 +57,14 @@ export function IconView({ value: icon, label }) {
   );
 }
 
-export function IconSelect({ value, onChange, defaultValue }) {
+export function IconSelect({ value, onChange }) {
   const selectedIcon = ICONS.find(option => value === option.value);
 
   return (
     <EuiComboBox
       isClearable={false}
       options={ICONS}
-      selectedOptions={selectedIcon ? [selectedIcon] : [defaultValue]}
+      selectedOptions={selectedIcon ? [selectedIcon] : [ICONS[0]]}
       onChange={onChange}
       singleSelection={{ asPlainText: true }}
       renderOption={IconView}
@@ -76,9 +75,4 @@ export function IconSelect({ value, onChange, defaultValue }) {
 IconSelect.propTypes = {
   onChange: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,
-  defaultValue: PropTypes.string,
-};
-
-IconSelect.defaultProps = {
-  defaultValue: DEFAULT_ICON
 };
