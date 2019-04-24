@@ -41,9 +41,6 @@ function TimeIntervalParamEditor({
   setTouched,
   setValidity,
 }: AggParamEditorProps<string>) {
-  const label = i18n.translate('common.ui.aggTypes.timeInterval.minimumIntervalLabel', {
-    defaultMessage: 'Minimum interval',
-  });
   const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
   const scaledHepText =
     interval && interval.scaled && !isInvalid ? (
@@ -81,8 +78,8 @@ function TimeIntervalParamEditor({
         [] as ComboBoxOption[]
       );
 
-  let selectedOptions = [];
-  let definedOption;
+  let selectedOptions: ComboBoxOption[] = [];
+  let definedOption: ComboBoxOption | undefined;
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
