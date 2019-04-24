@@ -32,24 +32,32 @@ export function JsonUploadAndParse(props) {
   const [indexName, setIndexName] = useState('');
   const [indexPattern, setIndexPattern] = useState('');
   const [indexTypes, setIndexTypes] = useState([]);
+  const [indexRequestInFlight, setIndexRequestInFlight] = useState(false);
 
   // If index flag set, index on update
-  if (boolIndexData && parsedFile && !_.isEqual(indexedFile, parsedFile)) {
-    triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType)
-      .then(
-        resp => {
-          if (resp.success) {
-            setIndexedFile(parsedFile);
-            onIndexAddSuccess && onIndexAddSuccess(resp);
-          } else {
-            setIndexedFile(null);
-            onIndexAddError && onIndexAddError();
-          }
-        });
-  }
-
-  // Determine index options
   useEffect(() => {
+    if (!indexDataType && indexTypes.length) {
+      setIndexDataType(indexTypes[0]);
+    }
+
+    if (boolIndexData && !indexRequestInFlight && parsedFile
+      && !_.isEqual(indexedFile, parsedFile)) {
+      setIndexRequestInFlight(true);
+      triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType)
+        .then(
+          resp => {
+            if (resp.success) {
+              setIndexedFile(parsedFile);
+              onIndexAddSuccess && onIndexAddSuccess(resp);
+            } else {
+              setIndexedFile(null);
+              onIndexAddError && onIndexAddError();
+            }
+            setIndexRequestInFlight(false);
+          });
+    }
+
+    // Determine index options
     if (parsedFile) {
       if (typeof preIndexTransform === 'object') {
         setIndexTypes(preIndexTransform.indexTypes);
@@ -66,12 +74,11 @@ export function JsonUploadAndParse(props) {
             return;
         }
       }
-      // Default to first
-      if (!indexDataType && indexTypes.length) {
-        setIndexDataType(indexTypes[0].value);
-      }
     }
-  }, [parsedFile, preIndexTransform, indexDataType, indexTypes]);
+  }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
+    parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
+    onIndexAddError]
+  );
 
   return (
     <EuiForm>
