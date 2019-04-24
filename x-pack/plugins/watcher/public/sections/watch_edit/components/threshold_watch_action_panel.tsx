@@ -14,7 +14,7 @@ export const WatchActionsPanel = () => {
   const { watch } = useContext(WatchContext);
   return (
     <Fragment>
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
             <h3>
@@ -28,7 +28,7 @@ export const WatchActionsPanel = () => {
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem className="watcherThresholdWatchActionDropdownContainer">
           <WatchActionsDropdown />
         </EuiFlexItem>
       </EuiFlexGroup>
