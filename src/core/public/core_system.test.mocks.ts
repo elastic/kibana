@@ -18,6 +18,7 @@
  */
 
 import { basePathServiceMock } from './base_path/base_path_service.mock';
+import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
@@ -103,4 +104,12 @@ export const MockPluginsService = pluginsServiceMock.create();
 export const PluginsServiceConstructor = jest.fn().mockImplementation(() => MockPluginsService);
 jest.doMock('./plugins', () => ({
   PluginsService: PluginsServiceConstructor,
+}));
+
+export const MockCapabilitiesService = capabilitiesServiceMock.create();
+export const CapabilitiesServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockCapabilitiesService);
+jest.doMock('./capabilities', () => ({
+  CapabilitiesService: CapabilitiesServiceConstructor,
 }));
