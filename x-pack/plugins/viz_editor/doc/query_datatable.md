@@ -212,13 +212,13 @@ interface DatatableSpec {
 
 interface DatatableSpecColumn {
     id: string;
+    isSegment: boolean;
+    isMetric: boolean;
+    dataType: 'string' | 'number' | 'boolean' | /* ... */;
     operation: DatatableOperation;
 }
 
 interface DatatableOperation {
-    isSegment: boolean;
-    isMetric: boolean;
-    dataType: 'string' | 'number' | 'boolean' | /* ... */;
     ref: any;
 }
 
@@ -272,9 +272,11 @@ const LineChart: VisualizationExtension = {
     ConfigPanel({ privateState, datatableSpec, datasource, onChangePrivateState, onChangeTableSpec, getAlternatives, onApplySuggestion }) {
         const OperationConfigurator = datasource.OperationConfiguraor;
         const primaryTable = datatableSpec[0];
+        const secondaryTable = datatableSpec[1];
 
-        const [xAxis, setXAxis] = getColumn(primaryTable, privateState.seriesAxes + 1);
-        const [yAxes, setYAxis, removeYAxis] = getNColumns(primaryTable, privateState.seriesAxes + 2);
+        const [xAxis, setXAxis] = getColumn(primaryTable, 0);
+        const [yAxes, setYAxis, removeYAxis] = getNColumns(primaryTable, 1);
+        const [annotationAxis, setAnnotationAxis] = getColumn(secondaryTable, 0);
 
         return (<>
             <p>x axis</p>
@@ -299,7 +301,15 @@ const LineChart: VisualizationExtension = {
                         }
                     }}
                 />
-            )</>}
+            )
+            {secondaryTable && 
+                <><p>Annotations</p>
+                    <OperationConfigurator constraints={{ cardinality: 'many', type: [xAxis.dataType] }} currentOperation={annotationAxis} onChangeOperation={(newOperation) => {
+                        onChangeTableSpec(setAnnotationAxis(newOperation));
+                    }}>
+                </>
+            }
+            </>}
         </>);
     },
     getAlternatives(datasource, spec) {
