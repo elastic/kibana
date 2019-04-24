@@ -83,7 +83,7 @@ const createFilter = (aggConfigs, table, columnIndex, rowIndex, cellValue) => {
   return filter;
 };
 
-const VisFiltersProvider = (Private, getAppState, $rootScope) => {
+const VisFiltersProvider = (Private, Promise, getAppState) => {
   const queryFilter = Private(FilterBarQueryFilterProvider);
 
   const pushFilters = (filters, simulate) => {
@@ -91,9 +91,7 @@ const VisFiltersProvider = (Private, getAppState, $rootScope) => {
     if (filters.length && !simulate) {
       const flatFilters = _.flatten(filters);
       const deduplicatedFilters = flatFilters.filter((v, i) => i === flatFilters.findIndex(f => _.isEqual(v, f)));
-      pushFilterBarFilters(appState, deduplicatedFilters);
-
-      $rootScope.$digest();
+      Promise.resolve(pushFilterBarFilters(appState, deduplicatedFilters));
     }
   };
 

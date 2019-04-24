@@ -64,7 +64,7 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
    * @param {object|array} filters Filter(s) to add
    * @param {bool} global Whether the filter should be added to global state
    */
-  queryFilter.addFilters = async function (filters, global) {
+  queryFilter.addFilters = function (filters, global) {
 
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
@@ -82,15 +82,15 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
       filters = [filters];
     }
 
-    const mappedFilters = await mapAndFlattenFilters(indexPatterns, filters);
+    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters)).then((mappedFilters) => {
+      if (!filterState.filters) {
+        filterState.filters = [];
+      }
 
-    if (!filterState.filters) {
-      filterState.filters = [];
-    }
+      filterState.filters = filterState.filters.concat(mappedFilters);
+    });
 
-    filterState.filters = filterState.filters.concat(mappedFilters);
 
-    $rootScope.$digest();
   };
 
   /**
@@ -218,7 +218,7 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
   };
 
   queryFilter.setFilters = filters => {
-    return mapAndFlattenFilters(indexPatterns, filters)
+    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters)
       .then(mappedFilters => {
         const appState = getAppState();
         const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {
@@ -226,16 +226,13 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
         });
         globalState.filters = globalFilters;
         if (appState) appState.filters = appFilters;
-
-        $rootScope.$digest();
-      });
+      }));
   };
 
   queryFilter.addFiltersAndChangeTimeFilter = async filters => {
     const timeFilter = await extractTimeFilter(indexPatterns, filters);
     if (timeFilter) changeTimeFilter(timeFilter);
-    queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
-    $rootScope.$digest();
+    await queryFilter.addFilters(filters.filter(filter => filter !== timeFilter));
   };
 
   initWatchers();

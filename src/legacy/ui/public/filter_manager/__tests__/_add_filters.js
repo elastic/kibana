@@ -97,6 +97,7 @@ describe('add filters', function () {
       filter.meta.negate = false;
 
       await queryFilter.addFilters(filter);
+      $rootScope.$digest();
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0]).to.eql(filter);
 
@@ -105,6 +106,7 @@ describe('add filters', function () {
       negatedFilter.meta.negate = true;
 
       await queryFilter.addFilters(negatedFilter);
+      $rootScope.$digest();
       // The negated filter should overwrite the positive one
       expect(appState.filters.length).to.be(1);
       expect(appState.filters[0]).to.eql(negatedFilter);
@@ -116,6 +118,7 @@ describe('add filters', function () {
       negatedFilter.meta.negate = true;
 
       await queryFilter.addFilters(negatedFilter);
+      $rootScope.$digest();
 
       // The negated filter should overwrite the positive one
       expect(appState.filters.length).to.be(1);
@@ -126,6 +129,7 @@ describe('add filters', function () {
       filter.meta.negate = false;
 
       await queryFilter.addFilters(filter);
+      $rootScope.$digest();
       expect(appState.filters.length).to.be(1);
     });
 
@@ -136,6 +140,7 @@ describe('add filters', function () {
 
       // set up the watchers, add new filters
       await queryFilter.addFilters(filters);
+      $rootScope.$digest();
       // updates should trigger state saves
       expect(appState.save.callCount).to.be(1);
       expect(globalState.save.callCount).to.be(1);

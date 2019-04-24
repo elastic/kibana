@@ -31,7 +31,7 @@ export function setupDirective() {
     return reactDirective(wrapInI18nContext(ApplyFiltersPopover));
   });
 
-  app.directive('applyFiltersPopover', (indexPatterns, $rootScope) => {
+  app.directive('applyFiltersPopover', (indexPatterns) => {
     return {
       template,
       restrict: 'E',
@@ -47,14 +47,12 @@ export function setupDirective() {
         // popover, because it has to reset its state whenever the new filters change. Setting a `key`
         // property on the component accomplishes this due to how React handles the `key` property.
         $scope.$watch('filters', filters => {
-          mapAndFlattenFilters(indexPatterns, filters).then(mappedFilters => {
+          Promise.resolve(mapAndFlattenFilters(indexPatterns, filters).then(mappedFilters => {
             $scope.state = {
               filters: mappedFilters,
               key: Date.now(),
             };
-
-            $rootScope.$digest();
-          });
+          }));
         });
       }
     };
