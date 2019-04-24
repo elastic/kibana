@@ -7,7 +7,7 @@
 import { useMemo } from 'react';
 import { TransactionListAPIResponse } from '../../server/lib/transactions/get_top_transactions';
 import { loadTransactionList } from '../services/rest/apm/transaction_groups';
-import { IUrlParams } from '../store/urlParams';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const getRelativeImpact = (

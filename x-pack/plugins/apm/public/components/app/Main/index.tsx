@@ -8,8 +8,6 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
 import { px, topNavHeight, unit, units } from '../../../style/variables';
-// @ts-ignore
-import ConnectRouterToRedux from '../../shared/ConnectRouterToRedux';
 import { GlobalFetchIndicator } from './GlobalFetchIndicator';
 import { LicenseCheck } from './LicenseCheck';
 import { routes } from './routeConfig';
@@ -27,7 +25,6 @@ export function Main() {
     <GlobalFetchIndicator>
       <MainContainer data-test-subj="apmMainContainer">
         <UpdateBreadcrumbs />
-        <Route component={ConnectRouterToRedux} />
         <Route component={ScrollToTopOnPathChange} />
         <LicenseCheck>
           <Switch>
