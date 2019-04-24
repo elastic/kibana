@@ -753,13 +753,10 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 </EuiPopover>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <EuiSpacer size="l" />
             {hasErrors ? null : <WatchVisualization />}
-            <EuiSpacer size="l" />
             <WatchActionsPanel />
           </Fragment>
         ) : null}
-        <EuiSpacer size="l" />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
