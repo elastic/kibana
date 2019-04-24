@@ -30,7 +30,7 @@ import { getBoolFilter } from './get_bool_filter';
 import { useLocation } from '../../../hooks/useLocation';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { history } from '../../../utils/history';
-import { StaticIndexPattern } from '../../../../../../../src/legacy/ui/public/index_patterns';
+import { StaticIndexPattern } from 'ui/index_patterns';
 
 const Container = styled.div`
   margin-bottom: 10px;
