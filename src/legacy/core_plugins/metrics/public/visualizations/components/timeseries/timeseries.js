@@ -35,8 +35,7 @@ import {
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { Series } from './series';
-import { GRID_LINE_CONFIG } from '../lib/config';
-import { ICON_TYPES_MAP } from '../constants/icons';
+import { GRID_LINE_CONFIG, ICON_TYPES_MAP } from '../../constants';
 
 function generateAnnotationData(values) {
   return values.map((value) => ({

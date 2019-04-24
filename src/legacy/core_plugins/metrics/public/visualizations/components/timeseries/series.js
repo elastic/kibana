@@ -27,7 +27,7 @@ import {
   ScaleType,
   CurveType
 } from '@elastic/charts';
-import { calculateFillColor } from '../lib/calculate_fill_color';
+import { calculateFillColor } from '../../lib/calculate_fill_color';
 
 export const Series = ({
   yScaleType,
