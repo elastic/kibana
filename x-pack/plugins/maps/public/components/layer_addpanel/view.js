@@ -32,6 +32,7 @@ export class AddLayerPanel extends Component {
     hasLayerSelected: false,
     layer: null,
     indexingTriggered: false,
+    importIndexingReady: false
   }
 
   _viewLayer = (source, temp = true) => {
@@ -68,10 +69,10 @@ export class AddLayerPanel extends Component {
       return null;
     }
 
-    const { hasLayerSelected, isLoading, selectLayerAndAdd } = this.props;
+    const { hasLayerSelected, isLoading, selectLayerAndAdd, importView } = this.props;
     return (
       <EuiButton
-        disabled={!hasLayerSelected}
+        disabled={!hasLayerSelected || importView && !this.state.importIndexingReady}
         isLoading={hasLayerSelected && isLoading}
         iconSide="right"
         iconType={'sortRight'}
@@ -146,6 +147,9 @@ export class AddLayerPanel extends Component {
         boolIndexData: this.state.indexingTriggered,
         addAndViewSource: source => this._viewLayer(source, false),
         onRemove: this.props.removeTransientLayer,
+        onIndexReadyStatusChange: indexReady => this.setState(
+          { importIndexingReady: indexReady }
+        ),
       };
     }
     return editorProperties;

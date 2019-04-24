@@ -57,7 +57,8 @@ export class GeojsonFileSource extends AbstractVectorSource {
     };
   };
 
-  static renderEditor({ onPreviewSource, inspectorAdapters, addAndViewSource, boolIndexData, onRemove }) {
+  static renderEditor({ onPreviewSource, inspectorAdapters, addAndViewSource,
+    boolIndexData, onRemove, onIndexReadyStatusChange }) {
     return (
       <ClientFileCreateSourceEditor
         previewGeojsonFile={
@@ -74,6 +75,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
         }
         boolIndexData={boolIndexData}
         onRemove={onRemove}
+        onIndexReadyStatusChange={onIndexReadyStatusChange}
       />
     );
   }

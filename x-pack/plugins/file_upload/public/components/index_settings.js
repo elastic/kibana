@@ -5,7 +5,7 @@
  */
 
 
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -24,12 +24,17 @@ export const IndexSettings = injectI18n(function IndexSettings({
   setIndexPattern,
   setIndexDataType,
   indexTypes,
-  intl
+  intl,
+  setHasIndexErrors
 }) {
   const [indexNames, setIndexNames] = useState(null);
   const [indexNameError, setIndexNameError] = useState('');
   const [indexPatterns, setIndexPatterns] = useState(null);
   const [indexPatternError, setIndexPatternError] = useState('');
+
+  useEffect(() => {
+    setHasIndexErrors(!!indexPatternError || !!indexNameError);
+  });
 
   if (!indexNames) {
     getExistingIndices().then(indices => {

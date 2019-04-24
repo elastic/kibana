@@ -22,6 +22,7 @@ export function JsonUploadAndParse(props) {
     onIndexAddSuccess,
     onIndexAddError,
     preIndexTransform,
+    onIndexReadyStatusChange,
   } = props;
 
   // Local state for parsed file and indexed details
@@ -33,12 +34,17 @@ export function JsonUploadAndParse(props) {
   const [indexPattern, setIndexPattern] = useState('');
   const [indexTypes, setIndexTypes] = useState([]);
   const [indexRequestInFlight, setIndexRequestInFlight] = useState(false);
+  const [hasIndexErrors, setHasIndexErrors] = useState(false);
 
   // If index flag set, index on update
   useEffect(() => {
     if (!indexDataType && indexTypes.length) {
       setIndexDataType(indexTypes[0]);
     }
+
+    // Index ready
+    const indexReady = !!parsedFile && !!indexDataType && !!indexName && !hasIndexErrors;
+    onIndexReadyStatusChange(indexReady);
 
     if (boolIndexData && !indexRequestInFlight && parsedFile
       && !_.isEqual(indexedFile, parsedFile)) {
@@ -77,7 +83,7 @@ export function JsonUploadAndParse(props) {
     }
   }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
     parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
-    onIndexAddError]
+    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange]
   );
 
   return (
@@ -103,6 +109,7 @@ export function JsonUploadAndParse(props) {
         setIndexPattern={setIndexPattern}
         setIndexDataType={setIndexDataType}
         indexTypes={indexTypes}
+        setHasIndexErrors={setHasIndexErrors}
       />
     </EuiForm>
   );

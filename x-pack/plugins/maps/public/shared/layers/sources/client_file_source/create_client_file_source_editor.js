@@ -12,7 +12,8 @@ export function ClientFileCreateSourceEditor({
   previewGeojsonFile,
   boolIndexData = false,
   viewIndexedData,
-  onRemove
+  onRemove,
+  onIndexReadyStatusChange,
 }) {
   return (
     <JsonUploadAndParse
@@ -21,6 +22,7 @@ export function ClientFileCreateSourceEditor({
       boolIndexData={boolIndexData}
       preIndexTransform={'geo'}
       onIndexAddSuccess={viewIndexedData}
+      onIndexReadyStatusChange={onIndexReadyStatusChange}
     />
   );
 }
