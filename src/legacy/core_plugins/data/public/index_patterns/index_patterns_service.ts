@@ -91,9 +91,9 @@ export class IndexPatternsService {
         mockFields,
         mockIndexPattern,
       },
-      types: {
-        ...types,
-      },
+      // types: {
+      //   ...types,
+      // },
       ui: {
         IndexPatternSelect,
       },
