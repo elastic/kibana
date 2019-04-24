@@ -63,9 +63,8 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
    * Adds new filters to the scope and state
    * @param {object|array} filters Filter(s) to add
    * @param {bool} global Whether the filter should be added to global state
-   * @returns {Promise} filter map promise
    */
-  queryFilter.addFilters = function (filters, global) {
+  queryFilter.addFilters = async function (filters, global) {
 
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
@@ -83,16 +82,15 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
       filters = [filters];
     }
 
-    return mapAndFlattenFilters(indexPatterns, filters)
-      .then(function (filters) {
-        if (!filterState.filters) {
-          filterState.filters = [];
-        }
+    const mappedFilters = await mapAndFlattenFilters(indexPatterns, filters);
 
-        filterState.filters = filterState.filters.concat(filters);
+    if (!filterState.filters) {
+      filterState.filters = [];
+    }
 
-        $rootScope.$digest();
-      });
+    filterState.filters = filterState.filters.concat(mappedFilters);
+
+    $rootScope.$digest();
   };
 
   /**
