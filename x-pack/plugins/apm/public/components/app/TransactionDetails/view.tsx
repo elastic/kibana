@@ -43,6 +43,7 @@ export function TransactionDetailsView({ urlParams, location }: Props) {
       <EuiSpacer size="s" />
 
       <TransactionCharts
+        hasMLJob={false}
         charts={transactionDetailsChartsData}
         urlParams={urlParams}
         location={location}
