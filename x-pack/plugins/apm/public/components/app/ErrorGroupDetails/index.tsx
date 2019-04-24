@@ -15,7 +15,6 @@ import {
 } from '@elastic/eui';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
 import { idx } from '@kbn/elastic-idx';
@@ -25,12 +24,12 @@ import {
   loadErrorDistribution,
   loadErrorGroupDetails
 } from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../store/urlParams';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
-// @ts-ignore
 import { FilterBar } from '../../shared/FilterBar';
 import { DetailView } from './DetailView';
 import { ErrorDistribution } from './Distribution';
+import { useLocation } from '../../../hooks/useLocation';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 const Titles = styled.div`
   margin-bottom: ${px(units.plus)};
@@ -61,12 +60,9 @@ function getShortGroupId(errorGroupId?: string) {
   return errorGroupId.slice(0, 5);
 }
 
-interface Props {
-  urlParams: IUrlParams;
-  location: Location;
-}
-
-export function ErrorGroupDetailsView({ urlParams, location }: Props) {
+export function ErrorGroupDetails() {
+  const location = useLocation();
+  const { urlParams } = useUrlParams();
   const { serviceName, start, end, errorGroupId } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
