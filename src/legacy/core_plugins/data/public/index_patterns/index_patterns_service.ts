@@ -51,7 +51,7 @@ import setupRouteWithDefaultPattern from 'ui/index_patterns/route_setup/load_def
 import { getFromSavedObject, isFilterable } from 'ui/index_patterns/static_utils';
 
 // IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field
-import * as types from 'ui/index_patterns/index.d.ts';
+// import * as types from 'ui/index_patterns/index.d.ts';
 
 /**
  * Index Patterns Service
@@ -90,9 +90,6 @@ export class IndexPatternsService {
       fixtures: {
         mockFields,
         mockIndexPattern,
-      },
-      types: {
-        ...types,
       },
       ui: {
         IndexPatternSelect,
