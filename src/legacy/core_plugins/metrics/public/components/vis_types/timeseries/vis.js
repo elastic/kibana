@@ -25,7 +25,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { ScaleType } from '@elastic/charts';
 
 import { createTickFormatter } from '../../lib/tick_formatter';
-import _ from 'lodash';
+import { startsWith, get, cloneDeep, map } from 'lodash';
 import { TimeSeries } from '../../../visualizations/components/timeseries';
 import replaceVars from '../../lib/replace_vars';
 import { getAxisLabelString } from '../../lib/get_axis_label_string';
@@ -46,6 +46,18 @@ class TimeseriesVisualization extends Component {
     if (!scaledDataFormat || !dateFormat) return val;
     const formatter = createXaxisFormatter(this.interval, scaledDataFormat, dateFormat);
     return formatter(val);
+  };
+
+  applyDocTo = template => doc => {
+    const vars = replaceVars(template, null, doc);
+
+    if (vars instanceof Error) {
+      this.showToastNotification = vars.error.caused_by;
+
+      return template;
+    }
+
+    return vars;
   };
 
   componentDidUpdate() {
@@ -70,38 +82,28 @@ class TimeseriesVisualization extends Component {
 
   render() {
     const { model, visData, onBrush } = this.props;
-    const series = _.get(visData, `${model.id}.series`, []);
-    let annotations;
+    const series = get(visData, `${model.id}.series`, []);
 
     this.showToastNotification = null;
 
-    if (Array.isArray(model.annotations)) {
-      annotations = model.annotations.map(annotation => {
-        const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
-          .map(item => [item.key, item.docs]);
-        return {
-          id: annotation.id,
-          color: annotation.color,
-          icon: annotation.icon,
-          series: data.map(s => {
-            return [s[0], s[1].map(doc => {
-              const vars = replaceVars(annotation.template, null, doc);
+    const annotations = map(model.annotations, ({ id, color, icon, template }) => {
+      const annotationData = get(visData, `${model.id}.annotations.${id}`, []);
+      const applyDocToTemplate = this.applyDocTo(template);
 
-              if (vars instanceof Error) {
-                this.showToastNotification = vars.error.caused_by;
+      return {
+        id,
+        color,
+        icon,
+        data: annotationData.map(({ docs, ...rest }) => ({
+          ...rest,
+          docs: docs.map(applyDocToTemplate)
+        }))
+      };
+    });
 
-                return annotation.template;
-              }
-
-              return vars;
-            })];
-          })
-        };
-      });
-    }
-    const seriesModel = model.series.map(s => _.cloneDeep(s)).filter(s => !s.hidden);
+    const seriesModel = model.series.map(s => cloneDeep(s)).filter(s => !s.hidden);
     const firstSeries = seriesModel.find(s => s.formatter && !s.separate_axis);
-    const tickFormatter = createTickFormatter(_.get(firstSeries, 'formatter'), _.get(firstSeries, 'value_template'), this.props.getConfig);
+    const tickFormatter = createTickFormatter(get(firstSeries, 'formatter'), get(firstSeries, 'value_template'), this.props.getConfig);
 
     const yAxisIdGenerator = htmlIdGenerator('yaxis');
     const mainAxisId = yAxisIdGenerator('main');
@@ -121,7 +123,7 @@ class TimeseriesVisualization extends Component {
 
     seriesModel.forEach(seriesGroup => {
       const seriesGroupId = seriesGroup.id;
-      const seriesData = series.filter(r => _.startsWith(r.id, seriesGroup.id));
+      const seriesData = series.filter(r => startsWith(r.id, seriesGroup.id));
       const seriesGroupTickFormatter = createTickFormatter(seriesGroup.formatter, seriesGroup.value_template, this.props.getConfig);
 
       seriesData.forEach(seriesDataRow => {

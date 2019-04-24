@@ -38,10 +38,10 @@ import { Series } from './series';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP } from '../../constants';
 
 function generateAnnotationData(values) {
-  return values.map((value) => ({
-    dataValue: value[0],
-    details: value[1][0],
-    header: moment(value[0]).format('MMM DD, YYYY hh:mm A')
+  return values.map(({ key, docs }) => ({
+    dataValue: key,
+    details: docs[0],
+    header: moment(key).format('MMM DD, YYYY hh:mm A')
   }));
 }
 
@@ -67,8 +67,8 @@ export const TimeSeries = ({
         theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
       />
 
-      { (annotations || []).map(({ id, series, icon, color }) => {
-        const dataValues = generateAnnotationData(series);
+      { annotations.map(({ id, data, icon, color }) => {
+        const dataValues = generateAnnotationData(data);
         const style = { line: { stroke: color, } };
 
         return (
@@ -77,7 +77,7 @@ export const TimeSeries = ({
             annotationId={getAnnotationId(id)}
             domainType={AnnotationDomainTypes.XDomain}
             dataValues={dataValues}
-            marker={<EuiIcon type={ICON_TYPES_MAP[icon]} />}
+            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
             style={style}
           />
         );})
