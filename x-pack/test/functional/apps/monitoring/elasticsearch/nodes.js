@@ -12,7 +12,8 @@ export default function ({ getService, getPageObjects }) {
   const nodesList = getService('monitoringElasticsearchNodes');
   const esClusterSummaryStatus = getService('monitoringElasticsearchSummaryStatus');
 
-  describe('Elasticsearch nodes listing', () => {
+  // FF bug: https://github.com/elastic/kibana/issues/35551
+  describe.skip('Elasticsearch nodes listing', () => {
     describe('with offline node', () => {
       const { setup, tearDown } = getLifecycleMethods(getService, getPageObjects);
 
@@ -85,7 +86,7 @@ export default function ({ getService, getPageObjects }) {
           });
         });
 
-        it.skip('should sort by cpu', async () => {
+        it('should sort by cpu', async () => {
           await nodesList.clickCpuCol();
           await nodesList.clickCpuCol();
 
@@ -142,7 +143,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it.skip('should sort by memory', async () => {
+      it('should sort by memory', async () => {
         await nodesList.clickMemoryCol();
         await nodesList.clickMemoryCol();
 
@@ -220,7 +221,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // Skip until https://github.com/elastic/eui/issues/1318 is implemented
-      it.skip('should filter for specific indices', async () => {
+      it('should filter for specific indices', async () => {
         await nodesList.setFilter('01');
         const rows = await nodesList.getRows();
         expect(rows.length).to.be(1);
