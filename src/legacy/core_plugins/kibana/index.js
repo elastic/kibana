@@ -136,11 +136,11 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return encodeURIComponent(`/management/kibana/index_patterns/${obj.id}`);
+            return `/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`;
           },
           getInAppUrl(obj) {
             return {
-              path: encodeURIComponent(`/app/kibana#/management/kibana/index_patterns/${obj.id}`),
+              path: `/app/kibana#/management/kibana/index_patterns/${encodeURIComponent(obj.id)}`,
               uiCapabilitiesPath: 'management.kibana.index_patterns',
             };
           },
@@ -152,11 +152,11 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return encodeURIComponent(`/management/kibana/objects/savedVisualizations/${obj.id}`);
+            return `/management/kibana/objects/savedVisualizations/${encodeURIComponent(obj.id)}`;
           },
           getInAppUrl(obj) {
             return {
-              path: encodeURIComponent(`/app/kibana#/visualize/edit/${obj.id}`),
+              path: `/app/kibana#/visualize/edit/${encodeURIComponent(obj.id)}`,
               uiCapabilitiesPath: 'visualize.show',
             };
           },
@@ -168,11 +168,11 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return encodeURIComponent(`/management/kibana/objects/savedSearches/${obj.id}`);
+            return `/management/kibana/objects/savedSearches/${encodeURIComponent(obj.id)}`;
           },
           getInAppUrl(obj) {
             return {
-              path: encodeURIComponent(`/app/kibana#/discover/${obj.id}`),
+              path: `/app/kibana#/discover/${encodeURIComponent(obj.id)}`,
               uiCapabilitiesPath: 'discover.show',
             };
           },
@@ -184,11 +184,11 @@ export default function (kibana) {
             return obj.attributes.title;
           },
           getEditUrl(obj) {
-            return encodeURIComponent(`/management/kibana/objects/savedDashboards/${obj.id}`);
+            return `/management/kibana/objects/savedDashboards/${encodeURIComponent(obj.id)}`;
           },
           getInAppUrl(obj) {
             return {
-              path: encodeURIComponent(`/app/kibana#/dashboard/${obj.id}`),
+              path: `/app/kibana#/dashboard/${encodeURIComponent(obj.id)}`,
               uiCapabilitiesPath: 'dashboard.show',
             };
           },

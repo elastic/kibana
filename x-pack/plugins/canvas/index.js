@@ -42,7 +42,7 @@ export function canvas(kibana) {
           },
           getInAppUrl(obj) {
             return {
-              path: encodeURIComponent(`/app/canvas#/workpad/${obj.id}`),
+              path: `/app/canvas#/workpad/${encodeURIComponent(obj.id)}`,
               uiCapabilitiesPath: 'canvas.show',
             };
           },
