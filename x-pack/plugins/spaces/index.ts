@@ -5,12 +5,9 @@
  */
 
 import { resolve } from 'path';
-
-import { SavedObjectsService } from 'src/legacy/server/saved_objects';
-import { PluginInitializerContext, HttpServiceSetup } from 'src/core/server';
 // @ts-ignore
 import KbnServer, { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { HttpServerInfo } from 'src/core/server/http';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -22,38 +19,7 @@ import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { plugin } from './server/new_platform';
-import { XPackMainPlugin } from '../xpack_main/xpack_main';
-import { SecurityPlugin } from '../security';
-import { SpacesServiceSetup } from './server/new_platform/spaces_service/spaces_service';
-
-export interface SpacesCoreSetup {
-  http: HttpServiceSetup;
-  savedObjects: SavedObjectsService;
-  elasticsearch: ElasticsearchPlugin;
-  usage: {
-    collectorSet: {
-      register: (collector: any) => void;
-    };
-  };
-  tutorial: {
-    addScopedTutorialContextFactory: (factory: any) => void;
-  };
-}
-
-export interface PluginsSetup {
-  getSecurity: () => SecurityPlugin;
-  xpackMain: XPackMainPlugin;
-  // TODO: this is temporary for `watchLicenseAndStatusToInitialize`
-  spaces: any;
-}
-
-export interface SpacesPluginSetup {
-  spacesService: SpacesServiceSetup;
-}
-
-export interface SpacesInitializerContext extends PluginInitializerContext {
-  legacyConfig: KibanaConfig;
-}
+import { SpacesInitializerContext, SpacesCoreSetup } from './server/new_platform/plugin';
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -156,15 +122,15 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       } as unknown) as SpacesInitializerContext;
 
-      const core = {
-        http: kbnServer.newPlatform.setup.core.http,
+      const core: SpacesCoreSetup = {
+        http: kbnServer.newPlatform.setup.core.http as HttpServerInfo,
         elasticsearch: server.plugins.elasticsearch,
         savedObjects: server.savedObjects,
         usage: (server as any).usage,
         tutorial: {
           addScopedTutorialContextFactory: (server as any).addScopedTutorialContextFactory,
         },
-      } as SpacesCoreSetup;
+      };
 
       const plugins = {
         xpackMain: server.plugins.xpack_main,

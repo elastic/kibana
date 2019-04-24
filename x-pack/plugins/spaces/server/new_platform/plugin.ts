@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { Logger, HttpServiceSetup, PluginInitializerContext } from 'src/core/server';
+import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
-import { SpacesCoreSetup, SpacesInitializerContext, PluginsSetup } from '../../index';
 // @ts-ignore
 import { AuditLogger } from '../../../../server/lib/audit_logger';
 // @ts-ignore
@@ -22,7 +22,37 @@ import { initPublicSpacesApi } from '../routes/api/public';
 import { initSpacesRequestInterceptors } from '../lib/request_inteceptors';
 import { getSpacesUsageCollector } from '../lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
+import { SecurityPlugin } from '../../../security';
+import { SpacesServiceSetup } from './spaces_service/spaces_service';
 
+export interface SpacesCoreSetup {
+  http: HttpServiceSetup;
+  savedObjects: SavedObjectsService;
+  elasticsearch: ElasticsearchPlugin;
+  usage: {
+    collectorSet: {
+      register: (collector: any) => void;
+    };
+  };
+  tutorial: {
+    addScopedTutorialContextFactory: (factory: any) => void;
+  };
+}
+
+export interface PluginsSetup {
+  getSecurity: () => SecurityPlugin;
+  xpackMain: XPackMainPlugin;
+  // TODO: this is temporary for `watchLicenseAndStatusToInitialize`
+  spaces: any;
+}
+
+export interface SpacesPluginSetup {
+  spacesService: SpacesServiceSetup;
+}
+
+export interface SpacesInitializerContext extends PluginInitializerContext {
+  legacyConfig: KibanaConfig;
+}
 export class Plugin {
   private readonly pluginId = 'spaces';
 
