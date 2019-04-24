@@ -179,6 +179,7 @@ export class FilterEditor extends Component {
         }
         checked={this.props.layer.applyGlobalQuery()}
         onChange={this._onApplyGlobalQueryChange}
+        data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
       />
     );
   }
