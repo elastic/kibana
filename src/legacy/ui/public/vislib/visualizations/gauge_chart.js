@@ -65,23 +65,25 @@ export function GaugeChartProvider(Private) {
       const adaptedHeight = Math.floor(availableHeight / nrOfItems) - gaugeBottomMargin;
 
       switch (alignment) {
-
         case 'vertical':
           return {
             width: containerWidth, //for compatiblity with tests
             height: adaptedHeight,
+            alignment,
           };
 
         case 'horizontal':
           return {
             width: adaptedWidth,
-            height: availableHeight
+            height: availableHeight,
+            alignment,
           };
 
         default:
           return {
             width: availableWidth < availableHeight ? containerWidth : adaptedWidth,
             height: availableWidth < availableHeight ? adaptedHeight : availableHeight,
+            alignment: availableWidth < availableHeight ? 'vertical' : 'horizontal',
           };
       }
     }
@@ -93,7 +95,11 @@ export function GaugeChartProvider(Private) {
       return function (selection) {
         selection.each(function (data) {
           const div = d3.select(this);
-          const { width, height } = self.calcGaugeDim(gaugeConfig.alignment, this, data.series.length);
+          const { width, height, alignment } = self.calcGaugeDim(
+            gaugeConfig.alignment,
+            this,
+            data.series.length
+          );
 
           if (height < 0 || width < 0) return;
 
@@ -114,7 +120,10 @@ export function GaugeChartProvider(Private) {
 
             svg.attr('height', height);
             const transformX = width / 2;
-            const transformY = gaugeConfig.gaugeType === 'Arc' ? height / (2 * 0.75) : height / 2;
+            const transformY =
+              gaugeConfig.gaugeType === 'Arc' && alignment === 'vertical'
+                ? height / (2 * 0.75)
+                : height / 2;
             g.attr('transform', `translate(${transformX}, ${transformY})`);
 
             self.addEvents(gauges);
