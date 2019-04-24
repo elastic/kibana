@@ -18,7 +18,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import _ from 'lodash';
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React, { Component, Fragment } from 'react';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { Breadcrumb } from 'ui/chrome';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
@@ -132,7 +132,7 @@ class ManageSpacePageUI extends Component<Props, State> {
   };
 
   public getForm = () => {
-    if (!uiCapabilities.spaces.manage) {
+    if (!capabilities.get().spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -166,7 +166,7 @@ class ManageSpacePageUI extends Component<Props, State> {
         <EnabledFeatures
           space={this.state.space}
           features={this.props.features}
-          uiCapabilities={uiCapabilities}
+          uiCapabilities={capabilities.get()}
           onChange={this.onSpaceChange}
           intl={this.props.intl}
         />

@@ -24,7 +24,8 @@ import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
 import 'ui/query_bar';
-import { uiCapabilities } from 'ui/capabilities';
+
+import { capabilities } from 'ui/capabilities';
 import 'ui/apply_filters';
 import 'ui/listen';
 import chrome from 'ui/chrome';
@@ -152,7 +153,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [...(uiCapabilities.visualize.save ? [{
+  $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
     key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
@@ -217,7 +218,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: uiCapabilities.visualize.createShortUrl,
+        allowShortUrl: capabilities.get().visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
