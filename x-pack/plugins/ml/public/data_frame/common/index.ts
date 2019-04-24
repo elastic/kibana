@@ -14,7 +14,11 @@ import { DefinePivotExposedState } from '../components/define_pivot/define_pivot
 
 import { PivotGroupByConfig } from '../common';
 
-import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
+import {
+  dateHistogramIntervalFormatRegex,
+  DATE_HISTOGRAM_FORMAT,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
+} from './pivot_group_by';
 
 // The display label used for an aggregation e.g. sum(bytes).
 export type Label = string;
@@ -65,6 +69,7 @@ interface HistogramAgg {
 interface DateHistogramAgg {
   date_histogram: {
     field: FieldName;
+    format?: DATE_HISTOGRAM_FORMAT;
     interval: string;
   };
 }
@@ -175,6 +180,14 @@ export function getDataFramePreviewRequest(
           interval: g.interval,
         },
       };
+
+      const timeUnitMatch = g.interval.match(dateHistogramIntervalFormatRegex);
+      if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
+        // the following is just a TS compatible way of using the
+        // matched string like `d` as the property to access the enum.
+        dateHistogramAgg.date_histogram.format =
+          DATE_HISTOGRAM_FORMAT[timeUnitMatch[1] as keyof typeof DATE_HISTOGRAM_FORMAT];
+      }
       request.pivot.group_by[g.formRowLabel] = dateHistogramAgg;
     }
   });

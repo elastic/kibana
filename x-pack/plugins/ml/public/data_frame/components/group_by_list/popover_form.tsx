@@ -17,7 +17,11 @@ import {
   EuiFormRow,
 } from '@elastic/eui';
 
-import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../common';
+import {
+  dateHistogramIntervalFormatRegex,
+  histogramIntervalFormatRegex,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
+} from '../../common';
 
 type supportedIntervalTypes =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
@@ -29,9 +33,9 @@ export function isIntervalValid(interval: string, intervalType: supportedInterva
   valid = interval !== '';
 
   if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
-    valid = /^[0-9]+((\.)?[0-9]+)?$/.test(interval);
+    valid = histogramIntervalFormatRegex.test(interval);
   } else if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
-    valid = /^[0-9]+(ms|s|m|h|d|w|M|q|y)$/.test(interval);
+    valid = dateHistogramIntervalFormatRegex.test(interval);
   }
 
   return valid;
