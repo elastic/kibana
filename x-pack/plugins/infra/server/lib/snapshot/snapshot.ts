@@ -146,6 +146,11 @@ const requestNodeMetrics = async (
               date_histogram: {
                 field: options.sourceConfiguration.fields.timestamp,
                 interval: options.timerange.interval || '1m',
+                offset: '-58s',
+                extended_bounds: {
+                  min: options.timerange.from,
+                  max: options.timerange.to,
+                },
               },
               aggregations: getMetricsAggregations(options),
             },
