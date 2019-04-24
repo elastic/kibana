@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import storeProd from './configureStore.prod';
-import storeDev from './configureStore.dev';
-
-const store = process.env.NODE_ENV === 'production' ? storeProd : storeDev;
-export default store;
+export const TIME_RANGE_REFRESH = 'TIME_RANGE_REFRESH';
+export const LOCATION_UPDATE = 'LOCATION_UPDATE';
+export const TIMEPICKER_DEFAULTS = {
+  rangeFrom: 'now-24h',
+  rangeTo: 'now',
+  refreshPaused: 'true',
+  refreshInterval: '0'
+};
