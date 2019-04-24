@@ -7,6 +7,7 @@
 import { Logger, HttpServiceSetup, PluginInitializerContext } from 'src/core/server';
 import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
+import { ServerRoute } from 'hapi';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
 // @ts-ignore
@@ -19,14 +20,16 @@ import { SpacesAuditLogger } from '../lib/audit_logger';
 import { createSpacesTutorialContextFactory } from '../lib/spaces_tutorial_context_factory';
 import { initPrivateApis } from '../routes/api/v1';
 import { initPublicSpacesApi } from '../routes/api/public';
-import { initSpacesRequestInterceptors } from '../lib/request_inteceptors';
 import { getSpacesUsageCollector } from '../lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SecurityPlugin } from '../../../security';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
 
+export interface SpacesHttpServiceSetup extends HttpServiceSetup {
+  route(route: ServerRoute | ServerRoute[]): void;
+}
 export interface SpacesCoreSetup {
-  http: HttpServiceSetup;
+  http: SpacesHttpServiceSetup;
   savedObjects: SavedObjectsService;
   elasticsearch: ElasticsearchPlugin;
   usage: {
@@ -48,6 +51,8 @@ export interface PluginsSetup {
 
 export interface SpacesPluginSetup {
   spacesService: SpacesServiceSetup;
+  // TODO: this is temporary, required by request interceptors which are initialized in legacy plugin
+  log: Logger;
 }
 
 export interface SpacesInitializerContext extends PluginInitializerContext {
@@ -65,7 +70,7 @@ export class Plugin {
     this.log = initializerContext.logger.get('spaces');
   }
 
-  public async setup(core: SpacesCoreSetup, plugins: PluginsSetup) {
+  public async setup(core: SpacesCoreSetup, plugins: PluginsSetup): Promise<SpacesPluginSetup> {
     const xpackMainPlugin: XPackMainPlugin = plugins.xpackMain;
     watchStatusAndLicenseToInitialize(xpackMainPlugin, plugins.spaces, async () => {
       await createDefaultSpace({
@@ -117,14 +122,6 @@ export class Plugin {
       xpackMain: xpackMainPlugin,
     });
 
-    initSpacesRequestInterceptors({
-      config: this.config,
-      http: core.http,
-      log: this.log,
-      spacesService,
-      xpackMain: xpackMainPlugin,
-    });
-
     // Register a function with server to manage the collection of usage stats
     core.usage.collectorSet.register(
       getSpacesUsageCollector({
@@ -137,6 +134,7 @@ export class Plugin {
 
     return {
       spacesService,
+      log: this.log,
     };
   }
 }

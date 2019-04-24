@@ -12,14 +12,14 @@ import { InterceptorDeps } from '.';
 
 export function initSpacesOnPostAuthRequestInterceptor({
   config,
-  http,
+  legacyServer,
   xpackMain,
   spacesService,
   log,
 }: InterceptorDeps) {
   const serverBasePath: string = config.get('server.basePath');
 
-  http.server.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
+  legacyServer.ext('onPostAuth', async function spacesOnPostAuthHandler(request: any, h: any) {
     const path = request.path;
 
     const isRequestingKibanaRoot = path === '/';
@@ -48,7 +48,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         if (spaces.length > 0) {
           // render spaces selector instead of home page
-          const app = http.server.getHiddenUiAppById('space_selector');
+          const app = legacyServer.getHiddenUiAppById('space_selector');
           return (await h.renderApp(app, { spaces })).takeover();
         }
       } catch (error) {

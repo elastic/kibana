@@ -163,14 +163,14 @@ describe('onPostAuthRequestInterceptor', () => {
       // we are including the already tested interceptor here in the test chain.
       initSpacesOnRequestInterceptor({
         config: server.config(),
-        http: { server } as any,
+        legacyServer: server,
         log,
         xpackMain: server.plugins.xpack_main,
         spacesService,
       });
       initSpacesOnPostAuthRequestInterceptor({
         config: server.config(),
-        http: { server } as any,
+        legacyServer: server,
         log,
         xpackMain: server.plugins.xpack_main,
         spacesService,

@@ -12,7 +12,7 @@ import { PublicRouteDeps } from '.';
 export function initDeleteSpacesApi(deps: PublicRouteDeps) {
   const { http, savedObjects, spacesService, routePreCheckLicenseFn } = deps;
 
-  http.server.route({
+  http.route({
     method: 'DELETE',
     path: '/api/spaces/space/{id}',
     async handler(request: any, h: any) {

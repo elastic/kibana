@@ -13,7 +13,7 @@ import { PublicRouteDeps } from '.';
 export function initPostSpacesApi(deps: PublicRouteDeps) {
   const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.server.route({
+  http.route({
     method: 'POST',
     path: '/api/spaces/space',
     async handler(request: any) {

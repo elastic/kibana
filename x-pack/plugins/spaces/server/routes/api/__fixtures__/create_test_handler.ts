@@ -7,7 +7,6 @@
 // @ts-ignore
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
-import { HttpServiceSetup } from 'src/core/server';
 import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';
@@ -15,6 +14,7 @@ import { PublicRouteDeps } from '../public';
 import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { PrivateRouteDeps } from '../v1';
+import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -179,7 +179,8 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
     initApiFn({
       http: ({
         server,
-      } as unknown) as HttpServiceSetup,
+        route: server.route.bind(server),
+      } as unknown) as SpacesHttpServiceSetup,
       routePreCheckLicenseFn: pre,
       savedObjects: server.savedObjects,
       spacesService,

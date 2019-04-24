@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HttpServiceSetup, Logger } from 'src/core/server';
+import { Logger } from 'src/core/server';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
@@ -13,12 +13,13 @@ import { initGetSpacesApi } from './get';
 import { initPostSpacesApi } from './post';
 import { initPutSpacesApi } from './put';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
+import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 
 type InterfaceExcept<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
-  http: HttpServiceSetup;
+  http: SpacesHttpServiceSetup;
   savedObjects: SavedObjectsService;
   spacesService: SpacesServiceSetup;
   log: Logger;

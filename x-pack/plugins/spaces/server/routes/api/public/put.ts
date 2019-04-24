@@ -14,7 +14,7 @@ import { PublicRouteDeps } from '.';
 export function initPutSpacesApi(deps: PublicRouteDeps) {
   const { http, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.server.route({
+  http.route({
     method: 'PUT',
     path: '/api/spaces/space/{id}',
     async handler(request: any) {

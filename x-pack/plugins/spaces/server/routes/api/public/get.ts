@@ -13,7 +13,7 @@ import { PublicRouteDeps } from '.';
 export function initGetSpacesApi(deps: PublicRouteDeps) {
   const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
 
-  http.server.route({
+  http.route({
     method: 'GET',
     path: '/api/spaces/space',
     async handler(request: any) {
@@ -39,7 +39,7 @@ export function initGetSpacesApi(deps: PublicRouteDeps) {
     },
   });
 
-  http.server.route({
+  http.route({
     method: 'GET',
     path: '/api/spaces/space/{id}',
     async handler(request: any) {

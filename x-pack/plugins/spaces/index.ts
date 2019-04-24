@@ -19,7 +19,12 @@ import { getSpaceSelectorUrl } from './server/lib/get_space_selector_url';
 import { migrateToKibana660 } from './server/lib/migrations';
 import { toggleUICapabilities } from './server/lib/toggle_ui_capabilities';
 import { plugin } from './server/new_platform';
-import { SpacesInitializerContext, SpacesCoreSetup } from './server/new_platform/plugin';
+import {
+  SpacesInitializerContext,
+  SpacesCoreSetup,
+  SpacesHttpServiceSetup,
+} from './server/new_platform/plugin';
+import { initSpacesRequestInterceptors } from './server/lib/request_inteceptors';
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -122,8 +127,13 @@ export const spaces = (kibana: Record<string, any>) =>
         },
       } as unknown) as SpacesInitializerContext;
 
+      const spacesHttpService: SpacesHttpServiceSetup = {
+        ...(kbnServer.newPlatform.setup.core.http as HttpServerInfo),
+        route: server.route.bind(server),
+      };
+
       const core: SpacesCoreSetup = {
-        http: kbnServer.newPlatform.setup.core.http as HttpServerInfo,
+        http: spacesHttpService,
         elasticsearch: server.plugins.elasticsearch,
         savedObjects: server.savedObjects,
         usage: (server as any).usage,
@@ -140,9 +150,20 @@ export const spaces = (kibana: Record<string, any>) =>
 
       // Need legacy because of `setup_base_path_provider`
       // (request.getBasePath and request.setBasePath)
-      core.http.server = kbnServer as any;
+      // core.http.server = kbnServer as any;
 
-      const { spacesService } = await plugin(initializerContext).setup(core, plugins);
+      // @ts-ignore core.http.route does not exist yet.
+      core.http.route = server.route;
+
+      const { spacesService, log } = await plugin(initializerContext).setup(core, plugins);
+
+      initSpacesRequestInterceptors({
+        config: initializerContext.legacyConfig,
+        legacyServer: server,
+        log,
+        spacesService,
+        xpackMain: plugins.xpackMain,
+      });
 
       server.expose('getSpaceId', (request: any) => spacesService.getSpaceId(request));
       server.expose('spacesClient', spacesService);

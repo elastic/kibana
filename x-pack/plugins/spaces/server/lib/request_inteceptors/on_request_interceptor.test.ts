@@ -106,7 +106,7 @@ describe('onRequestInterceptor', () => {
 
       initSpacesOnRequestInterceptor({
         config: server.config(),
-        http: { server } as any,
+        legacyServer: server,
         log,
         xpackMain: {} as XPackMainPlugin,
         spacesService: {
