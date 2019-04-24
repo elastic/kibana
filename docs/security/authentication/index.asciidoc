@@ -27,7 +27,7 @@ Token authentication allows users to login using the same Kibana provided login 
 
 The session cookies that are issued by the token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse.
 
-Prior to configuring Kibana, ensure token support is enabled in Elasticsearch. See the {ref}/security-api-get-token.html#_description_86[Elasticsearch token API] documentation for more information.
+Prior to configuring Kibana, ensure token support is enabled in Elasticsearch. See the {ref}/security-api-get-token.html[Elasticsearch token API] documentation for more information.
 
 To enable the token authentication provider in Kibana, set the following value in your `kibana.yml`:
 
