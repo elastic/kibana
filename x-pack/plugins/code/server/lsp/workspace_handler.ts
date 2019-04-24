@@ -270,7 +270,7 @@ export class WorkspaceHandler {
         }
       }
       // @ts-ignore
-      throw new Error("path in response doesn't not starts with workspace path");
+      throw new Error("path in response does not start with workspace path");
     }
     return null;
   }
