@@ -27,7 +27,7 @@ import { mapAndFlattenFilters } from './lib/map_and_flatten_filters';
 import { extractTimeFilter } from './lib/extract_time_filter';
 import { changeTimeFilter } from './lib/change_time_filter';
 
-export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope, getAppState, globalState, config) {
+export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $rootScope, getAppState, globalState, config) {
   const EventEmitter = Private(EventsProvider);
 
   const queryFilter = new EventEmitter();
@@ -83,14 +83,14 @@ export function FilterBarQueryFilterProvider(Private, indexPatterns, $rootScope,
       filters = [filters];
     }
 
-    return mapAndFlattenFilters(indexPatterns, filters)
+    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters)
       .then(function (filters) {
         if (!filterState.filters) {
           filterState.filters = [];
         }
 
         filterState.filters = filterState.filters.concat(filters);
-      });
+      }));
   };
 
   /**
