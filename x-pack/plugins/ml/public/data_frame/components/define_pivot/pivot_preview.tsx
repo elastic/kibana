@@ -87,8 +87,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
             {i18n.translate(
               'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutBody',
               {
-                defaultMessage:
-                  'Please make sure to choose at least one group-by field and aggregation.',
+                defaultMessage: 'Please choose at least one group-by field and aggregation.',
               }
             )}
           </p>

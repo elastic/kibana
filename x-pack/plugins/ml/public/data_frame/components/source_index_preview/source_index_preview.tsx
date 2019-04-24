@@ -165,7 +165,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
               'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutBody',
               {
                 defaultMessage:
-                  'The query for the source index returned no results. Please make sure the index contains documents and your query is not too limiting.',
+                  'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
               }
             )}
           </p>
