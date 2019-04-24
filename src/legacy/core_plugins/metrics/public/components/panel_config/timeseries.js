@@ -26,6 +26,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
+
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -78,6 +79,9 @@ class TimeseriesPanelConfigUi extends Component {
   }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
+  }
+  handleSubmit = (query) => {
+    this.props.onChange({ filter: query.query.query });
   }
 
   render() {
