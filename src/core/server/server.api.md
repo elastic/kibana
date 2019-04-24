@@ -77,7 +77,7 @@ export interface CoreSetup {
 // @public (undocumented)
 export interface CoreStart {
     // (undocumented)
-    http: HttpServiceStart;
+    http?: HttpServiceStart;
 }
 
 // @internal
