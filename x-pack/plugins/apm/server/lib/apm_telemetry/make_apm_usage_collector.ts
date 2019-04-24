@@ -5,14 +5,10 @@
  */
 
 import { SetupDeps } from '../../..';
-import {
-  APM_TELEMETRY_DOC_ID,
-  createApmTelementry,
-  getSavedObjectsClient
-} from './apm_telemetry';
+import { getSavedObjectsClient } from '../helpers/saved_objects_client';
+import { APM_TELEMETRY_DOC_ID, createApmTelementry } from './apm_telemetry';
 
-// TODO this type should be defined by the platform
-export interface CoreStartWithUsageCollector extends SetupDeps {
+export interface CoreSetupWithUsageCollector extends SetupDeps {
   http: SetupDeps['http'] & {
     server: {
       usage: {
@@ -25,7 +21,7 @@ export interface CoreStartWithUsageCollector extends SetupDeps {
   };
 }
 
-export function makeApmUsageCollector(core: CoreStartWithUsageCollector) {
+export function makeApmUsageCollector(core: CoreSetupWithUsageCollector) {
   const { server } = core.http;
 
   const apmUsageCollector = server.usage.collectorSet.makeUsageCollector({

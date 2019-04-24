@@ -6,7 +6,8 @@
 
 import { SetupDeps } from '../..';
 import { makeApmUsageCollector } from '../lib/apm_telemetry';
-import { CoreStartWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
+import { ensureIndexPatternExists } from '../lib/index_pattern';
+import { CoreSetupWithUsageCollector } from '../lib/apm_telemetry/make_apm_usage_collector';
 import { initErrorsApi } from '../routes/errors';
 import { initMetricsApi } from '../routes/metrics';
 import { initServicesApi } from '../routes/services';
@@ -20,6 +21,7 @@ export class Plugin {
     initServicesApi(core);
     initErrorsApi(core);
     initMetricsApi(core);
-    makeApmUsageCollector(core as CoreStartWithUsageCollector);
+    makeApmUsageCollector(core as CoreSetupWithUsageCollector);
+    ensureIndexPatternExists(core);
   }
 }
