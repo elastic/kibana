@@ -71,7 +71,7 @@ export interface MLJobApiResponse {
   }>;
 }
 
-export async function getMLJob({
+export async function getHasMLJob({
   serviceName,
   transactionType
 }: {
@@ -79,11 +79,16 @@ export async function getMLJob({
   transactionType?: string;
   anomalyName?: string;
 }) {
-  return callApi<MLJobApiResponse>({
-    method: 'GET',
-    pathname: `/api/ml/anomaly_detectors/${getMlJobId(
-      serviceName,
-      transactionType
-    )}`
-  });
+  try {
+    await callApi<MLJobApiResponse>({
+      method: 'HEAD',
+      pathname: `/api/ml/anomaly_detectors/${getMlJobId(
+        serviceName,
+        transactionType
+      )}`
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
 }

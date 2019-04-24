@@ -3298,7 +3298,6 @@
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createMLJobDescription.transactionDurationGraphText": "事务持续时间图表",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel": "创建新作业",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.enableAnomalyDetectionTitle": "启用异常检测",
-    "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.existedJobTooltip": "此类型的 ML 作业已存在",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText": "现在正在运行对 {serviceName}（{transactionType}）的分析。可能要花费点时间，才会将结果添加响应时间图表。",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText": "查看作业",
     "xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationTitle": "作业已成功创建",
