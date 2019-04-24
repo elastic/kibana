@@ -8,7 +8,7 @@ import { TimeSeriesAPIResponse } from '../../../../server/lib/transactions/chart
 import { ITransactionDistributionAPIResponse } from '../../../../server/lib/transactions/distribution';
 import { TransactionListAPIResponse } from '../../../../server/lib/transactions/get_top_transactions';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 

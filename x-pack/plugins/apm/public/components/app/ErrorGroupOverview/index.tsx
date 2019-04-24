@@ -19,7 +19,7 @@ import {
   loadErrorDistribution,
   loadErrorGroupList
 } from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
 import { ErrorGroupList } from './List';
 

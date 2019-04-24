@@ -38,6 +38,19 @@ function convertKueryToEsQuery(kuery, indexPattern) {
   const ast = fromKueryExpression(kuery);
   return toElasticsearchQuery(ast, indexPattern);
 }
+// Recommended by MDN for escaping user input to be treated as a literal string within a regular expression
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+export function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
+export function escapeParens(string) {
+  return string.replace(/[()]/g, '\\$&');
+}
+
+export function escapeDoubleQuotes(string) {
+  return string.replace(/\"/g, '\\$&');
+}
 
 export function getKqlQueryValues(inputValue, indexPattern) {
   const ast = fromKueryExpression(inputValue);
@@ -77,7 +90,10 @@ export function getKqlQueryValues(inputValue, indexPattern) {
 }
 
 export function getQueryPattern(fieldName, fieldValue) {
-  return new RegExp(`(${fieldName})\\s?:\\s?(")?(${fieldValue})(")?`, 'i');
+  const sanitizedFieldName = escapeRegExp(fieldName);
+  const sanitizedFieldValue = escapeRegExp(fieldValue);
+
+  return new RegExp(`(${sanitizedFieldName})\\s?:\\s?(")?(${sanitizedFieldValue})(")?`, 'i');
 }
 
 export function removeFilterFromQueryString(currentQueryString, fieldName, fieldValue) {
