@@ -156,6 +156,9 @@ export const dateHistogramBucketAgg = new BucketAggType({
     {
       name: 'time_zone',
       default: undefined,
+      // We don't ever want this parameter to be serialized out (when saving or to URLs)
+      // since we do all the logic handling it "on the fly" in the `write` method, to prevent
+      // time_zones being persisted into saved_objects
       serialize: () => undefined,
       write: (agg, output) => {
         // If a time_zone has been set explicitly always prefer this.
