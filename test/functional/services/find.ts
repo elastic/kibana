@@ -19,7 +19,6 @@
 
 import { WebDriver, WebElement } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
-// @ts-ignore not support yet
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function FindProvider({ getService }: FtrProviderContext) {
@@ -37,10 +36,10 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
-  const wrap = (webElement: WebElementWrapper | WebElement) =>
+  const wrap = (webElement: WebElement | WebElementWrapper) =>
     new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log, browserName);
 
-  const wrapAll = (webElements: Array<WebElementWrapper | WebElement>) => webElements.map(wrap);
+  const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) => webElements.map(wrap);
 
   class Find {
     public currentWait = defaultFindTimeout;
@@ -150,13 +149,12 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
     public async descendantExistsByCssSelector(
       selector: string,
-      parentElement: any,
+      parentElement: WebElementWrapper,
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(async () =>
-        wrapAll(await parentElement._webElement.findElements(By.css(selector), timeout))
-      );
+      const els = await parentElement._webElement.findElements(By.css(selector));
+      return await this.exists(async () => wrapAll(els), timeout);
     }
 
     public async descendantDisplayedByCssSelector(
@@ -226,7 +224,13 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     }
 
     public async exists(
-      findFunction: (el: WebDriver | WebElement) => WebElementWrapper | WebElementWrapper[],
+      findFunction: (
+        el: WebDriver
+      ) =>
+        | WebElementWrapper
+        | WebElementWrapper[]
+        | Promise<WebElementWrapper[]>
+        | Promise<WebElementWrapper>,
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       await this._withTimeout(timeout);
