@@ -8,6 +8,7 @@ import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
+import { documentationLinks } from 'ui/documentation_links';
 
 export const Summary = pure(() => (
   <EuiFlexItem>
@@ -22,15 +23,11 @@ export const Summary = pure(() => (
           defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {blog} and {videos}."
           values={{
             docs: (
-              <EuiLink href="https://www.elastic.co/guide/en/kibana/master/index.html">
+              <EuiLink href={documentationLinks.kibana} target="blank">
                 documentation
               </EuiLink>
             ),
-            data: (
-              <EuiLink href="kibana#home/tutorial_directory/security" target="blank">
-                ingesting data
-              </EuiLink>
-            ),
+            data: <EuiLink href="kibana#home/tutorial_directory/security">ingesting data</EuiLink>,
             blog: (
               <EuiLink href="#" target="blank">
                 blog posts
