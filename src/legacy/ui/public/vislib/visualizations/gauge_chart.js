@@ -22,7 +22,6 @@ import { VislibVisualizationsChartProvider } from './_chart';
 import { GaugeTypesProvider } from './gauges/gauge_types';
 
 export function GaugeChartProvider(Private) {
-
   const Chart = Private(VislibVisualizationsChartProvider);
   const gaugeTypes = Private(GaugeTypesProvider);
 
@@ -36,9 +35,7 @@ export function GaugeChartProvider(Private) {
     addEvents(element) {
       const events = this.events;
 
-      return element
-        .call(events.addHoverEvent())
-        .call(events.addMouseoutEvent());
+      return element.call(events.addHoverEvent()).call(events.addMouseoutEvent());
     }
 
     /**
@@ -103,12 +100,11 @@ export function GaugeChartProvider(Private) {
 
           if (height < 0 || width < 0) return;
 
-          div
-            .style('text-align', 'center')
-            .style('overflow-y', 'auto');
+          div.style('text-align', 'center').style('overflow-y', 'auto');
 
           data.series.forEach(series => {
-            const svg = div.append('svg')
+            const svg = div
+              .append('svg')
               .style('display', 'inline-block')
               .style('overflow', 'hidden')
               .attr('focusable', 'false')
@@ -129,7 +125,8 @@ export function GaugeChartProvider(Private) {
             self.addEvents(gauges);
           });
 
-          div.append('div')
+          div
+            .append('div')
             .attr('class', 'chart-title')
             .style('text-align', 'center')
             .text(data.label || data.yAxisLabel);
