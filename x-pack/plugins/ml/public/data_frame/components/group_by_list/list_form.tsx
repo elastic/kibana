@@ -6,7 +6,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiListGroup, EuiListGroupItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiSpacer } from '@elastic/eui';
 
 import { PivotGroupByConfig, PivotGroupByConfigDict } from '../../common';
 
@@ -21,27 +21,22 @@ interface ListProps {
 export const GroupByListForm: React.SFC<ListProps> = ({ deleteHandler, list, onChange }) => {
   const listKeys = Object.keys(list);
   return (
-    <EuiListGroup flush={true}>
+    <Fragment>
       {listKeys.map((optionsDataId: string) => {
         return (
           <Fragment key={optionsDataId}>
             <EuiPanel paddingSize="s">
-              <EuiListGroupItem
-                label={
-                  <GroupByLabelForm
-                    deleteHandler={deleteHandler}
-                    item={list[optionsDataId]}
-                    onChange={onChange}
-                    optionsDataId={optionsDataId}
-                  />
-                }
-                style={{ padding: 0, display: 'block', width: '100%' }}
+              <GroupByLabelForm
+                deleteHandler={deleteHandler}
+                item={list[optionsDataId]}
+                onChange={onChange}
+                optionsDataId={optionsDataId}
               />
             </EuiPanel>
             {listKeys.length > 0 && <EuiSpacer size="s" />}
           </Fragment>
         );
       })}
-    </EuiListGroup>
+    </Fragment>
   );
 };

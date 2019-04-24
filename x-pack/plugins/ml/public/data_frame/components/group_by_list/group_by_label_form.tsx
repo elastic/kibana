@@ -55,7 +55,6 @@ export const GroupByLabelForm: React.SFC<Props> = ({
                   defaultMessage: 'Edit interval',
                 }
               )}
-              style={{ padding: 0, minWidth: '0', minHeight: '0' }}
               size="s"
               iconType="pencil"
               onClick={() => setPopoverVisibility(!isPopoverVisible)}
@@ -76,7 +75,6 @@ export const GroupByLabelForm: React.SFC<Props> = ({
           aria-label={i18n.translate('xpack.ml.dataframe.groupByLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',
           })}
-          style={{ padding: 0, minWidth: '0', minHeight: '0' }}
           size="s"
           iconType="cross"
           onClick={() => deleteHandler(optionsDataId)}
@@ -91,7 +89,6 @@ export const GroupByLabelForm: React.SFC<Props> = ({
           aria-label={i18n.translate('xpack.ml.dataframe.groupByLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',
           })}
-          style={{ padding: 0, minWidth: '0', minHeight: '0' }}
           size="s"
           iconType="cross"
           onClick={() => deleteHandler(optionsDataId)}
