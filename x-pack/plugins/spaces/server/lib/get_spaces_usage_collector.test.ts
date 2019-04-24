@@ -60,30 +60,6 @@ function getServerMock(customization?: any) {
         },
       },
     },
-    savedObjects: {
-      getSavedObjectsRepository: jest.fn(() => {
-        return {
-          find() {
-            return {
-              saved_objects: [
-                {
-                  id: 'space-1',
-                  attributes: {
-                    disabledFeatures: [],
-                  },
-                },
-                {
-                  id: 'space-2',
-                  attributes: {
-                    disabledFeatures: ['feature1'],
-                  },
-                },
-              ],
-            };
-          },
-        };
-      }),
-    },
   };
   return Object.assign(defaultServerMock, customization);
 }
