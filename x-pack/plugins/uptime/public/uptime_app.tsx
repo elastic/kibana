@@ -53,6 +53,9 @@ export interface UptimeAppProps {
   initialDateRangeEnd: string;
   initialAutorefreshInterval: number;
   initialAutorefreshIsPaused: boolean;
+  isApmAvailable: boolean;
+  isInfraAvailable: boolean;
+  isLogsAvailable: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;

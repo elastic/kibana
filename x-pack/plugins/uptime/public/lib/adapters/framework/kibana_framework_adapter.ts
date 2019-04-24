@@ -7,12 +7,13 @@
 import ReactDOM from 'react-dom';
 import { unmountComponentAtNode } from 'react-dom';
 import chrome from 'ui/chrome';
-import { PLUGIN } from '../../../../common/constants';
+import { PLUGIN, INTEGRATED_SOLUTIONS } from '../../../../common/constants';
 import { UMBreadcrumb } from '../../../breadcrumbs';
 import { UptimePersistedState } from '../../../uptime_app';
 import { BootstrapUptimeApp, UMFrameworkAdapter } from '../../lib';
 import { CreateGraphQLClient } from './framework_adapter_types';
 import { renderUptimeKibanaGlobalHelp } from './kibana_global_help';
+import { getIntegratedAppAvailability } from './capabilities_adapter';
 
 export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
   private uiRoutes: any;
@@ -103,6 +104,17 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               return () => ReactDOM.unmountComponentAtNode(element);
             });
 
+          /**
+           * These values will let Uptime know if the integrated solutions
+           * are available. If any/all of them are unavaialble, we should not show
+           * links/integrations to those apps.
+           */
+          const {
+            apm: isApmAvailable,
+            infrastructure: isInfraAvailable,
+            logs: isLogsAvailable,
+          } = getIntegratedAppAvailability(INTEGRATED_SOLUTIONS);
+
           const {
             autorefreshIsPaused,
             autorefreshInterval,
@@ -124,6 +136,9 @@ export class UMKibanaFrameworkAdapter implements UMFrameworkAdapter {
               initialDateRangeEnd: dateRangeEnd,
               persistState: this.updatePersistedState,
               renderGlobalHelpControls,
+              isApmAvailable,
+              isInfraAvailable,
+              isLogsAvailable,
             }),
             elem
           );
