@@ -1076,19 +1076,31 @@ export interface KpiNetworkData {
 export interface KpiHostsData {
   hosts?: number | null;
 
-  agents?: number | null;
+  hostsHistogram?: (HistogramData | null)[] | null;
 
-  authentication: AuthenticationData;
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: (HistogramData | null)[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: (HistogramData | null)[] | null;
 
   uniqueSourceIps?: number | null;
 
+  uniqueSourceIpsHistogram?: (HistogramData | null)[] | null;
+
   uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: (HistogramData | null)[] | null;
 }
 
-export interface AuthenticationData {
-  success?: number | null;
+export interface HistogramData {
+  key?: number | null;
 
-  failure?: number | null;
+  doc_count?: number | null;
+
+  key_as_string?: string | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -5186,13 +5198,39 @@ export namespace KpiHostsDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiHostsData> {
     hosts?: HostsResolver<number | null, TypeParent, Context>;
 
-    agents?: AgentsResolver<number | null, TypeParent, Context>;
+    hostsHistogram?: HostsHistogramResolver<(HistogramData | null)[] | null, TypeParent, Context>;
 
-    authentication?: AuthenticationResolver<AuthenticationData, TypeParent, Context>;
+    authSuccess?: AuthSuccessResolver<number | null, TypeParent, Context>;
+
+    authSuccessHistogram?: AuthSuccessHistogramResolver<
+      (HistogramData | null)[] | null,
+      TypeParent,
+      Context
+    >;
+
+    authFailure?: AuthFailureResolver<number | null, TypeParent, Context>;
+
+    authFailureHistogram?: AuthFailureHistogramResolver<
+      (HistogramData | null)[] | null,
+      TypeParent,
+      Context
+    >;
 
     uniqueSourceIps?: UniqueSourceIpsResolver<number | null, TypeParent, Context>;
 
+    uniqueSourceIpsHistogram?: UniqueSourceIpsHistogramResolver<
+      (HistogramData | null)[] | null,
+      TypeParent,
+      Context
+    >;
+
     uniqueDestinationIps?: UniqueDestinationIpsResolver<number | null, TypeParent, Context>;
+
+    uniqueDestinationIpsHistogram?: UniqueDestinationIpsHistogramResolver<
+      (HistogramData | null)[] | null,
+      TypeParent,
+      Context
+    >;
   }
 
   export type HostsResolver<
@@ -5200,13 +5238,28 @@ export namespace KpiHostsDataResolvers {
     Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type AgentsResolver<
+  export type HostsHistogramResolver<
+    R = (HistogramData | null)[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthSuccessResolver<
     R = number | null,
     Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type AuthenticationResolver<
-    R = AuthenticationData,
+  export type AuthSuccessHistogramResolver<
+    R = (HistogramData | null)[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureResolver<
+    R = number | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AuthFailureHistogramResolver<
+    R = (HistogramData | null)[] | null,
     Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5215,28 +5268,45 @@ export namespace KpiHostsDataResolvers {
     Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
+  export type UniqueSourceIpsHistogramResolver<
+    R = (HistogramData | null)[] | null,
+    Parent = KpiHostsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type UniqueDestinationIpsResolver<
     R = number | null,
     Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace AuthenticationDataResolvers {
-  export interface Resolvers<Context = SiemContext, TypeParent = AuthenticationData> {
-    success?: SuccessResolver<number | null, TypeParent, Context>;
-
-    failure?: FailureResolver<number | null, TypeParent, Context>;
-  }
-
-  export type SuccessResolver<
-    R = number | null,
-    Parent = AuthenticationData,
+  export type UniqueDestinationIpsHistogramResolver<
+    R = (HistogramData | null)[] | null,
+    Parent = KpiHostsData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type FailureResolver<
+}
+
+export namespace HistogramDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = HistogramData> {
+    key?: KeyResolver<number | null, TypeParent, Context>;
+
+    doc_count?: DocCountResolver<number | null, TypeParent, Context>;
+
+    key_as_string?: KeyAsStringResolver<string | null, TypeParent, Context>;
+  }
+
+  export type KeyResolver<
     R = number | null,
-    Parent = AuthenticationData,
+    Parent = HistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type DocCountResolver<
+    R = number | null,
+    Parent = HistogramData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type KeyAsStringResolver<
+    R = string | null,
+    Parent = HistogramData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

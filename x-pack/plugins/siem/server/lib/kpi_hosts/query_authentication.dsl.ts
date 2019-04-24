@@ -70,7 +70,7 @@ export const buildAuthQuery = ({
             attempts_over_time: {
               auto_date_histogram: {
                 field: '@timestamp',
-                buckets: 10,
+                buckets: 6,
               },
             },
           },
@@ -85,7 +85,7 @@ export const buildAuthQuery = ({
             attempts_over_time: {
               auto_date_histogram: {
                 field: '@timestamp',
-                buckets: 10,
+                buckets: 6,
               },
             },
           },

@@ -16,14 +16,21 @@ export const AGENTS = i18n.translate('xpack.siem.kpiHosts.source.agentsTitle', {
 export const AUTHENTICATION_SUCCESS = i18n.translate(
   'xpack.siem.kpiHosts.source.authenticationSuccessTitle',
   {
-    defaultMessage: 'Authentication Success',
+    defaultMessage: 'Success',
   }
 );
 
 export const AUTHENTICATION_FAILURE = i18n.translate(
   'xpack.siem.kpiHosts.source.authenticationFailureTitle',
   {
-    defaultMessage: 'Authentication Failure',
+    defaultMessage: 'Fail',
+  }
+);
+
+export const AUTHENTICATION = i18n.translate(
+  'xpack.siem.kpiHosts.source.authenticationTitle',
+  {
+    defaultMessage: 'User Authentications',
   }
 );
 
@@ -31,13 +38,17 @@ export const ACTIVE_USERS = i18n.translate('xpack.siem.kpiHosts.source.activeUse
   defaultMessage: 'Active Users',
 });
 
+export const UNIQUE_PRIVATE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniquePrivateIpsTitle', {
+  defaultMessage: 'Unique Private IPs',
+});
+
 export const UNIQUE_SOURCE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniqueSourceIpsTitle', {
-  defaultMessage: 'Unique Source Ips',
+  defaultMessage: 'Source',
 });
 
 export const UNIQUE_DESTINATION_IPS = i18n.translate(
   'xpack.siem.kpiHosts.source.uniqueDestinationIpsTitle',
   {
-    defaultMessage: 'Unique Destination Ips',
+    defaultMessage: 'Dest.',
   }
 );

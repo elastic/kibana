@@ -31,13 +31,30 @@ const testKpiHostsSource = {
       source(id: "default") {
         KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {
           hosts
-          agents
-          authentication {
-            success
-            failure
+          hostsHistogram {
+            key
+            doc_count
+          }
+          authSuccess
+          authSuccessHistogram {
+            key
+            doc_count
+          }
+          authFailure
+          authFailureHistogram {
+            key
+            doc_count
           }
           uniqueSourceIps
+          uniqueSourceIpsHistogram {
+            key
+            doc_count
+          }
           uniqueDestinationIps
+          uniqueDestinationIpsHistogram {
+            key
+            doc_count
+          }
         }
       }
     }

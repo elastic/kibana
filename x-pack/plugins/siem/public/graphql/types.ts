@@ -1047,19 +1047,31 @@ export interface KpiNetworkData {
 export interface KpiHostsData {
   hosts?: number | null;
 
-  agents?: number | null;
+  hostsHistogram?: (HistogramData | null)[] | null;
 
-  authentication: AuthenticationData;
+  authSuccess?: number | null;
+
+  authSuccessHistogram?: (HistogramData | null)[] | null;
+
+  authFailure?: number | null;
+
+  authFailureHistogram?: (HistogramData | null)[] | null;
 
   uniqueSourceIps?: number | null;
 
+  uniqueSourceIpsHistogram?: (HistogramData | null)[] | null;
+
   uniqueDestinationIps?: number | null;
+
+  uniqueDestinationIpsHistogram?: (HistogramData | null)[] | null;
 }
 
-export interface AuthenticationData {
-  success?: number | null;
+export interface HistogramData {
+  key?: number | null;
 
-  failure?: number | null;
+  doc_count?: number | null;
+
+  key_as_string?: string | null;
 }
 
 export interface NetworkTopNFlowData {
@@ -2410,21 +2422,63 @@ export namespace GetKpiHostsQuery {
 
     hosts?: number | null;
 
-    agents?: number | null;
+    hostsHistogram?: (HostsHistogram | null)[] | null;
 
-    authentication: Authentication;
+    authSuccess?: number | null;
+
+    authSuccessHistogram?: (AuthSuccessHistogram | null)[] | null;
+
+    authFailure?: number | null;
+
+    authFailureHistogram?: (AuthFailureHistogram | null)[] | null;
 
     uniqueSourceIps?: number | null;
 
+    uniqueSourceIpsHistogram?: (UniqueSourceIpsHistogram | null)[] | null;
+
     uniqueDestinationIps?: number | null;
+
+    uniqueDestinationIpsHistogram?: (UniqueDestinationIpsHistogram | null)[] | null;
   };
 
-  export type Authentication = {
-    __typename?: 'authenticationData';
+  export type HostsHistogram = {
+    __typename?: 'HistogramData';
 
-    success?: number | null;
+    x?: string | null;
 
-    failure?: number | null;
+    y?: number | null;
+  };
+
+  export type AuthSuccessHistogram = {
+    __typename?: 'HistogramData';
+
+    x?: string | null;
+
+    y?: number | null;
+  };
+
+  export type AuthFailureHistogram = {
+    __typename?: 'HistogramData';
+
+    x?: string | null;
+
+    y?: number | null;
+  };
+
+  export type UniqueSourceIpsHistogram = {
+    __typename?: 'HistogramData';
+
+    x?: string | null;
+
+    y?: number | null;
+  };
+
+  export type UniqueDestinationIpsHistogram = {
+    __typename?: 'HistogramData';
+
+    x?: string | null;
+
+    y?: number | null;
   };
 }
 

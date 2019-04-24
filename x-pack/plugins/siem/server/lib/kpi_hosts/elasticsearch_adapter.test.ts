@@ -106,13 +106,15 @@ describe('Hosts Kpi elasticsearch_adapter', () => {
     test('getKpiHosts - response without data', async () => {
       expect(data).toEqual({
         hosts: null,
-        agents: null,
-        authentication: {
-          success: null,
-          failure: null,
-        },
+        hostsHistogram: null,
+        authSuccess: null,
+        authSuccessHistogram: null,
+        authFailure: null,
+        authFailureHistogram: null,
         uniqueSourceIps: null,
+        uniqueSourceIpsHistogram: null,
         uniqueDestinationIps: null,
+        uniqueDestinationIpsHistogram: null,
       });
     });
   });

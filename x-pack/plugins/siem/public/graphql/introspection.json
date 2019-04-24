@@ -6303,7 +6303,19 @@
             "deprecationReason": null
           },
           {
-            "name": "agents",
+            "name": "hostsHistogram",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authSuccess",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -6311,13 +6323,33 @@
             "deprecationReason": null
           },
           {
-            "name": "authentication",
+            "name": "authSuccessHistogram",
             "description": "",
             "args": [],
             "type": {
-              "kind": "NON_NULL",
+              "kind": "LIST",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "authenticationData", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authFailure",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "authFailureHistogram",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -6331,10 +6363,34 @@
             "deprecationReason": null
           },
           {
+            "name": "uniqueSourceIpsHistogram",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "uniqueDestinationIps",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "uniqueDestinationIpsHistogram",
+            "description": "",
+            "args": [],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "HistogramData", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -6346,11 +6402,11 @@
       },
       {
         "kind": "OBJECT",
-        "name": "authenticationData",
+        "name": "HistogramData",
         "description": "",
         "fields": [
           {
-            "name": "success",
+            "name": "key",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
@@ -6358,10 +6414,18 @@
             "deprecationReason": null
           },
           {
-            "name": "failure",
+            "name": "doc_count",
             "description": "",
             "args": [],
             "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "key_as_string",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }

@@ -7,17 +7,23 @@
 import gql from 'graphql-tag';
 
 export const kpiHostsSchema = gql`
-  type authenticationData {
-    success: Float
-    failure: Float
+  type HistogramData {
+    key: Float
+    doc_count: Float
+    key_as_string: String
   }
 
   type KpiHostsData {
     hosts: Float
-    agents: Float
-    authentication: authenticationData!
+    hostsHistogram: [HistogramData]
+    authSuccess: Float
+    authSuccessHistogram: [HistogramData]
+    authFailure: Float
+    authFailureHistogram: [HistogramData]
     uniqueSourceIps: Float
+    uniqueSourceIpsHistogram: [HistogramData]
     uniqueDestinationIps: Float
+    uniqueDestinationIpsHistogram: [HistogramData]
   }
 
   extend type Source {

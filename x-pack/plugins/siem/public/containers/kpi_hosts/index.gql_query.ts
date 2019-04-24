@@ -12,13 +12,30 @@ export const kpiHostsQuery = gql`
       id
       KpiHosts(timerange: $timerange, filterQuery: $filterQuery) {
         hosts
-        agents
-        authentication {
-          success
-          failure
+        hostsHistogram {
+          x: key
+          y: doc_count
+        }
+        authSuccess
+        authSuccessHistogram {
+          x: key
+          y: doc_count
+        }
+        authFailure
+        authFailureHistogram {
+          x: key
+          y: doc_count
         }
         uniqueSourceIps
+        uniqueSourceIpsHistogram {
+          x: key
+          y: doc_count
+        }
         uniqueDestinationIps
+        uniqueDestinationIpsHistogram {
+          x: key
+          y: doc_count
+        }
       }
     }
   }
