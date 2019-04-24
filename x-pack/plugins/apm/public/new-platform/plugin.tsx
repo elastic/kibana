@@ -6,30 +6,27 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { CoreSetup } from 'src/core/public';
 import { Main } from '../components/app/Main';
-import { history } from '../components/shared/Links/url_helpers';
+import { history } from '../utils/history';
 import { LocationProvider } from '../context/LocationContext';
-// @ts-ignore
-import configureStore from '../store/config/configureStore';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
 export class Plugin {
   public setup(core: CoreSetup) {
     const { i18n } = core;
-    const store = configureStore();
     ReactDOM.render(
       <i18n.Context>
-        <Provider store={store}>
-          <Router history={history}>
-            <LocationProvider history={history}>
+        <Router history={history}>
+          <LocationProvider history={history}>
+            <UrlParamsProvider>
               <Main />
-            </LocationProvider>
-          </Router>
-        </Provider>
+            </UrlParamsProvider>
+          </LocationProvider>
+        </Router>
       </i18n.Context>,
       document.getElementById(REACT_APP_ROOT_ID)
     );

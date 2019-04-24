@@ -1,0 +1,23 @@
+.codeShortcuts__key {
+  background: $euiColorEmptyShade;
+  border: $euiBorderThin;
+  box-sizing: border-box;
+  box-shadow: 0px 2px 0px $euiColorLightestShade;
+  border-radius: $euiSizeXS;
+  width: $euiSizeL;
+  min-width: $euiSizeL;
+  height: $euiSizeL;
+  display: inline-block;
+  text-align: center;
+  margin: $euiSizeXS;
+  line-height: $euiSizeL;
+  text-transform: uppercase;
+  font-size: $euiFontSizeS;
+}
+
+.codeShortcuts__helpText {
+  line-height: $euiSizeL;
+  font-size: $euiFontSizeS;
+  margin-left: $euiSizeL / 2;
+  color: $euiColorDarkestShade;
+}
