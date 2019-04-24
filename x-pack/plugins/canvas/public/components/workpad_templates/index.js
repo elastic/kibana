@@ -25,7 +25,7 @@ export const WorkpadTemplates = compose(
     // Clone workpad given an id
     cloneWorkpad: props => workpad => {
       workpad.id = getId('workpad');
-      workpad.name = `Untitled Workpad - ${workpad.name}`;
+      workpad.name = `My Canvas Workpad - ${workpad.name}`;
       workpad.tags = undefined;
       return workpadService
         .create(workpad)

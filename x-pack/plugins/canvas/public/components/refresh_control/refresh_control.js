@@ -8,7 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { Popover } from '../popover';
-import { loadingIndicator } from '../../lib/loading_indicator';
 import { AutoRefreshControls } from './auto_refresh_controls';
 
 const getRefreshInterval = (val = '') => {
@@ -37,21 +36,7 @@ const getRefreshInterval = (val = '') => {
   }
 };
 
-export const RefreshControl = ({
-  inFlight,
-  elementStats,
-  setRefreshInterval,
-  refreshInterval,
-  doRefresh,
-}) => {
-  const { pending } = elementStats;
-
-  if (inFlight || pending > 0) {
-    loadingIndicator.show();
-  } else {
-    loadingIndicator.hide();
-  }
-
+export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, doRefresh }) => {
   const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
 
   const popoverButton = handleClick => (

@@ -172,6 +172,7 @@ class Gauge extends Component {
         <div
           ref={(el) => this.resize = el}
           className={`tvbVisGauge__resize`}
+          data-test-subj="tvbVisGaugeContainer"
         >
           { metrics }
           <GaugeVis {...gaugeProps}/>

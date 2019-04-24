@@ -174,9 +174,7 @@ export class FilterEditor extends Component {
             />
           </h5>
         </EuiTitle>
-
         {this._renderQuery()}
-
         {this._renderQueryPopover()}
       </Fragment>
     );

@@ -12,7 +12,6 @@ import {
   flyoutOptionsSelectors as localFlyoutOptionsSelectors,
   logFilterSelectors as localLogFilterSelectors,
   logPositionSelectors as localLogPositionSelectors,
-  metricTimeSelectors as localMetricTimeSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
   waffleOptionsSelectors as localWaffleOptionsSelectors,
   waffleTimeSelectors as localWaffleTimeSelectors,
@@ -28,7 +27,6 @@ const selectLocal = (state: State) => state.local;
 
 export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilterSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
-export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTimeSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);

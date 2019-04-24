@@ -25,6 +25,7 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { injectedMetadataServiceMock } from './injected_metadata/injected_metadata_service.mock';
 import { legacyPlatformServiceMock } from './legacy/legacy_service.mock';
 import { notificationServiceMock } from './notifications/notifications_service.mock';
+import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 
@@ -90,6 +91,12 @@ export const MockChromeService = chromeServiceMock.create();
 export const ChromeServiceConstructor = jest.fn().mockImplementation(() => MockChromeService);
 jest.doMock('./chrome', () => ({
   ChromeService: ChromeServiceConstructor,
+}));
+
+export const MockOverlayService = overlayServiceMock.create();
+export const OverlayServiceConstructor = jest.fn().mockImplementation(() => MockOverlayService);
+jest.doMock('./overlays', () => ({
+  OverlayService: OverlayServiceConstructor,
 }));
 
 export const MockPluginsService = pluginsServiceMock.create();

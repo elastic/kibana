@@ -16,13 +16,14 @@ import {
   EuiLoadingKibana,
   EuiOverlayMask,
 } from '@elastic/eui';
-import { API_STATUS } from '../../../../../constants';
+import { API_STATUS, UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK } from '../../../../../constants';
 import {
   FollowerIndexPauseProvider,
   FollowerIndexResumeProvider,
   FollowerIndexUnfollowProvider
 } from '../../../../../components';
 import routing from '../../../../../services/routing';
+import { trackUiMetric } from '../../../../../services/track_ui_metric';
 import { ContextMenu } from '../context_menu';
 
 export class FollowerIndicesTable extends PureComponent {
@@ -189,7 +190,10 @@ export class FollowerIndicesTable extends PureComponent {
       render: (name) => {
         return (
           <EuiLink
-            onClick={() => selectFollowerIndex(name)}
+            onClick={() => {
+              trackUiMetric(UIM_FOLLOWER_INDEX_SHOW_DETAILS_CLICK);
+              selectFollowerIndex(name);
+            }}
             data-test-subj="ccrFollowerIndexListFollowerIndexLink"
           >
             {name}

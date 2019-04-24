@@ -19,29 +19,34 @@
 
 import { isString, isObject } from 'lodash';
 
-function isNotType(type) {
+function isType(type) {
   return function (agg) {
     const field = agg.params.field;
-    return !field || field.type !== type;
+    return field && field.type === type;
   };
 }
 
+const isStringType = isType('string');
+
 const migrateIncludeExcludeFormat = {
-  serialize: function (value) {
+  serialize: function (value, agg) {
+    if (this.shouldShow && !this.shouldShow(agg)) return;
     if (!value || isString(value)) return value;
     else return value.pattern;
   },
   write: function (aggConfig, output) {
     const value = aggConfig.params[this.name];
+
     if (isObject(value)) {
       output.params[this.name] = value.pattern;
-    } else if (value) {
+    } else if (value && isStringType(aggConfig)) {
       output.params[this.name] = value;
     }
   }
 };
 
 export {
-  isNotType,
+  isType,
+  isStringType,
   migrateIncludeExcludeFormat
 };

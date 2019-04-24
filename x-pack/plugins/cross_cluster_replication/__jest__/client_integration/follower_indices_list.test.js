@@ -16,7 +16,8 @@ jest.mock('ui/chrome', () => ({
 }));
 
 jest.mock('ui/index_patterns', () => {
-  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } =
+    require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants');
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
@@ -33,6 +34,9 @@ describe('<FollowerIndicesList />', () => {
   beforeEach(() => {
     server = sinon.fakeServer.create();
     server.respondImmediately = true;
+    // We make requests to APIs which don't impact the UX, e.g. UI metric telemetry,
+    // and we can mock them all with a 200 instead of mocking each one individually.
+    server.respondWith([200, {}, '']);
 
     // Register helpers to mock Http Requests
     ({ setLoadFollowerIndicesResponse } = registerHttpRequestMockHelpers(server));

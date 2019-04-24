@@ -28,16 +28,22 @@ export function requestFixture({
   search = '',
   payload,
 }: RequestFixtureOptions = {}) {
+  const cookieAuth = { clear: stub(), set: stub() };
   return ({
     raw: { req: { headers } },
     auth,
     headers,
     params,
     url: { path, search },
+    cookieAuth,
     getBasePath: () => basePath,
     loginAttempt: stub().returns(new LoginAttempt()),
     query: search ? url.parse(search, true /* parseQueryString */).query : {},
     payload,
     state: { user: 'these are the contents of the user client cookie' },
-  } as any) as Request & { loginAttempt: () => LoginAttempt; getBasePath: () => string };
+  } as any) as Request & {
+    cookieAuth: typeof cookieAuth;
+    loginAttempt: () => LoginAttempt;
+    getBasePath: () => string;
+  };
 }

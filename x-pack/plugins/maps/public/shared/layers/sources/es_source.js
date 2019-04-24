@@ -15,6 +15,8 @@ import { timefilter } from 'ui/timefilter/timefilter';
 import _ from 'lodash';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
+import { ESAggMetricTooltipProperty } from '../tooltips/es_aggmetric_tooltip_property';
+
 import uuid from 'uuid/v4';
 import { copyPersistentState } from '../../../store/util';
 
@@ -99,35 +101,24 @@ export class AbstractESSource extends AbstractVectorSource {
       return properties;
     }
 
-    function formatMetricValue(metricField, propertyValue) {
-      if (metricField.type === 'count') {
-        return propertyValue;
-      }
-
-      const indexPatternField = indexPattern.fields.byName[metricField.field];
-      if (!indexPatternField) {
-        return propertyValue;
-      }
-
-      const htmlConverter = indexPatternField.format.getConverterFor('html');
-      return (htmlConverter)
-        ? htmlConverter(propertyValue)
-        : indexPatternField.format.convert(propertyValue);
-    }
 
     const metricFields = this.getMetricFields();
-    const tooltipProps = {};
+    const tooltipProperties = [];
     metricFields.forEach((metricField) => {
       let value;
       for (const key in properties) {
         if (properties.hasOwnProperty(key) && metricField.propertyKey === key) {
-          value = formatMetricValue(metricField, properties[key]);
+          value = properties[key];
           break;
         }
       }
-      tooltipProps[metricField.propertyLabel] = (typeof value === 'undefined') ? '-' : value;
+
+      const tooltipProperty  = new ESAggMetricTooltipProperty(metricField.propertyLabel, value, indexPattern, metricField);
+      tooltipProperties.push(tooltipProperty);
     });
-    return tooltipProps;
+
+    return tooltipProperties;
+
   }
 
 

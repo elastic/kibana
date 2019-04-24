@@ -8,12 +8,10 @@ exports[`render 1`] = `
 >
   <EuiTitle
     size="xs"
-    textTransform="none"
   >
     <h3>
       <EuiTextColor
         color="subdued"
-        component="span"
       >
         <FormattedMessage
           defaultMessage="Recently viewed"
@@ -65,10 +63,7 @@ exports[`render 1`] = `
           className="homRecentlyAccessed__separator"
           grow={false}
         >
-          <EuiText
-            grow={true}
-            size="m"
-          >
+          <EuiText>
             <EuiIcon
               color="subdued"
               type="dot"

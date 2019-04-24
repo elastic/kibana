@@ -19,7 +19,15 @@
 
 import dedent from 'dedent';
 
-function generator({ artifactTarball, versionTag, license  }) {
+function generator({ artifactTarball, versionTag, license, usePublicArtifact  }) {
+  const copyArtifactTarballInsideDockerOptFolder = () => {
+    if (usePublicArtifact) {
+      return `RUN cd /opt && curl --retry 8 -s -L -O https://artifacts.elastic.co/downloads/kibana/${ artifactTarball } && cd -`;
+    }
+
+    return `COPY ${ artifactTarball } /opt`;
+  };
+
   return dedent(`
   #
   # ** THIS IS AN AUTO-GENERATED FILE **
@@ -30,7 +38,7 @@ function generator({ artifactTarball, versionTag, license  }) {
   # Extract Kibana and make various file manipulations.
   ################################################################################
   FROM centos:7 AS prep_files
-  COPY ${ artifactTarball } /opt
+  ${copyArtifactTarballInsideDockerOptFolder()}
   RUN mkdir /usr/share/kibana
   WORKDIR /usr/share/kibana
   RUN tar --strip-components=1 -zxf /opt/${ artifactTarball }

@@ -16,7 +16,10 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { LayerControl } from './view';
 
 const defaultProps = {
-  showAddLayerWizard: () => {}
+  showAddLayerWizard: () => {},
+  closeLayerTOC: () => {},
+  openLayerTOC: () => {},
+  isLayerTOCOpen: true,
 };
 
 describe('LayerControl', () => {
@@ -37,6 +40,18 @@ describe('LayerControl', () => {
         <LayerControl
           {...defaultProps}
           isReadOnly={true}
+        />
+      );
+
+      expect(component)
+        .toMatchSnapshot();
+    });
+
+    test('Should not render LayerTOC when isLayerTOCOpen is false', () => {
+      const component = shallowWithIntl(
+        <LayerControl
+          {...defaultProps}
+          isLayerTOCOpen={false}
         />
       );
 

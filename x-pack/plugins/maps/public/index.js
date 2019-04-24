@@ -14,6 +14,7 @@ import 'uiExports/search';
 import 'uiExports/embeddableFactories';
 import 'ui/agg_types';
 
+import { uiCapabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
@@ -52,6 +53,7 @@ routes
       $scope.delete = (ids) => {
         return gisMapSavedObjectLoader.delete(ids);
       };
+      $scope.readOnly = !uiCapabilities.maps.save;
     },
     resolve: {
       hasMaps: function (kbnUrl) {

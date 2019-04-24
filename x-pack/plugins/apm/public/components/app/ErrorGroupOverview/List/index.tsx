@@ -21,7 +21,7 @@ import {
   truncate,
   unit
 } from '../../../../style/variables';
-import { KibanaLink } from '../../../shared/Links/KibanaLink';
+import { APMLink } from '../../../shared/Links/APMLink';
 import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
 
 function paginateItems({
@@ -36,7 +36,7 @@ function paginateItems({
   return items.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
 }
 
-const GroupIdLink = styled(KibanaLink)`
+const GroupIdLink = styled(APMLink)`
   font-family: ${fontFamilyCode};
 `;
 
@@ -44,7 +44,7 @@ const MessageAndCulpritCell = styled.div`
   ${truncate('100%')};
 `;
 
-const MessageLink = styled(KibanaLink)`
+const MessageLink = styled(APMLink)`
   font-family: ${fontFamilyCode};
   font-size: ${fontSizes.large};
   ${truncate('100%')};
@@ -115,7 +115,7 @@ export class ErrorGroupList extends Component<Props, State> {
         width: px(unit * 6),
         render: (groupId: string) => {
           return (
-            <GroupIdLink hash={`/${serviceName}/errors/${groupId}`}>
+            <GroupIdLink path={`/${serviceName}/errors/${groupId}`}>
               {groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
             </GroupIdLink>
           );
@@ -138,7 +138,7 @@ export class ErrorGroupList extends Component<Props, State> {
                 id="error-message-tooltip"
                 content={message || NOT_AVAILABLE_LABEL}
               >
-                <MessageLink hash={`/${serviceName}/errors/${item.groupId}`}>
+                <MessageLink path={`/${serviceName}/errors/${item.groupId}`}>
                   {message || NOT_AVAILABLE_LABEL}
                 </MessageLink>
               </EuiToolTip>
