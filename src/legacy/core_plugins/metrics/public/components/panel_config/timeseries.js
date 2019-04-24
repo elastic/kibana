@@ -26,6 +26,9 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
+import { QueryBar } from '../../../../../ui/public/query_bar/components/query_bar.tsx';
+import { Storage } from '../../../../../ui/public/storage/storage.ts';
+
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -47,6 +50,7 @@ import { QueryBarInput } from 'ui/query_bar';
 */
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
+const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
 
   constructor(props) {
@@ -56,6 +60,9 @@ class TimeseriesPanelConfigUi extends Component {
 
   switchTab(selectedTab) {
     this.setState({ selectedTab });
+  }
+  handleSubmit = (query) => {
+    this.props.onChange({ filter: query.query.query });
   }
 
   render() {
@@ -156,40 +163,43 @@ class TimeseriesPanelConfigUi extends Component {
             />
 
             <EuiHorizontalRule />
-            <div style={{ 'border': '1px solid blue' }}>
-              <EuiFlexGroup responsive={false} wrap={true}>
-                <EuiFlexItem>
-                  <EuiFormRow
-                    id={htmlId('panelFilter')}
-                    label={(<FormattedMessage
-                      id="tsvb.timeseries.optionsTab.panelFilterLabel"
-                      defaultMessage="Panel filter"
-                    />)}
-                    fullWidth
-                  >
-                    <EuiFieldText
-                      onChange={handleTextChange('filter')}
-                      value={model.filter}
-                      fullWidth
-                    />
-                  </EuiFormRow>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFormLabel>
-                    <FormattedMessage
-                      id="tsvb.timeseries.optionsTab.ignoreGlobalFilterLabel"
-                      defaultMessage="Ignore global filter?"
-                    />
-                  </EuiFormLabel>
-                  <EuiSpacer size="s" />
-                  <YesNo
-                    value={model.ignore_global_filter}
-                    name="ignore_global_filter"
-                    onChange={this.props.onChange}
+
+            <EuiFlexGroup responsive={false} wrap={true}>
+              <EuiFlexItem>
+                <EuiFormRow
+                  id={htmlId('panelFilter')}
+                  label={(<FormattedMessage
+                    id="tsvb.timeseries.optionsTab.panelFilterLabel"
+                    defaultMessage="Panel filter"
+                  />)}
+                  fullWidth
+                >
+                  <QueryBar
+                    query={{ language: 'lucene', query: model.filter }}
+                    screenTitle={'TSVB'}
+                    onSubmit={this.handleSubmit}
+                    appName={'VisEditor'}
+                    indexPatterns={model.index_pattern || model.default_index_pattern}
+                    store={localStorage || {}}
+                    showDatePicker={false}
                   />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
+                </EuiFormRow>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFormLabel>
+                  <FormattedMessage
+                    id="tsvb.timeseries.optionsTab.ignoreGlobalFilterLabel"
+                    defaultMessage="Ignore global filter?"
+                  />
+                </EuiFormLabel>
+                <EuiSpacer size="s" />
+                <YesNo
+                  value={model.ignore_global_filter}
+                  name="ignore_global_filter"
+                  onChange={this.props.onChange}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPanel>
 
           <EuiSpacer />
