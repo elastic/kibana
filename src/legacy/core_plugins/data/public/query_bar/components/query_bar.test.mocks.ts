@@ -49,16 +49,16 @@ const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
 export const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
 
 jest.mock('ui/chrome', () => mockChromeFactory());
-jest.mock('../../chrome', () => mockChromeFactory());
+// jest.mock('../../chrome', () => mockChromeFactory());
 jest.mock('ui/persisted_log', () => ({
   PersistedLog: mockPersistedLogFactory,
 }));
-jest.mock('../../metadata', () => ({
+jest.mock('ui/metadata', () => ({
   metadata: {
     branch: 'foo',
   },
 }));
-jest.mock('../../autocomplete_providers', () => ({
+jest.mock('ui/autocomplete_providers', () => ({
   getAutocompleteProvider: mockGetAutocompleteProvider,
 }));
 
