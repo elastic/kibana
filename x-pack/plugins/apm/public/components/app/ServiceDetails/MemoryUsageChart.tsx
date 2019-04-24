@@ -8,7 +8,7 @@ import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Coordinate } from '../../../../typings/timeseries';
-import { MemoryMetricSeries } from '../../../store/selectors/chartSelectors';
+import { MemoryMetricSeries } from '../../../selectors/chartSelectors';
 import { asPercent } from '../../../utils/formatters';
 // @ts-ignore
 import CustomPlot from '../../shared/charts/CustomPlot';
