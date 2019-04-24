@@ -8,7 +8,6 @@ import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../new_platform/spaces_service';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../security';
 import { SpacesAuditLogger } from './audit_logger';

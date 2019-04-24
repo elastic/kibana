@@ -10,7 +10,6 @@ import * as Rx from 'rxjs';
 import { initSpacesOnRequestInterceptor } from './on_request_interceptor';
 import { SpacesService } from '../../new_platform/spaces_service';
 import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
-import { ElasticsearchPlugin } from 'src/legacy/core_plugins/elasticsearch';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
