@@ -52,9 +52,12 @@ export function GaugeChartProvider(Private) {
       const containerWidth = containerDom.clientWidth;
       const containerHeight = containerDom.clientHeight;
       const containerMargin = 20;
+
       //there are a few pixel of margin between multiple gauges
       //subtracting this margin prevents displaying scrollbars
-      const gaugeBottomMargin = 25;
+      //this is because of the "chart-title" element,
+      //that's inserted after the gauges
+      const gaugeBottomMargin = Math.ceil(25 / nrOfItems);
       const availableWidth = containerWidth - containerMargin;
       const availableHeight = containerHeight - containerMargin;
 
