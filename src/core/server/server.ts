@@ -21,7 +21,7 @@ import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpConfig, HttpService, HttpServiceSetup, HttpServiceStart, Router } from './http';
-import { LegacyService, SetupDeps } from './legacy';
+import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService } from './plugins';
 
@@ -31,8 +31,6 @@ export class Server {
   private readonly plugins: PluginsService;
   private readonly legacy: LegacyService;
   private readonly log: Logger;
-
-  private setupDeps?: SetupDeps;
 
   constructor(
     private readonly configService: ConfigService,
@@ -61,12 +59,15 @@ export class Server {
       http: httpSetup,
     });
 
-    this.setupDeps = {
+    const coreSetup = {
       elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       plugins: pluginsSetup,
     };
-    return this.setupDeps;
+
+    this.legacy.setup(coreSetup);
+
+    return coreSetup;
   }
 
   public async start() {
@@ -88,7 +89,7 @@ export class Server {
       http: httpStart,
     };
 
-    await this.legacy.start(this.setupDeps!, startDeps);
+    await this.legacy.start(startDeps);
 
     return startDeps;
   }

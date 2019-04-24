@@ -21,13 +21,12 @@ import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
+import { CoreSetup, CoreStart } from '../../server';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig } from '../dev';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { BasePathProxyServer, HttpConfig, HttpServiceSetup, HttpServiceStart } from '../http';
+import { BasePathProxyServer, HttpConfig } from '../http';
 import { Logger } from '../logging';
-import { PluginsServiceSetup } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -35,16 +34,6 @@ interface LegacyKbnServer {
   listen: () => Promise<void>;
   ready: () => Promise<void>;
   close: () => Promise<void>;
-}
-
-export interface SetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-  http: HttpServiceSetup;
-  plugins: PluginsServiceSetup;
-}
-
-export interface StartDeps {
-  http?: HttpServiceStart;
 }
 
 function getLegacyRawConfig(config: Config) {
@@ -64,12 +53,15 @@ export class LegacyService implements CoreService {
   private readonly log: Logger;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
+  private setupDeps?: CoreSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
   }
-  public async setup() {}
-  public async start(setupDeps: SetupDeps, startDeps: StartDeps) {
+  public async setup(setupDeps: CoreSetup) {
+    this.setupDeps = setupDeps;
+  }
+  public async start(startDeps: CoreStart) {
     this.log.debug('setting up legacy service');
 
     const update$ = this.coreContext.configService.getConfig$().pipe(
@@ -93,7 +85,10 @@ export class LegacyService implements CoreService {
             await this.createClusterManager(config);
             return;
           }
-          return await this.createKbnServer(config, setupDeps, startDeps);
+          if (!this.setupDeps) {
+            throw new Error('Core setup contract is not defined');
+          }
+          return await this.createKbnServer(config, this.setupDeps, startDeps);
         })
       )
       .toPromise();
@@ -134,7 +129,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, setupDeps: SetupDeps, startDeps: StartDeps) {
+  private async createKbnServer(config: Config, setupDeps: CoreSetup, startDeps: CoreStart) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {

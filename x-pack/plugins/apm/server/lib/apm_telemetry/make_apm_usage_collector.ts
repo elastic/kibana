@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'src/core/server';
+import { SetupDeps } from '../../..';
 import {
   APM_TELEMETRY_DOC_ID,
   createApmTelementry,
@@ -12,8 +12,8 @@ import {
 } from './apm_telemetry';
 
 // TODO this type should be defined by the platform
-export interface CoreStartWithUsageCollector extends CoreStart {
-  http: CoreStart['http'] & {
+export interface CoreStartWithUsageCollector extends SetupDeps {
+  http: SetupDeps['http'] & {
     server: {
       usage: {
         collectorSet: {

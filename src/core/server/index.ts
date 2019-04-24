@@ -57,7 +57,7 @@ export interface CoreSetup {
 }
 
 export interface CoreStart {
-  http: HttpServiceStart;
+  http?: HttpServiceStart;
 }
 
 export { HttpServiceSetup, HttpServiceStart, ElasticsearchServiceSetup, PluginsServiceSetup };

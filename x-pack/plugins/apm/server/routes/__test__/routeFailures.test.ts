@@ -5,7 +5,7 @@
  */
 
 import { flatten } from 'lodash';
-import { CoreStart } from 'src/core/server';
+import { SetupDeps } from '../../..';
 import { initErrorsApi } from '../errors';
 import { initServicesApi } from '../services';
 import { initTracesApi } from '../traces';
@@ -13,13 +13,13 @@ import { initTracesApi } from '../traces';
 describe('route handlers should fail with a Boom error', () => {
   let consoleErrorSpy: any;
 
-  async function testRouteFailures(init: (core: CoreStart) => void) {
+  async function testRouteFailures(init: (core: SetupDeps) => void) {
     const mockServer = { route: jest.fn() };
     const mockCore = ({
       http: {
         server: mockServer
       }
-    } as unknown) as CoreStart;
+    } as unknown) as SetupDeps;
     init(mockCore);
     expect(mockServer.route).toHaveBeenCalled();
 

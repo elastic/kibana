@@ -7,9 +7,16 @@
 import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import { resolve } from 'path';
-import { CoreStart, PluginInitializerContext } from 'src/core/server/index.js';
+import {
+  PluginInitializerContext,
+  HttpServiceStart
+} from 'src/core/server/index.js';
 import mappings from './mappings.json';
 import { plugin } from './server/new-platform/index';
+
+export interface SetupDeps {
+  http: HttpServiceStart;
+}
 
 // TODO: get proper types
 export function apm(kibana: any) {
@@ -106,7 +113,7 @@ export function apm(kibana: any) {
         http: {
           server
         }
-      } as CoreStart;
+      } as SetupDeps;
       plugin(initializerContext).setup(core);
     }
   });

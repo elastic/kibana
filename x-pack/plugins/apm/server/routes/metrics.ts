@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { CoreStart } from 'src/core/server';
+import { SetupDeps } from '../..';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getAllMetricsChartData } from '../lib/metrics/get_all_metrics_chart_data';
@@ -16,7 +16,8 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initMetricsApi(core: CoreStart) {
+export function initMetricsApi(core: SetupDeps) {
+  if (!core.http) return;
   const { server } = core.http;
   server.route({
     method: 'GET',
