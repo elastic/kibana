@@ -20,7 +20,7 @@
 import React from 'react';
 
 const wrapWithInlineComp = Component => props => (
-  <div className={`visEditorAggParam--inline visEditorAggParam--inline-${props.aggParam.name}`}>
+  <div className={`visEditorAggParam--half visEditorAggParam--half-${props.aggParam.name}`}>
     <Component {...props} />
   </div>);
 

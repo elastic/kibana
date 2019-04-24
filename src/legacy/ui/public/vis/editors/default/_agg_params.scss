@@ -11,11 +11,11 @@
   background-color: $backgroundColor;
 }
 
-.visEditorAggParam--inline {
+.visEditorAggParam--half {
   display: inline-block;
-  width: 50%;
+  width: calc(50% - #{$euiSizeS / 2});
 }
 
-.visEditorAggParam--inline-size {
-  padding-left: $vis-editor-agg-editor-spacing;
+.visEditorAggParam--half-size {
+  margin-left: $euiSizeS;
 }
