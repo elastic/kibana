@@ -85,6 +85,9 @@ function NumberIntervalParamEditor({
         onChange={onChange}
         onBlur={setTouched}
         fullWidth={true}
+        placeholder={i18n.translate('common.ui.aggTypes.numberInterval.selectIntervalPlaceholder', {
+          defaultMessage: 'Select an interval',
+        })}
       />
     </EuiFormRow>
   );
