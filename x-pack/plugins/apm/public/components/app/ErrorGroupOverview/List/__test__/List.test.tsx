@@ -6,8 +6,6 @@
 
 import { mount } from 'enzyme';
 import { Location } from 'history';
-import createHistory from 'history/createHashHistory';
-import PropTypes from 'prop-types';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { mockMoment, toJson } from '../../../../../utils/testHelpers';
