@@ -61,7 +61,6 @@ export interface ITransactionChartData {
   noHits: boolean;
   tpmSeries: ITpmBucket[] | IEmptySeries[];
   responseTimeSeries: TimeSerie[] | IEmptySeries[];
-  hasMLJob: boolean;
 }
 
 const INITIAL_DATA = {
@@ -94,8 +93,7 @@ export function getTransactionCharts(
   return {
     noHits,
     tpmSeries,
-    responseTimeSeries,
-    hasMLJob: anomalyTimeseries !== undefined
+    responseTimeSeries
   };
 }
 
