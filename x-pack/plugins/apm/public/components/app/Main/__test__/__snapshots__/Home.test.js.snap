@@ -8,7 +8,6 @@ exports[`Home component should render 1`] = `
     <EuiFlexItem>
       <EuiTitle
         size="l"
-        textTransform="none"
       >
         <h1>
           APM
@@ -23,7 +22,7 @@ exports[`Home component should render 1`] = `
   </EuiFlexGroup>
   <EuiSpacer />
   <FilterBar />
-  <withRouter(HistoryTabsWithoutRouter)
+  <HistoryTabs
     tabs={
       Array [
         Object {

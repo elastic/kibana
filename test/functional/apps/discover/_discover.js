@@ -162,6 +162,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct initial chart interval of Auto', async function () {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         const actualInterval = await PageObjects.discover.getChartInterval();
 
         const expectedInterval = 'Auto';
@@ -378,13 +379,14 @@ export default function ({ getService, getPageObjects }) {
       }
     });
 
-    describe('query #2, which has an empty time range', function () {
+    describe('query #2, which has an empty time range', async () => {
       const fromTime = '1999-06-11 09:22:11.000';
       const toTime = '1999-06-12 11:21:04.000';
 
-      before(() => {
+      before(async () => {
         log.debug('setAbsoluteRangeForAnotherQuery');
-        return PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
       });
 
       it('should show "no results"', async () => {
@@ -398,7 +400,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('filter editor', function () {
+    describe('filter editor', async function () {
       it('should add a phrases filter', async function () {
         await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
         expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
@@ -438,21 +440,23 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
 
         const maxTicks = [
-          '2015-09-19 17:00',
-          '2015-09-20 05:00',
-          '2015-09-20 17:00',
-          '2015-09-21 05:00',
-          '2015-09-21 17:00',
-          '2015-09-22 05:00',
-          '2015-09-22 17:00',
-          '2015-09-23 05:00'
+          '2015-09-20 00:00',
+          '2015-09-20 12:00',
+          '2015-09-21 00:00',
+          '2015-09-21 12:00',
+          '2015-09-22 00:00',
+          '2015-09-22 12:00',
+          '2015-09-23 00:00',
+          '2015-09-23 12:00'
         ];
 
-        for (const tick of await PageObjects.discover.getBarChartXTicks()) {
-          if (!maxTicks.includes(tick)) {
-            throw new Error(`unexpected x-axis tick "${tick}"`);
+        await retry.try(async function () {
+          for (const tick of await PageObjects.discover.getBarChartXTicks()) {
+            if (!maxTicks.includes(tick)) {
+              throw new Error(`unexpected x-axis tick "${tick}"`);
+            }
           }
-        }
+        });
       });
     });
   });

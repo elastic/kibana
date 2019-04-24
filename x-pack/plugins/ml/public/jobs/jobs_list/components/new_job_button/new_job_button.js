@@ -24,6 +24,7 @@ export function NewJobButton() {
   const buttonEnabled = (checkPermission('canCreateJob') && mlNodesAvailable());
   return (
     <EuiButton
+      data-test-subj="mlCreateNewJobButton"
       onClick={newJob}
       size="s"
       disabled={(buttonEnabled === false)}
