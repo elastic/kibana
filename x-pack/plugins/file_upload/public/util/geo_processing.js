@@ -30,13 +30,17 @@ const DEFAULT_GEO_POINT_MAPPINGS = {
 
 const DEFAULT_INGEST_PIPELINE = {};
 
-export const selectMappingsOptions = [{
-  text: 'geo_point',
-  value: 'geo_point'
-}, {
-  text: 'geo_shape',
-  value: 'geo_shape'
-}];
+export function getGeoIndexTypesForFeatures(featureTypes) {
+  if (!featureTypes || !featureTypes.length) {
+    return [];
+  } else if (!featureTypes.includes('Point')) {
+    return ['geo_shape'];
+  } else if (featureTypes.includes('Point') && featureTypes.length === 1) {
+    return [ 'geo_point', 'geo_shape' ];
+  } else {
+    return [ 'geo_shape' ];
+  }
+}
 
 function geoJsonToEs(parsedGeojson, datatype) {
   if (!parsedGeojson) {

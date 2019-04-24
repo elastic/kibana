@@ -23,7 +23,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
   indexPattern,
   setIndexPattern,
   setIndexDataType,
-  mappingsOptions,
+  indexTypes,
   intl
 }) {
   const [indexNames, setIndexNames] = useState(null);
@@ -58,7 +58,10 @@ export const IndexSettings = injectI18n(function IndexSettings({
       >
         <EuiSelect
           disabled={disabled}
-          options={mappingsOptions}
+          options={indexTypes.map(indexType =>({
+            text: indexType,
+            value: indexType,
+          }))}
           onChange={({ target }) => {
             setIndexDataType(target.value);
           }}

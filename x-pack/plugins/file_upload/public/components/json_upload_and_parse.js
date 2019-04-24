@@ -5,13 +5,13 @@
  */
 
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiForm,
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
 import { triggerIndexing } from '../util/indexing_service';
-import { selectMappingsOptions } from '../util/geo_processing';
+import { getGeoIndexTypesForFeatures } from '../util/geo_processing';
 import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
 import _ from 'lodash';
@@ -24,13 +24,14 @@ export function JsonUploadAndParse(props) {
     preIndexTransform,
   } = props;
 
-  // Local state for parsed and indexed files
+  // Local state for parsed file and indexed details
   const [fileRef, setFileRef] = useState(null);
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
   const [indexDataType, setIndexDataType] = useState('');
   const [indexName, setIndexName] = useState('');
   const [indexPattern, setIndexPattern] = useState('');
+  const [indexTypes, setIndexTypes] = useState([]);
 
   // If index flag set, index on update
   if (boolIndexData && parsedFile && !_.isEqual(indexedFile, parsedFile)) {
@@ -48,23 +49,29 @@ export function JsonUploadAndParse(props) {
   }
 
   // Determine index options
-  let mappingsOptions;
-  if (typeof preIndexTransform === 'object') {
-    mappingsOptions = preIndexTransform.options;
-  } else {
-    switch(preIndexTransform) {
-      case 'geo':
-        mappingsOptions = selectMappingsOptions;
-        break;
-      default:
-        throw(`Index options for ${preIndexTransform} not defined`);
-        return;
+  useEffect(() => {
+    if (parsedFile) {
+      if (typeof preIndexTransform === 'object') {
+        setIndexTypes(preIndexTransform.indexTypes);
+      } else {
+        switch(preIndexTransform) {
+          case 'geo':
+            const featureTypes = _.uniq(
+              parsedFile.features.map(({ geometry }) => geometry.type)
+            );
+            setIndexTypes(getGeoIndexTypesForFeatures(featureTypes));
+            break;
+          default:
+            throw(`Index options for ${preIndexTransform} not defined`);
+            return;
+        }
+      }
+      // Default to first
+      if (!indexDataType && indexTypes.length) {
+        setIndexDataType(indexTypes[0].value);
+      }
     }
-  }
-  // Default to first
-  if (!indexDataType) {
-    setIndexDataType(mappingsOptions[0].value);
-  }
+  }, [parsedFile, preIndexTransform, indexDataType, indexTypes]);
 
   return (
     <EuiForm>
@@ -88,7 +95,7 @@ export function JsonUploadAndParse(props) {
         indexPattern={indexPattern}
         setIndexPattern={setIndexPattern}
         setIndexDataType={setIndexDataType}
-        mappingsOptions={mappingsOptions}
+        indexTypes={indexTypes}
       />
     </EuiForm>
   );
