@@ -32,9 +32,9 @@ export interface MetricsExplorerPalette {
 }
 
 export const defaultPalette: MetricsExplorerPalette = {
-  [MetricsExplorerColor.color0]: '#00B3A4', // euiColorVis0 (green-ish)
-  [MetricsExplorerColor.color1]: '#3185FC', // euiColorVis1 (blue)
-  [MetricsExplorerColor.color2]: '#DB1374', // euiColorVis2 (red-ish)
+  [MetricsExplorerColor.color0]: '#3185FC', // euiColorVis1 (blue)
+  [MetricsExplorerColor.color1]: '#DB1374', // euiColorVis2 (red-ish)
+  [MetricsExplorerColor.color2]: '#00B3A4', // euiColorVis0 (green-ish)
   [MetricsExplorerColor.color3]: '#490092', // euiColorVis3 (purple)
   [MetricsExplorerColor.color4]: '#FEB6DB', // euiColorVis4 (pink)
   [MetricsExplorerColor.color5]: '#E6C220', // euiColorVis5 (yellow)
