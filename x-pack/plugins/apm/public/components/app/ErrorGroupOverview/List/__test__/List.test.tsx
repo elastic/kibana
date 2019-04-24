@@ -36,37 +36,8 @@ describe('ErrorGroupOverview -> List', () => {
   });
 
   it('should render with data', () => {
-    const storeState = { location: {} };
-    const wrapper = mountWithRouterAndStore(
-      <ErrorGroupList {...props} />,
-      storeState
-    );
+    const wrapper = mount(<ErrorGroupList {...props} />);
 
     expect(toJson(wrapper)).toMatchSnapshot();
   });
 });
-
-export function mountWithRouterAndStore(
-  Component: React.ReactElement,
-  storeState = {}
-) {
-  const history = createHistory();
-
-  const options = {
-    context: {
-      router: {
-        history,
-        route: {
-          match: { path: '/', url: '/', params: {}, isExact: true },
-          location: { pathname: '/', search: '', hash: '', key: '4yyjf5' }
-        }
-      }
-    },
-    childContextTypes: {
-      store: PropTypes.object.isRequired,
-      router: PropTypes.object.isRequired
-    }
-  };
-
-  return mount(Component, options);
-}
