@@ -22,7 +22,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import reactcss from 'reactcss';
 import calculateCoordinates from '../lib/calculate_coordinates';
-import { COLORS } from '../lib/config';
+import { COLORS } from '../constants';
 
 class GaugeVis extends Component {
 

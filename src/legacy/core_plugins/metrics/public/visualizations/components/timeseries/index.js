@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export * from './timeseries';
+export { TimeSeries } from './timeseries';

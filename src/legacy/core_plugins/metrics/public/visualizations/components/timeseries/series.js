@@ -19,87 +19,96 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
+
 import {
   getSpecId,
   getGroupId,
+  ScaleType,
+  CurveType,
   AreaSeries,
   BarSeries,
-  ScaleType,
-  CurveType
 } from '@elastic/charts';
+
 import { calculateFillColor } from '../../lib/calculate_fill_color';
 
-export const Series = ({
-  yScaleType,
-  id,
-  groupId,
-  label,
-  data,
-  bars,
-  lines,
-  color,
-  stack,
-  hideInLegend
-}) => {
-  const { fill: barFill, show: isBarSeries } = bars;
-  const { fill: lineFill, steps } = lines;
-  const Component = isBarSeries ? BarSeries : AreaSeries;
-  const specId = getSpecId(label + id);
-  const customSeriesColors = new Map();
-  const dataSeriesColorValues = {
-    colorValues: [],
-    specId,
-  };
+const isBarSeries = props => get(props, 'bars.show', false);
+const getComponent = isBar => isBar ? BarSeries : AreaSeries;
+const getFillStyles = (isBar, props) => isBarSeries(props) ? props.bars : props.lines;
 
-  customSeriesColors.set(
-    dataSeriesColorValues,
-    calculateFillColor(color, isBarSeries ? barFill : lineFill).fillColor
+const calculateCustomSeriesColors = (color, specId, { fill }) => {
+  const map = new Map();
+  const { fillColor } = calculateFillColor(color, fill);
+
+  map.set(
+    {
+      specId,
+      colorValues: [],
+    },
+    fillColor,
   );
 
-  const lineSeriesStyle1 = {
-    line: {
-      stroke: '',
-      strokeWidth: 10,
-      visible: true,
-      opacity: 1,
+  return map;
+};
+
+const calculateLineSeriesStyles = (isBar, { lineWidth }) => {
+  return {
+    [isBar ? 'barSeriesStyle' : 'areaSeriesStyle']: {
+      line: {
+        stroke: '',
+        strokeWidth: lineWidth || 0,
+        visible: Boolean(lineWidth),
+        opacity: 1,
+      },
+      border: {
+        stroke: '',
+        strokeWidth: 1,
+        visible: false,
+      },
+      point: {
+        visible: true,
+        radius: 0.5,
+        opacity: 0.1,
+        stroke: '',
+        strokeWidth: 0.5,
+      },
     },
-    border: {
-      stroke: 'gray',
-      strokeWidth: 2,
-      visible: false,
-    },
-    point: {
-      visible: true,
-      radius: 0.5,
-      opacity: 0.1,
-      stroke: '',
-      strokeWidth: 0.5,
-    },
+  };
+};
+
+export const Series = (props) => {
+  const id = getSpecId(props.label + props.id);
+  const isBar = isBarSeries(props);
+  const Component = getComponent(isBar);
+  const fillStyles = getFillStyles(isBar, props);
+
+  const seriesSettings = {
+    id,
+    name: props.label,
+    groupId: getGroupId(props.groupId),
+    xScaleType: props.xScaleType,
+    yScaleType: props.yScaleType,
+    xAccessor: 0,
+    yAccessors: [1],
+    // todo: props.stack ???
+    stackAccessors: props.stack ? [0] : null,
+    data: props.data,
+    yScaleToDataExtent: false,
+    curve: fillStyles.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
+    hideInLegend: props.hideInLegend,
+    customSeriesColors: calculateCustomSeriesColors(props.color, id, fillStyles),
+    ...calculateLineSeriesStyles(isBar, fillStyles),
   };
 
   return (
-    <Component
-      id={specId}
-      groupId={getGroupId(groupId)}
-      name={label}
-      xScaleType={ScaleType.Time}
-      yScaleType={yScaleType}
-      xAccessor={0}
-      yAccessors={[1]}
-      stackAccessors={stack ? [0] : null}
-      data={data}
-      yScaleToDataExtent={false}
-      customSeriesColors={customSeriesColors}
-      curve={steps ? CurveType.CURVE_STEP : CurveType.LINEAR}
-      hideInLegend={hideInLegend}
-      areaSeriesStyle={lineSeriesStyle1}
-    />
+    <Component {...seriesSettings} />
   );
 };
 
 Series.propTypes = {
   hideInLegend: PropTypes.bool,
   id: PropTypes.string,
+  xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
   groupId: PropTypes.string,
   label: PropTypes.node,
@@ -111,6 +120,7 @@ Series.propTypes = {
 
 Series.defaultProps = {
   yScaleType: ScaleType.Linear,
+  xScaleType: ScaleType.Time,
   bars: {},
   lines: {},
   hideInLegend: false,
