@@ -9,24 +9,12 @@ import { get } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
 
-const requiredFields = ['host', 'port'];
-const optionalFields = [
-  'scheme',
-  'path',
-  'method',
-  'headers',
-  'params',
-  'auth',
-  'body',
-  'proxy',
-  'connection_timeout',
-  'read_timeout',
-  'url'
-];
+const requiredFields = ['message'];
+const optionalFields = ['account', 'proxy'];
 
 const allFields = [...requiredFields, ...optionalFields];
 
-export class WebhookAction extends BaseAction {
+export class HipchatAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
@@ -34,9 +22,6 @@ export class WebhookAction extends BaseAction {
     allFields.forEach((field) => {
       this.fields[field] = get(props, field);
     });
-
-    const { url, host, port, path } = this.fields;
-    this.fullPath = url ? url : host + port + path;
   }
 
   get upstreamJson() {
@@ -58,34 +43,27 @@ export class WebhookAction extends BaseAction {
   }
 
   get description() {
-    return i18n.translate('xpack.watcher.models.webhookAction.description', {
-      defaultMessage: 'Webhook will trigger a {method} request on {fullPath}',
+    return i18n.translate('xpack.watcher.models.hipchatAction.description', {
+      defaultMessage: '{body} will be sent through Hipchat',
       values: {
-        method: this.method,
-        fullPath: this.fullPath
+        body: this.fields.message && this.fields.message.body || ''
       }
     });
   }
 
   get simulateMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateMessage', {
-      defaultMessage: 'Sample request sent to {fullPath}',
-      values: {
-        fullPath: this.fullPath
-      }
+    return i18n.translate('xpack.watcher.models.hipchatAction.simulateMessage', {
+      defaultMessage: 'Hipchat message has been sent.',
     });
   }
 
   get simulateFailMessage() {
-    return i18n.translate('xpack.watcher.models.webhookAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send request to {fullPath}.',
-      values: {
-        fullPath: this.fullPath
-      }
+    return i18n.translate('xpack.watcher.models.hipchatAction.simulateFailMessage', {
+      defaultMessage: 'Failed to send Hipchat message.',
     });
   }
 
   static fromUpstreamJson(upstreamAction) {
-    return new WebhookAction(upstreamAction);
+    return new HipchatAction(upstreamAction);
   }
 }
