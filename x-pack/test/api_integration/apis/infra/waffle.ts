@@ -74,44 +74,44 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
       before(() => esArchiver.load('infra/7.0.0/hosts'));
       after(() => esArchiver.unload('infra/7.0.0/hosts'));
 
-      // it('should basically work', () => {
-      //   return client
-      //     .query<WaffleNodesQuery.Query>({
-      //       query: waffleNodesQuery,
-      //       variables: {
-      //         sourceId: 'default',
-      //         timerange: {
-      //           to: max,
-      //           from: min,
-      //           interval: '1m',
-      //         },
-      //         metric: { type: 'cpu' },
-      //         type: 'host',
-      //         groupBy: [],
-      //       },
-      //     })
-      //     .then(resp => {
-      //       const { snapshot } = resp.data.source;
-      //       expect(snapshot).to.have.property('nodes');
-      //       if (snapshot) {
-      //         const { nodes } = snapshot;
-      //         expect(nodes.length).to.equal(1);
-      //         const firstNode = first(nodes);
-      //         expect(firstNode).to.have.property('path');
-      //         expect(firstNode.path.length).to.equal(1);
-      //         expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
-      //         expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
-      //         expect(firstNode).to.have.property('metric');
-      //         expect(firstNode.metric).to.eql({
-      //           name: 'cpu',
-      //           value: 0.0035,
-      //           avg: 0.009066666666666666,
-      //           max: 0.0684,
-      //           __typename: 'InfraSnapshotNodeMetric',
-      //         });
-      //       }
-      //     });
-      // });
+      it('should basically work', () => {
+        return client
+          .query<WaffleNodesQuery.Query>({
+            query: waffleNodesQuery,
+            variables: {
+              sourceId: 'default',
+              timerange: {
+                to: max,
+                from: min,
+                interval: '1m',
+              },
+              metric: { type: 'cpu' },
+              type: 'host',
+              groupBy: [],
+            },
+          })
+          .then(resp => {
+            const { snapshot } = resp.data.source;
+            expect(snapshot).to.have.property('nodes');
+            if (snapshot) {
+              const { nodes } = snapshot;
+              expect(nodes.length).to.equal(1);
+              const firstNode = first(nodes);
+              expect(firstNode).to.have.property('path');
+              expect(firstNode.path.length).to.equal(1);
+              expect(first(firstNode.path)).to.have.property('value', 'demo-stack-mysql-01');
+              expect(first(firstNode.path)).to.have.property('label', 'demo-stack-mysql-01');
+              expect(firstNode).to.have.property('metric');
+              expect(firstNode.metric).to.eql({
+                name: 'cpu',
+                value: 0.0035,
+                avg: 0.009066666666666666,
+                max: 0.0684,
+                __typename: 'InfraSnapshotNodeMetric',
+              });
+            }
+          });
+      });
 
       it('should basically work with 1 grouping', () => {
         return client
