@@ -17,8 +17,8 @@ interface DatatableSpec {
 
 interface DatatableSpecColumn {
     id: string;
-    name: string;
     operation: DatatableOperation;
+
 }
 
 type DatatableOperation = 
@@ -190,31 +190,157 @@ const visModel = {
 
 The editors don't know how the fields got created, but because of the `aggregatable` flag they can only use the column operation. Matching fields with "slots" in the current visualization works as it used to with more complicated datatable specs, it's just not possible anymore to use complex operation configurations in the visualization plugin. This basically separates the data modeling and the visualization phase from a user perspective, but doesn't hurt the flexibility of the model to interweave these steps for an easier user experience.
 
-## WIP - Working with the datatable spec
+# Defining the boundary between visualization and data source
 
-If a visualization plugin accesses and modifies the datatable spec, it requires additional information about the columns aside from the operation and the used fields - what the resulting data type will be, how the data will be accessible in the `kibana_datatable` structure on the expression and whether it will be a `segment` (a value which can be used to group rows in some way) or a `metric` (a value which can't be used for grouping but is a property of each given row, mostly numeric). The information about the used operation and the fields of the current datasource are sufficient to infer this information, so it isn't necessary to store it redundantly in the datatable spec itself. Instead the helper function `getTableDefinition` can be used to get an enriched view on a given table:
+The visualization plugin is the entity which knows how the shape of the data tables can and should look (in terms of which data types are allowed and how high the cardinality should be) and how the data tables are applied to the actual visualization renderer.
+
+The datasource plugin is the entity which knows what fields can be used for what and how these fields can be manipulated. It also names the columns in the data table.
+
+This means the visualization plugin is the caller and the database plugin is the callee (give me the datatable for the given specs, give me a default operation for the given field and type and cardinality constraints, ...)
+
+The visualization plugin writes the datatable spec with the help of the datasource plugin by querying for suitable operations. Operations are a concern of the datasource, but where they are placed in the datatable spec is decided by the visualization extension.
+
+These responsiblities result in the following interfaces:
 
 ```ts
-interface ColumnDefinition {
+
+interface DatatableSpec {
     id: string;
-    dataType: 'string' | 'number' | 'boolean' | /* ... */;
-    isMetric: boolean;
-    isSegment: boolean;
-    accessor: string | number;
+    datasourceRef: string;
+    columns: DatatableSpecColumn[];
 }
 
-declare function getTableDefinition(visModel: VisModel, tableId?: string): ColumnType[];
-declare function getColumnDefinition(visModel: VisModel, columnId: string; tableId?: string): ColumnType;
+interface DatatableSpecColumn {
+    id: string;
+    operation: DatatableOperation;
+}
+
+interface DatatableOperation {
+    isSegment: boolean;
+    isMetric: boolean;
+    dataType: 'string' | 'number' | 'boolean' | /* ... */;
+    ref: any;
+}
+
+interface OperationConfiguratorProps {
+    constraints: Constraints;
+    currentOperation?: DatatableOperation;
+    onChangeOperation: (newOperation: DatatableOperation) => void;
+    removable?: boolean;
+    onRemoveOperation: () => void;
+}
+
+interface DatasourceExtension {
+    DataPanel: ComponentType;
+    OperationConfigurator: ComponentType<OperationConfiguratorProps>;
+    getPossibleOperations(constraints: Constraints, field?: Field): DatatableOperation[];
+    getFields(constraints?: Constraints): Field[];
+    isSpecValid(spec: DatatableSpec): boolean;
+}
+
+interface ConfigPanelProps {
+    privateState: any;
+    datatableSpec: DatatableSpec;
+    datasource: DatasourceExtension;
+    onChangePrivateState: (newState: any) => void;
+    onChangeTableSpec: (newSpec: DatatableSpec) => void;
+    getAlternatives: (spec: DatatableSpec) => Suggestion[];
+    onApplySuggestion: (suggestion: Suggestion) => void;
+}
+
+interface Suggestion {
+    tableSpec: DatatableSpec;
+    privateState: any;
+    title: string;
+    extensionId: string;
+}
+
+interface VisualizationExtension {
+    ConfigPanel: ComponentType<ConfigPanelProps>;
+    getInitialPrivateState(datatableSpec: DatatableSpec, currentPrivateState?: any): any;
+    getAlternatives: (datasource: DatasourceExtension, spec: DatatableSpec): Suggestion[];
+    getSuggestionsForField: (datasource: DatasourceExtension, spec: DatatableSpec, field: Field): Suggestion[];
+}
 
 ```
 
-A "raw" column is always a segment and a metric, because it might make sense to use it either way.
+Simplified code of an visualization extension:
 
-This information can for example be used for building suggestions or for correctly configuring the renderer function on the expression. A separate set of helper functions can be used to manipulate the table specs and validate:
+```tsx
 
-```ts
-declare function addColumn(visModel: VisModel, operation: DatatableOperation, position?: number; tableId?: string): [newId: string, updatedModel: VisModel];
-declare function removeColumn(visModel: VisModel, columnId: string, tableId?: string): VisModel;
-declare function addTable(visModel: VisModel, operations: DatatableOperations[], tableId?: string): [newTableSpec: DatatableSpec, updatedModel: VisModel];
-declare function removeTable(visModel: VisModel, tableId: string): VisModel;
+const LineChart: VisualizationExtension = {
+    ConfigPanel({ privateState, datatableSpec, datasource, onChangePrivateState, onChangeTableSpec, getAlternatives, onApplySuggestion }) {
+        const OperationConfigurator = datasource.OperationConfiguraor;
+        const primaryTable = datatableSpec[0];
+
+        const [xAxis, setXAxis] = getColumn(primaryTable, privateState.seriesAxes + 1);
+        const [yAxes, setYAxis, removeYAxis] = getNColumns(primaryTable, privateState.seriesAxes + 2);
+
+        return (<>
+            <p>x axis</p>
+            <OperationConfigurator constraints={{ cardinality: 'some', type: ['string', 'number', 'date'] }} currentOperation={xAxis} onChangeOperation={(newOperation) => {
+                onChangeTableSpec(setXAxis(newOperation));
+            }}>
+            {yAxes.map((yAxis, index) => (<><p>x axis</p>
+                <OperationConfigurator
+                    constraints={{ cardinality: 'many', type: ['number'] }}
+                    currentOperation={yAxis}
+                    onChangeOperation={(newOperation) => {
+                        onChangeTableSpec(setYAxes(index, newOperation));
+                    }}
+                    removable
+                    onRemoveOperation={() => {
+                        const updatedTableSpec = removeYAxis(index);
+                        if (yAxes.length === 1) {
+                            // last y axis was deleted, handoff to top editor
+                            onApplySuggestion(getAlternatives(updatedTableSpec)[0]);
+                        } else {
+                            onChangeTableSpec(updatedTableSpec);
+                        }
+                    }}
+                />
+            )</>}
+        </>);
+    },
+    getAlternatives(datasource, spec) {
+        // check whether the current spec makes sense with this chart
+        // this could also use an elaborate suggestion mechanism like compassql
+        const isSuitable = checkInOrder(
+            () => spec.length === 1,
+            () => spec[0].columns.length === 2,
+            () => spec[0].columns[0].isSegment,
+            () => spec[0].columns[1].isMetric
+        );
+        
+        if (!isSuitable) {
+            return [];
+        }
+
+        return [{
+            tableSpec: spec,
+            privateState: { type: 'line' },
+            title: 'Basic line chart'
+        }];
+    },
+    getSuggestionsForField(datasource, spec, field) {
+        // check whether the current spec makes sense with this chart
+        // this could also use an elaborate suggestion mechanism like compassql
+        const isSuitable = checkInOrder(
+            () => spec.length === 1,
+            () => spec[0].columns.length === 1,
+            () => spec[0].columns[0].isMetric
+        );
+        
+        if (!isSuitable) {
+            return [];
+        }
+
+        return [{
+            tableSpec: addColumn(spec, datasource.getPossibleOperations({ cardinality: 'some', type: ['string', 'number', 'date'] }, field)[0]),
+            privateState: { type: 'line' },
+            title: 'Basic line chart'
+        }];
+    }
+}
+
 ```
