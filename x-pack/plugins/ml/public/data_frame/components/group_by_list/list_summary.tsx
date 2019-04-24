@@ -6,36 +6,11 @@
 
 import React, { Fragment } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiListGroup, EuiListGroupItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { PivotGroupByConfig, PivotGroupByConfigDict } from '../../common';
+import { PivotGroupByConfigDict } from '../../common';
 
-interface GroupByLabelProps {
-  item: PivotGroupByConfig;
-  optionsDataId: string;
-}
-
-const GroupByLabel: React.SFC<GroupByLabelProps> = ({ item, optionsDataId }) => {
-  return 'interval' in item ? (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ color: '#999' }}>
-        {item.interval}
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
+import { GroupByLabelSummary } from './group_by_label_summary';
 
 interface ListProps {
   list: PivotGroupByConfigDict;
@@ -51,7 +26,9 @@ export const GroupByListSummary: React.SFC<ListProps> = ({ list }) => {
           <Fragment key={optionsDataId}>
             <EuiPanel paddingSize="s">
               <EuiListGroupItem
-                label={<GroupByLabel item={list[optionsDataId]} optionsDataId={optionsDataId} />}
+                label={
+                  <GroupByLabelSummary item={list[optionsDataId]} optionsDataId={optionsDataId} />
+                }
                 style={{ padding: 0, display: 'block', width: '100%' }}
               />
             </EuiPanel>
