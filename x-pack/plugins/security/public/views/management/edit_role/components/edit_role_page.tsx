@@ -103,22 +103,6 @@ class EditRolePageUI extends Component<Props, State> {
             </Fragment>
           )}
 
-          {!isRoleEnabled(this.props.role) && (
-            <Fragment>
-              <EuiSpacer size="s" />
-              <EuiCallOut
-                color="primary"
-                size="s"
-                title={
-                  <FormattedMessage
-                    id="xpack.security.management.editRole.disabledRoleMessage"
-                    defaultMessage="This role is currently disabled. You can only view or delete it."
-                  />
-                }
-              />
-            </Fragment>
-          )}
-
           <EuiSpacer />
 
           {this.getRoleName()}
@@ -281,25 +265,18 @@ class EditRolePageUI extends Component<Props, State> {
       return this.getReturnToRoleListButton();
     }
 
-    const buttons = [];
-
-    if (isRoleEnabled(this.props.role)) {
-      buttons.push(this.getSaveButton(), this.getCancelButton());
-    } else {
-      buttons.push(this.getReturnToRoleListButton());
-    }
-
     return (
       <EuiFlexGroup responsive={false}>
-        {buttons.map((button, idx) => (
-          <EuiFlexItem grow={false} key={idx}>
-            {button}
-          </EuiFlexItem>
-        ))}
+        <EuiFlexItem grow={false}>{this.getSaveButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{this.getCancelButton()}</EuiFlexItem>
         <EuiFlexItem grow={true} />
         {this.getActionButton()}
       </EuiFlexGroup>
     );
+  };
+
+  public canSaveRole = () => {
+    return !isReadOnlyRole(this.props.role);
   };
 
   public getReturnToRoleListButton = () => {

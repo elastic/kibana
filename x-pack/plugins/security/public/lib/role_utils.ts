@@ -32,11 +32,7 @@ export function isReservedRole(role: Partial<Role>) {
  * @param role the Role as returned by roles API
  */
 export function isReadOnlyRole(role: Partial<Role>): boolean {
-  return (
-    isReservedRole(role) ||
-    !isRoleEnabled(role) ||
-    !!(role._transform_error && role._transform_error.length > 0)
-  );
+  return isReservedRole(role) || !!(role._transform_error && role._transform_error.length > 0);
 }
 
 /**
