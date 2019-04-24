@@ -5,7 +5,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React from 'react';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { HistoryTabs } from '../../shared/HistoryTabs';
