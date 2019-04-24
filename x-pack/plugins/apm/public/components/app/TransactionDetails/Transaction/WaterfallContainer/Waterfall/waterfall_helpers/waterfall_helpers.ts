@@ -15,7 +15,7 @@ import {
   uniq,
   zipObject
 } from 'lodash';
-import { idx } from '../../../../../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { TraceAPIResponse } from '../../../../../../../../server/lib/traces/get_trace';
 import { StringMap } from '../../../../../../../../typings/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';

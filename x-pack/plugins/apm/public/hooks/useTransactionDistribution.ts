@@ -5,7 +5,7 @@
  */
 
 import { loadTransactionDistribution } from '../services/rest/apm/transaction_groups';
-import { IUrlParams } from '../store/urlParams';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 const INITIAL_DATA = {

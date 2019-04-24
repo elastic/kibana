@@ -6,28 +6,32 @@
 
 import createHistory from 'history/createHashHistory';
 import React from 'react';
-import { Provider } from 'react-redux';
 import { Router } from 'react-router-dom';
 import { queryByLabelText, render } from 'react-testing-library';
 import { TransactionOverview } from '..';
-// @ts-ignore
-import configureStore from '../../../../store/config/configureStore';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+
+// Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
+/* eslint-disable no-console */
+const originalError = console.error;
+beforeAll(() => {
+  console.error = jest.fn();
+});
+afterAll(() => {
+  console.error = originalError;
+});
 
 function setup(props: {
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
 }) {
-  const store = configureStore();
   const history = createHistory();
   history.replace = jest.fn();
 
   const { container } = render(
-    <Provider store={store}>
-      <Router history={history}>
-        <TransactionOverview {...props} />
-      </Router>
-    </Provider>
+    <Router history={history}>
+      <TransactionOverview {...props} />
+    </Router>
   );
 
   return { container, history };

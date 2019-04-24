@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
 import { Feature } from '../../../../../xpack_main/types';
@@ -80,7 +80,7 @@ class SpacesGridPageUI extends Component<Props, State> {
   public getPageContent() {
     const { intl } = this.props;
 
-    if (!uiCapabilities.spaces.manage) {
+    if (!capabilities.get().spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 

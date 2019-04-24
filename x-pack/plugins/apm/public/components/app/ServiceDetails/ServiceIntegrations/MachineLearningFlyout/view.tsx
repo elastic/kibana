@@ -20,10 +20,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import React from 'react';
-import { getMlJobId } from '../../../../../../common/ml_job_constants';
+import React, { useState } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
-import { getMLJob } from '../../../../../services/rest/ml';
+import { getHasMLJob } from '../../../../../services/rest/ml';
 import { KibanaLink } from '../../../../shared/Links/KibanaLink';
 import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
@@ -32,39 +31,29 @@ import { TransactionSelect } from './TransactionSelect';
 interface Props {
   hasIndexPattern: boolean;
   isCreatingJob: boolean;
-  onChangeTransaction: (value: string) => void;
   onClickCreate: () => void;
   onClose: () => void;
-  selectedTransactionType?: string;
   serviceName: string;
   serviceTransactionTypes: string[];
-  transactionType?: string;
 }
 
-const INITIAL_DATA = { count: 0, jobs: [] };
 export function MachineLearningFlyoutView({
   hasIndexPattern,
   isCreatingJob,
-  onChangeTransaction,
   onClickCreate,
   onClose,
-  selectedTransactionType,
   serviceName,
-  serviceTransactionTypes,
-  transactionType
+  serviceTransactionTypes
 }: Props) {
-  const { data = INITIAL_DATA, status } = useFetcher(
-    () => getMLJob({ serviceName, transactionType }),
+  const [transactionType, setTransactionType] = useState(
+    serviceTransactionTypes[0]
+  );
+  const { data: hasMLJob = false, status } = useFetcher(
+    () => getHasMLJob({ serviceName, transactionType }),
     [serviceName, transactionType]
   );
 
-  if (status === FETCH_STATUS.LOADING) {
-    return null;
-  }
-
-  const hasMLJob = data.jobs.some(
-    job => job.job_id === getMlJobId(serviceName, selectedTransactionType)
-  );
+  const isLoadingMLJob = status === FETCH_STATUS.LOADING;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
@@ -212,11 +201,11 @@ export function MachineLearningFlyoutView({
           <EuiFlexItem>
             {serviceTransactionTypes.length > 1 ? (
               <TransactionSelect
-                serviceName={serviceName}
+                selectedTransactionType={transactionType}
                 transactionTypes={serviceTransactionTypes}
-                selected={selectedTransactionType}
-                existingJobs={data.jobs}
-                onChange={onChangeTransaction}
+                onChange={(value: string) => {
+                  setTransactionType(value);
+                }}
               />
             ) : null}
           </EuiFlexItem>
@@ -225,7 +214,12 @@ export function MachineLearningFlyoutView({
               <EuiButton
                 onClick={onClickCreate}
                 fill
-                disabled={isCreatingJob || hasMLJob || !hasIndexPattern}
+                disabled={
+                  isCreatingJob ||
+                  hasMLJob ||
+                  !hasIndexPattern ||
+                  isLoadingMLJob
+                }
               >
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',

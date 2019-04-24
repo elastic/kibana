@@ -34,7 +34,14 @@ describe('get_time', () => {
           title: 'test',
           timeFieldName: 'date',
           fields: [
-            { name: 'date', type: 'date', aggregatable: true, searchable: true, filterable: true },
+            {
+              name: 'date',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+              filterable: true,
+            },
           ],
         },
         { from: 'now-60y', to: 'now' }
