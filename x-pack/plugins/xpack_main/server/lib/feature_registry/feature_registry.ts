@@ -157,7 +157,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
     if (unknownAppEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
-        feature.id
+          feature.id
         }.${privilegeId} has unknown app entries: ${unknownAppEntries.join(', ')}`
       );
     }
@@ -166,7 +166,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
     if (unknownCatalogueEntries.length > 0) {
       throw new Error(
         `Feature privilege ${
-        feature.id
+          feature.id
         }.${privilegeId} has unknown catalogue entries: ${unknownCatalogueEntries.join(', ')}`
       );
     }
@@ -176,7 +176,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
         if (!management[managementSectionId]) {
           throw new Error(
             `Feature privilege ${
-            feature.id
+              feature.id
             }.${privilegeId} has unknown management section: ${managementSectionId}`
           );
         }
@@ -186,7 +186,7 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
         if (unknownSectionEntries.length > 0) {
           throw new Error(
             `Feature privilege ${
-            feature.id
+              feature.id
             }.${privilegeId} has unknown management entries for section ${managementSectionId}: ${unknownSectionEntries.join(
               ', '
             )}`
