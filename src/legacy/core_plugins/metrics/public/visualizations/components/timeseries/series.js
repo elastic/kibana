@@ -32,7 +32,42 @@ import {
 
 const isBarSeries = props => get(props, 'bars.show', false);
 const getComponent = isBar => isBar ? BarSeries : AreaSeries;
-const getFillStyles = (isBar, props) => isBarSeries(props) ? props.bars : props.lines;
+
+const getAreaFillStyles = ({ points, lines, color }) => ({
+  areaSeriesStyle: {
+    line: {
+      visible: Boolean(lines),
+      stroke: '',
+      strokeWidth: get(lines, 'lineWidth', 0),
+    },
+    area: {
+      fill: color,
+      opacity: get(lines, 'fill', 1),
+      visible: true,
+    },
+    point: {
+      visible: Boolean(points),
+      radius: get(points, 'radius', 0.5),
+      opacity: 1,
+      stroke: '',
+      strokeWidth: get(points, 'lineWidth', 0),
+    },
+  },
+  curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
+});
+
+const getBarsFillStyles = ({ bars }) => ({
+  barSeriesStyle: {
+    border: {
+      visible: Boolean(bars),
+      stroke: '',
+      strokeWidth: get(bars, 'lineWidth', 0),
+    },
+  },
+  curve: CurveType.LINEAR,
+});
+
+const calculateLineSeriesStyles = (isBar, props) => isBar ? getBarsFillStyles(props) : getAreaFillStyles(props);
 
 const calculateCustomSeriesColors = (color, specId) => {
   const map = new Map();
@@ -48,40 +83,11 @@ const calculateCustomSeriesColors = (color, specId) => {
   return map;
 };
 
-const calculateLineSeriesStyles = (isBar, fillStyles, color) => {
-  return {
-    [isBar ? 'barSeriesStyle' : 'areaSeriesStyle']: {
-      line: {
-        stroke: '',
-        strokeWidth: fillStyles.lineWidth || 0,
-        visible: Boolean(fillStyles.lineWidth),
-      },
-      area: {
-        fill: color,
-        opacity: fillStyles.fill,
-        visible: true,
-      },
-      border: {
-        stroke: '',
-        strokeWidth: 1,
-        visible: false,
-      },
-      point: {
-        visible: true,
-        radius: 0.5,
-        opacity: 0.1,
-        stroke: '',
-        strokeWidth: 0.5,
-      },
-    },
-  };
-};
-
 export const Series = (props) => {
   const id = getSpecId(props.label + props.id);
   const isBar = isBarSeries(props);
   const Component = getComponent(isBar);
-  const fillStyles = getFillStyles(isBar, props);
+  const lineSeriesStyles = calculateLineSeriesStyles(isBar, props);
 
   const seriesSettings = {
     id,
@@ -95,10 +101,9 @@ export const Series = (props) => {
     stackAccessors: props.stack ? [0] : null,
     data: props.data,
     yScaleToDataExtent: false,
-    curve: fillStyles.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
     hideInLegend: props.hideInLegend,
     customSeriesColors: calculateCustomSeriesColors(props.color, id),
-    ...calculateLineSeriesStyles(isBar, fillStyles, props.color),
+    ...lineSeriesStyles,
   };
 
   return (
