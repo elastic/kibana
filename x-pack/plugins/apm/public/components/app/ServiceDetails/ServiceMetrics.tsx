@@ -51,6 +51,7 @@ export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
   return (
     <React.Fragment>
       <TransactionCharts
+        hasMLJob={false}
         charts={transactionOverviewChartsData}
         urlParams={urlParams}
         location={location}
