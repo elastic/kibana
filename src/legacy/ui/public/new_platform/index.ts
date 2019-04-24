@@ -16,4 +16,4 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-export { __newPlatformInit__, getNewPlatform } from './new_platform';
+export { __newPlatformSetup__, __newPlatformStart__, getNewPlatform } from './new_platform';
