@@ -35,7 +35,7 @@ function TimeIntervalParamEditor({
   agg,
   aggParam,
   editorConfig,
-  value = '',
+  value,
   setValue,
   isInvalid,
   setTouched,
@@ -47,7 +47,7 @@ function TimeIntervalParamEditor({
   const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
   const scaledHepText =
     interval && interval.scaled && !isInvalid ? (
-      <label>
+      <strong className="eui-displayBlock">
         <FormattedMessage
           id="common.ui.aggTypes.timeInterval.scaledHelpText"
           defaultMessage="Currently scaled to {bucketDescription}"
@@ -56,10 +56,9 @@ function TimeIntervalParamEditor({
         <EuiIconTip
           position="right"
           type="questionInCircle"
-          color="text"
           content={interval.scale <= 1 ? tooManyBucketsTooltip : tooLargeBucketsTooltip}
         />
-      </label>
+      </strong>
     ) : null;
 
   const helpText = (
@@ -81,8 +80,14 @@ function TimeIntervalParamEditor({
         },
         [] as ComboBoxOption[]
       );
-  const definedOption = find(options, { key: value });
-  const selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
+
+  let selectedOptions = [];
+  let definedOption;
+  if (value) {
+    definedOption = find(options, { key: value });
+    selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
+  }
+
   const errors = [];
 
   if (isInvalid && value) {
@@ -123,7 +128,9 @@ function TimeIntervalParamEditor({
       fullWidth={true}
       helpText={helpText}
       isInvalid={isInvalid}
-      label={label}
+      label={i18n.translate('common.ui.aggTypes.timeInterval.minimumIntervalLabel', {
+        defaultMessage: 'Minimum interval',
+      })}
     >
       <EuiComboBox
         fullWidth={true}
@@ -135,6 +142,9 @@ function TimeIntervalParamEditor({
         options={options}
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
+        placeholder={i18n.translate('common.ui.aggTypes.timeInterval.selectIntervalPlaceholder', {
+          defaultMessage: 'Select an interval',
+        })}
       />
     </EuiFormRow>
   );
