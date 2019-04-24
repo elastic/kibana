@@ -21,11 +21,11 @@ import * as Rx from 'rxjs';
 
 import { ChromeBadge } from 'src/core/public/chrome';
 import { chromeServiceMock } from '../../../../../core/public/mocks';
-import { __newPlatformInit__, initChromeBadgeApi } from './badge';
+import { __newPlatformSetup__, initChromeBadgeApi } from './badge';
 
 const newPlatformChrome = chromeServiceMock.createSetupContract();
 
-__newPlatformInit__(newPlatformChrome);
+__newPlatformSetup__(newPlatformChrome);
 
 function setup() {
   const getBadge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);

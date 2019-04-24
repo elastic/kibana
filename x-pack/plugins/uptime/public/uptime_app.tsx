@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ApolloProvider } from 'react-apollo';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import { overviewBreadcrumb, UMBreadcrumb } from './breadcrumbs';
 import { UMGraphQLClient, UMUpdateBadge, UMUpdateBreadcrumbs } from './lib/lib';
@@ -122,7 +122,7 @@ const Application = (props: UptimeAppProps) => {
     setBreadcrumbs([overviewBreadcrumb]);
     renderGlobalHelpControls();
     setBadge(
-      !uiCapabilities.uptime.save
+      !capabilities.get().uptime.save
         ? {
             text: i18n.translate('xpack.uptime.badge.readOnly.text', {
               defaultMessage: 'Read only',
