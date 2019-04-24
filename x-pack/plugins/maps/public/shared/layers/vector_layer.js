@@ -239,22 +239,27 @@ export class VectorLayer extends AbstractLayer {
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
+    const searchFilters = {
+      ...dataFilters,
+      applyGlobalQuery: this.applyGlobalQuery(),
+    };
+    const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+      const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
+      return {
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: propertiesMap
+      };
+    }
+
     try {
-      const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
-      if (canSkip) {
-        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
-        return {
-          dataHasChanged: false,
-          join: join,
-          propertiesMap: propertiesMap
-        };
-      }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this.getSourceName();
       const {
         propertiesMap
-      } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
