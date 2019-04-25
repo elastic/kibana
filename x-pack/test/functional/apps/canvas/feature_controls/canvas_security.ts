@@ -11,7 +11,6 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
-  const find = getService('find');
   const appsMenu = getService('appsMenu');
 
   describe('security feature controls', () => {
@@ -213,15 +212,12 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await security.user.delete('no_canvas_privileges_user');
       });
 
-      const getMessageText = async () =>
-        await (await find.byCssSelector('body>pre')).getVisibleText();
-
       it(`returns a 404`, async () => {
         await PageObjects.common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -236,7 +232,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

@@ -28,6 +28,7 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const expectSpaceSelector = options.expectSpaceSelector || false;
       const expectSuccess = options.expectSuccess;
       const expectForbidden = options.expectForbidden || false;
+      const rawDataTabLocator = 'a[id=rawdata-tab]';
 
       await PageObjects.common.navigateToApp('login');
       await testSubjects.setValue('loginUsername', username);
@@ -39,6 +40,10 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
         await retry.try(() => testSubjects.find('kibanaSpaceSelector'));
         log.debug(`Finished login process, landed on space selector. currentUrl = ${await browser.getCurrentUrl()}`);
       } else if (expectForbidden) {
+        if (await find.existsByCssSelector(rawDataTabLocator)) {
+          // Firefox has 3 tabs and requires navigation to see Raw output
+          await find.clickByCssSelector(rawDataTabLocator);
+        }
         await retry.try(async () => {
           await PageObjects.error.expectForbidden();
         });
