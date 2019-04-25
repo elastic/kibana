@@ -196,7 +196,7 @@ const ViewSwitcherContainer = styled.div`
 const MapContainer = styled.div`
   position: absolute;
   display: flex;
-  top: 0;
+  top: 70px;
   right: 0;
   bottom: 0;
   left: 0;
