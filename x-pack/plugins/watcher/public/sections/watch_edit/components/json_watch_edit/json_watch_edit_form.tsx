@@ -18,30 +18,35 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { putWatchApiUrl } from '../../../lib/documentation_links';
-import { onWatchSave, saveWatch } from '../watch_edit_actions';
-import { WatchContext } from './watch_context';
-import { LicenseServiceContext } from '../../../license_service_context';
+import { ConfirmWatchesModal } from '../../../../components/confirm_watches_modal';
+import { ErrableFormRow } from '../../../../components/form_errors';
+import { putWatchApiUrl } from '../../../../lib/documentation_links';
+import { onWatchSave, saveWatch } from '../../watch_edit_actions';
+import { WatchContext } from '../../watch_context';
+import { LicenseServiceContext } from '../../../../license_service_context';
 
 export const JsonWatchEditForm = () => {
   const { watch, setWatchProperty } = useContext(WatchContext);
   const licenseService = useContext(LicenseServiceContext);
+
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+
   const [validationResult, setValidationResult] = useState<{
     type: string;
     title: string;
     message: string;
   } | null>(null);
+
   const hasActionErrors = !!validationResult && validationResult.type === 'error';
+
   const invalidActionMessage = i18n.translate(
     'xpack.watcher.sections.watchEdit.json.form.actionValidationErrorMessage',
     {
       defaultMessage: 'Invalid watch actions',
     }
   );
+
   const jsonErrors = {
     ...errors,
     json: hasActionErrors ? [...errors.json, invalidActionMessage] : [...errors.json],

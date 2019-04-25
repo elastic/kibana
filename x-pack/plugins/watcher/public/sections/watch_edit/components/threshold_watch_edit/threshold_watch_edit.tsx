@@ -27,18 +27,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../lib/api';
-import { aggTypes } from '../../../models/watch/agg_types';
-import { groupByTypes } from '../../../models/watch/group_by_types';
-import { comparators } from '../comparators';
-import { timeUnits } from '../time_units';
-import { onWatchSave, saveWatch } from '../watch_edit_actions';
+import { ConfirmWatchesModal } from '../../../../components/confirm_watches_modal';
+import { ErrableFormRow } from '../../../../components/form_errors';
+import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
+import { aggTypes } from '../../../../models/watch/agg_types';
+import { groupByTypes } from '../../../../models/watch/group_by_types';
+import { comparators } from '../../comparators';
+import { timeUnits } from '../../time_units';
+import { onWatchSave, saveWatch } from '../../watch_edit_actions';
 import { WatchActionsPanel } from './threshold_watch_action_panel';
-import { WatchContext } from './watch_context';
+import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
-import { LicenseServiceContext } from '../../../license_service_context';
+import { LicenseServiceContext } from '../../../../license_service_context';
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
     defaultMessage: 'Select a field',
@@ -754,7 +754,9 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               </EuiFlexItem>
             </EuiFlexGroup>
             {hasErrors ? null : <WatchVisualization />}
+            <EuiSpacer />
             <WatchActionsPanel />
+            <EuiSpacer />
           </Fragment>
         ) : null}
         <EuiFlexGroup>

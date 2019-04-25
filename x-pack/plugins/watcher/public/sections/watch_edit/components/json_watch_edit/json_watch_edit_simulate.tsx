@@ -27,13 +27,16 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
 import { toastNotifications } from 'ui/notify';
-import { ACTION_MODES, TIME_UNITS } from '../../../../common/constants';
-import { ExecutedWatchDetails, ExecutedWatchResults } from '../../../../common/types/watch_types';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { executeWatch } from '../../../lib/api';
-import { executeWatchApiUrl } from '../../../lib/documentation_links';
-import { WatchContext } from '../../../sections/watch_edit/components/watch_context';
-import { timeUnits } from '../time_units';
+import { ACTION_MODES, TIME_UNITS } from '../../../../../common/constants';
+import {
+  ExecutedWatchDetails,
+  ExecutedWatchResults,
+} from '../../../../../common/types/watch_types';
+import { ErrableFormRow } from '../../../../components/form_errors';
+import { executeWatch } from '../../../../lib/api';
+import { executeWatchApiUrl } from '../../../../lib/documentation_links';
+import { WatchContext } from '../../watch_context';
+import { timeUnits } from '../../time_units';
 import { JsonWatchEditSimulateResults } from './json_watch_edit_simulate_results';
 
 export const JsonWatchEditSimulate = ({

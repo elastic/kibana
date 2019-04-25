@@ -7,12 +7,14 @@
 import { get, isArray } from 'lodash';
 import { BaseAction } from './base_action';
 import { i18n } from '@kbn/i18n';
+import chrome from 'ui/chrome';
 
 export class EmailAction extends BaseAction {
   constructor(props = {}) {
     super(props);
-
-    const toArray = get(props, 'to');
+    const uiSettings = chrome.getUiSettingsClient();
+    const defaultToEmail = uiSettings.get('xPack:defaultAdminEmail') || undefined;
+    const toArray = get(props, 'to', defaultToEmail);
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
     this.subject = get(props, 'subject');
     this.body = get(props, 'body');
@@ -23,7 +25,7 @@ export class EmailAction extends BaseAction {
       to: [],
       body: [],
     };
-    if (!this.to || this.to.length === 0) {
+    if (!this.to || !this.to.length) {
       errors.to.push(
         i18n.translate('xpack.watcher.watchActions.email.emailRecipientIsRequiredValidationMessage', {
           defaultMessage: 'To email address is required.',
@@ -48,7 +50,11 @@ export class EmailAction extends BaseAction {
       subject: this.subject,
       body: this.body,
       email: {
-        to: this.to && this.to.length ? this.to : undefined,
+        to: this.to && this.to.length > 0 ? this.to : undefined,
+        subject: this.subject,
+        body: {
+          text: this.body,
+        },
       }
     });
 

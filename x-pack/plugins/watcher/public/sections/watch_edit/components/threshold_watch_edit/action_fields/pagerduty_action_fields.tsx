@@ -6,48 +6,48 @@
 import React, { Fragment } from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { IndexAction } from '../../../../common/types/action_types';
+import { ErrableFormRow } from '../../../../../components/form_errors';
+import { PagerDutyAction } from '../../../../../../common/types/action_types';
 
 interface Props {
-  action: IndexAction;
+  action: PagerDutyAction;
   editAction: (changedProperty: { key: string; value: string }) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
 }
 
-export const IndexActionFields: React.FunctionComponent<Props> = ({
-  action,
-  editAction,
+export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
   errors,
   hasErrors,
+  action,
+  editAction,
 }) => {
-  const { index } = action;
+  const { description } = action;
   return (
     <Fragment>
       <ErrableFormRow
-        id="indexName"
-        errorKey="index"
+        id="pagerDutyDescription"
+        errorKey="description"
         fullWidth
         errors={errors}
-        isShowingErrors={hasErrors && index !== undefined}
+        isShowingErrors={hasErrors && description !== undefined}
         label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.indexAction.indexFieldLabel',
+          'xpack.watcher.sections.watchEdit.threshold.pagerDutyAction.descriptionFieldLabel',
           {
-            defaultMessage: 'Index',
+            defaultMessage: 'Description',
           }
         )}
       >
         <EuiFieldText
           fullWidth
-          name="index"
-          value={index || ''}
+          name="description"
+          value={description || ''}
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction({ key: 'index', value: e.target.value });
+            editAction({ key: 'description', value: e.target.value });
           }}
           onBlur={() => {
-            if (!index) {
-              editAction({ key: 'index', value: '' });
+            if (!description) {
+              editAction({ key: 'description', value: '' });
             }
           }}
         />

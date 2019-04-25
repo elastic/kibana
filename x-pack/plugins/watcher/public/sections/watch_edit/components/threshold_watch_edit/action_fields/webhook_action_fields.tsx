@@ -7,8 +7,8 @@ import React, { Fragment } from 'react';
 
 import { EuiCodeEditor, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { WebhookAction } from '../../../../common/types/action_types';
+import { ErrableFormRow } from '../../../../../components/form_errors';
+import { WebhookAction } from '../../../../../../common/types/action_types';
 
 interface Props {
   action: WebhookAction;
@@ -67,6 +67,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiFormRow>
+
       <ErrableFormRow
         id="webhookHost"
         errorKey="host"
@@ -94,6 +95,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </ErrableFormRow>
+
       <ErrableFormRow
         id="webhookPort"
         errorKey="port"
@@ -121,6 +123,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </ErrableFormRow>
+
       <EuiFormRow
         fullWidth
         label={i18n.translate(
@@ -139,6 +142,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiFormRow>
+
       <ErrableFormRow
         id="webhookBody"
         label={i18n.translate(

@@ -14,9 +14,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { useContext, useEffect, useState } from 'react';
 import { Action } from 'plugins/watcher/models/action';
-import { ActionType } from '../../../../common/types/action_types';
-import { fetchSettings } from '../../../lib/api';
-import { WatchContext } from './watch_context';
+import { ActionType } from '../../../../../common/types/action_types';
+import { fetchSettings } from '../../../../lib/api';
+import { WatchContext } from '../../watch_context';
 
 const EMPTY_FIRST_OPTION_VALUE = 'empty-first-option';
 
@@ -55,33 +55,31 @@ export const WatchActionsDropdown: React.FunctionComponent = () => {
   useEffect(() => {
     getSettings();
   }, []);
-  const actionOptions =
-    actions &&
-    actions.map((action: ActionType) => {
-      const description = action.isEnabled ? action.selectMessage : disabledMessage;
-      return {
-        value: action.type,
-        inputDisplay: action.typeName,
-        disabled: !action.isEnabled,
-        dropdownDisplay: (
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
-              <EuiIcon type={action.iconClass} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <strong>{action.typeName}</strong>
-              <EuiSpacer size="xs" />
-              <EuiText size="s" color="subdued">
-                <p className="euiTextColor--subdued">{description}</p>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ),
-      };
-    });
-  const actionOptionsWithEmptyValue = actionOptions
-    ? [firstActionOption, ...actionOptions]
-    : [firstActionOption];
+  const actionOptions = actions
+    ? actions.map((action: ActionType) => {
+        const description = action.isEnabled ? action.selectMessage : disabledMessage;
+        return {
+          value: action.type,
+          inputDisplay: action.typeName,
+          disabled: !action.isEnabled,
+          dropdownDisplay: (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
+                <EuiIcon type={action.iconClass} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <strong>{action.typeName}</strong>
+                <EuiSpacer size="xs" />
+                <EuiText size="s" color="subdued">
+                  <p className="euiTextColor--subdued">{description}</p>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        };
+      })
+    : [];
+  const actionOptionsWithEmptyValue = [firstActionOption, ...actionOptions];
   return (
     <EuiSuperSelect
       options={actionOptionsWithEmptyValue}

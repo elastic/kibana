@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect } from 'react';
+import React, { Fragment } from 'react';
 
 import { EuiComboBox, EuiFieldText, EuiFormRow, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { EmailAction } from '../../../../common/types/action_types';
+import { ErrableFormRow } from '../../../../../components/form_errors';
+import { EmailAction } from '../../../../../../common/types/action_types';
 
 interface Props {
   action: EmailAction;
@@ -24,18 +24,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
 }) => {
   const { to, subject, body } = action;
-  const [toOptions, setToOptions] = useState<Array<{ label: string }>>([]);
-
-  useEffect(() => {
-    if (to && to.length > 0) {
-      const toOptionsList = to.map(toItem => {
-        return {
-          label: toItem,
-        };
-      });
-      setToOptions(toOptionsList);
-    }
-  }, []);
+  const toOptions = to ? to.map(label => ({ label })) : [];
 
   return (
     <Fragment>
@@ -58,18 +47,25 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           selectedOptions={toOptions}
           onCreateOption={(searchValue: string) => {
             const newOptions = [...toOptions, { label: searchValue }];
-            setToOptions(newOptions);
             editAction({ key: 'to', value: newOptions.map(newOption => newOption.label) });
           }}
           onChange={(selectedOptions: Array<{ label: string }>) => {
-            setToOptions(selectedOptions);
             editAction({
               key: 'to',
               value: selectedOptions.map(selectedOption => selectedOption.label),
             });
           }}
+          onBlur={() => {
+            if (!to) {
+              editAction({
+                key: 'to',
+                value: [],
+              });
+            }
+          }}
         />
       </ErrableFormRow>
+
       <EuiFormRow
         fullWidth
         label={i18n.translate(
@@ -88,6 +84,7 @@ export const EmailActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiFormRow>
+
       <ErrableFormRow
         id="emailBody"
         errorKey="body"

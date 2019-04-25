@@ -16,63 +16,52 @@ export class SlackAction extends BaseAction {
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
     this.text = props.text;
   }
+
   validate() {
+    // Currently no validation required
     const errors = {
       to: [],
-      text: []
+      text: [],
     };
-    if (!this.to || !this.to.length) {
-      errors.to.push(
-        i18n.translate('xpack.watcher.watchActions.slack.slackRecipientIsRequiredValidationMessage', {
-          defaultMessage: 'Slack recipient is required.',
-        })
-      );
-    }
-    if (!this.text) {
-      errors.text.push(
-        i18n.translate('xpack.watcher.watchActions.slack.slackMessageIsRequiredValidationMessage', {
-          defaultMessage: 'Slack message is required.',
-        })
-      );
-    }
     return errors;
   }
 
   get upstreamJson() {
     const result = super.upstreamJson;
-    const message = this.text || this.to.length
+    const to = this.to && this.to.length > 0 ? this.to : undefined;
+    const message = this.text || to
       ? {
         text: this.text,
-        to: this.to.length ? this.to : undefined
+        to,
       }
-      : undefined;
+      : {};
     Object.assign(result, {
-      to: this.to,
+      to,
       text: this.text,
       slack: {
         message
-      }
+      },
     });
 
     return result;
   }
 
   get simulateMessage() {
-    const toList = this.to.join(', ');
+    const toList = this.to && this.to.join(', ');
     return i18n.translate('xpack.watcher.models.slackAction.simulateMessage', {
-      defaultMessage: 'Sample Slack message sent to {toList}.',
+      defaultMessage: 'Sample Slack message sent {toList}.',
       values: {
-        toList
+        toList: toList ? `to ${toList}` : '',
       }
     });
   }
 
   get simulateFailMessage() {
-    const toList = this.to.join(', ');
+    const toList = this.to && this.to.join(', ');
     return i18n.translate('xpack.watcher.models.slackAction.simulateFailMessage', {
-      defaultMessage: 'Failed to send sample Slack message to {toList}.',
+      defaultMessage: 'Failed to send sample Slack message {toList}.',
       values: {
-        toList
+        toList: toList ? `to ${toList}` : '',
       }
     });
   }

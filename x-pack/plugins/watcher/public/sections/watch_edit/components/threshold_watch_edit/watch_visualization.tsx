@@ -28,9 +28,9 @@ import moment from 'moment-timezone';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
-import { getWatchVisualizationData } from '../../../lib/api';
-import { WatchContext } from './watch_context';
-import { aggTypes } from '../../../models/watch/agg_types';
+import { getWatchVisualizationData } from '../../../../lib/api';
+import { WatchContext } from '../../watch_context';
+import { aggTypes } from '../../../../models/watch/agg_types';
 const getChartTheme = () => {
   const isDarkTheme = chrome.getUiSettingsClient().get('theme:darkMode');
   const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;

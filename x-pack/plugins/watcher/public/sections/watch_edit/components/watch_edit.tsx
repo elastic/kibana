@@ -20,7 +20,7 @@ import { loadWatch } from '../../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';
 import { ThresholdWatchEdit } from './threshold_watch_edit';
-import { WatchContext } from './watch_context';
+import { WatchContext } from '../watch_context';
 
 const getTitle = (watch: BaseWatch) => {
   if (watch.isNew) {

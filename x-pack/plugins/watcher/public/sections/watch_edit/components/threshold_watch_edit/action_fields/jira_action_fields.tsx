@@ -7,8 +7,8 @@ import React, { Fragment } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { JiraAction } from '../../../../common/types/action_types';
+import { ErrableFormRow } from '../../../../../components/form_errors';
+import { JiraAction } from '../../../../../../common/types/action_types';
 
 interface Props {
   action: JiraAction;
@@ -45,6 +45,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </EuiFormRow>
+
       <ErrableFormRow
         id="jiraProjectKey"
         errorKey="projectKey"
@@ -72,6 +73,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </ErrableFormRow>
+
       <ErrableFormRow
         id="jiraIssueType"
         errorKey="issueType"
@@ -99,6 +101,7 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
           }}
         />
       </ErrableFormRow>
+
       <ErrableFormRow
         id="jiraSummary"
         errorKey="summary"

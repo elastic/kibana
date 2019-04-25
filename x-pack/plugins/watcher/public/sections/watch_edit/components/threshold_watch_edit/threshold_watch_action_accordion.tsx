@@ -20,19 +20,21 @@ import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_d
 import { Action } from 'plugins/watcher/models/action';
 import { toastNotifications } from 'ui/notify';
 import { WatchHistoryItem } from 'plugins/watcher/models/watch_history_item';
-import { ActionType } from '../../../../common/types/action_types';
-import { ACTION_TYPES, ACTION_MODES } from '../../../../common/constants';
-import { WatchContext } from './watch_context';
-import { WebhookActionFields } from './webhook_action_fields';
-import { LoggingActionFields } from './logging_action_fields';
-import { IndexActionFields } from './index_action_fields';
-import { SlackActionFields } from './slack_action_fields';
-import { EmailActionFields } from './email_action_fields';
-import { PagerDutyActionFields } from './pagerduty_action_fields';
-import { JiraActionFields } from './jira_action_fields';
-import { executeWatch } from '../../../lib/api';
+import { ActionType } from '../../../../../common/types/action_types';
+import { ACTION_TYPES, ACTION_MODES } from '../../../../../common/constants';
+import { WatchContext } from '../../watch_context';
+import {
+  WebhookActionFields,
+  LoggingActionFields,
+  IndexActionFields,
+  SlackActionFields,
+  EmailActionFields,
+  PagerDutyActionFields,
+  JiraActionFields,
+} from './action_fields';
+import { executeWatch } from '../../../../lib/api';
 
-const ActionFieldsComponent = {
+const ActionFieldsComponentMap = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,
   [ACTION_TYPES.SLACK]: SlackActionFields,
   [ACTION_TYPES.EMAIL]: EmailActionFields,
@@ -84,7 +86,7 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
 
   if (actions && actions.length >= 1) {
     return actions.map((action: any) => {
-      const FieldsComponent = ActionFieldsComponent[action.type];
+      const FieldsComponent = ActionFieldsComponentMap[action.type];
       const errors = action.validate();
       const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
 
@@ -126,8 +128,8 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
                 setWatchProperty('actions', updatedActions);
               }}
             />
+
             <EuiButton
-              fill
               type="submit"
               isDisabled={hasErrors}
               onClick={async () => {
