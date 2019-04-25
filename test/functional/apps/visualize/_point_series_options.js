@@ -22,48 +22,52 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries', 'timePicker']);
   const pointSeriesVis = PageObjects.pointSeries;
 
-  describe('point series', function describeIndexTests() {
-    before(async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
+  async function initChart() {
+    const fromTime = '2015-09-19 06:31:44.000';
+    const toTime = '2015-09-23 18:31:44.000';
 
-      log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
-      log.debug('clickLineChart');
-      await PageObjects.visualize.clickLineChart();
-      await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
-      log.debug('Bucket = X-Axis');
-      await PageObjects.visualize.clickBucket('X-Axis');
-      log.debug('Aggregation = Date Histogram');
-      await PageObjects.visualize.selectAggregation('Date Histogram');
-      log.debug('Field = @timestamp');
-      await PageObjects.visualize.selectField('@timestamp');
-      // add another metrics
-      log.debug('Add Metric');
-      await PageObjects.visualize.clickAddMetric();
-      log.debug('Metric = Value Axis');
-      await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
-      log.debug('Aggregation = Average');
-      await PageObjects.visualize.selectAggregation('Average', 'metrics');
-      log.debug('Field = memory');
-      await PageObjects.visualize.selectField('machine.ram', 'metrics');
-      // go to options page
-      log.debug('Going to axis options');
-      await pointSeriesVis.clickAxisOptions();
-      // add another value axis
-      log.debug('adding axis');
-      await pointSeriesVis.clickAddAxis();
-      // set average count to use second value axis
-      await pointSeriesVis.toggleCollapsibleTitle('Average machine.ram');
-      log.debug('Average memory value axis - ValueAxis-2');
-      await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.awaitGlobalLoadingIndicatorHidden();
-    });
+    log.debug('navigateToApp visualize');
+    await PageObjects.visualize.navigateToNewVisualization();
+    log.debug('clickLineChart');
+    await PageObjects.visualize.clickLineChart();
+    await PageObjects.visualize.clickNewSearch();
+    await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+    log.debug('Bucket = X-Axis');
+    await PageObjects.visualize.clickBucket('X-Axis');
+    log.debug('Aggregation = Date Histogram');
+    await PageObjects.visualize.selectAggregation('Date Histogram');
+    log.debug('Field = @timestamp');
+    await PageObjects.visualize.selectField('@timestamp');
+    // add another metrics
+    log.debug('Add Metric');
+    await PageObjects.visualize.clickAddMetric();
+    log.debug('Metric = Value Axis');
+    await PageObjects.visualize.clickBucket('Y-Axis', 'metric');
+    log.debug('Aggregation = Average');
+    await PageObjects.visualize.selectAggregation('Average', 'metrics');
+    log.debug('Field = memory');
+    await PageObjects.visualize.selectField('machine.ram', 'metrics');
+    // go to options page
+    log.debug('Going to axis options');
+    await pointSeriesVis.clickAxisOptions();
+    // add another value axis
+    log.debug('adding axis');
+    await pointSeriesVis.clickAddAxis();
+    // set average count to use second value axis
+    await pointSeriesVis.toggleCollapsibleTitle('Average machine.ram');
+    log.debug('Average memory value axis - ValueAxis-2');
+    await pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
+    await PageObjects.visualize.waitForVisualizationRenderingStabilized();
+    await PageObjects.visualize.clickGo();
+  }
+
+  describe('point series', function describeIndexTests() {
+    before(initChart);
 
     describe('secondary value axis', function () {
 
@@ -178,5 +182,32 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('x axis labels', async function () {
+      const expectedLabels = [
+        '2015-09-20 00:00',
+        '2015-09-21 00:00',
+        '2015-09-22 00:00',
+        '2015-09-23 00:00',
+      ];
+
+      it('should show round labels in default timezone', async function () {
+        await initChart();
+        const labels = await PageObjects.visualize.getXAxisLabels();
+        expect(labels).to.eql(expectedLabels);
+      });
+
+      it('should show round labels in different timezone', async function () {
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'America/Phoenix' });
+        await browser.refresh();
+        await initChart();
+
+        const labels = await PageObjects.visualize.getXAxisLabels();
+
+        await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Browser' });
+        await browser.refresh();
+
+        expect(labels).to.eql(expectedLabels);
+      });
+    });
   });
 }

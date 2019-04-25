@@ -150,6 +150,7 @@ export async function createDefaultSpace({ index, client }) {
       space: {
         name: 'Default Space',
         description: 'This is the default space',
+        disabledFeatures: [],
         _reserved: true
       }
     }
@@ -186,7 +187,7 @@ export async function cleanKibanaIndices({ client, stats, log, kibanaUrl }) {
         bool: {
           must_not: {
             ids: {
-              type: 'doc',
+              type: '_doc',
               values: ['space:default']
             }
           }

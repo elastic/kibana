@@ -14,6 +14,7 @@ import { pluck } from 'rxjs/operators';
 
 // TODO use theme provided from parentApp when kibana supports it
 import { EuiErrorBoundary } from '@elastic/eui';
+import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { I18nContext } from 'ui/i18n';
 import { EuiThemeProvider } from '../../../../common/eui_styled_components';
 import { InfraFrontendLibs } from '../lib/lib';
@@ -36,19 +37,21 @@ export async function startApp(libs: InfraFrontendLibs) {
 
     return (
       <I18nContext>
-        <EuiErrorBoundary>
-          <ConstateProvider devtools>
-            <ReduxStoreProvider store={store}>
-              <ApolloProvider client={libs.apolloClient}>
-                <ApolloClientContext.Provider value={libs.apolloClient}>
-                  <EuiThemeProvider darkMode={darkMode}>
-                    <PageRouter history={history} />
-                  </EuiThemeProvider>
-                </ApolloClientContext.Provider>
-              </ApolloProvider>
-            </ReduxStoreProvider>
-          </ConstateProvider>
-        </EuiErrorBoundary>
+        <UICapabilitiesProvider>
+          <EuiErrorBoundary>
+            <ConstateProvider devtools>
+              <ReduxStoreProvider store={store}>
+                <ApolloProvider client={libs.apolloClient}>
+                  <ApolloClientContext.Provider value={libs.apolloClient}>
+                    <EuiThemeProvider darkMode={darkMode}>
+                      <PageRouter history={history} />
+                    </EuiThemeProvider>
+                  </ApolloClientContext.Provider>
+                </ApolloProvider>
+              </ReduxStoreProvider>
+            </ConstateProvider>
+          </EuiErrorBoundary>
+        </UICapabilitiesProvider>
       </I18nContext>
     );
   };

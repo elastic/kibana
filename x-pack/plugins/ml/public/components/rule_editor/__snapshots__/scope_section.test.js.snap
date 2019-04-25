@@ -4,10 +4,7 @@ exports[`ScopeSection don't render when no partitioning fields 1`] = `""`;
 
 exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut when no filter list IDs 1`] = `
 <Fragment>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h2>
       <FormattedMessage
         defaultMessage="Scope"
@@ -46,10 +43,7 @@ exports[`ScopeSection false canGetFilters privilege show NoPermissionCallOut whe
 
 exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
 <Fragment>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h2>
       <FormattedMessage
         defaultMessage="Scope"
@@ -102,10 +96,7 @@ exports[`ScopeSection renders when enabled with no scope supplied 1`] = `
 
 exports[`ScopeSection renders when enabled with scope supplied 1`] = `
 <Fragment>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h2>
       <FormattedMessage
         defaultMessage="Scope"
@@ -158,10 +149,7 @@ exports[`ScopeSection renders when enabled with scope supplied 1`] = `
 
 exports[`ScopeSection renders when not enabled 1`] = `
 <Fragment>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h2>
       <FormattedMessage
         defaultMessage="Scope"
@@ -199,10 +187,7 @@ exports[`ScopeSection renders when not enabled 1`] = `
 
 exports[`ScopeSection show NoFilterListsCallOut when no filter list IDs 1`] = `
 <Fragment>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h2>
       <FormattedMessage
         defaultMessage="Scope"

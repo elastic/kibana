@@ -18,6 +18,7 @@
  */
 
 import { FtrProviderContext } from '../ftr_provider_context.d';
+import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -91,13 +92,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      if (process.platform === 'darwin') {
-        await input.pressKeys([browser.keys.COMMAND, 'a']); // Select all Mac
-      } else {
-        await input.pressKeys([browser.keys.CONTROL, 'a']); // Select all for everything else
-      }
-      await input.pressKeys(browser.keys.NULL); // Release modifier keys
-      await input.pressKeys(browser.keys.BACK_SPACE); // Delete all content
+      await input.clearValueWithKeyboard();
     }
 
     public async getMarkdownText() {
@@ -116,7 +111,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @memberof VisualBuilderPage
      */
     public async getMarkdownTableVariables(): Promise<
-      Array<{ key: string; value: string; selector: any }>
+      Array<{ key: string; value: string; selector: WebElementWrapper }>
     > {
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
@@ -125,10 +120,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
         log.debug('variable list is empty');
         return [];
       }
-      const variables: any[] = await testTableVariables.findAllByCssSelector(variablesSelector);
+      const variables = await testTableVariables.findAllByCssSelector(variablesSelector);
 
       const variablesKeyValueSelectorMap = await Promise.all(
-        variables.map(async (variable: any) => {
+        variables.map(async variable => {
           const subVars = await variable.findAllByCssSelector('td');
           const selector = await subVars[0].findByTagName('a');
           const key = await selector.getVisibleText();
@@ -158,7 +153,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @returns {Promise<any[]>}
      * @memberof VisualBuilderPage
      */
-    public async getSubTabs() {
+    public async getSubTabs(): Promise<WebElementWrapper[]> {
       return await find.allByCssSelector('[data-test-subj$="-subtab"]');
     }
 
@@ -252,7 +247,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
       return await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    public async fillInVariable(name = 'test', metric = 'count', nth = 0) {
+    public async fillInVariable(name = 'test', metric = 'Count', nth = 0) {
       const elements = await testSubjects.findAll('varRow');
       const varNameInput = await elements[nth].findByCssSelector('.tvbAggs__varName');
       await varNameInput.type(name);

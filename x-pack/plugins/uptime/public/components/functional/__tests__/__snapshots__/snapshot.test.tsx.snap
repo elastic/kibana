@@ -20,7 +20,6 @@ exports[`Snapshot component renders without errors 1`] = `
         >
           <EuiTitle
             size="xs"
-            textTransform="none"
           >
             <h5>
               <FormattedMessage
@@ -89,7 +88,6 @@ exports[`Snapshot component renders without errors 1`] = `
     >
       <EuiTitle
         size="xs"
-        textTransform="none"
       >
         <h5>
           <FormattedMessage

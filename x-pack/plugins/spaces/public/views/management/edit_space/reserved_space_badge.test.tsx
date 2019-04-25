@@ -12,12 +12,14 @@ import { ReservedSpaceBadge } from './reserved_space_badge';
 const reservedSpace = {
   id: '',
   name: '',
+  disabledFeatures: [],
   _reserved: true,
 };
 
 const unreservedSpace = {
   id: '',
   name: '',
+  disabledFeatures: [],
 };
 
 test('it renders without crashing', () => {
