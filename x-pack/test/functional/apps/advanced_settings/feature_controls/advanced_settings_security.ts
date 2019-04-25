@@ -10,6 +10,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
@@ -80,6 +81,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
         const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
         expect(advancedSetting).to.be('America/Phoenix');
+        await browser.refresh();
       });
     });
 
