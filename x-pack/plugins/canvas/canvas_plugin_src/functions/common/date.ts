@@ -5,48 +5,50 @@
  */
 
 import moment from 'moment';
-import { NullContextFunctionFactory } from '../types';
+import { NullContextFunctionSpec } from '../types';
 
 interface Arguments {
   value: string | null;
   format: string;
 }
 
-export const date: NullContextFunctionFactory<'date', Arguments, number> = () => ({
-  name: 'date',
-  type: 'number',
-  context: {
-    types: ['null'],
-  },
-  help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
-  args: {
-    value: {
-      aliases: ['_'],
-      types: ['string', 'null'],
-      help:
-        'An optional date string to parse into milliseconds since epoch ' +
-        'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
+export function date(): NullContextFunctionSpec<'date', Arguments, number> {
+  return {
+    name: 'date',
+    type: 'number',
+    context: {
+      types: ['null'],
     },
-    format: {
-      types: ['string'],
-      help:
-        'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
+    help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
+    args: {
+      value: {
+        aliases: ['_'],
+        types: ['string', 'null'],
+        help:
+          'An optional date string to parse into milliseconds since epoch ' +
+          'Can be either a valid Javascript Date input or a string to parse using the format argument. Must be an ISO 8601 string or you must provide the format',
+      },
+      format: {
+        types: ['string'],
+        help:
+          'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
+      },
     },
-  },
-  fn: (_context, args) => {
-    const { value: argDate, format } = args;
+    fn: (_context, args) => {
+      const { value: argDate, format } = args;
 
-    const outputDate =
-      argDate && format
-        ? moment.utc(argDate, format).toDate()
-        : argDate
-        ? new Date(argDate)
-        : new Date();
+      const outputDate =
+        argDate && format
+          ? moment.utc(argDate, format).toDate()
+          : argDate
+          ? new Date(argDate)
+          : new Date();
 
-    if (isNaN(outputDate.getTime())) {
-      throw new Error(`Invalid date input: ${argDate}`);
-    }
+      if (isNaN(outputDate.getTime())) {
+        throw new Error(`Invalid date input: ${argDate}`);
+      }
 
-    return outputDate.valueOf();
-  },
-});
+      return outputDate.valueOf();
+    },
+  };
+}

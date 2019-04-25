@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
-import { NullContextFunctionFactory } from '../types';
+import { NullContextFunctionSpec } from '../types';
 
 interface Arguments {
   color: string[];
@@ -20,42 +20,44 @@ interface Return {
   gradient: boolean;
 }
 
-export const palette: NullContextFunctionFactory<'palette', Arguments, Return> = () => ({
-  name: 'palette',
-  aliases: [],
-  type: 'palette',
-  help: 'Create a color palette',
-  context: {
-    types: ['null'],
-  },
-  args: {
-    color: {
-      aliases: ['_'],
-      multi: true,
-      types: ['string'],
-      help: 'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
+export function palette(): NullContextFunctionSpec<'palette', Arguments, Return> {
+  return {
+    name: 'palette',
+    aliases: [],
+    type: 'palette',
+    help: 'Create a color palette',
+    context: {
+      types: ['null'],
     },
-    gradient: {
-      types: ['boolean'],
-      default: false,
-      help: 'Prefer to make a gradient where supported and useful?',
-      options: [true, false],
+    args: {
+      color: {
+        aliases: ['_'],
+        multi: true,
+        types: ['string'],
+        help: 'Palette colors, rgba, hex, or HTML color string. Pass this multiple times.',
+      },
+      gradient: {
+        types: ['boolean'],
+        default: false,
+        help: 'Prefer to make a gradient where supported and useful?',
+        options: [true, false],
+      },
+      reverse: {
+        type: ['boolean'],
+        default: false,
+        help: 'Reverse the palette',
+        options: [true, false],
+      },
     },
-    reverse: {
-      type: ['boolean'],
-      default: false,
-      help: 'Reverse the palette',
-      options: [true, false],
-    },
-  },
-  fn: (_context, args) => {
-    const { color, reverse, gradient } = args;
-    const colors = ([] as string[]).concat(color || palettes.paul_tor_14.colors);
+    fn: (_context, args) => {
+      const { color, reverse, gradient } = args;
+      const colors = ([] as string[]).concat(color || palettes.paul_tor_14.colors);
 
-    return {
-      type: 'palette',
-      colors: reverse ? colors.reverse() : colors,
-      gradient,
-    };
-  },
-});
+      return {
+        type: 'palette',
+        colors: reverse ? colors.reverse() : colors,
+        gradient,
+      };
+    },
+  };
+}

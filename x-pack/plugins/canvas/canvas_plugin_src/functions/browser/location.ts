@@ -4,32 +4,34 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunctionFactory } from '../types';
+import { NullContextFunctionSpec } from '../types';
 
 const noop = () => {};
 
-export const location: NullContextFunctionFactory<'location', {}, void> = () => ({
-  name: 'location',
-  type: 'datatable',
-  context: {
-    types: ['null'],
-  },
-  args: {},
-  help:
-    "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
-  fn: () => {
-    return new Promise(resolve => {
-      function createLocation(geoposition: Position) {
-        const { latitude, longitude } = geoposition.coords;
-        return resolve({
-          type: 'datatable',
-          columns: [{ name: 'latitude', type: 'number' }, { name: 'longitude', type: 'number' }],
-          rows: [{ latitude, longitude }],
+export function location(): NullContextFunctionSpec<'location', {}, void> {
+  return {
+    name: 'location',
+    type: 'datatable',
+    context: {
+      types: ['null'],
+    },
+    args: {},
+    help:
+      "Use the browser's location functionality to get your current location. Usually quite slow, but fairly accurate",
+    fn: () => {
+      return new Promise(resolve => {
+        function createLocation(geoposition: Position) {
+          const { latitude, longitude } = geoposition.coords;
+          return resolve({
+            type: 'datatable',
+            columns: [{ name: 'latitude', type: 'number' }, { name: 'longitude', type: 'number' }],
+            rows: [{ latitude, longitude }],
+          });
+        }
+        return navigator.geolocation.getCurrentPosition(createLocation, noop, {
+          maximumAge: 5000,
         });
-      }
-      return navigator.geolocation.getCurrentPosition(createLocation, noop, {
-        maximumAge: 5000,
       });
-    });
-  },
-});
+    },
+  };
+}

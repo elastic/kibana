@@ -75,19 +75,37 @@ interface FunctionHandlers {
 
 // A basic Function specification; other Function specifications are based on
 // this interface.  It assumes the Function accepts any Context provided to it.
-interface FunctionSpec<Name, Arguments, Return> {
+export interface FunctionSpec<Name, Arguments, Return> {
+  /** Arguments for the Function */
   args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
+  aliases?: string[];
+  /** Help text displayed in the Expression editor */
   help: string;
+  /** The name of the Function */
   name: Name;
+  /** The type of the Function */
   type?: CanvasFunctionType | Name;
+  /** The implementation of the Function */
   fn(context: any, args: Arguments, handlers: FunctionHandlers): Return;
 }
 
 // A Function spec requires a Context be provided, of a specific type.
-interface ContextFunctionSpec<Name, Context, Arguments, Return>
+export interface ContextFunctionSpec<Name, Context, Arguments, Return>
   extends FunctionSpec<Name, Arguments, Return> {
+  /** The incoming Context provided to the Function; the information piped in. */
   context?: {
     types: Array<TypeToCanvasArgument<Context>>;
   };
+  /** The implementation of the Function */
   fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
+}
+
+export interface NullContextFunctionSpec<Name, Arguments, Return>
+  extends ContextFunctionSpec<Name, null, Arguments, Return> {
+  /** The incoming Context provided to the Function; the information piped in. */
+  context?: {
+    types: ['null'];
+  };
+  /** The implementation of the Function */
+  fn(context: null, args: Arguments, handlers: FunctionHandlers): Return;
 }

@@ -4,45 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory, Case } from '../types';
+import { FunctionSpec, Case } from '../types';
 
 interface Arguments {
   case: Array<() => Promise<Case>>;
   default: () => any;
 }
 
-export const switchFn: FunctionFactory<'switch', Arguments, any> = () => ({
-  name: 'switch',
-  help: 'Perform conditional logic with multiple conditions',
-  args: {
-    case: {
-      types: ['case'],
-      aliases: ['_'],
-      resolve: false,
-      multi: true,
-      help: 'The list of conditions to check',
+export function switchFn(): FunctionSpec<'switch', Arguments, any> {
+  return {
+    name: 'switch',
+    help: 'Perform conditional logic with multiple conditions',
+    args: {
+      case: {
+        types: ['case'],
+        aliases: ['_'],
+        resolve: false,
+        multi: true,
+        help: 'The list of conditions to check',
+      },
+      default: {
+        aliases: ['finally'],
+        resolve: false,
+        help: 'The default case if no cases match',
+      },
     },
-    default: {
-      aliases: ['finally'],
-      resolve: false,
-      help: 'The default case if no cases match',
-    },
-  },
-  fn: async (context, args) => {
-    const cases = args.case || [];
+    fn: async (context, args) => {
+      const cases = args.case || [];
 
-    for (let i = 0; i < cases.length; i++) {
-      const { matches, result } = await cases[i]();
+      for (let i = 0; i < cases.length; i++) {
+        const { matches, result } = await cases[i]();
 
-      if (matches) {
-        return result;
+        if (matches) {
+          return result;
+        }
       }
-    }
 
-    if (typeof args.default !== 'undefined') {
-      return await args.default();
-    }
+      if (typeof args.default !== 'undefined') {
+        return await args.default();
+      }
 
-    return context;
-  },
-});
+      return context;
+    },
+  };
+}

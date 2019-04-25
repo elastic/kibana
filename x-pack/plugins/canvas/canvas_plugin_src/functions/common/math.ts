@@ -8,7 +8,7 @@
 import { evaluate } from 'tinymath';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { ContextFunctionFactory, Datatable, isDatatable } from '../types';
+import { ContextFunctionSpec, Datatable, isDatatable } from '../types';
 
 interface Arguments {
   expression: string;
@@ -16,54 +16,56 @@ interface Arguments {
 
 type Context = number | Datatable;
 
-export const math: ContextFunctionFactory<'math', Context, Arguments, number> = () => ({
-  name: 'math',
-  type: 'number',
-  help:
-    'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. ' +
-    'If you pass in a number it is available as "value" (without the quotes)',
-  context: {
-    types: ['number', 'datatable'],
-  },
-  args: {
-    expression: {
-      aliases: ['_'],
-      types: ['string'],
-      help:
-        'An evaluated TinyMath expression. (See [TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html))',
+export function math(): ContextFunctionSpec<'math', Context, Arguments, number> {
+  return {
+    name: 'math',
+    type: 'number',
+    help:
+      'Interpret a math expression, with a number or datatable as context. Datatable columns are available by their column name. ' +
+      'If you pass in a number it is available as "value" (without the quotes)',
+    context: {
+      types: ['number', 'datatable'],
     },
-  },
-  fn: (context, args) => {
-    const { expression } = args;
+    args: {
+      expression: {
+        aliases: ['_'],
+        types: ['string'],
+        help:
+          'An evaluated TinyMath expression. (See [TinyMath Functions](https://www.elastic.co/guide/en/kibana/current/canvas-tinymath-functions.html))',
+      },
+    },
+    fn: (context, args) => {
+      const { expression } = args;
 
-    if (!expression || expression.trim() === '') {
-      throw new Error('Empty expression');
-    }
+      if (!expression || expression.trim() === '') {
+        throw new Error('Empty expression');
+      }
 
-    const mathContext = isDatatable(context)
-      ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
-      : { value: context };
+      const mathContext = isDatatable(context)
+        ? pivotObjectArray(context.rows, context.columns.map(col => col.name))
+        : { value: context };
 
-    try {
-      const result = evaluate(expression, mathContext);
-      if (Array.isArray(result)) {
-        if (result.length === 1) {
-          return result[0];
+      try {
+        const result = evaluate(expression, mathContext);
+        if (Array.isArray(result)) {
+          if (result.length === 1) {
+            return result[0];
+          }
+          throw new Error(
+            'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
+          );
         }
-        throw new Error(
-          'Expressions must return a single number. Try wrapping your expression in mean() or sum()'
-        );
+        if (isNaN(result)) {
+          throw new Error('Failed to execute math expression. Check your column names');
+        }
+        return result;
+      } catch (e) {
+        if (isDatatable(context) && context.rows.length === 0) {
+          throw new Error('Empty datatable');
+        } else {
+          throw e;
+        }
       }
-      if (isNaN(result)) {
-        throw new Error('Failed to execute math expression. Check your column names');
-      }
-      return result;
-    } catch (e) {
-      if (isDatatable(context) && context.rows.length === 0) {
-        throw new Error('Empty datatable');
-      } else {
-        throw e;
-      }
-    }
-  },
-});
+    },
+  };
+}

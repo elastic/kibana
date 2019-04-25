@@ -6,56 +6,58 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { ContextFunctionFactory, Datatable } from '../types';
+import { ContextFunctionSpec, Datatable } from '../types';
 
 interface Arguments {
   name: string;
   value: string | number | boolean | null;
 }
 
-export const staticColumn: ContextFunctionFactory<
+export function staticColumn(): ContextFunctionSpec<
   'staticColumn',
   Datatable,
   Arguments,
   Datatable
-> = () => ({
-  name: 'staticColumn',
-  type: 'datatable',
-  help: 'Add a column with a static value',
-  context: {
-    types: ['datatable'],
-  },
-  args: {
-    name: {
-      types: ['string'],
-      aliases: ['_', 'column'],
-      help: 'The name of the new column column',
-      required: true,
+> {
+  return {
+    name: 'staticColumn',
+    type: 'datatable',
+    help: 'Add a column with a static value',
+    context: {
+      types: ['datatable'],
     },
-    value: {
-      types: ['string', 'number', 'boolean', 'null'],
-      help:
-        'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
-      default: null,
+    args: {
+      name: {
+        types: ['string'],
+        aliases: ['_', 'column'],
+        help: 'The name of the new column column',
+        required: true,
+      },
+      value: {
+        types: ['string', 'number', 'boolean', 'null'],
+        help:
+          'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+        default: null,
+      },
     },
-  },
-  fn: (context, args) => {
-    const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
-    const type = getType(args.value);
-    const columns = [...context.columns];
-    const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
-    const newColumn = { name: args.name, type };
+    fn: (context, args) => {
+      const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
+      const type = getType(args.value);
+      const columns = [...context.columns];
+      const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
+      const newColumn = { name: args.name, type };
 
-    if (existingColumnIndex > -1) {
-      columns[existingColumnIndex] = newColumn;
-    } else {
-      columns.push(newColumn);
-    }
+      if (existingColumnIndex > -1) {
+        columns[existingColumnIndex] = newColumn;
+      } else {
+        columns.push(newColumn);
+      }
 
-    return {
-      type: 'datatable',
-      columns,
-      rows,
-    };
-  },
-});
+      return {
+        type: 'datatable',
+        columns,
+        rows,
+      };
+    },
+  };
+}

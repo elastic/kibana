@@ -94,13 +94,31 @@ type UnresolvedArrayTypeToCanvasArgument<T> =
 
 // A type containing properties common to all Function Arguments.
 interface BaseArgumentType<T> {
+  /** Alternate names for the Function valid for use in the Expression Editor */
   aliases?: string[];
+  /** Help text for the Argument to be displayed in the Expression Editor */
   help: string;
+  /** Default options for the Argument */
   options?: T[];
+  /**
+   * Is this Argument required?
+   * @default false
+   */
   required?: boolean;
+  /**
+   * If false, the Argument is supplied as a function to be invoked in the
+   * implementation, rather than a value.
+   * @default true
+   */
   resolve?: boolean;
+  /** Names of types that are valid values of the Argument. */
   types?: string[];
+  /** The optional default value of the Argument. */
   default?: T | string;
+  /**
+   * If true, multiple values may be supplied to the Argument.
+   * @default false
+   */
   multi?: boolean;
 }
 

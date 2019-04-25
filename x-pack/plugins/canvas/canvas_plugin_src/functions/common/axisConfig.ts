@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { ContextFunctionFactory, Datatable } from '../types';
+import { ContextFunctionSpec, Datatable } from '../types';
 
 interface Arguments {
   show: boolean;
@@ -21,80 +21,77 @@ interface AxisConfig extends Arguments {
 
 const VALID_POSITIONS = ['top', 'bottom', 'left', 'right', ''];
 
-export const axisConfig: ContextFunctionFactory<
-  'axisConfig',
-  Datatable,
-  Arguments,
-  AxisConfig
-> = () => ({
-  name: 'axisConfig',
-  aliases: [],
-  type: 'axisConfig',
-  context: {
-    types: ['datatable'],
-  },
-  help: 'Configure axis of a visualization',
-  args: {
-    show: {
-      types: ['boolean'],
-      help: 'Show the axis labels?',
-      default: true,
+export function axisConfig(): ContextFunctionSpec<'axisConfig', Datatable, Arguments, AxisConfig> {
+  return {
+    name: 'axisConfig',
+    aliases: [],
+    type: 'axisConfig',
+    context: {
+      types: ['datatable'],
     },
-    position: {
-      types: ['string'],
-      help: 'Position of the axis labels - top, bottom, left, and right',
-      options: ['top', 'bottom', 'left', 'right'],
-      default: 'left',
+    help: 'Configure axis of a visualization',
+    args: {
+      show: {
+        types: ['boolean'],
+        help: 'Show the axis labels?',
+        default: true,
+      },
+      position: {
+        types: ['string'],
+        help: 'Position of the axis labels - top, bottom, left, and right',
+        options: ['top', 'bottom', 'left', 'right'],
+        default: 'left',
+      },
+      min: {
+        types: ['number', 'date', 'string', 'null'],
+        help:
+          'Minimum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+      },
+      max: {
+        types: ['number', 'date', 'string', 'null'],
+        help:
+          'Maximum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+      },
+      tickSize: {
+        types: ['number', 'null'],
+        help: 'Increment size between each tick. Use for number axes only',
+      },
     },
-    min: {
-      types: ['number', 'date', 'string', 'null'],
-      help:
-        'Minimum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
+    fn: (_context, args) => {
+      const { position, min, max, ...rest } = args;
+
+      if (!VALID_POSITIONS.includes(position)) {
+        throw new Error(`Invalid position: '${args.position}'`);
+      }
+
+      const minVal = typeof min === 'string' ? moment.utc(min).valueOf() : min;
+      const maxVal = typeof max === 'string' ? moment.utc(max).valueOf() : max;
+
+      // This != check is not !== in order to handle NaN cases properly.
+      if (minVal != null && isNaN(minVal)) {
+        throw new Error(
+          `Invalid date string: '${
+            args.min
+          }'. 'min' must be a number, date in ms, or ISO8601 date string`
+        );
+      }
+
+      // This != check is not !== in order to handle NaN cases properly.
+      if (maxVal != null && isNaN(maxVal)) {
+        throw new Error(
+          `Invalid date string: '${
+            args.max
+          }'. 'max' must be a number, date in ms, or ISO8601 date string`
+        );
+      }
+
+      return {
+        max: maxVal,
+        min: minVal,
+        type: 'axisConfig',
+        position,
+        ...rest,
+      };
     },
-    max: {
-      types: ['number', 'date', 'string', 'null'],
-      help:
-        'Maximum value displayed in the axis. Must be a number or a date in ms or ISO8601 string',
-    },
-    tickSize: {
-      types: ['number', 'null'],
-      help: 'Increment size between each tick. Use for number axes only',
-    },
-  },
-  fn: (_context, args) => {
-    const { position, min, max, ...rest } = args;
-
-    if (!VALID_POSITIONS.includes(position)) {
-      throw new Error(`Invalid position: '${args.position}'`);
-    }
-
-    const minVal = typeof min === 'string' ? moment.utc(min).valueOf() : min;
-    const maxVal = typeof max === 'string' ? moment.utc(max).valueOf() : max;
-
-    // This != check is not !== in order to handle NaN cases properly.
-    if (minVal != null && isNaN(minVal)) {
-      throw new Error(
-        `Invalid date string: '${
-          args.min
-        }'. 'min' must be a number, date in ms, or ISO8601 date string`
-      );
-    }
-
-    // This != check is not !== in order to handle NaN cases properly.
-    if (maxVal != null && isNaN(maxVal)) {
-      throw new Error(
-        `Invalid date string: '${
-          args.max
-        }'. 'max' must be a number, date in ms, or ISO8601 date string`
-      );
-    }
-
-    return {
-      max: maxVal,
-      min: minVal,
-      type: 'axisConfig',
-      position,
-      ...rest,
-    };
-  },
-});
+  };
+}

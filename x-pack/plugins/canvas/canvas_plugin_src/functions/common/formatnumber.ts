@@ -5,35 +5,32 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ContextFunctionFactory } from '../types';
+import { ContextFunctionSpec } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export const formatnumber: ContextFunctionFactory<
-  'formatnumber',
-  number,
-  Arguments,
-  string
-> = () => ({
-  name: 'formatnumber',
-  type: 'string',
-  help: 'Turn a number into a string using a NumberJS format',
-  context: {
-    types: ['number'],
-  },
-  args: {
-    format: {
-      aliases: ['_'],
-      types: ['string'],
-      help: 'NumeralJS format string http://numeraljs.com/#format',
+export function formatnumber(): ContextFunctionSpec<'formatnumber', number, Arguments, string> {
+  return {
+    name: 'formatnumber',
+    type: 'string',
+    help: 'Turn a number into a string using a NumberJS format',
+    context: {
+      types: ['number'],
     },
-  },
-  fn: (context, args) => {
-    if (!args.format) {
-      return String(context);
-    }
-    return numeral(context).format(args.format);
-  },
-});
+    args: {
+      format: {
+        aliases: ['_'],
+        types: ['string'],
+        help: 'NumeralJS format string http://numeraljs.com/#format',
+      },
+    },
+    fn: (context, args) => {
+      if (!args.format) {
+        return String(context);
+      }
+      return numeral(context).format(args.format);
+    },
+  };
+}

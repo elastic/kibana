@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunctionFactory } from '../types';
+import { NullContextFunctionSpec } from '../types';
 
 export type Shape =
   | 'arrow'
@@ -54,47 +54,49 @@ const OPTIONS: Shape[] = [
   'triangleRight',
 ];
 
-export const shape: NullContextFunctionFactory<'shape', Arguments, Return> = () => ({
-  name: 'shape',
-  aliases: [],
-  type: 'shape',
-  help: 'Create a shape',
-  context: {
-    types: ['null'],
-  },
-  args: {
-    border: {
-      types: ['string', 'null'],
-      aliases: ['stroke'],
-      help: 'Valid CSS color string',
-    },
-    borderWidth: {
-      types: ['number', 'null'],
-      aliases: ['strokeWidth'],
-      help: 'Thickness of the border',
-      default: '0',
-    },
-    shape: {
-      types: ['string', 'null'],
-      help: 'Pick a shape',
-      aliases: ['_'],
-      default: 'square',
-      options: OPTIONS,
-    },
-    fill: {
-      types: ['string', 'null'],
-      help: 'Valid CSS color string',
-      default: 'black',
-    },
-    maintainAspect: {
-      types: ['boolean'],
-      help: 'Select true to maintain aspect ratio',
-      default: false,
-      options: [true, false],
-    },
-  },
-  fn: (_context, args) => ({
+export function shape(): NullContextFunctionSpec<'shape', Arguments, Return> {
+  return {
+    name: 'shape',
+    aliases: [],
     type: 'shape',
-    ...args,
-  }),
-});
+    help: 'Create a shape',
+    context: {
+      types: ['null'],
+    },
+    args: {
+      border: {
+        types: ['string', 'null'],
+        aliases: ['stroke'],
+        help: 'Valid CSS color string',
+      },
+      borderWidth: {
+        types: ['number', 'null'],
+        aliases: ['strokeWidth'],
+        help: 'Thickness of the border',
+        default: '0',
+      },
+      shape: {
+        types: ['string', 'null'],
+        help: 'Pick a shape',
+        aliases: ['_'],
+        default: 'square',
+        options: OPTIONS,
+      },
+      fill: {
+        types: ['string', 'null'],
+        help: 'Valid CSS color string',
+        default: 'black',
+      },
+      maintainAspect: {
+        types: ['boolean'],
+        help: 'Select true to maintain aspect ratio',
+        default: false,
+        options: [true, false],
+      },
+    },
+    fn: (_context, args) => ({
+      type: 'shape',
+      ...args,
+    }),
+  };
+}

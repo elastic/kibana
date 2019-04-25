@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { FunctionSpec } from '../types';
 
 interface Arguments {
   value: Return;
@@ -11,19 +11,21 @@ interface Arguments {
 
 type Return = boolean | number | string | null;
 
-export const eq: FunctionFactory<'eq', Arguments, Return> = () => ({
-  name: 'eq',
-  type: 'boolean',
-  help: 'Return if the context is equal to the argument',
-  args: {
-    value: {
-      aliases: ['_'],
-      types: ['boolean', 'number', 'string', 'null'],
-      required: true,
-      help: 'The value to compare the context to',
+export function eq(): FunctionSpec<'eq', Arguments, Return> {
+  return {
+    name: 'eq',
+    type: 'boolean',
+    help: 'Return if the context is equal to the argument',
+    args: {
+      value: {
+        aliases: ['_'],
+        types: ['boolean', 'number', 'string', 'null'],
+        required: true,
+        help: 'The value to compare the context to',
+      },
     },
-  },
-  fn: (context, args) => {
-    return context === args.value;
-  },
-});
+    fn: (context, args) => {
+      return context === args.value;
+    },
+  };
+}

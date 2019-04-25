@@ -5,30 +5,32 @@
  */
 
 import moment from 'moment';
-import { ContextFunctionFactory } from '../types';
+import { ContextFunctionSpec } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export const formatdate: ContextFunctionFactory<'formatdate', number, Arguments, string> = () => ({
-  name: 'formatdate',
-  type: 'string',
-  help: 'Output a ms since epoch number as a formatted string',
-  context: {
-    types: ['number'],
-  },
-  args: {
-    format: {
-      aliases: ['_'],
-      types: ['string'],
-      help: 'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+export function formatdate(): ContextFunctionSpec<'formatdate', number, Arguments, string> {
+  return {
+    name: 'formatdate',
+    type: 'string',
+    help: 'Output a ms since epoch number as a formatted string',
+    context: {
+      types: ['number'],
     },
-  },
-  fn: (context, args) => {
-    if (!args.format) {
-      return moment.utc(new Date(context)).toISOString();
-    }
-    return moment.utc(new Date(context)).format(args.format);
-  },
-});
+    args: {
+      format: {
+        aliases: ['_'],
+        types: ['string'],
+        help: 'MomentJS Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+      },
+    },
+    fn: (context, args) => {
+      if (!args.format) {
+        return moment.utc(new Date(context)).toISOString();
+      }
+      return moment.utc(new Date(context)).format(args.format);
+    },
+  };
+}

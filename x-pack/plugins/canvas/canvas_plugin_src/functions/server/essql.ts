@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { ContextFunctionFactory, Filter } from '../types';
+import { ContextFunctionSpec, Filter } from '../types';
 
 interface Arguments {
   query: string;
@@ -14,31 +14,33 @@ interface Arguments {
   timezone: string;
 }
 
-export const essql: ContextFunctionFactory<'essql', Filter, Arguments, any> = () => ({
-  name: 'essql',
-  type: 'datatable',
-  context: {
-    types: ['filter'],
-  },
-  help: 'Elasticsearch SQL',
-  args: {
-    query: {
-      aliases: ['_', 'q'],
-      types: ['string'],
-      help: 'SQL query',
+export function essql(): ContextFunctionSpec<'essql', Filter, Arguments, any> {
+  return {
+    name: 'essql',
+    type: 'datatable',
+    context: {
+      types: ['filter'],
     },
-    count: {
-      types: ['number'],
-      help: 'The number of docs to pull back. Smaller numbers perform better',
-      default: 1000,
+    help: 'Elasticsearch SQL',
+    args: {
+      query: {
+        aliases: ['_', 'q'],
+        types: ['string'],
+        help: 'SQL query',
+      },
+      count: {
+        types: ['number'],
+        help: 'The number of docs to pull back. Smaller numbers perform better',
+        default: 1000,
+      },
+      timezone: {
+        aliases: ['tz'],
+        types: ['string'],
+        default: 'UTC',
+        help: 'Timezone to use for date operations, valid ISO formats and UTC offsets both work',
+      },
     },
-    timezone: {
-      aliases: ['tz'],
-      types: ['string'],
-      default: 'UTC',
-      help: 'Timezone to use for date operations, valid ISO formats and UTC offsets both work',
-    },
-  },
-  fn: (context, args, handlers) =>
-    queryEsSQL(handlers.elasticsearchClient, { ...args, filter: context.and }),
-});
+    fn: (context, args, handlers) =>
+      queryEsSQL(handlers.elasticsearchClient, { ...args, filter: context.and }),
+  };
+}

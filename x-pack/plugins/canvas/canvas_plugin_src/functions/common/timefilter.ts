@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ContextFunctionFactory, Filter } from '../types';
+import { ContextFunctionSpec, Filter } from '../types';
 
 interface Arguments {
   column: string;
@@ -13,62 +13,64 @@ interface Arguments {
   to: string | null;
 }
 
-export const timefilter: ContextFunctionFactory<'timefilter', Filter, Arguments, Filter> = () => ({
-  name: 'timefilter',
-  aliases: [],
-  type: 'filter',
-  context: {
-    types: ['filter'],
-  },
-  help: 'Create a timefilter for querying a source',
-  args: {
-    column: {
-      type: ['string'],
-      aliases: ['field', 'c'],
-      default: '@timestamp',
-      help: 'The column or field to attach the filter to',
+export function timefilter(): ContextFunctionSpec<'timefilter', Filter, Arguments, Filter> {
+  return {
+    name: 'timefilter',
+    aliases: [],
+    type: 'filter',
+    context: {
+      types: ['filter'],
     },
-    from: {
-      types: ['string', 'null'],
-      aliases: ['f', 'start'],
-      help: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+    help: 'Create a timefilter for querying a source',
+    args: {
+      column: {
+        types: ['string'],
+        aliases: ['field', 'c'],
+        default: '@timestamp',
+        help: 'The column or field to attach the filter to',
+      },
+      from: {
+        types: ['string', 'null'],
+        aliases: ['f', 'start'],
+        help: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
+      },
+      to: {
+        types: ['string', 'null'],
+        aliases: ['t', 'end'],
+        help: 'End of the range, in ISO8601 or Elasticsearch datemath format',
+      },
     },
-    to: {
-      types: ['string', 'null'],
-      aliases: ['t', 'end'],
-      help: 'End of the range, in ISO8601 or Elasticsearch datemath format',
-    },
-  },
-  fn: (context, args) => {
-    if (!args.from && !args.to) {
-      return context;
-    }
-
-    const { from, to, column } = args;
-    const filter = {
-      type: 'time',
-      column,
-      and: [],
-    };
-
-    function parseAndValidate(str: string): string {
-      const moment = dateMath.parse(str);
-
-      if (!moment || !moment.isValid()) {
-        throw new Error(`Invalid date/time string: '${str}'`);
+    fn: (context, args) => {
+      if (!args.from && !args.to) {
+        return context;
       }
 
-      return moment.toISOString();
-    }
+      const { from, to, column } = args;
+      const filter = {
+        type: 'time',
+        column,
+        and: [],
+      };
 
-    if (!!to) {
-      (filter as any).to = parseAndValidate(to);
-    }
+      function parseAndValidate(str: string): string {
+        const moment = dateMath.parse(str);
 
-    if (!!from) {
-      (filter as any).from = parseAndValidate(from);
-    }
+        if (!moment || !moment.isValid()) {
+          throw new Error(`Invalid date/time string: '${str}'`);
+        }
 
-    return { ...context, and: [...context.and, filter] };
-  },
-});
+        return moment.toISOString();
+      }
+
+      if (!!to) {
+        (filter as any).to = parseAndValidate(to);
+      }
+
+      if (!!from) {
+        (filter as any).from = parseAndValidate(from);
+      }
+
+      return { ...context, and: [...context.and, filter] };
+    },
+  };
+}

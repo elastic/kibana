@@ -5,29 +5,31 @@
  */
 
 import { takeRight } from 'lodash';
-import { ContextFunctionFactory, Datatable } from '../types';
+import { ContextFunctionSpec, Datatable } from '../types';
 
 interface Arguments {
   count: number;
 }
 
-export const tail: ContextFunctionFactory<'tail', Datatable, Arguments, Datatable> = () => ({
-  name: 'tail',
-  aliases: [],
-  type: 'datatable',
-  help: 'Get the last N rows from the end of a datatable. Also see `head`',
-  context: {
-    types: ['datatable'],
-  },
-  args: {
-    count: {
-      aliases: ['_'],
-      types: ['number'],
-      help: 'Return this many rows from the end of the datatable',
+export function tail(): ContextFunctionSpec<'tail', Datatable, Arguments, Datatable> {
+  return {
+    name: 'tail',
+    aliases: [],
+    type: 'datatable',
+    help: 'Get the last N rows from the end of a datatable. Also see `head`',
+    context: {
+      types: ['datatable'],
     },
-  },
-  fn: (context, args) => ({
-    ...context,
-    rows: takeRight(context.rows, args.count),
-  }),
-});
+    args: {
+      count: {
+        aliases: ['_'],
+        types: ['number'],
+        help: 'Return this many rows from the end of the datatable',
+      },
+    },
+    fn: (context, args) => ({
+      ...context,
+      rows: takeRight(context.rows, args.count),
+    }),
+  };
+}

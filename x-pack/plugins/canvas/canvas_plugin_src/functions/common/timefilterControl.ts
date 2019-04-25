@@ -4,42 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunctionFactory, Render } from '../types';
+import { NullContextFunctionSpec, Render } from '../types';
 
 interface Arguments {
   column: string;
   compact: boolean;
 }
-export const timefilterControl: NullContextFunctionFactory<
+export function timefilterControl(): NullContextFunctionSpec<
   'timefilterControl',
   Arguments,
   Render<Arguments>
-> = () => ({
-  name: 'timefilterControl',
-  aliases: [],
-  type: 'render',
-  context: {
-    types: ['null'],
-  },
-  help: 'Configure a time filter control element',
-  args: {
-    column: {
-      type: ['string'],
-      aliases: ['field', 'c'],
-      help: 'The column or field to attach the filter to',
+> {
+  return {
+    name: 'timefilterControl',
+    aliases: [],
+    type: 'render',
+    context: {
+      types: ['null'],
     },
-    compact: {
-      type: ['boolean'],
-      help: 'Show the time filter as a button that triggers a popover',
-      default: true,
-      options: [true, false],
+    help: 'Configure a time filter control element',
+    args: {
+      column: {
+        types: ['string'],
+        aliases: ['field', 'c'],
+        help: 'The column or field to attach the filter to',
+      },
+      compact: {
+        types: ['boolean'],
+        help: 'Show the time filter as a button that triggers a popover',
+        default: true,
+        options: [true, false],
+      },
     },
-  },
-  fn: (_context, args) => {
-    return {
-      type: 'render',
-      as: 'time_filter',
-      value: args,
-    };
-  },
-});
+    fn: (_context, args) => {
+      return {
+        type: 'render',
+        as: 'time_filter',
+        value: args,
+      };
+    },
+  };
+}

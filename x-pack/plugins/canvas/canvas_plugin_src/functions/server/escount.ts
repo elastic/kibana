@@ -6,58 +6,60 @@
 
 // @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
-import { ContextFunctionFactory, Filter } from '../types';
+import { ContextFunctionSpec, Filter } from '../types';
 
 interface Arguments {
   index: string | null;
   query: string;
 }
 
-export const escount: ContextFunctionFactory<'escount', Filter, Arguments, any> = () => ({
-  name: 'escount',
-  type: 'number',
-  help: 'Query elasticsearch for a count of the number of hits matching a query',
-  context: {
-    types: ['filter'],
-  },
-  args: {
-    index: {
-      types: ['string', 'null'],
-      default: '_all',
-      help: 'Specify an index pattern. Eg "logstash-*"',
+export function escount(): ContextFunctionSpec<'escount', Filter, Arguments, any> {
+  return {
+    name: 'escount',
+    type: 'number',
+    help: 'Query elasticsearch for a count of the number of hits matching a query',
+    context: {
+      types: ['filter'],
     },
-    query: {
-      types: ['string'],
-      aliases: ['_', 'q'],
-      help: 'A Lucene query string',
-      default: '"-_index:.kibana"',
-    },
-  },
-  fn: (context, args, handlers) => {
-    context.and = context.and.concat([
-      {
-        type: 'luceneQueryString',
-        query: args.query,
-        and: [],
+    args: {
+      index: {
+        types: ['string', 'null'],
+        default: '_all',
+        help: 'Specify an index pattern. Eg "logstash-*"',
       },
-    ]);
+      query: {
+        types: ['string'],
+        aliases: ['_', 'q'],
+        help: 'A Lucene query string',
+        default: '"-_index:.kibana"',
+      },
+    },
+    fn: (context, args, handlers) => {
+      context.and = context.and.concat([
+        {
+          type: 'luceneQueryString',
+          query: args.query,
+          and: [],
+        },
+      ]);
 
-    const esRequest = buildESRequest(
-      {
-        index: args.index,
-        body: {
-          query: {
-            bool: {
-              must: [{ match_all: {} }],
+      const esRequest = buildESRequest(
+        {
+          index: args.index,
+          body: {
+            query: {
+              bool: {
+                must: [{ match_all: {} }],
+              },
             },
           },
         },
-      },
-      context
-    );
+        context
+      );
 
-    return handlers
-      .elasticsearchClient('count', esRequest)
-      .then((resp: { count: number }) => resp.count);
-  },
-});
+      return handlers
+        .elasticsearchClient('count', esRequest)
+        .then((resp: { count: number }) => resp.count);
+    },
+  };
+}

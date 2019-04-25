@@ -3,12 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionFactory } from '../types';
+import { FunctionSpec } from '../types';
 
-export const clear: FunctionFactory<'clear', {}, null> = () => ({
-  name: 'clear',
-  type: 'null',
-  help: 'Clears context and returns null',
-  args: {},
-  fn: () => null,
-});
+export function clear(): FunctionSpec<'clear', {}, null> {
+  return {
+    name: 'clear',
+    type: 'null',
+    help: 'Clears context and returns null',
+    args: {},
+    fn: () => null,
+  };
+}

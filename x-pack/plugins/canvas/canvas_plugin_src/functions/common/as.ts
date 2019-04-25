@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { Datatable, ContextFunctionFactory } from '../types';
+import { Datatable, ContextFunctionSpec } from '../types';
 
 interface Arguments {
   name: string;
@@ -14,35 +14,37 @@ interface Arguments {
 
 type Context = string | boolean | number | null;
 
-export const asFn: ContextFunctionFactory<'as', Context, Arguments, Datatable> = () => ({
-  name: 'as',
-  type: 'datatable',
-  context: {
-    types: ['string', 'boolean', 'number', 'null'],
-  },
-  help: 'Creates a datatable with a single value',
-  args: {
-    name: {
-      types: ['string'],
-      aliases: ['_'],
-      help: 'A name to give the column',
-      default: 'value',
+export function asFn(): ContextFunctionSpec<'as', Context, Arguments, Datatable> {
+  return {
+    name: 'as',
+    type: 'datatable',
+    context: {
+      types: ['string', 'boolean', 'number', 'null'],
     },
-  },
-  fn: (context, args) => {
-    return {
-      type: 'datatable',
-      columns: [
-        {
-          name: args.name,
-          type: getType(context),
-        },
-      ],
-      rows: [
-        {
-          [args.name]: context,
-        },
-      ],
-    };
-  },
-});
+    help: 'Creates a datatable with a single value',
+    args: {
+      name: {
+        types: ['string'],
+        aliases: ['_'],
+        help: 'A name to give the column',
+        default: 'value',
+      },
+    },
+    fn: (context, args) => {
+      return {
+        type: 'datatable',
+        columns: [
+          {
+            name: args.name,
+            type: getType(context),
+          },
+        ],
+        rows: [
+          {
+            [args.name]: context,
+          },
+        ],
+      };
+    },
+  };
+}

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionFactory } from '../types';
+import { FunctionSpec } from '../types';
 
-export const browser: FunctionFactory<'browser', {}, any> = () => ({
-  name: 'browser',
-  help: 'Force the interpreter to return to the browser',
-  args: {},
-  fn: context => context,
-});
+export function browser(): FunctionSpec<'browser', {}, any> {
+  return {
+    name: 'browser',
+    help: 'Force the interpreter to return to the browser',
+    args: {},
+    fn: context => context,
+  };
+}

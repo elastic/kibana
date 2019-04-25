@@ -52,7 +52,7 @@ describe('axisConfig', () => {
 
       it('defaults to "left" if not provided', () => {
         const result = fn(testTable);
-        expect(result).to.have.property('position', 'left');
+        expect(result).to.have.property('position', '');
       });
 
       it('throws when given an invalid position', () => {

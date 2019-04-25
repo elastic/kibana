@@ -4,17 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunctionFactory, Datatable } from '../types';
+import { ContextFunctionSpec, Datatable } from '../types';
 
-export const rowCount: ContextFunctionFactory<'rowCount', Datatable, {}, number> = () => ({
-  name: 'rowCount',
-  aliases: [],
-  type: 'number',
-  context: {
-    types: ['datatable'],
-  },
-  help:
-    'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
-  args: {},
-  fn: context => context.rows.length,
-});
+export function rowCount(): ContextFunctionSpec<'rowCount', Datatable, {}, number> {
+  return {
+    name: 'rowCount',
+    aliases: [],
+    type: 'number',
+    context: {
+      types: ['datatable'],
+    },
+    help:
+      'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
+    args: {},
+    fn: context => context.rows.length,
+  };
+}
