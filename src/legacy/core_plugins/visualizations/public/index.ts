@@ -17,22 +17,27 @@
  * under the License.
  */
 
+import { VisFiltersService, VisFiltersSetup } from './vis_filters';
 import { VisTypesService, VisTypesSetup } from './vis_types';
 
 class VisualizationsPlugin {
+  private readonly visFilters: VisFiltersService;
   private readonly visTypes: VisTypesService;
 
   constructor() {
+    this.visFilters = new VisFiltersService();
     this.visTypes = new VisTypesService();
   }
 
   public setup() {
     return {
+      visFilters: this.visFilters.setup(),
       visTypes: this.visTypes.setup(),
     };
   }
 
   public stop() {
+    this.visFilters.stop();
     this.visTypes.stop();
   }
 }
@@ -46,6 +51,7 @@ export const visualizations = new VisualizationsPlugin().setup();
 
 /** @public */
 export interface VisualizationsSetup {
+  visFilters: VisFiltersSetup;
   visTypes: VisTypesSetup;
 }
 
