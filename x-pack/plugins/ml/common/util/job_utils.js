@@ -9,6 +9,9 @@
 import _ from 'lodash';
 import semver from 'semver';
 import numeral from '@elastic/numeral';
+import moment from 'moment';
+import d3 from 'd3';
+import { i18n } from '@kbn/i18n';
 
 import { ALLOWED_DATA_UNITS } from '../constants/validation';
 import { parseInterval } from './parse_interval';
@@ -509,4 +512,33 @@ export function validateGroupNames(job) {
     contains: id =>  (messages.some(m => id === m.id)),
     find: id => (messages.find(m => id === m.id)),
   };
+}
+
+export function normalizeTimes(jobs) {
+  const min = Math.min(...jobs.map(job => +job.timeRange.from));
+  const max = Math.max(...jobs.map(job => +job.timeRange.to));
+
+  const gantScale = d3.scale.linear().domain([min, max]).range([1, 299]);
+
+  jobs.forEach(job => {
+    if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
+      job.timeRange.fromPx = gantScale(job.timeRange.from);
+      job.timeRange.toPx = gantScale(job.timeRange.to);
+      job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
+
+      job.timeRange.toMoment = moment(job.timeRange.to);
+      job.timeRange.fromMoment = moment(job.timeRange.from);
+
+      const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
+      const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
+      job.timeRange.label = i18n.translate('xpack.ml.jobSelector.jobTimeRangeLabel', {
+        defaultMessage: '{fromString} to {toString}',
+        values: {
+          fromString,
+          toString,
+        }
+      });
+    }
+  });
+  return jobs;
 }

@@ -11,7 +11,7 @@ import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
+import { isTimeSeriesViewJob, normalizeTimes } from '../../../common/util/job_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -140,12 +140,12 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
-  async function jobsWithTimerange() { // TODO: rename to jobsAndGroupsWithTimerange
+  async function jobsWithTimerange() {
     const [JOBS, JOB_STATS] = [0, 1];
-    const jobs = [];
     const jobsMap = {};
     const groups = {};
     const groupsMap = {};
+    let jobs = [];
 
     const requests = [
       callWithRequest('ml.jobs'),
@@ -171,7 +171,13 @@ export function jobsProvider(callWithRequest) {
             }
           }
         }
-        // Oraganize job by group
+        jobs.push(job);
+      });
+
+      jobs = normalizeTimes(jobs);
+
+      jobs.forEach((job) => {
+      // Organize job by group
         if (job.groups !== undefined) {
           job.groups.forEach((g) => {
             if (groups[g] === undefined) {
@@ -191,15 +197,38 @@ export function jobsProvider(callWithRequest) {
               // keep track of earliest 'from' / latest 'to' for group range
               if (groups[g].timeRange.to === undefined || job.timeRange.to > groups[g].timeRange.to) {
                 groups[g].timeRange.to = job.timeRange.to;
+                groups[g].timeRange.toMoment = job.timeRange.toMoment;
               }
               if (groups[g].timeRange.from === undefined || job.timeRange.from < groups[g].timeRange.from) {
                 groups[g].timeRange.from = job.timeRange.from;
+                groups[g].timeRange.fromMoment = job.timeRange.fromMoment;
+              }
+              if (groups[g].timeRange.toPx === undefined || job.timeRange.toPx > groups[g].timeRange.toPx) {
+                groups[g].timeRange.toPx = job.timeRange.toPx;
+              }
+              if (groups[g].timeRange.fromPx === undefined || job.timeRange.fromPx < groups[g].timeRange.fromPx) {
+                groups[g].timeRange.fromPx = job.timeRange.fromPx;
               }
             }
           });
         }
+      });
 
-        jobs.push(job);
+      Object.keys(groups).forEach((groupId) => {
+        const group = groups[groupId];
+        group.timeRange.widthPx = group.timeRange.toPx - group.timeRange.fromPx;
+        group.timeRange.toMoment = moment(group.timeRange.to);
+        group.timeRange.fromMoment = moment(group.timeRange.from);
+        // create label
+        const fromString = group.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
+        const toString = group.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
+        group.timeRange.label = i18n.translate('xpack.ml.jobSelectList.groupTimeRangeLabel', {
+          defaultMessage: '{fromString} to {toString}',
+          values: {
+            fromString,
+            toString,
+          }
+        });
       });
     }
 

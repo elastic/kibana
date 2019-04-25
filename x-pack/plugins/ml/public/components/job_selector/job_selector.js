@@ -9,7 +9,6 @@
 import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
-import d3 from 'd3';
 
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
@@ -94,36 +93,6 @@ export function getBadge({ id, icon, isGroup = false, removeId, numJobs }) {
   );
 }
 
-// TODO: move to server side if possible
-function normalizeTimes(jobs) {
-  const min = Math.min(...jobs.map(job => +job.timeRange.from));
-  const max = Math.max(...jobs.map(job => +job.timeRange.to));
-
-  const gantScale = d3.scale.linear().domain([min, max]).range([1, 299]);
-
-  jobs.forEach(job => {
-    if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
-      job.timeRange.fromPx = gantScale(job.timeRange.from);
-      job.timeRange.toPx = gantScale(job.timeRange.to);
-      job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
-
-      job.timeRange.toMoment = moment(job.timeRange.to);
-      job.timeRange.fromMoment = moment(job.timeRange.from);
-
-      const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
-      const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-      job.timeRange.label = i18n.translate('xpack.ml.jobSelector.jobTimeRangeLabel', {
-        defaultMessage: '{fromString} to {toString}',
-        values: {
-          fromString,
-          toString,
-        }
-      });
-    }
-  });
-  return jobs;
-}
-
 const BADGE_LIMIT = 10;
 
 export function JobSelector({
@@ -185,10 +154,9 @@ export function JobSelector({
 
     ml.jobs.jobsWithTimerange()
       .then((resp) => {
-        const jobsWithTimerange = normalizeTimes(resp.jobs);
-        const groupsWithTimerange = normalizeTimes(resp.groups);
-        setJobs(jobsWithTimerange);
-        setGroups(groupsWithTimerange);
+        console.log('--- RESPONSE ----', resp); // remove
+        setJobs(resp.jobs);
+        setGroups(resp.groups);
         setMaps({ groupsMap: resp.groupsMap, jobsMap: resp.jobsMap });
       })
       .catch((err) => {
