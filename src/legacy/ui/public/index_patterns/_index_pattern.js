@@ -35,6 +35,7 @@ import { IndexPatternsPatternCacheProvider } from './_pattern_cache';
 import { FieldsFetcherProvider } from './fields_fetcher_provider';
 import { SavedObjectsClientProvider, findObjectByTitle } from '../saved_objects';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function getRoutes() {
   return {
@@ -122,9 +123,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       });
 
       const warningText = i18n.translate('common.ui.indexPattern.warningText', {
-        defaultMessage: 'Instead of querying indices only matching the pattern {title}, you are now querying all indices ' +
-          'matching {index}. This index pattern should be migrated to a wildcard-based index pattern. To do so, edit the ' +
-          'index pattern in Management.',
+        defaultMessage: 'Currently querying all indices matching {index}. {title} should be migrated to a wildcard-based index pattern.',
         values: {
           title: indexPattern.title,
           index: indexPattern.getIndex()
@@ -139,7 +138,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
             <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton size="s" href={kbnUrl.getRouteHref(indexPattern, 'edit')}>
-                  Edit index pattern
+                  <FormattedMessage id="common.ui.indexPattern.editIndexPattern" defaultMessage="Edit index pattern" />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
