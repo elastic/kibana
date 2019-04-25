@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
 import { PivotGroupByConfig } from '../../common';
 
@@ -40,8 +40,8 @@ export const GroupByLabelForm: React.SFC<Props> = ({
   return 'interval' in item ? (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem>{optionsDataId}</EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ color: '#999' }}>
-        {item.interval}
+      <EuiFlexItem grow={false}>
+        <EuiTextColor color="subdued">{item.interval}</EuiTextColor>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover

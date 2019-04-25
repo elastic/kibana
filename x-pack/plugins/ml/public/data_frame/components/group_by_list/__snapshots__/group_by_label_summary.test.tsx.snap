@@ -1,6 +1,46 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <GroupByLabelSummary /> Minimal initialization 1`] = `
+exports[`Data Frame: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    the-options-data-id
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTextColor
+      color="subdued"
+    >
+      10m
+    </EuiTextColor>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelSummary /> Histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    the-options-data-id
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTextColor
+      color="subdued"
+    >
+      100
+    </EuiTextColor>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelSummary /> Terms aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"

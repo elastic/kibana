@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 
 import { PivotGroupByConfig } from '../../common';
 
@@ -19,8 +19,8 @@ export const GroupByLabelSummary: React.SFC<Props> = ({ item, optionsDataId }) =
   return 'interval' in item ? (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem>{optionsDataId}</EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ color: '#999' }}>
-        {item.interval}
+      <EuiFlexItem grow={false}>
+        <EuiTextColor color="subdued">{item.interval}</EuiTextColor>
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : (

@@ -12,7 +12,45 @@ import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../common'
 import { GroupByLabelForm } from './group_by_label_form';
 
 describe('Data Frame: <GroupByLabelForm />', () => {
-  test('Minimal initialization', () => {
+  test('Date histogram aggregation', () => {
+    const item: PivotGroupByConfig = {
+      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+      field: 'the-group-by-field',
+      formRowLabel: 'the-group-by-label',
+      interval: '10m',
+    };
+    const props = {
+      item,
+      optionsDataId: 'the-options-data-id',
+      deleteHandler() {},
+      onChange() {},
+    };
+
+    const wrapper = shallow(<GroupByLabelForm {...props} />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  test('Histogram aggregation', () => {
+    const item: PivotGroupByConfig = {
+      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM,
+      field: 'the-group-by-field',
+      formRowLabel: 'the-group-by-label',
+      interval: '100',
+    };
+    const props = {
+      item,
+      optionsDataId: 'the-options-data-id',
+      deleteHandler() {},
+      onChange() {},
+    };
+
+    const wrapper = shallow(<GroupByLabelForm {...props} />);
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  test('Terms aggregation', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',

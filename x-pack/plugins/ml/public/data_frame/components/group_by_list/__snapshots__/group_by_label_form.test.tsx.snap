@@ -1,6 +1,132 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <GroupByLabelForm /> Minimal initialization 1`] = `
+exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    the-options-data-id
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTextColor
+      color="subdued"
+    >
+      10m
+    </EuiTextColor>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonIcon
+          aria-label="Edit interval"
+          color="primary"
+          iconSize="m"
+          iconType="pencil"
+          onClick={[Function]}
+          size="s"
+          type="button"
+        />
+      }
+      closePopover={[Function]}
+      hasArrow={true}
+      id="mlIntervalFormPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="m"
+    >
+      <PopoverForm
+        defaultInterval="10m"
+        intervalType="date_histogram"
+        onChange={[Function]}
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete item"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <EuiFlexItem>
+    the-options-data-id
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiTextColor
+      color="subdued"
+    >
+      100
+    </EuiTextColor>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiPopover
+      anchorPosition="downCenter"
+      button={
+        <EuiButtonIcon
+          aria-label="Edit interval"
+          color="primary"
+          iconSize="m"
+          iconType="pencil"
+          onClick={[Function]}
+          size="s"
+          type="button"
+        />
+      }
+      closePopover={[Function]}
+      hasArrow={true}
+      id="mlIntervalFormPopover"
+      isOpen={false}
+      ownFocus={true}
+      panelPaddingSize="m"
+    >
+      <PopoverForm
+        defaultInterval="100"
+        intervalType="histogram"
+        onChange={[Function]}
+      />
+    </EuiPopover>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiButtonIcon
+      aria-label="Delete item"
+      color="primary"
+      iconSize="m"
+      iconType="cross"
+      onClick={[Function]}
+      size="s"
+      type="button"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
