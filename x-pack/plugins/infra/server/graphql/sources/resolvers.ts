@@ -12,6 +12,7 @@ import {
   InfraSourceResolvers,
   MutationResolvers,
   QueryResolvers,
+  UpdateSourceLogColumnInput,
 } from '../../graphql/types';
 import { InfraSourceStatus } from '../../lib/source_status';
 import {
@@ -123,12 +124,6 @@ export const createSourcesResolvers = (
   },
   Mutation: {
     async createSource(root, args, { req }) {
-      const logColumns = (args.sourceProperties.logColumns || []).map(logColumn =>
-        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
-          throw new UserInputError(failure(errors).join('\n'));
-        })
-      );
-
       const sourceConfiguration = await libs.sources.createSourceConfiguration(
         req,
         args.id,
@@ -137,7 +132,7 @@ export const createSourcesResolvers = (
           fields: args.sourceProperties.fields
             ? compactObject(args.sourceProperties.fields)
             : undefined,
-          logColumns,
+          logColumns: decodeLogColumns(args.sourceProperties.logColumns),
         })
       );
 
@@ -153,12 +148,6 @@ export const createSourcesResolvers = (
       };
     },
     async updateSource(root, args, { req }) {
-      const logColumns = (args.sourceProperties.logColumns || []).map(logColumn =>
-        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
-          throw new UserInputError(failure(errors).join('\n'));
-        })
-      );
-
       const updatedSourceConfiguration = await libs.sources.updateSourceConfiguration(
         req,
         args.id,
@@ -167,7 +156,7 @@ export const createSourcesResolvers = (
           fields: args.sourceProperties.fields
             ? compactObject(args.sourceProperties.fields)
             : undefined,
-          logColumns,
+          logColumns: decodeLogColumns(args.sourceProperties.logColumns),
         })
       );
 
@@ -191,3 +180,12 @@ const compactObject = <T>(obj: T): CompactObject<T> =>
           },
     {} as CompactObject<T>
   );
+
+const decodeLogColumns = (logColumns?: UpdateSourceLogColumnInput[] | null) =>
+  logColumns
+    ? logColumns.map(logColumn =>
+        SavedSourceConfigurationColumnRuntimeType.decode(logColumn).getOrElseL(errors => {
+          throw new UserInputError(failure(errors).join('\n'));
+        })
+      )
+    : undefined;
