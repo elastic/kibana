@@ -43,7 +43,8 @@ export function getOperationTemplate(operator: SelectOperator) {
   return template;
 }
 
-export function fieldToOperation(id: string, field: DatasourceField, operator: SelectOperator) {
+export function fieldToOperation(field: DatasourceField, operator: SelectOperator) {
+  const id = String(Math.floor(Math.random() * 100000));
   const template = {
     ...getOperationTemplate(operator),
     id,

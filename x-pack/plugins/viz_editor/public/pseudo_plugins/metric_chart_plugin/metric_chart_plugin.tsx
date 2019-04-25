@@ -21,6 +21,7 @@ import {
   selectOperation,
 } from '../../common';
 import { Draggable } from '../../common/components/draggable';
+import { DroppablePane } from '../../frame/main/droppable_pane';
 import { AxisEditor } from './axis_editor';
 
 const PLUGIN_NAME = 'metric_chart';
@@ -41,7 +42,7 @@ function configPanel({
     const firstQuery = Object.values(visModel.queries)[0];
     const firstQueryKey = Object.keys(visModel.queries)[0];
     const possibleOperator = field.type === 'number' ? 'avg' : getOperatorsForField(field)[0];
-    const possibleOperation = fieldToOperation('other', field, possibleOperator);
+    const possibleOperation = fieldToOperation(field, possibleOperator);
     const isMultiOperation = isApplicableForCardinality(firstQuery.select[0].operator, 'multi');
     const extendedQueryState = {
       ...visModel,
@@ -81,6 +82,14 @@ function configPanel({
         </Draggable>
       </div>
     </>
+  );
+}
+
+function WorkspacePanel({ children, ...props }: any) {
+  return (
+    <DroppablePane {...props} useFirstSuggestion>
+      {children}
+    </DroppablePane>
   );
 }
 
@@ -134,20 +143,28 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: MetricChartVisModel
 ): Suggestion[] {
-  const possibleOperator = field.type === 'number' ? 'avg' : getOperatorsForField(field)[0];
-  const possibleOperation = fieldToOperation('metric', field, possibleOperator);
+  const possibleOperator = getOperatorsForField(field)[0];
+  const possibleOperation = fieldToOperation(field, possibleOperator);
   const prefilledState = prefillPrivateState({
     ...visModel,
     queries: { q1: { select: [possibleOperation] } },
   });
 
-  return [buildSuggestion(prefilledState)];
+  const firstQuery = Object.values(visModel.queries)[0];
+  let score = 0.8;
+
+  // decrease score if there is already an operation in the query
+  if (firstQuery && firstQuery.select.length >= 1) {
+    score = 0.5;
+  }
+  return [buildSuggestion(prefilledState, score)];
 }
 
 export const config: EditorPlugin<MetricChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
+  WorkspacePanel,
   getChartSuggestions,
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way

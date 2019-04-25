@@ -239,8 +239,8 @@ function getSuggestionsForField(
   const { datasource } = visModel;
 
   const select: ColumnOperation[] = [
-    { ...(fieldToOperation('y', field, 'column') as ColumnOperation), id: '0' },
-    { ...(fieldToOperation('x', field, 'column') as ColumnOperation), id: '1' },
+    { ...(fieldToOperation(field, 'column') as ColumnOperation) },
+    { ...(fieldToOperation(field, 'column') as ColumnOperation) },
   ];
 
   let hasDate = false;
@@ -249,11 +249,9 @@ function getSuggestionsForField(
     hasDate = true;
     select[1] = {
       ...(fieldToOperation(
-        'x',
         datasource.fields.find(f => f.name === datasource.timeFieldName)!,
         'column'
       ) as ColumnOperation),
-      id: '1',
     };
   }
 
@@ -269,8 +267,8 @@ function getSuggestionsForField(
     private: {
       ...visModel.private,
       scatterChart: {
-        xAxis: { title: 'X Axis', columns: [`q1_1`] },
-        yAxis: { title: 'Y Axis', columns: [`q1_0`] },
+        xAxis: { title: 'X Axis', columns: [`q1_${select[1].id}`] },
+        yAxis: { title: 'Y Axis', columns: [`q1_${select[0].id}`] },
         hasDate,
       },
     },

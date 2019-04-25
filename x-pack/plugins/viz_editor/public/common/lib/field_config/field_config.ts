@@ -20,8 +20,8 @@ export function getOperatorsForField(
 
     if (field.type === 'number') {
       if (includeMetric) {
-        operators.push('avg');
         operators.push('sum');
+        operators.push('avg');
       }
       if (includeSegment) {
         operators.push('terms');
@@ -29,6 +29,10 @@ export function getOperatorsForField(
     }
 
     if (field.type === 'string' && includeSegment) {
+      operators.push('terms');
+    }
+
+    if (field.type === 'boolean' && includeSegment) {
       operators.push('terms');
     }
   }

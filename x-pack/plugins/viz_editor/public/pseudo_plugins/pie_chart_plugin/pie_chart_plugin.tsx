@@ -172,7 +172,7 @@ function getSuggestionsForField(
   }
 
   return operationNames.map(operationName => {
-    const firstOperation = fieldToOperation('slice', field, operationName);
+    const firstOperation = fieldToOperation(field, operationName);
     const formattedNameSlice = operationToName(operationName);
     const formattedNameSize = operationToName('count');
 
@@ -183,13 +183,13 @@ function getSuggestionsForField(
       queries: {
         q1: {
           datasourceRef,
-          select: [{ operator: 'count', id: 'count' }, { ...firstOperation, id: field.name }],
+          select: [{ operator: 'count', id: 'count' }, firstOperation],
         },
       },
       private: {
         ...visModel.private,
         pieChart: {
-          sliceAxis: { title: 'Slice By', columns: [`q1_${field.name}`] },
+          sliceAxis: { title: 'Slice By', columns: [`q1_${firstOperation.id}`] },
           angleAxis: { title: 'Size By', columns: ['q1_count'] },
         },
       },
@@ -197,7 +197,7 @@ function getSuggestionsForField(
 
     return {
       previewExpression: toExpression(prefilledVisModel, 'preview'),
-      score: 0.5,
+      score: field.type === 'boolean' ? 0.9 : 0.5,
       visModel: prefilledVisModel,
       title: `Pie Chart: ${formattedNameSlice} of ${field.name} vs ${formattedNameSize}`,
       iconType: 'visPie' as IconType,

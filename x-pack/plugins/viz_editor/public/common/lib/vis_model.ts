@@ -123,7 +123,7 @@ export function initialState(): VisModel<any, any> {
   return {
     datasource: null,
     queries: {},
-    editorPlugin: 'xy_chart',
+    editorPlugin: 'empty_chart',
     datasourcePlugin: 'index_pattern',
     title: '',
     private: {},

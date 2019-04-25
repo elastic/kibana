@@ -50,7 +50,7 @@ export function OperationEditor<T extends SelectOperation>(props: OperationEdito
             ...operation,
             argument: { ...operation.argument, field: field.name },
           }
-        : fieldToOperation(operation.id, field, defaultOperator(field));
+        : { ...fieldToOperation(field, defaultOperator(field)), id: operation.id };
 
     // keep alias to avoid updating references
     updatedOperation.id = operation.id;

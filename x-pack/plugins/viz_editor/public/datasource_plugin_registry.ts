@@ -13,9 +13,11 @@ import { config as indexpatternPlugin } from './pseudo_plugins/indexpattern_data
 
 export interface DatasourcePanelProps<S extends VisModel = VisModel> {
   visModel: S;
-  onChangeVisModel: (newState: S) => void;
+  onChangeVisModel: (visModel: S) => void;
   getSuggestionsForField: GetSuggestionsType<S>;
   getSuggestions: (visModel: S) => Suggestion[];
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: any;
 }
 
 export interface DatasourcePlugin<S extends VisModel = VisModel> {

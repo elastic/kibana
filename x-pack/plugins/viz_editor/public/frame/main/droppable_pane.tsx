@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { VisModel } from '../../common';
+import { getTopSuggestion, VisModel } from '../../common';
 import { Draggable } from '../../common/components/draggable';
 import { VisualizationModal } from '../../common/components/visualization_modal';
 import { GetSuggestionsType, Suggestion } from '../../editor_plugin_registry';
@@ -13,19 +13,21 @@ import { GetSuggestionsType, Suggestion } from '../../editor_plugin_registry';
 interface ModalProps {
   visModel: VisModel;
   children: any;
-  getAllSuggestionsForField: GetSuggestionsType<VisModel<any, any>>;
+  getSuggestionsForField: GetSuggestionsType<VisModel<any, any>>;
   onChangeVisModel: (newState: VisModel) => void;
   getInterpreter: () => Promise<{ interpreter: any }>;
   renderersRegistry: { get: (renderer: string) => any };
+  useFirstSuggestion?: boolean;
 }
 
 export function DroppablePane({
   visModel,
-  getAllSuggestionsForField,
+  getSuggestionsForField,
   onChangeVisModel,
   children,
   renderersRegistry,
   getInterpreter,
+  useFirstSuggestion,
 }: ModalProps) {
   // tslint:disable-next-line:no-shadowed-variable
   const initialState = {
@@ -38,19 +40,22 @@ export function DroppablePane({
 
   return (
     <Draggable
-      className="euiPanel euiPanel--paddingLarge euiPageContent"
       canHandleDrop={(field: any) => !!field && !!field.type}
       onDrop={(field: any) => {
         const { datasource } = visModel;
         if (!datasource) {
           return;
         }
-        const suggestions = getAllSuggestionsForField(datasource.id, field, visModel);
-        setState({
-          isOpen: true,
-          fieldName: field.name,
-          suggestions,
-        });
+        const suggestions = getSuggestionsForField(datasource.id, field, visModel);
+        if (useFirstSuggestion) {
+          onChangeVisModel(getTopSuggestion(suggestions).visModel);
+        } else {
+          setState({
+            isOpen: true,
+            fieldName: field.name,
+            suggestions,
+          });
+        }
       }}
     >
       {children}

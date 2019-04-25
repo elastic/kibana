@@ -8,7 +8,6 @@ import { EuiButton, EuiTextArea } from '@elastic/eui';
 import React, { useState } from 'react';
 import {
   EditorPlugin,
-  Suggestion,
   UnknownVisModel,
   updatePrivateState,
   VisModel,
@@ -87,6 +86,7 @@ function prefillPrivateState(visModel: UnknownVisModel) {
   };
 }
 
+/*
 function getSuggestion(visModel: VegaChartVisModel): Suggestion {
   const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as VegaChartVisModel;
   return {
@@ -99,12 +99,14 @@ function getSuggestion(visModel: VegaChartVisModel): Suggestion {
     category: 'Vega Chart',
   };
 }
+*/
 
 export const config: EditorPlugin<VegaChartVisModel> = {
   name: 'vega_chart',
   toExpression,
   ConfigPanel: configPanel,
-  getChartSuggestions: visModel => [getSuggestion(visModel)],
+  // disable suggestions for now to prevent vega from showing up in the bottom right suggestions
+  getChartSuggestions: visModel => [],
   // this part should check whether the x and y axes have to be initialized in some way
   getInitialState: currentState => prefillPrivateState(currentState),
 };

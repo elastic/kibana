@@ -30,7 +30,6 @@ import {
   VisModel,
 } from '../../../public';
 import { ExpressionRenderer } from '../expression_renderer';
-import { DroppablePane } from './droppable_pane';
 
 type Action =
   | { type: 'loaded' }
@@ -150,6 +149,7 @@ export function Main(props: MainProps) {
   const suggestions = getSuggestions(state.visModel);
 
   const panelProps = {
+    ...props,
     visModel: state.visModel,
     onChangeVisModel,
     getSuggestionsForField: getAllSuggestionsForField,
@@ -188,68 +188,58 @@ export function Main(props: MainProps) {
         </EuiPageSideBar>
       )}
       <EuiPageBody className="vzBody">
-        <DroppablePane
-          {...props}
-          visModel={state.visModel}
-          getAllSuggestionsForField={getAllSuggestionsForField}
-          onChangeVisModel={onChangeVisModel}
-        >
-          <EuiPageContentBody>
-            <EuiFlexGroup direction="column">
-              <EuiFlexItem grow={5}>
-                {WorkspacePanel ? (
-                  <WorkspacePanel {...panelProps}>
-                    {hasData && <ExpressionRenderer {...props} expression={expression} />}
-                  </WorkspacePanel>
-                ) : (
-                  hasData && <ExpressionRenderer {...props} expression={expression} />
-                )}
-              </EuiFlexItem>
-              {state.metadata.expressionMode ? (
-                <EuiFlexItem>
-                  <EuiTextArea
-                    fullWidth
-                    value={expression}
-                    onChange={e => {
-                      onChangeVisModel({
-                        ...state.visModel,
-                        private: { ...state.visModel.private, expression: e.target.value },
-                      });
-                    }}
-                  />
-                </EuiFlexItem>
+        <EuiPageContentBody className="euiPanel euiPanel--paddingLarge euiPageContent">
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={5}>
+              {WorkspacePanel ? (
+                <WorkspacePanel {...panelProps}>
+                  {hasData && <ExpressionRenderer {...props} expression={expression} />}
+                </WorkspacePanel>
               ) : (
-                <>
-                  {hasData && (
-                    <EuiFlexItem>
-                      <ExpressionRenderer
-                        {...props}
-                        expression={getTableExpression(state.visModel)}
-                      />
-                      <EuiCodeBlock>{expression}</EuiCodeBlock>
-                    </EuiFlexItem>
-                  )}
-                  <EuiFlexItem grow={false}>
-                    <EuiFlexGroup direction="row" alignItems="flexStart">
-                      <EuiButtonEmpty
-                        size="xs"
-                        onClick={() => dispatch({ type: 'expressionMode' })}
-                      >
-                        <FormattedMessage
-                          id="xpack.viz_editor.frame.editExpressionButtonLabel"
-                          defaultMessage="Edit expression directly"
-                        />
-                      </EuiButtonEmpty>
-                      <EuiButtonEmpty size="xs" onClick={() => dispatch({ type: 'clear' })}>
-                        Clear editor
-                      </EuiButtonEmpty>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </>
+                hasData && <ExpressionRenderer {...props} expression={expression} />
               )}
-            </EuiFlexGroup>
-          </EuiPageContentBody>
-        </DroppablePane>
+            </EuiFlexItem>
+            {state.metadata.expressionMode ? (
+              <EuiFlexItem>
+                <EuiTextArea
+                  fullWidth
+                  value={expression}
+                  onChange={e => {
+                    onChangeVisModel({
+                      ...state.visModel,
+                      private: { ...state.visModel.private, expression: e.target.value },
+                    });
+                  }}
+                />
+              </EuiFlexItem>
+            ) : (
+              <>
+                {hasData && (
+                  <EuiFlexItem>
+                    <ExpressionRenderer
+                      {...props}
+                      expression={getTableExpression(state.visModel)}
+                    />
+                    <EuiCodeBlock>{expression}</EuiCodeBlock>
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiFlexGroup direction="row" alignItems="flexStart">
+                    <EuiButtonEmpty size="xs" onClick={() => dispatch({ type: 'expressionMode' })}>
+                      <FormattedMessage
+                        id="xpack.viz_editor.frame.editExpressionButtonLabel"
+                        defaultMessage="Edit expression directly"
+                      />
+                    </EuiButtonEmpty>
+                    <EuiButtonEmpty size="xs" onClick={() => dispatch({ type: 'clear' })}>
+                      Clear editor
+                    </EuiButtonEmpty>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </>
+            )}
+          </EuiFlexGroup>
+        </EuiPageContentBody>
       </EuiPageBody>
       {!state.metadata.expressionMode && (
         <EuiPageSideBar className="vzSidebar">
@@ -284,3 +274,13 @@ export function Main(props: MainProps) {
     </EuiPage>
   );
 }
+
+/*
+
+        <DroppablePane
+          {...props}
+          visModel={state.visModel}
+          getAllSuggestionsForField={getAllSuggestionsForField}
+          onChangeVisModel={onChangeVisModel}
+        >
+*/

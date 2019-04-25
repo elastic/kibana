@@ -34,11 +34,7 @@ function configPanel({
 
   const onDropField = (pos: number) => (field: DatasourceField) => {
     const possibleOperator = field.type === 'number' ? 'avg' : getOperatorsForField(field)[0];
-    const possibleOperation = fieldToOperation(
-      String(Math.floor(Math.random() * 100000)),
-      field,
-      possibleOperator
-    );
+    const possibleOperation = fieldToOperation(field, possibleOperator);
     const updatedSelect = [...firstQuery.select];
     updatedSelect.splice(pos, 0, possibleOperation);
     onChangeVisModel({

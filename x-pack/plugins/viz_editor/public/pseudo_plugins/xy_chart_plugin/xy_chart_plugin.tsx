@@ -11,12 +11,7 @@ import {
   IconType,
 } from '@elastic/eui';
 import React from 'react';
-import {
-  DatasourceField,
-  fieldToOperation,
-  SelectOperation,
-  SelectOperator,
-} from '../../../common';
+import { DatasourceField, fieldToOperation, SelectOperation } from '../../../common';
 import {
   EditorPlugin,
   getOperatorsForField,
@@ -26,6 +21,7 @@ import {
   UnknownVisModel,
   VisualizationPanelProps,
 } from '../../../public';
+import { DroppablePane } from '../../frame/main/droppable_pane';
 import { SeriesAxisEditor } from './seriesaxis_editor';
 import { prefillPrivateState, updateXyState } from './state_helpers';
 import { PLUGIN_NAME, XyChartVisModel, XyDisplayType } from './types';
@@ -140,6 +136,7 @@ function toExpression(viewState: XyChartVisModel, mode: 'preview' | 'view' | 'ed
 const displayTypeIcon: { [type: string]: IconType } = {
   line: 'visLine',
   area: 'visArea',
+  bar: 'visBarVertical',
 };
 
 function buildSuggestion(
@@ -147,7 +144,8 @@ function buildSuggestion(
   options?: {
     title?: string;
     iconType?: IconType;
-  }
+  },
+  score: number = 0.7
 ) {
   const title = [visModel.private.xyChart.yAxis.title, visModel.private.xyChart.xAxis.title].join(
     ' over '
@@ -157,7 +155,7 @@ function buildSuggestion(
     title,
     visModel,
     previewExpression: toExpression(visModel, 'preview'),
-    score: 0.7,
+    score,
     iconType: displayTypeIcon.line,
     pluginName: PLUGIN_NAME,
     category: 'line',
@@ -236,7 +234,7 @@ function buildViewModel(
   };
 }
 
-function _getSuggestionsForFieldAsReplacement(
+function _getSuggestionsForFieldAsXOrY(
   field: DatasourceField,
   visModel: XyChartVisModel
 ): Suggestion[] {
@@ -246,73 +244,196 @@ function _getSuggestionsForFieldAsReplacement(
     return [];
   }
 
-  let suggestions = [] as Array<Suggestion | null>;
+  const firstQuery = Object.values(visModel.queries)[0];
+  const firstQueryKey = Object.keys(visModel.queries)[0];
+  const possibleOperator = getOperatorsForField(field)[0];
+  const possibleOperation = fieldToOperation(field, possibleOperator);
 
-  const opToSuggestion = (op: SelectOperator): Suggestion | null => {
-    let xAxis = [];
-    let yAxis = [];
-
-    if (op === 'count') {
-      return null;
-    }
-
-    xAxis = [fieldToOperation('x', field, op)];
-    yAxis = [fieldToOperation('y', field, 'count')];
-
-    const newVisModel = buildViewModel(visModel, xAxis, yAxis, []);
-
-    return buildSuggestion(newVisModel, {
-      iconType: displayTypeIcon.line,
-    });
+  const isMultiOperation = isApplicableForCardinality(firstQuery.select[0].operator, 'multi');
+  const extendedQueryState = {
+    ...visModel,
+    queries: {
+      ...visModel.queries,
+      [firstQueryKey]: {
+        ...firstQuery,
+        // add columns in the right order for xy chart to pick up
+        select: isMultiOperation
+          ? [possibleOperation, ...firstQuery.select]
+          : [...firstQuery.select, possibleOperation],
+      },
+    },
   };
+  const newVisModel = buildViewModel(
+    extendedQueryState,
+    [extendedQueryState.queries[firstQueryKey]!.select[1]],
+    [extendedQueryState.queries[firstQueryKey]!.select[0]],
+    []
+  );
 
-  const opWithDateHistogram = (op: SelectOperator): Suggestion | null => {
-    let xAxis = [];
-    let yAxis = [];
-    let seriesAxis: SelectOperation[] = [];
+  return [
+    buildSuggestion(
+      newVisModel,
+      {
+        iconType: displayTypeIcon.line,
+      },
+      0.8
+    ),
+  ];
+}
 
-    if (op === 'column') {
-      xAxis = [
-        fieldToOperation(
-          'x',
-          datasource.fields.find(f => f.name === datasource.timeFieldName)!,
-          'column'
-        ),
-      ];
-      yAxis = [fieldToOperation('y', field, op)];
-    } else {
-      xAxis = [
-        fieldToOperation(
-          'x',
-          datasource.fields.find(f => f.name === datasource.timeFieldName)!,
-          'date_histogram'
-        ),
-      ];
+function _getSuggestionsForFieldAsInitialState(
+  field: DatasourceField,
+  visModel: XyChartVisModel
+): Suggestion[] {
+  const { datasource } = visModel;
 
-      if (op === 'count') {
-        return null;
-      } else {
-        seriesAxis = [fieldToOperation('series', field, op)];
-        yAxis = [fieldToOperation('y', field, 'count')];
-      }
-    }
-
-    const newVisModel = buildViewModel(visModel, xAxis, yAxis, seriesAxis);
-
-    return buildSuggestion(newVisModel, {
-      iconType: displayTypeIcon.line,
-    });
-  };
-
-  if (datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
-    suggestions = suggestions.concat(
-      getOperatorsForField(field, false, true).map(op => opWithDateHistogram(op))
-    );
+  if (!datasource) {
+    return [];
   }
 
-  suggestions = suggestions.concat(getOperatorsForField(field, false, true).map(opToSuggestion));
+  if (field.type === 'number') {
+    if (datasource.timeFieldName) {
+      const dateField = datasource.fields.find(f => f.name === datasource.timeFieldName)!;
+      const xAxis = [fieldToOperation(dateField, getOperatorsForField(dateField, false, true)[0])];
+      const yAxis = [fieldToOperation(field, getOperatorsForField(field, true, false)[0])];
 
-  return suggestions.filter(suggestion => !!suggestion) as Suggestion[];
+      const newVisModel = buildViewModel(visModel, xAxis, yAxis, []);
+
+      return [
+        buildSuggestion(
+          newVisModel,
+          {
+            iconType: displayTypeIcon.line,
+          },
+          0.9
+        ),
+      ];
+    } else {
+      return [];
+    }
+  }
+
+  if (field.type === 'date' || field.type === 'string') {
+    const xAxis = [fieldToOperation(field, getOperatorsForField(field, false, true)[0])];
+    const yAxis = [fieldToOperation(field, 'count')];
+
+    const newVisModel = updateXyState(buildViewModel(visModel, xAxis, yAxis, []), {
+      displayType: field.type === 'date' ? 'line' : 'bar',
+    });
+
+    return [
+      buildSuggestion(
+        newVisModel,
+        {
+          iconType: field.type === 'date' ? displayTypeIcon.line : displayTypeIcon.bar,
+        },
+        0.9
+      ),
+    ];
+  }
+
+  return [];
+
+  // let suggestions = [] as Array<Suggestion | null>;
+
+  // const opToSuggestion = (op: SelectOperator): Suggestion | null => {
+  //   let xAxis = [];
+  //   let yAxis = [];
+
+  //   if (op === 'count') {
+  //     return null;
+  //   }
+
+  //   xAxis = [fieldToOperation(field, op)];
+  //   yAxis = [fieldToOperation(field, 'count')];
+  // };
+
+  // const opWithDateHistogram = (op: SelectOperator): Suggestion | null => {
+  //   let xAxis = [];
+  //   let yAxis = [];
+  //   let seriesAxis: SelectOperation[] = [];
+
+  //   if (op === 'column') {
+  //     xAxis = [
+  //       fieldToOperation(
+  //         datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+  //         'column'
+  //       ),
+  //     ];
+  //     yAxis = [fieldToOperation(field, op)];
+  //   } else {
+  //     xAxis = [
+  //       fieldToOperation(
+  //         datasource.fields.find(f => f.name === datasource.timeFieldName)!,
+  //         'date_histogram'
+  //       ),
+  //     ];
+
+  //     if (op === 'count') {
+  //       return null;
+  //     } else {
+  //       seriesAxis = [fieldToOperation(field, op)];
+  //       yAxis = [fieldToOperation(field, 'count')];
+  //     }
+  //   }
+
+  //   const newVisModel = buildViewModel(visModel, xAxis, yAxis, seriesAxis);
+
+  //   return buildSuggestion(newVisModel, {
+  //     iconType: displayTypeIcon.line,
+  //   });
+  // };
+
+  // if (datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
+  //   suggestions = suggestions.concat(
+  //     getOperatorsForField(field, false, true).map(op => opWithDateHistogram(op))
+  //   );
+  // }
+
+  // suggestions = suggestions.concat(getOperatorsForField(field, false, true).map(opToSuggestion));
+
+  // return suggestions.filter(suggestion => !!suggestion) as Suggestion[];
+}
+
+function _getSuggestionsForFieldAsSplit(
+  field: DatasourceField,
+  visModel: XyChartVisModel
+): Suggestion[] {
+  const firstQuery = Object.values(visModel.queries)[0];
+  const firstQueryKey = Object.keys(visModel.queries)[0];
+  const possibleOperator = getOperatorsForField(field, false, true)[0];
+  const possibleOperation = fieldToOperation(field, possibleOperator);
+
+  const extendedQueryState = {
+    ...visModel,
+    queries: {
+      ...visModel.queries,
+      [firstQueryKey]: {
+        ...firstQuery,
+        select: [possibleOperation, ...firstQuery.select],
+      },
+    },
+  };
+  const newVisModel = buildViewModel(
+    extendedQueryState,
+    [extendedQueryState.queries[firstQueryKey]!.select[2]],
+    [extendedQueryState.queries[firstQueryKey]!.select[1]],
+    [extendedQueryState.queries[firstQueryKey]!.select[0]]
+  );
+
+  return [
+    buildSuggestion(
+      newVisModel,
+      {
+        iconType: displayTypeIcon.line,
+      },
+      0.8
+    ),
+  ];
+}
+
+function WorkspacePanel({ children, ...props }: any) {
+  return <DroppablePane {...props}>{children}</DroppablePane>;
 }
 
 function getSuggestionsForField(
@@ -321,18 +442,32 @@ function getSuggestionsForField(
   visModel: XyChartVisModel
 ): Suggestion[] {
   const operationNames = getOperatorsForField(field);
+  const firstQuery = Object.values(visModel.queries)[0];
 
   if (operationNames.length === 0 || !field.aggregatable) {
     return [] as Suggestion[];
   }
 
-  return _getSuggestionsForFieldAsReplacement(field, visModel);
+  if (!firstQuery || firstQuery.select.length === 0) {
+    return _getSuggestionsForFieldAsInitialState(field, visModel);
+  }
+
+  if (firstQuery && firstQuery.select.length === 1) {
+    return _getSuggestionsForFieldAsXOrY(field, visModel);
+  }
+
+  if (firstQuery && firstQuery.select.length === 2) {
+    return _getSuggestionsForFieldAsSplit(field, visModel);
+  }
+
+  return [];
 }
 
 export const config: EditorPlugin<XyChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
   ConfigPanel: configPanel,
+  WorkspacePanel,
   getChartSuggestions: visModel => getSuggestion(visModel, 'line', 'Switch to line chart'),
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way

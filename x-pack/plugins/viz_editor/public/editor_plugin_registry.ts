@@ -8,6 +8,7 @@ import { IconType } from '@elastic/eui';
 import { DatasourceField } from '../common';
 import { UnknownVisModel, VisModel } from '../public';
 
+import { config as emptyChartConfig } from './pseudo_plugins/empty_chart_plugin';
 import { config as metricChartConfig } from './pseudo_plugins/metric_chart_plugin';
 import { config as pieChartConfig } from './pseudo_plugins/pie_chart_plugin';
 import { config as scatterChartConfig } from './pseudo_plugins/scatter_chart_plugin';
@@ -36,6 +37,8 @@ export interface VisualizationPanelProps<S extends VisModel = VisModel> {
   onChangeVisModel: (visModel: S) => void;
   getSuggestionsForField: GetSuggestionsType<S>;
   getSuggestions: (visModel: S) => Suggestion[];
+  getInterpreter: () => Promise<{ interpreter: any }>;
+  renderersRegistry: any;
 }
 
 /**
@@ -66,6 +69,7 @@ const pluginMap: { [key: string]: EditorPlugin<any> } = {
   vega_chart: vegaChartConfig,
   scatter_chart: scatterChartConfig,
   table_chart: tableChartConfig,
+  empty_chart: emptyChartConfig,
 };
 
 // TODO: Expose this to other pluins so editor configs can be injected
