@@ -8,7 +8,7 @@ import { ErrorDistributionAPIResponse } from '../../../../server/lib/errors/dist
 import { ErrorGroupAPIResponse } from '../../../../server/lib/errors/get_error_group';
 import { ErrorGroupListAPIResponse } from '../../../../server/lib/errors/get_error_groups';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
