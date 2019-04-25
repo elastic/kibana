@@ -6,7 +6,6 @@
 
 import { createAction } from 'redux-actions';
 
-export const setCanUserWrite = createAction('setCanUserWrite');
 export const setFullscreen = createAction('setFullscreen');
 export const selectToplevelNodes = createAction('selectToplevelNodes');
 export const setFirstLoad = createAction('setFirstLoad');
