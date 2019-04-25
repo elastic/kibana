@@ -94,6 +94,10 @@ export interface DataFrameRequest extends DataFramePreviewRequest {
   };
 }
 
+export interface DataFrameJobConfig extends DataFrameRequest {
+  id: string;
+}
+
 export const pivotSupportedAggs = [
   PIVOT_SUPPORTED_AGGS.AVG,
   PIVOT_SUPPORTED_AGGS.CARDINALITY,
