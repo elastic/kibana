@@ -8,14 +8,15 @@ import React, { Component, Fragment } from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { UserAPIClient } from '../../../lib/api';
 
 class ConfirmDeleteUI extends Component {
   deleteUsers = () => {
-    const { usersToDelete, apiClient, callback } = this.props;
+    const { usersToDelete, callback } = this.props;
     const errors = [];
     usersToDelete.forEach(async username => {
       try {
-        await apiClient.deleteUser(username);
+        await UserAPIClient.deleteUser(username);
         toastNotifications.addSuccess(
           this.props.intl.formatMessage({
             id: 'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',

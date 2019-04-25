@@ -22,7 +22,6 @@ import { AggParams } from '../agg_params';
 import { BaseParamType } from '../param_types/base';
 import { FieldParamType } from '../param_types/field';
 import { OptionedParamType } from '../param_types/optioned';
-import { RegexParamType } from '../param_types/regex';
 
 describe('AggParams class', function () {
 
@@ -62,19 +61,6 @@ describe('AggParams class', function () {
 
       expect(aggParams).to.have.length(params.length);
       expect(aggParams[0]).to.be.a(OptionedParamType);
-    });
-
-    it('Uses the RegexParamType class for params of type "regex"', function () {
-      const params = [
-        {
-          name: 'exclude',
-          type: 'regex'
-        }
-      ];
-      const aggParams = new AggParams(params);
-
-      expect(aggParams).to.have.length(params.length);
-      expect(aggParams[0]).to.be.a(RegexParamType);
     });
 
     it('Always converts the params to a BaseParamType', function () {

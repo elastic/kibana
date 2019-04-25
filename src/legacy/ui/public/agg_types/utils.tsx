@@ -24,6 +24,10 @@ function isValidJson(value: string): boolean {
 
   const trimmedValue = value.trim();
 
+  if (trimmedValue.length === 0) {
+    return true;
+  }
+
   if (trimmedValue[0] === '{' || trimmedValue[0] === '[') {
     try {
       JSON.parse(trimmedValue);

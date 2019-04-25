@@ -30,6 +30,7 @@ describe('coordinateMigration', () => {
   test('waits for isMigrated, if there is an index conflict', async () => {
     const pollInterval = 1;
     const runMigration = jest.fn(() => {
+      // eslint-disable-next-line no-throw-literal
       throw { body: { error: { index: '.foo', type: 'resource_already_exists_exception' } } };
     });
     const isMigrated = jest.fn();

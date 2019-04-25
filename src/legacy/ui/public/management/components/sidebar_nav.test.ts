@@ -36,25 +36,25 @@ const visibleItem = { display: 'item', id: 'item', ...activeProps };
 const notVisibleSection = {
   display: 'Not visible',
   id: 'not-visible',
-  items: toIndexedArray([visibleItem]),
+  visibleItems: toIndexedArray([visibleItem]),
   ...notVisibleProps,
 };
 const disabledSection = {
   display: 'Disabled',
   id: 'disabled',
-  items: toIndexedArray([visibleItem]),
+  visibleItems: toIndexedArray([visibleItem]),
   ...disabledProps,
 };
 const noItemsSection = {
   display: 'No items',
   id: 'no-items',
-  items: toIndexedArray([]),
+  visibleItems: toIndexedArray([]),
   ...activeProps,
 };
 const noActiveItemsSection = {
   display: 'No active items',
   id: 'no-active-items',
-  items: toIndexedArray([
+  visibleItems: toIndexedArray([
     { display: 'disabled', id: 'disabled', ...disabledProps },
     { display: 'notVisible', id: 'notVisible', ...notVisibleProps },
   ]),
@@ -63,7 +63,7 @@ const noActiveItemsSection = {
 const activeSection = {
   display: 'activeSection',
   id: 'activeSection',
-  items: toIndexedArray([visibleItem]),
+  visibleItems: toIndexedArray([visibleItem]),
   ...activeProps,
 };
 

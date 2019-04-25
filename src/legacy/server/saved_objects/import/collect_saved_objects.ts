@@ -44,6 +44,10 @@ export async function collectSavedObjects(
     createFilterStream<SavedObject>(obj => !!obj),
     createLimitStream(objectLimit),
     createFilterStream<SavedObject>(obj => (filter ? filter(obj) : true)),
+    createMapStream((obj: SavedObject) => {
+      // Ensure migrations execute on every saved object
+      return Object.assign({ migrationVersion: {} }, obj);
+    }),
     createConcatStream([]),
   ])) as SavedObject[];
 }

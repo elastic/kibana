@@ -16,8 +16,11 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./kibana'));
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./beats'));
+    loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./maps'));
+    loadTestFile(require.resolve('./apm'));
+    loadTestFile(require.resolve('./code'));
   });
 }

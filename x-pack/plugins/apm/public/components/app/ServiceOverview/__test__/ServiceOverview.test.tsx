@@ -5,23 +5,14 @@
  */
 
 import React from 'react';
-import { Provider } from 'react-redux';
 import { render, wait, waitForElement } from 'react-testing-library';
 import 'react-testing-library/cleanup-after-each';
 import { toastNotifications } from 'ui/notify';
 import * as apmRestServices from '../../../../services/rest/apm/services';
-// @ts-ignore
-import configureStore from '../../../../store/config/configureStore';
-import { ServiceOverview } from '../view';
+import { ServiceOverview } from '..';
 
 function renderServiceOverview() {
-  const store = configureStore();
-
-  return render(
-    <Provider store={store}>
-      <ServiceOverview urlParams={{}} />
-    </Provider>
-  );
+  return render(<ServiceOverview />);
 }
 
 describe('Service Overview -> View', () => {
@@ -30,7 +21,7 @@ describe('Service Overview -> View', () => {
   });
 
   // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-  /* tslint:disable:no-console */
+  /* eslint-disable no-console */
   const originalError = console.error;
   beforeAll(() => {
     console.error = jest.fn();

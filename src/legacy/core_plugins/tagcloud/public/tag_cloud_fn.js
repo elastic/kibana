@@ -32,13 +32,61 @@ export const tagcloud = () => ({
     defaultMessage: 'Tagcloud visualization'
   }),
   args: {
-    visConfig: {
-      types: ['string', 'null'],
-      default: '"{}"',
+    scale: {
+      types: ['string'],
+      default: 'linear',
+      options: ['linear', 'log', 'square root'],
+      help: i18n.translate('tagCloud.function.scale.help', {
+        defaultMessage: 'Scale to determine font size of a word'
+      }),
+    },
+    orientation: {
+      types: ['string'],
+      default: 'single',
+      options: ['single', 'right angled', 'multiple'],
+      help: i18n.translate('tagCloud.function.orientation.help', {
+        defaultMessage: 'Orientation of words inside tagcloud'
+      }),
+    },
+    minFontSize: {
+      types: ['number'],
+      default: 18,
+    },
+    maxFontSize: {
+      types: ['number'],
+      default: 72
+    },
+    showLabel: {
+      types: ['boolean'],
+      default: true,
+    },
+    metric: {
+      types: ['vis_dimension'],
+      help: i18n.translate('tagCloud.function.metric.help', {
+        defaultMessage: 'metric dimension configuration'
+      }),
+      required: true,
+    },
+    bucket: {
+      types: ['vis_dimension'],
+      help: i18n.translate('tagCloud.function.bucket.help', {
+        defaultMessage: 'bucket dimension configuration'
+      }),
     },
   },
   fn(context, args) {
-    const visConfig = JSON.parse(args.visConfig);
+    const visConfig = {
+      scale: args.scale,
+      orientation: args.orientation,
+      minFontSize: args.minFontSize,
+      maxFontSize: args.maxFontSize,
+      showLabel: args.showLabel,
+      metric: args.metric,
+    };
+
+    if (args.bucket !== undefined) {
+      visConfig.bucket = args.bucket;
+    }
 
     return {
       type: 'render',

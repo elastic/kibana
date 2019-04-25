@@ -18,11 +18,9 @@
  */
 
 module.exports = {
-  presets: [
-    require.resolve('@babel/preset-typescript'),
-    require.resolve('@babel/preset-react')
-  ],
+  presets: [require.resolve('@babel/preset-typescript'), require.resolve('@babel/preset-react')],
   plugins: [
+    require.resolve('@kbn/elastic-idx/babel'),
     require.resolve('babel-plugin-add-module-exports'),
 
     // The class properties proposal was merged with the private fields proposal
@@ -41,11 +39,7 @@ module.exports = {
       //
       // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
       test: /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
-      plugins: [
-        [
-          require.resolve('babel-plugin-typescript-strip-namespaces'),
-        ],
-      ]
-    }
-  ]
+      plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
+    },
+  ],
 };

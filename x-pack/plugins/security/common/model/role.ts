@@ -4,26 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPrivilege } from './index_privilege';
-import { KibanaPrivilege } from './kibana_privilege';
+import { FeaturesPrivileges } from './features_privileges';
+
+export interface RoleIndexPrivilege {
+  names: string[];
+  privileges: string[];
+  field_security?: {
+    grant?: string[];
+    except?: string[];
+  };
+  query?: string;
+}
+
+export interface RoleKibanaPrivilege {
+  spaces: string[];
+  base: string[];
+  feature: FeaturesPrivileges;
+  _reserved?: string[];
+}
 
 export interface Role {
   name: string;
   elasticsearch: {
     cluster: string[];
-    indices: IndexPrivilege[];
+    indices: RoleIndexPrivilege[];
     run_as: string[];
   };
-  kibana: {
-    global: KibanaPrivilege[];
-    space: {
-      [spaceId: string]: KibanaPrivilege[];
-    };
-  };
+  kibana: RoleKibanaPrivilege[];
   metadata?: {
     [anyKey: string]: any;
   };
   transient_metadata?: {
     [anyKey: string]: any;
   };
+  _transform_error?: string[];
+  _unrecognized_applications?: string[];
 }

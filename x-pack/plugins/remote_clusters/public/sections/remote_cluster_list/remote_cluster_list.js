@@ -108,6 +108,7 @@ export const RemoteClusterList = injectI18n(
                 <EuiButton
                   {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
                   fill
+                  data-test-subj="remoteClusterCreateButton"
                 >
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterList.connectButtonLabel"
@@ -209,6 +210,7 @@ export const RemoteClusterList = injectI18n(
               {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/add`)}
               fill
               iconType="plusInCircle"
+              data-test-subj="remoteClusterEmptyPromptCreateButton"
             >
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterList.emptyPrompt.connectButtonLabel"
@@ -226,6 +228,7 @@ export const RemoteClusterList = injectI18n(
           justifyContent="flexStart"
           alignItems="center"
           gutterSize="s"
+          data-test-subj="remoteClustersTableLoading"
         >
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="m" />

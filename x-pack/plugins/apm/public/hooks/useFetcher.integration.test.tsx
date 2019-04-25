@@ -10,7 +10,7 @@ import { delay, tick } from '../utils/testHelpers';
 import { useFetcher } from './useFetcher';
 
 // Suppress warnings about "act" until async/await syntax is supported: https://github.com/facebook/react/issues/14769
-/* tslint:disable:no-console */
+/* eslint-disable no-console */
 const originalError = console.error;
 beforeAll(() => {
   console.error = jest.fn();
@@ -30,9 +30,6 @@ describe('when simulating race condition', () => {
 
   beforeEach(async () => {
     jest.useFakeTimers();
-    jest
-      .spyOn(window, 'requestAnimationFrame')
-      .mockImplementation(cb => cb(0) as any);
 
     renderSpy = jest.fn();
     requestCallOrder = [];

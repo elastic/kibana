@@ -12,8 +12,12 @@ export function isSeedNodeValid(seedNode) {
   const portParts = seedNode.split(':');
   const parts = portParts[0].split('.');
   const containsInvalidCharacters = parts.some(part => {
-    const match = part.match(/[A-Za-z0-9\-]*/)[0];
-    return match !== part || !part;
+    if (!part) {
+      // no need to wait for regEx if the part is empty
+      return true;
+    }
+    const [match] = part.match(/[A-Za-z0-9\-]*/);
+    return match !== part;
   });
 
   return !containsInvalidCharacters;

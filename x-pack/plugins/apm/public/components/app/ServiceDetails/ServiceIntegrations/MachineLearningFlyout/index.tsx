@@ -5,62 +5,51 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React, { Component } from 'react';
 import { toastNotifications } from 'ui/notify';
 import { startMLJob } from '../../../../../services/rest/ml';
 import { getAPMIndexPattern } from '../../../../../services/rest/savedObjects';
-import { IUrlParams } from '../../../../../store/urlParams';
-import { MLJobLink } from '../../../../shared/Links/MLJobLink';
+import { IUrlParams } from '../../../../../context/UrlParamsContext/types';
+import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
 import { MachineLearningFlyoutView } from './view';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   urlParams: IUrlParams;
-  location: Location;
   serviceTransactionTypes: string[];
 }
 
 interface State {
   isCreatingJob: boolean;
-  hasMLJob: boolean;
   hasIndexPattern: boolean;
-  selectedTransactionType?: string;
 }
 
 export class MachineLearningFlyout extends Component<Props, State> {
   public state: State = {
     isCreatingJob: false,
-    hasIndexPattern: false,
-    hasMLJob: false,
-    selectedTransactionType: this.props.urlParams.transactionType
+    hasIndexPattern: false
   };
-  public willUnmount = false;
+  public mounted = false;
 
   public componentWillUnmount() {
-    this.willUnmount = true;
+    this.mounted = false;
   }
 
   public async componentDidMount() {
+    this.mounted = true;
     const indexPattern = await getAPMIndexPattern();
-    if (!this.willUnmount) {
-      // TODO: this is causing warning from react because setState happens after
-      // the component has been unmounted - dispite of the checks
-      this.setState({ hasIndexPattern: !!indexPattern });
-    }
-  }
 
-  // TODO: This should use `getDerivedStateFromProps`
-  public componentDidUpdate(prevProps: Props) {
-    if (
-      prevProps.urlParams.transactionType !==
-      this.props.urlParams.transactionType
-    ) {
+    // setTimeout:0 hack forces the state update to wait for next tick
+    // in case the component is mid-unmount :/
+    setTimeout(() => {
+      if (!this.mounted) {
+        return;
+      }
       this.setState({
-        selectedTransactionType: this.props.urlParams.transactionType
+        hasIndexPattern: !!indexPattern
       });
-    }
+    }, 0);
   }
 
   public onClickCreate = async () => {
@@ -116,7 +105,7 @@ export class MachineLearningFlyout extends Component<Props, State> {
   };
 
   public addSuccessToast = () => {
-    const { location, urlParams } = this.props;
+    const { urlParams } = this.props;
     const { serviceName, transactionType } = urlParams;
 
     if (!serviceName) {
@@ -146,7 +135,6 @@ export class MachineLearningFlyout extends Component<Props, State> {
           <MLJobLink
             serviceName={serviceName}
             transactionType={transactionType}
-            location={location}
           >
             {i18n.translate(
               'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.jobCreatedNotificationText.viewJobLinkText',
@@ -160,26 +148,10 @@ export class MachineLearningFlyout extends Component<Props, State> {
     });
   };
 
-  public onChangeTransaction(value: string) {
-    this.setState({
-      selectedTransactionType: value
-    });
-  }
-
   public render() {
-    const {
-      isOpen,
-      onClose,
-      urlParams,
-      location,
-      serviceTransactionTypes
-    } = this.props;
-    const { serviceName, transactionType } = urlParams;
-    const {
-      isCreatingJob,
-      hasIndexPattern,
-      selectedTransactionType
-    } = this.state;
+    const { isOpen, onClose, urlParams, serviceTransactionTypes } = this.props;
+    const { serviceName } = urlParams;
+    const { isCreatingJob, hasIndexPattern } = this.state;
 
     if (!isOpen || !serviceName) {
       return null;
@@ -189,14 +161,10 @@ export class MachineLearningFlyout extends Component<Props, State> {
       <MachineLearningFlyoutView
         hasIndexPattern={hasIndexPattern}
         isCreatingJob={isCreatingJob}
-        location={location}
-        onChangeTransaction={this.onChangeTransaction}
         onClickCreate={this.onClickCreate}
         onClose={onClose}
-        selectedTransactionType={selectedTransactionType}
         serviceName={serviceName}
         serviceTransactionTypes={serviceTransactionTypes}
-        transactionType={transactionType}
       />
     );
   }

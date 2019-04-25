@@ -19,10 +19,7 @@ test('it renders without crashing', () => {
         indices: [],
         run_as: [],
       },
-      kibana: {
-        global: [],
-        space: {},
-      },
+      kibana: [],
     },
     httpClient: jest.fn(),
     onChange: jest.fn(),
@@ -39,10 +36,7 @@ test('it renders a IndexPrivilegeForm for each privilege on the role', () => {
   const props = {
     role: {
       name: '',
-      kibana: {
-        global: [],
-        space: {},
-      },
+      kibana: [],
       elasticsearch: {
         cluster: [],
         indices: [

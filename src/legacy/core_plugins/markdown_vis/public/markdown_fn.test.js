@@ -22,14 +22,14 @@ import { kibanaMarkdown } from './markdown_fn';
 
 describe('interpreter/functions#markdown', () => {
   const fn = functionWrapper(kibanaMarkdown);
-  const visConfig = {
+  const args = {
     fontSize: 12,
     openLinksInNewTab: true,
     markdown: '## hello _markdown_',
   };
 
   it('returns an object with the correct structure', () => {
-    const actual = fn(undefined, { visConfig: JSON.stringify(visConfig) });
+    const actual = fn(undefined, args);
     expect(actual).toMatchSnapshot();
   });
 });

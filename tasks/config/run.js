@@ -100,16 +100,7 @@ module.exports = function (grunt) {
     },
 
     // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
-    tslint: {
-      cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/tslint')
-      ]
-    },
-
-    // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
+    //    runs the typecheck script to check for Typescript type errors
     typeCheck: {
       cmd: process.execPath,
       args: [

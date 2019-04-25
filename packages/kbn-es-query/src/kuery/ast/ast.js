@@ -20,7 +20,7 @@
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 import { parse as parseKuery } from './kuery';
-import { parse as parseLegacyKuery } from './legacy_kuery';
+import { KQLSyntaxError } from '../errors';
 
 export function fromLiteralExpression(expression, parseOptions) {
   parseOptions = {
@@ -31,12 +31,16 @@ export function fromLiteralExpression(expression, parseOptions) {
   return fromExpression(expression, parseOptions, parseKuery);
 }
 
-export function fromLegacyKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, parseLegacyKuery);
-}
-
 export function fromKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, parseKuery);
+  try {
+    return fromExpression(expression, parseOptions, parseKuery);
+  } catch (error) {
+    if (error.name === 'SyntaxError') {
+      throw new KQLSyntaxError(error, expression);
+    } else {
+      throw error;
+    }
+  }
 }
 
 function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
@@ -46,20 +50,25 @@ function fromExpression(expression, parseOptions = {}, parse = parseKuery) {
 
   parseOptions = {
     ...parseOptions,
-    helpers: { nodeTypes }
+    helpers: { nodeTypes },
   };
 
   return parse(expression, parseOptions);
 }
 
-// indexPattern isn't required, but if you pass one in, we can be more intelligent
-// about how we craft the queries (e.g. scripted fields)
-export function toElasticsearchQuery(node, indexPattern) {
+/**
+ * @params {String} indexPattern
+ * @params {Object} config - contains the dateFormatTZ
+ *
+ * IndexPattern isn't required, but if you pass one in, we can be more intelligent
+ * about how we craft the queries (e.g. scripted fields)
+ */
+export function toElasticsearchQuery(node, indexPattern, config = {}) {
   if (!node || !node.type || !nodeTypes[node.type]) {
     return toElasticsearchQuery(nodeTypes.function.buildNode('and', []));
   }
 
-  return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern);
+  return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern, config);
 }
 
 export function doesKueryExpressionHaveLuceneSyntaxError(expression) {

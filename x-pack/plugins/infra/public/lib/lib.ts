@@ -33,11 +33,8 @@ export type InfraApolloClient = ApolloClient<NormalizedCacheObject>;
 export interface InfraFrameworkAdapter {
   // Insstance vars
   appState?: object;
-  dateFormat?: string;
   kbnVersion?: string;
-  scaledDateFormat?: string;
   timezone?: string;
-  darkMode?: boolean;
 
   // Methods
   setUISettings(key: string, value: any): void;
@@ -45,9 +42,10 @@ export interface InfraFrameworkAdapter {
   renderBreadcrumbs(component: React.ReactElement<any>): void;
 }
 
-export interface InfraFramworkAdapterConstructable {
-  new (uiModule: IModule, timezoneProvider: InfraTimezoneProvider): InfraFrameworkAdapter;
-}
+export type InfraFramworkAdapterConstructable = new (
+  uiModule: IModule,
+  timezoneProvider: InfraTimezoneProvider
+) => InfraFrameworkAdapter;
 
 // TODO: replace AxiosRequestConfig with something more defined
 export type InfraRequestConfig = AxiosRequestConfig;
