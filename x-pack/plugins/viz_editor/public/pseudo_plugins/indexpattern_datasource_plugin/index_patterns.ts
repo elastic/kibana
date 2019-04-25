@@ -19,7 +19,11 @@ export const getIndexPatterns = () => {
         return Object.assign(attributes, {
           id,
           title: attributes.title,
-          fields: JSON.parse(attributes.fields as string),
+          fields: JSON.parse(attributes.fields as string).filter(
+            // don't show non-keyword string fields
+            ({ type, esTypes }: any) =>
+              type !== 'string' || (esTypes && esTypes.includes('keyword'))
+          ),
         }) as Datasource;
       });
     })
