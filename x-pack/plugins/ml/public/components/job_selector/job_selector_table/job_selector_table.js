@@ -8,10 +8,9 @@
 
 import React, { Fragment, useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
-// import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
-import { CustomSelectionTable } from './custom_selection_table';
-import { getBadge } from './job_selector';
-import { TimeRangeBar } from './timerange_bar';
+import { CustomSelectionTable } from '../custom_selection_table';
+import { getBadge } from '../job_selector';
+import { TimeRangeBar } from '../timerange_bar/';
 
 import {
   EuiFlexGroup,

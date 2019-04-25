@@ -13,7 +13,7 @@ import d3 from 'd3';
 
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
-import { JobSelectorTable } from './job_selector_table';
+import { JobSelectorTable } from './job_selector_table/';
 import { timefilter } from 'ui/timefilter';
 import { stringHash } from '../../../common/util/string_utils';
 import { setGlobalState } from './job_select_service_utils';
