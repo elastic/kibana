@@ -69,9 +69,9 @@ test('200 OK with body', async () => {
     return res.ok({ key: 'value' });
   });
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/')
@@ -88,10 +88,10 @@ test('202 Accepted with body', async () => {
     return res.accepted({ location: 'somewhere' });
   });
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/')
@@ -108,10 +108,10 @@ test('204 No content', async () => {
     return res.noContent();
   });
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/')
@@ -130,10 +130,10 @@ test('400 Bad request with error', async () => {
     return res.badRequest(err);
   });
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/')
@@ -160,10 +160,10 @@ test('valid params', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/some-string')
@@ -190,10 +190,10 @@ test('invalid params', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/some-string')
@@ -223,10 +223,10 @@ test('valid query', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=test&quux=123')
@@ -253,10 +253,10 @@ test('invalid query', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=test')
@@ -286,10 +286,10 @@ test('valid body', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -320,10 +320,10 @@ test('invalid body', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .post('/foo/')
@@ -353,10 +353,10 @@ test('handles putting', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .put('/foo/')
@@ -384,10 +384,10 @@ test('handles deleting', async () => {
     }
   );
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .delete('/foo/3')
@@ -410,10 +410,10 @@ test('filtered headers', async () => {
     return res.noContent();
   });
 
-  const { registerRouter } = await server.setup(config);
+  const { registerRouter, server: innerServer } = await server.setup(config);
   registerRouter(router);
 
-  const { server: innerServer } = await server.start(config);
+  await server.start(config);
 
   await supertest(innerServer.listener)
     .get('/foo/?bar=quux')
@@ -443,10 +443,10 @@ describe('with `basepath: /bar` and `rewriteBasePath: false`', () => {
       res.ok({ key: 'value:/foo' })
     );
 
-    const { registerRouter } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup(config);
     registerRouter(router);
 
-    const { server: innerServer } = await server.start(configWithBasePath);
+    await server.start(configWithBasePath);
     innerServerListener = innerServer.listener;
   });
 
@@ -504,10 +504,10 @@ describe('with `basepath: /bar` and `rewriteBasePath: true`', () => {
       res.ok({ key: 'value:/foo' })
     );
 
-    const { registerRouter } = await server.setup(config);
+    const { registerRouter, server: innerServer } = await server.setup(config);
     registerRouter(router);
 
-    const { server: innerServer } = await server.start(configWithBasePath);
+    await server.start(configWithBasePath);
     innerServerListener = innerServer.listener;
   });
 
@@ -582,8 +582,7 @@ test('returns server and connection options on start', async () => {
     ...config,
     port: 12345,
   };
-  const { options } = await server.setup(configWithPort);
-  const { server: innerServer } = await server.start(configWithPort);
+  const { options, server: innerServer } = await server.setup(configWithPort);
 
   expect(innerServer).toBeDefined();
   expect(innerServer).toBe((server as any).server);

@@ -26,15 +26,17 @@ const createSetupContractMock = () => {
     registerAuth: jest.fn(),
     registerOnRequest: jest.fn(),
     registerRouter: jest.fn(),
+    // we can mock some hapi server method when we need it
+    server: {} as Server,
   };
   return setupContract;
 };
 
 const createStartContractMock = () => {
   const startContract = {
-    // we can mock some hapi server method when we need it
-    server: {} as Server,
+    isListening: jest.fn(),
   };
+  startContract.isListening.mockReturnValue(true);
   return startContract;
 };
 

@@ -98,36 +98,6 @@ test('does not fail on "setup" if there are unused paths detected', async () => 
   expect(loggingServiceMock.collect(logger)).toMatchSnapshot('unused paths logs');
 });
 
-test('does not start http service is `autoListen:false`', async () => {
-  configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: false }));
-
-  const server = new Server(configService as any, logger, env);
-  expect(mockLegacyService.start).not.toHaveBeenCalled();
-  expect(httpService.start).not.toHaveBeenCalled();
-
-  await server.setup();
-  await server.start();
-
-  expect(httpService.start).not.toHaveBeenCalled();
-  expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
-});
-
-test('does not start http service if process is dev cluster master', async () => {
-  const server = new Server(
-    configService as any,
-    logger,
-    new Env('.', getEnvOptions({ isDevClusterMaster: true }))
-  );
-
-  expect(mockLegacyService.start).not.toHaveBeenCalled();
-
-  await server.setup();
-  await server.start();
-
-  expect(httpService.start).not.toHaveBeenCalled();
-  expect(mockLegacyService.start).toHaveBeenCalledTimes(1);
-});
-
 test('stops services on "stop"', async () => {
   const server = new Server(configService as any, logger, env);
 

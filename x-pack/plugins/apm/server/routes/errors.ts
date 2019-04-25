@@ -7,7 +7,7 @@
 import Boom from 'boom';
 import Joi from 'joi';
 import { Legacy } from 'kibana';
-import { SetupDeps } from '../..';
+import { CoreSetup } from 'src/core/server';
 import { getDistribution } from '../lib/errors/distribution/get_distribution';
 import { getErrorGroup } from '../lib/errors/get_error_group';
 import { getErrorGroups } from '../lib/errors/get_error_groups';
@@ -21,7 +21,7 @@ const defaultErrorHandler = (err: Error) => {
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initErrorsApi(core: SetupDeps) {
+export function initErrorsApi(core: CoreSetup) {
   const { server } = core.http;
   server.route({
     method: 'GET',
