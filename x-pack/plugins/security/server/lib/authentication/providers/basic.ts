@@ -104,7 +104,15 @@ export class BasicAuthenticationProvider {
 
     if (authenticationResult.notHandled() && state) {
       authenticationResult = await this.authenticateViaState(request, state);
-    } else if (authenticationResult.notHandled() && canRedirectRequest(request)) {
+      return authenticationResult;
+    }
+
+    // last ditch effort, let's see if anonymous access is enabled
+    if (authenticationResult.notHandled()) {
+      authenticationResult = await this.authenticateWithoutAnything();
+    }
+
+    if (authenticationResult.notHandled() && canRedirectRequest(request)) {
       // If we couldn't handle authentication let's redirect user to the login page.
       const nextURL = encodeURIComponent(`${request.getBasePath()}${request.url.path}`);
       authenticationResult = AuthenticationResult.redirectTo(
@@ -228,6 +236,16 @@ export class BasicAuthenticationProvider {
 
       return AuthenticationResult.failed(err);
     }
+  }
+
+  private async authenticateWithoutAnything() {
+    this.debug('Trying to authenticate without anything.');
+
+    const user = await this.options.client.callWithRequest({ headers: {} }, 'shield.authenticate');
+
+    this.debug('Request has been authenticated via state.');
+
+    return AuthenticationResult.succeeded(user);
   }
 
   /**
