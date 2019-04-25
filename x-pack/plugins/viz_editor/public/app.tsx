@@ -47,6 +47,9 @@ function App($scope: any, $element: Element[]) {
 
   $scope.$on('$destroy', () => unmountComponentAtNode(el));
 
+  // This is here to prevent crashes due to faulty charts.
+  // Can go away as soon as elastic-charts is stable enough
+  // tslint:disable-next-line:no-empty
   window.onerror = () => {};
 
   return render(

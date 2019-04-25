@@ -305,16 +305,12 @@ function _getSuggestionsForFieldAsReplacement(
   };
 
   if (datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
-    if (field.type === 'number') {
-      suggestions = suggestions.concat(opWithDateHistogram('column'));
-    } else {
-      suggestions = suggestions.concat(
-        getOperatorsForField(field).map(op => opWithDateHistogram(op))
-      );
-    }
+    suggestions = suggestions.concat(
+      getOperatorsForField(field, false, true).map(op => opWithDateHistogram(op))
+    );
   }
 
-  suggestions = suggestions.concat(getOperatorsForField(field).map(opToSuggestion));
+  suggestions = suggestions.concat(getOperatorsForField(field, false, true).map(opToSuggestion));
 
   return suggestions.filter(suggestion => !!suggestion) as Suggestion[];
 }

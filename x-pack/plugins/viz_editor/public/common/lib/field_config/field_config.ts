@@ -6,23 +6,36 @@
 
 import { DatasourceField, SelectOperator } from '../../../../common';
 
-export function getOperatorsForField(field: DatasourceField): SelectOperator[] {
+export function getOperatorsForField(
+  field: DatasourceField,
+  includeMetric: boolean = true,
+  includeSegment: boolean = true
+): SelectOperator[] {
+  const operators: SelectOperator[] = [];
   // TODO: Make this configuration plugin-oriented
-  if (!field.aggregatable) {
-    return ['column'];
+  if (field.aggregatable) {
+    if (field.type === 'date' && includeSegment) {
+      operators.push('date_histogram');
+    }
+
+    if (field.type === 'number') {
+      if (includeMetric) {
+        operators.push('avg');
+        operators.push('sum');
+      }
+      if (includeSegment) {
+        operators.push('terms');
+      }
+    }
+
+    if (field.type === 'string' && includeSegment) {
+      operators.push('terms');
+    }
   }
 
-  if (field.type === 'date') {
-    return ['date_histogram'];
+  if (includeMetric && includeSegment) {
+    operators.push('column');
   }
 
-  if (field.type === 'number') {
-    return ['column', 'terms', 'avg', 'sum'];
-  }
-
-  if (field.type === 'string') {
-    return ['terms', 'count'];
-  }
-
-  return ['column'];
+  return operators;
 }

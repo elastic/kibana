@@ -165,7 +165,7 @@ function getSuggestionsForField(
   if (!field.aggregatable) {
     return [];
   }
-  const operationNames = getOperatorsForField(field);
+  const operationNames = getOperatorsForField(field, false, true);
 
   if (operationNames.length === 0) {
     return [];
