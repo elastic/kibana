@@ -7,13 +7,12 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import styled from 'styled-components';
-import { UICapabilitiesProvider } from 'ui/capabilities/react';
 import { px, topNavHeight, unit, units } from '../../../style/variables';
 import { GlobalFetchIndicator } from './GlobalFetchIndicator';
 import { LicenseCheck } from './LicenseCheck';
 import { routes } from './routeConfig';
 import { ScrollToTopOnPathChange } from './ScrollToTopOnPathChange';
-import { UpdateBadge } from './UpdateBadge';
+import { useUpdateBadgeEffect } from './useUpdateBadgeEffect';
 import { UpdateBreadcrumbs } from './UpdateBreadcrumbs';
 
 const MainContainer = styled.div`
@@ -23,22 +22,21 @@ const MainContainer = styled.div`
 `;
 
 export function Main() {
+  useUpdateBadgeEffect();
+
   return (
-    <UICapabilitiesProvider>
-      <GlobalFetchIndicator>
-        <MainContainer data-test-subj="apmMainContainer">
-          <UpdateBreadcrumbs />
-          <UpdateBadge />
-          <Route component={ScrollToTopOnPathChange} />
-          <LicenseCheck>
-            <Switch>
-              {routes.map((route, i) => (
-                <Route key={i} {...route} />
-              ))}
-            </Switch>
-          </LicenseCheck>
-        </MainContainer>
-      </GlobalFetchIndicator>
-    </UICapabilitiesProvider>
+    <GlobalFetchIndicator>
+      <MainContainer data-test-subj="apmMainContainer">
+        <UpdateBreadcrumbs />
+        <Route component={ScrollToTopOnPathChange} />
+        <LicenseCheck>
+          <Switch>
+            {routes.map((route, i) => (
+              <Route key={i} {...route} />
+            ))}
+          </Switch>
+        </LicenseCheck>
+      </MainContainer>
+    </GlobalFetchIndicator>
   );
 }
