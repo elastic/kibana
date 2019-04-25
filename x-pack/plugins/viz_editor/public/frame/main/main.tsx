@@ -34,6 +34,7 @@ import { DroppablePane } from './droppable_pane';
 
 type Action =
   | { type: 'loaded' }
+  | { type: 'clear' }
   | { type: 'loadError'; message: string }
   | { type: 'expressionMode' }
   | { type: 'updateVisModel'; newState: VisModel };
@@ -101,6 +102,11 @@ function reducer(state: RootState, action: Action): RootState {
       }
       // TODO this is the place where we can hook in an undo/redo history later
       return { ...state, visModel: action.newState };
+    case 'clear':
+      return {
+        visModel: initialState(),
+        metadata: { expressionMode: false },
+      };
     default:
       throw new Error(`Unknown action ${(action as any).type}`);
   }
@@ -157,9 +163,9 @@ export function Main(props: MainProps) {
   const hasData = Object.keys(state.visModel.queries).length > 0;
 
   return (
-    <EuiPage>
+    <EuiPage className="vzPage">
       {!state.metadata.expressionMode && (
-        <EuiPageSideBar>
+        <EuiPageSideBar className="vzSidebar">
           {datasourceRegistry.getAll().map(({ name, icon }) => (
             <EuiButtonToggle
               key={name}
@@ -191,14 +197,13 @@ export function Main(props: MainProps) {
           <EuiPageContentBody>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={5}>
-                {hasData &&
-                  (WorkspacePanel ? (
-                    <WorkspacePanel {...panelProps}>
-                      <ExpressionRenderer {...props} expression={expression} />
-                    </WorkspacePanel>
-                  ) : (
-                    <ExpressionRenderer {...props} expression={expression} />
-                  ))}
+                {WorkspacePanel ? (
+                  <WorkspacePanel {...panelProps}>
+                    {hasData && <ExpressionRenderer {...props} expression={expression} />}
+                  </WorkspacePanel>
+                ) : (
+                  hasData && <ExpressionRenderer {...props} expression={expression} />
+                )}
               </EuiFlexItem>
               {state.metadata.expressionMode ? (
                 <EuiFlexItem>
@@ -215,13 +220,15 @@ export function Main(props: MainProps) {
                 </EuiFlexItem>
               ) : (
                 <>
-                  <EuiFlexItem>
-                    <ExpressionRenderer
-                      {...props}
-                      expression={getTableExpression(state.visModel)}
-                    />
-                    <EuiCodeBlock>{expression}</EuiCodeBlock>
-                  </EuiFlexItem>
+                  {hasData && (
+                    <EuiFlexItem>
+                      <ExpressionRenderer
+                        {...props}
+                        expression={getTableExpression(state.visModel)}
+                      />
+                      <EuiCodeBlock>{expression}</EuiCodeBlock>
+                    </EuiFlexItem>
+                  )}
                   <EuiFlexItem grow={false}>
                     <EuiFlexGroup direction="row" alignItems="flexStart">
                       <EuiButtonEmpty
@@ -233,6 +240,9 @@ export function Main(props: MainProps) {
                           defaultMessage="Edit expression directly"
                         />
                       </EuiButtonEmpty>
+                      <EuiButtonEmpty size="xs" onClick={() => dispatch({ type: 'clear' })}>
+                        Clear editor
+                      </EuiButtonEmpty>
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </>
@@ -242,7 +252,7 @@ export function Main(props: MainProps) {
         </DroppablePane>
       </EuiPageBody>
       {!state.metadata.expressionMode && (
-        <EuiPageSideBar>
+        <EuiPageSideBar className="vzSidebar">
           <ConfigPanel {...panelProps} />
 
           {hasData && (
