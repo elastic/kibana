@@ -11,35 +11,50 @@ import { FieldId, AggId } from '../../../../common/types/fields';
 
 type agg = 'agg';
 
+export type RollupFields = { [id in FieldId]: [{ [key in agg]: AggId }] };
+
 export interface RollupJob {
   job_id: string;
   rollup_index: string;
   index_pattern: string;
-  fields: { [id in FieldId]: [{ [key in agg]: AggId }] };
+  fields: RollupFields;
 }
 
-export async function getRollupJob(
+export async function rollupServiceProvider(
   indexPattern: string,
   callWithRequest: CallWithRequestType,
   request: Request
-): Promise<RollupJob | null> {
-  const savedObject = await loadRollupIndexPattern(indexPattern, request);
+) {
+  const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, request);
+  let jobIndexPatterns: string[] = [indexPattern];
 
-  if (savedObject !== null) {
-    const parsedTypeMetaData = JSON.parse(savedObject.attributes.typeMeta);
-    const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
-    const resp = await callWithRequest('ml.rollupIndexCapabilities', { indexPattern: rollUpIndex });
+  async function getRollupJobs(): Promise<RollupJob[] | null> {
+    if (rollupIndexPatternObject !== null) {
+      const parsedTypeMetaData = JSON.parse(rollupIndexPatternObject.attributes.typeMeta);
+      const rollUpIndex: string = parsedTypeMetaData.params.rollup_index;
+      const rollupCaps = await callWithRequest('ml.rollupIndexCapabilities', {
+        indexPattern: rollUpIndex,
+      });
 
-    if (resp[rollUpIndex] && resp[rollUpIndex].rollup_jobs) {
-      const rollupJobs: RollupJob[] = resp[rollUpIndex].rollup_jobs;
-      const job = rollupJobs.find(j => j.job_id === rollUpIndex);
-      if (job !== undefined) {
-        return job;
+      const indexRollupCaps = rollupCaps[rollUpIndex];
+      if (indexRollupCaps && indexRollupCaps.rollup_jobs) {
+        jobIndexPatterns = indexRollupCaps.rollup_jobs.map((j: RollupJob) => j.index_pattern);
+
+        return indexRollupCaps.rollup_jobs;
       }
     }
+
+    return null;
   }
 
-  return null;
+  function getIndexPattern() {
+    return jobIndexPatterns.join(',');
+  }
+
+  return {
+    getRollupJobs,
+    getIndexPattern,
+  };
 }
 
 async function loadRollupIndexPattern(

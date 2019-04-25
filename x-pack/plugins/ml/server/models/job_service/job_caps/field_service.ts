@@ -8,7 +8,7 @@ import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
 import { Field, Aggregation, FieldId } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
-import { getRollupJob, RollupJob } from './rollup';
+import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations } from './aggregations';
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 
@@ -93,16 +93,36 @@ class FieldsService {
   // of aggregations and fields that can be used for an ML job
   // if the index is a rollup, the fields and aggs will be filtered
   // based on what is available in the rollup job
+  // the _indexPattern will be replaced with a comma separated list
+  // of index patterns from all of the rollup jobs
   public async getData(): Promise<AggAndFieldList> {
+    let rollupFields: RollupFields = {};
+
+    if (this._isRollup) {
+      const rollupService = await rollupServiceProvider(
+        this._indexPattern,
+        this._callWithRequest,
+        this._request
+      );
+      const rollupConfigs: RollupJob[] | null = await rollupService.getRollupJobs();
+
+      // if a rollup index has been specified, yet there are no
+      // rollup configs, return with no results
+      if (rollupConfigs === null) {
+        return {
+          aggs: [],
+          fields: [],
+        };
+      } else {
+        rollupFields = combineAllRollupFields(rollupConfigs);
+        this._indexPattern = rollupService.getIndexPattern();
+      }
+    }
+
     const aggs = cloneDeep(aggregations);
     const fields: Field[] = await this.createFields();
 
-    let rollupConfig: RollupJob | null = null;
-    if (this._isRollup) {
-      rollupConfig = await getRollupJob(this._indexPattern, this._callWithRequest, this._request);
-    }
-
-    return await combineFieldsAndAggs(fields, aggs, rollupConfig);
+    return await combineFieldsAndAggs(fields, aggs, rollupFields);
   }
 }
 
@@ -111,12 +131,12 @@ class FieldsService {
 async function combineFieldsAndAggs(
   fields: Field[],
   aggs: Aggregation[],
-  rollupConfig: RollupJob | null
+  rollupFields: RollupFields
 ): Promise<AggAndFieldList> {
   const textAndKeywordFields = getTextAndKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
 
-  const mix = mixFactory(rollupConfig);
+  const mix = mixFactory(rollupFields);
 
   aggs.forEach(a => {
     if (a.type === METRIC_AGG_TYPE) {
@@ -158,12 +178,13 @@ function filterAggs(aggs: Aggregation[]): Aggregation[] {
 
 // returns a mix function that is used to cross-reference aggs and fields.
 // wrapped in a provider to allow filtering based on rollup job capabilities
-function mixFactory(rollupConfig: RollupJob | null) {
+function mixFactory(rollupFields: RollupFields) {
+  const isRollup = Object.keys(rollupFields).length > 0;
+
   return function mix(field: Field, agg: Aggregation): void {
     if (
-      rollupConfig === null ||
-      (rollupConfig.fields[field.id] &&
-        rollupConfig.fields[field.id].find(f => f.agg === agg.kibanaName))
+      isRollup === false ||
+      (rollupFields[field.id] && rollupFields[field.id].find(f => f.agg === agg.kibanaName))
     ) {
       if (field.aggs !== undefined) {
         field.aggs.push(agg);
@@ -173,6 +194,25 @@ function mixFactory(rollupConfig: RollupJob | null) {
       }
     }
   };
+}
+
+function combineAllRollupFields(rollupConfigs: RollupJob[]): RollupFields {
+  const rollupFields: RollupFields = {};
+  rollupConfigs.forEach(conf => {
+    Object.keys(conf.fields).forEach(fieldName => {
+      if (rollupFields[fieldName] === undefined) {
+        rollupFields[fieldName] = conf.fields[fieldName];
+      } else {
+        const aggs = conf.fields[fieldName];
+        aggs.forEach(agg => {
+          if (rollupFields[fieldName].find(f => f.agg === agg.agg) === null) {
+            rollupFields[fieldName].push(agg);
+          }
+        });
+      }
+    });
+  });
+  return rollupFields;
 }
 
 function getTextAndKeywordFields(fields: Field[]): Field[] {
