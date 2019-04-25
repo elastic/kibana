@@ -4,6 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Chance from 'chance';
 
-export { getRandomString } from './strings';
-export { nextTick } from './utils';
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+
+export const getRandomString = (options = {}) =>
+  `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;
