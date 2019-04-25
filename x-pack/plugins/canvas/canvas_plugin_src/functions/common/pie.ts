@@ -15,13 +15,54 @@ import {
   ContextFunctionSpec,
   Legend,
   Palette,
-  Pie,
-  PieData,
   PointSeries,
   Render,
   SeriesStyle,
   Style,
 } from '../types';
+
+interface PieSeriesOptions {
+  show: boolean;
+  innerRadius: number;
+  stroke: {
+    width: number;
+  };
+  label: {
+    show: boolean;
+    radius: number;
+  };
+  tilt: number;
+  radius: number | 'auto';
+}
+
+interface PieOptions {
+  canvas: boolean;
+  colors: string[];
+  legend: {
+    show: boolean;
+    backgroundOpacity: number;
+    labelBoxBorderColor: string;
+    position: Legend;
+  };
+  grid: {
+    show: boolean;
+  };
+  series: {
+    pie: PieSeriesOptions;
+  };
+}
+
+interface PieData {
+  label: string;
+  data: number[];
+  color?: string;
+}
+
+interface Pie {
+  font: Style;
+  data: PieData[];
+  options: PieOptions;
+}
 
 interface Arguments {
   palette: Palette | null;

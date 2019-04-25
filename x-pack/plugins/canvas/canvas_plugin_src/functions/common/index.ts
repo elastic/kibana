@@ -38,7 +38,6 @@ import { metric } from './metric';
 import { neq } from './neq';
 import { palette } from './palette';
 import { pie } from './pie';
-// @ts-ignore
 import { plot } from './plot';
 import { ply } from './ply';
 import { progress } from './progress';

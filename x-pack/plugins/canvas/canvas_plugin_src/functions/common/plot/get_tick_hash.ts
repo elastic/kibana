@@ -5,9 +5,10 @@
  */
 
 import { get, sortBy } from 'lodash';
+import { DatatableColumn, DatatableRow, DatatableColumnType, Ticks } from '../../types';
 
-export const getTickHash = (columns, rows) => {
-  const ticks = {
+export const getTickHash = (columns: DatatableColumn[], rows: DatatableRow[]) => {
+  const ticks: Ticks = {
     x: {
       hash: {},
       counter: 0,
@@ -18,7 +19,7 @@ export const getTickHash = (columns, rows) => {
     },
   };
 
-  if (get(columns, 'x.type') === 'string') {
+  if (get<DatatableColumn[], DatatableColumnType>(columns, 'x.type') === 'string') {
     sortBy(rows, ['x']).forEach(row => {
       if (!ticks.x.hash[row.x]) {
         ticks.x.hash[row.x] = ticks.x.counter++;

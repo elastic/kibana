@@ -15,6 +15,7 @@ import {
   Palette,
   SeriesStyle,
 } from '.';
+import { AxisConfig } from './common';
 
 /**
  * This type can convert a type into a known Canvas Argument string.  For example,
@@ -40,6 +41,7 @@ type KnownTypeToCanvasArgument<T> =
   T extends string ? 'string' : 
   T extends boolean ? 'boolean' : 
   T extends number ? 'number' :
+  T extends AxisConfig ? 'axisConfig' :
   T extends Filter ? 'filter' :
   T extends Case ? 'case' :
   T extends ContainerStyle ? 'containerStyle' :

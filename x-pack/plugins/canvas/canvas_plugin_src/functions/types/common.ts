@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Style } from './style';
-
 /**
  * Utility type for converting a union of types into an intersection.
  *
@@ -61,6 +59,11 @@ export interface Case {
 export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
 
 /**
+ * This type represents a `DatatableRow` in a `Datatable`.
+ */
+export type DatatableRow = Record<string, any>;
+
+/**
  * This type represents the shape of a column in a `Datatable`.
  */
 export interface DatatableColumn {
@@ -73,7 +76,7 @@ export interface DatatableColumn {
  */
 export interface Datatable {
   columns: DatatableColumn[];
-  rows: any[];
+  rows: DatatableRow[];
   type: 'datatable';
 }
 
@@ -84,7 +87,7 @@ export type Legend = 'nw' | 'sw' | 'ne' | 'se';
  */
 export interface PointSeries {
   columns: DatatableColumn[];
-  rows: any[];
+  rows: Array<Record<string, any>>;
   type: 'pointseries';
 }
 
@@ -95,7 +98,7 @@ export interface SeriesStyle {
   lines: number;
   bars: number;
   points: number;
-  fill: boolean;
+  fill: number;
   stack: number;
   horizontalBars: boolean;
 }
@@ -106,47 +109,53 @@ export interface Palette {
   gradient: boolean;
 }
 
-export interface PieData {
-  label: string;
-  data: number[];
+export interface SeriesOptions {
+  numbers?: {
+    show: boolean;
+  };
+  lines?: {
+    show: boolean;
+    lineWidth: number;
+    fillColor: string;
+    fill: number;
+  };
+  bars?: {
+    show: boolean;
+    barWidth: number;
+    fill: number;
+    align: 'center';
+    horizontal: boolean;
+  };
+  stack?: number;
   color?: string;
+  bubbles: {
+    show: boolean;
+    fill?: number;
+  };
+  points?: {
+    show: boolean;
+  };
+  shadowSize?: number;
 }
 
-export interface Pie {
-  font: Style;
-  data: PieData[];
-  options: {
-    canvas: boolean;
-    colors: string[];
-    legend: {
-      show: boolean;
-      backgroundOpacity: number;
-      labelBoxBorderColor: string;
-      position: Legend;
-    };
-    grid: {
-      show: boolean;
-    };
-    series: {
-      pie: {
-        show: boolean;
-        innerRadius: number;
-        stroke: {
-          width: number;
-        };
-        label: {
-          show: boolean;
-          radius: number;
-        };
-        tilt: number;
-        radius: number | 'auto';
-      };
-      bubbles: {
-        show: boolean;
-      };
-      shadowSize: number;
-    };
+export interface Ticks {
+  x: {
+    hash: Record<string, any>;
+    counter: number;
   };
+  y: {
+    hash: Record<string, any>;
+    counter: number;
+  };
+}
+
+export interface AxisConfig {
+  type: 'axisConfig';
+  show: boolean;
+  position: 'bottom' | 'top' | 'left' | 'right';
+  min: number;
+  max: number;
+  tickSize: number;
 }
 
 /**
@@ -155,3 +164,10 @@ export interface Pie {
  */
 export const isDatatable = (datatable: any): datatable is Datatable =>
   !!datatable && datatable.type === 'datatable';
+
+/**
+ * A Utility function that Typescript can use to determine if an object is a Datatable.
+ * @param datatable
+ */
+export const isAxisConfig = (axisConfig: any): axisConfig is AxisConfig =>
+  !!axisConfig && axisConfig.type === 'axisConfig';

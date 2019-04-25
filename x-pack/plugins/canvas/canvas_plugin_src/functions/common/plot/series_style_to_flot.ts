@@ -5,20 +5,21 @@
  */
 
 import { get } from 'lodash';
+import { SeriesStyle, SeriesOptions } from '../../types';
 
-export const seriesStyleToFlot = seriesStyle => {
+export const seriesStyleToFlot = (seriesStyle: SeriesStyle) => {
   if (!seriesStyle) {
     return {};
   }
 
-  const lines = get(seriesStyle, 'lines');
-  const bars = get(seriesStyle, 'bars');
-  const fill = get(seriesStyle, 'fill');
-  const color = get(seriesStyle, 'color');
-  const stack = get(seriesStyle, 'stack');
-  const horizontal = get(seriesStyle, 'horizontalBars', false);
+  const lines = get<SeriesStyle['lines']>(seriesStyle, 'lines');
+  const bars = get<SeriesStyle['bars']>(seriesStyle, 'bars');
+  const fill = get<SeriesStyle['fill']>(seriesStyle, 'fill');
+  const color = get<SeriesStyle['color']>(seriesStyle, 'color');
+  const stack = get<SeriesStyle['stack']>(seriesStyle, 'stack');
+  const horizontal = get<SeriesStyle['horizontalBars']>(seriesStyle, 'horizontalBars', false);
 
-  const flotStyle = {
+  const flotStyle: SeriesOptions = {
     numbers: {
       show: true,
     },
@@ -40,7 +41,8 @@ export const seriesStyleToFlot = seriesStyle => {
     // we just set the size to be static.
     points: { show: false },
     bubbles: {
-      fill: fill,
+      show: true,
+      fill,
     },
   };
 
