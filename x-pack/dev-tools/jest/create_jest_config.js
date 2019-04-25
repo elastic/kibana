@@ -44,9 +44,7 @@ export function createJestConfig({
     ],
     testPathIgnorePatterns: [
       `.*[/\\\\]plugins[/\\\\]code[/\\\\]server[/\\\\]indexer[/\\\\].*`,
-      `.*[/\\\\]plugins[/\\\\]code[/\\\\]server[/\\\\]lib[/\\\\].*`,
       `.*[/\\\\]plugins[/\\\\]code[/\\\\]server[/\\\\]lsp[/\\\\].*`,
-      `.*[/\\\\]plugins[/\\\\]code[/\\\\]server[/\\\\]queue[/\\\\].*`,
     ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`
