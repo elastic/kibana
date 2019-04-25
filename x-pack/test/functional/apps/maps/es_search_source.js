@@ -10,8 +10,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
 
-  // FF: suite fails in headless mode
-  describe.skip('elasticsearch document layer', () => {
+  describe('elasticsearch document layer', () => {
     before(async () => {
       await PageObjects.maps.loadSavedMap('document example');
     });

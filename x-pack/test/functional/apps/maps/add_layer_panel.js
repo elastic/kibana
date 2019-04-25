@@ -39,8 +39,7 @@ export default function ({ getPageObjects }) {
       expect(panelOpen).to.be(false);
     });
 
-    // FF: suite fails in headless mode
-    it.skip('should close & remove layer on clicking "Cancel" after selecting layer',
+    it('should close & remove layer on clicking "Cancel" after selecting layer',
       async () => {
         // Verify panel page element is open
         let panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
@@ -64,8 +63,7 @@ export default function ({ getPageObjects }) {
         expect(vectorLayerExists).to.be(false);
       });
 
-    // FF: suite fails in headless mode
-    it.skip('should close and remove layer on map save', async () => {
+    it('should close and remove layer on map save', async () => {
       // Verify panel page element is open
       let panelOpen = await PageObjects.maps.isLayerAddPanelOpen();
       expect(panelOpen).to.be(true);

@@ -10,8 +10,7 @@ export default function ({ getPageObjects, getService, updateBaselines }) {
   const PageObjects = getPageObjects(['common', 'maps', 'header', 'home', 'timePicker']);
   const screenshot = getService('screenshots');
 
-  // FF: suite fails in headless mode
-  describe.skip('maps loaded from sample data', () => {
+  describe('maps loaded from sample data', () => {
 
     // Sample data is shifted to be relative to current time
     // This means that a static timerange will return different documents

@@ -15,7 +15,7 @@ export default function ({ getPageObjects, getService }) {
   const testSubjects = getService('testSubjects');
 
   // FF bug: https://github.com/elastic/kibana/issues/35172
-  describe.skip('embed in dashboard', () => {
+  describe('embed in dashboard', () => {
     before(async () => {
       await kibanaServer.uiSettings.replace({
         'defaultIndex': 'c698b940-e149-11e8-a35a-370a8516603a',

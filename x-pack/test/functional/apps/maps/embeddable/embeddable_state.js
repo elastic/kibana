@@ -12,8 +12,7 @@ export default function ({ getPageObjects, getService }) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const DASHBOARD_NAME = 'verify_map_embeddable_state';
 
-  // FF: suite fails in headless mode
-  describe.skip('embeddable state', () => {
+  describe('embeddable state', () => {
 
     before(async () => {
       await kibanaServer.uiSettings.replace({
