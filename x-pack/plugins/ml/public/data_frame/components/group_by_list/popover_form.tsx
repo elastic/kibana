@@ -76,7 +76,9 @@ export const PopoverForm: React.SFC<Props> = ({ defaultInterval, intervalType, o
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
             <EuiButton isDisabled={!valid} onClick={() => onChange(interval)}>
-              Save
+              {i18n.translate('xpack.ml.dataframe.popoverForm.submitButtonLabel', {
+                defaultMessage: 'Apply',
+              })}
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>

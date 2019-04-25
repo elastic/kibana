@@ -48,7 +48,7 @@ exports[`Data Frame: <PopoverForm /> Minimal initialization 1`] = `
           size="m"
           type="button"
         >
-          Save
+          Apply
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
