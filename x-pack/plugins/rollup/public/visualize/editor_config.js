@@ -52,12 +52,8 @@ export function initEditorConfig() {
 
     // Set date histogram time zone based on rollup capabilities
     if (aggTypeName === 'date_histogram') {
-      const timezone = fieldAgg.time_zone || 'UTC';
       const interval = fieldAgg.interval;
       return {
-        time_zone: {
-          fixedValue: timezone,
-        },
         interval: {
           fixedValue: 'custom',
         },

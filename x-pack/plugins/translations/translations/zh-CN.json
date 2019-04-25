@@ -2960,7 +2960,6 @@
     "tsvb.replaceVars.errors.markdownErrorTitle": "处理 Markdown 时出错",
     "tsvb.replaceVars.errors.unknownVarDescription": "{badVar} 为未知变量",
     "tsvb.replaceVars.errors.unknownVarTitle": "处理 Markdown 时出错",
-    "tsvb.requestHandler.notifier.locationNameTitle": "指标",
     "tsvb.serialDiff.aggregationLabel": "聚合",
     "tsvb.serialDiff.lagLabel": "延迟",
     "tsvb.serialDiff.metricLabel": "指标",
