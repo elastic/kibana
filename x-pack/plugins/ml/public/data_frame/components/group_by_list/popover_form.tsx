@@ -28,17 +28,14 @@ export type supportedIntervalTypes =
   | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 
 export function isIntervalValid(interval: string, intervalType: supportedIntervalTypes) {
-  let valid = true;
-
-  valid = interval !== '';
-
-  if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
-    valid = histogramIntervalFormatRegex.test(interval);
-  } else if (valid && intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
-    valid = dateHistogramIntervalFormatRegex.test(interval);
+  if (interval !== '') {
+    if (intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
+      return histogramIntervalFormatRegex.test(interval);
+    } else if (intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
+      return dateHistogramIntervalFormatRegex.test(interval);
+    }
   }
-
-  return valid;
+  return false;
 }
 
 interface Props {
