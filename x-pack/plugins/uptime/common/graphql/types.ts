@@ -38,6 +38,8 @@ export interface Query {
   getErrorsList?: ErrorListItem[] | null;
 
   getMonitorPageTitle?: MonitorPageTitle | null;
+
+  getMonitorCount: number;
 }
 
 export interface PingResults {
@@ -517,6 +519,13 @@ export interface GetErrorsListQueryArgs {
 }
 export interface GetMonitorPageTitleQueryArgs {
   monitorId: string;
+}
+export interface GetMonitorCountQueryArgs {
+  dateRangeStart: string;
+
+  dateRangeEnd: string;
+
+  filters?: string | null;
 }
 
 // ====================================================

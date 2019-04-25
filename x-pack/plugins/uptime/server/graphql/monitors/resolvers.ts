@@ -12,6 +12,7 @@ import {
   GetFilterBarQueryArgs,
   GetLatestMonitorsQueryArgs,
   GetMonitorChartsDataQueryArgs,
+  GetMonitorCountQueryArgs,
   GetMonitorPageTitleQueryArgs,
   GetMonitorsQueryArgs,
   GetSnapshotQueryArgs,
@@ -74,6 +75,13 @@ export type UMGetMontiorPageTitleResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetMonitorCountResolver = UMResolver<
+  number | Promise<number>,
+  any,
+  GetMonitorCountQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
@@ -85,6 +93,7 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getFilterBar: UMGetFilterBarResolver;
     getErrorsList: UMGetErrorsListResolver;
     getMonitorPageTitle: UMGetMontiorPageTitleResolver;
+    getMonitorCount: UMGetMonitorCountResolver;
   };
 } => ({
   Query: {
@@ -133,6 +142,13 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { req }
     ): Promise<any> {
       return libs.monitors.getErrorsList(req, dateRangeStart, dateRangeEnd, filters);
+    },
+    async getMonitorCount(
+      resolver,
+      { dateRangeStart, dateRangeEnd, filters },
+      { req }
+    ): Promise<number> {
+      return await libs.monitors.getMonitorIdCount(req, dateRangeStart, dateRangeEnd, filters);
     },
     async getMonitorPageTitle(
       resolver: any,

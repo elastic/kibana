@@ -143,5 +143,7 @@ export const monitorsSchema = gql`
     getErrorsList(dateRangeStart: String!, dateRangeEnd: String!, filters: String): [ErrorListItem!]
 
     getMonitorPageTitle(monitorId: String!): MonitorPageTitle
+
+    getMonitorCount(dateRangeStart: String!, dateRangeEnd: String!, filters: String): Int!
   }
 `;

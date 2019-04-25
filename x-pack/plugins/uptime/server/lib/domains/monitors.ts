@@ -39,6 +39,15 @@ export class UMMonitorsDomain {
     return this.adapter.getSnapshotCount(request, dateRangeStart, dateRangeEnd, filters);
   }
 
+  public async getMonitorIdCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<number> {
+    return this.adapter.getMonitorIdCount(request, dateRangeStart, dateRangeEnd, filters);
+  }
+
   public async getFilterBar(
     request: any,
     dateRangeStart: string,

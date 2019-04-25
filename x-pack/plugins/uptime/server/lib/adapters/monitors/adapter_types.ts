@@ -33,4 +33,10 @@ export interface UMMonitorsAdapter {
     filters?: string | null
   ): Promise<any>;
   getMonitorPageTitle(request: any, monitorId: string): Promise<MonitorPageTitle | null>;
+  getMonitorIdCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<number>;
 }

@@ -216,6 +216,31 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     return { up, down, total: up + down };
   }
 
+  public async getMonitorIdCount(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    filters?: string | null
+  ): Promise<number> {
+    const { query } = getFilteredQuery(dateRangeStart, dateRangeEnd, filters);
+    const params = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query,
+        size: 0,
+        aggs: {
+          monitor_count: {
+            cardinality: {
+              field: 'monitor.id',
+            },
+          },
+        },
+      },
+    };
+    const queryResult = await this.database.search(request, params);
+    return get<number>(queryResult, 'aggregations.monitor_count.value', 0);
+  }
+
   /**
    * Fetch the latest status for a monitors list
    * @param request Kibana request
