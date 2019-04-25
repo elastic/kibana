@@ -51,3 +51,27 @@ interface GroupByTerms extends GroupByConfigBase {
 
 export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
+
+export interface TermsAgg {
+  terms: {
+    field: FieldName;
+  };
+}
+
+export interface HistogramAgg {
+  histogram: {
+    field: FieldName;
+    interval: string;
+  };
+}
+
+export interface DateHistogramAgg {
+  date_histogram: {
+    field: FieldName;
+    format?: DATE_HISTOGRAM_FORMAT;
+    interval: string;
+  };
+}
+
+type PivotGroupBy = TermsAgg | HistogramAgg | DateHistogramAgg;
+export type PivotGroupByDict = Dictionary<PivotGroupBy>;

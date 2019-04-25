@@ -10,14 +10,8 @@ import { JobDetailsExposedState } from '../components/job_details/job_details_fo
 import { DefinePivotExposedState } from '../components/define_pivot/define_pivot_form';
 
 import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from './pivot_group_by';
-
-import {
-  getDataFramePreviewRequest,
-  getDataFrameRequest,
-  getPivotQuery,
-  PivotAggsConfig,
-  PIVOT_SUPPORTED_AGGS,
-} from './index';
+import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from './pivot_aggs';
+import { getDataFramePreviewRequest, getDataFrameRequest, getPivotQuery } from './request';
 
 describe('Data Frame: Common', () => {
   test('getPivotQuery()', () => {
