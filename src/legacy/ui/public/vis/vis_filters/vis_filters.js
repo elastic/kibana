@@ -18,9 +18,9 @@
  */
 
 import _ from 'lodash';
-import { FilterBarPushFiltersProvider } from '../filter_bar/push_filters';
-import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';
-import { onBrushEvent } from '../utils/brush_event';
+import { FilterBarPushFiltersProvider } from '../../filter_bar/push_filters';
+import { FilterBarQueryFilterProvider } from '../../filter_bar/query_filter';
+import { onBrushEvent } from './brush_event';
 
 /**
  * For terms aggregations on `__other__` buckets, this assembles a list of applicable filter
