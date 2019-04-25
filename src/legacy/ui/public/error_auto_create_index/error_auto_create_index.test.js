@@ -20,32 +20,13 @@
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
 import { __newPlatformSetup__, kfetch } from '../kfetch';
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
-import { HttpService } from '../../../../core/public/http';
-import { fatalErrorsServiceMock } from '../../../../core/public/fatal_errors/fatal_errors_service.mock';
-import { injectedMetadataServiceMock } from '../../../../core/public/injected_metadata/injected_metadata_service.mock';
-import { BasePathService } from '../../../../core/public/base_path';
-/* eslint-enable @kbn/eslint/no-restricted-paths */
+import { setup } from '../kfetch/kfetch_test_setup';
 
 import { isAutoCreateIndexError } from './error_auto_create_index';
 
-function setupService() {
-  const httpService = new HttpService();
-  const fatalErrors = fatalErrorsServiceMock.createSetupContract();
-  const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
-
-  injectedMetadata.getBasePath.mockReturnValue('http://localhost/myBase');
-
-  const basePath = new BasePathService().setup({ injectedMetadata });
-  const http = httpService.setup({ basePath, fatalErrors, injectedMetadata });
-
-  return { httpService, fatalErrors, http };
-}
-
 describe('isAutoCreateIndexError correctly handles KFetchError thrown by kfetch', () => {
   beforeAll(() => {
-    __newPlatformSetup__(setupService().http);
+    __newPlatformSetup__(setup().http);
   });
 
   describe('404', () => {

@@ -91,19 +91,19 @@ export class HttpService {
       return body;
     }
 
-    async function get(path: string, options: HttpFetchOptions = {}) {
+    function get(path: string, options: HttpFetchOptions = {}) {
       return fetch(path, { ...options, method: 'GET' });
     }
 
-    async function post(path: string, options: HttpFetchOptions = {}) {
+    function post(path: string, options: HttpFetchOptions = {}) {
       return fetch(path, { ...options, method: 'POST' });
     }
 
-    async function put(path: string, options: HttpFetchOptions = {}) {
+    function put(path: string, options: HttpFetchOptions = {}) {
       return fetch(path, { ...options, method: 'PUT' });
     }
 
-    async function del(path: string, options: HttpFetchOptions = {}) {
+    function del(path: string, options: HttpFetchOptions = {}) {
       return fetch(path, { ...options, method: 'DELETE' });
     }
 

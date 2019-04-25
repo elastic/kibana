@@ -202,8 +202,7 @@ describe('http requests', async () => {
 
     const abortable = http.fetch('/my/path');
 
-    expect(typeof abortable.then).toBe('function');
-    expect(typeof abortable.catch).toBe('function');
+    expect(abortable).toBeInstanceOf(Promise);
     expect(typeof abortable.abort).toBe('function');
     expect(abortable.abort()).toBe(abortable);
   });

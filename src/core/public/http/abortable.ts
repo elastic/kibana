@@ -28,8 +28,11 @@ export function abortable<T>(handler: HttpHandler<T>) {
       handler(path, { ...options, signal: controller.signal }).then(resolve, reject);
     });
 
-    return Object.assign(promise, {
-      abort() {
+    // NOTE: We are only using Object.defineProperty with enumerable:false to be explicit about
+    // excluding promise.abort() which isn't the case with Object.assign.
+    return Object.defineProperty(promise, 'abort', {
+      enumerable: false,
+      value() {
         controller.abort();
         return promise;
       },

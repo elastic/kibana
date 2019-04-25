@@ -17,6 +17,7 @@
  * under the License.
  */
 
+// @ts-ignore
 /* eslint-disable @kbn/eslint/no-restricted-paths */
 import { HttpService } from '../../../../core/public/http';
 import { fatalErrorsServiceMock } from '../../../../core/public/fatal_errors/fatal_errors_service.mock';
