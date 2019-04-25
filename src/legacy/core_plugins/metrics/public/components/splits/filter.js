@@ -17,21 +17,30 @@
  * under the License.
  */
 
-import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText } from '@elastic/eui';
+/*
+  These imports are nasty
+*/
+import { QueryBar } from '../../../../../ui/public/query_bar/components/query_bar.tsx';
+import { Storage } from '../../../../../ui/public/storage/storage.ts';
+
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+const localStorage = new Storage(window.localStorage);
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
   const defaults = { filter: '' };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
-  const handleTextChange = createTextHandler(onChange);
   const handleSelectChange = createSelectHandler(onChange);
+  const handleSubmit = (query) => {
+    onChange({ filter: query.query.query });
+  };
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -50,20 +59,23 @@ export const SplitByFilter = props => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <div style={{ border: '1px solid blue' }} className="splitByFiltersBarAddQueryBar">
-          <EuiFormRow
-            id={htmlId('query')}
-            label={(<FormattedMessage
-              id="tsvb.splits.filter.queryStringLabel"
-              defaultMessage="Query string"
-            />)}
-          >
-            <EuiFieldText
-              value={model.filter}
-              onChange={handleTextChange('filter')}
-            />
-          </EuiFormRow>
-        </div>
+        <EuiFormRow
+          id={htmlId('query')}
+          label={(<FormattedMessage
+            id="tsvb.splits.filter.queryStringLabel"
+            defaultMessage="Query string"
+          />)}
+        >
+          <QueryBar
+            query={{ language: 'lucene', query: model.filter }}
+            screenTitle={'DataMetricsGroupByFilter'}
+            onSubmit={handleSubmit}
+            appName={'VisEditor'}
+            indexPatterns={model.index_pattern || model.default_index_pattern}
+            store={localStorage || {}}
+            showDatePicker={false}
+          />
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
