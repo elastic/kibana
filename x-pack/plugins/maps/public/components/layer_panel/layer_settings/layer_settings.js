@@ -129,7 +129,7 @@ export function LayerSettings(props) {
         <EuiSwitch
           label={
             i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckboxLabel', {
-              defaultMessage: `Apply global query.`
+              defaultMessage: `Apply global filter to layer`
             })
           }
           checked={props.applyGlobalQuery}
@@ -149,7 +149,7 @@ export function LayerSettings(props) {
         position="top"
         content={
           i18n.translate('xpack.maps.layerPanel.applyGlobalQueryCheckbox.disableTooltip', {
-            defaultMessage: `Layer does not support filtering`
+            defaultMessage: `Layer does not support filtering.`
           })
         }
       >
