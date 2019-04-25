@@ -1,7 +1,7 @@
 {
   "id": "metricbeat_system_ecs",
   "title": "Metricbeat System",
-  "description": "Detect anomalies in Metricbeat System data - cpu, diskio, filesystem, memory (ECS)",
+  "description": "Detect anomalies in Metricbeat System data (ECS)",
   "type": "Metricbeat data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "metricbeat-*",
