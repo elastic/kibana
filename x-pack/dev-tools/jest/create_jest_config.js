@@ -43,7 +43,7 @@ export function createJestConfig({
       '[/\\\\]node_modules[/\\\\].+\\.js$'
     ],
     testPathIgnorePatterns: [
-      `${xPackKibanaDirectory}/plugins/code/*`
+      `.*[/\\\\]plugins[/\\\\]code[/\\\\].*`
     ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`
