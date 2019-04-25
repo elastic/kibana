@@ -43,19 +43,23 @@ const getOptions = (
   if (!OPTIONS) {
     const mapFieldToOption = createFieldToOptionMapper(intl);
     OPTIONS = {
-      [InfraNodeType.pod]: ['kubernetes.namespace', 'kubernetes.node.name'].map(mapFieldToOption),
+      [InfraNodeType.pod]: ['kubernetes.namespace', 'kubernetes.node.name', 'service.type'].map(
+        mapFieldToOption
+      ),
       [InfraNodeType.container]: [
         'host.name',
         'cloud.availability_zone',
         'cloud.machine.type',
         'cloud.project.id',
         'cloud.provider',
+        'service.type',
       ].map(mapFieldToOption),
       [InfraNodeType.host]: [
         'cloud.availability_zone',
         'cloud.machine.type',
         'cloud.project.id',
         'cloud.provider',
+        'service.type',
       ].map(mapFieldToOption),
     };
   }
