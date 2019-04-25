@@ -36,9 +36,12 @@ export default (gulp, { mocha }) => {
 
   gulp.task('testbrowser', () => {
     return getEnabledPlugins().then(plugins => {
-      return pluginHelpers.run('testBrowser', {
+      const wtf = require('wtfnode');
+      const x = pluginHelpers.run('testBrowser', {
         plugins: plugins.join(','),
       });
+      wtf.dump();
+      return x;
     });
   });
 
