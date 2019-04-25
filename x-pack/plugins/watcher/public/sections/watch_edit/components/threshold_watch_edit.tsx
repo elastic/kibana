@@ -515,22 +515,22 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                       description={`${
                         groupByTypes[watch.groupBy].sizeRequired
                           ? i18n.translate(
-                              'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
-                              {
-                                defaultMessage: 'grouped over',
-                              }
-                            )
+                            'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
+                            {
+                              defaultMessage: 'grouped over',
+                            }
+                          )
                           : i18n.translate('xpack.watcher.sections.watchEdit.threshold.overLabel', {
-                              defaultMessage: 'over',
-                            })
-                      }`}
+                            defaultMessage: 'over',
+                          })
+                        }`}
                       value={`${groupByTypes[watch.groupBy].text} ${
                         groupByTypes[watch.groupBy].sizeRequired
                           ? `${watch.termSize || ''} ${
-                              watch.termField ? `'${watch.termField}'` : ''
-                            }`
+                          watch.termField ? `'${watch.termField}'` : ''
+                          }`
                           : ''
-                      }`}
+                        }`}
                       isActive={
                         groupByPopoverOpen ||
                         (watch.groupBy === 'top' && !(watch.termSize && watch.termField))
@@ -672,7 +672,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                         />
                       </EuiFlexItem>
                       {Array.from(Array(comparators[watch.thresholdComparator].requiredValues)).map(
-                        (value, i) => {
+                        (notUsed, i) => {
                           return (
                             <Fragment key={`threshold${i}`}>
                               {i > 0 ? (
@@ -722,7 +722,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                         watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
                           ? timeUnits[watch.timeWindowUnit].labelSingular
                           : timeUnits[watch.timeWindowUnit].labelPlural
-                      }`}
+                        }`}
                       isActive={watchDurationPopoverOpen || !watch.timeWindowSize}
                       onClick={() => {
                         setWatchDurationPopoverOpen(true);
