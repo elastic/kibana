@@ -17,12 +17,11 @@
  * under the License.
  */
 
-// @ts-ignore
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { HttpService } from '../../../../core/public/http';
-import { fatalErrorsServiceMock } from '../../../../core/public/fatal_errors/fatal_errors_service.mock';
-import { injectedMetadataServiceMock } from '../../../../core/public/injected_metadata/injected_metadata_service.mock';
-import { BasePathService } from '../../../../core/public/base_path';
+import { HttpService } from '../../core/public/http';
+import { BasePathService } from '../../core/public/base_path';
+import { fatalErrorsServiceMock } from '../../core/public/fatal_errors/fatal_errors_service.mock';
+import { injectedMetadataServiceMock } from '../../core/public/injected_metadata/injected_metadata_service.mock';
 /* eslint-enable @kbn/eslint/no-restricted-paths */
 
 export function setup() {

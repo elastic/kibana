@@ -22,7 +22,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import { __newPlatformSetup__, addInterceptor, kfetch, KFetchOptions } from '.';
 import { Interceptor, resetInterceptors, withDefaultOptions } from './kfetch';
 import { KFetchError } from './kfetch_error';
-import { setup } from './kfetch_test_setup';
+import { setup } from '../../../../test_utils/public/kfetch_test_setup';
 
 describe('kfetch', () => {
   beforeAll(() => {
