@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { last, head } from 'lodash';
+import { last } from 'lodash';
 
 /**
  * @param {Array} seriesGroup
@@ -43,9 +43,9 @@ export function getLastSeriesTimestamp(seriesGroup = []) {
 
   seriesGroup.forEach(series => {
     series.forEach(({ data }) => {
-      const dataLastTimestamp = head(last(data));
+      const [ dataLastTimestamp ] = last(data);
 
-      lastTimestamp  = Math.max(...[lastTimestamp, dataLastTimestamp]);
+      lastTimestamp  = Math.max(lastTimestamp, dataLastTimestamp);
     });
   });
 
