@@ -221,12 +221,22 @@ export function VislibAxisScaleProvider() {
         // then shift the calculated tick positions back into the real domain to have a nice tick position in the actual
         // time zone. This is necessary because the d3 time scale doesn't provide a function to get nice time positions in
         // a configurable time zone directly.
-        const offset = moment(domain[0]).utcOffset();
-        const shiftedDomain = domain.map(val => moment(val).add(offset, 'minute'));
+        const startOffset = moment(domain[0]).utcOffset();
+        const shiftedDomain = domain.map(val => moment(val).add(startOffset, 'minute'));
         this.tickScale = scale.copy().domain(shiftedDomain);
-        this.scale.timezoneCorrectedTicks = (n) => this.tickScale.ticks(n).map((d) => {
-          return moment(d).subtract(offset, 'minute').valueOf();
-        });
+        this.scale.timezoneCorrectedTicks = (n) => {
+          const timePerTick = (domain[1] - domain[0]) / n;
+          const hourTicks = timePerTick < 1000 * 60 * 60 * 24;
+
+          return this.tickScale.ticks(n).map((d) => {
+            // To get a nice date for the tick, we have to shift the offset of the current UTC tick. This is
+            // relevant in cases where the domain spans various DSTs.
+            // However if there are multiple ticks per day, this would cause a gap because the ticks are placed
+            // in UTC which doesn't have DST. In this case, always shift by the offset of the beginning of the domain.
+            const currentOffset = moment(d).utcOffset();
+            return moment(d).subtract(hourTicks ? startOffset : currentOffset, 'minute').valueOf();
+          });
+        };
       }
 
       return this.scale;
