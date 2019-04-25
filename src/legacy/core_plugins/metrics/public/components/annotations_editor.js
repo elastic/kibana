@@ -146,7 +146,7 @@ class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <div style={{ border: '1px solid blue' }}>
+                <div style={{ border: '1px solid blue' }} className="forAddingQueryBar">
                   <EuiFormRow
                     id={htmlId('queryString')}
                     label={(<FormattedMessage

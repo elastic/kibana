@@ -50,7 +50,7 @@ export const SplitByFilter = props => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <div style={{ border: '1px solid blue' }}>
+        <div style={{ border: '1px solid blue' }} className="splitByFiltersBarAddQueryBar">
           <EuiFormRow
             id={htmlId('query')}
             label={(<FormattedMessage
