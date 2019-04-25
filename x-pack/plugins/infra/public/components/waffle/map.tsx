@@ -99,7 +99,7 @@ export const Map: React.SFC<Props> = ({
 const WaffleMapOuterContainer = euiStyled.div`
   flex: 1 0 0%;
   display: flex;
-  justify-content: center;
+  justify-content: flex-start;
   flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
