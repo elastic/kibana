@@ -23,7 +23,6 @@ import _ from 'lodash';
 const newFn = () => ({ id: uuid.v1() });
 
 export function handleChange(props, doc) {
-  // debugger;
   const { model, name } = props;
   const collection = model[name] || [];
   const part = {};
