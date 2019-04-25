@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const screenshot = getService('screenshots');
+  const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'security',
     'common',
@@ -67,6 +68,7 @@ export default function ({ getService, getPageObjects }) {
     it('user East should only see EAST doc', async function () {
       await PageObjects.security.logout();
       await PageObjects.security.login('userEast', 'changeme');
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'dlstest*'  });
       await PageObjects.common.navigateToApp('discover');
       await retry.try(async () => {
         const hitCount = await PageObjects.discover.getHitCount();

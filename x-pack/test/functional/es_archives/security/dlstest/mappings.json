@@ -142,9 +142,6 @@
         "config": {
           "dynamic": "true",
           "properties": {
-            "accessibility:disableAnimations": {
-              "type": "boolean"
-            },
             "buildNum": {
               "type": "keyword"
             },
