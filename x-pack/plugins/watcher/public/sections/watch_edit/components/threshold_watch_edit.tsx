@@ -167,6 +167,12 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
     errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
   );
   const shouldShowThresholdExpression = watch.index && watch.index.length > 0 && watch.timeField;
+  const andThresholdText = i18n.translate(
+    'xpack.watcher.sections.watchEdit.threshold.andLabel',
+    {
+      defaultMessage: 'AND',
+    }
+  )
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -638,7 +644,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                       description={comparators[watch.thresholdComparator].text}
                       value={watch.threshold
                         .slice(0, comparators[watch.thresholdComparator].requiredValues)
-                        .join(' AND ')}
+                        .join(` ${andThresholdText} `)}
                       isActive={watchThresholdPopoverOpen || !watch.threshold}
                       onClick={() => {
                         setWatchThresholdPopoverOpen(true);
@@ -672,7 +678,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                             <Fragment key={`threshold${i}`}>
                               {i > 0 ? (
                                 <EuiFlexItem grow={false}>
-                                  <EuiText>AND</EuiText>
+                                  <EuiText>{andThresholdText}</EuiText>
                                 </EuiFlexItem>
                               ) : null}
                               <EuiFlexItem grow={false}>
