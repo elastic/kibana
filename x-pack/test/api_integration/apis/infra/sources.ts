@@ -8,8 +8,13 @@ import expect from '@kbn/expect';
 import gql from 'graphql-tag';
 
 import { sourceQuery } from '../../../../plugins/infra/public/containers/source/query_source.gql_query';
+import {
+  sourceConfigurationFieldsFragment,
+  sourceStatusFieldsFragment,
+} from '../../../../plugins/infra/public/containers/source/source_fields_fragment.gql_query';
 import { SourceQuery } from '../../../../plugins/infra/public/graphql/types';
 import { KbnTestProvider } from './types';
+import { sharedFragments } from '../../../../plugins/infra/common/graphql/shared';
 
 const sourcesTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -40,6 +45,10 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(sourceConfiguration.fields.container).to.be('container.id');
         expect(sourceConfiguration.fields.host).to.be('host.name');
         expect(sourceConfiguration.fields.pod).to.be('kubernetes.pod.uid');
+        expect(sourceConfiguration.logColumns).to.have.length(3);
+        expect(sourceConfiguration.logColumns[0]).to.have.key('timestampColumn');
+        expect(sourceConfiguration.logColumns[1]).to.have.key('fieldColumn');
+        expect(sourceConfiguration.logColumns[2]).to.have.key('messageColumn');
 
         // test data in x-pack/test/functional/es_archives/infra/data.json.gz
         expect(sourceStatus.indexFields.length).to.be(1765);
@@ -65,6 +74,13 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
                 tiebreaker: 'TIEBREAKER',
                 timestamp: 'TIMESTAMP',
               },
+              logColumns: [
+                {
+                  messageColumn: {
+                    id: 'MESSAGE_COLUMN',
+                  },
+                },
+              ],
             },
             sourceId: 'default',
           },
@@ -84,6 +100,9 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(configuration.fields.pod).to.be('POD');
         expect(configuration.fields.tiebreaker).to.be('TIEBREAKER');
         expect(configuration.fields.timestamp).to.be('TIMESTAMP');
+        expect(configuration.logColumns).to.have.length(1);
+        expect(configuration.logColumns[0]).to.have.key('messageColumn');
+
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
@@ -113,6 +132,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(configuration.fields.pod).to.be('kubernetes.pod.uid');
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.fields.timestamp).to.be('@timestamp');
+        expect(configuration.logColumns).to.have.length(3);
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
@@ -224,6 +244,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(configuration.fields.tiebreaker).to.be('_doc');
         expect(configuration.fields.timestamp).to.be('@timestamp');
         expect(configuration.fields.container).to.be('container.id');
+        expect(configuration.logColumns).to.have.length(3);
         expect(status.logIndicesExist).to.be(true);
         expect(status.metricIndicesExist).to.be(true);
       });
@@ -336,8 +357,8 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
             sourceProperties: {
               logColumns: [
                 {
-                  fieldLogColumn: {
-                    kind: 'field',
+                  fieldColumn: {
+                    id: 'ADDED_COLUMN_ID',
                     field: 'ADDED_COLUMN_FIELD',
                   },
                 },
@@ -352,12 +373,13 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
         expect(version).to.be.a('string');
         expect(version).to.not.be(initialVersion);
         expect(updatedAt).to.be.greaterThan(createdAt);
-        expect(configuration.logColumns).to.equal([
-          {
-            kind: 'field',
-            field: 'ADDED_COLUMN_FIELD',
-          },
-        ]);
+        expect(configuration.logColumns).to.have.length(1);
+        expect(configuration.logColumns[0]).to.have.key('fieldColumn');
+        expect(configuration.logColumns[0].fieldColumn).to.have.property('id', 'ADDED_COLUMN_ID');
+        expect(configuration.logColumns[0].fieldColumn).to.have.property(
+          'field',
+          'ADDED_COLUMN_FIELD'
+        );
       });
     });
   });
@@ -370,29 +392,20 @@ const createSourceMutation = gql`
   mutation createSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
     createSource(id: $sourceId, sourceProperties: $sourceProperties) {
       source {
-        id
-        version
-        updatedAt
+        ...InfraSourceFields
         configuration {
-          name
-          description
-          metricAlias
-          logAlias
-          fields {
-            container
-            host
-            pod
-            tiebreaker
-            timestamp
-          }
+          ...SourceConfigurationFields
         }
         status {
-          logIndicesExist
-          metricIndicesExist
+          ...SourceStatusFields
         }
       }
     }
   }
+
+  ${sharedFragments.InfraSourceFields}
+  ${sourceConfigurationFieldsFragment}
+  ${sourceStatusFieldsFragment}
 `;
 
 const deleteSourceMutation = gql`
@@ -407,27 +420,18 @@ const updateSourceMutation = gql`
   mutation updateSource($sourceId: ID!, $sourceProperties: UpdateSourceInput!) {
     updateSource(id: $sourceId, sourceProperties: $sourceProperties) {
       source {
-        id
-        version
-        updatedAt
+        ...InfraSourceFields
         configuration {
-          name
-          description
-          metricAlias
-          logAlias
-          fields {
-            container
-            host
-            pod
-            tiebreaker
-            timestamp
-          }
+          ...SourceConfigurationFields
         }
         status {
-          logIndicesExist
-          metricIndicesExist
+          ...SourceStatusFields
         }
       }
     }
   }
+
+  ${sharedFragments.InfraSourceFields}
+  ${sourceConfigurationFieldsFragment}
+  ${sourceStatusFieldsFragment}
 `;
