@@ -34,29 +34,35 @@ export class EncryptedSavedObjectsAuditLogger {
     );
   }
 
-  public encryptAttributesSuccess(attributesNames: ReadonlySet<string>, type: string, id: string) {
+  public encryptAttributesSuccess(
+    attributesNames: ReadonlyArray<string>,
+    type: string,
+    id: string
+  ) {
     if (!this.enabled) {
       return;
     }
 
-    const attributesNamesArray = Array.from(attributesNames);
     this.auditLogger.log(
       'encrypt_success',
-      `Successfully encrypted attributes "[${attributesNamesArray}]" for saved object "${type}:${id}".`,
-      { id, type, attributesNames: attributesNamesArray }
+      `Successfully encrypted attributes "[${attributesNames}]" for saved object "${type}:${id}".`,
+      { id, type, attributesNames }
     );
   }
 
-  public decryptAttributesSuccess(attributesNames: ReadonlySet<string>, type: string, id: string) {
+  public decryptAttributesSuccess(
+    attributesNames: ReadonlyArray<string>,
+    type: string,
+    id: string
+  ) {
     if (!this.enabled) {
       return;
     }
 
-    const attributesNamesArray = Array.from(attributesNames);
     this.auditLogger.log(
       'decrypt_success',
-      `Successfully decrypted attributes "[${attributesNamesArray}]" for saved object "${type}:${id}".`,
-      { id, type, attributesNames: attributesNamesArray }
+      `Successfully decrypted attributes "[${attributesNames}]" for saved object "${type}:${id}".`,
+      { id, type, attributesNames }
     );
   }
 }

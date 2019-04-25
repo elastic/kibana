@@ -45,26 +45,20 @@ describe('#registerType', () => {
   it('throws if `attributesToEncrypt` is empty', () => {
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set() })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"The \\"attributesToEncrypt\\" array for \\"known-type-1\\" is empty."`
-    );
+    ).toThrowError('The "attributesToEncrypt" array for "known-type-1" is empty.');
   });
 
   it('throws if `type` has been registered already', () => {
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) });
     expect(() =>
       service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attr']) })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"The \\"known-type-1\\" saved object type is already registered."`
-    );
+    ).toThrowError('The "known-type-1" saved object type is already registered.');
   });
 
   it('throws if `type` references to the unknown type', () => {
     expect(() =>
       service.registerType({ type: 'unknown-type', attributesToEncrypt: new Set(['attr']) })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"The type \\"unknown-type\\" is not known saved object type."`
-    );
+    ).toThrowError('The type "unknown-type" is not known saved object type.');
   });
 });
 
@@ -90,9 +84,7 @@ describe('#stripEncryptedAttributes', () => {
   it('does not strip attributes from unknown types', () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    service.stripEncryptedAttributes('unknown-type', attributes);
-
-    expect(attributes).toEqual({
+    expect(service.stripEncryptedAttributes('unknown-type', attributes)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -102,9 +94,7 @@ describe('#stripEncryptedAttributes', () => {
   it('does not strip attributes from known, but not registered types', () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    service.stripEncryptedAttributes('known-type-1', attributes);
-
-    expect(attributes).toEqual({
+    expect(service.stripEncryptedAttributes('known-type-1', attributes)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -115,9 +105,8 @@ describe('#stripEncryptedAttributes', () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attrFour']) });
-    service.stripEncryptedAttributes('known-type-1', attributes);
 
-    expect(attributes).toEqual({
+    expect(service.stripEncryptedAttributes('known-type-1', attributes)).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -131,9 +120,8 @@ describe('#stripEncryptedAttributes', () => {
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
-    service.stripEncryptedAttributes('known-type-1', attributes);
 
-    expect(attributes).toEqual({
+    expect(service.stripEncryptedAttributes('known-type-1', attributes)).toEqual({
       attrTwo: 'two',
     });
   });
@@ -158,9 +146,9 @@ describe('#encryptAttributes', () => {
   it('does not encrypt attributes for unknown types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    await service.encryptAttributes('unknown-type', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.encryptAttributes('unknown-type', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -171,9 +159,9 @@ describe('#encryptAttributes', () => {
   it('does not encrypt attributes for known, but not registered types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-1', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -185,9 +173,10 @@ describe('#encryptAttributes', () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attrFour']) });
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
 
-    expect(attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-1', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -202,9 +191,10 @@ describe('#encryptAttributes', () => {
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
     });
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
 
-    expect(attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-1', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: '|one|known-type-1,object-id,attrTwo,two|',
       attrTwo: 'two',
       attrThree: '|three|known-type-1,object-id,attrTwo,two|',
@@ -212,7 +202,7 @@ describe('#encryptAttributes', () => {
     });
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(
-      new Set(['attrOne', 'attrThree']),
+      ['attrOne', 'attrThree'],
       'known-type-1',
       'object-id'
     );
@@ -225,15 +215,16 @@ describe('#encryptAttributes', () => {
       type: 'known-type-1',
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
 
-    expect(attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-1', 'object-id', attributes)
+    ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: '|three|known-type-1,object-id,attrTwo,two|',
     });
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.encryptAttributesSuccess).toHaveBeenCalledWith(
-      new Set(['attrThree']),
+      ['attrThree'],
       'known-type-1',
       'object-id'
     );
@@ -253,15 +244,16 @@ describe('#encryptAttributes', () => {
       attributesToExcludeFromAAD: new Set(['attrTwo']),
     });
 
-    await service.encryptAttributes('known-type-1', 'object-id-1', knownType1attributes);
-    await service.encryptAttributes('known-type-2', 'object-id-2', knownType2attributes);
-
-    expect(knownType1attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-1', 'object-id-1', knownType1attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: '|three|known-type-1,object-id-1,attrOne,one,attrTwo,two|',
     });
-    expect(knownType2attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-2', 'object-id-2', knownType2attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: '|three|known-type-2,object-id-2,attrOne,one|',
@@ -275,15 +267,15 @@ describe('#encryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    await service.encryptAttributes('known-type-1', 'object-id-1', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.encryptAttributes('known-type-1', 'object-id-1', attributes)
+    ).resolves.toEqual({
       attrOne: '|one|known-type-1,object-id-1,|',
       attrThree: '|three|known-type-1,object-id-1,|',
     });
   });
 
-  it('fails if encryption of any attribute fails and does not mutate attributes', async () => {
+  it('fails if encryption of any attribute fails', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
     service.registerType({
       type: 'known-type-1',
@@ -317,9 +309,9 @@ describe('#decryptAttributes', () => {
   it('does not decrypt attributes for unknown types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    await service.decryptAttributes('unknown-type', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.decryptAttributes('unknown-type', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -330,9 +322,9 @@ describe('#decryptAttributes', () => {
   it('does not decrypt attributes for known, but not registered types', async () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
-    await service.decryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -344,9 +336,10 @@ describe('#decryptAttributes', () => {
     const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
     service.registerType({ type: 'known-type-1', attributesToEncrypt: new Set(['attrFour']) });
-    await service.decryptAttributes('known-type-1', 'object-id', attributes);
 
-    expect(attributes).toEqual({
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', attributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -362,18 +355,21 @@ describe('#decryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour']),
     });
 
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    const encryptedAttributes = await service.encryptAttributes(
+      'known-type-1',
+      'object-id',
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
       attrOne: expect.not.stringMatching('one'),
       attrTwo: 'two',
       attrThree: expect.not.stringMatching('three'),
       attrFour: null,
     });
 
-    await service.decryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', encryptedAttributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: 'three',
@@ -381,7 +377,7 @@ describe('#decryptAttributes', () => {
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
-      new Set(['attrOne', 'attrThree']),
+      ['attrOne', 'attrThree'],
       'known-type-1',
       'object-id'
     );
@@ -395,22 +391,25 @@ describe('#decryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    const encryptedAttributes = await service.encryptAttributes(
+      'known-type-1',
+      'object-id',
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
       attrTwo: 'two',
       attrThree: expect.not.stringMatching('three'),
     });
 
-    await service.decryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', encryptedAttributes)
+    ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
-      new Set(['attrThree']),
+      ['attrThree'],
       'known-type-1',
       'object-id'
     );
@@ -425,24 +424,28 @@ describe('#decryptAttributes', () => {
       attributesToExcludeFromAAD: new Set(['attrOne']),
     });
 
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    const encryptedAttributes = await service.encryptAttributes(
+      'known-type-1',
+      'object-id',
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
       attrOne: 'one',
       attrTwo: 'two',
       attrThree: expect.not.stringMatching('three'),
     });
 
-    const attributesWithoutAttr = { attrTwo: 'two', attrThree: attributes.attrThree };
-    await service.decryptAttributes('known-type-1', 'object-id', attributesWithoutAttr);
+    const attributesWithoutAttr = { attrTwo: 'two', attrThree: encryptedAttributes.attrThree };
 
-    expect(attributesWithoutAttr).toEqual({
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', attributesWithoutAttr)
+    ).resolves.toEqual({
       attrTwo: 'two',
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
-      new Set(['attrThree']),
+      ['attrThree'],
       'known-type-1',
       'object-id'
     );
@@ -455,22 +458,25 @@ describe('#decryptAttributes', () => {
       attributesToEncrypt: new Set(['attrOne', 'attrThree']),
     });
 
-    await service.encryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    const encryptedAttributes = await service.encryptAttributes(
+      'known-type-1',
+      'object-id',
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
       attrOne: expect.not.stringMatching('one'),
       attrThree: expect.not.stringMatching('three'),
     });
 
-    await service.decryptAttributes('known-type-1', 'object-id', attributes);
-
-    expect(attributes).toEqual({
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', encryptedAttributes)
+    ).resolves.toEqual({
       attrOne: 'one',
       attrThree: 'three',
     });
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
     expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
-      new Set(['attrOne', 'attrThree']),
+      ['attrOne', 'attrThree'],
       'known-type-1',
       'object-id'
     );
@@ -479,7 +485,7 @@ describe('#decryptAttributes', () => {
   describe('decryption failures', () => {
     let encryptedAttributes: Record<string, string>;
     beforeEach(async () => {
-      encryptedAttributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
+      const attributes = { attrOne: 'one', attrTwo: 'two', attrThree: 'three' };
 
       service.registerType({
         type: 'known-type-1',
@@ -491,7 +497,11 @@ describe('#decryptAttributes', () => {
         attributesToEncrypt: new Set(['attrThree']),
       });
 
-      await service.encryptAttributes('known-type-1', 'object-id', encryptedAttributes);
+      encryptedAttributes = await service.encryptAttributes(
+        'known-type-1',
+        'object-id',
+        attributes
+      );
     });
 
     it('fails to decrypt if not all attributes that contribute to AAD are present', async () => {
@@ -506,10 +516,6 @@ describe('#decryptAttributes', () => {
         'known-type-1',
         'object-id'
       );
-      expect(attributesWithoutAttr).toEqual({
-        attrTwo: 'two',
-        attrThree: encryptedAttributes.attrThree,
-      });
     });
 
     it('fails to decrypt if ID does not match', async () => {
@@ -523,11 +529,6 @@ describe('#decryptAttributes', () => {
         'known-type-1',
         'object-id*'
       );
-      expect(encryptedAttributes).toEqual({
-        attrOne: 'one',
-        attrTwo: 'two',
-        attrThree: encryptedAttributes.attrThree,
-      });
     });
 
     it('fails to decrypt if type does not match', async () => {
@@ -541,11 +542,6 @@ describe('#decryptAttributes', () => {
         'known-type-2',
         'object-id'
       );
-      expect(encryptedAttributes).toEqual({
-        attrOne: 'one',
-        attrTwo: 'two',
-        attrThree: encryptedAttributes.attrThree,
-      });
     });
 
     it('fails to decrypt if encrypted attribute is defined, but not a string', async () => {
@@ -564,11 +560,6 @@ describe('#decryptAttributes', () => {
         'known-type-1',
         'object-id'
       );
-      expect(encryptedAttributes).toEqual({
-        attrOne: 'one',
-        attrTwo: 'two',
-        attrThree: encryptedAttributes.attrThree,
-      });
     });
 
     it('fails to decrypt if encrypted attribute is wrong', async () => {
@@ -585,11 +576,6 @@ describe('#decryptAttributes', () => {
         'known-type-1',
         'object-id'
       );
-      expect(encryptedAttributes).toEqual({
-        attrOne: 'one',
-        attrTwo: 'two',
-        attrThree: encryptedAttributes.attrThree,
-      });
     });
 
     it('fails if encrypted with another encryption key', async () => {
@@ -615,11 +601,6 @@ describe('#decryptAttributes', () => {
         'known-type-1',
         'object-id'
       );
-      expect(encryptedAttributes).toEqual({
-        attrOne: 'one',
-        attrTwo: 'two',
-        attrThree: encryptedAttributes.attrThree,
-      });
     });
   });
 });

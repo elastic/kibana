@@ -10,8 +10,8 @@ test('properly logs audit events when audit logs are enabled', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
   const audit = new EncryptedSavedObjectsAuditLogger(true, mockInternalAuditLogger);
 
-  audit.encryptAttributesSuccess(new Set(['one', 'two']), 'known-type', 'object-id');
-  audit.decryptAttributesSuccess(new Set(['three', 'four']), 'known-type-1', 'object-id-1');
+  audit.encryptAttributesSuccess(['one', 'two'], 'known-type', 'object-id');
+  audit.decryptAttributesSuccess(['three', 'four'], 'known-type-1', 'object-id-1');
   audit.encryptAttributeFailure('five', 'known-type-2', 'object-id-2');
   audit.decryptAttributeFailure('six', 'known-type-3', 'object-id-3');
 
@@ -42,8 +42,8 @@ test('does not log audit events when audit logs are disabled', () => {
   const mockInternalAuditLogger = { log: jest.fn() };
   const audit = new EncryptedSavedObjectsAuditLogger(false, mockInternalAuditLogger);
 
-  audit.encryptAttributesSuccess(new Set(['one', 'two']), 'known-type', 'object-id');
-  audit.decryptAttributesSuccess(new Set(['three', 'four']), 'known-type-1', 'object-id-1');
+  audit.encryptAttributesSuccess(['one', 'two'], 'known-type', 'object-id');
+  audit.decryptAttributesSuccess(['three', 'four'], 'known-type-1', 'object-id-1');
   audit.encryptAttributeFailure('five', 'known-type-2', 'object-id-2');
   audit.decryptAttributeFailure('six', 'known-type-3', 'object-id-3');
 

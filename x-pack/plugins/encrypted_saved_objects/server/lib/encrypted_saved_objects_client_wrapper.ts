@@ -28,6 +28,10 @@ interface EncryptedSavedObjectsClientOptions {
   service: Readonly<EncryptedSavedObjectsService>;
 }
 
+/**
+ * Generates UUIDv4 ID for the any newly created saved object that is supposed to contain
+ * encrypted attributes.
+ */
 function generateID() {
   return uuid.v4();
 }
@@ -57,17 +61,16 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     }
 
     const id = generateID();
-    await this.options.service.encryptAttributes(type, id, attributes);
-
     return this.stripEncryptedAttributesFromResponse(
-      await this.options.baseClient.create(type, attributes, {
-        ...options,
-        id,
-      })
+      await this.options.baseClient.create(
+        type,
+        await this.options.service.encryptAttributes(type, id, attributes),
+        { ...options, id }
+      )
     );
   }
 
-  public async bulkCreate(objects: BulkCreateObject[], options: BaseOptions) {
+  public async bulkCreate(objects: BulkCreateObject[], options?: BaseOptions) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
     // sequential processing.
@@ -87,9 +90,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
         }
 
         const id = generateID();
-        await this.options.service.encryptAttributes(object.type, id, object.attributes);
-
-        return { ...object, id };
+        return {
+          ...object,
+          id,
+          attributes: await this.options.service.encryptAttributes(
+            object.type,
+            id,
+            object.attributes
+          ),
+        };
       })
     );
 
@@ -98,7 +107,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     );
   }
 
-  public async delete(type: string, id: string, options: BaseOptions = {}) {
+  public async delete(type: string, id: string, options?: BaseOptions) {
     return await this.options.baseClient.delete(type, id, options);
   }
 
@@ -108,13 +117,13 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     );
   }
 
-  public async bulkGet(objects: BulkGetObjects = [], options: BaseOptions) {
+  public async bulkGet(objects: BulkGetObjects = [], options?: BaseOptions) {
     return this.stripEncryptedAttributesFromBulkResponse(
       await this.options.baseClient.bulkGet(objects, options)
     );
   }
 
-  public async get(type: string, id: string, options: BaseOptions) {
+  public async get(type: string, id: string, options?: BaseOptions) {
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.get(type, id, options)
     );
@@ -124,31 +133,57 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     type: string,
     id: string,
     attributes: Partial<T>,
-    options: UpdateOptions
+    options?: UpdateOptions
   ) {
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.update(type, id, attributes, options);
     }
 
-    await this.options.service.encryptAttributes(type, id, attributes);
     return this.stripEncryptedAttributesFromResponse(
-      await this.options.baseClient.update(type, id, attributes, options)
+      await this.options.baseClient.update(
+        type,
+        id,
+        await this.options.service.encryptAttributes(type, id, attributes),
+        options
+      )
     );
   }
 
+  /**
+   * Strips encrypted attributes from any non-bulk Saved Objects API response. If type isn't
+   * registered, response is returned as is.
+   * @param response Raw response returned by the underlying base client.
+   */
   private stripEncryptedAttributesFromResponse<
     T extends UpdateResponse | CreateResponse | GetResponse
   >(response: T): T {
-    this.options.service.stripEncryptedAttributes(response.type, response.attributes);
+    if (this.options.service.isRegistered(response.type)) {
+      response.attributes = this.options.service.stripEncryptedAttributes(
+        response.type,
+        response.attributes
+      );
+    }
+
     return response;
   }
 
+  /**
+   * Strips encrypted attributes from any bulk Saved Objects API response. If type for any bulk
+   * response portion isn't registered, it is returned as is.
+   * @param response Raw response returned by the underlying base client.
+   */
   private stripEncryptedAttributesFromBulkResponse<
     T extends BulkCreateResponse | BulkGetResponse | FindResponse
   >(response: T): T {
     for (const savedObject of response.saved_objects) {
-      this.options.service.stripEncryptedAttributes(savedObject.type, savedObject.attributes);
+      if (this.options.service.isRegistered(savedObject.type)) {
+        savedObject.attributes = this.options.service.stripEncryptedAttributes(
+          savedObject.type,
+          savedObject.attributes
+        );
+      }
     }
+
     return response;
   }
 }

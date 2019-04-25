@@ -8,13 +8,13 @@ import crypto from 'crypto';
 import { Legacy, Server } from 'kibana';
 import { SavedObjectsRepository } from 'src/legacy/server/saved_objects/service/lib';
 import { BaseOptions } from 'src/legacy/server/saved_objects/service/saved_objects_client';
-import { EncryptedSavedObjectsAuditLogger } from './lib/encrypted_saved_objects_audit_logger';
-import { EncryptedSavedObjectsClientWrapper } from './lib/encrypted_saved_objects_client_wrapper';
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
-} from './lib/encrypted_saved_objects_service';
-import { EncryptionError } from './lib/encryption_error';
+  EncryptionError,
+  EncryptedSavedObjectsAuditLogger,
+  EncryptedSavedObjectsClientWrapper,
+} from './lib';
 
 export const PLUGIN_ID = 'encrypted_saved_objects';
 export const CONFIG_PREFIX = `xpack.${PLUGIN_ID}`;
@@ -70,8 +70,10 @@ export class Plugin {
         service.registerType(typeRegistration),
       getDecryptedAsInternalUser: async (type: string, id: string, options?: BaseOptions) => {
         const savedObject = await internalRepository.get(type, id, options);
-        await service.decryptAttributes(type, id, savedObject.attributes);
-        return savedObject;
+        return {
+          ...savedObject,
+          attributes: await service.decryptAttributes(type, id, savedObject.attributes),
+        };
       },
     };
   }

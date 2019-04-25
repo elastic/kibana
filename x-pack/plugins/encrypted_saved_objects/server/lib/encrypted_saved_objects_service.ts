@@ -88,24 +88,33 @@ export class EncryptedSavedObjectsService {
 
   /**
    * Takes saved object attributes for the specified type and strips any of them that are supposed
-   * to be encrypted and returns that __MUTATED__ attributes dictionary back.
+   * to be encrypted and returns that __NEW__ attributes dictionary back.
    * @param type Type of the saved object to strip encrypted attributes from.
    * @param attributes Dictionary of __ALL__ saved object attributes.
    */
-  public stripEncryptedAttributes<T extends Record<string, unknown>>(type: string, attributes: T) {
+  public stripEncryptedAttributes<T extends Record<string, unknown>>(
+    type: string,
+    attributes: T
+  ): Record<string, unknown> {
     const typeRegistration = this.typeRegistrations.get(type);
     if (typeRegistration === undefined) {
-      return;
+      return attributes;
     }
 
-    for (const attributeNameToEncrypt of typeRegistration.attributesToEncrypt) {
-      delete attributes[attributeNameToEncrypt];
+    const clonedAttributes: Record<string, unknown> = {};
+    for (const [attributeName, attributeValue] of Object.entries(attributes)) {
+      if (!typeRegistration.attributesToEncrypt.has(attributeName)) {
+        clonedAttributes[attributeName] = attributeValue;
+      }
     }
+
+    return clonedAttributes;
   }
 
   /**
    * Takes saved object attributes for the specified type and encrypts all of them that are supposed
-   * to be encrypted if any and returns that __MUTATED__ attributes dictionary back.
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were encrypted original attributes dictionary is returned.
    * @param type Type of the saved object to encrypt attributes for.
    * @param id Id of the saved object to strip encrypted attributes from.
    * @param attributes Dictionary of __ALL__ saved object attributes.
@@ -115,21 +124,21 @@ export class EncryptedSavedObjectsService {
     type: string,
     id: string,
     attributes: T
-  ) {
+  ): Promise<T> {
     const typeRegistration = this.typeRegistrations.get(type);
     if (typeRegistration === undefined) {
-      return;
+      return attributes;
     }
 
     const encryptionAAD = this.getAAD(typeRegistration, id, attributes);
-    const encryptedAttributes = new Map<string, string>();
+    const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeRegistration.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue != null) {
         try {
-          encryptedAttributes.set(
-            attributeName,
-            await this.crypto.encrypt(attributeValue, encryptionAAD)
+          encryptedAttributes[attributeName] = await this.crypto.encrypt(
+            attributeValue,
+            encryptionAAD
           );
         } catch (err) {
           this.log.error(`Failed to encrypt "${attributeName}" attribute: ${err.message || err}`);
@@ -146,28 +155,31 @@ export class EncryptedSavedObjectsService {
 
     // Normally we expect all registered to-be-encrypted attributes to be defined, but if it's
     // not the case we should collect and log them to make troubleshooting easier.
-    if (encryptedAttributes.size !== typeRegistration.attributesToEncrypt.size) {
+    const encryptedAttributesKeys = Array.from(Object.keys(encryptedAttributes));
+    if (encryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
       this.log.debug(
         `The following attributes of saved object "${type}:${id}" should have been encrypted: ${Array.from(
           typeRegistration.attributesToEncrypt
-        )}, but found only: ${Array.from(encryptedAttributes.keys())}`
+        )}, but found only: ${encryptedAttributesKeys}`
       );
     }
 
-    if (encryptedAttributes.size > 0) {
-      // We mutate original attributes dictionary only if we were able to successfully encrypt all
-      // required attributes.
-      for (const [attributeName, attributeValue] of encryptedAttributes) {
-        attributes[attributeName] = attributeValue;
-      }
-
-      this.audit.encryptAttributesSuccess(new Set(encryptedAttributes.keys()), type, id);
+    if (encryptedAttributesKeys.length === 0) {
+      return attributes;
     }
+
+    this.audit.encryptAttributesSuccess(encryptedAttributesKeys, type, id);
+
+    return {
+      ...attributes,
+      ...encryptedAttributes,
+    };
   }
 
   /**
    * Takes saved object attributes for the specified type and decrypts all of them that are supposed
-   * to be encrypted if any and returns that __MUTATED__ attributes dictionary back.
+   * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
+   * attributes were decrypted original attributes dictionary is returned.
    * @param type Type of the saved object to decrypt attributes for.
    * @param id Id of the saved object to strip encrypted attributes from.
    * @param attributes Dictionary of __ALL__ saved object attributes.
@@ -178,14 +190,14 @@ export class EncryptedSavedObjectsService {
     type: string,
     id: string,
     attributes: T
-  ) {
+  ): Promise<T> {
     const typeRegistration = this.typeRegistrations.get(type);
     if (typeRegistration === undefined) {
-      return;
+      return attributes;
     }
 
     const encryptionAAD = this.getAAD(typeRegistration, id, attributes);
-    const decryptedAttributes = new Map<string, string>();
+    const decryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeRegistration.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
       if (attributeValue == null) {
@@ -202,9 +214,9 @@ export class EncryptedSavedObjectsService {
       }
 
       try {
-        decryptedAttributes.set(
-          attributeName,
-          await this.crypto.decrypt(attributeValue, encryptionAAD)
+        decryptedAttributes[attributeName] = await this.crypto.decrypt(
+          attributeValue,
+          encryptionAAD
         );
       } catch (err) {
         this.log.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
@@ -220,23 +232,25 @@ export class EncryptedSavedObjectsService {
 
     // Normally we expect all registered to-be-encrypted attributes to be defined, but if it's
     // not the case we should collect and log them to make troubleshooting easier.
-    if (decryptedAttributes.size !== typeRegistration.attributesToEncrypt.size) {
+    const decryptedAttributesKeys = Array.from(Object.keys(decryptedAttributes));
+    if (decryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
       this.log.debug(
         `The following attributes of saved object "${type}:${id}" should have been decrypted: ${Array.from(
           typeRegistration.attributesToEncrypt
-        )}, but found only: ${Array.from(decryptedAttributes.keys())}`
+        )}, but found only: ${decryptedAttributesKeys}`
       );
     }
 
-    if (decryptedAttributes.size > 0) {
-      // We mutate original attributes dictionary only if we were able to successfully decrypt all
-      // required attributes.
-      for (const [attributeName, attributeValue] of decryptedAttributes) {
-        attributes[attributeName] = attributeValue;
-      }
-
-      this.audit.decryptAttributesSuccess(new Set(decryptedAttributes.keys()), type, id);
+    if (decryptedAttributesKeys.length === 0) {
+      return attributes;
     }
+
+    this.audit.decryptAttributesSuccess(decryptedAttributesKeys, type, id);
+
+    return {
+      ...attributes,
+      ...decryptedAttributes,
+    };
   }
 
   /**
