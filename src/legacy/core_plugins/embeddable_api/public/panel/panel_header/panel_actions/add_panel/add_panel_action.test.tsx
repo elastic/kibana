@@ -49,6 +49,7 @@ import {
   FilterableEmbeddable,
   FilterableEmbeddableFactory,
   HelloWorldEmbeddable,
+  FilterableContainerInput,
 } from '../../../../__test__/index';
 
 import { EmbeddableFactoryRegistry, isErrorEmbeddable } from '../../../../';
@@ -82,7 +83,7 @@ beforeEach(async () => {
     id: '123',
   });
 
-  if (isErrorEmbeddable(filterableEmbeddable)) {
+  if (isErrorEmbeddable<FilterableEmbeddable>(filterableEmbeddable)) {
     throw new Error('Error creating new filterable embeddable');
   } else {
     embeddable = filterableEmbeddable;
@@ -92,7 +93,7 @@ beforeEach(async () => {
 test('Is not compatible when container is in view mode', async () => {
   const action = new AddPanelAction();
   container.updateInput({ viewMode: ViewMode.VIEW });
-  expect(await action.isCompatible({ embeddable: container })).toBe(false);
+  expect(await action.isCompatible<FilterableContainer>({ embeddable: container })).toBe(false);
 });
 
 test('Is not compatible when embeddable is not a container', async () => {

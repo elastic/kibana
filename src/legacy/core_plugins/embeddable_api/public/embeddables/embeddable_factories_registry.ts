@@ -17,16 +17,26 @@
  * under the License.
  */
 
+import { SavedObjectAttributes } from 'src/legacy/server/saved_objects';
 import { EmbeddableFactory } from './embeddable_factory';
+import { EmbeddableInput, EmbeddableOutput, Embeddable } from './embeddable';
 
 export class EmbeddableFactoryRegistry {
-  private factories: { [key: string]: EmbeddableFactory } = {};
+  private factories: { [key: string]: EmbeddableFactory<any, any, any, any> } = {};
 
-  public registerFactory(factory: EmbeddableFactory) {
+  public registerFactory<
+    I extends EmbeddableInput = EmbeddableInput,
+    O extends EmbeddableOutput = EmbeddableOutput,
+    E extends Embeddable<I, O> = Embeddable<I, O>,
+    T extends SavedObjectAttributes = SavedObjectAttributes
+  >(factory: EmbeddableFactory<I, O, E, T>) {
     this.factories[factory.name] = factory;
   }
 
-  public getFactoryByName<E extends EmbeddableFactory = EmbeddableFactory>(name: string): E {
+  public getFactoryByName<
+    EEI extends EmbeddableInput,
+    E extends EmbeddableFactory<EEI> = EmbeddableFactory<EEI>
+  >(name: string): E {
     return this.factories[name] as E;
   }
 

@@ -24,8 +24,8 @@ import { Embeddable, EmbeddableInput, EmbeddableOutput } from './embeddable';
 
 export const ERROR_EMBEDDABLE_TYPE = 'error';
 
-export function isErrorEmbeddable(
-  embeddable: Embeddable | ErrorEmbeddable
+export function isErrorEmbeddable<E extends Embeddable<any, any>>(
+  embeddable: E | ErrorEmbeddable
 ): embeddable is ErrorEmbeddable {
   return (embeddable as ErrorEmbeddable).getInput().error !== undefined;
 }

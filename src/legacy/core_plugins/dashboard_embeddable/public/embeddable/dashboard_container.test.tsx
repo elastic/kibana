@@ -67,7 +67,7 @@ test('DashboardContainer initializes embeddables', async done => {
 
   const subscription = container.getOutput$().subscribe(output => {
     if (container.getOutput().embeddableLoaded['123']) {
-      const embeddable = container.getEmbeddable<HelloWorldEmbeddable>('123');
+      const embeddable = container.getChild<HelloWorldEmbeddable>('123');
       expect(embeddable).toBeDefined();
       expect(embeddable.id).toBe('123');
       done();
@@ -75,7 +75,7 @@ test('DashboardContainer initializes embeddables', async done => {
   });
 
   if (container.getOutput().embeddableLoaded['123']) {
-    const embeddable = container.getEmbeddable<HelloWorldEmbeddable>('123');
+    const embeddable = container.getChild<HelloWorldEmbeddable>('123');
     expect(embeddable).toBeDefined();
     expect(embeddable.id).toBe('123');
     subscription.unsubscribe();
@@ -98,7 +98,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
     expect(false).toBe(true);
   }
 
-  const embeddableInContainer = container.getEmbeddable<HelloWorldEmbeddable>(embeddable.id);
+  const embeddableInContainer = container.getChild<HelloWorldEmbeddable>(embeddable.id);
   expect(embeddableInContainer).toBeDefined();
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });

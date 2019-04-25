@@ -86,7 +86,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
     if (
       this.embeddable &&
       !isErrorEmbeddable(this.embeddable) &&
-      this.props.container.getEmbeddable(this.embeddable.id)
+      this.props.container.getChild(this.embeddable.id)
     ) {
       this.props.container.removeEmbeddable(this.embeddable);
     }
@@ -124,9 +124,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
   }
 
   private renderEmbeddable() {
-    this.embeddable = this.props.container.getEmbeddable<DashboardEmbeddable>(
-      this.props.embeddableId
-    );
+    this.embeddable = this.props.container.getChild<DashboardEmbeddable>(this.props.embeddableId);
     if (this.mounted && this.embeddable) {
       this.setState({ loading: false }, () => {
         this.embeddable.renderInPanel(this.panelElement, this.props.container);

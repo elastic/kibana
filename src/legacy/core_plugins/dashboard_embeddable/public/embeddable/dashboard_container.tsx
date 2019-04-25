@@ -155,7 +155,7 @@ export class DashboardContainer extends Container<
 
   public getPanelIndexPatterns() {
     const indexPatterns: IndexPattern[] = [];
-    Object.values(this.embeddables).forEach(embeddable => {
+    Object.values(this.children).forEach(embeddable => {
       if (!isErrorEmbeddable(embeddable)) {
         const embeddableIndexPatterns = embeddable.getOutput().indexPatterns;
         if (embeddableIndexPatterns) {

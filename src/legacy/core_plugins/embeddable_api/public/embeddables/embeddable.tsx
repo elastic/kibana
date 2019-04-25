@@ -112,7 +112,7 @@ export class Embeddable<
     }
     if (this.parent) {
       // Ensures state changes flow from container downward.
-      this.parent.updateEmbeddableInput<I>(this.id, changes);
+      this.parent.updateInputForChild<I>(this.id, changes);
     } else {
       const newInput = {
         ...this.input,

@@ -84,10 +84,14 @@ export abstract class EmbeddableFactory<
   /**
    *
    */
-  public createFromSavedObject(
+  public createFromSavedObject<
+    CEI extends Partial<EmbeddableInput> = {},
+    CI extends ContainerInput = ContainerInput,
+    CO extends ContainerOutput = ContainerOutput
+  >(
     savedObjectId: string,
     explicitInput: Partial<I>,
-    parent?: Container
+    parent?: Container<CEI, CI, CO>
   ): Promise<E | ErrorEmbeddable> {
     throw new Error(`Creation from saved object not supported by type ${this.name}`);
   }
@@ -96,8 +100,7 @@ export abstract class EmbeddableFactory<
    */
   public abstract create<
     CEI extends Partial<EmbeddableInput> = {},
-    EO extends EmbeddableOutput = EmbeddableOutput,
     CI extends ContainerInput = ContainerInput,
     CO extends ContainerOutput = ContainerOutput
-  >(initialInput: I, parent?: Container<CEI, EO, CI, CO>): Promise<E | ErrorEmbeddable>;
+  >(initialInput: I, parent?: Container<CEI, CI, CO>): Promise<E | ErrorEmbeddable>;
 }

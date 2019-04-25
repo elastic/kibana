@@ -42,21 +42,37 @@ export abstract class Action<
   C extends Container = Container,
   T extends {} = {}
 > {
-  // Used to determine the order when there is more than one action matched to a trigger.
-  // Higher numbers are displayed first.
+  /**
+   * Determined the order when there is more than one action matched to a trigger.
+   * Higher numbers are displayed first.
+   */
   public priority: number = 0;
 
   constructor(public readonly id: string) {}
 
+  /**
+   * Optional icon that can be displayed along with the title.
+   */
   public getIcon(context: ActionContext): EuiContextMenuItemIcon | undefined {
     return undefined;
   }
 
+  /**
+   * Returns a title to be displayed to the user.
+   * @param context
+   */
   public abstract getTitle(context: ActionContext): string;
 
+  /**
+   * Returns a promise that resolves to true if this action is compatible given the context,
+   * otherwise resolves to false.
+   */
   public isCompatible(context: ActionContext): Promise<boolean> {
     return Promise.resolve(true);
   }
 
+  /**
+   * Executes the action.
+   */
   public abstract execute(context: ExecuteActionContext<E, C, T>): void;
 }

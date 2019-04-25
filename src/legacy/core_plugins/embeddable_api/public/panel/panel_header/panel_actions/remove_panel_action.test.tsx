@@ -78,11 +78,11 @@ beforeEach(async () => {
 
 test('Removes the embeddable', async () => {
   const removePanelAction = new RemovePanelAction();
-  expect(container.getEmbeddable(embeddable.id)).toBeDefined();
+  expect(container.getChild(embeddable.id)).toBeDefined();
 
   removePanelAction.execute({ embeddable });
 
-  expect(container.getEmbeddable(embeddable.id)).toBeUndefined();
+  expect(container.getChild(embeddable.id)).toBeUndefined();
 });
 
 test('Is not compatible when embeddable is not in a parent', async () => {

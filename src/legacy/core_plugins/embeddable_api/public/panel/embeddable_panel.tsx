@@ -49,6 +49,7 @@ interface State {
 
 export class EmbeddablePanel extends React.Component<Props, State> {
   private embeddableRoot: React.RefObject<HTMLDivElement>;
+  private parentSubscription?: Subscription;
   private subscription?: Subscription;
   private mounted: boolean = false;
   constructor(props: Props) {
@@ -73,14 +74,21 @@ export class EmbeddablePanel extends React.Component<Props, State> {
 
   public componentWillMount() {
     this.mounted = true;
-    const { parent } = this.props.embeddable;
+    const { embeddable } = this.props;
+    const { parent } = embeddable;
+
+    this.subscription = embeddable.getInput$().subscribe(async () => {
+      if (this.mounted) {
+        this.setState({
+          viewMode: embeddable.getInput().viewMode ? embeddable.getInput().viewMode : ViewMode.EDIT,
+        });
+      }
+    });
+
     if (parent) {
-      this.subscription = embeddable.getInput$().subscribe(async () => {
-        const panels = await this.getPanels();
+      this.parentSubscription = parent.getInput$().subscribe(async () => {
         if (this.mounted && parent) {
           this.setState({
-            panels,
-            viewMode: parent.getViewMode(),
             hidePanelTitles: Boolean(parent.getInput().hidePanelTitles),
           });
         }
@@ -92,6 +100,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     this.mounted = false;
     if (this.subscription) {
       this.subscription.unsubscribe();
+    }
+    if (this.parentSubscription) {
+      this.parentSubscription.unsubscribe();
     }
   }
 
@@ -126,7 +137,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   }
 
   public componentDidMount() {
-    this.props.embeddable.render(this.embeddableRoot.current);
+    if (this.embeddableRoot.current) {
+      this.props.embeddable.render(this.embeddableRoot.current);
+    }
   }
 
   private getPanels = async () => {

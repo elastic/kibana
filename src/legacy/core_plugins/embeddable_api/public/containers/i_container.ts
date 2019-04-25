@@ -17,16 +17,13 @@
  * under the License.
  */
 
-import uuid from 'uuid';
 import {
   Embeddable,
   EmbeddableFactoryRegistry,
   EmbeddableInput,
   EmbeddableOutput,
   ErrorEmbeddable,
-  EmbeddableFactory,
 } from '../embeddables';
-import { ViewMode } from '../types';
 import { IEmbeddable } from '../embeddables/i_embeddable';
 
 export interface PanelState<E extends { [key: string]: unknown } = { [key: string]: unknown }> {
@@ -55,8 +52,6 @@ export interface ContainerInput extends EmbeddableInput {
 }
 
 export interface IContainer<
-  CEI extends Partial<EmbeddableInput> = {},
-  EO extends EmbeddableOutput = EmbeddableOutput,
   I extends ContainerInput = ContainerInput,
   O extends ContainerOutput = ContainerOutput
 > extends IEmbeddable<I, O> {
@@ -71,10 +66,46 @@ export interface IContainer<
   getInputForChild<EEI extends EmbeddableInput>(id: string): EEI;
 
   /**
-   * Change the input for a given child. Note, this will override any inherited state taken from
+   * Changes the input for a given child. Note, this will override any inherited state taken from
    * the container itself.
    * @param id
    * @param changes
    */
   updateInputForChild<EEI extends EmbeddableInput>(id: string, changes: Partial<EEI>): void;
+
+  /**
+   * Returns the child embeddable with the given id.
+   * @param id
+   */
+  getChild<E extends Embeddable<EmbeddableInput> = Embeddable<EmbeddableInput>>(id: string): E;
+
+  /**
+   * Removes the embeddable with the given id.
+   * @param embeddableId
+   */
+  removeEmbeddable(embeddableId: string): void;
+
+  /**
+   * Adds a new embeddable that is backed off of a saved object.
+   */
+  addSavedObjectEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    E extends Embeddable<EEI> = Embeddable<EEI>
+  >(
+    type: string,
+    savedObjectId: string
+  ): Promise<E | ErrorEmbeddable>;
+
+  /**
+   * Adds a new embeddable to the container. `explicitInput` may partially specify the required embeddable input,
+   * but the remainder must come from inherited container state.
+   */
+  addNewEmbeddable<
+    EEI extends EmbeddableInput = EmbeddableInput,
+    EEO extends EmbeddableOutput = EmbeddableOutput,
+    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
+  >(
+    type: string,
+    explicitInput: Partial<EEI>
+  ): Promise<E | ErrorEmbeddable>;
 }

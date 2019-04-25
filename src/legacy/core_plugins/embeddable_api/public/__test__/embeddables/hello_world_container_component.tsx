@@ -63,7 +63,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
         }
 
         if (this.state.embeddables[panelState.embeddableId] === undefined) {
-          const embeddable = await this.props.container.getEmbeddable(panelState.embeddableId);
+          const embeddable = await this.props.container.getChild(panelState.embeddableId);
           const node = this.roots[panelState.embeddableId].current;
           if (this.mounted && node !== null && embeddable) {
             embeddable.renderInPanel(node, this.props.container);
@@ -81,7 +81,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
       Object.keys(embeddablesLoaded).forEach(async id => {
         const loaded = embeddablesLoaded[id];
         if (loaded && !this.state.loaded[id]) {
-          const embeddable = await this.props.container.getEmbeddable(id);
+          const embeddable = await this.props.container.getChild(id);
           const node = this.roots[id].current;
           if (this.mounted && node !== null && embeddable) {
             embeddable.renderInPanel(node, this.props.container);
@@ -135,7 +135,7 @@ export class HelloWorldContainerComponent extends Component<Props, State> {
     }
 
     if (this.state.embeddables[id] === undefined) {
-      const embeddable = await this.props.container.getEmbeddable(id);
+      const embeddable = await this.props.container.getChild(id);
       const node = this.roots[id].current;
       if (this.mounted && node !== null && embeddable) {
         embeddable.renderInPanel(node, this.props.container);

@@ -36,6 +36,7 @@ import { EmbeddableFactoryRegistry, isErrorEmbeddable } from '../embeddables';
 import {
   HelloWorldEmbeddable,
   HelloWorldInput,
+  HelloWorldOutput,
 } from '../__test__/embeddables/hello_world_embeddable';
 import { ContainerInput } from './container';
 import { ViewMode } from '../types';
@@ -82,7 +83,7 @@ test('Container initializes embeddables', async done => {
 
   const subscription = container.getOutput$().subscribe(() => {
     if (container.getOutput().embeddableLoaded['123']) {
-      const embeddable = container.getEmbeddable<HelloWorldEmbeddable>('123');
+      const embeddable = container.getChild<HelloWorldEmbeddable>('123');
       expect(embeddable).toBeDefined();
       expect(embeddable.id).toBe('123');
       subscription.unsubscribe();
@@ -91,7 +92,7 @@ test('Container initializes embeddables', async done => {
   });
 
   if (container.getOutput().embeddableLoaded['123']) {
-    const embeddable = container.getEmbeddable<HelloWorldEmbeddable>('123');
+    const embeddable = container.getChild<HelloWorldEmbeddable>('123');
     expect(embeddable).toBeDefined();
     expect(embeddable.id).toBe('123');
     done();
@@ -113,7 +114,7 @@ test('Container.addNewEmbeddable', async () => {
     expect(false).toBe(true);
   }
 
-  const embeddableInContainer = container.getEmbeddable<HelloWorldEmbeddable>(embeddable.id);
+  const embeddableInContainer = container.getChild<HelloWorldEmbeddable>(embeddable.id);
   expect(embeddableInContainer).toBeDefined();
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
@@ -133,13 +134,14 @@ test('Container.removeEmbeddable removes and cleans up', async () => {
     embeddableFactories
   );
 
-  const embeddable = await container.addNewEmbeddable<HelloWorldInput, HelloWorldEmbeddable>(
-    HELLO_WORLD_EMBEDDABLE,
-    {
-      firstName: 'Susy',
-      lastName: 'Q',
-    }
-  );
+  const embeddable = await container.addNewEmbeddable<
+    HelloWorldInput,
+    HelloWorldOutput,
+    HelloWorldEmbeddable
+  >(HELLO_WORLD_EMBEDDABLE, {
+    firstName: 'Susy',
+    lastName: 'Q',
+  });
 
   if (isErrorEmbeddable(embeddable)) {
     expect(false).toBe(true);
@@ -150,7 +152,9 @@ test('Container.removeEmbeddable removes and cleans up', async () => {
 
   container.removeEmbeddable(embeddable.id);
 
-  const noFind = container.getEmbeddable<HelloWorldEmbeddable>(embeddable.id);
+  const noFind = container.getChild<HelloWorldInput, HelloWorldOutput, HelloWorldEmbeddable>(
+    embeddable.id
+  );
   expect(noFind).toBeUndefined();
 
   expect(container.getInput().panels[embeddable.id]).toBeUndefined();
@@ -160,6 +164,8 @@ test('Container.removeEmbeddable removes and cleans up', async () => {
   }
 
   expect(embeddable.getDivorced).toThrowError();
+
+  expect(container.getOutput().embeddableLoaded[embeddable.id]).toBeUndefined();
 });
 
 test('Container.input$ is notified when child embeddable input is updated', async () => {
@@ -287,7 +293,7 @@ test(`Container updates its state when a child's input is updated`, async done =
     const newContainer = new HelloWorldContainer(container.getInput(), embeddableFactories);
     const outputSubscription = newContainer.getOutput$().subscribe(output => {
       if (output.embeddableLoaded[embeddable.id]) {
-        const newEmbeddable = newContainer.getEmbeddable<HelloWorldEmbeddable>(embeddable.id);
+        const newEmbeddable = newContainer.getChild<HelloWorldEmbeddable>(embeddable.id);
         expect(newEmbeddable.getInput().nameTitle).toBe('Dr.');
         outputSubscription.unsubscribe();
         inputSubscription.unsubscribe();
@@ -366,7 +372,7 @@ test('Test nested reactions', async done => {
   const containerSubscription = container.getInput$().subscribe(input => {
     const embeddableNameTitle = embeddable.getInput().nameTitle;
     const viewMode = input.viewMode;
-    const nameTitleFromContainer = container.getInputForEmbeddable<HelloWorldInput>(embeddable.id)
+    const nameTitleFromContainer = container.getInputForChild<HelloWorldInput>(embeddable.id)
       .nameTitle;
     if (
       embeddableNameTitle === 'Dr.' &&
@@ -408,13 +414,11 @@ test('Explicit embeddable input mapped to undefined will default to inherited', 
 
   embeddable.updateInput({ filters: [] });
 
-  expect(container.getInputForEmbeddable<FilterableEmbeddableInput>(embeddable.id).filters).toEqual(
-    []
-  );
+  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([]);
 
   embeddable.updateInput({ filters: undefined });
 
-  expect(container.getInputForEmbeddable<FilterableEmbeddableInput>(embeddable.id).filters).toEqual(
-    [derivedFilter]
-  );
+  expect(container.getInputForChild<FilterableEmbeddableInput>(embeddable.id).filters).toEqual([
+    derivedFilter,
+  ]);
 });

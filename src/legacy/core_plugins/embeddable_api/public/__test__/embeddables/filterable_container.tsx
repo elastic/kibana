@@ -33,7 +33,6 @@ export interface InheritedChildrenInput {
 
 export class FilterableContainer extends Container<
   InheritedChildrenInput,
-  EmbeddableOutput,
   FilterableContainerInput
 > {
   constructor(
