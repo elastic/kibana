@@ -95,12 +95,10 @@
     window.__test_utils__ = window.__test_utils__ || { documentClicksHandler, isTracking: false };
 
     // Handle "click" event on the document to update our test subjects
-    if (window.__test_utils__.isTracking) {
-      document.removeEventListener('click', window.__test_utils__.documentClicksHandler);
+    if (!window.__test_utils__.isTracking) {
+      document.addEventListener('click', window.__test_utils__.documentClicksHandler);
+      window.__test_utils__.isTracking = true;
     }
-
-    document.addEventListener('click', window.__test_utils__.documentClicksHandler);
-    window.__test_utils__.isTracking = true;
 
     findTestSubjects();
     output();
