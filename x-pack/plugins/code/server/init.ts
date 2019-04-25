@@ -249,7 +249,7 @@ async function initCodeNode(server: Server, serverOptions: ServerOptions, log: L
   fileRoute(codeServerRouter, serverOptions);
   workspaceRoute(codeServerRouter, serverOptions);
   symbolByQnameRoute(codeServerRouter, log);
-  installRoute(codeServerRouter, lspService, installManager);
+  installRoute(codeServerRouter, lspService);
   lspRoute(codeServerRouter, lspService, serverOptions);
   setupRoute(codeServerRouter);
 }
