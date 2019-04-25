@@ -38,14 +38,14 @@ export function fromUser(userInput: object | string) {
 
   userInput = userInput || '';
   if (typeof userInput === 'string') {
-    userInput = userInput.trim();
-    if (userInput.length === 0) {
+    const trimmedUserInput = userInput.trim();
+    if (trimmedUserInput.length === 0) {
       return matchAll;
     }
 
-    if (userInput[0] === '{') {
+    if (trimmedUserInput[0] === '{') {
       try {
-        return JSON.parse(userInput);
+        return JSON.parse(trimmedUserInput);
       } catch (e) {
         return userInput;
       }

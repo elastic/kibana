@@ -5,7 +5,7 @@
  */
 
 import { MetricsChartAPIResponse } from '../../../../server/lib/metrics/get_all_metrics_chart_data';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
