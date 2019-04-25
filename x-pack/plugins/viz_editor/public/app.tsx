@@ -47,6 +47,8 @@ function App($scope: any, $element: Element[]) {
 
   $scope.$on('$destroy', () => unmountComponentAtNode(el));
 
+  window.onerror = () => {};
+
   return render(
     <I18nProvider>
       <Main getInterpreter={getInterpreter} renderersRegistry={renderersRegistry} />
