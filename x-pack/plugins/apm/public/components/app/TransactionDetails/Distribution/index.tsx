@@ -11,12 +11,13 @@ import { Location } from 'history';
 import React, { Component } from 'react';
 import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { fromQuery, history, toQuery } from '../../../shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
 
 interface IChartPoint {
   sample?: IBucket['sample'];
