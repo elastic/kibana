@@ -108,10 +108,7 @@ exports[`TOCEntry props isReadOnly 1`] = `
       />
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <div
           className="eui-textTruncate eui-textLeft"
           style={

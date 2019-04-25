@@ -70,6 +70,7 @@ export class Server {
 
     const pluginsSetup = await this.plugins.setup({
       elasticsearch: elasticsearchServiceSetup,
+      http: httpSetup,
     });
 
     await this.legacy.setup({

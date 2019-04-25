@@ -17,6 +17,7 @@ describe('ML - data recognizer', () => {
     'apm_transaction',
     'auditbeat_process_docker_ecs',
     'auditbeat_process_hosts_ecs',
+    'metricbeat_system_ecs',
     'nginx_ecs',
   ];
 

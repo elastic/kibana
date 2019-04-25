@@ -112,41 +112,25 @@ exports[`it renders without crashing 1`] = `
             />
           </EuiFormRow>
         </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        direction="column"
+      >
         <EuiFlexItem>
-          <EuiFormRow
-            className="indexPrivilegeForm__grantedFieldsRow"
-            describedByIds={Array []}
-            fullWidth={true}
-            hasEmptyLabelSpace={false}
-            helpText={
-              <FormattedMessage
-                defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
-                id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowHelpText"
-                values={Object {}}
-              />
-            }
+          <EuiSwitch
+            checked={false}
+            compressed={true}
+            data-test-subj="restrictFieldsQuery0"
             label={
               <FormattedMessage
-                defaultMessage="Granted fields (optional)"
-                id="xpack.security.management.editRole.indexPrivilegeForm.grantedFieldsFormRowLabel"
+                defaultMessage="Grant access to specific fields"
+                id="xpack.security.management.editRoles.indexPrivilegeForm.grantFieldPrivilegesLabel"
                 values={Object {}}
               />
             }
-            labelType="label"
-          >
-            <EuiComboBox
-              compressed={false}
-              data-test-subj="fieldInput0"
-              fullWidth={false}
-              isClearable={true}
-              isDisabled={false}
-              onChange={[Function]}
-              onCreateOption={[Function]}
-              options={Array []}
-              selectedOptions={Array []}
-              singleSelection={false}
-            />
-          </EuiFormRow>
+            onChange={[Function]}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

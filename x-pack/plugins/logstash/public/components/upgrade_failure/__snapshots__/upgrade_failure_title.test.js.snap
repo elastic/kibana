@@ -13,10 +13,7 @@ exports[`UpgradeFailureTitle component renders component as expected 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiTitle
-      size="m"
-      textTransform="none"
-    >
+    <EuiTitle>
       <h2>
         the Title
       </h2>
