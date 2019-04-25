@@ -8,6 +8,7 @@ import queryString from 'querystring';
 import { Action } from 'redux-actions';
 import { kfetch } from 'ui/kfetch';
 import { TextDocumentPositionParams } from 'vscode-languageserver';
+import { path } from 'd3-path';
 import { call, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import { parseGoto, parseLspUrl, toCanonicalUrl } from '../../common/uri_util';
 import { FileTree } from '../../model';
@@ -28,6 +29,7 @@ import {
   revealPosition,
   fetchRepos,
   turnOnDefaultRepoScope,
+  openTreePath,
 } from '../actions';
 import { loadRepo, loadRepoFailed, loadRepoSuccess } from '../actions/status';
 import { PathTypes } from '../common/types';
@@ -187,13 +189,21 @@ function* handleMainRouteChange(action: Action<Match>) {
     yield put(fetchRepoCommits({ uri: repoUri, revision }));
   }
   const tree = yield select(getTree);
+  const isDir = pathType === PathTypes.tree;
+  const openPath = isDir
+    ? file
+    : file
+        .split('/')
+        .slice(0, -1)
+        .join('/');
+  yield put(openTreePath(openPath));
   yield put(
     fetchRepoTree({
       uri: repoUri,
       revision,
-      path: file || '',
+      path: file,
       parents: getPathOfTree(tree, (file || '').split('/')) === null,
-      isDir: pathType === PathTypes.tree,
+      isDir,
     })
   );
   const uri = toCanonicalUrl({
