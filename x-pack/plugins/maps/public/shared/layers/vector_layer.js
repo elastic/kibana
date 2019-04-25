@@ -11,6 +11,7 @@ import { LeftInnerJoin } from './joins/left_inner_join';
 import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -209,10 +210,16 @@ export class VectorLayer extends AbstractLayer {
     let updateDueToLayerQuery = false;
     let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
-      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
-      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
       updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
+      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+      if (searchFilters.applyGlobalQuery) {
+        updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+        updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      } else {
+        // Global filters and query are not applied to layer search request so no re-fetch required.
+        // Exception is "Refresh" query.
+        updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+      }
     }
 
     let updateDueToPrecisionChange = false;

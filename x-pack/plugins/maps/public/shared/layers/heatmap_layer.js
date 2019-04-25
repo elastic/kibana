@@ -10,6 +10,7 @@ import { AbstractLayer } from './layer';
 import { EuiIcon } from '@elastic/eui';
 import { HeatmapStyle } from './styles/heatmap_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 
 const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__';//unique name to store scaled value for weighting
 
@@ -133,14 +134,19 @@ export class HeatmapLayer extends AbstractLayer {
 
     const updateDueToExtent = this.updateDueToExtent(this._source, meta, searchFilters);
 
-    const updateDueToQuery = searchFilters.query
-      && !_.isEqual(meta.query, searchFilters.query);
+    let updateDueToQuery = false;
+    let updateDueToFilters = false;
+    if (searchFilters.applyGlobalQuery) {
+      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+    } else {
+      // Global filters and query are not applied to layer search request so no re-fetch required.
+      // Exception is "Refresh" query.
+      updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+    }
     const updateDueToLayerQuery = searchFilters.layerQuery
       && !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
     const updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
-
-    const updateDueToFilters = searchFilters.filters
-      && !_.isEqual(meta.filters, searchFilters.filters);
 
     const updateDueToMetricChange = !_.isEqual(meta.metric, searchFilters.metric);
 
