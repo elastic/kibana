@@ -24,8 +24,16 @@ import * as collectionActions from '../lib/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
+/*
+  The relative imports are messy.
+*/
+import { QueryBar } from '../../../../../ui/public/query_bar/components/query_bar.tsx';
+import { Storage } from '../../../../../ui/public/storage/storage.ts';
+
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
+
+const localStorage = new Storage(window.localStorage);
 class FilterItemsUi extends Component {
 
   constructor(props) {
@@ -41,7 +49,10 @@ class FilterItemsUi extends Component {
       }));
     };
   }
-
+  handleSubmit = (model, query) => {
+    const part = { filter: query.query.query };
+    collectionActions.handleChange(this.props, _.assign({}, model, part));
+  }
   renderRow(row, i, items) {
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
@@ -49,6 +60,7 @@ class FilterItemsUi extends Component {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
+
     const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
@@ -67,15 +79,22 @@ class FilterItemsUi extends Component {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <div style={{ border: '1px solid blue' }} className="TSVBFilterITemsAddQueryBar">
-            <EuiFieldText
-              placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
-              aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
-              onChange={this.handleChange(model, 'filter')}
-              value={model.filter}
-              fullWidth
-            />
-          </div>
+          <QueryBar
+            query={{ language: 'lucene', query: model.filter }}
+            screenTitle={'DataMetricsGroupByFiltersFilter'}
+            onSubmit={(query) => this.handleSubmit(model, query)}
+            appName={'VisEditor'}
+            indexPatterns={model.index_pattern || model.default_index_pattern}
+            store={localStorage || {}}
+            showDatePicker={false}
+          />
+          {/* <EuiFieldText
+            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
+            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
+            onChange={this.handleChange(model, 'filter')}
+            value={model.filter}
+            fullWidth
+          /> */}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
