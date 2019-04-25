@@ -401,35 +401,103 @@ function _getSuggestionsForFieldAsSplit(
 ): Suggestion[] {
   const firstQuery = Object.values(visModel.queries)[0];
   const firstQueryKey = Object.keys(visModel.queries)[0];
-  const possibleOperator = getOperatorsForField(field, false, true)[0];
+  const possibleOperator =
+    field.type === 'number'
+      ? getOperatorsForField(field, true, false)[0]
+      : getOperatorsForField(field, false, true)[0];
   const possibleOperation = fieldToOperation(field, possibleOperator);
 
-  const extendedQueryState = {
-    ...visModel,
-    queries: {
-      ...visModel.queries,
-      [firstQueryKey]: {
-        ...firstQuery,
-        select: [possibleOperation, ...firstQuery.select],
+  if (field.type === 'string') {
+    // suggest as series split
+    const extendedQueryState = {
+      ...visModel,
+      queries: {
+        ...visModel.queries,
+        [firstQueryKey]: {
+          ...firstQuery,
+          select: [possibleOperation, ...firstQuery.select],
+        },
       },
-    },
-  };
-  const newVisModel = buildViewModel(
-    extendedQueryState,
-    [extendedQueryState.queries[firstQueryKey]!.select[2]],
-    [extendedQueryState.queries[firstQueryKey]!.select[1]],
-    [extendedQueryState.queries[firstQueryKey]!.select[0]]
-  );
+    };
+    const newVisModel = buildViewModel(
+      extendedQueryState,
+      [extendedQueryState.queries[firstQueryKey]!.select[2]],
+      [extendedQueryState.queries[firstQueryKey]!.select[1]],
+      [extendedQueryState.queries[firstQueryKey]!.select[0]]
+    );
 
-  return [
-    buildSuggestion(
-      newVisModel,
-      {
-        iconType: displayTypeIcon.line,
+    return [
+      buildSuggestion(
+        newVisModel,
+        {
+          iconType: displayTypeIcon.line,
+        },
+        0.8
+      ),
+    ];
+  }
+
+  if (field.type === 'date') {
+    // suggest as x axis, use current x axis as split
+    const extendedQueryState = {
+      ...visModel,
+      queries: {
+        ...visModel.queries,
+        [firstQueryKey]: {
+          ...firstQuery,
+          select: [firstQuery.select[1], firstQuery.select[0], possibleOperation],
+        },
       },
-      0.8
-    ),
-  ];
+    };
+    const newVisModel = buildViewModel(
+      extendedQueryState,
+      [extendedQueryState.queries[firstQueryKey]!.select[2]],
+      [extendedQueryState.queries[firstQueryKey]!.select[1]],
+      [extendedQueryState.queries[firstQueryKey]!.select[0]]
+    );
+
+    return [
+      buildSuggestion(
+        updateXyState(newVisModel, { displayType: 'line' }),
+        {
+          iconType: displayTypeIcon.line,
+        },
+        0.8
+      ),
+    ];
+  }
+
+  if (field.type === 'number') {
+    // suggest as y axis, TODO implement multiple y axes
+    const extendedQueryState = {
+      ...visModel,
+      queries: {
+        ...visModel.queries,
+        [firstQueryKey]: {
+          ...firstQuery,
+          select: [possibleOperation, firstQuery.select[1]],
+        },
+      },
+    };
+    const newVisModel = buildViewModel(
+      extendedQueryState,
+      [extendedQueryState.queries[firstQueryKey]!.select[1]],
+      [extendedQueryState.queries[firstQueryKey]!.select[0]],
+      []
+    );
+
+    return [
+      buildSuggestion(
+        newVisModel,
+        {
+          iconType: displayTypeIcon.line,
+        },
+        0.5
+      ),
+    ];
+  }
+
+  return [];
 }
 
 function WorkspacePanel({ children, ...props }: any) {

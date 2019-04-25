@@ -40,6 +40,7 @@ export function DroppablePane({
 
   return (
     <Draggable
+      isBlock
       canHandleDrop={(field: any) => !!field && !!field.type}
       onDrop={(field: any) => {
         const { datasource } = visModel;

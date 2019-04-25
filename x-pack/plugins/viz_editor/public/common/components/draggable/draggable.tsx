@@ -20,6 +20,7 @@ interface Props {
   draggable?: boolean;
   canHandleDrop?: (value: any) => boolean;
   onDrop?: (value: any) => void;
+  isBlock?: boolean;
   children: any;
 }
 
@@ -42,6 +43,7 @@ export function Draggable(props: Props) {
     children,
     canHandleDrop = () => false,
     onDrop,
+    isBlock,
   } = props;
   const [state, setState] = useState(initialState);
   const { isActive } = state;
@@ -82,7 +84,9 @@ export function Draggable(props: Props) {
 
   return (
     <div
-      className={`${className} ${isActive ? activeTargetClassName : ''}`}
+      className={`${className} ${isActive ? activeTargetClassName : ''} ${
+        isBlock ? '' : 'inline-draggable'
+      }`}
       {...droppableProps}
       {...draggableProps}
     >
