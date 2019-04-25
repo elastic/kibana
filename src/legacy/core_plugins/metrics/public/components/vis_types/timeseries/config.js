@@ -24,6 +24,11 @@ import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
+/*
+  These relative imports are nasty
+*/
+import { QueryBar } from '../../../../../../ui/public/query_bar/components/query_bar.tsx';
+import { Storage } from '../../../../../../ui/public/storage/storage.ts';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -39,10 +44,14 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
+const localStorage = new Storage(window.localStorage);
+
 const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
-
+  const handleSubmit = (query) => {
+    props.onChange({ filter: query.query.query });
+  };
   const defaults = {
     fill: '',
     line_width: '',
@@ -307,7 +316,7 @@ const TimeseriesConfig = injectI18n(function (props) {
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
-      <div style={{ border: '1px solid blue' }}>
+      <EuiFlexItem>
         <EuiFormRow
           id={htmlId('series_filter')}
           label={(<FormattedMessage
@@ -316,13 +325,18 @@ const TimeseriesConfig = injectI18n(function (props) {
           />)}
           fullWidth
         >
-          <EuiFieldText
-            onChange={handleTextChange('filter')}
-            value={model.filter}
-            fullWidth
+          <QueryBar
+            query={{ language: 'lucene', query: model.filter }}
+            screenTitle={'TSVB'}
+            onSubmit={handleSubmit}
+            appName={'VisEditor'}
+            indexPatterns={model.index_pattern || model.default_index_pattern}
+            store={localStorage || {}}
+            showDatePicker={false}
           />
+
         </EuiFormRow>
-      </div>
+      </EuiFlexItem>
       <EuiHorizontalRule margin="s" />
 
       { type }
