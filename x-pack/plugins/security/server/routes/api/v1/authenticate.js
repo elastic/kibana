@@ -89,7 +89,7 @@ export function initAuthenticateApi(server) {
         }
 
         return h.redirect(
-          deauthenticationResult.redirectURL || `${server.config().get('server.basePath')}/`
+          deauthenticationResult.redirectURL || `${server.config().get('server.basePath')}/login`
         );
       } catch (err) {
         throw wrapError(err);

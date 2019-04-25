@@ -211,7 +211,7 @@ describe('Authentication routes', () => {
       sinon.assert.calledWithExactly(hStub.redirect, 'https://custom.logout');
     });
 
-    it('redirects user to the base path if deauthentication succeeds.', async () => {
+    it('redirects user to login if deauthentication succeeds.', async () => {
       const request = requestFixture();
 
       serverStub.plugins.security.deauthenticate
@@ -221,10 +221,10 @@ describe('Authentication routes', () => {
       await logoutRoute.handler(request, hStub);
 
       sinon.assert.calledOnce(hStub.redirect);
-      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/');
+      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/login');
     });
 
-    it('redirects user to the base path if deauthentication is not handled.', async () => {
+    it('redirects user to login if deauthentication is not handled.', async () => {
       const request = requestFixture();
 
       serverStub.plugins.security.deauthenticate
@@ -234,7 +234,7 @@ describe('Authentication routes', () => {
       await logoutRoute.handler(request, hStub);
 
       sinon.assert.calledOnce(hStub.redirect);
-      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/');
+      sinon.assert.calledWithExactly(hStub.redirect, '/test-base-path/login');
     });
   });
 
