@@ -8,7 +8,8 @@ export interface Dictionary<TValue> {
   [id: string]: TValue;
 }
 
-// converts a dictionary to an array. note this looses the dictionary `key` information.
+// converts a dictionary to an array. note this loses the dictionary `key` information.
+// however it's able to retain the type information of the dictionay elements.
 export function dictionaryToArray<TValue>(dict: Dictionary<TValue>): TValue[] {
   return Object.keys(dict).map(key => dict[key]);
 }

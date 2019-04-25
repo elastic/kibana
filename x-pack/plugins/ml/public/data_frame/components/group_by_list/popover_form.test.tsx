@@ -16,7 +16,9 @@ describe('isIntervalValid()', () => {
     const isValid = (interval: string) =>
       isIntervalValid(interval, PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM);
 
-    expect(isValid('10')).toBe(true);
+    expect(isValid('0')).toBe(false);
+    expect(isValid('00')).toBe(false);
+    expect(isValid('001')).toBe(false);
     expect(isValid('10.')).toBe(false);
     expect(isValid('10.5')).toBe(true);
     expect(isValid('10.5.')).toBe(false);
@@ -33,6 +35,7 @@ describe('isIntervalValid()', () => {
     const isValid = (interval: string) =>
       isIntervalValid(interval, PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM);
 
+    expect(isValid('0')).toBe(false);
     expect(isValid('10')).toBe(false);
     expect(isValid('10.5')).toBe(false);
     expect(isValid('10.5.')).toBe(false);
@@ -41,6 +44,7 @@ describe('isIntervalValid()', () => {
     expect(isValid('.5')).toBe(false);
     expect(isValid('.5.')).toBe(false);
     expect(isValid('ms')).toBe(false);
+    expect(isValid('0ms')).toBe(false);
     expect(isValid('1ms')).toBe(true);
     expect(isValid('2s')).toBe(true);
     expect(isValid('5m')).toBe(true);

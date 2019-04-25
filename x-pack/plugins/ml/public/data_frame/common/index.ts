@@ -182,12 +182,19 @@ export function getDataFramePreviewRequest(
         },
       };
 
+      // DATE_HISTOGRAM_FORMAT is an enum which maps interval units like ms/s/m/... to
+      // date_histrogram aggregation formats like 'yyyy-MM-dd'. The following code extracts
+      // the interval unit from the configurations interval and adds a matching
+      // aggregation format to the configuration.
       const timeUnitMatch = g.interval.match(dateHistogramIntervalFormatRegex);
       if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
         // the following is just a TS compatible way of using the
         // matched string like `d` as the property to access the enum.
-        dateHistogramAgg.date_histogram.format =
+        const format =
           DATE_HISTOGRAM_FORMAT[timeUnitMatch[1] as keyof typeof DATE_HISTOGRAM_FORMAT];
+        if (format !== undefined) {
+          dateHistogramAgg.date_histogram.format = format;
+        }
       }
       request.pivot.group_by[g.formRowLabel] = dateHistogramAgg;
     }

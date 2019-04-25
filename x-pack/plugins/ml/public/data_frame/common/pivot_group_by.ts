@@ -19,8 +19,10 @@ interface GroupByConfigBase {
   formRowLabel: string;
 }
 
-export const histogramIntervalFormatRegex = /^[0-9]+((\.)?[0-9]+)?$/;
-export const dateHistogramIntervalFormatRegex = /^[0-9]+(ms|s|m|h|d|w|M|q|y)$/;
+// Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.
+export const histogramIntervalFormatRegex = /^([1-9][0-9]*((\.)([0-9]+))?|([0](\.)([0-9]+)))$/;
+// Don't allow intervals of '0', don't allow floating intervals.
+export const dateHistogramIntervalFormatRegex = /^[1-9][0-9]*(ms|s|m|h|d|w|M|q|y)$/;
 
 export enum DATE_HISTOGRAM_FORMAT {
   ms = 'yyyy-MM-dd HH:mm:ss.SSS',
