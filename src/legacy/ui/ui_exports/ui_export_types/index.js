@@ -52,6 +52,7 @@ export {
   inspectorViews,
   chromeNavControls,
   navbarExtensions,
+  embeddableActions,
   contextMenuActions,
   managementSections,
   indexManagement,

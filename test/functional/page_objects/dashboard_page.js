@@ -201,7 +201,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await retry.waitFor('in edit mode', async () => {
         const [panels, menuIcons] = await Promise.all([
           testSubjects.findAll('dashboardPanel'),
-          testSubjects.findAll('dashboardPanelToggleMenuIcon'),
+          testSubjects.findAll('embeddablePanelToggleMenuIcon'),
         ]);
         return panels.length === menuIcons.length;
       });
@@ -613,7 +613,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const checkList = [];
       for (const name of vizList) {
         const isPresent = await testSubjects.exists(
-          `dashboardPanelHeading-${name.replace(/\s+/g, '')}`,
+          `embeddablePanelHeading-${name.replace(/\s+/g, '')}`,
           { timeout: 10000 }
         );
         checkList.push({ name, isPresent });

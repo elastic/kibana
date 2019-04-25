@@ -71,6 +71,7 @@ declare module 'hapi' {
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
     savedObjectsManagement(): SavedObjectsManagement;
+    getInjectedUiAppVars: (pluginName: string) => { [key: string]: any };
   }
 
   interface Request {

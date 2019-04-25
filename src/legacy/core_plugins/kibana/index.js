@@ -48,6 +48,7 @@ export default function (kibana) {
   const kbnBaseUrl = '/app/kibana';
   return new kibana.Plugin({
     id: 'kibana',
+    require: ['embeddable_api'],
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -64,6 +65,10 @@ export default function (kibana) {
         'plugins/kibana/visualize/saved_visualizations/saved_visualization_register',
         'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
+      ],
+      embeddableFactories: [
+        'plugins/kibana/visualize/embeddable/visualize_embeddable_factory',
+        'plugins/kibana/discover/embeddable/search_embeddable_factory',
       ],
       app: {
         id: 'kibana',

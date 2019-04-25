@@ -20,22 +20,31 @@
 import '../doc_table';
 import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
-import { EmbeddableFactory } from 'ui/embeddable';
 import {
-  EmbeddableInstanceConfiguration,
-  OnEmbeddableStateChanged,
-} from 'ui/embeddable/embeddable_factory';
+  embeddableFactories,
+  EmbeddableFactory,
+  ErrorEmbeddable,
+  triggerRegistry,
+  Container,
+} from 'plugins/embeddable_api/index';
+import chrome from 'ui/chrome';
+import { IPrivate } from 'ui/private';
+// @ts-ignore
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedSearchLoader } from '../types';
-import { SearchEmbeddable } from './search_embeddable';
+import { SearchEmbeddable, SearchInput, SearchOutput, FilterManager } from './search_embeddable';
 
-export class SearchEmbeddableFactory extends EmbeddableFactory {
-  constructor(
-    private $compile: ng.ICompileService,
-    private $rootScope: ng.IRootScopeService,
-    private searchLoader: SavedSearchLoader
-  ) {
+export const SEARCH_EMBEDDABLE_TYPE = 'search';
+
+export class SearchEmbeddableFactory extends EmbeddableFactory<
+  SearchInput,
+  SearchOutput,
+  SearchEmbeddable
+> {
+  public readonly type = SEARCH_EMBEDDABLE_TYPE;
+
+  constructor() {
     super({
-      name: 'search',
       savedObjectMetaData: {
         name: i18n.translate('kbn.discover.savedSearch.savedObjectName', {
           defaultMessage: 'Saved search',
@@ -46,35 +55,74 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     });
   }
 
-  public getEditPath(panelId: string) {
-    return this.searchLoader.urlFor(panelId);
+  public isEditable() {
+    return capabilities.get().discover.save as boolean;
   }
 
-  /**
-   *
-   * @param {Object} panelMetadata. Currently just passing in panelState but it's more than we need, so we should
-   * decouple this to only include data given to us from the embeddable when it's added to the dashboard. Generally
-   * will be just the object id, but could be anything depending on the plugin.
-   * @param onEmbeddableStateChanged
-   * @return {Promise.<Embeddable>}
-   */
-  public create(
-    { id }: EmbeddableInstanceConfiguration,
-    onEmbeddableStateChanged: OnEmbeddableStateChanged
-  ) {
-    const editUrl = this.getEditPath(id);
-    const editable = capabilities.get().discover.save as boolean;
+  public canCreateNew() {
+    return false;
+  }
 
-    // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
-    return this.searchLoader.get(id).then(savedObject => {
-      return new SearchEmbeddable({
-        onEmbeddableStateChanged,
-        savedSearch: savedObject,
-        editUrl,
-        editable,
-        $rootScope: this.$rootScope,
-        $compile: this.$compile,
-      });
+  public getDisplayName() {
+    return i18n.translate('kbn.embeddable.search.displayName', {
+      defaultMessage: 'search',
     });
   }
+
+  public async createFromSavedObject(
+    savedObjectId: string,
+    input: Partial<SearchInput> & { id: string },
+    parent?: Container
+  ): Promise<SearchEmbeddable | ErrorEmbeddable> {
+    const $injector = await chrome.dangerouslyGetActiveInjector();
+
+    const $compile = $injector.get<ng.ICompileService>('$compile');
+    const $rootScope = $injector.get<ng.IRootScopeService>('$rootScope');
+    const courier = $injector.get<unknown>('courier');
+    const searchLoader = $injector.get<SavedSearchLoader>('savedSearches');
+    const editUrl = chrome.addBasePath(`/app/kibana${searchLoader.urlFor(savedObjectId)}`);
+
+    const Private = $injector.get<IPrivate>('Private');
+    const filterManager = Private<FilterManager>(FilterManagerProvider);
+
+    // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
+    return searchLoader
+      .get(savedObjectId)
+      .then(savedObject => {
+        return new SearchEmbeddable(
+          {
+            courier,
+            savedSearch: savedObject,
+            $rootScope,
+            $compile,
+            editUrl,
+            filterManager,
+            editable: capabilities.get().discover.save as boolean,
+            indexPatterns: _.compact([savedObject.searchSource.getField('index')]),
+          },
+          input,
+          parent
+        );
+      })
+      .catch((e: Error) => {
+        console.error(e); // eslint-disable-line no-console
+        return new ErrorEmbeddable(e, input.id);
+      });
+  }
+
+  public async create(input: SearchInput) {
+    return Promise.resolve(
+      new ErrorEmbeddable('Saved searches can only be created from a saved object', input.id)
+    );
+  }
 }
+
+embeddableFactories.registerFactory(new SearchEmbeddableFactory());
+
+export const SEARCH_ROW_CLICK_TRIGGER = 'SEARCH_ROW_CLICK_TRIGGER';
+
+triggerRegistry.registerTrigger({
+  id: SEARCH_ROW_CLICK_TRIGGER,
+  title: 'On row click',
+  actionIds: [],
+});

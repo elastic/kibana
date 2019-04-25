@@ -1,0 +1,20 @@
+.dshDashboardViewport {
+  width: 100%;
+  background-color: $euiColorEmptyShade;
+  flex: 1;
+  display: flex;
+}
+
+.dshDashboardViewport-withMargins {
+  width: 100%;
+  flex: 1;
+  display: flex;
+}
+
+#dashboardViewport {
+  flex: 1;
+  display: flex;
+  [data-reactroot] {
+    flex: 1;
+  }
+}

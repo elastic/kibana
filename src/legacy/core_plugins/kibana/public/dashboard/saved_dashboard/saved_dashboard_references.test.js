@@ -81,24 +81,6 @@ Object {
       `"\\"type\\" attribute is missing from panel \\"0\\""`
     );
   });
-
-  test('fails when "id" attribute is missing from a panel', () => {
-    const doc = {
-      id: '1',
-      attributes: {
-        foo: true,
-        panelsJSON: JSON.stringify([
-          {
-            type: 'visualization',
-            title: 'Title 1',
-          },
-        ]),
-      },
-    };
-    expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
-      `"\\"id\\" attribute is missing from panel \\"0\\""`
-    );
-  });
 });
 
 describe('injectReferences', () => {

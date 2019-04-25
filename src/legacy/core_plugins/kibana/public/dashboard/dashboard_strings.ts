@@ -18,21 +18,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DashboardViewMode } from './dashboard_view_mode';
+import { ViewMode } from 'plugins/embeddable_api/index';
 
 /**
  * @param title {string} the current title of the dashboard
- * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
+ * @param viewMode {ViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
  * @param isDirty {boolean} if the dashboard is in a dirty state. If in dirty state, adds (unsaved) to the
  * end of the title.
  * @returns {string} A title to display to the user based on the above parameters.
  */
-export function getDashboardTitle(
-  title: string,
-  viewMode: DashboardViewMode,
-  isDirty: boolean
-): string {
-  const isEditMode = viewMode === DashboardViewMode.EDIT;
+export function getDashboardTitle(title: string, viewMode: ViewMode, isDirty: boolean): string {
+  const isEditMode = viewMode === ViewMode.EDIT;
   let displayTitle: string;
 
   if (isEditMode && isDirty) {

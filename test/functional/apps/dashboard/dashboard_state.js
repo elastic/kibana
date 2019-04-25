@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   DEFAULT_PANEL_WIDTH,
-} from '../../../../src/legacy/core_plugins/kibana/public/dashboard/dashboard_constants';
+} from '../../../../src/legacy/core_plugins/dashboard_embeddable/public/embeddable/dashboard_constants';
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
@@ -244,7 +244,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await browser.getCurrentUrl();
-          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
+          const newUrl = currentUrl.replace(',vis:(colors:(%2780,000%27:%23FFFFFF))', '');
           await browser.get(newUrl.toString(), false);
           await PageObjects.header.waitUntilLoadingHasFinished();
 

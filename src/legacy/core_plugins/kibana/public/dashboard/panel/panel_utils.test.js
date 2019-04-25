@@ -25,26 +25,42 @@ jest.mock(
   { virtual: true }
 );
 
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
-import { PanelUtils } from './panel_utils';
-import { createPanelState } from './panel_state';
+jest.mock(
+  'ui/notify',
+  () => ({
+    toastNotifications: {
+      addDanger: () => {},
+    },
+  }),
+  { virtual: true }
+);
+
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from 'plugins/dashboard_embeddable/index';
+import { parseVersion, convertPanelDataPre61, convertPanelDataPre63 } from './panel_utils';
 
 test('parseVersion', () => {
-  const { major, minor } = PanelUtils.parseVersion('6.2.0');
+  const { major, minor } = parseVersion('6.2.0');
   expect(major).toBe(6);
   expect(minor).toBe(2);
 });
 
-test('convertPanelDataPre_6_1 gives supplies width and height when missing', () => {
-  const panelData = [
+test('convertPanelDataPre61 gives supplies width and height when missing', () => {
+  const panelData =
     {
       col: 3,
       id: 'foo1',
       row: 1,
       type: 'visualization',
       panelIndex: 1,
-      gridData: createPanelState,
-    },
+    };
+  const newPanelData = convertPanelDataPre61(panelData, false);
+  expect(newPanelData.gridData.w).toBe(DEFAULT_PANEL_WIDTH);
+  expect(newPanelData.gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
+  expect(newPanelData.version).toBe('6.3.0');
+});
+
+test('convertPanelDataPre61 scales width and height', () => {
+  const panelData =
     {
       col: 3,
       id: 'foo2',
@@ -53,20 +69,15 @@ test('convertPanelDataPre_6_1 gives supplies width and height when missing', () 
       size_y: 2,
       type: 'visualization',
       panelIndex: 2,
-      gridData: createPanelState,
-    },
-  ];
-  panelData.forEach(oldPanel => PanelUtils.convertPanelDataPre_6_1(oldPanel));
-  expect(panelData[0].gridData.w).toBe(DEFAULT_PANEL_WIDTH);
-  expect(panelData[0].gridData.h).toBe(DEFAULT_PANEL_HEIGHT);
-  expect(panelData[0].version).toBe('6.3.0');
-
-  expect(panelData[1].gridData.w).toBe(3);
-  expect(panelData[1].gridData.h).toBe(2);
-  expect(panelData[1].version).toBe('6.3.0');
+    };
+  const newPanelData = convertPanelDataPre61(panelData, false);
+  expect(newPanelData.gridData.w).toBe(12);
+  expect(newPanelData.gridData.h).toBe(10);
+  expect(newPanelData.version).toBe('6.3.0');
 });
 
-test('convertPanelDataPre_6_3 scales panel dimensions', () => {
+
+test('convertPanelDataPre63 scales panel dimensions', () => {
   const oldPanel = {
     gridData: {
       h: 3,
@@ -76,7 +87,7 @@ test('convertPanelDataPre_6_3 scales panel dimensions', () => {
     },
     version: '6.2.0',
   };
-  const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel, false);
+  const updatedPanel = convertPanelDataPre63(oldPanel, false);
   expect(updatedPanel.gridData.w).toBe(28);
   expect(updatedPanel.gridData.h).toBe(15);
   expect(updatedPanel.gridData.x).toBe(8);
@@ -94,7 +105,7 @@ test('convertPanelDataPre_6_3 with margins scales panel dimensions', () => {
     },
     version: '6.2.0',
   };
-  const updatedPanel = PanelUtils.convertPanelDataPre_6_3(oldPanel, true);
+  const updatedPanel = convertPanelDataPre63(oldPanel, true);
   expect(updatedPanel.gridData.w).toBe(28);
   expect(updatedPanel.gridData.h).toBe(12);
   expect(updatedPanel.gridData.x).toBe(8);

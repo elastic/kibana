@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }) {
           const originalPanelCount = await PageObjects.dashboard.getPanelCount();
 
           await dashboardAddPanel.ensureAddPanelIsShowing();
-          await dashboardAddPanel.clickAddNewEmbeddableLink();
+          await dashboardAddPanel.clickAddNewEmbeddableLink('visualization');
           await PageObjects.visualize.clickAreaChart();
           await PageObjects.visualize.clickNewSearch();
           await PageObjects.visualize.saveVisualizationExpectSuccess('new viz panel');

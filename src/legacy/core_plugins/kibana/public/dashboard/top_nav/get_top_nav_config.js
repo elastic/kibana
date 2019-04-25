@@ -18,7 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DashboardViewMode } from '../dashboard_view_mode';
+import { ViewMode } from '../../../../embeddable_api/public';
 import { TopNavIds } from './top_nav_ids';
 
 /**
@@ -31,7 +31,7 @@ import { TopNavIds } from './top_nav_ids';
  */
 export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
   switch (dashboardMode) {
-    case DashboardViewMode.VIEW:
+    case ViewMode.VIEW:
       return (
         hideWriteControls ?
           [
@@ -45,7 +45,7 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
           ]
       );
-    case DashboardViewMode.EDIT:
+    case ViewMode.EDIT:
       return [
         getSaveConfig(actions[TopNavIds.SAVE]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),

@@ -45,6 +45,7 @@ uiModules.get('app/discover')
         searchSource: '=?',
         infiniteScroll: '=?',
         filter: '=?',
+        onRowClick: '=?',
         filters: '=?',
         minimumVisibleRows: '=?',
         onAddColumn: '=?',
@@ -94,7 +95,9 @@ uiModules.get('app/discover')
           if ($scope.columns.length === 0) $scope.columns.push('_source');
         });
 
-        $scope.$watch('searchSource', function () {
+
+        function onSearchSourceUpdated() {
+
           if (!$scope.searchSource) return;
 
           $scope.indexPattern = $scope.searchSource.getField('index');
@@ -167,7 +170,9 @@ uiModules.get('app/discover')
           }
           startSearching();
           courier.fetch();
-        });
+        }
+
+        $scope.$watch('searchSource', onSearchSourceUpdated);
 
         $scope.pageOfItems = [];
         $scope.onPageNext = () => {
