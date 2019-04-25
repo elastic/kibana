@@ -47,6 +47,8 @@ const localStorage = new Storage(window.localStorage);
 const uiSettings = chrome.getUiSettingsClient();
 const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
+const localStorage = new Storage(window.localStorage);
+
 const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
