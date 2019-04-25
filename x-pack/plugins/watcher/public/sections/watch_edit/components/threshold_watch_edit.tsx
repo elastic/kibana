@@ -167,12 +167,9 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
     errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
   );
   const shouldShowThresholdExpression = watch.index && watch.index.length > 0 && watch.timeField;
-  const andThresholdText = i18n.translate(
-    'xpack.watcher.sections.watchEdit.threshold.andLabel',
-    {
-      defaultMessage: 'AND',
-    }
-  )
+  const andThresholdText = i18n.translate('xpack.watcher.sections.watchEdit.threshold.andLabel', {
+    defaultMessage: 'AND',
+  });
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -518,22 +515,22 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                       description={`${
                         groupByTypes[watch.groupBy].sizeRequired
                           ? i18n.translate(
-                            'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
-                            {
-                              defaultMessage: 'grouped over',
-                            }
-                          )
+                              'xpack.watcher.sections.watchEdit.threshold.groupedOverLabel',
+                              {
+                                defaultMessage: 'grouped over',
+                              }
+                            )
                           : i18n.translate('xpack.watcher.sections.watchEdit.threshold.overLabel', {
-                            defaultMessage: 'over',
-                          })
-                        }`}
+                              defaultMessage: 'over',
+                            })
+                      }`}
                       value={`${groupByTypes[watch.groupBy].text} ${
                         groupByTypes[watch.groupBy].sizeRequired
                           ? `${watch.termSize || ''} ${
-                          watch.termField ? `'${watch.termField}'` : ''
-                          }`
+                              watch.termField ? `'${watch.termField}'` : ''
+                            }`
                           : ''
-                        }`}
+                      }`}
                       isActive={
                         groupByPopoverOpen ||
                         (watch.groupBy === 'top' && !(watch.termSize && watch.termField))
@@ -669,7 +666,9 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                           onChange={e => {
                             setWatchProperty('thresholdComparator', e.target.value);
                           }}
-                          options={Object.values(comparators).map(({ text, value }) => { return { text, value }; })}
+                          options={Object.values(comparators).map(({ text, value }) => {
+                            return { text, value };
+                          })}
                         />
                       </EuiFlexItem>
                       {Array.from(Array(comparators[watch.thresholdComparator].requiredValues)).map(
@@ -723,7 +722,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                         watch.timeWindowSize && parseInt(watch.timeWindowSize, 10) === 1
                           ? timeUnits[watch.timeWindowUnit].labelSingular
                           : timeUnits[watch.timeWindowUnit].labelPlural
-                        }`}
+                      }`}
                       isActive={watchDurationPopoverOpen || !watch.timeWindowSize}
                       onClick={() => {
                         setWatchDurationPopoverOpen(true);
