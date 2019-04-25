@@ -74,12 +74,8 @@ export class AbstractLayer {
     return this._source.isJoinable();
   }
 
-  hasJoins() {
-    return this._descriptor.joins && this._descriptor.joins.length;
-  }
-
   supportsElasticsearchFilters() {
-    return this.hasJoins() || this._source.supportsElasticsearchFilters();
+    return this._source.supportsElasticsearchFilters();
   }
 
   async supportsFitToBounds() {

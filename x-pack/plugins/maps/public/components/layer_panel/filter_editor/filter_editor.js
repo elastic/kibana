@@ -15,7 +15,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiTextColor,
-  EuiSwitch,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -79,10 +78,6 @@ export class FilterEditor extends Component {
     this._close();
   }
 
-  _onApplyGlobalQueryChange = event => {
-    this.props.setLayerApplyGlobalQuery(this.props.layer.getId(), event.target.checked);
-  }
-
   _renderQueryPopover() {
     const layerQuery = this.props.layer.getQuery();
 
@@ -120,26 +115,20 @@ export class FilterEditor extends Component {
   }
 
   _renderQuery() {
-    if (!this.props.layer.getSource().supportsElasticsearchFilters()) {
-      return null;
-    }
-
     const query = this.props.layer.getQuery();
     if (!query || !query.query) {
       return (
-        <Fragment>
-          <EuiText>
-            <p>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.maps.layerPanel.filterEditor.emptyState.description"
-                  defaultMessage="Add a filter to narrow the layer data."
-                />
-              </EuiTextColor>
-            </p>
-          </EuiText>
-          {this._renderQueryPopover()}
-        </Fragment>
+        <EuiText>
+          <p>
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.maps.layerPanel.filterEditor.emptyState.description"
+                defaultMessage="Add a filter to narrow the layer data."
+              />
+            </EuiTextColor>
+          </p>
+        </EuiText>
+
       );
     }
 
@@ -149,7 +138,6 @@ export class FilterEditor extends Component {
           {query.query}
         </EuiCodeBlock>
         <EuiSpacer size="m" />
-        {this._renderQueryPopover()}
       </Fragment>
     );
   }
@@ -176,22 +164,6 @@ export class FilterEditor extends Component {
     );
   }
 
-  _renderApplyGlobalQuery() {
-    return (
-      <EuiSwitch
-        label={
-          i18n.translate('xpack.maps.layerPanel.filterEditor.applyGlobalQueryLabel', {
-            defaultMessage: `Apply global query.`
-          })
-
-        }
-        checked={this.props.layer.applyGlobalQuery()}
-        onChange={this._onApplyGlobalQueryChange}
-        data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
-      />
-    );
-  }
-
   render() {
     return (
       <Fragment>
@@ -206,11 +178,9 @@ export class FilterEditor extends Component {
 
         <EuiSpacer size="m"/>
 
-        {this._renderApplyGlobalQuery()}
-
-        <EuiSpacer/>
-
         {this._renderQuery()}
+
+        {this._renderQueryPopover()}
 
       </Fragment>
     );
