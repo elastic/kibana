@@ -26,17 +26,15 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('security/dlstest');
       browser.setWindowSize(1600, 1000);
 
-      await PageObjects.settings.createIndexPattern('dlstest', null);
-
-      await PageObjects.settings.navigateTo();
-      await PageObjects.security.clickElasticsearchRoles();
     });
 
     it('should add new role myroleEast', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('myroleEast', {
         elasticsearch: {
           'indices': [{
-            'names': ['dlstest'],
+            'names': ['dlstest*'],
             'privileges': ['read', 'view_index_metadata'],
             'query': '{"match": {"region": "EAST"}}'
           }]
@@ -53,6 +51,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should add new user userEAST ', async function () {
+      await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
       await PageObjects.security.addUser({
         username: 'userEast', password: 'changeme',
