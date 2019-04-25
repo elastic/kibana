@@ -26,6 +26,9 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
+/*
+  These imports are nasty
+*/
 import { QueryBar } from '../../../../../ui/public/query_bar/components/query_bar.tsx';
 import { Storage } from '../../../../../ui/public/storage/storage.ts';
 
@@ -176,7 +179,7 @@ class TimeseriesPanelConfigUi extends Component {
                 >
                   <QueryBar
                     query={{ language: 'lucene', query: model.filter }}
-                    screenTitle={'TSVB'}
+                    screenTitle={'PanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}
                     indexPatterns={model.index_pattern || model.default_index_pattern}
