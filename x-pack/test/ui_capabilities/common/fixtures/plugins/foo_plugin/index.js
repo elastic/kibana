@@ -30,14 +30,14 @@ export default function (kibana) {
           all: {
             savedObject: {
               all: ['foo'],
-              read: ['index-pattern', 'config'],
+              read: ['index-pattern'],
             },
             ui: ['create', 'edit', 'delete', 'show'],
           },
           read: {
             savedObject: {
               all: [],
-              read: ['foo', 'index-pattern', 'config'],
+              read: ['foo', 'index-pattern'],
             },
             ui: ['show'],
           }

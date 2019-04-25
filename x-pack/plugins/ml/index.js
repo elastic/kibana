@@ -21,6 +21,7 @@ import mappings from './mappings';
 import { makeMlUsageCollector } from './server/lib/ml_telemetry';
 import { notificationRoutes } from './server/routes/notification_settings';
 import { systemRoutes } from './server/routes/system';
+import { dataFrameRoutes } from './server/routes/data_frame';
 import { dataRecognizer } from './server/routes/modules';
 import { dataVisualizerRoutes } from './server/routes/data_visualizer';
 import { calendars } from './server/routes/calendars';
@@ -93,7 +94,7 @@ export const ml = (kibana) => {
           privilege: {
             savedObject: {
               all: [],
-              read: ['config']
+              read: []
             },
             ui: [],
           },
@@ -128,6 +129,7 @@ export const ml = (kibana) => {
       annotationRoutes(server, commonRouteConfig);
       jobRoutes(server, commonRouteConfig);
       dataFeedRoutes(server, commonRouteConfig);
+      dataFrameRoutes(server, commonRouteConfig);
       indicesRoutes(server, commonRouteConfig);
       jobValidationRoutes(server, commonRouteConfig);
       notificationRoutes(server, commonRouteConfig);

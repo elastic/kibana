@@ -32,10 +32,10 @@ import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { IUrlParams } from '../../../../store/urlParams';
-import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
+import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 type ScheduleKey = keyof Schedule;
 
@@ -297,14 +297,18 @@ export class WatcherFlyout extends Component<
               To learn more about Watcher, please read our {documentationLink}."
             values={{
               documentationLink: (
-                <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
+                <ElasticDocsLink
+                  target="_blank"
+                  section="/x-pack"
+                  path="/watcher-getting-started.html"
+                >
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription.documentationLinkText',
                     {
                       defaultMessage: 'documentation'
                     }
                   )}
-                </EuiLink>
+                </ElasticDocsLink>
               )
             }}
           />
@@ -499,14 +503,18 @@ export class WatcherFlyout extends Component<
                     defaultMessage="If you have not configured email, please see the {documentationLink}."
                     values={{
                       documentationLink: (
-                        <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
+                        <ElasticDocsLink
+                          target="_blank"
+                          section="/x-pack"
+                          path="/actions-email.html#configuring-email"
+                        >
                           {i18n.translate(
                             'xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsHelpText.documentationLinkText',
                             {
                               defaultMessage: 'documentation'
                             }
                           )}
-                        </EuiLink>
+                        </ElasticDocsLink>
                       )
                     }}
                   />

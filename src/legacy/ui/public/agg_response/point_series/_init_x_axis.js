@@ -18,6 +18,7 @@
  */
 
 import { uniq } from 'lodash';
+import moment from 'moment';
 
 export function initXAxis(chart, table) {
   const { format, title, params, accessor } = chart.aspects.x[0];
@@ -29,7 +30,7 @@ export function initXAxis(chart, table) {
   chart.xAxisLabel = title;
   if (params.interval) {
     chart.ordered = {
-      interval: params.interval
+      interval: moment.duration(params.interval),
     };
   }
 }

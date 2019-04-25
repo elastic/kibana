@@ -47,7 +47,7 @@ import {
 import {
   getOutlinkEncoders,
 } from './services/outlink_encoders';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 
 const app = uiModules.get('app/graph');
 
@@ -804,7 +804,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
   // if saving is disabled using uiCapabilities, we don't want to render the save
   // button so it's consistent with all of the other applications
-  if (uiCapabilities.graph.save) {
+  if (capabilities.get().graph.save) {
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
     if (!$scope.allSavingDisabled) {
       $scope.topNavMenu.push({
@@ -855,7 +855,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
   });
   // if deleting is disabled using uiCapabilities, we don't want to render the delete
   // button so it's consistent with all of the other applications
-  if (uiCapabilities.graph.delete) {
+  if (capabilities.get().graph.delete) {
 
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
     if (!$scope.allSavingDisabled) {
