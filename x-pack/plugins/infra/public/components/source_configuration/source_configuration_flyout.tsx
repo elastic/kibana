@@ -7,6 +7,7 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -85,6 +86,11 @@ export const SourceConfigurationFlyout = injectI18n(
         [configuration]
       ),
     });
+
+    const errors = useMemo(
+      () => [...indicesConfigurationFormState.errors, ...logColumnsConfigurationFormState.errors],
+      [indicesConfigurationFormState.errors, logColumnsConfigurationFormState.errors]
+    );
 
     const resetForms = useCallback(
       () => {
@@ -240,6 +246,18 @@ export const SourceConfigurationFlyout = injectI18n(
           <EuiTabbedContent tabs={tabs} />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
+          {errors.length > 0 ? (
+            <>
+              <EuiCallOut color="danger">
+                <ul>
+                  {errors.map((error, errorIndex) => (
+                    <li key={errorIndex}>{error}</li>
+                  ))}
+                </ul>
+              </EuiCallOut>
+              <EuiSpacer size="m" />
+            </>
+          ) : null}
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               {!isFormDirty ? (

@@ -8,6 +8,7 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonIcon,
+  EuiEmptyPrompt,
   EuiForm,
   EuiPanel,
   EuiPopover,
@@ -61,12 +62,16 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
         />
       </EuiFlexItem>
     </EuiFlexGroup>
-    {logColumnConfiguration.map((column, index) => (
-      <LogColumnConfigurationPanel
-        logColumnConfigurationProps={column}
-        key={`logColumnConfigurationPanel-${index}`}
-      />
-    ))}
+    {logColumnConfiguration.length > 0 ? (
+      logColumnConfiguration.map((column, index) => (
+        <LogColumnConfigurationPanel
+          logColumnConfigurationProps={column}
+          key={`logColumnConfigurationPanel-${index}`}
+        />
+      ))
+    ) : (
+      <LogColumnConfigurationEmptyPrompt />
+    )}
   </EuiForm>
 );
 
@@ -167,6 +172,21 @@ const RemoveLogColumnButton: React.FunctionComponent<{
   onClick?: () => void;
 }> = ({ onClick }) => (
   <EuiButtonIcon aria-label="Remove column" color="danger" iconType="trash" onClick={onClick} />
+);
+
+const LogColumnConfigurationEmptyPrompt: React.FunctionComponent = () => (
+  <EuiEmptyPrompt
+    iconType="list"
+    title={<h2>No columns</h2>}
+    body={
+      <p>
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.noLogColumnsDescription"
+          defaultMessage="Add a column to this list using the button above."
+        />
+      </p>
+    }
+  />
 );
 
 interface SelectableColumnOption {

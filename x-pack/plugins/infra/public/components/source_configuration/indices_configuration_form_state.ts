@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { ReactNode, useCallback, useMemo, useState } from 'react';
 
 import { createInputFieldProps, validateInputFieldNotEmpty } from './input_fields';
 
@@ -147,14 +147,21 @@ export const useIndicesConfigurationFormState = ({
     ]
   );
 
-  const isFormValid = useMemo(
-    () => Object.values(fieldProps).every(({ error }) => error.length <= 0),
+  const errors = useMemo(
+    () =>
+      Object.values(fieldProps).reduce<ReactNode[]>(
+        (accumulatedErrors, { error }) => [...accumulatedErrors, ...error],
+        []
+      ),
     [fieldProps]
   );
+
+  const isFormValid = useMemo(() => errors.length <= 0, [errors]);
 
   const isFormDirty = useMemo(() => Object.keys(formStateChanges).length > 0, [formStateChanges]);
 
   return {
+    errors,
     fieldProps,
     formState,
     formStateChanges,

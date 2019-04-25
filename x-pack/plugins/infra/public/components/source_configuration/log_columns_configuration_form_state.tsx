@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import {
   LogColumnConfiguration,
@@ -104,14 +106,26 @@ export const useLogColumnsConfigurationFormState = ({
     [formState.logColumns]
   );
 
-  const isFormValid = useMemo(() => (logColumnConfigurationProps.length > 0 ? true : false), [
-    logColumnConfigurationProps,
-  ]);
+  const errors = useMemo(
+    () =>
+      logColumnConfigurationProps.length <= 0
+        ? [
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logColumnListEmptyErrorMessage"
+              defaultMessage="The log column list must not be empty."
+            />,
+          ]
+        : [],
+    [logColumnConfigurationProps]
+  );
+
+  const isFormValid = useMemo(() => (errors.length <= 0 ? true : false), [errors]);
 
   const isFormDirty = useMemo(() => Object.keys(formStateChanges).length > 0, [formStateChanges]);
 
   return {
     addLogColumn,
+    errors,
     logColumnConfigurationProps,
     formState,
     formStateChanges,
