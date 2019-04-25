@@ -25,6 +25,11 @@ type QueryDomainFirstLastSeenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type QueryUsersResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.UsersResolver>,
+  QuerySourceResolver
+>;
+
 export interface IDetailsResolversDeps {
   ipDetails: IpDetails;
 }
@@ -36,6 +41,7 @@ export const createIpDetailsResolvers = (
     IpOverview: QueryIpOverviewResolver;
     Domains: QueryDomainsResolver;
     DomainFirstLastSeen: QueryDomainFirstLastSeenResolver;
+    Users: QueryUsersResolver;
   };
 } => ({
   Source: {
@@ -61,6 +67,15 @@ export const createIpDetailsResolvers = (
         flowTarget: args.flowTarget,
       };
       return libs.ipDetails.getDomainFirstLastSeen(req, options);
+    },
+    async Users(source, args, { req }, info) {
+      const options = {
+        ...createOptions(source, args, info),
+        ip: args.ip,
+        usersSortField: args.sort,
+        flowTarget: args.flowTarget,
+      };
+      return libs.ipDetails.getUsers(req, options);
     },
   },
 });

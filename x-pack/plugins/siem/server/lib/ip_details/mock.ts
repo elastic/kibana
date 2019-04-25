@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsEdges, NetworkDirectionEcs } from '../../graphql/types';
+import { DomainsEdges, NetworkDirectionEcs, UsersEdges } from '../../graphql/types';
 
-import { DomainsBuckets, IpOverviewHit } from './types';
+import { DomainsBuckets, IpOverviewHit, UsersResponse } from './types';
 
 export const responseAggs: IpOverviewHit = {
   aggregations: {
@@ -378,6 +378,183 @@ export const mockFormattedDestination: DomainsEdges[] = [
         direction: [NetworkDirectionEcs.outbound, NetworkDirectionEcs.inbound],
         packets: 16946245,
       },
+    },
+  },
+];
+
+export const mockUsersData: UsersResponse = {
+  took: 445,
+  timed_out: false,
+  _shards: {
+    total: 59,
+    successful: 59,
+    skipped: 0,
+    failed: 0,
+  },
+  hits: {
+    max_score: null,
+    hits: [],
+  },
+  aggregations: {
+    user_count: {
+      value: 3,
+    },
+    users: {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '_apt',
+          doc_count: 10,
+          groupName: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'nogroup',
+                doc_count: 10,
+              },
+            ],
+          },
+          groupId: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '65534',
+                doc_count: 10,
+              },
+            ],
+          },
+          id: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '104',
+                doc_count: 10,
+              },
+            ],
+          },
+        },
+        {
+          key: 'root',
+          doc_count: 109,
+          groupName: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'Debian-exim',
+                doc_count: 72,
+              },
+              {
+                key: 'root',
+                doc_count: 37,
+              },
+            ],
+          },
+          groupId: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '116',
+                doc_count: 72,
+              },
+              {
+                key: '0',
+                doc_count: 37,
+              },
+            ],
+          },
+          id: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '0',
+                doc_count: 109,
+              },
+            ],
+          },
+        },
+        {
+          key: 'systemd-resolve',
+          doc_count: 4,
+          groupName: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          groupId: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [],
+          },
+          id: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '102',
+                doc_count: 4,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+};
+
+export const mockFormattedUsersEdges: UsersEdges[] = [
+  {
+    node: {
+      _id: '_apt',
+      user: {
+        id: ['104'],
+        name: '_apt',
+        groupId: ['65534'],
+        groupName: ['nogroup'],
+        count: 10,
+      },
+    },
+    cursor: {
+      value: '_apt',
+      tiebreaker: null,
+    },
+  },
+  {
+    node: {
+      _id: 'root',
+      user: {
+        id: ['0'],
+        name: 'root',
+        groupId: ['116', '0'],
+        groupName: ['Debian-exim', 'root'],
+        count: 109,
+      },
+    },
+    cursor: {
+      value: 'root',
+      tiebreaker: null,
+    },
+  },
+  {
+    node: {
+      _id: 'systemd-resolve',
+      user: {
+        id: ['102'],
+        name: 'systemd-resolve',
+        groupId: [],
+        groupName: [],
+        count: 4,
+      },
+    },
+    cursor: {
+      value: 'systemd-resolve',
+      tiebreaker: null,
     },
   },
 ];

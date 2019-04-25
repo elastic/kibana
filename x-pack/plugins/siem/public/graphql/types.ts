@@ -65,6 +65,8 @@ export interface Source {
 
   DomainFirstLastSeen: FirstLastSeenDomain;
 
+  Users: UsersData;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -952,6 +954,40 @@ export interface FirstLastSeenDomain {
   lastSeen?: Date | null;
 }
 
+export interface UsersData {
+  edges: UsersEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface UsersEdges {
+  node: UsersNode;
+
+  cursor: CursorType;
+}
+
+export interface UsersNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  user?: UsersItem | null;
+}
+
+export interface UsersItem {
+  name?: string | null;
+
+  id?: ToStringArray | null;
+
+  groupId?: ToStringArray | null;
+
+  groupName?: ToStringArray | null;
+
+  count?: number | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1143,6 +1179,12 @@ export interface DomainsSortField {
   direction: Direction;
 }
 
+export interface UsersSortField {
+  field: UsersFields;
+
+  direction: Direction;
+}
+
 export interface NetworkTopNFlowSortField {
   field: NetworkTopNFlowFields;
 
@@ -1250,6 +1292,21 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+}
+export interface UsersSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: UsersSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1362,6 +1419,10 @@ export enum NetworkDirectionEcs {
   outgoing = 'outgoing',
   listening = 'listening',
   unknown = 'unknown',
+}
+
+export enum UsersFields {
+  name = 'name',
 }
 
 export enum NetworkTopNFlowFields {
@@ -3380,6 +3441,90 @@ export namespace GetUncommonProcessesQuery {
     __typename?: 'HostEcsFields';
 
     name?: ToStringArray | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
+export namespace GetUsersQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: string | null;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInput;
+    sort: UsersSortField;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Users: Users;
+  };
+
+  export type Users = {
+    __typename?: 'UsersData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'UsersEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'UsersNode';
+
+    user?: User | null;
+  };
+
+  export type User = {
+    __typename?: 'UsersItem';
+
+    name?: string | null;
+
+    id?: ToStringArray | null;
+
+    groupId?: ToStringArray | null;
+
+    groupName?: ToStringArray | null;
+
+    count?: number | null;
   };
 
   export type Cursor = {
