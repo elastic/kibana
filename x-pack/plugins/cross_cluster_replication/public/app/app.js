@@ -126,7 +126,7 @@ export class App extends Component {
           {getReason()}
           {' '}
           <a
-            data-test-subj="ccrManageLicenseLink"
+            data-test-subj="manageLicenseLink"
             href={chrome.addBasePath('/app/kibana#/management/elasticsearch/license_management/home')}
           >
             <FormattedMessage
