@@ -164,9 +164,9 @@ class AnnotationsEditor extends Component {
                 >
                   <QueryBar
                     query={{ language: 'lucene', query: model.query_string }}
-                    screenTitle={'TSVBAnnotationsEditor'}
+                    screenTitle={'AnnotationsEditor'}
                     onSubmit={(query) => this.handleSubmit(model, query)}
-                    appName={'VisEditorAnnotations'}
+                    appName={'VisEditor'}
                     indexPatterns={model.index_pattern || model.default_index_pattern}
                     store={localStorage || {}}
                     showDatePicker={false}
