@@ -58,35 +58,20 @@ feature.
 Once you enter a command in the editor, click the 
 green triangle to submit the request to {es}.
 
-<<<<<<< HEAD
-When the response come back, you should see it in the left hand panel:
-=======
 You can select multiple requests and submit them together.
 Console sends the requests to {es} one by one and shows the output 
 in the response pane. Submitting multiple request is helpful when you're debugging an issue or trying query 
 combinations in multiple scenarios.
->>>>>>> 4a21108c29... [DOCS] Updates docs for Console (#35505)
+
 
 [float]
 [[console-autocomplete]]
 === Using autocomplete
 
-<<<<<<< HEAD
-[float]
-[[console-ui]]
-=== The Console UI
-
-In this section you will find a more detailed description of UI of Console. The basic aspects of the UI are explained
-in the <<console-kibana>> section.
-
-
-include::multi-requests.asciidoc[]
-=======
 When typing a command, Console makes context-sensitive suggestions.
 These suggestions can help you explore parameters for each API and speed up typing. 
 To configure your preferences for autocomplete, go to 
 <<configuring-console, Settings>>. 
->>>>>>> 4a21108c29... [DOCS] Updates docs for Console (#35505)
 
 [float]
 [[console-view-api]]
