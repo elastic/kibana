@@ -607,3 +607,9 @@ test('registers onRequest interceptor several times', async () => {
   doRegister();
   expect(doRegister).not.toThrowError();
 });
+
+test('throws an error if starts without set up', async () => {
+  await expect(server.start(config)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Http server is not setup up yet"`
+  );
+});

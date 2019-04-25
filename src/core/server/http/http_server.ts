@@ -92,7 +92,7 @@ export class HttpServer {
 
   public async start(config: HttpConfig) {
     if (this.server === undefined) {
-      throw new Error('server is not setup up yet');
+      throw new Error('Http server is not setup up yet');
     }
     this.log.debug('starting http server');
 
