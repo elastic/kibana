@@ -14,7 +14,7 @@ import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { JobSelectorTable } from './job_selector_table/';
 import { timefilter } from 'ui/timefilter';
-import { stringHash } from '../../../common/util/string_utils';
+import { tabColor } from '../../../common/util/group_color_utils';
 import { setGlobalState } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
@@ -34,35 +34,7 @@ import {
   EuiTitle
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as euiVars from '@elastic/eui/dist/eui_theme_dark.json';
 
-const COLORS = [
-  euiVars.euiColorVis0,
-  euiVars.euiColorVis1,
-  euiVars.euiColorVis2,
-  euiVars.euiColorVis3,
-  // euiVars.euiColorVis4, // light pink, too hard to read with white text
-  euiVars.euiColorVis5,
-  euiVars.euiColorVis6,
-  euiVars.euiColorVis7,
-  euiVars.euiColorVis8,
-  euiVars.euiColorVis9,
-  euiVars.euiColorDarkShade,
-  euiVars.euiColorPrimary
-];
-
-const colorMap = {};
-
-function tabColor(name) {
-  if (colorMap[name] === undefined) {
-    const n = stringHash(name);
-    const color = COLORS[(n % COLORS.length)];
-    colorMap[name] = color;
-    return color;
-  } else {
-    return colorMap[name];
-  }
-}
 
 export function getBadge({ id, icon, isGroup = false, removeId, numJobs }) {
   const color = isGroup ? tabColor(id) : 'hollow';
