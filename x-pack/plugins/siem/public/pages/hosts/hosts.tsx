@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,7 +23,6 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { UncommonProcessesQuery } from '../../containers/uncommon_processes';
 import { IndexType } from '../../graphql/types';
 import { hostsModel, hostsSelectors, State } from '../../store';
-import { PageContent, PageContentBody } from '../styles';
 
 import { HostsKql } from './kql';
 import * as i18n from './translations';
@@ -46,122 +46,119 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
         <>
           <HostsKql indexPattern={indexPattern} type={hostsModel.HostsType.page} />
-          <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-            <PageContentBody data-test-subj="pane1ScrollContainer">
-              <GlobalTime>
-                {({ to, from, setQuery }) => (
-                  <>
-                    <HostsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
+          <GlobalTime>
+            {({ to, from, setQuery }) => (
+              <>
+                <HostsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={hostsModel.HostsType.page}
+                >
+                  {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                    <HostsTableManage
+                      id={id}
+                      indexPattern={indexPattern}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      loading={loading}
+                      data={hosts}
+                      totalCount={totalCount}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      loadMore={loadMore}
                       type={hostsModel.HostsType.page}
-                    >
-                      {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
-                        <HostsTableManage
-                          id={id}
-                          indexPattern={indexPattern}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
-                          data={hosts}
-                          totalCount={totalCount}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </HostsQuery>
-                    <UncommonProcessesQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
+                    />
+                  )}
+                </HostsQuery>
+
+                <EuiSpacer />
+
+                <UncommonProcessesQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={hostsModel.HostsType.page}
+                >
+                  {({
+                    uncommonProcesses,
+                    totalCount,
+                    loading,
+                    pageInfo,
+                    loadMore,
+                    id,
+                    refetch,
+                  }) => (
+                    <UncommonProcessTableManage
+                      id={id}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      loading={loading}
+                      data={uncommonProcesses}
+                      totalCount={totalCount}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loadMore={loadMore}
                       type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        uncommonProcesses,
-                        totalCount,
-                        loading,
-                        pageInfo,
-                        loadMore,
-                        id,
-                        refetch,
-                      }) => (
-                        <UncommonProcessTableManage
-                          id={id}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
-                          data={uncommonProcesses}
-                          totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </UncommonProcessesQuery>
-                    <AuthenticationsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
+                    />
+                  )}
+                </UncommonProcessesQuery>
+
+                <EuiSpacer />
+
+                <AuthenticationsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={hostsModel.HostsType.page}
+                >
+                  {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                    <AuthenticationTableManage
+                      id={id}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      loading={loading}
+                      data={authentications}
+                      totalCount={totalCount}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loadMore={loadMore}
                       type={hostsModel.HostsType.page}
-                    >
-                      {({
-                        authentications,
-                        totalCount,
-                        loading,
-                        pageInfo,
-                        loadMore,
-                        id,
-                        refetch,
-                      }) => (
-                        <AuthenticationTableManage
-                          id={id}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          loading={loading}
-                          data={authentications}
-                          totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </AuthenticationsQuery>
-                    <EventsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
+                    />
+                  )}
+                </AuthenticationsQuery>
+
+                <EuiSpacer />
+
+                <EventsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={hostsModel.HostsType.page}
+                >
+                  {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                    <EventsTableManage
+                      id={id}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      data={events!}
+                      loading={loading}
+                      totalCount={totalCount}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loadMore={loadMore}
                       type={hostsModel.HostsType.page}
-                    >
-                      {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
-                        <EventsTableManage
-                          id={id}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          data={events!}
-                          loading={loading}
-                          totalCount={totalCount}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loadMore={loadMore}
-                          type={hostsModel.HostsType.page}
-                        />
-                      )}
-                    </EventsQuery>
-                  </>
-                )}
-              </GlobalTime>
-            </PageContentBody>
-          </PageContent>
+                    />
+                  )}
+                </EventsQuery>
+              </>
+            )}
+          </GlobalTime>
         </>
       ) : (
         <EmptyPage

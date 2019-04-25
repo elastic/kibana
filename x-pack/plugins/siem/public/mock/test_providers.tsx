@@ -5,6 +5,7 @@
  */
 
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { I18nProvider } from '@kbn/i18n/react';
 import { InMemoryCache as Cache } from 'apollo-cache-inmemory';
 import ApolloClient from 'apollo-client';
 import { ApolloLink } from 'apollo-link';
@@ -44,14 +45,16 @@ export const TestProviders = pure<Props>(
     mockFramework = mockFrameworks.default_UTC,
     onDragEnd = jest.fn(),
   }) => (
-    <ApolloProvider client={client}>
-      <ReduxStoreProvider store={store}>
-        <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-          <KibanaConfigContext.Provider value={mockFramework}>
-            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-          </KibanaConfigContext.Provider>
-        </ThemeProvider>
-      </ReduxStoreProvider>
-    </ApolloProvider>
+    <I18nProvider>
+      <ApolloProvider client={client}>
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <KibanaConfigContext.Provider value={mockFramework}>
+              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+            </KibanaConfigContext.Provider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
+      </ApolloProvider>
+    </I18nProvider>
   )
 );
