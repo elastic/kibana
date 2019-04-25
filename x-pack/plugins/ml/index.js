@@ -99,7 +99,7 @@ export const ml = (kibana) => {
           privilege: {
             savedObject: {
               all: [],
-              read: ['config']
+              read: []
             },
             ui: [],
           },
