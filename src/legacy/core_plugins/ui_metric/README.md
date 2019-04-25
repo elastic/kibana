@@ -73,5 +73,3 @@ These saved objects are automatically consumed by the stats API and surfaced und
 
 By storing these metrics and their counts as key-value pairs, we can add more metrics without having
 to worry about exceeding the 1000-field soft limit in Elasticsearch.
-
-// TODO: Clarify that colons are NOT allowed in metric names or app types possibly reject request in trackUiMetric; disallow commas too?
