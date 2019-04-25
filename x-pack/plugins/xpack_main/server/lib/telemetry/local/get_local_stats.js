@@ -43,6 +43,7 @@ export function handleLocalStats(server, clusterInfo, clusterStats, license, xpa
  * @return {Promise} The object containing the current Elasticsearch cluster's telemetry.
  */
 export function getLocalStatsWithCaller(server, callCluster) {
+  console.log('getting kibana stats inside local!')
   return Promise.all([
     getClusterInfo(callCluster),  // cluster info
     getClusterStats(callCluster), // cluster stats (not to be confused with cluster _state_)
