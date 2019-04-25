@@ -14,8 +14,8 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./network_dns'));
     loadTestFile(require.resolve('./network_top_n_flow'));
     loadTestFile(require.resolve('./overview_host'));
-    loadTestFile(require.resolve('./overview_network'));
     loadTestFile(require.resolve('./sources'));
+    loadTestFile(require.resolve('./overview_network'));
     loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./uncommon_processes'));
