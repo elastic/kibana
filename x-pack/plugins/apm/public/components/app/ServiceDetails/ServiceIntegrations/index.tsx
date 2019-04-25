@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
 import chrome from 'ui/chrome';
-import { IUrlParams } from '../../../../store/urlParams';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { LicenseContext } from '../../Main/LicenseCheck';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';

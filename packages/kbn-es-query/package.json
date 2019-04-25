@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "lodash": "npm:@elastic/lodash@3.10.1-kibana1",
-    "moment-timezone": "^0.5.14"
+    "moment-timezone": "^0.5.14",
+    "@kbn/i18n": "1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
