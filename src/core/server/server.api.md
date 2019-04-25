@@ -77,7 +77,7 @@ export interface CoreSetup {
 // @public (undocumented)
 export interface CoreStart {
     // (undocumented)
-    http?: HttpServiceStart;
+    http: HttpServiceStart;
 }
 
 // @internal
@@ -117,7 +117,9 @@ export type Headers = Record<string, string | string[] | undefined>;
 export type HttpServiceSetup = HttpServerSetup;
 
 // @public (undocumented)
-export type HttpServiceStart = HttpServerInfo;
+export interface HttpServiceStart {
+    isListening: () => boolean;
+}
 
 // @public (undocumented)
 export class KibanaRequest<Params, Query, Body> {

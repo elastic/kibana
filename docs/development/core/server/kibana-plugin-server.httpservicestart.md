@@ -2,10 +2,18 @@
 
 [Home](./index) &gt; [kibana-plugin-server](./kibana-plugin-server.md) &gt; [HttpServiceStart](./kibana-plugin-server.httpservicestart.md)
 
-## HttpServiceStart type
+## HttpServiceStart interface
+
 
 <b>Signature:</b>
 
 ```typescript
-export declare type HttpServiceStart = HttpServerInfo;
+export interface HttpServiceStart 
 ```
+
+## Properties
+
+|  Property | Type | Description |
+|  --- | --- | --- |
+|  [isListening](./kibana-plugin-server.httpservicestart.islistening.md) | <code>() =&gt; boolean</code> | Indicates if http server is listening on a port |
+

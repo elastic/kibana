@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-http?: HttpServiceStart;
+http: HttpServiceStart;
 ```

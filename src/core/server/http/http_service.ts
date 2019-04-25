@@ -29,7 +29,9 @@ import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
 export type HttpServiceSetup = HttpServerSetup;
+/** @public */
 export interface HttpServiceStart {
+  /** Indicates if http server is listening on a port */
   isListening: () => boolean;
 }
 
