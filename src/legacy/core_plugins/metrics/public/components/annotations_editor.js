@@ -28,6 +28,7 @@ import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
+<<<<<<< HEAD
 import { Storage } from 'ui/storage';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { data } from 'plugins/data';
@@ -36,6 +37,13 @@ const { QueryBar } = data.query.ui;
 // const { QueryBarInput } = data.query.ui;
 const uiSettingsQueryLanguage = chrome.getUiSettingsClient().get('search:queryLanguage');
 
+=======
+/*
+  These relative imports are nasty
+*/
+import { QueryBar } from '../../../../ui/public/query_bar/components/query_bar.tsx';
+import { Storage } from '../../../../ui/public/storage/storage.ts';
+>>>>>>> Uses collection change handler to update the model.query_string in the annotations editor
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -94,12 +102,17 @@ class AnnotationsEditor extends Component {
     };
   }
   handleSubmit = (model, query) => {
+<<<<<<< HEAD
     const part = { query_string: query.query };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
     // collectionActions.handleChange(this.props, {
     //   ...model,
     //   ...part
     // });
+=======
+    const part = { query_string: query.query.query };
+    collectionActions.handleChange(this.props, _.assign({}, model, part));
+>>>>>>> Uses collection change handler to update the model.query_string in the annotations editor
   };
   renderRow(row) {
     const defaults = {
