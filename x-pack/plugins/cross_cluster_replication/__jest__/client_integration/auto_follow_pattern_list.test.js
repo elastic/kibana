@@ -19,6 +19,10 @@ jest.mock('ui/index_patterns', () => {
   return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
 });
 
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
 const { setup } = pageHelpers.autoFollowPatternList;
 
 describe('<AutoFollowPatternList />', () => {
