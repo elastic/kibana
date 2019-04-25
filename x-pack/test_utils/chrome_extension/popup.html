@@ -9,8 +9,8 @@
   <h1>Test subjects finder</h1>
   <main>
     <div class="track-config">
-      <div class="main-control">
-        <label class="form-control__label" for="domRoot">Dom root</label>
+      <div class="form-control">
+        <label class="form-control__label" for="domRootInput">Dom root</label>
         <input class="form-control__input" type="text" id="domRootInput" placeholder="e.g. #my-app" />
         <div class="form-control__helper-text">
           The DOM node you want to start to traverse from. If not specified, the "body" will be used.
@@ -18,7 +18,7 @@
       </div>
 
       <div class="form-control">
-        <label class="form-control__label" for="domRoot">Output type</label>
+        <label class="form-control__label" for="outputTypeSelect">Output type</label>
         <select class="form-control__select" id="outputTypeSelect">
           <option value="typescript">Typescript</option>
           <option value="list">List</option>
