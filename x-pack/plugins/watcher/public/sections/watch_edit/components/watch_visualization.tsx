@@ -163,17 +163,22 @@ const WatchVisualizationUi = () => {
               />
             );
           })}
-          <LineSeries
-            id={getSpecId('threshold')}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            data={[[domain.min, watch.threshold], [domain.max, watch.threshold]]}
-            xAccessor={0}
-            yAccessors={[1]}
-            timeZone={timezone}
-            yScaleToDataExtent={true}
-            customSeriesColors={thresholdCustomSeriesColors}
-          />
+          {watch.threshold.map((value, i) => {
+            return (
+              <LineSeries
+                key={`threshold${i}`}
+                id={getSpecId(`threshold${i}`)}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                data={[[domain.min, watch.threshold[i]], [domain.max, watch.threshold[i]]]}
+                xAccessor={0}
+                yAccessors={[1]}
+                timeZone={timezone}
+                yScaleToDataExtent={true}
+                customSeriesColors={thresholdCustomSeriesColors}
+              />
+            );
+          })}
         </Chart>
       ) : (
         <EuiCallOut
