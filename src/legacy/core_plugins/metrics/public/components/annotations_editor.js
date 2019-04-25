@@ -28,7 +28,11 @@ import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
-
+/*
+  These relative imports are nasty
+*/
+import { QueryBar } from '../../../../ui/public/query_bar/components/query_bar.tsx';
+import { Storage } from '../../../../ui/public/storage/storage.ts';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -58,6 +62,7 @@ function newAnnotation() {
 
 const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
+const localStorage = new Storage(window.localStorage);
 class AnnotationsEditor extends Component {
 
   constructor(props) {
@@ -73,7 +78,10 @@ class AnnotationsEditor extends Component {
       handleChange(_.assign({}, item, part));
     };
   }
-
+  handleSubmit = (model, query) => {
+    const part = { query_string: query.query.query };
+    collectionActions.handleChange(this.props, _.assign({}, model, part));
+  };
   renderRow(row) {
     const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
     const model = { ...defaults, ...row };
@@ -146,22 +154,24 @@ class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <div style={{ border: '1px solid blue' }} className="forAddingQueryBar">
-                  <EuiFormRow
-                    id={htmlId('queryString')}
-                    label={(<FormattedMessage
-                      id="tsvb.annotationsEditor.queryStringLabel"
-                      defaultMessage="Query string"
-                    />)}
-                    fullWidth
-                  >
-                    <EuiFieldText
-                      onChange={this.handleChange(model, 'query_string')}
-                      value={model.query_string}
-                      fullWidth
-                    />
-                  </EuiFormRow>
-                </div>
+                <EuiFormRow
+                  id={htmlId('queryString')}
+                  label={(<FormattedMessage
+                    id="tsvb.annotationsEditor.queryStringLabel"
+                    defaultMessage="Query string"
+                  />)}
+                  fullWidth
+                >
+                  <QueryBar
+                    query={{ language: 'lucene', query: model.query_string }}
+                    screenTitle={'TSVBAnnotationsEditor'}
+                    onSubmit={(query) => this.handleSubmit(model, query)}
+                    appName={'VisEditorAnnotations'}
+                    indexPatterns={model.index_pattern || model.default_index_pattern}
+                    store={localStorage || {}}
+                    showDatePicker={false}
+                  />
+                </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
