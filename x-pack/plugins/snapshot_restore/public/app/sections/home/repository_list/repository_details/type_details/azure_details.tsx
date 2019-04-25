@@ -22,7 +22,17 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
   } = useAppDependencies();
 
   const {
-    settings: { client, container, basePath, compress, chunkSize, readonly, locationMode },
+    settings: {
+      client,
+      container,
+      basePath,
+      compress,
+      chunkSize,
+      readonly,
+      locationMode,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
+    },
   } = repository;
 
   const listItems = [];
@@ -68,7 +78,7 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
       title: (
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.typeAzure.compressLabel"
-          defaultMessage="Compress"
+          defaultMessage="Snapshot compression"
         />
       ),
       description: String(compress),
@@ -87,12 +97,36 @@ export const AzureDetails: React.FunctionComponent<Props> = ({ repository }) => 
     });
   }
 
+  if (maxSnapshotBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.maxSnapshotBytesLabel"
+          defaultMessage="Max snapshot bytes per second"
+        />
+      ),
+      description: maxSnapshotBytesPerSec,
+    });
+  }
+
+  if (maxRestoreBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeAzure.maxRestoreBytesLabel"
+          defaultMessage="Max restore bytes per second"
+        />
+      ),
+      description: maxRestoreBytesPerSec,
+    });
+  }
+
   if (readonly !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.typeAzure.readonlyLabel"
-          defaultMessage="Readonly"
+          defaultMessage="Read-only"
         />
       ),
       description: String(readonly),

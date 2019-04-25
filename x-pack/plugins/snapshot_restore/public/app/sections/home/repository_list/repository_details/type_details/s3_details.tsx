@@ -32,6 +32,9 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
       bufferSize,
       cannedAcl,
       storageClass,
+      readonly,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
     },
   } = repository;
 
@@ -76,7 +79,7 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
       title: (
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.typeS3.compressLabel"
-          defaultMessage="Compress"
+          defaultMessage="Snapshot compression"
         />
       ),
       description: String(compress),
@@ -140,6 +143,42 @@ export const S3Details: React.FunctionComponent<Props> = ({ repository }) => {
         />
       ),
       description: storageClass,
+    });
+  }
+
+  if (maxSnapshotBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeS3.maxSnapshotBytesLabel"
+          defaultMessage="Max snapshot bytes per second"
+        />
+      ),
+      description: maxSnapshotBytesPerSec,
+    });
+  }
+
+  if (maxRestoreBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeS3.maxRestoreBytesLabel"
+          defaultMessage="Max restore bytes per second"
+        />
+      ),
+      description: maxRestoreBytesPerSec,
+    });
+  }
+
+  if (readonly !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeS3.readonlyLabel"
+          defaultMessage="Read-only"
+        />
+      ),
+      description: String(readonly),
     });
   }
 

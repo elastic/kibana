@@ -28,6 +28,9 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     loadDefaults,
     compress,
     chunkSize,
+    readonly,
+    maxSnapshotBytesPerSec,
+    maxRestoreBytesPerSec,
     'security.principal': securityPrincipal,
     ...rest
   } = settings;
@@ -70,7 +73,7 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
       title: (
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.typeHDFS.compressLabel"
-          defaultMessage="Compress"
+          defaultMessage="Snapshot compression"
         />
       ),
       description: String(compress),
@@ -86,6 +89,42 @@ export const HDFSDetails: React.FunctionComponent<Props> = ({ repository }) => {
         />
       ),
       description: String(chunkSize),
+    });
+  }
+
+  if (maxSnapshotBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.maxSnapshotBytesLabel"
+          defaultMessage="Max snapshot bytes per second"
+        />
+      ),
+      description: maxSnapshotBytesPerSec,
+    });
+  }
+
+  if (maxRestoreBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.maxRestoreBytesLabel"
+          defaultMessage="Max restore bytes per second"
+        />
+      ),
+      description: maxRestoreBytesPerSec,
+    });
+  }
+
+  if (readonly !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeHDFS.readonlyLabel"
+          defaultMessage="Read-only"
+        />
+      ),
+      description: String(readonly),
     });
   }
 
