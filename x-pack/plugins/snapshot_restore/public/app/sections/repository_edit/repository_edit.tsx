@@ -81,8 +81,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     return (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.snapshotRestore.editRepository.loadingRepository"
-          defaultMessage="Loading repository details..."
+          id="xpack.snapshotRestore.editRepository.loadingRepositoryDescription"
+          defaultMessage="Loading repository details…"
         />
       </SectionLoading>
     );
@@ -93,12 +93,15 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
     const errorObject = notFound
       ? {
           data: {
-            error: i18n.translate('xpack.snapshotRestore.editRepository.errorRepositoryNotFound', {
-              defaultMessage: `The repository '{name}' does not exist.`,
-              values: {
-                name,
-              },
-            }),
+            error: i18n.translate(
+              'xpack.snapshotRestore.editRepository.repositoryNotFoundErrorMessage',
+              {
+                defaultMessage: `The repository '{name}' does not exist.`,
+                values: {
+                  name,
+                },
+              }
+            ),
           },
         }
       : repositoryError;
@@ -106,7 +109,7 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.editRepository.errorLoadingRepositoryTitle"
+            id="xpack.snapshotRestore.editRepository.loadingRepositoryErrorTitle"
             defaultMessage="Error loading repository details"
           />
         }
@@ -120,8 +123,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.editRepository.errorSavingRepositoryTitle"
-            defaultMessage="Error saving repository details"
+            id="xpack.snapshotRestore.editRepository.avingRepositoryErrorTitle"
+            defaultMessage="Cannot save repository"
           />
         }
         error={saveError}
@@ -159,11 +162,8 @@ export const RepositoryEdit: React.FunctionComponent<RouteComponentProps<MatchPa
         <EuiTitle size="l">
           <h1>
             <FormattedMessage
-              id="xpack.snapshotRestore.editRepository.title"
-              defaultMessage="Edit repository '{name}'"
-              values={{
-                name,
-              }}
+              id="xpack.snapshotRestore.editRepositoryTitle"
+              defaultMessage="Edit repository"
             />
           </h1>
         </EuiTitle>

@@ -54,8 +54,8 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.addRepository.errorSavingRepositoryTitle"
-            defaultMessage="Error registering new repository"
+            id="xpack.snapshotRestore.addRepository.savingRepositoryErrorTitle"
+            defaultMessage="Cannot register new repository"
           />
         }
         error={saveError}
@@ -73,7 +73,7 @@ export const RepositoryAdd: React.FunctionComponent<RouteComponentProps> = ({ hi
         <EuiTitle size="l">
           <h1>
             <FormattedMessage
-              id="xpack.snapshotRestore.addRepository.title"
+              id="xpack.snapshotRestore.addRepositoryTitle"
               defaultMessage="Register repository"
             />
           </h1>

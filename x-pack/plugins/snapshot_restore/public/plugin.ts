@@ -28,7 +28,7 @@ export class Plugin {
     esSection.register(PLUGIN.ID, {
       visible: true,
       display: i18n.translate('xpack.snapshotRestore.appName', {
-        defaultMessage: 'Snapshot and Restore',
+        defaultMessage: 'Snapshot Repositories',
       }),
       order: 7,
       url: `#${CLIENT_BASE_PATH}`,

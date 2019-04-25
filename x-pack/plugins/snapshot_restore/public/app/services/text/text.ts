@@ -16,7 +16,7 @@ class TextService {
       [REPOSITORY_TYPES.fs]: i18n.translate(
         'xpack.snapshotRestore.repositoryType.fileSystemTypeName',
         {
-          defaultMessage: 'Shared File System',
+          defaultMessage: 'Shared file system',
         }
       ),
       [REPOSITORY_TYPES.url]: i18n.translate(
@@ -43,13 +43,13 @@ class TextService {
       [REPOSITORY_TYPES.source]: i18n.translate(
         'xpack.snapshotRestore.repositoryType.sourceTypeName',
         {
-          defaultMessage: 'Source Only',
+          defaultMessage: 'Source-only',
         }
       ),
     };
     this.breadcrumbs = {
       home: i18n.translate('xpack.snapshotRestore.home.breadcrumbTitle', {
-        defaultMessage: 'Snapshot and Restore',
+        defaultMessage: 'Snapshot Repositories',
       }),
       repositoryAdd: i18n.translate('xpack.snapshotRestore.addRepository.breadcrumbTitle', {
         defaultMessage: 'Add repository',
@@ -69,7 +69,7 @@ class TextService {
       return this.i18n.translate(
         'xpack.snapshotRestore.repositoryType.sourceTypeWithDelegateName',
         {
-          defaultMessage: '{delegateType} (Source Only)',
+          defaultMessage: '{delegateType} (Source-only)',
           values: {
             delegateType: getTypeName(delegateType),
           },
@@ -82,7 +82,7 @@ class TextService {
 
   public getSizeNotationHelpText() {
     return this.i18n.translate('xpack.snapshotRestore.repositoryForm.sizeNotationPlaceholder', {
-      defaultMessage: 'Example sizes: {example1}, {example2}, {example3}, {example4}',
+      defaultMessage: 'Examples: {example1}, {example2}, {example3}, {example4}',
       values: {
         example1: '1024',
         example2: '1g',

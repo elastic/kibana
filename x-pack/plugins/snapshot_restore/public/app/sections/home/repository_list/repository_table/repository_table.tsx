@@ -93,16 +93,20 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
         {
           render: ({ name }: { name: string }) => {
             const label = i18n.translate(
-              'xpack.snapshotRestore.repositoryList.table.actionEditButton',
-              {
-                defaultMessage: 'Edit',
-              }
+              'xpack.snapshotRestore.repositoryList.table.actionEditTooltip',
+              { defaultMessage: 'Edit' }
             );
 
             return (
               <EuiToolTip content={label} delay="long">
                 <EuiButtonIcon
-                  aria-label={label}
+                  aria-label={i18n.translate(
+                    'xpack.snapshotRestore.repositoryList.table.actionEditAriaLabel',
+                    {
+                      defaultMessage: 'Edit repository `{name}`',
+                      values: { name },
+                    }
+                  )}
                   iconType="pencil"
                   color="primary"
                   href={`#${BASE_PATH}/edit_repository/${name}`}
@@ -116,19 +120,26 @@ const RepositoryTableUi: React.FunctionComponent<Props> = ({
             return (
               <RepositoryDeleteProvider>
                 {deleteRepositoryPrompt => {
+                  const label = i18n.translate(
+                    'xpack.snapshotRestore.repositoryList.table.actionRemoveTooltip',
+                    { defaultMessage: 'Remove' }
+                  );
                   return (
-                    <EuiButtonIcon
-                      aria-label={i18n.translate(
-                        'xpack.snapshotRestore.repositoryList.table.actionRemoveDescription',
-                        {
-                          defaultMessage: 'Remove repository',
-                        }
-                      )}
-                      iconType="trash"
-                      color="danger"
-                      data-test-subj="srRepositoryListDeleteActionButton"
-                      onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
-                    />
+                    <EuiToolTip content={label} delay="long">
+                      <EuiButtonIcon
+                        aria-label={i18n.translate(
+                          'xpack.snapshotRestore.repositoryList.table.actionRemoveAriaLabel',
+                          {
+                            defaultMessage: 'Remove repository `{name}`',
+                            values: { name },
+                          }
+                        )}
+                        iconType="trash"
+                        color="danger"
+                        data-test-subj="srRepositoryListDeleteActionButton"
+                        onClick={() => deleteRepositoryPrompt([name], onRepositoryDeleted)}
+                      />
+                    </EuiToolTip>
                   );
                 }}
               </RepositoryDeleteProvider>

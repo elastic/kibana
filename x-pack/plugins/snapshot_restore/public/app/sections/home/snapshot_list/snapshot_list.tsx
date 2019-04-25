@@ -75,7 +75,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
     content = (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.snapshotRestore.snapshotList.loadingSnapshots"
+          id="xpack.snapshotRestore.snapshotList.loadingSnapshotsDescription"
           defaultMessage="Loading snapshots…"
         />
       </SectionLoading>
@@ -85,11 +85,50 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.snapshotList.errorLoadingSnapshots"
+            id="xpack.snapshotRestore.snapshotList.loadingSnapshotsErrorMessage"
             defaultMessage="Error loading snapshots"
           />
         }
         error={error}
+      />
+    );
+  } else if (repositories.length === 0) {
+    content = (
+      <EuiEmptyPrompt
+        iconType="managementApp"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesTitle"
+              defaultMessage="You don't have any snapshots or repositories yet"
+            />
+          </h1>
+        }
+        body={
+          <Fragment>
+            <p>
+              <FormattedMessage
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesDescription"
+                defaultMessage="Start by registering a repository for your snapshots."
+              />
+            </p>
+            <p>
+              <EuiButton
+                href={history.createHref({
+                  pathname: `${BASE_PATH}/add_repository`,
+                })}
+                fill
+                iconType="plusInCircle"
+                data-test-subj="srSnapshotsEmptyPromptAddRepositoryButton"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.snapshotList.emptyPrompt.noRepositoriesAddButtonLabel"
+                  defaultMessage="Register a repository"
+                />
+              </EuiButton>
+            </p>
+          </Fragment>
+        }
       />
     );
   } else if (snapshots.length === 0) {
@@ -99,8 +138,8 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         title={
           <h1>
             <FormattedMessage
-              id="xpack.snapshotRestore.snapshotList.emptyPromptTitle"
-              defaultMessage="No snapshots found"
+              id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsTitle"
+              defaultMessage="You don't have any snapshots yet"
             />
           </h1>
         }
@@ -108,41 +147,23 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
           <Fragment>
             <p>
               <FormattedMessage
-                id="xpack.snapshotRestore.snapshotList.emptyPromptDescription"
-                defaultMessage="A snapshot is a backup taken from a running Elasticsearch cluster. They are stored in a shared filesystem or remote repository."
+                id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription"
+                defaultMessage="You can create a snapshot using the Elasticsearch API."
               />
             </p>
-            {repositories.length === 0 ? (
-              <p>
-                <EuiButton
-                  href={history.createHref({
-                    pathname: `${BASE_PATH}/add_repository`,
-                  })}
-                  fill
-                  iconType="plusInCircle"
-                  data-test-subj="srSnapshotsEmptyPromptAddRepositoryButton"
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.snapshotList.noRepositoriesAddButton"
-                    defaultMessage="Register your first repository"
-                  />
-                </EuiButton>
-              </p>
-            ) : (
-              <p>
-                <EuiLink
-                  href={documentationLinksService.getSnapshotDocUrl()}
-                  target="_blank"
-                  data-test-subj="srSnapshotsEmptyPromptDocLink"
-                >
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.emptyPromptDocLinkLabel"
-                    defaultMessage="Learn about creating snapshots"
-                  />{' '}
-                  <EuiIcon type="link" />
-                </EuiLink>
-              </p>
-            )}
+            <p>
+              <EuiLink
+                href={documentationLinksService.getSnapshotDocUrl()}
+                target="_blank"
+                data-test-subj="srSnapshotsEmptyPromptDocLink"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.emptyPrompt.noSnapshotsDocLinkText"
+                  defaultMessage="Learn how to create a snapshot"
+                />{' '}
+                <EuiIcon type="link" />
+              </EuiLink>
+            </p>
           </Fragment>
         }
       />
@@ -153,23 +174,21 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
         title={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryWarningTitle"
-            defaultMessage="Some of your repositories contain errors"
+            defaultMessage="Some repositories contain errors"
           />
         }
         color="warning"
         iconType="alert"
       >
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryWarningMessage"
-          defaultMessage="These errors might prevent some snapshots from being loaded and might
-            cause other snapshots to load slowly. You can fix these problems by addressing the
-            errors in the {tab}."
+          id="xpack.snapshotRestore.repositoryWarningDescription"
+          defaultMessage="Snapshots might load slowly. Go to {repositoryLink} to fix the errors."
           values={{
-            tab: (
+            repositoryLink: (
               <EuiLink href={linkToRepositories()}>
                 <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryWarningLinkMessage"
-                  defaultMessage="Repositories tab"
+                  id="xpack.snapshotRestore.repositoryWarningLinkText"
+                  defaultMessage="Repositories"
                 />
               </EuiLink>
             ),

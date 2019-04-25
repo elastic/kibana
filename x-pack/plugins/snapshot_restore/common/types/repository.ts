@@ -55,6 +55,9 @@ export interface S3Repository {
     bufferSize?: string;
     cannedAcl?: string;
     storageClass?: string;
+    maxRestoreBytesPerSec?: string;
+    maxSnapshotBytesPerSec?: string;
+    readonly?: boolean;
   };
 }
 
@@ -67,6 +70,9 @@ export interface HDFSRepository {
     loadDefaults?: boolean;
     compress?: boolean;
     chunkSize?: string | null;
+    maxRestoreBytesPerSec?: string;
+    maxSnapshotBytesPerSec?: string;
+    readonly?: boolean;
     ['security.principal']?: string;
     [key: string]: any; // For conf.* settings
   };
@@ -79,10 +85,12 @@ export interface AzureRepository {
     client?: string;
     container?: string;
     basePath?: string;
+    locationMode?: string;
     compress?: boolean;
     chunkSize?: string | null;
+    maxRestoreBytesPerSec?: string;
+    maxSnapshotBytesPerSec?: string;
     readonly?: boolean;
-    locationMode?: string;
   };
 }
 
@@ -95,6 +103,9 @@ export interface GCSRepository {
     basePath?: string;
     compress?: boolean;
     chunkSize?: string | null;
+    maxRestoreBytesPerSec?: string;
+    maxSnapshotBytesPerSec?: string;
+    readonly?: boolean;
   };
 }
 

@@ -85,7 +85,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
               <h1>
                 <FormattedMessage
                   id="xpack.snapshotRestore.home.snapshotRestoreTitle"
-                  defaultMessage="Snapshot and Restore"
+                  defaultMessage="Snapshot Repositories"
                 />
               </h1>
             </EuiFlexItem>
@@ -95,7 +95,10 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
                 target="_blank"
                 iconType="help"
               >
-                Snapshot and Restore docs
+                <FormattedMessage
+                  id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
+                  defaultMessage="Snapshot docs"
+                />
               </EuiButtonEmpty>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -105,8 +108,7 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.snapshotRestore.home.snapshotRestoreDescription"
-              defaultMessage="Snapshot and restore allows you to create snapshots of individual indices or an entire cluster,
-                store them on a shared filesystem or remote repository, and restore them into a running cluster."
+              defaultMessage="Use repositories to store backups of your Elasticsearch indices and clusters."
             />
           </EuiText>
         </EuiTitle>

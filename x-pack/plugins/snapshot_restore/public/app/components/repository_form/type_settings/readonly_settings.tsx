@@ -52,9 +52,8 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
         return (
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription"
-            defaultMessage="URL repositories with the {scheme} scheme must be whitelisted as part of the {settingKey} Elasticsearch setting."
+            defaultMessage="This URL must be registered in the {settingKey} setting."
             values={{
-              scheme: <EuiCode>{scheme}</EuiCode>,
               settingKey: <EuiCode>repositories.url.allowed_urls</EuiCode>,
             }}
           />
@@ -63,9 +62,8 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
         return (
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlFilePathDescription"
-            defaultMessage="URL repositories with the {scheme} scheme can only point to locations registered in the {settingKey} setting."
+            defaultMessage="This file location must be registered in the {settingKey} setting"
             values={{
-              scheme: <EuiCode>file</EuiCode>,
               settingKey: <EuiCode>path.repo</EuiCode>,
             }}
           />
@@ -114,7 +112,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
           <Fragment>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlDescription"
-              defaultMessage="Location of the snapshots. Required."
+              defaultMessage="The location of the snapshots."
             />
           </Fragment>
         }
@@ -148,7 +146,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
                 label={
                   <FormattedMessage
                     id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlLabel"
-                    defaultMessage="Path"
+                    defaultMessage="Path (required)"
                   />
                 }
                 fullWidth

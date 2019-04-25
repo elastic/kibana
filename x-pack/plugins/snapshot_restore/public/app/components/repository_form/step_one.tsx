@@ -153,7 +153,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               target="_blank"
             >
               <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.fields.typeHelpText"
+                id="xpack.snapshotRestore.repositoryForm.fields.typeDocsLinkText"
                 defaultMessage="Learn more"
               />{' '}
               <EuiIcon type="link" />
@@ -170,7 +170,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <SectionError
           title={
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.errorLoadingRepositoryTypes"
+              id="xpack.snapshotRestore.repositoryForm.loadingRepositoryTypesErrorMessage"
               defaultMessage="Error loading repository types"
             />
           }
@@ -183,7 +183,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
       return (
         <SectionLoading>
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.LoadingRepositoryTypes"
+            id="xpack.snapshotRestore.repositoryForm.loadingRepositoryTypesDescription"
             defaultMessage="Loading repository types…"
           />
         </SectionLoading>
@@ -214,21 +214,17 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           <Fragment>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.typeDescription"
-              defaultMessage="Repository storage type. Elasticsearch supports a few types by default, additional repository types require plugins."
-            />
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.typePluginsLearnMore"
-              defaultMessage="Learn more about {pluginsDocLink}"
+              defaultMessage="Elasticsearch supports file system, read-only URL, and source-only repositories.
+                Additional types require plugins. {docLink}"
               values={{
-                pluginsDocLink: (
+                docLink: (
                   <EuiLink
                     href={documentationLinksService.getRepositoryPluginDocUrl()}
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.snapshotRestore.repositoryForm.fields.typePluginsLearnMoreLink"
-                      defaultMessage="Snapshot and Restore repository plugins"
+                      id="xpack.snapshotRestore.repositoryForm.fields.typePluginsDocLinkText"
+                      defaultMessage="Learn more about plugins."
                     />
                   </EuiLink>
                 ),
@@ -259,7 +255,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           <h3>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescriptionTitle"
-              defaultMessage="Source only"
+              defaultMessage="Source-only snapshots"
             />
           </h3>
         </EuiTitle>
@@ -268,23 +264,16 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <Fragment>
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescription"
-            defaultMessage="A source repository enables you to create minimal,
-              source-only snapshots that take up to 50% less space on disk.
-              Source only snapshots contain stored fields and index metadata."
-          />
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyLearnMore"
-            defaultMessage="Learn more about {sourceOnlyDocLink}"
+            defaultMessage="Snapshots contain stored fields and index metadata and take up to 50% less space. {docLink}"
             values={{
-              sourceOnlyDocLink: (
+              docLink: (
                 <EuiLink
                   href={documentationLinksService.getRepositoryTypeDocUrl(REPOSITORY_TYPES.source)}
                   target="_blank"
                 >
                   <FormattedMessage
-                    id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyLearnMoreLink"
-                    defaultMessage="Source Only repositories"
+                    id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDocLinkText"
+                    defaultMessage="Learn more about source-only repositories."
                   />
                 </EuiLink>
               ),
@@ -300,7 +289,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyLabel"
-              defaultMessage="Enable source only"
+              defaultMessage="Source-only snapshots"
             />
           }
           checked={repository.type === REPOSITORY_TYPES.source}

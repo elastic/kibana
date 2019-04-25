@@ -52,6 +52,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
 
   const hasValidationErrors: boolean = !validation.isValid;
   const {
+    name,
     type,
     settings: { delegateType },
   } = repository;
@@ -66,7 +67,10 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
             <h2>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.fields.settingsTitle"
-                defaultMessage="Settings"
+                defaultMessage="{repositoryName} settings"
+                values={{
+                  repositoryName: `'${name}'`,
+                }}
               />
             </h2>
           </EuiTitle>
@@ -117,7 +121,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
     const savingLabel = (
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.savingButtonLabel"
-        defaultMessage="Saving..."
+        defaultMessage="Saving…"
       />
     );
 

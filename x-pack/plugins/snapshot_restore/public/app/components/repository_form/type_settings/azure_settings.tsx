@@ -6,7 +6,6 @@
 
 import React, { Fragment } from 'react';
 import {
-  EuiCode,
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
@@ -39,7 +38,17 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
     },
   } = useAppDependencies();
   const {
-    settings: { client, container, basePath, compress, chunkSize, readonly, locationMode },
+    settings: {
+      client,
+      container,
+      basePath,
+      compress,
+      chunkSize,
+      readonly,
+      locationMode,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
+    },
   } = repository;
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
@@ -65,7 +74,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.clientDescription"
-            defaultMessage="Azure named client to use."
+            defaultMessage="Name of the Azure client."
           />
         }
         idAria="azureRepositoryClientDescription"
@@ -110,7 +119,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.containerDescription"
-            defaultMessage="Container name. You must create the azure container before creating the repository."
+            defaultMessage="Name of the Azure container to use for snapshots."
           />
         }
         idAria="azureRepositoryContainerDescription"
@@ -155,7 +164,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.basePathDescription"
-            defaultMessage="Specifies the path within container to repository data."
+            defaultMessage="The container path to the repository data."
           />
         }
         idAria="azureRepositoryBasePathDescription"
@@ -192,7 +201,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeAzure.compressTitle"
-                defaultMessage="Compress"
+                defaultMessage="Snapshot compression"
               />
             </h3>
           </EuiTitle>
@@ -200,9 +209,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.compressDescription"
-            defaultMessage="Turns on compression of the snapshot files.
-              Compression is applied only to metadata files (index mapping and settings).
-              Data files are not compressed."
+            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
           />
         }
         idAria="azureRepositoryCompressDescription"
@@ -219,7 +226,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeAzure.compressLabel"
-                defaultMessage="Enable compression"
+                defaultMessage="Compress snapshots"
               />
             }
             checked={!(compress === false)}
@@ -247,8 +254,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.chunkSizeDescription"
-            defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation."
+            defaultMessage="Break down files into smaller units when taking snapshots."
           />
         }
         idAria="azureRepositoryChunkSizeDescription"
@@ -279,6 +285,98 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
+      {/* Max snapshot bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.maxSnapshotBytesTitle"
+                defaultMessage="Max snapshot bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.maxSnapshotBytesDescription"
+            defaultMessage="The rate for creating snapshots for each node."
+          />
+        }
+        idAria="azureRepositoryMaxSnapshotBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeAzure.maxSnapshotBytesLabel"
+              defaultMessage="Max snapshot bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['azureRepositoryMaxSnapshotBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+          error={settingErrors.maxSnapshotBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxSnapshotBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxSnapshotBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max restore bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeAzure.maxRestoreBytesTitle"
+                defaultMessage="Max restore bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeAzure.maxRestoreBytesDescription"
+            defaultMessage="The snapshot restore rate for each node."
+          />
+        }
+        idAria="azureRepositoryMaxRestoreBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeAzure.maxRestoreBytesLabel"
+              defaultMessage="Max restore bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['azureRepositoryMaxRestoreBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+          error={settingErrors.maxRestoreBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxRestoreBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxRestoreBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
       {/* Location mode field */}
       <EuiDescribedFormGroup
         title={
@@ -294,10 +392,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.locationModeDescription"
-            defaultMessage="Setting to {secondaryOnly} will force read-only to true."
-            values={{
-              secondaryOnly: <EuiCode>{locationModeOptions[1].value}</EuiCode>,
-            }}
+            defaultMessage="Use either the primary or secondary location. If secondary, read-only is true."
           />
         }
         idAria="azureRepositoryLocationModeDescription"
@@ -336,7 +431,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyTitle"
-                defaultMessage="Readonly"
+                defaultMessage="Read-only"
               />
             </h3>
           </EuiTitle>
@@ -344,7 +439,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyDescription"
-            defaultMessage="Makes repository read-only."
+            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
           />
         }
         idAria="azureRepositoryReadonlyDescription"
@@ -362,7 +457,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyLabel"
-                defaultMessage="Enable readonly"
+                defaultMessage="Read-only repository"
               />
             }
             checked={!!readonly}

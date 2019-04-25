@@ -74,7 +74,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
     return (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.loadingRepository"
+          id="xpack.snapshotRestore.repositoryDetails.loadingRepositoryDescription"
           defaultMessage="Loading repository…"
         />
       </SectionLoading>
@@ -87,7 +87,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
       ? {
           data: {
             error: i18n.translate(
-              'xpack.snapshotRestore.repositoryDetails.errorRepositoryNotFound',
+              'xpack.snapshotRestore.repositoryDetails.repositoryNotFoundErrorMessage',
               {
                 defaultMessage: `The repository '{name}' does not exist.`,
                 values: {
@@ -102,7 +102,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryDetails.errorLoadingRepositoryTitle"
+            id="xpack.snapshotRestore.repositoryDetails.loadingRepositoryErrorTitle"
             defaultMessage="Error loading repository"
           />
         }
@@ -175,7 +175,7 @@ const RepositoryDetailsUi: React.FunctionComponent<Props> = ({
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryDetails.repositoryTypeDocLink"
-                defaultMessage="Type docs"
+                defaultMessage="Repository docs"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

@@ -11,7 +11,6 @@ import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
-  EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
@@ -48,6 +47,9 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
       loadDefaults,
       compress,
       chunkSize,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
+      readonly,
       'security.principal': securityPrincipal,
       ...rest // For conf.* settings
     },
@@ -74,7 +76,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.uriDescription"
-            defaultMessage="The URI address for HDFS. Required."
+            defaultMessage="The URI address for HDFS."
           />
         }
         idAria="hdfsRepositoryUriDescription"
@@ -84,7 +86,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeHDFS.uriLabel"
-              defaultMessage="URI"
+              defaultMessage="URI (required)"
             />
           }
           fullWidth
@@ -126,7 +128,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.pathDescription"
-            defaultMessage="The file path within the filesystem where data is stored/loaded. Required."
+            defaultMessage="The file path where data is stored."
           />
         }
         idAria="hdfsRepositoryPathDescription"
@@ -136,7 +138,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeHDFS.pathLabel"
-              defaultMessage="Path"
+              defaultMessage="Path (required)"
             />
           }
           fullWidth
@@ -171,7 +173,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.loadDefaultsDescription"
-            defaultMessage="Whether to load the default Hadoop configuration or not."
+            defaultMessage="Load the default Hadoop configuration."
           />
         }
         idAria="hdfsRepositoryLoadDefaultsDescription"
@@ -188,7 +190,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeHDFS.loadDefaultsLabel"
-                defaultMessage="Enable load defaults"
+                defaultMessage="Load defaults"
               />
             }
             checked={!(loadDefaults === false)}
@@ -208,7 +210,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeHDFS.compressTitle"
-                defaultMessage="Compress"
+                defaultMessage="Snapshot compression"
               />
             </h3>
           </EuiTitle>
@@ -216,9 +218,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.compressDescription"
-            defaultMessage="Turns on compression of the snapshot files.
-              Compression is applied only to metadata files (index mapping and settings).
-              Data files are not compressed."
+            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
           />
         }
         idAria="hdfsRepositoryCompressDescription"
@@ -235,7 +235,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeHDFS.compressLabel"
-                defaultMessage="Enable compression"
+                defaultMessage="Compress snapshots"
               />
             }
             checked={!(compress === false)}
@@ -263,8 +263,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.chunkSizeDescription"
-            defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation."
+            defaultMessage="Break down files into smaller units when taking snapshots."
           />
         }
         idAria="hdfsRepositoryChunkSizeDescription"
@@ -356,16 +355,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
           <Fragment>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeHDFS.configurationDescription"
-              defaultMessage="Additional JSON formatted configuration parameters to be added to Hadoop configuration.
-                Only client oriented properties from the Hadoop core and HDFS configuration files will be recognized."
-            />
-            <EuiSpacer size="s" />
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeHDFS.configurationKeyDescription"
-              defaultMessage="Keys should be in the format {confKeyFormat}."
-              values={{
-                confKeyFormat: <EuiCode>{'conf.<key>'}</EuiCode>,
-              }}
+              defaultMessage="Additional JSON format configuration parameters to add to the Hadoop configuration. Only client-oriented properties from the Hadoop core and HDFS files are recognized."
             />
           </Fragment>
         }
@@ -386,6 +376,15 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeHDFS.configurationFormatError"
               defaultMessage="Invalid JSON format"
+            />
+          }
+          helpText={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeHDFS.configurationKeyDescription"
+              defaultMessage="Keys should be in the format {confKeyFormat}."
+              values={{
+                confKeyFormat: <EuiCode>{'conf.<key>'}</EuiCode>,
+              }}
             />
           }
         >
@@ -434,6 +433,143 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
               } catch (e) {
                 setIsConfInvalid(true);
               }
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max snapshot bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxSnapshotBytesTitle"
+                defaultMessage="Max snapshot bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxSnapshotBytesDescription"
+            defaultMessage="The rate for creating snapshots for each node."
+          />
+        }
+        idAria="hdfsRepositoryMaxSnapshotBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxSnapshotBytesLabel"
+              defaultMessage="Max snapshot bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['hdfsRepositoryMaxSnapshotBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+          error={settingErrors.maxSnapshotBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxSnapshotBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxSnapshotBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max restore bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxRestoreBytesTitle"
+                defaultMessage="Max restore bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxRestoreBytesDescription"
+            defaultMessage="The snapshot restore rate for each node."
+          />
+        }
+        idAria="hdfsRepositoryMaxRestoreBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeHDFS.maxRestoreBytesLabel"
+              defaultMessage="Max restore bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['hdfsRepositoryMaxRestoreBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+          error={settingErrors.maxRestoreBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxRestoreBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxRestoreBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Readonly field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeHDFS.readonlyTitle"
+                defaultMessage="Read-only"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeHDFS.readonlyDescription"
+            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+          />
+        }
+        idAria="hdfsRepositoryReadonlyDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace={true}
+          fullWidth
+          describedByIds={['hdfsRepositoryReadonlyDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
+          error={settingErrors.readonly}
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeHDFS.readonlyLabel"
+                defaultMessage="Read-only repository"
+              />
+            }
+            checked={!!readonly}
+            onChange={e => {
+              updateRepositorySettings({
+                readonly: e.target.checked,
+              });
             }}
           />
         </EuiFormRow>

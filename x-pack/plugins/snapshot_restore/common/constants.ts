@@ -6,7 +6,7 @@
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
 import { RepositoryType } from './types';
 
-const PLUGIN_NAME = 'Snapshot and Restore';
+const PLUGIN_NAME = 'Snapshot Repositories';
 
 export const PLUGIN = {
   ID: 'snapshot_restore',

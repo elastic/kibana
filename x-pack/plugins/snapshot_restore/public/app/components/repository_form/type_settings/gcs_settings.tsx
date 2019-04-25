@@ -31,57 +31,21 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
     },
   } = useAppDependencies();
   const {
-    settings: { bucket, client, basePath, compress, chunkSize },
+    settings: {
+      bucket,
+      client,
+      basePath,
+      compress,
+      chunkSize,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
+      readonly,
+    },
   } = repository;
   const hasErrors: boolean = Boolean(Object.keys(settingErrors).length);
 
   return (
     <Fragment>
-      {/* Bucket field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketTitle"
-                defaultMessage="Bucket"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketDescription"
-            defaultMessage="The name of the bucket to be used for snapshots. Required."
-          />
-        }
-        idAria="gcsRepositoryBucketDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketLabel"
-              defaultMessage="Bucket"
-            />
-          }
-          fullWidth
-          describedByIds={['gcsRepositoryBucketDescription']}
-          isInvalid={Boolean(hasErrors && settingErrors.bucket)}
-          error={settingErrors.bucket}
-        >
-          <EuiFieldText
-            defaultValue={bucket || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                bucket: e.target.value,
-              });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
       {/* Client field */}
       <EuiDescribedFormGroup
         title={
@@ -97,7 +61,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.clientDescription"
-            defaultMessage="The name of the client to use to connect to Google Cloud Storage."
+            defaultMessage="Name of the Google Cloud Storage client."
           />
         }
         idAria="gcsRepositoryClientDescription"
@@ -127,6 +91,51 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
+      {/* Bucket field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketTitle"
+                defaultMessage="Bucket"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketDescription"
+            defaultMessage="Name of the Google Cloud Storage bucket to use for snapshots."
+          />
+        }
+        idAria="gcsRepositoryBucketDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketLabel"
+              defaultMessage="Bucket (required)"
+            />
+          }
+          fullWidth
+          describedByIds={['gcsRepositoryBucketDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.bucket)}
+          error={settingErrors.bucket}
+        >
+          <EuiFieldText
+            defaultValue={bucket || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                bucket: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
       {/* Base path field */}
       <EuiDescribedFormGroup
         title={
@@ -142,7 +151,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.basePathDescription"
-            defaultMessage="Specifies the path within bucket to repository data."
+            defaultMessage="The bucket path to the repository data."
           />
         }
         idAria="gcsRepositoryBasePathDescription"
@@ -179,7 +188,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeGCS.compressTitle"
-                defaultMessage="Compress"
+                defaultMessage="Compress snapshots"
               />
             </h3>
           </EuiTitle>
@@ -187,9 +196,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.compressDescription"
-            defaultMessage="Turns on compression of the snapshot files.
-              Compression is applied only to metadata files (index mapping and settings).
-              Data files are not compressed."
+            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
           />
         }
         idAria="gcsRepositoryCompressDescription"
@@ -206,7 +213,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeGCS.compressLabel"
-                defaultMessage="Enable compression"
+                defaultMessage="Compress snapshots"
               />
             }
             checked={!(compress === false)}
@@ -234,8 +241,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.chunkSizeDescription"
-            defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation."
+            defaultMessage="Break down files into smaller units when taking snapshots."
           />
         }
         idAria="gcsRepositoryChunkSizeDescription"
@@ -260,6 +266,143 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
             onChange={e => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max snapshot bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.maxSnapshotBytesTitle"
+                defaultMessage="Max snapshot bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.maxSnapshotBytesDescription"
+            defaultMessage="The rate for creating snapshots for each node."
+          />
+        }
+        idAria="gcsRepositoryMaxSnapshotBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeGCS.maxSnapshotBytesLabel"
+              defaultMessage="Max snapshot bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['gcsRepositoryMaxSnapshotBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+          error={settingErrors.maxSnapshotBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxSnapshotBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxSnapshotBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max restore bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.maxRestoreBytesTitle"
+                defaultMessage="Max restore bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.maxRestoreBytesDescription"
+            defaultMessage="The snapshot restore rate for each node."
+          />
+        }
+        idAria="gcsRepositoryMaxRestoreBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeGCS.maxRestoreBytesLabel"
+              defaultMessage="Max restore bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['gcsRepositoryMaxRestoreBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+          error={settingErrors.maxRestoreBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxRestoreBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxRestoreBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Readonly field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.readonlyTitle"
+                defaultMessage="Read-only"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeGCS.readonlyDescription"
+            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+          />
+        }
+        idAria="gcsRepositoryReadonlyDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace={true}
+          fullWidth
+          describedByIds={['gcsRepositoryReadonlyDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
+          error={settingErrors.readonly}
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeGCS.readonlyLabel"
+                defaultMessage="Read-only repository"
+              />
+            }
+            checked={!!readonly}
+            onChange={e => {
+              updateRepositorySettings({
+                readonly: e.target.checked,
               });
             }}
           />
