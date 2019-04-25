@@ -19,54 +19,51 @@
 
 import React, { useEffect } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } from '@elastic/eui';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { isUndefined } from 'lodash';
 
 interface Bounds {
-  min: string;
-  max: string;
-}
-
-function isBoundEmpty(value: string): boolean {
-  return value === '';
+  min: number | '';
+  max: number | '';
 }
 
 function areBoundsInvalid({ min, max }: Bounds): boolean {
-  if (isBoundEmpty(min) && isBoundEmpty(max)) {
+  if (min === '' && max === '') {
     return false;
   }
 
-  const minValue: number = parseInt(min, 10);
-  const maxValue: number = parseInt(max, 10);
-
-  if (isNaN(minValue) || isNaN(maxValue)) {
-    return true;
-  }
-
-  return minValue > maxValue;
+  return min > max;
 }
 
-function ExtendedBoundsParamEditor({ value, setValue, setValidity }: AggParamEditorProps<Bounds>) {
+function ExtendedBoundsParamEditor({
+  agg,
+  value,
+  setValue,
+  setValidity,
+}: AggParamEditorProps<Bounds>) {
   const tooltipContent = i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
     defaultMessage:
       'Min and Max do not filter the results, but rather extend the bounds of the result set',
   });
 
   const mainLabel = (
-    <>
+    <span id={`extendedBoundsLabel${agg.id}`}>
       <FormattedMessage
         id="common.ui.aggTypes.extendedBoundsLabel"
-        defaultMessage="Extended bounds"
+        defaultMessage="Extended bounds (optional)"
       />{' '}
-      <EuiIconTip
-        position="right"
-        content={tooltipContent}
-        type="questionInCircle"
-        aria-label={tooltipContent}
-      />
-    </>
+      <EuiIconTip position="right" content={tooltipContent} type="questionInCircle" />
+    </span>
   );
 
   const minLabel = i18n.translate('common.ui.aggTypes.extendedBounds.minLabel', {
@@ -104,26 +101,38 @@ function ExtendedBoundsParamEditor({ value, setValue, setValidity }: AggParamEdi
       error={error}
       className="visEditorSidebar__aggParamFormRow"
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow label={minLabel} fullWidth={true} isInvalid={isInvalid}>
-            <EuiFieldNumber
-              value={isBoundEmpty(value.min) ? '' : Number(value.min)}
-              onChange={ev => setValue({ ...value, min: ev.target.value })}
-              fullWidth={true}
-              isInvalid={isInvalid}
-            />
-          </EuiFormRow>
+          <EuiFieldNumber
+            value={isUndefined(value.min) ? '' : value.min}
+            onChange={ev =>
+              setValue({ ...value, min: ev.target.value === '' ? '' : parseFloat(ev.target.value) })
+            }
+            fullWidth={true}
+            isInvalid={isInvalid}
+            aria-labelledby={`extendedBoundsLabel${agg.id} extendedBoundsMinLabel${agg.id}`}
+            prepend={
+              <EuiText size="xs" id={`extendedBoundsMinLabel${agg.id}`}>
+                <strong>{minLabel}</strong>
+              </EuiText>
+            }
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label={maxLabel} fullWidth={true} isInvalid={isInvalid}>
-            <EuiFieldNumber
-              value={isBoundEmpty(value.max) ? '' : Number(value.max)}
-              onChange={ev => setValue({ ...value, max: ev.target.value })}
-              fullWidth={true}
-              isInvalid={isInvalid}
-            />
-          </EuiFormRow>
+          <EuiFieldNumber
+            value={isUndefined(value.max) ? '' : value.max}
+            onChange={ev =>
+              setValue({ ...value, max: ev.target.value === '' ? '' : parseFloat(ev.target.value) })
+            }
+            fullWidth={true}
+            isInvalid={isInvalid}
+            aria-labelledby={`extendedBoundsLabel${agg.id} extendedBoundsMaxLabel${agg.id}`}
+            prepend={
+              <EuiText size="xs" id={`extendedBoundsMaxLabel${agg.id}`}>
+                <strong>{maxLabel}</strong>
+              </EuiText>
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
