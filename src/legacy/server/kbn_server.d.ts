@@ -84,7 +84,7 @@ export default class KbnServer {
     };
     start: {
       core: {
-        http?: HttpServiceStart;
+        http: HttpServiceStart;
       };
     };
     stop: null;

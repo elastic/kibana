@@ -21,28 +21,35 @@ import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { CoreService } from '../../types';
-import { Logger, LoggerFactory } from '../logging';
+import { Logger } from '../logging';
+import { CoreContext } from '../core_context';
 import { HttpConfig } from './http_config';
-import { HttpServer, HttpServerSetup, HttpServerInfo } from './http_server';
+import { HttpServer, HttpServerSetup } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 
 /** @public */
 export type HttpServiceSetup = HttpServerSetup;
-export type HttpServiceStart = HttpServerInfo;
+export interface HttpServiceStart {
+  isListening: () => boolean;
+}
 
 /** @internal */
 export class HttpService implements CoreService<HttpServiceSetup, HttpServiceStart> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
+  private readonly config$: Observable<HttpConfig>;
   private configSubscription?: Subscription;
 
   private readonly log: Logger;
 
-  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
-    this.log = logger.get('http');
+  constructor(private readonly coreContext: CoreContext) {
+    this.log = coreContext.logger.get('http');
+    this.config$ = this.coreContext.configService.atPath('server', HttpConfig);
 
-    this.httpServer = new HttpServer(logger.get('http', 'server'));
-    this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
+    this.httpServer = new HttpServer(coreContext.logger.get('http', 'server'));
+    this.httpsRedirectServer = new HttpsRedirectServer(
+      coreContext.logger.get('http', 'redirect', 'server')
+    );
   }
 
   public async setup() {
@@ -64,16 +71,23 @@ export class HttpService implements CoreService<HttpServiceSetup, HttpServiceSta
   public async start() {
     const config = await this.config$.pipe(first()).toPromise();
 
-    // If a redirect port is specified, we start an HTTP server at this port and
-    // redirect all requests to the SSL port.
-    if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
-      await this.httpsRedirectServer.start(config);
+    // We shouldn't set up http service in two cases:`
+    // 1. If `server.autoListen` is explicitly set to `false`.
+    // 2. When the process is run as dev cluster master in which case cluster manager
+    // will fork a dedicated process where http service will be set up instead.
+    if (!this.coreContext.env.isDevClusterMaster && config.autoListen) {
+      // If a redirect port is specified, we start an HTTP server at this port and
+      // redirect all requests to the SSL port.
+      if (config.ssl.enabled && config.ssl.redirectHttpFromPort !== undefined) {
+        await this.httpsRedirectServer.start(config);
+      }
+
+      await this.httpServer.start(config);
     }
 
-    // The HttpService's setup method calls `start` on HttpServer because it is
-    // a more appropriate name. In the future, starting the server should be moved
-    // to the `start` lifecycle handler of HttpService.
-    return await this.httpServer.start(config);
+    return {
+      isListening: () => this.httpServer.isListening(),
+    };
   }
 
   public async stop() {

@@ -32,6 +32,7 @@ import {
 } from './cookie_session_storage';
 
 export interface HttpServerSetup {
+  server: Server;
   options: ServerOptions;
   registerRouter: (router: Router) => void;
   /**
@@ -48,10 +49,6 @@ export interface HttpServerSetup {
    * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
    */
   registerOnRequest: (requestHandler: OnRequestHandler) => void;
-}
-
-export interface HttpServerInfo {
-  server: Server;
 }
 
 export class HttpServer {
@@ -86,10 +83,14 @@ export class HttpServer {
         fn: AuthenticationHandler<T>,
         cookieOptions: SessionStorageCookieOptions<T>
       ) => this.registerAuth(fn, cookieOptions, config.basePath),
+      // Return server instance with the connection options so that we can properly
+      // bridge core and the "legacy" Kibana internally. Once this bridge isn't
+      // needed anymore we shouldn't return the instance from this method.
+      server: this.server,
     };
   }
 
-  public async start(config: HttpConfig): Promise<HttpServerInfo> {
+  public async start(config: HttpConfig) {
     if (this.server === undefined) {
       throw new Error('server is not setup up yet');
     }
@@ -114,13 +115,6 @@ export class HttpServer {
         config.rewriteBasePath ? config.basePath : ''
       }`
     );
-
-    // Return server instance with the connection options so that we can properly
-    // bridge core and the "legacy" Kibana internally. Once this bridge isn't
-    // needed anymore we shouldn't return anything from this method.
-    return {
-      server: this.server,
-    };
   }
 
   public async stop() {

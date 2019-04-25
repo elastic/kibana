@@ -41,7 +41,7 @@ export interface PluginsServiceSetup {
 /** @internal */
 export interface PluginsServiceSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
-  http?: HttpServiceSetup;
+  http: HttpServiceSetup;
 }
 
 /** @internal */

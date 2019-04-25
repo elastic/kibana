@@ -17,10 +17,9 @@
  * under the License.
  */
 
-import { first } from 'rxjs/operators';
 import { ConfigService, Env } from './config';
 import { ElasticsearchService } from './elasticsearch';
-import { HttpConfig, HttpService, HttpServiceSetup, HttpServiceStart, Router } from './http';
+import { HttpService, HttpServiceSetup, Router } from './http';
 import { LegacyService } from './legacy';
 import { Logger, LoggerFactory } from './logging';
 import { PluginsService } from './plugins';
@@ -32,16 +31,10 @@ export class Server {
   private readonly legacy: LegacyService;
   private readonly log: Logger;
 
-  constructor(
-    private readonly configService: ConfigService,
-    logger: LoggerFactory,
-    private readonly env: Env
-  ) {
-    this.log = logger.get('server');
-
-    this.http = new HttpService(configService.atPath('server', HttpConfig), logger);
-
+  constructor(configService: ConfigService, logger: LoggerFactory, env: Env) {
     const core = { env, configService, logger };
+    this.log = logger.get('server');
+    this.http = new HttpService(core);
     this.plugins = new PluginsService(core);
     this.legacy = new LegacyService(core);
     this.elasticsearch = new ElasticsearchService(core);
@@ -71,19 +64,7 @@ export class Server {
   }
 
   public async start() {
-    const httpConfig = await this.configService
-      .atPath('server', HttpConfig)
-      .pipe(first())
-      .toPromise();
-
-    let httpStart: HttpServiceStart | undefined;
-    // We shouldn't set up http service in two cases:
-    // 1. If `server.autoListen` is explicitly set to `false`.
-    // 2. When the process is run as dev cluster master in which case cluster manager
-    // will fork a dedicated process where http service will be set up instead.
-    if (!this.env.isDevClusterMaster && httpConfig.autoListen) {
-      httpStart = await this.http.start();
-    }
+    const httpStart = await this.http.start();
 
     const startDeps = {
       http: httpStart,
