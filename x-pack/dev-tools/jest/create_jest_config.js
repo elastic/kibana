@@ -42,6 +42,9 @@ export function createJestConfig({
     transformIgnorePatterns: [
       '[/\\\\]node_modules[/\\\\].+\\.js$'
     ],
+    testPathIgnorePatterns: [
+      `.*[/\\\\]plugins[/\\\\]code[/\\\\].*`
+    ],
     snapshotSerializers: [
       `${kibanaDirectory}/node_modules/enzyme-to-json/serializer`
     ],
