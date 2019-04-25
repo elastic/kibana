@@ -33,11 +33,13 @@ const label = (
     />{' '}
     <EuiIconTip
       position="right"
-      content={i18n.translate('common.ui.aggTypes.numberInterval.minimumIntervalTooltip', {
-        defaultMessage:
-          "Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}",
-        values: { histogramMaxBars: 'histogram:maxBars' },
-      })}
+      content={
+        <FormattedMessage
+          id="common.ui.aggTypes.numberInterval.minimumIntervalTooltip"
+          defaultMessage="Interval will be automatically scaled in the event that the provided value creates more buckets than specified by Advanced Setting's {histogramMaxBars}"
+          values={{ histogramMaxBars: 'histogram:maxBars' }}
+        />
+      }
       type="questionInCircle"
     />
   </>
