@@ -34,17 +34,15 @@ import { createXaxisFormatter } from '../../lib/create_xaxis_formatter';
 import { isBackgroundDark } from '../../../../common/set_is_reversed';
 
 class TimeseriesVisualization extends Component {
-
-  get interval() {
-    const { visData, model } = this.props;
-
-    return getInterval(visData, model);
-  }
-
-  xAxisFormatter = (val) => {
+  xAxisFormatter = interval => val => {
     const { scaledDataFormat, dateFormat } = this.props.visData;
-    if (!scaledDataFormat || !dateFormat) return val;
-    const formatter = createXaxisFormatter(this.interval, scaledDataFormat, dateFormat);
+
+    if (!scaledDataFormat || !dateFormat) {
+      return val;
+    }
+
+    const formatter = createXaxisFormatter(interval, scaledDataFormat, dateFormat);
+
     return formatter(val);
   };
 
@@ -83,6 +81,7 @@ class TimeseriesVisualization extends Component {
   render() {
     const { model, visData, onBrush } = this.props;
     const series = get(visData, `${model.id}.series`, []);
+    const interval = getInterval(visData, model);
 
     this.showToastNotification = null;
 
@@ -180,12 +179,12 @@ class TimeseriesVisualization extends Component {
       showGrid: Boolean(model.show_grid),
       legend: Boolean(model.show_legend),
       legendPosition: model.legend_position,
-      xAxisLabel: this.interval ? getAxisLabelString(this.interval) : '',
+      xAxisLabel: interval ? getAxisLabelString(interval) : '',
       series,
       yaxes,
       annotations,
       onBrush,
-      xAxisFormatter: this.xAxisFormatter,
+      xAxisFormatter: this.xAxisFormatter(interval),
     };
 
     return (
