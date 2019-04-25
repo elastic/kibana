@@ -132,7 +132,7 @@ export function LayerSettings(props) {
               defaultMessage: `Apply global filter to layer`
             })
           }
-          checked={props.applyGlobalQuery}
+          checked={layerSupportsGlobalQuery ? props.applyGlobalQuery : false}
           onChange={onApplyGlobalQueryChange}
           disabled={!layerSupportsGlobalQuery}
           data-test-subj="mapLayerPanelApplyGlobalQueryCheckbox"
