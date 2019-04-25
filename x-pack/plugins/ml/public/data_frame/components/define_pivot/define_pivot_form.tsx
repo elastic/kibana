@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { uniq } from 'lodash';
-
 import { i18n } from '@kbn/i18n';
 
 import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
@@ -34,6 +32,7 @@ import {
   IndexPatternContext,
   Label,
   PivotAggsConfig,
+  PivotAggsConfigDict,
   PivotGroupByConfig,
   PivotGroupByConfigDict,
 } from '../../common';
@@ -41,8 +40,7 @@ import {
 import { getPivotDropdownOptions } from './common';
 
 export interface DefinePivotExposedState {
-  aggList: Label[];
-  aggs: PivotAggsConfig[];
+  aggList: PivotAggsConfigDict;
   groupByList: PivotGroupByConfigDict;
   search: string;
   valid: boolean;
@@ -53,8 +51,7 @@ const emptySearch = '';
 
 export function getDefaultPivotState(): DefinePivotExposedState {
   return {
-    aggList: [] as Label[],
-    aggs: [] as PivotAggsConfig[],
+    aggList: {} as PivotAggsConfigDict,
     groupByList: {} as PivotGroupByConfigDict,
     search: defaultSearch,
     valid: false,
@@ -98,14 +95,14 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     aggOptionsData,
   } = getPivotDropdownOptions(indexPattern);
 
-  const addGroupByInterval = (label: Label, item: PivotGroupByConfig) => {
-    groupByList[label] = item;
-    setGroupByList({ ...groupByList });
-  };
-
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
     groupByList[label] = groupByOptionsData[label];
+    setGroupByList({ ...groupByList });
+  };
+
+  const updateGroupBy = (label: Label, item: PivotGroupByConfig) => {
+    groupByList[label] = item;
     setGroupByList({ ...groupByList });
   };
 
@@ -115,31 +112,37 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   };
 
   // The list of selected aggregations
-  const [aggList, setAggList] = useState(defaults.aggList as Label[]);
+  const [aggList, setAggList] = useState(defaults.aggList);
 
   const addAggregation = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
-    const newList = uniq([...aggList, label]);
-    setAggList(newList);
+    aggList[label] = aggOptionsData[label];
+    setAggList({ ...aggList });
+  };
+
+  const updateAggregation = (label: Label, item: PivotAggsConfig) => {
+    delete aggList[label];
+    const newLabel = `${item.agg}(${item.field})`;
+    aggList[newLabel] = item;
+    setAggList({ ...aggList });
   };
 
   const deleteAggregation = (label: Label) => {
-    const newList = aggList.filter(l => l !== label);
-    setAggList(newList);
+    delete aggList[label];
+    setAggList({ ...aggList });
   };
 
-  const pivotAggs = aggList.map(l => aggOptionsData[l]);
+  const pivotAggsArr = dictionaryToArray(aggList);
   const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(search);
 
-  const valid = pivotGroupByArr.length > 0 && aggList.length > 0;
+  const valid = pivotGroupByArr.length > 0 && pivotAggsArr.length > 0;
   useEffect(
     () => {
-      onChange({ aggList, aggs: pivotAggs, groupByList, search, valid });
+      onChange({ aggList, groupByList, search, valid });
     },
     [
-      aggList,
-      pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
+      pivotAggsArr.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
       pivotGroupByArr
         .map(
           d =>
@@ -179,7 +182,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <Fragment>
               <GroupByListForm
                 list={groupByList}
-                onChange={addGroupByInterval}
+                onChange={updateGroupBy}
                 deleteHandler={deleteGroupBy}
               />
               <DropDown
@@ -203,7 +206,8 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <Fragment>
               <AggListForm
                 list={aggList}
-                optionsData={aggOptionsData}
+                options={aggOptionsData}
+                onChange={updateAggregation}
                 deleteHandler={deleteAggregation}
               />
               <DropDown
@@ -232,7 +236,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       <EuiFlexItem>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
         <EuiSpacer size="l" />
-        <PivotPreview aggs={pivotAggs} groupBy={groupByList} query={pivotQuery} />
+        <PivotPreview aggs={aggList} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -57,12 +57,13 @@ describe('Data Frame: Common', () => {
       field: 'the-group-by-field',
       formRowLabel: 'the-group-by-label',
     };
-    const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', formRowLabel: 'the-agg-label' },
-    ];
+    const agg: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-agg-field',
+      formRowLabel: 'the-agg-label',
+    };
     const pivotState: DefinePivotExposedState = {
-      aggList: ['the-agg-name'],
-      aggs,
+      aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       search: 'the-query',
       valid: true,

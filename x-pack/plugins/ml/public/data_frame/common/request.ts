@@ -141,7 +141,7 @@ export function getDataFrameRequest(
       indexPatternTitle,
       getPivotQuery(pivotState.search),
       dictionaryToArray(pivotState.groupByList),
-      pivotState.aggs
+      dictionaryToArray(pivotState.aggList)
     ),
     dest: {
       index: jobDetailsState.targetIndex,

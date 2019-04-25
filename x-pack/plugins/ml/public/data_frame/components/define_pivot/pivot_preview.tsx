@@ -21,7 +21,7 @@ import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
   IndexPatternContext,
-  PivotAggsConfig,
+  PivotAggsConfigDict,
   PivotGroupByConfigDict,
   SimpleQuery,
 } from '../../common';
@@ -39,7 +39,7 @@ const PreviewTitle = () => (
 );
 
 interface Props {
-  aggs: PivotAggsConfig[];
+  aggs: PivotAggsConfigDict;
   groupBy: PivotGroupByConfigDict;
   query: SimpleQuery;
 }
