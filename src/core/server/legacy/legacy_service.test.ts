@@ -414,3 +414,9 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     );
   });
 });
+
+test('Cannot start without setup phase', async () => {
+  await expect(legacyService.start(startDeps)).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Legacy service is not setup yet."`
+  );
+});

@@ -62,7 +62,11 @@ export class LegacyService implements CoreService {
     this.setupDeps = setupDeps;
   }
   public async start(startDeps: CoreStart) {
-    this.log.debug('setting up legacy service');
+    const { setupDeps } = this;
+    if (!setupDeps) {
+      throw new Error('Legacy service is not setup yet.');
+    }
+    this.log.debug('starting legacy service');
 
     const update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
@@ -85,10 +89,7 @@ export class LegacyService implements CoreService {
             await this.createClusterManager(config);
             return;
           }
-          if (!this.setupDeps) {
-            throw new Error('Core setup contract is not defined');
-          }
-          return await this.createKbnServer(config, this.setupDeps, startDeps);
+          return await this.createKbnServer(config, setupDeps, startDeps);
         })
       )
       .toPromise();
