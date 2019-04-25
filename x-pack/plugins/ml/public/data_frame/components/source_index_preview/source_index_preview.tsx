@@ -4,17 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent, useContext, useEffect, useState } from 'react';
+import React, { FunctionComponent, useContext, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-
-import { SearchResponse } from 'elasticsearch';
 
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCallOut,
   EuiCheckbox,
-  EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -36,8 +34,6 @@ interface ExpandableTableProps extends EuiInMemoryTableProps {
 
 const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<ExpandableTableProps>;
 
-import { ml } from '../../../services/ml_api_service';
-
 import { Dictionary } from '../../../../common/types/common';
 
 import { IndexPatternContext, SimpleQuery } from '../../common';
@@ -45,12 +41,12 @@ import { IndexPatternContext, SimpleQuery } from '../../common';
 import {
   EsDoc,
   EsFieldName,
-  getDefaultSelectableFields,
   getSelectableFields,
   MAX_COLUMNS,
   toggleSelectedField,
 } from './common';
 import { ExpandedRow } from './expanded_row';
+import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data';
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
@@ -71,12 +67,24 @@ interface Sorting {
 
 type TableSorting = Sorting | boolean;
 
+interface SourceIndexPreviewTitle {
+  indexPatternTitle: string;
+}
+const SourceIndexPreviewTitle: React.SFC<SourceIndexPreviewTitle> = ({ indexPatternTitle }) => (
+  <EuiTitle size="xs">
+    <span>
+      {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
+        defaultMessage: 'Source index {indexPatternTitle}',
+        values: { indexPatternTitle },
+      })}
+    </span>
+  </EuiTitle>
+);
+
 interface Props {
   query: SimpleQuery;
   cellClick?(search: string): void;
 }
-
-const SEARCH_SIZE = 1000;
 
 export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, query }) => {
   const indexPattern = useContext(IndexPatternContext);
@@ -85,9 +93,6 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     return null;
   }
 
-  const [loading, setLoading] = useState(false);
-
-  const [tableItems, setTableItems] = useState([] as EsDoc[]);
   const [selectedFields, setSelectedFields] = useState([] as EsFieldName[]);
   const [isColumnsPopoverVisible, setColumnsPopoverVisible] = useState(false);
 
@@ -104,14 +109,6 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     setSelectedFields([...toggleSelectedField(selectedFields, column)]);
   }
 
-  let docFields: EsFieldName[] = [];
-  let docFieldsCount = 0;
-  if (tableItems.length > 0) {
-    docFields = getSelectableFields(tableItems);
-    docFields.sort();
-    docFieldsCount = docFields.length;
-  }
-
   const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState(
     {} as ItemIdToExpandedRowMap
   );
@@ -126,34 +123,64 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
   }
 
-  useEffect(
-    () => {
-      setLoading(true);
-
-      ml.esSearch({
-        index: indexPattern.title,
-        rest_total_hits_as_int: true,
-        size: SEARCH_SIZE,
-        body: { query },
-      })
-        .then((resp: SearchResponse<any>) => {
-          const docs = resp.hits.hits;
-
-          if (selectedFields.length === 0) {
-            const newSelectedFields = getDefaultSelectableFields(docs);
-            setSelectedFields(newSelectedFields);
-          }
-
-          setTableItems(docs as EsDoc[]);
-          setLoading(false);
-        })
-        .catch((resp: any) => {
-          setTableItems([] as EsDoc[]);
-          setLoading(false);
-        });
-    },
-    [indexPattern.title, query.query_string.query]
+  const { errorMessage, status, tableItems } = useSourceIndexData(
+    indexPattern,
+    query,
+    selectedFields,
+    setSelectedFields
   );
+
+  if (status === SOURCE_INDEX_STATUS.ERROR) {
+    return (
+      <EuiPanel grow={false}>
+        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+        <EuiCallOut
+          title={i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternError', {
+            defaultMessage: 'An error occurred loading the source index data.',
+          })}
+          color="danger"
+          iconType="cross"
+        >
+          <p>{errorMessage}</p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
+
+  if (status === SOURCE_INDEX_STATUS.LOADED && tableItems.length === 0) {
+    return (
+      <EuiPanel grow={false}>
+        <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
+        <EuiCallOut
+          title={i18n.translate(
+            'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutTitle',
+            {
+              defaultMessage: 'Empty source index query result.',
+            }
+          )}
+          color="primary"
+        >
+          <p>
+            {i18n.translate(
+              'xpack.ml.dataframe.sourceIndexPreview.dataFrameSourceIndexNoDataCalloutBody',
+              {
+                defaultMessage:
+                  'The query for the source index returned no results. Please make sure the index contains documents and your query is not too restrictive.',
+              }
+            )}
+          </p>
+        </EuiCallOut>
+      </EuiPanel>
+    );
+  }
+
+  let docFields: EsFieldName[] = [];
+  let docFieldsCount = 0;
+  if (tableItems.length > 0) {
+    docFields = getSelectableFields(tableItems);
+    docFields.sort();
+    docFieldsCount = docFields.length;
+  }
 
   const columns = selectedFields.map(k => {
     const column = {
@@ -209,24 +236,11 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     });
   }
 
-  if (!loading && tableItems.length === 0) {
-    return (
-      <EuiEmptyPrompt title={<h2>No results</h2>} body={<p>Check the syntax of your query.</p>} />
-    );
-  }
-
   return (
-    <EuiPanel>
+    <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <span>
-              {i18n.translate('xpack.ml.dataframe.sourceIndexPreview.sourceIndexPatternTitle', {
-                defaultMessage: 'Source Index {indexPatternTitle}',
-                values: { indexPatternTitle: indexPattern.title },
-              })}
-            </span>
-          </EuiTitle>
+          <SourceIndexPreviewTitle indexPatternTitle={indexPattern.title} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center">
@@ -287,8 +301,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      {loading && <EuiProgress size="xs" color="accent" />}
-      {!loading && <EuiProgress size="xs" color="accent" max={1} value={0} />}
+      {status === SOURCE_INDEX_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
+      {status !== SOURCE_INDEX_STATUS.LOADING && (
+        <EuiProgress size="xs" color="accent" max={1} value={0} />
+      )}
       <ExpandableTable
         items={tableItems}
         columns={columns}
