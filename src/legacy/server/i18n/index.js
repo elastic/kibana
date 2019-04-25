@@ -21,21 +21,11 @@ import { resolve } from 'path';
 import globby from 'globby';
 import { i18n, i18nLoader } from '@kbn/i18n';
 
-import { fromRoot } from '../../utils';
-
 export async function i18nMixin(kbnServer, server, config) {
   const locale = config.get('i18n.locale');
 
-  const translationsDirs = [
-    fromRoot('src/legacy/ui/translations'),
-    fromRoot('src/legacy/server/translations'),
-    fromRoot('src/core/translations'),
-  ];
-
-  const scanDirs = config.get('plugins.scanDirs').concat([fromRoot('node_modules/@kbn')]);
-
   const groupedEntries = await Promise.all([
-    ...scanDirs.map(async path => {
+    ...config.get('plugins.scanDirs').map(async path => {
       const entries = await globby(`*/translations/${locale}.json`, {
         cwd: path,
       });
@@ -49,13 +39,6 @@ export async function i18nMixin(kbnServer, server, config) {
           cwd: path,
         }
       );
-      return entries.map(entry => resolve(path, entry));
-    }),
-
-    ...translationsDirs.map(async path => {
-      const entries = await globby(`${locale}.json`, {
-        cwd: path,
-      });
       return entries.map(entry => resolve(path, entry));
     }),
   ]);
