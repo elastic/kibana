@@ -17,56 +17,12 @@
  * under the License.
  */
 
-import {
-  getLastSeriesTimestamp,
-  makeFilter,
-  annotationFilter
-} from './annotations';
+import { makeFilter, annotationFilter } from './filter';
 
-describe('src/legacy/core_plugins/metrics/common/annotations.test.js', () => {
-  let series;
+describe('src/legacy/core_plugins/metrics/server/lib/vis_data/response_processors/annotations/annotations.js', () => {
   let annotations;
-  const lastTimestamp = 10000;
 
   beforeEach(() => {
-    series = [
-      [
-        {
-          id: 1,
-          data: [
-            [100, 43],
-            [1000, 56],
-            [lastTimestamp, 59],
-          ],
-        },
-        {
-          id: 1,
-          data: [
-            [100, 33],
-            [1000, 16],
-            [lastTimestamp, 29],
-          ],
-        },
-      ],
-      [
-        {
-          id: 2,
-          data: [
-            [100, 3],
-            [1000, 6],
-            [lastTimestamp, 9],
-          ],
-        },
-        {
-          id: 2,
-          data: [
-            [100, 5],
-            [1000, 7],
-            [lastTimestamp, 9],
-          ],
-        },
-      ],
-    ];
     annotations = [
       {
         key: 100,
@@ -78,30 +34,6 @@ describe('src/legacy/core_plugins/metrics/common/annotations.test.js', () => {
         key: 10000,
       }
     ];
-  });
-
-  describe('getLastSeriesTimestamp()', () => {
-    test('should return the last timestamp', () => {
-      const timestamp = getLastSeriesTimestamp(series);
-
-      expect(timestamp).toBe(lastTimestamp);
-    });
-
-    test('should return the max last timestamp of series', () => {
-      const maxLastTimestamp = 20000;
-
-      series[0][1].data = [[100, 5], [1000, 7], [maxLastTimestamp, 50]];
-
-      const timestamp = getLastSeriesTimestamp(series);
-
-      expect(timestamp).toBe(maxLastTimestamp);
-    });
-
-    test('should return null if nothing is passed', () => {
-      const timestamp = getLastSeriesTimestamp();
-
-      expect(timestamp).toBe(null);
-    });
   });
 
   describe('makeFilter()', () => {

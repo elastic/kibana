@@ -18,7 +18,7 @@
  */
 import { handleAnnotationResponse } from './response_processors/annotations/';
 import { getAnnotationRequestParams } from './annorations/get_request_params';
-import { getLastSeriesTimestamp } from './helpers/annotations';
+import { getLastSeriesTimestamp } from './helpers/timestamp';
 
 function validAnnotation(annotation) {
   return annotation.index_pattern &&

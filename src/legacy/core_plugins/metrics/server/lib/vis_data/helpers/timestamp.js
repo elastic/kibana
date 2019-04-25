@@ -17,8 +17,37 @@
  * under the License.
  */
 
-import { flow } from 'lodash';
-import { filterAnnotations } from './filter';
-import { getAnnotationBuckets } from './buckets';
+import { last } from 'lodash';
 
-export const handleAnnotationResponse = timestamp => flow(getAnnotationBuckets, filterAnnotations(timestamp));
+/**
+ * @param {Array} seriesGroup
+ * [
+ *  [
+ *    {
+ *      data: [
+ *        [1555189200000, 12],
+ *        [1555191100000, 42],
+ *        [1555263300000, 95],
+ *        ...coordinates,
+ *      ]
+ *      ...properties,
+ *    }
+ *    ...series,
+ *  ]
+ *  ...seriesGroups,
+ * ]
+ * @return {number} lastTimestamp
+ */
+export function getLastSeriesTimestamp(seriesGroup = []) {
+  let lastTimestamp = null;
+
+  seriesGroup.forEach(series => {
+    series.forEach(({ data }) => {
+      const [ dataLastTimestamp ] = last(data);
+
+      lastTimestamp  = Math.max(lastTimestamp, dataLastTimestamp);
+    });
+  });
+
+  return lastTimestamp;
+}

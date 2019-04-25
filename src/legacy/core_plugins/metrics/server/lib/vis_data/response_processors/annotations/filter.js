@@ -17,41 +17,6 @@
  * under the License.
  */
 
-import { last } from 'lodash';
-
-/**
- * @param {Array} seriesGroup
- * [
- *  [
- *    {
- *      data: [
- *        [1555189200000, 12],
- *        [1555191100000, 42],
- *        [1555263300000, 95],
- *        ...coordinates,
- *      ]
- *      ...properties,
- *    }
- *    ...series,
- *  ]
- *  ...seriesGroups,
- * ]
- * @return {number} lastTimestamp
- */
-export function getLastSeriesTimestamp(seriesGroup = []) {
-  let lastTimestamp = null;
-
-  seriesGroup.forEach(series => {
-    series.forEach(({ data }) => {
-      const [ dataLastTimestamp ] = last(data);
-
-      lastTimestamp  = Math.max(lastTimestamp, dataLastTimestamp);
-    });
-  });
-
-  return lastTimestamp;
-}
-
 /**
  * @param {Function} by - it's a callback which determines how data will be mapped.
  * @return {Function} function - a predefined filter function
