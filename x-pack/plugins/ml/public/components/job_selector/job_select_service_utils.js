@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash'; // TODO: find a way to not rely on this anymore
+import { difference, find } from 'lodash'; // TODO: find a way to not rely on this anymore
 import { toastNotifications } from 'ui/notify';
-import { mlJobService } from 'plugins/ml/services/job_service'; // TODO: change to relative path
+import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
 
 
@@ -27,7 +27,7 @@ function warnAboutInvalidJobIds(invalidIds) {
 // jobs loaded via mlJobsService.
 function getInvalidJobIds(ids) {
   return ids.filter(id => {
-    const job = _.find(mlJobService.jobs, { 'job_id': id });
+    const job = find(mlJobService.jobs, { 'job_id': id });
     return (job === undefined && id !== '*');
   });
 }
@@ -55,7 +55,7 @@ function loadJobIdsFromGlobalState(globalState) {
       const invalidIds = getInvalidJobIds(tempJobIds);
       warnAboutInvalidJobIds(invalidIds);
 
-      validIds = _.difference(tempJobIds, invalidIds);
+      validIds = difference(tempJobIds, invalidIds);
     } else {
       validIds = tempJobIds;
     }

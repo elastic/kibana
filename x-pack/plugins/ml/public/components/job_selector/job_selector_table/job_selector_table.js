@@ -75,12 +75,16 @@ export function JobSelectorTable({
 
   const tabs = [{
     id: 'Jobs',
-    name: 'Jobs',
+    name: i18n.translate('xpack.ml.jobSelector.jobsTab', {
+      defaultMessage: 'Jobs',
+    }),
     content: renderJobsTable(),
   },
   {
     id: 'Groups',
-    name: 'Groups',
+    name: i18n.translate('xpack.ml.jobSelector.groupsTab', {
+      defaultMessage: 'Groups',
+    }),
     content: renderGroupsTable()
   }];
 
@@ -205,7 +209,7 @@ export function JobSelectorTable({
         columns={groupColumns}
         filterDefaultFields={!singleSelection ? GROUP_FILTER_FIELDS : undefined}
         items={groupsList}
-        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable, isGroup: true })}
+        onTableChange={(selectionFromTable) => onSelection({ selectionFromTable })}
         selectedIds={selectedIds}
         sortableProperties={sortableProperties}
       />
@@ -233,8 +237,10 @@ export function JobSelectorTable({
 }
 
 JobSelectorTable.propTypes = {
+  groupsList: PropTypes.array,
   jobs: PropTypes.array,
-  onSelection: PropTypes.func,
+  onSelection: PropTypes.func.isRequired,
+  selectedIds: PropTypes.array.isRequired,
   singleSelection: PropTypes.string,
   timeseriesOnly: PropTypes.string
 };

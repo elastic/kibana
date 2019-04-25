@@ -7,7 +7,7 @@
 
 
 import React, { Fragment, useState, useEffect } from 'react';
-// import { PropTypes } from 'prop-types';
+import { PropTypes } from 'prop-types';
 import {
   EuiCheckbox,
   EuiSearchBar,
@@ -352,3 +352,15 @@ export function CustomSelectionTable({
     </Fragment>
   );
 }
+
+CustomSelectionTable.propTypes = {
+  columns: PropTypes.array.isRequired,
+  filterDefaultFields: PropTypes.array.isRequired,
+  filters: PropTypes.array,
+  items: PropTypes.array.isRequired,
+  onTableChange: PropTypes.func.isRequired,
+  selectedId: PropTypes.array,
+  singleSelection: PropTypes.string,
+  sortableProperties: PropTypes.object,
+  timeseriesOnly: PropTypes.string
+};
