@@ -13,15 +13,12 @@ import { OverviewNetwork } from '../../components/page/overview/overview_network
 import { GlobalTime } from '../../containers/global_time';
 
 import { Summary } from './summary';
-import { Welcome } from './welcome';
 
 export const OverviewComponent = pure(() => (
   <>
-    <Welcome />
-
     <GlobalTime>
       {({ to, from, setQuery }) => (
-        <EuiFlexGroup gutterSize="xl">
+        <EuiFlexGroup>
           <Summary />
           <OverviewHost endDate={to} startDate={from} setQuery={setQuery} />
           <OverviewNetwork endDate={to} startDate={from} setQuery={setQuery} />

@@ -81,6 +81,8 @@ export interface Source {
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
+
+  LastEventTime: LastEventTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -839,6 +841,10 @@ export interface DetailItem {
   originalValue?: EsValue | null;
 }
 
+export interface LastEventTimeData {
+  lastSeen?: Date | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1196,6 +1202,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface LastTimeDetails {
+  hostName?: string | null;
+
+  ip?: string | null;
+}
+
 export interface HostsSortField {
   field: HostsFields;
 
@@ -1265,6 +1277,13 @@ export interface TimelineDetailsSourceArgs {
   eventId: string;
 
   indexName: string;
+}
+export interface LastEventTimeSourceArgs {
+  id?: string | null;
+
+  indexKey: LastEventIndexKey;
+
+  details: LastTimeDetails;
 }
 export interface HostsSourceArgs {
   id?: string | null;
@@ -1414,6 +1433,13 @@ export enum Direction {
   desc = 'desc',
 }
 
+export enum LastEventIndexKey {
+  hostDetails = 'hostDetails',
+  hosts = 'hosts',
+  ipDetails = 'ipDetails',
+  network = 'network',
+}
+
 export enum HostsFields {
   hostName = 'hostName',
   lastSeen = 'lastSeen',
@@ -1518,6 +1544,8 @@ export namespace SourceResolvers {
     Timeline?: TimelineResolver<TimelineData, TypeParent, Context>;
 
     TimelineDetails?: TimelineDetailsResolver<TimelineDetailsData, TypeParent, Context>;
+
+    LastEventTime?: LastEventTimeResolver<LastEventTimeData, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
@@ -1619,6 +1647,19 @@ export namespace SourceResolvers {
     eventId: string;
 
     indexName: string;
+  }
+
+  export type LastEventTimeResolver<
+    R = LastEventTimeData,
+    Parent = Source,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context, LastEventTimeArgs>;
+  export interface LastEventTimeArgs {
+    id?: string | null;
+
+    indexKey: LastEventIndexKey;
+
+    details: LastTimeDetails;
   }
 
   export type HostsResolver<R = HostsData, Parent = Source, Context = SiemContext> = Resolver<
@@ -4258,6 +4299,18 @@ export namespace DetailItemResolvers {
   export type OriginalValueResolver<
     R = EsValue | null,
     Parent = DetailItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace LastEventTimeDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = LastEventTimeData> {
+    lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
+  }
+
+  export type LastSeenResolver<
+    R = Date | null,
+    Parent = LastEventTimeData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

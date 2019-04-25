@@ -44,6 +44,7 @@ export default {
     'packages/kbn-ui-framework/src/services/**/*.js',
     '!packages/kbn-ui-framework/src/services/index.js',
     '!packages/kbn-ui-framework/src/services/**/*/index.js',
+    'src/legacy/core_plugins/metrics/**/*.js'
   ],
   moduleNameMapper: {
     '^plugins/([^\/.]*)/(.*)': '<rootDir>/src/legacy/core_plugins/$1/public/$2',
@@ -61,6 +62,7 @@ export default {
   coverageDirectory: '<rootDir>/target/jest-coverage',
   coverageReporters: [
     'html',
+    'text',
   ],
   moduleFileExtensions: [
     'js',

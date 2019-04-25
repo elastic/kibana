@@ -22,5 +22,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./apm'));
     loadTestFile(require.resolve('./siem'));
+    loadTestFile(require.resolve('./code'));
   });
 }

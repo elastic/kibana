@@ -50,7 +50,7 @@ describe('FirstLastSeen Component', async () => {
       </TestProviders>
     );
     expect(container.innerHTML).toBe(
-      '<div class="euiLoadingSpinner euiLoadingSpinner--medium"></div>'
+      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
     );
   });
 

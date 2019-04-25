@@ -52,6 +52,8 @@ export interface Source {
   Timeline: TimelineData;
 
   TimelineDetails: TimelineDetailsData;
+
+  LastEventTime: LastEventTimeData;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
@@ -810,6 +812,10 @@ export interface DetailItem {
   originalValue?: EsValue | null;
 }
 
+export interface LastEventTimeData {
+  lastSeen?: Date | null;
+}
+
 export interface HostsData {
   edges: HostsEdges[];
 
@@ -1167,6 +1173,12 @@ export interface SortField {
   direction: Direction;
 }
 
+export interface LastTimeDetails {
+  hostName?: string | null;
+
+  ip?: string | null;
+}
+
 export interface HostsSortField {
   field: HostsFields;
 
@@ -1236,6 +1248,13 @@ export interface TimelineDetailsSourceArgs {
   eventId: string;
 
   indexName: string;
+}
+export interface LastEventTimeSourceArgs {
+  id?: string | null;
+
+  indexKey: LastEventIndexKey;
+
+  details: LastTimeDetails;
 }
 export interface HostsSourceArgs {
   id?: string | null;
@@ -1383,6 +1402,13 @@ export enum IndexType {
 export enum Direction {
   asc = 'asc',
   desc = 'desc',
+}
+
+export enum LastEventIndexKey {
+  hostDetails = 'hostDetails',
+  hosts = 'hosts',
+  ipDetails = 'ipDetails',
+  network = 'network',
 }
 
 export enum HostsFields {
@@ -1873,6 +1899,34 @@ export namespace GetEventsQuery {
     __typename?: 'ZeekEcsFields';
 
     session_id?: ToStringArray | null;
+  };
+}
+
+export namespace GetLastEventTimeQuery {
+  export type Variables = {
+    sourceId: string;
+    indexKey: LastEventIndexKey;
+    details: LastTimeDetails;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    LastEventTime: LastEventTime;
+  };
+
+  export type LastEventTime = {
+    __typename?: 'LastEventTimeData';
+
+    lastSeen?: Date | null;
   };
 }
 

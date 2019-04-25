@@ -22,7 +22,6 @@ import { NetworkTopNFlowQuery } from '../../containers/network_top_n_flow';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { IndexType } from '../../graphql/types';
 import { networkModel, networkSelectors, State } from '../../store';
-import { PageContent, PageContentBody } from '../styles';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
@@ -43,87 +42,80 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
       indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
         <>
           <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.page} />
-          <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-            <PageContentBody data-test-subj="pane1ScrollContainer">
-              <GlobalTime>
-                {({ to, from, setQuery }) => (
-                  <>
-                    <KpiNetworkQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
-                    >
-                      {({ kpiNetwork, loading, id, refetch }) => (
-                        <KpiNetworkComponentManage
-                          id={id}
-                          setQuery={setQuery}
-                          refetch={refetch}
-                          data={kpiNetwork}
-                          loading={loading}
-                        />
-                      )}
-                    </KpiNetworkQuery>
-                    <EuiSpacer size="m" />
-                    <NetworkTopNFlowQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
+
+          <GlobalTime>
+            {({ to, from, setQuery }) => (
+              <>
+                <KpiNetworkQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                >
+                  {({ kpiNetwork, loading, id, refetch }) => (
+                    <KpiNetworkComponentManage
+                      id={id}
+                      setQuery={setQuery}
+                      refetch={refetch}
+                      data={kpiNetwork}
+                      loading={loading}
+                    />
+                  )}
+                </KpiNetworkQuery>
+
+                <EuiSpacer />
+
+                <NetworkTopNFlowQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.page}
+                >
+                  {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => (
+                    <NetworkTopNFlowTableManage
+                      data={networkTopNFlow}
+                      indexPattern={indexPattern}
+                      id={id}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
                       type={networkModel.NetworkType.page}
-                    >
-                      {({
-                        totalCount,
-                        loading,
-                        networkTopNFlow,
-                        pageInfo,
-                        loadMore,
-                        id,
-                        refetch,
-                      }) => (
-                        <NetworkTopNFlowTableManage
-                          data={networkTopNFlow}
-                          indexPattern={indexPattern}
-                          id={id}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loading={loading}
-                          loadMore={loadMore}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          totalCount={totalCount}
-                          type={networkModel.NetworkType.page}
-                        />
-                      )}
-                    </NetworkTopNFlowQuery>
-                    <EuiSpacer size="m" />
-                    <NetworkDnsQuery
-                      endDate={to}
-                      filterQuery={filterQuery}
-                      sourceId="default"
-                      startDate={from}
+                    />
+                  )}
+                </NetworkTopNFlowQuery>
+
+                <EuiSpacer />
+
+                <NetworkDnsQuery
+                  endDate={to}
+                  filterQuery={filterQuery}
+                  sourceId="default"
+                  startDate={from}
+                  type={networkModel.NetworkType.page}
+                >
+                  {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
+                    <NetworkDnsTableManage
+                      data={networkDns}
+                      id={id}
+                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                      loading={loading}
+                      loadMore={loadMore}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      refetch={refetch}
+                      setQuery={setQuery}
+                      totalCount={totalCount}
                       type={networkModel.NetworkType.page}
-                    >
-                      {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
-                        <NetworkDnsTableManage
-                          data={networkDns}
-                          id={id}
-                          hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                          loading={loading}
-                          loadMore={loadMore}
-                          nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                          refetch={refetch}
-                          setQuery={setQuery}
-                          totalCount={totalCount}
-                          type={networkModel.NetworkType.page}
-                        />
-                      )}
-                    </NetworkDnsQuery>
-                  </>
-                )}
-              </GlobalTime>
-            </PageContentBody>
-          </PageContent>
+                    />
+                  )}
+                </NetworkDnsQuery>
+              </>
+            )}
+          </GlobalTime>
         </>
       ) : (
         <EmptyPage

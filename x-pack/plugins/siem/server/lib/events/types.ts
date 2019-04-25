@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EventsData, TimelineData, TimelineDetailsData } from '../../graphql/types';
+import {
+  EventsData,
+  LastEventIndexKey,
+  LastEventTimeData,
+  LastTimeDetails,
+  SourceConfiguration,
+  TimelineData,
+  TimelineDetailsData,
+} from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 import { SearchHit } from '../types';
 
@@ -15,6 +23,10 @@ export interface EventsAdapter {
     req: FrameworkRequest,
     options: RequestDetailsOptions
   ): Promise<TimelineDetailsData>;
+  getLastEventTimeData(
+    req: FrameworkRequest,
+    options: LastEventTimeRequestOptions
+  ): Promise<LastEventTimeData>;
 }
 
 export interface EventsRequestOptions extends RequestOptions {
@@ -33,6 +45,19 @@ export interface EventHit extends SearchHit {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     [agg: string]: any;
   };
+}
+
+export interface LastEventTimeHit extends SearchHit {
+  aggregations: {
+    last_seen_event: {
+      value_as_string: string;
+    };
+  };
+}
+export interface LastEventTimeRequestOptions {
+  indexKey: LastEventIndexKey;
+  details: LastTimeDetails;
+  sourceConfiguration: SourceConfiguration;
 }
 
 export interface TimerangeFilter {

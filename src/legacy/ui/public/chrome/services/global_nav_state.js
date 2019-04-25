@@ -21,7 +21,7 @@ import { distinctUntilChanged } from 'rxjs/operators';
 import { uiModules } from '../../modules';
 
 let newPlatformChrome;
-export function __newPlatformInit__(instance) {
+export function __newPlatformSetup__(instance) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/global_nav_state is already initialized');
   }

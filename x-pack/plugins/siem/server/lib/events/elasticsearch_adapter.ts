@@ -23,6 +23,7 @@ import {
   EcsEdges,
   EventsData,
   KpiItem,
+  LastEventTimeData,
   TimelineData,
   TimelineDetailsData,
   TimelineEdges,
@@ -45,7 +46,15 @@ import {
 import { TermAggregation } from '../types';
 
 import { buildDetailsQuery, buildQuery } from './query.dsl';
-import { EventHit, EventsAdapter, EventsRequestOptions, RequestDetailsOptions } from './types';
+import { buildLastEventTimeQuery } from './query.last_event_time.dsl';
+import {
+  EventHit,
+  EventsAdapter,
+  EventsRequestOptions,
+  LastEventTimeHit,
+  LastEventTimeRequestOptions,
+  RequestDetailsOptions,
+} from './types';
 
 export class ElasticsearchEventsAdapter implements EventsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -130,6 +139,21 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
         getDataFromHits(merge(sourceData, hitsData)),
         getIndexAlias(options.indexName)
       ),
+    };
+  }
+
+  public async getLastEventTimeData(
+    request: FrameworkRequest,
+    options: LastEventTimeRequestOptions
+  ): Promise<LastEventTimeData> {
+    const response = await this.framework.callWithRequest<LastEventTimeHit, TermAggregation>(
+      request,
+      'search',
+      buildLastEventTimeQuery(options)
+    );
+
+    return {
+      lastSeen: getOr(null, 'aggregations.last_seen_event.value_as_string', response),
     };
   }
 }

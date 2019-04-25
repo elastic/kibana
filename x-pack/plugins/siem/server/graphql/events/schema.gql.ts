@@ -54,8 +54,24 @@ export const eventsSchema = gql`
     originalValue: EsValue
   }
 
+  input LastTimeDetails {
+    hostName: String
+    ip: String
+  }
+
   type TimelineDetailsData {
     data: [DetailItem!]
+  }
+
+  type LastEventTimeData {
+    lastSeen: Date
+  }
+
+  enum LastEventIndexKey {
+    hostDetails
+    hosts
+    ipDetails
+    network
   }
 
   extend type Source {
@@ -74,5 +90,10 @@ export const eventsSchema = gql`
       filterQuery: String
     ): TimelineData!
     TimelineDetails(eventId: String!, indexName: String!): TimelineDetailsData!
+    LastEventTime(
+      id: String
+      indexKey: LastEventIndexKey!
+      details: LastTimeDetails!
+    ): LastEventTimeData!
   }
 `;

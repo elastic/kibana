@@ -18,7 +18,7 @@
  */
 
 import '../doc_table';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactory } from 'ui/embeddable';
 import {
@@ -63,7 +63,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     onEmbeddableStateChanged: OnEmbeddableStateChanged
   ) {
     const editUrl = this.getEditPath(id);
-    const editable = uiCapabilities.discover.save as boolean;
+    const editable = capabilities.get().discover.save as boolean;
 
     // can't change this to be async / awayt, because an Anglular promise is expected to be returned.
     return this.searchLoader.get(id).then(savedObject => {
