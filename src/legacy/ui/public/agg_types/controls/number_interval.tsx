@@ -56,17 +56,12 @@ function NumberIntervalParamEditor({
 }: AggParamEditorProps<number | undefined>) {
   const base: number = get(editorConfig, 'interval.base');
   const min = base || 0;
+  const isValid = (value !== undefined && value >= min);
 
-  useEffect(
-    () => {
-      setValidity(value !== undefined && value >= min);
-    },
-    [value]
-  );
+  useEffect(() => { setValidity(isValid); }, [value]);
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const numberValue = parseFloat(event.target.value);
-    setValidity(!isNaN(numberValue));
     setValue(isNaN(numberValue) ? undefined : numberValue);
   };
 
