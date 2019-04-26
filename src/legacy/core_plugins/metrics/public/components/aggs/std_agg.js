@@ -26,15 +26,14 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFormLabel } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../common/es_types';
+import { METRIC_TYPES } from '../../../common/metric_types';
 
 function StandardAgg(props) {
   const { model, panel, series, fields, uiRestrictions } = props;
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  let restrict = 'numeric';
-  if (model.type === 'cardinality') {
-    restrict = 'none';
-  }
+  const restrictFields = model.type === METRIC_TYPES.CARDINALITY ? [] : [ES_TYPES.NUMBER];
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
   const htmlId = htmlIdGenerator();
@@ -81,7 +80,7 @@ function StandardAgg(props) {
                   <FieldSelect
                     fields={fields}
                     type={model.type}
-                    restrict={restrict}
+                    restrict={restrictFields}
                     indexPattern={indexPattern}
                     value={model.field}
                     onChange={handleSelectChange('field')}
