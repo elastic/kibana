@@ -138,7 +138,7 @@ export function RunControls({
               error={newForecastDurationErrors}
               helpText={<FormattedMessage
                 id="xpack.ml.timeSeriesExplorer.runControls.forecastMaximumLengthHelpText"
-                defaultMessage="Length of forecast, up to a maximum of 8 weeks.
+                defaultMessage="Length of forecast.
                   Use s for seconds, m for minutes, h for hours, d for days, w for weeks."
               />}
             >
