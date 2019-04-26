@@ -13,6 +13,7 @@
 .mapLayerPanel__body {
   flex-basis: 1px; /* Fixes scrolling for Firefox */
   padding-bottom: 0; /* 1 */
+  overflow: scroll;
 
   > *:last-child {
     margin-bottom: $euiSize; /* 1 */
