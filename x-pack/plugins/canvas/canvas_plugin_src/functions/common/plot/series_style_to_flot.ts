@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { SeriesStyle, SeriesOptions } from '../../types';
+import { SeriesStyle } from '../../types';
 
 export const seriesStyleToFlot = (seriesStyle: SeriesStyle) => {
   if (!seriesStyle) {
@@ -19,7 +19,7 @@ export const seriesStyleToFlot = (seriesStyle: SeriesStyle) => {
   const stack = get<SeriesStyle['stack']>(seriesStyle, 'stack');
   const horizontal = get<SeriesStyle['horizontalBars']>(seriesStyle, 'horizontalBars', false);
 
-  const flotStyle: SeriesOptions = {
+  const flotStyle = {
     numbers: {
       show: true,
     },
@@ -47,10 +47,10 @@ export const seriesStyleToFlot = (seriesStyle: SeriesStyle) => {
   };
 
   if (stack) {
-    flotStyle.stack = stack;
+    (flotStyle as any).stack = stack;
   }
   if (color) {
-    flotStyle.color = color;
+    (flotStyle as any).color = color;
   }
 
   return flotStyle;

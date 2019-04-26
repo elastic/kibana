@@ -54,6 +54,13 @@ export interface Case {
 // ----------
 
 /**
+ * A Utility function that Typescript can use to determine if an object is a Datatable.
+ * @param datatable
+ */
+export const isDatatable = (datatable: any): datatable is Datatable =>
+  !!datatable && datatable.type === 'datatable';
+
+/**
  * This type represents the `type` of any `DatatableColumn` in a `Datatable`.
  */
 export type DatatableColumnType = 'string' | 'number' | 'boolean' | 'date' | 'null';
@@ -92,50 +99,21 @@ export interface PointSeries {
 }
 
 export interface SeriesStyle {
-  type: 'seriesStyle';
-  label: string;
-  color: string;
-  lines: number;
   bars: number;
-  points: number;
+  color: string;
   fill: number;
-  stack: number;
   horizontalBars: boolean;
+  label: string;
+  lines: number;
+  points: number;
+  stack: number;
+  type: 'seriesStyle';
 }
 
 export interface Palette {
   type: 'palette';
   colors: string[];
   gradient: boolean;
-}
-
-export interface SeriesOptions {
-  numbers?: {
-    show: boolean;
-  };
-  lines?: {
-    show: boolean;
-    lineWidth: number;
-    fillColor: string;
-    fill: number;
-  };
-  bars?: {
-    show: boolean;
-    barWidth: number;
-    fill: number;
-    align: 'center';
-    horizontal: boolean;
-  };
-  stack?: number;
-  color?: string;
-  bubbles: {
-    show: boolean;
-    fill?: number;
-  };
-  points?: {
-    show: boolean;
-  };
-  shadowSize?: number;
 }
 
 export interface Ticks {
@@ -159,15 +137,8 @@ export interface AxisConfig {
 }
 
 /**
- * A Utility function that Typescript can use to determine if an object is a Datatable.
- * @param datatable
- */
-export const isDatatable = (datatable: any): datatable is Datatable =>
-  !!datatable && datatable.type === 'datatable';
-
-/**
- * A Utility function that Typescript can use to determine if an object is a Datatable.
- * @param datatable
+ * A Utility function that Typescript can use to determine if an object is an AxisConfig.
+ * @param axisConfig
  */
 export const isAxisConfig = (axisConfig: any): axisConfig is AxisConfig =>
   !!axisConfig && axisConfig.type === 'axisConfig';

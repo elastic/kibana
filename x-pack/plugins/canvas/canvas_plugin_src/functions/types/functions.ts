@@ -10,27 +10,48 @@ import { functions as browserFunctions } from '../../functions/browser';
 import { functions as serverFunctions } from '../../functions/server';
 
 /**
- * A `FunctionFactory` defines the function that produces a named FunctionSpec.
+ * A Function type which represents a Function in Canvas.  This type assumes
+ * any Context can be provided and used by the Function implementation.
  */
-// prettier-ignore
-export type FunctionFactory<Name extends string, Arguments, Return> = 
-  () => FunctionSpec<Name, Arguments, Return>;
+export interface FunctionSpec<Name, Arguments, Return> {
+  /** Arguments for the Function */
+  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
+  aliases?: string[];
+  /** Help text displayed in the Expression editor */
+  help: string;
+  /** The name of the Function */
+  name: Name;
+  /** The type of the Function */
+  type?: CanvasFunctionType | Name;
+  /** The implementation of the Function */
+  fn(context: any, args: Arguments, handlers: FunctionHandlers): Return;
+}
 
 /**
- * A `ContextFunctionFactory` defines the function that produces a named FunctionSpec
- * which includes a Context.
+ * A Function type which restricts the incoming Context to a specific type.
  */
-// prettier-ignore
-export type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
-    () => ContextFunctionSpec<Name, Context, Arguments, Return>;
+export interface ContextFunctionSpec<Name, Context, Arguments, Return>
+  extends FunctionSpec<Name, Arguments, Return> {
+  /** The incoming Context provided to the Function; the information piped in. */
+  context?: {
+    types: Array<TypeToCanvasArgument<Context>>;
+  };
+  /** The implementation of the Function */
+  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
+}
 
 /**
- * A `NullContextualFunctionFactory` defines the function that produces a named FunctionSpec
- * which includes an always-null Context.
+ * A Function type which restricts the incoming Context specifically to `null`.
  */
-// prettier-ignore
-export type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
-    () => ContextFunctionSpec<Name, null, Arguments, Return>;
+export interface NullContextFunctionSpec<Name, Arguments, Return>
+  extends ContextFunctionSpec<Name, null, Arguments, Return> {
+  /** The incoming Context provided to the Function; the information piped in. */
+  context?: {
+    types: ['null'];
+  };
+  /** The implementation of the Function */
+  fn(context: null, args: Arguments, handlers: FunctionHandlers): Return;
+}
 
 /**
  * A type which infers all of the Function names.
@@ -68,44 +89,24 @@ type CanvasFunctionType =
   | 'style';
 
 // Handlers can be passed to the `fn` property of the Function.  At the moment, these Functions
-// are not strongly-defined.
+// are not strongly defined.
 interface FunctionHandlers {
   [key: string]: (...args: any) => any;
 }
 
-// A basic Function specification; other Function specifications are based on
-// this interface.  It assumes the Function accepts any Context provided to it.
-export interface FunctionSpec<Name, Arguments, Return> {
-  /** Arguments for the Function */
-  args: { [key in keyof Arguments]: ArgumentType<Arguments[key]> };
-  aliases?: string[];
-  /** Help text displayed in the Expression editor */
-  help: string;
-  /** The name of the Function */
-  name: Name;
-  /** The type of the Function */
-  type?: CanvasFunctionType | Name;
-  /** The implementation of the Function */
-  fn(context: any, args: Arguments, handlers: FunctionHandlers): Return;
-}
+// A `FunctionFactory` defines the function that produces a named FunctionSpec.
+// prettier-ignore
+type FunctionFactory<Name extends string, Arguments, Return> = 
+  () => FunctionSpec<Name, Arguments, Return>;
 
-// A Function spec requires a Context be provided, of a specific type.
-export interface ContextFunctionSpec<Name, Context, Arguments, Return>
-  extends FunctionSpec<Name, Arguments, Return> {
-  /** The incoming Context provided to the Function; the information piped in. */
-  context?: {
-    types: Array<TypeToCanvasArgument<Context>>;
-  };
-  /** The implementation of the Function */
-  fn(context: Context, args: Arguments, handlers: FunctionHandlers): Return;
-}
+// A `ContextFunctionFactory` defines the function that produces a named FunctionSpec
+// which includes a Context.
+// prettier-ignore
+type ContextFunctionFactory<Name extends string, Context, Arguments, Return> = 
+    () => ContextFunctionSpec<Name, Context, Arguments, Return>;
 
-export interface NullContextFunctionSpec<Name, Arguments, Return>
-  extends ContextFunctionSpec<Name, null, Arguments, Return> {
-  /** The incoming Context provided to the Function; the information piped in. */
-  context?: {
-    types: ['null'];
-  };
-  /** The implementation of the Function */
-  fn(context: null, args: Arguments, handlers: FunctionHandlers): Return;
-}
+// A `NullContextualFunctionFactory` defines the function that produces a named FunctionSpec
+// which includes an always-null Context.
+// prettier-ignore
+type NullContextFunctionFactory<Name extends string, Arguments, Return> = 
+    () => ContextFunctionSpec<Name, null, Arguments, Return>;
