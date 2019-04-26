@@ -41,6 +41,7 @@ interface MonitorListQueryResult {
 
 interface MonitorListProps {
   dangerColor: string;
+  linkParameters?: string;
 }
 
 type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
@@ -52,7 +53,7 @@ const monitorListPagination = {
   pageSizeOptions: [5, 10, 20, 50],
 };
 
-export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
+export const MonitorListComponent = ({ dangerColor, data, linkParameters, loading }: Props) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -98,7 +99,10 @@ export const MonitorListComponent = ({ dangerColor, data, loading }: Props) => (
           }),
           render: (id: string, monitor: LatestMonitor) => (
             <EuiLink>
-              <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
+              <Link
+                data-test-subj={`monitor-page-link-${id}`}
+                to={`/monitor/${id}${linkParameters}`}
+              >
                 {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
                   ? monitor.ping.monitor.name
                   : id}
