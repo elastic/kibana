@@ -60,6 +60,8 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
           }
         }
         onChange={[Function]}
+        options={Object {}}
+        otherAggNames={Array []}
       />
     </EuiPopover>
   </EuiFlexItem>
@@ -140,6 +142,8 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
           }
         }
         onChange={[Function]}
+        options={Object {}}
+        otherAggNames={Array []}
       />
     </EuiPopover>
   </EuiFlexItem>
@@ -208,6 +212,8 @@ exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
           }
         }
         onChange={[Function]}
+        options={Object {}}
+        otherAggNames={Array []}
       />
     </EuiPopover>
   </EuiFlexItem>

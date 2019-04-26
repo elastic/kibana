@@ -7,25 +7,26 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { PivotGroupByConfig, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../common';
+import { AggName, PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from '../../common';
 
-import { GroupByListForm } from './list_form';
+import { AggLabelForm } from './agg_label_form';
 
-describe('Data Frame: <GroupByListForm />', () => {
-  test('Minimal initialization', () => {
-    const item: PivotGroupByConfig = {
-      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+describe('Data Frame: <AggLabelForm />', () => {
+  test('Date histogram aggregation', () => {
+    const item: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.CARDINALITY,
       field: 'the-group-by-field',
       aggName: 'the-group-by-label',
     };
     const props = {
-      list: { 'the-options-data-id': item },
+      item,
+      otherAggNames: [],
       options: {},
-      deleteHandler() {},
+      deleteHandler(l: AggName) {},
       onChange() {},
     };
 
-    const wrapper = shallow(<GroupByListForm {...props} />);
+    const wrapper = shallow(<AggLabelForm {...props} />);
 
     expect(wrapper).toMatchSnapshot();
   });

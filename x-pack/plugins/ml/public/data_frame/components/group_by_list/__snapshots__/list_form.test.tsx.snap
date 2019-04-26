@@ -17,6 +17,7 @@ exports[`Data Frame: <GroupByListForm /> Minimal initialization 1`] = `
         }
       }
       onChange={[Function]}
+      options={Object {}}
       otherAggNames={Array []}
     />
   </EuiPanel>

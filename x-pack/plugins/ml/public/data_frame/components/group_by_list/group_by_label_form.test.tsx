@@ -21,7 +21,8 @@ describe('Data Frame: <GroupByLabelForm />', () => {
     };
     const props = {
       item,
-      optionsDataId: 'the-options-data-id',
+      otherAggNames: [],
+      options: {},
       deleteHandler() {},
       onChange() {},
     };
@@ -40,7 +41,8 @@ describe('Data Frame: <GroupByLabelForm />', () => {
     };
     const props = {
       item,
-      optionsDataId: 'the-options-data-id',
+      otherAggNames: [],
+      options: {},
       deleteHandler() {},
       onChange() {},
     };
@@ -58,7 +60,8 @@ describe('Data Frame: <GroupByLabelForm />', () => {
     };
     const props = {
       item,
-      optionsDataId: 'the-options-data-id',
+      otherAggNames: [],
+      options: {},
       deleteHandler() {},
       onChange() {},
     };
