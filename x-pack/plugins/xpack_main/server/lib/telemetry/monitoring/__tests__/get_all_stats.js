@@ -126,7 +126,8 @@ describe('get_all_stats', () => {
                 cluster_uuid: 'a',
                 kibana_stats: {
                   kibana: {
-                    version: '1.2.3-alpha1'
+                    version: '1.2.3-alpha1',
+                    statuses: [{ name: 'includes-usage-data', state: 'includes-usage-data' }],
                   },
                   os: {
                     platform: 'win',
@@ -192,7 +193,8 @@ describe('get_all_stats', () => {
         .onCall(0).returns(Promise.resolve(clusterUuidsResponse))
         .onCall(1).returns(Promise.resolve(esStatsResponse))
         .onCall(2).returns(Promise.resolve(kibanaStatsResponse))
-        .onCall(3).returns(Promise.resolve(logstashStatsResponse));
+        .onCall(3).returns(Promise.resolve(logstashStatsResponse))
+        .onCall(6).returns(Promise.resolve(kibanaStatsResponse));
 
       callWithInternalUser.withArgs('search')
         .onCall(0).returns(Promise.resolve(clusterUuidsResponse))
