@@ -667,7 +667,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 >
                   <div>
                     <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
-                    <EuiFlexGroup>
+                    <EuiFlexGroup alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.thresholdComparator}
