@@ -20,7 +20,7 @@ interface FilterBarQueryResult {
 }
 
 interface FilterBarProps {
-  currentQuery?: object;
+  currentQuery?: string;
   updateQuery: UptimeSearchBarQueryChangeHandler;
 }
 
@@ -125,14 +125,16 @@ export const FilterBarComponent = ({ currentQuery, data, updateQuery }: Props) =
     },
   ];
   return (
-    <EuiSearchBar
-      box={{ incremental: false }}
-      className="euiFlexGroup--gutterSmall"
-      onChange={updateQuery}
-      filters={filters}
-      query={currentQuery}
-      schema={filterBarSearchSchema}
-    />
+    <div data-test-subj="xpack.uptime.filterBar">
+      <EuiSearchBar
+        box={{ incremental: false }}
+        className="euiFlexGroup--gutterSmall"
+        onChange={updateQuery}
+        filters={filters}
+        query={currentQuery}
+        schema={filterBarSearchSchema}
+      />
+    </div>
   );
 };
 
