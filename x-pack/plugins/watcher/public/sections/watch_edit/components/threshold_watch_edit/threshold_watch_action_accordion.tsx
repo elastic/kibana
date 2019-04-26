@@ -14,8 +14,13 @@ import {
   EuiIcon,
   EuiTitle,
   EuiForm,
+  EuiCallOut,
+  EuiLink,
+  EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { ExecuteDetails } from 'plugins/watcher/models/execute_details/execute_details';
 import { Action } from 'plugins/watcher/models/action';
 import { toastNotifications } from 'ui/notify';
@@ -33,6 +38,7 @@ import {
   JiraActionFields,
 } from './action_fields';
 import { executeWatch } from '../../../../lib/api';
+import { watchActionsConfigurationMap } from '../../../../lib/documentation_links';
 
 const ActionFieldsComponentMap = {
   [ACTION_TYPES.LOGGING]: LoggingActionFields,
@@ -44,7 +50,17 @@ const ActionFieldsComponentMap = {
   [ACTION_TYPES.JIRA]: JiraActionFields,
 };
 
-export const WatchActionsAccordion: React.FunctionComponent = () => {
+interface Props {
+  settings: {
+    actionTypes: {
+      [key: string]: {
+        enabled: boolean;
+      };
+    };
+  } | null;
+}
+
+export const WatchActionsAccordion: React.FunctionComponent<Props> = ({ settings }) => {
   const { watch, setWatchProperty } = useContext(WatchContext);
   const { actions } = watch;
 
@@ -127,7 +143,46 @@ export const WatchActionsAccordion: React.FunctionComponent = () => {
                 });
                 setWatchProperty('actions', updatedActions);
               }}
-            />
+            >
+              {settings && settings.actionTypes[action.type].enabled === false ? (
+                <Fragment>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningTitleText',
+                      {
+                        defaultMessage: 'Account may not be configured.',
+                      }
+                    )}
+                    color="warning"
+                    iconType="help"
+                  >
+                    <EuiText>
+                      <p>
+                        <FormattedMessage
+                          id="xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningDescriptionText"
+                          defaultMessage="To create this action, at least one {accountType} account must be configured. {docLink}"
+                          values={{
+                            accountType: action.typeName,
+                            docLink: (
+                              <EuiLink
+                                href={watchActionsConfigurationMap[action.type]}
+                                target="_blank"
+                              >
+                                <FormattedMessage
+                                  id="xpack.watcher.sections.watchEdit.threshold.actions.actionConfigurationWarningHelpLinkText"
+                                  defaultMessage="Learn more."
+                                />
+                              </EuiLink>
+                            ),
+                          }}
+                        />
+                      </p>
+                    </EuiText>
+                  </EuiCallOut>
+                  <EuiSpacer />
+                </Fragment>
+              ) : null}
+            </FieldsComponent>
 
             <EuiButton
               type="submit"

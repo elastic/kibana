@@ -14,7 +14,14 @@ export class SlackAction extends BaseAction {
 
     const toArray = get(props, 'to');
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
-    this.text = props.text;
+
+    const defaultText = i18n.translate('xpack.watcher.models.slackAction.defaultText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.text = props.text || defaultText;
   }
 
   validate() {
@@ -64,10 +71,6 @@ export class SlackAction extends BaseAction {
         toList: toList ? `to ${toList}` : '',
       }
     });
-  }
-
-  static defaults = {
-    text: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
   }
 
   static fromUpstreamJson(upstreamAction) {

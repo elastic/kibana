@@ -5,13 +5,32 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
+import { fetchSettings } from '../../../../lib/api';
 import { WatchActionsDropdown } from './threshold_watch_action_dropdown';
 import { WatchActionsAccordion } from './threshold_watch_action_accordion';
 import { WatchContext } from '../../watch_context';
 
 export const WatchActionsPanel = () => {
   const { watch } = useContext(WatchContext);
+
+  const [settings, setSettings] = useState<{
+    actionTypes: {
+      [key: string]: {
+        enabled: boolean;
+      };
+    };
+  } | null>(null);
+
+  const getSettings = async () => {
+    const actionSettings = await fetchSettings();
+    setSettings(actionSettings);
+  };
+
+  useEffect(() => {
+    getSettings();
+  }, []);
+
   return (
     <Fragment>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -29,11 +48,11 @@ export const WatchActionsPanel = () => {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem className="watcherThresholdWatchActionDropdownContainer">
-          <WatchActionsDropdown />
+          <WatchActionsDropdown settings={settings} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <WatchActionsAccordion />
+      <WatchActionsAccordion settings={settings} />
     </Fragment>
   );
 };

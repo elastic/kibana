@@ -14,6 +14,7 @@ interface Props {
   editAction: (changedProperty: { key: string; value: string }) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
+  children: React.ReactNode;
 }
 
 export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
@@ -21,10 +22,12 @@ export const PagerDutyActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
   action,
   editAction,
+  children,
 }) => {
   const { description } = action;
   return (
     <Fragment>
+      {children}
       <ErrableFormRow
         id="pagerDutyDescription"
         errorKey="description"

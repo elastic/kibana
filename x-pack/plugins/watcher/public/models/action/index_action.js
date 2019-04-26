@@ -67,7 +67,6 @@ export class IndexAction extends BaseAction {
     return new IndexAction(upstreamAction);
   }
 
-  static defaults = {};
   static typeName = i18n.translate('xpack.watcher.models.indexAction.typeName', {
     defaultMessage: 'Index',
   });

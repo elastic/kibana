@@ -15,6 +15,7 @@ interface Props {
   editAction: (changedProperty: { key: string; value: any }) => void;
   errors: { [key: string]: string[] };
   hasErrors: boolean;
+  children: React.ReactNode;
 }
 
 export const JiraActionFields: React.FunctionComponent<Props> = ({
@@ -22,11 +23,13 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
   editAction,
   errors,
   hasErrors,
+  children,
 }) => {
   const { account, projectKey, issueType, summary } = action;
 
   return (
     <Fragment>
+      {children}
       <EuiFormRow
         fullWidth
         label={i18n.translate(

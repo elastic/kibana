@@ -12,7 +12,13 @@ export class LoggingAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
-    this.text = get(props, 'text');
+    const defaultText = i18n.translate('xpack.watcher.models.loggingAction.defaultText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.text = get(props, 'text', defaultText);
   }
 
   validate() {
@@ -54,10 +60,6 @@ export class LoggingAction extends BaseAction {
       defaultMessage: 'Failed to log sample message.',
     });
   }
-
-  static defaults = {
-    text: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
-  };
 
   static fromUpstreamJson(upstreamAction) {
     return new LoggingAction(upstreamAction);

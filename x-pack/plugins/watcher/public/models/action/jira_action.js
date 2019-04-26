@@ -11,10 +11,18 @@ import { i18n } from '@kbn/i18n';
 export class JiraAction extends BaseAction {
   constructor(props = {}) {
     super(props);
+
+    const defaultSummary = i18n.translate('xpack.watcher.models.jiraAction.defaultSummaryText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.summary = get(props, 'summary', defaultSummary);
+
     this.account = get(props, 'account');
     this.projectKey = get(props, 'projectKey');
     this.issueType = get(props, 'issueType');
-    this.summary = get(props, 'summary');
   }
 
   validate() {
@@ -98,7 +106,4 @@ export class JiraAction extends BaseAction {
   static simulatePrompt = i18n.translate('xpack.watcher.models.jiraAction.simulateButtonLabel', {
     defaultMessage: 'Create a sample Jira issue now'
   });
-  static defaults = {
-    summary: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
-  };
 }

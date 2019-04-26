@@ -11,14 +11,20 @@ import { SlackAction } from '../../../../../../common/types/action_types';
 interface Props {
   action: SlackAction;
   editAction: (changedProperty: { key: string; value: any }) => void;
+  children: React.ReactNode;
 }
 
-export const SlackActionFields: React.FunctionComponent<Props> = ({ action, editAction }) => {
+export const SlackActionFields: React.FunctionComponent<Props> = ({
+  action,
+  editAction,
+  children,
+}) => {
   const { text, to } = action;
   const toOptions = to ? to.map(label => ({ label })) : [];
 
   return (
     <Fragment>
+      {children}
       <EuiFormRow
         fullWidth
         label={i18n.translate(

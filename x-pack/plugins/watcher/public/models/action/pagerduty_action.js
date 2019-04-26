@@ -12,7 +12,14 @@ import { i18n } from '@kbn/i18n';
 export class PagerDutyAction extends BaseAction {
   constructor(props = {}) {
     super(props);
-    this.description = get(props, 'description');
+
+    const defaultDescription = i18n.translate('xpack.watcher.models.pagerdutyAction.defaultDescriptionText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.description = get(props, 'description', defaultDescription);
   }
 
   validate() {
@@ -69,8 +76,5 @@ export class PagerDutyAction extends BaseAction {
   static simulatePrompt = i18n.translate('xpack.watcher.models.pagerDutyAction.simulateButtonLabel', {
     defaultMessage: 'Test fire a PagerDuty event'
   });
-  static defaults = {
-    description: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
-  };
 }
 

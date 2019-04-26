@@ -12,10 +12,9 @@ import {
   EuiFlexGroup,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import { Action } from 'plugins/watcher/models/action';
-import { ActionType } from '../../../../../common/types/action_types';
-import { fetchSettings } from '../../../../lib/api';
+import { ACTION_TYPES } from '../../../../../common/constants';
 import { WatchContext } from '../../watch_context';
 
 const EMPTY_FIRST_OPTION_VALUE = 'empty-first-option';
@@ -34,34 +33,40 @@ const firstActionOption = {
   value: EMPTY_FIRST_OPTION_VALUE,
 };
 
-export const WatchActionsDropdown: React.FunctionComponent = () => {
-  const allActionTypes = Action.getActionTypes();
-  const { addAction } = useContext(WatchContext);
-  const [actions, setActions] = useState<any>(null);
-  const getSettings = async () => {
-    const settings = await fetchSettings();
-    const newActions = Object.keys(allActionTypes).map(actionKey => {
-      const { typeName, iconClass, selectMessage } = allActionTypes[actionKey];
-      return {
-        type: actionKey,
-        typeName,
-        iconClass,
-        selectMessage,
-        isEnabled: settings.actionTypes[actionKey].enabled,
+interface Props {
+  settings: {
+    actionTypes: {
+      [key: string]: {
+        enabled: boolean;
       };
-    });
-    setActions(newActions);
-  };
-  useEffect(() => {
-    getSettings();
-  }, []);
+    };
+  } | null;
+}
+
+export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings }) => {
+  const { addAction } = useContext(WatchContext);
+
+  const allActionTypes = Action.getActionTypes();
+
+  const actions = Object.keys(allActionTypes).map(actionKey => {
+    const { typeName, iconClass, selectMessage } = allActionTypes[actionKey];
+    return {
+      type: actionKey,
+      typeName,
+      iconClass,
+      selectMessage,
+      isEnabled: settings ? settings.actionTypes[actionKey].enabled : true,
+    };
+  });
+
   const actionOptions = actions
-    ? actions.map((action: ActionType) => {
-        const description = action.isEnabled ? action.selectMessage : disabledMessage;
+    ? actions.map((action: any) => {
+        const isActionDisabled = action.type === ACTION_TYPES.EMAIL && !action.isEnabled; // Currently can only fully verify email action
+        const description = isActionDisabled ? disabledMessage : action.selectMessage;
         return {
           value: action.type,
           inputDisplay: action.typeName,
-          disabled: !action.isEnabled,
+          disabled: isActionDisabled && !action.isEnabled,
           dropdownDisplay: (
             <EuiFlexGroup>
               <EuiFlexItem grow={false} style={{ alignSelf: 'center' }}>
@@ -85,8 +90,7 @@ export const WatchActionsDropdown: React.FunctionComponent = () => {
       options={actionOptionsWithEmptyValue}
       valueOfSelected={EMPTY_FIRST_OPTION_VALUE}
       onChange={(value: string) => {
-        const defaults = allActionTypes[value].defaults;
-        addAction({ defaults, type: value });
+        addAction({ type: value });
       }}
       itemLayoutAlign="top"
       hasDividers

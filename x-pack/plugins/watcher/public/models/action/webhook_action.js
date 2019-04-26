@@ -13,11 +13,14 @@ export class WebhookAction extends BaseAction {
   constructor(props = {}) {
     super(props);
 
+    const defaultJson = JSON.stringify({ message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold' }, null, 2);
+    this.body = get(props, 'body', defaultJson);
+
     this.method = get(props, 'method');
     this.host = get(props, 'host');
     this.port = get(props, 'port');
     this.path = get(props, 'path');
-    this.body = get(props, 'body');
+
     this.fullPath = `${this.host}${this.port}${this.path}`;
   }
 
@@ -99,9 +102,6 @@ export class WebhookAction extends BaseAction {
     return new WebhookAction(upstreamAction);
   }
 
-  static defaults = {
-    body: JSON.stringify({ message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold' }, null, 2)
-  };
   static typeName = i18n.translate('xpack.watcher.models.webhookAction.typeName', {
     defaultMessage: 'Webhook',
   });

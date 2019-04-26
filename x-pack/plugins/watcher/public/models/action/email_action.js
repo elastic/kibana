@@ -12,11 +12,20 @@ import chrome from 'ui/chrome';
 export class EmailAction extends BaseAction {
   constructor(props = {}) {
     super(props);
+
     const uiSettings = chrome.getUiSettingsClient();
     const defaultToEmail = uiSettings.get('xPack:defaultAdminEmail') || undefined;
     const toArray = get(props, 'to', defaultToEmail);
     this.to = isArray(toArray) ? toArray : toArray && [ toArray ];
-    this.subject = get(props, 'subject');
+
+    const defaultSubject = i18n.translate('xpack.watcher.models.emailAction.defaultSubjectText', {
+      defaultMessage: 'Watch [{context}] has exceeded the threshold',
+      values: {
+        context: '{{ctx.metadata.name}}',
+      }
+    });
+    this.subject = get(props, 'subject', defaultSubject);
+
     this.body = get(props, 'body');
   }
 
@@ -95,7 +104,4 @@ export class EmailAction extends BaseAction {
   static simulatePrompt = i18n.translate('xpack.watcher.models.emailAction.simulateButtonLabel', {
     defaultMessage: 'Test fire an email now'
   });
-  static defaults = {
-    subject: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold'
-  };
 }
