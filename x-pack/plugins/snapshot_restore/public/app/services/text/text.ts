@@ -84,10 +84,10 @@ class TextService {
     return this.i18n.translate('xpack.snapshotRestore.repositoryForm.sizeNotationPlaceholder', {
       defaultMessage: 'Examples: {example1}, {example2}, {example3}, {example4}',
       values: {
-        example1: '1024',
-        example2: '1g',
-        example3: '10mb',
-        example4: '5k',
+        example1: '1g',
+        example2: '10mb',
+        example3: '5k',
+        example4: '1024B',
       },
     });
   }
