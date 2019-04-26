@@ -18,8 +18,9 @@ export default function({ getService }: TestInvoker) {
   const {
     resolveImportErrorsTest,
     createExpectResults,
-    expectRbacForbidden,
-    expectUnknownType,
+    expectBadRequest,
+    expectBadRequestWithUnknownType,
+    expectBadRequestForUnknownType,
   } = resolveImportErrorsTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_resolve_import_errors', () => {
@@ -60,12 +61,12 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectBadRequest,
           },
           unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectBadRequestWithUnknownType,
           },
         },
       });
@@ -79,8 +80,8 @@ export default function({ getService }: TestInvoker) {
             response: createExpectResults(scenario.spaceId),
           },
           unknownType: {
-            statusCode: 200,
-            response: expectUnknownType,
+            statusCode: 400,
+            response: expectBadRequestForUnknownType,
           },
         },
       });
@@ -90,12 +91,12 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectBadRequest,
           },
           unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectBadRequestWithUnknownType,
           },
         },
       });
@@ -109,8 +110,8 @@ export default function({ getService }: TestInvoker) {
             response: createExpectResults(scenario.spaceId),
           },
           unknownType: {
-            statusCode: 200,
-            response: expectUnknownType,
+            statusCode: 400,
+            response: expectBadRequestForUnknownType,
           },
         },
       });
@@ -122,12 +123,12 @@ export default function({ getService }: TestInvoker) {
           spaceId: scenario.spaceId,
           tests: {
             default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
+              statusCode: 400,
+              response: expectBadRequest,
             },
             unknownType: {
-              statusCode: 403,
-              response: expectRbacForbidden,
+              statusCode: 400,
+              response: expectBadRequestWithUnknownType,
             },
           },
         }
@@ -142,8 +143,8 @@ export default function({ getService }: TestInvoker) {
             response: createExpectResults(scenario.spaceId),
           },
           unknownType: {
-            statusCode: 200,
-            response: expectUnknownType,
+            statusCode: 400,
+            response: expectBadRequestForUnknownType,
           },
         },
       });
@@ -153,12 +154,12 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           default: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectBadRequest,
           },
           unknownType: {
-            statusCode: 403,
-            response: expectRbacForbidden,
+            statusCode: 400,
+            response: expectBadRequestWithUnknownType,
           },
         },
       });
@@ -174,8 +175,8 @@ export default function({ getService }: TestInvoker) {
               response: createExpectResults(scenario.spaceId),
             },
             unknownType: {
-              statusCode: 200,
-              response: expectUnknownType,
+              statusCode: 400,
+              response: expectBadRequestForUnknownType,
             },
           },
         }
@@ -188,12 +189,12 @@ export default function({ getService }: TestInvoker) {
           spaceId: scenario.spaceId,
           tests: {
             default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
+              statusCode: 400,
+              response: expectBadRequest,
             },
             unknownType: {
-              statusCode: 403,
-              response: expectRbacForbidden,
+              statusCode: 400,
+              response: expectBadRequestWithUnknownType,
             },
           },
         }
@@ -206,12 +207,12 @@ export default function({ getService }: TestInvoker) {
           spaceId: scenario.spaceId,
           tests: {
             default: {
-              statusCode: 403,
-              response: expectRbacForbidden,
+              statusCode: 400,
+              response: expectBadRequest,
             },
             unknownType: {
-              statusCode: 403,
-              response: expectRbacForbidden,
+              statusCode: 400,
+              response: expectBadRequestWithUnknownType,
             },
           },
         }

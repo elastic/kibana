@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import Boom from 'boom';
 import { Readable } from 'stream';
 import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
@@ -52,15 +53,23 @@ export async function resolveImportErrors({
   const filter = createObjectsFilter(retries);
 
   // Get the objects to resolve errors
-  const { errors: collectorErrors, collectedObjects: objectsToResolve } = await collectSavedObjects(
-    {
-      readStream,
-      objectLimit,
-      filter,
-      supportedTypes,
-    }
-  );
-  errorAccumulator = [...errorAccumulator, ...collectorErrors];
+  const objectsToResolve = await collectSavedObjects({
+    readStream,
+    objectLimit,
+    filter,
+  });
+
+  const objectTypes = [...new Set(objectsToResolve.map(obj => obj.type))];
+  const authorizedTypes = await savedObjectsClient.canBulkCreate(objectTypes);
+  const invalidTypes = [
+    ...new Set([
+      ...objectTypes.filter(type => !supportedTypes.includes(type)),
+      ...authorizedTypes.filter(resp => resp.can === false).map(resp => resp.type),
+    ]),
+  ];
+  if (invalidTypes.length) {
+    throw Boom.badRequest(`Unable to bulk_create ${invalidTypes.sort().join(',')}`);
+  }
 
   // Create a map of references to replace for each object to avoid iterating through
   // retries for every object to resolve

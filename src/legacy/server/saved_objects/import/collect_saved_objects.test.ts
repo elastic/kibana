@@ -27,13 +27,8 @@ describe('collectSavedObjects()', () => {
         this.push(null);
       },
     });
-    const result = await collectSavedObjects({ readStream, objectLimit: 10, supportedTypes: [] });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "collectedObjects": Array [],
-  "errors": Array [],
-}
-`);
+    const result = await collectSavedObjects({ readStream, objectLimit: 10 });
+    expect(result).toMatchInlineSnapshot(`Array []`);
   });
 
   test('collects objects from stream', async () => {
@@ -46,19 +41,15 @@ Object {
     const result = await collectSavedObjects({
       readStream,
       objectLimit: 1,
-      supportedTypes: ['a'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "collectedObjects": Array [
-    Object {
-      "foo": true,
-      "migrationVersion": Object {},
-      "type": "a",
-    },
-  ],
-  "errors": Array [],
-}
+Array [
+  Object {
+    "foo": true,
+    "migrationVersion": Object {},
+    "type": "a",
+  },
+]
 `);
   });
 
@@ -72,19 +63,15 @@ Object {
     const result = await collectSavedObjects({
       readStream,
       objectLimit: 1,
-      supportedTypes: ['a'],
     });
     expect(result).toMatchInlineSnapshot(`
-Object {
-  "collectedObjects": Array [
-    Object {
-      "foo": true,
-      "migrationVersion": Object {},
-      "type": "a",
-    },
-  ],
-  "errors": Array [],
-}
+Array [
+  Object {
+    "foo": true,
+    "migrationVersion": Object {},
+    "type": "a",
+  },
+]
 `);
   });
 
@@ -100,58 +87,6 @@ Object {
       collectSavedObjects({
         readStream,
         objectLimit: 1,
-        supportedTypes: ['a'],
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't import more than 1 objects"`);
-  });
-
-  test('unsupported types return as import errors', async () => {
-    const readStream = new Readable({
-      read() {
-        this.push('{"id":"1","type":"a","attributes":{"title":"my title"}}\n');
-        this.push('{"id":"2","type":"b","attributes":{"title":"my title 2"}}\n');
-        this.push(null);
-      },
-    });
-    const result = await collectSavedObjects({ readStream, objectLimit: 2, supportedTypes: ['1'] });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "collectedObjects": Array [],
-  "errors": Array [
-    Object {
-      "error": Object {
-        "type": "unsupported_type",
-      },
-      "id": "1",
-      "title": "my title",
-      "type": "a",
-    },
-    Object {
-      "error": Object {
-        "type": "unsupported_type",
-      },
-      "id": "2",
-      "title": "my title 2",
-      "type": "b",
-    },
-  ],
-}
-`);
-  });
-
-  test('unsupported types still count towards object limit', async () => {
-    const readStream = new Readable({
-      read() {
-        this.push('{"foo":true,"type":"a"}\n');
-        this.push('{"bar":true,"type":"b"}\n');
-        this.push(null);
-      },
-    });
-    await expect(
-      collectSavedObjects({
-        readStream,
-        objectLimit: 1,
-        supportedTypes: ['a'],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't import more than 1 objects"`);
   });

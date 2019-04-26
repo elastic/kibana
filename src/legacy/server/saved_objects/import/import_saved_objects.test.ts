@@ -59,16 +59,28 @@ describe('importSavedObjects()', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    canBulkCreate: jest.fn(),
     bulkGet: jest.fn(),
+    canBulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
+    canFind: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
+    savedObjectsClient.canBulkCreate.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
+    savedObjectsClient.canBulkGet.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
+    savedObjectsClient.canFind.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
   });
 
   test('returns early when no objects exist', async () => {
@@ -443,83 +455,14 @@ Object {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: savedObjects,
     });
-    const result = await importSavedObjects({
-      readStream,
-      objectLimit: 5,
-      overwrite: false,
-      savedObjectsClient,
-      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
-    });
-    expect(result).toMatchInlineSnapshot(`
-Object {
-  "errors": Array [
-    Object {
-      "error": Object {
-        "type": "unsupported_type",
-      },
-      "id": "1",
-      "title": "my title",
-      "type": "wigwags",
-    },
-  ],
-  "success": false,
-  "successCount": 4,
-}
-`);
-    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`
-[MockFunction] {
-  "calls": Array [
-    Array [
-      Array [
-        Object {
-          "attributes": Object {
-            "title": "My Index Pattern",
-          },
-          "id": "1",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "index-pattern",
-        },
-        Object {
-          "attributes": Object {
-            "title": "My Search",
-          },
-          "id": "2",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "search",
-        },
-        Object {
-          "attributes": Object {
-            "title": "My Visualization",
-          },
-          "id": "3",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "visualization",
-        },
-        Object {
-          "attributes": Object {
-            "title": "My Dashboard",
-          },
-          "id": "4",
-          "migrationVersion": Object {},
-          "references": Array [],
-          "type": "dashboard",
-        },
-      ],
-      Object {
-        "overwrite": false,
-      },
-    ],
-  ],
-  "results": Array [
-    Object {
-      "type": "return",
-      "value": Promise {},
-    },
-  ],
-}
-`);
+    await expect(
+      importSavedObjects({
+        readStream,
+        objectLimit: 5,
+        overwrite: false,
+        savedObjectsClient,
+        supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unable to bulk_create wigwags"`);
   });
 });

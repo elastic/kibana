@@ -33,10 +33,13 @@ describe('POST /api/saved_objects/_export', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    canBulkCreate: jest.fn(),
     bulkGet: jest.fn(),
+    canBulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
+    canFind: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
   };
@@ -128,6 +131,9 @@ Array [
         "savedObjectsClient": Object {
           "bulkCreate": [MockFunction],
           "bulkGet": [MockFunction],
+          "canBulkCreate": [MockFunction],
+          "canBulkGet": [MockFunction],
+          "canFind": [MockFunction],
           "create": [MockFunction],
           "delete": [MockFunction],
           "errors": Object {},
@@ -135,6 +141,10 @@ Array [
           "get": [MockFunction],
           "update": [MockFunction],
         },
+        "supportedTypes": Array [
+          "index-pattern",
+          "search",
+        ],
         "types": Array [
           "search",
         ],

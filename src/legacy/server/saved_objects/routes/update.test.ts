@@ -26,10 +26,13 @@ describe('PUT /api/saved_objects/{type}/{id?}', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    canBulkCreate: jest.fn(),
     bulkGet: jest.fn(),
+    canBulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
+    canFind: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
   };

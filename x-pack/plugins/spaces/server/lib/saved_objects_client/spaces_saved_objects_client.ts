@@ -117,6 +117,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     });
   }
 
+  public async canBulkCreate(types: string[]) {
+    throwErrorIfTypesContainsSpace(types);
+
+    return await this.client.canBulkCreate(types);
+  }
+
   /**
    * Deletes an object
    *
@@ -168,6 +174,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     });
   }
 
+  public async canFind(types: string[]) {
+    throwErrorIfTypesContainsSpace(types);
+
+    return await this.client.canFind(types);
+  }
+
   /**
    * Returns an array of objects by id
    *
@@ -190,6 +202,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
       ...options,
       namespace: getNamespace(this.spaceId),
     });
+  }
+
+  public async canBulkGet(types: string[]) {
+    throwErrorIfTypesContainsSpace(types);
+
+    return await this.client.canBulkGet(types);
   }
 
   /**

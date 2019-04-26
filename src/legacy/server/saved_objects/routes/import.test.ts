@@ -26,10 +26,13 @@ describe('POST /api/saved_objects/_import', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
+    canBulkCreate: jest.fn(),
     bulkGet: jest.fn(),
+    canBulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
+    canFind: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
   };
@@ -37,6 +40,15 @@ describe('POST /api/saved_objects/_import', () => {
   beforeEach(() => {
     server = createMockServer();
     jest.resetAllMocks();
+    savedObjectsClient.canBulkCreate.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
+    savedObjectsClient.canBulkGet.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
+    savedObjectsClient.canFind.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
 
     const prereqs = {
       getSavedObjectsClient: {

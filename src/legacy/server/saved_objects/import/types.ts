@@ -32,10 +32,6 @@ export interface ConflictError {
   type: 'conflict';
 }
 
-export interface UnsupportedTypeError {
-  type: 'unsupported_type';
-}
-
 export interface UnknownError {
   type: 'unknown';
   message: string;
@@ -58,5 +54,5 @@ export interface ImportError {
   id: string;
   type: string;
   title?: string;
-  error: ConflictError | UnsupportedTypeError | MissingReferencesError | UnknownError;
+  error: ConflictError | MissingReferencesError | UnknownError;
 }

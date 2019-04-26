@@ -27,22 +27,18 @@ import {
 } from '../../../utils/streams';
 import { SavedObject } from '../service';
 import { createLimitStream } from './create_limit_stream';
-import { ImportError } from './types';
 
 interface CollectSavedObjectsOptions {
   readStream: Readable;
   objectLimit: number;
   filter?: (obj: SavedObject) => boolean;
-  supportedTypes: string[];
 }
 
 export async function collectSavedObjects({
   readStream,
   objectLimit,
   filter,
-  supportedTypes,
 }: CollectSavedObjectsOptions) {
-  const errors: ImportError[] = [];
   const collectedObjects: SavedObject[] = await createPromiseFromStreams([
     readStream,
     createSplitStream('\n'),
@@ -53,20 +49,6 @@ export async function collectSavedObjects({
     }),
     createFilterStream<SavedObject>(obj => !!obj),
     createLimitStream(objectLimit),
-    createFilterStream<SavedObject>(obj => {
-      if (supportedTypes.includes(obj.type)) {
-        return true;
-      }
-      errors.push({
-        id: obj.id,
-        type: obj.type,
-        title: obj.attributes.title,
-        error: {
-          type: 'unsupported_type',
-        },
-      });
-      return false;
-    }),
     createFilterStream<SavedObject>(obj => (filter ? filter(obj) : true)),
     createMapStream((obj: SavedObject) => {
       // Ensure migrations execute on every saved object
@@ -74,8 +56,5 @@ export async function collectSavedObjects({
     }),
     createConcatStream([]),
   ]);
-  return {
-    errors,
-    collectedObjects,
-  };
+  return collectedObjects;
 }

@@ -53,28 +53,27 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     });
   };
 
-  const expectUnknownType = (resp: { [key: string]: any }) => {
+  const expectBadRequest = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
-      success: false,
-      successCount: 2,
-      errors: [
-        {
-          id: '1',
-          type: 'wigwags',
-          title: 'Wigwags title',
-          error: {
-            type: 'unsupported_type',
-          },
-        },
-      ],
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Unable to bulk_create dashboard,globaltype`,
     });
   };
 
-  const expectRbacForbidden = (resp: { [key: string]: any }) => {
+  const expectBadRequestWithUnknownType = (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype`,
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Unable to bulk_create dashboard,globaltype,wigwags`,
+    });
+  };
+
+  const expectBadRequestForUnknownType = (resp: { [key: string]: any }) => {
+    expect(resp.body).to.eql({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: `Unable to bulk_create wigwags`,
     });
   };
 
@@ -135,7 +134,8 @@ export function importTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   return {
     importTest,
     createExpectResults,
-    expectRbacForbidden,
-    expectUnknownType,
+    expectBadRequest,
+    expectBadRequestWithUnknownType,
+    expectBadRequestForUnknownType,
   };
 }

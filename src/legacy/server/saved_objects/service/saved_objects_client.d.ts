@@ -127,14 +127,24 @@ export declare class SavedObjectsClient {
     objects: Array<BulkCreateObject<T>>,
     options?: CreateOptions
   ): Promise<BulkCreateResponse<T>>;
+  public canBulkCreate(
+    types: string[]
+  ): Promise<
+    Array<{
+      type: string;
+      can: boolean;
+    }>
+  >;
   public delete(type: string, id: string, options?: BaseOptions): Promise<{}>;
   public find<T extends SavedObjectAttributes = any>(
     options: FindOptions
   ): Promise<FindResponse<T>>;
+  public canFind(types: string[]): Promise<Array<{ type: string; can: boolean }>>;
   public bulkGet<T extends SavedObjectAttributes = any>(
     objects: BulkGetObjects,
     options?: BaseOptions
   ): Promise<BulkGetResponse<T>>;
+  public canBulkGet(types: string[]): Promise<Array<{ type: string; can: boolean }>>;
   public get<T extends SavedObjectAttributes = any>(
     type: string,
     id: string,

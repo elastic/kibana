@@ -123,6 +123,19 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Function is used to validate if each type of saved object can be created in bulk.
+   *
+   * This is and should only be used by import / export / resolve import errors to merge
+   * invalid types and unauthorized types in a single error response.
+   *
+   * @param {Array<string>} types Types of saved objects
+   * @return [{ type, can }]
+   */
+  async canBulkCreate(types) {
+    return types.map(type => ({ type, can: true }));
+  }
+
+  /**
    * Deletes an object
    *
    * @param {string} type
@@ -156,6 +169,19 @@ export class SavedObjectsClient {
   }
 
   /**
+   * Function is used to validate if each type of saved object can be created used with find.
+   *
+   * This is and should only be used by import / export / resolve import errors to merge
+   * invalid types and unauthorized types in a single error response.
+   *
+   * @param {Array<string>} types Types of saved objects
+   * @return [{ type, can }]
+   */
+  async canFind(types) {
+    return types.map(type => ({ type, can: true }));
+  }
+
+  /**
    * Returns an array of objects by id
    *
    * @param {array} objects - an array ids, or an array of objects containing id and optionally type
@@ -171,6 +197,19 @@ export class SavedObjectsClient {
    */
   async bulkGet(objects = [], options = {}) {
     return this._repository.bulkGet(objects, options);
+  }
+
+  /**
+   * Function is used to validate if each type of saved object can be created used in bulk get.
+   *
+   * This is and should only be used by import / export / resolve import errors to merge
+   * invalid types and unauthorized types in a single error response.
+   *
+   * @param {Array<string>} types Types of saved objects
+   * @return [{ type, can }]
+   */
+  async canBulkGet(types) {
+    return types.map(type => ({ type, can: true }));
   }
 
   /**

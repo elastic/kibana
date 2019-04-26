@@ -138,12 +138,7 @@ export default function ({ getService }) {
               expect(resp.body).to.eql({
                 statusCode: 400,
                 error: 'Bad Request',
-                message: 'child "type" fails because ["type" at position 0 fails because ' +
-                  '["0" must be one of [config, index-pattern, visualization, search, dashboard, url]]]',
-                validation: {
-                  source: 'payload',
-                  keys: ['type.0'],
-                }
+                message: 'Unable to find wigwags',
               });
             });
         });

@@ -27,21 +27,21 @@ interface ExportTestDefinition {
 }
 
 export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectRbacForbidden = (type: string) => (resp: { [key: string]: any }) => {
+  const createExpectBadRequest = (type: string) => (resp: { [key: string]: any }) => {
     // In export only, the API uses "bulk_get" or "find" depending on the parameters it receives.
     // The best that could be done here is to have an if statement to ensure at least one of the
     // two errors has been thrown.
     if (resp.body.message.indexOf(`bulk_get`) !== -1) {
       expect(resp.body).to.eql({
-        statusCode: 403,
-        error: 'Forbidden',
+        statusCode: 400,
+        error: 'Bad Request',
         message: `Unable to bulk_get ${type}`,
       });
       return;
     }
     expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
+      statusCode: 400,
+      error: 'Bad Request',
       message: `Unable to find ${type}`,
     });
   };
@@ -136,7 +136,7 @@ export function exportTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   exportTest.only = makeExportTest(describe.only);
 
   return {
-    createExpectRbacForbidden,
+    createExpectBadRequest,
     expectTypeOrObjectsRequired,
     createExpectVisualizationResults,
     exportTest,

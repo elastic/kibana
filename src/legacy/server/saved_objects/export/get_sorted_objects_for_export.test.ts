@@ -23,22 +23,28 @@ describe('getSortedObjectsForExport()', () => {
   const savedObjectsClient = {
     errors: {} as any,
     find: jest.fn(),
+    canFind: jest.fn(),
     bulkGet: jest.fn(),
+    canBulkGet: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
+    canBulkCreate: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
   };
 
-  afterEach(() => {
-    savedObjectsClient.find.mockReset();
-    savedObjectsClient.bulkGet.mockReset();
-    savedObjectsClient.create.mockReset();
-    savedObjectsClient.bulkCreate.mockReset();
-    savedObjectsClient.delete.mockReset();
-    savedObjectsClient.get.mockReset();
-    savedObjectsClient.update.mockReset();
+  beforeEach(() => {
+    jest.resetAllMocks();
+    savedObjectsClient.canBulkCreate.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
+    savedObjectsClient.canBulkGet.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
+    savedObjectsClient.canFind.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
   });
 
   test('exports selected types and sorts them', async () => {
@@ -66,6 +72,7 @@ describe('getSortedObjectsForExport()', () => {
       savedObjectsClient,
       exportSizeLimit: 500,
       types: ['index-pattern', 'search'],
+      supportedTypes: ['index-pattern', 'search'],
     });
     expect(response).toMatchInlineSnapshot(`
 Array [
@@ -137,6 +144,7 @@ Array [
         savedObjectsClient,
         exportSizeLimit: 1,
         types: ['index-pattern', 'search'],
+        supportedTypes: ['index-pattern', 'search'],
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Can't export more than 1 objects"`);
   });
@@ -165,6 +173,7 @@ Array [
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern', 'search'],
+      supportedTypes: ['index-pattern', 'search'],
       objects: [
         {
           type: 'index-pattern',
@@ -249,6 +258,7 @@ Array [
       exportSizeLimit: 10000,
       savedObjectsClient,
       types: ['index-pattern', 'search'],
+      supportedTypes: ['index-pattern', 'search'],
       objects: [
         {
           type: 'search',
@@ -315,6 +325,7 @@ Array [
       exportSizeLimit: 1,
       savedObjectsClient,
       types: ['index-pattern', 'search'],
+      supportedTypes: ['index-pattern', 'search'],
       objects: [
         {
           type: 'index-pattern',

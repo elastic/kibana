@@ -51,14 +51,12 @@ export const createExportRoute = (
       payload: Joi.object()
         .keys({
           type: Joi.array()
-            .items(Joi.string().valid(supportedTypes))
+            .items(Joi.string())
             .single()
             .optional(),
           objects: Joi.array()
             .items({
-              type: Joi.string()
-                .valid(supportedTypes)
-                .required(),
+              type: Joi.string().required(),
               id: Joi.string().required(),
             })
             .max(server.config().get('savedObjects.maxImportExportSize'))
@@ -71,6 +69,7 @@ export const createExportRoute = (
     async handler(request: ExportRequest, h: Hapi.ResponseToolkit) {
       const { savedObjectsClient } = request.pre;
       const docsToExport = await getSortedObjectsForExport({
+        supportedTypes,
         savedObjectsClient,
         types: request.payload.type,
         objects: request.payload.objects,

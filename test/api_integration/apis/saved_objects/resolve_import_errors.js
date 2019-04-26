@@ -88,27 +88,18 @@ export default function ({ getService }) {
           });
       });
 
-      it('should return 200 when retrying unsupported types', async () => {
+      it('should return 400 when retrying unsupported types', async () => {
         const fileBuffer = Buffer.from('{"id":"1","type":"wigwags","attributes":{"title":"my title"},"references":[]}', 'utf8');
         await supertest
           .post('/api/saved_objects/_resolve_import_errors')
           .field('retries', JSON.stringify([{ type: 'wigwags', id: '1' }]))
           .attach('file', fileBuffer, 'export.ndjson')
-          .expect(200)
+          .expect(400)
           .then(resp => {
             expect(resp.body).to.eql({
-              success: false,
-              successCount: 0,
-              errors: [
-                {
-                  id: '1',
-                  type: 'wigwags',
-                  title: 'my title',
-                  error: {
-                    type: 'unsupported_type',
-                  },
-                },
-              ],
+              statusCode: 400,
+              error: 'Bad Request',
+              message: 'Unable to bulk_create wigwags',
             });
           });
       });
