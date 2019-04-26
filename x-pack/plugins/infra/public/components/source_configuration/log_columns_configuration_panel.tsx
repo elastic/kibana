@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 
 import { AddLogColumnButtonAndPopover } from './add_log_column_popover';
@@ -97,10 +97,14 @@ const TimestampLogColumnConfigurationPanel: React.FunctionComponent<
   <ExplainedLogColumnConfigurationPanel
     fieldName="Timestamp"
     helpText={
-      <span>
-        This built-in field shows the log entry's time as determined by the <code>timestamp</code>{' '}
-        setting.
-      </span>
+      <FormattedMessage
+        tagName="span"
+        id="xpack.infra.sourceConfiguration.timestampLogColumnDescription"
+        defaultMessage="This built-in field shows the log entry's time as determined by the {timestampSetting} field setting."
+        values={{
+          timestampSetting: <code>timestamp</code>,
+        }}
+      />
     }
     removeColumn={logColumnConfigurationProps.remove}
   />
@@ -112,9 +116,11 @@ const MessageLogColumnConfigurationPanel: React.FunctionComponent<
   <ExplainedLogColumnConfigurationPanel
     fieldName="Message"
     helpText={
-      <span>
-        This built-in field shows the log entry message as derived from the document fields.
-      </span>
+      <FormattedMessage
+        tagName="span"
+        id="xpack.infra.sourceConfiguration.messageLogColumnDescription"
+        defaultMessage="This built-in field shows the log entry message as derived from the document fields."
+      />
     }
     removeColumn={logColumnConfigurationProps.remove}
   />
@@ -130,7 +136,12 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
 }) => (
   <EuiPanel>
     <EuiFlexGroup>
-      <EuiFlexItem grow={1}>Field</EuiFlexItem>
+      <EuiFlexItem grow={1}>
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.fieldLogColumnTitle"
+          defaultMessage="Field"
+        />
+      </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <code>{field}</code>
       </EuiFlexItem>
@@ -161,16 +172,36 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   </EuiPanel>
 );
 
-const RemoveLogColumnButton: React.FunctionComponent<{
+const RemoveLogColumnButton = injectI18n<{
   onClick?: () => void;
-}> = ({ onClick }) => (
-  <EuiButtonIcon aria-label="Remove column" color="danger" iconType="trash" onClick={onClick} />
-);
+}>(({ intl, onClick }) => {
+  const removeColumnLabel = intl.formatMessage({
+    id: 'xpack.infra.sourceConfiguration.removeLogColumnButtonLabel',
+    defaultMessage: 'Remove this column',
+  });
+
+  return (
+    <EuiButtonIcon
+      aria-label={removeColumnLabel}
+      color="danger"
+      iconType="trash"
+      onClick={onClick}
+      title={removeColumnLabel}
+    />
+  );
+});
 
 const LogColumnConfigurationEmptyPrompt: React.FunctionComponent = () => (
   <EuiEmptyPrompt
     iconType="list"
-    title={<h2>No columns</h2>}
+    title={
+      <h2>
+        <FormattedMessage
+          id="xpack.infra.sourceConfiguration.noLogColumnsTitle"
+          defaultMessage="No columns"
+        />
+      </h2>
+    }
     body={
       <p>
         <FormattedMessage

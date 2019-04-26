@@ -6,6 +6,7 @@
 
 import { EuiBadge, EuiButton, EuiPopover, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
 import { Option } from '@elastic/eui/src/components/selectable/types';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React, { useState, useCallback, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -104,7 +105,10 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
       anchorPosition="downRight"
       button={
         <EuiButton isDisabled={isDisabled} iconType="plusInCircle" onClick={openPopover}>
-          Add Column
+          <FormattedMessage
+            id="xpack.infra.sourceConfiguration.addLogColumnButtonLabel"
+            defaultMessage="Add Column"
+          />
         </EuiButton>
       }
       closePopover={closePopover}
@@ -144,7 +148,14 @@ const usePopoverVisibilityState = (initialState: boolean) => {
   );
 };
 
-const BuiltinBadge: React.FunctionComponent = () => <EuiBadge>Built-in</EuiBadge>;
+const BuiltinBadge: React.FunctionComponent = () => (
+  <EuiBadge>
+    <FormattedMessage
+      id="xpack.infra.sourceConfiguration.builtInColumnBadgeLabel"
+      defaultMessage="Built-in"
+    />
+  </EuiBadge>
+);
 
 const SelectableContent = euiStyled.div`
   width: 400px;
