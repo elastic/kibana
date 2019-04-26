@@ -5,11 +5,11 @@
  */
 
 // @ts-ignore EuiSearchBar missing
-import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiBasicTable, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
-import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
+import { EmptyState, ErrorList, FilterBar, MonitorTable, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
 import { useUrlParams } from '../hooks';
@@ -32,7 +32,7 @@ export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: st
 export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
   const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
   const [params, updateUrl] = useUrlParams(history, location);
-  const { dateRangeStart, dateRangeEnd, search } = params;
+  const { dateRangeStart, dateRangeEnd, monitorListPage, monitorListSize, search } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -81,11 +81,16 @@ export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Pr
         <EuiSpacer size="s" />
         <MonitorList
           basePath={basePath}
+          currentPage={monitorListPage}
+          currentSize={monitorListSize}
           dangerColor={colors.danger}
           dateRangeStart={dateRangeStart}
           dateRangeEnd={dateRangeEnd}
           linkParameters={linkParameters}
-          variables={sharedProps}
+          updateSelectedPage={(index: string, size: number) => {
+            updateUrl({ monitorListPage: index, monitorListSize: size });
+          }}
+          variables={{ ...sharedProps, page: monitorListPage, size: monitorListSize }}
         />
         <EuiSpacer size="s" />
         <ErrorList linkParameters={linkParameters} variables={sharedProps} />

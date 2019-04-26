@@ -32,6 +32,8 @@ export interface Query {
   getMonitorChartsData?: MonitorChart | null;
 
   getLatestMonitors: Ping[];
+  /** Fetch the data for a monitor table. */
+  getMonitorTable: MonitorTable;
 
   getFilterBar?: FilterBar | null;
 
@@ -417,6 +419,15 @@ export interface StatusData {
   /** The total down counts for this point. */
   total?: number | null;
 }
+/** A slice of the uptime monitors, along with page keys and the total count of all monitors. */
+export interface MonitorTable {
+  /** The monitor ID to query after for the desired page. */
+  pages: string[];
+  /** The monitors to display in the table. */
+  items: LatestMonitor[];
+  /** The total number of monitors detected for the given filters. */
+  monitorIdCount: number;
+}
 
 export interface FilterBar {
   ids?: MonitorKey[] | null;
@@ -482,6 +493,8 @@ export interface GetMonitorsQueryArgs {
 
   dateRangeEnd: string;
 
+  size: number;
+
   filters?: string | null;
 }
 export interface GetSnapshotQueryArgs {
@@ -504,6 +517,18 @@ export interface GetLatestMonitorsQueryArgs {
   dateRangeEnd: string;
 
   monitorId?: string | null;
+}
+export interface GetMonitorTableQueryArgs {
+  /** The beginning of the date range filter. */
+  dateRangeStart: string;
+  /** The end of the date range filter. */
+  dateRangeEnd: string;
+  /** The page size of the table. */
+  size: number;
+  /** The current page will start after this ID. */
+  page?: string | null;
+  /** Any filters to apply to the table results. */
+  filters?: string | null;
 }
 export interface GetFilterBarQueryArgs {
   dateRangeStart: string;

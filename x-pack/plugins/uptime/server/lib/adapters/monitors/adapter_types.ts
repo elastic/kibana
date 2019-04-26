@@ -17,6 +17,8 @@ export interface UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    size: number,
+    page?: string,
     filters?: string | null
   ): Promise<any>;
   getSnapshotCount(
@@ -39,4 +41,11 @@ export interface UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<number>;
+  getMonitorTablePages(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    size: number,
+    filters?: string
+  ): Promise<string[]>;
 }

@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseIsPaused } from '../parse_is_paused';
+import { parseBooleanParam } from '../parse_boolean_param';
 
-describe('parseIsPaused', () => {
+describe('parseBooleanParam', () => {
   it('parses correct true isPaused value', () => {
-    expect(parseIsPaused('true', false)).toEqual(true);
+    expect(parseBooleanParam('true', false)).toEqual(true);
   });
 
   it('parses correct false isPaused value', () => {
-    expect(parseIsPaused('false', true)).toEqual(false);
+    expect(parseBooleanParam('false', true)).toEqual(false);
   });
 
   it('uses default value for non-boolean string', () => {
-    expect(parseIsPaused('foo', true)).toEqual(true);
+    expect(parseBooleanParam('foo', true)).toEqual(true);
   });
 });

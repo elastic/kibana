@@ -11,6 +11,11 @@
 export const QUERY = {
   DEFAULT_BUCKET_COUNT: 25,
   SIMPLE_QUERY_STRING_FIELDS: [
+    'agent.hostname',
+    'agent.id',
+    'agent.name',
+    'container.id',
+    'container.name',
     'monitor.id',
     'monitor.url',
     'monitor.type',

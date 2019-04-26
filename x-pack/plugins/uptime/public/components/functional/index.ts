@@ -14,6 +14,7 @@ export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
 export { MonitorPageTitle } from './monitor_page_title';
 export { MonitorStatusBar } from './monitor_status_bar';
+export { MonitorTable } from './monitor_table';
 export { PingList } from './ping_list';
 export { Snapshot } from './snapshot';
 export { SnapshotHistogram } from './snapshot_histogram';

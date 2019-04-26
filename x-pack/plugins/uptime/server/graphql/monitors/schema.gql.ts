@@ -101,6 +101,16 @@ export const monitorsSchema = gql`
     downSeries: [MonitorSeriesPoint!]
   }
 
+  "A slice of the uptime monitors, along with page keys and the total count of all monitors."
+  type MonitorTable {
+    "The monitor ID to query after for the desired page."
+    pages: [String!]!
+    "The monitors to display in the table."
+    items: [LatestMonitor!]!
+    "The total number of monitors detected for the given filters."
+    monitorIdCount: Int!
+  }
+
   type LatestMonitorsResult {
     monitors: [LatestMonitor!]
   }
@@ -125,6 +135,7 @@ export const monitorsSchema = gql`
     getMonitors(
       dateRangeStart: String!
       dateRangeEnd: String!
+      size: Int!
       filters: String
     ): LatestMonitorsResult
 
@@ -137,6 +148,20 @@ export const monitorsSchema = gql`
     ): MonitorChart
 
     getLatestMonitors(dateRangeStart: String!, dateRangeEnd: String!, monitorId: String): [Ping!]!
+
+    "Fetch the data for a monitor table."
+    getMonitorTable(
+      "The beginning of the date range filter."
+      dateRangeStart: String!
+      "The end of the date range filter."
+      dateRangeEnd: String!
+      "The page size of the table."
+      size: Int!
+      "The current page will start after this ID."
+      page: String
+      "Any filters to apply to the table results."
+      filters: String
+    ): MonitorTable!
 
     getFilterBar(dateRangeStart: String!, dateRangeEnd: String!): FilterBar
 

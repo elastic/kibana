@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { parseIsPaused } from './parse_is_paused';
-import { parseAutorefreshInterval } from './parse_autorefresh_interval';
+import { parseBooleanParam } from './parse_boolean_param';
+import { parseIntParam } from './parse_int_param';
 import { CLIENT_DEFAULTS } from '../../../../common/constants';
 
 export interface UptimeUrlParams {
@@ -13,6 +13,8 @@ export interface UptimeUrlParams {
   autorefreshIsPaused: boolean;
   dateRangeStart: string;
   dateRangeEnd: string;
+  monitorListPage: string;
+  monitorListSize: number;
   search: string;
   selectedPingStatus: string;
 }
@@ -22,6 +24,8 @@ const {
   AUTOREFRESH_IS_PAUSED,
   DATE_RANGE_START,
   DATE_RANGE_END,
+  MONITOR_LIST_PAGE,
+  MONITOR_LIST_SIZE,
   SEARCH,
   SELECTED_PING_LIST_STATUS,
 } = CLIENT_DEFAULTS;
@@ -34,15 +38,19 @@ export const getSupportedUrlParams = (params: {
     autorefreshIsPaused,
     dateRangeStart,
     dateRangeEnd,
+    monitorListPage,
+    monitorListSize,
     search,
     selectedPingStatus,
   } = params;
 
   return {
-    autorefreshInterval: parseAutorefreshInterval(autorefreshInterval, AUTOREFRESH_INTERVAL),
-    autorefreshIsPaused: parseIsPaused(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
+    autorefreshInterval: parseIntParam(autorefreshInterval, AUTOREFRESH_INTERVAL),
+    autorefreshIsPaused: parseBooleanParam(autorefreshIsPaused, AUTOREFRESH_IS_PAUSED),
     dateRangeStart: dateRangeStart || DATE_RANGE_START,
     dateRangeEnd: dateRangeEnd || DATE_RANGE_END,
+    monitorListPage: monitorListPage || MONITOR_LIST_PAGE,
+    monitorListSize: parseIntParam(monitorListSize, MONITOR_LIST_SIZE),
     search: search || SEARCH,
     selectedPingStatus:
       selectedPingStatus === undefined ? SELECTED_PING_LIST_STATUS : selectedPingStatus,

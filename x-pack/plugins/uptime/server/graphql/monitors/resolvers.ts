@@ -15,6 +15,7 @@ import {
   GetMonitorCountQueryArgs,
   GetMonitorPageTitleQueryArgs,
   GetMonitorsQueryArgs,
+  GetMonitorTableQueryArgs,
   GetSnapshotQueryArgs,
   MonitorChart,
   MonitorPageTitle,
@@ -82,6 +83,13 @@ export type UMGetMonitorCountResolver = UMResolver<
   UMContext
 >;
 
+export type UMGetMonitorTableResolver = UMResolver<
+  any | Promise<any>,
+  any,
+  GetMonitorTableQueryArgs,
+  UMContext
+>;
+
 export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
   libs: UMServerLibs
 ): {
@@ -94,12 +102,24 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
     getErrorsList: UMGetErrorsListResolver;
     getMonitorPageTitle: UMGetMontiorPageTitleResolver;
     getMonitorCount: UMGetMonitorCountResolver;
+    getMonitorTable: UMGetMonitorTableResolver;
   };
 } => ({
   Query: {
     // @ts-ignore TODO update typings and remove this comment
-    async getMonitors(resolver, { dateRangeStart, dateRangeEnd, filters }, { req }): Promise<any> {
-      const result = await libs.monitors.getMonitors(req, dateRangeStart, dateRangeEnd, filters);
+    async getMonitors(
+      resolver,
+      { dateRangeStart, dateRangeEnd, size, filters },
+      { req }
+    ): Promise<any> {
+      const result = await libs.monitors.getMonitors(
+        req,
+        dateRangeStart,
+        dateRangeEnd,
+        size,
+        undefined,
+        filters
+      );
       return {
         monitors: result,
       };
@@ -156,6 +176,35 @@ export const createMonitorsResolvers: CreateUMGraphQLResolvers = (
       { req }
     ): Promise<MonitorPageTitle | null> {
       return await libs.monitors.getMonitorPageTitle(req, monitorId);
+    },
+    async getMonitorTable(
+      resolver: any,
+      { dateRangeStart, dateRangeEnd, page, size, filters },
+      { req }
+    ): Promise<any> {
+      const [pages, items, monitorIdCount] = await Promise.all([
+        libs.monitors.getMonitorTablePages(
+          req,
+          dateRangeStart,
+          dateRangeEnd,
+          size,
+          filters || undefined
+        ),
+        libs.monitors.getMonitors(
+          req,
+          dateRangeStart,
+          dateRangeEnd,
+          size,
+          page || undefined,
+          filters
+        ),
+        libs.monitors.getMonitorIdCount(req, dateRangeStart, dateRangeEnd, filters),
+      ]);
+      return {
+        pages,
+        items,
+        monitorIdCount,
+      };
     },
   },
 });

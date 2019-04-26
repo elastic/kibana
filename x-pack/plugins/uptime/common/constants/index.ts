@@ -7,5 +7,6 @@
 export { CLIENT_DEFAULTS } from './client_defaults';
 export { INDEX_NAMES } from './index_names';
 export { INTEGRATED_SOLUTIONS } from './capabilities';
+export { LIMITS } from './limits';
 export { PLUGIN } from './plugin';
 export { QUERY } from './query';

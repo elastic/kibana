@@ -5,7 +5,7 @@
  */
 
 import { get, set } from 'lodash';
-import { INDEX_NAMES } from '../../../../common/constants';
+import { INDEX_NAMES, LIMITS } from '../../../../common/constants';
 import {
   ErrorListItem,
   FilterBar,
@@ -222,7 +222,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     dateRangeEnd: string,
     filters?: string | null
   ): Promise<number> {
-    const { query } = getFilteredQuery(dateRangeStart, dateRangeEnd, filters);
+    const { query } = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
     const params = {
       index: INDEX_NAMES.HEARTBEAT,
       body: {
@@ -242,6 +242,77 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
   }
 
   /**
+   * Retrieves the keys to be used for paginated monitor list queries.
+   * The list of strings returned by this function can be assumed to provide
+   * the starting point for pages at the current moment of time.
+   * @param request The server request object.
+   * @param dateRangeStart The beginning of the date range filter.
+   * @param dateRangeEnd The end of the date range filter.
+   * @param size The desired size of the pages.
+   * @param filters Additional filters to apply to the query.
+   */
+  public async getMonitorTablePages(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    size: number,
+    filters?: string | undefined
+  ): Promise<string[]> {
+    const {
+      SERVER: { MONITORS_PAGINATION_MAP_LIMIT, MONITORS_PER_PAGINATION_QUERY },
+    } = LIMITS;
+    const { query } = getFilteredQueryAndStatusFilter(dateRangeStart, dateRangeEnd, filters);
+    const tparams = {
+      index: INDEX_NAMES.HEARTBEAT,
+      body: {
+        query,
+        size: 0,
+        aggs: {
+          monitor_ids: {
+            composite: {
+              sources: [
+                {
+                  id: {
+                    terms: {
+                      field: 'monitor.id',
+                    },
+                  },
+                },
+              ],
+              size: MONITORS_PER_PAGINATION_QUERY,
+            },
+          },
+        },
+      },
+    };
+
+    // TODO: if status filter is applied, we have to add top_hits to this query
+    let monitorsQueried = 0;
+    let afterKey: any = null;
+    const pages: string[] = [''];
+    do {
+      if (afterKey) {
+        set(tparams, 'body.aggs.monitor_ids.composite.after', afterKey);
+      }
+
+      const queryResult = await this.database.search(request, tparams);
+      const buckets = get(queryResult, 'aggregations.monitor_ids.buckets', []);
+
+      // TODO: if status filter is applied, we have to have O(n) efficiency
+      // else
+      // a call to Array.filter would look cleaner, but this is O(n / PAGE_SIZE) instead of O(n)
+      for (let i = size - 1; i < buckets.length; i += size) {
+        pages.push(get<string>(buckets[i], 'key.id'));
+      }
+
+      afterKey = get(queryResult, 'aggregations.monitor_ids.after_key', undefined);
+      monitorsQueried += MONITORS_PER_PAGINATION_QUERY;
+    } while (monitorsQueried < MONITORS_PAGINATION_MAP_LIMIT && afterKey);
+
+    return pages;
+  }
+
+  /**
    * Fetch the latest status for a monitors list
    * @param request Kibana request
    * @param dateRangeStart timestamp bounds
@@ -252,6 +323,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    size: number,
+    page?: string,
     filters?: string | null
   ): Promise<LatestMonitor[]> {
     const { statusFilter, query } = getFilteredQueryAndStatusFilter(
@@ -275,15 +348,8 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
                     },
                   },
                 },
-                {
-                  url: {
-                    terms: {
-                      field: 'url.full',
-                    },
-                  },
-                },
               ],
-              size: 50,
+              size,
             },
             aggs: {
               latest: {
@@ -316,6 +382,9 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
         },
       },
     };
+    if (page) {
+      set(params, 'body.aggs.hosts.composite.after', { id: page });
+    }
     const queryResult = await this.database.search(request, params);
     const aggBuckets: any[] = get(queryResult, 'aggregations.hosts.buckets', []);
     const latestMonitors: LatestMonitor[] = aggBuckets
@@ -329,7 +398,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
       .map(
         (bucket): LatestMonitor => {
           const key: string = get(bucket, 'key.id');
-          const url: string | null = get(bucket, 'key.url', null);
+          const url: string | null = get(bucket, 'latest.hits.hits[0]._source.url.full', null);
           const upSeries: MonitorSeriesPoint[] = [];
           const downSeries: MonitorSeriesPoint[] = [];
           const histogramBuckets: any[] = get(bucket, 'histogram.buckets', []);

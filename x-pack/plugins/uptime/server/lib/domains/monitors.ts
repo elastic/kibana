@@ -25,9 +25,11 @@ export class UMMonitorsDomain {
     request: any,
     dateRangeStart: string,
     dateRangeEnd: string,
+    size: number,
+    page?: string,
     filters?: string | null
   ): Promise<any> {
-    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, filters);
+    return this.adapter.getMonitors(request, dateRangeStart, dateRangeEnd, size, page, filters);
   }
 
   public async getSnapshotCount(
@@ -70,5 +72,21 @@ export class UMMonitorsDomain {
     monitorId: string
   ): Promise<MonitorPageTitle | null> {
     return await this.adapter.getMonitorPageTitle(request, monitorId);
+  }
+
+  public async getMonitorTablePages(
+    request: any,
+    dateRangeStart: string,
+    dateRangeEnd: string,
+    size: number,
+    filters?: string
+  ): Promise<string[]> {
+    return await this.adapter.getMonitorTablePages(
+      request,
+      dateRangeStart,
+      dateRangeEnd,
+      size,
+      filters
+    );
   }
 }
