@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 
-import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
+import { toastNotifications } from 'ui/notify';
 
 import {
   EuiFieldSearch,
@@ -26,11 +28,11 @@ import { SourceIndexPreview } from '../../components/source_index_preview';
 import { PivotPreview } from './pivot_preview';
 
 import {
+  AggName,
   DropDownLabel,
   getPivotQuery,
   groupByConfigHasInterval,
   IndexPatternContext,
-  Label,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -96,17 +98,26 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   } = getPivotDropdownOptions(indexPattern);
 
   const addGroupBy = (d: DropDownLabel[]) => {
-    const label: Label = d[0].label;
-    groupByList[label] = groupByOptionsData[label];
-    setGroupByList({ ...groupByList });
+    const label: AggName = d[0].label;
+    if (groupByList[label] === undefined) {
+      groupByList[label] = groupByOptionsData[label];
+      setGroupByList({ ...groupByList });
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.definePivot.groupByExistsErrorMessage', {
+          defaultMessage: `A group by configuration with the name '{label}' already exists.`,
+          values: { label },
+        })
+      );
+    }
   };
 
-  const updateGroupBy = (label: Label, item: PivotGroupByConfig) => {
+  const updateGroupBy = (label: AggName, item: PivotGroupByConfig) => {
     groupByList[label] = item;
     setGroupByList({ ...groupByList });
   };
 
-  const deleteGroupBy = (label: Label) => {
+  const deleteGroupBy = (label: AggName) => {
     delete groupByList[label];
     setGroupByList({ ...groupByList });
   };
@@ -115,19 +126,27 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   const [aggList, setAggList] = useState(defaults.aggList);
 
   const addAggregation = (d: DropDownLabel[]) => {
-    const label: Label = d[0].label;
-    aggList[label] = aggOptionsData[label];
+    const label: AggName = d[0].label;
+    if (aggList[label] === undefined) {
+      aggList[label] = aggOptionsData[label];
+      setAggList({ ...aggList });
+    } else {
+      toastNotifications.addDanger(
+        i18n.translate('xpack.ml.dataframe.definePivot.aggExistsErrorMessage', {
+          defaultMessage: `An aggregation configuration with the name '{label}' already exists.`,
+          values: { label },
+        })
+      );
+    }
+  };
+
+  const updateAggregation = (previousAggName: AggName, item: PivotAggsConfig) => {
+    delete aggList[previousAggName];
+    aggList[item.aggName] = item;
     setAggList({ ...aggList });
   };
 
-  const updateAggregation = (label: Label, item: PivotAggsConfig) => {
-    delete aggList[label];
-    const newLabel = `${item.agg}(${item.field})`;
-    aggList[newLabel] = item;
-    setAggList({ ...aggList });
-  };
-
-  const deleteAggregation = (label: Label) => {
+  const deleteAggregation = (label: AggName) => {
     delete aggList[label];
     setAggList({ ...aggList });
   };
@@ -142,11 +161,10 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       onChange({ aggList, groupByList, search, valid });
     },
     [
-      pivotAggsArr.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
+      pivotAggsArr.map(d => `${d.agg} ${d.field} ${d.aggName}`).join(' '),
       pivotGroupByArr
         .map(
-          d =>
-            `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.formRowLabel}`
+          d => `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.aggName}`
         )
         .join(' '),
       search,

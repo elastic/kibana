@@ -6,17 +6,17 @@
 
 import { Dictionary } from '../../../common/types/common';
 
+import { AggName, FieldName } from './aggregations';
+
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
   HISTOGRAM = 'histogram',
   TERMS = 'terms',
 }
 
-type FieldName = string;
-
 interface GroupByConfigBase {
   field: FieldName;
-  formRowLabel: string;
+  aggName: AggName;
 }
 
 // Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.

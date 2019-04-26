@@ -20,7 +20,13 @@ import {
 
 import { dictionaryToArray } from '../../../../common/types/common';
 
-import { PivotAggsConfig, PivotAggsConfigDict, PIVOT_SUPPORTED_AGGS } from '../../common';
+import {
+  AggName,
+  isAggName,
+  PivotAggsConfig,
+  PivotAggsConfigDict,
+  PIVOT_SUPPORTED_AGGS,
+} from '../../common';
 
 interface SelectOption {
   text: string;
@@ -28,12 +34,18 @@ interface SelectOption {
 
 interface Props {
   defaultData: PivotAggsConfig;
+  otherAggNames: AggName[];
   options: PivotAggsConfigDict;
   onChange(d: PivotAggsConfig): void;
 }
 
-export const PopoverForm: React.SFC<Props> = ({ defaultData, onChange, options }) => {
-  const [aggregationName, setAggregationName] = useState(defaultData.formRowLabel);
+export const PopoverForm: React.SFC<Props> = ({
+  defaultData,
+  otherAggNames,
+  onChange,
+  options,
+}) => {
+  const [aggName, setAggName] = useState(defaultData.aggName);
   const [agg, setAgg] = useState(defaultData.agg);
   const [field, setField] = useState(defaultData.field);
 
@@ -49,31 +61,39 @@ export const PopoverForm: React.SFC<Props> = ({ defaultData, onChange, options }
       return { text: o.agg };
     });
 
-  // aggregation names must be alphanumeric with support for -_ as special chars.
-  const validAggregationName = /^[a-z0-9\-_]+$/i.test(aggregationName);
-  const formValid = validAggregationName;
+  let aggNameError = '';
+
+  let validAggName = isAggName(aggName);
+  if (!validAggName) {
+    aggNameError = i18n.translate('xpack.ml.dataframe.popoverForm.aggNameInvalidCharError', {
+      defaultMessage: 'Invalid name. The characters "[", "]", and ">" are not allowed.',
+    });
+  }
+
+  if (validAggName) {
+    validAggName = !otherAggNames.includes(aggName);
+    aggNameError = i18n.translate('xpack.ml.dataframe.popoverForm.aggNameAlreadyUsedError', {
+      defaultMessage: 'Another aggregation already uses that name.',
+    });
+  }
+
+  const formValid = validAggName;
 
   return (
     <EuiForm>
       <EuiFlexGroup>
         <EuiFlexItem style={{ width: 200 }}>
           <EuiFormRow
-            error={
-              !validAggregationName && [
-                i18n.translate('xpack.ml.dataframe.popoverForm.aggNameError', {
-                  defaultMessage: 'Invalid aggregation name.',
-                }),
-              ]
-            }
-            isInvalid={!validAggregationName}
+            error={!validAggName && [aggNameError]}
+            isInvalid={!validAggName}
             label={i18n.translate('xpack.ml.dataframe.popoverForm.aggNameLabel', {
               defaultMessage: 'Aggregation name',
             })}
           >
             <EuiFieldText
-              defaultValue={aggregationName}
-              isInvalid={!validAggregationName}
-              onChange={e => setAggregationName(e.target.value)}
+              defaultValue={aggName}
+              isInvalid={!validAggName}
+              onChange={e => setAggName(e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -111,9 +131,7 @@ export const PopoverForm: React.SFC<Props> = ({ defaultData, onChange, options }
           <EuiFormRow hasEmptyLabelSpace>
             <EuiButton
               isDisabled={!formValid}
-              onClick={() =>
-                onChange({ ...defaultData, formRowLabel: aggregationName, agg, field })
-              }
+              onClick={() => onChange({ ...defaultData, aggName, agg, field })}
             >
               {i18n.translate('xpack.ml.dataframe.popoverForm.submitButtonLabel', {
                 defaultMessage: 'Apply',

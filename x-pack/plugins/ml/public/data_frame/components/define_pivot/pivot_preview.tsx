@@ -108,13 +108,13 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
   const columnKeys = Object.keys(dataFramePreviewData[0]);
   columnKeys.sort((a, b) => {
     // make sure groupBy fields are always most left columns
-    if (groupByArr.some(d => d.formRowLabel === a) && groupByArr.some(d => d.formRowLabel === b)) {
+    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
       return a.localeCompare(b);
     }
-    if (groupByArr.some(d => d.formRowLabel === a)) {
+    if (groupByArr.some(d => d.aggName === a)) {
       return -1;
     }
-    if (groupByArr.some(d => d.formRowLabel === b)) {
+    if (groupByArr.some(d => d.aggName === b)) {
       return 1;
     }
     return a.localeCompare(b);

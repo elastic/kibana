@@ -10,35 +10,35 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 
-import { Label, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
+import { AggName, PivotAggsConfig, PivotAggsConfigDict } from '../../common';
 
 import { PopoverForm } from './popover_form';
 
 interface Props {
   item: PivotAggsConfig;
+  otherAggNames: AggName[];
   options: PivotAggsConfigDict;
-  optionsDataId: string;
-  deleteHandler(l: string): void;
-  onChange(id: Label, item: PivotAggsConfig): void;
+  deleteHandler(l: AggName): void;
+  onChange(item: PivotAggsConfig): void;
 }
 
 export const AggLabelForm: React.SFC<Props> = ({
   deleteHandler,
   item,
+  otherAggNames,
   onChange,
   options,
-  optionsDataId,
 }) => {
   const [isPopoverVisible, setPopoverVisibility] = useState(false);
 
   function update(updateItem: PivotAggsConfig) {
-    onChange(optionsDataId, { ...updateItem });
+    onChange({ ...updateItem });
     setPopoverVisibility(false);
   }
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
+      <EuiFlexItem>{item.aggName}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiPopover
           id="mlFormPopover"
@@ -56,7 +56,12 @@ export const AggLabelForm: React.SFC<Props> = ({
           isOpen={isPopoverVisible}
           closePopover={() => setPopoverVisibility(false)}
         >
-          <PopoverForm defaultData={item} onChange={update} options={options} />
+          <PopoverForm
+            defaultData={item}
+            onChange={update}
+            otherAggNames={otherAggNames}
+            options={options}
+          />
         </EuiPopover>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -66,7 +71,7 @@ export const AggLabelForm: React.SFC<Props> = ({
           })}
           size="s"
           iconType="cross"
-          onClick={() => deleteHandler(optionsDataId)}
+          onClick={() => deleteHandler(item.aggName)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

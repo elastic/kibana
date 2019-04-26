@@ -24,7 +24,7 @@ jest.mock('react', () => {
   return { ...r, memo: (x: any) => x };
 });
 
-describe('Data Frame: <PivotPreview / >', () => {
+describe('Data Frame: <PivotPreview />', () => {
   test('Minimal initialization', () => {
     const indexPattern = {
       title: 'the-index-pattern-title',
@@ -34,12 +34,12 @@ describe('Data Frame: <PivotPreview / >', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      formRowLabel: 'the-group-by-label',
+      aggName: 'the-group-by-label',
     };
     const agg: PivotAggsConfig = {
       agg: PIVOT_SUPPORTED_AGGS.AVG,
       field: 'the-agg-field',
-      formRowLabel: 'the-agg-label',
+      aggName: 'the-agg-label',
     };
     const props = {
       aggs: { 'the-agg-name': agg },

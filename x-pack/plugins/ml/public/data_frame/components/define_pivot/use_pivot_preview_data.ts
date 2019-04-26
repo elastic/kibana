@@ -74,13 +74,10 @@ export const usePivotPreviewData = (
       },
       [
         indexPattern.title,
-        aggsArr.map(a => `${a.agg} ${a.field} ${a.formRowLabel}`).join(' '),
+        aggsArr.map(a => `${a.agg} ${a.field} ${a.aggName}`).join(' '),
         groupByArr
           .map(
-            g =>
-              `${g.agg} ${g.field} ${g.formRowLabel} ${
-                groupByConfigHasInterval(g) ? g.interval : ''
-              }`
+            g => `${g.agg} ${g.field} ${g.aggName} ${groupByConfigHasInterval(g) ? g.interval : ''}`
           )
           .join(' '),
         query.query_string.query,
