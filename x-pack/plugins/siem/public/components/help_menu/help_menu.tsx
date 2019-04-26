@@ -6,10 +6,11 @@
 
 import React from 'react';
 import { EuiButton, EuiHorizontalRule, EuiIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
 
 export const Icon = styled(EuiIcon)`
-  margin-right: 8px;
+  margin-right: ${theme.euiSizeS};
 `;
 
 export class HelpMenuComponent extends React.PureComponent {
