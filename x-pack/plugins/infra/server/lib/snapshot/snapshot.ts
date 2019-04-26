@@ -17,7 +17,12 @@ import { InfraSources } from '../sources';
 
 import { JsonObject } from '../../../common/typed_json';
 import { SNAPSHOT_COMPOSITE_REQUEST_SIZE } from './constants';
-import { getGroupedNodesSources, getMetricsAggregations, getMetricsSources } from './query_helpers';
+import {
+  getGroupedNodesSources,
+  getMetricsAggregations,
+  getMetricsSources,
+  getDateHistogramOffset,
+} from './query_helpers';
 import {
   getNodeMetrics,
   getNodeMetricsForLookup,
@@ -146,7 +151,7 @@ const requestNodeMetrics = async (
               date_histogram: {
                 field: options.sourceConfiguration.fields.timestamp,
                 interval: options.timerange.interval || '1m',
-                offset: '-58s',
+                offset: getDateHistogramOffset(options),
                 extended_bounds: {
                   min: options.timerange.from,
                   max: options.timerange.to,

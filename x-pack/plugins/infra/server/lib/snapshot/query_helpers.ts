@@ -7,6 +7,7 @@
 import { metricAggregationCreators } from './metric_aggregation_creators';
 import { InfraSnapshotRequestOptions } from './snapshot';
 import { NAME_FIELDS } from '../constants';
+import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
   const sources = options.groupBy.map(gb => {
@@ -27,4 +28,14 @@ export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
 
 export const getMetricsAggregations = (options: InfraSnapshotRequestOptions) => {
   return metricAggregationCreators[options.metric.type](options.nodeType);
+};
+
+export const getDateHistogramOffset = (options: InfraSnapshotRequestOptions): string => {
+  const { from, interval } = options.timerange;
+  const fromInSeconds = Math.floor(from / 1000);
+  const bucketSizeInSeconds = getIntervalInSeconds(interval);
+
+  // negative offset to align buckets with full intervals (e.g. minutes)
+  const offset = (fromInSeconds % bucketSizeInSeconds) - bucketSizeInSeconds;
+  return `${offset}s`;
 };

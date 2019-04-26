@@ -104,9 +104,9 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
               expect(firstNode).to.have.property('metric');
               expect(firstNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.0035,
-                avg: 0.009066666666666666,
-                max: 0.0684,
+                value: 0.003666666666666667,
+                avg: 0.00809090909090909,
+                max: 0.057833333333333334,
                 __typename: 'InfraSnapshotNodeMetric',
               });
             }
@@ -206,9 +206,9 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
               expect(firstNode).to.have.property('metric');
               expect(firstNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.0035,
-                avg: 0.009066666666666666,
-                max: 0.0684,
+                value: 0.003666666666666667,
+                avg: 0.00809090909090909,
+                max: 0.057833333333333334,
                 __typename: 'InfraSnapshotNodeMetric',
               });
               const secondNode = nodes[1];
@@ -219,9 +219,9 @@ const waffleTests: KbnTestProvider = ({ getService }) => {
               expect(secondNode).to.have.property('metric');
               expect(secondNode.metric).to.eql({
                 name: 'cpu',
-                value: 0.0035,
-                avg: 0.009066666666666666,
-                max: 0.0684,
+                value: 0.003666666666666667,
+                avg: 0.00809090909090909,
+                max: 0.057833333333333334,
                 __typename: 'InfraSnapshotNodeMetric',
               });
             }
