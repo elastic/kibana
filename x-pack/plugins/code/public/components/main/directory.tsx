@@ -32,8 +32,8 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
         data-test-subj={`codeFileExplorerNode-${n.name}`}
       >
         <div className="code-directory__node">
-          <EuiIcon type={typeIconMap[n.type]} />
-          <EuiText size="s" className="code-fileNodeName eui-textTruncate">
+          <EuiIcon type={typeIconMap[n.type]} color="subdued" />
+          <EuiText size="xs" className="code-fileNodeName eui-textTruncate">
             {n.name}
           </EuiText>
         </div>
