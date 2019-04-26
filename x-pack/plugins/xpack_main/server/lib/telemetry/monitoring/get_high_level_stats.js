@@ -182,7 +182,7 @@ export async function fetchHighLevelStats(server, callCluster, clusterUuids, sta
     { terms: { cluster_uuid: clusterUuids } },
   ];
 
-  // supply this from
+  // we should supply this from a parameter in the future so that this remains generic
   if (isKibanaIndex) {
     const kibanaFilter = {
       bool: {
