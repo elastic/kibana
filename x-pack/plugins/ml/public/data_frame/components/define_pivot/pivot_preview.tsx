@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -22,11 +22,28 @@ import { dictionaryToArray } from '../../../../common/types/common';
 import {
   IndexPatternContext,
   PivotAggsConfigDict,
+  PivotGroupByConfig,
   PivotGroupByConfigDict,
   SimpleQuery,
 } from '../../common';
 
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
+
+function sortColumns(groupByArr: PivotGroupByConfig[]) {
+  return (a: string, b: string) => {
+    // make sure groupBy fields are always most left columns
+    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
+      return a.localeCompare(b);
+    }
+    if (groupByArr.some(d => d.aggName === a)) {
+      return -1;
+    }
+    if (groupByArr.some(d => d.aggName === b)) {
+      return 1;
+    }
+    return a.localeCompare(b);
+  };
+}
 
 const PreviewTitle = () => (
   <EuiTitle size="xs">
@@ -45,6 +62,8 @@ interface Props {
 }
 
 export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query }) => {
+  const [clearTable, setClearTable] = useState(false);
+
   const indexPattern = useContext(IndexPatternContext);
 
   if (indexPattern === null) {
@@ -57,6 +76,25 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
     aggs,
     groupBy
   );
+
+  const groupByArr = dictionaryToArray(groupBy);
+
+  // EuiInMemoryTable has an issue with dynamic sortable columns
+  // and will trigger a full page Kibana error in such a case.
+  // The following is a workaround until this is solve upstream:
+  // - If the sortable/columns config changes,
+  //   the table will be unmounted/not rendered.
+  //   This is what the useEffect() part does.
+  // - After that the table gets re-enabled. To make sure React
+  //   doesn't consolidate the state updates, setTimeout is used.
+  const firstColumnName =
+    dataFramePreviewData.length > 0
+      ? Object.keys(dataFramePreviewData[0]).sort(sortColumns(groupByArr))[0]
+      : undefined;
+  useEffect(() => setClearTable(true), [firstColumnName]);
+  if (clearTable) {
+    setTimeout(() => setClearTable(false), 0);
+  }
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
     return (
@@ -104,21 +142,8 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
     );
   }
 
-  const groupByArr = dictionaryToArray(groupBy);
   const columnKeys = Object.keys(dataFramePreviewData[0]);
-  columnKeys.sort((a, b) => {
-    // make sure groupBy fields are always most left columns
-    if (groupByArr.some(d => d.aggName === a) && groupByArr.some(d => d.aggName === b)) {
-      return a.localeCompare(b);
-    }
-    if (groupByArr.some(d => d.aggName === a)) {
-      return -1;
-    }
-    if (groupByArr.some(d => d.aggName === b)) {
-      return 1;
-    }
-    return a.localeCompare(b);
-  });
+  columnKeys.sort(sortColumns(groupByArr));
 
   const columns = columnKeys.map(k => {
     return {
@@ -143,7 +168,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
       )}
-      {dataFramePreviewData.length > 0 && (
+      {dataFramePreviewData.length > 0 && clearTable === false && (
         <EuiInMemoryTable
           items={dataFramePreviewData}
           columns={columns}
