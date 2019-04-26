@@ -24,7 +24,9 @@ export function VislibTypesPointSeries() {
   const createSeriesFromParams = (cfg, seri) => {
     //percentile data id format is {mainId}.{percentileValue}, this has to be cleaned
     //up to match with ids in cfg.seriesParams entry that contain only {mainId}
-    const seriId = seri.id.indexOf('.') !== -1 ? seri.id.split('.')[0] : seri.id;
+    const seriId = seri.id && seri.id.indexOf('.') !== -1
+      ? seri.id.split('.')[0]
+      : seri.id;
     const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
       return seriId === seriConfig.data.id;
     }) : null;
