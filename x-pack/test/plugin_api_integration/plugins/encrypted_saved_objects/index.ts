@@ -5,6 +5,7 @@
  */
 
 import { Request } from 'hapi';
+import { boomify, badRequest } from 'boom';
 import { Legacy } from 'kibana';
 
 const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
@@ -21,11 +22,19 @@ export default function esoPlugin(kibana: any) {
         path: '/api/eso/v1/get-decrypted-as-internal-user/{id}',
         async handler(request: Request) {
           const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
-          return await (server.plugins as any).encrypted_saved_objects.getDecryptedAsInternalUser(
-            SAVED_OBJECT_WITH_SECRET_TYPE,
-            request.params.id,
-            { namespace: namespace === 'default' ? undefined : namespace }
-          );
+          try {
+            return await (server.plugins as any).encrypted_saved_objects.getDecryptedAsInternalUser(
+              SAVED_OBJECT_WITH_SECRET_TYPE,
+              request.params.id,
+              { namespace: namespace === 'default' ? undefined : namespace }
+            );
+          } catch (err) {
+            if ((server.plugins as any).encrypted_saved_objects.isEncryptionError(err)) {
+              return badRequest('Failed to encrypt attributes');
+            }
+
+            return boomify(err);
+          }
         },
       });
 

@@ -137,5 +137,51 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
       expect(decryptedResponse.attributes).to.eql(savedObjectOriginalAttributes);
     });
+
+    it('#getDecryptedAsInternalUser is able to decrypt if non-AAD attribute has changed', async () => {
+      const updatedAttributes = { publicPropertyExcludedFromAAD: chance.string() };
+
+      const { body: response } = await supertest
+        .put(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: updatedAttributes }, {})
+        .expect(200);
+
+      expect(response.attributes).to.eql({
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
+      });
+
+      const { body: decryptedResponse } = await supertest
+        .get(`/api/eso/v1/get-decrypted-as-internal-user/${savedObject.id}`)
+        .expect(200);
+
+      expect(decryptedResponse.attributes).to.eql({
+        ...savedObjectOriginalAttributes,
+        publicPropertyExcludedFromAAD: updatedAttributes.publicPropertyExcludedFromAAD,
+      });
+    });
+
+    it('#getDecryptedAsInternalUser fails to decrypt if AAD attribute has changed', async () => {
+      const updatedAttributes = { publicProperty: chance.string() };
+
+      const { body: response } = await supertest
+        .put(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
+        .set('kbn-xsrf', 'xxx')
+        .send({ attributes: updatedAttributes }, {})
+        .expect(200);
+
+      expect(response.attributes).to.eql({
+        publicProperty: updatedAttributes.publicProperty,
+      });
+
+      // Bad request means that we successfully detected "EncryptionError" (not unexpected one).
+      await supertest
+        .get(`/api/eso/v1/get-decrypted-as-internal-user/${savedObject.id}`)
+        .expect(400, {
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Failed to encrypt attributes',
+        });
+    });
   });
 }

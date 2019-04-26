@@ -482,6 +482,53 @@ describe('#decryptAttributes', () => {
     );
   });
 
+  it('decrypts non-string attributes and restores their original type', async () => {
+    const attributes = {
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: 'three',
+      attrFour: null,
+      attrFive: { nested: 'five' },
+      attrSix: 6,
+    };
+
+    service.registerType({
+      type: 'known-type-1',
+      attributesToEncrypt: new Set(['attrOne', 'attrThree', 'attrFour', 'attrFive', 'attrSix']),
+    });
+
+    const encryptedAttributes = await service.encryptAttributes(
+      'known-type-1',
+      'object-id',
+      attributes
+    );
+    expect(encryptedAttributes).toEqual({
+      attrOne: expect.not.stringMatching('one'),
+      attrTwo: 'two',
+      attrThree: expect.not.stringMatching('three'),
+      attrFour: null,
+      attrFive: expect.any(String),
+      attrSix: expect.any(String),
+    });
+
+    await expect(
+      service.decryptAttributes('known-type-1', 'object-id', encryptedAttributes)
+    ).resolves.toEqual({
+      attrOne: 'one',
+      attrTwo: 'two',
+      attrThree: 'three',
+      attrFour: null,
+      attrFive: { nested: 'five' },
+      attrSix: 6,
+    });
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledTimes(1);
+    expect(mockAuditLogger.decryptAttributesSuccess).toHaveBeenCalledWith(
+      ['attrOne', 'attrThree', 'attrFive', 'attrSix'],
+      'known-type-1',
+      'object-id'
+    );
+  });
+
   describe('decryption failures', () => {
     let encryptedAttributes: Record<string, string>;
     beforeEach(async () => {
