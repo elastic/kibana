@@ -78,7 +78,7 @@ export function registerStatsApi(kbnServer, server, config) {
               getUsage(callCluster),
               getClusterUuid(callCluster),
             ]);
-            console.log('usage::', usage)
+            console.log('usage::', usage);
 
 
             let modifiedUsage = usage;
@@ -136,7 +136,7 @@ export function registerStatsApi(kbnServer, server, config) {
         let kibanaStats = {};
         if (!isExcludeKibanaUsage) {
           const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
-          console.log('kibanaStatsCollector::', kibanaStatsCollector)
+          console.log('kibanaStatsCollector::', kibanaStatsCollector);
           kibanaStats = await kibanaStatsCollector.fetch();
           kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
         }

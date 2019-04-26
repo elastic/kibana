@@ -93,7 +93,6 @@ export function combineStats(highLevelStats, usageStats = {}) {
  * specialized usage data that comes with kibana stats (kibana_stats.usage).
  */
 export async function getKibanaStats(server, callCluster, clusterUuids, start, end) {
-  console.log('fetching kibana inside xpack_main monitoring')
   const rawStats = await fetchHighLevelStats(server, callCluster, clusterUuids, start, end, KIBANA_SYSTEM_ID);
   const highLevelStats = handleHighLevelStatsResponse(rawStats, KIBANA_SYSTEM_ID);
   const usageStats = getUsageStats(rawStats);

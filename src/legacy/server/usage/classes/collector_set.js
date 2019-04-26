@@ -102,7 +102,6 @@ export class CollectorSet {
    */
   getFilteredCollectorSet(filter) {
     const filtered = this._collectors.filter(filter);
-    console.log('filtered::', filtered)
     return this._makeCollectorSetFromArray(filtered);
   }
 
@@ -113,7 +112,7 @@ export class CollectorSet {
 
   // convert an array of fetched stats results into key/object
   toObject(statsData) {
-    console.log('statsData::', statsData)
+    console.log('statsData::', statsData);
     if (!statsData) return {};
     return statsData.reduce((accumulatedStats, { type, result }) => {
       return {

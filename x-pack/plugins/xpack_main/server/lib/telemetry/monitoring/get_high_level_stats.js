@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { createQuery } from './create_query';
 import { INDEX_PATTERN_KIBANA, INDEX_PATTERN_BEATS, INDEX_PATTERN_LOGSTASH } from '../../../../../monitoring/common/constants';
 import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
+import compareVersions from 'compare-versions';
 
 /**
  * Update a counter associated with the {@code key}.
@@ -187,7 +188,72 @@ export function getHighLevelStats(server, callCluster, clusterUuids, start, end,
  * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
  * @return {Promise} Response for the instances to fetch detailed for the product.
  */
-export function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
+
+
+export function getLegacyParams(server, clusterUuids, start, end, product) {
+  const config = server.config();
+
+  return {
+    index: getIndexPatternForStackProduct(product),
+    size: config.get('xpack.monitoring.max_bucket_size'),
+    ignoreUnavailable: true,
+    filterPath: [
+      'hits.hits._source.cluster_uuid',
+      `hits.hits._source.${product}_stats.${product}.version`,
+      `hits.hits._source.${product}_stats.os`,
+      `hits.hits._source.${product}_stats.usage`,
+      // we don't want metadata
+      `hits.hits._source.${product}_stats.cloud.name`,
+      `hits.hits._source.${product}_stats.cloud.id`,
+      `hits.hits._source.${product}_stats.cloud.vm_type`,
+      `hits.hits._source.${product}_stats.cloud.region`,
+      `hits.hits._source.${product}_stats.cloud.zone`
+    ],
+    body: {
+      query: createQuery({
+        start,
+        end,
+        type: `${product}_stats`,
+        filters: [
+          { terms: { cluster_uuid: clusterUuids } },
+          {
+            'bool': {
+              'must': [
+                { 'match': { 'kibana_stats.kibana.statuses.name': 'includes-usage-data' } },
+                { 'match': { 'kibana_stats.kibana.statuses.state': 'includes-usage-data' } }
+              ]
+            }
+          }
+        ]
+      }),
+      collapse: {
+        // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)
+        field: `${product}_stats.${product}.uuid`
+      },
+      sort: [
+        { 'timestamp': 'desc' }
+      ]
+    }
+  };
+}
+
+export function isLegacyVersion(version) {
+  const stripPrerelease =  v => v.split('-')[0];
+  version = stripPrerelease(version);
+  const gte = c => compareVersions(version, c) > -1;
+  const lt = c => compareVersions(version, c) === -1;
+
+  if (gte('7.1.0')) {
+    return false;
+  }
+  if (gte('6.7.3') && lt('7.0.0')) {
+    return false;
+  }
+  return true;
+}
+
+
+export async function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
   const config = server.config();
   const isKibanaIndex = product === KIBANA_SYSTEM_ID;
 
@@ -227,7 +293,24 @@ export function fetchHighLevelStats(server, callCluster, clusterUuids, start, en
     }
   };
 
-  return callCluster('search', params);
+  const result = await callCluster('search', params);
+
+  /*
+    `exists` filter for (kibana_stats.usage.index) does not work with old mapping.
+    Trigger legacyFetchHighLevelStats on versions older than
+    Bug fix Context: https://github.com/elastic/kibana/pull/34609
+  */
+  if (isKibanaIndex) {
+    const someResultsAreLegacy = (result && !result.hits.hits.length) ||
+      result.hits.hits.some(hit => isLegacyVersion(hit._source.kibana_stats.kibana.version));
+
+    if (someResultsAreLegacy) {
+      const legacyParams = getLegacyParams(server, clusterUuids, start, end, product);
+      return callCluster('search', legacyParams);
+    }
+  }
+
+  return result;
 }
 
 /**

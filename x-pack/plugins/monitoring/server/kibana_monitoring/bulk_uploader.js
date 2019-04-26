@@ -57,7 +57,12 @@ export class BulkUploader {
     });
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
-    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
+    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer, {
+      statuses: [{
+        name: 'includes-usage-data',
+        state: `${this._lastFetchWithUsage ? 'includes' : 'excludes'}-usage-data`
+      }],
+    });
   }
 
   /*
@@ -69,6 +74,7 @@ export class BulkUploader {
     this._log.info('Starting monitoring stats collection');
     const filterCollectorSet = _collectorSet => {
       const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
+      this._lastFetchWithUsage = !filterUsage;
       if (!filterUsage) {
         this._lastFetchUsageTime = Date.now();
       }
@@ -191,7 +197,6 @@ export class BulkUploader {
       const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});
-
     // convert the nested object into a flat array, with each payload prefixed
     // with an 'index' instruction, for bulk upload
     const flat = Object.keys(typesNested).reduce((accum, type) => {

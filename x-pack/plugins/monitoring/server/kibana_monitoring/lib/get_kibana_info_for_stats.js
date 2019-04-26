@@ -17,7 +17,7 @@ const snapshotRegex = /-snapshot/i;
  * @param {String} host Kibana host
  * @return {Object} The object containing a "kibana" field and source instance details.
  */
-export function getKibanaInfoForStats(server, kbnServer) {
+export function getKibanaInfoForStats(server, kbnServer, extraStats = {}) {
   const config = server.config();
   const status = kbnServer.status.toJSON();
 
@@ -29,6 +29,7 @@ export function getKibanaInfoForStats(server, kbnServer) {
     transport_address: `${config.get('server.host')}:${config.get('server.port')}`,
     version: kbnServer.version.replace(snapshotRegex, ''),
     snapshot: snapshotRegex.test(kbnServer.version),
-    status: get(status, 'overall.state')
+    status: get(status, 'overall.state'),
+    ...extraStats
   };
 }
