@@ -11,6 +11,8 @@ import { getTimeUnitsLabel } from 'plugins/watcher/lib/get_time_units_label';
 import { i18n } from '@kbn/i18n';
 import { aggTypes } from './agg_types';
 import { groupByTypes } from './group_by_types';
+import { comparators } from './comparators';
+const { BETWEEN } = COMPARATORS;
 const DEFAULT_VALUES = {
   AGG_TYPE: 'count',
   TERM_SIZE: 5,
@@ -19,7 +21,7 @@ const DEFAULT_VALUES = {
   TIME_WINDOW_UNIT: 'm',
   TRIGGER_INTERVAL_SIZE: 1,
   TRIGGER_INTERVAL_UNIT: 'm',
-  THRESHOLD: 1000,
+  THRESHOLD: [1000, 5000],
   GROUP_BY: 'all',
 };
 
@@ -102,7 +104,6 @@ export class ThresholdWatch extends BaseWatch {
       aggField: [],
       termSize: [],
       termField: [],
-      threshold: [],
       timeWindowSize: [],
     };
     validationResult.errors = errors;
@@ -176,15 +177,29 @@ export class ThresholdWatch extends BaseWatch {
         );
       }
     }
-    if (!this.threshold) {
-      errors.threshold.push(
-        i18n.translate(
+
+    Array.from(Array(comparators[this.thresholdComparator].requiredValues)).forEach((value, i) => {
+      const key = `threshold${i}`;
+      errors[key] = [];
+      if (!this.threshold[i]) {
+        errors[key].push(i18n.translate(
           'xpack.watcher.thresholdWatchExpression.thresholdLevel.valueIsRequiredValidationMessage',
           {
             defaultMessage: 'A value is required.',
           }
-        )
-      );
+        ));
+      }
+    });
+    if (this.thresholdComparator === BETWEEN && this.threshold[0] && this.threshold[1] && !(this.threshold[1] > this.threshold[0])) {
+      errors.threshold1.push(i18n.translate(
+        'xpack.watcher.thresholdWatchExpression.thresholdLevel.secondValueMustBeGreaterMessage',
+        {
+          defaultMessage: 'This value must be greater than {lowerBound}.',
+          values: {
+            lowerBound: this.threshold[0]
+          }
+        }
+      ));
     }
     if (!this.timeWindowSize) {
       errors.timeWindowSize.push(
@@ -212,7 +227,7 @@ export class ThresholdWatch extends BaseWatch {
       thresholdComparator: this.thresholdComparator,
       timeWindowSize: this.timeWindowSize,
       timeWindowUnit: this.timeWindowUnit,
-      threshold: this.threshold,
+      threshold: comparators[this.thresholdComparator].requiredValues > 1 ? this.threshold : this.threshold[0],
     });
 
     return result;

@@ -31,6 +31,7 @@ import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { getWatchVisualizationData } from '../../../lib/api';
 import { WatchContext } from './watch_context';
 import { aggTypes } from '../../../models/watch/agg_types';
+import { comparators } from '../../../models/watch/comparators';
 const getChartTheme = () => {
   const isDarkTheme = chrome.getUiSettingsClient().get('theme:darkMode');
   const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
@@ -82,7 +83,9 @@ const getDomain = (watch: any) => {
     max: visualizeTimeWindowTo,
   };
 };
-
+const getThreshold = (watch: any) => {
+  return watch.threshold.slice(0, comparators[watch.thresholdComparator].requiredValues);
+};
 const getTimeBuckets = (watch: any) => {
   const domain = getDomain(watch);
   const timeBuckets = new TimeBuckets();
@@ -123,12 +126,17 @@ const WatchVisualizationUi = () => {
       .format(getTimeBuckets(watch).getScaledDateFormat());
   };
   const aggLabel = aggTypes[watch.aggType].text;
-  const thresholdCustomSeriesColors: CustomSeriesColorsMap = new Map();
-  const thresholdDataSeriesColorValues: DataSeriesColorsValues = {
-    colorValues: [],
-    specId: getSpecId('threshold'),
+
+  const getCustomColors = (specId: string) => {
+    const customSeriesColors: CustomSeriesColorsMap = new Map();
+    const dataSeriesColorValues: DataSeriesColorsValues = {
+      colorValues: [],
+      specId: getSpecId(specId),
+    };
+    customSeriesColors.set(dataSeriesColorValues, '#BD271E');
+    return customSeriesColors;
   };
-  thresholdCustomSeriesColors.set(thresholdDataSeriesColorValues, '#BD271E');
+
   const domain = getDomain(watch);
   const watchVisualizationDataKeys = Object.keys(watchVisualizationData);
   return (
@@ -163,17 +171,23 @@ const WatchVisualizationUi = () => {
               />
             );
           })}
-          <LineSeries
-            id={getSpecId('threshold')}
-            xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Linear}
-            data={[[domain.min, watch.threshold], [domain.max, watch.threshold]]}
-            xAccessor={0}
-            yAccessors={[1]}
-            timeZone={timezone}
-            yScaleToDataExtent={true}
-            customSeriesColors={thresholdCustomSeriesColors}
-          />
+          {getThreshold(watch).map((value: any, i: number) => {
+            const specId = i === 0 ? 'threshold' : `threshold${i}`;
+            return (
+              <LineSeries
+                key={specId}
+                id={getSpecId(specId)}
+                xScaleType={ScaleType.Time}
+                yScaleType={ScaleType.Linear}
+                data={[[domain.min, watch.threshold[i]], [domain.max, watch.threshold[i]]]}
+                xAccessor={0}
+                yAccessors={[1]}
+                timeZone={timezone}
+                yScaleToDataExtent={true}
+                customSeriesColors={getCustomColors(specId)}
+              />
+            );
+          })}
         </Chart>
       ) : (
         <EuiCallOut
