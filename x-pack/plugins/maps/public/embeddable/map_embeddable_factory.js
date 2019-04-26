@@ -39,8 +39,9 @@ export class MapEmbeddableFactory extends EmbeddableFactory {
         store.dispatch(addLayerWithoutDataSync(layerDescriptor));
       });
     } catch (error) {
-      // Unable to parse layerListJSON
-      // Error will be surfaced by map embeddable
+      throw new Error(i18n.translate('xpack.maps.mapEmbeddableFactory', {
+        defaultMessage: 'Unable to load map, malformed saved object',
+      }));
     }
     const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
 
