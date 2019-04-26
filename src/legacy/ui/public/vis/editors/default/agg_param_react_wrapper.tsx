@@ -30,7 +30,7 @@ interface AggParamReactWrapperProps<T> {
   aggParam: AggParam;
   editorConfig: EditorConfig;
   indexedFields: FieldParamType[];
-  isInvalid: boolean;
+  showValidation: boolean;
   paramEditor: React.FunctionComponent<AggParamEditorProps<T>>;
   value: T;
   onChange(value?: T): void;
