@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -29,7 +30,7 @@ import {
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import { TableTitle } from '../../table_title';
+// import { TableTitle } from '../../table_title';
 
 interface OwnProps {
   data: HostsEdges[];
@@ -86,7 +87,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
   ) => Array<Columns<ValueOf<HostItem>>>;
-  private memoizedTitle: (totalCount: number) => JSX.Element;
+  // private memoizedTitle: (totalCount: number) => JSX.Element;
   private memoizedSorting: (
     trigger: string,
     sortField: HostsFields,
@@ -96,7 +97,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   constructor(props: HostsTableProps) {
     super(props);
     this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
-    this.memoizedTitle = memoizeOne(this.getTitle);
+    // this.memoizedTitle = memoizeOne(this.getTitle);
     this.memoizedSorting = memoizeOne(this.getSorting);
   }
 
@@ -115,17 +116,27 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     return (
       <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}
-        loadingTitle={i18n.HOSTS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={this.wrappedLoadMore}
-        limit={limit}
         hasNextPage={hasNextPage}
+        headerCount={totalCount}
+        headerTitle={i18n.HOSTS}
+        headerTooltip={i18n.TOOLTIP}
+        headerUnit={
+          totalCount === 1 ? (
+            <FormattedMessage id="xpack.siem.hosts.hostsTable.unitSingular" defaultMessage="Host" />
+          ) : (
+            <FormattedMessage id="xpack.siem.hosts.hostsTable.unitPlural" defaultMessage="Hosts" />
+          )
+        }
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.HOSTS}
+        loadMore={this.wrappedLoadMore}
         onChange={this.onChange}
-        updateLimitPagination={this.wrappedUpdateLimitPagination}
+        pageOfItems={data}
         sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
-        title={this.memoizedTitle(totalCount)}
+        updateLimitPagination={this.wrappedUpdateLimitPagination}
+        // title={this.memoizedTitle(totalCount)}
       />
     );
   }
@@ -136,9 +147,9 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     direction: Direction
   ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
 
-  private getTitle = (totalCount: number): JSX.Element => (
-    <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
-  );
+  // private getTitle = (totalCount: number): JSX.Element => (
+  //   <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
+  // );
 
   private wrappedUpdateLimitPagination = (newLimit: number) =>
     this.props.updateLimitPagination({ limit: newLimit, hostsType: this.props.type });

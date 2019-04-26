@@ -11,6 +11,7 @@ import { pure } from 'recompose';
 import styled from 'styled-components';
 
 import { CountBadge } from '../index';
+import { HeaderPanel } from '../../header_panel';
 
 interface OwnProps {
   title: string;
@@ -19,15 +20,19 @@ interface OwnProps {
 }
 
 export const TableTitle = pure<OwnProps>(({ title, infoTooltip, totalCount }) => (
-  <h3>
-    {title}
-    {!isEmpty(infoTooltip) && (
-      <Sup>
-        <EuiIconTip content={infoTooltip} position="right" />
-      </Sup>
-    )}
-    <CountBadge color="hollow">{totalCount}</CountBadge>
-  </h3>
+  <>
+    <h3>
+      {title}
+      {!isEmpty(infoTooltip) && (
+        <Sup>
+          <EuiIconTip content={infoTooltip} position="right" />
+        </Sup>
+      )}
+      <CountBadge color="hollow">{totalCount}</CountBadge>
+    </h3>
+
+    {/* <HeaderPanel subtitle={`Showing: ${totalCount} Hosts`} title={title} tooltip={infoTooltip} /> */}
+  </>
 ));
 
 const Sup = styled.sup`

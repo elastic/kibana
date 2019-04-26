@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { EuiToolTip } from '@elastic/eui';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
 import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -78,20 +78,18 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns()}
-      loadingTitle={i18n.AUTHENTICATIONS}
-      loading={loading}
-      pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
-      limit={limit}
       hasNextPage={hasNextPage}
+      headerCount={totalCount}
+      headerTitle={i18n.AUTHENTICATIONS}
+      headerUnit={totalCount === 1 ? 'User' : 'Users'}
       itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadingTitle={i18n.AUTHENTICATIONS}
+      loadMore={() => loadMore(nextCursor)}
+      pageOfItems={data}
       updateLimitPagination={newLimit =>
         updateLimitPagination({ limit: newLimit, hostsType: type })
-      }
-      title={
-        <h3>
-          {i18n.AUTHENTICATIONS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
-        </h3>
       }
     />
   )

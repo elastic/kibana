@@ -14,13 +14,14 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
-  EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty, noop, getOr } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
+import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
@@ -44,16 +45,19 @@ export interface Criteria {
 interface BasicTableProps<T> {
   columns: Array<Columns<T>>;
   hasNextPage: boolean;
+  headerCount: number;
+  headerTitle: string | React.ReactElement;
+  headerTooltip: string;
+  headerUnit: string | React.ReactElement;
+  itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
   loadingTitle?: string;
   loadMore: () => void;
-  itemsPerRow?: ItemsPerRow[];
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   sorting?: SortingBasicTable;
-  title: string | React.ReactElement;
   updateLimitPagination: (limit: number) => void;
 }
 
@@ -94,6 +98,10 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     const {
       columns,
       hasNextPage,
+      headerCount,
+      headerTitle,
+      headerTooltip,
+      headerUnit,
       itemsPerRow,
       limit,
       loading,
@@ -101,7 +109,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       onChange = noop,
       pageOfItems,
       sorting = null,
-      title,
       updateLimitPagination,
     } = this.props;
     const { isEmptyTable } = this.state;
@@ -112,7 +119,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
           <LoadingPanel
             height="auto"
             width="100%"
-            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
             data-test-subj="InitialLoadingPanelLoadMoreTable"
           />
         </EuiPanel>
@@ -154,16 +161,22 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
               <LoadingPanel
                 height="100%"
                 width="100%"
-                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
                 position="absolute"
                 zIndex={3}
                 data-test-subj="LoadingPanelLoadMoreTable"
               />
             </>
           )}
-          <EuiTitle size="s">
-            <>{title}</>
-          </EuiTitle>
+
+          <HeaderPanel
+            subtitle={`Showing: ${headerCount} ${headerUnit}`}
+            title={headerTitle}
+            tooltip={headerTooltip}
+          />
+
+          <EuiSpacer />
+
           <EuiBasicTable
             items={pageOfItems}
             columns={columns}
@@ -179,6 +192,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                 : null
             }
           />
+
           {hasNextPage && (
             <FooterAction>
               <EuiFlexGroup
