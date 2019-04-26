@@ -29,6 +29,7 @@ import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import chrome from 'ui/chrome';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
@@ -43,6 +44,7 @@ class VisEditor extends Component {
       autoApply: true,
       visFields: props.visFields,
       extractedIndexPatterns: [''],
+      indexPatterns: [],
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
@@ -61,12 +63,30 @@ class VisEditor extends Component {
     this.props.vis.uiStateVal(field, value);
   };
 
+  /*
+    fetchIndexPatterns should probably move to the '../lib' folder under a new file.
+    Q: fetchIndexPatterns also needs to be triggered on componentDidMount?
+  */
+  fetchIndexPatterns = async () => {
+    const allIndexPatternObjects = await chrome
+      .getSavedObjectsClient()
+      .find({
+        type: 'index-pattern',
+        perPage: 100,
+      });
+    if (allIndexPatternObjects && allIndexPatternObjects.savedObjects) {
+      this.setState({
+        indexPatterns: allIndexPatternObjects.savedObjects,
+      });
+    }
+  };
+
   updateVisState = debounce(() => {
     this.props.vis.params = this.state.model;
     this.props.vis.updateState();
   }, VIS_STATE_DEBOUNCE_DELAY);
 
-  handleChange = async (partialModel) => {
+  handleChange = async partialModel => {
     if (isEmpty(partialModel)) {
       return;
     }
@@ -87,11 +107,15 @@ class VisEditor extends Component {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
 
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        fetchFields(extractedIndexPatterns)
-          .then(visFields => this.setState({
+        // fetch new index patterns for KQL as required
+        // Q: should I be using promises rather than async functions?
+        await this.fetchIndexPatterns();
+        fetchFields(extractedIndexPatterns).then(visFields =>
+          this.setState({
             visFields,
             extractedIndexPatterns,
-          }));
+          })
+        );
       }
     }
 
@@ -106,7 +130,7 @@ class VisEditor extends Component {
     this.setState({ dirty: false });
   };
 
-  handleAutoApplyToggle = (event) => {
+  handleAutoApplyToggle = event => {
     this.setState({ autoApply: event.target.checked });
   };
 
@@ -138,7 +162,7 @@ class VisEditor extends Component {
       return (
         <div className="tvbEditor" data-test-subj="tvbVisEditor">
           <div className="tvbEditor--hideForReporting">
-            <VisPicker model={model} onChange={this.handleChange}/>
+            <VisPicker model={model} onChange={this.handleChange} />
           </div>
           <VisEditorVisualization
             dirty={this.state.dirty}
@@ -155,6 +179,12 @@ class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
+            <button
+              style={{ border: '2px solid blue', backgroundColor: 'gray' }}
+              onClick={async () => await this.fetchIndexPatterns(model.default_index_pattern)}
+            >
+              FETCH
+            </button>
             <PanelConfig
               fields={this.state.visFields}
               model={model}
@@ -162,6 +192,7 @@ class VisEditor extends Component {
               dateFormat={this.props.config.get('dateFormat')}
               onChange={this.handleChange}
               getConfig={this.getConfig}
+              indexPatterns={this.state.indexPatterns}
             />
           </div>
         </div>
