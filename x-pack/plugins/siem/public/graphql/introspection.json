@@ -5691,7 +5691,8 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          { "name": "name", "description": "", "isDeprecated": false, "deprecationReason": null }
+          { "name": "name", "description": "", "isDeprecated": false, "deprecationReason": null },
+          { "name": "count", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },

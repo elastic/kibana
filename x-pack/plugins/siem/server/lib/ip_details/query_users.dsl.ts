@@ -87,14 +87,14 @@ export const buildUsersQuery = ({
   return dslQuery;
 };
 
-interface QueryOrder {
-  _key: Direction;
-}
+type QueryOrder = { _count: Direction } | { _key: Direction };
 
 const getQueryOrder = (usersSortField: UsersSortField): QueryOrder => {
   switch (usersSortField.field) {
     case UsersFields.name:
       return { _key: usersSortField.direction };
+    case UsersFields.count:
+      return { _count: usersSortField.direction };
     default:
       return assertUnreachable(usersSortField.field);
   }

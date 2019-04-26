@@ -115,6 +115,7 @@ const firstLastSeenSchema = gql`
 const usersSchema = gql`
   enum UsersFields {
     name
+    count
   }
 
   input UsersSortField {

@@ -1478,6 +1478,7 @@ export enum NetworkDirectionEcs {
 
 export enum UsersFields {
   name = 'name',
+  count = 'count',
 }
 
 export enum NetworkTopNFlowFields {

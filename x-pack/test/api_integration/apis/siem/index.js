@@ -19,5 +19,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./timeline'));
     loadTestFile(require.resolve('./timeline_details'));
     loadTestFile(require.resolve('./uncommon_processes'));
+    loadTestFile(require.resolve('./users'));
   });
 }

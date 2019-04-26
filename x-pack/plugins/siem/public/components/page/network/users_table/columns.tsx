@@ -121,7 +121,7 @@ export const getUsersColumns = (
     name: i18n.DOCUMENT_COUNT,
     truncateText: false,
     hideForMobile: false,
-    sortable: false,
+    sortable: true,
     render: docCount => {
       if (docCount != null) {
         return <>{docCount}</>;

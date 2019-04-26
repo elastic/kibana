@@ -72,14 +72,14 @@ interface BasicTableState {
   paginationLoading: boolean;
 }
 
-export interface Columns<T, U = T, V = T, W = T, X = T, Y = T, Z = T> {
+export interface Columns<T> {
   field?: string;
   name: string | React.ReactNode;
   isMobileHeader?: boolean;
   sortable?: boolean;
   truncateText?: boolean;
   hideForMobile?: boolean;
-  render?: (item: T | U | V | X | Y | Z) => void;
+  render?: (item: T) => void;
 }
 
 export class LoadMoreTable<T, U, V, W, X, Y, Z> extends React.PureComponent<

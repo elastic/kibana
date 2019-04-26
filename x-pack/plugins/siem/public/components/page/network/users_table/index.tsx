@@ -18,6 +18,7 @@ import { CountBadge } from '../../index';
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
+import { assertUnreachable } from '../../../../lib/helpers';
 
 interface OwnProps {
   data: UsersEdges[];
@@ -160,18 +161,21 @@ const getSortField = (sortField: UsersSortField): SortingBasicTable => {
         field: `node.user.${sortField.field}`,
         direction: sortField.direction,
       };
-    default:
+    case UsersFields.count:
       return {
         field: `node.user.${sortField.field}`,
         direction: sortField.direction,
       };
   }
+  return assertUnreachable(sortField.field);
 };
 
 const getSortFromString = (sortField: string): UsersFields => {
   switch (sortField) {
     case UsersFields.name.valueOf():
       return UsersFields.name;
+    case UsersFields.count.valueOf():
+      return UsersFields.count;
     default:
       return UsersFields.name;
   }
