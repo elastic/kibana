@@ -112,6 +112,43 @@ export default function manageRepositoriesFunctionalTests({
         });
       });
 
+      it('in search page, change language filters can go back and forward', async () => {
+        log.debug('it select typescript language filter');
+        const url = `${PageObjects.common.getHostPort()}/app/code#/search?q=string&p=&langs=typescript`;
+        await browser.get(url);
+
+        const language = await (await find.byCssSelector(
+          '.euiFacetButton--isSelected'
+        )).getVisibleText();
+
+        expect(language.indexOf('typescript')).to.equal(0);
+
+        const unselectedFilter = (await find.allByCssSelector('.euiFacetButton--unSelected'))[1];
+        await unselectedFilter.click();
+
+        const l = await (await find.allByCssSelector(
+          '.euiFacetButton--isSelected'
+        ))[1].getVisibleText();
+
+        expect(l.indexOf('javascript')).to.equal(0);
+
+        await browser.goBack();
+
+        const lang = await (await find.byCssSelector(
+          '.euiFacetButton--isSelected'
+        )).getVisibleText();
+
+        expect(lang.indexOf('typescript')).to.equal(0);
+
+        await driver.navigate().forward();
+
+        const filter = await (await find.allByCssSelector(
+          '.euiFacetButton--isSelected'
+        ))[1].getVisibleText();
+
+        expect(filter.indexOf('javascript')).to.equal(0);
+      });
+
       it('in source view page file line number changed can go back and forward', async () => {
         log.debug('it goes back after line number changed');
         const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter`;
@@ -138,6 +175,35 @@ export default function manageRepositoriesFunctionalTests({
         await retry.try(async () => {
           const existence = await find.existsByCssSelector('.code-line-number-21', FIND_TIME);
           expect(existence).to.be(true);
+        });
+      });
+
+      it('in source view page, switch side tab can go back and forward', async () => {
+        log.debug('it goes back after line number changed');
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/controllers/api.ts`;
+        await browser.get(url);
+        // refresh so language server will be initialized.
+        await browser.refresh();
+        // wait for tab is not disabled
+        await PageObjects.common.sleep(5000);
+        await testSubjects.click('codeStructureTreeTab');
+        await retry.try(async () => {
+          const tabText = await (await find.byCssSelector('.euiTab-isSelected')).getVisibleText();
+          expect(tabText).to.equal('Structure');
+        });
+
+        await browser.goBack();
+
+        await retry.try(async () => {
+          const tabText = await (await find.byCssSelector('.euiTab-isSelected')).getVisibleText();
+          expect(tabText).to.equal('File');
+        });
+
+        await driver.navigate().forward();
+
+        await retry.try(async () => {
+          const tabText = await (await find.byCssSelector('.euiTab-isSelected')).getVisibleText();
+          expect(tabText).to.equal('Structure');
         });
       });
     });
