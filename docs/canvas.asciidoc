@@ -1,37 +1,36 @@
-
 [role="xpack"]
 [[canvas]]
 = Canvas
-
+ 
 [partintro]
 --
 
-Congratulations on finding the Canvas application in {kib}. You are in for a treat. 
-Canvas is a whole new way of making data look amazing. Canvas combines data with 
-colors, shapes, text, and your own imagination to bring dynamic, multi-page, 
-pixel-perfect, data displays to screens large and small. 
+Canvas is a data visualization and presentation layer that sits within {kib}. 
+Backed by {es}, Canvas lets you create dynamic, pixel-perfect, infographic-style 
+presentations of your live data. Play with color palettes, add your own CSS elements, 
+drag and drop assets — and turn your presentations and reports into dynamic works of art.
 
-We made Canvas for people like us. We figure, you are probably people like us: 
-you make neat stuff and you want to show that neat stuff to others. Canvas is 
-for makers who are a little bit creative, a little bit technical, and whole lot 
-of curious.
+Canvas combines data with colors, shapes, text, and your own imagination to bring 
+dynamic, multi-page, pixel-perfect, data displays to screens large and small. 
 
-[role="screenshot"]
-image::images/canvas_workpad_weblog.png[]
+Ready to learn more? 
 
+Get acquainted with the Canvas workspace:
 
-We've put together <<canvas-getting-started, this Getting Started>> to get you
-up and running with Canvas. 
+* <<canvas-getting-started, Introduction to Canvas>>
+* <<canvas-create-workpad>>
 
-If you want to dig into the expression language and the functions that drive 
-Canvas, see the <<canvas-common-functions>> and 
-<<canvas-tinymath-functions>>.
+Dig into the expression language and the functions that drive Canvas:
+
+* <<canvas-common-functions>> 
+* <<canvas-tinymath-functions>>
+
 
 --
 
 include::canvas/canvas-getting-started.asciidoc[]
 
-include::canvas/canvas-workpad.asciidoc[]
+include::canvas/canvas-create-workpad.asciidoc[]
 
 include::canvas/canvas-function-reference.asciidoc[]
 

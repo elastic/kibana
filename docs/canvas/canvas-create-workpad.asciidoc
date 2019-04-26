@@ -1,0 +1,6 @@
+[role="xpack"]
+[[canvas-create-workpad]]
+=== Create a new workpad
+
+The common functions can run anywhere, which means they'll execute wherever 
+the expre,,......
