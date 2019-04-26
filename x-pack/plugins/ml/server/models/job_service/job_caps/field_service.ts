@@ -67,7 +67,7 @@ class FieldsService {
   private async createFields(): Promise<Field[]> {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
-    if (fieldCaps.fields) {
+    if (fieldCaps && fieldCaps.fields) {
       Object.keys(fieldCaps.fields).forEach((k: FieldId) => {
         const fc = fieldCaps.fields[k];
         const firstKey = Object.keys(fc)[0];
