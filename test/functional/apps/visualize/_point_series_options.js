@@ -204,12 +204,13 @@ export default function ({ getService, getPageObjects }) {
         await browser.refresh();
         await initChart();
 
-        const labels = await PageObjects.visualize.getXAxisLabels();
-
         await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'Browser' });
         await browser.refresh();
 
-        expect(labels).to.eql(expectedLabels);
+        retry.try(async () => {
+          const labels = await PageObjects.visualize.getXAxisLabels();
+          expect(labels).to.eql(expectedLabels);
+        });
       });
     });
   });
