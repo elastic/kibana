@@ -62,7 +62,8 @@ export function CustomSelectionTable({
   const [lastSelected, setLastSelected] = useState(selectedIds);
   const [sortedColumn, setSortedColumn] = useState('');
   const [pager, setPager] = useState();
-  const [firstAndLastIndex, setFirstAndLastIndex] = useState({
+  const [pagerSettings, setPagerSettings] = useState({
+    itemsPerPage: JOBS_PER_PAGE,
     firstItemIndex: 0,
     lastItemIndex: 1
   });
@@ -71,6 +72,7 @@ export function CustomSelectionTable({
 
   useEffect(() => {
     setCurrentItems(items);
+    handleQueryChange({ query: query });
   }, [items]); // eslint-disable-line
 
   // When changes to selected ids made via badge removal - update selection in the table accordingly
@@ -80,7 +82,8 @@ export function CustomSelectionTable({
 
   useEffect(() => {
     const tablePager = new Pager(currentItems.length, JOBS_PER_PAGE);
-    setFirstAndLastIndex({
+    setPagerSettings({
+      itemsPerPage: JOBS_PER_PAGE,
       firstItemIndex: tablePager.getFirstItemIndex(),
       lastItemIndex: tablePager.getLastItemIndex()
     });
@@ -120,10 +123,20 @@ export function CustomSelectionTable({
     onTableChange(currentSelected);
   }
 
+  function handleChangeItemsPerPage(itemsPerPage) {
+    pager.setItemsPerPage(itemsPerPage);
+    setPagerSettings({
+      ...pagerSettings,
+      itemsPerPage,
+      firstItemIndex: pager.getFirstItemIndex(),
+      lastItemIndex: pager.getLastItemIndex()
+    });
+  }
+
   function handlePageChange(pageIndex) {
     pager.goToPageIndex(pageIndex);
-    setFirstAndLastIndex({
-      ...firstAndLastIndex,
+    setPagerSettings({
+      ...pagerSettings,
       firstItemIndex: pager.getFirstItemIndex(),
       lastItemIndex: pager.getLastItemIndex()
     });
@@ -287,7 +300,7 @@ export function CustomSelectionTable({
 
     const rows = [];
 
-    for (let itemIndex = firstAndLastIndex.firstItemIndex; itemIndex <= firstAndLastIndex.lastItemIndex; itemIndex++) {
+    for (let itemIndex = pagerSettings.firstItemIndex; itemIndex <= pagerSettings.lastItemIndex; itemIndex++) {
       const item = currentItems[itemIndex];
       if (item === undefined) break;
       rows.push(renderRow(item));
@@ -304,6 +317,7 @@ export function CustomSelectionTable({
           <EuiSearchBar
             defaultQuery={query}
             box={{
+              incremental: true,
               placeholder: 'Search...'
             }}
             filters={filters}
@@ -343,10 +357,10 @@ export function CustomSelectionTable({
       { pager !== undefined &&
         <EuiTablePagination
           activePage={pager.getCurrentPageIndex()}
-          itemsPerPage={JOBS_PER_PAGE}
-          itemsPerPageOptions={[JOBS_PER_PAGE]}
+          itemsPerPage={pagerSettings.itemsPerPage}
+          itemsPerPageOptions={[10, JOBS_PER_PAGE, 50]}
           pageCount={pager.getTotalPages()}
-          onChangeItemsPerPage={() => {}}
+          onChangeItemsPerPage={handleChangeItemsPerPage}
           onChangePage={(pageIndex) => handlePageChange(pageIndex)}
         />}
     </Fragment>
