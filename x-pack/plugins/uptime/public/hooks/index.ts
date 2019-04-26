@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { createUiMetricUri } from './ui_metric';
+export { useUrlParams } from './use_url_params';
