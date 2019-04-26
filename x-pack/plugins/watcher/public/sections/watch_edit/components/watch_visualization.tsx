@@ -71,7 +71,7 @@ const getDomain = (watch: any) => {
   const VISUALIZE_TIME_WINDOW_MULTIPLIER = 5;
   const fromExpression = `now-${watch.timeWindowSize * VISUALIZE_TIME_WINDOW_MULTIPLIER}${
     watch.timeWindowUnit
-    }`;
+  }`;
   const toExpression = 'now';
   const fromMoment = dateMath.parse(fromExpression);
   const toMoment = dateMath.parse(toExpression);
@@ -181,21 +181,21 @@ const WatchVisualizationUi = () => {
           })}
         </Chart>
       ) : (
-          <EuiCallOut
-            title={
-              <FormattedMessage
-                id="xpack.watcher.thresholdPreviewChart.noDataTitle"
-                defaultMessage="No data"
-              />
-            }
-            color="warning"
-          >
+        <EuiCallOut
+          title={
             <FormattedMessage
-              id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
-              defaultMessage="Your index and condition did not return any data."
+              id="xpack.watcher.thresholdPreviewChart.noDataTitle"
+              defaultMessage="No data"
             />
-          </EuiCallOut>
-        )}
+          }
+          color="warning"
+        >
+          <FormattedMessage
+            id="xpack.watcher.thresholdPreviewChart.dataDoesNotExistTextMessage"
+            defaultMessage="Your index and condition did not return any data."
+          />
+        </EuiCallOut>
+      )}
       <EuiSpacer size="m" />
     </Fragment>
   );
