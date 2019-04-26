@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { aggTypes } from './agg_types';
 import { groupByTypes } from './group_by_types';
 import { comparators } from './comparators';
+const { BETWEEN } = COMPARATORS;
 const DEFAULT_VALUES = {
   AGG_TYPE: 'count',
   TERM_SIZE: 5,
@@ -189,7 +190,7 @@ export class ThresholdWatch extends BaseWatch {
         ));
       }
     });
-    if (this.thresholdComparator === 'between' && this.threshold[0] && this.threshold[1] && !(this.threshold[1] > this.threshold[0])) {
+    if (this.thresholdComparator === BETWEEN && this.threshold[0] && this.threshold[1] && !(this.threshold[1] > this.threshold[0])) {
       errors.threshold1.push(i18n.translate(
         'xpack.watcher.thresholdWatchExpression.thresholdLevel.secondValueMustBeGreaterMessage',
         {
