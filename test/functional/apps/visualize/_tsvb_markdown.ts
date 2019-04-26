@@ -81,20 +81,18 @@ export default function({ getPageObjects }: FtrProviderContext) {
         const markdownText = await visualBuilder.getMarkdownText();
         expect(markdownText).to.be(expectedRenderer);
       });
+      it('should render markdown table', async () => {
+        const TABLE =
+          '| raw | formatted |\n|-|-|\n| {{count.last.raw}} | {{count.last.formatted}} |';
+        const DATA = '46';
 
-      it('should change label name', async () => {
-        const BASE_LABEL = 'count';
-        const LABEL = 'label';
-        await visualBuilder.markdownSwitchSubTab('data');
+        await visualBuilder.enterMarkdown(TABLE);
+        const text = await visualBuilder.getMarkdownText();
+        const tableValues = text.split('\n').map(row => row.split(' '))[1]; // [46, 46]
 
-        await visualBuilder.setMarkdownDataVariable(LABEL, LABEL);
-
-        await visualBuilder.markdownSwitchSubTab('markdown');
-        const table = await visualBuilder.getMarkdownTableVariables();
-        table.forEach(row => {
-          expect(row.key).to.contain(LABEL);
+        tableValues.forEach(value => {
+          expect(value).to.be.equal(DATA);
         });
-        await cleanupMarkdownData(LABEL, BASE_LABEL);
       });
 
       it('should change variable name', async () => {
@@ -115,18 +113,19 @@ export default function({ getPageObjects }: FtrProviderContext) {
         await cleanupMarkdownData(VARIABLE, VARIABLE);
       });
 
-      it('should render markdown table', async () => {
-        const TABLE =
-          '| raw | formatted |\n|-|-|\n| {{count.last.raw}} | {{count.last.formatted}} |';
-        const DATA = '46';
+      it('should change label name', async () => {
+        const BASE_LABEL = 'count';
+        const LABEL = 'label';
+        await visualBuilder.markdownSwitchSubTab('data');
 
-        await visualBuilder.enterMarkdown(TABLE);
-        const text = await visualBuilder.getMarkdownText();
-        const tableValues = text.split('\n').map(row => row.split(' '))[1]; // [46, 46]
+        await visualBuilder.setMarkdownDataVariable(LABEL, LABEL);
 
-        tableValues.forEach(value => {
-          expect(value).to.be.equal(DATA);
+        await visualBuilder.markdownSwitchSubTab('markdown');
+        const table = await visualBuilder.getMarkdownTableVariables();
+        table.forEach(row => {
+          expect(row.key).to.contain(LABEL);
         });
+        await cleanupMarkdownData(LABEL, BASE_LABEL);
       });
     });
   });

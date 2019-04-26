@@ -19,6 +19,7 @@
 
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
+import { delay } from 'bluebird';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
@@ -113,8 +114,10 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
     public async getMarkdownTableVariables(): Promise<
       Array<{ key: string; value: string; selector: WebElementWrapper }>
     > {
+      await delay(100); // stale element workaround
       const testTableVariables = await testSubjects.find('tsvbMarkdownVariablesTable');
       const variablesSelector = 'tbody tr';
+      await delay(100); // stale element workaround
       const exists = await find.existsByDisplayedByCssSelector(variablesSelector);
       if (!exists) {
         log.debug('variable list is empty');
