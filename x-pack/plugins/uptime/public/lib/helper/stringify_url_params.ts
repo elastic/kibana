@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import qs from 'querystring';
+import { UptimeUrlParams } from './url_params/get_supported_url_params';
 
-export function createUiMetricUri(appName: string, actionType: string): string {
-  return chrome.addBasePath(`/api/ui_metric/${appName}/${actionType}`);
-}
+export const stringifyUrlParams = (params: UptimeUrlParams) => `?${qs.stringify(params)}`;
