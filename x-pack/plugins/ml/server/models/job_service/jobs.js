@@ -186,7 +186,12 @@ export function jobsProvider(callWithRequest) {
                 jobIds: [job.job_id],
                 timeRange: {
                   to: job.timeRange.to,
-                  from: job.timeRange.from
+                  toMoment: null,
+                  from: job.timeRange.from,
+                  fromMoment: null,
+                  fromPx: job.timeRange.fromPx,
+                  toPx: job.timeRange.toPx,
+                  widthPx: null,
                 }
               };
 
@@ -195,18 +200,18 @@ export function jobsProvider(callWithRequest) {
               groups[g].jobIds.push(job.job_id);
               groupsMap[g].jobIds.push(job.job_id);
               // keep track of earliest 'from' / latest 'to' for group range
-              if (groups[g].timeRange.to === undefined || job.timeRange.to > groups[g].timeRange.to) {
+              if (groups[g].timeRange.to === null || job.timeRange.to > groups[g].timeRange.to) {
                 groups[g].timeRange.to = job.timeRange.to;
                 groups[g].timeRange.toMoment = job.timeRange.toMoment;
               }
-              if (groups[g].timeRange.from === undefined || job.timeRange.from < groups[g].timeRange.from) {
+              if (groups[g].timeRange.from === null || job.timeRange.from < groups[g].timeRange.from) {
                 groups[g].timeRange.from = job.timeRange.from;
                 groups[g].timeRange.fromMoment = job.timeRange.fromMoment;
               }
-              if (groups[g].timeRange.toPx === undefined || job.timeRange.toPx > groups[g].timeRange.toPx) {
+              if (groups[g].timeRange.toPx === null || job.timeRange.toPx > groups[g].timeRange.toPx) {
                 groups[g].timeRange.toPx = job.timeRange.toPx;
               }
-              if (groups[g].timeRange.fromPx === undefined || job.timeRange.fromPx < groups[g].timeRange.fromPx) {
+              if (groups[g].timeRange.fromPx === null || job.timeRange.fromPx < groups[g].timeRange.fromPx) {
                 groups[g].timeRange.fromPx = job.timeRange.fromPx;
               }
             }
