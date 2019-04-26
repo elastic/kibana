@@ -43,7 +43,7 @@ function loadJobIdsFromGlobalState(globalState) {
   const jobIds = [];
   if (globalState.ml && globalState.ml.jobIds) {
     let tempJobIds = [];
-    let validIds;
+
     if (typeof globalState.ml.jobIds === 'string') {
       tempJobIds.push(globalState.ml.jobIds);
     } else {
@@ -51,15 +51,10 @@ function loadJobIdsFromGlobalState(globalState) {
     }
     tempJobIds = tempJobIds.map(id => String(id));
 
-    if (mlJobService.jobs.length > 0) {
-      const invalidIds = getInvalidJobIds(tempJobIds);
-      warnAboutInvalidJobIds(invalidIds);
+    const invalidIds = getInvalidJobIds(tempJobIds);
+    warnAboutInvalidJobIds(invalidIds);
 
-      validIds = difference(tempJobIds, invalidIds);
-    } else {
-      validIds = tempJobIds;
-    }
-
+    let validIds = difference(tempJobIds, invalidIds);
     // if there are no valid ids, warn and then select the first job
     if (validIds.length === 0) {
       toastNotifications.addWarning(i18n.translate('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {

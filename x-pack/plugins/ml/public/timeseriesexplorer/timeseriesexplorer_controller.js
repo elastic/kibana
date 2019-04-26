@@ -73,6 +73,17 @@ uiRoutes
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
       mlNodeCount: getMlNodeCount,
+      jobs: function () {
+        return mlJobService.loadJobs()
+          .then(function (resp) {
+            return resp;
+          })
+          .catch(function (error) {
+            console.log('Error loading jobs in route resolve.', error);
+            // Always resolve to ensure tab still works.
+            Promise.resolve([]);
+          });
+      }
     }
   });
 
@@ -137,92 +148,87 @@ module.controller('MlTimeSeriesExplorerController', function (
 
     $scope.jobs = [];
 
-    // Load the job info needed by the visualization, then do the first load.
-    mlJobService.loadJobs()
-      .then((resp) => {
+    // Get the job info needed by the visualization, then do the first load.
+    if (mlJobService.jobs.length > 0) {
+      $scope.jobs = createTimeSeriesJobData(mlJobService.jobs);
+      const timeSeriesJobIds = $scope.jobs.map(j => j.id);
 
-        if (resp.jobs.length > 0) {
-          $scope.jobs = createTimeSeriesJobData(resp.jobs);
-          const timeSeriesJobIds = $scope.jobs.map(j => j.id);
+      // Select any jobs set in the global state (i.e. passed in the URL).
+      let selectedJobIds = getSelectedJobIds(globalState);
 
-          // Select any jobs set in the global state (i.e. passed in the URL).
-          let selectedJobIds = getSelectedJobIds(globalState);
-
-          // Check if any of the jobs set in the URL are not time series jobs
-          // (e.g. if switching to this view straight from the Anomaly Explorer).
-          const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
-          selectedJobIds = _.without(selectedJobIds, ...invalidIds);
-          if (invalidIds.length > 0) {
-            let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
-              defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
-              values: {
-                invalidIdsCount: invalidIds.length,
-                invalidIds
-              }
-            });
-            if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
-              warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
-                defaultMessage: ', auto selecting first job'
-              });
-            }
-            toastNotifications.addWarning(warningText);
+      // Check if any of the jobs set in the URL are not time series jobs
+      // (e.g. if switching to this view straight from the Anomaly Explorer).
+      const invalidIds = _.difference(selectedJobIds, timeSeriesJobIds);
+      selectedJobIds = _.without(selectedJobIds, ...invalidIds);
+      if (invalidIds.length > 0) {
+        let warningText = i18n('xpack.ml.timeSeriesExplorer.canNotViewRequestedJobsWarningMessage', {
+          defaultMessage: `You can't view requested {invalidIdsCount, plural, one {job} other {jobs}} {invalidIds} in this dashboard`,
+          values: {
+            invalidIdsCount: invalidIds.length,
+            invalidIds
           }
-          // TODO: removed -> || mlJobSelectService.groupIds.length -> replace functionality
-          if (selectedJobIds.length > 1) { // TODO: check for group ids in url
-          // if more than one job or a group has been loaded from the URL
-            if (selectedJobIds.length > 1) {
-            // if more than one job, select the first job from the selection.
-              toastNotifications.addWarning(
-                i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-                  defaultMessage: 'You can only view one job at a time in this dashboard'
-                })
-              );
-              mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
-            } else {
-            // if a group has been loaded
-              if (selectedJobIds.length > 0) {
-              // if the group contains valid jobs, select the first
-                toastNotifications.addWarning(
-                  i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
-                    defaultMessage: 'You can only view one job at a time in this dashboard'
-                  })
-                );
-                // mlJobSelectService.setJobIds([selectedJobIds[0]]);
-                mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
-              } else if ($scope.jobs.length > 0) {
-              // if there are no valid jobs in the group but there are valid jobs
-              // in the list of all jobs, select the first
-                mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
-              } else {
-              // if there are no valid jobs left.
-                $scope.loading = false;
-              }
-            }
-          } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
-          // if some ids have been filtered out because they were invalid.
-          // refresh the URL with the first valid id
-            mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
-          } else if (selectedJobIds.length > 0) {
-          // normal behavior. a job ID has been loaded from the URL
-            loadForJobId(selectedJobIds[0]);
-          } else {
-            if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
-            // no jobs were loaded from the URL, so add the first job
-            // from the full jobs list.
-              mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
-            } else {
-            // Jobs exist, but no time series jobs.
-              $scope.loading = false;
-            }
-          }
+        });
+        if (selectedJobIds.length === 0 && timeSeriesJobIds.length > 0) {
+          warningText += i18n('xpack.ml.timeSeriesExplorer.autoSelectingFirstJobText', {
+            defaultMessage: ', auto selecting first job'
+          });
+        }
+        toastNotifications.addWarning(warningText);
+      }
+      // TODO: removed -> || mlJobSelectService.groupIds.length -> replace functionality
+      if (selectedJobIds.length > 1) { // TODO: check for group ids in url
+      // if more than one job or a group has been loaded from the URL
+        if (selectedJobIds.length > 1) {
+        // if more than one job, select the first job from the selection.
+          toastNotifications.addWarning(
+            i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+              defaultMessage: 'You can only view one job at a time in this dashboard'
+            })
+          );
+
+          mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
         } else {
+        // if a group has been loaded
+          if (selectedJobIds.length > 0) {
+          // if the group contains valid jobs, select the first
+            toastNotifications.addWarning(
+              i18n('xpack.ml.timeSeriesExplorer.youCanViewOneJobAtTimeWarningMessage', {
+                defaultMessage: 'You can only view one job at a time in this dashboard'
+              })
+            );
+
+            mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+          } else if ($scope.jobs.length > 0) {
+          // if there are no valid jobs in the group but there are valid jobs
+          // in the list of all jobs, select the first
+            mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
+          } else {
+          // if there are no valid jobs left.
+            $scope.loading = false;
+          }
+        }
+      } else if (invalidIds.length > 0 && selectedJobIds.length > 0) {
+      // if some ids have been filtered out because they were invalid.
+      // refresh the URL with the first valid id
+        mlJobSelectService.next({ selection: [selectedJobIds[0]], resetSelection: true });
+      } else if (selectedJobIds.length > 0) {
+      // normal behavior. a job ID has been loaded from the URL
+        loadForJobId(selectedJobIds[0]);
+      } else {
+        if (selectedJobIds.length === 0 && $scope.jobs.length > 0) {
+        // no jobs were loaded from the URL, so add the first job
+        // from the full jobs list.
+          mlJobSelectService.next({ selection: [$scope.jobs[0].id], resetSelection: true });
+        } else {
+        // Jobs exist, but no time series jobs.
           $scope.loading = false;
         }
+      }
+    } else {
+      $scope.loading = false;
+    }
 
-        $scope.$applyAsync();
-      }).catch((resp) => {
-        console.log('Time series explorer - error getting job info from elasticsearch:', resp);
-      });
+    $scope.$applyAsync();
   };
 
   $scope.refresh = function () {

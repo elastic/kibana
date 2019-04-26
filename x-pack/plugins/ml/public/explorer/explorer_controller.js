@@ -47,6 +47,17 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
+      jobs: function () {
+        return mlJobService.loadJobs()
+          .then(function (resp) {
+            return resp;
+          })
+          .catch(function (error) {
+            console.log('Error loading jobs in route resolve.', error);
+            // Always resolve to ensure tab still works.
+            Promise.resolve([]);
+          });
+      }
     },
   });
 
@@ -146,55 +157,50 @@ module.controller('MlExplorerController', function (
   // <ml-explorer-react-wrapper /> and <Explorer /> have been initialized.
   function loadJobsListener({ action }) {
     if (action === EXPLORER_ACTION.LOAD_JOBS) {
-      mlJobService.loadJobs()
-        .then((resp) => {
-          if (resp.jobs.length > 0) {
-            // Select any jobs set in the global state (i.e. passed in the URL).
-            const selectedJobIds = mlJobSelectService.getValue().selection;
-            let selectedCells;
-            let filterData = {};
+      // Jobs load via route resolver
+      if (mlJobService.jobs.length > 0) {
+        // Select any jobs set in the global state (i.e. passed in the URL).
+        const selectedJobIds = mlJobSelectService.getValue().selection;
+        let selectedCells;
+        let filterData = {};
 
-            // keep swimlane selection, restore selectedCells from AppState
-            if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
-              selectedCells = {
-                type: $scope.appState.mlExplorerSwimlane.selectedType,
-                lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
-                times: $scope.appState.mlExplorerSwimlane.selectedTimes,
-                showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
-                viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
-              };
-            }
+        // keep swimlane selection, restore selectedCells from AppState
+        if ($scope.appState.mlExplorerSwimlane.selectedType !== undefined) {
+          selectedCells = {
+            type: $scope.appState.mlExplorerSwimlane.selectedType,
+            lanes: $scope.appState.mlExplorerSwimlane.selectedLanes,
+            times: $scope.appState.mlExplorerSwimlane.selectedTimes,
+            showTopFieldValues: $scope.appState.mlExplorerSwimlane.showTopFieldValues,
+            viewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
+          };
+        }
 
-            // keep influencers filter selection, restore from AppState
-            if ($scope.appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
-              filterData = {
-                influencersFilterQuery: $scope.appState.mlExplorerFilter.influencersFilterQuery,
-                filterActive: $scope.appState.mlExplorerFilter.filterActive,
-                filteredFields: $scope.appState.mlExplorerFilter.filteredFields,
-                queryString: $scope.appState.mlExplorerFilter.queryString,
-              };
-            }
+        // keep influencers filter selection, restore from AppState
+        if ($scope.appState.mlExplorerFilter.influencersFilterQuery !== undefined) {
+          filterData = {
+            influencersFilterQuery: $scope.appState.mlExplorerFilter.influencersFilterQuery,
+            filterActive: $scope.appState.mlExplorerFilter.filterActive,
+            filteredFields: $scope.appState.mlExplorerFilter.filteredFields,
+            queryString: $scope.appState.mlExplorerFilter.queryString,
+          };
+        }
 
-            jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
-              filterData,
-              fullJobs: resp.jobs,
-              selectedCells,
-              selectedJobIds,
-              swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
-            });
-          } else {
-            explorer$.next({
-              action: EXPLORER_ACTION.RELOAD,
-              payload: {
-                loading: false,
-                noJobsFound: true,
-              }
-            });
-          }
-        })
-        .catch((resp) => {
-          console.log('Explorer - error getting job info from elasticsearch:', resp);
+        jobSelectionUpdate(EXPLORER_ACTION.INITIALIZE, {
+          filterData,
+          fullJobs: mlJobService.jobs,
+          selectedCells,
+          selectedJobIds,
+          swimlaneViewByFieldName: $scope.appState.mlExplorerSwimlane.viewByFieldName,
         });
+      } else {
+        explorer$.next({
+          action: EXPLORER_ACTION.RELOAD,
+          payload: {
+            loading: false,
+            noJobsFound: true,
+          }
+        });
+      }
     }
   }
 
