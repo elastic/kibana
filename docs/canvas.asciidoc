@@ -13,12 +13,16 @@ drag and drop assets — and turn your presentations and reports into dynamic wo
 Canvas combines data with colors, shapes, text, and your own imagination to bring 
 dynamic, multi-page, pixel-perfect, data displays to screens large and small. 
 
-Ready to learn more? 
+[role="screenshot"]
+image::canvas/images/canvas-ecommerce.png[]
+
+[float]
+=== Ready to learn more? 
 
 Get acquainted with the Canvas workspace:
 
-* <<canvas-getting-started, Introduction to Canvas>>
-* <<canvas-create-workpad>>
+* <<canvas-getting-started, Get started with Canvas>>
+* <<canvas-create-workpad, Create a new workpad>>
 
 Dig into the expression language and the functions that drive Canvas:
 

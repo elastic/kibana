@@ -1,24 +1,15 @@
 [role="xpack"]
 [[canvas-getting-started]]
-=== Getting started with Canvas
+== Getting started with Canvas
 
-Your best bet to getting started with Canvas is to check out one 
-(or all) of the sample data sets that ship with {kib}. 
-
-. Click the {kib} logo in the upper left hand corner of your browser to navigate 
-to the {kib} home page.
-. Click *Load a data set and a Kibana dashboard*. This also loads a 
-Canvas workpad to go with the data set.
-. Pick a data set. Let’s go with the eCommerce one for this example, but while you're 
-here, feel free to click *Add* on all of the available sample data sets.
-. Click the Canvas icon in the left hand navigation menu.
-. Find the *[eCommerce] Revenue Tracking* workpad and click on its name to open it.
+Before you start this tutorial, <<add-sample-data, add the eCommerce sample data set>>. 
+Each sample data set includes a Canvas workpad to go along with the data. Once you've 
+added the data, open *Canvas* and click the name of the *[eCommerce] Revenue Tracking* workpad.
 
 [role="screenshot"]
 image::images/canvas-ecommerce.png[]
 
-You’re in! The first thing to do is to make a copy of this 
-workpad so you can come back to it later if needed. We’ll be making a mess 
+Let's make a copy of this workpad so we don't have to worry about making a mess 
 of it in this tutorial. 
 
 . Click the name of the workpad in the lower left hand corner. 
@@ -31,13 +22,12 @@ workpad from here, but let's not for now.
 You now have a new workpad called *[eCommerce] Revenue Tracking - Copy*.
 
 [float]
-==== Using the workpad
+=== Play around with the workpad
 
-Now that you have a workpad with sample data that you can mess with, let’s mess with it. 
-We’ll start out by making a few stylistic changes. 
+Let's start out by making a few stylistic changes. 
 
 . Click the gauge chart in the top left of the workpad (fun fact, these are actually pie charts). 
-Try clicking on the small red slice. If you click the number, you'll notice that
+Click on the small red slice - if you click the number, you'll notice that
 you’ve actually selected a number element, not the gauge itself. 
 + 
 This element is now selected. Off to the right, you'll see that the side bar has changed. 
@@ -46,7 +36,7 @@ This is where you can make changes to the element.
 [role="screenshot"]
 image::images/canvas_workpad_edit_style.png[]
 
-. Try changing the color palette. Easy right? Click the Back button in your 
+. Try changing the color palette. Click the Back button in your 
 browser to undo your change.
 
 . Try dragging the chart around the page. Grab the resize handles to make 
@@ -59,7 +49,7 @@ You will notice the sidebar changing again. You now have
 access to the page and workpad-level settings. Feel free to change the page 
 background color or rename your workpad.
 
-Speaking of pages, Canvas workpads can have multiple pages.
+Speaking of pages, Canvas workpads can have multiple pages:
 
 . Click the arrow to the right of the *Page 1 of 2* text in the toolbar at the bottom
 of the page. You'll see a whole new view of the the eCommerce data.
@@ -72,10 +62,18 @@ workpad.
 [role="screenshot"]
 image::images/canvas_workpad_3_page.png[]
 
-You now have a three-page workpad, and a new element connected 
-to some demo data.  Your next step is to wire your new element 
-up to some real data; you can click on the *Data* tab in the right sidebar menu 
-and click "Change your data source" to start working with your {es} data.
+[float]
+=== Changing your data source
+You now have a three-page workpad, and a new element connected to some demo data.  
+Your next step is to wire your new element up to some real data. 
+
+Click on the *Data* tab in the right sidebar menu and click "Change your data source" 
+to start working with your {es} data. 
+
+[float]
+==== Next steps
+* <<canvas-create-workpad, Create a new workpad>>
+* <<canvas-function-reference, Learn about the expression language and the functions that drive Canvas>> 
 
 
 

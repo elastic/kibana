@@ -1,6 +1,59 @@
 [role="xpack"]
 [[canvas-create-workpad]]
-=== Create a new workpad
+== Create a new workpad
 
-The common functions can run anywhere, which means they'll execute wherever 
-the expre,,......
+Canvas is a creative space for presenting data that allows you to combine colors, 
+shapes, text, to bring dynamic, multi-page, pixel-perfect, data displays to screens
+large and small. 
+
+A Canvas workpad is your drawing space. In this tutorial, you'll learn how to create
+and configure your own workpad, and add text, data elements, and visual assets. 
+
+Before you start this tutorial, you will need to have your own {es} data source 
+connected in {kib}, or you can add on of the {kib} <<add-sample-data, sample data sets>>. 
+
+[float]
+=== Starting a new project
+Open *Canvas*. Click the *Templates* tab to create a new project from a light or 
+dark template; templates include placeholder text, images, and styles to help you
+get started. You can also click *Create workpad* to start from scratch.
+
+[float]
+=== Working with elements
+Elements are the individual components that can be placed on a workpad and configured
+to suit your presentation. You can use elements to add text, logos, and images to your
+presentation. An element can also be connected to a data source to display live data. 
+
+Add text::  
+* Click *Add element* on the top right, and select *Markdown* to add a text box to your workpad.
+* Click on the text box in the workpad to reveal the *Markdown* menu on the right hand
+side. From this menu you can add text content, and configure text styles.
+
+Add assets:: 
+* Click *Manage assets* to import new images
+* Select an image from your library and <isert icon> to add an image element to your workpad
+
+Present your data:: 
+* Click *Add element* to choose from available data elements, such as a coordinate plot, 
+line chart, pie chart, etc. Select an element type to add it to your workpad.
+* Click on the element in the workpad to open the sidebar editor. The editor enables
+you to can edit *Display* information for this element, and well as its *Data* source. 
+* You can also open the *Expression editor* on the bottom right to bypass the sidebar
+editor and edit the expression associated with an element directly.
+
+
+[float]
+=== Working with data sources 
+
+
+
+[float]
+=== Adding a new page
+You can add additional pages to your Canvas workpad to build out your presentation. 
+From the bottom of the page click *Page 1 of ...* to view all existing pages. 
+Next, click *+* on the righthand side to add a new page. 
+
+[float]
+=== Sharing your workpad
+
+
