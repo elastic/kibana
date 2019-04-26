@@ -49,7 +49,8 @@ export const PopoverForm: React.SFC<Props> = ({ defaultData, onChange, options }
       return { text: o.agg };
     });
 
-  const validAggregationName = aggregationName !== '';
+  // aggregation names must be alphanumeric with support for -_ as special chars.
+  const validAggregationName = /^[a-z0-9\-_]+$/i.test(aggregationName);
   const formValid = validAggregationName;
 
   return (
@@ -79,8 +80,8 @@ export const PopoverForm: React.SFC<Props> = ({ defaultData, onChange, options }
         {availableAggs.length > 1 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.popoverForm.fieldLabel', {
-                defaultMessage: 'Field',
+              label={i18n.translate('xpack.ml.dataframe.popoverForm.aggLabel', {
+                defaultMessage: 'Aggregation',
               })}
             >
               <EuiSelect
