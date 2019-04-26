@@ -126,7 +126,6 @@ const requestNodeMetrics = async (
       query: {
         bool: {
           filter: [
-            ...createQueryFilterClauses(options.filterQuery),
             {
               range: {
                 [options.sourceConfiguration.fields.timestamp]: {
