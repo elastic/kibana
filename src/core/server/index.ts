@@ -30,9 +30,20 @@ export {
   ElasticsearchClientConfig,
   APICaller,
 } from './elasticsearch';
+export {
+  AuthenticationHandler,
+  AuthToolkit,
+  KibanaRequest,
+  OnRequestHandler,
+  OnRequestToolkit,
+  Router,
+} from './http';
 export { Logger, LoggerFactory, LogMeta, LogRecord, LogLevel } from './logging';
+
 export {
   DiscoveredPlugin,
+  Plugin,
+  PluginInitializer,
   PluginInitializerContext,
   PluginName,
   PluginSetupContext,
@@ -45,4 +56,4 @@ export interface CoreSetup {
   plugins: PluginsServiceSetup;
 }
 
-export { ElasticsearchServiceSetup, HttpServiceSetup, PluginsServiceSetup };
+export { HttpServiceSetup, ElasticsearchServiceSetup, PluginsServiceSetup };

@@ -7,7 +7,7 @@
 import { EuiIcon } from '@elastic/eui';
 import { shallow } from 'enzyme';
 import React from 'react';
-import { Role } from '../../../../../common/model/role';
+import { Role } from '../../../../../common/model';
 import { ReservedRoleBadge } from './reserved_role_badge';
 
 const reservedRole: Role = {
@@ -17,10 +17,23 @@ const reservedRole: Role = {
     indices: [],
     run_as: [],
   },
-  kibana: {
-    global: [],
-    space: {},
-  },
+  kibana: [
+    {
+      spaces: ['*'],
+      base: ['all'],
+      feature: {},
+    },
+    {
+      spaces: ['default'],
+      base: ['foo'],
+      feature: {},
+    },
+    {
+      spaces: ['marketing'],
+      base: ['read'],
+      feature: {},
+    },
+  ],
   metadata: {
     _reserved: true,
   },
@@ -33,10 +46,23 @@ const unreservedRole = {
     indices: [],
     run_as: [],
   },
-  kibana: {
-    global: [],
-    space: {},
-  },
+  kibana: [
+    {
+      spaces: ['*'],
+      base: ['all'],
+      feature: {},
+    },
+    {
+      spaces: ['default'],
+      base: ['foo'],
+      feature: {},
+    },
+    {
+      spaces: ['marketing'],
+      base: ['read'],
+      feature: {},
+    },
+  ],
 };
 
 test('it renders without crashing', () => {

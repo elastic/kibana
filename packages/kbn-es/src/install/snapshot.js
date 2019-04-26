@@ -45,7 +45,7 @@ exports.downloadSnapshot = async function installSnapshot({
   log.info('install path: %s', chalk.bold(installPath));
   log.info('license: %s', chalk.bold(license));
 
-  const artifact = await Artifact.get(license, version, log);
+  const artifact = await Artifact.getSnapshot(license, version, log);
   const dest = path.resolve(basePath, 'cache', artifact.getFilename());
   await artifact.download(dest);
 

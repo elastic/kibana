@@ -27,10 +27,11 @@ import { isValidJson } from '../utils';
 
 function RawJsonParamEditor({
   agg,
-  value,
-  setValue,
   isInvalid,
+  value,
   setValidity,
+  setValue,
+  setTouched,
 }: AggParamEditorProps<string>) {
   const label = (
     <>
@@ -68,6 +69,7 @@ function RawJsonParamEditor({
         onChange={onChange}
         rows={2}
         fullWidth={true}
+        onBlur={setTouched}
       />
     </EuiFormRow>
   );

@@ -120,7 +120,7 @@ export class ThresholdWatch extends BaseWatch {
         thresholdComparator: metadata.threshold_comparator,
         timeWindowSize: metadata.time_window_size,
         timeWindowUnit: metadata.time_window_unit,
-        threshold: metadata.threshold
+        threshold: Array.isArray(metadata.threshold) ? metadata.threshold : [metadata.threshold]
       }
     );
 

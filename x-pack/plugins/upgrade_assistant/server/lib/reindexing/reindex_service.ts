@@ -463,6 +463,7 @@ export const reindexServiceFactory = (
         index: [
           {
             names,
+            allow_restricted_indices: true,
             privileges: ['all'],
           },
           {

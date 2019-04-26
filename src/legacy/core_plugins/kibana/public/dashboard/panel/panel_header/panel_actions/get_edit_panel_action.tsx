@@ -42,7 +42,13 @@ export function getEditPanelAction() {
       icon: <EuiIcon type="pencil" />,
       isDisabled: ({ embeddable }) =>
         !embeddable || !embeddable.metadata || !embeddable.metadata.editUrl,
-      isVisible: ({ containerState }) => containerState.viewMode === DashboardViewMode.EDIT,
+      isVisible: ({ containerState, embeddable }) => {
+        const canEditEmbeddable = Boolean(
+          embeddable && embeddable.metadata && embeddable.metadata.editable
+        );
+        const inDashboardEditMode = containerState.viewMode === DashboardViewMode.EDIT;
+        return canEditEmbeddable && inDashboardEditMode;
+      },
       getHref: ({ embeddable }) => {
         if (embeddable && embeddable.metadata.editUrl) {
           return embeddable.metadata.editUrl;

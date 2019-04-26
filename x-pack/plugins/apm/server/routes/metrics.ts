@@ -24,7 +24,8 @@ export function initMetricsApi(core: CoreSetup) {
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: async req => {
       const setup = setupRequest(req);

@@ -5,7 +5,6 @@
  */
 
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -27,17 +26,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+
 import { ConfirmWatchesModal } from '../../../../components/confirm_watches_modal';
 import { ErrableFormRow } from '../../../../components/form_errors';
 import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
 import { aggTypes } from '../../../../models/watch/agg_types';
 import { groupByTypes } from '../../../../models/watch/group_by_types';
-import { comparators } from '../../comparators';
+import { comparators } from '../../../../models/watch/comparators';
 import { timeUnits } from '../../time_units';
 import { onWatchSave, saveWatch } from '../../watch_edit_actions';
-import { WatchActionsPanel } from './threshold_watch_action_panel';
 import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
+import { WatchActionsPanel } from './threshold_watch_action_panel';
 import { LicenseServiceContext } from '../../../../license_service_context';
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
@@ -157,11 +157,21 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
       defaultMessage: 'Please fix the errors in the expression below.',
     }
   );
-  const expressionFields = ['aggField', 'termSize', 'termField', 'threshold', 'timeWindowSize'];
+  const expressionFields = [
+    'aggField',
+    'termSize',
+    'termField',
+    'threshold0',
+    'threshold1',
+    'timeWindowSize',
+  ];
   const hasExpressionErrors = !!Object.keys(errors).find(
     errorKey => expressionFields.includes(errorKey) && errors[errorKey].length >= 1
   );
   const shouldShowThresholdExpression = watch.index && watch.index.length > 0 && watch.timeField;
+  const andThresholdText = i18n.translate('xpack.watcher.sections.watchEdit.threshold.andLabel', {
+    defaultMessage: 'AND',
+  });
   return (
     <EuiPageContent>
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
@@ -631,12 +641,22 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                   button={
                     <EuiExpression
                       description={comparators[watch.thresholdComparator].text}
-                      value={watch.threshold}
-                      isActive={watchThresholdPopoverOpen || !watch.threshold}
+                      value={watch.threshold
+                        .slice(0, comparators[watch.thresholdComparator].requiredValues)
+                        .join(` ${andThresholdText} `)}
+                      isActive={
+                        watchThresholdPopoverOpen ||
+                        errors.threshold0.length ||
+                        (errors.threshold1 && errors.threshold1.length)
+                      }
                       onClick={() => {
                         setWatchThresholdPopoverOpen(true);
                       }}
-                      color={watch.threshold ? 'secondary' : 'danger'}
+                      color={
+                        errors.threshold0.length || (errors.threshold1 && errors.threshold1.length)
+                          ? 'danger'
+                          : 'secondary'
+                      }
                     />
                   }
                   isOpen={watchThresholdPopoverOpen}
@@ -649,33 +669,50 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                 >
                   <div>
                     <EuiPopoverTitle>{comparators[watch.thresholdComparator].text}</EuiPopoverTitle>
-                    <EuiFlexGroup>
+                    <EuiFlexGroup alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiSelect
                           value={watch.thresholdComparator}
                           onChange={e => {
                             setWatchProperty('thresholdComparator', e.target.value);
                           }}
-                          options={Object.values(comparators)}
+                          options={Object.values(comparators).map(({ text, value }) => {
+                            return { text, value };
+                          })}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <ErrableFormRow
-                          errorKey="threshold"
-                          isShowingErrors={hasErrors}
-                          errors={errors}
-                        >
-                          <EuiFieldNumber
-                            value={watch.threshold}
-                            min={1}
-                            onChange={e => {
-                              const { value } = e.target;
-                              const threshold = value !== '' ? parseInt(value, 10) : value;
-                              setWatchProperty('threshold', threshold);
-                            }}
-                          />
-                        </ErrableFormRow>
-                      </EuiFlexItem>
+                      {Array.from(Array(comparators[watch.thresholdComparator].requiredValues)).map(
+                        (notUsed, i) => {
+                          return (
+                            <Fragment key={`threshold${i}`}>
+                              {i > 0 ? (
+                                <EuiFlexItem grow={false}>
+                                  <EuiText>{andThresholdText}</EuiText>
+                                </EuiFlexItem>
+                              ) : null}
+                              <EuiFlexItem grow={false}>
+                                <ErrableFormRow
+                                  errorKey={`threshold${i}`}
+                                  isShowingErrors={hasErrors}
+                                  errors={errors}
+                                >
+                                  <EuiFieldNumber
+                                    value={watch.threshold[i]}
+                                    min={1}
+                                    onChange={e => {
+                                      const { value } = e.target;
+                                      const threshold = value !== '' ? parseInt(value, 10) : value;
+                                      const newThreshold = [...watch.threshold];
+                                      newThreshold[i] = threshold;
+                                      setWatchProperty('threshold', newThreshold);
+                                    }}
+                                  />
+                                </ErrableFormRow>
+                              </EuiFlexItem>
+                            </Fragment>
+                          );
+                        }
+                      )}
                     </EuiFlexGroup>
                   </div>
                 </EuiPopover>

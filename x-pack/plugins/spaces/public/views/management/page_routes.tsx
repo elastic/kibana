@@ -3,24 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { I18nContext } from 'ui/i18n';
-
 // @ts-ignore
 import template from 'plugins/spaces/views/management/template.html';
-// @ts-ignore
-import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
-import 'ui/autoload/styles';
-
 import { SpacesNavState } from 'plugins/spaces/views/nav_control';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import 'ui/autoload/styles';
+import { I18nContext } from 'ui/i18n';
+import { kfetch } from 'ui/kfetch';
 // @ts-ignore
 import routes from 'ui/routes';
 import { SpacesManager } from '../../lib/spaces_manager';
 import { ManageSpacePage } from './edit_space';
 import { getCreateBreadcrumbs, getEditBreadcrumbs, getListBreadcrumbs } from './lib';
 import { SpacesGridPage } from './spaces_grid';
-
 const reactRootNodeId = 'manageSpacesReactRoot';
 
 routes.when('/management/spaces/list', {
@@ -30,23 +26,22 @@ routes.when('/management/spaces/list', {
     $scope: any,
     $http: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
-    const userProfile = Private(UserProfileProvider);
-
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+
+      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
         <I18nContext>
           <SpacesGridPage
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
-            userProfile={userProfile}
+            features={features}
           />
         </I18nContext>,
         domNode
@@ -69,23 +64,22 @@ routes.when('/management/spaces/create', {
     $scope: any,
     $http: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
-    const userProfile = Private(UserProfileProvider);
-
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+
+      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
         <I18nContext>
           <ManageSpacePage
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
-            userProfile={userProfile}
+            features={features}
           />
         </I18nContext>,
         domNode
@@ -113,18 +107,17 @@ routes.when('/management/spaces/edit/:spaceId', {
     $http: any,
     $route: any,
     chrome: any,
-    Private: any,
     spacesNavState: SpacesNavState,
     spaceSelectorURL: string
   ) {
-    const userProfile = Private(UserProfileProvider);
-
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById(reactRootNodeId);
 
       const { spaceId } = $route.current.params;
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
+
+      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
 
       render(
         <I18nContext>
@@ -132,7 +125,7 @@ routes.when('/management/spaces/edit/:spaceId', {
             spaceId={spaceId}
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
-            userProfile={userProfile}
+            features={features}
             setBreadcrumbs={breadcrumbs => {
               chrome.breadcrumbs.set(breadcrumbs);
             }}
