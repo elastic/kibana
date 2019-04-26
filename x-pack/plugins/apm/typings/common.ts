@@ -8,6 +8,9 @@ export interface StringMap<T = unknown> {
   [key: string]: T;
 }
 
+export type ChartType = 'area' | 'linemark';
+export type YUnit = 'percent' | 'bytes' | 'number';
+
 // Allow unknown properties in an object
 export type AllowUnknownProperties<Obj> = Obj extends object
   ? { [Prop in keyof Obj]: AllowUnknownProperties<Obj[Prop]> } & {

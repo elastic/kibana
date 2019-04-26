@@ -9,6 +9,7 @@ import { CoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getAllMetricsChartData } from '../lib/metrics/get_all_metrics_chart_data';
+import { getMetricsChartDataByAgent } from '../lib/metrics/get_metrics_chart_data_by_agent';
 
 const defaultErrorHandler = (err: Error) => {
   // eslint-disable-next-line
@@ -33,6 +34,26 @@ export function initMetricsApi(core: CoreSetup) {
       return await getAllMetricsChartData({
         setup,
         serviceName
+      }).catch(defaultErrorHandler);
+    }
+  });
+
+  server.route({
+    method: 'GET',
+    path: `/api/apm/services/{serviceName}/metrics-by-agent/{agentName}`,
+    options: {
+      validate: {
+        query: withDefaultValidators()
+      },
+      tags: ['access:apm']
+    },
+    handler: async req => {
+      const setup = setupRequest(req);
+      const { agentName, serviceName } = req.params;
+      return await getMetricsChartDataByAgent({
+        setup,
+        serviceName,
+        agentName
       }).catch(defaultErrorHandler);
     }
   });
