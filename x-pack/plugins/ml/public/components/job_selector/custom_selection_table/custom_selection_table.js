@@ -355,7 +355,7 @@ export function CustomSelectionTable({
 
 CustomSelectionTable.propTypes = {
   columns: PropTypes.array.isRequired,
-  filterDefaultFields: PropTypes.array.isRequired,
+  filterDefaultFields: PropTypes.array,
   filters: PropTypes.array,
   items: PropTypes.array.isRequired,
   onTableChange: PropTypes.func.isRequired,
