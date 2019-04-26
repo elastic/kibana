@@ -173,7 +173,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.loadDefaultsDescription"
-            defaultMessage="Load the default Hadoop configuration."
+            defaultMessage="Loads the default Hadoop configuration."
           />
         }
         idAria="hdfsRepositoryLoadDefaultsDescription"
@@ -218,7 +218,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.compressDescription"
-            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="hdfsRepositoryCompressDescription"
@@ -263,7 +263,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.chunkSizeDescription"
-            defaultMessage="Break down files into smaller units when taking snapshots."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="hdfsRepositoryChunkSizeDescription"
@@ -309,7 +309,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.securityPrincipalDescription"
-            defaultMessage="Kerberos principal to use when connecting to a secured HDFS cluster."
+            defaultMessage="The Kerberos principal to use when connecting to a secured HDFS cluster."
           />
         }
         idAria="hdfsRepositorySecurityPrincipalDescription"
@@ -545,7 +545,7 @@ export const HDFSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeHDFS.readonlyDescription"
-            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
         idAria="hdfsRepositoryReadonlyDescription"

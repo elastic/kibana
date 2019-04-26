@@ -74,7 +74,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.clientDescription"
-            defaultMessage="Name of the Azure client."
+            defaultMessage="The name of the Azure client."
           />
         }
         idAria="azureRepositoryClientDescription"
@@ -119,7 +119,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.containerDescription"
-            defaultMessage="Name of the Azure container to use for snapshots."
+            defaultMessage="The name of the Azure container to use for snapshots."
           />
         }
         idAria="azureRepositoryContainerDescription"
@@ -209,7 +209,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.compressDescription"
-            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="azureRepositoryCompressDescription"
@@ -254,7 +254,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.chunkSizeDescription"
-            defaultMessage="Break down files into smaller units when taking snapshots."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="azureRepositoryChunkSizeDescription"
@@ -392,7 +392,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.locationModeDescription"
-            defaultMessage="Use either the primary or secondary location. If secondary, read-only is true."
+            defaultMessage="The primary or secondary location. If secondary, read-only is true."
           />
         }
         idAria="azureRepositoryLocationModeDescription"
@@ -439,7 +439,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeAzure.readonlyDescription"
-            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
         idAria="azureRepositoryReadonlyDescription"

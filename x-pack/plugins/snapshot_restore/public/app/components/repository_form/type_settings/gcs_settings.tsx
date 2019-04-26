@@ -61,7 +61,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.clientDescription"
-            defaultMessage="Name of the Google Cloud Storage client."
+            defaultMessage="The name of the Google Cloud Storage client."
           />
         }
         idAria="gcsRepositoryClientDescription"
@@ -106,7 +106,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.bucketDescription"
-            defaultMessage="Name of the Google Cloud Storage bucket to use for snapshots."
+            defaultMessage="The name of the Google Cloud Storage bucket to use for snapshots."
           />
         }
         idAria="gcsRepositoryBucketDescription"
@@ -196,7 +196,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.compressDescription"
-            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="gcsRepositoryCompressDescription"
@@ -241,7 +241,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.chunkSizeDescription"
-            defaultMessage="Break down files into smaller units when taking snapshots."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="gcsRepositoryChunkSizeDescription"
@@ -379,7 +379,7 @@ export const GCSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeGCS.readonlyDescription"
-            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
         idAria="gcsRepositoryReadonlyDescription"

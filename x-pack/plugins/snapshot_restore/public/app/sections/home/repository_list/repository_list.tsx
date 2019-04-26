@@ -97,7 +97,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
-                defaultMessage="Use repositories to store snapshots."
+                defaultMessage="You need a repository to store your snapshots."
               />
             </p>
           </Fragment>

@@ -148,7 +148,7 @@ export const SnapshotList: React.FunctionComponent<RouteComponentProps<MatchPara
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.snapshotList.emptyPrompt.noSnapshotsDescription"
-                defaultMessage="You can create a snapshot using the Elasticsearch API."
+                defaultMessage="Create a snapshot using the Elasticsearch API."
               />
             </p>
             <p>

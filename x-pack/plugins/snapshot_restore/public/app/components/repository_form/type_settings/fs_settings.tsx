@@ -115,7 +115,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.compressDescription"
-            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="fsRepositoryCompressDescription"
@@ -160,7 +160,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.chunkSizeDescription"
-            defaultMessage="Break down files into smaller units when taking snapshots."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="fsRepositoryChunkSizeDescription"
@@ -298,7 +298,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.readonlyDescription"
-            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
         idAria="fsRepositoryReadonlyDescription"

@@ -90,7 +90,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.clientDescription"
-            defaultMessage="Name of the AWS S3 client."
+            defaultMessage="The name of the AWS S3 client."
           />
         }
         idAria="s3RepositoryClientDescription"
@@ -135,7 +135,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.bucketDescription"
-            defaultMessage="Name of the AWS S3 bucket to use for snapshots."
+            defaultMessage="The name of the AWS S3 bucket to use for snapshots."
           />
         }
         idAria="s3RepositoryBucketDescription"
@@ -225,7 +225,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.compressDescription"
-            defaultMessage="Compress the index mapping and settings files for snapshots. Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="s3RepositoryCompressDescription"
@@ -270,7 +270,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.chunkSizeDescription"
-            defaultMessage="Break down files into smaller units when taking snapshots."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="s3RepositoryChunkSizeDescription"
@@ -316,7 +316,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.serverSideEncryptionDescription"
-            defaultMessage="Encrypt files on the server using AES256 algorithm."
+            defaultMessage="Encrypts files on the server using AES256 algorithm."
           />
         }
         idAria="s3RepositoryServerSideEncryptionDescription"
@@ -379,6 +379,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryBufferSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
           error={settingErrors.bufferSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={bufferSize || ''}
@@ -407,7 +408,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.cannedAclDescription"
-            defaultMessage="The canned ACL is added to new S3 buckets and objects."
+            defaultMessage="The canned ACL to add to new S3 buckets and objects."
           />
         }
         idAria="s3RepositoryCannedAclDescription"
@@ -591,7 +592,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.readonlyDescription"
-            defaultMessage="Only one cluster should have write access to this repository. Enable read-only mode for all other clusters."
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
         idAria="s3RepositoryReadonlyDescription"

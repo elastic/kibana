@@ -264,7 +264,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         <Fragment>
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.fields.sourceOnlyDescription"
-            defaultMessage="Snapshots contain stored fields and index metadata and take up to 50% less space. {docLink}"
+            defaultMessage="Creates source-only snapshots that take up to 50% less space. {docLink}"
             values={{
               docLink: (
                 <EuiLink

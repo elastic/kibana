@@ -62,7 +62,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
         return (
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlFilePathDescription"
-            defaultMessage="This file location must be registered in the {settingKey} setting"
+            defaultMessage="This file location must be registered in the {settingKey} setting."
             values={{
               settingKey: <EuiCode>path.repo</EuiCode>,
             }}
