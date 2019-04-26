@@ -27,6 +27,11 @@ type QueryTimelineDetailsResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+type QueryLastEventTimeResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.LastEventTimeResolver>,
+  QuerySourceResolver
+>;
+
 export interface EventsResolversDeps {
   events: Events;
 }
@@ -38,6 +43,7 @@ export const createEventsResolvers = (
     Events: QueryEventsResolver;
     Timeline: QueryTimelineResolver;
     TimelineDetails: QueryTimelineDetailsResolver;
+    LastEventTime: QueryLastEventTimeResolver;
   };
 } => ({
   Source: {
@@ -57,6 +63,14 @@ export const createEventsResolvers = (
         indexName: args.indexName,
         eventId: args.eventId,
       });
+    },
+    async LastEventTime(source, args, { req }) {
+      const options = {
+        sourceConfiguration: source.configuration,
+        indexKey: args.indexKey,
+        details: args.details,
+      };
+      return libs.events.getLastEventTimeData(req, options);
     },
   },
 });

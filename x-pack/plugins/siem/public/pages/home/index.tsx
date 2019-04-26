@@ -26,6 +26,7 @@ import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
+import { PageHeadline } from '../../components/page_headline';
 import { SuperDatePicker } from '../../components/super_date_picker';
 import { StatefulTimeline } from '../../components/timeline';
 import { NotFoundPage } from '../404';
@@ -96,6 +97,7 @@ export const HomePage = pure(() => (
                   </FixEuiFlexGroup>
                 </PageHeaderSection>
               </PageHeader>
+              <PageHeadline />
               <Switch>
                 <Redirect from="/" exact={true} to="/overview" />
                 <Route path="/overview" component={Overview} />
@@ -113,7 +115,7 @@ export const HomePage = pure(() => (
 ));
 
 const Page = styled(EuiPage)`
-  padding: 0px 16px 16px 16px;
+  padding: 0px 70px 24px 24px; // 70px temporary until timeline is moved - MichaelMarcialis
 `;
 
 const PageHeader = styled(EuiPageHeader)`
