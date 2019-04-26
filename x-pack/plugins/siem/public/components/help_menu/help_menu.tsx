@@ -5,22 +5,34 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiHorizontalRule, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
+import styled from 'styled-components';
 
-export class HelpMenu extends React.PureComponent {
+export const Icon = styled(EuiIcon)`
+  margin-right: 8px;
+`;
+
+export class HelpMenuComponent extends React.PureComponent {
   public render() {
     return (
-      <React.Fragment>
+      <>
         <EuiHorizontalRule margin="none" />
+
         <EuiSpacer />
-        <EuiText size="s">
-          <p>For SIEM specific information:</p>
-        </EuiText>
+
+        <EuiTitle size="xxs">
+          <h6>
+            <Icon type="securityAnalyticsApp" />
+            SIEM Application Help
+          </h6>
+        </EuiTitle>
+
         <EuiSpacer />
-        <EuiButton fill iconType="popout" href="https://discuss.elastic.co/" target="_blank">
+
+        <EuiButton iconType="popout" href="https://discuss.elastic.co/" target="_blank">
           Submit feedback
         </EuiButton>
-      </React.Fragment>
+      </>
     );
   }
 }
