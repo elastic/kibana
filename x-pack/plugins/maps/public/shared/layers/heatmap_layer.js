@@ -170,7 +170,7 @@ export class HeatmapLayer extends AbstractLayer {
     return {
       ...dataFilters,
       layerQuery: this.getQuery(),
-      applyGlobalQuery: this.applyGlobalQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
       metric: this._getPropKeyOfSelectedMetric()
     };

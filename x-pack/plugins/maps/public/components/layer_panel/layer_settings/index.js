@@ -19,7 +19,7 @@ function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
     alpha: selectedLayer.getAlpha(),
-    applyGlobalQuery: selectedLayer.applyGlobalQuery(),
+    applyGlobalQuery: selectedLayer.getApplyGlobalQuery(),
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),

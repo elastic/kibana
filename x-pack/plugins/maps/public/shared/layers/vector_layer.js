@@ -248,7 +248,7 @@ export class VectorLayer extends AbstractLayer {
 
     const searchFilters = {
       ...dataFilters,
-      applyGlobalQuery: this.applyGlobalQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
     };
     const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
     if (canSkip) {
@@ -305,7 +305,7 @@ export class VectorLayer extends AbstractLayer {
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
       layerQuery: this.getQuery(),
-      applyGlobalQuery: this.applyGlobalQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
     };
   }
 

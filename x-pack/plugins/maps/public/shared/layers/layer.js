@@ -146,7 +146,7 @@ export class AbstractLayer {
     return this._descriptor.query;
   }
 
-  applyGlobalQuery() {
+  getApplyGlobalQuery() {
     return this._descriptor.applyGlobalQuery;
   }
 
@@ -269,7 +269,7 @@ export class AbstractLayer {
   }
 
   getQueryableIndexPatternIds() {
-    if (this.applyGlobalQuery()) {
+    if (this.getApplyGlobalQuery()) {
       return this.getIndexPatternIds();
     }
 
