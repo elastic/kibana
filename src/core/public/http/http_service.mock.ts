@@ -24,7 +24,7 @@ const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
   get: jest.fn(),
   post: jest.fn(),
   put: jest.fn(),
-  del: jest.fn(),
+  delete: jest.fn(),
   addLoadingCount: jest.fn(),
   getLoadingCount$: jest.fn(),
 });
