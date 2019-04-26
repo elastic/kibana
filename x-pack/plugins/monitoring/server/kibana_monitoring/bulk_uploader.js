@@ -57,12 +57,7 @@ export class BulkUploader {
     });
 
     this._callClusterWithInternalUser = callClusterFactory(server).getCallClusterInternal();
-    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer, {
-      statuses: [{
-        name: 'includes-usage-data',
-        state: `${this._lastFetchWithUsage ? 'includes' : 'excludes'}-usage-data`
-      }],
-    });
+    this._getKibanaInfoForStats = () => getKibanaInfoForStats(server, kbnServer);
   }
 
   /*

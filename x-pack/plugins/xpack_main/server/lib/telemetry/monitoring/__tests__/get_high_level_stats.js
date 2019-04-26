@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { fetchHighLevelStats, getHighLevelStats, handleHighLevelStatsResponse, isLegacyVersion } from '../get_high_level_stats';
+import { fetchHighLevelStats, getHighLevelStats, handleHighLevelStatsResponse } from '../get_high_level_stats';
 
 describe('get_high_level_stats', () => {
   const callWith = sinon.stub();
@@ -272,26 +272,6 @@ describe('get_high_level_stats', () => {
       const clusters = handleHighLevelStatsResponse({ hits: { hits: [ ] } }, product);
 
       expect(clusters).to.eql({});
-    });
-  });
-
-  describe('isLegacyVersion', () => {
-    it('returns true for legacy versions', () => {
-      const scenarios = [
-        [isLegacyVersion('6.7.0'), true],
-        [isLegacyVersion('6.7.3'), false],
-        [isLegacyVersion('6.7.4'), false],
-        [isLegacyVersion('7.0.0-beta1'), true],
-        [isLegacyVersion('7.0.0'), true],
-        [isLegacyVersion('7.1.0'), false],
-        [isLegacyVersion('7.3.0'), false],
-        [isLegacyVersion('8.0.0-rc2'), false],
-        [isLegacyVersion('8.0.0'), false],
-      ];
-
-      scenarios.forEach(([testCase, expectedResult]) => {
-        expect(testCase).to.eql(expectedResult);
-      });
     });
   });
 });
