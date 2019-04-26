@@ -37,6 +37,7 @@ export function canvas(kibana) {
         [CANVAS_TYPE]: {
           icon: 'canvasApp',
           defaultSearchField: 'name',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.name;
           },

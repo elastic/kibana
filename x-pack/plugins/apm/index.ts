@@ -42,11 +42,6 @@ export function apm(kibana: any) {
         };
       },
       hacks: ['plugins/apm/hacks/toggle_app_link_in_nav'],
-      savedObjectsManagement: {
-        'apm-telemetry': {
-          isImportableAndExportable: false
-        }
-      },
       savedObjectSchemas: {
         'apm-telemetry': {
           isNamespaceAgnostic: true

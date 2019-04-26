@@ -61,6 +61,7 @@ export function maps(kibana) {
         'map': {
           icon: APP_ICON,
           defaultSearchField: 'title',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.title;
           },

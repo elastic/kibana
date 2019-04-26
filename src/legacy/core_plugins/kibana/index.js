@@ -132,6 +132,7 @@ export default function (kibana) {
         'index-pattern': {
           icon: 'indexPatternApp',
           defaultSearchField: 'title',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -148,6 +149,7 @@ export default function (kibana) {
         visualization: {
           icon: 'visualizeApp',
           defaultSearchField: 'title',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -164,6 +166,7 @@ export default function (kibana) {
         search: {
           icon: 'search',
           defaultSearchField: 'title',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -180,6 +183,7 @@ export default function (kibana) {
         dashboard: {
           icon: 'dashboardApp',
           defaultSearchField: 'title',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.title;
           },
@@ -195,6 +199,7 @@ export default function (kibana) {
         },
         url: {
           defaultSearchField: 'url',
+          isImportableAndExportable: true,
           getTitle(obj) {
             return obj.attributes.url;
           },
@@ -209,6 +214,7 @@ export default function (kibana) {
           isImportableAndExportable: false,
         },
         config: {
+          isImportableAndExportable: true,
           getInAppUrl() {
             return {
               path: `/app/kibana#/management/kibana/settings`,

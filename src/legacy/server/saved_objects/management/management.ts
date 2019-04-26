@@ -40,12 +40,11 @@ export class SavedObjectsManagement {
   }
 
   public isImportAndExportable(type: string) {
-    // import and exportable by default unless isImportableAndExportable set explicitly to false
     if (this.definition && this.definition.hasOwnProperty(type)) {
-      return this.definition[type].isImportableAndExportable !== false;
+      return this.definition[type].isImportableAndExportable === true;
     }
 
-    return true;
+    return false;
   }
 
   public getDefaultSearchField(type: string) {

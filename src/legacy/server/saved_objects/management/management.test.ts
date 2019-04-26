@@ -20,10 +20,10 @@
 import { SavedObjectsManagement } from './management';
 
 describe('isImportAndExportable()', () => {
-  it('returns true for unknown types', () => {
+  it('returns false for unknown types', () => {
     const management = new SavedObjectsManagement();
     const result = management.isImportAndExportable('bar');
-    expect(result).toBe(true);
+    expect(result).toBe(false);
   });
 
   it('returns true for explicitly importable and exportable type', () => {

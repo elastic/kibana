@@ -16,14 +16,6 @@ export function upgradeAssistant(kibana: any) {
     require: ['elasticsearch'],
     uiExports: {
       managementSections: ['plugins/upgrade_assistant'],
-      savedObjectsManagement: {
-        'upgrade-assistant-reindex-operation': {
-          isImportableAndExportable: false,
-        },
-        'upgrade-assistant-telemetry': {
-          isImportableAndExportable: false,
-        },
-      },
       savedObjectSchemas: {
         'upgrade-assistant-reindex-operation': {
           isNamespaceAgnostic: true,
