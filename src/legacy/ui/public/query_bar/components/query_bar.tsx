@@ -83,7 +83,8 @@ interface DateRange {
 
 interface Props {
   query: Query;
-  onSubmit: (payload: { dateRange: DateRange; query: Query }) => void;
+  onSubmit?: (payload: { dateRange: DateRange; query: Query }) => void;
+  onQueryChange?: (query: Query) => void;
   disableAutoFocus?: boolean;
   appName: string;
   screenTitle: string;
@@ -99,6 +100,7 @@ interface Props {
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
+  showSubmitButton?: boolean;
 }
 
 interface State {
@@ -156,6 +158,11 @@ export class QueryBarUI extends Component<Props, State> {
     }
     return nextState;
   }
+
+  public static defaultProps = {
+    onSubmit: () => {},
+    showSubmitButton: true,
+  };
 
   /*
    Keep the "draft" value in local state until the user actually submits the query. There are a couple advantages:
@@ -299,6 +306,10 @@ export class QueryBarUI extends Component<Props, State> {
         index: null,
       },
       () => {
+        if (this.props.onQueryChange) {
+          this.props.onQueryChange(this.state.query);
+        }
+
         if (!this.inputRef) {
           return;
         }
@@ -362,16 +373,26 @@ export class QueryBarUI extends Component<Props, State> {
   public onInputChange = (value: string) => {
     const hasValue = Boolean(value.trim());
 
-    this.setState({
-      query: {
-        query: value,
-        language: this.state.query.language,
+    this.setState(
+      {
+        query: {
+          query: value,
+          language: this.state.query.language,
+        },
+        inputIsPristine: false,
+        isSuggestionsVisible: hasValue,
+        index: null,
+        suggestionLimit: 50,
       },
-      inputIsPristine: false,
-      isSuggestionsVisible: hasValue,
-      index: null,
-      suggestionLimit: 50,
-    });
+      () => {
+        if (this.props.onQueryChange) {
+          this.props.onQueryChange({
+            query: value,
+            language: this.state.query.language,
+          });
+        }
+      }
+    );
   };
 
   public onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -425,6 +446,9 @@ export class QueryBarUI extends Component<Props, State> {
           },
           () => {
             target.setSelectionRange(newSelectionStart, newSelectionEnd);
+            if (this.props.onQueryChange) {
+              this.props.onQueryChange(this.state.query);
+            }
           }
         );
       };
@@ -493,16 +517,18 @@ export class QueryBarUI extends Component<Props, State> {
       to: this.state.dateRangeTo,
     });
 
-    this.props.onSubmit({
-      query: {
-        query: fromUser(this.state.query.query),
-        language: this.state.query.language,
-      },
-      dateRange: {
-        from: this.state.dateRangeFrom,
-        to: this.state.dateRangeTo,
-      },
-    });
+    if (this.props.onSubmit) {
+      this.props.onSubmit({
+        query: {
+          query: fromUser(this.state.query.query),
+          language: this.state.query.language,
+        },
+        dateRange: {
+          from: this.state.dateRangeFrom,
+          to: this.state.dateRangeTo,
+        },
+      });
+    }
     this.setState({ isSuggestionsVisible: false });
   };
 
@@ -517,16 +543,21 @@ export class QueryBarUI extends Component<Props, State> {
     });
 
     this.props.store.set('kibana.userQueryLanguage', language);
-    this.props.onSubmit({
-      query: {
-        query: '',
-        language,
-      },
-      dateRange: {
-        from: this.state.dateRangeFrom,
-        to: this.state.dateRangeTo,
-      },
-    });
+    if (this.props.onSubmit) {
+      this.props.onSubmit({
+        query: {
+          query: '',
+          language,
+        },
+        dateRange: {
+          from: this.state.dateRangeFrom,
+          to: this.state.dateRangeTo,
+        },
+      });
+    }
+    if (this.props.onQueryChange) {
+      this.props.onQueryChange({ query: '', language });
+    }
   };
 
   public componentDidMount() {
@@ -644,7 +675,7 @@ export class QueryBarUI extends Component<Props, State> {
             </div>
           </EuiOutsideClickDetector>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{this.renderUpdateButton()}</EuiFlexItem>
+        {this.renderUpdateButton()}
       </EuiFlexGroup>
     );
   }
@@ -653,24 +684,28 @@ export class QueryBarUI extends Component<Props, State> {
     const button = this.props.customSubmitButton ? (
       React.cloneElement(this.props.customSubmitButton, { onClick: this.onClickSubmitButton })
     ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={this.isDirty()}
-        isDisabled={this.state.isDateRangeInvalid}
-        onClick={this.onClickSubmitButton}
-        data-test-subj="querySubmitButton"
-      />
+      <EuiFlexItem grow={false}>
+        <EuiSuperUpdateButton
+          needsUpdate={this.isDirty()}
+          isDisabled={this.state.isDateRangeInvalid}
+          onClick={this.onClickSubmitButton}
+          data-test-subj="querySubmitButton"
+        />
+      </EuiFlexItem>
     );
 
-    if (!this.props.showDatePicker) {
-      return button;
+    if (!this.props.showDatePicker && !this.props.showSubmitButton) {
+      return;
+    } else {
+      return (
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            {this.props.showDatePicker ? this.renderDatePicker() : ''}
+            {this.props.showSubmitButton ? button : ''}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      );
     }
-
-    return (
-      <EuiFlexGroup responsive={false} gutterSize="s">
-        {this.renderDatePicker()}
-        <EuiFlexItem grow={false}>{button}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
   }
 
   private renderDatePicker() {
