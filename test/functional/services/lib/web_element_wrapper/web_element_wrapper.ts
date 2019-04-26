@@ -53,7 +53,7 @@ export class WebElementWrapper {
     private timeout: number,
     private fixedHeaderHeight: number,
     private logger: ToolingLog,
-    private browserName: string
+    private browserType: string
   ) {
     if (webElement instanceof WebElementWrapper) {
       return webElement;
@@ -81,7 +81,7 @@ export class WebElementWrapper {
       this.timeout,
       this.fixedHeaderHeight,
       this.logger,
-      this.browserName
+      this.browserType
     );
   }
 
@@ -326,7 +326,7 @@ export class WebElementWrapper {
    */
   public async moveMouseTo(): Promise<void> {
     await this.scrollIntoViewIfNecessary();
-    if (this._browserName === 'firefox') {
+    if (this.browserType === 'firefox') {
       // workaround for Actions API bug in FF 65+
       const actions = (this.driver as any).actions();
       await actions.move({ x: 0, y: 0 }).perform();

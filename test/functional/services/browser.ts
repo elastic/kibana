@@ -44,7 +44,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Browser name
      */
-    public readonly browserName: string = browserType;
+    public readonly browserType: string = browserType;
 
     /**
      * Is WebDriver instance W3C compatible
@@ -134,7 +134,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       xOffset?: number,
       yOffset?: number
     ): Promise<void> {
-      if (this.browserName === browsers.FIREFOX) {
+      if (this.browserType === browsers.FIREFOX) {
         // workaround for Actions API bug in FF 65+
         const actions = (driver as any).actions();
         await actions.move({ x: 0, y: 0 }).perform();
