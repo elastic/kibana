@@ -221,8 +221,8 @@ export default function (kibana) {
               uiCapabilitiesPath: 'advancedSettings.show',
             };
           },
-          getTitle() {
-            return 'Advanced Settings';
+          getTitle(obj) {
+            return `Advanced Settings [${obj.id}]`;
           },
         },
       },

@@ -69,8 +69,8 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         it('shows all saved objects', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
           expect(objects).to.eql([
-            'config [id=6.0.0]',
-            `config [id=${version}]`,
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
             'A Dashboard',
             'logstash-*',
             'A Pie',
@@ -81,11 +81,11 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
             {
-              title: 'config [id=6.0.0]',
+              title: 'Advanced Settings [6.0.0]',
               canViewInApp: false,
             },
             {
-              title: `config [id=${version}]`,
+              title: `Advanced Settings [${version}]`,
               canViewInApp: false,
             },
             {
@@ -191,22 +191,22 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         it('shows two configs, a visualization and an index pattern', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
           expect(objects).to.eql([
-            'config [id=6.0.0]',
-            `config [id=${version}]`,
+            'Advanced Settings [6.0.0]',
+            `Advanced Settings [${version}]`,
             'logstash-*',
             'A Pie',
           ]);
         });
 
-        it('can view only the visualization in application', async () => {
+        it('can view only two configs and the visualization in application', async () => {
           const bools = await PageObjects.settings.getSavedObjectsTableSummary();
           expect(bools).to.eql([
             {
-              title: 'config [id=6.0.0]',
+              title: 'Advanced Settings [6.0.0]',
               canViewInApp: false,
             },
             {
-              title: `config [id=${version}]`,
+              title: `Advanced Settings [${version}]`,
               canViewInApp: false,
             },
             {
