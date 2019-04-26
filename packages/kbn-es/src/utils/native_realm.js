@@ -22,8 +22,6 @@ const chalk = require('chalk');
 
 const { log: defaultLog } = require('./log');
 
-const USERS = ['apm_system', 'kibana', 'logstash_system', 'beats_system', 'remote_monitoring_user'];
-
 exports.NativeRealm = class NativeRealm {
   constructor(elasticPassword, port, log = defaultLog) {
     this._client = new Client({ node: `http://elastic:${elasticPassword}@localhost:${port}` });
@@ -55,9 +53,20 @@ exports.NativeRealm = class NativeRealm {
       return;
     }
 
-    USERS.forEach(user => {
+    (await this.getReservedUsers()).forEach(user => {
       this.setPassword(user, options[`password.${user}`]);
     });
+  }
+
+  async getReservedUsers() {
+    const users = await this._client.security.getUser();
+
+    return Object.keys(users.body).reduce((acc, user) => {
+      if (users.body[user].metadata._reserved === true) {
+        acc.push(user);
+      }
+      return acc;
+    }, []);
   }
 
   async isSecurityEnabled() {

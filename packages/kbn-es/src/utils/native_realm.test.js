@@ -30,6 +30,7 @@ const mockClient = {
   },
   security: {
     changePassword: jest.fn(),
+    getUser: jest.fn(),
   },
 };
 Client.mockImplementation(() => mockClient);
@@ -90,21 +91,42 @@ describe('setPasswords', () => {
   it('uses provided passwords', async () => {
     mockXPackInfo(true, true);
 
+    mockClient.security.getUser.mockImplementation(() => ({
+      body: {
+        kibana: {
+          metadata: {
+            _reserved: true,
+          },
+        },
+        non_native: {
+          metadata: {
+            _reserved: false,
+          },
+        },
+        logstash_system: {
+          metadata: {
+            _reserved: true,
+          },
+        },
+        elastic: {
+          metadata: {
+            _reserved: true,
+          },
+        },
+        beats_system: {
+          metadata: {
+            _reserved: true,
+          },
+        },
+      },
+    }));
+
     await nativeRealm.setPasswords({
       'password.kibana': 'bar',
     });
 
     expect(mockClient.security.changePassword.mock.calls).toMatchInlineSnapshot(`
 Array [
-  Array [
-    Object {
-      "body": Object {
-        "password": "changeme",
-      },
-      "refresh": "wait_for",
-      "username": "apm_system",
-    },
-  ],
   Array [
     Object {
       "body": Object {
@@ -129,7 +151,7 @@ Array [
         "password": "changeme",
       },
       "refresh": "wait_for",
-      "username": "beats_system",
+      "username": "elastic",
     },
   ],
   Array [
@@ -138,11 +160,37 @@ Array [
         "password": "changeme",
       },
       "refresh": "wait_for",
-      "username": "remote_monitoring_user",
+      "username": "beats_system",
     },
   ],
 ]
 `);
+  });
+});
+
+describe('getReservedUsers', () => {
+  it('returns array of reserved usernames', async () => {
+    mockClient.security.getUser.mockImplementation(() => ({
+      body: {
+        kibana: {
+          metadata: {
+            _reserved: true,
+          },
+        },
+        non_native: {
+          metadata: {
+            _reserved: false,
+          },
+        },
+        logstash_system: {
+          metadata: {
+            _reserved: true,
+          },
+        },
+      },
+    }));
+
+    expect(await nativeRealm.getReservedUsers()).toEqual(['kibana', 'logstash_system']);
   });
 });
 
