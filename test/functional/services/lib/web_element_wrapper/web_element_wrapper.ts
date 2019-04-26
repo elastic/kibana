@@ -329,12 +329,8 @@ export class WebElementWrapper {
     if (this._browserName === 'firefox') {
       // workaround for Actions API bug in FF 65+
       const actions = (this.driver as any).actions();
-      await actions
-        .move({ x: 0, y: 0 })
-        .perform();
-      await actions
-        .move({ x: 10, y: 10, origin: this._webElement })
-        .perform();
+      await actions.move({ x: 0, y: 0 }).perform();
+      await actions.move({ x: 10, y: 10, origin: this._webElement }).perform();
     } else {
       const mouse = (this.driver.actions() as any).mouse();
       const actions = (this.driver as any).actions({ bridge: true });

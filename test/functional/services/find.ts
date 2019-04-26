@@ -29,7 +29,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
   const driver = webdriver.driver;
   const By = webdriver.By;
-  const until =  webdriver.until;
+  const until = webdriver.until;
   const browserName = webdriver.browserType;
 
   const WAIT_FOR_EXISTS_TIME = config.get('timeouts.waitForExists');
@@ -37,7 +37,14 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
   const wrap = (webElement: WebElement | WebElementWrapper) =>
-    new WebElementWrapper(webElement, webdriver, defaultFindTimeout, fixedHeaderHeight, log, browserName);
+    new WebElementWrapper(
+      webElement,
+      webdriver,
+      defaultFindTimeout,
+      fixedHeaderHeight,
+      log,
+      browserName
+    );
 
   const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) => webElements.map(wrap);
 

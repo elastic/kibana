@@ -26,11 +26,13 @@ import { WebElementWrapper } from './lib/web_element_wrapper';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export async function BrowserProvider({ getService }: FtrProviderContext) {
-  const { driver, Key, LegacyActionSequence, browserType } = await getService('__webdriver__').init();
+  const { driver, Key, LegacyActionSequence, browserType } = await getService(
+    '__webdriver__'
+  ).init();
   const browsers = Object.freeze({
     CHROME: 'chrome',
     FIREFOX: 'firefox',
-    IE: 'ie'
+    IE: 'ie',
   });
 
   class BrowserService {
@@ -42,15 +44,17 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Browser name
      */
-    public readonly browserName: String = browserType;
+    public readonly browserName: string = browserType;
 
     /**
      * Is WebDriver instance W3C compatible
      */
-    public readonly isW3CEnabled: Boolean = (driver as any).executor_.w3c === true;
+    public readonly isW3CEnabled: boolean = (driver as any).executor_.w3c === true;
 
     public getActions(): any {
-      return this.isW3CEnabled ? (driver as any).actions() : (driver as any).actions({ bridge: true });
+      return this.isW3CEnabled
+        ? (driver as any).actions()
+        : (driver as any).actions({ bridge: true });
     }
 
     /**
@@ -133,12 +137,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       if (this.browserName === browsers.FIREFOX) {
         // workaround for Actions API bug in FF 65+
         const actions = (driver as any).actions();
-        await actions
-          .move({ x: 0, y: 0 })
-          .perform();
-        await actions
-          .move({ x: 10, y: 10, origin: element._webElement })
-          .perform();
+        await actions.move({ x: 0, y: 0 }).perform();
+        await actions.move({ x: 10, y: 10, origin: element._webElement }).perform();
       } else {
         const actions = (driver as any).actions({ bridge: true });
         if (element instanceof WebElementWrapper) {
@@ -152,7 +152,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
             .move({ origin: { x: xOffset, y: yOffset } })
             .perform();
         } else {
-            throw new Error('Element or coordinates should be provided');
+          throw new Error('Element or coordinates should be provided');
         }
       }
     }
@@ -185,18 +185,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           const position = await point.location.getPosition();
           return {
             x: Math.round(position.x + offset.x),
-            y: Math.round(position.y + offset.y)
+            y: Math.round(position.y + offset.y),
           };
         } else {
           return {
             x: Math.round(point.location.x + offset.x),
-            y: Math.round(point.location.y + offset.y)
+            y: Math.round(point.location.y + offset.y),
           };
         }
       };
       // tslint:disable-next-line:variable-name
       const _convertPoint = (point: any) => {
-        return (point.location instanceof WebElementWrapper) ? point.location._webElement : point.location;
+        return point.location instanceof WebElementWrapper
+          ? point.location._webElement
+          : point.location;
       };
 
       if (this.isW3CEnabled) {
@@ -207,7 +209,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         // tslint:disable-next-line:variable-name
         const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
 
-        return await  (driver as any).actions()
+        return await (driver as any)
+          .actions()
           .move({ x: _from.x, y: _from.y, origin: 'pointer' })
           .press()
           .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
@@ -269,7 +272,9 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async pressKeys(...args: string[]): Promise<void>;
     public async pressKeys(...args: string[]): Promise<void> {
       const chord = this.keys.chord(...args);
-      await this.getActions().sendKeys(chord).perform();
+      await this.getActions()
+        .sendKeys(chord)
+        .perform();
     }
 
     /**
@@ -356,9 +361,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async doubleClick(element?: WebElementWrapper): Promise<void> {
       if (element instanceof WebElementWrapper) {
-        await this.getActions().doubleClick(element._webElement).perform();
+        await this.getActions()
+          .doubleClick(element._webElement)
+          .perform();
       } else {
-        await this.getActions().doubleClick().perform();
+        await this.getActions()
+          .doubleClick()
+          .perform();
       }
     }
 
