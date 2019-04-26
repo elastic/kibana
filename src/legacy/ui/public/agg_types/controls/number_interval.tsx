@@ -48,7 +48,7 @@ const label = (
 function NumberIntervalParamEditor({
   agg,
   editorConfig,
-  isInvalid,
+  showValidation,
   value,
   setTouched,
   setValidity,
@@ -56,9 +56,14 @@ function NumberIntervalParamEditor({
 }: AggParamEditorProps<number | undefined>) {
   const base: number = get(editorConfig, 'interval.base');
   const min = base || 0;
-  const isValid = (value !== undefined && value >= min);
+  const isValid = value !== undefined && value >= min;
 
-  useEffect(() => { setValidity(isValid); }, [value]);
+  useEffect(
+    () => {
+      setValidity(isValid);
+    },
+    [isValid]
+  );
 
   const onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const numberValue = parseFloat(event.target.value);
@@ -70,7 +75,7 @@ function NumberIntervalParamEditor({
       className="visEditorSidebar__aggParamFormRow"
       label={label}
       fullWidth={true}
-      isInvalid={isInvalid}
+      isInvalid={showValidation ? !isValid : false}
       helpText={get(editorConfig, 'interval.help')}
     >
       <EuiFieldNumber
@@ -78,7 +83,7 @@ function NumberIntervalParamEditor({
         min={min}
         step={base}
         data-test-subj={`visEditorInterval${agg.id}`}
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
         onChange={onChange}
         onBlur={setTouched}
         fullWidth={true}
