@@ -29,6 +29,7 @@ import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
+import chrome from 'ui/chrome';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
@@ -43,6 +44,7 @@ class VisEditor extends Component {
       autoApply: true,
       visFields: props.visFields,
       extractedIndexPatterns: [''],
+      indexPatterns: [],
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
@@ -59,6 +61,24 @@ class VisEditor extends Component {
 
   handleUiState = (field, value) => {
     this.props.vis.uiStateVal(field, value);
+  };
+
+  /*
+    fetchIndexPatterns should probably move to the '../lib' folder under a new file.
+    Q: fetchIndexPatterns also needs to be triggered on componentDidMount?
+  */
+  fetchIndexPatterns = async () => {
+    const allIndexPatternObjects = await chrome
+      .getSavedObjectsClient()
+      .find({
+        type: 'index-pattern',
+        perPage: 100,
+      });
+    if (allIndexPatternObjects && allIndexPatternObjects.savedObjects) {
+      this.setState({
+        indexPatterns: allIndexPatternObjects.savedObjects,
+      });
+    }
   };
 
   updateVisState = debounce(() => {
@@ -157,6 +177,12 @@ class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
+            <button
+              style={{ border: '2px solid blue', backgroundColor: 'gray' }}
+              onClick={async () => await this.fetchIndexPatterns(model.default_index_pattern)}
+            >
+              FETCH
+            </button>
             <PanelConfig
               fields={this.state.visFields}
               model={model}
@@ -164,6 +190,7 @@ class VisEditor extends Component {
               dateFormat={this.props.config.get('dateFormat')}
               onChange={this.handleChange}
               getConfig={this.getConfig}
+              indexPatterns={this.state.indexPatterns}
             />
           </div>
         </div>
