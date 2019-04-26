@@ -26,59 +26,66 @@ import { Range } from '../../utils/range';
 
 interface NumberRowProps {
   disableDelete: boolean;
+  isInvalid: boolean;
   labelledbyId: string;
   model: NumberRowModel;
   range: Range;
-  onChange({id, value}: { id: string, value: string}): void;
+  onBlur(): void;
+  onChange({ id, value }: { id: string; value: string }): void;
   onDelete(index: string): void;
 }
 
 export interface NumberRowModel {
   id: string;
+  isInvalid: boolean;
   value: number | '';
 }
 
 function NumberRow({
-    disableDelete,
-    model,
-    labelledbyId,
-    range,
-    onDelete,
-    onChange,
+  disableDelete,
+  model,
+  isInvalid,
+  labelledbyId,
+  range,
+  onBlur,
+  onDelete,
+  onChange,
 }: NumberRowProps) {
-  
   const deleteBtnAriaLabel = i18n.translate('common.ui.numberList.removeUnitButtonAriaLabel', {
-      defaultMessage:  'Remove this rank value'
-    });
-
-  const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) => onChange({
-    ...model,
-    value: get(event, 'target.value'),
+    defaultMessage: 'Remove this rank value',
   });
+
+  const onValueChanged = (event: React.ChangeEvent<HTMLInputElement>) =>
+    onChange({
+      value: get(event, 'target.value'),
+      id: model.id,
+    });
 
   return (
     <EuiFlexGroup responsive={false} alignItems="center">
       <EuiFlexItem>
         <EuiFieldNumber
           aria-labelledby={labelledbyId}
+          isInvalid={isInvalid}
           onChange={onValueChanged}
           value={model.value}
           fullWidth={true}
           min={range.min}
           max={range.max}
+          onBlur={onBlur}
         />
       </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={deleteBtnAriaLabel}>
-            <EuiButtonIcon
-              aria-label={deleteBtnAriaLabel}
-              color="danger"
-              iconType="trash"
-              onClick={() => onDelete(model.id)}
-              disabled={disableDelete}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={deleteBtnAriaLabel}>
+          <EuiButtonIcon
+            aria-label={deleteBtnAriaLabel}
+            color="danger"
+            iconType="trash"
+            onClick={() => onDelete(model.id)}
+            disabled={disableDelete}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

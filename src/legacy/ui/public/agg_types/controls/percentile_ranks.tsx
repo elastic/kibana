@@ -24,25 +24,41 @@ import { i18n } from '@kbn/i18n';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { NumberList } from '../number_list/new_number_list';
 
-function PercentileRanksEditor({ agg, value, setValidity, setValue }: AggParamEditorProps<number[]>) {
+function PercentileRanksEditor({
+  agg,
+  isInvalid,
+  value,
+  setTouched,
+  setValidity,
+  setValue,
+}: AggParamEditorProps<Array<number | undefined>>) {
   const label = i18n.translate('common.ui.aggTypes.valuesLabel', { defaultMessage: 'Values' });
 
-  useEffect(
-    () => {
-      setValidity(!!value.length);
-    },
-    [value]
-  );
-
+  // useEffect(
+  //   () => {
+  //     if (value.length === 0) {
+  //       setValidity(false);
+  //     }
+  //   },
+  //   [value]
+  // );
 
   return (
-    <EuiFormRow label={label} fullWidth={true} id={`visEditorPercentileRanksLabel${agg.id}`} className="visEditorSidebar__aggParamFormRow">
+    <EuiFormRow
+      isInvalid={isInvalid}
+      label={label}
+      fullWidth={true}
+      id={`visEditorPercentileRanksLabel${agg.id}`}
+      className="visEditorSidebar__aggParamFormRow"
+    >
       <NumberList
         labelledbyId={`visEditorPercentileRanksLabel${agg.id}`}
-        initArray={value}
+        numberArray={value}
         range="[-Infinity,Infinity]"
         unitName="value"
+        showValidation={isInvalid}
         onChange={setValue}
+        setTouched={setTouched}
         setValidity={setValidity}
       />
     </EuiFormRow>
