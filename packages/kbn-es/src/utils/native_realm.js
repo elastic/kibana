@@ -49,19 +49,6 @@ exports.NativeRealm = class NativeRealm {
     }
   }
 
-  async isSecurityEnabled() {
-    try {
-      const {
-        body: { features },
-      } = await this._client.xpack.info({ categories: 'features' });
-
-      return features.security && features.security.enabled && features.security.available;
-    } catch (e) {
-      this._log.error(chalk.red(`unable to fetch features info: ${e.message}`));
-      return false;
-    }
-  }
-
   async setPasswords(options) {
     if (!(await this.isSecurityEnabled())) {
       this._log.info('security is not enabled, unable to set native realm passwords');
@@ -71,5 +58,16 @@ exports.NativeRealm = class NativeRealm {
     USERS.forEach(user => {
       this.setPassword(user, options[`password.${user}`]);
     });
+  }
+
+  async isSecurityEnabled() {
+    try {
+      const {
+        body: { features },
+      } = await this._client.xpack.info({ categories: 'features' });
+      return features.security && features.security.enabled && features.security.available;
+    } catch (e) {
+      return false;
+    }
   }
 };
