@@ -165,7 +165,7 @@ export const SourceConfigurationFlyout = injectI18n(
 
     const tabs: EuiTabbedContentTab[] = [
       {
-        id: 'indicesAndFields',
+        id: 'indicesAndFieldsTab',
         name: intl.formatMessage({
           id: 'xpack.infra.sourceConfiguration.sourceConfigurationIndicesTabTitle',
           defaultMessage: 'Indices and fields',
@@ -199,7 +199,7 @@ export const SourceConfigurationFlyout = injectI18n(
         ),
       },
       {
-        id: 'logs',
+        id: 'logsTab',
         name: intl.formatMessage({
           id: 'xpack.infra.sourceConfiguration.sourceConfigurationLogsTabTitle',
           defaultMessage: 'Log entries',

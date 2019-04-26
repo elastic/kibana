@@ -57,6 +57,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
 
     return (
       <LogTextStreamLogEntryItemDiv
+        data-test-subj="streamEntry logTextStreamEntry"
         innerRef={
           /* Workaround for missing RefObject support in styled-components */
           boundingBoxRef as any
@@ -68,6 +69,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
           if (isTimestampColumn(column)) {
             return (
               <LogTextStreamItemDateField
+                dataTestSubj="logColumn timestampLogColumn"
                 hasHighlights={false}
                 isHovered={isHovered}
                 key={`${columnIndex}`}
@@ -97,6 +99,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                   )}
                 </LogTextStreamIconDiv>
                 <LogTextStreamItemMessageField
+                  dataTestSubj="logColumn messageLogColumn"
                   isHovered={isHovered}
                   isWrapped={wrap}
                   scale={scale}
@@ -107,6 +110,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
           } else if (isFieldColumn(column)) {
             return (
               <LogTextStreamItemFieldField
+                dataTestSubj={`logColumn fieldLogColumn fieldLogColumn:${column.field}`}
                 encodedValue={column.value}
                 isHovered={isHovered}
                 key={`${columnIndex}`}

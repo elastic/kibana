@@ -12,6 +12,7 @@ import { TextScale } from '../../../../common/log_text_scale';
 import { LogTextStreamItemField } from './item_field';
 
 interface LogTextStreamItemFieldFieldProps {
+  dataTestSubj?: string;
   encodedValue: string;
   isHovered: boolean;
   scale: TextScale;
@@ -19,11 +20,15 @@ interface LogTextStreamItemFieldFieldProps {
 
 export const LogTextStreamItemFieldField: React.FunctionComponent<
   LogTextStreamItemFieldFieldProps
-> = ({ encodedValue, isHovered, scale }) => {
+> = ({ dataTestSubj, encodedValue, isHovered, scale }) => {
   const value = useMemo(() => JSON.parse(encodedValue), [encodedValue]);
 
   return (
-    <LogTextStreamItemFieldFieldWrapper isHovered={isHovered} scale={scale}>
+    <LogTextStreamItemFieldFieldWrapper
+      data-test-subj={dataTestSubj}
+      isHovered={isHovered}
+      scale={scale}
+    >
       {value}
     </LogTextStreamItemFieldFieldWrapper>
   );

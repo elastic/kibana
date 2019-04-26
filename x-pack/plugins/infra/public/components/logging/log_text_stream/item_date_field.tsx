@@ -14,6 +14,7 @@ import { LogTextStreamItemField } from './item_field';
 
 interface LogTextStreamItemDateFieldProps {
   children: React.ReactNode;
+  dataTestSubj?: string;
   hasHighlights: boolean;
   isHovered: boolean;
   scale: TextScale;
@@ -24,10 +25,11 @@ export class LogTextStreamItemDateField extends React.PureComponent<
   {}
 > {
   public render() {
-    const { children, hasHighlights, isHovered, scale } = this.props;
+    const { children, dataTestSubj, hasHighlights, isHovered, scale } = this.props;
 
     return (
       <LogTextStreamItemDateFieldWrapper
+        data-test-subj={dataTestSubj}
         hasHighlights={hasHighlights}
         isHovered={isHovered}
         scale={scale}

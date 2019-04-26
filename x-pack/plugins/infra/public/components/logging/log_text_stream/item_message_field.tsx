@@ -19,6 +19,7 @@ import {
 } from '../../../utils/log_entry';
 
 interface LogTextStreamItemMessageFieldProps {
+  dataTestSubj?: string;
   segments: LogEntryMessageSegment[];
   isHovered: boolean;
   isWrapped: boolean;
@@ -27,11 +28,12 @@ interface LogTextStreamItemMessageFieldProps {
 
 export const LogTextStreamItemMessageField: React.FunctionComponent<
   LogTextStreamItemMessageFieldProps
-> = ({ isHovered, isWrapped, scale, segments }) => {
+> = ({ dataTestSubj, isHovered, isWrapped, scale, segments }) => {
   const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
 
   return (
     <LogTextStreamItemMessageFieldWrapper
+      data-test-subj={dataTestSubj}
       hasHighlights={false}
       isHovered={isHovered}
       isWrapped={isWrapped}

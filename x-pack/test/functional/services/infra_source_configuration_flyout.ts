@@ -4,15 +4,30 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import testSubjSelector from '@kbn/test-subj-selector';
+
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
 
 export function InfraSourceConfigurationFlyoutProvider({
   getService,
 }: KibanaFunctionalTestDefaultProviders) {
+  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
+    async switchToIndicesAndFieldsTab() {
+      await find.clickByCssSelector(
+        `${testSubjSelector('sourceConfigurationFlyout')} #indicesAndFieldsTab`
+      );
+      await testSubjects.find('sourceConfigurationNameSectionTitle');
+    },
+
+    async switchToLogsTab() {
+      await find.clickByCssSelector(`${testSubjSelector('sourceConfigurationFlyout')} #logsTab`);
+      await testSubjects.find('sourceConfigurationLogColumnsSectionTitle');
+    },
+
     async getNameInput() {
       return await testSubjects.find('nameInput');
     },

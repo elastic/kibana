@@ -22,7 +22,7 @@ export const NameConfigurationPanel = ({
   nameFieldProps,
 }: NameConfigurationPanelProps) => (
   <EuiForm>
-    <EuiTitle size="s">
+    <EuiTitle size="s" data-test-subj="sourceConfigurationNameSectionTitle">
       <h3>
         <FormattedMessage
           id="xpack.infra.sourceConfiguration.nameSectionTitle"

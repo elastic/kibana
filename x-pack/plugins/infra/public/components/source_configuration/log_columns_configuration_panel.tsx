@@ -38,7 +38,7 @@ export const LogColumnsConfigurationPanel: React.FunctionComponent<
   <EuiForm>
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj="sourceConfigurationLogColumnsSectionTitle">
           <h3>
             <FormattedMessage
               id="xpack.infra.sourceConfiguration.logColumnsSectionTitle"
