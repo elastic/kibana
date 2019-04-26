@@ -49,8 +49,13 @@ interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
 }
 
-export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
+type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
+export type PivotGroupByConfig = GroupByConfigWithInterval | GroupByTerms;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
+
+export function groupByConfigHasInterval(arg: any): arg is GroupByConfigWithInterval {
+  return arg.hasOwnProperty('interval');
+}
 
 export interface TermsAgg {
   terms: {

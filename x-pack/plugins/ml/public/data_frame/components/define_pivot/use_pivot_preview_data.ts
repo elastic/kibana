@@ -12,6 +12,7 @@ import { ml } from '../../../services/ml_api_service';
 import { Dictionary } from '../../../../common/types/common';
 import {
   getDataFramePreviewRequest,
+  groupByConfigHasInterval,
   PivotAggsConfig,
   PivotGroupByConfigDict,
   SimpleQuery,
@@ -74,7 +75,12 @@ export const usePivotPreviewData = (
         indexPattern.title,
         aggs.map(a => `${a.agg} ${a.field} ${a.formRowLabel}`).join(' '),
         groupByArr
-          .map(g => `${g.agg} ${g.field} ${g.formRowLabel} ${'interval' in g ? g.interval : ''}`)
+          .map(
+            g =>
+              `${g.agg} ${g.field} ${g.formRowLabel} ${
+                groupByConfigHasInterval(g) ? g.interval : ''
+              }`
+          )
           .join(' '),
         query.query_string.query,
       ]

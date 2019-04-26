@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiTextColor } from '@elastic/eui';
 
-import { PivotGroupByConfig } from '../../common';
+import { groupByConfigHasInterval, PivotGroupByConfig } from '../../common';
 
 import { PopoverForm } from './popover_form';
 
@@ -30,7 +30,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
   const [isPopoverVisible, setPopoverVisibility] = useState(false);
 
   function updateInterval(interval: string) {
-    if ('interval' in item) {
+    if (groupByConfigHasInterval(item)) {
       item.interval = interval;
       onChange(optionsDataId, item);
       setPopoverVisibility(false);
@@ -42,7 +42,7 @@ export const GroupByLabelForm: React.SFC<Props> = ({
       <EuiFlexItem className="mlGroupByLabel--text">
         <span className="mlGroupByLabel__text">{optionsDataId}</span>
       </EuiFlexItem>
-      {'interval' in item && (
+      {groupByConfigHasInterval(item) && (
         <Fragment>
           <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
             <EuiTextColor color="subdued" className="mlGroupByLabel__text">

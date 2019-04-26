@@ -14,7 +14,6 @@ exports[`Data Frame: <GroupByLabelSummary /> Date histogram aggregation 1`] = `
     >
       the-options-data-id
     </span>
-     
   </EuiFlexItem>
   <EuiFlexItem
     className="mlGroupByLabel--text mlGroupByLabel--interval"
@@ -44,7 +43,6 @@ exports[`Data Frame: <GroupByLabelSummary /> Histogram aggregation 1`] = `
     >
       the-options-data-id
     </span>
-     
   </EuiFlexItem>
   <EuiFlexItem
     className="mlGroupByLabel--text mlGroupByLabel--interval"
@@ -64,6 +62,7 @@ exports[`Data Frame: <GroupByLabelSummary /> Terms aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
+  responsive={false}
 >
   <EuiFlexItem
     className="mlGroupByLabel--text"

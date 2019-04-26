@@ -30,6 +30,7 @@ import { PivotPreview } from './pivot_preview';
 import {
   DropDownLabel,
   getPivotQuery,
+  groupByConfigHasInterval,
   IndexPatternContext,
   Label,
   PivotAggsConfig,
@@ -140,7 +141,10 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       aggList,
       pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
       pivotGroupByArr
-        .map(d => `${d.agg} ${d.field} ${'interval' in d ? d.interval : ''} ${d.formRowLabel}`)
+        .map(
+          d =>
+            `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.formRowLabel}`
+        )
         .join(' '),
       search,
       valid,
