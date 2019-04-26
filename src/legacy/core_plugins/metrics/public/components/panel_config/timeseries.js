@@ -422,6 +422,7 @@ TimeseriesPanelConfigUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData$: PropTypes.object,
+  indexPatterns: PropTypes.array,
 };
 
 const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);
