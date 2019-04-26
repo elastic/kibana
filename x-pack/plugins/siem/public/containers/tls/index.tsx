@@ -64,8 +64,8 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
           sourceId,
           timerange: {
             interval: '12h',
-            from: startDate!, // TODO: Remove these bangs
-            to: endDate!, // TODO: Remove these bangs
+            from: startDate ? startDate : 0,
+            to: endDate ? endDate : Date.now(),
           },
           ip,
           flowTarget,

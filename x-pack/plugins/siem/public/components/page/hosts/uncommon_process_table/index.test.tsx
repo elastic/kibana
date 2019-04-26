@@ -28,7 +28,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -46,7 +46,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -70,7 +70,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -95,7 +95,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -120,7 +120,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -144,7 +144,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />

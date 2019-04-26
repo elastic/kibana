@@ -84,7 +84,6 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     };
   }
 
-  // TODO: Ensure this all works correctly like expected
   public async getTls(request: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
     const response = await this.framework.callWithRequest<TlsData, TermAggregation>(
       request,
@@ -202,7 +201,6 @@ export const formatDomainsEdges = (
     },
   }));
 
-// TODO: Double check this to ensure if it is correct or not
 const getTlsEdges = (
   response: DatabaseSearchResponse<TlsData, TermAggregation>,
   options: TlsRequestOptions
