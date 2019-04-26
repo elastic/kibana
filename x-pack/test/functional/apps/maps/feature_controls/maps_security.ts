@@ -14,8 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
 
-  // FF: suite fails in headless mode
-  describe.skip('security feature controls', () => {
+  describe('security feature controls', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('maps/data');
       await esArchiver.load('maps/kibana');
