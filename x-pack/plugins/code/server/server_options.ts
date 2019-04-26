@@ -29,8 +29,6 @@ export class ServerOptions {
 
   public readonly credsPath = resolve(this.config.get('path.data'), 'code/credentials');
 
-  public readonly langServerPath = resolve(this.config.get('path.data'), 'code/langserver');
-
   public readonly jdtWorkspacePath = resolve(this.config.get('path.data'), 'code/jdt_ws');
 
   public readonly jdtConfigPath = resolve(this.config.get('path.data'), 'code/jdt_config');
