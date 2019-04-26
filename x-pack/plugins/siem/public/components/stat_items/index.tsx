@@ -11,23 +11,20 @@ import {
   EuiPanel,
   EuiHorizontalRule,
   // @ts-ignore
-  EuiBarSeries,
-  // @ts-ignore
   EuiStat,
-  // @ts-ignore
-  EuiSeriesChartUtils,
   EuiIcon,
 } from '@elastic/eui';
 
-const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
 const iconType = 'stopFilled';
-import { EuiSeriesChart, EuiAreaSeries } from '@elastic/eui/lib/experimental';
 import numeral from '@elastic/numeral';
 import React from 'react';
 import { pure } from 'recompose';
 
 import { getEmptyTagValue } from '../empty_value';
 import { LoadingPanel } from '../loading';
+import { BarChart } from './barchart';
+import { AreaChart } from './areachart';
+import { EuiTitle } from '@elastic/eui';
 
 export interface StatItem {
   key: string;
@@ -67,7 +64,7 @@ export interface StatItemsProps extends StatItems {
   key: string;
 }
 
-const CardTitle = pure<{ isLoading: boolean; value: number | null | undefined }>(
+const StatTitle = pure<{ isLoading: boolean; value: number | null | undefined }>(
   ({ isLoading, value }) => (
     <span className="eui-displayInlineBlock">
       {isLoading ? (
@@ -87,9 +84,13 @@ const getChartSpan = (barChart: BarChartData[] | undefined | null, areaChart: Ar
 
 export const StatItemsComponent = pure<StatItemsProps>(
   ({ fields, description, isLoading, key, grow, barChart, areaChart }) => (
-    <EuiFlexItem key={`card-items-${key}`} grow={grow || null}>
+    <EuiFlexItem key={`stat-items-${key}`} grow={grow}>
       <EuiPanel>
-        <EuiStat description={description} titleSize="m" title={
+        <EuiStat description={
+            <EuiTitle size="xxs"><span>{description}</span></EuiTitle>
+          }
+          titleSize="m" 
+          title={
           <EuiFlexGroup justifyContent="spaceBetween" component="span">
             {
               fields.map(field => (
@@ -99,15 +100,16 @@ export const StatItemsComponent = pure<StatItemsProps>(
                     component="span"
                     gutterSize="m"
                     alignItems="center"
+                    data-test-subj="stat-title"
                   >
                     <EuiFlexItem component="span" grow={2}>
                       <EuiIcon type={iconType} color={field.color} />
                     </EuiFlexItem>
                     <EuiFlexItem component="span" grow={4}>
-                      <CardTitle isLoading={isLoading} value={field.value} />
+                      <StatTitle isLoading={isLoading} value={field.value} />
                     </EuiFlexItem>
                     <EuiFlexItem component="span" grow={4}>
-                    {field.description}
+                      {field.description}
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -120,47 +122,23 @@ export const StatItemsComponent = pure<StatItemsProps>(
           height="auto"
           width="100%"
           text="Loading"
-          data-test-subj="InitialLoadingPanelLoadMoreTable"
+          data-test-subj="InitialLoadingKpisHostsChart"
         /> : (
         <EuiFlexGroup gutterSize="none">
           {
             barChart ?  (
               <EuiFlexItem grow={getChartSpan(barChart, areaChart)}>
-                <EuiSeriesChart showDefaultAxis={true} height={100} yType={SCALE.ORDINAL} orientation={ORIENTATION.HORIZONTAL}>
-                  {
-                    barChart.map(series => series.value != null ? (
-                      <EuiBarSeries key={`stat-items-barchart-${series.key}`} 
-                        name={`stat-items-barchart-${series.key}`}
-                        data={series.value}
-                        color={series.color} />
-                    ) : null)
-                  }
-                </EuiSeriesChart>
+                <BarChart barChart={barChart}/>
               </EuiFlexItem>
             ) : null
           }
           {
             areaChart ?  (
               <EuiFlexItem grow={getChartSpan(barChart, areaChart)}>
-                <EuiSeriesChart showDefaultAxis={true} height={100}>
-                  {
-                    areaChart.map(series => series.value != null ? (
-                      /**
-                       * Placing ts-ignore here for fillOpacity
-                       * */
-                      // @ts-ignore
-                      <EuiAreaSeries key={`stat-items-areachart-${series.key}`} 
-                        name={`stat-items-areachart-${series.key}`}
-                        data={series.value}
-                        fillOpacity={0.04}
-                        color={series.color} />
-                    ) : null)
-                  }
-                </EuiSeriesChart>
+                <AreaChart areaChart={areaChart} />
               </EuiFlexItem>
             ) : null
           }
-      
         </EuiFlexGroup>
       )}
       </EuiPanel>

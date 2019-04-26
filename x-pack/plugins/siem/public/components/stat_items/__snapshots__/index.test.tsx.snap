@@ -1,10 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Stat Items rendering it renders loading icons 1`] = `
+exports[`Stat Items loading it renders loading icons 1`] = `
 <Component
   fields={
     Array [
       Object {
+        "color": "#000000",
         "description": "NETWORK_EVENTS",
         "key": "networkEvents",
         "value": null,
@@ -16,12 +17,845 @@ exports[`Stat Items rendering it renders loading icons 1`] = `
 `;
 
 exports[`Stat Items rendering it renders the default widget 1`] = `
-<Component
+<pure(Component)
+  areaChart={
+    Array [
+      Object {
+        "color": "#000000",
+        "key": "uniqueSourcePrivateIps",
+        "value": null,
+      },
+      Object {
+        "color": "#000000",
+        "key": "uniqueDestinationPrivateIps",
+        "value": null,
+      },
+    ]
+  }
+  barChart={
+    Array [
+      Object {
+        "color": "#000000",
+        "key": "uniqueSourcePrivateIps",
+        "value": null,
+      },
+      Object {
+        "color": "#000000",
+        "key": "uniqueDestinationPrivateIps",
+        "value": null,
+      },
+    ]
+  }
+  description="UNIQUE_PRIVATE_IPS"
   fields={
     Array [
       Object {
-        "description": "NETWORK_EVENTS",
-        "key": "networkEvents",
+        "color": "#000000",
+        "description": "UNIQUE_SOURCE_PRIVATE_IPS",
+        "key": "uniqueSourcePrivateIps",
+        "value": null,
+      },
+      Object {
+        "color": "#000000",
+        "description": "UNIQUE_DESTINATION_PRIVATE_IPS",
+        "key": "uniqueDestinationPrivateIps",
+        "value": null,
+      },
+    ]
+  }
+  isLoading={false}
+>
+  <Component
+    areaChart={
+      Array [
+        Object {
+          "color": "#000000",
+          "key": "uniqueSourcePrivateIps",
+          "value": null,
+        },
+        Object {
+          "color": "#000000",
+          "key": "uniqueDestinationPrivateIps",
+          "value": null,
+        },
+      ]
+    }
+    barChart={
+      Array [
+        Object {
+          "color": "#000000",
+          "key": "uniqueSourcePrivateIps",
+          "value": null,
+        },
+        Object {
+          "color": "#000000",
+          "key": "uniqueDestinationPrivateIps",
+          "value": null,
+        },
+      ]
+    }
+    description="UNIQUE_PRIVATE_IPS"
+    fields={
+      Array [
+        Object {
+          "color": "#000000",
+          "description": "UNIQUE_SOURCE_PRIVATE_IPS",
+          "key": "uniqueSourcePrivateIps",
+          "value": null,
+        },
+        Object {
+          "color": "#000000",
+          "description": "UNIQUE_DESTINATION_PRIVATE_IPS",
+          "key": "uniqueDestinationPrivateIps",
+          "value": null,
+        },
+      ]
+    }
+    isLoading={false}
+  >
+    <EuiFlexItem
+      key="stat-items-undefined"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <EuiPanel
+          grow={true}
+          hasShadow={false}
+          paddingSize="m"
+        >
+          <div
+            className="euiPanel euiPanel--paddingMedium"
+          >
+            <EuiStat
+              description={
+                <EuiTitle
+                  size="xxs"
+                >
+                  <span>
+                    UNIQUE_PRIVATE_IPS
+                  </span>
+                </EuiTitle>
+              }
+              reverse={false}
+              textAlign="left"
+              title={
+                <EuiFlexGroup
+                  component="span"
+                  justifyContent="spaceBetween"
+                >
+                  <EuiFlexItem
+                    component="span"
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      component="span"
+                      gutterSize="m"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem
+                        component="span"
+                        grow={2}
+                      >
+                        <EuiIcon
+                          color="#000000"
+                          type="stopFilled"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        component="span"
+                        grow={4}
+                      >
+                        <pure(Component)
+                          isLoading={false}
+                          value={null}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        component="span"
+                        grow={4}
+                      >
+                        UNIQUE_SOURCE_PRIVATE_IPS
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem
+                    component="span"
+                  >
+                    <EuiFlexGroup
+                      alignItems="center"
+                      component="span"
+                      gutterSize="m"
+                      justifyContent="spaceBetween"
+                    >
+                      <EuiFlexItem
+                        component="span"
+                        grow={2}
+                      >
+                        <EuiIcon
+                          color="#000000"
+                          type="stopFilled"
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        component="span"
+                        grow={4}
+                      >
+                        <pure(Component)
+                          isLoading={false}
+                          value={null}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem
+                        component="span"
+                        grow={4}
+                      >
+                        UNIQUE_DESTINATION_PRIVATE_IPS
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              titleColor="default"
+              titleSize="m"
+            >
+              <div
+                className="euiStat euiStat--leftAligned"
+              >
+                <EuiText
+                  className="euiStat__description"
+                  size="s"
+                >
+                  <div
+                    className="euiText euiText--small euiStat__description"
+                  >
+                    <p>
+                      <EuiTitle
+                        size="xxs"
+                      >
+                        <span
+                          className="euiTitle euiTitle--xxsmall"
+                        >
+                          UNIQUE_PRIVATE_IPS
+                        </span>
+                      </EuiTitle>
+                    </p>
+                  </div>
+                </EuiText>
+                <EuiTitle
+                  className="euiStat__title"
+                  size="m"
+                >
+                  <p
+                    className="euiTitle euiTitle--medium euiStat__title"
+                  >
+                    <EuiFlexGroup
+                      component="span"
+                      justifyContent="spaceBetween"
+                    >
+                      <span
+                        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <EuiFlexItem
+                          component="span"
+                          key="stat-items-field-uniqueSourcePrivateIps"
+                        >
+                          <span
+                            className="euiFlexItem"
+                          >
+                            <EuiFlexGroup
+                              alignItems="center"
+                              component="span"
+                              gutterSize="m"
+                              justifyContent="spaceBetween"
+                            >
+                              <span
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={2}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow2"
+                                  >
+                                    <EuiIcon
+                                      color="#000000"
+                                      type="stopFilled"
+                                    >
+                                      <stopFilled
+                                        className="euiIcon euiIcon--medium"
+                                        focusable="false"
+                                        height="16"
+                                        style={
+                                          Object {
+                                            "fill": "#000000",
+                                          }
+                                        }
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <svg
+                                          className="euiIcon euiIcon--medium"
+                                          focusable="false"
+                                          height="16"
+                                          style={
+                                            Object {
+                                              "fill": "#000000",
+                                            }
+                                          }
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <rect
+                                            fillRule="evenodd"
+                                            height="12"
+                                            rx="2"
+                                            width="12"
+                                            x="2"
+                                            y="2"
+                                          />
+                                        </svg>
+                                      </stopFilled>
+                                    </EuiIcon>
+                                  </span>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={4}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow4"
+                                  >
+                                    <pure(Component)
+                                      isLoading={false}
+                                      value={null}
+                                    >
+                                      <Component
+                                        isLoading={false}
+                                        value={null}
+                                      >
+                                        <span
+                                          className="eui-displayInlineBlock"
+                                        >
+                                          --
+                                        </span>
+                                      </Component>
+                                    </pure(Component)>
+                                  </span>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={4}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow4"
+                                  >
+                                    UNIQUE_SOURCE_PRIVATE_IPS
+                                  </span>
+                                </EuiFlexItem>
+                              </span>
+                            </EuiFlexGroup>
+                          </span>
+                        </EuiFlexItem>
+                        <EuiFlexItem
+                          component="span"
+                          key="stat-items-field-uniqueDestinationPrivateIps"
+                        >
+                          <span
+                            className="euiFlexItem"
+                          >
+                            <EuiFlexGroup
+                              alignItems="center"
+                              component="span"
+                              gutterSize="m"
+                              justifyContent="spaceBetween"
+                            >
+                              <span
+                                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+                              >
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={2}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow2"
+                                  >
+                                    <EuiIcon
+                                      color="#000000"
+                                      type="stopFilled"
+                                    >
+                                      <stopFilled
+                                        className="euiIcon euiIcon--medium"
+                                        focusable="false"
+                                        height="16"
+                                        style={
+                                          Object {
+                                            "fill": "#000000",
+                                          }
+                                        }
+                                        viewBox="0 0 16 16"
+                                        width="16"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <svg
+                                          className="euiIcon euiIcon--medium"
+                                          focusable="false"
+                                          height="16"
+                                          style={
+                                            Object {
+                                              "fill": "#000000",
+                                            }
+                                          }
+                                          viewBox="0 0 16 16"
+                                          width="16"
+                                          xmlns="http://www.w3.org/2000/svg"
+                                        >
+                                          <rect
+                                            fillRule="evenodd"
+                                            height="12"
+                                            rx="2"
+                                            width="12"
+                                            x="2"
+                                            y="2"
+                                          />
+                                        </svg>
+                                      </stopFilled>
+                                    </EuiIcon>
+                                  </span>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={4}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow4"
+                                  >
+                                    <pure(Component)
+                                      isLoading={false}
+                                      value={null}
+                                    >
+                                      <Component
+                                        isLoading={false}
+                                        value={null}
+                                      >
+                                        <span
+                                          className="eui-displayInlineBlock"
+                                        >
+                                          --
+                                        </span>
+                                      </Component>
+                                    </pure(Component)>
+                                  </span>
+                                </EuiFlexItem>
+                                <EuiFlexItem
+                                  component="span"
+                                  grow={4}
+                                >
+                                  <span
+                                    className="euiFlexItem euiFlexItem--flexGrow4"
+                                  >
+                                    UNIQUE_DESTINATION_PRIVATE_IPS
+                                  </span>
+                                </EuiFlexItem>
+                              </span>
+                            </EuiFlexGroup>
+                          </span>
+                        </EuiFlexItem>
+                      </span>
+                    </EuiFlexGroup>
+                  </p>
+                </EuiTitle>
+              </div>
+            </EuiStat>
+            <EuiHorizontalRule>
+              <hr
+                className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+              />
+            </EuiHorizontalRule>
+            <EuiFlexGroup
+              gutterSize="none"
+            >
+              <div
+                className="euiFlexGroup euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <EuiFlexItem
+                  grow={5}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrow5"
+                  >
+                    <pure(Component)
+                      barChart={
+                        Array [
+                          Object {
+                            "color": "#000000",
+                            "key": "uniqueSourcePrivateIps",
+                            "value": null,
+                          },
+                          Object {
+                            "color": "#000000",
+                            "key": "uniqueDestinationPrivateIps",
+                            "value": null,
+                          },
+                        ]
+                      }
+                    >
+                      <Component
+                        barChart={
+                          Array [
+                            Object {
+                              "color": "#000000",
+                              "key": "uniqueSourcePrivateIps",
+                              "value": null,
+                            },
+                            Object {
+                              "color": "#000000",
+                              "key": "uniqueDestinationPrivateIps",
+                              "value": null,
+                            },
+                          ]
+                        }
+                      >
+                        <FlexibleEuiSeriesChart
+                          height={100}
+                          orientation="horizontal"
+                          showDefaultAxis={true}
+                          yType="ordinal"
+                        >
+                          <div
+                            style={
+                              Object {
+                                "height": "100%",
+                                "width": "100%",
+                              }
+                            }
+                          >
+                            <EuiSeriesChart
+                              animateData={true}
+                              enableSelectionBrush={false}
+                              height={100}
+                              margins={
+                                Object {
+                                  "bottom": 40,
+                                  "left": 40,
+                                  "right": 10,
+                                  "top": 10,
+                                }
+                              }
+                              orientation="horizontal"
+                              selectionBrushOrientation="horizontal"
+                              showCrosshair={true}
+                              showDefaultAxis={true}
+                              width={0}
+                              xPadding={0}
+                              xType="linear"
+                              yPadding={0}
+                              yType="ordinal"
+                            >
+                              <EuiEmptyPrompt
+                                body={<p />}
+                                className="euiSeriesChartContainer__emptyPrompt"
+                                iconColor="subdued"
+                                iconType="visualizeApp"
+                                title={
+                                  <span>
+                                    Chart not available
+                                  </span>
+                                }
+                              >
+                                <div
+                                  className="euiEmptyPrompt euiSeriesChartContainer__emptyPrompt"
+                                >
+                                  <EuiIcon
+                                    color="subdued"
+                                    size="xxl"
+                                    type="visualizeApp"
+                                  >
+                                    <visualizeApp
+                                      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                                      focusable="false"
+                                      height="32"
+                                      style={null}
+                                      viewBox="0 0 32 32"
+                                      width="32"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <svg
+                                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                                        focusable="false"
+                                        height="32"
+                                        style={null}
+                                        viewBox="0 0 32 32"
+                                        width="32"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          className="euiIcon__fillSecondary"
+                                          d="M32 32H4a4 4 0 0 1-4-4V0h2v28a2 2 0 0 0 2 2h28v2z"
+                                        />
+                                        <path
+                                          d="M6 20h2v7H6zM16 12h2v15h-2zM26 17h2v10h-2z"
+                                        />
+                                        <path
+                                          d="M27 6a3 3 0 0 0-2.08.84L20 4.36A2.2 2.2 0 0 0 20 4a3 3 0 0 0-6 0c.001.341.062.68.18 1l-5.6 4.46A3 3 0 0 0 7 9a3 3 0 1 0 3 3 2.93 2.93 0 0 0-.18-1l5.6-4.48A3 3 0 0 0 17 7a3 3 0 0 0 2.08-.84l5 2.48A2.2 2.2 0 0 0 24 9a3 3 0 1 0 3-3zM7 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10-8a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                                        />
+                                      </svg>
+                                    </visualizeApp>
+                                  </EuiIcon>
+                                  <EuiSpacer
+                                    size="s"
+                                  >
+                                    <div
+                                      className="euiSpacer euiSpacer--s"
+                                    />
+                                  </EuiSpacer>
+                                  <EuiTextColor
+                                    color="subdued"
+                                  >
+                                    <span
+                                      className="euiTextColor euiTextColor--subdued"
+                                    >
+                                      <EuiTitle>
+                                        <span
+                                          className="euiTitle euiTitle--medium"
+                                        >
+                                          Chart not available
+                                        </span>
+                                      </EuiTitle>
+                                      <EuiSpacer
+                                        size="m"
+                                      >
+                                        <div
+                                          className="euiSpacer euiSpacer--m"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiText>
+                                        <div
+                                          className="euiText euiText--medium"
+                                        >
+                                          <p />
+                                        </div>
+                                      </EuiText>
+                                    </span>
+                                  </EuiTextColor>
+                                </div>
+                              </EuiEmptyPrompt>
+                            </EuiSeriesChart>
+                          </div>
+                        </FlexibleEuiSeriesChart>
+                      </Component>
+                    </pure(Component)>
+                  </div>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={5}
+                >
+                  <div
+                    className="euiFlexItem euiFlexItem--flexGrow5"
+                  >
+                    <pure(Component)
+                      areaChart={
+                        Array [
+                          Object {
+                            "color": "#000000",
+                            "key": "uniqueSourcePrivateIps",
+                            "value": null,
+                          },
+                          Object {
+                            "color": "#000000",
+                            "key": "uniqueDestinationPrivateIps",
+                            "value": null,
+                          },
+                        ]
+                      }
+                    >
+                      <Component
+                        areaChart={
+                          Array [
+                            Object {
+                              "color": "#000000",
+                              "key": "uniqueSourcePrivateIps",
+                              "value": null,
+                            },
+                            Object {
+                              "color": "#000000",
+                              "key": "uniqueDestinationPrivateIps",
+                              "value": null,
+                            },
+                          ]
+                        }
+                      >
+                        <FlexibleEuiSeriesChart
+                          height={100}
+                          showDefaultAxis={true}
+                        >
+                          <div
+                            style={
+                              Object {
+                                "height": "100%",
+                                "width": "100%",
+                              }
+                            }
+                          >
+                            <EuiSeriesChart
+                              animateData={true}
+                              enableSelectionBrush={false}
+                              height={100}
+                              margins={
+                                Object {
+                                  "bottom": 40,
+                                  "left": 40,
+                                  "right": 10,
+                                  "top": 10,
+                                }
+                              }
+                              orientation="vertical"
+                              selectionBrushOrientation="horizontal"
+                              showCrosshair={true}
+                              showDefaultAxis={true}
+                              width={0}
+                              xPadding={0}
+                              xType="linear"
+                              yPadding={0}
+                              yType="linear"
+                            >
+                              <EuiEmptyPrompt
+                                body={<p />}
+                                className="euiSeriesChartContainer__emptyPrompt"
+                                iconColor="subdued"
+                                iconType="visualizeApp"
+                                title={
+                                  <span>
+                                    Chart not available
+                                  </span>
+                                }
+                              >
+                                <div
+                                  className="euiEmptyPrompt euiSeriesChartContainer__emptyPrompt"
+                                >
+                                  <EuiIcon
+                                    color="subdued"
+                                    size="xxl"
+                                    type="visualizeApp"
+                                  >
+                                    <visualizeApp
+                                      className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                                      focusable="false"
+                                      height="32"
+                                      style={null}
+                                      viewBox="0 0 32 32"
+                                      width="32"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <svg
+                                        className="euiIcon euiIcon--xxLarge euiIcon--subdued euiIcon--app"
+                                        focusable="false"
+                                        height="32"
+                                        style={null}
+                                        viewBox="0 0 32 32"
+                                        width="32"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                      >
+                                        <path
+                                          className="euiIcon__fillSecondary"
+                                          d="M32 32H4a4 4 0 0 1-4-4V0h2v28a2 2 0 0 0 2 2h28v2z"
+                                        />
+                                        <path
+                                          d="M6 20h2v7H6zM16 12h2v15h-2zM26 17h2v10h-2z"
+                                        />
+                                        <path
+                                          d="M27 6a3 3 0 0 0-2.08.84L20 4.36A2.2 2.2 0 0 0 20 4a3 3 0 0 0-6 0c.001.341.062.68.18 1l-5.6 4.46A3 3 0 0 0 7 9a3 3 0 1 0 3 3 2.93 2.93 0 0 0-.18-1l5.6-4.48A3 3 0 0 0 17 7a3 3 0 0 0 2.08-.84l5 2.48A2.2 2.2 0 0 0 24 9a3 3 0 1 0 3-3zM7 13a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10-8a1 1 0 1 1 0-2 1 1 0 0 1 0 2zm10 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"
+                                        />
+                                      </svg>
+                                    </visualizeApp>
+                                  </EuiIcon>
+                                  <EuiSpacer
+                                    size="s"
+                                  >
+                                    <div
+                                      className="euiSpacer euiSpacer--s"
+                                    />
+                                  </EuiSpacer>
+                                  <EuiTextColor
+                                    color="subdued"
+                                  >
+                                    <span
+                                      className="euiTextColor euiTextColor--subdued"
+                                    >
+                                      <EuiTitle>
+                                        <span
+                                          className="euiTitle euiTitle--medium"
+                                        >
+                                          Chart not available
+                                        </span>
+                                      </EuiTitle>
+                                      <EuiSpacer
+                                        size="m"
+                                      >
+                                        <div
+                                          className="euiSpacer euiSpacer--m"
+                                        />
+                                      </EuiSpacer>
+                                      <EuiText>
+                                        <div
+                                          className="euiText euiText--medium"
+                                        >
+                                          <p />
+                                        </div>
+                                      </EuiText>
+                                    </span>
+                                  </EuiTextColor>
+                                </div>
+                              </EuiEmptyPrompt>
+                            </EuiSeriesChart>
+                          </div>
+                        </FlexibleEuiSeriesChart>
+                      </Component>
+                    </pure(Component)>
+                  </div>
+                </EuiFlexItem>
+              </div>
+            </EuiFlexGroup>
+          </div>
+        </EuiPanel>
+      </div>
+    </EuiFlexItem>
+  </Component>
+</pure(Component)>
+`;
+
+exports[`Stat Items rendering should render barChart 1`] = `
+<Component
+  barChart={
+    Array [
+      Object {
+        "color": "#000000",
+        "key": "uniqueSourcePrivateIps",
+        "value": null,
+      },
+      Object {
+        "color": "#000000",
+        "key": "uniqueDestinationPrivateIps",
+        "value": null,
+      },
+    ]
+  }
+  description="UNIQUE_PRIVATE_IPS"
+  fields={
+    Array [
+      Object {
+        "color": "#000000",
+        "description": "UNIQUE_SOURCE_PRIVATE_IPS",
+        "key": "uniqueSourcePrivateIps",
+        "value": null,
+      },
+      Object {
+        "color": "#000000",
+        "description": "UNIQUE_DESTINATION_PRIVATE_IPS",
+        "key": "uniqueDestinationPrivateIps",
         "value": null,
       },
     ]
