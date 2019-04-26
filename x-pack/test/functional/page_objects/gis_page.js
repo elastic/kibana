@@ -247,10 +247,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openLayerTocActionsPanel(layerName) {
-      const cleanLayerName = layerName.split(' ').join('');
-      const isOpen = await testSubjects.exists(`layerTocActionsPanel${cleanLayerName}`);
+      const escapedDisplayName = this.escapeLayerName(layerName);
+      const isOpen = await testSubjects.exists(`layerTocActionsPanel${escapedDisplayName}`);
       if (!isOpen) {
-        await testSubjects.click(`layerTocActionsPanelToggleButton${cleanLayerName}`);
+        await testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
       }
     }
 

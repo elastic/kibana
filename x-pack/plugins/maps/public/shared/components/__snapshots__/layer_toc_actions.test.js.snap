@@ -5,17 +5,29 @@ exports[`LayerTocActions is rendered 1`] = `
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="eui-alignMiddle"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -86,17 +98,29 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="eui-alignMiddle"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -167,17 +191,29 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <EuiLoadingSpinner
-        size="m"
-      />
+      <span
+        className="eui-alignMiddle"
+      >
+        <EuiLoadingSpinner
+          size="m"
+        />
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -248,17 +284,29 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="eui-alignMiddle"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -311,24 +359,36 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <EuiToolTip
-        content="Map is at zoom level 0.
-          This layer is only visible between zoom levels 2 to 3."
-        delay="regular"
-        position="top"
+      <span
+        className="eui-alignMiddle"
       >
-        <div>
-          icon mock
-        </div>
-      </EuiToolTip>
+        <EuiToolTip
+          content="Map is at zoom level 0.
+          This layer is only visible between zoom levels 2 to 3."
+          delay="regular"
+          position="top"
+        >
+          <div>
+            icon mock
+          </div>
+        </EuiToolTip>
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -399,17 +459,29 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <div>
-        icon mock
-      </div>
+      <span
+        className="eui-alignMiddle"
+      >
+        <div>
+          icon mock
+        </div>
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}
@@ -480,21 +552,33 @@ exports[`LayerTocActions should show warning when layer has errors 1`] = `
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
+      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
+      style={
+        Object {
+          "maxWidth": "19rem",
+        }
+      }
       type="button"
     >
-      <EuiIconTip
-        aria-label="Load warning"
-        color="warning"
-        content="simulated layer error"
-        size="m"
-        type="alert"
-      />
+      <span
+        className="eui-alignMiddle"
+      >
+        <EuiIconTip
+          aria-label="Load warning"
+          color="warning"
+          content="simulated layer error"
+          size="m"
+          type="alert"
+        />
+      </span>
+       
+      layer 1
     </EuiButtonEmpty>
   }
   closePopover={[Function]}

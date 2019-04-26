@@ -14,11 +14,17 @@ exports[`TOCEntry is rendered 1`] = `
   >
     <EuiFlexItem
       grow={false}
+      style={
+        Object {
+          "position": "relative",
+        }
+      }
     >
       <LayerTocActions
         cloneLayer={[Function]}
         displayName="layer 1"
         editLayer={[Function]}
+        escapedDisplayName="layer_1"
         fitToBounds={[Function]}
         layer={
           Object {
@@ -33,44 +39,42 @@ exports[`TOCEntry is rendered 1`] = `
         toggleVisible={[Function]}
         zoom={0}
       />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiText>
-        <div
-          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
-          data-test-subj="mapLayerTOCDisplayNamelayer_1"
+      <span
+        className="mapTocEntry__detailsToggle"
+      >
+        <EuiButtonIcon
+          aria-label="Show layer details"
+          className="mapTocEntry__detailsToggleButton"
+          color="primary"
+          iconSize="m"
+          iconType="arrowDown"
           onClick={[Function]}
-          style={
-            Object {
-              "maxWidth": "19rem",
-            }
-          }
-        >
-          layer 1
-        </div>
-        <span
-          className="mapTocEntry__layerIcons"
-        >
-          <EuiButtonIcon
-            aria-label="Edit layer"
-            color="primary"
-            iconSize="m"
-            iconType="pencil"
-            onClick={[Function]}
-            title="Edit layer"
-            type="button"
-          />
-          <span
-            className="mapTocEntry__grab"
-          >
-            <EuiIcon
-              type="grab"
-            />
-          </span>
-        </span>
-      </EuiText>
+          title="Show layer details"
+          type="button"
+        />
+      </span>
     </EuiFlexItem>
   </EuiFlexGroup>
+  <span
+    className="mapTocEntry__layerIcons"
+  >
+    <EuiButtonIcon
+      aria-label="Edit layer"
+      color="primary"
+      iconSize="m"
+      iconType="pencil"
+      onClick={[Function]}
+      title="Edit layer"
+      type="button"
+    />
+    <span
+      className="mapTocEntry__grab"
+    >
+      <EuiIcon
+        type="grab"
+      />
+    </span>
+  </span>
 </div>
 `;
 
@@ -88,11 +92,17 @@ exports[`TOCEntry props isReadOnly 1`] = `
   >
     <EuiFlexItem
       grow={false}
+      style={
+        Object {
+          "position": "relative",
+        }
+      }
     >
       <LayerTocActions
         cloneLayer={[Function]}
         displayName="layer 1"
         editLayer={[Function]}
+        escapedDisplayName="layer_1"
         fitToBounds={[Function]}
         isReadOnly={true}
         layer={
@@ -108,22 +118,20 @@ exports[`TOCEntry props isReadOnly 1`] = `
         toggleVisible={[Function]}
         zoom={0}
       />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiText>
-        <div
-          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
-          data-test-subj="mapLayerTOCDisplayNamelayer_1"
+      <span
+        className="mapTocEntry__detailsToggle"
+      >
+        <EuiButtonIcon
+          aria-label="Show layer details"
+          className="mapTocEntry__detailsToggleButton"
+          color="primary"
+          iconSize="m"
+          iconType="arrowDown"
           onClick={[Function]}
-          style={
-            Object {
-              "maxWidth": "19rem",
-            }
-          }
-        >
-          layer 1
-        </div>
-      </EuiText>
+          title="Show layer details"
+          type="button"
+        />
+      </span>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -143,11 +151,17 @@ exports[`TOCEntry props should display layer details when layer id is in openTOC
   >
     <EuiFlexItem
       grow={false}
+      style={
+        Object {
+          "position": "relative",
+        }
+      }
     >
       <LayerTocActions
         cloneLayer={[Function]}
         displayName="layer 1"
         editLayer={[Function]}
+        escapedDisplayName="layer_1"
         fitToBounds={[Function]}
         layer={
           Object {
@@ -162,42 +176,20 @@ exports[`TOCEntry props should display layer details when layer id is in openTOC
         toggleVisible={[Function]}
         zoom={0}
       />
-    </EuiFlexItem>
-    <EuiFlexItem>
-      <EuiText>
-        <div
-          className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
-          data-test-subj="mapLayerTOCDisplayNamelayer_1"
+      <span
+        className="mapTocEntry__detailsToggle"
+      >
+        <EuiButtonIcon
+          aria-label="Hide layer details"
+          className="mapTocEntry__detailsToggleButton"
+          color="primary"
+          iconSize="m"
+          iconType="arrowUp"
           onClick={[Function]}
-          style={
-            Object {
-              "maxWidth": "19rem",
-            }
-          }
-        >
-          layer 1
-        </div>
-        <span
-          className="mapTocEntry__layerIcons"
-        >
-          <EuiButtonIcon
-            aria-label="Edit layer"
-            color="primary"
-            iconSize="m"
-            iconType="pencil"
-            onClick={[Function]}
-            title="Edit layer"
-            type="button"
-          />
-          <span
-            className="mapTocEntry__grab"
-          >
-            <EuiIcon
-              type="grab"
-            />
-          </span>
-        </span>
-      </EuiText>
+          title="Hide layer details"
+          type="button"
+        />
+      </span>
     </EuiFlexItem>
   </EuiFlexGroup>
   <div
@@ -207,5 +199,25 @@ exports[`TOCEntry props should display layer details when layer id is in openTOC
       TOC details mock
     </div>
   </div>
+  <span
+    className="mapTocEntry__layerIcons"
+  >
+    <EuiButtonIcon
+      aria-label="Edit layer"
+      color="primary"
+      iconSize="m"
+      iconType="pencil"
+      onClick={[Function]}
+      title="Edit layer"
+      type="button"
+    />
+    <span
+      className="mapTocEntry__grab"
+    >
+      <EuiIcon
+        type="grab"
+      />
+    </span>
+  </span>
 </div>
 `;

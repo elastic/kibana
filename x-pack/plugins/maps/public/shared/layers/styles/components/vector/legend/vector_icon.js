@@ -6,44 +6,35 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import classNames from 'classnames';
 
 import { dynamicColorShape, staticColorShape } from '../style_option_shapes';
-import { ColorGradient } from '../../../../../icons/color_gradient';
 import { FillableCircle, FillableVector } from '../../../../../icons/additional_layer_icons';
 import { VectorStyle } from '../../../vector_style';
+import { getColorRampCenterColor } from '../../../../../utils/color_utils';
 
 export function VectorIcon({ fillColor, lineColor, isPointsOnly }) {
-  if (fillColor && fillColor.type === VectorStyle.STYLE_TYPE.DYNAMIC) {
-    const classes = classNames('mapColorGradientIcon', {
-      mapColorGradientIcon__pointsOnly: isPointsOnly
-    });
-    return (
-      <ColorGradient
-        className={classes}
-        color={fillColor.options.color}
-      />
-    );
-  }
-
-  const stroke = lineColor && lineColor.type === VectorStyle.STYLE_TYPE.STATIC
-    ? lineColor && lineColor.options.color
-    : 'grey';
-  const fill = fillColor && fillColor.type === VectorStyle.STYLE_TYPE.STATIC
-    ? fillColor && fillColor.options.color
-    : 'none';
-
   const style = {
-    stroke,
+    stroke: extractColorFromStyleProperty(lineColor, 'none'),
     strokeWidth: '1px',
-    fill
+    fill: extractColorFromStyleProperty(fillColor, 'grey'),
   };
 
-  return (
-    isPointsOnly
-      ? <FillableCircle style={style}/>
-      : <FillableVector style={style}/>
-  );
+  return isPointsOnly
+    ? <FillableCircle style={style}/>
+    : <FillableVector style={style}/>;
+}
+
+function extractColorFromStyleProperty(colorStyleProperty, defaultColor) {
+  if (!colorStyleProperty) {
+    return defaultColor;
+  }
+
+  if (colorStyleProperty.type === VectorStyle.STYLE_TYPE.STATIC) {
+    return colorStyleProperty.options.color;
+  }
+
+  // return middle of gradient for dynamic style property
+  return getColorRampCenterColor(colorStyleProperty.options.color);
 }
 
 const colorStylePropertyShape = PropTypes.shape({

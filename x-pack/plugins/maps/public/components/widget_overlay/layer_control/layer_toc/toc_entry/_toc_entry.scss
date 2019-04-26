@@ -9,6 +9,11 @@
       visibility: visible;
       opacity: 1;
     }
+
+    .mapTocEntry__detailsToggle {
+      visibility: visible;
+      opacity: 1;
+    }
   }
 }
 
@@ -36,5 +41,20 @@
   padding: $euiSizeXS;
   visibility: hidden;
   opacity: 0;
+}
+
+.mapTocEntry__detailsToggle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  visibility: hidden;
+  opacity: 0;
+}
+
+.mapTocEntry__detailsToggleButton {
+  background-color: $euiColorLightestShade;
+  height: $euiSize;
+  width: $euiSizeXXL;
+  z-index
 }
 

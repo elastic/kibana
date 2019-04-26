@@ -13,16 +13,9 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiToolTip,
-  EuiIconTip
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-function cleanDisplayName(displayName) {
-  if (!displayName) {
-    return displayName;
-  }
-  return displayName.split(' ').join('');
-}
 
 export class LayerTocActions extends Component {
 
@@ -63,13 +56,17 @@ export class LayerTocActions extends Component {
     const icon = this._renderIcon();
     return (
       <EuiButtonEmpty
+        style={{ maxWidth: '19rem' }}
+        className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
         size="xs"
         flush="left"
         color="text"
         onClick={this._onClick}
-        data-test-subj={`layerTocActionsPanelToggleButton${cleanDisplayName(this.props.displayName)}`}
+        data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
       >
-        {icon}
+        <span className="eui-alignMiddle">{icon}</span>
+        {' '}
+        {this.props.displayName}
       </EuiButtonEmpty>);
   }
 
@@ -219,7 +216,7 @@ export class LayerTocActions extends Component {
         <EuiContextMenu
           initialPanelId={0}
           panels={this._getPanels()}
-          data-test-subj={`layerTocActionsPanel${cleanDisplayName(this.props.displayName)}`}
+          data-test-subj={`layerTocActionsPanel${this.props.escapedDisplayName}`}
         />
       </EuiPopover>);
   }
