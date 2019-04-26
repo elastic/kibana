@@ -64,8 +64,10 @@ class VisEditor extends Component {
   };
 
   /*
-    fetchIndexPatterns should probably move to the '../lib' folder under a new file.
-    Q: fetchIndexPatterns also needs to be triggered on componentDidMount?
+    Retrieving the whole object for index patterns that are available.
+    We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
+    Comment: fetchIndexPatterns should probably move to the '../lib' folder under a new file.
+    Question: will we need to debounce this call as we do for updateVisState?
   */
   fetchIndexPatterns = async () => {
     const allIndexPatternObjects = await chrome
@@ -107,8 +109,7 @@ class VisEditor extends Component {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
 
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        // fetch new index patterns for KQL as required
-        // Q: should I be using promises rather than async functions?
+        // Only fetch a whole new collection of index patterns if needed.
         await this.fetchIndexPatterns();
         fetchFields(extractedIndexPatterns).then(visFields =>
           this.setState({
@@ -179,12 +180,6 @@ class VisEditor extends Component {
             onDataChange={this.onDataChange}
           />
           <div className="tvbEditor--hideForReporting">
-            <button
-              style={{ border: '2px solid blue', backgroundColor: 'gray' }}
-              onClick={async () => await this.fetchIndexPatterns(model.default_index_pattern)}
-            >
-              FETCH
-            </button>
             <PanelConfig
               fields={this.state.visFields}
               model={model}
@@ -204,6 +199,7 @@ class VisEditor extends Component {
 
   componentDidMount() {
     this.props.renderComplete();
+    this.fetchIndexPatterns();
   }
 
   componentDidUpdate() {

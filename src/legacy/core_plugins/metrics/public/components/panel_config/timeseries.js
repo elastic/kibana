@@ -182,7 +182,7 @@ class TimeseriesPanelConfigUi extends Component {
                     screenTitle={'PanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}
-                    indexPatterns={model.index_pattern || model.default_index_pattern}
+                    indexPatterns={this.props.indexPatterns}
                     store={localStorage || {}}
                     showDatePicker={false}
                   />
@@ -398,6 +398,7 @@ TimeseriesPanelConfigUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData$: PropTypes.object,
+  indexPatterns: PropTypes.array,
 };
 
 const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);
