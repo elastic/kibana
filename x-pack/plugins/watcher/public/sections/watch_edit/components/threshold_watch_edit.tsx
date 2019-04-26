@@ -642,11 +642,19 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
                       value={watch.threshold
                         .slice(0, comparators[watch.thresholdComparator].requiredValues)
                         .join(` ${andThresholdText} `)}
-                      isActive={watchThresholdPopoverOpen || !watch.threshold}
+                      isActive={
+                        watchThresholdPopoverOpen ||
+                        errors.threshold0.length ||
+                        (errors.threshold1 && errors.threshold1.length)
+                      }
                       onClick={() => {
                         setWatchThresholdPopoverOpen(true);
                       }}
-                      color={watch.threshold ? 'secondary' : 'danger'}
+                      color={
+                        errors.threshold0.length || (errors.threshold1 && errors.threshold1.length)
+                          ? 'danger'
+                          : 'secondary'
+                      }
                     />
                   }
                   isOpen={watchThresholdPopoverOpen}
