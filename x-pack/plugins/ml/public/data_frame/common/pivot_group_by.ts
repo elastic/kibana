@@ -14,6 +14,15 @@ export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   TERMS = 'terms',
 }
 
+export type PivotSupportedGroupByAggs =
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
+
+export type PivotSupportedGroupByAggsWithInterval =
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
+
 interface GroupByConfigBase {
   field: FieldName;
   aggName: AggName;
@@ -49,8 +58,8 @@ interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
 }
 
-type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
-export type PivotGroupByConfig = GroupByConfigWithInterval | GroupByTerms;
+export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
+export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
 
 export function groupByConfigHasInterval(arg: any): arg is GroupByConfigWithInterval {

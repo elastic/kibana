@@ -17,7 +17,7 @@ exports[`Data Frame: <GroupByListForm /> Minimal initialization 1`] = `
         }
       }
       onChange={[Function]}
-      optionsDataId="the-options-data-id"
+      otherAggNames={Array []}
     />
   </EuiPanel>
   <EuiSpacer

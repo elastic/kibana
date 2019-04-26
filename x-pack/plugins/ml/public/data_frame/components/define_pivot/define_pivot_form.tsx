@@ -112,8 +112,9 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     }
   };
 
-  const updateGroupBy = (label: AggName, item: PivotGroupByConfig) => {
-    groupByList[label] = item;
+  const updateGroupBy = (previousAggName: AggName, item: PivotGroupByConfig) => {
+    delete groupByList[previousAggName];
+    groupByList[item.aggName] = item;
     setGroupByList({ ...groupByList });
   };
 
@@ -200,6 +201,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             <Fragment>
               <GroupByListForm
                 list={groupByList}
+                options={groupByOptionsData}
                 onChange={updateGroupBy}
                 deleteHandler={deleteGroupBy}
               />
