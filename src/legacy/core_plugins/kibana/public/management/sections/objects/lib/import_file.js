@@ -27,8 +27,7 @@ export async function importFile(file, overwriteAll = false) {
     pathname: '/api/saved_objects/_import',
     body: formData,
     headers: {
-      // Important to be undefined, it forces proper headers to be set for FormData
-      'Content-Type': undefined,
+      'Content-Type': 'multipart/form-data',
     },
     query: {
       overwrite: overwriteAll

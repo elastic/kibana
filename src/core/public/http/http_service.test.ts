@@ -26,6 +26,8 @@ import { BasePathService } from '../base_path/base_path_service';
 import { fatalErrorsServiceMock } from '../fatal_errors/fatal_errors_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { HttpService } from './http_service';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 function setupService() {
   const httpService = new HttpService();
@@ -186,13 +188,36 @@ describe('http requests', async () => {
     expect(fetchMock.lastOptions()!.method).toBe('PUT');
   });
 
-  it('should support del() helper', async () => {
+  it('should support delete() helper', async () => {
     const { http } = setupService();
 
     fetchMock.delete('*', {});
-    await http.del('/my/path', { method: 'GET' });
+    await http.delete('/my/path', { method: 'GET' });
 
     expect(fetchMock.lastOptions()!.method).toBe('DELETE');
+  });
+
+  it('should make requests for NDJSON content', async () => {
+    const { http } = setupService();
+    const content = readFileSync(join(__dirname, '_import_objects.ndjson'), { encoding: 'utf-8' });
+
+    fetchMock.post('*', {
+      body: content,
+      headers: { 'Content-Type': 'application/ndjson' },
+    });
+
+    const data = await http.post('/my/path', {
+      body: content,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    expect(data).toBeInstanceOf(Blob);
+
+    const ndjson = await new Response(data).text();
+
+    expect(ndjson).toEqual(content);
   });
 
   it('should return an abortable promise', () => {

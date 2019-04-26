@@ -19,6 +19,8 @@
 
 // @ts-ignore
 import fetchMock from 'fetch-mock/es5/client';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { __newPlatformSetup__, addInterceptor, kfetch, KFetchOptions } from '.';
 import { Interceptor, resetInterceptors, withDefaultOptions } from './kfetch';
 import { KFetchError } from './kfetch_error';
@@ -100,6 +102,30 @@ describe('kfetch', () => {
     });
   });
 
+  it('should make requests for NDJSON content', async () => {
+    const content = readFileSync(join(__dirname, '_import_objects.ndjson'), { encoding: 'utf-8' });
+
+    fetchMock.post('*', {
+      body: content,
+      headers: { 'Content-Type': 'application/ndjson' },
+    });
+
+    const data = await kfetch({
+      method: 'POST',
+      pathname: '/my/path',
+      body: content,
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    expect(data).toBeInstanceOf(Blob);
+
+    const ndjson = await new Response(data).text();
+
+    expect(ndjson).toEqual(content);
+  });
+
   it('should reject on network error', async () => {
     expect.assertions(1);
     fetchMock.get('*', { status: 500 });
@@ -114,8 +140,7 @@ describe('kfetch', () => {
   it('should return an abortable promise', () => {
     const abortable = kfetch({ pathname: '/my/path' });
 
-    expect(typeof abortable.then).toBe('function');
-    expect(typeof abortable.catch).toBe('function');
+    expect(abortable).toBeInstanceOf(Promise);
     expect(typeof abortable.abort).toBe('function');
     expect(abortable.abort()).toBe(abortable);
   });

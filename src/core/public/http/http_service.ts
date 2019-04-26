@@ -91,28 +91,16 @@ export class HttpService {
       return body;
     }
 
-    function get(path: string, options: HttpFetchOptions = {}) {
-      return fetch(path, { ...options, method: 'GET' });
-    }
-
-    function post(path: string, options: HttpFetchOptions = {}) {
-      return fetch(path, { ...options, method: 'POST' });
-    }
-
-    function put(path: string, options: HttpFetchOptions = {}) {
-      return fetch(path, { ...options, method: 'PUT' });
-    }
-
-    function del(path: string, options: HttpFetchOptions = {}) {
-      return fetch(path, { ...options, method: 'DELETE' });
-    }
-
     return {
       fetch: abortable<HttpBody>(fetch),
-      get: abortable<HttpBody>(get),
-      post: abortable<HttpBody>(post),
-      put: abortable<HttpBody>(put),
-      del: abortable<HttpBody>(del),
+      get: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'GET' })),
+      post: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'POST' })),
+      put: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'PUT' })),
+      delete: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'DELETE' })),
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
           .pipe(
