@@ -49,32 +49,19 @@ export function LayerSettings(props) {
   const renderZoomSliders = () => {
     return (
       <EuiFormRow
-        helpText={
-          i18n.translate('xpack.maps.layerPanel.settingsPanel.zoomFeedbackHelptext', {
-            defaultMessage: 'Display layer when map is in zoom range.'
-          })
-        }
+        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
+          defaultMessage: 'Zoom range for layer visibility'
+        })}
       >
-        <EuiFlexGroup>
-          <EuiFlexItem>
-
-            <EuiFormRow
-              label={i18n.translate('xpack.maps.layerPanel.settingsPanel.visibleZoomLabel', {
-                defaultMessage: 'Visible zoom range'
-              })}
-            >
-              <ValidatedDualRange
-                min={MIN_ZOOM}
-                max={MAX_ZOOM}
-                value={[props.minZoom, props.maxZoom]}
-                showInput
-                showRange
-                onChange={onZoomChange}
-                allowEmptyRange={false}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ValidatedDualRange
+          min={MIN_ZOOM}
+          max={MAX_ZOOM}
+          value={[props.minZoom, props.maxZoom]}
+          showInput
+          showRange
+          onChange={onZoomChange}
+          allowEmptyRange={false}
+        />
       </EuiFormRow>
     );
   };
