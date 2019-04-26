@@ -4,12 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiPageContent,
-  EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
-} from '@elastic/eui';
+import { EuiPageHeader, EuiPageHeaderSection } from '@elastic/eui';
 import styled from 'styled-components';
 
 export const PageHeader = styled(EuiPageHeader)`
@@ -24,11 +19,4 @@ export const PageHeader = styled(EuiPageHeader)`
 
 export const PageHeaderSection = styled(EuiPageHeaderSection)`
   width: 100%;
-`;
-export const PageContent = styled(EuiPageContent)`
-  margin-top: 106px;
-`;
-
-export const PageContentBody = styled(EuiPageContentBody)`
-  padding: 12px;
 `;

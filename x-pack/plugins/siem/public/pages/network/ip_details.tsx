@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import { ActionCreator } from 'typescript-fsa';
 import chrome from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
@@ -24,8 +23,7 @@ import { IpOverviewQuery } from '../../containers/ip_overview';
 import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../containers/source';
 import { FlowTarget, IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
-import { networkActions, networkModel, networkSelectors, State } from '../../store';
-import { PageContent, PageContentBody } from '../styles';
+import { networkModel, networkSelectors, State } from '../../store';
 import { TlsTable } from '../../components/page/network/tls_table';
 
 import { NetworkKql } from './kql';
@@ -42,15 +40,7 @@ interface IPDetailsComponentReduxProps {
   flowTarget: FlowTarget;
 }
 
-export interface IpDetailsComponentDispatchProps {
-  updateIpDetailsFlowTarget: ActionCreator<{
-    flowTarget: FlowTarget;
-  }>;
-}
-
-type IPDetailsComponentProps = IPDetailsComponentReduxProps &
-  IpDetailsComponentDispatchProps &
-  NetworkComponentProps;
+type IPDetailsComponentProps = IPDetailsComponentReduxProps & NetworkComponentProps;
 
 const IPDetailsComponent = pure<IPDetailsComponentProps>(
   ({
@@ -59,101 +49,91 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
     },
     filterQuery,
     flowTarget,
-    updateIpDetailsFlowTarget,
   }) => (
     <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
       {({ filebeatIndicesExist, indexPattern }) =>
         indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
           <>
             <NetworkKql indexPattern={indexPattern} type={networkModel.NetworkType.details} />
-            <PageContent data-test-subj="pageContent" panelPaddingSize="none">
-              <PageContentBody data-test-subj="pane1ScrollContainer">
-                <GlobalTime>
-                  {({ to, from, setQuery }) => (
-                    <>
-                      <IpOverviewQuery
-                        sourceId="default"
-                        filterQuery={filterQuery}
-                        type={networkModel.NetworkType.details}
+
+            <GlobalTime>
+              {({ to, from, setQuery }) => (
+                <>
+                  <IpOverviewQuery
+                    sourceId="default"
+                    filterQuery={filterQuery}
+                    type={networkModel.NetworkType.details}
+                    ip={decodeIpv6(ip)}
+                  >
+                    {({ ipOverviewData, loading }) => (
+                      <IpOverview
                         ip={decodeIpv6(ip)}
-                      >
-                        {({ ipOverviewData, loading }) => (
-                          <IpOverview
-                            ip={decodeIpv6(ip)}
-                            data={ipOverviewData}
-                            loading={loading}
-                            type={networkModel.NetworkType.details}
-                            flowTarget={flowTarget}
-                            updateFlowTargetAction={updateIpDetailsFlowTarget}
-                          />
-                        )}
-                      </IpOverviewQuery>
-
-                      <EuiSpacer size="s" />
-                      <EuiHorizontalRule margin="xs" />
-                      <EuiSpacer size="s" />
-
-                      <DomainsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
+                        data={ipOverviewData}
+                        loading={loading}
+                        type={networkModel.NetworkType.details}
                         flowTarget={flowTarget}
-                        ip={decodeIpv6(ip)}
-                        sourceId="default"
-                        startDate={from}
-                        type={networkModel.NetworkType.details}
-                      >
-                        {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                          <DomainsTableManage
-                            data={domains}
-                            indexPattern={indexPattern}
-                            id={id}
-                            flowTarget={flowTarget}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                            ip={ip}
-                            loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            totalCount={totalCount}
-                            type={networkModel.NetworkType.details}
-                          />
-                        )}
-                      </DomainsQuery>
+                      />
+                    )}
+                  </IpOverviewQuery>
+                  <EuiSpacer size="s" />
+                  <EuiHorizontalRule margin="xs" />
+                  <EuiSpacer size="s" />
 
-                      <EuiSpacer size="s" />
-                      <EuiHorizontalRule margin="xs" />
-                      <EuiSpacer size="s" />
-
-                      <TlsQuery
-                        endDate={to}
-                        filterQuery={filterQuery}
+                  <DomainsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={decodeIpv6(ip)}
+                    sourceId="default"
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  >
+                    {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                      <DomainsTableManage
+                        data={domains}
+                        indexPattern={indexPattern}
+                        id={id}
                         flowTarget={flowTarget}
-                        ip={decodeIpv6(ip)}
-                        sourceId="default"
-                        startDate={from}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        ip={ip}
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        totalCount={totalCount}
                         type={networkModel.NetworkType.details}
-                      >
-                        {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
-                          <TlsTableManage
-                            data={tls}
-                            id={id}
-                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!} // TODO: Remove exclamation point
-                            loading={loading}
-                            loadMore={loadMore}
-                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!} // TODO: Remove exclamation point
-                            refetch={refetch}
-                            setQuery={setQuery}
-                            totalCount={totalCount}
-                            type={networkModel.NetworkType.details}
-                          />
-                        )}
-                      </TlsQuery>
-                    </>
-                  )}
-                </GlobalTime>
-              </PageContentBody>
-            </PageContent>
+                      />
+                    )}
+                  </DomainsQuery>
+
+                  <TlsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={decodeIpv6(ip)}
+                    sourceId="default"
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  >
+                    {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                      <TlsTableManage
+                        data={tls}
+                        id={id}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!} // TODO: Remove exclamation point
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!} // TODO: Remove exclamation point
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        totalCount={totalCount}
+                        type={networkModel.NetworkType.details}
+                      />
+                    )}
+                  </TlsQuery>
+                </>
+              )}
+            </GlobalTime>
           </>
         ) : (
           <EmptyPage
@@ -177,12 +157,7 @@ const makeMapStateToProps = () => {
   });
 };
 
-export const IPDetails = connect(
-  makeMapStateToProps,
-  {
-    updateIpDetailsFlowTarget: networkActions.updateIpDetailsFlowTarget,
-  }
-)(IPDetailsComponent);
+export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
 
 export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
   {
