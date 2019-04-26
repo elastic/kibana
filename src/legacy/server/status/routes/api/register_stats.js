@@ -30,7 +30,7 @@ import { KIBANA_STATS_TYPE } from '../../constants';
  *       GET /api/stats?extended
  *   - No value or 'false' is isExtended = false
  *   - Any other value causes a statusCode 400 response (Bad Request)
- * Including ?exclude_stats in the query string excludes the usage stats from the response.
+ * Including ?exclude_usage in the query string excludes the usage stats from the response. Same value semantics as ?extended
  */
 export function registerStatsApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
