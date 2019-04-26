@@ -112,4 +112,52 @@ const firstLastSeenSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, firstLastSeenSchema];
+const tlsSchema = gql`
+  enum TlsFields {
+    issuer
+    subject
+    sha1
+    ja3
+    validUntil
+  }
+
+  type TlsNode {
+    _id: String
+    timestamp: Date
+    alternativeNames: [String!]
+    notAfter: [String!]
+    commonNames: [String!]
+    ja3: [String!]
+    issuerNames: [String!]
+  }
+
+  input TlsSortField {
+    field: TlsFields!
+    direction: Direction!
+  }
+
+  type TlsEdges {
+    node: TlsNode!
+    cursor: CursorType!
+  }
+
+  type TlsData {
+    edges: [TlsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfo!
+  }
+
+  extend type Source {
+    Tls(
+      filterQuery: String
+      id: String
+      ip: String!
+      pagination: PaginationInput!
+      sort: TlsSortField!
+      flowTarget: FlowTarget!
+      timerange: TimerangeInput!
+    ): TlsData!
+  }
+`;
+
+export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, firstLastSeenSchema, tlsSchema];

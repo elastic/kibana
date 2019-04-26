@@ -65,6 +65,8 @@ export interface Source {
 
   DomainFirstLastSeen: FirstLastSeenDomain;
 
+  Tls: TlsData;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -952,6 +954,36 @@ export interface FirstLastSeenDomain {
   lastSeen?: Date | null;
 }
 
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  alternativeNames?: string[] | null;
+
+  notAfter?: string[] | null;
+
+  commonNames?: string[] | null;
+
+  ja3?: string[] | null;
+
+  issuerNames?: string[] | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1143,6 +1175,12 @@ export interface DomainsSortField {
   direction: Direction;
 }
 
+export interface TlsSortField {
+  field: TlsFields;
+
+  direction: Direction;
+}
+
 export interface NetworkTopNFlowSortField {
   field: NetworkTopNFlowFields;
 
@@ -1250,6 +1288,21 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+}
+export interface TlsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1362,6 +1415,14 @@ export enum NetworkDirectionEcs {
   outgoing = 'outgoing',
   listening = 'listening',
   unknown = 'unknown',
+}
+
+export enum TlsFields {
+  issuer = 'issuer',
+  subject = 'subject',
+  sha1 = 'sha1',
+  ja3 = 'ja3',
+  validUntil = 'validUntil',
 }
 
 export enum NetworkTopNFlowFields {
@@ -3303,6 +3364,86 @@ export namespace GetTimelineQuery {
     resumed?: ToBooleanArray | null;
 
     version?: ToStringArray | null;
+  };
+}
+
+export namespace GetTlsQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: string | null;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInput;
+    sort: TlsSortField;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Tls: Tls;
+  };
+
+  export type Tls = {
+    __typename?: 'TlsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'TlsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'TlsNode';
+
+    _id?: string | null;
+
+    alternativeNames?: string[] | null;
+
+    commonNames?: string[] | null;
+
+    ja3?: string[] | null;
+
+    issuerNames?: string[] | null;
+
+    notAfter?: string[] | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
   };
 }
 

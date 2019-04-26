@@ -10,6 +10,7 @@ import {
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
+  TlsSortField,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -51,8 +52,13 @@ export interface DomainsQuery extends BasicQuery {
   domainsSortField: DomainsSortField;
 }
 
+export interface TlsQuery extends BasicQuery {
+  tlsSortField: TlsSortField;
+}
+
 interface IpOverviewQueries {
   domains: DomainsQuery;
+  tls: TlsQuery;
 }
 
 export interface NetworkDetailsModel {

@@ -26,13 +26,16 @@ import { FlowTarget, IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkActions, networkModel, networkSelectors, State } from '../../store';
 import { PageContent, PageContentBody } from '../styles';
+import { TlsTable } from '../../components/page/network/tls_table';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
+import { TlsQuery } from '../../containers/tls';
 
 const basePath = chrome.getBasePath();
 
 const DomainsTableManage = manageQuery(DomainsTable);
+const TlsTableManage = manageQuery(TlsTable);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
@@ -117,6 +120,35 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                           />
                         )}
                       </DomainsQuery>
+
+                      <EuiSpacer size="s" />
+                      <EuiHorizontalRule margin="xs" />
+                      <EuiSpacer size="s" />
+
+                      <TlsQuery
+                        endDate={to}
+                        filterQuery={filterQuery}
+                        flowTarget={flowTarget}
+                        ip={decodeIpv6(ip)}
+                        sourceId="default"
+                        startDate={from}
+                        type={networkModel.NetworkType.details}
+                      >
+                        {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                          <TlsTableManage
+                            data={tls}
+                            id={id}
+                            hasNextPage={getOr(false, 'hasNextPage', pageInfo)!} // TODO: Remove exclamation point
+                            loading={loading}
+                            loadMore={loadMore}
+                            nextCursor={getOr(null, 'endCursor.value', pageInfo)!} // TODO: Remove exclamation point
+                            refetch={refetch}
+                            setQuery={setQuery}
+                            totalCount={totalCount}
+                            type={networkModel.NetworkType.details}
+                          />
+                        )}
+                      </TlsQuery>
                     </>
                   )}
                 </GlobalTime>

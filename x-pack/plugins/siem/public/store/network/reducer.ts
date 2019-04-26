@@ -13,6 +13,7 @@ import {
   FlowTarget,
   NetworkDnsFields,
   NetworkTopNFlowFields,
+  TlsFields,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 
@@ -30,6 +31,7 @@ import {
   updateTopNFlowLimit,
   updateTopNFlowSort,
   updateTopNFlowTarget,
+  updateTlsSort,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel, NetworkType } from './model';
@@ -67,6 +69,13 @@ export const initialNetworkState: NetworkState = {
         limit: DEFAULT_TABLE_LIMIT,
         domainsSortField: {
           field: DomainsFields.bytes,
+          direction: Direction.desc,
+        },
+      },
+      tls: {
+        limit: DEFAULT_TABLE_LIMIT,
+        tlsSortField: {
+          field: TlsFields.issuer,
           direction: Direction.desc,
         },
       },
@@ -233,6 +242,19 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         domains: {
           ...state[NetworkType.details].queries.domains,
           domainsSortField,
+        },
+      },
+    },
+  }))
+  .case(updateTlsSort, (state, { tlsSortField }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        tls: {
+          ...state[NetworkType.details].queries.domains,
+          tlsSortField,
         },
       },
     },

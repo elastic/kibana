@@ -6,7 +6,7 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { IpDetails } from '../../lib/ip_details';
+import { IpDetails, TlsRequestOptions } from '../../lib/ip_details';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
 
@@ -17,6 +17,11 @@ export type QueryIpOverviewResolver = ChildResolverOf<
 
 export type QueryDomainsResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.DomainsResolver>,
+  QuerySourceResolver
+>;
+
+export type QueryTlsResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.TlsResolver>,
   QuerySourceResolver
 >;
 
@@ -35,6 +40,7 @@ export const createIpDetailsResolvers = (
   Source: {
     IpOverview: QueryIpOverviewResolver;
     Domains: QueryDomainsResolver;
+    Tls: QueryTlsResolver;
     DomainFirstLastSeen: QueryDomainFirstLastSeenResolver;
   };
 } => ({
@@ -52,6 +58,15 @@ export const createIpDetailsResolvers = (
         flowDirection: args.flowDirection,
       };
       return libs.ipDetails.getDomains(req, options);
+    },
+    async Tls(source, args, { req }, info) {
+      const options: TlsRequestOptions = {
+        ...createOptions(source, args, info),
+        ip: args.ip,
+        tlsSortField: args.sort,
+        flowTarget: args.flowTarget,
+      };
+      return libs.ipDetails.getTls(req, options);
     },
     async DomainFirstLastSeen(source, args, { req }) {
       const options = {

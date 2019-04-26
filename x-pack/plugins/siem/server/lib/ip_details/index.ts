@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DomainsSortField } from '../../../public/graphql/types';
 import {
   DomainsData,
   FirstLastSeenDomain,
   FlowDirection,
   FlowTarget,
   IpOverviewData,
+  TlsSortField,
+  DomainsSortField,
+  TlsData,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 
@@ -29,6 +31,12 @@ export interface DomainsRequestOptions extends RequestOptions {
   flowDirection: FlowDirection;
 }
 
+export interface TlsRequestOptions extends RequestOptions {
+  ip: string;
+  tlsSortField: TlsSortField;
+  flowTarget: FlowTarget;
+}
+
 export class IpDetails {
   constructor(private readonly adapter: IpDetailsAdapter) {}
 
@@ -44,6 +52,10 @@ export class IpDetails {
     options: DomainsRequestOptions
   ): Promise<DomainsData> {
     return await this.adapter.getDomains(req, options);
+  }
+
+  public async getTls(req: FrameworkRequest, options: TlsRequestOptions): Promise<TlsData> {
+    return await this.adapter.getTls(req, options);
   }
 
   public async getDomainFirstLastSeen(

@@ -94,6 +94,8 @@ export interface Source {
 
   DomainFirstLastSeen: FirstLastSeenDomain;
 
+  Tls: TlsData;
+
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   NetworkTopNFlow: NetworkTopNFlowData;
@@ -981,6 +983,36 @@ export interface FirstLastSeenDomain {
   lastSeen?: Date | null;
 }
 
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  alternativeNames?: string[] | null;
+
+  notAfter?: string[] | null;
+
+  commonNames?: string[] | null;
+
+  ja3?: string[] | null;
+
+  issuerNames?: string[] | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1172,6 +1204,12 @@ export interface DomainsSortField {
   direction: Direction;
 }
 
+export interface TlsSortField {
+  field: TlsFields;
+
+  direction: Direction;
+}
+
 export interface NetworkTopNFlowSortField {
   field: NetworkTopNFlowFields;
 
@@ -1279,6 +1317,21 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+}
+export interface TlsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1393,6 +1446,14 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum TlsFields {
+  issuer = 'issuer',
+  subject = 'subject',
+  sha1 = 'sha1',
+  ja3 = 'ja3',
+  validUntil = 'validUntil',
+}
+
 export enum NetworkTopNFlowFields {
   bytes = 'bytes',
   packets = 'packets',
@@ -1469,6 +1530,8 @@ export namespace SourceResolvers {
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
     DomainFirstLastSeen?: DomainFirstLastSeenResolver<FirstLastSeenDomain, TypeParent, Context>;
+
+    Tls?: TlsResolver<TlsData, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -1651,6 +1714,28 @@ export namespace SourceResolvers {
     domainName: string;
 
     flowTarget: FlowTarget;
+  }
+
+  export type TlsResolver<R = TlsData, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    TlsArgs
+  >;
+  export interface TlsArgs {
+    filterQuery?: string | null;
+
+    id?: string | null;
+
+    ip: string;
+
+    pagination: PaginationInput;
+
+    sort: TlsSortField;
+
+    flowTarget: FlowTarget;
+
+    timerange: TimerangeInput;
   }
 
   export type KpiNetworkResolver<
@@ -4647,6 +4732,105 @@ export namespace FirstLastSeenDomainResolvers {
   export type LastSeenResolver<
     R = Date | null,
     Parent = FirstLastSeenDomain,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TlsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TlsData> {
+    edges?: EdgesResolver<TlsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<R = TlsEdges[], Parent = TlsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalCountResolver<R = number, Parent = TlsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PageInfoResolver<R = PageInfo, Parent = TlsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace TlsEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TlsEdges> {
+    node?: NodeResolver<TlsNode, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<R = TlsNode, Parent = TlsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<R = CursorType, Parent = TlsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace TlsNodeResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TlsNode> {
+    _id?: IdResolver<string | null, TypeParent, Context>;
+
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    alternativeNames?: AlternativeNamesResolver<string[] | null, TypeParent, Context>;
+
+    notAfter?: NotAfterResolver<string[] | null, TypeParent, Context>;
+
+    commonNames?: CommonNamesResolver<string[] | null, TypeParent, Context>;
+
+    ja3?: Ja3Resolver<string[] | null, TypeParent, Context>;
+
+    issuerNames?: IssuerNamesResolver<string[] | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = TlsNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TimestampResolver<
+    R = Date | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AlternativeNamesResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NotAfterResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CommonNamesResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type Ja3Resolver<R = string[] | null, Parent = TlsNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IssuerNamesResolver<
+    R = string[] | null,
+    Parent = TlsNode,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }
