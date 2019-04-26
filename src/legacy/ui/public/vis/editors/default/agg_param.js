@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
+import { isFunction, isEqual } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -90,12 +90,14 @@ uiModules
 
           if (attr.editorComponent) {
             $scope.$watch('agg.params[aggParam.name]', (value) => {
+              if (!isEqual($scope.paramValue, value)) {
+                $scope.setValidity(true);
+                showValidation();
+              }
+
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
-
-              $scope.setValidity(true);
-              showValidation();
             }, true);
 
             $scope.$watch(() => {
@@ -110,11 +112,13 @@ uiModules
           }
 
           $scope.onChange = (value) => {
+            $scope.paramValue = value;
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
 
             ngModelCtrl.$setDirty();
+            showValidation();
           };
 
           $scope.setTouched = () => {
