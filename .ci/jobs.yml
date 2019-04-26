@@ -1,6 +1,6 @@
 JOB:
-  - kibana-intake
-  - x-pack-intake
+  # - kibana-intake
+  # - x-pack-intake
   # - kibana-ciGroup1
   # - kibana-ciGroup2
   # - kibana-ciGroup3
