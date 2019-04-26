@@ -34,7 +34,7 @@ export function createJestConfig({
       `<rootDir>/dev-tools/jest/setup/enzyme.js`,
     ],
     testMatch: [
-      '**/*.test.{js,ts,tsx}'
+      '**/request_expander.test.{js,ts,tsx}'
     ],
     transform: {
       '^.+\\.(js|tsx?)$': `${kibanaDirectory}/src/dev/jest/babel_transform.js`,
