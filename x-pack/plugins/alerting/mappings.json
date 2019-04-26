@@ -1,0 +1,20 @@
+{
+  "action": {
+    "properties": {
+      "description": {
+        "type": "text"
+      },
+      "connectorId": {
+        "type": "keyword"
+      },
+      "connectorOptions": {
+        "dynamic": "true",
+        "type": "object"
+      },
+      "connectorOptionsSecrets": {
+        "dynamic": "true",
+        "type": "object"
+      }
+    }
+  }
+}
