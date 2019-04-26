@@ -26,6 +26,15 @@ exports[`it renders without crashing 1`] = `
             "label": "manage_security",
           },
           Object {
+            "label": "manage_api_key",
+          },
+          Object {
+            "label": "owner_manage_api_key",
+          },
+          Object {
+            "label": "create_api_key",
+          },
+          Object {
             "label": "manage_index_templates",
           },
           Object {
