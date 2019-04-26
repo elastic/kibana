@@ -221,8 +221,8 @@ export default function (kibana) {
               uiCapabilitiesPath: 'advancedSettings.show',
             };
           },
-          getEditUrl() {
-            return `/management/kibana/settings`;
+          getTitle() {
+            return 'Advanced Settings';
           },
         },
       },
@@ -268,6 +268,7 @@ export default function (kibana) {
               index_patterns: true,
             },
             advancedSettings: {
+              show: true,
               save: true
             },
             indexPatterns: {
