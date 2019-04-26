@@ -415,10 +415,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/nock@^9.3.1":
-  version "9.3.1"
-  resolved "https://registry.yarnpkg.com/@types/nock/-/nock-9.3.1.tgz#7d761a43a10aebc7ec6bae29d89afc6cbffa5d30"
-  integrity sha512-eOVHXS5RnWOjTVhu3deCM/ruy9E6JCgeix2g7wpFiekQh3AaEAK1cz43tZDukKmtSmQnwvSySq7ubijCA32I7Q==
+"@types/nock@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@types/nock/-/nock-10.0.0.tgz#08584a37447e61bfbe641a08c7d15310a08febd4"
+  integrity sha512-DJM4sOEUeGzqjDkMtCubuN8zQ9gUxzPC+WVMzK2X4q6Kc5pnRFWcm8gkk4JNsDs7Zs6jjVf+dNYbNOii8fzPLA==
   dependencies:
     "@types/node" "*"
 
