@@ -49,12 +49,9 @@ export const comparators: { [key: string]: Comparator } = {
     requiredValues: 1,
   },
   [COMPARATORS.BETWEEN]: {
-    text: i18n.translate(
-      'xpack.watcher.thresholdWatchExpression.comparators.isBelowOrEqualsLabel',
-      {
-        defaultMessage: 'Is between',
-      }
-    ),
+    text: i18n.translate('xpack.watcher.thresholdWatchExpression.comparators.isBetweenLabel', {
+      defaultMessage: 'Is between',
+    }),
     value: COMPARATORS.BETWEEN,
     requiredValues: 2,
   },

@@ -5,7 +5,8 @@
  */
 
 import { singleLineScript } from '../lib/single_line_script';
-const BETWEEN = 'between';
+import { COMPARATORS } from '../../../../common/constants';
+const { BETWEEN } = COMPARATORS;
 /*
 watch.transform.script.inline
  */
