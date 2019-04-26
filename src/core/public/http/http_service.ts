@@ -94,13 +94,17 @@ export class HttpService {
     return {
       fetch: abortable<HttpBody>(fetch),
       get: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'GET' })),
+        fetch(path, { ...options, method: 'GET' })
+      ),
       post: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'POST' })),
+        fetch(path, { ...options, method: 'POST' })
+      ),
       put: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'PUT' })),
+        fetch(path, { ...options, method: 'PUT' })
+      ),
       delete: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'DELETE' })),
+        fetch(path, { ...options, method: 'DELETE' })
+      ),
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
           .pipe(
