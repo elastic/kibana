@@ -444,7 +444,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async execute<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
       return await driver.executeScript(
         fn,
-        ...cloneDeep(args, arg => {
+        ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }
@@ -455,7 +455,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async executeAsync<A extends any[], R>(fn: string | ((...args: A) => R), ...args: A) {
       return await driver.executeAsyncScript(
         fn,
-        ...cloneDeep(args, arg => {
+        ...cloneDeep<any>(args, arg => {
           if (arg instanceof WebElementWrapper) {
             return arg._webElement;
           }

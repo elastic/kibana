@@ -167,12 +167,13 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
     public async descendantExistsByCssSelector(
       selector: string,
-      parentElement: any,
+      parentElement: WebElementWrapper,
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(async () =>
-        wrapAll(await parentElement._webElement.findElements(By.css(selector), timeout))
+      return await this.exists(
+        async () => wrapAll(await parentElement._webElement.findElements(By.css(selector))),
+        timeout
       );
     }
 
@@ -243,7 +244,13 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     }
 
     public async exists(
-      findFunction: (el: WebDriver | WebElement) => WebElementWrapper | WebElementWrapper[],
+      findFunction: (
+        el: WebDriver | WebElement
+      ) =>
+        | Promise<WebElementWrapper>
+        | Promise<WebElementWrapper[]>
+        | WebElementWrapper
+        | WebElementWrapper[],
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       await this._withTimeout(timeout);
