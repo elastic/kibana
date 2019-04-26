@@ -65,14 +65,14 @@ export const PopoverForm: React.SFC<Props> = ({
 
   let validAggName = isAggName(aggName);
   if (!validAggName) {
-    aggNameError = i18n.translate('xpack.ml.dataframe.popoverForm.aggNameInvalidCharError', {
+    aggNameError = i18n.translate('xpack.ml.dataframe.agg.popoverForm.aggNameInvalidCharError', {
       defaultMessage: 'Invalid name. The characters "[", "]", and ">" are not allowed.',
     });
   }
 
   if (validAggName) {
     validAggName = !otherAggNames.includes(aggName);
-    aggNameError = i18n.translate('xpack.ml.dataframe.popoverForm.aggNameAlreadyUsedError', {
+    aggNameError = i18n.translate('xpack.ml.dataframe.agg.popoverForm.aggNameAlreadyUsedError', {
       defaultMessage: 'Another aggregation already uses that name.',
     });
   }
@@ -86,7 +86,7 @@ export const PopoverForm: React.SFC<Props> = ({
           <EuiFormRow
             error={!validAggName && [aggNameError]}
             isInvalid={!validAggName}
-            label={i18n.translate('xpack.ml.dataframe.popoverForm.aggNameLabel', {
+            label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.nameLabel', {
               defaultMessage: 'Aggregation name',
             })}
           >
@@ -100,7 +100,7 @@ export const PopoverForm: React.SFC<Props> = ({
         {availableAggs.length > 1 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.popoverForm.aggLabel', {
+              label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.aggLabel', {
                 defaultMessage: 'Aggregation',
               })}
             >
@@ -115,7 +115,7 @@ export const PopoverForm: React.SFC<Props> = ({
         {availableFields.length > 1 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.popoverForm.fieldLabel', {
+              label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.fieldLabel', {
                 defaultMessage: 'Field',
               })}
             >
@@ -133,7 +133,7 @@ export const PopoverForm: React.SFC<Props> = ({
               isDisabled={!formValid}
               onClick={() => onChange({ ...defaultData, aggName, agg, field })}
             >
-              {i18n.translate('xpack.ml.dataframe.popoverForm.submitButtonLabel', {
+              {i18n.translate('xpack.ml.dataframe.agg.popoverForm.submitButtonLabel', {
                 defaultMessage: 'Apply',
               })}
             </EuiButton>

@@ -118,16 +118,22 @@ export const PopoverForm: React.SFC<Props> = ({
 
   let validAggName = isAggName(aggName);
   if (!validAggName) {
-    aggNameError = i18n.translate('xpack.ml.dataframe.popoverForm.aggNameInvalidCharError', {
-      defaultMessage: 'Invalid name. The characters "[", "]", and ">" are not allowed.',
-    });
+    aggNameError = i18n.translate(
+      'xpack.ml.dataframe.groupBy.popoverForm.aggNameInvalidCharError',
+      {
+        defaultMessage: 'Invalid name. The characters "[", "]", and ">" are not allowed.',
+      }
+    );
   }
 
   if (validAggName) {
     validAggName = !otherAggNames.includes(aggName);
-    aggNameError = i18n.translate('xpack.ml.dataframe.popoverForm.aggNameAlreadyUsedError', {
-      defaultMessage: 'Another group by configuration already uses that name.',
-    });
+    aggNameError = i18n.translate(
+      'xpack.ml.dataframe.groupBy.popoverForm.aggNameAlreadyUsedError',
+      {
+        defaultMessage: 'Another group by configuration already uses that name.',
+      }
+    );
   }
 
   const validInterval =
@@ -145,7 +151,7 @@ export const PopoverForm: React.SFC<Props> = ({
           <EuiFormRow
             error={!validAggName && [aggNameError]}
             isInvalid={!validAggName}
-            label={i18n.translate('xpack.ml.dataframe.popoverForm.groupByNameLabel', {
+            label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.nameLabel', {
               defaultMessage: 'Group by name',
             })}
           >
@@ -159,7 +165,7 @@ export const PopoverForm: React.SFC<Props> = ({
         {availableAggs.length > 1 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.popoverForm.aggLabel', {
+              label={i18n.translate('xpack.ml.dataframe.groupby.popoverForm.aggLabel', {
                 defaultMessage: 'Aggregation',
               })}
             >
@@ -174,7 +180,7 @@ export const PopoverForm: React.SFC<Props> = ({
         {availableFields.length > 1 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.popoverForm.fieldLabel', {
+              label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.fieldLabel', {
                 defaultMessage: 'Field',
               })}
             >
@@ -191,13 +197,13 @@ export const PopoverForm: React.SFC<Props> = ({
             <EuiFormRow
               error={
                 !validInterval && [
-                  i18n.translate('xpack.ml.dataframe.popoverForm.intervalError', {
+                  i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalError', {
                     defaultMessage: 'Invalid interval.',
                   }),
                 ]
               }
               isInvalid={!validInterval}
-              label={i18n.translate('xpack.ml.dataframe.popoverForm.intervalLabel', {
+              label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalLabel', {
                 defaultMessage: 'Interval',
               })}
             >
@@ -212,7 +218,7 @@ export const PopoverForm: React.SFC<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
             <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
-              {i18n.translate('xpack.ml.dataframe.popoverForm.submitButtonLabel', {
+              {i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.submitButtonLabel', {
                 defaultMessage: 'Apply',
               })}
             </EuiButton>
