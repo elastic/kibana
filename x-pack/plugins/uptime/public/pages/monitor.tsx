@@ -22,10 +22,12 @@ import {
 } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
+import { useUrlParams } from '../hooks';
+import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface MonitorPageProps {
   history: { push: any };
-  location: { pathname: string };
+  location: { pathname: string; search: string };
   match: { params: { id: string } };
   // this is the query function provided by Apollo's Client API
   query: <T, TVariables = OperationVariables>(
@@ -34,33 +36,36 @@ interface MonitorPageProps {
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
-export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProps) => {
+export const MonitorPage = ({ history, location, query, setBreadcrumbs }: MonitorPageProps) => {
   const [monitorId] = useState<string>(location.pathname.replace(/^(\/monitor\/)/, ''));
-  const [selectedStatus, setSelectedStatus] = useState<string | null>('down');
-  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
-  useEffect(() => {
-    query({
-      query: gql`
-        query MonitorPageTitle($monitorId: String!) {
-          monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
-            id
-            url
-            name
+  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const [params, updateUrlParams] = useUrlParams(history, location);
+  const { dateRangeStart, dateRangeEnd, selectedPingStatus } = params;
+
+  useEffect(
+    () => {
+      query({
+        query: gql`
+          query MonitorPageTitle($monitorId: String!) {
+            monitorPageTitle: getMonitorPageTitle(monitorId: $monitorId) {
+              id
+              url
+              name
+            }
           }
+        `,
+        variables: { monitorId },
+      }).then((result: any) => {
+        const { name, url, id } = result.data.monitorPageTitle;
+        const heading: string = name || url || id;
+        setBreadcrumbs(getMonitorPageBreadcrumb(heading, stringifyUrlParams(params)));
+        if (setHeadingText) {
+          setHeadingText(heading);
         }
-      `,
-      variables: { monitorId },
-    }).then((result: any) => {
-      const { name, url, id } = result.data.monitorPageTitle;
-      const heading: string = name || url || id;
-      setBreadcrumbs(getMonitorPageBreadcrumb(heading));
-      if (setHeadingText) {
-        setHeadingText(heading);
-      }
-    });
-  }, []);
+      });
+    },
+    [params]
+  );
   return (
     <Fragment>
       <MonitorPageTitle monitorId={monitorId} variables={{ monitorId }} />
@@ -73,13 +78,16 @@ export const MonitorPage = ({ location, query, setBreadcrumbs }: MonitorPageProp
       <MonitorCharts {...colors} variables={{ dateRangeStart, dateRangeEnd, monitorId }} />
       <EuiSpacer size="s" />
       <PingList
-        onSelectedStatusUpdate={setSelectedStatus}
+        onSelectedStatusUpdate={(selectedStatus: string | null) =>
+          updateUrlParams({ selectedPingStatus: selectedStatus || '' })
+        }
         onUpdateApp={refreshApp}
+        selectedOption={selectedPingStatus}
         variables={{
           dateRangeStart,
           dateRangeEnd,
           monitorId,
-          status: selectedStatus,
+          status: selectedPingStatus,
         }}
       />
     </Fragment>
