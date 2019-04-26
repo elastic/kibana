@@ -213,10 +213,10 @@ const getOrNumber = (path: string, bucket: DomainsBuckets) => {
   return numb;
 };
 
-export function getUsersEdges(
+export const getUsersEdges = (
   response: DatabaseSearchResponse<UsersData, TermAggregation>
-): UsersEdges[] {
-  return getOr([], `aggregations.users.buckets`, response).map((bucket: UsersBucketsItem) => ({
+): UsersEdges[] =>
+  getOr([], `aggregations.users.buckets`, response).map((bucket: UsersBucketsItem) => ({
     node: {
       _id: bucket.key,
       user: {
@@ -236,4 +236,3 @@ export function getUsersEdges(
       tiebreaker: null,
     },
   }));
-}

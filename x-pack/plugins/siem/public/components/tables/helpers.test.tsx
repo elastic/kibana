@@ -16,32 +16,55 @@ describe('Table Helpers', () => {
 
   describe('#getRowItemDraggables', () => {
     test('it returns correctly against snapshot', () => {
-      const rowItems = getRowItemDraggables(items, 'attrName', 'idPrefix');
+      const rowItems = getRowItemDraggables({
+        rowItems: items,
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+      });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('it returns no items when provided a 0 displayCount', () => {
-      const rowItems = getRowItemDraggables(items, 'attrName', 'idPrefix', undefined, 0);
+      const rowItems = getRowItemDraggables({
+        rowItems: items,
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+        displayCount: 0,
+      });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.html()).toBe(getEmptyValue());
     });
 
     test('it returns no items when provided an empty array', () => {
-      const rowItems = getRowItemDraggables([], 'attrName', 'idPrefix');
+      const rowItems = getRowItemDraggables({
+        rowItems: [],
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+      });
       const wrapper = shallow(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.html()).toBe(getEmptyValue());
     });
 
     test('it returns 2 items then overflows', () => {
-      const rowItems = getRowItemDraggables(items, 'attrName', 'idPrefix', undefined, 2);
+      const rowItems = getRowItemDraggables({
+        rowItems: items,
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+        displayCount: 2,
+      });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').length).toBe(2);
     });
 
     test('it uses custom renderer', () => {
       const renderer = (item: string) => <>{`Hi ${item} renderer`}</>;
-      const rowItems = getRowItemDraggables(items, 'attrName', 'idPrefix', renderer);
+      const rowItems = getRowItemDraggables({
+        rowItems: items,
+        attrName: 'attrName',
+        idPrefix: 'idPrefix',
+        render: renderer,
+      });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(
         wrapper

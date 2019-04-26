@@ -21,7 +21,7 @@ export const USER_NAME = i18n.translate(
 export const USER_ID = i18n.translate(
   'xpack.siem.network.ipDetails.usersTable.columns.userIdTitle',
   {
-    defaultMessage: 'Id',
+    defaultMessage: 'ID',
   }
 );
 
@@ -35,7 +35,7 @@ export const GROUP_NAME = i18n.translate(
 export const GROUP_ID = i18n.translate(
   'xpack.siem.network.ipDetails.usersTable.columns.groupIdTitle',
   {
-    defaultMessage: 'Group Id',
+    defaultMessage: 'Group ID',
   }
 );
 

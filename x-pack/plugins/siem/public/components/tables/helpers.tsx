@@ -14,14 +14,21 @@ import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
 
-export const getRowItemDraggables = (
-  rowItems: string[],
-  attrName: string,
-  idPrefix: string,
-  render?: (item: string) => JSX.Element,
+export const getRowItemDraggables = ({
+  rowItems,
+  attrName,
+  idPrefix,
+  render,
   displayCount = 5,
-  maxOverflow = 5
-): JSX.Element => {
+  maxOverflow = 5,
+}: {
+  rowItems: string[];
+  attrName: string;
+  idPrefix: string;
+  render?: (item: string) => JSX.Element;
+  displayCount?: number;
+  maxOverflow?: number;
+}): JSX.Element => {
   const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
     const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
     return (

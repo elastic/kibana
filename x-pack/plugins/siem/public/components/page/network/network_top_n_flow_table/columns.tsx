@@ -86,7 +86,12 @@ export const getNetworkTopNFlowColumns = (
 
       if (Array.isArray(domains) && domains.length > 0) {
         const id = escapeDataProviderId(`${tableId}-table-${ip}-${flowDirection}`);
-        return getRowItemDraggables(domains, domainAttr, id, undefined, 1);
+        return getRowItemDraggables({
+          rowItems: domains,
+          attrName: domainAttr,
+          idPrefix: id,
+          displayCount: 1,
+        });
       } else {
         return getEmptyTagValue();
       }

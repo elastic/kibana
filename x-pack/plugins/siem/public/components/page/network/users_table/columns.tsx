@@ -32,13 +32,12 @@ export const getUsersColumns = (
   Columns<UsersItem['count']>
 ] => [
   {
-    field: `node.user.name`,
+    field: 'node.user.name',
     name: i18n.USER_NAME,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
     render: userName => {
-      const userNameAttr = 'user.name';
       if (userName != null) {
         const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-user-${userName}`);
         return (
@@ -51,7 +50,7 @@ export const getUsersColumns = (
               name: userName,
               excluded: false,
               kqlQuery: '',
-              queryMatch: { field: userNameAttr, value: userName },
+              queryMatch: { field: 'user.name', value: userName },
             }}
             render={(dataProvider, _, snapshot) =>
               snapshot.isDragging ? (
@@ -77,7 +76,11 @@ export const getUsersColumns = (
     sortable: false,
     render: userIds => {
       if (userIds != null && userIds.length > 0) {
-        return getRowItemDraggables(userIds, 'user.id', `${tableId}-table-${flowTarget}`);
+        return getRowItemDraggables({
+          rowItems: userIds,
+          attrName: 'user.id',
+          idPrefix: `${tableId}-table-${flowTarget}`,
+        });
       } else {
         return getEmptyTagValue();
       }
@@ -91,11 +94,11 @@ export const getUsersColumns = (
     sortable: false,
     render: groupNames => {
       if (groupNames != null && groupNames.length > 0) {
-        return getRowItemDraggables(
-          groupNames,
-          'user.group.name',
-          `${tableId}-table-${flowTarget}`
-        );
+        return getRowItemDraggables({
+          rowItems: groupNames,
+          attrName: 'user.group.name',
+          idPrefix: `${tableId}-table-${flowTarget}`,
+        });
       } else {
         return getEmptyTagValue();
       }
@@ -109,7 +112,11 @@ export const getUsersColumns = (
     sortable: false,
     render: groupId => {
       if (groupId != null && groupId.length > 0) {
-        return getRowItemDraggables(groupId, 'user.group.id', `${tableId}-table-${flowTarget}`);
+        return getRowItemDraggables({
+          rowItems: groupId,
+          attrName: 'user.group.id',
+          idPrefix: `${tableId}-table-${flowTarget}`,
+        });
       } else {
         return getEmptyTagValue();
       }

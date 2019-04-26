@@ -70,7 +70,7 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-export const UsersTableId = 'users-table';
+export const usersTableId = 'users-table';
 
 class UsersTableComponent extends React.PureComponent<UsersTableProps> {
   public render() {
@@ -92,7 +92,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
 
     return (
       <LoadMoreTable
-        columns={getUsersColumns(indexPattern, ip, flowTarget, type, UsersTableId)}
+        columns={getUsersColumns(indexPattern, ip, flowTarget, type, usersTableId)}
         loadingTitle={i18n.USERS}
         loading={loading}
         pageOfItems={data}
