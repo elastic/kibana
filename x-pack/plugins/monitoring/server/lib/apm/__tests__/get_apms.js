@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { handleResponse } from '../get_beats';
+import { handleResponse } from '../get_apms';
 import expect from '@kbn/expect';
 
 const start = 1515534342000;
@@ -87,27 +87,7 @@ const response = {
   }
 };
 
-describe('beats/get_beats', () => {
-  it('Handles empty response', () => {
-    expect(handleResponse()).to.eql([]);
-  });
-
-  it('Maps hits into a listing', () => {
-    expect(handleResponse(response, start, end)).to.eql([
-      {
-        bytes_sent_rate: 18.756344057548876,
-        errors: 7,
-        memory: 2340,
-        name: 'beat-listing.test-0101',
-        output: 'Redis',
-        total_events_rate: 2.8548258969945715,
-        type: 'Filebeat',
-        uuid: 'fooUuid',
-        version: '6.2.0'
-      }
-    ]);
-  });
-
+describe('apm/get_apms', () => {
   it('Timestamp is desc', () => {
     const responseMulti = { hits: { hits: [] } };
     const hit = response.hits.hits[0];
@@ -127,5 +107,4 @@ describe('beats/get_beats', () => {
     expect(beats[1].version).to.eql(ver[1]);
     expect(beats[2].version).to.eql(ver[2]);
   });
-
 });
