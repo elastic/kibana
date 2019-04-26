@@ -14,6 +14,7 @@ export enum HostsType {
 
 export interface BasicQuery {
   limit: number;
+  paginationPage: number;
 }
 
 export interface HostsQuery extends BasicQuery {

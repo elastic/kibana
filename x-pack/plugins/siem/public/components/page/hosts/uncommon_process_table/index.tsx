@@ -34,10 +34,12 @@ interface OwnProps {
 
 interface UncommonProcessTableReduxProps {
   limit: number;
+  paginationPage: number;
 }
 
 interface UncommonProcessTableDispatchProps {
   updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updatePaginationPage: ActionCreator<{ paginationPage: number; hostsType: hostsModel.HostsType }>;
 }
 
 type UncommonProcessTableProps = OwnProps &
@@ -78,10 +80,12 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
     limit,
     loading,
     loadMore,
-    totalCount,
     nextCursor,
-    updateLimitPagination,
+    paginationPage,
+    totalCount,
     type,
+    updateLimitPagination,
+    updatePaginationPage,
   }) => (
     <LoadMoreTable
       columns={getUncommonColumns()}
@@ -92,8 +96,12 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       limit={limit}
       hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
+      totalCount={totalCount}
       updateLimitPagination={newLimit =>
         updateLimitPagination({ limit: newLimit, hostsType: type })
+      }
+      updatePagePagination={newPage =>
+        updatePaginationPage({ paginationPage: newPage, hostsType: type })
       }
       title={
         <h3>
@@ -106,8 +114,10 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) =>
-    getUncommonProcessesSelector(state, type);
+  // const getPagePagination = hostsSelectors.uncommonProcessesSelector();
+  const mapStateToProps = (state: State, { type }: OwnProps) => ({
+    ...getUncommonProcessesSelector(state, type),
+  });
   return mapStateToProps;
 };
 
@@ -115,6 +125,7 @@ export const UncommonProcessTable = connect(
   makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
+    updatePaginationPage: hostsActions.updatePaginationPage,
   }
 )(UncommonProcessTableComponent);
 

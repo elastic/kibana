@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPagination,
   EuiPanel,
   EuiPopover,
   EuiTitle,
@@ -53,11 +54,13 @@ interface BasicTableProps<T> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   sorting?: SortingBasicTable;
+  totalCount: number;
   title: string | React.ReactElement;
   updateLimitPagination: (limit: number) => void;
 }
 
 interface BasicTableState {
+  activePage: number;
   isEmptyTable: boolean;
   isPopoverOpen: boolean;
   paginationLoading: boolean;
@@ -74,11 +77,15 @@ export interface Columns<T> {
 }
 
 export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
-  public readonly state = {
-    isEmptyTable: this.props.pageOfItems.length === 0,
-    isPopoverOpen: false,
-    paginationLoading: false,
-  };
+  constructor(props: BasicTableProps<T>) {
+    super(props);
+    this.state = {
+      activePage: 0,
+      isEmptyTable: this.props.pageOfItems.length === 0,
+      isPopoverOpen: false,
+      paginationLoading: false,
+    };
+  }
 
   static getDerivedStateFromProps(props: BasicTableProps<any>, state: BasicTableState) {
     if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
@@ -101,10 +108,16 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       onChange = noop,
       pageOfItems,
       sorting = null,
+      totalCount,
       title,
       updateLimitPagination,
     } = this.props;
     const { isEmptyTable } = this.state;
+
+    // if (this.props.pageOfItems.length > 0) {
+    //   debugger;
+    // }
+    const pageCount = Math.ceil(totalCount / limit);
 
     if (loading && isEmptyTable) {
       return (
@@ -212,13 +225,11 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                     direction="row"
                   >
                     <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="loadingMoreButton"
-                        isLoading={loading}
-                        onClick={this.props.loadMore}
-                      >
-                        {loading ? `${i18n.LOADING}...` : i18n.LOAD_MORE}
-                      </EuiButton>
+                      <EuiPagination
+                        pageCount={pageCount}
+                        activePage={this.state.activePage}
+                        onPageClick={this.goToPage}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -242,6 +253,13 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       ...this.state,
       isPopoverOpen: false,
     });
+  };
+
+  private goToPage = (pageNumber: number) => {
+    this.setState({
+      activePage: pageNumber,
+    });
+    this.props.loadMore();
   };
 }
 

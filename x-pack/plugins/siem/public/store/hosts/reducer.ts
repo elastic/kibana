@@ -16,6 +16,7 @@ import {
   updateEventsLimit,
   updateHostsLimit,
   updateHostsSort,
+  updatePaginationPage,
   updateUncommonProcessesLimit,
 } from './actions';
 import { HostsModel } from './model';
@@ -32,7 +33,7 @@ export const initialHostsState: HostsState = {
         sortField: HostsFields.lastSeen,
       },
       events: { limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT, paginationPage: 1 },
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -46,7 +47,7 @@ export const initialHostsState: HostsState = {
         sortField: HostsFields.lastSeen,
       },
       events: { limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { limit: DEFAULT_TABLE_LIMIT, paginationPage: 1 },
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -113,6 +114,18 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         ...state[hostsType].queries,
         uncommonProcesses: {
           limit,
+        },
+      },
+    },
+  }))
+  .case(updatePaginationPage, (state, { paginationPage, hostsType }) => ({
+    ...state,
+    [hostsType]: {
+      ...state[hostsType],
+      queries: {
+        ...state[hostsType].queries,
+        uncommonProcesses: {
+          paginationPage,
         },
       },
     },

@@ -33,6 +33,7 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface UncommonProcessesComponentReduxProps {
   limit: number;
+  paginationPage: number;
 }
 
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
