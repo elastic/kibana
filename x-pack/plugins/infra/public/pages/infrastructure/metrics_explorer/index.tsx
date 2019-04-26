@@ -126,7 +126,6 @@ export const MetricsExplorerPage = injectI18n(
           }
         />
         <MetricsExplorerToolbar
-          source={source}
           derivedIndexPattern={derivedIndexPattern}
           currentTimerange={currentTimerange}
           options={options}
@@ -141,6 +140,7 @@ export const MetricsExplorerPage = injectI18n(
           <MetricsExplorerCharts
             loading={loading}
             data={data}
+            source={source}
             options={options}
             onLoadMore={setAfterKey}
             onFilter={handleFilterQuerySubmit}

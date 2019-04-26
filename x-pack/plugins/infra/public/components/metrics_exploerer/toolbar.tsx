@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
-import { SourceQuery } from '../../../common/graphql/types';
 import {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
@@ -25,7 +24,6 @@ import { MetricsExplorerAggregationPicker } from './aggregation';
 
 interface Props {
   intl: InjectedIntl;
-  source: SourceQuery.Query['source']['configuration'] | undefined;
   derivedIndexPattern: StaticIndexPattern;
   currentTimerange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;

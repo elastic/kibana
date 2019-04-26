@@ -12,6 +12,7 @@ import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_me
 import { InfraLoadingPanel } from '../loading';
 import { NoData } from '../empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
+import { SourceQuery } from '../../graphql/types';
 
 interface Props {
   loading: boolean;
@@ -21,9 +22,10 @@ interface Props {
   onFilter: (filter: string) => void;
   data: MetricsExplorerResponse | null;
   intl: InjectedIntl;
+  source: SourceQuery.Query['source']['configuration'] | undefined;
 }
 export const MetricsExplorerCharts = injectI18n(
-  ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter }: Props) => {
+  ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter, source }: Props) => {
     if (!data && loading) {
       return (
         <InfraLoadingPanel
@@ -70,6 +72,7 @@ export const MetricsExplorerCharts = injectI18n(
                 title={options.groupBy ? series.id : null}
                 height={data.series.length > 1 ? 200 : 400}
                 series={series}
+                source={source}
               />
             </EuiFlexItem>
           ))}
