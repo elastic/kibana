@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { Fragment, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -37,54 +37,48 @@ export const GroupByLabelForm: React.SFC<Props> = ({
     }
   }
 
-  return 'interval' in item ? (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTextColor color="subdued">{item.interval}</EuiTextColor>
+  return (
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+      <EuiFlexItem className="mlGroupByLabel--text">
+        <span className="mlGroupByLabel__text">{optionsDataId}</span>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          id="mlIntervalFormPopover"
-          ownFocus
-          button={
-            <EuiButtonIcon
-              aria-label={i18n.translate(
-                'xpack.ml.dataframe.groupByLabelForm.editIntervalAriaLabel',
-                {
-                  defaultMessage: 'Edit interval',
-                }
-              )}
-              size="s"
-              iconType="pencil"
-              onClick={() => setPopoverVisibility(!isPopoverVisible)}
-            />
-          }
-          isOpen={isPopoverVisible}
-          closePopover={() => setPopoverVisibility(false)}
-        >
-          <PopoverForm
-            defaultInterval={item.interval}
-            intervalType={item.agg}
-            onChange={updateInterval}
-          />
-        </EuiPopover>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          aria-label={i18n.translate('xpack.ml.dataframe.groupByLabelForm.deleteItemAriaLabel', {
-            defaultMessage: 'Delete item',
-          })}
-          size="s"
-          iconType="cross"
-          onClick={() => deleteHandler(optionsDataId)}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      <EuiFlexItem>{optionsDataId}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      {'interval' in item && (
+        <Fragment>
+          <EuiFlexItem grow={false} className="mlGroupByLabel--text mlGroupByLabel--interval">
+            <EuiTextColor color="subdued" className="mlGroupByLabel__text">
+              {item.interval}
+            </EuiTextColor>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} className="mlGroupByLabel--button">
+            <EuiPopover
+              id="mlIntervalFormPopover"
+              ownFocus
+              button={
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.ml.dataframe.groupByLabelForm.editIntervalAriaLabel',
+                    {
+                      defaultMessage: 'Edit interval',
+                    }
+                  )}
+                  size="s"
+                  iconType="pencil"
+                  onClick={() => setPopoverVisibility(!isPopoverVisible)}
+                />
+              }
+              isOpen={isPopoverVisible}
+              closePopover={() => setPopoverVisibility(false)}
+            >
+              <PopoverForm
+                defaultInterval={item.interval}
+                intervalType={item.agg}
+                onChange={updateInterval}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </Fragment>
+      )}
+      <EuiFlexItem grow={false} className="mlGroupByLabel--button">
         <EuiButtonIcon
           aria-label={i18n.translate('xpack.ml.dataframe.groupByLabelForm.deleteItemAriaLabel', {
             defaultMessage: 'Delete item',

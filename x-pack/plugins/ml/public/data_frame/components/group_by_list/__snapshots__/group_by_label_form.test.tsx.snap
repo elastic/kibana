@@ -4,20 +4,30 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
+  responsive={false}
 >
-  <EuiFlexItem>
-    the-options-data-id
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="mlGroupByLabel__text"
+    >
+      the-options-data-id
+    </span>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--text mlGroupByLabel--interval"
     grow={false}
   >
     <EuiTextColor
+      className="mlGroupByLabel__text"
       color="subdued"
     >
       10m
     </EuiTextColor>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--button"
     grow={false}
   >
     <EuiPopover
@@ -48,6 +58,7 @@ exports[`Data Frame: <GroupByLabelForm /> Date histogram aggregation 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon
@@ -67,20 +78,30 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
+  responsive={false}
 >
-  <EuiFlexItem>
-    the-options-data-id
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="mlGroupByLabel__text"
+    >
+      the-options-data-id
+    </span>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--text mlGroupByLabel--interval"
     grow={false}
   >
     <EuiTextColor
+      className="mlGroupByLabel__text"
       color="subdued"
     >
       100
     </EuiTextColor>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--button"
     grow={false}
   >
     <EuiPopover
@@ -111,6 +132,7 @@ exports[`Data Frame: <GroupByLabelForm /> Histogram aggregation 1`] = `
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon
@@ -130,11 +152,19 @@ exports[`Data Frame: <GroupByLabelForm /> Terms aggregation 1`] = `
 <EuiFlexGroup
   alignItems="center"
   gutterSize="s"
+  responsive={false}
 >
-  <EuiFlexItem>
-    the-options-data-id
+  <EuiFlexItem
+    className="mlGroupByLabel--text"
+  >
+    <span
+      className="mlGroupByLabel__text"
+    >
+      the-options-data-id
+    </span>
   </EuiFlexItem>
   <EuiFlexItem
+    className="mlGroupByLabel--button"
     grow={false}
   >
     <EuiButtonIcon
