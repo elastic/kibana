@@ -30,9 +30,28 @@ export type supportedIntervalTypes =
 export function isIntervalValid(interval: string, intervalType: supportedIntervalTypes) {
   if (interval !== '') {
     if (intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM) {
-      return histogramIntervalFormatRegex.test(interval);
+      if (!histogramIntervalFormatRegex.test(interval)) {
+        return false;
+      }
+      if (parseFloat(interval) === 0 && parseInt(interval, 10) === 0) {
+        return false;
+      }
+      return true;
     } else if (intervalType === PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM) {
-      return dateHistogramIntervalFormatRegex.test(interval);
+      if (!dateHistogramIntervalFormatRegex.test(interval)) {
+        return false;
+      }
+
+      const timeUnitMatch = interval.match(dateHistogramIntervalFormatRegex);
+      if (timeUnitMatch !== null && Array.isArray(timeUnitMatch) && timeUnitMatch.length === 2) {
+        const timeUnit = timeUnitMatch[1];
+        const intervalNum = parseInt(interval.replace(timeUnit, ''), 10);
+        if ((timeUnit === 'w' || timeUnit === 'M' || timeUnit === 'y') && intervalNum > 1) {
+          return false;
+        }
+      }
+
+      return true;
     }
   }
   return false;
