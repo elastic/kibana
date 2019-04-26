@@ -126,7 +126,7 @@ describe('get_all_stats', () => {
                 cluster_uuid: 'a',
                 kibana_stats: {
                   kibana: {
-                    version: '1.2.3-alpha1',
+                    version: '1.2.3-alpha1'
                   },
                   os: {
                     platform: 'win',
