@@ -5,9 +5,9 @@
  */
 import { EuiPortal, EuiProgress } from '@elastic/eui';
 import React, { Fragment, useMemo, useReducer } from 'react';
-import { useDelayedVisibility } from './useDelayedVisibility';
+import { useDelayedVisibility } from '../components/shared/useDelayedVisibility';
 
-export const GlobalFetchContext = React.createContext({
+export const LoadingIndicatorContext = React.createContext({
   statuses: {},
   dispatchStatus: (action: Action) => undefined as void
 });
@@ -36,7 +36,7 @@ function getIsAnyLoading(statuses: State) {
   return Object.values(statuses).some(isLoading => isLoading);
 }
 
-export function GlobalFetchIndicator({
+export function LoadingIndicatorProvider({
   children
 }: {
   children: React.ReactNode;
@@ -53,7 +53,7 @@ export function GlobalFetchIndicator({
         </EuiPortal>
       )}
 
-      <GlobalFetchContext.Provider
+      <LoadingIndicatorContext.Provider
         value={{ statuses, dispatchStatus }}
         children={children}
       />

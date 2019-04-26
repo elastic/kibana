@@ -5,7 +5,7 @@
  */
 
 import { useContext, useEffect, useState } from 'react';
-import { GlobalFetchContext } from '../components/app/Main/GlobalFetchIndicator';
+import { LoadingIndicatorContext } from '../context/LoadingIndicatorContext';
 import { useComponentId } from './useComponentId';
 
 export enum FETCH_STATUS {
@@ -22,7 +22,7 @@ export function useFetcher<Response>(
   useEffectKey: Array<string | boolean | number | undefined>
 ) {
   const id = useComponentId();
-  const { dispatchStatus } = useContext(GlobalFetchContext);
+  const { dispatchStatus } = useContext(LoadingIndicatorContext);
   const [result, setResult] = useState<{
     data?: Response;
     status?: FETCH_STATUS;
