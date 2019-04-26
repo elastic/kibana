@@ -91,8 +91,6 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       'search',
       buildTlsQuery(options)
     );
-    console.log('[server] query is:', JSON.stringify(buildTlsQuery(options), null, 2));
-    console.log('[server] response is:', JSON.stringify(response, null, 2));
 
     const { cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.count.value', response);

@@ -87,7 +87,7 @@ export const mockGlobalState: State = {
         },
         tls: {
           limit: 10,
-          tlsSortField: { field: TlsFields.issuer, direction: Direction.desc },
+          tlsSortField: { field: TlsFields._id, direction: Direction.desc },
         },
       },
     },

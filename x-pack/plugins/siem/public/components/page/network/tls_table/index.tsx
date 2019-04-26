@@ -81,7 +81,6 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
       type,
     } = this.props;
 
-    console.log('Here I am about to call loadMoreTable with tlsSortField:', tlsSortField);
     return (
       <LoadMoreTable
         columns={getTlsColumns(tlsTableId)}
@@ -110,16 +109,13 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
   }
 
   private onChange = (criteria: Criteria) => {
-    console.log('I am in onChange');
     if (criteria.sort != null) {
       const splitField = criteria.sort.field.split('.');
       const newTlsSort: TlsSortField = {
         field: getSortFromString(splitField[splitField.length - 1]),
         direction: criteria.sort.direction,
       };
-      console.log('I have newTlsSort and tlsSortField of:', newTlsSort, this.props.tlsSortField);
       if (!isEqual(newTlsSort, this.props.tlsSortField)) {
-        console.log('They are not equal, updating my tlsSort', newTlsSort);
         this.props.updateTlsSort({
           tlsSortField: newTlsSort,
           networkType: this.props.type,
@@ -146,27 +142,18 @@ export const TlsTable = connect(
 )(TlsTableComponent);
 
 const getSortField = (sortField: TlsSortField): SortingBasicTable => {
-  console.log('I am in getSortField with param:', sortField);
   const obj = {
     field: `node.${sortField.field}`,
     direction: sortField.direction,
   };
-  console.log('I am in getSortField returning:', obj);
   return obj;
 };
 
 const getSortFromString = (sortField: string): TlsFields => {
-  console.log('I am in getSortFromString with sortField', sortField);
   switch (sortField) {
-    case TlsFields.issuer.valueOf():
-      return TlsFields.issuer;
-    case TlsFields.subject.valueOf():
-      return TlsFields.subject;
-    case TlsFields.sha1.valueOf():
-      return TlsFields.sha1;
-    case TlsFields.ja3.valueOf():
-      return TlsFields.ja3;
+    case '_id':
+      return TlsFields._id;
     default:
-      return TlsFields.issuer;
+      return TlsFields._id;
   }
 };

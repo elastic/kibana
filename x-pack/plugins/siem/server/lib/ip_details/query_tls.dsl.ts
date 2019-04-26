@@ -9,58 +9,49 @@ import { createQueryFilterClauses, assertUnreachable } from '../../utils/build_q
 import { TlsRequestOptions } from './index';
 import { TlsSortField, Direction, TlsFields } from '../../graphql/types';
 
-const getAggs = (limit: number, tlsSortField: TlsSortField) => {
-  console.log('[server] tlsSortField is:', tlsSortField);
-  console.log('[server] getQueryOrder is:', getQueryOrder(tlsSortField));
-  const obj = {
-    count: {
-      cardinality: {
-        field: 'tls.server_certificate.fingerprint.sha1',
+const getAggs = (limit: number, tlsSortField: TlsSortField) => ({
+  count: {
+    cardinality: {
+      field: 'tls.server_certificate.fingerprint.sha1',
+    },
+  },
+  sha1: {
+    terms: {
+      field: 'tls.server_certificate.fingerprint.sha1',
+      size: limit + 1,
+      order: {
+        ...getQueryOrder(tlsSortField),
       },
     },
-    sha1: {
-      terms: {
-        field: 'tls.server_certificate.fingerprint.sha1',
-        size: limit + 1,
-        // order: { issuer_names: 'desc' },
+    aggs: {
+      issuer_names: {
+        terms: {
+          field: 'tls.server_certificate.issuer.common_name',
+        },
       },
-      aggs: {
-        issuer_names: {
-          terms: {
-            field: 'tls.server_certificate.issuer.common_name',
-          },
-          aggs: {
-            common_name: {
-              max: { field: 'key' },
-            },
-          },
+      common_names: {
+        terms: {
+          field: 'tls.server_certificate.subject.common_name',
         },
-        common_names: {
-          terms: {
-            field: 'tls.server_certificate.subject.common_name',
-          },
+      },
+      alternative_names: {
+        terms: {
+          field: 'tls.server_certificate.alternative_names',
         },
-        alternative_names: {
-          terms: {
-            field: 'tls.server_certificate.alternative_names',
-          },
+      },
+      not_after: {
+        terms: {
+          field: 'tls.server_certificate.not_after',
         },
-        not_after: {
-          terms: {
-            field: 'tls.server_certificate.not_after',
-          },
-        },
-        ja3: {
-          terms: {
-            field: 'tls.fingerprints.ja3.hash',
-          },
+      },
+      ja3: {
+        terms: {
+          field: 'tls.fingerprints.ja3.hash',
         },
       },
     },
-  };
-  console.log('[server] The whole query is:', JSON.stringify(obj, null, 2));
-  return obj;
-};
+  },
+});
 
 export const buildTlsQuery = ({
   ip,
@@ -105,26 +96,14 @@ export const buildTlsQuery = ({
   return dslQuery;
 };
 
-type QueryOrder =
-  | { _key: Direction }
-  | { issuer_names: Direction }
-  | { alternative_names: Direction }
-  | { common_names: Direction }
-  | { not_after: Direction }
-  | { ja3: Direction };
+interface QueryOrder {
+  _key: Direction;
+}
 
 const getQueryOrder = (tlsSortField: TlsSortField): QueryOrder => {
   switch (tlsSortField.field) {
-    case TlsFields.sha1:
+    case TlsFields._id:
       return { _key: tlsSortField.direction };
-    case TlsFields.issuer:
-      return { issuer_names: tlsSortField.direction };
-    case TlsFields.subject:
-      return { alternative_names: tlsSortField.direction }; // TODO: Fix this with common_names secondary sort
-    case TlsFields.ja3:
-      return { ja3: tlsSortField.direction };
-    case TlsFields.validUntil:
-      return { not_after: tlsSortField.direction };
     default:
       return assertUnreachable(tlsSortField.field);
   }

@@ -1418,11 +1418,7 @@ export enum NetworkDirectionEcs {
 }
 
 export enum TlsFields {
-  issuer = 'issuer',
-  subject = 'subject',
-  sha1 = 'sha1',
-  ja3 = 'ja3',
-  validUntil = 'validUntil',
+  _id = '_id',
 }
 
 export enum NetworkTopNFlowFields {

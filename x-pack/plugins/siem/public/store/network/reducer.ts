@@ -75,7 +75,7 @@ export const initialNetworkState: NetworkState = {
       tls: {
         limit: DEFAULT_TABLE_LIMIT,
         tlsSortField: {
-          field: TlsFields.issuer,
+          field: TlsFields._id,
           direction: Direction.desc,
         },
       },

@@ -114,11 +114,7 @@ const firstLastSeenSchema = gql`
 
 const tlsSchema = gql`
   enum TlsFields {
-    issuer
-    subject
-    sha1
-    ja3
-    validUntil
+    _id
   }
 
   type TlsNode {

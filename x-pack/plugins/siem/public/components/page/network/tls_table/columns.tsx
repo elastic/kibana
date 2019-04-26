@@ -29,7 +29,7 @@ export const getTlsColumns = (
     name: i18n.ISSUER,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
+    sortable: false,
     render: ({ _id, issuerNames }) => {
       if (issuerNames != null && issuerNames[0] != null) {
         const id = escapeDataProviderId(`${tableId}-${_id}-table-issuerNames-${issuerNames[0]}-`);
@@ -69,7 +69,7 @@ export const getTlsColumns = (
     name: i18n.SUBJECT,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
+    sortable: false,
     render: ({ _id, alternativeNames, commonNames }) => {
       if (alternativeNames != null && alternativeNames[0] != null) {
         const name = alternativeNames[0];
@@ -174,9 +174,9 @@ export const getTlsColumns = (
   {
     field: 'node',
     name: i18n.JA3_FINGERPRINT,
-    truncateText: false,
+    truncateText: true,
     hideForMobile: false,
-    sortable: true,
+    sortable: false,
     render: ({ _id, ja3 }) => {
       if (ja3 != null && ja3[0] != null) {
         const id = escapeDataProviderId(`${tableId}-${_id}-table-ja3-${ja3[0]}-`);
@@ -213,7 +213,7 @@ export const getTlsColumns = (
     name: i18n.VALID_UNTIL,
     truncateText: false,
     hideForMobile: false,
-    sortable: true,
+    sortable: false,
     render: notAfter => {
       if (notAfter != null && notAfter[0] != null) {
         return <>{notAfter[0]}</>;

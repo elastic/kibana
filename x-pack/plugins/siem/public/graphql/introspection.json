@@ -5585,21 +5585,7 @@
         "inputFields": null,
         "interfaces": null,
         "enumValues": [
-          { "name": "issuer", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "subject",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "sha1", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "ja3", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "validUntil",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          }
+          { "name": "_id", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       },
