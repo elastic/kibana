@@ -59,12 +59,13 @@
 
 .code-directory__node {
   width: calc(200rem / 14);
-  padding: 0 $euiSizeS;
+  padding: .25rem $euiSizeS;
   border-radius: $euiBorderRadius;
   white-space: nowrap;
   color: $euiColorFullShade;
+  transition: background-color $euiAnimSlightResistance $euiAnimSpeedFast;
   &:hover {
-    background-color: rgba($euiColorGhost, .10);
+    background-color: $euiColorLightShade;
     cursor: pointer;
   }
 }
