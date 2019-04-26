@@ -188,7 +188,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await PageObjects.settings.clickKibanaSavedObjects();
         });
 
-        it('shows a visualization and an index pattern', async () => {
+        it('shows two configs, a visualization and an index pattern', async () => {
           const objects = await PageObjects.settings.getSavedObjectsInTable();
           expect(objects).to.eql([
             'config [id=6.0.0]',
