@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import { fetchHighLevelStats, getHighLevelStats, handleHighLevelStatsResponse,  isLegacyVersion } from '../get_high_level_stats';
+import { fetchHighLevelStats, getHighLevelStats, handleHighLevelStatsResponse, isLegacyVersion } from '../get_high_level_stats';
 
 describe('get_high_level_stats', () => {
   const callWith = sinon.stub();

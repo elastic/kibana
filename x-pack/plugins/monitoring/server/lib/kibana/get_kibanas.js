@@ -29,8 +29,6 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
 
-  console.log('getting kibana stats for monitoring!');
-
   const params = {
     index: kbnIndexPattern,
     size: config.get('xpack.monitoring.max_bucket_size'),

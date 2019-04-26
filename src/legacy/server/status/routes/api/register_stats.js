@@ -40,13 +40,8 @@ export function registerStatsApi(kbnServer, server, config) {
     return uuid;
   };
 
-  const getUsage = async (callCluster, filterTypes = []) => {
-    const usageSet = await collectorSet.getFilteredCollectorSet(set => {
-      console.log('set::', set.type);
-      return !filterTypes.includes(set.type);
-    });
-
-    const usage = await usageSet.bulkFetchUsage(callCluster);
+  const getUsage = async callCluster => {
+    const usage = await collectorSet.bulkFetchUsage(callCluster);
     return collectorSet.toObject(usage);
   };
 
@@ -58,7 +53,6 @@ export function registerStatsApi(kbnServer, server, config) {
         validate: {
           query: Joi.object({
             extended: Joi.string().valid('', 'true', 'false'),
-            exclude_usage: Joi.string().valid('', 'true', 'false'),
             legacy: Joi.string().valid('', 'true', 'false')
           })
         },
@@ -67,7 +61,6 @@ export function registerStatsApi(kbnServer, server, config) {
       async handler(req) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
-        const isExcludeKibanaUsage = req.query.exclude_usage !== undefined && req.query.exclude_usage !== 'false';
 
         let extended;
         if (isExtended) {
@@ -78,7 +71,6 @@ export function registerStatsApi(kbnServer, server, config) {
               getUsage(callCluster),
               getClusterUuid(callCluster),
             ]);
-            console.log('usage::', usage);
 
 
             let modifiedUsage = usage;
@@ -133,13 +125,9 @@ export function registerStatsApi(kbnServer, server, config) {
         /* kibana_stats gets singled out from the collector set as it is used
          * for health-checking Kibana and fetch does not rely on fetching data
          * from ES */
-        let kibanaStats = {};
-        if (!isExcludeKibanaUsage) {
-          const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
-          console.log('kibanaStatsCollector::', kibanaStatsCollector);
-          kibanaStats = await kibanaStatsCollector.fetch();
-          kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
-        }
+        const kibanaStatsCollector = collectorSet.getCollectorByType(KIBANA_STATS_TYPE);
+        let kibanaStats = await kibanaStatsCollector.fetch();
+        kibanaStats = collectorSet.toApiFieldNames(kibanaStats);
 
         return {
           ...kibanaStats,
