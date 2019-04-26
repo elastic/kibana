@@ -81,7 +81,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
 
   // EuiInMemoryTable has an issue with dynamic sortable columns
   // and will trigger a full page Kibana error in such a case.
-  // The following is a workaround until this is solve upstream:
+  // The following is a workaround until this is solved upstream:
   // - If the sortable/columns config changes,
   //   the table will be unmounted/not rendered.
   //   This is what the useEffect() part does.
