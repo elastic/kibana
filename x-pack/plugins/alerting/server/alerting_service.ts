@@ -5,8 +5,8 @@
  */
 
 import Boom from 'boom';
+import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { consoleConnector } from './default_connectors';
-import { SavedObjectsClient } from '../../../../src/legacy/server/saved_objects';
 
 type ConnectorExecutor = (connectorOptions: any, params: any) => Promise<any>;
 
