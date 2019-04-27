@@ -9,7 +9,6 @@ import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { ActionCreator } from 'redux';
-import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
@@ -25,8 +24,6 @@ interface OwnProps {
   flowTarget: FlowTarget;
   loading: boolean;
   hasNextPage: boolean;
-  indexPattern: StaticIndexPattern;
-  ip: string;
   nextCursor: string;
   totalCount: number;
   loadMore: (cursor: string) => void;
@@ -78,8 +75,6 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
       data,
       usersSortField,
       hasNextPage,
-      indexPattern,
-      ip,
       limit,
       loading,
       loadMore,
@@ -92,7 +87,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
 
     return (
       <LoadMoreTable
-        columns={getUsersColumns(indexPattern, ip, flowTarget, type, usersTableId)}
+        columns={getUsersColumns(flowTarget, usersTableId)}
         loadingTitle={i18n.USERS}
         loading={loading}
         pageOfItems={data}
@@ -140,10 +135,9 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
 
 const makeMapStateToProps = () => {
   const getUsersSelector = networkSelectors.usersSelector();
-  const mapStateToProps = (state: State) => ({
+  return (state: State) => ({
     ...getUsersSelector(state),
   });
-  return mapStateToProps;
 };
 
 export const UsersTable = connect(

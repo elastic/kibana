@@ -126,10 +126,9 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
 
 const makeMapStateToProps = () => {
   const getTlsSelector = networkSelectors.tlsSelector();
-  const mapStateToProps = (state: State) => ({
+  return (state: State) => ({
     ...getTlsSelector(state),
   });
-  return mapStateToProps;
 };
 
 export const TlsTable = connect(
@@ -140,13 +139,10 @@ export const TlsTable = connect(
   }
 )(TlsTableComponent);
 
-const getSortField = (sortField: TlsSortField): SortingBasicTable => {
-  const obj = {
-    field: `node.${sortField.field}`,
-    direction: sortField.direction,
-  };
-  return obj;
-};
+const getSortField = (sortField: TlsSortField): SortingBasicTable => ({
+  field: `node.${sortField.field}`,
+  direction: sortField.direction,
+});
 
 const getSortFromString = (sortField: string): TlsFields => {
   switch (sortField) {

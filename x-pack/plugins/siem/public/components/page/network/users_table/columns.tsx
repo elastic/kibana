@@ -4,25 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
-import { StaticIndexPattern } from 'ui/index_patterns';
-
 import { FlowTarget, UsersItem } from '../../../../graphql/types';
-import { networkModel } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { getEmptyTagValue } from '../../../empty_value';
+import { defaultToEmptyTag } from '../../../empty_value';
 import { Columns } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
-import { getRowItemDraggables } from '../../../tables/helpers';
+import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
 
 export const getUsersColumns = (
-  indexPattern: StaticIndexPattern,
-  ip: string,
   flowTarget: FlowTarget,
-  type: networkModel.NetworkType,
   tableId: string
 ): [
   Columns<UsersItem['name']>,
@@ -37,36 +27,12 @@ export const getUsersColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: userName => {
-      if (userName != null) {
-        const id = escapeDataProviderId(`${tableId}-table-${flowTarget}-user-${userName}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: userName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: 'user.name', value: userName },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>{userName}</>
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: userName =>
+      getRowItemDraggable({
+        rowItem: userName,
+        attrName: 'user.name',
+        idPrefix: `${tableId}-table-${flowTarget}-user-${userName}`,
+      }),
   },
   {
     field: 'node.user.id',
@@ -74,17 +40,12 @@ export const getUsersColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: userIds => {
-      if (userIds != null && userIds.length > 0) {
-        return getRowItemDraggables({
-          rowItems: userIds,
-          attrName: 'user.id',
-          idPrefix: `${tableId}-table-${flowTarget}`,
-        });
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: userIds =>
+      getRowItemDraggables({
+        rowItems: userIds,
+        attrName: 'user.id',
+        idPrefix: `${tableId}-table-${flowTarget}`,
+      }),
   },
   {
     field: 'node.user.groupName',
@@ -92,17 +53,12 @@ export const getUsersColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: groupNames => {
-      if (groupNames != null && groupNames.length > 0) {
-        return getRowItemDraggables({
-          rowItems: groupNames,
-          attrName: 'user.group.name',
-          idPrefix: `${tableId}-table-${flowTarget}`,
-        });
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: groupNames =>
+      getRowItemDraggables({
+        rowItems: groupNames,
+        attrName: 'user.group.name',
+        idPrefix: `${tableId}-table-${flowTarget}`,
+      }),
   },
   {
     field: 'node.user.groupId',
@@ -110,31 +66,19 @@ export const getUsersColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: groupId => {
-      if (groupId != null && groupId.length > 0) {
-        return getRowItemDraggables({
-          rowItems: groupId,
-          attrName: 'user.group.id',
-          idPrefix: `${tableId}-table-${flowTarget}`,
-        });
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: groupId =>
+      getRowItemDraggables({
+        rowItems: groupId,
+        attrName: 'user.group.id',
+        idPrefix: `${tableId}-table-${flowTarget}`,
+      }),
   },
-
   {
     field: 'node.user.count',
     name: i18n.DOCUMENT_COUNT,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: docCount => {
-      if (docCount != null) {
-        return <>{docCount}</>;
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: docCount => defaultToEmptyTag(docCount),
   },
 ];

@@ -123,11 +123,9 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
                       <UsersTableManage
                         data={users}
-                        indexPattern={indexPattern}
                         id={id}
                         flowTarget={flowTarget}
                         hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        ip={ip}
                         loading={loading}
                         loadMore={loadMore}
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
