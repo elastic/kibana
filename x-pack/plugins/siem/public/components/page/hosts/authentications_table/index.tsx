@@ -112,7 +112,17 @@ export const AuthenticationTable = connect(
   }
 )(AuthenticationTableComponent);
 
-const getAuthenticationColumns = (): Array<Columns<AuthenticationsEdges>> => [
+const getAuthenticationColumns = (): [
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>,
+  Columns<AuthenticationsEdges>
+] => [
   {
     name: i18n.USER,
     truncateText: false,

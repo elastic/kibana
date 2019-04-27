@@ -16,7 +16,7 @@
 
 export type ToStringArray = string[];
 
-export type Date = any;
+export type Date = string;
 
 export type ToNumberArray = number[];
 

@@ -45,7 +45,7 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 
 export type ToStringArray = string[] | string;
 
-export type Date = any;
+export type Date = string;
 
 export type ToNumberArray = number[] | number;
 

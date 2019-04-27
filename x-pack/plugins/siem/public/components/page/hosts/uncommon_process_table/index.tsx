@@ -112,7 +112,14 @@ export const UncommonProcessTable = connect(
   }
 )(UncommonProcessTableComponent);
 
-const getUncommonColumns = (): Array<Columns<UncommonProcessesEdges>> => [
+const getUncommonColumns = (): [
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>
+] => [
   {
     name: i18n.NAME,
     truncateText: false,
@@ -161,7 +168,7 @@ const getUncommonColumns = (): Array<Columns<UncommonProcessesEdges>> => [
   },
   {
     name: i18n.HOSTS,
-    truncateText: true,
+    truncateText: false,
     hideForMobile: false,
     render: ({ node }) =>
       getRowItemDraggables({

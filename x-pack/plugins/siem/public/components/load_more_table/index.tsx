@@ -42,16 +42,36 @@ export interface Criteria {
 }
 
 // Using telescoping templates to remove 'any' that was polluting downstream column type checks
-interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T> {
+interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
   columns:
-    | Array<Columns<T>>
     | [Columns<T>]
     | [Columns<T>, Columns<U>]
     | [Columns<T>, Columns<U>, Columns<V>]
     | [Columns<T>, Columns<U>, Columns<V>, Columns<W>]
     | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>]
     | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>]
-    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>, Columns<Z>];
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>, Columns<Z>]
+    | [
+        Columns<T>,
+        Columns<U>,
+        Columns<V>,
+        Columns<W>,
+        Columns<X>,
+        Columns<Y>,
+        Columns<Z>,
+        Columns<AA>
+      ]
+    | [
+        Columns<T>,
+        Columns<U>,
+        Columns<V>,
+        Columns<W>,
+        Columns<X>,
+        Columns<Y>,
+        Columns<Z>,
+        Columns<AA>,
+        Columns<AB>
+      ];
   hasNextPage: boolean;
   limit: number;
   loading: boolean;
@@ -82,8 +102,8 @@ export interface Columns<T> {
   render?: (item: T) => void;
 }
 
-export class LoadMoreTable<T, U, V, W, X, Y, Z> extends React.PureComponent<
-  BasicTableProps<T, U, V, W, X, Y, Z>,
+export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureComponent<
+  BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
   BasicTableState
 > {
   public readonly state = {
@@ -92,8 +112,8 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z> extends React.PureComponent<
     paginationLoading: false,
   };
 
-  static getDerivedStateFromProps<T, U, V, W, X, Y, Z>(
-    props: BasicTableProps<T, U, V, W, X, Y, Z>,
+  static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
+    props: BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
     state: BasicTableState
   ) {
     if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
