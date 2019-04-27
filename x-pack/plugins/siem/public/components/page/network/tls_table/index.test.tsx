@@ -68,11 +68,10 @@ describe('Tls Table Component', () => {
         direction: 'desc',
         field: '_id',
       });
-      /*
-      TODO: Figure out this test or delete it
+
       wrapper
         .find('.euiTable thead tr th button')
-        .at(1)
+        .first()
         .simulate('click');
 
       wrapper.update();
@@ -81,28 +80,13 @@ describe('Tls Table Component', () => {
         direction: 'asc',
         field: '_id',
       });
-      */
+
       expect(
         wrapper
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('SHA1 FingerprintClick to sort in ascending order');
-      /*
-      TODO: Fix this test or remove it
-      expect(
-        wrapper
-          .find('.euiTable thead tr th button')
-          .at(1)
-          .text()
-      ).toEqual('BytesClick to sort in descending order');
-      expect(
-        wrapper
-          .find('.euiTable thead tr th button')
-          .at(1)
-          .find('svg')
-      ).toBeTruthy();
-      */
+      ).toEqual('SHA1 FingerprintClick to sort in descending order');
     });
   });
 });
