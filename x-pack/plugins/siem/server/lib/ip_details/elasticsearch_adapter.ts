@@ -15,11 +15,13 @@ import {
   GeoEcsFields,
   HostEcsFields,
   IpOverviewData,
+  UsersData,
+  UsersEdges,
 } from '../../graphql/types';
 import { DatabaseSearchResponse, FrameworkAdapter, FrameworkRequest } from '../framework';
 import { SearchHit, TermAggregation } from '../types';
 
-import { DomainsRequestOptions, IpOverviewRequestOptions } from './index';
+import { DomainsRequestOptions, IpOverviewRequestOptions, UsersRequestOptions } from './index';
 import { buildDomainsQuery } from './query_domains.dsl';
 import { buildFirstLastSeenDomainQuery } from './query_last_first_seen_domain.dsl';
 import { buildOverviewQuery } from './query_overview.dsl';
@@ -30,7 +32,9 @@ import {
   IpDetailsAdapter,
   IpOverviewHit,
   OverviewHit,
+  UsersBucketsItem,
 } from './types';
+import { buildUsersQuery } from './query_users.dsl';
 
 export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
   constructor(private readonly framework: FrameworkAdapter) {}
@@ -95,6 +99,36 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
     return {
       firstSeen: get('firstSeen.value_as_string', aggregations),
       lastSeen: get('lastSeen.value_as_string', aggregations),
+    };
+  }
+
+  public async getUsers(
+    request: FrameworkRequest,
+    options: UsersRequestOptions
+  ): Promise<UsersData> {
+    const response = await this.framework.callWithRequest<UsersData, TermAggregation>(
+      request,
+      'search',
+      buildUsersQuery(options)
+    );
+
+    const { cursor, limit } = options.pagination;
+    const totalCount = getOr(0, 'aggregations.user_count.value', response);
+    const usersEdges = getUsersEdges(response);
+    const hasNextPage = usersEdges.length > limit;
+    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
+    const edges = usersEdges.splice(beginning, limit - beginning);
+
+    return {
+      edges,
+      totalCount,
+      pageInfo: {
+        endCursor: {
+          value: String(limit),
+          tiebreaker: null,
+        },
+        hasNextPage,
+      },
     };
   }
 }
@@ -178,3 +212,27 @@ const getOrNumber = (path: string, bucket: DomainsBuckets) => {
   }
   return numb;
 };
+
+export const getUsersEdges = (
+  response: DatabaseSearchResponse<UsersData, TermAggregation>
+): UsersEdges[] =>
+  getOr([], `aggregations.users.buckets`, response).map((bucket: UsersBucketsItem) => ({
+    node: {
+      _id: bucket.key,
+      user: {
+        id: getOr([], 'id.buckets', bucket).map((id: UsersBucketsItem) => id.key),
+        name: bucket.key,
+        groupId: getOr([], 'groupId.buckets', bucket).map(
+          (groupId: UsersBucketsItem) => groupId.key
+        ),
+        groupName: getOr([], 'groupName.buckets', bucket).map(
+          (groupName: UsersBucketsItem) => groupName.key
+        ),
+        count: get('doc_count', bucket),
+      },
+    },
+    cursor: {
+      value: bucket.key,
+      tiebreaker: null,
+    },
+  }));

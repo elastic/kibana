@@ -10,6 +10,7 @@ import {
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
+  UsersSortField,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -51,8 +52,13 @@ export interface DomainsQuery extends BasicQuery {
   domainsSortField: DomainsSortField;
 }
 
+export interface UsersQuery extends BasicQuery {
+  usersSortField: UsersSortField;
+}
+
 interface IpOverviewQueries {
   domains: DomainsQuery;
+  users: UsersQuery;
 }
 
 export interface NetworkDetailsModel {

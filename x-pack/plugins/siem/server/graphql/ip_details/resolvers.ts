@@ -6,9 +6,10 @@
 
 import { SourceResolvers } from '../../graphql/types';
 import { AppResolverOf, ChildResolverOf } from '../../lib/framework';
-import { IpDetails } from '../../lib/ip_details';
+import { DomainsRequestOptions, IpDetails, UsersRequestOptions } from '../../lib/ip_details';
 import { createOptions } from '../../utils/build_query/create_options';
 import { QuerySourceResolver } from '../sources/resolvers';
+import { DomainFirstLastSeenRequestOptions } from '../../lib/ip_details/types';
 
 export type QueryIpOverviewResolver = ChildResolverOf<
   AppResolverOf<SourceResolvers.IpOverviewResolver>,
@@ -25,6 +26,11 @@ type QueryDomainFirstLastSeenResolver = ChildResolverOf<
   QuerySourceResolver
 >;
 
+export type QueryUsersResolver = ChildResolverOf<
+  AppResolverOf<SourceResolvers.UsersResolver>,
+  QuerySourceResolver
+>;
+
 export interface IDetailsResolversDeps {
   ipDetails: IpDetails;
 }
@@ -36,6 +42,7 @@ export const createIpDetailsResolvers = (
     IpOverview: QueryIpOverviewResolver;
     Domains: QueryDomainsResolver;
     DomainFirstLastSeen: QueryDomainFirstLastSeenResolver;
+    Users: QueryUsersResolver;
   };
 } => ({
   Source: {
@@ -44,7 +51,7 @@ export const createIpDetailsResolvers = (
       return libs.ipDetails.getIpOverview(req, options);
     },
     async Domains(source, args, { req }, info) {
-      const options = {
+      const options: DomainsRequestOptions = {
         ...createOptions(source, args, info),
         ip: args.ip,
         domainsSortField: args.sort,
@@ -54,13 +61,22 @@ export const createIpDetailsResolvers = (
       return libs.ipDetails.getDomains(req, options);
     },
     async DomainFirstLastSeen(source, args, { req }) {
-      const options = {
+      const options: DomainFirstLastSeenRequestOptions = {
         sourceConfiguration: source.configuration,
         ip: args.ip,
         domainName: args.domainName,
         flowTarget: args.flowTarget,
       };
       return libs.ipDetails.getDomainFirstLastSeen(req, options);
+    },
+    async Users(source, args, { req }, info) {
+      const options: UsersRequestOptions = {
+        ...createOptions(source, args, info),
+        ip: args.ip,
+        usersSortField: args.sort,
+        flowTarget: args.flowTarget,
+      };
+      return libs.ipDetails.getUsers(req, options);
     },
   },
 });
