@@ -41,6 +41,7 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
+// Using telescoping templates to remove 'any' that was polluting downstream column type checks
 interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T> {
   columns:
     | Array<Columns<T>>

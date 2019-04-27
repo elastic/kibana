@@ -13,6 +13,7 @@ import {
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
   TlsSortField,
+  UsersSortField,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
 
@@ -90,3 +91,12 @@ export const updateTlsSort = actionCreator<{
 export const updateTlsLimit = actionCreator<{
   limit: number;
 }>('UPDATE_TLS_LIMIT');
+
+// Users Table Actions
+export const updateUsersLimit = actionCreator<{
+  limit: number;
+}>('UPDATE_USERS_LIMIT');
+
+export const updateUsersSort = actionCreator<{
+  usersSortField: UsersSortField;
+}>('UPDATE_USERS_SORT');

@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { get, isEmpty } from 'lodash/fp';
 import React from 'react';
-import styled from 'styled-components';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import {
@@ -30,6 +28,7 @@ import { Provider } from '../../../timeline/data_providers/provider';
 import { AddToKql } from '../../add_to_kql';
 
 import * as i18n from './translations';
+import { getRowItemDraggables } from '../../../tables/helpers';
 
 export const getNetworkTopNFlowColumns = (
   indexPattern: StaticIndexPattern,
@@ -86,57 +85,13 @@ export const getNetworkTopNFlowColumns = (
       const ip: string | null = get(ipAttr, node);
 
       if (Array.isArray(domains) && domains.length > 0) {
-        const domain = domains[0];
-        const id = escapeDataProviderId(
-          `${tableId}-table-${ip}-${flowTarget}-${flowDirection}-domain-${domain}`
-        );
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: domain,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: { field: domainAttr, value: domain },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <>
-                  {domain}
-                  {domains.length > 1 && (
-                    <EuiToolTip
-                      content={
-                        <>
-                          {domains.slice(1, 6).map(domainName => (
-                            <span key={`${id}-${domainName}`}>
-                              {defaultToEmptyTag(domainName)}
-                              <br />
-                            </span>
-                          ))}
-                          {domains.slice(1).length > 5 && (
-                            <b>
-                              <br />
-                              {i18n.MORE}
-                            </b>
-                          )}
-                        </>
-                      }
-                    >
-                      <MoreDomains type="eye" />
-                    </EuiToolTip>
-                  )}
-                </>
-              )
-            }
-          />
-        );
+        const id = escapeDataProviderId(`${tableId}-table-${ip}-${flowDirection}`);
+        return getRowItemDraggables({
+          rowItems: domains,
+          attrName: domainAttr,
+          idPrefix: id,
+          displayCount: 1,
+        });
       } else {
         return getEmptyTagValue();
       }
@@ -239,7 +194,3 @@ const getUniqueTitle = (flowTarget: FlowTarget) => {
   }
   assertUnreachable(flowTarget);
 };
-
-const MoreDomains = styled(EuiIcon)`
-  margin-left: 5px;
-`;

@@ -14,6 +14,7 @@ import {
   NetworkDnsFields,
   NetworkTopNFlowFields,
   TlsFields,
+  UsersFields,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_LIMIT } from '../constants';
 
@@ -33,6 +34,8 @@ import {
   updateTopNFlowSort,
   updateTopNFlowTarget,
   updateTlsSort,
+  updateUsersLimit,
+  updateUsersSort,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel, NetworkType } from './model';
@@ -78,6 +81,13 @@ export const initialNetworkState: NetworkState = {
         tlsSortField: {
           field: TlsFields._id,
           direction: Direction.desc,
+        },
+      },
+      users: {
+        limit: DEFAULT_TABLE_LIMIT,
+        usersSortField: {
+          field: UsersFields.name,
+          direction: Direction.asc,
         },
       },
     },
@@ -269,6 +279,32 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         tls: {
           ...state[NetworkType.details].queries.tls,
           tlsSortField,
+        },
+      },
+    },
+  }))
+  .case(updateUsersLimit, (state, { limit }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        users: {
+          ...state[NetworkType.details].queries.users,
+          limit,
+        },
+      },
+    },
+  }))
+  .case(updateUsersSort, (state, { usersSortField }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        users: {
+          ...state[NetworkType.details].queries.users,
+          usersSortField,
         },
       },
     },

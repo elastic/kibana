@@ -6,13 +6,15 @@
 
 import {
   DomainsData,
+  DomainsSortField,
   FirstLastSeenDomain,
   FlowDirection,
   FlowTarget,
   IpOverviewData,
   TlsSortField,
-  DomainsSortField,
   TlsData,
+  UsersData,
+  UsersSortField,
 } from '../../graphql/types';
 import { FrameworkRequest, RequestOptions } from '../framework';
 
@@ -34,6 +36,11 @@ export interface DomainsRequestOptions extends RequestOptions {
 export interface TlsRequestOptions extends RequestOptions {
   ip: string;
   tlsSortField: TlsSortField;
+  flowTarget: FlowTarget;
+}
+export interface UsersRequestOptions extends RequestOptions {
+  ip: string;
+  usersSortField: UsersSortField;
   flowTarget: FlowTarget;
 }
 
@@ -63,5 +70,9 @@ export class IpDetails {
     options: DomainFirstLastSeenRequestOptions
   ): Promise<FirstLastSeenDomain> {
     return await this.adapter.getDomainsFirstLastSeen(req, options);
+  }
+
+  public async getUsers(req: FrameworkRequest, options: UsersRequestOptions): Promise<UsersData> {
+    return await this.adapter.getUsers(req, options);
   }
 }

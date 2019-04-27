@@ -69,3 +69,9 @@ export const tlsSelector = () =>
     selectNetworkDetails,
     network => network.queries.tls
   );
+
+export const usersSelector = () =>
+  createSelector(
+    selectNetworkDetails,
+    network => network.queries.users
+  );

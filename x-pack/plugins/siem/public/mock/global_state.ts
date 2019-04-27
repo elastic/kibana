@@ -14,6 +14,7 @@ import {
   NetworkDnsFields,
   NetworkTopNFlowFields,
   TlsFields,
+  UsersFields,
 } from '../graphql/types';
 import { State } from '../store';
 
@@ -88,6 +89,10 @@ export const mockGlobalState: State = {
         tls: {
           limit: 10,
           tlsSortField: { field: TlsFields._id, direction: Direction.desc },
+        },
+        users: {
+          limit: 10,
+          usersSortField: { field: UsersFields.name, direction: Direction.asc },
         },
       },
     },

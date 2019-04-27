@@ -35,7 +35,7 @@ const sourcesTests: KbnTestProvider = ({ getService }) => {
           expect(sourceConfiguration.logAlias).to.be('filebeat-*');
 
           // test data in x-pack/test/functional/es_archives/auditbeat_test_data/data.json.gz
-          expect(sourceStatus.indexFields.length).to.be(345);
+          expect(sourceStatus.indexFields.length).to.be(349);
           expect(sourceStatus.auditbeatIndices.length).to.be(1);
           expect(sourceStatus.auditbeatIndicesExist).to.be(true);
           expect(sourceStatus.auditbeatAliasExists).to.be(true);
