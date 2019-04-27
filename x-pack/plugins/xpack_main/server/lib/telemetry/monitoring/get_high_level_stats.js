@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
-
+import { KIBANA_SYSTEM_ID } from '../../../../common/constants';
 /**
  * Update a counter associated with the {@code key}.
  *

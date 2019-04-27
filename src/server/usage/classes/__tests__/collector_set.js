@@ -141,7 +141,7 @@ describe('CollectorSet', () => {
       });
     });
   });
-  
+
   describe('isUsageCollector', () => {
     const server = { };
     const collectorOptions = { type: 'MY_TEST_COLLECTOR', fetch: () => {} };
