@@ -126,7 +126,7 @@ export default function ({ getService }) {
             .expect('Content-Type', /json/)
             .expect(200)
             .then(({ body }) => {
-              expect(body).to.not.have('usage');
+              expect(body).to.not.have.property('usage');
             });
         });
       });
