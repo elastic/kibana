@@ -16,9 +16,10 @@ export default function ({ getService, getPageObjects }) {
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
-      await esArchiver.load('security/flstest/kibana'); //(savedobject)
+      await esArchiver.loadIfNeeded('security/flstest');
+      await esArchiver.load('empty_kibana');
       browser.setWindowSize(1600, 1000);
+      await PageObjects.settings.createIndexPattern('flstest', null);
     });
 
     it('should add new role viewssnrole', async function () {
