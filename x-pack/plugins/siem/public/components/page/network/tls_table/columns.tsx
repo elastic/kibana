@@ -174,7 +174,7 @@ export const getTlsColumns = (
   {
     field: 'node',
     name: i18n.JA3_FINGERPRINT,
-    truncateText: true,
+    truncateText: false,
     hideForMobile: false,
     sortable: false,
     render: ({ _id, ja3 }) => {

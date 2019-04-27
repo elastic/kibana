@@ -96,7 +96,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
                 ...fetchMoreResult,
                 source: {
                   ...fetchMoreResult.source,
-                  Domains: {
+                  Tls: {
                     ...fetchMoreResult.source.Tls,
                     edges: [...prev.source.Tls.edges, ...fetchMoreResult.source.Tls.edges],
                   },

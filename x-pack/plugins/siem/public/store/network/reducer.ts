@@ -24,6 +24,7 @@ import {
   updateDnsSort,
   updateDomainsFlowDirection,
   updateDomainsLimit,
+  updateTlsLimit,
   updateDomainsSort,
   updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
@@ -220,6 +221,19 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
+  .case(updateTlsLimit, (state, { limit }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        tls: {
+          ...state[NetworkType.details].queries.tls,
+          limit,
+        },
+      },
+    },
+  }))
   .case(updateDomainsFlowDirection, (state, { flowDirection }) => ({
     ...state,
     [NetworkType.details]: {
@@ -253,7 +267,7 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       queries: {
         ...state[NetworkType.details].queries,
         tls: {
-          ...state[NetworkType.details].queries.domains,
+          ...state[NetworkType.details].queries.tls,
           tlsSortField,
         },
       },

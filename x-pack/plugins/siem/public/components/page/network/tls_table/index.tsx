@@ -80,7 +80,6 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
       updateTlsLimit,
       type,
     } = this.props;
-
     return (
       <LoadMoreTable
         columns={getTlsColumns(tlsTableId)}
