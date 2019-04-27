@@ -21,14 +21,17 @@ export function useTransactionOverviewCharts(urlParams: IUrlParams) {
   } = urlParams;
 
   const { data, error, status } = useFetcher(
-    () =>
-      loadTransactionOverviewCharts({
-        serviceName,
-        start,
-        end,
-        transactionType,
-        kuery
-      }),
+    () => {
+      if (serviceName && start && end) {
+        return loadTransactionOverviewCharts({
+          serviceName,
+          start,
+          end,
+          transactionType,
+          kuery
+        });
+      }
+    },
     [serviceName, start, end, transactionType, kuery]
   );
 

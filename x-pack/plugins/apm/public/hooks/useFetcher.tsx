@@ -14,11 +14,8 @@ export enum FETCH_STATUS {
   FAILURE = 'failure'
 }
 
-// use this in request methods to signal to `useFetch` that all arguments are not yet available
-export class MissingArgumentsError extends Error {}
-
 export function useFetcher<Response>(
-  fn: () => Promise<Response>,
+  fn: () => Promise<Response> | undefined,
   useEffectKey: Array<string | boolean | number | undefined>
 ) {
   const id = useComponentId();
@@ -51,9 +48,6 @@ export function useFetcher<Response>(
           });
         }
       } catch (e) {
-        if (e instanceof MissingArgumentsError) {
-          return;
-        }
         if (!didCancel) {
           dispatchStatus({ id, isLoading: false });
           setResult({

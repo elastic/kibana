@@ -33,8 +33,11 @@ interface ServiceMetricsProps {
 export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
   const { serviceName, start, end, errorGroupId, kuery } = urlParams;
   const { data: errorDistributionData } = useFetcher(
-    () =>
-      loadErrorDistribution({ serviceName, start, end, errorGroupId, kuery }),
+    () => {
+      if (serviceName && start && end) {
+        return loadErrorDistribution({ serviceName, start, end });
+      }
+    },
     [serviceName, start, end, errorGroupId, kuery]
   );
 

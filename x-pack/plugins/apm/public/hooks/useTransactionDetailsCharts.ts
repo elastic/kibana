@@ -21,15 +21,18 @@ export function useTransactionDetailsCharts(urlParams: IUrlParams) {
   } = urlParams;
 
   const { data, error, status } = useFetcher(
-    () =>
-      loadTransactionDetailsCharts({
-        serviceName,
-        transactionName,
-        transactionType,
-        start,
-        end,
-        kuery
-      }),
+    () => {
+      if (serviceName && transactionName && transactionType && start && end) {
+        return loadTransactionDetailsCharts({
+          serviceName,
+          transactionName,
+          transactionType,
+          start,
+          end,
+          kuery
+        });
+      }
+    },
     [serviceName, transactionName, transactionType, start, end, kuery]
   );
 

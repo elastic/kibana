@@ -66,12 +66,20 @@ export function ErrorGroupDetails() {
   const { serviceName, start, end, errorGroupId } = urlParams;
 
   const { data: errorGroupData } = useFetcher(
-    () => loadErrorGroupDetails({ serviceName, start, end, errorGroupId }),
+    () => {
+      if (serviceName && start && end && errorGroupId) {
+        return loadErrorGroupDetails({ serviceName, start, end, errorGroupId });
+      }
+    },
     [serviceName, start, end, errorGroupId]
   );
 
   const { data: errorDistributionData } = useFetcher(
-    () => loadErrorDistribution({ serviceName, start, end }),
+    () => {
+      if (serviceName && start && end) {
+        return loadErrorDistribution({ serviceName, start, end });
+      }
+    },
     [serviceName, start, end]
   );
 
