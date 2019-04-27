@@ -6,7 +6,7 @@
 
 import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
-import { get, has } from 'lodash/fp';
+import { has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -22,6 +22,7 @@ import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
+import { getRowItemDraggables } from '../../../tables/helpers';
 
 interface OwnProps {
   data: AuthenticationsEdges[];
@@ -99,10 +100,9 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
 
 const makeMapStateToProps = () => {
   const getAuthenticationsSelector = hostsSelectors.authenticationsSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) => {
+  return (state: State, { type }: OwnProps) => {
     return getAuthenticationsSelector(state, type);
   };
-  return mapStateToProps;
 };
 
 export const AuthenticationTable = connect(
@@ -117,40 +117,12 @@ const getAuthenticationColumns = (): Array<Columns<AuthenticationsEdges>> => [
     name: i18n.USER,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const userName: string | null | undefined = get('user.name[0]', node);
-      if (userName != null) {
-        const id = escapeDataProviderId(`authentications-table-${node._id}-user-${userName}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: userName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'user.name',
-                value: userName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                userName
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: node.user.name,
+        attrName: 'user.name',
+        idPrefix: `authentications-table-${node._id}-userName`,
+      }),
   },
   {
     name: i18n.FAILURES,
@@ -158,7 +130,7 @@ const getAuthenticationColumns = (): Array<Columns<AuthenticationsEdges>> => [
     hideForMobile: false,
     render: ({ node }) => {
       const id = escapeDataProviderId(
-        `authentications-table-${node._id}-node-failures-${node.failures}`
+        `authentications-table-${node._id}-failures-${node.failures}`
       );
       return (
         <DraggableWrapper
@@ -205,82 +177,35 @@ const getAuthenticationColumns = (): Array<Columns<AuthenticationsEdges>> => [
     name: i18n.LAST_FAILED_SOURCE,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const sourceIp: string | null | undefined = get('lastFailure.source.ip[0]', node);
-      if (sourceIp != null) {
-        const id = escapeDataProviderId(
-          `authentications-table-${node._id}-lastFailure-${sourceIp}`
-        );
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: sourceIp,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'source.ip',
-                value: sourceIp,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <IPDetailsLink ip={sourceIp} />
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems:
+          node.lastFailure != null &&
+          node.lastFailure.source != null &&
+          node.lastFailure.source.ip != null
+            ? node.lastFailure.source.ip
+            : null,
+        attrName: 'source.ip',
+        idPrefix: `authentications-table-${node._id}-lastFailureSource`,
+        render: item => <IPDetailsLink ip={item} />,
+      }),
   },
   {
     name: i18n.LAST_FAILED_DESTINATION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const hostName: string | null | undefined = get('lastFailure.host.name[0]', node);
-      const hostId: string | null | undefined = get('lastFailure.host.id[0]', node);
-      if (hostName != null && hostId != null) {
-        const id = escapeDataProviderId(`authentications-table-${node._id}-lastFailure-${hostId}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: hostName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'host.name',
-                value: hostName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems:
+          node.lastFailure != null &&
+          node.lastFailure.host != null &&
+          node.lastFailure.host.name != null
+            ? node.lastFailure.host.name
+            : null,
+        attrName: 'host.name',
+        idPrefix: `authentications-table-${node._id}-lastFailureDestination`,
+        render: item => <HostDetailsLink hostName={item} />,
+      }),
   },
   {
     name: i18n.SUCCESSES,
@@ -335,81 +260,34 @@ const getAuthenticationColumns = (): Array<Columns<AuthenticationsEdges>> => [
     name: i18n.LAST_SUCCESSFUL_SOURCE,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const sourceIp: string | null | undefined = get('lastSuccess.source.ip[0]', node);
-      if (sourceIp != null) {
-        const id = escapeDataProviderId(
-          `authentications-table-${node._id}-lastSuccess-${sourceIp}`
-        );
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: sourceIp,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'source.ip',
-                value: sourceIp,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <IPDetailsLink ip={sourceIp} />
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems:
+          node.lastSuccess != null &&
+          node.lastSuccess.source != null &&
+          node.lastSuccess.source.ip != null
+            ? node.lastSuccess.source.ip
+            : null,
+        attrName: 'source.ip',
+        idPrefix: `authentications-table-${node._id}-lastSuccessSource`,
+        render: item => <IPDetailsLink ip={item} />,
+      }),
   },
   {
     name: i18n.LAST_SUCCESSFUL_DESTINATION,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const hostName: string | null | undefined = get('lastSuccess.host.name[0]', node);
-      const hostId: string | null | undefined = get('lastSuccess.host.id[0]', node);
-      if (hostName != null && hostId != null) {
-        const id = escapeDataProviderId(`authentications-table-${node._id}-lastSuccess-${hostId}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: hostName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'host.name',
-                value: hostName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                <HostDetailsLink hostName={hostName}>{hostName}</HostDetailsLink>
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems:
+          node.lastSuccess != null &&
+          node.lastSuccess.host != null &&
+          node.lastSuccess.host.name != null
+            ? node.lastSuccess.host.name
+            : null,
+        attrName: 'host.name',
+        idPrefix: `authentications-table-${node._id}-lastSuccessfulDestination`,
+        render: item => <HostDetailsLink hostName={item} />,
+      }),
   },
 ];
