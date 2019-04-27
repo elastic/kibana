@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import { getOr } from 'lodash/fp';
@@ -12,16 +11,14 @@ import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import { FlowTarget } from '../../../../graphql/types';
-import { mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
+import { mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
-describe('Domains Table Component', () => {
+describe('Tls Table Component', () => {
   const loadMore = jest.fn();
-  const ip = '10.10.10.10';
   const state: State = mockGlobalState;
 
   let store = createStore(state);
@@ -34,16 +31,13 @@ describe('Domains Table Component', () => {
     test('it renders the default Domains table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <DomainsTable
-            indexPattern={mockIndexPattern}
-            ip={ip}
+          <TlsTable
             totalCount={1}
             loading={false}
             loadMore={loadMore}
-            data={mockDomainsData.edges}
-            flowTarget={FlowTarget.source}
-            hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+            data={mockTlsData.edges}
+            hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
             type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
@@ -58,26 +52,24 @@ describe('Domains Table Component', () => {
       const wrapper = mount(
         <MockedProvider>
           <TestProviders store={store}>
-            <DomainsTable
-              indexPattern={mockIndexPattern}
-              ip={ip}
+            <TlsTable
               totalCount={1}
               loading={false}
               loadMore={loadMore}
-              data={mockDomainsData.edges}
-              flowTarget={FlowTarget.source}
-              hasNextPage={getOr(false, 'hasNextPage', mockDomainsData.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockDomainsData.pageInfo)}
+              data={mockTlsData.edges}
+              hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
               type={networkModel.NetworkType.details}
             />
           </TestProviders>
         </MockedProvider>
       );
-      expect(store.getState().network.details.queries!.domains.domainsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
         direction: 'desc',
-        field: 'bytes',
+        field: '_id',
       });
-
+      /*
+      TODO: Figure out this test or delete it
       wrapper
         .find('.euiTable thead tr th button')
         .at(1)
@@ -85,16 +77,19 @@ describe('Domains Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.details.queries!.domains.domainsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
         direction: 'asc',
-        field: 'bytes',
+        field: '_id',
       });
+      */
       expect(
         wrapper
           .find('.euiTable thead tr th button')
           .first()
           .text()
-      ).toEqual('Domain NameClick to sort in ascending order');
+      ).toEqual('SHA1 FingerprintClick to sort in ascending order');
+      /*
+      TODO: Fix this test or remove it
       expect(
         wrapper
           .find('.euiTable thead tr th button')
@@ -107,7 +102,7 @@ describe('Domains Table Component', () => {
           .at(1)
           .find('svg')
       ).toBeTruthy();
+      */
     });
   });
 });
-*/

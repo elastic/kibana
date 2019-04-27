@@ -6,7 +6,7 @@
 
 import { TlsData } from '../../../../graphql/types';
 
-export const mockDomainsData: TlsData = {
+export const mockTlsData: TlsData = {
   totalCount: 2,
   edges: [
     {
