@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { WebDriver, WebElement } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
-
 import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export async function FindProvider({ getService }: FtrProviderContext) {
@@ -134,7 +134,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
           elements = [];
         }
         // Force isStale checks for all the retrieved elements.
-        await Promise.all(elements.map(async element => await element.isEnabled()));
+        await Promise.all(elements.map(async (element: any) => await element.isEnabled()));
         await this._withTimeout(defaultFindTimeout);
         return elements;
       });
@@ -342,7 +342,8 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       log.debug(`Find.byButtonText('${buttonText}') with timeout=${timeout}`);
       return await retry.tryForTime(timeout, async () => {
         // tslint:disable-next-line:variable-name
-        const _element = element instanceof WebElementWrapper ? element._webElement : element;
+        const _element =
+          element instanceof WebElementWrapper ? (element as any)._webElement : element;
         const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(
           allButtons.map(async el => {

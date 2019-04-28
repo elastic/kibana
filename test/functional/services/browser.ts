@@ -471,7 +471,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     public async getScrollTop(): Promise<number> {
-      const scrollSize = await driver.executeScript<string>('return document.body.scrollLeft');
+      const scrollSize = await driver.executeScript<string>('return document.body.scrollTop');
       return parseInt(scrollSize, 10);
     }
 
@@ -481,7 +481,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     // return promise with REAL scroll position
-    public async setScrollTop(scrollSize: number | string) {
+    public async setScrollTop(scrollSize: number | string): Promise<number> {
       await driver.executeScript('document.body.scrollTop = ' + scrollSize);
       return this.getScrollTop();
     }
