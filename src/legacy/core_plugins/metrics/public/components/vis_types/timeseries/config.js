@@ -24,11 +24,8 @@ import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-/*
-  These relative imports are nasty
-*/
-import { QueryBar } from '../../../../../../ui/public/query_bar/components/query_bar.tsx';
-import { Storage } from '../../../../../../ui/public/storage/storage.ts';
+import { QueryBar } from 'ui/query_bar';
+import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,
   EuiComboBox,
