@@ -67,20 +67,28 @@ class VisEditor extends Component {
     Retrieving the whole object for index patterns that are available.
     We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
     Comment: fetchIndexPatterns should probably move to the '../lib' folder under a new file.
+    TODO: I'm not happy with the logic used in fetchIndexPatterns
     Question: will we need to debounce this call as we do for updateVisState?
   */
   fetchIndexPatterns = async () => {
+    let selectedIndexPatternfromSavedObject = this.state.indexPatterns;
     const allIndexPatternObjects = await chrome
       .getSavedObjectsClient()
       .find({
         type: 'index-pattern',
         perPage: 100,
       });
+    // We now filter the collection of indexPatterns to the one that's selected or default to the default index pattern
     if (allIndexPatternObjects && allIndexPatternObjects.savedObjects) {
-      this.setState({
-        indexPatterns: allIndexPatternObjects.savedObjects,
-      });
+      const selectedIndexPatternName = this.state.model.index_pattern ?
+        this.state.model.index_pattern :
+        this.state.model.default_index_pattern;
+      selectedIndexPatternfromSavedObject = allIndexPatternObjects
+        .savedObjects
+        .filter(pattern => pattern.attributes.title === selectedIndexPatternName);
+
     }
+    return selectedIndexPatternfromSavedObject;
   };
 
   updateVisState = debounce(() => {
@@ -89,6 +97,8 @@ class VisEditor extends Component {
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   handleChange = async partialModel => {
+    // I'm losing the query when the langaguage syntax switch is clicked. The model updates on that action.
+    console.log('PartialModel', partialModel);
     if (isEmpty(partialModel)) {
       return;
     }
@@ -109,8 +119,6 @@ class VisEditor extends Component {
       const extractedIndexPatterns = extractIndexPatterns(nextModel);
 
       if (!isEqual(this.state.extractedIndexPatterns, extractedIndexPatterns)) {
-        // Only fetch a whole new collection of index patterns if needed.
-        await this.fetchIndexPatterns();
         fetchFields(extractedIndexPatterns).then(visFields =>
           this.setState({
             visFields,
@@ -118,6 +126,12 @@ class VisEditor extends Component {
           })
         );
       }
+      // Fetch a whole new collection of index patterns and set the selected one on state.
+      this.fetchIndexPatterns().then(selectedIndexPattern =>
+        this.setState({
+          indexPatterns: selectedIndexPattern,
+        })
+      );
     }
 
     this.setState({
