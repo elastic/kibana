@@ -31,8 +31,6 @@ const localStorage = new Storage(window.localStorage);
 const uiSettings = chrome.getUiSettingsClient();
 const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
-const localStorage = new Storage(window.localStorage);
-
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
   const defaults = { filter: { query: '', language: uiSettingsQueryLanguage } };
