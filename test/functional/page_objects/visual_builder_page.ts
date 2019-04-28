@@ -17,9 +17,9 @@
  * under the License.
  */
 
+import { delay } from 'bluebird';
 import { FtrProviderContext } from '../ftr_provider_context.d';
 import { WebElementWrapper } from '../services/lib/web_element_wrapper';
-import { delay } from 'bluebird';
 
 export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');

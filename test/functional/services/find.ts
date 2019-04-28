@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// @ts-ignore
 import { WebDriver, WebElement } from 'selenium-webdriver';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -37,7 +36,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
   const defaultFindTimeout = config.get('timeouts.find');
   const fixedHeaderHeight = config.get('layout.fixedHeaderHeight');
 
-  const wrap = (webElement: WebElementWrapper | WebElement) =>
+  const wrap = (webElement: WebElement | WebElementWrapper) =>
     new WebElementWrapper(
       webElement,
       webdriver,
@@ -47,7 +46,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       browserType
     );
 
-  const wrapAll = (webElements: Array<WebElementWrapper | WebElement>) => webElements.map(wrap);
+  const wrapAll = (webElements: Array<WebElement | WebElementWrapper>) => webElements.map(wrap);
 
   class Find {
     public currentWait = defaultFindTimeout;
@@ -135,9 +134,7 @@ export async function FindProvider({ getService }: FtrProviderContext) {
           elements = [];
         }
         // Force isStale checks for all the retrieved elements.
-        await Promise.all(
-          elements.map(async (element: WebElementWrapper) => await element.isEnabled())
-        );
+        await Promise.all(elements.map(async element => await element.isEnabled()));
         await this._withTimeout(defaultFindTimeout);
         return elements;
       });
@@ -171,10 +168,8 @@ export async function FindProvider({ getService }: FtrProviderContext) {
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       log.debug(`Find.descendantExistsByCssSelector('${selector}') with timeout=${timeout}`);
-      return await this.exists(
-        async () => wrapAll(await parentElement._webElement.findElements(By.css(selector))),
-        timeout
-      );
+      const els = await parentElement._webElement.findElements(By.css(selector));
+      return await this.exists(async () => wrapAll(els), timeout);
     }
 
     public async descendantDisplayedByCssSelector(
@@ -245,12 +240,12 @@ export async function FindProvider({ getService }: FtrProviderContext) {
 
     public async exists(
       findFunction: (
-        el: WebDriver | WebElement
+        el: WebDriver
       ) =>
-        | Promise<WebElementWrapper>
-        | Promise<WebElementWrapper[]>
         | WebElementWrapper
-        | WebElementWrapper[],
+        | WebElementWrapper[]
+        | Promise<WebElementWrapper[]>
+        | Promise<WebElementWrapper>,
       timeout: number = WAIT_FOR_EXISTS_TIME
     ): Promise<boolean> {
       await this._withTimeout(timeout);
@@ -346,8 +341,9 @@ export async function FindProvider({ getService }: FtrProviderContext) {
     ): Promise<WebElementWrapper> {
       log.debug(`Find.byButtonText('${buttonText}') with timeout=${timeout}`);
       return await retry.tryForTime(timeout, async () => {
-        const elem = element instanceof WebElementWrapper ? (element as any)._webElement : element;
-        const allButtons = wrapAll(await elem.findElements(By.tagName('button')));
+        // tslint:disable-next-line:variable-name
+        const _element = element instanceof WebElementWrapper ? element._webElement : element;
+        const allButtons = wrapAll(await _element.findElements(By.tagName('button')));
         const buttonTexts = await Promise.all(
           allButtons.map(async el => {
             return el.getVisibleText();
