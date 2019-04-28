@@ -7050,7 +7050,7 @@
             "deprecationReason": null
           },
           {
-            "name": "host",
+            "name": "hosts",
             "description": "",
             "args": [],
             "type": {

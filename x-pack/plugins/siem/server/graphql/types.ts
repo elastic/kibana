@@ -1196,7 +1196,7 @@ export interface UncommonProcessItem {
 
   process: ProcessEcsFields;
 
-  host: HostEcsFields[];
+  hosts: HostEcsFields[];
 
   user?: UserEcsFields | null;
 }
@@ -5536,7 +5536,7 @@ export namespace UncommonProcessItemResolvers {
 
     process?: ProcessResolver<ProcessEcsFields, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields[], TypeParent, Context>;
+    hosts?: HostsResolver<HostEcsFields[], TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
   }
@@ -5556,7 +5556,7 @@ export namespace UncommonProcessItemResolvers {
     Parent = UncommonProcessItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HostResolver<
+  export type HostsResolver<
     R = HostEcsFields[],
     Parent = UncommonProcessItem,
     Context = SiemContext

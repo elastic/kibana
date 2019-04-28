@@ -163,7 +163,7 @@ describe('elasticsearch_adapter', () => {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         node: {
           _id: 'id-123',
-          host: [
+          hosts: [
             { id: ['host-id-1'], name: ['host-name-1'] },
             { id: ['host-id-1'], name: ['host-name-1'] },
           ],
@@ -183,7 +183,7 @@ describe('elasticsearch_adapter', () => {
         cursor: { tiebreaker: null, value: 'cursor-1' },
         node: {
           _id: 'id-123',
-          host: [
+          hosts: [
             { id: ['host-id-1'], name: ['host-name-1'] },
             { id: ['host-id-1'], name: ['host-name-1'] },
           ],
@@ -207,7 +207,7 @@ describe('elasticsearch_adapter', () => {
         },
         node: {
           _id: '',
-          host: [],
+          hosts: [],
           instances: 0,
           process: {},
         },

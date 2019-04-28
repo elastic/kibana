@@ -164,7 +164,7 @@ const getUncommonColumns = (): [
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => <>{node.host != null ? node.host.length : getEmptyValue()}</>,
+    render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
   },
   {
     name: i18n.HOSTS,
@@ -180,8 +180,8 @@ const getUncommonColumns = (): [
 ];
 
 export const getHostNames = (node: UncommonProcessItem): string[] => {
-  if (node.host != null) {
-    return node.host
+  if (node.hosts != null) {
+    return node.hosts
       .filter(host => host.name != null && host.name[0] != null)
       .map(host => (host.name != null && host.name[0] != null ? host.name[0] : ''));
   } else {

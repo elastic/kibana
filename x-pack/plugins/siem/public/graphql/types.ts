@@ -1167,7 +1167,7 @@ export interface UncommonProcessItem {
 
   process: ProcessEcsFields;
 
-  host: HostEcsFields[];
+  hosts: HostEcsFields[];
 
   user?: UserEcsFields | null;
 }
@@ -3610,7 +3610,7 @@ export namespace GetUncommonProcessesQuery {
 
     user?: User | null;
 
-    host: Host[];
+    hosts: Hosts[];
   };
 
   export type Process = {
@@ -3629,7 +3629,7 @@ export namespace GetUncommonProcessesQuery {
     name?: ToStringArray | null;
   };
 
-  export type Host = {
+  export type Hosts = {
     __typename?: 'HostEcsFields';
 
     name?: ToStringArray | null;
