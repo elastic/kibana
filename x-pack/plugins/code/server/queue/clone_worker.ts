@@ -63,6 +63,8 @@ export class CloneWorker extends AbstractGitWorker {
     );
     const repo = RepositoryUtils.buildRepository(url);
     return await repoService.clone(repo, (progress: number, cloneProgress?: CloneProgress) => {
+      // For clone job payload, it only has the url. Populate back the
+      // repository uri before update progress.
       job.payload.uri = repo.uri;
       this.updateProgress(job, progress, undefined, cloneProgress);
     });
@@ -70,6 +72,9 @@ export class CloneWorker extends AbstractGitWorker {
 
   public async onJobCompleted(job: Job, res: CloneWorkerResult) {
     this.log.info(`Clone job done for ${res.repo.uri}`);
+    // For clone job payload, it only has the url. Populate back the
+    // repository uri.
+    job.payload.uri = res.repo.uri;
     await super.onJobCompleted(job, res);
 
     // Throw out a repository index request after 1 second.
