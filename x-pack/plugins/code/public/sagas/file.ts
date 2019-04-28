@@ -47,18 +47,16 @@ import { repoRoutePattern } from './patterns';
 function* handleFetchRepoTree(action: Action<FetchRepoTreePayload>) {
   try {
     const { uri, revision, path, parents, isDir } = action.payload!;
-    if (path) {
-      if (isDir) {
-        const tree = yield select(createTreeSelector(path));
-        if (tree) {
-          const { children } = tree;
-          // do not request file tree if this tree exists and its children are not empty
-          if (!children || children.length === 0) {
-            yield call(fetchPath, { uri, revision, path, parents, isDir });
-          }
-        } else {
+    if (path && isDir) {
+      const tree = yield select(createTreeSelector(path));
+      if (tree) {
+        const { children } = tree;
+        // do not request file tree if this tree exists and its children are not empty
+        if (!children || children.length === 0) {
           yield call(fetchPath, { uri, revision, path, parents, isDir });
         }
+      } else {
+        yield call(fetchPath, { uri, revision, path, parents, isDir });
       }
     } else {
       yield call(fetchPath, action.payload!);
