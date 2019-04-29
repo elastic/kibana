@@ -11,6 +11,7 @@ export class BaseAction {
   constructor(props = {}) {
     this.id = get(props, 'id');
     this.type = get(props, 'type');
+    this.isNew = get(props, 'isNew', false);
   }
 
   get upstreamJson() {

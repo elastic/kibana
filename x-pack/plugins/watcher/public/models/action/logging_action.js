@@ -18,7 +18,7 @@ export class LoggingAction extends BaseAction {
         context: '{{ctx.metadata.name}}',
       }
     });
-    this.text = get(props, 'text', defaultText);
+    this.text = get(props, 'text', props.ignoreDefaults ? null : defaultText);
   }
 
   validate() {

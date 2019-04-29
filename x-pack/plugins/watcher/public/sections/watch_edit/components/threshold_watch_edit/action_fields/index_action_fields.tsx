@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../../../components/form_errors';
@@ -24,34 +24,32 @@ export const IndexActionFields: React.FunctionComponent<Props> = ({
 }) => {
   const { index } = action;
   return (
-    <Fragment>
-      <ErrableFormRow
-        id="indexName"
-        errorKey="index"
+    <ErrableFormRow
+      id="indexName"
+      errorKey="index"
+      fullWidth
+      errors={errors}
+      isShowingErrors={hasErrors && index !== undefined}
+      label={i18n.translate(
+        'xpack.watcher.sections.watchEdit.threshold.indexAction.indexFieldLabel',
+        {
+          defaultMessage: 'Index',
+        }
+      )}
+    >
+      <EuiFieldText
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && index !== undefined}
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.indexAction.indexFieldLabel',
-          {
-            defaultMessage: 'Index',
+        name="index"
+        value={index || ''}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          editAction({ key: 'index', value: e.target.value });
+        }}
+        onBlur={() => {
+          if (!index) {
+            editAction({ key: 'index', value: '' });
           }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          name="index"
-          value={index || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction({ key: 'index', value: e.target.value });
-          }}
-          onBlur={() => {
-            if (!index) {
-              editAction({ key: 'index', value: '' });
-            }
-          }}
-        />
-      </ErrableFormRow>
-    </Fragment>
+        }}
+      />
+    </ErrableFormRow>
   );
 };

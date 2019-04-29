@@ -18,9 +18,8 @@ export class JiraAction extends BaseAction {
         context: '{{ctx.metadata.name}}',
       }
     });
-    this.summary = get(props, 'summary', defaultSummary);
 
-    this.account = get(props, 'account');
+    this.summary = get(props, 'summary', props.ignoreDefaults ? null : defaultSummary);
     this.projectKey = get(props, 'projectKey');
     this.issueType = get(props, 'issueType');
   }
@@ -60,7 +59,6 @@ export class JiraAction extends BaseAction {
 
     Object.assign(result, {
       projectKey: this.projectKey,
-      account: this.account ? this.account : null,
       issueType: this.issueType,
       summary: this.summary,
       jira: {
@@ -73,7 +71,6 @@ export class JiraAction extends BaseAction {
           },
           summary: this.summary,
         },
-        account: this.account ? this.account : null,
       }
     });
 

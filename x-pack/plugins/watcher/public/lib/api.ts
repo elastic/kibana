@@ -167,7 +167,16 @@ export const getWatchVisualizationData = async (watchModel: BaseWatch, visualize
   return response.data;
 };
 
-export const fetchSettings = async () => {
-  const { data } = await getHttpClient().get(`${basePath}/settings`);
-  return Settings.fromUpstreamJson(data);
+export const loadSettings = () => {
+  return useRequest({
+    path: `${basePath}/settings`,
+    method: 'get',
+    processData: (data: {
+      actionTypes: {
+        [key: string]: {
+          enabled: boolean;
+        };
+      };
+    }) => Settings.fromUpstreamJson(data),
+  });
 };

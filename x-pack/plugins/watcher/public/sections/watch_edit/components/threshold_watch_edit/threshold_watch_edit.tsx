@@ -151,6 +151,16 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   }, []);
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const actionErrors = watch.actions.reduce((acc: any, action: any) => {
+    const actionValidationErrors = action.validate();
+    acc[action.id] = actionValidationErrors;
+    return acc;
+  }, {});
+  const hasActionErrors = !!Object.keys(actionErrors).find(actionError => {
+    return !!Object.keys(actionErrors[actionError]).find((actionErrorKey: string) => {
+      return actionErrors[actionError][actionErrorKey].length >= 1;
+    });
+  });
   const expressionErrorMessage = i18n.translate(
     'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
     {
@@ -792,7 +802,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
             </EuiFlexGroup>
             {hasErrors ? null : <WatchVisualization />}
             <EuiSpacer />
-            <WatchActionsPanel />
+            <WatchActionsPanel actionErrors={actionErrors} />
             <EuiSpacer />
           </Fragment>
         ) : null}
@@ -801,7 +811,7 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
             <EuiButton
               fill
               type="submit"
-              isDisabled={hasErrors}
+              isDisabled={hasErrors || hasActionErrors}
               onClick={async () => {
                 const savedWatch = await onWatchSave(watch, licenseService);
                 if (savedWatch && savedWatch.validationError) {

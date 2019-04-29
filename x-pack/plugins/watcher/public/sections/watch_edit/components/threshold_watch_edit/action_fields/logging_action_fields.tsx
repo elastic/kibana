@@ -24,34 +24,32 @@ export const LoggingActionFields: React.FunctionComponent<Props> = ({
 }) => {
   const { text } = action;
   return (
-    <Fragment>
-      <ErrableFormRow
-        id="loggingText"
-        errorKey="text"
+    <ErrableFormRow
+      id="loggingText"
+      errorKey="text"
+      fullWidth
+      errors={errors}
+      isShowingErrors={hasErrors && text !== undefined}
+      label={i18n.translate(
+        'xpack.watcher.sections.watchEdit.threshold.loggingAction.logTextFieldLabel',
+        {
+          defaultMessage: 'Log text',
+        }
+      )}
+    >
+      <EuiFieldText
         fullWidth
-        errors={errors}
-        isShowingErrors={hasErrors && text !== undefined}
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.loggingAction.logTextFieldLabel',
-          {
-            defaultMessage: 'Log text',
+        name="text"
+        value={text || ''}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+          editAction({ key: 'text', value: e.target.value });
+        }}
+        onBlur={() => {
+          if (!text) {
+            editAction({ key: 'text', value: '' });
           }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          name="text"
-          value={text || ''}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            editAction({ key: 'text', value: e.target.value });
-          }}
-          onBlur={() => {
-            if (!text) {
-              editAction({ key: 'text', value: '' });
-            }
-          }}
-        />
-      </ErrableFormRow>
-    </Fragment>
+        }}
+      />
+    </ErrableFormRow>
   );
 };

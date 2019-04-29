@@ -6,6 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+import { get } from 'lodash';
 import { ACTION_TYPES, WATCH_TYPES } from '../../../common/constants';
 import { BaseWatch } from '../../../common/types/watch_types';
 import { createWatch, loadWatch } from '../../lib/api';
@@ -32,6 +33,15 @@ function getPropsFromAction(type: string, action: { [key: string]: any }) {
     // Slack action has its props inside the "message" object
     return action[type].message;
   }
+
+  if (type === ACTION_TYPES.JIRA) {
+    // Jira action has its required props inside the "fields" object
+    const jiraAction: { projectKey?: string; issueType?: string; summary?: string } = {};
+    jiraAction.projectKey = get(action[type], 'fields.project.key');
+    jiraAction.issueType = get(action[type], 'fields.issuetype.name');
+    jiraAction.summary = get(action[type], 'fields.summary');
+    return jiraAction;
+  }
   return action[type];
 }
 
@@ -49,7 +59,7 @@ function createActionsForWatch(watchInstance: BaseWatch) {
   Object.keys(watchInstance.watch.actions).forEach(k => {
     action = watchInstance.watch.actions[k];
     type = getTypeFromAction(action);
-    actionProps = getPropsFromAction(type, action);
+    actionProps = { ...getPropsFromAction(type, action), ignoreDefaults: true };
     watchInstance.createAction(type, actionProps);
   });
   return watchInstance;

@@ -5,7 +5,7 @@
  */
 import React, { Fragment } from 'react';
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ErrableFormRow } from '../../../../../components/form_errors';
 import { JiraAction } from '../../../../../../common/types/action_types';
@@ -25,29 +25,11 @@ export const JiraActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
   children,
 }) => {
-  const { account, projectKey, issueType, summary } = action;
+  const { projectKey, issueType, summary } = action;
 
   return (
     <Fragment>
       {children}
-      <EuiFormRow
-        fullWidth
-        label={i18n.translate(
-          'xpack.watcher.sections.watchEdit.threshold.jiraAction.acccountTextFieldLabel',
-          {
-            defaultMessage: 'Account',
-          }
-        )}
-      >
-        <EuiFieldText
-          fullWidth
-          name="account"
-          value={account || ''}
-          onChange={e => {
-            editAction({ key: 'account', value: e.target.value });
-          }}
-        />
-      </EuiFormRow>
 
       <ErrableFormRow
         id="jiraProjectKey"

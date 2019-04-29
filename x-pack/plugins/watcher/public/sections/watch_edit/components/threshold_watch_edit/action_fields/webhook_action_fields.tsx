@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React, { Fragment, useEffect } from 'react';
 
 import { EuiCodeEditor, EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,6 +17,8 @@ interface Props {
   hasErrors: boolean;
 }
 
+const HTTP_VERBS = ['head', 'get', 'post', 'put', 'delete'];
+
 export const WebhookActionFields: React.FunctionComponent<Props> = ({
   action,
   editAction,
@@ -24,6 +26,10 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
   hasErrors,
 }) => {
   const { method, host, port, path, body } = action;
+
+  useEffect(() => {
+    editAction({ key: 'contentType', value: 'application/json' }); // set content-type for threshold watch to json by default
+  }, []);
 
   return (
     <Fragment>
@@ -40,28 +46,7 @@ export const WebhookActionFields: React.FunctionComponent<Props> = ({
           fullWidth
           name="method"
           value={method || 'get'}
-          options={[
-            {
-              text: 'HEAD',
-              value: 'head',
-            },
-            {
-              text: 'GET',
-              value: 'get',
-            },
-            {
-              text: 'POST',
-              value: 'post',
-            },
-            {
-              text: 'PUT',
-              value: 'put',
-            },
-            {
-              text: 'DELETE',
-              value: 'delete',
-            },
-          ]}
+          options={HTTP_VERBS.map(verb => ({ text: verb.toUpperCase(), value: verb }))}
           onChange={e => {
             editAction({ key: 'method', value: e.target.value });
           }}

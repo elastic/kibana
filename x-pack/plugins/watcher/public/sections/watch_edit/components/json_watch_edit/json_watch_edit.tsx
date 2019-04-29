@@ -111,7 +111,10 @@ const JsonWatchEditUi = ({ pageTitle }: { pageTitle: string }) => {
             onClick={() => {
               setSelectedTab(tab.id);
               setExecuteDetails(
-                new ExecuteDetails({ ...executeDetails, actionModes: getActionModes(watchActions) })
+                new ExecuteDetails({
+                  ...executeDetails,
+                  actionModes: getActionModes(watchActions),
+                })
               );
             }}
             isSelected={tab.id === selectedTab}

@@ -19,7 +19,7 @@ export class PagerDutyAction extends BaseAction {
         context: '{{ctx.metadata.name}}',
       }
     });
-    this.description = get(props, 'description', defaultDescription);
+    this.description = get(props, 'description', props.ignoreDefaults ? null : defaultDescription);
   }
 
   validate() {

@@ -19,7 +19,7 @@ describe('settings module', () => {
           expect(actionTypes.webhook.enabled).to.be(true);
           expect(actionTypes.index.enabled).to.be(true);
           expect(actionTypes.logging.enabled).to.be(true);
-          expect(actionTypes.slack.enabled).to.be(true);
+          expect(actionTypes.slack.enabled).to.be(false);
           expect(actionTypes.jira.enabled).to.be(false);
           expect(actionTypes.pagerduty.enabled).to.be(false);
         });
@@ -93,7 +93,7 @@ describe('settings module', () => {
         expect(json.action_types.webhook.enabled).to.be(true);
         expect(json.action_types.index.enabled).to.be(true);
         expect(json.action_types.logging.enabled).to.be(true);
-        expect(json.action_types.slack.enabled).to.be(true);
+        expect(json.action_types.slack.enabled).to.be(false);
         expect(json.action_types.jira.enabled).to.be(false);
         expect(json.action_types.pagerduty.enabled).to.be(false);
       });

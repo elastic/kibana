@@ -15,6 +15,7 @@ type PagerDutyActionType = 'pagerduty';
 export interface BaseAction {
   id: string;
   typeName: string;
+  isNew: boolean;
   simulateMessage: string;
   simulateFailMessage: string;
   simulatePrompt: string;
@@ -26,7 +27,7 @@ export interface BaseAction {
 export interface EmailAction extends BaseAction {
   type: EmailActionType;
   iconClass: 'email';
-  to: [];
+  to: string[];
   subject?: string;
   body: string;
 }
@@ -56,20 +57,19 @@ export interface WebhookAction extends BaseAction {
   host: string;
   port: number;
   path?: string;
-  body: string;
+  body?: string;
 }
 
 export interface SlackAction extends BaseAction {
   type: SlackActionType;
   iconClass: 'logoSlack';
-  text: string;
-  to: string[];
+  text?: string;
+  to?: string[];
 }
 
 export interface JiraAction extends BaseAction {
   type: JiraActionType;
   iconClass: 'apps';
-  account?: string;
   projectKey: string;
   issueType: string;
   summary: string;

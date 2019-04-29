@@ -18,6 +18,7 @@ export class WebhookAction extends BaseAction {
     this.port = props.port;
     this.path = props.path;
     this.body = props.body;
+    this.contentType = props.contentType;
   }
 
   // To Kibana
@@ -29,6 +30,7 @@ export class WebhookAction extends BaseAction {
       port: this.port,
       path: this.path,
       body: this.body,
+      contentType: this.contentType,
     });
     return result;
   }
@@ -44,6 +46,7 @@ export class WebhookAction extends BaseAction {
       port: json.port,
       path: json.path,
       body: json.body,
+      contentType: json.contentType,
     });
 
     const action = new WebhookAction(props, errors);
@@ -64,17 +67,20 @@ export class WebhookAction extends BaseAction {
     if (this.body) {
       optionalFields.body = this.body;
     }
+    if (this.contentType) {
+      optionalFields.headers = {
+        'Content-Type': this.contentType,
+      };
+    }
 
     result[this.id] = {
       webhook: {
         host: this.host,
         port: this.port,
         ...optionalFields,
-        headers: {
-          'Content-Type': 'application/json',
-        },
       }
     };
+
     return result;
   }
 
@@ -93,6 +99,9 @@ export class WebhookAction extends BaseAction {
     }
     if (json.actionJson.webhook.body) {
       optionalFields.body = json.actionJson.webhook.body;
+    }
+    if (json.actionJson.webhook.headers['Content-Type']) {
+      optionalFields.contentType = json.actionJson.webhook.headers['Content-Type'];
     }
 
     Object.assign(props, {

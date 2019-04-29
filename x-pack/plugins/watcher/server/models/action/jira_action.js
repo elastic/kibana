@@ -13,7 +13,6 @@ export class JiraAction extends BaseAction {
     props.type = ACTION_TYPES.JIRA;
     super(props, errors);
 
-    this.account = props.account;
     this.projectKey = props.projectKey;
     this.issueType = props.issueType;
     this.summary = props.summary;
@@ -23,7 +22,6 @@ export class JiraAction extends BaseAction {
   get downstreamJson() {
     const result = super.downstreamJson;
     Object.assign(result, {
-      account: this.account,
       projectKey: this.projectKey,
       issueType: this.issueType,
       summary: this.summary,
@@ -38,7 +36,6 @@ export class JiraAction extends BaseAction {
     const { errors } = this.validateJson(json);
 
     Object.assign(props, {
-      account: json.account,
       projectKey: json.projectKey,
       issueType: json.issueType,
       summary: json.summary,
@@ -52,12 +49,6 @@ export class JiraAction extends BaseAction {
   get upstreamJson() {
     const result = super.upstreamJson;
 
-    const optionalFields = {};
-
-    if (this.account) {
-      optionalFields.account = this.account;
-    }
-
     result[this.id] = {
       jira: {
         fields: {
@@ -69,7 +60,6 @@ export class JiraAction extends BaseAction {
           },
           summary: this.summary,
         },
-        ...optionalFields,
       }
     };
 
@@ -81,17 +71,10 @@ export class JiraAction extends BaseAction {
     const props = super.getPropsFromUpstreamJson(json);
     const { errors } = this.validateJson(json.actionJson);
 
-    const optionalFields = {};
-
-    if (json.actionJson.account) {
-      optionalFields.account = json.actionJson.account;
-    }
-
     Object.assign(props, {
       projectKey: json.actionJson.jira.fields.project.key,
       issueType: json.actionJson.jira.fields.issuetype.name,
       summary: json.actionJson.jira.fields.summary,
-      ...optionalFields,
     });
 
     const action = new JiraAction(props, errors);

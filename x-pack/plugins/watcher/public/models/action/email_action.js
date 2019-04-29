@@ -24,7 +24,7 @@ export class EmailAction extends BaseAction {
         context: '{{ctx.metadata.name}}',
       }
     });
-    this.subject = get(props, 'subject', defaultSubject);
+    this.subject = get(props, 'subject', props.ignoreDefaults ? null : defaultSubject);
 
     this.body = get(props, 'body');
   }
@@ -34,10 +34,11 @@ export class EmailAction extends BaseAction {
       to: [],
       body: [],
     };
+
     if (!this.to || !this.to.length) {
       errors.to.push(
         i18n.translate('xpack.watcher.watchActions.email.emailRecipientIsRequiredValidationMessage', {
-          defaultMessage: 'To email address is required.',
+          defaultMessage: '"To" email address is required.',
         })
       );
     }
@@ -48,6 +49,7 @@ export class EmailAction extends BaseAction {
         })
       );
     }
+
     return errors;
   }
 

@@ -41,23 +41,23 @@ interface Props {
       };
     };
   } | null;
+  isLoading: boolean;
 }
 
-export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings }) => {
+export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings, isLoading }) => {
   const { addAction } = useContext(WatchContext);
 
-  const allActionTypes = Action.getActionTypes();
+  const allActionTypes = Action.getActionTypes() as Record<string, any>;
 
-  const actions = Object.keys(allActionTypes).map(actionKey => {
-    const { typeName, iconClass, selectMessage } = allActionTypes[actionKey];
-    return {
-      type: actionKey,
+  const actions = Object.entries(allActionTypes).map(
+    ([type, { typeName, iconClass, selectMessage }]) => ({
+      type,
       typeName,
       iconClass,
       selectMessage,
-      isEnabled: settings ? settings.actionTypes[actionKey].enabled : true,
-    };
-  });
+      isEnabled: settings ? settings.actionTypes[type].enabled : true,
+    })
+  );
 
   const actionOptions = actions
     ? actions.map((action: any) => {
@@ -90,11 +90,11 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings 
       options={actionOptionsWithEmptyValue}
       valueOfSelected={EMPTY_FIRST_OPTION_VALUE}
       onChange={(value: string) => {
-        addAction({ type: value });
+        addAction({ type: value, defaults: { isNew: true } });
       }}
       itemLayoutAlign="top"
       hasDividers
-      isLoading={!actions}
+      isLoading={isLoading}
     />
   );
 };

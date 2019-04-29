@@ -41,7 +41,7 @@ export class BaseWatch {
     this.watchStatus = watchStatus;
   }
 
-  createAction = (type) => {
+  createAction = (type, defaults) => {
     const ActionTypes = Action.getActionTypes();
     const ActionType = ActionTypes[type];
 
@@ -55,7 +55,7 @@ export class BaseWatch {
     }
 
     const id = createActionId(this.actions, type);
-    const props = { id, type };
+    const props = { id, type, ...defaults };
 
     const action = new ActionType(props);
     this.addAction(action);

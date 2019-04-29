@@ -14,14 +14,15 @@ export class WebhookAction extends BaseAction {
     super(props);
 
     const defaultJson = JSON.stringify({ message: 'Watch [{{ctx.metadata.name}}] has exceeded the threshold' }, null, 2);
-    this.body = get(props, 'body', defaultJson);
+    this.body = get(props, 'body', props.ignoreDefaults ? null : defaultJson);
 
     this.method = get(props, 'method');
     this.host = get(props, 'host');
     this.port = get(props, 'port');
     this.path = get(props, 'path');
+    this.contentType = get(props, 'contentType');
 
-    this.fullPath = `${this.host}${this.port}${this.path}`;
+    this.fullPath = `${this.host}:${this.port}${this.path}`;
   }
 
   validate() {
@@ -45,7 +46,7 @@ export class WebhookAction extends BaseAction {
         })
       );
     }
-    if (typeof this.body === 'string' && this.body !== '') {
+    if (this.contentType === 'application/json' && typeof this.body === 'string' && this.body !== '') {
       try {
         const parsedJson = JSON.parse(this.body);
         if (parsedJson && typeof parsedJson !== 'object') {

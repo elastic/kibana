@@ -21,7 +21,7 @@ export class SlackAction extends BaseAction {
         context: '{{ctx.metadata.name}}',
       }
     });
-    this.text = props.text || defaultText;
+    this.text = get(props, 'text', props.ignoreDefaults ? null : defaultText);
   }
 
   validate() {
