@@ -54,14 +54,7 @@ export const dateHistogramBucketAgg = new BucketAggType({
     date: true
   },
   makeLabel: function (agg) {
-    let output = '';
-    try {
-      output = this.params.write(agg);
-    } catch (e) {
-      // if interval is invalid, return empty string and log an error
-      console.log(e.toString()); // eslint-disable-line no-console
-      return '';
-    }
+    const output = this.params.write(agg);
     const field = agg.getFieldDisplayName();
     return i18n.translate('common.ui.aggTypes.buckets.dateHistogramLabel', {
       defaultMessage: '{fieldName} per {intervalDescription}',
