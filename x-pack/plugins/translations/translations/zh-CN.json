@@ -135,8 +135,6 @@
     "common.ui.aggTypes.filters.filterLabel": "筛选 {index}",
     "common.ui.aggTypes.filters.labelPlaceholder": "标签",
     "common.ui.aggTypes.filters.removeFilterButtonAriaLabel": "移除此筛选",
-    "common.ui.aggTypes.filters.requiredFilterDescription": "必须指定至少一个筛选。",
-    "common.ui.aggTypes.filters.requiredFilterLabel": "必需：",
     "common.ui.aggTypes.filters.toggleFilterButtonAriaLabel": "切换筛选标签",
     "common.ui.aggTypes.histogram.missingMaxMinValuesWarning": "无法检索最大值和最小值以自动缩放直方图存储桶。这可能会导致可视化性能低下。",
     "common.ui.aggTypes.intervalCreatesTooLargeBucketsTooltip": "此时间间隔将创建过大而无法在选定时间范围内显示的存储桶，因此其已缩放至 {bucketDescription}",

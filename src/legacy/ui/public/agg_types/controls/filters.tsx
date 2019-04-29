@@ -18,6 +18,7 @@
  */
 
 import React, { useState } from 'react';
+import { omit } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -38,7 +39,8 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
   );
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
-    setValue(updatedFilters);
+    // do not set internal id parameter into saved object
+    setValue(updatedFilters.map(filter => omit(filter, 'id')));
     setFilters(updatedFilters);
   };
 
