@@ -67,7 +67,7 @@ module.exports = function (grunt) {
   console.log(process.env.CHECKS_REPORTER_ACTIVE, process.env.JOB_NAME, process.env.JOB_NAME.indexOf('elastic+kibana+pull-request'));
   console.log('typeof', typeof process.env.CHECKS_REPORTER_ACTIVE);
   const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
-    process.env.CHECKS_REPORTER_ACTIVE === true &&
+    process.env.CHECKS_REPORTER_ACTIVE === 'true' &&
     process.env.JOB_NAME &&
     process.env.JOB_NAME.indexOf('elastic+kibana+pull-request') !== -1 ? {
         options,
