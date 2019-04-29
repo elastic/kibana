@@ -191,7 +191,7 @@ export CHECKS_REPORTER_ACTIVE=true
 ### $@ - all arguments
 ###
 function checks-reporter-with-killswitch() {
-  if [ "$CHECKS_REPORTER_ACTIVE" = true ] ; then
+  if [ "$CHECKS_REPORTER_ACTIVE" = true && "$JOB_NAME" = "elastic+kibana+pull-request" ] ; then
     yarn run github-checks-reporter "$@"
   else
     arguments=("$@");
