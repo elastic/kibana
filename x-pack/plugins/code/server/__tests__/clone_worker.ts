@@ -148,9 +148,11 @@ describe('clone_worker_tests', () => {
       }
     );
 
-    // EsClient update got called twice. One for updating default branch and revision
-    // of a repository. The other for update git clone status.
-    assert.ok(updateSpy.calledTwice);
+    // EsClient update got called 3 times:
+    // * update default branch and revision of a repository object
+    // * update the revision in the git clone status
+    // * update the clone progress
+    assert.ok(updateSpy.calledThrice);
 
     // Index request is issued after a 1s delay.
     await delay(1000);

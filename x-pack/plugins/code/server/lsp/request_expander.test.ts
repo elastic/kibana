@@ -81,12 +81,12 @@ test('requests should throw error after lsp init timeout', async () => {
   };
   mkdirp.sync(request1.workspacePath);
   const request2 = {
-    method: 'request1',
+    method: 'request2',
     params: [],
-    workspacePath: '/tmp/test/workspace/1',
+    workspacePath: '/tmp/test/workspace/2',
     timeoutForInitializeMs: 100,
   };
-  mkdirp.sync(request1.workspacePath);
+  mkdirp.sync(request2.workspacePath);
   const response1Promise = expander.handleRequest(request1);
   const response2Promise = expander.handleRequest(request2);
   await expect(response1Promise).rejects.toEqual(InitializingError);
