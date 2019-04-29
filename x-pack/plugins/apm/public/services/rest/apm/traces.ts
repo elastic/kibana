@@ -7,7 +7,7 @@
 import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
 import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 

@@ -18,11 +18,13 @@ import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
+import { useFetcher } from '../../../hooks/useFetcher';
+import { getHasMLJob } from '../../../services/rest/ml';
 
 interface TransactionOverviewProps extends RouteComponentProps {
   urlParams: IUrlParams;
@@ -70,12 +72,17 @@ export function TransactionOverviewView({
     urlParams
   );
 
-  const { data: transactionListData } = useTransactionList(urlParams);
-
-  // filtering by type is currently required
+  // TODO: improve urlParams typings.
+  // `serviceName` or `transactionType` will never be undefined here, and this check should not be needed
   if (!serviceName || !transactionType) {
     return null;
   }
+
+  const { data: transactionListData } = useTransactionList(urlParams);
+  const { data: hasMLJob = false } = useFetcher(
+    () => getHasMLJob({ serviceName, transactionType }),
+    [serviceName, transactionType]
+  );
 
   return (
     <React.Fragment>
@@ -107,6 +114,7 @@ export function TransactionOverviewView({
       ) : null}
 
       <TransactionCharts
+        hasMLJob={hasMLJob}
         charts={transactionOverviewCharts}
         location={location}
         urlParams={urlParams}
