@@ -9,11 +9,11 @@ import React from 'react';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME
-} from 'x-pack/plugins/apm/common/elasticsearch_fieldnames';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/Links/TransactionLink';
-import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
-import { Transaction } from 'x-pack/plugins/apm/typings/es_schemas/ui/Transaction';
+} from '../../../../../../../common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
+import { APMLink } from '../../../../../shared/Links/APMLink';
+import { TransactionLink } from '../../../../../shared/Links/TransactionLink';
+import { StickyProperties } from '../../../../../shared/StickyProperties';
 
 interface Props {
   transaction?: Transaction;
@@ -31,9 +31,9 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       }),
       fieldName: SERVICE_NAME,
       val: (
-        <KibanaLink hash={`/${transaction.service.name}`}>
+        <APMLink path={`/${transaction.service.name}`}>
           {transaction.service.name}
-        </KibanaLink>
+        </APMLink>
       ),
       width: '50%'
     },

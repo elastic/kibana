@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
-import { legacyDecodeURIComponent } from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { legacyDecodeURIComponent } from '../../shared/Links/url_helpers';
 import { ErrorGroupDetails } from '../ErrorGroupDetails';
 import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';

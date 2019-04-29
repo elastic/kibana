@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ServiceAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_service';
-import { ServiceListAPIResponse } from 'x-pack/plugins/apm/server/lib/services/get_services';
-import { IUrlParams } from '../../../store/urlParams';
+import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
+import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
-export async function loadServiceList({ start, end, kuery }: IUrlParams) {
+export async function loadServiceList({
+  start,
+  end,
+  kuery
+}: {
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<ServiceListAPIResponse>({
     pathname: `/api/apm/services`,
     query: {
@@ -26,7 +33,12 @@ export async function loadServiceDetails({
   start,
   end,
   kuery
-}: IUrlParams) {
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<ServiceAPIResponse>({
     pathname: `/api/apm/services/${serviceName}`,
     query: {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLineageMap } from './lineage_map';
 import { getParentCandidates } from './parent_candidates';
 import {

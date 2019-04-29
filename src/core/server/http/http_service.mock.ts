@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { Server, ServerOptions } from 'hapi';
 import { HttpService } from './http_service';
 
@@ -24,6 +25,8 @@ const createSetupContractMock = () => {
     // we can mock some hapi server method when we need it
     server: {} as Server,
     options: {} as ServerOptions,
+    registerAuth: jest.fn(),
+    registerOnRequest: jest.fn(),
   };
   return setupContract;
 };

@@ -16,27 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { httpServiceMock } from './http/http_service.mock';
-const httpService = httpServiceMock.create();
-jest.mock('./http/http_service', () => ({
-  HttpService: jest.fn(() => httpService),
-}));
 
-const mockPluginsService = { setup: jest.fn(), stop: jest.fn() };
-jest.mock('./plugins/plugins_service', () => ({
-  PluginsService: jest.fn(() => mockPluginsService),
-}));
-
-import { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
-const elasticsearchService = elasticsearchServiceMock.create();
-jest.mock('./elasticsearch/elasticsearch_service', () => ({
-  ElasticsearchService: jest.fn(() => elasticsearchService),
-}));
-
-const mockLegacyService = { setup: jest.fn(), stop: jest.fn() };
-jest.mock('./legacy/legacy_service', () => ({
-  LegacyService: jest.fn(() => mockLegacyService),
-}));
+import {
+  elasticsearchService,
+  httpService,
+  mockLegacyService,
+  mockPluginsService,
+} from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Env } from './config';

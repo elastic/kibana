@@ -16,42 +16,39 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { BasePathSetup } from '../../../../core/public/base_path';
-import { ChromeSetup } from '../../../../core/public/chrome';
-import { FatalErrorsSetup } from '../../../../core/public/fatal_errors';
-import { HttpSetup } from '../../../../core/public/http';
-import { I18nSetup } from '../../../../core/public/i18n';
-import { InjectedMetadataSetup } from '../../../../core/public/injected_metadata';
-import { NotificationsSetup } from '../../../../core/public/notifications';
-import { UiSettingsSetup } from '../../../../core/public/ui_settings';
-
-interface CoreSetup {
-  i18n: I18nSetup;
-  injectedMetadata: InjectedMetadataSetup;
-  fatalErrors: FatalErrorsSetup;
-  notifications: NotificationsSetup;
-  http: HttpSetup;
-  basePath: BasePathSetup;
-  uiSettings: UiSettingsSetup;
-  chrome: ChromeSetup;
-}
+import { CoreSetup, CoreStart } from '../../../../core/public';
 
 const runtimeContext = {
+  setup: {
+    core: (null as unknown) as CoreSetup,
+    plugins: {},
+  },
   start: {
-    core: null as CoreSetup | null,
+    core: (null as unknown) as CoreStart,
     plugins: {},
   },
 };
 
-export function __newPlatformInit__(core: CoreSetup) {
+export function __newPlatformSetup__(core: CoreSetup) {
+  if (runtimeContext.setup.core) {
+    throw new Error('New platform core api was already set up');
+  }
+
+  runtimeContext.setup.core = core;
+}
+
+export function __newPlatformStart__(core: CoreStart) {
   if (runtimeContext.start.core) {
-    throw new Error('New platform core api was already initialized');
+    throw new Error('New platform core api was already started');
   }
 
   runtimeContext.start.core = core;
 }
 
 export function getNewPlatform() {
+  if (runtimeContext.setup.core === null || runtimeContext.start.core === null) {
+    throw new Error('runtimeContext is not initialized yet');
+  }
+
   return runtimeContext;
 }

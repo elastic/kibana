@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -79,7 +79,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_get,action:saved_objects/globaltype/bulk_get,action:saved_objects/visualization/bulk_get`,
+      message: `Unable to bulk_get dashboard,globaltype,visualization`,
     });
   };
 
@@ -89,9 +89,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         {
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
           type: 'visualization',
-          migrationVersion: {
-            visualization: '7.0.0',
-          },
+          migrationVersion: resp.body.saved_objects[0].migrationVersion,
           updated_at: '2017-09-21T18:51:23.794Z',
           version: resp.body.saved_objects[0].version,
           attributes: {

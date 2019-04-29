@@ -19,8 +19,7 @@
 
 import { first } from 'rxjs/operators';
 
-const MockClusterClient = jest.fn();
-jest.mock('./cluster_client', () => ({ ClusterClient: MockClusterClient }));
+import { MockClusterClient } from './elasticsearch_service.test.mocks';
 
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';

@@ -47,22 +47,8 @@ exports[`AdvancedSettings should render normally 1`] = `
   <EuiSpacer
     size="m"
   />
-  <InjectIntl(FormUI)
-    categories={
-      Array [
-        "general",
-        "elasticsearch",
-      ]
-    }
-    categoryCounts={
-      Object {
-        "elasticsearch": 2,
-        "general": 11,
-      }
-    }
-    clear={[Function]}
-    clearQuery={[Function]}
-    save={[Function]}
+  <AdvancedSettingsVoiceAnnouncement
+    queryText=""
     settings={
       Object {
         "elasticsearch": Array [
@@ -82,6 +68,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "array",
             "value": undefined,
           },
@@ -99,6 +86,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "boolean",
             "value": undefined,
           },
@@ -118,6 +106,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "string",
             "value": undefined,
           },
@@ -135,6 +124,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "image",
             "value": undefined,
           },
@@ -154,6 +144,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "json",
             "value": undefined,
           },
@@ -171,6 +162,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "number",
             "value": undefined,
           },
@@ -192,6 +184,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "banana",
             ],
             "readonly": false,
+            "requiresPageReload": false,
             "type": "select",
             "value": undefined,
           },
@@ -209,6 +202,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "string",
             "value": undefined,
           },
@@ -226,6 +220,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "json",
             "value": undefined,
           },
@@ -243,6 +238,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "markdown",
             "value": undefined,
           },
@@ -260,6 +256,7 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "number",
             "value": undefined,
           },
@@ -281,6 +278,7 @@ exports[`AdvancedSettings should render normally 1`] = `
               "banana",
             ],
             "readonly": false,
+            "requiresPageReload": false,
             "type": "select",
             "value": undefined,
           },
@@ -298,6 +296,279 @@ exports[`AdvancedSettings should render normally 1`] = `
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+  />
+  <InjectIntl(FormUI)
+    categories={
+      Array [
+        "general",
+        "elasticsearch",
+      ]
+    }
+    categoryCounts={
+      Object {
+        "elasticsearch": 2,
+        "general": 11,
+      }
+    }
+    clear={[Function]}
+    clearQuery={[Function]}
+    enableSaving={true}
+    save={[Function]}
+    settings={
+      Object {
+        "elasticsearch": Array [
+          Object {
+            "ariaName": "Test array setting",
+            "category": Array [
+              "elasticsearch",
+            ],
+            "defVal": Array [
+              "default_value",
+            ],
+            "description": "Description for Test array setting",
+            "displayName": "Test array setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:array:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "array",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test boolean setting",
+            "category": Array [
+              "elasticsearch",
+            ],
+            "defVal": true,
+            "description": "Description for Test boolean setting",
+            "displayName": "Test boolean setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:boolean:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "boolean",
+            "value": undefined,
+          },
+        ],
+        "general": Array [
+          Object {
+            "ariaName": "Test custom string setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test custom string setting",
+            "displayName": "Test custom string setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:customstring:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test image setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test image setting",
+            "displayName": "Test image setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:image:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "image",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "An overridden json",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "{
+  \\"foo\\": \\"bar\\"
+}",
+            "description": "Description for overridden json",
+            "displayName": "An overridden json",
+            "isCustom": undefined,
+            "isOverridden": true,
+            "name": "test:isOverridden:json",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "json",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "An overridden number",
+            "category": Array [
+              "general",
+            ],
+            "defVal": 1234,
+            "description": "Description for overridden number",
+            "displayName": "An overridden number",
+            "isCustom": undefined,
+            "isOverridden": true,
+            "name": "test:isOverridden:number",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "number",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test overridden select setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "orange",
+            "description": "Description for overridden select setting",
+            "displayName": "Test overridden select setting",
+            "isCustom": undefined,
+            "isOverridden": true,
+            "name": "test:isOverridden:select",
+            "optionLabels": undefined,
+            "options": Array [
+              "apple",
+              "orange",
+              "banana",
+            ],
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "select",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "An overridden string",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "foo",
+            "description": "Description for overridden string",
+            "displayName": "An overridden string",
+            "isCustom": undefined,
+            "isOverridden": true,
+            "name": "test:isOverridden:string",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test json setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "{\\"foo\\": \\"bar\\"}",
+            "description": "Description for Test json setting",
+            "displayName": "Test json setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:json:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "json",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test markdown setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "",
+            "description": "Description for Test markdown setting",
+            "displayName": "Test markdown setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:markdown:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "markdown",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test number setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": 5,
+            "description": "Description for Test number setting",
+            "displayName": "Test number setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:number:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "number",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test select setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": "orange",
+            "description": "Description for Test select setting",
+            "displayName": "Test select setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:select:setting",
+            "optionLabels": undefined,
+            "options": Array [
+              "apple",
+              "orange",
+              "banana",
+            ],
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "select",
+            "value": undefined,
+          },
+          Object {
+            "ariaName": "Test string setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test string setting",
+            "displayName": "Test string setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:string:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
             "type": "string",
             "value": undefined,
           },
@@ -307,6 +578,7 @@ exports[`AdvancedSettings should render normally 1`] = `
     showNoResultsMessage={true}
   />
   <advanced_settings_page_footer
+    enableSaving={true}
     onQueryMatchChange={[Function]}
     query={
       Query {
@@ -325,6 +597,185 @@ exports[`AdvancedSettings should render normally 1`] = `
           "printClause": [Function],
         },
         "text": "",
+      }
+    }
+  />
+</div>
+`;
+
+exports[`AdvancedSettings should render read-only when saving is disabled 1`] = `
+<div>
+  <EuiFlexGroup
+    gutterSize="none"
+  >
+    <EuiFlexItem>
+      <advanced_settings_page_title />
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <Search
+        categories={
+          Array [
+            "general",
+            "elasticsearch",
+          ]
+        }
+        onQueryChange={[Function]}
+        query={
+          Query {
+            "ast": _AST {
+              "_clauses": Array [
+                Object {
+                  "field": "ariaName",
+                  "match": "must",
+                  "operator": "eq",
+                  "type": "field",
+                  "value": "test string setting",
+                },
+              ],
+              "_indexedClauses": Object {
+                "field": Object {
+                  "ariaName": Array [
+                    Object {
+                      "field": "ariaName",
+                      "match": "must",
+                      "operator": "eq",
+                      "type": "field",
+                      "value": "test string setting",
+                    },
+                  ],
+                },
+                "group": Array [],
+                "is": Object {},
+                "term": Array [],
+              },
+            },
+            "syntax": Object {
+              "parse": [Function],
+              "print": [Function],
+              "printClause": [Function],
+            },
+            "text": "ariaName:\\"test string setting\\"",
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <advanced_settings_page_subtitle />
+  <EuiSpacer
+    size="m"
+  />
+  <CallOuts />
+  <EuiSpacer
+    size="m"
+  />
+  <AdvancedSettingsVoiceAnnouncement
+    queryText="ariaName:\\"test string setting\\""
+    settings={
+      Object {
+        "general": Array [
+          Object {
+            "ariaName": "Test string setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test string setting",
+            "displayName": "Test string setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:string:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+  />
+  <InjectIntl(FormUI)
+    categories={
+      Array [
+        "general",
+        "elasticsearch",
+      ]
+    }
+    categoryCounts={
+      Object {
+        "elasticsearch": 2,
+        "general": 11,
+      }
+    }
+    clear={[Function]}
+    clearQuery={[Function]}
+    enableSaving={false}
+    save={[Function]}
+    settings={
+      Object {
+        "general": Array [
+          Object {
+            "ariaName": "Test string setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test string setting",
+            "displayName": "Test string setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:string:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+    showNoResultsMessage={true}
+  />
+  <advanced_settings_page_footer
+    enableSaving={false}
+    onQueryMatchChange={[Function]}
+    query={
+      Query {
+        "ast": _AST {
+          "_clauses": Array [
+            Object {
+              "field": "ariaName",
+              "match": "must",
+              "operator": "eq",
+              "type": "field",
+              "value": "test string setting",
+            },
+          ],
+          "_indexedClauses": Object {
+            "field": Object {
+              "ariaName": Array [
+                Object {
+                  "field": "ariaName",
+                  "match": "must",
+                  "operator": "eq",
+                  "type": "field",
+                  "value": "test string setting",
+                },
+              ],
+            },
+            "group": Array [],
+            "is": Object {},
+            "term": Array [],
+          },
+        },
+        "syntax": Object {
+          "parse": [Function],
+          "print": [Function],
+          "printClause": [Function],
+        },
+        "text": "ariaName:\\"test string setting\\"",
       }
     }
   />
@@ -396,6 +847,33 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
   <EuiSpacer
     size="m"
   />
+  <AdvancedSettingsVoiceAnnouncement
+    queryText="ariaName:\\"test string setting\\""
+    settings={
+      Object {
+        "general": Array [
+          Object {
+            "ariaName": "Test string setting",
+            "category": Array [
+              "general",
+            ],
+            "defVal": null,
+            "description": "Description for Test string setting",
+            "displayName": "Test string setting",
+            "isCustom": undefined,
+            "isOverridden": false,
+            "name": "test:string:setting",
+            "optionLabels": undefined,
+            "options": undefined,
+            "readonly": false,
+            "requiresPageReload": false,
+            "type": "string",
+            "value": undefined,
+          },
+        ],
+      }
+    }
+  />
   <InjectIntl(FormUI)
     categories={
       Array [
@@ -411,6 +889,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
     }
     clear={[Function]}
     clearQuery={[Function]}
+    enableSaving={true}
     save={[Function]}
     settings={
       Object {
@@ -429,6 +908,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
             "optionLabels": undefined,
             "options": undefined,
             "readonly": false,
+            "requiresPageReload": false,
             "type": "string",
             "value": undefined,
           },
@@ -438,6 +918,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
     showNoResultsMessage={true}
   />
   <advanced_settings_page_footer
+    enableSaving={true}
     onQueryMatchChange={[Function]}
     query={
       Query {

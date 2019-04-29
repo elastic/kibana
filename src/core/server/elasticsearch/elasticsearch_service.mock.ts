@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { BehaviorSubject } from 'rxjs';
 import { ClusterClient } from './cluster_client';
 import { ElasticsearchConfig } from './elasticsearch_config';

@@ -10,6 +10,8 @@ import { VectorStyle } from './styles/vector_style';
 import { LeftInnerJoin } from './joins/left_inner_join';
 import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
+import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -107,15 +109,16 @@ export class VectorLayer extends AbstractLayer {
     };
   }
 
-  async getBounds(filters) {
+  async getBounds(dataFilters) {
     if (this._source.isBoundsAware()) {
-      return await this._source.getBoundsForFilters(filters);
+      const searchFilters = this._getSearchFilters(dataFilters);
+      return await this._source.getBoundsForFilters(searchFilters);
     }
     return this._getBoundsBasedOnData();
   }
 
-  async getStringFields() {
-    return await this._source.getStringFields();
+  async getLeftJoinFields() {
+    return await this._source.getLeftJoinFields();
   }
 
   async getSourceName() {
@@ -158,6 +161,7 @@ export class VectorLayer extends AbstractLayer {
   }
 
   async _canSkipSourceUpdate(source, sourceDataId, searchFilters) {
+
     const timeAware = await source.isTimeAware();
     const refreshTimerAware = await source.isRefreshTimerAware();
     const extentAware = source.isFilterByMapBounds();
@@ -203,9 +207,19 @@ export class VectorLayer extends AbstractLayer {
 
     let updateDueToQuery = false;
     let updateDueToFilters = false;
+    let updateDueToLayerQuery = false;
+    let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
-      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
+      updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+      if (searchFilters.applyGlobalQuery) {
+        updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+        updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      } else {
+        // Global filters and query are not applied to layer search request so no re-fetch required.
+        // Exception is "Refresh" query.
+        updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+      }
     }
 
     let updateDueToPrecisionChange = false;
@@ -221,31 +235,38 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToFields
       && !updateDueToQuery
       && !updateDueToFilters
+      && !updateDueToLayerQuery
+      && !updateDueToApplyGlobalQuery
       && !updateDueToPrecisionChange;
   }
 
-  async _syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters }) {
+  async _syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters }) {
 
-    const joinSource = join.getJoinSource();
+    const joinSource = join.getRightJoinSource();
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
+    const searchFilters = {
+      ...dataFilters,
+      applyGlobalQuery: this.getApplyGlobalQuery(),
+    };
+    const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+      const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
+      return {
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: propertiesMap
+      };
+    }
+
     try {
-      const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
-      if (canSkip) {
-        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
-        return {
-          dataHasChanged: false,
-          join: join,
-          propertiesMap: propertiesMap
-        };
-      }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this.getSourceName();
       const {
         propertiesMap
-      } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
@@ -265,7 +286,7 @@ export class VectorLayer extends AbstractLayer {
 
   async _syncJoins({ startLoading, stopLoading, onLoadError, dataFilters }) {
     const joinSyncs = this.getValidJoins().map(async join => {
-      return this._syncJoin(join, { startLoading, stopLoading, onLoadError, dataFilters });
+      return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
     });
     return await Promise.all(joinSyncs);
   }
@@ -283,6 +304,8 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
+      layerQuery: this.getQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
     };
   }
 
@@ -512,17 +535,38 @@ export class VectorLayer extends AbstractLayer {
     return [this._getMbPointLayerId(), this._getMbLineLayerId(), this._getMbPolygonLayerId()];
   }
 
+
+  _addJoinsToSourceTooltips(tooltipsFromSource) {
+    for (let i = 0; i < tooltipsFromSource.length; i++) {
+      const tooltipProperty = tooltipsFromSource[i];
+      const matchingJoins = [];
+      for (let j = 0; j < this._joins.length; j++) {
+        if (this._joins[j].getLeftFieldName() === tooltipProperty.getPropertyName()) {
+          matchingJoins.push(this._joins[j]);
+        }
+      }
+      if (matchingJoins.length) {
+        tooltipsFromSource[i] = new JoinTooltipProperty(tooltipProperty, matchingJoins);
+      }
+    }
+  }
+
+
   async getPropertiesForTooltip(properties) {
-    const tooltipsFromSource =  await this._source.filterAndFormatPropertiesToHtml(properties);
+
+    let allTooltips =  await this._source.filterAndFormatPropertiesToHtml(properties);
+    this._addJoinsToSourceTooltips(allTooltips);
+
+
     for (let i = 0; i < this._joins.length; i++) {
       const propsFromJoin = await this._joins[i].filterAndFormatPropertiesForTooltip(properties);
-      Object.assign(tooltipsFromSource, propsFromJoin);
+      allTooltips = [...allTooltips, ...propsFromJoin];
     }
-    return tooltipsFromSource;
+    return allTooltips;
   }
 
   canShowTooltip() {
-    return this._source.canFormatFeatureProperties();
+    return this.isVisible() && this._source.canFormatFeatureProperties();
   }
 
   getFeatureByFeatureById(id) {

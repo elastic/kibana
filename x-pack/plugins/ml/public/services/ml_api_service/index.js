@@ -12,6 +12,7 @@ import chrome from 'ui/chrome';
 import { http } from '../../services/http_service';
 
 import { annotations } from './annotations';
+import { dataFrame } from './data_frame';
 import { filters } from './filters';
 import { results } from './results';
 import { jobs } from './jobs';
@@ -247,6 +248,13 @@ export const ml = {
     });
   },
 
+  listDataRecognizerModules() {
+    return http({
+      url: `${basePath}/modules/get_module`,
+      method: 'GET'
+    });
+  },
+
   getDataRecognizerModule(obj) {
     return http({
       url: `${basePath}/modules/get_module/${obj.moduleId}`,
@@ -420,6 +428,7 @@ export const ml = {
   },
 
   annotations,
+  dataFrame,
   filters,
   results,
   jobs,

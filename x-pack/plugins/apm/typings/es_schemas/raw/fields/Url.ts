@@ -6,5 +6,4 @@
 
 export interface Url {
   full: string;
-  [key: string]: unknown;
 }

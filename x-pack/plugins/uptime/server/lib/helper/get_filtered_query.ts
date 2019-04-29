@@ -5,6 +5,7 @@
  */
 
 import { get, set } from 'lodash';
+import { QUERY } from '../../../common/constants';
 
 export const getFilteredQuery = (
   dateRangeStart: string,
@@ -19,7 +20,16 @@ export const getFilteredQuery = (
     filtersObj = filters;
   }
   if (get(filtersObj, 'bool.must', undefined)) {
-    const userFilters = get(filtersObj, 'bool.must', []);
+    const userFilters = get(filtersObj, 'bool.must', []).map((filter: any) =>
+      filter.simple_query_string
+        ? {
+            simple_query_string: {
+              ...filter.simple_query_string,
+              fields: QUERY.SIMPLE_QUERY_STRING_FIELDS,
+            },
+          }
+        : filter
+    );
     delete filtersObj.bool.must;
     filtersObj.bool.filter = [...userFilters];
   }

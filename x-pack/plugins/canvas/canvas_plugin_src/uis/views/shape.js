@@ -24,13 +24,13 @@ export const shape = () => ({
       name: 'fill',
       displayName: 'Fill',
       argType: 'color',
-      help: 'Fill color of the shape',
+      help: 'Accepts HEX, RGB or HTML Color names',
     },
     {
       name: 'border',
       displayName: 'Border',
       argType: 'color',
-      help: 'Border color',
+      help: 'Accepts HEX, RGB or HTML Color names',
     },
     {
       name: 'borderWidth',

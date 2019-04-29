@@ -48,11 +48,11 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
-    expect(response).toEqual({});
+    expect(response).toEqual({ errors: [], itemsDeleted: ['test_cluster'] });
   });
 
   it('should return an error if the response does still contain cluster information', async () => {
@@ -74,11 +74,14 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
-    expect(response).toEqual(wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400));
+    expect(response.errors).toEqual([{
+      name: 'test_cluster',
+      error: wrapCustomError(new Error('Unable to delete cluster, information still returned from ES.'), 400),
+    }]);
   });
 
   it('should return an error if the cluster does not exist', async () => {
@@ -86,11 +89,14 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
-    expect(response).toEqual(wrapCustomError(new Error('There is no remote cluster with that name.'), 404));
+    expect(response.errors).toEqual([{
+      name: 'test_cluster',
+      error: wrapCustomError(new Error('There is no remote cluster with that name.'), 404),
+    }]);
   });
 
   it('should forward an ES error', async () => {
@@ -101,10 +107,13 @@ describe('[API Routes] Remote Clusters Delete', () => {
     registerDeleteRoute(server);
     const response = await routeHandler({
       params: {
-        name: 'test_cluster'
+        nameOrNames: 'test_cluster'
       }
     });
 
-    expect(response).toEqual(Boom.boomify(mockError));
+    expect(response.errors).toEqual([{
+      name: 'test_cluster',
+      error: Boom.boomify(mockError),
+    }]);
   });
 });

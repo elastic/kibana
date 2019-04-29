@@ -18,7 +18,11 @@ function recognize(callWithRequest, indexPatternTitle) {
 
 function getModule(callWithRequest, moduleId) {
   const dr = new DataRecognizer(callWithRequest);
-  return dr.getModule(moduleId);
+  if (moduleId === undefined) {
+    return dr.listModules();
+  } else {
+    return dr.getModule(moduleId);
+  }
 }
 
 function saveModuleItems(
@@ -66,10 +70,15 @@ export function dataRecognizer(server, commonRouteConfig) {
 
   server.route({
     method: 'GET',
-    path: '/api/ml/modules/get_module/{moduleId}',
+    path: '/api/ml/modules/get_module/{moduleId?}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      const moduleId = request.params.moduleId;
+      let moduleId = request.params.moduleId;
+      if (moduleId === '') {
+        // if the endpoint is called with a trailing /
+        // the moduleId will be an empty string.
+        moduleId = undefined;
+      }
       return getModule(callWithRequest, moduleId)
         .catch(resp => wrapError(resp));
     },

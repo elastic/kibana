@@ -72,6 +72,7 @@ uiRoutes
           title: 'Logstash Pipelines',
           storageKey: 'logstash.pipelines',
           getPageData,
+          reactNodeId: 'monitoringLogstashPipelinesApp',
           $scope,
           $injector
         });

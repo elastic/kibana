@@ -36,7 +36,7 @@ import {
   PHASE_DELETE,
   PHASE_WARM,
   STRUCTURE_POLICY_NAME,
-} from '../../store/constants';
+} from '../../constants';
 import { findFirstError } from '../../services/find_errors';
 import { NodeAttrsDetails } from './components/node_attrs_details';
 import { PolicyJsonFlyout } from './components/policy_json_flyout';

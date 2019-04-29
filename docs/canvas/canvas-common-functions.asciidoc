@@ -1,3 +1,4 @@
+[role="xpack"]
 [[canvas-common-functions]]
 === Canvas common functions
 

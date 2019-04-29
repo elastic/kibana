@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow applying changed params', async () => {
       await PageObjects.visualize.setNumericInterval('1', { append: true });
-      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      const interval = await PageObjects.visualize.getNumericInterval();
       expect(interval).to.be('20001');
       const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
       expect(isApplyButtonEnabled).to.be(true);
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
-      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      const interval = await PageObjects.visualize.getNumericInterval();
       expect(interval).to.be('2000');
     });
 

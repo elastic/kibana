@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { topHitMetricAgg } from '../../metrics/top_hit';
 import { VisProvider } from '../../../vis';

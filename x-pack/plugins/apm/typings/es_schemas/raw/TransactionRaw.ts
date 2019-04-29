@@ -31,7 +31,6 @@ export interface TransactionRaw extends APMBaseDoc {
       agent?: {
         [name: string]: number;
       };
-      [key: string]: unknown;
     };
     name?: string;
     result?: string;
@@ -41,9 +40,7 @@ export interface TransactionRaw extends APMBaseDoc {
       dropped?: number;
     };
     type: string;
-    [key: string]: unknown;
   };
-  [key: string]: unknown;
 
   // Shared by errors and transactions
   container?: Container;

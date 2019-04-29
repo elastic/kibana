@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import styled from 'styled-components';
-
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { switchProp } from '../../../utils/styles';
 
-export const LogTextStreamItemField = styled.div.attrs<{
+export const LogTextStreamItemField = euiStyled.div.attrs<{
   scale?: 'small' | 'medium' | 'large';
 }>({})`
   font-size: ${props =>

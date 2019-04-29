@@ -13,4 +13,5 @@ export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: string): any;
   getPageObjects(pageObjectNames: string[]): any;
   loadTestFile(path: string): void;
+  readConfigFile(path: string): any;
 }

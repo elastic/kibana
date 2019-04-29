@@ -9,30 +9,23 @@ import PropTypes from 'prop-types';
 import { Positionable } from '../positionable';
 import { ElementContent } from '../element_content';
 
-export class ElementWrapper extends React.PureComponent {
-  static propTypes = {
-    renderable: PropTypes.object,
-    transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
-    state: PropTypes.string,
-    createHandlers: PropTypes.func.isRequired,
-  };
+export const ElementWrapper = props => {
+  const { renderable, transformMatrix, width, height, state, handlers } = props;
 
-  constructor(props) {
-    super(props);
-    this._handlers = props.createHandlers(props.selectedPage);
-  }
+  return (
+    <Positionable transformMatrix={transformMatrix} width={width} height={height}>
+      <ElementContent renderable={renderable} state={state} handlers={handlers} />
+    </Positionable>
+  );
+};
 
-  _handlers = null;
-
-  render() {
-    const { renderable, transformMatrix, width, height, state } = this.props;
-
-    return (
-      <Positionable transformMatrix={transformMatrix} width={width} height={height}>
-        <ElementContent renderable={renderable} state={state} handlers={this._handlers} />
-      </Positionable>
-    );
-  }
-}
+ElementWrapper.propTypes = {
+  // positionable props (from element object)
+  transformMatrix: PropTypes.arrayOf(PropTypes.number).isRequired,
+  width: PropTypes.number.isRequired,
+  height: PropTypes.number.isRequired,
+  // ElementContent pass-through props
+  renderable: PropTypes.object,
+  state: PropTypes.string,
+  handlers: PropTypes.object.isRequired,
+};

@@ -110,6 +110,7 @@ class MarkdownPanelConfigUi extends Component {
           fields={this.props.fields}
           model={this.props.model}
           name={this.props.name}
+          visData$={this.props.visData$}
           onChange={this.props.onChange}
         />
       );
@@ -256,6 +257,7 @@ class MarkdownPanelConfigUi extends Component {
                 <FormattedMessage
                   id="tsvb.markdown.optionsTab.customCSSLabel"
                   defaultMessage="Custom CSS (supports Less)"
+                  description="CSS and Less are names of technologies and should not be translated."
                 />
               </span>
             </EuiTitle>
@@ -314,7 +316,8 @@ MarkdownPanelConfigUi.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  dateFormat: PropTypes.string
+  dateFormat: PropTypes.string,
+  visData$: PropTypes.object,
 };
 
 const MarkdownPanelConfig = injectI18n(MarkdownPanelConfigUi);

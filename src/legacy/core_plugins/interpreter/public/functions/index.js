@@ -21,21 +21,9 @@ import { clog } from './clog';
 import { esaggs } from './esaggs';
 import { kibana } from './kibana';
 import { kibanaContext } from './kibana_context';
-import { vega } from './vega';
-import { timelionVis } from './timelion_vis';
-import { tsvb } from './tsvb';
-import { kibanaMarkdown } from './markdown';
-import { inputControlVis } from './input_control';
-import { metric } from './metric';
-import { kibanaPie } from './pie';
-import { regionmap } from './regionmap';
-import { tilemap } from './tilemap';
-import { kibanaTable } from './table';
-import { tagcloud } from './tagcloud';
-import { vislib } from './vislib';
 import { visualization } from './visualization';
+import { visDimension } from './vis_dimension';
 
 export const functions = [
-  clog, esaggs, kibana, kibanaContext, vega, timelionVis, tsvb, kibanaMarkdown, inputControlVis,
-  metric, kibanaPie, regionmap, tilemap, kibanaTable, tagcloud, vislib, visualization
+  clog, esaggs, kibana, kibanaContext, visualization, visDimension,
 ];

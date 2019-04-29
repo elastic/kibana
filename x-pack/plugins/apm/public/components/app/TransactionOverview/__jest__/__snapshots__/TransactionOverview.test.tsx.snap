@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TransactionOverview when transactionType is selected and multiple transaction types are given should render dropdown with transaction types 1`] = `
+<select
+  class="euiSelect"
+  id="transaction-type-select-row"
+>
+  <option
+    value="firstType"
+  >
+    firstType
+  </option>
+  <option
+    value="secondType"
+  >
+    secondType
+  </option>
+</select>
+`;

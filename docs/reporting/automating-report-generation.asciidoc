@@ -1,11 +1,11 @@
 [role="xpack"]
 [[automating-report-generation]]
 == Automating Report Generation
-You can automatically generate reports with a watch, or by submitting
+You can automatically generate reports with {watcher}, or by submitting
 HTTP POST requests from a script.
 
 To automatically generate reports with a watch, you need to configure
-{watcher} to trust the Kibana server’s certificate. For more information,
+{watcher} to trust the {kib} server’s certificate. For more information,
 see <<securing-reporting, Securing Reporting>>.
 
 include::report-intervals.asciidoc[]
@@ -13,27 +13,28 @@ include::report-intervals.asciidoc[]
 To get the URL for triggering a report generation during a given time period:
 
 . Load the saved object.
-. Use the time-picker to specify a relative or absolute time period.
-. Click *Reporting* in the Kibana toolbar.
-. Copy the displayed **Generation URL**.
+. Use the timepicker to specify a relative or absolute time period.
+. Click *Share* in the Kibana toolbar.
+. Select *PDF Reports*.
+. Click **Copy POST URL**.
 
 NOTE: The response from this request with be JSON, and will contain a `path` property
 with a URL to use to download the generated report. When requesting that path,
 you will get a 503 response if it's not completed yet. In this case, retry after the
-number of seconds in the `Retry-After` header in the response until you get the PDF.
+number of seconds in the `Retry-After` header in the response until the PDF is returned.
 
 To configure a watch to email reports, you use the `reporting` attachment type
 in an `email` action. For more information, see
-{xpack-ref}/actions-email.html#configuring-email[Configuring Email Accounts].
+{stack-ov}/actions-email.html#configuring-email[Configuring Email Accounts].
 
 include::watch-example.asciidoc[]
 
 For more information about configuring watches, see
-{xpack-ref}/how-watcher-works.html[How Watcher Works].
+{stack-ov}/how-watcher-works.html[How Watcher Works].
 
 == Deprecated Report URLs
 
-The following is deprecated in 6.0, and you should now use Kibana to get the URL for a
+The following is deprecated in 6.0, and you should now use {kib} to get the URL for a
 particular report.
 
 You may request PDF reports optimized for printing through three {reporting} endpoints:

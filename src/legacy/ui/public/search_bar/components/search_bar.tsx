@@ -39,6 +39,10 @@ interface DateRange {
   to: string;
 }
 
+/**
+ * NgReact lib requires that changes to the props need to be made in the directive config as well
+ * See [search_bar\directive\index.js] file
+ */
 interface Props {
   query: {
     query: string;
@@ -47,6 +51,7 @@ interface Props {
   onQuerySubmit: (payload: { dateRange: DateRange; query: Query }) => void;
   disableAutoFocus?: boolean;
   appName: string;
+  screenTitle: string;
   indexPatterns: IndexPattern[];
   store: Storage;
   filters: Filter[];
@@ -91,9 +96,9 @@ class SearchBarUI extends Component<Props, State> {
   };
 
   // member-ordering rules conflict with use-before-declaration rules
-  /* tslint:disable */
+  /* eslint-disable */
   public ro = new ResizeObserver(this.setFilterBarHeight);
-  /* tslint:enable */
+  /* eslint-enable */
 
   public toggleFiltersVisible = () => {
     this.setState({
@@ -153,6 +158,7 @@ class SearchBarUI extends Component<Props, State> {
         {this.props.showQueryBar ? (
           <QueryBar
             query={this.props.query}
+            screenTitle={this.props.screenTitle}
             onSubmit={this.props.onQuerySubmit}
             appName={this.props.appName}
             indexPatterns={this.props.indexPatterns}

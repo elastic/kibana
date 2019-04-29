@@ -5,7 +5,7 @@
  */
 
 import { verifyMonitoringLicense } from '../verify_monitoring_license';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 
 describe('Monitoring Verify License', () => {

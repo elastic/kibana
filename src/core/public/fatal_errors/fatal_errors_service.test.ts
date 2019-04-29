@@ -24,12 +24,7 @@ expect.addSnapshotSerializer({
   print: () => `Rx.Observable`,
 });
 
-const mockRender = jest.fn();
-jest.mock('react-dom', () => {
-  return {
-    render: mockRender,
-  };
-});
+import { mockRender } from './fatal_errors_service.test.mocks';
 
 import { FatalErrorsService } from './fatal_errors_service';
 

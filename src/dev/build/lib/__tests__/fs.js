@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { chmodSync, statSync } from 'fs';
 
 import del from 'del';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { mkdirp, write, read, getChildPaths, copy, copyAll, getFileHash, untar } from '../fs';
 

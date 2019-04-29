@@ -7,7 +7,7 @@ import { i18n } from '@kbn/i18n';
 import { createAction } from 'redux-actions';
 import { showApiError } from '../../services/api_errors';
 import { loadNodes, loadNodeDetails } from '../../services/api';
-import { SET_SELECTED_NODE_ATTRS } from '../constants';
+import { SET_SELECTED_NODE_ATTRS } from '../../constants';
 
 export const setSelectedNodeAttrs = createAction(SET_SELECTED_NODE_ATTRS);
 export const setSelectedPrimaryShardCount = createAction(

@@ -14,24 +14,18 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
-import { get } from 'lodash';
 import React from 'react';
-import { RRRRenderResponse } from 'react-redux-request';
 import styled from 'styled-components';
-import { idx } from 'x-pack/plugins/apm/common/idx';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { STATUS } from 'x-pack/plugins/apm/public/constants';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ErrorGroupAPIResponse } from 'x-pack/plugins/apm/server/lib/errors/get_error_group';
-import { APMError } from 'x-pack/plugins/apm/typings/es_schemas/ui/APMError';
+import { first } from 'lodash';
+import { idx } from '@kbn/elastic-idx';
+import { ErrorGroupAPIResponse } from '../../../../../server/lib/errors/get_error_group';
+import { APMError } from '../../../../../typings/es_schemas/ui/APMError';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { px, unit } from '../../../../style/variables';
 import { DiscoverErrorLink } from '../../../shared/Links/DiscoverLinks/DiscoverErrorLink';
-import { PropertiesTable } from '../../../shared/PropertiesTable';
-import { getCurrentTab } from '../../../shared/PropertiesTable/tabConfig';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
+import { ErrorMetadata } from '../../../shared/MetadataTable/ErrorMetadata';
 import { Stacktrace } from '../../../shared/Stacktrace';
 import {
   ErrorTab,
@@ -49,16 +43,22 @@ const HeaderContainer = styled.div`
 `;
 
 interface Props {
-  errorGroup: RRRRenderResponse<ErrorGroupAPIResponse>;
+  errorGroup: ErrorGroupAPIResponse;
   urlParams: IUrlParams;
   location: Location;
 }
 
+// TODO: Move query-string-based tabs into a re-usable component?
+function getCurrentTab(
+  tabs: ErrorTab[] = [],
+  currentTabKey: string | undefined
+) {
+  const selectedTab = tabs.find(({ key }) => key === currentTabKey);
+  return selectedTab ? selectedTab : first(tabs) || {};
+}
+
 export function DetailView({ errorGroup, urlParams, location }: Props) {
-  if (errorGroup.status !== STATUS.SUCCESS) {
-    return null;
-  }
-  const { transaction, error, occurrencesCount } = errorGroup.data;
+  const { transaction, error, occurrencesCount } = errorGroup;
 
   if (!error) {
     return null;
@@ -133,7 +133,6 @@ export function TabContent({
   currentTab: ErrorTab;
 }) {
   const codeLanguage = error.service.name;
-  const agentName = error.agent.name;
   const excStackframes = idx(error, _ => _.error.exception[0].stacktrace);
   const logStackframes = idx(error, _ => _.error.exception[0].stacktrace);
 
@@ -147,13 +146,6 @@ export function TabContent({
         <Stacktrace stackframes={excStackframes} codeLanguage={codeLanguage} />
       );
     default:
-      const propData = get(error, currentTab.key);
-      return (
-        <PropertiesTable
-          propData={propData}
-          propKey={currentTab.key}
-          agentName={agentName}
-        />
-      );
+      return <ErrorMetadata error={error} />;
   }
 }

@@ -6,7 +6,7 @@
 
 import fs from 'fs';
 import crypto from 'crypto';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { resolve } from 'path';
 
 import { extract } from '../extract';

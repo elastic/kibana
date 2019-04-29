@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import {
   IStackframe,
   IStackframeWithLineContext
-} from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+} from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import {
   borderRadius,
   fontFamilyCode,

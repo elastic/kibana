@@ -9,6 +9,7 @@ import omit from 'lodash/fp/omit';
 import { parse as parseQueryString, stringify as stringifyQueryString } from 'querystring';
 import React from 'react';
 import { RouteComponentProps, withRouter } from 'react-router';
+// eslint-disable-next-line @typescript-eslint/camelcase
 import { decode_object, encode_object } from 'rison-node';
 import { Omit } from '../lib/lib';
 

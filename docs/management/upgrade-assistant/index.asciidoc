@@ -1,3 +1,4 @@
+[role="xpack"]
 [[upgrade-assistant]]
 == Upgrade Assistant
 

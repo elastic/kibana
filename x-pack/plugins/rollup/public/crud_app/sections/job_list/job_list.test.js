@@ -11,6 +11,15 @@ import { JobList } from './job_list';
 jest.mock('ui/chrome', () => ({
   addBasePath: () => {},
   breadcrumbs: { set: () => {} },
+  getInjected: (key) => {
+    if (key === 'uiCapabilities') {
+      return {
+        navLinks: {},
+        management: {},
+        catalogue: {}
+      };
+    }
+  }
 }));
 
 jest.mock('../../services', () => {
@@ -30,7 +39,7 @@ const defaultProps = {
   isLoading: false
 };
 
-const initTestBed = registerTestBed(JobList, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(JobList, { defaultProps, store: rollupJobsStore });
 
 describe('<JobList />', () => {
   it('should render empty prompt when loading is complete and there are no jobs', () => {
@@ -51,24 +60,6 @@ describe('<JobList />', () => {
 
     expect(exists('jobListLoading')).toBeFalsy();
     expect(component.find('JobTableUi').length).toBeTruthy();
-  });
-
-  describe('route query params change', () => {
-    it('should call the "openDetailPanel()" prop each time the "job" query params changes', () => {
-      const openDetailPanel = jest.fn();
-      const jobId = 'foo';
-      const { setProps } = initTestBed({ openDetailPanel });
-
-      expect(openDetailPanel.mock.calls.length).toBe(0);
-
-      setProps({
-        history: { location: { search: `?job=${jobId}` } },
-        openDetailPanel,
-      });
-
-      expect(openDetailPanel.mock.calls.length).toBe(1);
-      expect(openDetailPanel.mock.calls[0][0]).toEqual(jobId);
-    });
   });
 
   describe('when there is an API error', () => {

@@ -21,12 +21,11 @@ import _ from 'lodash';
 
 import { toastNotifications } from 'ui/notify';
 import '../directives/validate_date_interval';
-import '../directives/input_number';
 import chrome from '../../chrome';
 import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
-import intervalTemplate from '../controls/number_interval.html';
-import minDocCountTemplate from '../controls/min_doc_count.html';
+import { NumberIntervalParamEditor } from '../controls/number_interval';
+import { MinDocCountParamEditor } from '../controls/min_doc_count';
 import extendedBoundsTemplate from '../controls/extended_bounds.html';
 import { i18n } from '@kbn/i18n';
 
@@ -76,7 +75,7 @@ export const histogramBucketAgg = new BucketAggType({
     },
     {
       name: 'interval',
-      editor: intervalTemplate,
+      editorComponent: NumberIntervalParamEditor,
       modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
         const field = aggConfig.getField();
         const aggBody = field.scripted
@@ -148,8 +147,8 @@ export const histogramBucketAgg = new BucketAggType({
 
     {
       name: 'min_doc_count',
-      default: null,
-      editor: minDocCountTemplate,
+      default: false,
+      editorComponent: MinDocCountParamEditor,
       write: function (aggConfig, output) {
         if (aggConfig.params.min_doc_count) {
           output.params.min_doc_count = 0;

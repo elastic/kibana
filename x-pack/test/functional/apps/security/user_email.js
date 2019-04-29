@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('useremail', function () {
     before(async () => {
-      await esArchiver.load('discover');
+      await esArchiver.load('security/discover');
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });

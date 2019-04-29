@@ -6,7 +6,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import React, { SFC } from 'react';
+import React, { FunctionComponent } from 'react';
 
 export interface Props {
   /** Optional value for the component */
@@ -17,7 +17,7 @@ export interface Props {
   commit: (value: string) => void;
 }
 
-export const AdvancedFilter: SFC<Props> = ({ value = '', onChange, commit }) => (
+export const AdvancedFilter: FunctionComponent<Props> = ({ value = '', onChange, commit }) => (
   <form
     onSubmit={e => {
       e.preventDefault();

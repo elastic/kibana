@@ -4,7 +4,7 @@ exports[`Suggestions snapshot 1`] = `
 <styled.ul
   innerRef={[Function]}
 >
-  <Component
+  <Suggestion
     innerRef={[Function]}
     key="[object Object]_0"
     onClick={[Function]}
@@ -20,7 +20,7 @@ exports[`Suggestions snapshot 1`] = `
       }
     }
   />
-  <Component
+  <Suggestion
     innerRef={[Function]}
     key="[object Object]_1"
     onClick={[Function]}

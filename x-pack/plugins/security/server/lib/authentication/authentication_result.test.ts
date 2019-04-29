@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {
@@ -54,7 +55,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('correctly produces `succeeded` authentication result without state.', () => {
-      const user = { username: 'user' };
+      const user = { username: 'user' } as AuthenticatedUser;
       const authenticationResult = AuthenticationResult.succeeded(user);
 
       expect(authenticationResult.succeeded()).toBe(true);
@@ -69,7 +70,7 @@ describe('AuthenticationResult', () => {
     });
 
     it('correctly produces `succeeded` authentication result with state.', () => {
-      const user = { username: 'user' };
+      const user = { username: 'user' } as AuthenticatedUser;
       const state = { some: 'state' };
       const authenticationResult = AuthenticationResult.succeeded(user, state);
 
@@ -121,6 +122,98 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.state).toBe(state);
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
+    });
+  });
+
+  describe('shouldUpdateState', () => {
+    it('always `false` for `failed`', () => {
+      expect(AuthenticationResult.failed(new Error('error')).shouldUpdateState()).toBe(false);
+    });
+
+    it('always `false` for `notHandled`', () => {
+      expect(AuthenticationResult.notHandled().shouldUpdateState()).toBe(false);
+    });
+
+    it('depends on `state` for `redirected`.', () => {
+      const mockURL = 'some-url';
+      expect(AuthenticationResult.redirectTo(mockURL, 'string').shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.redirectTo(mockURL, 0).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.redirectTo(mockURL, true).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.redirectTo(mockURL, false).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.redirectTo(mockURL, { prop: 'object' }).shouldUpdateState()).toBe(
+        true
+      );
+      expect(AuthenticationResult.redirectTo(mockURL, { prop: 'object' }).shouldUpdateState()).toBe(
+        true
+      );
+
+      expect(AuthenticationResult.redirectTo(mockURL).shouldUpdateState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, undefined).shouldUpdateState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, null).shouldUpdateState()).toBe(false);
+    });
+
+    it('depends on `state` for `succeeded`.', () => {
+      const mockUser = { username: 'u' } as AuthenticatedUser;
+      expect(AuthenticationResult.succeeded(mockUser, 'string').shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.succeeded(mockUser, 0).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.succeeded(mockUser, true).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.succeeded(mockUser, false).shouldUpdateState()).toBe(true);
+      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldUpdateState()).toBe(
+        true
+      );
+      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldUpdateState()).toBe(
+        true
+      );
+
+      expect(AuthenticationResult.succeeded(mockUser).shouldUpdateState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, undefined).shouldUpdateState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, null).shouldUpdateState()).toBe(false);
+    });
+  });
+
+  describe('shouldClearState', () => {
+    it('always `false` for `failed`', () => {
+      expect(AuthenticationResult.failed(new Error('error')).shouldClearState()).toBe(false);
+    });
+
+    it('always `false` for `notHandled`', () => {
+      expect(AuthenticationResult.notHandled().shouldClearState()).toBe(false);
+    });
+
+    it('depends on `state` for `redirected`.', () => {
+      const mockURL = 'some-url';
+      expect(AuthenticationResult.redirectTo(mockURL, null).shouldClearState()).toBe(true);
+
+      expect(AuthenticationResult.redirectTo(mockURL).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, undefined).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, 'string').shouldClearState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, 0).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, true).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, false).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.redirectTo(mockURL, { prop: 'object' }).shouldClearState()).toBe(
+        false
+      );
+      expect(AuthenticationResult.redirectTo(mockURL, { prop: 'object' }).shouldClearState()).toBe(
+        false
+      );
+    });
+
+    it('depends on `state` for `succeeded`.', () => {
+      const mockUser = { username: 'u' } as AuthenticatedUser;
+      expect(AuthenticationResult.succeeded(mockUser, null).shouldClearState()).toBe(true);
+
+      expect(AuthenticationResult.succeeded(mockUser).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, undefined).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, 'string').shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, 0).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, true).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, false).shouldClearState()).toBe(false);
+      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldClearState()).toBe(
+        false
+      );
+      expect(AuthenticationResult.succeeded(mockUser, { prop: 'object' }).shouldClearState()).toBe(
+        false
+      );
     });
   });
 });
