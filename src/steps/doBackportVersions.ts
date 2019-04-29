@@ -132,12 +132,16 @@ async function cherrypickAndConfirm(
     await cherrypick({ owner, repoName, sha });
     spinner.succeed();
   } catch (e) {
-    spinner.fail(
-      `Cherry-picking failed. Please resolve conflicts in: ${getRepoPath(
+    spinner.fail(`Cherry-picking failed.\n`);
+    log(
+      `Please resolve conflicts in: ${getRepoPath(
         owner,
         repoName
-      )}`
+      )} and when all conflicts have been resolved and staged run:`
     );
+    log(`
+    git cherry-pick --continue
+    `);
 
     const hasConflict = e.cmd.includes('git cherry-pick');
     if (!hasConflict) {
