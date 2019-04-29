@@ -19,7 +19,6 @@
 
 import angular from 'angular';
 import { createLegacyClass } from './utils/legacy_class';
-import { documentationLinks } from './documentation_links';
 
 const canStack = (function () {
   const err = new Error();
@@ -288,12 +287,5 @@ export class StackedBarChartConfig extends VislibError {
 export class NoResults extends VislibError {
   constructor() {
     super('No results found');
-  }
-}
-
-export class OutdatedKuerySyntaxError extends KbnError {
-  constructor() {
-    const link = `[docs](${documentationLinks.query.kueryQuerySyntax})`;
-    super(`It looks like you're using an outdated Kuery syntax. See what changed in the ${link}!`);
   }
 }
