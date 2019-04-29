@@ -87,7 +87,7 @@ export class HeaderBadge extends Component<Props, State> {
   private unsubscribe() {
     if (this.subscription) {
       this.subscription.unsubscribe();
-      delete this.subscription;
+      this.subscription = undefined;
     }
   }
 }

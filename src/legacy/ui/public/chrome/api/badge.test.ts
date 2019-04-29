@@ -32,9 +32,8 @@ function setup() {
   newPlatformChrome.getBadge$.mockReturnValue(getBadge$);
 
   const chrome: any = {};
-  const internals: any = {};
   initChromeBadgeApi(chrome);
-  return { chrome, internals, getBadge$ };
+  return { chrome, getBadge$ };
 }
 
 afterEach(() => {

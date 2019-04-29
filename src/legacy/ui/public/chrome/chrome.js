@@ -71,7 +71,7 @@ initChromeXsrfApi(chrome, internals);
 initChromeBasePathApi(chrome);
 initChromeInjectedVarsApi(chrome);
 initChromeNavApi(chrome, internals);
-initChromeBadgeApi(chrome, internals);
+initChromeBadgeApi(chrome);
 initBreadcrumbsApi(chrome, internals);
 initLoadingCountApi(chrome, internals);
 initHelpExtensionApi(chrome, internals);

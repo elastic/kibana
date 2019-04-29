@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { Chrome } from 'ui/chrome';
 import { ChromeBadge, ChromeSetup } from '../../../../../core/public';
 export type Badge = ChromeBadge;
 
@@ -35,7 +36,7 @@ function createBadgeApi() {
   return {
     badge: {
       /**
-       * Get an observerable that emits the current badge
+       * Get an observable that emits the current badge
        * and emits each update to the badge
        */
       get$() {
@@ -45,14 +46,14 @@ function createBadgeApi() {
       /**
        * Replace the badge with a new one
        */
-      set(newBadge: Badge | undefined) {
+      set(newBadge?: Badge) {
         newPlatformChrome.setBadge(newBadge);
       },
     },
   };
 }
 
-export function initChromeBadgeApi(chrome: { [key: string]: any }) {
+export function initChromeBadgeApi(chrome: Chrome) {
   const { badge } = createBadgeApi();
   chrome.badge = badge;
 }

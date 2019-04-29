@@ -53,6 +53,7 @@ declare const chrome: Chrome;
 
 // eslint-disable-next-line import/no-default-export
 export default chrome;
+export { Chrome };
 export { Breadcrumb } from './api/breadcrumbs';
 export { NavLink } from './api/nav';
 export { HelpExtension } from './api/help_extension';
