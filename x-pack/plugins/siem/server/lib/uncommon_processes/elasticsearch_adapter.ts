@@ -32,7 +32,7 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       'search',
       buildQuery(options)
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.process_count.value', response);
     const buckets = getOr([], 'aggregations.group_by_process.buckets', response);
     const hits = getHits(buckets);
@@ -47,11 +47,8 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       edges,
       totalCount,
       pageInfo: {
+        activePage: activePage ? activePage : 0,
         hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
       },
     };
   }

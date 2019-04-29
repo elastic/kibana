@@ -22,7 +22,7 @@ export interface UncommonProcessesArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadMore: (activePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 
@@ -33,7 +33,6 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface UncommonProcessesComponentReduxProps {
   limit: number;
-  paginationPage: number;
 }
 
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
@@ -76,32 +75,33 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
         {({ data, loading, fetchMore, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
-            variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  UncommonProcesses: {
-                    ...fetchMoreResult.source.UncommonProcesses,
-                    edges: [
-                      ...prev.source.UncommonProcesses.edges,
-                      ...fetchMoreResult.source.UncommonProcesses.edges,
-                    ],
-                  },
+          this.setFetchMoreOptions((newActivePage: number) => {
+            const cursorStart = newActivePage * limit;
+            return {
+              variables: {
+                pagination: {
+                  cursor: String(cursorStart),
+                  limit: limit + cursorStart,
+                  activePage: newActivePage,
                 },
-              };
-            },
-          }));
+              },
+              updateQuery: (prev, { fetchMoreResult }) => {
+                if (!fetchMoreResult) {
+                  return prev;
+                }
+                return {
+                  ...fetchMoreResult,
+                  source: {
+                    ...fetchMoreResult.source,
+                    UncommonProcesses: {
+                      ...fetchMoreResult.source.UncommonProcesses,
+                      edges: [...fetchMoreResult.source.UncommonProcesses.edges],
+                    },
+                  },
+                };
+              },
+            };
+          });
           return children({
             id,
             loading,

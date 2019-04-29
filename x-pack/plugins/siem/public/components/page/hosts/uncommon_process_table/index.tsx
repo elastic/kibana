@@ -25,21 +25,18 @@ import * as i18n from './translations';
 interface OwnProps {
   data: UncommonProcessesEdges[];
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
+  activePage: number;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: hostsModel.HostsType;
 }
 
 interface UncommonProcessTableReduxProps {
   limit: number;
-  paginationPage: number;
 }
 
 interface UncommonProcessTableDispatchProps {
   updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
-  updatePaginationPage: ActionCreator<{ paginationPage: number; hostsType: hostsModel.HostsType }>;
 }
 
 type UncommonProcessTableProps = OwnProps &
@@ -74,34 +71,18 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 };
 
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
-  ({
-    data,
-    hasNextPage,
-    limit,
-    loading,
-    loadMore,
-    nextCursor,
-    paginationPage,
-    totalCount,
-    type,
-    updateLimitPagination,
-    updatePaginationPage,
-  }) => (
+  ({ data, limit, loading, loadMore, totalCount, type, updateLimitPagination }) => (
     <LoadMoreTable
       columns={getUncommonColumns()}
       loadingTitle={i18n.UNCOMMON_PROCESSES}
       loading={loading}
       pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
+      loadMore={(newActivePage: number) => loadMore(newActivePage)}
       limit={limit}
-      hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
       totalCount={totalCount}
       updateLimitPagination={newLimit =>
         updateLimitPagination({ limit: newLimit, hostsType: type })
-      }
-      updatePagePagination={newPage =>
-        updatePaginationPage({ paginationPage: newPage, hostsType: type })
       }
       title={
         <h3>
@@ -114,7 +95,6 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  // const getPagePagination = hostsSelectors.uncommonProcessesSelector();
   const mapStateToProps = (state: State, { type }: OwnProps) => ({
     ...getUncommonProcessesSelector(state, type),
   });
@@ -125,7 +105,6 @@ export const UncommonProcessTable = connect(
   makeMapStateToProps,
   {
     updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
-    updatePaginationPage: hostsActions.updatePaginationPage,
   }
 )(UncommonProcessTableComponent);
 

@@ -1527,6 +1527,12 @@
             "defaultValue": null
           },
           {
+            "name": "activePage",
+            "description": "The active page parameter defines the page of results you want to fetch",
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "defaultValue": null
+          },
+          {
             "name": "tiebreaker",
             "description": "The tiebreaker parameter allow to be more precise to fetch the next item",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
@@ -2141,6 +2147,22 @@
         "name": "PageInfo",
         "description": "",
         "fields": [
+          {
+            "name": "activePage",
+            "description": "",
+            "args": [],
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "startCursor",
+            "description": "",
+            "args": [],
+            "type": { "kind": "OBJECT", "name": "CursorType", "ofType": null },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "endCursor",
             "description": "",

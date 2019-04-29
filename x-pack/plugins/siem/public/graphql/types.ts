@@ -281,6 +281,10 @@ export interface CursorType {
 }
 
 export interface PageInfo {
+  activePage?: number | null;
+
+  startCursor?: CursorType | null;
+
   endCursor?: CursorType | null;
 
   hasNextPage?: boolean | null;
@@ -1127,6 +1131,8 @@ export interface PaginationInput {
   limit: number;
   /** The cursor parameter defines the next result you want to fetch */
   cursor?: string | null;
+  /** The active page parameter defines the page of results you want to fetch */
+  activePage?: number | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
 }
@@ -3444,6 +3450,8 @@ export namespace GetUncommonProcessesQuery {
 
   export type PageInfo = {
     __typename?: 'PageInfo';
+
+    activePage?: number | null;
 
     endCursor?: EndCursor | null;
 

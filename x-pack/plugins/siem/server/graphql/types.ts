@@ -310,6 +310,10 @@ export interface CursorType {
 }
 
 export interface PageInfo {
+  activePage?: number | null;
+
+  startCursor?: CursorType | null;
+
   endCursor?: CursorType | null;
 
   hasNextPage?: boolean | null;
@@ -1156,6 +1160,8 @@ export interface PaginationInput {
   limit: number;
   /** The cursor parameter defines the next result you want to fetch */
   cursor?: string | null;
+  /** The active page parameter defines the page of results you want to fetch */
+  activePage?: number | null;
   /** The tiebreaker parameter allow to be more precise to fetch the next item */
   tiebreaker?: string | null;
 }
@@ -2451,11 +2457,25 @@ export namespace CursorTypeResolvers {
 
 export namespace PageInfoResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
+    activePage?: ActivePageResolver<number | null, TypeParent, Context>;
+
+    startCursor?: StartCursorResolver<CursorType | null, TypeParent, Context>;
+
     endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
 
     hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
   }
 
+  export type ActivePageResolver<
+    R = number | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type StartCursorResolver<
+    R = CursorType | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
   export type EndCursorResolver<
     R = CursorType | null,
     Parent = PageInfo,

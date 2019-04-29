@@ -26,6 +26,8 @@ export const sharedSchema = gql`
     limit: Float!
     "The cursor parameter defines the next result you want to fetch"
     cursor: String
+    "The active page parameter defines the page of results you want to fetch"
+    activePage: Float
     "The tiebreaker parameter allow to be more precise to fetch the next item"
     tiebreaker: String
   }
@@ -53,8 +55,7 @@ export const sharedSchema = gql`
   }
 
   type PageInfo {
-    endCursor: CursorType
-    hasNextPage: Boolean
+    activePage: Float
   }
 
   enum IndexType {

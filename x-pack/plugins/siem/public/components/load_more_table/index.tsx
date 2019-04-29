@@ -6,7 +6,6 @@
 
 import {
   EuiBasicTable,
-  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -44,11 +43,10 @@ export interface Criteria {
 
 interface BasicTableProps<T> {
   columns: Array<Columns<T>>;
-  hasNextPage: boolean;
   limit: number;
   loading: boolean;
   loadingTitle?: string;
-  loadMore: () => void;
+  loadMore: (activePage: number) => void;
   itemsPerRow?: ItemsPerRow[];
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -100,7 +98,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
   public render() {
     const {
       columns,
-      hasNextPage,
       itemsPerRow,
       limit,
       loading,
@@ -113,10 +110,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       updateLimitPagination,
     } = this.props;
     const { isEmptyTable } = this.state;
-
-    // if (this.props.pageOfItems.length > 0) {
-    //   debugger;
-    // }
     const pageCount = Math.ceil(totalCount / limit);
 
     if (loading && isEmptyTable) {
@@ -192,50 +185,48 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                 : null
             }
           />
-          {hasNextPage && (
-            <FooterAction>
-              <EuiFlexGroup
-                gutterSize="none"
-                alignItems="flexStart"
-                justifyContent="flexStart"
-                direction="row"
-              >
-                <EuiFlexItem grow={false}>
-                  {!isEmpty(itemsPerRow) && (
-                    <EuiPopover
-                      id="customizablePagination"
-                      data-test-subj="loadingMoreSizeRowPopover"
-                      button={button}
-                      isOpen={this.state.isPopoverOpen}
-                      closePopover={this.closePopover}
-                      panelPaddingSize="none"
-                    >
-                      <EuiContextMenuPanel
-                        items={rowItems}
-                        data-test-subj="loadingMorePickSizeRow"
-                      />
-                    </EuiPopover>
-                  )}
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiFlexGroup
-                    gutterSize="none"
-                    alignItems="flexStart"
-                    justifyContent="center"
-                    direction="row"
+          <FooterAction>
+            <EuiFlexGroup
+              gutterSize="none"
+              alignItems="flexStart"
+              justifyContent="flexStart"
+              direction="row"
+            >
+              <EuiFlexItem grow={false}>
+                {!isEmpty(itemsPerRow) && (
+                  <EuiPopover
+                    id="customizablePagination"
+                    data-test-subj="loadingMoreSizeRowPopover"
+                    button={button}
+                    isOpen={this.state.isPopoverOpen}
+                    closePopover={this.closePopover}
+                    panelPaddingSize="none"
                   >
-                    <EuiFlexItem grow={false}>
-                      <EuiPagination
-                        pageCount={pageCount}
-                        activePage={this.state.activePage}
-                        onPageClick={this.goToPage}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </FooterAction>
-          )}
+                    <EuiContextMenuPanel
+                      items={rowItems}
+                      data-test-subj="loadingMorePickSizeRow"
+                    />
+                  </EuiPopover>
+                )}
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiFlexGroup
+                  gutterSize="none"
+                  alignItems="flexStart"
+                  justifyContent="center"
+                  direction="row"
+                >
+                  <EuiFlexItem grow={false}>
+                    <EuiPagination
+                      pageCount={pageCount}
+                      activePage={this.state.activePage}
+                      onPageClick={this.goToPage}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </FooterAction>
         </BasicTableContainer>
       </EuiPanel>
     );
@@ -255,11 +246,11 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
     });
   };
 
-  private goToPage = (pageNumber: number) => {
+  private goToPage = (activePage: number) => {
     this.setState({
-      activePage: pageNumber,
+      activePage,
     });
-    this.props.loadMore();
+    this.props.loadMore(activePage);
   };
 }
 

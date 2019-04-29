@@ -130,20 +130,21 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                       loadMore,
                       id,
                       refetch,
-                    }) => (
-                      <UncommonProcessTableManage
-                        id={id}
-                        refetch={refetch}
-                        setQuery={setQuery}
-                        loading={loading}
-                        data={uncommonProcesses}
-                        totalCount={totalCount}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        loadMore={loadMore}
-                        type={type}
-                      />
-                    )}
+                    }) => {
+                      return (
+                        <UncommonProcessTableManage
+                          id={id}
+                          refetch={refetch}
+                          setQuery={setQuery}
+                          loading={loading}
+                          data={uncommonProcesses}
+                          totalCount={totalCount}
+                          activePage={getOr(0, 'activePage', pageInfo)!}
+                          loadMore={loadMore}
+                          type={type}
+                        />
+                      );
+                    }}
                   </UncommonProcessesQuery>
 
                   <EuiSpacer />
