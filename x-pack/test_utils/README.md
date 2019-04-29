@@ -68,6 +68,27 @@ describe('<RemoteClusterList />', () => {
 });
 ```
 
+## Chrome extension
+
+There is a small Chrome extension that you can install in order to track the test subject on the current page. As it is meant to be used 
+during development, the extension is only active when navigating a `localhost` URL.
+
+You will find the "Test subjects finder" extension in the `x-pack/test_utils/chrome_extension` folder. In order to install it, simply open the
+"extensions" window in Chrome then drag and drop the `test_subjects_finder.crx` file on the window.
+
+You can specify a DOM node (the tree "root") from which the test subjects will be found. If you don't specify any, the document `<body>` 
+will be used. The output format can either be `Typescript` (to export a string union type) or `List`. If you use Typescript, 
+the union type will give you autocomplete on the test subjects in your test, you just need to provide the union type when registring the Testbed.
+
+```ts
+// my_component.helpers.ts
+
+type TestSubjects = 'addButton'
+ | 'autoFollowPatternForm';
+
+export const setup = registerTestBed<TestSubjects>(MyComponent);
+```
+
 ## API
 
 ## `registerTestBed(Component [, testBedConfig])`
