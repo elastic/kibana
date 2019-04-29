@@ -38,11 +38,10 @@ function areBoundsValid({ min, max }: Bounds): boolean {
 }
 
 function ExtendedBoundsParamEditor({
-  agg,
   value,
   setValue,
   setValidity,
-  isInvalid,
+  showValidation,
   setTouched,
 }: AggParamEditorProps<Bounds>) {
   const minLabel = i18n.translate('common.ui.aggTypes.extendedBounds.minLabel', {
@@ -53,31 +52,33 @@ function ExtendedBoundsParamEditor({
     defaultMessage: 'Max',
   });
 
+  const isValid = areBoundsValid(value);
   let error;
 
-  if (isInvalid) {
+  if (!isValid) {
     error = i18n.translate('common.ui.aggTypes.extendedBounds.errorMessage', {
-      defaultMessage: 'Min should be less than or equal to Max',
+      defaultMessage: 'Min should be less than or equal to Max.',
     });
   }
 
-  useEffect(() => {
-    setValidity(areBoundsValid(value));
+  useEffect(
+    () => {
+      setValidity(isValid);
 
-    return () => setValidity(true);
-  }, []);
+      return () => setValidity(true);
+    },
+    [isValid]
+  );
 
   const handleChange = (ev: ChangeEvent<HTMLInputElement>, name: string) => {
-    const updatedValue = {
+    setValue({
       ...value,
       [name]: ev.target.value === '' ? '' : parseFloat(ev.target.value),
-    };
-    setValidity(areBoundsValid(updatedValue));
-    setValue(updatedValue);
+    });
   };
 
   return (
-    <EuiFormRow fullWidth={true} isInvalid={isInvalid} error={error}>
+    <EuiFormRow fullWidth={true} isInvalid={showValidation ? !isValid : false} error={error}>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldNumber
@@ -85,7 +86,7 @@ function ExtendedBoundsParamEditor({
             onChange={ev => handleChange(ev, 'min')}
             onBlur={setTouched}
             fullWidth={true}
-            isInvalid={isInvalid}
+            isInvalid={showValidation ? !isValid : false}
             aria-label={minLabel}
             prepend={
               <EuiText size="xs">
@@ -100,7 +101,7 @@ function ExtendedBoundsParamEditor({
             onChange={ev => handleChange(ev, 'max')}
             onBlur={setTouched}
             fullWidth={true}
-            isInvalid={isInvalid}
+            isInvalid={showValidation ? !isValid : false}
             aria-label={maxLabel}
             prepend={
               <EuiText size="xs">

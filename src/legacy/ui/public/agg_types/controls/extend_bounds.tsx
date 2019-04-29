@@ -34,11 +34,11 @@ function ExtendBoundsParamEditor(props: AggParamEditorProps<boolean>) {
   return (
     <SwitchParamEditor
       displayLabel={i18n.translate('common.ui.aggTypes.extendedBoundsLabel', {
-        defaultMessage: 'Extend bounds?',
+        defaultMessage: 'Extend bounds',
       })}
       displayToolTip={i18n.translate('common.ui.aggTypes.extendedBoundsTooltip', {
         defaultMessage:
-          'Min and Max do not filter the results, but rather extend the bounds of the result set',
+          'Min and Max do not filter the results, but rather extend the bounds of the result set.',
       })}
       disabled={
         !props.agg.params.min_doc_count ||
