@@ -4,9 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Promise from 'bluebird';
 import {
-  CONFIG_TELEMETRY,
   REPORT_INTERVAL_MS,
   LOCALSTORAGE_KEY,
 } from '../../common/constants';
@@ -19,38 +17,34 @@ export class Telemetry {
    */
   constructor($injector, fetchTelemetry) {
     this._storage = $injector.get('localStorage');
-    this._config = $injector.get('config');
     this._$http = $injector.get('$http');
     this._telemetryUrl = $injector.get('telemetryUrl');
-    this._attributes = this._storage.get(LOCALSTORAGE_KEY) || {};
+    this._telemetryOptedIn = $injector.get('telemetryOptedIn');
     this._fetchTelemetry = fetchTelemetry;
-  }
+    this._sending = false;
 
-  _set(key, value) {
-    this._attributes[key] = value;
-  }
-
-  _get(key) {
-    return this._attributes[key];
+    // try to load the local storage data
+    const attributes = this._storage.get(LOCALSTORAGE_KEY) || {};
+    this._lastReport = attributes.lastReport;
   }
 
   _saveToBrowser() {
-    this._storage.set(LOCALSTORAGE_KEY, this._attributes);
+    // we are the only code that manipulates this key, so it's safe to blindly overwrite the whole object
+    this._storage.set(LOCALSTORAGE_KEY, { lastReport: this._lastReport });
   }
 
-  /*
-   * Check time interval passage
+  /**
+   * Determine if we are due to send a new report.
+   *
+   * @returns {Boolean} true if a new report should be sent. false otherwise.
    */
   _checkReportStatus() {
-    // check if opt-in for telemetry is enabled in config
-    if (this._config.get(CONFIG_TELEMETRY, false)) {
-      // If the last report is empty it means we've never sent telemetry and
-      // now is the time to send it.
-      if (!this._get('lastReport')) {
-        return true;
-      }
+    // check if opt-in for telemetry is enabled
+    if (this._telemetryOptedIn) {
+      // returns NaN for any malformed or unset (null/undefined) value
+      const lastReport = parseInt(this._lastReport, 10);
       // If it's been a day since we last sent telemetry
-      if (Date.now() - parseInt(this._get('lastReport'), 10) > REPORT_INTERVAL_MS) {
+      if (isNaN(lastReport) || (Date.now() - lastReport) > REPORT_INTERVAL_MS) {
         return true;
       }
     }
@@ -58,15 +52,20 @@ export class Telemetry {
     return false;
   }
 
-  /*
+  /**
    * Check report permission and if passes, send the report
+   *
+   * @returns {Promise} Always.
    */
   _sendIfDue() {
-    if (!this._checkReportStatus()) { return Promise.resolve(null); }
+    if (this._sending || !this._checkReportStatus()) { return Promise.resolve(false); }
+
+    // mark that we are working so future requests are ignored until we're done
+    this._sending = true;
 
     return this._fetchTelemetry()
       .then(response => {
-        return response.data.map(cluster => {
+        return Promise.all(response.data.map(cluster => {
           const req = {
             method: 'POST',
             url: this._telemetryUrl,
@@ -75,35 +74,30 @@ export class Telemetry {
           // if passing data externally, then suppress kbnXsrfToken
           if (this._telemetryUrl.match(/^https/)) { req.kbnXsrfToken = false; }
           return this._$http(req);
-        });
+        }));
       })
-      .then(response => {
-      // we sent a report, so we need to record and store the current time stamp
-        this._set('lastReport', Date.now());
+      // the response object is ignored because we do not check it
+      .then(() => {
+        // we sent a report, so we need to record and store the current timestamp
+        this._lastReport = Date.now();
         this._saveToBrowser();
-        return response;
       })
-      .catch(() => {
       // no ajaxErrorHandlers for telemetry
-        return Promise.resolve(null);
+      .catch(() => null)
+      .then(() => {
+        this._sending = false;
+        return true; // sent, but not necessarilly successfully
       });
   }
 
-  /*
+  /**
    * Public method
+   *
+   * @returns {Number} `window.setInterval` response to allow cancelling the interval.
    */
   start() {
-    // delay the initial report to allow the user some time to read the opt-out message
-    let hasWaited = false;
-
     // continuously check if it's due time for a report
-    window.setInterval(() => {
-      if (hasWaited) {
-        // throw away the return data
-        this._sendIfDue();
-      }
-      hasWaited = true;
-    }, 60000);
+    return window.setInterval(() => this._sendIfDue(), 60000);
   }
 
 } // end class

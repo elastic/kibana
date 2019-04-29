@@ -1,10 +1,4 @@
-$tabBackgroundColor: #FFF;
-$tabHoverBackgroundColor: #F2F2F2;
-
-// Dark theme colors
-$tabColor--darkTheme: $kuiTextColor--darkTheme;
-$tabBackgroundColor--darkTheme: #333333;
-$tabHoverBackgroundColor--darkTheme: $kuiBackgroundColor--darkTheme;
-$tabBorderColor--darkTheme: $kuiBackgroundColor--darkTheme;
+$tabBackgroundColor: transparent;
+$tabHoverBackgroundColor: $euiColorLightestShade;
 
 @import "tabs";

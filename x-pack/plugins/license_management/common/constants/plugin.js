@@ -5,5 +5,5 @@
  */
 
 export const PLUGIN = {
-  ID: 'license_management'
+  ID: 'license_management',
 };

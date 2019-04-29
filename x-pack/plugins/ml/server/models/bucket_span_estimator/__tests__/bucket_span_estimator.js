@@ -7,7 +7,7 @@
 
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { estimateBucketSpanFactory } from '../bucket_span_estimator';
 
 // Mock callWithRequest with the ability to simulate returning different
@@ -39,7 +39,7 @@ const callWithRequest = (method) => {
 import * as mockModule from '../../../client/call_with_internal_user_factory';
 
 // mock server
-function mockServerFactory(isEnabled = false) {
+function mockServerFactory(isEnabled = false, licenseType = 'platinum') {
   return {
     plugins: {
       xpack_main: {
@@ -47,7 +47,10 @@ function mockServerFactory(isEnabled = false) {
           isAvailable: () => true,
           feature: () => ({
             isEnabled: () => isEnabled
-          })
+          }),
+          license: {
+            getType: () => licenseType
+          }
         }
       }
     }
@@ -59,11 +62,10 @@ const formConfig = {
   aggTypes: ['count'],
   duration: {},
   fields: [null],
-  filters: [],
   index: '',
   query: {
     bool: {
-      must: [{ query_string: { analyze_wildcard: true, query: '*' } }],
+      must: [{ match_all: {} }],
       must_not: []
     }
   }

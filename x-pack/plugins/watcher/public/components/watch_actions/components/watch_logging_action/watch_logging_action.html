@@ -2,9 +2,9 @@
   <label
     for="{{watchLoggingAction.makeId('text')}}"
     class="kuiFormLabel"
-  >
-    Log text
-  </label>
+    i18n-id="xpack.watcher.watchActions.logging.logTextLabel"
+    i18n-default-message="Log text"
+  ></label>
   <input
     type="text"
     id="{{watchLoggingAction.makeId('text')}}"
@@ -19,7 +19,7 @@
     xpack-aria-describes="{{watchLoggingAction.makeId('text')}}"
     class="kuiInputNote kuiInputNote--danger"
     ng-if="watchLoggingAction.isValidationMessageVisible('text', 'required')"
-  >
-    Log text is required.
-  </div>
+    i18n-id="xpack.watcher.watchActions.logging.logTextIsRequiredValidationMessage"
+    i18n-default-message="Log text is required."
+  ></div>
 </div>

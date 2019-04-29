@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UnauthorizedPrompt renders as expected 1`] = `
+<EuiEmptyPrompt
+  body={
+    <p
+      data-test-subj="permissionDeniedMessage"
+    >
+      <FormattedMessage
+        defaultMessage="You do not have permission to manage spaces."
+        id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedDescription"
+        values={Object {}}
+      />
+    </p>
+  }
+  iconColor="danger"
+  iconType="spacesApp"
+  title={
+    <h2>
+      <FormattedMessage
+        defaultMessage="Permission denied"
+        id="xpack.spaces.management.unauthorizedPrompt.permissionDeniedTitle"
+        values={Object {}}
+      />
+    </h2>
+  }
+/>
+`;

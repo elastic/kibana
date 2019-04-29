@@ -5,6 +5,7 @@
  */
 
 import { get, isEmpty, omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 
 /**
  * This model captures the grok debugger response from upstream to be passed to
@@ -21,7 +22,14 @@ export class GrokdebuggerResponse {
     const docs = get(upstreamGrokdebuggerResponse, 'docs');
     const error = docs[0].error;
     if (!isEmpty(error)) {
-      const opts = { 'error': 'Provided Grok patterns do not match data in the input' };
+      const opts = { 'error': i18n.translate(
+        'xpack.grokDebugger.patternsErrorMessage', {
+          defaultMessage: 'Provided {grokLogParsingTool} patterns do not match data in the input',
+          values: {
+            grokLogParsingTool: 'Grok'
+          }
+        }
+      ), };
       return new GrokdebuggerResponse(opts);
     }
     const structuredEvent = omit(get(docs, '0.doc._source'), 'rawEvent');

@@ -5,7 +5,7 @@
  */
 
 import { get, omit } from 'lodash';
-import { fromCallback } from 'bluebird';
+import { promisify } from 'util';
 import { CloudService } from './cloud_service';
 import { CloudServiceResponse } from './cloud_response';
 import { CLOUD_METADATA_SERVICES } from '../../common/constants';
@@ -30,9 +30,11 @@ class AzureCloudService extends CloudService {
       json: true
     };
 
-    return fromCallback(callback => request(req, callback), { multiArgs: true })
+    return promisify(request)(req)
     // Note: there is no fallback option for Azure
-      .then(response => this._parseResponse(response[1], (body) => this._parseBody(body)));
+      .then(response => {
+        return this._parseResponse(response.body, (body) => this._parseBody(body));
+      });
   }
 
   /**

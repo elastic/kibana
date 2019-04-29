@@ -2,17 +2,10 @@
 
 exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
     className="scope-field-checkbox"
-    component="div"
     grow={false}
   >
     <EuiCheckbox
@@ -25,15 +18,20 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
+      value="domain"
     />
   </EuiFlexItem>
 </EuiFlexGroup>
@@ -41,17 +39,10 @@ exports[`ScopeExpression renders when empty list of filter IDs is supplied 1`] =
 
 exports[`ScopeExpression renders when enabled set to false 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
     className="scope-field-checkbox"
-    component="div"
     grow={false}
   >
     <EuiCheckbox
@@ -64,32 +55,47 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
+      value="domain"
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="safe_domains"
-          description="is in"
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "in",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
+          value="safe_domains"
         />
       }
       closePopover={[Function]}
+      hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
@@ -104,25 +110,23 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -152,7 +156,6 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -186,7 +189,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -195,17 +198,10 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
 
 exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
     className="scope-field-checkbox"
-    component="div"
     grow={false}
   >
     <EuiCheckbox
@@ -218,32 +214,47 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
+      value="domain"
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue="safe_domains"
-          description="is in"
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "in",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
+          value="safe_domains"
         />
       }
       closePopover={[Function]}
+      hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
@@ -258,25 +269,23 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -306,7 +315,6 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -340,7 +348,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>
@@ -349,17 +357,10 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
 
 exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
   gutterSize="m"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
     className="scope-field-checkbox"
-    component="div"
     grow={false}
   >
     <EuiCheckbox
@@ -372,32 +373,47 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
-    <EuiExpressionButton
-      buttonValue="domain"
+    <EuiExpression
       className="scope-field-button"
-      description="when"
+      description={
+        <FormattedMessage
+          defaultMessage="when"
+          id="xpack.ml.ruleEditor.scopeExpression.scopeFieldWhenLabel"
+          values={Object {}}
+        />
+      }
       isActive={false}
       onClick={[Function]}
+      value="domain"
     />
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiPopover
       anchorPosition="downLeft"
       button={
-        <EuiExpressionButton
-          buttonValue=""
-          description="is "
+        <EuiExpression
+          description={
+            <FormattedMessage
+              defaultMessage="is {filterType}"
+              id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypeButtonLabel"
+              values={
+                Object {
+                  "filterType": "",
+                }
+              }
+            />
+          }
           isActive={false}
           onClick={[Function]}
+          value=""
         />
       }
       closePopover={[Function]}
+      hasArrow={true}
       id="operatorValuePopover"
       isOpen={false}
       ownFocus={true}
@@ -412,25 +428,23 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
         }
       >
         <EuiPopoverTitle>
-          Is
+          <FormattedMessage
+            defaultMessage="Is"
+            id="xpack.ml.ruleEditor.scopeExpression.scopeFilterTypePopoverTitle"
+            values={Object {}}
+          />
         </EuiPopoverTitle>
-        <EuiExpression>
+        <div
+          className="euiExpression"
+        >
           <EuiFlexGroup
-            alignItems="stretch"
-            component="div"
-            direction="row"
-            gutterSize="l"
-            justifyContent="flexStart"
-            responsive={true}
             style={
               Object {
                 "maxWidth": 450,
               }
             }
-            wrap={false}
           >
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -459,7 +473,6 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
               />
             </EuiFlexItem>
             <EuiFlexItem
-              component="div"
               grow={false}
               style={
                 Object {
@@ -492,7 +505,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiExpression>
+        </div>
       </div>
     </EuiPopover>
   </EuiFlexItem>

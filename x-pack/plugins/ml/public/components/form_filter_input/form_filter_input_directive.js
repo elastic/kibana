@@ -12,7 +12,7 @@ import angular from 'angular';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlFormFilterInput', function () {
+module.directive('mlFormFilterInput', function (i18n) {
   return {
     scope: {
       placeholder: '@?',
@@ -25,7 +25,15 @@ module.directive('mlFormFilterInput', function () {
     replace: false,
     template,
     link(scope) {
-      scope.placeholder = angular.isDefined(scope.placeholder) ? scope.placeholder : 'Filter';
+      const placeholderIsDefined = angular.isDefined(scope.placeholder);
+
+      scope.placeholder = placeholderIsDefined
+        ? scope.placeholder
+        : i18n('xpack.ml.formFilterInput.filterPlaceholder', { defaultMessage: 'Filter' });
+
+      scope.ariaLabel = placeholderIsDefined
+        ? scope.placeholder
+        : i18n('xpack.ml.formFilterInput.filterAriaLabel', { defaultMessage: 'Filter' });
     }
   };
 });

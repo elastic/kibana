@@ -16,6 +16,7 @@ import {
   EuiHealth,
   EuiText,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function HealthStatusIndicator(props) {
 
@@ -29,7 +30,11 @@ export function HealthStatusIndicator(props) {
 
   return (
     <EuiHealth color={statusColor} data-test-subj="statusIcon">
-      Health is {props.status}
+      <FormattedMessage
+        id="xpack.monitoring.cluster.overview.healthStatusDescription"
+        defaultMessage="Health is {status}"
+        values={{ status: props.status }}
+      />
     </EuiHealth>
   );
 }
@@ -53,6 +58,7 @@ export function ClusterItemContainer(props) {
     kibana: 'logoKibana',
     logstash: 'logoLogstash',
     beats: 'logoBeats',
+    apm: 'apmApp'
   };
   const icon = iconMap[props.url];
 

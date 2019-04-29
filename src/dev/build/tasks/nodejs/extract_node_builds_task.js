@@ -27,7 +27,7 @@ export const ExtractNodeBuildsTask = {
   description: 'Extracting node.js builds for all platforms',
   async run(config) {
     await Promise.all(
-      config.getPlatforms().map(async platform => {
+      config.getNodePlatforms().map(async platform => {
         const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
 
         // windows executable is not extractable, it's just a .exe file

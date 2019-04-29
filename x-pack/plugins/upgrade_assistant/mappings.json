@@ -1,0 +1,65 @@
+{
+  "upgrade-assistant-reindex-operation": {
+    "dynamic": true,
+    "properties": {
+      "indexName": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "integer"
+      }
+    }
+  },
+  "upgrade-assistant-telemetry": {
+    "properties": {
+      "ui_open": {
+        "properties": {
+          "overview": {
+            "type": "long",
+            "null_value": 0
+          },
+          "cluster": {
+            "type": "long",
+            "null_value": 0
+          },
+          "indices": {
+            "type": "long",
+            "null_value": 0
+          }
+        }
+      },
+      "ui_reindex": {
+        "properties": {
+          "close": {
+            "type": "long",
+            "null_value": 0
+          },
+          "open": {
+            "type": "long",
+            "null_value": 0
+          },
+          "start": {
+            "type": "long",
+            "null_value": 0
+          },
+          "stop": {
+            "type": "long",
+            "null_value": 0
+          }
+        }
+      },
+      "features": {
+        "properties": {
+          "deprecation_logging": {
+            "properties": {
+              "enabled": {
+                "type": "boolean",
+                "null_value": true
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

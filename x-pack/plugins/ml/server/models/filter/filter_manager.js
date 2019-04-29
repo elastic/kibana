@@ -31,7 +31,7 @@ export class FilterManager {
         filter.used_by = filtersInUse[filter.filter_id];
         return filter;
       } else {
-        return Boom.notFound(`Filter with the id "${filterId}" not found`);
+        throw Boom.notFound(`Filter with the id "${filterId}" not found`);
       }
     } catch (error) {
       throw Boom.badRequest(error);
@@ -92,7 +92,7 @@ export class FilterManager {
       // Returns the newly created filter.
       return await this.callWithRequest('ml.addFilter', { filterId, body: filter });
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 
@@ -101,17 +101,24 @@ export class FilterManager {
     addItems,
     removeItems) {
     try {
+      const body = {};
+      if (description !== undefined) {
+        body.description = description;
+      }
+      if (addItems !== undefined) {
+        body.add_items = addItems;
+      }
+      if (removeItems !== undefined) {
+        body.remove_items = removeItems;
+      }
+
       // Returns the newly updated filter.
       return await this.callWithRequest('ml.updateFilter', {
         filterId,
-        body: {
-          description,
-          add_items: addItems,
-          remove_items: removeItems
-        }
+        body
       });
     } catch (error) {
-      return Boom.badRequest(error);
+      throw Boom.badRequest(error);
     }
   }
 

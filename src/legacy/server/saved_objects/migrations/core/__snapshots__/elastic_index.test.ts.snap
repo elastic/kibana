@@ -1,0 +1,41 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticIndex write writes documents in bulk to the index 1`] = `
+Array [
+  "bulk",
+  Object {
+    "body": Array [
+      Object {
+        "index": Object {
+          "_id": "niceguy:fredrogers",
+          "_index": ".myalias",
+        },
+      },
+      Object {
+        "niceguy": Object {
+          "aka": "Mr Rogers",
+        },
+        "quotes": Array [
+          "The greatest gift you ever give is your honest self.",
+        ],
+        "type": "niceguy",
+      },
+      Object {
+        "index": Object {
+          "_id": "badguy:rickygervais",
+          "_index": ".myalias",
+        },
+      },
+      Object {
+        "badguy": Object {
+          "aka": "Dominic Badguy",
+        },
+        "migrationVersion": Object {
+          "badguy": "2.3.4",
+        },
+        "type": "badguy",
+      },
+    ],
+  },
+]
+`;

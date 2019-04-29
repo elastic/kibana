@@ -10,13 +10,22 @@ import {
   KuiToolBarFooterSection,
   KuiToolBarText
 } from '@kbn/ui-framework/components';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function MonitoringTableFooter({ pageIndexFirstRow, pageIndexLastRow, rowsFiltered, paginationControls }) {
   return (
     <KuiToolBarFooter>
       <KuiToolBarFooterSection>
         <KuiToolBarText>
-          { pageIndexFirstRow } &ndash; { pageIndexLastRow } of { rowsFiltered }
+          <FormattedMessage
+            id="xpack.monitoring.table.footer.pageRowsDescription"
+            defaultMessage="{pageIndexFirstRow} &ndash; {pageIndexLastRow} of {rowsFiltered}"
+            values={{
+              pageIndexFirstRow,
+              pageIndexLastRow,
+              rowsFiltered
+            }}
+          />
         </KuiToolBarText>
 
         { paginationControls }

@@ -25,8 +25,7 @@ In this tutorial, you’ll learn to:
 * Edit a visualization
 * Inspect the data behind the scenes
 
-NOTE: If security is enabled, you must have the `all` Kibana privilege.
-You must also have access to the `kibana_sample_data_flights` index with 
-the `read`, `write,` and `manage` privileges. See {xpack-ref}/security-privileges.html[Security Privileges] 
+NOTE: If security is enabled, you must have `read`, `write`, and `manage` privileges
+on the `kibana_sample_data_*` indices. See {xpack-ref}/security-privileges.html[Security Privileges] 
 for more information.
 

@@ -15,7 +15,7 @@ import { mlJobService } from 'plugins/ml/services/job_service';
 
 let jobSelectService = undefined;
 
-export function JobSelectServiceProvider($rootScope, globalState) {
+export function JobSelectServiceProvider($rootScope, globalState, i18n) {
 
   function checkGlobalState() {
     if (globalState.ml === undefined) {
@@ -42,8 +42,9 @@ export function JobSelectServiceProvider($rootScope, globalState) {
 
       // if there are no valid ids, warn and then select the first job
       if (validIds.length === 0) {
-        const warningText = `No jobs selected, auto selecting first job`;
-        toastNotifications.addWarning(warningText);
+        toastNotifications.addWarning(i18n('xpack.ml.jobSelect.noJobsSelectedWarningMessage', {
+          defaultMessage: 'No jobs selected, auto selecting first job',
+        }));
 
         if (mlJobService.jobs.length) {
           validIds = [mlJobService.jobs[0].job_id];
@@ -89,33 +90,51 @@ export function JobSelectServiceProvider($rootScope, globalState) {
 
   function warnAboutInvalidJobIds(invalidIds) {
     if (invalidIds.length > 0) {
-      const warningText = (invalidIds.length === 1) ? `Requested job ${invalidIds} does not exist` :
-        `Requested jobs ${invalidIds} do not exist`;
-      toastNotifications.addWarning(warningText);
+      toastNotifications.addWarning(i18n('xpack.ml.jobSelect.requestedJobsDoesNotExistWarningMessage', {
+        defaultMessage: `Requested
+{invalidIdsLength, plural, one {job {invalidIds} does not exist} other {jobs {invalidIds} do not exist}}`,
+        values: {
+          invalidIdsLength: invalidIds.length,
+          invalidIds,
+        }
+      }));
     }
   }
 
   function createDescription(jobs) {
     let txt = '';
     // add up the number of jobs including duplicates if they belong to multiple groups
-    const count = mlJobService.jobs.reduce((sum, job) => {
-      return sum + ((job.groups === undefined) ? 1 : job.groups.length);
-    }, 0);
-    if (jobs.length === count) {
-      txt = 'All jobs';
-    } else {
-      // not all jobs have been selected
-      // add up how many jobs belong to groups and how many don't
-      const groupCounts = {};
-      let groupLessJobs = 0;
-      jobs.forEach(job => {
-        const obj = splitJobId(job);
-        if (obj.group) {
-          groupCounts[obj.group] = (groupCounts[obj.group] || 0) + 1;
-        } else {
+    const jobCount = mlJobService.jobs.length;
+
+    // add up how many jobs belong to groups and how many don't
+    const selectedGroupJobs = [];
+    const groupCounts = {};
+    let groupLessJobs = 0;
+    const splitJobs = jobs.map(job => {
+      const obj = splitJobId(job);
+      if (obj.group) {
+        // keep track of selected jobs from group selection
+        selectedGroupJobs.push(obj.job);
+      }
+      return obj;
+    });
+
+    splitJobs.forEach(jobObj => {
+      if (jobObj.group) {
+        groupCounts[jobObj.group] = (groupCounts[jobObj.group] || 0) + 1;
+      } else {
+        // if job has already been included via group selection don't add as groupless job
+        if (selectedGroupJobs.includes(jobObj.job) === false) {
           groupLessJobs++;
         }
+      }
+    });
+    // All jobs have been selected
+    if ((_.uniq(selectedGroupJobs).length + groupLessJobs) === jobCount) {
+      txt = i18n('xpack.ml.jobSelect.allJobsDescription', {
+        defaultMessage: 'All jobs',
       });
+    } else {
       const wholeGroups = [];
       const groups = mlJobService.getJobGroups();
       // work out how many groups have all of their jobs selected
@@ -137,13 +156,27 @@ export function JobSelectServiceProvider($rootScope, globalState) {
         txt = wholeGroups[0];
         if (wholeGroups.length > 1 || groupLessJobs > 0) {
           const total = (wholeGroups.length - 1) + groupLessJobs;
-          txt += ` and ${total} other${(total > 1 ? 's' : '')}`;
+          txt = i18n('xpack.ml.jobSelect.wholeGroupDescription', {
+            defaultMessage: `{wholeGroup} (with {count, plural, zero {# job} one {# job} other {# jobs}}) and
+            {total, plural, zero {# other} one {# other} other {# others}}`,
+            values: {
+              count: groupCounts[wholeGroups[0]],
+              wholeGroup: wholeGroups[0],
+              total,
+            }
+          });
         }
       } else {
         // otherwise just list the job ids
         txt = splitJobId(jobs[0]).job;
         if (jobs.length > 1) {
-          txt += ` and ${jobs.length - 1} other${(jobs.length > 2 ? 's' : '')}`;
+          txt = i18n('xpack.ml.jobSelect.jobDescription', {
+            defaultMessage: '{jobId} and {jobsAmount, plural, zero {# other} one {# other} other {# others}}',
+            values: {
+              jobId: splitJobId(jobs[0]).job,
+              jobsAmount: jobs.length - 1,
+            }
+          });
         }
       }
     }

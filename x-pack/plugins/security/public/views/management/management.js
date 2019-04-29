@@ -5,19 +5,18 @@
  */
 
 import 'plugins/security/views/management/change_password_form/change_password_form';
-import 'plugins/security/views/management/index_privileges_form/index_privileges_form';
 import 'plugins/security/views/management/password_form/password_form';
 import 'plugins/security/views/management/users';
 import 'plugins/security/views/management/roles';
 import 'plugins/security/views/management/edit_user';
-import 'plugins/security/views/management/edit_role';
-import 'plugins/security/views/management/management.less';
+import 'plugins/security/views/management/edit_role/index';
 import routes from 'ui/routes';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import '../../services/shield_user';
 import { ROLES_PATH, USERS_PATH } from './management_urls';
 
 import { management } from 'ui/management';
+import { i18n } from '@kbn/i18n';
 
 routes.defaults(/\/management/, {
   resolve: {
@@ -31,8 +30,12 @@ routes.defaults(/\/management/, {
 
       function ensureSecurityRegistered() {
         const registerSecurity = () => management.register('security', {
-          display: 'Security',
-          order: 10
+          display: i18n.translate(
+            'xpack.security.management.securityTitle', {
+              defaultMessage: 'Security',
+            }),
+          order: 100,
+          icon: 'securityApp',
         });
         const getSecurity = () => management.getSection('security');
 
@@ -42,7 +45,10 @@ routes.defaults(/\/management/, {
           security.register('users', {
             name: 'securityUsersLink',
             order: 10,
-            display: 'Users',
+            display: i18n.translate(
+              'xpack.security.management.usersTitle', {
+                defaultMessage: 'Users',
+              }),
             url: `#${USERS_PATH}`,
           });
         }
@@ -51,22 +57,26 @@ routes.defaults(/\/management/, {
           security.register('roles', {
             name: 'securityRolesLink',
             order: 20,
-            display: 'Roles',
+            display: i18n.translate(
+              'xpack.security.management.rolesTitle', {
+                defaultMessage: 'Roles',
+              }),
             url: `#${ROLES_PATH}`,
           });
         }
       }
 
-      deregisterSecurity();
-      if (!showSecurityLinks) return;
-
-      // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
-      // management screens
-      //
-      // $promise is used here because the result is an ngResource, not a promise itself
-      return ShieldUser.getCurrent().$promise
-        .then(ensureSecurityRegistered)
-        .catch(deregisterSecurity);
+      if (!showSecurityLinks) {
+        deregisterSecurity();
+      } else {
+        // getCurrent will reject if there is no authenticated user, so we prevent them from seeing the security
+        // management screens
+        //
+        // $promise is used here because the result is an ngResource, not a promise itself
+        return ShieldUser.getCurrent().$promise
+          .then(ensureSecurityRegistered)
+          .catch(deregisterSecurity);
+      }
     }
   }
 });

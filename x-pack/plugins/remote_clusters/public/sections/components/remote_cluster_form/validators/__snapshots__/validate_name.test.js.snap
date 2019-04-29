@@ -1,0 +1,273 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`validateName rejects empty input '   ' 1`] = `
+<FormattedMessage
+  defaultMessage="Name is required."
+  id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
+/>
+`;
+
+exports[`validateName rejects empty input 'null' 1`] = `
+<FormattedMessage
+  defaultMessage="Name is required."
+  id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
+/>
+`;
+
+exports[`validateName rejects empty input 'undefined' 1`] = `
+<FormattedMessage
+  defaultMessage="Name is required."
+  id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
+/>
+`;
+
+exports[`validateName rejects invalid characters ' ' 1`] = `
+<FormattedMessage
+  defaultMessage="Name is required."
+  id="xpack.remoteClusters.form.errors.nameMissing"
+  values={Object {}}
+/>
+`;
+
+exports[`validateName rejects invalid characters '!' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        !
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '#' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        #
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '$' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        $
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '%' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        %
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '&' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        &
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '(' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        (
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters ')' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        )
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '*' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        *
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '+' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        +
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters ',' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        ,
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '.' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        .
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '<' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        &lt;
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '>' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        &gt;
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '?' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        ?
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '@' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        @
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;
+
+exports[`validateName rejects invalid characters '^' 1`] = `
+<FormattedMessage
+  defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}} {characterList} from the name."
+  id="xpack.remoteClusters.form.errors.illegalCharacters"
+  values={
+    Object {
+      "characterList": <strong>
+        ^
+      </strong>,
+      "characterListLength": 1,
+    }
+  }
+/>
+`;

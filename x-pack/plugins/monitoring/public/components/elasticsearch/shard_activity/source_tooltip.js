@@ -5,8 +5,8 @@
  */
 
 import React, { Fragment } from 'react';
-import { EuiLink } from '@elastic/eui';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
+import { EuiLink, EuiToolTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, children }) => {
   if (!sourceTransportAddress) {
@@ -17,13 +17,30 @@ export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, chi
     <Fragment>
       {sourceTransportAddress}
       <br />
-      Copied from { isCopiedFromPrimary ? 'primary' : 'replica' } shard
+      <FormattedMessage
+        id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip"
+        defaultMessage="Copied from {copiedFrom} shard"
+        values={{
+          copiedFrom: isCopiedFromPrimary ?
+            (
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.primarySourceText"
+                defaultMessage="primary"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.monitoring.elasticsearch.shardActivity.sourceTooltip.replicaSourceText"
+                defaultMessage="replica"
+              />
+            ),
+        }}
+      />
     </Fragment>
   );
 
   return (
-    <Tooltip text={tipText} placement="bottom" trigger="hover">
+    <EuiToolTip content={tipText} position="bottom">
       <EuiLink>{children}</EuiLink>
-    </Tooltip>
+    </EuiToolTip>
   );
 };

@@ -8,6 +8,7 @@
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { populateAppStateSettings } from 'plugins/ml/jobs/new_job/simple/components/utils/app_state_settings';
 import { WIZARD_TYPE } from 'plugins/ml/jobs/new_job/simple/components/constants/general';
+import { setFullTimeRange } from '../../../../../components/full_time_range_selector/full_time_range_selector_service';
 
 
 export function preLoadJob($scope, appState) {
@@ -16,7 +17,7 @@ export function preLoadJob($scope, appState) {
   if (job !== undefined) {
     const mlJobSettings = jobSettingsFromJob(job, $scope.ui.aggTypeOptions);
     populateAppStateSettings({ mlJobSettings }, $scope);
-    $scope.setFullTimeRange()
+    setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery)
       .then(() => $scope.loadVis())
       .catch(() => $scope.loadVis());
   } else {
@@ -33,7 +34,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
 
   function getKibanaAggName(mlAggName) {
     const agg = aggTypeOptions.find(a => a.mlName === mlAggName);
-    return (agg) ? agg.name : undefined;
+    return (agg) ? agg.mlName : undefined;
   }
 
   const jobSettings = {};
@@ -43,9 +44,26 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
   if (job.custom_settings.created_by === WIZARD_TYPE.SINGLE_METRIC) {
     // single metric
     const d = dtrs[0];
-    const field = { agg: getKibanaAggName(d.function, aggTypeOptions) };
+    let func = d.function;
+
+    // distinct_count jobs in single metric wizard use a particular aggregation where
+    // the detector function is replaced as non_zero_count.
+    // here we look for this exact situation and switch the function back to distinct_count
+    if (
+      func === 'non_zero_count' &&
+      job.analysis_config.summary_count_field_name !== undefined &&
+      job.analysis_config.summary_count_field_name.match(/^dc_.+/)) {
+      func = 'distinct_count';
+    }
+
+    const field = { agg: getKibanaAggName(func) };
     if (d.field_name) {
       field.fieldName = d.field_name;
+    } else if (func === 'distinct_count' && job.analysis_config.summary_count_field_name !== undefined) {
+      const fieldMatch = job.analysis_config.summary_count_field_name.match(/^dc_(.+)/);
+      if (fieldMatch[1] !== undefined) {
+        field.fieldName = fieldMatch[1];
+      }
     }
 
     jobSettings.fields = [field];
@@ -58,7 +76,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
         splitField = d.partition_field_name;
       }
 
-      const field = { agg: getKibanaAggName(d.function, aggTypeOptions) };
+      const field = { agg: getKibanaAggName(d.function) };
       if (d.field_name) {
         field.fieldName = d.field_name;
       }
@@ -79,7 +97,7 @@ export function jobSettingsFromJob(job, aggTypeOptions) {
         overField = d.over_field_name;
       }
 
-      const field = { agg: getKibanaAggName(d.function, aggTypeOptions) };
+      const field = { agg: getKibanaAggName(d.function) };
       if (d.field_name) {
         field.fieldName = d.field_name;
       }

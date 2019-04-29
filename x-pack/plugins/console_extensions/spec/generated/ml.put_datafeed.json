@@ -1,0 +1,11 @@
+{
+  "ml.put_datafeed": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_ml/datafeeds/{datafeed_id}"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-put-datafeed.html"
+  }
+}

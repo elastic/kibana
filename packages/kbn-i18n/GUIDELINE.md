@@ -6,23 +6,25 @@
 
 The message ids chosen for message keys are descriptive of the string, and its role in the interface (button, label, header, etc.). Each message id ends with a descriptive type. Types are defined at the end of message id by combining to the last segment using camel case.
 
-The following types are supported:
-- header
-- label
-- button
-- dropDown
-- placeholder
-- tooltip
-- aria
-- errorMessage
-- toggleSwitch
-- link and etc.
+Ids should end with:
 
-There is one more complex case, when we have to divide a single expression into different labels. 
+- Description (in most cases if it's `<p>` tag),
+- Title (if it's `<h1>`, `<h2>`, etc. tags),
+- Label (if it's `<label>` tag),
+- ButtonLabel (if it's `<button>` tag),
+- DropDownOptionLabel (if it'a an option),
+- Placeholder (if it's a placeholder),
+- Tooltip (if it's a tootltip),
+- AriaLabel (if it's `aria-label` tag attribute),
+- ErrorMessage (if it's an error message),
+- LinkText (if it's `<a>` tag),
+- ToggleSwitch and etc.
+
+There is one more complex case, when we have to divide a single expression into different labels.
 
 For example the message before translation looks like:
 
-  ```js
+  ```html
   <p>
       The following deprecated languages are in use: {deprecatedLangsInUse.join(', ')}. Support for these languages will be removed in the next major version of Kibana and Elasticsearch. Convert your scripted fields to <EuiLink href={painlessDocLink}>Painless</EuiLink> to avoid any problems.
   </p>
@@ -45,7 +47,7 @@ For example:
 
 ```js
 {
-  'kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessLink': 'Painless'
+  'kbn.management.editIndexPattern.scripted.deprecationLangLabel.painlessLinkLabel': 'Painless'
 }
 ```
 
@@ -60,7 +62,7 @@ Messages can contain placeholders for embedding a value of a variable. For examp
 }
 ```
 
-Mostly such placeholders have meaningful name according to the сontent.
+Mostly such placeholders have meaningful name according to the content.
 
 ### Pluralization
 
@@ -78,12 +80,35 @@ In case when `indicesLength` has value 1, the result string will be "`1 index`".
 
 ## Best practices
 
+### Usage of appropriate component
+
+#### In ReactJS
+
+- You should use `<FormattedMessage>` most of the time.
+- In case when the string is expected (`aria-label`, `placeholder`), use `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
+- In case if none of the above can not be applied (e.g. it's needed to translate any code that doesn't have access to the component props), you can call JS function `i18n.translate()` from `@kbn/i18n` package.
+
+#### In AngularJS
+
+- Use `i18n` service in controllers, directives, services by injected it.
+- Use `i18nId` directive in template.
+- Use `i18n` filter in template for attribute translation.
+- In case if none of the above can not be applied, you can call JS function `i18n.translate()` from `@kbn/i18n` package.
+
+Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
+
+#### In JavaScript
+
+- Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@kbn/i18n` package.
 
 ### Naming convention
 
 The message ids chosen for message keys should always be descriptive of the string, and its role in the interface (button label, title, etc.). Think of them as long variable names. When you have to change a message id, adding a progressive number to the existing key should always be used as a last resort.
+Here's a rule of id maning:
 
-- Message id should start with namespace (`kbn`, `common.ui` and etc.). 
+`{plugin}.{area}.[{sub-area}].{element}`
+
+- Message id should start with namespace that identifies a functional area of the app (`common.ui` or `common.server`) or a plugin (`kbn`, `vega`, etc.).
 
     For example:
 
@@ -97,10 +122,10 @@ The message ids chosen for message keys should always be descriptive of the stri
 - Each message id should end with a type. For example:
 
   ```js
-  'kbn.management.editIndexPattern.createIndexButton'
-  'kbn.management.editIndexPattern.mappingConflictHeader'
+  'kbn.management.editIndexPattern.createIndexButtonLabel'
+  'kbn.management.editIndexPattern.mappingConflictTitle'
   'kbn.management.editIndexPattern.mappingConflictLabel'
-  'kbn.management.editIndexPattern.fields.filterAria'
+  'kbn.management.editIndexPattern.fields.filterAriaLabel'
   'kbn.management.editIndexPattern.fields.filterPlaceholder'
   'kbn.management.editIndexPattern.refreshTooltip'
   'kbn.management.editIndexPattern.fields.allTypesDropDown'
@@ -146,19 +171,18 @@ The message ids chosen for message keys should always be descriptive of the stri
   />
   ```
 
-
 ### Defining type for message
 
 Each message id should end with a type of the message.
 
 | type | example message id |
 | --- | --- |
-| header | `kbn.management.createIndexPatternHeader` |
+| header | `kbn.management.createIndexPatternTitle` |
 | label | `kbn.management.createIndexPatternLabel ` |
-| button | `kbn.management.editIndexPattern.scripted.addFieldButton` |
+| button | `kbn.management.editIndexPattern.scripted.addFieldButtonLabel` |
 | drop down | `kbn.management.editIndexPattern.fields.allTypesDropDown` |
 | placeholder | `kbn.management.createIndexPattern.stepTime.options.patternPlaceholder` |
-| `aria-label` attribute | `kbn.management.editIndexPattern.removeAria` |
+| `aria-label` attribute | `kbn.management.editIndexPattern.removeAriaLabel` |
 | tooltip | `kbn.management.editIndexPattern.removeTooltip` |
 | error message | `kbn.management.createIndexPattern.step.invalidCharactersErrorMessage` |
 | toggleSwitch | `kbn.management.createIndexPattern.includeSystemIndicesToggleSwitch` |
@@ -170,7 +194,7 @@ For example:
   ```js
   <h1>
       <FormattedMessage
-        id="kbn.management.createIndexPatternHeader"
+        id="kbn.management.createIndexPatternTitle"
         defaultMessage="Create index pattern"
       />
   </h1>
@@ -192,7 +216,7 @@ For example:
   ```js
 
   <EuiButton data-test-subj="addScriptedFieldLink" href={addScriptedFieldUrl}>
-       <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButton" defaultMessage="Add scripted field"/>
+       <FormattedMessage id="kbn.management.editIndexPattern.scripted.addFieldButtonLabel" defaultMessage="Add scripted field"/>
   </EuiButton>
   ```
 
@@ -221,8 +245,8 @@ For example:
 
   ```js
   <button
-      aria-label="{{'kbn.management.editIndexPattern.removeAria' | i18n: {defaultMessage: 'Remove index pattern'} }}"
-      tooltip="{{'kbn.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      aria-label="{{ ::'kbn.management.editIndexPattern.removeAriaLabel' | i18n: {defaultMessage: 'Remove index pattern'} }}"
+      tooltip="{{ ::'kbn.management.editIndexPattern.removeTooltip' | i18n: {defaultMessage: 'Remove index pattern'} }}"
       >
   </button>
   ```
@@ -251,6 +275,82 @@ For example:
   />
   ```
 
+### Variety of `values`
+
+- Variables
+
+  ```html
+  <span i18n-id="kbn.management.editIndexPattern.timeFilterHeader"
+    i18n-default-message="Time Filter field name: {timeFieldName}"
+    i18n-values="{ timeFieldName: indexPattern.timeFieldName }"></span>
+  ```
+
+  ```html
+  <FormattedMessage
+    id="kbn.management.createIndexPatternHeader"
+    defaultMessage="Create {indexPatternName}"
+    values={{
+      indexPatternName
+    }}
+  />
+  ```
+
+- Labels and variables in tag
+
+  ```html
+  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
+    i18n-values="{ indexPatternTitle: '<strong>' + indexPattern.title + '</strong>' }"></span>
+  ```
+
+  -----------------------------------------------------------
+  **BUT** we can not use tags that should be compiled:
+
+  ```html
+  <span i18n-id="kbn.management.editIndexPattern.timeFilterLabel.timeFilterDetail"
+    i18n-default-message="This page lists every field in the {indexPatternTitle} index"
+    i18n-values="{ indexPatternTitle: '<div my-directive>' + indexPattern.title + '</div>' }"></span>
+  ```
+
+  To void injections vulnerability, `i18nId` directive doesn't compile its values.
+
+  -----------------------------------------------------------
+
+  ```html
+  <FormattedMessage
+    id="kbn.management.createIndexPattern.step.indexPattern.disallowLabel"
+    defaultMessage="You can't use spaces or the characters {characterList}."
+    values={{ characterList: <strong>{characterList}</strong> }}
+  />
+  ```
+
+  ```html
+  <FormattedMessage
+    id="kbn.management.settings.form.noSearchResultText"
+    defaultMessage="No settings found {clearSearch}"
+    values={{
+      clearSearch: (
+        <EuiLink onClick={clearQuery}>
+          <FormattedMessage
+            id="kbn.management.settings.form.clearNoSearchResultText"
+            defaultMessage="(clear search)"
+          />
+        </EuiLink>
+      ),
+    }}
+  />
+  ```
+
+- Non-translatable text such as property name.
+
+  ```html
+  <FormattedMessage
+    id="xpack.security.management.users.editUser.changePasswordUpdateKibanaTitle"
+    defaultMessage="After you change the password for the kibana user, you must update the {kibana}
+    file and restart Kibana."
+    values={{ kibana: 'kibana.yml' }}
+  />
+  ```
 
 ### Text with plurals
 
@@ -258,7 +358,7 @@ The numeric input is mapped to a plural category, some subset of "zero", "one", 
 
 Here is an example of message translation depending on a plural category:
 
-```js
+```html
 <span i18n-id="kbn.management.editIndexPattern.mappingConflictLabel"
       i18n-default-message="{conflictFieldsLength, plural, one {A field is} other {# fields are}} defined as several types (string, integer, etc) across the indices that match this pattern."
       i18n-values="{ conflictFieldsLength: conflictFields.length }"></span>
@@ -279,48 +379,52 @@ Splitting sentences into several keys often inadvertently presumes a grammar, a 
 
   If this group of sentences is separated it’s possible that the context of the `'it'` in `'close it'` will be lost.
 
-
-
 ### Unit tests
 
-When testing React component that use the injectI18n higher-order component, use the shallowWithIntl helper function defined in test_utils/enzyme_helpers to render the component. This will shallow render the component with Enzyme and inject the necessary context and props to use the intl mock defined in test_utils/mocks/intl.
+Testing React component that uses the `injectI18n` higher-order component is more complicated because `injectI18n()` creates a wrapper component around the original component.
+
+With shallow rendering only top level component is rendered, that is a wrapper itself, not the original component. Since we want to test the rendering of the original component, we need to access it via the wrapper's `WrappedComponent` property. Its value will be the component we passed into `injectI18n()`.
+
+When testing such component, use the `shallowWithIntl` helper function defined in `test_utils/enzyme_helpers` and pass the component's `WrappedComponent` property to render the wrapped component. This will shallow render the component with Enzyme and inject the necessary context and props to use the `intl` mock defined in `test_utils/mocks/intl`.
+
+Use the `mountWithIntl` helper function to mount render the component.
 
 For example, there is a component that is wrapped by `injectI18n`, like in the `AddFilter` component:
 
 ```js
 // ...
-export class AddFilterComponent extends Component {
+export const AddFilter = injectI18n(
+  class AddFilterUi extends Component {
   // ...
-  render() {
-    const { filter } = this.state;
-    return (
-      <EuiFlexGroup>
-        <EuiFlexItem grow={10}>
-          <EuiFieldText
-            fullWidth
-            value={filter}
-            onChange={e => this.setState({ filter: e.target.value.trim() })}
-            placeholder={this.props.intl.formatMessage({
-              id: 'kbn.management.indexPattern.edit.source.placeholder',
-              defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
-            })}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
+    render() {
+      const { filter } = this.state;
+      return (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={10}>
+            <EuiFieldText
+              fullWidth
+              value={filter}
+              onChange={e => this.setState({ filter: e.target.value.trim() })}
+              placeholder={this.props.intl.formatMessage({
+                id: 'kbn.management.indexPattern.edit.source.placeholder',
+                defaultMessage: 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')'
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
   }
-}
-
-export const AddFilter = injectI18n(AddFilterComponent);
+);
 ```
 
-To test the `AddFilterComponent` component it is needed to render it using `shallowWithIntl` function to pass `intl` object into the `props`.
+To test the `AddFilter` component it is needed to render its `WrappedComponent` property using `shallowWithIntl` function to pass `intl` object into the `props`.
 
 ```js
 // ...
 it('should render normally', async () => {
     const component = shallowWithIntl(
-      <AddFilterComponent onAddFilter={() => {}}/>
+      <AddFilter.WrappedComponent onAddFilter={() => {}}/>
     );
 
     expect(component).toMatchSnapshot();
@@ -328,3 +432,26 @@ it('should render normally', async () => {
 // ...
 ```
 
+## Development steps
+
+1. Localize label with the suitable i18n component.
+
+2. Make sure that UI still looks correct and is functioning properly (e.g. click handler is processed, checkbox is checked/unchecked, etc.).
+
+3. Check functionality of an element (button is clicked, checkbox is checked/unchecked, etc.).
+
+4. Run i18n validation/extraction tools and skim through created `en.json`:
+    ```bash
+    $ node scripts/i18n_check --ignore-missing
+    $ node scripts/i18n_extract --output-dir ./
+    ```
+
+5. Run linters and type checker as you normally do.
+
+6. Run tests.
+
+7. Run Kibana with enabled pseudo-locale (either pass `--i18n.locale=en-xa` as a command-line argument or add it to the `kibana.yml`) and observe the text you've just localized.
+
+    If you did everything correctly, it should turn into something like this `Ĥéļļļô ŴŴôŕļļð!` assuming your text was `Hello World!`.
+
+8. Check that CI is green.

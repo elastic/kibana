@@ -1,11 +1,12 @@
 [[search]]
 == Searching Your Data
 You can search the indices that match the current index pattern by entering
-your search criteria in the Query bar. You can use Kibana's standard query language
-(based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax]) 
-or the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]. Autocomplete 
-and a simplified query syntax are available for the Kibana query language as experimental
-features which you can opt-in to under the options menu in the Query Bar. 
+your search criteria in the Query bar. By default you can use Kibana's standard query language
+which features autocomplete and a simple, easy to use syntax. Kibana's legacy query
+language (based on Lucene https://lucene.apache.org/core/2_9_4/queryparsersyntax.html[query syntax])
+is still available for the time being under the options menu in the Query Bar. When this
+legacy query language is selected, the full JSON-based {ref}/query-dsl.html[Elasticsearch Query DSL]
+can also be used.
 
 When you submit a search request, the histogram, Documents table, and Fields
 list are updated to reflect the search results. The total number of hits
@@ -20,15 +21,12 @@ To search your data, enter your search criteria in the Query bar and
 press *Enter* or click *Search* image:images/search-button.jpg[] to submit
 the request to Elasticsearch.
 
-[NOTE]
-===========
-You can opt-in to our experimental query features by default by changing `search:queryLanguage`
-to `kuery` under Advanced Settings.
-===========
+include::kuery.asciidoc[]
 
 [[lucene-query]]
 === Lucene Query Syntax
-Kibana's query language has historically been based on the Lucene query syntax. The following
+Kibana's legacy query language was based on the Lucene query syntax. For the time being this syntax
+is still available under the options menu in the Query Bar and in Advanced Settings. The following
 are some tips that can help get you started.
 
 * To perform a free text search, simply enter a text string. For example, if
@@ -55,7 +53,6 @@ docs.
 NOTE: These examples use the Lucene query syntax. When lucene is selected as your
 query language you can also submit queries using the {ref}/query-dsl.html[Elasticsearch Query DSL].
 
-include::kuery.asciidoc[]
 
 [[save-open-search]]
 === Saving and Opening Searches

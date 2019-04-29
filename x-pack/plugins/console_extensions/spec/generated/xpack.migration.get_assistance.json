@@ -14,8 +14,8 @@
       "GET"
     ],
     "patterns": [
-      "_xpack/migration/assistance",
-      "_xpack/migration/assistance/{indices}"
+      "_migration/assistance",
+      "_migration/assistance/{indices}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-assistance.html"
   }

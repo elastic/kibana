@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultsDeep, isEmpty, uniq, compact } from 'lodash';
+import { defaultsDeep, uniq, compact } from 'lodash';
 import { callClusterFactory } from '../../../xpack_main';
+
 import {
   LOGGING_TAG,
   KIBANA_MONITORING_LOGGING_TAG,
@@ -40,15 +41,18 @@ export class BulkUploader {
       throw new Error('interval number of milliseconds is required');
     }
 
-    this._timer =  null;
+    this._timer = null;
     this._interval = interval;
+    this._lastFetchUsageTime = null;
+    this._usageInterval = server.plugins.xpack_main.telemetryCollectionInterval;
+
     this._log = {
       debug: message => server.log(['debug', ...LOGGING_TAGS], message),
       info: message => server.log(['info', ...LOGGING_TAGS], message),
       warn: message => server.log(['warning', ...LOGGING_TAGS], message)
     };
 
-    this._client = server.plugins.elasticsearch.getCluster('admin').createClient({
+    this._cluster = server.plugins.elasticsearch.createCluster('admin', {
       plugins: [monitoringBulk],
     });
 
@@ -63,12 +67,34 @@ export class BulkUploader {
    */
   start(collectorSet) {
     this._log.info('Starting monitoring stats collection');
+    const filterCollectorSet = _collectorSet => {
+      const filterUsage = this._lastFetchUsageTime && this._lastFetchUsageTime + this._usageInterval > Date.now();
+      this._lastFetchWithUsage = !filterUsage;
+      if (!filterUsage) {
+        this._lastFetchUsageTime = Date.now();
+      }
 
-    // this is internal bulk upload, so filter out API-only collectors
-    const filterThem = _collectorSet => _collectorSet.getFilteredCollectorSet(c => c.ignoreForInternalUploader !== true);
-    this._fetchAndUpload(filterThem(collectorSet)); // initial fetch
+      return _collectorSet.getFilteredCollectorSet(c => {
+        // this is internal bulk upload, so filter out API-only collectors
+        if (c.ignoreForInternalUploader) {
+          return false;
+        }
+        // Only collect usage data at the same interval as telemetry would (default to once a day)
+        if (filterUsage && _collectorSet.isUsageCollector(c)) {
+          return false;
+        }
+        return true;
+      });
+    };
+
+    if (this._timer) {
+      clearInterval(this._timer);
+    } else {
+      this._fetchAndUpload(filterCollectorSet(collectorSet)); // initial fetch
+    }
+
     this._timer = setInterval(() => {
-      this._fetchAndUpload(filterThem(collectorSet));
+      this._fetchAndUpload(filterCollectorSet(collectorSet));
     }, this._interval);
   }
 
@@ -103,7 +129,8 @@ export class BulkUploader {
     if (payload) {
       try {
         this._log.debug(`Uploading bulk stats payload to the local cluster`);
-        this._onPayload(payload);
+        await this._onPayload(payload);
+        this._log.debug(`Uploaded bulk stats payload to the local cluster`);
       } catch (err) {
         this._log.warn(err.stack);
         this._log.warn(`Unable to bulk upload the stats payload to the local cluster`);
@@ -114,7 +141,7 @@ export class BulkUploader {
   }
 
   _onPayload(payload) {
-    return sendBulkPayload(this._client, this._interval, payload);
+    return sendBulkPayload(this._cluster, this._interval, payload);
   }
 
   /*
@@ -162,13 +189,9 @@ export class BulkUploader {
     // convert the raw data to a nested object by taking each payload through
     // its formatter, organizing it per-type
     const typesNested = rawData.reduce((accum, { type, result }) => {
-      if (isEmpty(result)) {
-        return accum;
-      }
       const { type: uploadType, payload: uploadData } = collectorSet.getCollectorByType(type).formatForBulkUpload(result);
       return defaultsDeep(accum, { [uploadType]: uploadData });
     }, {});
-
     // convert the nested object into a flat array, with each payload prefixed
     // with an 'index' instruction, for bulk upload
     const flat = Object.keys(typesNested).reduce((accum, type) => {

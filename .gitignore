@@ -9,6 +9,7 @@ node_modules
 !/src/dev/notice/__fixtures__/node_modules
 trash
 /optimize
+/built_assets
 target
 /build
 .jruby
@@ -40,6 +41,6 @@ selenium
 package-lock.json
 .yo-rc.json
 .vscode
+*.sublime-*
 npm-debug.log*
 .tern-project
-**/public/index.css

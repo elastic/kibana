@@ -22,7 +22,7 @@ uiRoutes.when('/beats/beat/:beatUuid', {
   },
   controllerAs: 'beat',
   controller: class BeatDetail extends MonitoringViewBaseController {
-    constructor($injector, $scope) {
+    constructor($injector, $scope, i18n) {
       // breadcrumbs + page title
       const $route = $injector.get('$route');
       const globalState = $injector.get('globalState');
@@ -30,7 +30,12 @@ uiRoutes.when('/beats/beat/:beatUuid', {
 
       const pageData = $route.current.locals.pageData;
       super({
-        title: `Beats - ${pageData.summary.name} - Overview`,
+        title: i18n('xpack.monitoring.beats.instance.routeTitle', {
+          defaultMessage: 'Beats - {instanceName} - Overview',
+          values: {
+            instanceName: pageData.summary.name
+          }
+        }),
         getPageData,
         $scope,
         $injector

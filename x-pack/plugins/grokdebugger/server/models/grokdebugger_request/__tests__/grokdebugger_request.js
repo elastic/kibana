@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { GrokdebuggerRequest } from '../grokdebugger_request';
 
 describe('grokdebugger_request', () => {
@@ -47,21 +47,21 @@ describe('grokdebugger_request', () => {
             description: 'this is a grokdebugger simulation',
             processors: [
               {
-                "grok": {
-                  "field": "rawEvent",
-                  "patterns": ["%{IP:client} %{WORD:method} %{URIPATHPARAM:request}"],
-                  "pattern_definitions": {}
+                'grok': {
+                  'field': 'rawEvent',
+                  'patterns': ['%{IP:client} %{WORD:method} %{URIPATHPARAM:request}'],
+                  'pattern_definitions': {}
                 }
               }
             ]
           },
           docs: [
             {
-              "_index": "grokdebugger",
-              "_type": "grokdebugger",
-              "_id": "grokdebugger",
-              "_source": {
-                "rawEvent": "55.3.244.1 GET /index.html"
+              '_index': 'grokdebugger',
+              '_type': 'grokdebugger',
+              '_id': 'grokdebugger',
+              '_source': {
+                'rawEvent': '55.3.244.1 GET /index.html'
               }
             }
           ]
@@ -77,21 +77,21 @@ describe('grokdebugger_request', () => {
             description: 'this is a grokdebugger simulation',
             processors: [
               {
-                "grok": {
-                  "field": "rawEvent",
-                  "patterns": ["%{IP:client} %{WORD:method} %{URIPATHPARAM:request}"],
-                  "pattern_definitions": '%{FOO:bar}'
+                'grok': {
+                  'field': 'rawEvent',
+                  'patterns': ['%{IP:client} %{WORD:method} %{URIPATHPARAM:request}'],
+                  'pattern_definitions': '%{FOO:bar}'
                 }
               }
             ]
           },
           docs: [
             {
-              "_index": "grokdebugger",
-              "_type": "grokdebugger",
-              "_id": "grokdebugger",
-              "_source": {
-                "rawEvent": "55.3.244.1 GET /index.html"
+              '_index': 'grokdebugger',
+              '_type': 'grokdebugger',
+              '_id': 'grokdebugger',
+              '_source': {
+                'rawEvent': '55.3.244.1 GET /index.html'
               }
             }
           ]

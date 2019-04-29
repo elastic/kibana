@@ -17,13 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 
 import {
   createListStream,
   createPromiseFromStreams,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createIndexDocRecordsStream } from '../index_doc_records_stream';
 import {
@@ -126,8 +126,8 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
     client.assertNoPendingResponses();
   });
 
-  it('sends a maximum of 1000 documents at a time', async () => {
-    const records = createPersonDocRecords(1001);
+  it('sends a maximum of 300 documents at a time', async () => {
+    const records = createPersonDocRecords(301);
     const stats = createStubStats();
     const client = createStubClient([
       async (name, params) => {
@@ -137,7 +137,7 @@ describe('esArchiver: createIndexDocRecordsStream()', () => {
       },
       async (name, params) => {
         expect(name).to.be('bulk');
-        expect(params.body.length).to.eql(999 * 2);
+        expect(params.body.length).to.eql(299 * 2);
         return { ok: true };
       },
       async (name, params) => {

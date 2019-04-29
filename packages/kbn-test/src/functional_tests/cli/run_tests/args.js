@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+
 import dedent from 'dedent';
 import { ToolingLog, pickLevelFromFlags } from '@kbn/dev-utils';
 
@@ -30,7 +32,7 @@ const options = {
     arg: '<snapshot|source>',
     choices: ['snapshot', 'source'],
     desc: 'Build Elasticsearch from source or run from snapshot.',
-    default: 'snapshot',
+    defaultHelp: 'Default: $TEST_ES_FROM or snapshot',
   },
   'kibana-install-dir': {
     arg: '<dir>',
@@ -43,6 +45,17 @@ const options = {
   },
   updateBaselines: {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
+  },
+  'include-tag': {
+    arg: '<tag>',
+    desc: 'Tags that suites must include to be run, can be included multiple times.',
+  },
+  'exclude-tag': {
+    arg: '<tag>',
+    desc: 'Tags that suites must NOT include to be run, can be included multiple times.',
+  },
+  'assert-none-excluded': {
+    desc: 'Exit with 1/0 based on if any test is excluded with the current set of tags.',
   },
   verbose: { desc: 'Log everything.' },
   debug: { desc: 'Run in debug mode.' },
@@ -58,7 +71,7 @@ export function displayHelp() {
       return {
         ...option,
         usage: `${name} ${option.arg || ''}`,
-        default: option.default ? `Default: ${option.default}` : '',
+        default: option.defaultHelp || '',
       };
     })
     .map(option => {
@@ -93,10 +106,24 @@ export function processOptions(userOptions, defaultConfigPaths) {
     }
   }
 
+  if (!userOptions.esFrom) {
+    userOptions.esFrom = process.env.TEST_ES_FROM || 'snapshot';
+  }
+
   if (userOptions['kibana-install-dir']) {
     userOptions.installDir = userOptions['kibana-install-dir'];
     delete userOptions['kibana-install-dir'];
   }
+
+  userOptions.suiteTags = {
+    include: [].concat(userOptions['include-tag'] || []),
+    exclude: [].concat(userOptions['exclude-tag'] || []),
+  };
+  delete userOptions['include-tag'];
+  delete userOptions['exclude-tag'];
+
+  userOptions.assertNoneExcluded = !!userOptions['assert-none-excluded'];
+  delete userOptions['assert-none-excluded'];
 
   function createLogger() {
     return new ToolingLog({
@@ -107,7 +134,7 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
   return {
     ...userOptions,
-    configs,
+    configs: configs.map(c => resolve(c)),
     createLogger,
     extraKbnOpts: userOptions._,
   };
@@ -115,7 +142,9 @@ export function processOptions(userOptions, defaultConfigPaths) {
 
 function validateOptions(userOptions) {
   Object.entries(userOptions).forEach(([key, val]) => {
-    if (key === '_') return;
+    if (key === '_' || key === 'suiteTags') {
+      return;
+    }
 
     // Validate flags passed
     if (options[key] === undefined) {

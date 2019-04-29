@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -35,6 +35,7 @@ export default function ({ getService }) {
         expect(body.settings.kibana.transport_address.length > 0).to.eql(true);
         expect(body.settings.kibana.version.length > 0).to.eql(true);
         expect(body.settings.kibana.status.length > 0).to.eql(true);
+        expect(body.settings.xpack.default_admin_email).to.eql(null);
       });
     });
   });

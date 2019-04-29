@@ -19,9 +19,9 @@
 
 import { EuiCallOut } from '@elastic/eui';
 import testSubjSelector from '@kbn/test-subj-selector';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 
 import { FatalErrorsScreen } from './fatal_errors_screen';
 
@@ -54,26 +54,26 @@ describe('reloading', () => {
 
     const locationReloadSpy = jest.spyOn(window.location, 'reload').mockImplementation(noop);
 
-    shallow(<FatalErrorsScreen {...defaultProps} />);
+    shallowWithIntl(<FatalErrorsScreen {...defaultProps} />);
     expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
     expect(addEventListenerSpy).toHaveBeenCalledWith('hashchange', expect.any(Function), undefined);
 
     expect(locationReloadSpy).not.toHaveBeenCalled();
     const [, handler] = addEventListenerSpy.mock.calls[0];
-    handler();
+    (handler as jest.Mock)();
     expect(locationReloadSpy).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('rendering', () => {
   it('render matches snapshot', () => {
-    expect(shallow(<FatalErrorsScreen {...defaultProps} />)).toMatchSnapshot();
+    expect(shallowWithIntl(<FatalErrorsScreen {...defaultProps} />)).toMatchSnapshot();
   });
 
   it('rerenders when errorInfo$ emits more errors', () => {
     const errorInfo$ = new Rx.ReplaySubject<typeof errorInfoFoo>();
 
-    const el = shallow(<FatalErrorsScreen {...defaultProps} errorInfo$={errorInfo$} />);
+    const el = shallowWithIntl(<FatalErrorsScreen {...defaultProps} errorInfo$={errorInfo$} />);
 
     expect(el.find(EuiCallOut)).toHaveLength(0);
 
@@ -111,7 +111,7 @@ describe('buttons', () => {
       window.location.hash = '/foo/bar';
       jest.spyOn(window.location, 'reload').mockImplementation(noop);
 
-      const el = mount(<FatalErrorsScreen {...defaultProps} />);
+      const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
       const button = el.find('button').find(testSubjSelector('clearSession'));
       button.simulate('click');
 
@@ -126,7 +126,7 @@ describe('buttons', () => {
     it('calls window.history.back()', () => {
       jest.spyOn(window.history, 'back').mockImplementation(noop);
 
-      const el = mount(<FatalErrorsScreen {...defaultProps} />);
+      const el = mountWithIntl(<FatalErrorsScreen {...defaultProps} />);
       const button = el.find('button').find(testSubjSelector('goBack'));
       button.simulate('click');
 

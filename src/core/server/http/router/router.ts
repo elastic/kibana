@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from 'hapi-latest';
-import { ObjectType, schema, TypeOf } from '../../config/schema';
+import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { Request, ResponseObject, ResponseToolkit } from 'hapi';
 
 import { KibanaRequest } from './request';
 import { KibanaResponse, ResponseFactory, responseFactory } from './response';
@@ -30,6 +30,7 @@ export interface RouterRoute {
   handler: (req: Request, responseToolkit: ResponseToolkit) => Promise<ResponseObject>;
 }
 
+/** @public */
 export class Router {
   public routes: Array<Readonly<RouterRoute>> = [];
 

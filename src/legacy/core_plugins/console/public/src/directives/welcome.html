@@ -1,0 +1,76 @@
+<div class="euiText">
+
+  <h2
+    i18n-id="console.welcomePage.pageTitle"
+    i18n-default-message="Welcome to Console"
+  ></h2>
+
+  <p>
+    <strong
+      i18n-id="console.welcomePage.quickIntroTitle"
+      i18n-default-message="Quick intro to the UI"
+    ></strong>
+  </p>
+
+  <p
+    i18n-id="console.welcomePage.quickIntroDescription"
+    i18n-default-message="The Console UI is split into two panes: an editor pane (left) and a response pane (right).
+    Use the editor to type requests and submit them to Elasticsearch. The results will be displayed in
+    the response pane on the right side."
+  ></p>
+
+  <p
+    i18n-id="console.welcomePage.supportedRequestFormatTitle"
+    i18n-default-message="Console understands requests in a compact format, similar to cURL:"
+  ></p>
+  <sense-help-example></sense-help-example>
+
+  <p
+    i18n-id="console.welcomePage.supportedRequestFormatDescription"
+    i18n-default-message="While typing a request, Console will make suggestions which you can then accept by hitting Enter/Tab.
+    These suggestions are made based on the request structure {asWellAs} your indices and types."
+    i18n-values="{ html_asWellAs: '<i>' + asWellAsFragmentText + '</i>' }"
+  >
+  </p>
+
+  <p>
+    <strong
+      i18n-id="console.welcomePage.quickTipsTitle"
+      i18n-default-message="A few quick tips, while I have your attention"
+    >
+    </strong>
+  </p>
+  <ul>
+    <li
+      i18n-id="console.welcomePage.quickTips.submitRequestDescription"
+      i18n-default-message="Submit requests to ES using the green triangle button."
+    ></li>
+    <li
+      i18n-id="console.welcomePage.quickTips.useWrenchMenuDescription"
+      i18n-default-message="Use the wrench menu for other useful things."
+    ></li>
+    <li
+      i18n-id="console.welcomePage.quickTips.cUrlFormatForRequestsDescription"
+      i18n-default-message="You can paste requests in cURL format and they will be translated to the Console syntax."
+    ></li>
+    <li
+      i18n-id="console.welcomePage.quickTips.resizeEditorDescription"
+      i18n-default-message="You can resize the editor and output panes by dragging the separator between them."
+    ></li>
+    <li
+      i18n-id="console.welcomePage.quickTips.keyboardShortcutsDescription"
+      i18n-default-message="Study the keyboard shortcuts under the Help button. Good stuff in there!"
+    ></li>
+  </ul>
+
+  <button
+    type="button"
+    class="kuiButton kuiButton--primary"
+    data-test-subj="help-close-button"
+    ng-click="kbnTopNav.close()"
+    i18n-id="console.welcomePage.closeButtonLabel"
+    i18n-default-message="Get to work"
+  >
+  </button>
+
+</div>

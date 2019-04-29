@@ -9,6 +9,7 @@ import { getNodeInfo } from '../../../../../lib/logstash/get_node_info';
 import { getPipelines, processPipelinesAPIResponse } from '../../../../../lib/logstash/get_pipelines';
 import { handleError } from '../../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../../lib/ccs_utils';
+import { INDEX_PATTERN_LOGSTASH } from '../../../../../../common/constants';
 
 /**
  * Retrieve pipelines for a node
@@ -32,11 +33,11 @@ export function logstashNodePipelinesRoute(server) {
         })
       }
     },
-    handler: async (req, reply) => {
+    handler: async (req) => {
       const config = server.config();
       const { ccs } = req.payload;
       const { clusterUuid, logstashUuid } = req.params;
-      const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
+      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
       const throughputMetric = 'logstash_node_pipeline_throughput';
       const nodesCountMetric = 'logstash_node_pipeline_nodes_count';
       const metricSet = [
@@ -53,9 +54,9 @@ export function logstashNodePipelinesRoute(server) {
           throughputMetric,
           nodesCountMetric
         );
-        reply(response);
+        return response;
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

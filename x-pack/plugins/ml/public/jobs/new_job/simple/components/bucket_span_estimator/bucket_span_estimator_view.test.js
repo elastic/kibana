@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { BucketSpanEstimator } from './bucket_span_estimator_view';
@@ -18,7 +18,7 @@ describe('BucketSpanEstimator', () => {
       guessBucketSpan: () => { },
       buttonText: 'Estimate bucket span'
     };
-    const wrapper = shallow(<BucketSpanEstimator {...props} />);
+    const wrapper = shallowWithIntl(<BucketSpanEstimator {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -29,7 +29,7 @@ describe('BucketSpanEstimator', () => {
       guessBucketSpan: () => { },
       buttonText: 'Estimating bucket span'
     };
-    const wrapper = shallow(<BucketSpanEstimator {...props} />);
+    const wrapper = shallowWithIntl(<BucketSpanEstimator {...props} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

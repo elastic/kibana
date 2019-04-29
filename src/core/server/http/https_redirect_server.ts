@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Request, ResponseToolkit, Server } from 'hapi-latest';
+import { Request, ResponseToolkit, Server } from 'hapi';
 import { format as formatUrl } from 'url';
 
 import { Logger } from '../logging';
@@ -30,16 +30,14 @@ export class HttpsRedirectServer {
   constructor(private readonly log: Logger) {}
 
   public async start(config: HttpConfig) {
+    this.log.debug('starting http --> https redirect server');
+
     if (!config.ssl.enabled || config.ssl.redirectHttpFromPort === undefined) {
       throw new Error(
         'Redirect server cannot be started when [ssl.enabled] is set to `false`' +
           ' or [ssl.redirectHttpFromPort] is not specified.'
       );
     }
-
-    this.log.info(
-      `starting HTTP --> HTTPS redirect server [${config.host}:${config.ssl.redirectHttpFromPort}]`
-    );
 
     // Redirect server is configured in the same way as any other HTTP server
     // within the platform with the only exception that it should always be a
@@ -65,6 +63,7 @@ export class HttpsRedirectServer {
 
     try {
       await this.server.start();
+      this.log.debug(`http --> https redirect server running at ${this.server.info.uri}`);
     } catch (err) {
       if (err.code === 'EADDRINUSE') {
         throw new Error(
@@ -79,11 +78,12 @@ export class HttpsRedirectServer {
   }
 
   public async stop() {
-    this.log.info('stopping HTTPS redirect server');
-
-    if (this.server !== undefined) {
-      await this.server.stop();
-      this.server = undefined;
+    if (this.server === undefined) {
+      return;
     }
+
+    this.log.debug('stopping http --> https redirect server');
+    await this.server.stop();
+    this.server = undefined;
   }
 }

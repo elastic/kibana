@@ -21,8 +21,11 @@ const fs = require('fs');
 const path = require('path');
 const chalk = require('chalk');
 const execa = require('execa');
+const del = require('del');
+const url = require('url');
 const { log: defaultLog, decompress } = require('../utils');
 const { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } = require('../paths');
+const { Artifact } = require('../artifact');
 
 /**
  * Extracts an ES archive and optionally installs plugins
@@ -43,13 +46,20 @@ exports.installArchive = async function installArchive(archive, options = {}) {
     log = defaultLog,
   } = options;
 
-  if (fs.existsSync(installPath)) {
-    log.info('install directory already exists, removing');
-    rmrfSync(installPath);
+  let dest = archive;
+  if (['http:', 'https:'].includes(url.parse(archive).protocol)) {
+    const artifact = await Artifact.getArchive(archive, log);
+    dest = path.resolve(basePath, 'cache', artifact.getFilename());
+    await artifact.download(dest);
   }
 
-  log.info('extracting %s', chalk.bold(archive));
-  await decompress(archive, installPath);
+  if (fs.existsSync(installPath)) {
+    log.info('install directory already exists, removing');
+    await del(installPath, { force: true });
+  }
+
+  log.info('extracting %s', chalk.bold(dest));
+  await decompress(dest, installPath);
   log.info('extracted to %s', chalk.bold(installPath));
 
   if (license === 'trial') {
@@ -65,26 +75,6 @@ exports.installArchive = async function installArchive(archive, options = {}) {
 
   return { installPath };
 };
-
-/**
- * Recursive deletion for a directory
- *
- * @param {String} path
- */
-function rmrfSync(path) {
-  if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(file => {
-      const curPath = path + '/' + file;
-
-      if (fs.lstatSync(curPath).isDirectory()) {
-        rmrfSync(curPath);
-      } else {
-        fs.unlinkSync(curPath);
-      }
-    });
-    fs.rmdirSync(path);
-  }
-}
 
 /**
  * Appends single line to elasticsearch.yml config file

@@ -23,6 +23,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./index_patterns'));
+    loadTestFile(require.resolve('./kql_telemetry'));
     loadTestFile(require.resolve('./management'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./scripts'));
@@ -31,5 +32,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./suggestions'));
     loadTestFile(require.resolve('./status'));
     loadTestFile(require.resolve('./stats'));
+    loadTestFile(require.resolve('./ui_metric'));
   });
 }

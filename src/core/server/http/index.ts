@@ -17,22 +17,10 @@
  * under the License.
  */
 
-import { Observable } from 'rxjs';
-
-import { Env } from '../config';
-import { LoggerFactory } from '../logging';
-import { HttpConfig } from './http_config';
-import { HttpService } from './http_service';
-
+export { HttpConfig } from './http_config';
+export { HttpService, HttpServiceSetup } from './http_service';
 export { Router, KibanaRequest } from './router';
-export { HttpService };
-
-export { HttpConfig };
-
-export class HttpModule {
-  public readonly service: HttpService;
-
-  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory, env: Env) {
-    this.service = new HttpService(this.config$, logger, env);
-  }
-}
+export { HttpServerInfo } from './http_server';
+export { BasePathProxyServer } from './base_path_proxy_server';
+export { AuthenticationHandler, AuthToolkit } from './lifecycle/auth';
+export { OnRequestHandler, OnRequestToolkit } from './lifecycle/on_request';

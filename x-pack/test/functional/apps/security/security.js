@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }) {
     describe('Login Page', () => {
       before(async () => {
         await esArchiver.load('empty_kibana');
+        await PageObjects.security.logout();
       });
 
       after(async () => {
@@ -29,9 +30,9 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('displays message if login fails', async () => {
-        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password');
+        await PageObjects.security.loginPage.login('wrong-user', 'wrong-password', { expectSuccess: false });
         const errorMessage = await PageObjects.security.loginPage.getErrorMessage();
-        expect(errorMessage).to.be('Oops! Error. Try again.');
+        expect(errorMessage).to.be('Invalid username or password. Please try again.');
       });
     });
   });

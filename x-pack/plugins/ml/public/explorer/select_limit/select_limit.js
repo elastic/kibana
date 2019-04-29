@@ -7,65 +7,79 @@
 
 
 /*
-* AngularJS directive for rendering a select element with limit levels.
-*/
+ * React component for rendering a select element with limit options.
+ */
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
-import _ from 'lodash';
+import {
+  EuiSelect,
+} from '@elastic/eui';
 
-import { stateFactoryProvider } from 'plugins/ml/factories/state_factory';
+import { injectObservablesAsProps } from '../../util/observable_utils';
 
-import template from './select_limit.html';
-import 'plugins/ml/components/controls/controls_select';
+const optionsMap = {
+  '5': 5,
+  '10': 10,
+  '25': 25,
+  '50': 50,
+};
 
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('apps/ml');
+const LIMIT_OPTIONS = [
+  { val: 5, display: '5' },
+  { val: 10, display: '10' },
+  { val: 25, display: '25' },
+  { val: 50, display: '50' },
+];
 
-module
-  .service('mlSelectLimitService', function (Private) {
-    const stateFactory = Private(stateFactoryProvider);
-    this.state = stateFactory('mlSelectLimit', {
-      limit: { display: '10', val: 10 }
-    });
-  })
-  .directive('mlSelectLimit', function (mlSelectLimitService) {
-    return {
-      restrict: 'E',
-      template,
-      link: function (scope, element) {
-        scope.limitOptions = [
-          { display: '5', val: 5 },
-          { display: '10', val: 10 },
-          { display: '25', val: 25 },
-          { display: '50', val: 50 }
-        ];
+function optionValueToLimit(value) {
+  // Get corresponding limit object with required display and val properties from the specified value.
+  let limit = LIMIT_OPTIONS.find(opt => (opt.val === value));
 
-        const limitState = mlSelectLimitService.state.get('limit');
-        const limitValue = _.get(limitState, 'val', 0);
-        let limitOption = scope.limitOptions.find(d => d.val === limitValue);
-        if (limitOption === undefined) {
-          // Attempt to set value in URL which doesn't map to one of the options.
-          limitOption = scope.limitOptions.find(d => d.val === 10);
-        }
-        scope.limit = limitOption;
-        mlSelectLimitService.state.set('limit', scope.limit);
+  // Default to 10 if supplied value doesn't map to one of the options.
+  if (limit === undefined) {
+    limit = LIMIT_OPTIONS[1];
+  }
 
-        scope.setLimit = function (limit) {
-          if (!_.isEqual(scope.limit, limit)) {
-            scope.limit = limit;
-            mlSelectLimitService.state.set('limit', scope.limit).changed();
-          }
-        };
+  return limit;
+}
 
-        function setLimit() {
-          scope.setLimit(mlSelectLimitService.state.get('limit'));
-        }
+const EUI_OPTIONS = LIMIT_OPTIONS.map(({ display, val }) => ({
+  value: display,
+  text: val,
+}));
 
-        mlSelectLimitService.state.watch(setLimit);
+export const limit$ = new BehaviorSubject(LIMIT_OPTIONS[1]);
 
-        element.on('$destroy', () => {
-          mlSelectLimitService.state.unwatch(setLimit);
-          scope.$destroy();
-        });
-      }
-    };
-  });
+class SelectLimitUnwrapped extends Component {
+  onChange = (e) => {
+    const valueDisplay = e.target.value;
+    const limit = optionValueToLimit(optionsMap[valueDisplay]);
+    limit$.next(limit);
+  }
+
+  render() {
+    return (
+      <EuiSelect
+        options={EUI_OPTIONS}
+        onChange={this.onChange}
+        value={this.props.limit.display}
+      />
+    );
+  }
+}
+
+SelectLimitUnwrapped.propTypes = {
+  limit: PropTypes.object,
+};
+
+SelectLimitUnwrapped.defaultProps = {
+  limit: LIMIT_OPTIONS[1],
+};
+
+const SelectLimit = injectObservablesAsProps({
+  limit: limit$
+}, SelectLimitUnwrapped);
+
+export { SelectLimit };

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uiCapabilities } from './capabilities';
+
 function getUiSettingsClient() {
   return {
     get: key => {
@@ -15,8 +17,12 @@ function getUiSettingsClient() {
         default:
           throw new Error(`Unexpected config key: ${key}`);
       }
-    }
+    },
   };
+}
+
+function getBasePath() {
+  return '/some/base/path';
 }
 
 function addBasePath(path) {
@@ -29,13 +35,23 @@ function getInjected(key) {
       return 'apm*';
     case 'mlEnabled':
       return true;
+    case 'uiCapabilities':
+      return uiCapabilities;
+    case 'isCloudEnabled':
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }
 }
 
+function getXsrfToken() {
+  return 'kbn';
+}
+
 export default {
   getInjected,
   addBasePath,
-  getUiSettingsClient
+  getBasePath,
+  getUiSettingsClient,
+  getXsrfToken,
 };

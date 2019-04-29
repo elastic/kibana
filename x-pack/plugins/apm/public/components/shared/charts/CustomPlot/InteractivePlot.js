@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import { SharedPlot } from './plotUtils';
 import PropTypes from 'prop-types';
 import React, { PureComponent } from 'react';
@@ -56,7 +56,7 @@ class InteractivePlot extends PureComponent {
       selectionEnd
     } = this.props;
 
-    if (_.isEmpty(series)) {
+    if (isEmpty(series)) {
       return null;
     }
 
@@ -74,10 +74,9 @@ class InteractivePlot extends PureComponent {
         {hoverX && <MarkSeries data={markPoints} colorType="literal" />}
         {hoverX && <VerticalGridLines tickValues={[hoverX]} />}
 
-        {isDrawing &&
-          selectionEnd !== null && (
-            <SelectionMarker start={x(selectionStart)} end={x(selectionEnd)} />
-          )}
+        {isDrawing && selectionEnd !== null && (
+          <SelectionMarker start={x(selectionStart)} end={x(selectionEnd)} />
+        )}
       </SharedPlot>
     );
   }

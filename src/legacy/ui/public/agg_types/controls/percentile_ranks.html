@@ -1,0 +1,14 @@
+<div class="form-group">
+  <label
+    id="visEditorPercentileRanksLabel{{agg.id}}"
+    i18n-id="common.ui.aggTypes.valuesLabel"
+    i18n-default-message="Values"
+  ></label>
+  <kbn-number-list
+    ng-model="agg.params.values"
+    unit-name="value"
+    range="[-Infinity,Infinity]"
+    labelledby-id="visEditorPercentileRanksLabel{{agg.id}}"
+    >
+  </kbn-number-list>
+</div>

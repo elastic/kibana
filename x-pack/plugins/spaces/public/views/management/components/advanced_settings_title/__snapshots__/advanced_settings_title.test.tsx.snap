@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedSettingsTitle renders as expected 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+  responsive={false}
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <SpaceAvatar
+      announceSpaceName={true}
+      space={
+        Object {
+          "disabledFeatures": Array [],
+          "id": "my-space",
+          "name": "My Space",
+        }
+      }
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    style={
+      Object {
+        "marginLeft": "10px",
+      }
+    }
+  >
+    <EuiTitle
+      size="m"
+    >
+      <h1
+        data-test-subj="managementSettingsTitle"
+      >
+        <FormattedMessage
+          defaultMessage="Settings"
+          id="xpack.spaces.management.advancedSettingsTitle.settingsTitle"
+          values={Object {}}
+        />
+      </h1>
+    </EuiTitle>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

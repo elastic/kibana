@@ -7,6 +7,8 @@
 import React from 'react';
 
 import { EuiFlexItem, EuiCard, EuiLink, EuiButton } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EXTERNAL_LINKS } from '../../../../common/constants';
 
 export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   if (!shouldShowRequestTrialExtension) {
@@ -14,29 +16,44 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
   }
   const description = (
     <span>
-      If you’d like to continuing using security, machine learning, and our
-      other awesome{' '}
-      <EuiLink
-        href="https://www.elastic.co/subscriptions/xpack"
-        target="_blank"
-      >
-        Platinum features
-      </EuiLink>, request an extension now.
+      <FormattedMessage
+        id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.howToContinueUsingPluginsDescription"
+        defaultMessage="If you’d like to continuing using security, machine learning, and our
+        other awesome {platinumLicenseFeaturesLinkText}, request an extension now."
+        values={{
+          platinumLicenseFeaturesLinkText: (
+            <EuiLink
+              href={EXTERNAL_LINKS.SUBSCRIPTIONS}
+              target="_blank"
+            >
+              <FormattedMessage
+                id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.platinumLicenseFeaturesLinkText"
+                defaultMessage="Platinum features"
+              />
+            </EuiLink>
+          )
+        }}
+      />
     </span>
   );
   return (
     <EuiFlexItem>
       <EuiCard
-        title="Extend your trial"
+        title={(<FormattedMessage
+          id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendYourTrialTitle"
+          defaultMessage="Extend your trial"
+        />)}
         description={description}
         footer={
           <EuiButton
             data-test-subj="extendTrialButton"
-            style={{ marginTop: 'auto' }}
             target="_blank"
-            href="https://www.elastic.co/trialextension"
+            href={EXTERNAL_LINKS.TRIAL_EXTENSION}
           >
-            Extend trial
+            <FormattedMessage
+              id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.extendTrialButtonLabel"
+              defaultMessage="Extend trial"
+            />
           </EuiButton>
         }
       />

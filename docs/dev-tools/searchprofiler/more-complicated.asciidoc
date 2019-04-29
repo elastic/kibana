@@ -2,7 +2,7 @@
 [[profiler-complicated]]
 === Profiling a more complicated query
 
-To understand how the query trees are displayed inside the Search Profiler,
+To understand how the query trees are displayed inside the {searchprofiler},
 let's look at a more complicated query.
 
 . Index the following data:
@@ -118,6 +118,6 @@ image::dev-tools/searchprofiler/images/gs10.png["Drilling into the first shard's
 Click a shard's Expand button to view the aggregation details. Hover over an
 aggregation row to view the timing breakdown.
 
-For more information about how the Search Profiler works, how timings are calculated, and
-how to interpret various results, see the
-{ref}/_profiling_queries.html[Profile Reference Documentation]
+For more information about how the {searchprofiler} works, how timings are calculated, and
+how to interpret various results, see 
+{ref}/search-profile-queries.html[Profiling queries].

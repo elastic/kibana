@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { schema, TypeOf } from '@kbn/config-schema';
 import chalk from 'chalk';
-import { schema, TypeOf } from '../../config/schema';
 
 import { LogLevel } from '../log_level';
 import { LogRecord } from '../log_record';

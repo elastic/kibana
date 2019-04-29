@@ -17,22 +17,61 @@ import {
   EuiDescriptionList,
 } from '@elastic/eui';
 
-import './styles/main.less';
+import { formatValue } from '../../../../formatters/format_value';
+
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function DetectorDescriptionList({
   job,
-  detector }) {
+  detector,
+  anomaly, }) {
 
   const listItems = [
     {
-      title: 'job ID',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.detectorDescriptionList.jobIdTitle"
+          defaultMessage="Job ID"
+        />
+      ),
       description: job.job_id,
     },
     {
-      title: 'detector',
+      title: (
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.detectorDescriptionList.detectorTitle"
+          defaultMessage="Detector"
+        />
+      ),
       description: detector.detector_description,
     }
   ];
+
+  if (anomaly.actual !== undefined) {
+    // Format based on magnitude of value at this stage, rather than using the
+    // Kibana field formatter (if set) which would add complexity converting
+    // the entered value to / from e.g. bytes.
+    const actual = formatValue(anomaly.actual, anomaly.source.function);
+    const typical = formatValue(anomaly.typical, anomaly.source.function);
+
+    listItems.push(
+      {
+        title: (
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyTitle"
+            defaultMessage="Selected anomaly"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.ml.ruleEditor.detectorDescriptionList.selectedAnomalyDescription"
+            defaultMessage="actual {actual}, typical {typical}"
+            values={{ actual, typical }}
+          />
+        ),
+      }
+    );
+  }
 
   return (
     <EuiDescriptionList
@@ -45,5 +84,6 @@ export function DetectorDescriptionList({
 DetectorDescriptionList.propTypes = {
   job: PropTypes.object.isRequired,
   detector: PropTypes.object.isRequired,
+  anomaly: PropTypes.object.isRequired,
 };
 

@@ -14,7 +14,7 @@ You might need to click *New* in the menu bar to refresh the data.
 . In the search field, enter the following string:
 +
 [source,text]
-account_number:<100 AND balance:>47500
+account_number<100 AND balance>47500
 
 The search returns all account numbers between zero and 99 with balances in
 excess of 47,500. It returns results for account numbers 8, 32, 78, 85, and 97.

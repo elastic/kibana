@@ -1,0 +1,34 @@
+.ml-explorer-chart-info-tooltip {
+  max-width: 384px;
+}
+
+.ml-explorer-chart-description {
+  font-size: $euiFontSizeXS;
+  font-style: italic;
+}
+
+.ml-explorer-chart-info-tooltip .mlDescriptionList > * {
+  margin-top: 3px;
+}
+
+.ml-explorer-chart-info-tooltip .mlDescriptionList {
+  display: grid;
+  grid-template-columns: max-content auto;
+
+  .mlDescriptionList__title {
+    color: $euiColorGhost;
+    font-size: $euiFontSizeXS;
+    font-weight: normal;
+    white-space: nowrap;
+    grid-column-start: 1;
+  }
+
+  .mlDescriptionList__description {
+    color: $euiColorGhost;
+    font-size: $euiFontSizeXS;
+    font-weight: bold;
+    padding-left: $euiSizeS;
+    max-width: 256px;
+    grid-column-start: 2;
+  }
+}

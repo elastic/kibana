@@ -1,5 +1,9 @@
 <div class='fields-selection-population'>
-  <h4 class="euiTitle euiTitle--small">Fields</h4>
+  <h4
+    class="euiTitle euiTitle--small"
+    i18n-id="xpack.ml.newJob.simple.fieldsSelectionPopulation.fieldsTitle"
+    i18n-default-message="Fields"
+  ></h4>
   <div class="euiSpacer euiSpacer--s"></div>
   <div class="row">
     <div class="col-md-12">
@@ -10,7 +14,7 @@
             on-select="selectField()"
             ng-disabled="formConfig.overField === undefined || jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"
             append-to-body=true>
-            <ui-select-match placeholder="Add field">
+            <ui-select-match placeholder="{{ ::'xpack.ml.newJob.simple.fieldsSelectionPopulation.addFieldPlaceholder' | i18n: {defaultMessage: 'Add field'} }}">
                 <ml-field-type-icon type="$select.selected.mlType"></ml-field-type-icon>{{$select.selected.name}}
             </ui-select-match>
             <ui-select-choices repeat="field in ui.fields | filter: { name: $select.search }" group-by="'mlType'">
@@ -50,7 +54,7 @@
                   </select>
                 </div>
                 <button
-                  aria-label="Remove Detector"
+                  aria-label="{{ ::'xpack.ml.newJob.simple.fieldsSelectionPopulation.removeDetectorButtonAriaLabel' | i18n: {defaultMessage: 'Remove Detector'} }}"
                   ng-click="removeField($index, field)"
                   tooltip-append-to-body="true"
                   ng-disabled="formConfig.fields[$index] === undefined || jobState === JOB_STATE.RUNNING  || jobState === JOB_STATE.STOPPING || jobState === JOB_STATE.FINISHED"

@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`dev/i18n/serializers/json5 should serialize default messages to JSON5 1`] = `
+"{
+  formats: {
+    number: {
+      currency: {
+        style: 'currency',
+      },
+      percent: {
+        style: 'percent',
+      },
+    },
+    date: {
+      short: {
+        month: 'numeric',
+        day: 'numeric',
+        year: '2-digit',
+      },
+      medium: {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      long: {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+      full: {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      },
+    },
+    time: {
+      short: {
+        hour: 'numeric',
+        minute: 'numeric',
+      },
+      medium: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+      },
+      long: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+      full: {
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        timeZoneName: 'short',
+      },
+    },
+    relative: {
+      years: {
+        units: 'year',
+      },
+      months: {
+        units: 'month',
+      },
+      days: {
+        units: 'day',
+      },
+      hours: {
+        units: 'hour',
+      },
+      minutes: {
+        units: 'minute',
+      },
+      seconds: {
+        units: 'second',
+      },
+    },
+  },
+  messages: {
+    'plugin1.message.id-1': 'Message text 1',
+    'plugin2.message.id-2': 'Message text 2', // Message description
+  },
+}
+"
+`;

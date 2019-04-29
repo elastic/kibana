@@ -59,10 +59,6 @@ export default props => (
       <GuideDemo>
         <ModalExample />
       </GuideDemo>
-
-      <GuideDemo isDarkTheme>
-        <ModalExample />
-      </GuideDemo>
     </GuideSection>
 
     <GuideSection

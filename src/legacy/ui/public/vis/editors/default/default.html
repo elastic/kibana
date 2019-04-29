@@ -1,0 +1,21 @@
+<div class="visEditor--default">
+  <div class="collapsible-sidebar visEditor__collapsibleSidebar" ng-class="::getSidebarClass()">
+    <vis-editor-sidebar class="visEditor__sidebar" />
+    <vis-editor-resizer
+      class="visEditor__resizer"
+      tabindex="0"
+      aria-label="{{::'common.ui.vis.editors.resizeAriaLabels' | i18n: { defaultMessage: 'Press left/right to resize the editor' } }}"
+      data-test-subj="visualizeEditorResizer"
+    >&#xFE19;</vis-editor-resizer>
+  </div>
+
+  <div
+    class="visEditor__canvas"
+    data-shared-item
+    data-shared-items-container
+    render-complete
+    data-title="{{vis.title}}"
+    data-description="{{vis.description}}"
+  />
+
+</div>

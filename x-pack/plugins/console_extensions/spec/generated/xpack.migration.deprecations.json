@@ -4,8 +4,8 @@
       "GET"
     ],
     "patterns": [
-      "_xpack/migration/deprecations",
-      "{indices}/_xpack/migration/deprecations"
+      "_migration/deprecations",
+      "{indices}/_migration/deprecations"
     ],
     "documentation": "http://www.elastic.co/guide/en/migration/current/migration-api-deprecation.html"
   }

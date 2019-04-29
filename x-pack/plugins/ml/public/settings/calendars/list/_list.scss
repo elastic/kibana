@@ -1,0 +1,9 @@
+.mlCalendarList {
+
+  .mlCalendarList__content {
+    max-width: map-get($euiBreakpoints, 'xl');
+    margin-top: $euiSize;
+    margin-bottom: $euiSize;
+  }
+
+}

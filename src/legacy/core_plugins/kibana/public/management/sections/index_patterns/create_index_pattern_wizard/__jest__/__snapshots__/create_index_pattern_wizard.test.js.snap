@@ -1,0 +1,205 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateIndexPatternWizard defaults to the loading state 1`] = `
+<Fragment>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      showSystemIndices={false}
+    />
+    <LoadingState />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateIndexPatternWizard renders index pattern step when there are indices 1`] = `
+<Fragment>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      showSystemIndices={false}
+    />
+    <StepIndexPattern
+      allIndices={
+        Array [
+          Object {
+            "name": "myIndexPattern",
+          },
+        ]
+      }
+      esService={Object {}}
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        Object {
+          "checkIndicesForErrors": [Function],
+          "getIndexPatternMappings": [Function],
+          "getIndexPatternName": [Function],
+          "getIndexPatternType": [Function],
+          "getIsBeta": [Function],
+          "getShowSystemIndices": [Function],
+          "renderPrompt": [Function],
+        }
+      }
+      initialQuery=""
+      isIncludingSystemIndices={false}
+      savedObjectsClient={Object {}}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateIndexPatternWizard renders the empty state when there are no indices 1`] = `
+<Fragment>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      showSystemIndices={false}
+    />
+    <EmptyState
+      onRefresh={[Function]}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateIndexPatternWizard renders time field step when step is set to 2 1`] = `
+<Fragment>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      showSystemIndices={false}
+    />
+    <StepTimeField
+      createIndexPattern={[Function]}
+      goToPreviousStep={[Function]}
+      indexPattern=""
+      indexPatternCreationType={
+        Object {
+          "checkIndicesForErrors": [Function],
+          "getIndexPatternMappings": [Function],
+          "getIndexPatternName": [Function],
+          "getIndexPatternType": [Function],
+          "getIsBeta": [Function],
+          "getShowSystemIndices": [Function],
+          "renderPrompt": [Function],
+        }
+      }
+      indexPatternsService={Object {}}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateIndexPatternWizard renders when there are no indices but there are remote clusters 1`] = `
+<Fragment>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={false}
+      onChangeIncludingSystemIndices={[Function]}
+      showSystemIndices={false}
+    />
+    <StepIndexPattern
+      allIndices={Array []}
+      esService={Object {}}
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        Object {
+          "checkIndicesForErrors": [Function],
+          "getIndexPatternMappings": [Function],
+          "getIndexPatternName": [Function],
+          "getIndexPatternType": [Function],
+          "getIsBeta": [Function],
+          "getShowSystemIndices": [Function],
+          "renderPrompt": [Function],
+        }
+      }
+      initialQuery=""
+      isIncludingSystemIndices={false}
+      savedObjectsClient={Object {}}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;
+
+exports[`CreateIndexPatternWizard shows system indices even if there are no other indices if the include system indices is toggled 1`] = `
+<Fragment>
+  <div>
+    <Header
+      indexPatternName="name"
+      isBeta={false}
+      isIncludingSystemIndices={true}
+      onChangeIncludingSystemIndices={[Function]}
+      showSystemIndices={false}
+    />
+    <StepIndexPattern
+      allIndices={
+        Array [
+          Object {
+            "name": ".kibana ",
+          },
+        ]
+      }
+      esService={Object {}}
+      goToNextStep={[Function]}
+      indexPatternCreationType={
+        Object {
+          "checkIndicesForErrors": [Function],
+          "getIndexPatternMappings": [Function],
+          "getIndexPatternName": [Function],
+          "getIndexPatternType": [Function],
+          "getIsBeta": [Function],
+          "getShowSystemIndices": [Function],
+          "renderPrompt": [Function],
+        }
+      }
+      initialQuery=""
+      isIncludingSystemIndices={true}
+      savedObjectsClient={Object {}}
+    />
+  </div>
+  <EuiGlobalToastList
+    dismissToast={[Function]}
+    toastLifeTimeMs={6000}
+    toasts={Array []}
+  />
+</Fragment>
+`;

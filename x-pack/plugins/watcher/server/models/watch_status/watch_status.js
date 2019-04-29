@@ -9,6 +9,7 @@ import { badRequest } from 'boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { ActionStatus } from '../action_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../common/constants';
+import { i18n } from '@kbn/i18n';
 
 function getActionStatusTotals(watchStatus) {
   const result = {};
@@ -30,6 +31,7 @@ export class WatchStatus {
     this.id = props.id;
     this.watchState = props.state;
     this.watchStatusJson = props.watchStatusJson;
+    this.watchErrors = props.watchErrors || {};
 
     this.isActive = Boolean(get(this.watchStatusJson, 'state.active'));
     this.lastChecked = getMoment(get(this.watchStatusJson, 'last_checked'));
@@ -37,7 +39,11 @@ export class WatchStatus {
 
     const actionStatusesJson = get(this.watchStatusJson, 'actions', {});
     this.actionStatuses = map(actionStatusesJson, (actionStatusJson, id) => {
-      const json = { id, actionStatusJson };
+      const json = {
+        id,
+        actionStatusJson,
+        errors: this.watchErrors.actions && this.watchErrors.actions[id],
+      };
       return ActionStatus.fromUpstreamJson(json);
     });
   }
@@ -55,6 +61,10 @@ export class WatchStatus {
 
     if (totals[ACTION_STATES.ERROR] > 0) {
       return WATCH_STATES.ERROR;
+    }
+
+    if (totals[ACTION_STATES.CONFIG_ERROR] > 0) {
+      return WATCH_STATES.CONFIG_ERROR;
     }
 
     const firingTotal = totals[ACTION_STATES.FIRING] + totals[ACTION_STATES.ACKNOWLEDGED] +
@@ -129,10 +139,24 @@ export class WatchStatus {
   // generate object from elasticsearch response
   static fromUpstreamJson(json) {
     if (!json.id) {
-      throw badRequest('json argument must contain an id property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchStatus.idPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain an {id} property',
+          values: {
+            id: 'id'
+          }
+        }),
+      );
     }
     if (!json.watchStatusJson) {
-      throw badRequest('json argument must contain a watchStatusJson property');
+      throw badRequest(
+        i18n.translate('xpack.watcher.models.watchStatus.watchStatusJsonPropertyMissingBadRequestMessage', {
+          defaultMessage: 'json argument must contain a {watchStatusJson} property',
+          values: {
+            watchStatusJson: 'watchStatusJson'
+          }
+        }),
+      );
     }
 
     return new WatchStatus(json);

@@ -5,7 +5,7 @@
  */
 
 import { calculateAuto } from '../calculate_auto.js';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import _ from 'lodash';
 import moment from 'moment';
 

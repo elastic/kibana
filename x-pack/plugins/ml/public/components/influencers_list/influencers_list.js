@@ -20,21 +20,35 @@ import {
   EuiTitle,
   EuiToolTip
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { abbreviateWholeNumber } from 'plugins/ml/formatters/abbreviate_whole_number';
 import { getSeverity } from 'plugins/ml/../common/util/anomaly_utils';
+import { EntityCell } from '../entity_cell';
 
 
 function getTooltipContent(maxScoreLabel, totalScoreLabel) {
   return (
     <React.Fragment>
-      <p>Maximum anomaly score: {maxScoreLabel}</p>
-      <p>Total anomaly score: {totalScoreLabel}</p>
+      <p>
+        <FormattedMessage
+          id="xpack.ml.influencersList.maxAnomalyScoreTooltipDescription"
+          defaultMessage="Maximum anomaly score: {maxScoreLabel}"
+          values={{ maxScoreLabel }}
+        />
+      </p>
+      <p>
+        <FormattedMessage
+          id="xpack.ml.influencersList.totalAnomalyScoreTooltipDescription"
+          defaultMessage="Total anomaly score: {totalScoreLabel}"
+          values={{ totalScoreLabel }}
+        />
+      </p>
     </React.Fragment>
   );
 }
 
-function Influencer({ influencerFieldName, valueData }) {
+function Influencer({ influencerFieldName, influencerFilter, valueData }) {
   const maxScorePrecise = valueData.maxAnomalyScore;
   const maxScore = parseInt(maxScorePrecise);
   const maxScoreLabel = (maxScore !== 0) ? maxScore : '< 1';
@@ -54,12 +68,16 @@ function Influencer({ influencerFieldName, valueData }) {
     <div>
       <div className="field-label">
         {(influencerFieldName !== 'mlcategory') ? (
-          <div className="field-value">{valueData.influencerFieldValue}</div>
+          <EntityCell
+            entityName={influencerFieldName}
+            entityValue={valueData.influencerFieldValue}
+            filter={influencerFilter}
+          />
         ) : (
           <div className="field-value">mlcategory {valueData.influencerFieldValue}</div>
         )}
       </div>
-      <div className={`progress ${severity}`} value="{valueData.maxAnomalyScore}" max="100">
+      <div className={`progress ${severity.id}`} value="{valueData.maxAnomalyScore}" max="100">
         <div className="progress-bar-holder">
           <div className="progress-bar" style={barStyle}/>
         </div>
@@ -89,14 +107,16 @@ function Influencer({ influencerFieldName, valueData }) {
 }
 Influencer.propTypes = {
   influencerFieldName: PropTypes.string.isRequired,
+  influencerFilter: PropTypes.func,
   valueData: PropTypes.object.isRequired
 };
 
-function InfluencersByName({ influencerFieldName, fieldValues }) {
+function InfluencersByName({ influencerFieldName, influencerFilter, fieldValues }) {
   const influencerValues = fieldValues.map(valueData => (
     <Influencer
       key={valueData.influencerFieldValue}
       influencerFieldName={influencerFieldName}
+      influencerFilter={influencerFilter}
       valueData={valueData}
     />
   ));
@@ -113,10 +133,11 @@ function InfluencersByName({ influencerFieldName, fieldValues }) {
 }
 InfluencersByName.propTypes = {
   influencerFieldName: PropTypes.string.isRequired,
+  influencerFilter: PropTypes.func,
   fieldValues: PropTypes.array.isRequired
 };
 
-export function InfluencersList({ influencers }) {
+export function InfluencersList({ influencers, influencerFilter }) {
 
   if (influencers === undefined || Object.keys(influencers).length === 0) {
     return (
@@ -124,7 +145,12 @@ export function InfluencersList({ influencers }) {
         <EuiFlexItem grow={false}>
           <EuiSpacer size="xxl" />
           <EuiText>
-            <h4>No influencers found</h4>
+            <h4>
+              <FormattedMessage
+                id="xpack.ml.influencersList.noInfluencersFoundTitle"
+                defaultMessage="No influencers found"
+              />
+            </h4>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -135,6 +161,7 @@ export function InfluencersList({ influencers }) {
     <InfluencersByName
       key={influencerFieldName}
       influencerFieldName={influencerFieldName}
+      influencerFilter={influencerFilter}
       fieldValues={influencers[influencerFieldName]}
     />
   ));
@@ -146,5 +173,6 @@ export function InfluencersList({ influencers }) {
   );
 }
 InfluencersList.propTypes = {
-  influencers: PropTypes.object
+  influencers: PropTypes.object,
+  influencerFilter: PropTypes.func,
 };

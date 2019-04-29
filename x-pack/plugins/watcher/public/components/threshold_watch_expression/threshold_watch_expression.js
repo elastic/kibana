@@ -13,7 +13,6 @@ import './components/threshold_watch_group_by';
 import './components/threshold_watch_threshold_level';
 import './components/threshold_watch_time_window';
 import 'plugins/watcher/components/expression_builder';
-import './threshold_watch_expression.less';
 import { aggTypes } from './lib/agg_types';
 import { comparators } from './lib/comparators';
 import { groupByTypes } from './lib/group_by_types';

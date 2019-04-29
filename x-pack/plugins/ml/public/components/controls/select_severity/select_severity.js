@@ -10,104 +10,132 @@
  * React component for rendering a select element with threshold levels.
  */
 import PropTypes from 'prop-types';
-import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
-  EuiComboBox,
-  EuiHighlight,
   EuiHealth,
+  EuiSpacer,
+  EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 
-import './styles/main.less';
+import { getSeverityColor } from '../../../../common/util/anomaly_utils';
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
-import { getSeverityColor } from 'plugins/ml/../common/util/anomaly_utils';
+const warningLabel = i18n.translate('xpack.ml.controls.selectSeverity.warningLabel', { defaultMessage: 'warning' });
+const minorLabel = i18n.translate('xpack.ml.controls.selectSeverity.minorLabel', { defaultMessage: 'minor' });
+const majorLabel = i18n.translate('xpack.ml.controls.selectSeverity.majorLabel', { defaultMessage: 'major' });
+const criticalLabel = i18n.translate('xpack.ml.controls.selectSeverity.criticalLabel', { defaultMessage: 'critical' });
 
-const OPTIONS = [
-  { value: 0, label: 'warning', color: getSeverityColor(0) },
-  { value: 25, label: 'minor', color: getSeverityColor(25) },
-  { value: 50, label: 'major', color: getSeverityColor(50) },
-  { value: 75, label: 'critical', color: getSeverityColor(75) }
+const optionsMap = {
+  [warningLabel]: 0,
+  [minorLabel]: 25,
+  [majorLabel]: 50,
+  [criticalLabel]: 75,
+};
+
+export const SEVERITY_OPTIONS = [
+  {
+    val: 0,
+    display: warningLabel,
+    color: getSeverityColor(0)
+  },
+  {
+    val: 25,
+    display: minorLabel,
+    color: getSeverityColor(25)
+  },
+  {
+    val: 50,
+    display: majorLabel,
+    color: getSeverityColor(50)
+  },
+  {
+    val: 75,
+    display: criticalLabel,
+    color: getSeverityColor(75)
+  },
 ];
 
 function optionValueToThreshold(value) {
-  // Builds the corresponding threshold object with the required display and val properties
-  // from the specified value.
-  const option = OPTIONS.find(opt => (opt.value === value));
+  // Get corresponding threshold object with required display and val properties from the specified value.
+  let threshold = SEVERITY_OPTIONS.find(opt => (opt.val === value));
 
   // Default to warning if supplied value doesn't map to one of the options.
-  let threshold = OPTIONS[0];
-  if (option !== undefined) {
-    threshold = { display: option.label, val: option.value };
+  if (threshold === undefined) {
+    threshold = SEVERITY_OPTIONS[0];
   }
 
   return threshold;
 }
 
-class SelectSeverity extends Component {
-  constructor(props) {
-    super(props);
+export const severity$ = new BehaviorSubject(SEVERITY_OPTIONS[0]);
 
-    // Restore the threshold from the state, or default to warning.
-    this.mlSelectSeverityService = this.props.mlSelectSeverityService;
-    const thresholdState = this.mlSelectSeverityService.state.get('threshold');
-    const thresholdValue = _.get(thresholdState, 'val', 0);
-    const threshold = optionValueToThreshold(thresholdValue);
-    const selectedOption = OPTIONS.find(opt => (opt.value === threshold.val));
-
-    this.mlSelectSeverityService.state.set('threshold', threshold);
-
-    this.state = {
-      selectedOptions: [selectedOption]
-    };
+class SelectSeverityUnwrapped extends Component {
+  onChange = (valueDisplay) => {
+    const threshold = optionValueToThreshold(optionsMap[valueDisplay]);
+    severity$.next(threshold);
   }
 
-  onChange = (selectedOptions) => {
-    if (selectedOptions.length === 0) {
-      // Don't allow no options to be selected.
-      return;
-    }
-
-    this.setState({
-      selectedOptions,
-    });
-
-    const threshold = optionValueToThreshold(selectedOptions[0].value);
-    this.mlSelectSeverityService.state.set('threshold', threshold).changed();
-  };
-
-  renderOption = (option, searchValue, contentClassName) => {
-    const { color, label, value } = option;
-    return (
-      <EuiHealth color={color}>
-        <span className={contentClassName}>
-          <EuiHighlight search={searchValue}>
-            {label}
-          </EuiHighlight>
-          &nbsp;
-          <span>({value})</span>
-        </span>
-      </EuiHealth>
-    );
-  };
+  getOptions = () =>
+    SEVERITY_OPTIONS.map(({ color, display, val }) => ({
+      value: display,
+      inputDisplay: (
+        <Fragment>
+          <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+            {display}
+          </EuiHealth>
+        </Fragment>
+      ),
+      dropdownDisplay: (
+        <Fragment>
+          <EuiHealth color={color} style={{ lineHeight: 'inherit' }}>
+            {display}
+          </EuiHealth>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            <p className="euiTextColor--subdued">
+              <FormattedMessage
+                id="xpack.ml.controls.selectSeverity.scoreDetailsDescription"
+                defaultMessage="score {value} and above"
+                values={{ value: val }}
+              />
+            </p>
+          </EuiText>
+        </Fragment>
+      ),
+    }));
 
   render() {
-    const { selectedOptions } = this.state;
+    const { severity } = this.props;
+    const options = this.getOptions();
+
     return (
-      <EuiComboBox
-        placeholder="Select severity"
-        className="ml-select-severity"
-        singleSelection={true}
-        options={OPTIONS}
-        selectedOptions={selectedOptions}
+      <EuiSuperSelect
+        className={this.props.classNames}
+        hasDividers
+        options={options}
+        valueOfSelected={severity.display}
         onChange={this.onChange}
-        renderOption={this.renderOption}
       />
     );
   }
 }
-SelectSeverity.propTypes = {
-  mlSelectSeverityService: PropTypes.object.isRequired,
+
+SelectSeverityUnwrapped.propTypes = {
+  classNames: PropTypes.string
 };
+
+SelectSeverityUnwrapped.defaultProps = {
+  classNames: ''
+};
+
+const SelectSeverity = injectObservablesAsProps(
+  { severity: severity$ },
+  SelectSeverityUnwrapped
+);
 
 export { SelectSeverity };

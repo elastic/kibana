@@ -1,0 +1,1 @@
+Utils should be data processing functions and other tools.... all in all utils is basicly everything that is not an adaptor, or presenter and yet too much to put in a lib.

@@ -6,7 +6,7 @@
 
 import chrome from 'ui/chrome';
 
-import { http } from 'plugins/ml/services/http_service';
+import { http } from '../../services/http_service';
 
 const basePath = chrome.addBasePath('/api/ml');
 
@@ -100,9 +100,9 @@ export const jobs = {
     });
   },
 
-  jobAuditSummary() {
+  deletingJobTasks() {
     return http({
-      url: `${basePath}/job_audit_messages/summary`,
+      url: `${basePath}/jobs/deleting_jobs_tasks`,
       method: 'GET',
     });
   },

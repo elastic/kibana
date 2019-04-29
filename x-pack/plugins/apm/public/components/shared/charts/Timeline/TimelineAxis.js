@@ -6,22 +6,35 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XYPlot, XAxis } from 'react-vis';
 import LastTickValue from './LastTickValue';
 import AgentMarker from './AgentMarker';
-import { colors, px } from '../../../../style/variables';
+import { px } from '../../../../style/variables';
 import { getTimeFormatter } from '../../../../utils/formatters';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
 
-// Remove last tick if it's too close to xMax
-const getXAxisTickValues = (tickValues, xMax) =>
-  _.last(tickValues) * 1.05 > xMax ? tickValues.slice(0, -1) : tickValues;
+// Remove any tick that is too close to traceRootDuration
+const getXAxisTickValues = (tickValues, traceRootDuration) => {
+  if (traceRootDuration == null) {
+    return tickValues;
+  }
 
-function TimelineAxis({ header, plotValues, agentMarks }) {
+  const padding = (tickValues[1] - tickValues[0]) / 2;
+  const lowerBound = traceRootDuration - padding;
+  const upperBound = traceRootDuration + padding;
+
+  return tickValues.filter(value => {
+    const isInRange = inRange(value, lowerBound, upperBound);
+    return !isInRange && value !== traceRootDuration;
+  });
+};
+
+function TimelineAxis({ plotValues, agentMarks, traceRootDuration }) {
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormat = getTimeFormatter(xMax);
-  const xAxisTickValues = getXAxisTickValues(tickValues, xMax);
+  const xAxisTickValues = getXAxisTickValues(tickValues, traceRootDuration);
 
   return (
     <Sticky disableCompensation>
@@ -30,21 +43,20 @@ function TimelineAxis({ header, plotValues, agentMarks }) {
           <div
             style={{
               position: 'absolute',
-              backgroundColor: colors.white,
-              borderBottom: `1px solid ${colors.gray3}`,
+              backgroundColor: theme.euiColorEmptyShade,
+              borderBottom: `1px solid ${theme.euiColorMediumShade}`,
               height: px(margins.top),
               zIndex: 2,
               width: '100%',
               ...style
             }}
           >
-            {header}
             <XYPlot
               dontCheckIfEmpty
               width={width}
-              height={40}
+              height={margins.top}
               margin={{
-                top: 40,
+                top: margins.top,
                 left: margins.left,
                 right: margins.right
               }}
@@ -56,18 +68,25 @@ function TimelineAxis({ header, plotValues, agentMarks }) {
                 tickSize={0}
                 tickValues={xAxisTickValues}
                 tickFormat={tickFormat}
+                tickPadding={20}
                 style={{
-                  text: { fill: colors.gray3 }
+                  text: { fill: theme.euiColorMediumShade }
                 }}
               />
 
-              <LastTickValue x={xScale(xMax)} value={tickFormat(xMax)} />
+              {traceRootDuration > 0 && (
+                <LastTickValue
+                  x={xScale(traceRootDuration)}
+                  value={tickFormat(traceRootDuration)}
+                  marginTop={28}
+                />
+              )}
 
               {agentMarks.map(agentMark => (
                 <AgentMarker
-                  key={agentMark.timeAxis}
+                  key={agentMark.name}
                   agentMark={agentMark}
-                  x={xScale(agentMark.timeAxis)}
+                  x={xScale(agentMark.us)}
                 />
               ))}
             </XYPlot>

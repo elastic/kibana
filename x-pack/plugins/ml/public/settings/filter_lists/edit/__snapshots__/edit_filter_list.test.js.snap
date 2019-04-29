@@ -12,6 +12,7 @@ exports[`EditFilterList adds new items to filter list 1`] = `
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description="List of known safe domains"
       isNewFilterIdInvalid={false}
       newFilterId=""
@@ -31,6 +32,8 @@ exports[`EditFilterList adds new items to filter list 1`] = `
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -67,16 +70,9 @@ exports[`EditFilterList adds new items to filter list 1`] = `
       totalItemCount={6}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -85,11 +81,14 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -98,9 +97,14 @@ exports[`EditFilterList adds new items to filter list 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -120,6 +124,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description="List of known safe domains"
       isNewFilterIdInvalid={false}
       newFilterId=""
@@ -139,6 +144,8 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={1}
@@ -177,16 +184,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -195,11 +195,14 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -208,9 +211,14 @@ exports[`EditFilterList renders after selecting an item and deleting it 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -230,6 +238,7 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description="List of known safe domains"
       isNewFilterIdInvalid={false}
       newFilterId=""
@@ -249,6 +258,8 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -282,16 +293,9 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
       totalItemCount={3}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -300,11 +304,14 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -313,9 +320,14 @@ exports[`EditFilterList renders after selecting an item and deleting it 2`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -335,6 +347,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description=""
       isNewFilterIdInvalid={true}
       newFilterId=""
@@ -344,6 +357,8 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -371,16 +386,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
       totalItemCount={0}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -389,11 +397,14 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -402,9 +413,14 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -424,6 +440,7 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description=""
       isNewFilterIdInvalid={false}
       newFilterId="new_filter_list"
@@ -433,6 +450,8 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -460,16 +479,9 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
       totalItemCount={0}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -478,11 +490,14 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -491,9 +506,14 @@ exports[`EditFilterList renders the edit page for a new filter list and updates 
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -513,6 +533,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description="List of known safe domains"
       isNewFilterIdInvalid={false}
       newFilterId=""
@@ -532,6 +553,8 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -566,16 +589,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -584,11 +600,14 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -597,9 +616,14 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -619,6 +643,7 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description="Known safe web domains"
       isNewFilterIdInvalid={false}
       newFilterId=""
@@ -638,6 +663,8 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -672,16 +699,9 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -690,11 +710,14 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -703,9 +726,14 @@ exports[`EditFilterList renders the edit page for an existing filter list and up
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -725,6 +753,7 @@ exports[`EditFilterList updates the items per page 1`] = `
     verticalPosition="center"
   >
     <EditFilterListHeader
+      canCreateFilter={true}
       description="List of known safe domains"
       isNewFilterIdInvalid={false}
       newFilterId=""
@@ -744,6 +773,8 @@ exports[`EditFilterList updates the items per page 1`] = `
     />
     <EditFilterListToolbar
       addItems={[Function]}
+      canCreateFilter={true}
+      canDeleteFilter={true}
       deleteSelectedItems={[Function]}
       onSearchChange={[Function]}
       selectedItemCount={0}
@@ -778,16 +809,9 @@ exports[`EditFilterList updates the items per page 1`] = `
       totalItemCount={4}
     />
     <EuiFlexGroup
-      alignItems="stretch"
-      component="div"
-      direction="row"
-      gutterSize="l"
       justifyContent="flexEnd"
-      responsive={true}
-      wrap={false}
     >
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButtonEmpty
@@ -796,11 +820,14 @@ exports[`EditFilterList updates the items per page 1`] = `
           onClick={[Function]}
           type="button"
         >
-          Cancel
+          <FormattedMessage
+            defaultMessage="Cancel"
+            id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
+            values={Object {}}
+          />
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem
-        component="div"
         grow={false}
       >
         <EuiButton
@@ -809,9 +836,14 @@ exports[`EditFilterList updates the items per page 1`] = `
           fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
-          Save
+          <FormattedMessage
+            defaultMessage="Save"
+            id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"
+            values={Object {}}
+          />
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>

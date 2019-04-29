@@ -10,6 +10,7 @@ import { getBeatSummary } from '../../../../lib/beats';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
 import { metricSet } from './metric_set_detail';
+import { INDEX_PATTERN_BEATS } from '../../../../../common/constants';
 
 export function beatsDetailRoute(server) {
   server.route({
@@ -30,13 +31,13 @@ export function beatsDetailRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
 
       const clusterUuid = req.params.clusterUuid;
       const beatUuid = req.params.beatUuid;
       const config = server.config();
       const ccs = req.payload.ccs;
-      const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
+      const beatsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_BEATS, ccs);
 
       const summaryOptions = {
         clusterUuid,
@@ -51,12 +52,12 @@ export function beatsDetailRoute(server) {
           getMetrics(req, beatsIndexPattern, metricSet, [{ term: { 'beats_stats.beat.uuid': beatUuid } }]),
         ]);
 
-        reply({
+        return {
           summary,
           metrics,
-        });
+        };
       } catch (err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
 
     }

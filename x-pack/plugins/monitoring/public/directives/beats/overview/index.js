@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { BeatsOverview } from 'plugins/monitoring/components/beats/overview';
 import { timefilter } from 'ui/timefilter';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringBeatsOverview', () => {
@@ -30,10 +31,12 @@ uiModule.directive('monitoringBeatsOverview', () => {
 
       scope.$watch('data', (data = {}) => {
         render((
-          <BeatsOverview
-            {...data}
-            onBrush={onBrush}
-          />
+          <I18nContext>
+            <BeatsOverview
+              {...data}
+              onBrush={onBrush}
+            />
+          </I18nContext>
         ), $el[0]);
       });
 

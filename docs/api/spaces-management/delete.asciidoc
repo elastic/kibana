@@ -1,0 +1,27 @@
+[[spaces-api-delete]]
+=== Delete space
+
+experimental[This API is *experimental* and may be changed or removed completely in a future release. The underlying Spaces concepts are stable, but the APIs for managing Spaces are currently experimental.]
+
+[WARNING]
+==================================================
+Deleting a space will automatically delete all saved objects that belong to that space. This operation cannot be undone!
+==================================================
+
+Note: You cannot access this endpoint via the Console in Kibana.
+
+==== Request
+
+To delete a space, submit a DELETE request to the `/api/spaces/space/<space_id>`
+endpoint:
+
+[source,js]
+--------------------------------------------------
+DELETE /api/spaces/space/marketing
+--------------------------------------------------
+// KIBANA
+
+==== Response
+
+If the space is successfully deleted, the response code is `204`; otherwise, the response
+code is 404.

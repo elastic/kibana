@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { WatchStatus } from '../watch_status';
 import { ACTION_STATES, WATCH_STATES, WATCH_STATE_COMMENTS } from '../../../../common/constants';
 import moment from 'moment';
@@ -250,6 +250,17 @@ describe('watch_status', () => {
         ];
 
         expect(watchStatus.state).to.be(WATCH_STATES.ERROR);
+      });
+
+      it('correctly calculates WATCH_STATE.CONFIG_ERROR', () => {
+        const watchStatus = WatchStatus.fromUpstreamJson(upstreamJson);
+
+        watchStatus.actionStatuses = [
+          { state: ACTION_STATES.OK },
+          { state: ACTION_STATES.CONFIG_ERROR }
+        ];
+
+        expect(watchStatus.state).to.be(WATCH_STATES.CONFIG_ERROR);
       });
 
       it(`correctly calculates WATCH_STATES.DISABLED when watch is inactive`, () => {

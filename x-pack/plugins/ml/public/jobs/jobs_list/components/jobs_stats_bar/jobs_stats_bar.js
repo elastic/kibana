@@ -5,23 +5,57 @@
  */
 
 
-import './styles/main.less';
 import { JOB_STATE, DATAFEED_STATE } from 'plugins/ml/../common/constants/states';
 
 import PropTypes from 'prop-types';
-import React, {
-  Component,
-} from 'react';
+import React from 'react';
+import { i18n } from '@kbn/i18n';
 
 function createJobStats(jobsSummaryList) {
 
   const jobStats = {
-    activeNodes: { label: 'Active ML Nodes', value: 0, show: true },
-    total: { label: 'Total jobs', value: 0, show: true },
-    open: { label: 'Open jobs', value: 0, show: true },
-    closed: { label: 'Closed jobs', value: 0, show: true },
-    failed: { label: 'Failed jobs', value: 0, show: false },
-    activeDatafeeds: { label: 'Active datafeeds', value: 0, show: true }
+    activeNodes: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
+        defaultMessage: 'Active ML Nodes'
+      }),
+      value: 0,
+      show: true
+    },
+    total: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.totalJobsLabel', {
+        defaultMessage: 'Total jobs'
+      }),
+      value: 0,
+      show: true
+    },
+    open: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.openJobsLabel', {
+        defaultMessage: 'Open jobs'
+      }),
+      value: 0,
+      show: true
+    },
+    closed: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.closedJobsLabel', {
+        defaultMessage: 'Closed jobs'
+      }),
+      value: 0,
+      show: true
+    },
+    failed: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.failedJobsLabel', {
+        defaultMessage: 'Failed jobs'
+      }),
+      value: 0,
+      show: false
+    },
+    activeDatafeeds: {
+      label: i18n.translate('xpack.ml.jobsList.statsBar.activeDatafeedsLabel', {
+        defaultMessage: 'Active datafeeds'
+      }),
+      value: 0,
+      show: true
+    }
   };
 
   if (jobsSummaryList === undefined) {
@@ -76,46 +110,20 @@ Stat.propTypes = {
   stat: PropTypes.object.isRequired,
 };
 
-export class JobStatsBar extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      jobsSummaryList: [],
-      jobStats: {},
-    };
-  }
+export const JobStatsBar = ({ jobsSummaryList }) => {
+  const jobStats = createJobStats(jobsSummaryList);
+  const stats = Object.keys(jobStats).map(k => jobStats[k]);
 
-  updateJobStats = (jobsSummaryList) => {
-    const jobStats = createJobStats(jobsSummaryList);
-    this.setState({
-      jobsSummaryList,
-      jobStats,
-    });
-  };
+  return (
+    <div className="jobs-stats-bar">
+      {
+        stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
+      }
+    </div>
+  );
+};
 
-  componentDidMount() {
-    this.props.setUpdateJobStats(this.updateJobStats);
-  }
-
-  componentWillUnmount() {
-    this.props.unsetUpdateJobStats();
-  }
-
-  render() {
-    const { jobStats } = this.state;
-    const stats = Object.keys(jobStats).map(k => jobStats[k]);
-
-    return (
-      <div className="jobs-stats-bar">
-        {
-          stats.filter(s => (s.show)).map(s => <Stat key={s.label} stat={s} />)
-        }
-      </div>
-    );
-  }
-}
 JobStatsBar.propTypes = {
-  setUpdateJobStats: PropTypes.func.isRequired,
-  unsetUpdateJobStats: PropTypes.func.isRequired,
+  jobsSummaryList: PropTypes.array.isRequired,
 };
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { wrap as wrapError } from 'boom';
+import { boomify } from 'boom';
 import { KIBANA_SETTINGS_TYPE } from '../../../../../monitoring/common/constants';
 import { getKibanaInfoForStats } from '../../../../../monitoring/server/kibana_monitoring/lib';
 
@@ -17,7 +17,7 @@ export function settingsRoute(server, kbnServer) {
   server.route({
     path: '/api/settings',
     method: 'GET',
-    async handler(req, reply) {
+    async handler(req) {
       const { server } = req;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       const callCluster = (...args) => callWithRequest(req, ...args); // All queries from HTTP API must use authentication headers from the request
@@ -26,23 +26,26 @@ export function settingsRoute(server, kbnServer) {
         const { collectorSet } = server.usage;
         const settingsCollector = collectorSet.getCollectorByType(KIBANA_SETTINGS_TYPE);
 
-        const settings = await settingsCollector.fetch(callCluster);
+        let settings = await settingsCollector.fetch(callCluster);
+        if (!settings) {
+          settings = settingsCollector.getEmailValueStructure(null);
+        }
         const uuid = await getClusterUuid(callCluster);
 
         const kibana = getKibanaInfoForStats(server, kbnServer);
-        reply({
+        return {
           cluster_uuid: uuid,
           settings: {
             ...settings,
             kibana,
           }
-        });
+        };
       } catch(err) {
         req.log(['error'], err); // FIXME doesn't seem to log anything useful if ES times out
         if (err.isBoom) {
-          reply(err);
+          return err;
         } else {
-          reply(wrapError(err, err.statusCode, err.message));
+          return boomify(err, { statusCode: err.statusCode, message: err.message });
         }
       }
     }

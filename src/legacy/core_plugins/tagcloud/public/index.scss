@@ -1,0 +1,10 @@
+@import 'src/legacy/ui/public/styles/styling_constants';
+
+// Prefix all styles with "tgc" to avoid conflicts.
+// Examples
+//   tgcChart
+//   tgcChart__legend
+//   tgcChart__legend--small
+//   tgcChart__legend-isLoading
+
+@import './tag_cloud';

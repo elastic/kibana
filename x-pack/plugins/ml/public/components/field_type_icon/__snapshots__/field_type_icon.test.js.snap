@@ -2,16 +2,18 @@
 
 exports[`FieldTypeIcon render component when type matches a field type 1`] = `
 <FieldTypeIconContainer
-  ariaLabel="Aggregatable string field"
+  ariaLabel="keyword type"
   className="field-type-icon"
   iconChar="t"
+  needsAria={true}
 />
 `;
 
 exports[`FieldTypeIcon update component 1`] = `
 <FieldTypeIconContainer
-  ariaLabel="Aggregatable string field"
-  className="field-type-icon"
-  iconChar="t"
+  ariaLabel="ip type"
+  className="field-type-icon kuiIcon fa-laptop"
+  iconChar=""
+  needsAria={true}
 />
 `;

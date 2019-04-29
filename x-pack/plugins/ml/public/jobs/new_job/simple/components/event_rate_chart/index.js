@@ -7,4 +7,3 @@
 
 
 import './event_rate_chart_directive';
-import './styles/main.less';

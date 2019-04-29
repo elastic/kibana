@@ -4,8 +4,8 @@
       "GET"
     ],
     "patterns": [
-      "_xpack/rollup/job/{id}",
-      "_xpack/rollup/job/"
+      "_rollup/job/{id}",
+      "_rollup/job/"
     ]
   }
 }

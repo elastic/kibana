@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const dashboardPanelActions = getService('dashboardPanelActions');
@@ -29,26 +29,29 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.loadSavedDashboard('few panels');
     });
 
-    it('Sample action appears in context menu in view mode', async () => {
+    it('allows to register links into the context menu', async () => {
       await dashboardPanelActions.openContextMenu();
-      const newPanelActionExists = await testSubjects.exists(
+      const actionElement = await testSubjects.find('dashboardPanelAction-samplePanelLink');
+      const actionElementTag = await actionElement.getTagName();
+      expect(actionElementTag).to.be('a');
+      const actionElementLink = await actionElement.getProperty('href');
+      expect(actionElementLink).to.be('https://example.com/kibana/test');
+    });
+
+    it('Sample action appears in context menu in view mode', async () => {
+      await testSubjects.existOrFail(
         'dashboardPanelAction-samplePanelAction'
       );
-      expect(newPanelActionExists).to.be(true);
     });
 
     it('Clicking sample action shows a flyout', async () => {
-      await dashboardPanelActions.openContextMenu();
       await testSubjects.click('dashboardPanelAction-samplePanelAction');
-      const flyoutExists = await testSubjects.exists('samplePanelActionFlyout');
-      expect(flyoutExists).to.be(true);
+      await testSubjects.existOrFail('samplePanelActionFlyout');
     });
 
     it('flyout shows the correct contents', async () => {
-      const titleExists = await testSubjects.exists('samplePanelActionTitle');
-      expect(titleExists).to.be(true);
-      const bodyExists = await testSubjects.exists('samplePanelActionBody');
-      expect(bodyExists).to.be(true);
+      await testSubjects.existOrFail('samplePanelActionTitle');
+      await testSubjects.existOrFail('samplePanelActionBody');
     });
   });
 }

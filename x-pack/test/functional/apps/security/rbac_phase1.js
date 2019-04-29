@@ -4,48 +4,58 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
-  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['security', 'settings', 'common', 'visualize', 'timePicker']);
   const log = getService('log');
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
   describe('rbac ', async function () {
     before(async () => {
-      await remote.setWindowSize(1600, 1000);
+      await browser.setWindowSize(1600, 1000);
       log.debug('users');
       await esArchiver.loadIfNeeded('logstash_functional');
       log.debug('load kibana index with default index pattern');
-      await esArchiver.load('discover');
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
+      await esArchiver.load('security/discover');
+      await kibanaServer.uiSettings.replace({ 'defaultIndex': 'logstash-*' });
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_all', {
-        "kibana": ["all"],
-        "indices": [{
-          "names": [ "logstash-*" ],
-          "privileges": [ "read", "view_index_metadata" ]
-        }]
+        kibana: {
+          global: ['all']
+        },
+        elasticsearch: {
+          'indices': [{
+            'names': ['logstash-*'],
+            'privileges': ['read', 'view_index_metadata']
+          }]
+        }
       });
 
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('rbac_read', {
-        "kibana": ["read"],
-        "indices": [{
-          "names": [ "logstash-*" ],
-          "privileges": [ "read", "view_index_metadata" ]
-        }]
+        kibana: {
+          global: ['read']
+        },
+        elasticsearch: {
+          'indices': [{
+            'names': ['logstash-*'],
+            'privileges': ['read', 'view_index_metadata']
+          }]
+        }
       });
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({ username: 'kibanauser', password: 'changeme',
+      await PageObjects.security.addUser({
+        username: 'kibanauser', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'kibanafirst kibanalast',
         email: 'kibanauser@myEmail.com', save: true,
-        roles: ['rbac_all'] });
+        roles: ['rbac_all']
+      });
       log.debug('After Add user: , userObj.userName');
       const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       log.debug('actualUsers = %j', users);
@@ -55,10 +65,12 @@ export default function ({ getService, getPageObjects }) {
       expect(users.kibanauser.reserved).to.be(false);
       await PageObjects.security.clickElasticsearchUsers();
       log.debug('After Add user new: , userObj.userName');
-      await PageObjects.security.addUser({ username: 'kibanareadonly', password: 'changeme',
+      await PageObjects.security.addUser({
+        username: 'kibanareadonly', password: 'changeme',
         confirmPassword: 'changeme', fullname: 'kibanareadonlyFirst kibanareadonlyLast',
         email: 'kibanareadonly@myEmail.com', save: true,
-        roles: ['rbac_read'] });
+        roles: ['rbac_read']
+      });
       log.debug('After Add user: , userObj.userName');
       const users1 = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
       const user = users1.kibanareadonly;
@@ -77,43 +89,18 @@ export default function ({ getService, getPageObjects }) {
       const toTime = '2015-09-23 18:31:44.000';
       const vizName1 = 'Visualization VerticalBarChart';
 
-      log.debug('navigateToApp visualize');
+      log.debug('log in as kibanauser with rbac_all role');
       await PageObjects.security.login('kibanauser', 'changeme');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
-      log.debug('clickVerticalBarChart');
-      await PageObjects.visualize.clickVerticalBarChart();
-      await PageObjects.visualize.clickNewSearch();
-      log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.visualize.waitForVisualization();
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(true);
-      await PageObjects.security.logout();
-
-    });
-
-    it('rbac read only role can not  save a visualization', async function () {
-      const fromTime = '2015-09-19 06:31:44.000';
-      const toTime = '2015-09-23 18:31:44.000';
-      const vizName1 = 'Viz VerticalBarChart';
-
       log.debug('navigateToApp visualize');
-      await PageObjects.security.login('kibanareadonly', 'changeme');
-      await PageObjects.common.navigateToUrl('visualize', 'new');
+      await PageObjects.visualize.navigateToNewVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
       log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
       await PageObjects.visualize.waitForVisualization();
-      const success = await PageObjects.visualize.saveVisualization(vizName1);
-      expect(success).to.be(false);
+      await PageObjects.visualize.saveVisualizationExpectSuccess(vizName1);
       await PageObjects.security.logout();
-
     });
 
     after(async function () {

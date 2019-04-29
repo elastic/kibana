@@ -103,10 +103,6 @@ export default props => (
       <GuideDemo>
         <TextInput/>
       </GuideDemo>
-
-      <GuideDemo isDarkTheme={true}>
-        <TextInput/>
-      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -126,11 +122,6 @@ export default props => (
       <GuideDemo
         html={assistedInputHtml}
       />
-
-      <GuideDemo
-        html={assistedInputHtml}
-        isDarkTheme
-      />
     </GuideSection>
 
     <GuideSection
@@ -142,11 +133,6 @@ export default props => (
     >
       <GuideDemo
         html={searchInputHtml}
-      />
-
-      <GuideDemo
-        html={searchInputHtml}
-        isDarkTheme
       />
     </GuideSection>
 
@@ -179,10 +165,6 @@ export default props => (
       <GuideDemo>
         <TextArea/>
       </GuideDemo>
-
-      <GuideDemo isDarkTheme={true}>
-        <TextArea/>
-      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -213,10 +195,6 @@ export default props => (
       <GuideDemo>
         <CheckBox/>
       </GuideDemo>
-
-      <GuideDemo isDarkTheme={true}>
-        <CheckBox/>
-      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -233,9 +211,6 @@ export default props => (
         <Select/>
       </GuideDemo>
 
-      <GuideDemo isDarkTheme={true}>
-        <Select/>
-      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );

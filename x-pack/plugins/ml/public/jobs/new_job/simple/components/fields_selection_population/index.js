@@ -7,5 +7,4 @@
 
 
 import './fields_selection_directive';
-import './styles/main.less';
 import 'plugins/ml/components/field_type_icon';

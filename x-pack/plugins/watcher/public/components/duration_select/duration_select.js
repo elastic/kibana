@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import 'ui/fancy_forms';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { TIME_UNITS } from 'plugins/watcher/constants';
 import template from './duration_select.html';
-import './duration_select.less';
 import moment from 'moment';
 import 'plugins/watcher/services/html_id_generator';
 

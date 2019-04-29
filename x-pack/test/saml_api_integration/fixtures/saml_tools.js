@@ -29,14 +29,14 @@ const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
 
 export async function getSAMLRequestId(urlWithSAMLRequestId) {
   const inflatedSAMLRequest = await inflateRawAsync(
-    new Buffer(url.parse(urlWithSAMLRequestId, true /* parseQueryString */).query.SAMLRequest, 'base64')
+    Buffer.from(url.parse(urlWithSAMLRequestId, true /* parseQueryString */).query.SAMLRequest, 'base64')
   );
 
   const parsedSAMLRequest = await parseStringAsync(inflatedSAMLRequest.toString());
   return parsedSAMLRequest['saml2p:AuthnRequest'].$.ID;
 }
 
-export async function getSAMLResponse({ destination, inResponseTo, sessionIndex }) {
+export async function getSAMLResponse({ destination, inResponseTo, sessionIndex, username = 'a@b.c' } = {}) {
   const issueInstant = (new Date()).toISOString();
   const notOnOrAfter = (new Date(Date.now() + 3600 * 1000)).toISOString();
 
@@ -60,7 +60,7 @@ export async function getSAMLResponse({ destination, inResponseTo, sessionIndex 
       <saml:AttributeStatement xmlns:xs="http://www.w3.org/2001/XMLSchema"
                              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
         <saml:Attribute Name="urn:oid:0.0.7" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:uri">
-          <saml:AttributeValue xsi:type="xs:string">a@b.c</saml:AttributeValue>
+          <saml:AttributeValue xsi:type="xs:string">${username}</saml:AttributeValue>
         </saml:Attribute>
       </saml:AttributeStatement>
     </saml:Assertion>
@@ -82,7 +82,7 @@ export async function getSAMLResponse({ destination, inResponseTo, sessionIndex 
     { location: { reference: `//*[local-name(.)='Issuer']`, action: 'after' } }
   );
 
-  return new Buffer(`
+  return Buffer.from(`
     <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="_bdf1d51245ed0f71aa23"
                   ${inResponseTo ? `InResponseTo="${inResponseTo}"` : ''} Version="2.0"
                   IssueInstant="${issueInstant}"
@@ -111,7 +111,7 @@ export async function getLogoutRequest({ destination, sessionIndex }) {
 
   // HTTP-Redirect with deflate encoding:
   // http://docs.oasis-open.org/security/saml/v2.0/saml-bindings-2.0-os.pdf - section 3.4.4.1
-  const deflatedLogoutRequest = await deflateRawAsync(new Buffer(logoutRequestTemplateXML));
+  const deflatedLogoutRequest = await deflateRawAsync(Buffer.from(logoutRequestTemplateXML));
 
   const queryStringParameters = {
     SAMLRequest: deflatedLogoutRequest.toString('base64'),

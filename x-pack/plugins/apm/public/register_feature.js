@@ -11,13 +11,15 @@ import {
 } from 'ui/registry/feature_catalogue';
 
 if (chrome.getInjected('apmUiEnabled')) {
-  FeatureCatalogueRegistryProvider.register(() => {
+  FeatureCatalogueRegistryProvider.register(i18n => {
     return {
       id: 'apm',
       title: 'APM',
-      description:
-        'Automatically collect in-depth performance metrics and ' +
-        'errors from inside your applications.',
+      description: i18n('xpack.apm.apmDescription', {
+        defaultMessage:
+          'Automatically collect in-depth performance metrics and ' +
+          'errors from inside your applications.'
+      }),
       icon: 'apmApp',
       path: '/app/apm',
       showOnHomePage: true,

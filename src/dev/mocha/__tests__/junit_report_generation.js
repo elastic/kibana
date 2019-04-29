@@ -24,7 +24,7 @@ import { fromNode as fcb } from 'bluebird';
 import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { setupJUnitReportGeneration } from '../junit_report_generation';
 
@@ -93,7 +93,8 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE works',
         time: testPass.$.time,
-      }
+      },
+      'system-out': testPass['system-out']
     });
 
     expect(testFail.$.time).to.match(DURATION_REGEX);
@@ -104,6 +105,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE fails',
         time: testFail.$.time,
       },
+      'system-out': testFail['system-out'],
       failure: [
         testFail.failure[0]
       ]
@@ -118,6 +120,7 @@ describe('dev/mocha/junit report generation', () => {
         name: 'SUITE SUB_SUITE "before each" hook: fail hook for "never runs"',
         time: beforeEachFail.$.time,
       },
+      'system-out': testFail['system-out'],
       failure: [
         beforeEachFail.failure[0]
       ]
@@ -128,6 +131,7 @@ describe('dev/mocha/junit report generation', () => {
         classname: sharedClassname,
         name: 'SUITE SUB_SUITE never runs',
       },
+      'system-out': testFail['system-out'],
       skipped: ['']
     });
   });

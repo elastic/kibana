@@ -9,7 +9,14 @@ import {
   EsSupertestWithoutAuthProvider,
   SupertestWithoutAuthProvider,
   UsageAPIProvider,
+  InfraOpsGraphQLClientProvider,
+  InfraOpsGraphQLClientFactoryProvider,
 } from './services';
+
+import {
+  SecurityServiceProvider,
+  SpacesServiceProvider,
+} from '../common/services';
 
 export default async function ({ readConfigFile }) {
 
@@ -25,10 +32,15 @@ export default async function ({ readConfigFile }) {
       esSupertest: kibanaAPITestsConfig.get('services.esSupertest'),
       supertestWithoutAuth: SupertestWithoutAuthProvider,
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
+      infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
+      infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
       kibanaServer: kibanaCommonConfig.get('services.kibanaServer'),
+      chance: kibanaAPITestsConfig.get('services.chance'),
+      security: SecurityServiceProvider,
+      spaces: SpacesServiceProvider,
     },
     esArchiver: xPackFunctionalTestsConfig.get('esArchiver'),
     junit: {

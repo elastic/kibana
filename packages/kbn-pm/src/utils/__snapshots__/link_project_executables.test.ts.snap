@@ -3,6 +3,7 @@
 exports[`bin script points nowhere does not try to create symlink or node_modules/.bin directory: fs module calls 1`] = `
 Object {
   "chmod": Array [],
+  "copyDirectory": Array [],
   "createSymlink": Array [],
   "isDirectory": Array [],
   "isFile": Array [
@@ -13,8 +14,10 @@ Object {
       "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
     ],
   ],
+  "isSymlink": Array [],
   "mkdirp": Array [],
   "readFile": Array [],
+  "unlink": Array [],
 }
 `;
 
@@ -30,6 +33,7 @@ Object {
       "755",
     ],
   ],
+  "copyDirectory": Array [],
   "createSymlink": Array [
     Array [
       "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
@@ -51,6 +55,7 @@ Object {
       "<repoRoot>/packages/kbn-pm/src/utils/bar/bin/bar.js",
     ],
   ],
+  "isSymlink": Array [],
   "mkdirp": Array [
     Array [
       "<repoRoot>/packages/kbn-pm/src/utils/foo/node_modules/.bin",
@@ -60,6 +65,7 @@ Object {
     ],
   ],
   "readFile": Array [],
+  "unlink": Array [],
 }
 `;
 

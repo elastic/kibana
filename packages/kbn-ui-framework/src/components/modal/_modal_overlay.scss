@@ -9,5 +9,5 @@
   align-items: center;
   justify-content: center;
   padding-bottom: 10vh;
-  background-color: $modalOverlayBackground;
+  background: transparentize($modalOverlayBackground, .2);
 }

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getSuggestionsProvider } from '../field';
-import indexPatternResponse from 'ui/kuery/__tests__/index_pattern_response.json';
+import indexPatternResponse from '../__fixtures__/index_pattern_response.json';
 import { isFilterable } from 'ui/index_patterns/static_utils';
 
 describe('Kuery field suggestions', function () {
@@ -77,7 +77,7 @@ describe('Kuery field suggestions', function () {
     const suggestions = getSuggestions({ prefix, suffix });
     expect(suggestions.length).to.be.greaterThan(0);
     suggestions.forEach(suggestion => {
-      expect(suggestion.description.length).to.be.greaterThan(0);
+      expect(suggestion).to.have.property('description');
     });
   });
 });

@@ -8,27 +8,49 @@
 
 import { toastNotifications } from 'ui/notify';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { i18n } from '@kbn/i18n';
 
 let indexPatternCache = [];
 let fullIndexPatterns = [];
 let currentIndexPattern = null;
 let currentSavedSearch = null;
 
+export let refreshIndexPatterns = null;
+
 export function loadIndexPatterns(Private, indexPatterns) {
   fullIndexPatterns = indexPatterns;
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   return savedObjectsClient.find({
     type: 'index-pattern',
-    fields: ['title'],
+    fields: ['id', 'title', 'type', 'fields'],
     perPage: 10000
   }).then((response) => {
     indexPatternCache = response.savedObjects;
+
+    if (refreshIndexPatterns === null) {
+      refreshIndexPatterns = () => {
+        return new Promise((resolve, reject) => {
+          loadIndexPatterns(Private, indexPatterns)
+          	.then((resp) => {
+              resolve(resp);
+            })
+            .catch((error) => {
+              reject(error);
+            });
+        });
+      };
+    }
+
     return indexPatternCache;
   });
 }
 
 export function getIndexPatterns() {
   return indexPatternCache;
+}
+
+export function getIndexPatternNames() {
+  return indexPatternCache.map(i => (i.attributes && i.attributes.title));
 }
 
 export function getIndexPatternIdFromName(name) {
@@ -70,8 +92,13 @@ export function timeBasedIndexCheck(indexPattern, showNotification = false) {
   if (indexPattern.isTimeBased() === false) {
     if (showNotification) {
       toastNotifications.addWarning({
-        title: `The index pattern ${indexPattern.title} is not based on a time series`,
-        text: 'Anomaly detection only runs over time-based indices',
+        title: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The index pattern {indexPatternTitle} is not based on a time series',
+          values: { indexPatternTitle: indexPattern.title }
+        }),
+        text: i18n.translate('xpack.ml.indexPatternNotBasedOnTimeSeriesNotificationDescription', {
+          defaultMessage: 'Anomaly detection only runs over time-based indices'
+        }),
       });
     }
     return false;

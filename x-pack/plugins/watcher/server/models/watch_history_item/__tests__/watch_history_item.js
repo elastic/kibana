@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { WatchHistoryItem } from '../watch_history_item';
 
 describe('watch_history_item', () => {
@@ -73,7 +73,8 @@ describe('watch_history_item', () => {
             state: {
               active: upstreamJson.watchHistoryItemJson.status.state.active
             }
-          }
+          },
+          watchErrors: {}
         });
       });
 

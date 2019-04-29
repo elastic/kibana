@@ -1,0 +1,134 @@
+{
+  "job_id": "farequote",
+  "job_type": "anomaly_detector",
+  "job_version": "7.0.0",
+  "description": "",
+  "create_time": 1546418356716,
+  "finished_time": 1546418359427,
+  "established_model_memory": 42102,
+  "analysis_config": {
+    "bucket_span": "15m",
+    "summary_count_field_name": "doc_count",
+    "detectors": [
+      {
+        "detector_description": "count",
+        "function": "count",
+        "detector_index": 0
+      }
+    ],
+    "influencers": []
+  },
+  "analysis_limits": {
+    "model_memory_limit": "10mb",
+    "categorization_examples_limit": 4
+  },
+  "data_description": {
+    "time_field": "@timestamp",
+    "time_format": "epoch_ms"
+  },
+  "model_plot_config": {
+    "enabled": true
+  },
+  "model_snapshot_retention_days": 1,
+  "custom_settings": {
+    "created_by": "single-metric-wizard"
+  },
+  "model_snapshot_id": "1546418359",
+  "model_snapshot_min_version": "6.4.0",
+  "results_index_name": "shared",
+  "data_counts": {
+    "job_id": "farequote",
+    "processed_record_count": 479,
+    "processed_field_count": 479,
+    "input_bytes": 21554,
+    "input_field_count": 479,
+    "invalid_date_count": 0,
+    "missing_field_count": 0,
+    "out_of_order_timestamp_count": 0,
+    "empty_bucket_count": 0,
+    "sparse_bucket_count": 0,
+    "bucket_count": 478,
+    "earliest_record_timestamp": 1454804096000,
+    "latest_record_timestamp": 1455234298000,
+    "last_data_time": 1546418357578,
+    "input_record_count": 479
+  },
+  "model_size_stats": {
+    "job_id": "farequote",
+    "result_type": "model_size_stats",
+    "model_bytes": 42102,
+    "total_by_field_count": 3,
+    "total_over_field_count": 0,
+    "total_partition_field_count": 2,
+    "bucket_allocation_failures_count": 0,
+    "memory_status": "ok",
+    "log_time": 1546418359000,
+    "timestamp": 1455232500000
+  },
+  "datafeed_config": {
+    "datafeed_id": "datafeed-farequote",
+    "job_id": "farequote",
+    "query_delay": "115823ms",
+    "indices": [
+      "farequote"
+    ],
+    "query": {
+      "bool": {
+        "must": [
+          {
+            "query_string": {
+              "query": "*",
+              "fields": [],
+              "type": "best_fields",
+              "default_operator": "or",
+              "max_determinized_states": 10000,
+              "enable_position_increments": true,
+              "fuzziness": "AUTO",
+              "fuzzy_prefix_length": 0,
+              "fuzzy_max_expansions": 50,
+              "phrase_slop": 0,
+              "analyze_wildcard": true,
+              "escape": false,
+              "auto_generate_synonyms_phrase_query": true,
+              "fuzzy_transpositions": true,
+              "boost": 1
+            }
+          }
+        ],
+        "adjust_pure_negative": true,
+        "boost": 1
+      }
+    },
+    "aggregations": {
+      "buckets": {
+        "date_histogram": {
+          "field": "@timestamp",
+          "interval": 900000,
+          "offset": 0,
+          "order": {
+            "_key": "asc"
+          },
+          "keyed": false,
+          "min_doc_count": 0
+        },
+        "aggregations": {
+          "@timestamp": {
+            "max": {
+              "field": "@timestamp"
+            }
+          }
+        }
+      }
+    },
+    "scroll_size": 1000,
+    "chunking_config": {
+      "mode": "manual",
+      "time_span": "900000000ms"
+    },
+    "delayed_data_check_config": {
+      "enabled": true
+    },
+    "state": "stopped"
+  },
+  "state": "closed"
+}

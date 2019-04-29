@@ -22,11 +22,6 @@ export function HomePageProvider({ getService }) {
   const retry = getService('retry');
 
   class HomePage {
-
-    async clickKibanaIcon() {
-      await testSubjects.click('kibanaLogo');
-    }
-
     async clickSynopsis(title) {
       await testSubjects.click(`homeSynopsisLink${title}`);
     }
@@ -53,32 +48,34 @@ export function HomePageProvider({ getService }) {
 
     async addSampleDataSet(id) {
       await testSubjects.click(`addSampleDataSet${id}`);
+      await this._waitForSampleDataLoadingAction(id);
     }
 
     async removeSampleDataSet(id) {
       await testSubjects.click(`removeSampleDataSet${id}`);
+      await this._waitForSampleDataLoadingAction(id);
+    }
+
+    // loading action is either uninstall and install
+    async _waitForSampleDataLoadingAction(id) {
+      const sampleDataCard = await testSubjects.find(`sampleDataSetCard${id}`);
+      await retry.try(async () => {
+        // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
+        // before action is complete
+        await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
+      });
     }
 
     async launchSampleDataSet(id) {
       await testSubjects.click(`launchSampleDataSet${id}`);
     }
 
-    // When logging into a brand new Kibana instance, the welcome screen
-    // may pop up. It may not, depending on the speed of the test, so it
-    // pays to check for the welcome screen and hide it in any test that
-    // hits the Kibana home page.
-    isWelcomeShowing() {
-      return testSubjects.exists('skipWelcomeScreen');
-    }
-
-    async hideWelcomeScreen() {
-      await testSubjects.click('skipWelcomeScreen');
-    }
-
     async loadSavedObjects() {
       await retry.try(async () => {
         await testSubjects.click('loadSavedObjects');
-        const successMsgExists = await testSubjects.exists('loadSavedObjects_success', 5000);
+        const successMsgExists = await testSubjects.exists('loadSavedObjects_success', {
+          timeout: 5000
+        });
         if (!successMsgExists) {
           throw new Error('Failed to load saved objects');
         }

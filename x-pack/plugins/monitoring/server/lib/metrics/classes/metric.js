@@ -54,6 +54,19 @@ export class Metric {
     };
   }
 
+  getFields() {
+    return [this.field];
+  }
+
+  getDocType() {
+    return this.docType || this.getInferredDocType();
+  }
+
+  getInferredDocType() {
+    const fields = this.getFields();
+    return fields && fields.length ? fields[0].split('.')[0] : null;
+  }
+
   static calculateLatency(timeInMillis, totalEvents) {
     if (timeInMillis === null || totalEvents === null) {
       return null;

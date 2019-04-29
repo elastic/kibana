@@ -16,5 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import * as Public from './public';
+import * as Server from './server';
 
-export { injectIntoKbnServer, createBasePathProxy } from './server/legacy_compat';
+export { Public, Server };

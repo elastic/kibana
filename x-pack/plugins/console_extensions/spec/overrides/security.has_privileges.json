@@ -1,0 +1,25 @@
+{
+  "security.has_privileges": {
+    "data_autocomplete_rules": {
+      "cluster": [],
+      "index": {
+        "__template": {
+          "names": [],
+          "privileges": [] 
+        },        
+        "names": [],
+        "privileges": [] 
+      },
+      "application": {
+        "__template": {
+          "application": [],
+          "privileges": [],
+          "resources": []
+        },
+        "application": [],
+        "privileges": [],
+        "resources": []
+      }
+    }	
+  }
+}

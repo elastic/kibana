@@ -7,11 +7,19 @@
 import { LicenseStatus as PresentationComponent } from './license_status';
 import { connect } from 'react-redux';
 import { getLicense, getExpirationDateFormatted, isExpired } from '../../../store/reducers/licenseManagement';
+import { i18n } from '@kbn/i18n';
 
 const mapStateToProps = (state) => {
   const { isActive, type } = getLicense(state);
   return {
-    status: isActive ? 'Active' : 'Inactive',
+    status: isActive ?
+      i18n.translate('xpack.licenseMgmt.licenseDashboard.licenseStatus.activeLicenseStatusText', {
+        defaultMessage: 'Active'
+      })
+      :
+      i18n.translate('xpack.licenseMgmt.licenseDashboard.licenseStatus.inactiveLicenseStatusText', {
+        defaultMessage: 'Inactive'
+      }),
     type,
     isExpired: isExpired(state),
     expiryDate: getExpirationDateFormatted(state)

@@ -1,0 +1,60 @@
+<div ng-if="aggParam.shouldShow(agg)">
+  <div>
+    <label id="extendedBoundsLabel{{agg.id}}">
+      <span
+        i18n-id="common.ui.aggTypes.extendedBoundsLabel"
+        i18n-default-message="Extended Bounds"
+      ></span>
+      <icon-tip
+        position="'right'"
+        content="::'common.ui.aggTypes.extendedBoundsTooltip' | i18n: { defaultMessage: 'Min and Max do not filter the results, but rather extend the bounds of the result set' }"
+      ></icon-tip>
+    </label>
+  </div>
+  <div class="visEditorAgg__formRow--flex">
+    <div class="form-group">
+      <label
+        id="extendedBoundsMinLabel{{agg.id}}"
+        for="extendedBoundsMinInput{{agg.id}}"
+      >
+        <span
+          i18n-id="common.ui.aggTypes.extendedBounds.minLabel"
+          i18n-default-message="Min"
+        ></span>
+        <small
+          i18n-id="common.ui.aggTypes.extendedBounds.minLabel.optionalText"
+          i18n-default-message="(optional)"
+        ></small>
+      </label>
+      <input
+        id="extendedBoundsMinInput{{agg.id}}"
+        aria-labelledby="extendedBoundsLabel{{agg.id}} extendedBoundsMinLabel{{agg.id}}"
+        ng-model="agg.params.extended_bounds.min"
+        type="number"
+        class="form-control"
+        name="extended_bounds.min" />
+    </div>
+    <div class="form-group">
+      <label
+        id="extendedBoundsMaxLabel{{agg.id}}"
+        for="extendedBoundsMaxInput{{agg.id}}"
+      >
+      <span
+        i18n-id="common.ui.aggTypes.extendedBounds.maxLabel"
+        i18n-default-message="Max"
+      ></span>
+      <small
+        i18n-id="common.ui.aggTypes.extendedBounds.maxLabel.optionalText"
+        i18n-default-message="(optional)"
+      ></small>
+      </label>
+      <input
+        id="extendedBoundsMaxInput{{agg.id}}"
+        aria-labelledby="extendedBoundsLabel{{agg.id}} extendedBoundsMaxLabel{{agg.id}}"
+        ng-model="agg.params.extended_bounds.max"
+        type="number"
+        class="form-control"
+        name="extended_bounds.max" />
+    </div>
+  </div>
+</div>

@@ -14,7 +14,7 @@ jest.mock('../../../../privilege/check_privilege', () => ({
 }));
 jest.mock('../../../../services/ml_api_service', () => 'ml');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { DeleteFilterListModal } from './delete_filter_list_modal';
@@ -25,21 +25,22 @@ const testSelectedLists = [
 ];
 
 const testProps = {
-  selectedFilterLists: testSelectedLists
+  selectedFilterLists: testSelectedLists,
+  canDeleteFilter: true
 };
 
 describe('DeleteFilterListModal', () => {
 
   test('renders as disabled delete button when no lists selected', () => {
-    const component = shallow(
-      <DeleteFilterListModal />
+    const component = shallowWithIntl(
+      <DeleteFilterListModal {...testProps}/>
     );
 
     expect(component).toMatchSnapshot();
   });
 
   test('renders as enabled delete button when a list is selected', () => {
-    const component = shallow(
+    const component = shallowWithIntl(
       <DeleteFilterListModal {...testProps} />
     );
 
@@ -47,7 +48,7 @@ describe('DeleteFilterListModal', () => {
   });
 
   test('renders modal after clicking delete button', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <DeleteFilterListModal {...testProps} />
     );
     wrapper.find('EuiButton').simulate('click');
@@ -57,7 +58,7 @@ describe('DeleteFilterListModal', () => {
 
 
   test('renders as delete button after opening and closing modal', () => {
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <DeleteFilterListModal {...testProps} />
     );
     wrapper.find('EuiButton').simulate('click');
@@ -82,7 +83,7 @@ describe('DeleteFilterListModal false canDeleteFilter privilege', () => {
       return false;
     });
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <DeleteFilterListModal {...testProps} />
     );
 

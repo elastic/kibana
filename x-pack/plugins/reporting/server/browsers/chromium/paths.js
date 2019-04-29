@@ -11,18 +11,24 @@ export const paths = {
   baseUrl: 'https://s3.amazonaws.com/headless-shell/',
   packages: [{
     platforms: ['darwin', 'freebsd', 'openbsd'],
-    archiveFilename: 'chromium-503a3e4-darwin.zip',
-    archiveChecksum: 'c1b530f99374e122c0bd7ba663867a95',
+    archiveFilename: 'chromium-2fac04a-darwin.zip',
+    archiveChecksum: '36814b1629457aa178b4ecdf6cc1bc5f',
+    rawChecksum: '9b40e2efa7f4f1870835ee4cdaf1dd51',
     binaryRelativePath: 'headless_shell-darwin/headless_shell',
   }, {
     platforms: ['linux'],
-    archiveFilename: 'chromium-503a3e4-linux.zip',
-    archiveChecksum: '9486d8eff9fc4f94c899aa72f5e59520',
+    archiveFilename: 'chromium-2fac04a-linux.zip',
+    archiveChecksum: '5cd6b898a35f9dc0ba6f49d821b8a2a3',
+    rawChecksum: 'b3fd218d3c3446c388da4e6c8a82754c',
     binaryRelativePath: 'headless_shell-linux/headless_shell'
   }, {
     platforms: ['win32'],
-    archiveFilename: 'chromium-503a3e4-win32.zip',
-    archiveChecksum: 'a71ce5565791767492f6d0fb4fe5360d',
-    binaryRelativePath: 'headless_shell-win32\\headless_shell.exe'
+    archiveFilename: 'chromium-2fac04a-windows.zip',
+    archiveChecksum: '1499a4d5847792d59b9c1a8ab7dc8b94',
+    rawChecksum: '08b48d2f3d23c4bc8b58779ca4a7b627',
+    binaryRelativePath: 'headless_shell-windows\\headless_shell.exe'
   }]
 };
+
+export const getChromeLogLocation = (binaryPath) =>
+  path.join(binaryPath, '..', 'chrome_debug.log');

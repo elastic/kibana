@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import pkg from '../../../../../package.json';
 import { getVersionInfo } from '../version_info';
@@ -45,6 +45,17 @@ describe('dev/build/lib/version_info', () => {
       expect(versionInfo).to.have.property('buildVersion').contain(pkg.version).match(/-SNAPSHOT$/);
       expect(versionInfo).to.have.property('buildSha').match(/^[0-9a-f]{40}$/);
       expect(versionInfo).to.have.property('buildNumber').a('number').greaterThan(1000);
+    });
+  });
+
+  describe('versionQualifier', () => {
+    it('appends a version qualifier', async () => {
+      const versionInfo = await getVersionInfo({
+        isRelease: true,
+        versionQualifier: 'beta55',
+        pkg
+      });
+      expect(versionInfo).to.have.property('buildVersion').be(pkg.version + '-beta55');
     });
   });
 });

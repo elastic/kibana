@@ -6,30 +6,37 @@
 import routes from 'ui/routes';
 import template from 'plugins/security/views/management/edit_user.html';
 import 'angular-resource';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import { EDIT_USERS_PATH } from './management_urls';
 import { EditUser } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { createApiClient } from '../../lib/api';
+import { I18nContext } from 'ui/i18n';
+import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from './breadcrumbs';
 
 const renderReact = (elem, httpClient, changeUrl, username) => {
   render(
-    <EditUser
-      changeUrl={changeUrl}
-      apiClient={createApiClient(httpClient)}
-      username={username}
-    />,
+    <I18nContext>
+      <EditUser
+        changeUrl={changeUrl}
+        username={username}
+      />
+    </I18nContext>,
     elem
   );
 };
 
 routes.when(`${EDIT_USERS_PATH}/:username?`, {
   template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.username
+      ? getEditUserBreadcrumbs
+      : getCreateUserBreadcrumbs
+  ),
   controllerAs: 'editUser',
-  controller($scope, $route, kbnUrl, Notifier, confirmModal, $http) {
+  controller($scope, $route, kbnUrl, $http) {
     $scope.$on('$destroy', () => {
       const elem = document.getElementById('editUserReactRoot');
       if (elem) {

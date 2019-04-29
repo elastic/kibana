@@ -20,29 +20,32 @@
 import { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs/operators';
 
-import { CoreService } from '../../types/core_service';
-import { Env } from '../config';
+import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
-import { HttpServer } from './http_server';
+import { HttpServer, HttpServerInfo } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
 import { Router } from './router';
 
-export class HttpService implements CoreService {
+/** @public */
+export type HttpServiceSetup = HttpServerInfo;
+
+/** @internal */
+export class HttpService implements CoreService<HttpServiceSetup> {
   private readonly httpServer: HttpServer;
   private readonly httpsRedirectServer: HttpsRedirectServer;
   private configSubscription?: Subscription;
 
   private readonly log: Logger;
 
-  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory, env: Env) {
+  constructor(private readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
     this.log = logger.get('http');
 
-    this.httpServer = new HttpServer(logger.get('http', 'server'), env);
+    this.httpServer = new HttpServer(logger.get('http', 'server'));
     this.httpsRedirectServer = new HttpsRedirectServer(logger.get('http', 'redirect', 'server'));
   }
 
-  public async start() {
+  public async setup() {
     this.configSubscription = this.config$.subscribe(() => {
       if (this.httpServer.isListening()) {
         // If the server is already running we can't make any config changes
@@ -61,7 +64,10 @@ export class HttpService implements CoreService {
       await this.httpsRedirectServer.start(config);
     }
 
-    await this.httpServer.start(config);
+    // The HttpService's setup method calls `start` on HttpServer because it is
+    // a more appropriate name. In the future, starting the server should be moved
+    // to the `start` lifecycle handler of HttpService.
+    return await this.httpServer.start(config);
   }
 
   public async stop() {

@@ -17,18 +17,15 @@
  * under the License.
  */
 
+import { Type } from '@kbn/config-schema';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, first, map } from 'rxjs/operators';
 
+import { Config, ConfigPath, ConfigWithSchema, Env } from '.';
 import { Logger, LoggerFactory } from '../logging';
-import { ConfigWithSchema } from './config_with_schema';
-import { Env } from './env';
-import { RawConfig } from './raw_config';
-import { Type } from './schema';
 
-export type ConfigPath = string | string[];
-
+/** @public */
 export class ConfigService {
   private readonly log: Logger;
 
@@ -39,8 +36,8 @@ export class ConfigService {
   private readonly handledPaths: ConfigPath[] = [];
 
   constructor(
-    private readonly config$: Observable<RawConfig>,
-    readonly env: Env,
+    private readonly config$: Observable<Config>,
+    private readonly env: Env,
     logger: LoggerFactory
   ) {
     this.log = logger.get('config');
@@ -58,16 +55,16 @@ export class ConfigService {
    * Reads the subset of the config at the specified `path` and validates it
    * against the static `schema` on the given `ConfigClass`.
    *
-   * @param path The path to the desired subset of the config.
-   * @param ConfigClass A class (not an instance of a class) that contains a
+   * @param path - The path to the desired subset of the config.
+   * @param ConfigClass - A class (not an instance of a class) that contains a
    * static `schema` that we validate the config at the given `path` against.
    */
-  public atPath<Schema extends Type<any>, Config>(
+  public atPath<TSchema extends Type<any>, TConfig>(
     path: ConfigPath,
-    ConfigClass: ConfigWithSchema<Schema, Config>
+    ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
-    return this.getDistinctRawConfig(path).pipe(
-      map(rawConfig => this.createConfig(path, rawConfig, ConfigClass))
+    return this.getDistinctConfig(path).pipe(
+      map(config => this.createConfig(path, config, ConfigClass))
     );
   }
 
@@ -75,16 +72,15 @@ export class ConfigService {
    * Same as `atPath`, but returns `undefined` if there is no config at the
    * specified path.
    *
-   * @see atPath
+   * {@link ConfigService.atPath}
    */
-  public optionalAtPath<Schema extends Type<any>, Config>(
+  public optionalAtPath<TSchema extends Type<any>, TConfig>(
     path: ConfigPath,
-    ConfigClass: ConfigWithSchema<Schema, Config>
+    ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
-    return this.getDistinctRawConfig(path).pipe(
-      map(
-        rawConfig =>
-          rawConfig === undefined ? undefined : this.createConfig(path, rawConfig, ConfigClass)
+    return this.getDistinctConfig(path).pipe(
+      map(config =>
+        config === undefined ? undefined : this.createConfig(path, config, ConfigClass)
       )
     );
   }
@@ -93,13 +89,11 @@ export class ConfigService {
     const enabledPath = createPluginEnabledPath(path);
 
     const config = await this.config$.pipe(first()).toPromise();
-
     if (!config.has(enabledPath)) {
       return true;
     }
 
     const isEnabled = config.get(enabledPath);
-
     if (isEnabled === false) {
       // If the plugin is _not_ enabled, we mark the entire plugin path as
       // handled, as it's expected that it won't be used.
@@ -114,17 +108,24 @@ export class ConfigService {
     return true;
   }
 
-  public async getUnusedPaths(): Promise<string[]> {
+  public async getUnusedPaths() {
     const config = await this.config$.pipe(first()).toPromise();
     const handledPaths = this.handledPaths.map(pathToString);
 
     return config.getFlattenedPaths().filter(path => !isPathHandled(path, handledPaths));
   }
 
-  private createConfig<Schema extends Type<any>, Config>(
+  public async getUsedPaths() {
+    const config = await this.config$.pipe(first()).toPromise();
+    const handledPaths = this.handledPaths.map(pathToString);
+
+    return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
+  }
+
+  private createConfig<TSchema extends Type<any>, TConfig>(
     path: ConfigPath,
-    rawConfig: {},
-    ConfigClass: ConfigWithSchema<Schema, Config>
+    config: Record<string, any>,
+    ConfigClass: ConfigWithSchema<TSchema, TConfig>
   ) {
     const namespace = Array.isArray(path) ? path.join('.') : path;
 
@@ -138,23 +139,25 @@ export class ConfigService {
       );
     }
 
-    const environmentMode = this.env.getMode();
-    const config = ConfigClass.schema.validate(
-      rawConfig,
+    const validatedConfig = ConfigClass.schema.validate(
+      config,
       {
-        dev: environmentMode.dev,
-        prod: environmentMode.prod,
-        ...this.env.getPackageInfo(),
+        dev: this.env.mode.dev,
+        prod: this.env.mode.prod,
+        ...this.env.packageInfo,
       },
       namespace
     );
-    return new ConfigClass(config, this.env);
+    return new ConfigClass(validatedConfig, this.env);
   }
 
-  private getDistinctRawConfig(path: ConfigPath) {
+  private getDistinctConfig(path: ConfigPath) {
     this.markAsHandled(path);
 
-    return this.config$.pipe(map(config => config.get(path)), distinctUntilChanged(isEqual));
+    return this.config$.pipe(
+      map(config => config.get(path)),
+      distinctUntilChanged(isEqual)
+    );
   }
 
   private markAsHandled(path: ConfigPath) {

@@ -10,6 +10,7 @@ import { getMetrics } from '../../../../lib/details/get_metrics';
 import { handleError } from '../../../../lib/errors';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { metricSet } from './metric_set_overview';
+import { INDEX_PATTERN_LOGSTASH } from '../../../../../common/constants';
 
 /*
  * Logstash Overview route.
@@ -42,11 +43,11 @@ export function logstashOverviewRoute(server) {
         })
       }
     },
-    async handler(req, reply) {
+    async handler(req) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
+      const lsIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_LOGSTASH, ccs);
 
       try {
         const [ metrics, clusterStatus ] = await Promise.all([
@@ -54,12 +55,12 @@ export function logstashOverviewRoute(server) {
           getClusterStatus(req, lsIndexPattern, { clusterUuid })
         ]);
 
-        reply({
+        return {
           metrics,
           clusterStatus,
-        });
+        };
       } catch(err) {
-        reply(handleError(err, req));
+        throw handleError(err, req);
       }
     }
   });

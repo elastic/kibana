@@ -6,17 +6,21 @@
 
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { AuthScopeService } from '../auth_scope_service';
+import { getErrorStatusCode } from '../errors';
 import { BasicAuthenticationProvider } from './providers/basic';
 import { SAMLAuthenticationProvider } from './providers/saml';
+import { TokenAuthenticationProvider } from './providers/token';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
+import { LoginAttempt } from './login_attempt';
 
 // Mapping between provider key defined in the config and authentication
 // provider class that can handle specific authentication mechanism.
 const providerMap = new Map([
   ['basic', BasicAuthenticationProvider],
-  ['saml', SAMLAuthenticationProvider]
+  ['saml', SAMLAuthenticationProvider],
+  ['token', TokenAuthenticationProvider],
 ]);
 
 function assertRequest(request) {
@@ -44,15 +48,6 @@ function getProviderOptions(server) {
 
     ...config.get('xpack.security.public')
   };
-}
-
-/**
- * Extracts error code from Boom and Elasticsearch "native" errors.
- * @param {Error} error Error instance to extract status code from.
- * @returns {number}
- */
-function getErrorStatusCode(error) {
-  return error.isBoom ? error.output.statusCode : error.statusCode;
 }
 
 /**
@@ -134,7 +129,7 @@ class Authenticator {
     assertRequest(request);
 
     const isSystemApiRequest = this._server.plugins.kibana.systemApi.isSystemApiRequest(request);
-    const existingSession = await this._session.get(request);
+    const existingSession = await this._getSessionValue(request);
 
     let authenticationResult;
     for (const [providerType, provider] of this._providerIterator(existingSession)) {
@@ -146,25 +141,32 @@ class Authenticator {
         ownsSession ? existingSession.state : null
       );
 
-      if (ownsSession || authenticationResult.state) {
+      if (ownsSession || authenticationResult.shouldUpdateState()) {
         // If authentication succeeds or requires redirect we should automatically extend existing user session,
         // unless authentication has been triggered by a system API request. In case provider explicitly returns new
         // state we should store it in the session regardless of whether it's a system API request or not.
         const sessionCanBeUpdated = (authenticationResult.succeeded() || authenticationResult.redirected())
-          && (authenticationResult.state || !isSystemApiRequest);
+          && (authenticationResult.shouldUpdateState() || !isSystemApiRequest);
 
-        // If provider owned the session, but failed to authenticate anyway, that likely means
-        // that session is not valid and we should clear it.
-        if (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401) {
+        // If provider owned the session, but failed to authenticate anyway, that likely means that
+        // session is not valid and we should clear it. Also provider can specifically ask to clear
+        // session by setting it to `null` even if authentication attempt didn't fail.
+        if (authenticationResult.shouldClearState() || (
+          authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
+        ) {
           await this._session.clear(request);
         } else if (sessionCanBeUpdated) {
           await this._session.set(
             request,
-            authenticationResult.state
+            authenticationResult.shouldUpdateState()
               ? { state: authenticationResult.state, provider: providerType }
               : existingSession
           );
         }
+      }
+
+      if (authenticationResult.failed()) {
+        return authenticationResult;
       }
 
       if (authenticationResult.succeeded()) {
@@ -273,6 +275,15 @@ export async function initAuthenticator(server) {
   const session = await Session.create(server);
   const authScope = new AuthScopeService();
   const authenticator = new Authenticator(server, authScope, session);
+
+  const loginAttempts = new WeakMap();
+  server.decorate('request', 'loginAttempt', function () {
+    const request = this;
+    if (!loginAttempts.has(request)) {
+      loginAttempts.set(request, new LoginAttempt());
+    }
+    return loginAttempts.get(request);
+  });
 
   server.expose('authenticate', (request) => authenticator.authenticate(request));
   server.expose('deauthenticate', (request) => authenticator.deauthenticate(request));

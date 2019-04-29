@@ -1,0 +1,24 @@
+{
+  "ml.get_buckets": {
+    "url_params": {
+      "expand": "__flag__",
+      "exclude_interim": "__flag__",
+      "from": 0,
+      "size": 0,
+      "start": "",
+      "end": "",
+      "anomaly_score": 0,
+      "sort": "",
+      "desc": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_ml/anomaly_detectors/{job_id}/results/buckets/{timestamp}",
+      "_ml/anomaly_detectors/{job_id}/results/buckets"
+    ],
+    "documentation": "http://www.elastic.co/guide/en/elasticsearch/reference/current/ml-get-bucket.html"
+  }
+}

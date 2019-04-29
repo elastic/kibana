@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { GrokdebuggerResponse } from '../grokdebugger_response';
 
 describe('grokdebugger_response', () => {
@@ -22,13 +22,13 @@ describe('grokdebugger_response', () => {
                 _type: 'grokdebugger',
                 _id: 'grokdebugger',
                 _source: {
-                  "request": "/index.html",
-                  "rawEvent": "55.3.244.1 GET /index.html",
-                  "method": "GET",
-                  "client": "55.3.244.1"
+                  'request': '/index.html',
+                  'rawEvent': '55.3.244.1 GET /index.html',
+                  'method': 'GET',
+                  'client': '55.3.244.1'
                 },
                 _ingest: {
-                  "timestamp": "2017-05-13T23:29:14.809Z"
+                  'timestamp': '2017-05-13T23:29:14.809Z'
                 }
               }
             }
@@ -52,10 +52,10 @@ describe('grokdebugger_response', () => {
               error: {
                 root_cause: [
                   {
-                    "type": "exception",
-                    "reason": "java.lang.IllegalArgumentException",
-                    "header": {
-                      "processor_type": "grok"
+                    'type': 'exception',
+                    'reason': 'java.lang.IllegalArgumentException',
+                    'header': {
+                      'processor_type': 'grok'
                     }
                   }
                 ],

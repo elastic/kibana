@@ -18,8 +18,10 @@
  */
 
 import { resolve } from 'path';
+import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
 
-const PKG_VERSION = require('../../package.json').version;
+const { version } = require('../../package.json');
+const KIBANA_INSTALL_DIR = `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
 module.exports = function (grunt) {
 
@@ -37,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -55,6 +56,7 @@ module.exports = function (grunt) {
   }
 
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
@@ -71,6 +73,13 @@ module.exports = function (grunt) {
       ]
     },
 
+    sasslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/sasslint')
+      ]
+    },
+
     // used by the test tasks
     //    runs the check_file_casing script to ensure filenames use correct casing
     checkFileCasing: {
@@ -81,21 +90,40 @@ module.exports = function (grunt) {
       ]
     },
 
-    // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
-    tslint: {
+    // used by the test tasks
+    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    checkCoreApiChanges: {
       cmd: process.execPath,
       args: [
-        require.resolve('../../scripts/tslint')
+        require.resolve('../../scripts/check_core_api_changes')
       ]
     },
 
     // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
+    //    runs the typecheck script to check for Typescript type errors
     typeCheck: {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/type_check')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    ensures that all typescript files belong to a typescript project
+    checkTsProjects: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_ts_projects')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    runs the i18n_check script to check i18n engine usage
+    i18nCheck: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/i18n_check'),
+        '--ignore-missing',
       ]
     },
 
@@ -113,6 +141,13 @@ module.exports = function (grunt) {
     browserTestServer: createKbnServerTask({
       flags: [
         ...browserTestServerFlags,
+      ]
+    }),
+    browserSCSS: createKbnServerTask({
+      flags: [
+        ...browserTestServerFlags,
+        '--optimize',
+        '--optimize.enabled=false'
       ]
     }),
 
@@ -156,7 +191,6 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--esFrom', 'source',
         '--bail',
         '--debug',
       ],
@@ -168,10 +202,20 @@ module.exports = function (grunt) {
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
-        '--esFrom', 'source',
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    },
+
+    interpreterFunctionalTestsRelease: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/interpreter_functional/config.js',
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -180,12 +224,9 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
-        '--esFrom', 'source',
         '--bail',
         '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
       ],
     },
 
@@ -194,26 +235,13 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
         '--bail',
         '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 
-    functionalTestsRelease: {
-      cmd: process.execPath,
-      args: [
-        'scripts/functional_tests',
-        '--config', 'test/functional/config.js',
-        '--esFrom', 'source',
-        '--bail',
-        '--debug',
-        '--kibana-install-dir', `./build/oss/kibana-${PKG_VERSION}-${process.platform}-x86_64`,
-        '--',
-        '--server.maxPayloadBytes=1648576',
-      ],
-    },
+    ...getFunctionalTestGroupRunConfigs({
+      kibanaInstallDir: KIBANA_INSTALL_DIR
+    })
   };
 };

@@ -31,7 +31,7 @@ module.directive('mlJobSelectList', function (Private) {
     replace: true,
     transclude: true,
     template,
-    controller: function ($scope) {
+    controller: function ($scope, i18n) {
       const mlJobSelectService = Private(JobSelectServiceProvider);
       $scope.jobs = [];
       $scope.groups = [];
@@ -117,6 +117,7 @@ module.directive('mlJobSelectList', function (Private) {
           } else {
             $scope.noJobsCreated = true;
           }
+          $scope.$applyAsync();
         }).catch((resp) => {
           console.log('mlJobSelectList controller - error getting job info from ES:', resp);
         });
@@ -208,7 +209,13 @@ module.directive('mlJobSelectList', function (Private) {
 
           const fromString = timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
           const toString =  timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-          timeRange.label = `${fromString} to ${toString}`;
+          timeRange.label = i18n('xpack.ml.jobSelectList.groupTimeRangeLabel', {
+            defaultMessage: '{fromString} to {toString}',
+            values: {
+              fromString,
+              toString,
+            }
+          });
 
           group.timeRange = timeRange;
           return group;
@@ -356,7 +363,13 @@ module.directive('mlJobSelectList', function (Private) {
 
             const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
             const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-            job.timeRange.label = `${fromString} to ${toString}`;
+            job.timeRange.label = i18n('xpack.ml.jobSelectList.jobTimeRangeLabel', {
+              defaultMessage: '{fromString} to {toString}',
+              values: {
+                fromString,
+                toString,
+              }
+            });
           }
         });
 

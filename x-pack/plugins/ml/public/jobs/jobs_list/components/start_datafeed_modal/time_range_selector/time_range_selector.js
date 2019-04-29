@@ -14,9 +14,8 @@ import {
   EuiDatePicker,
 } from '@elastic/eui';
 
-import './styles/main.less';
-
 import moment from 'moment';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 const TIME_FORMAT = 'YYYY-MM-DD HH:mm:ss';
 
@@ -28,7 +27,7 @@ export class TimeRangeSelector extends Component {
       startTab: 0,
       endTab: 1,
     };
-    this.latestTimeStamp = this.props.startTime;
+    this.latestTimestamp = this.props.startTime;
     this.now = this.props.now;
   }
 
@@ -69,15 +68,50 @@ export class TimeRangeSelector extends Component {
   }
 
   getTabItems() {
+
     const datePickerTimes = {
-      start: (moment.isMoment(this.props.startTime)) ? this.props.startTime : this.latestTimeStamp,
+      start: (moment.isMoment(this.props.startTime)) ? this.props.startTime : this.latestTimestamp,
       end: (moment.isMoment(this.props.endTime)) ? this.props.endTime : this.now,
     };
-    const formattedStartTime = this.latestTimeStamp.format(TIME_FORMAT);
+    const formattedStartTime = this.latestTimestamp.format(TIME_FORMAT);
+
+    // Show different labels for the start time depending on whether
+    // the job has seen any data yet
+    const showContinueLabels = (this.latestTimestamp.valueOf() > 0);
+    const startLabels = (showContinueLabels === true) ?
+      [
+        (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.continueFromStartTimeLabel"
+          defaultMessage="Continue from {formattedStartTime}"
+          values={{ formattedStartTime }}
+        />),
+        (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.continueFromNowLabel"
+          defaultMessage="Continue from now"
+        />),
+        (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.continueFromSpecifiedTimeLabel"
+          defaultMessage="Continue from specified time"
+        />)
+      ] : [
+        (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.startAtBeginningOfDataLabel"
+          defaultMessage="Start at beginning of data"
+        />),
+        (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.startFromNowLabel"
+          defaultMessage="Start from now"
+        />),
+        (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.specifyStartTimeLabel"
+          defaultMessage="Specify start time"
+        />)
+      ];
+
     const startItems = [
-      { index: 0, label: `Continue from ${formattedStartTime}` },
-      { index: 1, label: 'Continue from now' },
-      { index: 2, label: 'Continue from specified time',
+      { index: 0, label: startLabels[0] },
+      { index: 1, label: startLabels[1] },
+      { index: 2, label: startLabels[2],
         body: (
           <EuiDatePicker
             selected={datePickerTimes.start}
@@ -89,8 +123,19 @@ export class TimeRangeSelector extends Component {
       },
     ];
     const endItems = [
-      { index: 0, label: 'No end time (Real-time search)' },
-      { index: 1, label: 'Specify end time',
+      {
+        index: 0,
+        label: (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.noEndTimeLabel"
+          defaultMessage="No end time (Real-time search)"
+        />)
+      },
+      {
+        index: 1,
+        label: (<FormattedMessage
+          id="xpack.ml.jobsList.startDatafeedModal.specifyEndTimeLabel"
+          defaultMessage="Specify end time"
+        />),
         body: (
           <EuiDatePicker
             selected={datePickerTimes.end}
@@ -113,13 +158,19 @@ export class TimeRangeSelector extends Component {
       <div className="time-range-selector">
         <div className="time-range-section-container">
           <TabStack
-            title="Search start time"
+            title={(<FormattedMessage
+              id="xpack.ml.jobsList.startDatafeedModal.searchStartTimeTitle"
+              defaultMessage="Search start time"
+            />)}
             items={startItems}
             switchState={this.state.startTab}
             switchFunc={this.setStartTab}
           />
           <TabStack
-            title="Search end time"
+            title={(<FormattedMessage
+              id="xpack.ml.jobsList.startDatafeedModal.searchEndTimeTitle"
+              defaultMessage="Search end time"
+            />)}
             items={endItems}
             switchState={this.state.endTab}
             switchFunc={this.setEndTab}

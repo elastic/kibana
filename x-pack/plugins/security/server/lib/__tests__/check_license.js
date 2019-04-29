@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { checkLicense } from '../check_license';
 
@@ -18,7 +18,7 @@ describe('check_license', function () {
       isXpackUnavailable: sinon.stub(),
       feature: sinon.stub(),
       license: sinon.stub({
-        isOneOf() {},
+        isOneOf() { },
       })
     };
 

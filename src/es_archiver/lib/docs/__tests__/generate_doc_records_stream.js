@@ -18,14 +18,14 @@
  */
 
 import sinon from 'sinon';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { delay } from 'bluebird';
 
 import {
   createListStream,
   createPromiseFromStreams,
   createConcatStream,
-} from '../../../../utils';
+} from '../../../../legacy/utils';
 
 import { createGenerateDocRecordsStream } from '../generate_doc_records_stream';
 import {
@@ -63,6 +63,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         expect(name).to.be('search');
         expect(params).to.have.property('index', 'logstash-*');
         expect(params).to.have.property('scroll', '1m');
+        expect(params).to.have.property('rest_total_hits_as_int', true);
         return {
           hits: {
             total: 0,
@@ -88,7 +89,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         await delay(200);
         return {
           _scroll_id: 'index1ScrollId',
-          hits: { total: 2, hits: [ { _id: 1 } ] }
+          hits: { total: 2, hits: [ { _id: 1, _index: '.kibana_foo' } ] }
         };
       },
       async (name, params) => {
@@ -97,7 +98,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         expect(Date.now() - checkpoint).to.not.be.lessThan(200);
         checkpoint = Date.now();
         await delay(200);
-        return { hits: { total: 2, hits: [ { _id: 2 } ] } };
+        return { hits: { total: 2, hits: [ { _id: 2, _index: 'foo' } ] } };
       },
       async (name, params) => {
         expect(name).to.be('search');
@@ -122,7 +123,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       {
         type: 'doc',
         value: {
-          index: undefined,
+          index: '.kibana_1',
           type: undefined,
           id: 1,
           source: undefined
@@ -131,7 +132,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
       {
         type: 'doc',
         value: {
-          index: undefined,
+          index: 'foo',
           type: undefined,
           id: 2,
           source: undefined

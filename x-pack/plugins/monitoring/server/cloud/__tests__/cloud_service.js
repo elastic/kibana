@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { CloudService } from '../cloud_service';
 import { CloudServiceResponse } from '../cloud_response';
@@ -65,7 +65,7 @@ describe('CloudService', () => {
       // invalid JSON
       expect(() => service._stringToJson('{"xyz"}')).to.throwException();
       // (single quotes are not actually valid in serialized JSON)
-      expect(() => service._stringToJson("{'a': 'xyz'}")).to.throwException();
+      expect(() => service._stringToJson('{\'a\': \'xyz\'}')).to.throwException();
       expect(() => service._stringToJson('{{}')).to.throwException();
       expect(() => service._stringToJson('{}}')).to.throwException();
     });

@@ -20,7 +20,7 @@
 import chalk from 'chalk';
 import del from 'del';
 import ora from 'ora';
-import { relative } from 'path';
+import { join, relative } from 'path';
 
 import { isDirectory } from '../utils/fs';
 import { log } from '../utils/log';
@@ -30,31 +30,56 @@ export const CleanCommand: ICommand = {
   description: 'Remove the node_modules and target directories from all projects.',
   name: 'clean',
 
-  async run(projects, projectGraph, { rootPath }) {
-    const directoriesToDelete = [];
+  async run(projects) {
+    const toDelete = [];
     for (const project of projects.values()) {
       if (await isDirectory(project.nodeModulesLocation)) {
-        directoriesToDelete.push(project.nodeModulesLocation);
+        toDelete.push({
+          cwd: project.path,
+          pattern: relative(project.path, project.nodeModulesLocation),
+        });
       }
 
       if (await isDirectory(project.targetLocation)) {
-        directoriesToDelete.push(project.targetLocation);
+        toDelete.push({
+          cwd: project.path,
+          pattern: relative(project.path, project.targetLocation),
+        });
       }
 
-      if (await isDirectory(project.optimizeLocation)) {
-        directoriesToDelete.push(project.optimizeLocation);
+      const { extraPatterns } = project.getCleanConfig();
+      if (extraPatterns) {
+        toDelete.push({
+          cwd: project.path,
+          pattern: extraPatterns,
+        });
       }
     }
 
-    if (directoriesToDelete.length === 0) {
-      log.write(chalk.bold.green('\n\nNo directories to delete'));
+    if (toDelete.length === 0) {
+      log.write(chalk.bold.green('\n\nNothing to delete'));
     } else {
-      log.write(chalk.bold.red('\n\nDeleting directories:\n'));
+      log.write(chalk.bold.red('\n\nDeleting:\n'));
 
-      for (const dir of directoriesToDelete) {
-        const deleting = del(dir, { force: true });
-        ora.promise(deleting, relative(rootPath, dir));
-        await deleting;
+      /**
+       * In order to avoid patterns like `/build` in packages from accidentally
+       * impacting files outside the package we use `process.chdir()` to change
+       * the cwd to the package and execute `del()` without the `force` option
+       * so it will check that each file being deleted is within the package.
+       *
+       * `del()` does support a `cwd` option, but it's only for resolving the
+       * patterns and does not impact the cwd check.
+       */
+      const originalCwd = process.cwd();
+      try {
+        for (const { pattern, cwd } of toDelete) {
+          process.chdir(cwd);
+          const promise = del(pattern);
+          ora.promise(promise, relative(originalCwd, join(cwd, String(pattern))));
+          await promise;
+        }
+      } finally {
+        process.chdir(originalCwd);
       }
     }
   },

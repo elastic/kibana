@@ -9,10 +9,12 @@ import { management } from 'ui/management';
 import template from './pipeline_list_route.html';
 import './components/pipeline_list';
 import 'plugins/logstash/services/license';
+import { getPipelineListBreadcrumbs } from '../breadcrumbs';
 
 routes
   .when('/management/logstash/pipelines/', {
-    template
+    template,
+    k7Breadcrumbs: getPipelineListBreadcrumbs
   });
 
 routes.defaults(/\/management/, {

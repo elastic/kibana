@@ -27,16 +27,46 @@ else
 fi
 
 
+export KIBANA_DIR="$dir"
+export XPACK_DIR="$KIBANA_DIR/x-pack"
+
+parentDir="$(cd "$KIBANA_DIR/.."; pwd)"
+export PARENT_DIR="$parentDir"
+
+kbnBranch="$(jq -r .branch "$KIBANA_DIR/package.json")"
+export KIBANA_PKG_BRANCH="$kbnBranch"
+
+echo " -- KIBANA_DIR='$KIBANA_DIR'"
+echo " -- XPACK_DIR='$XPACK_DIR'"
+echo " -- PARENT_DIR='$PARENT_DIR'"
+echo " -- KIBANA_PKG_BRANCH='$KIBANA_PKG_BRANCH'"
+echo " -- TEST_ES_SNAPSHOT_VERSION='$TEST_ES_SNAPSHOT_VERSION'"
+
 ###
 ### download node
 ###
-nodeVersion="$(cat $dir/.node-version)"
-nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+UNAME=$(uname)
+OS="linux"
+if [[ "$UNAME" = *"MINGW64_NT"* ]]; then
+  OS="win"
+fi
+echo " -- Running on OS: $OS"
+
+nodeVersion="$(cat "$dir/.node-version")"
 nodeDir="$cacheDir/node/$nodeVersion"
+
+if [[ "$OS" == "win" ]]; then
+  nodeBin="$HOME/node"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip"
+else
+  nodeBin="$nodeDir/bin"
+  nodeUrl="https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
+fi
+
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
 echo " -- setting up node.js"
-if [ -x "$nodeDir/bin/node" ] && [ "$($nodeDir/bin/node --version)" == "v$nodeVersion" ]; then
+if [ -x "$nodeBin/node" ] && [ "$("$nodeBin/node" --version)" == "v$nodeVersion" ]; then
   echo " -- reusing node.js install"
 else
   if [ -d "$nodeDir" ]; then
@@ -46,65 +76,107 @@ else
 
   echo " -- downloading node.js from $nodeUrl"
   mkdir -p "$nodeDir"
-  curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+  if [[ "$OS" == "win" ]]; then
+    nodePkg="$nodeDir/${nodeUrl##*/}"
+    curl --silent -o "$nodePkg" "$nodeUrl"
+    unzip -qo "$nodePkg" -d "$nodeDir"
+    mv "${nodePkg%.*}" "$nodeBin"
+  else
+    curl --silent "$nodeUrl" | tar -xz -C "$nodeDir" --strip-components=1
+  fi
 fi
-
 
 ###
 ### "install" node into this shell
 ###
-export PATH="$nodeDir/bin:$PATH"
-hash -r
-
+export PATH="$nodeBin:$PATH"
 
 ###
 ### downloading yarn
 ###
 yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
-yarnUrl="https://github.com/yarnpkg/yarn/releases/download/v$yarnVersion/yarn-$yarnVersion.js"
-yarnDir="$cacheDir/yarn/$yarnVersion"
-if [ -z "$yarnVersion" ]; then
-  echo " ${RED}!! missing engines.yarn in package.json${RESET_C}";
-  exit 1
-elif [ -x "$yarnDir/bin/yarn" ] && [ "$($yarnDir/bin/yarn --version)" == "$yarnVersion" ]; then
-  echo " -- reusing yarn install"
-else
-  if [ -d "$yarnDir" ]; then
-    echo " -- clearing previous yarn install"
-    rm -rf "$yarnDir"
-  fi
+npm install -g "yarn@^${yarnVersion}"
 
-  echo " -- downloading yarn from $yarnUrl"
-  mkdir -p "$yarnDir/bin"
-  curl -L --silent "$yarnUrl" > "$yarnDir/bin/yarn"
-  chmod +x "$yarnDir/bin/yarn"
-fi
-
+###
+### setup yarn offline cache
+###
+yarn config set yarn-offline-mirror "$cacheDir/yarn-offline-cache"
 
 ###
 ### "install" yarn into this shell
 ###
-export PATH="$yarnDir/bin:$PATH"
 yarnGlobalDir="$(yarn global bin)"
 export PATH="$PATH:$yarnGlobalDir"
-hash -r
 
+###
+### use the chromedriver cache if it exists
+###
+if [ -d "$dir/.chromedriver" ]; then
+  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.chromedriver)")"
+  cachedPkgVersion="$(cat "$dir/.chromedriver/pkgVersion")"
+  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
+    export CHROMEDRIVER_FILEPATH="$dir/.chromedriver/chromedriver.zip"
+    export CHROMEDRIVER_SKIP_DOWNLOAD=true
+    echo " -- Using chromedriver cache at $CHROMEDRIVER_FILEPATH"
+  else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "  SKIPPING CHROMEDRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  fi
+else
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "  CHROMEDRIVER CACHE NOT FOUND"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
+
+###
+### use the geckodriver cache if it exists
+###
+if [ -d "$dir/.geckodriver" ]; then
+  branchPkgVersion="$(node -e "console.log(require('./package.json').devDependencies.geckodriver)")"
+  cachedPkgVersion="$(cat "$dir/.geckodriver/pkgVersion")"
+  if [ "$cachedPkgVersion" == "$branchPkgVersion" ]; then
+    export GECKODRIVER_FILEPATH="$dir/.geckodriver/geckodriver.tar.gz"
+    echo " -- Using geckodriver cache at '$GECKODRIVER_FILEPATH'"
+  else
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+    echo "  SKIPPING GECKODRIVER CACHE: cached($cachedPkgVersion) branch($branchPkgVersion)"
+    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  fi
+else
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+  echo "  GECKODRIVER CACHE NOT FOUND"
+  echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+fi
 
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-yarn config set cache-folder "$cacheDir/yarn"
-yarn kbn bootstrap
-
+yarn kbn bootstrap --prefer-offline
 
 ###
 ### verify no git modifications
 ###
-
 GIT_CHANGES="$(git ls-files --modified)"
 if [ "$GIT_CHANGES" ]; then
   echo -e "\n${RED}ERROR: 'yarn kbn bootstrap' caused changes to the following files:${C_RESET}\n"
+  echo -e "$GIT_CHANGES\n"
+  exit 1
+fi
+
+###
+### rebuild kbn-pm distributable to ensure it's not out of date
+###
+echo " -- building kbn-pm distributable"
+yarn kbn run build -i @kbn/pm
+
+###
+### verify no git modifications
+###
+GIT_CHANGES="$(git ls-files --modified)"
+if [ "$GIT_CHANGES" ]; then
+  echo -e "\n${RED}ERROR: 'yarn kbn run build -i @kbn/pm' caused changes to the following files:${C_RESET}\n"
   echo -e "$GIT_CHANGES\n"
   exit 1
 fi

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 export default function ({ getService, getPageObjects }) {
 
@@ -42,7 +42,21 @@ export default function ({ getService, getPageObjects }) {
       log.debug('actualUsers = %j', users);
       expect(users.Lee.roles).to.eql(['kibana_user']);
       expect(users.Lee.fullname).to.eql('LeeFirst LeeLast');
+      expect(users.Lee.email).to.eql('lee@myEmail.com');
       expect(users.Lee.reserved).to.be(false);
+    });
+
+    it('should add new user with optional fields left empty', async function () {
+      await PageObjects.security.addUser({
+        username: 'OptionalUser', password: 'OptionalUserPwd',
+        confirmPassword: 'OptionalUserPwd', save: true, roles: []
+      });
+      const users = indexBy(await PageObjects.security.getElasticsearchUsers(), 'username');
+      log.debug('actualUsers = %j', users);
+      expect(users.OptionalUser.roles).to.eql(['']);
+      expect(users.OptionalUser.fullname).to.eql('');
+      expect(users.OptionalUser.email).to.eql('');
+      expect(users.OptionalUser.reserved).to.be(false);
     });
 
     it('should delete user', async function () {

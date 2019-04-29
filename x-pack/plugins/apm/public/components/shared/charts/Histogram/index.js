@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import d3 from 'd3';
-import _ from 'lodash';
+import { isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
 import { scaleLinear } from 'd3-scale';
 import styled from 'styled-components';
@@ -21,8 +21,10 @@ import {
   makeWidthFlexible,
   VerticalGridLines
 } from 'react-vis';
-import { unit, colors } from '../../../../style/variables';
+import { unit } from '../../../../style/variables';
 import Tooltip from '../Tooltip';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { tint } from 'polished';
 
 const XY_HEIGHT = unit * 10;
 const XY_MARGIN = {
@@ -68,7 +70,10 @@ export class HistogramInner extends PureComponent {
       const padding = (item.x - item.x0) / 20;
       return {
         ...item,
-        color: item === selectedItem ? colors.blue2 : colors.apmLightBlue,
+        color:
+          item === selectedItem
+            ? theme.euiColorVis1
+            : tint(0.5, theme.euiColorVis1),
         x0: item.x0 + padding,
         x: item.x - padding,
         y: item.y > 0 ? Math.max(item.y, MINIMUM_BUCKET_SIZE) : 0
@@ -91,7 +96,7 @@ export class HistogramInner extends PureComponent {
       width: XY_WIDTH
     } = this.props;
     const { hoveredBucket } = this.state;
-    if (_.isEmpty(buckets) || XY_WIDTH === 0) {
+    if (isEmpty(buckets) || XY_WIDTH === 0) {
       return null;
     }
 
@@ -151,7 +156,7 @@ export class HistogramInner extends PureComponent {
               x={x(hoveredBucket.x0)}
               width={x(bucketSize) - x(0)}
               style={{
-                fill: colors.gray5
+                fill: theme.euiColorLightestShade
               }}
             />
           )}
@@ -176,7 +181,7 @@ export class HistogramInner extends PureComponent {
               width={x(bucketSize) - x(0)}
               style={{
                 fill: 'transparent',
-                stroke: colors.blue2,
+                stroke: theme.euiColorVis1,
                 rx: '0px',
                 ry: '0px'
               }}
@@ -185,7 +190,6 @@ export class HistogramInner extends PureComponent {
 
           <VerticalRectSeries
             colorType="literal"
-            color={colors.apmLightBlue}
             data={chartData}
             style={{
               rx: '0px',

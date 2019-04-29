@@ -24,7 +24,7 @@ export function handleResponse(response) {
 
     if (shard) {
       // note: if the request is for a node, then it's enough to deduplicate without primary, but for indices it displays both
-      const shardId = `${shard.index}-${shard.shard}-${shard.primary}-${shard.relocating_node}`;
+      const shardId = `${shard.index}-${shard.shard}-${shard.primary}-${shard.relocating_node}-${shard.node}`;
 
       if (!uniqueShards.has(shardId)) {
         shards.push(shard);

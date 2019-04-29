@@ -1,0 +1,16 @@
+.tvbError__title,
+.tvbError__additional,
+.tvbError__stack {
+  margin-top: $euiSizeS;
+}
+
+// EUITODO: Convert to EuiCodeBlock
+.tvbError__stack {
+  padding: $euiSizeS;
+  background: $euiCodeBlockBackgroundColor;
+  color: $euiCodeBlockColor;
+  line-height: $euiLineHeight;
+  font-family: $euiCodeFontFamily;
+  font-weight: $euiFontWeightRegular;
+  white-space: pre-wrap;
+}

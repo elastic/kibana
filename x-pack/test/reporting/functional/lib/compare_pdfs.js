@@ -7,51 +7,12 @@
 import path from 'path';
 import fs from 'fs';
 import { promisify } from 'bluebird';
-import pixelmatch from 'pixelmatch';
 import mkdirp from 'mkdirp';
-
-import { PNG } from 'pngjs';
 import { PDFImage } from 'pdf-image';
+import PDFJS from 'pdfjs-dist';
+import { comparePngs } from '../../../../../test/functional/services/lib/compare_pngs';
 
 const mkdirAsync = promisify(mkdirp);
-const writeFileAsync = promisify(fs.writeFile);
-
-function comparePngs(actualPath, expectedPath, diffPath, log) {
-  log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
-  return new Promise(resolve => {
-    const actual = fs.createReadStream(actualPath).pipe(new PNG()).on('parsed', doneReading);
-    const expected = fs.createReadStream(expectedPath).pipe(new PNG()).on('parsed', doneReading);
-    let filesRead = 0;
-
-    // Note that this threshold value only affects color comparison from pixel to pixel. It won't have
-    // any affect when comparing neighboring pixels - so slight shifts, font variations, or "blurry-ness"
-    // will still show up as diffs, but upping this will not help that.  Instead we keep the threshold low, and expect
-    // some the diffCount to be lower than our own threshold value.
-    const THRESHOLD = .1;
-
-    function doneReading() {
-      if (++filesRead < 2) return;
-      const diffPng = new PNG({ width: actual.width, height: actual.height });
-      log.debug(`calculating diff pixels...`);
-      const diffPixels = pixelmatch(
-        actual.data,
-        expected.data,
-        diffPng.data,
-        actual.width,
-        actual.height,
-        {
-          threshold: THRESHOLD,
-          // Adding this doesn't seem to make a difference at all, but ideally we want to avoid picking up anti aliasing
-          // differences from fonts on different OSs.
-          includeAA: true
-        }
-      );
-      log.debug(`diff pixels: ${diffPixels}`);
-      diffPng.pack().pipe(fs.createWriteStream(diffPath));
-      resolve(diffPixels);
-    }
-  });
-}
 
 export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screenshotsDirectory, log) {
   log.debug(`checkIfPdfsMatch: ${actualPdfPath} vs ${baselinePdfPath}`);
@@ -73,52 +34,45 @@ export async function checkIfPdfsMatch(actualPdfPath, baselinePdfPath, screensho
   // don't want to start causing failures for other devs working on OS's which are lacking snapshots.  We have
   // mac and linux covered which is better than nothing for now.
   try {
-    await writeFileAsync(baselineCopyPath, fs.readFileSync(baselinePdfPath));
+    log.debug(`writeFileSync: ${baselineCopyPath}`);
+    fs.writeFileSync(baselineCopyPath, fs.readFileSync(baselinePdfPath));
   } catch (error) {
     log.error(`No baseline pdf found at ${baselinePdfPath}`);
     return 0;
   }
-  await writeFileAsync(actualCopyPath, fs.readFileSync(actualPdfPath));
+  log.debug(`writeFileSync: ${actualCopyPath}`);
+  fs.writeFileSync(actualCopyPath, fs.readFileSync(actualPdfPath));
 
   const convertOptions = {
-    '-density': '300',
   };
+
   const actualPdfImage = new PDFImage(actualCopyPath, { convertOptions });
   const expectedPdfImage = new PDFImage(baselineCopyPath, { convertOptions });
 
-  let pageNum = 0;
-  let diffTotal = 0;
-  // Ran across an instance where the page conversion failed with `Failed to convert page to image` for no known
-  // reason. Seeing if a loop will resolve these flaky errors.
-  let failCount = 0;
-  while (true) {
-    let expectedPagePng;
-    let actualPagePng;
-    try {
-      log.debug(`Converting expected pdf page ${pageNum} to png`);
-      expectedPagePng = await expectedPdfImage.convertPage(pageNum);
-      log.debug(`Converting actual pdf page ${pageNum} to png`);
-      actualPagePng = await actualPdfImage.convertPage(pageNum);
-    } catch (e) {
-      log.error(`Error caught while converting pdf page ${pageNum} to png: ${e.message}`);
-      if (JSON.stringify(e).indexOf('Requested FirstPage is greater than the number of pages in the file') >= 0) {
-        break;
-      } else {
-        if (failCount < 3) {
-          log.error(`${failCount}: Will try conversion again...`);
-          failCount++;
-          continue;
-        } else {
-          log.error(`Failed ${failCount} times, throwing error`);
-          throw e;
-        }
-      }
-    }
+  log.debug(`Calculating numberOfPages`);
 
+  const actualDoc = await PDFJS.getDocument(actualCopyPath);
+  const expectedDoc = await PDFJS.getDocument(baselineCopyPath);
+  const actualPages = actualDoc.numPages;
+  const expectedPages = expectedDoc.numPages;
+
+  if (actualPages !== expectedPages) {
+    throw new Error(
+      `Expected ${expectedPages} pages but got ${actualPages} in PDFs expected: "${baselineCopyPath}" actual: "${actualCopyPath}".`
+    );
+  }
+
+  let diffTotal = 0;
+
+  for (let pageNum = 0; pageNum <= expectedPages; ++pageNum) {
+    log.debug(`Converting expected pdf page ${pageNum} to png`);
+    const expectedPagePng = await expectedPdfImage.convertPage(pageNum);
+    log.debug(`Converting actual pdf page ${pageNum} to png`);
+    const actualPagePng = await actualPdfImage.convertPage(pageNum);
     const diffPngPath = path.resolve(failureDirectoryPath, `${baselinePdfFileName}-${pageNum}.png`);
-    diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, log);
+    diffTotal += await comparePngs(actualPagePng, expectedPagePng, diffPngPath, sessionDirectoryPath, log);
     pageNum++;
   }
+
   return diffTotal;
 }
-

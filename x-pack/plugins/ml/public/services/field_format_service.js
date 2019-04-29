@@ -8,9 +8,9 @@
 
 import _ from 'lodash';
 
-import { mlFunctionToESAggregation } from 'plugins/ml/../common/util/job_utils';
-import { getIndexPatternById } from 'plugins/ml/util/index_utils';
-import { mlJobService } from 'plugins/ml/services/job_service';
+import { mlFunctionToESAggregation } from '../../common/util/job_utils';
+import { getIndexPatternById } from '../util/index_utils';
+import { mlJobService } from '../services/job_service';
 
 // Service for accessing FieldFormat objects configured for a Kibana index pattern
 // for use in formatting the actual and typical values from anomalies.
@@ -121,4 +121,3 @@ class FieldFormatService {
 }
 
 export const mlFieldFormatService = new FieldFormatService();
-
