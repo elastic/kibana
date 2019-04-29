@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Delayed } from '.';
+import { Delayed } from './index';
 
 // Advanced time like setTimeout and mocks Date.now() to stay in sync
 class AdvanceTimer {
