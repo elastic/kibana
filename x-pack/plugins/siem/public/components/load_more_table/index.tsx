@@ -75,14 +75,11 @@ export interface Columns<T> {
 }
 
 export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
-  constructor(props: BasicTableProps<T>) {
-    super(props);
-    this.state = {
-      activePage: 0,
-      isEmptyTable: this.props.pageOfItems.length === 0,
-      isPopoverOpen: false,
-      paginationLoading: false,
-    };
+  public readonly state = {
+    activePage: 0,
+    isEmptyTable: this.props.pageOfItems.length === 0,
+    isPopoverOpen: false,
+    paginationLoading: false,
   }
 
   static getDerivedStateFromProps(props: BasicTableProps<any>, state: BasicTableState) {

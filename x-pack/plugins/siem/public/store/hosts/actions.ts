@@ -34,10 +34,6 @@ export const updateUncommonProcessesLimit = actionCreator<{ limit: number; hosts
   'UPDATE_UNCOMMONPROCESSES_LIMIT'
 );
 
-export const updatePaginationPage = actionCreator<{ paginationPage: number; hostsType: HostsType }>(
-  'UPDATE_UNCOMMONPROCESSES_PAGE'
-);
-
 export const setHostsFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;
   hostsType: HostsType;
