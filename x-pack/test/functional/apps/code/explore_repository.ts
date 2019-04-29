@@ -119,6 +119,7 @@ export default function exploreRepositoryFunctonalTests({
         await retry.try(async () => {
           expect(await testSubjects.exists('codeSourceViewer')).to.be(true);
         });
+
         // open another folder
         await testSubjects.click('codeFileTreeNode-Directory-src-doc');
         await retry.tryForTime(5000, async () => {
@@ -139,6 +140,23 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
         log.info('src folder closed');
+      });
+
+      it('click a breadcrumb should not affect the file tree', async () => {
+        log.debug('it goes to a deep node of file tree');
+        const url = `${PageObjects.common.getHostPort()}/app/code#/github.com/Microsoft/TypeScript-Node-Starter/blob/master/src/models/User.ts`;
+        await browser.get(url);
+        // Click breadcrumb does not affect file tree
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileBreadcrumb-src')).ok();
+        });
+        await testSubjects.click('codeFileBreadcrumb-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-src-doc-open')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-test-closed')).ok();
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
+        });
       });
 
       it('Click file/directory on the right panel', async () => {

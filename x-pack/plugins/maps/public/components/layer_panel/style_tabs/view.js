@@ -40,7 +40,7 @@ export function StyleTabs({ layer, updateStyle }) {
       <EuiPanel key={index}>
         <EuiTitle size="xs"><h5>{Style.getDisplayName()}</h5></EuiTitle>
         {description}
-        <EuiSpacer margin="m"/>
+        <EuiSpacer size="m"/>
         {styleEditor}
       </EuiPanel>
     );
