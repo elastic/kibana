@@ -1,7 +1,7 @@
 
 {
   "groups": [],
-  "description": "Kibana sample web logs data : detect anomalies in mean bytes transmitted",
+  "description": "Kibana sample web logs data : find anomalies in the average file size",
   "analysis_config" : {
     "bucket_span": "1h",
     "detectors": [
