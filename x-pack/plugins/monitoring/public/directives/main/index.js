@@ -8,6 +8,7 @@ import { get } from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './index.html';
 import { shortenPipelineHash } from '../../../common/formatting';
+import { shouldDisplayLsPipelineNav } from '../../hacks';
 
 /*
  * Manage data and provide helper methods for the "main" directive's template
@@ -120,6 +121,9 @@ uiModule.directive('monitoringMain', (breadcrumbs, license, kbnUrl, config, $inj
       });
       scope.$watch('pageData.clusterStatus.pipeline_count', pipelineCount => {
         controller.pipelineCount = pipelineCount;
+      });
+      scope.$watch('pageData.nodeSummary.version', nodeVersion => {
+        controller.shouldDisplayPipelineNav = shouldDisplayLsPipelineNav(nodeVersion);
       });
     }
   };
