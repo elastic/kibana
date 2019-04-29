@@ -97,7 +97,7 @@ export const PopoverForm: React.SFC<Props> = ({
             />
           </EuiFormRow>
         </EuiFlexItem>
-        {availableAggs.length > 1 && (
+        {availableAggs.length > 0 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.aggLabel', {
@@ -112,7 +112,7 @@ export const PopoverForm: React.SFC<Props> = ({
             </EuiFormRow>
           </EuiFlexItem>
         )}
-        {availableFields.length > 1 && (
+        {availableFields.length > 0 && (
           <EuiFlexItem style={{ width: 150 }}>
             <EuiFormRow
               label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.fieldLabel', {
