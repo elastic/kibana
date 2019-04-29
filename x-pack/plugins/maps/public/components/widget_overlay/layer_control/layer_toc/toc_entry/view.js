@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
@@ -35,7 +36,19 @@ export class TOCEntry extends React.Component {
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.updateDebounced.cancel();
   }
+
+  shouldComponentUpdate() {
+    this.updateDebounced();
+    return false;
+  }
+
+  updateDebounced = _.debounce(() => {
+    if (this._isMounted) {
+      this.forceUpdate();
+    }
+  }, 256);
 
   async _updateDisplayName() {
     const label = await this.props.layer.getDisplayName();
