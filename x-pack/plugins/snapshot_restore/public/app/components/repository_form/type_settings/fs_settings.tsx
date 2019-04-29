@@ -66,7 +66,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           <Fragment>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryFor.typeFS.locationDescription"
-              defaultMessage="The location must be registered in the {settingKey} setting on all master and data nodes. "
+              defaultMessage="The location must be registered in the {settingKey} setting on all master and data nodes."
               values={{
                 settingKey: <EuiCode>path.repo</EuiCode>,
               }}
