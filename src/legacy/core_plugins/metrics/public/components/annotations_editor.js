@@ -77,7 +77,7 @@ class AnnotationsEditor extends Component {
     };
   }
   handleSubmit = (model, query) => {
-    const part = { query_string: query.query.query };
+    const part = { query_string: query.query };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
   };
   renderRow(row) {
@@ -161,7 +161,9 @@ class AnnotationsEditor extends Component {
                   fullWidth
                 >
                   <QueryBar
-                    query={{ language: 'lucene', query: model.query_string }}
+                    query={
+                      { language: model.query_string.language ? model.query_string.language : 'lucene',
+                        query: model.query_string.query }}
                     screenTitle={'AnnotationsEditor'}
                     onSubmit={(query) => this.handleSubmit(model, query)}
                     appName={'VisEditor'}
