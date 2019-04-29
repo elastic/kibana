@@ -18044,15 +18044,15 @@ moment@^2.10.6:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
   integrity sha512-TCZ36BjURTeFTM/CwRcViQlfkMvL1/vFISuNLO5GkcVm1+QHfbSiNqZuWeMFjj1/3+uAjXswgRk30j1kkLYJBQ==
 
-monocle-ts@^1.0.0:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.7.1.tgz#03a615938aa90983a4fa29749969d30f72d80ba1"
-  integrity sha512-X9OzpOyd/R83sYex8NYpJjUzi/MLQMvGNVfxDYiIvs+QMXMEUDwR61MQoARFN10Cqz5h/mbFSPnIQNUIGhYd2Q==
-
 monaco-editor@^0.14.3:
   version "0.14.3"
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.14.3.tgz#7cc4a4096a3821f52fea9b10489b527ef3034e22"
   integrity sha512-RhaO4xXmWn/p0WrkEOXe4PoZj6xOcvDYjoAh0e1kGUrQnP1IOpc0m86Ceuaa2CLEMDINqKijBSmqhvBQnsPLHQ==
+
+monocle-ts@^1.0.0:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.7.1.tgz#03a615938aa90983a4fa29749969d30f72d80ba1"
+  integrity sha512-X9OzpOyd/R83sYex8NYpJjUzi/MLQMvGNVfxDYiIvs+QMXMEUDwR61MQoARFN10Cqz5h/mbFSPnIQNUIGhYd2Q==
 
 monotone-convex-hull-2d@^1.0.1:
   version "1.0.1"
