@@ -42,7 +42,6 @@ class DataPlugin {
   }
 }
 
-
 /**
  * We export data here so that users importing from 'plugins/data'
  * will automatically receive the response value of the `setup` contract, mimicking
