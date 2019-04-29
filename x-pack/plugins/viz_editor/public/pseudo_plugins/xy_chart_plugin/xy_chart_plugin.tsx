@@ -407,7 +407,7 @@ function _getSuggestionsForFieldAsSplit(
       : getOperatorsForField(field, false, true)[0];
   const possibleOperation = fieldToOperation(field, possibleOperator);
 
-  if (field.type === 'string') {
+  if (field.type === 'string' || field.type === 'boolean') {
     // suggest as series split
     const extendedQueryState = {
       ...visModel,
