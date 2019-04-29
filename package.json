@@ -79,7 +79,8 @@
   "resolutions": {
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
-    "**/typescript": "^3.3.3333"
+    "**/typescript": "^3.3.3333",
+    "**/@elastic/eui/**/core-js": "2.5.3"
   },
   "workspaces": {
     "packages": [
@@ -134,7 +135,7 @@
     "bluebird": "3.5.3",
     "boom": "^7.2.0",
     "brace": "0.11.1",
-    "cache-loader": "1.2.2",
+    "cache-loader": "^3.0.0",
     "chalk": "^2.4.1",
     "color": "1.0.3",
     "commander": "2.8.1",
@@ -341,7 +342,7 @@
     "chance": "1.0.10",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
-    "chromedriver": "73.0.0",
+    "chromedriver": "^74.0.0",
     "classnames": "2.2.5",
     "dedent": "^0.7.0",
     "delete-empty": "^2.0.0",

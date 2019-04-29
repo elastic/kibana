@@ -15,18 +15,19 @@ import { i18n } from '@kbn/i18n';
 import { Location } from 'history';
 import { first } from 'lodash';
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useTransactionList } from '../../../hooks/useTransactionList';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { legacyEncodeURIComponent } from '../../shared/Links/url_helpers';
 import { TransactionList } from './List';
 import { useRedirect } from './useRedirect';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { getHasMLJob } from '../../../services/rest/ml';
+import { history } from '../../../utils/history';
+import { useLocation } from '../../../hooks/useLocation';
 
-interface TransactionOverviewProps extends RouteComponentProps {
+interface Props {
   urlParams: IUrlParams;
   serviceTransactionTypes: string[];
 }
@@ -50,12 +51,11 @@ function getRedirectLocation({
   }
 }
 
-export function TransactionOverviewView({
+export function TransactionOverview({
   urlParams,
-  serviceTransactionTypes,
-  location,
-  history
-}: TransactionOverviewProps) {
+  serviceTransactionTypes
+}: Props) {
+  const location = useLocation();
   const { serviceName, transactionType } = urlParams;
 
   // redirect to first transaction type
@@ -135,5 +135,3 @@ export function TransactionOverviewView({
     </React.Fragment>
   );
 }
-
-export const TransactionOverview = withRouter(TransactionOverviewView);

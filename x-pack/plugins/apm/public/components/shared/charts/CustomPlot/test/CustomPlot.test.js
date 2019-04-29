@@ -16,7 +16,7 @@ import InteractivePlot from '../InteractivePlot';
 import {
   getResponseTimeSeries,
   getEmptySerie
-} from '../../../../../store/selectors/chartSelectors';
+} from '../../../../../selectors/chartSelectors';
 
 function getXValueByIndex(index) {
   return responseWithData.responseTimes.avg[index].x;

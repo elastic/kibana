@@ -19,14 +19,14 @@ import React, { Component } from 'react';
 import { isEmpty } from 'lodash';
 import styled from 'styled-components';
 import { Coordinate } from '../../../../../typings/timeseries';
-import { ITransactionChartData } from '../../../../store/selectors/chartSelectors';
-import { IUrlParams } from '../../../../store/urlParams';
+import { ITransactionChartData } from '../../../../selectors/chartSelectors';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { asInteger, asMillis, tpmUnit } from '../../../../utils/formatters';
-import { LicenseContext } from '../../../app/Main/LicenseCheck';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 // @ts-ignore
 import CustomPlot from '../CustomPlot';
 import { SyncChartGroup } from '../SyncChartGroup';
+import { LicenseContext } from '../../../../context/LicenseContext';
 
 interface TransactionChartProps {
   hasMLJob: boolean;

@@ -66,7 +66,7 @@ async function patchNodeGit(config, log, build, platform) {
   const downloadPath = build.resolvePathForPlatform(platform, '.nodegit_binaries', packageName);
   const extractDir = await downloadAndExtractTarball(downloadUrl, downloadPath, log, 3);
 
-  const destination = build.resolvePathForPlatform(platform, 'node_modules/nodegit/build/Release');
+  const destination = build.resolvePathForPlatform(platform, 'node_modules/@elastic/nodegit/build/Release');
   log.debug('Replacing nodegit binaries from ', extractDir);
   await deleteAll([destination], log);
   await scanCopy({

@@ -17,17 +17,11 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { Dictionary } from '../../../../common/types/common';
+import { PivotAggsConfigDict } from '../../common';
 
-interface OptionsDataElement {
-  agg: string;
-  field: string;
-  formRowLabel: string;
-}
-
-interface ListProps {
+export interface ListProps {
   list: string[];
-  optionsData: Dictionary<OptionsDataElement>;
+  optionsData: PivotAggsConfigDict;
   deleteHandler?(l: string): void;
 }
 
