@@ -25,6 +25,20 @@ import { LoadingPanel } from '../loading';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
 import { EuiTitle } from '@elastic/eui';
+import styled from 'styled-components';
+
+export const WrappedByAutoSizer = styled.div`
+  height: 100px;
+  position: relative;
+`;
+
+export const ChartOverlay = styled.div`
+  height: 100%;
+  width:100%;
+  top: 0;
+  left: 0;
+  position: absolute;
+`;
 
 export interface StatItem {
   key: string;
@@ -66,7 +80,7 @@ export interface StatItemsProps extends StatItems {
 
 const StatTitle = pure<{ isLoading: boolean; value: number | null | undefined }>(
   ({ isLoading, value }) => (
-    <span className="eui-displayInlineBlock">
+    <span>
       {isLoading ? (
           <EuiLoadingSpinner size="m" />
       ) : value != null ? (
@@ -103,10 +117,14 @@ export const StatItemsComponent = pure<StatItemsProps>(
                     data-test-subj="stat-title"
                   >
                     <EuiFlexItem component="span" grow={2}>
-                      <EuiIcon type={iconType} color={field.color} />
-                    </EuiFlexItem>
-                    <EuiFlexItem component="span" grow={4}>
-                      <StatTitle isLoading={isLoading} value={field.value} />
+                      <EuiFlexGroup
+                        component="span"
+                        gutterSize="m"
+                        alignItems="center"
+                      >
+                        <EuiFlexItem component="span"><EuiIcon type={iconType} color={field.color} size="xl" /></EuiFlexItem>
+                        <EuiFlexItem component="span"><StatTitle isLoading={isLoading} value={field.value} /></EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiFlexItem>
                     <EuiFlexItem component="span" grow={4}>
                       {field.description}
