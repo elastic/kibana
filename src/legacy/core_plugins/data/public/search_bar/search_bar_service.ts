@@ -29,7 +29,9 @@ import { setupDirective } from './directive';
 export class SearchBarService {
   public setup() {
     return {
-      SearchBar,
+      ui: {
+        SearchBar,
+      },
       loadLegacyDirectives: _.once(setupDirective),
     };
   }
