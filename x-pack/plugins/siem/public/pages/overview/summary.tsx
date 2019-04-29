@@ -8,6 +8,7 @@ import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import { pure } from 'recompose';
+import { documentationLinks } from 'ui/documentation_links';
 
 export const Summary = pure(() => (
   <EuiFlexItem>
@@ -21,10 +22,22 @@ export const Summary = pure(() => (
           id="xpack.siem.overview.startedText"
           defaultMessage="Welcome to Security Information &amp; Event Management (SIEM). Get started by reviewing our {docs} or {data}. For information about upcoming features and tutorials, be sure to check out our {blog} and {videos}."
           values={{
-            docs: <EuiLink href="#">documentation</EuiLink>,
+            docs: (
+              <EuiLink href={documentationLinks.kibana} target="blank">
+                documentation
+              </EuiLink>
+            ),
             data: <EuiLink href="kibana#home/tutorial_directory/security">ingesting data</EuiLink>,
-            blog: <EuiLink href="#">blog posts</EuiLink>,
-            videos: <EuiLink href="#">videos</EuiLink>,
+            blog: (
+              <EuiLink href="#" target="blank">
+                blog posts
+              </EuiLink>
+            ),
+            videos: (
+              <EuiLink href="#" target="blank">
+                videos
+              </EuiLink>
+            ),
           }}
         />
       </p>
@@ -36,9 +49,13 @@ export const Summary = pure(() => (
       <p>
         <FormattedMessage
           id="xpack.siem.overview.feedbackText"
-          defaultMessage="If you have input or suggestions regarding your experience with Elastic SIEM, please feel free to {feedback}."
+          defaultMessage="If you have input or suggestions regarding your experience with SIEM, please feel free to {feedback}."
           values={{
-            feedback: <EuiLink href="#">submit feedback online</EuiLink>,
+            feedback: (
+              <EuiLink href="https://discuss.elastic.co/" target="blank">
+                submit feedback online
+              </EuiLink>
+            ),
           }}
         />
       </p>
