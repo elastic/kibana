@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export async function checkIsMatchAll(filter) {
+export async function mapMatchAll(filter) {
   if (filter.match_all) {
     const type = 'match_all';
     const key = filter.meta.field;

@@ -19,12 +19,12 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { checkIsGeoBoundingBox } from '../map_geo_bounding_box';
+import { mapGeoBoundingBox } from '../map_geo_bounding_box';
 import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoBoundingBox()', function () {
-    let mapGeoBoundingBox;
+    let mapGeoBoundingBoxFn;
     let mockIndexPatterns;
 
     beforeEach(ngMock.module(
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
 
     beforeEach(ngMock.inject(function (Private) {
       mockIndexPatterns = Private(IndexPatternMock);
-      mapGeoBoundingBox = checkIsGeoBoundingBox(mockIndexPatterns);
+      mapGeoBoundingBoxFn = mapGeoBoundingBox(mockIndexPatterns);
     }));
 
     it('should return the key and value for matching filters with bounds', function (done) {
@@ -49,7 +49,7 @@ describe('Filter Bar Directive', function () {
           }
         }
       };
-      mapGeoBoundingBox(filter).then(function (result) {
+      mapGeoBoundingBoxFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'point');
         expect(result).to.have.property('value');
         // remove html entities and non-alphanumerics to get the gist of the value
@@ -60,7 +60,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
-      mapGeoBoundingBox(filter).catch(function (result) {
+      mapGeoBoundingBoxFn(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });
@@ -79,7 +79,7 @@ describe('Filter Bar Directive', function () {
           }
         }
       };
-      mapGeoBoundingBox(filter).then(function (result) {
+      mapGeoBoundingBoxFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'point');
         expect(result).to.have.property('value');
         // remove html entities and non-alphanumerics to get the gist of the value

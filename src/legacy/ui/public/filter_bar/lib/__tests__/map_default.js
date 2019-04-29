@@ -18,14 +18,14 @@
  */
 
 import expect from '@kbn/expect';
-import { checkIsDefault } from '../map_default';
+import { mapDefault } from '../map_default';
 
 describe('Filter Bar Directive', function () {
   describe('mapDefault()', function () {
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { query: { match_all: {} } };
-      checkIsDefault(filter).then(function (result) {
+      mapDefault(filter).then(function (result) {
         expect(result).to.have.property('key', 'query');
         expect(result).to.have.property('value', '{"match_all":{}}');
         done();
@@ -42,7 +42,7 @@ describe('Filter Bar Directive', function () {
           }
         }
       };
-      checkIsDefault(filter).then(function (result) {
+      mapDefault(filter).then(function (result) {
         expect(result).to.have.property('key', 'bool');
         expect(result).to.have.property('value', JSON.stringify(filter.bool));
         done();
@@ -51,7 +51,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined if there is no valid key', function (done) {
       const filter = { meta: {} };
-      checkIsDefault(filter).catch(function (result) {
+      mapDefault(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

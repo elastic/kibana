@@ -18,14 +18,14 @@
  */
 
 import expect from '@kbn/expect';
-import { checkIsMissing } from '../map_missing';
+import { mapMissing } from '../map_missing';
 
 describe('Filter Bar Directive', function () {
   describe('mapMissing()', function () {
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { missing: { field: '_type' } };
-      checkIsMissing(filter).then(function (result) {
+      mapMissing(filter).then(function (result) {
         expect(result).to.have.property('key', '_type');
         expect(result).to.have.property('value', 'missing');
         done();
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { query: { match: { query: 'foo' } } };
-      checkIsMissing(filter).catch(function (result) {
+      mapMissing(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

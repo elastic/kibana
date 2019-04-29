@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export async function checkIsPhrases(filter) {
+export async function mapPhrases(filter) {
   const { type, key, value, params } = filter.meta;
   if (type !== 'phrases') {
     throw filter;

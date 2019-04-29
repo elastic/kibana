@@ -39,7 +39,7 @@ function getParams(filter, indexPattern) {
   return { type, key, value, params };
 }
 
-export function checkIsGeoPolygon(indexPatterns) {
+export function mapGeoPolygon(indexPatterns) {
   return async function (filter) {
     if (!filter.geo_polygon) {
       throw filter;

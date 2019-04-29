@@ -19,12 +19,12 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { checkIsRange } from '../map_range';
+import { mapRange } from '../map_range';
 import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapRange()', function () {
-    let mapRange;
+    let mapRangeFn;
     let mockIndexPatterns;
 
     beforeEach(ngMock.module(
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
 
     beforeEach(ngMock.inject(function (Private) {
       mockIndexPatterns = Private(IndexPatternMock);
-      mapRange = checkIsRange(mockIndexPatterns);
+      mapRangeFn = mapRange(mockIndexPatterns);
     }));
 
     it('should return the key and value for matching filters with gt/lt', function (done) {
@@ -48,7 +48,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return the key and value for matching filters with gte/lte', function (done) {
       const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lte: 2048, gte: 1024 } } };
-      mapRange(filter).then(function (result) {
+      mapRangeFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
         expect(result).to.have.property('value', '1,024 to 2,048');
         done();
@@ -57,7 +57,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
-      mapRange(filter).catch(function (result) {
+      mapRangeFn(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

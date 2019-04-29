@@ -19,12 +19,12 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { checkIsPhrase } from '../map_phrase';
+import { mapPhrase } from '../map_phrase';
 import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapPhrase()', function () {
-    let mapPhrase;
+    let mapPhraseFn;
     let mockIndexPatterns;
 
     beforeEach(ngMock.module(
@@ -34,12 +34,12 @@ describe('Filter Bar Directive', function () {
 
     beforeEach(ngMock.inject(function (Private) {
       mockIndexPatterns = Private(IndexPatternMock);
-      mapPhrase = checkIsPhrase(mockIndexPatterns);
+      mapPhraseFn = mapPhrase(mockIndexPatterns);
     }));
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { match: { _type: { query: 'apache', type: 'phrase' } } } };
-      mapPhrase(filter).then(function (result) {
+      mapPhraseFn(filter).then(function (result) {
         expect(result).to.have.property('key', '_type');
         expect(result).to.have.property('value', 'apache');
         done();
@@ -48,7 +48,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
-      mapPhrase(filter).catch(function (result) {
+      mapPhraseFn(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

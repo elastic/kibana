@@ -19,14 +19,14 @@
 
 import expect from '@kbn/expect';
 // import ngMock from 'ng_mock';
-import { checkIsQueryString } from '../map_query_string';
+import { mapQueryString } from '../map_query_string';
 
 describe('Filter Bar Directive', function () {
   describe('mapQueryString()', function () {
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { query: { query_string: { query: 'foo:bar' } } };
-      checkIsQueryString(filter).then(function (result) {
+      mapQueryString(filter).then(function (result) {
         expect(result).to.have.property('key', 'query');
         expect(result).to.have.property('value', 'foo:bar');
         done();
@@ -35,7 +35,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { query: { match: { query: 'foo' } } };
-      checkIsQueryString(filter).catch(function (result) {
+      mapQueryString(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

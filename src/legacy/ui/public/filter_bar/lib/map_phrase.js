@@ -40,7 +40,7 @@ function getParams(filter, indexPattern) {
   return { type, key, value, params };
 }
 
-export function checkIsPhrase(indexPatterns) {
+export function mapPhrase(indexPatterns) {
   return async function (filter) {
     const isScriptedPhraseFilter = isScriptedPhrase(filter);
     if (!_.has(filter, ['query', 'match']) && !isScriptedPhraseFilter) {

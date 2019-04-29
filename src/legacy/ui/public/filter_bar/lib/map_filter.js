@@ -18,16 +18,16 @@
  */
 
 import _ from 'lodash';
-import { checkIsMatchAll } from './map_match_all';
-import { checkIsPhrase } from './map_phrase';
-import { checkIsPhrases } from './map_phrases';
-import { checkIsRange } from './map_range';
-import { checkIsExists } from './map_exists';
-import { checkIsMissing } from './map_missing';
-import { checkIsQueryString } from './map_query_string';
-import { checkIsGeoBoundingBox } from './map_geo_bounding_box';
-import { checkIsGeoPolygon } from './map_geo_polygon';
-import { checkIsDefault } from './map_default';
+import { mapMatchAll } from './map_match_all';
+import { mapPhrase } from './map_phrase';
+import { mapPhrases } from './map_phrases';
+import { mapRange } from './map_range';
+import { mapExists } from './map_exists';
+import { mapMissing } from './map_missing';
+import { mapQueryString } from './map_query_string';
+import { mapGeoBoundingBox } from './map_geo_bounding_box';
+import { mapGeoPolygon } from './map_geo_polygon';
+import { mapDefault } from './map_default';
 import { generateMappingChain } from './generate_mapping_chain';
 
 export async function mapFilter(indexPatterns, filter) {
@@ -48,16 +48,16 @@ export async function mapFilter(indexPatterns, filter) {
   // that either handles the mapping operation or not
   // and add it here. ProTip: These are executed in order listed
   const mappers = [
-    checkIsMatchAll,
-    checkIsRange(indexPatterns),
-    checkIsPhrase(indexPatterns),
-    checkIsPhrases,
-    checkIsExists,
-    checkIsMissing,
-    checkIsQueryString,
-    checkIsGeoBoundingBox(indexPatterns),
-    checkIsGeoPolygon(indexPatterns),
-    checkIsDefault,
+    mapMatchAll,
+    mapRange(indexPatterns),
+    mapPhrase(indexPatterns),
+    mapPhrases,
+    mapExists,
+    mapMissing,
+    mapQueryString,
+    mapGeoBoundingBox(indexPatterns),
+    mapGeoPolygon(indexPatterns),
+    mapDefault,
   ];
 
   const noop = function () {

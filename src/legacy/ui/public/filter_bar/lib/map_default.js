@@ -20,7 +20,7 @@
 import angular from 'angular';
 import _ from 'lodash';
 
-export async function checkIsDefault(filter) {
+export async function mapDefault(filter) {
   const metaProperty = /(^\$|meta)/;
 
   const key = _.find(_.keys(filter), function (key) {

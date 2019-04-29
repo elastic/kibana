@@ -19,12 +19,12 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { checkIsGeoPolygon } from '../map_geo_polygon';
+import { mapGeoPolygon } from '../map_geo_polygon';
 import IndexPatternMock from 'fixtures/mock_index_patterns';
 
 describe('Filter Bar Directive', function () {
   describe('mapGeoPolygon()', function () {
-    let mapGeoPolygon;
+    let mapGeoPolygonFn;
     let mockIndexPatterns;
 
     beforeEach(ngMock.module(
@@ -34,7 +34,7 @@ describe('Filter Bar Directive', function () {
 
     beforeEach(ngMock.inject(function (Private) {
       mockIndexPatterns = Private(IndexPatternMock);
-      mapGeoPolygon = checkIsGeoPolygon(mockIndexPatterns);
+      mapGeoPolygonFn = mapGeoPolygon(mockIndexPatterns);
     }));
 
     it('should return the key and value for matching filters with bounds', function (done) {
@@ -51,7 +51,7 @@ describe('Filter Bar Directive', function () {
           }
         }
       };
-      mapGeoPolygon(filter).then(function (result) {
+      mapGeoPolygonFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'point');
         expect(result).to.have.property('value');
         // remove html entities and non-alphanumerics to get the gist of the value
@@ -62,7 +62,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { meta: { index: 'logstash-*' }, query: { query_string: { query: 'foo:bar' } } };
-      mapGeoPolygon(filter).catch(function (result) {
+      mapGeoPolygonFn(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });
@@ -83,7 +83,7 @@ describe('Filter Bar Directive', function () {
           }
         }
       };
-      mapGeoPolygon(filter).then(function (result) {
+      mapGeoPolygonFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'point');
         expect(result).to.have.property('value');
         // remove html entities and non-alphanumerics to get the gist of the value

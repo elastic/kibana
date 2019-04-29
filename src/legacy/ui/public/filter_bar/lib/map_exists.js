@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export async function checkIsExists(filter) {
+export async function mapExists(filter) {
   if (filter.exists) {
     const type = 'exists';
     const key = filter.exists.field;

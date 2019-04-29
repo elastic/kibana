@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export async function checkIsMissing(filter) {
+export async function mapMissing(filter) {
   if (filter.missing) {
     const type = 'missing';
     const key = filter.missing.field;

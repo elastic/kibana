@@ -17,7 +17,7 @@
  * under the License.
  */
 
-export async function checkIsQueryString(filter) {
+export async function mapQueryString(filter) {
   if (filter.query && filter.query.query_string) {
     const type = 'query_string';
     const key = 'query';

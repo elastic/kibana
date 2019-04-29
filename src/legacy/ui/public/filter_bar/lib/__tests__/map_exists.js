@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { checkIsExists } from '../map_exists';
+import { mapExists } from '../map_exists';
 
 describe('Filter Bar Directive', function () {
   describe('mapExists()', function () {
@@ -28,7 +28,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return the key and value for matching filters', function (done) {
       const filter = { exists: { field: '_type' } };
-      checkIsExists(filter).then(function (result) {
+      mapExists(filter).then(function (result) {
         expect(result).to.have.property('key', '_type');
         expect(result).to.have.property('value', 'exists');
         done();
@@ -37,7 +37,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return undefined for none matching', function (done) {
       const filter = { query: { match: { query: 'foo' } } };
-      checkIsExists(filter).catch(function (result) {
+      mapExists(filter).catch(function (result) {
         expect(result).to.be(filter);
         done();
       });

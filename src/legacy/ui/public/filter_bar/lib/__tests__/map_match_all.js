@@ -19,7 +19,7 @@
 
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
-import { checkIsMatchAll } from '../map_match_all';
+import { mapMatchAll } from '../map_match_all';
 
 describe('ui/filter_bar/lib', function () {
   describe('mapMatchAll()', function () {
@@ -40,7 +40,7 @@ describe('ui/filter_bar/lib', function () {
     describe('when given a filter that is not match_all', function () {
       it('filter is rejected', function (done) {
         delete filter.match_all;
-        checkIsMatchAll(filter).catch(result => {
+        mapMatchAll(filter).catch(result => {
           expect(result).to.be(filter);
           done();
         });
@@ -50,7 +50,7 @@ describe('ui/filter_bar/lib', function () {
     describe('when given a match_all filter', function () {
       let result;
       beforeEach(function (done) {
-        checkIsMatchAll(filter).then(r => {
+        mapMatchAll(filter).then(r => {
           result = r;
           done();
         });

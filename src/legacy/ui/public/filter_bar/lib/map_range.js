@@ -51,7 +51,7 @@ function getParams(filter, indexPattern) {
   return { type, key, value, params };
 }
 
-export function checkIsRange(indexPatterns) {
+export function mapRange(indexPatterns) {
   return async function (filter) {
     const isScriptedRangeFilter = isScriptedRange(filter);
     if (!filter.range && !isScriptedRangeFilter) {

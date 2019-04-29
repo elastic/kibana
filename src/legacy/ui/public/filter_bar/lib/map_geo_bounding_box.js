@@ -40,7 +40,7 @@ function getParams(filter, indexPattern) {
   return { type, key, value, params };
 }
 
-export function checkIsGeoBoundingBox(indexPatterns) {
+export function mapGeoBoundingBox(indexPatterns) {
   return async function (filter) {
     if (!filter.geo_bounding_box) {
       throw filter;
