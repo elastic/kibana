@@ -17,10 +17,17 @@
  * under the License.
  */
 
-import { resolve } from 'path';
+import { dirname, resolve } from 'path';
+import fs from 'fs';
+import { promisify } from 'bluebird';
+import mkdirp from 'mkdirp';
 
-import { copy, untar } from '../../lib';
+import { untar } from '../../lib';
 import { getNodeDownloadInfo } from './node_download_info';
+
+const statAsync = promisify(fs.stat);
+const mkdirpAsync = promisify(mkdirp);
+const copyFileAsync = promisify(fs.copyFile);
 
 export const ExtractNodeBuildsTask = {
   global: true,
@@ -30,16 +37,20 @@ export const ExtractNodeBuildsTask = {
       config.getNodePlatforms().map(async platform => {
         const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
 
-        // windows executable is not extractable, it's just a .exe file
+        // windows executable is not extractable, it's just an .exe file
+        // for performance reasons, do a copy-on-write by using the fs.constants.COPYFILE_FICLONE flag
         if (platform.isWindows()) {
-          return await copy(downloadPath, resolve(extractDir, 'node.exe'));
+          const destination = resolve(extractDir, 'node.exe');
+          await statAsync(downloadPath);
+          await mkdirpAsync(dirname(destination));
+          return await copyFileAsync(downloadPath, destination, fs.constants.COPYFILE_FICLONE);
         }
 
         // all other downloads are tarballs
         await untar(downloadPath, extractDir, {
           strip: 1
         });
-      })
+      }),
     );
   },
 };
