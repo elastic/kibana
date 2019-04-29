@@ -10,9 +10,10 @@ import { AuthorizationService } from '../../../security/server/lib/authorization
 import { isReservedSpace } from '../../common/is_reserved_space';
 import { Space } from '../../common/model/space';
 import { SpacesAuditLogger } from './audit_logger';
+import { SpacesConfig } from '../new_platform/config';
 
 interface SpacesClientRequestFacade {
-  headers: Headers;
+  headers?: Headers;
 }
 export class SpacesClient {
   constructor(
@@ -20,7 +21,7 @@ export class SpacesClient {
     private readonly debugLogger: (message: string) => void,
     private readonly authorization: AuthorizationService | null,
     private readonly callWithRequestSavedObjectRepository: any,
-    private readonly config: any,
+    private readonly config: SpacesConfig,
     private readonly internalSavedObjectRepository: any,
     private readonly request: SpacesClientRequestFacade
   ) {}
@@ -45,7 +46,7 @@ export class SpacesClient {
       const { saved_objects } = await this.internalSavedObjectRepository.find({
         type: 'space',
         page: 1,
-        perPage: this.config.get('xpack.spaces.maxSpaces'),
+        perPage: this.config.maxSpaces,
         sortField: 'name.keyword',
       });
 
@@ -92,7 +93,7 @@ export class SpacesClient {
       const { saved_objects } = await this.callWithRequestSavedObjectRepository.find({
         type: 'space',
         page: 1,
-        perPage: this.config.get('xpack.spaces.maxSpaces'),
+        perPage: this.config.maxSpaces,
         sortField: 'name.keyword',
       });
 
@@ -142,7 +143,7 @@ export class SpacesClient {
       page: 1,
       perPage: 0,
     });
-    if (total >= this.config.get('xpack.spaces.maxSpaces')) {
+    if (total >= this.config.maxSpaces) {
       throw Boom.badRequest(
         'Unable to create Space, this exceeds the maximum number of spaces set by the xpack.spaces.maxSpaces setting'
       );

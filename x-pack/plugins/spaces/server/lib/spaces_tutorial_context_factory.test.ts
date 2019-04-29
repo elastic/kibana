@@ -8,10 +8,11 @@ import * as Rx from 'rxjs';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { SpacesService } from '../new_platform/spaces_service';
-import { SavedObjectsService, KibanaConfig } from '../../../../../src/legacy/server/kbn_server';
+import { SavedObjectsService } from '../../../../../src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../security';
 import { SpacesAuditLogger } from './audit_logger';
 import { ElasticsearchServiceSetup } from '../../../../../src/core/server';
+import { SpacesConfig } from '../new_platform/config';
 
 const server = {
   config: () => {
@@ -36,7 +37,7 @@ const log = {
   fatal: jest.fn(),
 };
 
-const service = new SpacesService(log, server.config() as KibanaConfig);
+const service = new SpacesService(log, server.config().get('server.basePath'));
 
 describe('createSpacesTutorialContextFactory', () => {
   it('should create a valid context factory', async () => {
@@ -52,6 +53,7 @@ describe('createSpacesTutorialContextFactory', () => {
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
+      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
     });
     expect(typeof createSpacesTutorialContextFactory(spacesService)).toEqual('function');
   });
@@ -69,6 +71,7 @@ describe('createSpacesTutorialContextFactory', () => {
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
+      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 
@@ -95,6 +98,7 @@ describe('createSpacesTutorialContextFactory', () => {
       savedObjects: {} as SavedObjectsService,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
+      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
     });
     const contextFactory = createSpacesTutorialContextFactory(spacesService);
 

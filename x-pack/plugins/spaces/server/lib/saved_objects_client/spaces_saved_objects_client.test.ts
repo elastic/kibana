@@ -8,10 +8,11 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { SpacesService } from '../../new_platform/spaces_service';
-import { SavedObjectsService, KibanaConfig } from '../../../../../../src/legacy/server/kbn_server';
+import { SavedObjectsService } from '../../../../../../src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { ElasticsearchServiceSetup } from '../../../../../../src/core/server';
+import { SpacesConfig } from '../../new_platform/config';
 
 const config: any = {
   'server.basePath': '/',
@@ -37,7 +38,7 @@ const log = {
   fatal: jest.fn(),
 };
 
-const service = new SpacesService(log, server.config() as KibanaConfig);
+const service = new SpacesService(log, server.config().get('server.basePath'));
 
 const createMockRequest = (space: Partial<Space>) => ({
   getBasePath: () => (space.id !== DEFAULT_SPACE_ID ? `/s/${space.id}` : ''),
@@ -71,6 +72,7 @@ const createSpacesService = async () => {
     savedObjects: {} as SavedObjectsService,
     getSecurity: () => ({} as SecurityPlugin),
     spacesAuditLogger: {} as SpacesAuditLogger,
+    config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
   });
 };
 

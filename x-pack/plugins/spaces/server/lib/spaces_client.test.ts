@@ -7,6 +7,8 @@
 import { SpacesClient } from './spaces_client';
 import { AuthorizationService } from '../../../security/server/lib/authorization/service';
 import { actionsFactory } from '../../../security/server/lib/authorization/actions';
+import { SpacesConfig } from '../new_platform/config';
+import { TypeOf } from '@kbn/config-schema';
 
 const createMockAuditLogger = () => {
   return {
@@ -62,16 +64,8 @@ const createMockAuthorization = () => {
   };
 };
 
-const createMockConfig = (settings: { [key: string]: any } = {}) => {
-  const mockConfig = {
-    get: jest.fn(),
-  };
-
-  mockConfig.get.mockImplementation(key => {
-    return settings[key];
-  });
-
-  return mockConfig;
+const createMockConfig = (config: TypeOf<typeof SpacesConfig['schema']> = { maxSpaces: 1000 }) => {
+  return new SpacesConfig(config);
 };
 
 describe('#getAll', () => {
@@ -123,7 +117,7 @@ describe('#getAll', () => {
       const request = Symbol() as any;
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': 1234,
+        maxSpaces: 1234,
       });
 
       const client = new SpacesClient(
@@ -162,7 +156,7 @@ describe('#getAll', () => {
       };
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': 1234,
+        maxSpaces: 1234,
       });
       const request = Symbol() as any;
 
@@ -210,7 +204,7 @@ describe('#getAll', () => {
       });
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': 1234,
+        maxSpaces: 1234,
       });
       const mockInternalRepository = {
         find: jest.fn().mockReturnValue({
@@ -270,7 +264,7 @@ describe('#getAll', () => {
       };
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': 1234,
+        maxSpaces: 1234,
       });
       const request = Symbol() as any;
 
@@ -311,6 +305,7 @@ describe('#canEnumerateSpaces', () => {
     test(`returns true`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const authorization = null;
       const request = Symbol() as any;
 
@@ -319,7 +314,7 @@ describe('#canEnumerateSpaces', () => {
         mockDebugLogger,
         authorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -335,6 +330,7 @@ describe('#canEnumerateSpaces', () => {
     test(`returns true`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
       const request = Symbol() as any;
@@ -344,7 +340,7 @@ describe('#canEnumerateSpaces', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -361,6 +357,7 @@ describe('#canEnumerateSpaces', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
@@ -374,7 +371,7 @@ describe('#canEnumerateSpaces', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -395,6 +392,7 @@ describe('#canEnumerateSpaces', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
@@ -408,7 +406,7 @@ describe('#canEnumerateSpaces', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -448,6 +446,7 @@ describe('#get', () => {
     test(`gets space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const authorization = null;
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(savedObject),
@@ -459,7 +458,7 @@ describe('#get', () => {
         mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -477,6 +476,7 @@ describe('#get', () => {
     test(`gets space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
       const mockCallWithRequestRepository = {
@@ -489,7 +489,7 @@ describe('#get', () => {
         mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -509,6 +509,7 @@ describe('#get', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesAtSpace } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesAtSpace.mockReturnValue({
@@ -522,7 +523,7 @@ describe('#get', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -542,6 +543,7 @@ describe('#get', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesAtSpace } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesAtSpace.mockReturnValue({
@@ -558,7 +560,7 @@ describe('#get', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         mockInternalRepository,
         request
       );
@@ -628,7 +630,7 @@ describe('#create', () => {
         }),
       };
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': maxSpaces,
+        maxSpaces,
       });
       const request = Symbol() as any;
 
@@ -669,7 +671,7 @@ describe('#create', () => {
         }),
       };
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': maxSpaces,
+        maxSpaces,
       });
       const request = Symbol() as any;
 
@@ -710,7 +712,7 @@ describe('#create', () => {
         }),
       };
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': maxSpaces,
+        maxSpaces,
       });
       const request = Symbol() as any;
 
@@ -753,7 +755,7 @@ describe('#create', () => {
         }),
       };
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': maxSpaces,
+        maxSpaces,
       });
       const request = Symbol() as any;
 
@@ -786,6 +788,7 @@ describe('#create', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
@@ -799,7 +802,7 @@ describe('#create', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -833,7 +836,7 @@ describe('#create', () => {
         }),
       };
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': maxSpaces,
+        maxSpaces,
       });
       const request = Symbol() as any;
 
@@ -885,7 +888,7 @@ describe('#create', () => {
         }),
       };
       const mockConfig = createMockConfig({
-        'xpack.spaces.maxSpaces': maxSpaces,
+        maxSpaces,
       });
       const request = Symbol() as any;
 
@@ -959,6 +962,7 @@ describe('#update', () => {
     test(`updates space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const authorization = null;
       const mockCallWithRequestRepository = {
         update: jest.fn(),
@@ -971,7 +975,7 @@ describe('#update', () => {
         mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -989,6 +993,7 @@ describe('#update', () => {
     test(`updates space using callWithRequestRepository`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
       const mockCallWithRequestRepository = {
@@ -1002,7 +1007,7 @@ describe('#update', () => {
         mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1023,6 +1028,7 @@ describe('#update', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockCheckPrivilegesGlobally.mockReturnValue({
         hasAllRequested: false,
@@ -1036,7 +1042,7 @@ describe('#update', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1056,6 +1062,7 @@ describe('#update', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockCheckPrivilegesGlobally.mockReturnValue({
         hasAllRequested: true,
@@ -1073,7 +1080,7 @@ describe('#update', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         mockInternalRepository,
         request
       );
@@ -1120,6 +1127,7 @@ describe('#delete', () => {
     test(`throws bad request when the space is reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const authorization = null;
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(reservedSavedObject),
@@ -1131,7 +1139,7 @@ describe('#delete', () => {
         mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1146,6 +1154,7 @@ describe('#delete', () => {
     test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const authorization = null;
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(notReservedSavedObject),
@@ -1160,7 +1169,7 @@ describe('#delete', () => {
         mockDebugLogger,
         authorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1179,6 +1188,7 @@ describe('#delete', () => {
     test(`throws bad request when the space is reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
       const mockCallWithRequestRepository = {
@@ -1191,7 +1201,7 @@ describe('#delete', () => {
         mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1207,6 +1217,7 @@ describe('#delete', () => {
     test(`deletes space using callWithRequestRepository when space isn't reserved`, async () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
       const mockCallWithRequestRepository = {
@@ -1222,7 +1233,7 @@ describe('#delete', () => {
         mockDebugLogger,
         mockAuthorization,
         mockCallWithRequestRepository,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1243,6 +1254,7 @@ describe('#delete', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
@@ -1255,7 +1267,7 @@ describe('#delete', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         null,
         request
       );
@@ -1275,6 +1287,7 @@ describe('#delete', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
@@ -1290,7 +1303,7 @@ describe('#delete', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         mockInternalRepository,
         request
       );
@@ -1311,6 +1324,7 @@ describe('#delete', () => {
       const username = Symbol();
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
+      const mockConfig = createMockConfig();
       const { mockAuthorization, mockCheckPrivilegesGlobally } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
       mockCheckPrivilegesGlobally.mockReturnValue({
@@ -1329,7 +1343,7 @@ describe('#delete', () => {
         mockDebugLogger,
         mockAuthorization,
         null,
-        null,
+        mockConfig,
         mockInternalRepository,
         request
       );

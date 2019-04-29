@@ -17,6 +17,7 @@ import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
 import { ElasticsearchServiceSetup } from '../../../../../../src/core/server';
+import { SpacesConfig } from '../../new_platform/config';
 
 describe('onPostAuthRequestInterceptor', () => {
   const sandbox = sinon.sandbox.create();
@@ -150,6 +151,7 @@ describe('onPostAuthRequestInterceptor', () => {
         savedObjects: server.savedObjects,
         getSecurity: () => ({} as SecurityPlugin),
         spacesAuditLogger: {} as SpacesAuditLogger,
+        config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
       });
 
       spacesService.scopedClient = jest.fn().mockReturnValue({

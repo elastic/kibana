@@ -5,12 +5,14 @@
  */
 
 import { first } from 'rxjs/operators';
-import { SavedObjectsService, KibanaConfig } from '../../../../../../src/legacy/server/kbn_server';
+import { Observable, Subscription } from 'rxjs';
+import { SavedObjectsService } from '../../../../../../src/legacy/server/kbn_server';
 import { Logger, ElasticsearchServiceSetup, Headers } from '../../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
+import { SpacesConfig } from '../config';
 
 interface RequestFacade {
   headers?: Headers;
@@ -34,17 +36,16 @@ interface SpacesServiceDeps {
   elasticsearch: ElasticsearchServiceSetup;
   savedObjects: SavedObjectsService;
   getSecurity: () => SecurityPlugin;
+  config$: Observable<SpacesConfig>;
   spacesAuditLogger: any;
 }
 
 export class SpacesService {
-  private readonly serverBasePath: string;
+  private configSubscription$?: Subscription;
 
-  private readonly contextCache: WeakMap<any, CacheEntry>;
+  private readonly contextCache: WeakMap<any, CacheEntry> = new WeakMap();
 
-  constructor(private readonly log: Logger, private readonly config: KibanaConfig) {
-    this.serverBasePath = config.get('server.basePath');
-
+  constructor(private readonly log: Logger, private readonly serverBasePath: string) {
     this.contextCache = new WeakMap();
   }
 
@@ -52,8 +53,17 @@ export class SpacesService {
     elasticsearch,
     savedObjects,
     getSecurity,
+    config$,
     spacesAuditLogger,
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
+    let config: SpacesConfig = await config$.pipe(first()).toPromise();
+
+    this.configSubscription$ = config$.subscribe({
+      next: updatedConfig => {
+        config = updatedConfig;
+      },
+    });
+
     const adminClient = await elasticsearch.adminClient$.pipe(first()).toPromise();
     return {
       getSpaceId: (request: RequestFacade) => {
@@ -91,12 +101,19 @@ export class SpacesService {
           },
           authorization,
           callWithRequestRepository,
-          this.config,
+          config,
           internalRepository,
           request
         );
       },
     };
+  }
+
+  public async stop() {
+    if (this.configSubscription$) {
+      this.configSubscription$.unsubscribe();
+      this.configSubscription$ = undefined;
+    }
   }
 
   private populateCache(request: RequestFacade) {

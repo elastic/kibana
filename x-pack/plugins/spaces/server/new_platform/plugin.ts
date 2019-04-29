@@ -5,6 +5,7 @@
  */
 
 import { ServerRoute } from 'hapi';
+import { Observable } from 'rxjs';
 import { KibanaConfig, SavedObjectsService } from '../../../../../src/legacy/server/kbn_server';
 import {
   Logger,
@@ -28,6 +29,7 @@ import { getSpacesUsageCollector } from '../lib/get_spaces_usage_collector';
 import { SpacesService } from './spaces_service';
 import { SecurityPlugin } from '../../../security';
 import { SpacesServiceSetup } from './spaces_service/spaces_service';
+import { SpacesConfig } from './config';
 
 export interface SpacesHttpServiceSetup extends HttpServiceSetup {
   route(route: ServerRoute | ServerRoute[]): void;
@@ -67,12 +69,12 @@ export interface SpacesInitializerContext extends PluginInitializerContext {
 export class Plugin {
   private readonly pluginId = 'spaces';
 
-  private config: KibanaConfig;
+  private config$: Observable<SpacesConfig>;
 
   private log: Logger;
 
-  constructor(initializerContext: SpacesInitializerContext) {
-    this.config = initializerContext.legacyConfig;
+  constructor(private readonly initializerContext: SpacesInitializerContext) {
+    this.config$ = initializerContext.config.create(SpacesConfig);
     this.log = initializerContext.logger.get('spaces');
   }
 
@@ -90,16 +92,20 @@ export class Plugin {
     xpackMainPlugin.info.feature(this.pluginId).registerLicenseCheckResultsGenerator(checkLicense);
 
     const spacesAuditLogger = new SpacesAuditLogger(
-      this.config,
+      this.initializerContext.config,
       new AuditLogger(core.http.server, 'spaces')
     );
 
-    const service = new SpacesService(this.log, this.config);
+    const service = new SpacesService(
+      this.log,
+      this.initializerContext.legacyConfig.get('server.basePath')
+    );
     const spacesService = await service.setup({
       elasticsearch: core.elasticsearch,
       savedObjects: core.savedObjects,
       getSecurity: plugins.getSecurity,
       spacesAuditLogger,
+      config$: this.config$,
     });
 
     const { addScopedSavedObjectsClientWrapperFactory, types } = core.savedObjects;
@@ -114,7 +120,7 @@ export class Plugin {
 
     initPrivateApis({
       http: core.http,
-      config: this.config,
+      config: this.initializerContext.legacyConfig,
       savedObjects: core.savedObjects,
       spacesService,
       xpackMain: xpackMainPlugin,
@@ -131,7 +137,7 @@ export class Plugin {
     // Register a function with server to manage the collection of usage stats
     core.usage.collectorSet.register(
       getSpacesUsageCollector({
-        config: this.config,
+        config: this.initializerContext.legacyConfig,
         savedObjects: core.savedObjects,
         usage: core.usage,
         xpackMain: xpackMainPlugin,

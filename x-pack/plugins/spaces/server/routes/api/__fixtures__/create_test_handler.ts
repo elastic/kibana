@@ -17,6 +17,7 @@ import { SpacesService } from '../../../new_platform/spaces_service';
 import { SpacesAuditLogger } from '../../../lib/audit_logger';
 import { PrivateRouteDeps } from '../v1';
 import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
+import { SpacesConfig } from '../../../new_platform/config';
 
 interface KibanaServer extends Legacy.Server {
   savedObjects: any;
@@ -52,7 +53,6 @@ export const defaultPreCheckLicenseImpl = (request: any) => '';
 
 const baseConfig: TestConfig = {
   'server.basePath': '',
-  'xpack.spaces.maxSpaces': 1000,
 };
 
 export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRouteDeps) => void) {
@@ -158,7 +158,7 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
       fatal: jest.fn(),
     };
 
-    const service = new SpacesService(log, server.config());
+    const service = new SpacesService(log, server.config().get('server.basePath'));
     const spacesService = await service.setup({
       elasticsearch: ({
         adminClient$: Rx.of({
@@ -171,6 +171,7 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
       savedObjects: server.savedObjects,
       getSecurity: () => ({} as SecurityPlugin),
       spacesAuditLogger: {} as SpacesAuditLogger,
+      config$: Rx.of(new SpacesConfig({ maxSpaces: 1000 })),
     });
 
     spacesService.scopedClient = jest.fn((req: any) => {
@@ -179,7 +180,7 @@ export function createTestHandler(initApiFn: (deps: PublicRouteDeps & PrivateRou
         () => null,
         null,
         mockSavedObjectsRepository,
-        mockConfig,
+        new SpacesConfig({ maxSpaces: 1000 }),
         mockSavedObjectsRepository,
         req
       );
