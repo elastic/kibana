@@ -106,16 +106,19 @@ const migrateDateHistogramAggregation = doc => {
 
     if (visState && visState.aggs) {
       visState.aggs.forEach(agg => {
-        if (agg.type === 'date_histogram' && agg.params && agg.params.interval === 'custom') {
-          agg.params.interval = agg.params.customInterval;
+        if (agg.type === 'date_histogram' && agg.params) {
+          if (agg.params.interval === 'custom') {
+            agg.params.interval = agg.params.customInterval;
+          }
           delete agg.params.customInterval;
         }
 
         if (get(agg, 'params.customBucket.type', null) === 'date_histogram'
           && agg.params.customBucket.params
-          && agg.params.customBucket.params.interval === 'custom'
         ) {
-          agg.params.customBucket.params.interval = agg.params.customBucket.params.customInterval;
+          if (agg.params.customBucket.params.interval === 'custom') {
+            agg.params.customBucket.params.interval = agg.params.customBucket.params.customInterval;
+          }
           delete agg.params.customBucket.params.customInterval;
         }
       });
