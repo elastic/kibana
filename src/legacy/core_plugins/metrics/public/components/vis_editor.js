@@ -37,6 +37,7 @@ class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
+    // what else is on vis and where can I find the code?
     this.appState = vis.API.getAppState();
     this.state = {
       model: props.visParams,
@@ -44,7 +45,7 @@ class VisEditor extends Component {
       autoApply: true,
       visFields: props.visFields,
       extractedIndexPatterns: [''],
-      indexPatterns: [],
+      indexPatterns: [], // adding these in here so that we share the same patterns in all the child components
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
@@ -64,29 +65,25 @@ class VisEditor extends Component {
   };
 
   /*
-    Retrieving the whole object for index patterns that are available.
+    Retrieving the index pattern objects that are available.
     We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
-    Comment: fetchIndexPatterns should probably move to the '../lib' folder under a new file.
-    TODO: I'm not happy with the logic used in fetchIndexPatterns
-    Question: will we need to debounce this call as we do for updateVisState?
+    NOTE/QUESTION: Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
+    COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
   */
   fetchIndexPatterns = async () => {
     let selectedIndexPatternfromSavedObject = this.state.indexPatterns;
-    const allIndexPatternObjects = await chrome
-      .getSavedObjectsClient()
-      .find({
-        type: 'index-pattern',
-        perPage: 100,
-      });
+    const allIndexPatternObjects = await chrome.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      perPage: 100,
+    });
     // We now filter the collection of indexPatterns to the one that's selected or default to the default index pattern
     if (allIndexPatternObjects && allIndexPatternObjects.savedObjects) {
-      const selectedIndexPatternName = this.state.model.index_pattern ?
-        this.state.model.index_pattern :
-        this.state.model.default_index_pattern;
-      selectedIndexPatternfromSavedObject = allIndexPatternObjects
-        .savedObjects
-        .filter(pattern => pattern.attributes.title === selectedIndexPatternName);
-
+      const selectedIndexPatternName = this.state.model.index_pattern
+        ? this.state.model.index_pattern
+        : this.state.model.default_index_pattern;
+      selectedIndexPatternfromSavedObject = allIndexPatternObjects.savedObjects.filter(
+        pattern => pattern.attributes.title === selectedIndexPatternName
+      );
     }
     return selectedIndexPatternfromSavedObject;
   };
@@ -97,8 +94,6 @@ class VisEditor extends Component {
   }, VIS_STATE_DEBOUNCE_DELAY);
 
   handleChange = async partialModel => {
-    // I'm losing the query when the langaguage syntax switch is clicked. The model updates on that action.
-    console.log('PartialModel', partialModel);
     if (isEmpty(partialModel)) {
       return;
     }
