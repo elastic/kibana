@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { IndexPatternsService } from './index_patterns';
 import { QueryBarService } from './query_bar';
+import { IndexPatternsService, IndexPatternsSetup } from './index_patterns';
 
-class DataService {
+class DataPlugin {
   private readonly indexPatterns: IndexPatternsService;
   private readonly queryBar: QueryBarService;
 
@@ -42,6 +42,18 @@ class DataService {
   }
 }
 
-export const data = new DataService().setup();
+
+/**
+ * We export data here so that users importing from 'plugins/data'
+ * will automatically receive the response value of the `setup` contract, mimicking
+ * the data that will eventually be injected by the new platform.
+ */
+export const data = new DataPlugin().setup();
+
 /** @public */
-export type DataSetup = ReturnType<DataService['setup']>;
+export interface DataSetup {
+  indexPatterns: IndexPatternsSetup;
+}
+
+/** @public types */
+export { IndexPattern, StaticIndexPattern, StaticIndexPatternField, Field } from './index_patterns';
