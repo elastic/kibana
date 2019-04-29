@@ -25,6 +25,7 @@ describe('Rollup Search Strategy', () => {
           {
             name: 'day_of_week.terms.value',
             type: 'object',
+            esTypes: ['object'],
             searchable: false,
             aggregatable: false,
           },
@@ -146,6 +147,7 @@ describe('Rollup Search Strategy', () => {
           readFromDocValues: true,
           searchable: true,
           type: 'object',
+          esTypes: ['object'],
         },
       ]);
     });

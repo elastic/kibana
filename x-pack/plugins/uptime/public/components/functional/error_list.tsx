@@ -20,13 +20,20 @@ import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ErrorListItem, Ping } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { errorListQuery } from '../../queries';
 
 interface ErrorListProps {
-  loading: boolean;
+  linkParameters?: string;
+}
+
+interface ErrorListQueryResult {
   errorList?: ErrorListItem[];
 }
 
-export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
+type Props = UptimeGraphQLQueryProps<ErrorListQueryResult> & ErrorListProps;
+
+export const ErrorListComponent = ({ data, linkParameters, loading }: Props) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -35,7 +42,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
     </EuiTitle>
     <EuiInMemoryTable
       loading={loading}
-      items={errorList}
+      items={(data && data.errorList) || undefined}
       columns={[
         {
           field: 'count',
@@ -67,7 +74,7 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
           }),
           render: (id: string, { name }: ErrorListItem) => (
             <EuiLink>
-              <Link to={`/monitor/${id}`}>{name || id}</Link>
+              <Link to={`/monitor/${id}${linkParameters}`}>{name || id}</Link>
             </EuiLink>
           ),
           width: '25%',
@@ -101,4 +108,9 @@ export const ErrorList = ({ loading, errorList }: ErrorListProps) => (
       pagination={{ initialPageSize: 10, pageSizeOptions: [5, 10, 20, 50] }}
     />
   </EuiPanel>
+);
+
+export const ErrorList = withUptimeGraphQL<ErrorListQueryResult, ErrorListProps>(
+  ErrorListComponent,
+  errorListQuery
 );

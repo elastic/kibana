@@ -19,6 +19,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
   class GisPage {
 
+    constructor() {
+      this.basePath = '';
+    }
+
+    setBasePath(basePath) {
+      this.basePath = basePath;
+    }
+
     async setAbsoluteRange(start, end) {
       await PageObjects.timePicker.setAbsoluteRange(start, end);
       await this.waitForLayersToLoad();
@@ -129,6 +137,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async expectMissingSaveButton() {
+      await testSubjects.missingOrFail('mapSaveButton');
+    }
+
+    async expectMissingCreateNewButton() {
+      await testSubjects.missingOrFail('newMapLink');
+    }
+
+    async expectMissingAddLayerButton() {
+      await testSubjects.missingOrFail('addLayerButton');
+    }
+
+    async expectExistAddLayerButton() {
+      await testSubjects.existOrFail('addLayerButton');
+    }
+
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
       const exists = await testSubjects.exists('mapsListingPage');
@@ -160,7 +184,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/');
+          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -233,6 +257,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await testSubjects.click(`mapOpenLayerButton${layerName}`);
+    }
+
+    async disableApplyGlobalQuery() {
+      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        await retry.try(async () => {
+          log.debug(`disabling applyGlobalQuery`);
+          await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
+          const isStillSelected = await element.isSelected();
+          if (isStillSelected) {
+            throw new Error('applyGlobalQuery not disabled');
+          }
+        });
+        await this.waitForLayersToLoad();
+      }
     }
 
     async doesLayerExist(layerName) {

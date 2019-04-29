@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import '../filters/label';
 import { IndexedArray } from '../indexed_array';
 import { FieldParamType } from './param_types/field';
 import { OptionedParamType } from './param_types/optioned';
