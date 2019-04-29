@@ -5,9 +5,8 @@
  */
 
 import { resolve } from 'path';
-// @ts-ignore
-import KbnServer, { Server, KibanaConfig } from 'src/legacy/server/kbn_server';
-import { HttpServerInfo } from 'src/core/server/http';
+import KbnServer, { Server } from '../../../src/legacy/server/kbn_server';
+import { HttpServiceSetup } from '../../../src/core/server';
 // @ts-ignore
 import { AuditLogger } from '../../server/lib/audit_logger';
 // @ts-ignore
@@ -128,7 +127,7 @@ export const spaces = (kibana: Record<string, any>) =>
       } as unknown) as SpacesInitializerContext;
 
       const spacesHttpService: SpacesHttpServiceSetup = {
-        ...(kbnServer.newPlatform.setup.core.http as HttpServerInfo),
+        ...(kbnServer.newPlatform.setup.core.http as HttpServiceSetup),
         route: server.route.bind(server),
       };
 
