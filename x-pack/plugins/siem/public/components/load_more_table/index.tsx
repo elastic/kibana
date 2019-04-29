@@ -14,7 +14,6 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
-  EuiSpacer,
 } from '@elastic/eui';
 import { isEmpty, noop, getOr } from 'lodash/fp';
 import React from 'react';
@@ -175,7 +174,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
             tooltip={headerTooltip}
           />
 
-          <EuiBasicTable
+          <BasicTable
             items={pageOfItems}
             columns={columns}
             onChange={onChange}
@@ -283,4 +282,13 @@ const BackgroundRefetch = styled.div`
   position: absolute;
   z-index: 3;
   border-radius: 5px;
+`;
+
+const BasicTable = styled(EuiBasicTable)`
+  tbody {
+    th,
+    td {
+      vertical-align: top;
+    }
+  }
 `;
