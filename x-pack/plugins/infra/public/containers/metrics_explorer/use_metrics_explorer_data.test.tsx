@@ -16,6 +16,7 @@ import {
   derivedIndexPattern,
   timeRange,
   resp,
+  createSeries,
 } from '../../utils/fixtures/metrics_explorer';
 
 const renderUseMetricsExplorerDataHook = () =>
