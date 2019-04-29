@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import angular from 'angular';
 import { isFunction } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
@@ -93,11 +92,6 @@ uiModules
 
           if (attr.editorComponent) {
             $scope.$watch('agg.params[aggParam.name]', (value) => {
-              // Reset validity when the value of the parameter changed by a reset
-              if (angular.equals($scope.paramValue, value)) {
-                $scope.setValidity(true);
-                showValidation();
-              }
               // Whenever the value of the parameter changed (e.g. by a reset or actually by calling)
               // we store the new value in $scope.paramValue, which will be passed as a new value to the react component.
               $scope.paramValue = value;
