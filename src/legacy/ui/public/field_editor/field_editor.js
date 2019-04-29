@@ -40,8 +40,10 @@ import {
 } from 'ui/notify';
 
 import {
+  EuiBasicTable,
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiCode,
   EuiConfirmModal,
   EuiFieldNumber,
@@ -326,6 +328,57 @@ export class FieldEditorComponent extends PureComponent {
           onChange={(e) => {
             this.onTypeChange(e.target.value);
           }}
+        />
+      </EuiFormRow>
+    );
+  }
+
+  renderTypeConflict() {
+    const { field } = this.state;
+    if(!field.conflictDescriptions) {
+      return null;
+    }
+    const labelText = (
+      <EuiCallOut
+        color="warning"
+        title={<FormattedMessage id="common.ui.fieldEditor.multiTypeLabel" defaultMessage="Multiple type field"/>}
+        size="s"
+        iconType="alert"
+      >
+        <FormattedMessage
+          id="common.ui.fieldEditor.multiTypeLabelDesc"
+          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions."
+        />
+      </EuiCallOut>
+    );
+
+    const columns = [{
+      field: 'type',
+      name: 'Type',
+      width: '100px',
+    }, {
+      field: 'indices',
+      name: 'Index Names'
+    }];
+
+    const items = Object.keys(field.conflictDescriptions).map(type => {
+      return ({
+        type,
+        indices: field.conflictDescriptions[type]
+          ? field.conflictDescriptions[type].join(', ')
+          : []
+      });
+    });
+
+    return (
+      <EuiFormRow
+        label={labelText}
+        isInvalid
+        fullWidth
+      >
+        <EuiBasicTable
+          items={items}
+          columns={columns}
         />
       </EuiFormRow>
     );
@@ -719,6 +772,7 @@ export class FieldEditorComponent extends PureComponent {
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
+          {this.renderTypeConflict()}
           {this.renderFormat()}
           {this.renderPopularity()}
           {this.renderScript()}
