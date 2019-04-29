@@ -186,7 +186,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
 
     public async getRhythmChartLegendValue() {
       await PageObjects.visualize.waitForVisualizationRenderingStabilized();
-      const metricValue = await find.byCssSelector('.tvbLegend__itemValue');
+      const metricValue = await find.byCssSelector('.euiText.elasticChartsLegendListItem__displayValue');
       await metricValue.moveMouseTo();
       return await metricValue.getVisibleText();
     }
