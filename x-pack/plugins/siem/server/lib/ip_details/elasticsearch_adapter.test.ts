@@ -5,7 +5,7 @@
  */
 import { FlowTarget } from '../../graphql/types';
 
-import { formatDomainsEdges, getIpOverviewAgg } from './elasticsearch_adapter';
+import { formatDomainsEdges, getIpOverviewAgg, getUsersEdges } from './elasticsearch_adapter';
 
 import {
   formattedDestination,
@@ -14,6 +14,8 @@ import {
   mockDomainsResponseBuckets,
   mockFormattedDestination,
   mockFormattedSource,
+  mockFormattedUsersEdges,
+  mockUsersData,
   responseAggs,
 } from './mock';
 
@@ -47,6 +49,14 @@ describe('elasticsearch_adapter', () => {
     test('will return a destination correctly', () => {
       const destination = formatDomainsEdges(mockDomainsResponseBuckets, FlowTarget.destination);
       expect(destination).toEqual(mockFormattedDestination);
+    });
+  });
+
+  describe('#getUsers', () => {
+    test('will format edges correctly', () => {
+      // @ts-ignore Re-work `DatabaseSearchResponse` types as mock ES Response won't match
+      const edges = getUsersEdges(mockUsersData);
+      expect(edges).toEqual(mockFormattedUsersEdges);
     });
   });
 });

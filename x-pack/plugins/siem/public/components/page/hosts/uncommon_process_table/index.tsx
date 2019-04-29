@@ -4,22 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
 import { ActionCreator } from 'typescript-fsa';
 
-import { HostEcsFields, UncommonProcessesEdges } from '../../../../graphql/types';
+import { UncommonProcessesEdges, UncommonProcessItem } from '../../../../graphql/types';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
-import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../drag_and_drop/helpers';
-import { defaultToEmptyTag, getEmptyTagValue, getEmptyValue } from '../../../empty_value';
-import { HostDetailsLink } from '../../../links';
+import { defaultToEmptyTag, getEmptyValue } from '../../../empty_value';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
+import { getRowItemDraggables } from '../../../tables/helpers';
 
 interface OwnProps {
   data: UncommonProcessesEdges[];
@@ -103,9 +99,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
 
 const makeMapStateToProps = () => {
   const getUncommonProcessesSelector = hostsSelectors.uncommonProcessesSelector();
-  const mapStateToProps = (state: State, { type }: OwnProps) =>
-    getUncommonProcessesSelector(state, type);
-  return mapStateToProps;
+  return (state: State, { type }: OwnProps) => getUncommonProcessesSelector(state, type);
 };
 
 export const UncommonProcessTable = connect(
@@ -115,92 +109,47 @@ export const UncommonProcessTable = connect(
   }
 )(UncommonProcessTableComponent);
 
-const getUncommonColumns = (): Array<Columns<UncommonProcessesEdges>> => [
+const getUncommonColumns = (): [
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>,
+  Columns<UncommonProcessesEdges>
+] => [
   {
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const processName: string | null | undefined = get('process.name[0]', node);
-      if (processName != null) {
-        const id = escapeDataProviderId(
-          `uncommon-process-table-${node._id}-processName-${processName}`
-        );
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: processName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'process.name',
-                value: processName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                defaultToEmptyTag(processName)
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: node.process.name,
+        attrName: 'process.name',
+        idPrefix: `uncommon-process-table-${node._id}-processName`,
+      }),
   },
   {
     name: i18n.LAST_USER,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const userName: string | null | undefined = get('user.name[0]', node);
-      if (userName != null) {
-        const id = escapeDataProviderId(`uncommon-process-table-${node._id}-user-${userName}`);
-        return (
-          <DraggableWrapper
-            key={id}
-            dataProvider={{
-              and: [],
-              enabled: true,
-              id,
-              name: userName,
-              excluded: false,
-              kqlQuery: '',
-              queryMatch: {
-                field: 'user.name',
-                value: userName,
-              },
-            }}
-            render={(dataProvider, _, snapshot) =>
-              snapshot.isDragging ? (
-                <DragEffects>
-                  <Provider dataProvider={dataProvider} />
-                </DragEffects>
-              ) : (
-                userName
-              )
-            }
-          />
-        );
-      } else {
-        return getEmptyTagValue();
-      }
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: node.user != null ? node.user.name : null,
+        attrName: 'user.name',
+        idPrefix: `uncommon-process-table-${node._id}-processUser`,
+      }),
   },
   {
     name: i18n.LAST_COMMAND,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => defaultToEmptyTag(getArgs(node.process.args)),
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: node.process != null ? node.process.args : null,
+        attrName: 'process.args',
+        idPrefix: `uncommon-process-table-${node._id}-processArgs`,
+        displayCount: 1, // TODO: Change this back once we have improved the UI
+      }),
   },
   {
     name: i18n.NUMBER_OF_INSTANCES,
@@ -212,55 +161,27 @@ const getUncommonColumns = (): Array<Columns<UncommonProcessesEdges>> => [
     name: i18n.NUMBER_OF_HOSTS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => <>{node.host != null ? node.host.length : getEmptyValue()}</>,
+    render: ({ node }) => <>{node.hosts != null ? node.hosts.length : getEmptyValue()}</>,
   },
   {
     name: i18n.HOSTS,
     truncateText: false,
     hideForMobile: false,
-    render: ({ node }) => {
-      const hosts: HostEcsFields[] = node.host;
-      const draggables = hosts
-        .filter(({ name }) => name != null && name[0] != null)
-        .map(({ name }, index) => {
-          if (name != null && name[0] != null) {
-            const dwId = escapeDataProviderId(
-              `uncommon-process-table-${node._id}-hostName-${name[0]}`
-            );
-            return (
-              <React.Fragment key={dwId}>
-                {index !== 0 ? <>,&nbsp;</> : null}
-                <DraggableWrapper
-                  key={dwId}
-                  dataProvider={{
-                    and: [],
-                    enabled: true,
-                    id: dwId,
-                    name: name[0],
-                    excluded: false,
-                    kqlQuery: '',
-                    queryMatch: {
-                      field: 'host.name',
-                      value: name[0],
-                    },
-                  }}
-                  render={(dataProvider, _, snapshot) =>
-                    snapshot.isDragging ? (
-                      <DragEffects>
-                        <Provider dataProvider={dataProvider} />
-                      </DragEffects>
-                    ) : (
-                      <HostDetailsLink hostName={name[0]}>{name}</HostDetailsLink>
-                    )
-                  }
-                />
-              </React.Fragment>
-            );
-          } else {
-            return getEmptyTagValue();
-          }
-        });
-      return draggables.length > 0 ? draggables : getEmptyTagValue();
-    },
+    render: ({ node }) =>
+      getRowItemDraggables({
+        rowItems: getHostNames(node),
+        attrName: 'host.name',
+        idPrefix: `uncommon-process-table-${node._id}-processHost`,
+      }),
   },
 ];
+
+export const getHostNames = (node: UncommonProcessItem): string[] => {
+  if (node.hosts != null) {
+    return node.hosts
+      .filter(host => host.name != null && host.name[0] != null)
+      .map(host => (host.name != null && host.name[0] != null ? host.name[0] : ''));
+  } else {
+    return [];
+  }
+};

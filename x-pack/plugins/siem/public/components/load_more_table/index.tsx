@@ -41,8 +41,37 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
-interface BasicTableProps<T> {
-  columns: Array<Columns<T>>;
+// Using telescoping templates to remove 'any' that was polluting downstream column type checks
+interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
+  columns:
+    | [Columns<T>]
+    | [Columns<T>, Columns<U>]
+    | [Columns<T>, Columns<U>, Columns<V>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>, Columns<Z>]
+    | [
+        Columns<T>,
+        Columns<U>,
+        Columns<V>,
+        Columns<W>,
+        Columns<X>,
+        Columns<Y>,
+        Columns<Z>,
+        Columns<AA>
+      ]
+    | [
+        Columns<T>,
+        Columns<U>,
+        Columns<V>,
+        Columns<W>,
+        Columns<X>,
+        Columns<Y>,
+        Columns<Z>,
+        Columns<AA>,
+        Columns<AB>
+      ];
   hasNextPage: boolean;
   headerCount: number;
   headerSupplement?: React.ReactElement;
@@ -77,14 +106,20 @@ export interface Columns<T> {
   render?: (item: T) => void;
 }
 
-export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
+export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureComponent<
+  BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
+  BasicTableState
+> {
   public readonly state = {
     isEmptyTable: this.props.pageOfItems.length === 0,
     isPopoverOpen: false,
     paginationLoading: false,
   };
 
-  static getDerivedStateFromProps(props: BasicTableProps<any>, state: BasicTableState) {
+  static getDerivedStateFromProps<T, U, V, W, X, Y, Z, AA, AB>(
+    props: BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>,
+    state: BasicTableState
+  ) {
     if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
       return {
         ...state,

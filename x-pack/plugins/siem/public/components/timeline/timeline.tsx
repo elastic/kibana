@@ -170,7 +170,7 @@ export const Timeline = pure<Props>(
                       onChangeItemsPerPage={onChangeItemsPerPage}
                       onLoadMore={loadMore}
                       nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
+                      tieBreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)}
                       getUpdatedAt={getUpdatedAt}
                       width={width}
                     />

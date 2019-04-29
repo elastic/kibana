@@ -17,8 +17,10 @@ import {
   HostsFields,
   HostsSortField,
   HostItem,
+  HostFields,
+  OsFields,
 } from '../../../../graphql/types';
-import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
+import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import {
   Criteria,
@@ -86,7 +88,12 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private memoizedColumns: (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ) => Array<Columns<ValueOf<HostItem>>>;
+  ) => [
+    Columns<HostFields['name']>,
+    Columns<HostItem['lastSeen']>,
+    Columns<OsFields['name']>,
+    Columns<OsFields['version']>
+  ];
   // private memoizedTitle: (totalCount: number) => JSX.Element;
   private memoizedSorting: (
     trigger: string,
@@ -159,7 +166,12 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private getMemoizeHostsColumns = (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ): Array<Columns<ValueOf<HostItem>>> => getHostsColumns(type, indexPattern);
+  ): [
+    Columns<HostFields['name']>,
+    Columns<HostItem['lastSeen']>,
+    Columns<OsFields['name']>,
+    Columns<OsFields['version']>
+  ] => getHostsColumns(type, indexPattern);
 
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {

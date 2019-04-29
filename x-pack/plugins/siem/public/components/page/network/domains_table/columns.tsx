@@ -16,9 +16,9 @@ import {
   DomainsNetworkField,
   FlowDirection,
   FlowTarget,
-  NetworkDirectionEcs,
+  DomainsEdges,
 } from '../../../../graphql/types';
-import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
+import { assertUnreachable } from '../../../../lib/helpers';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { networkModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -39,14 +39,21 @@ export const getDomainsColumns = (
   flowTarget: FlowTarget,
   type: networkModel.NetworkType,
   tableId: string
-): Array<Columns<ValueOf<DomainsItem> | ValueOf<DomainsNetworkField>>> => [
+): [
+  Columns<DomainsItem['domainName']>,
+  Columns<DomainsNetworkField['direction']>,
+  Columns<DomainsNetworkField['bytes']>,
+  Columns<DomainsNetworkField['packets']>,
+  Columns<DomainsItem['uniqueIpCount']>,
+  Columns<DomainsEdges>
+] => [
   {
     field: `node.${flowTarget}.domainName`,
     name: i18n.DOMAIN_NAME,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (domainName: string | null) => {
+    render: domainName => {
       const domainNameAttr = `${flowTarget}.domainName`;
       if (domainName != null) {
         const id = escapeDataProviderId(
@@ -85,7 +92,7 @@ export const getDomainsColumns = (
     name: i18n.DIRECTION,
     truncateText: false,
     hideForMobile: false,
-    render: (directions: NetworkDirectionEcs[] | null | undefined) =>
+    render: directions =>
       isEmpty(directions)
         ? getEmptyTagValue()
         : directions &&
@@ -112,7 +119,7 @@ export const getDomainsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (bytes: number | null | undefined) => {
+    render: bytes => {
       if (bytes != null) {
         return numeral(bytes).format('0.000b');
       } else {
@@ -126,7 +133,7 @@ export const getDomainsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (packets: number | null | undefined) => {
+    render: packets => {
       if (packets != null) {
         return numeral(packets).format('0,000');
       } else {
@@ -140,7 +147,7 @@ export const getDomainsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (uniqueIpCount: number | null | undefined) => {
+    render: uniqueIpCount => {
       if (uniqueIpCount != null) {
         return numeral(uniqueIpCount).format('0,000');
       } else {

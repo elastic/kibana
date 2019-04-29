@@ -80,7 +80,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loading={loading}
                       loadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                       refetch={refetch}
                       setQuery={setQuery}
                       totalCount={totalCount}
@@ -105,7 +105,7 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loading={loading}
                       loadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                       refetch={refetch}
                       setQuery={setQuery}
                       totalCount={totalCount}

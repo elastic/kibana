@@ -11,7 +11,7 @@ import * as React from 'react';
 import { Direction } from '../../graphql/types';
 
 import { LoadMoreTable } from './index';
-import { getHostsColumns, mockData, rowItems } from './index.mock';
+import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 
 describe('Load More Table Component', () => {
   const loadMore = jest.fn();
@@ -196,7 +196,7 @@ describe('Load More Table Component', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
         <LoadMoreTable
-          columns={getHostsColumns().map(h => ({ ...h, sortable: true }))}
+          columns={sortedHosts}
           loadingTitle="Hosts"
           loading={false}
           pageOfItems={mockData.Hosts.edges}
@@ -272,7 +272,7 @@ describe('Load More Table Component', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
         <LoadMoreTable
-          columns={getHostsColumns().map(h => ({ ...h, sortable: true }))}
+          columns={sortedHosts}
           loadingTitle="Hosts"
           loading={false}
           pageOfItems={mockData.Hosts.edges}

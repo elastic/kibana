@@ -108,7 +108,13 @@ export const EventsTable = connect(
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (): Array<Columns<EcsEdges>> => [
+const getEventsColumns = (): [
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>
+] => [
   {
     name: i18n.HOST_NAME,
     sortable: true,
