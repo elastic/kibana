@@ -17,21 +17,26 @@
  * under the License.
  */
 
+import { resolve } from 'path';
+import { Legacy } from '../../../../kibana';
 import { registerUserActionRoute } from './server/routes/api/ui_metric';
 import { registerUiMetricUsageCollector } from './server/usage/index';
 
-export default function (kibana) {
+// eslint-disable-next-line import/no-default-export
+export default function(kibana: any) {
   return new kibana.Plugin({
     id: 'ui_metric',
     require: ['kibana', 'elasticsearch'],
+    publicDir: resolve(__dirname, 'public'),
 
     uiExports: {
       mappings: require('./mappings.json'),
+      hacks: ['plugins/ui_metric'],
     },
 
-    init: function (server) {
+    init(server: Legacy.Server) {
       registerUserActionRoute(server);
       registerUiMetricUsageCollector(server);
-    }
+    },
   });
 }
