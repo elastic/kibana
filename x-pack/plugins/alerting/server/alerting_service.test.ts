@@ -133,7 +133,11 @@ describe('#AlertingService', () => {
           },
         },
       });
-      const result = await alerting.fireAction(savedObjectsClient, 'mock-action', { baz: false });
+      const result = await alerting.fireAction({
+        id: 'mock-action',
+        params: { baz: false },
+        savedObjectsClient,
+      });
       expect(result).toEqual({ success: true });
       expect(mockConnector).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -176,7 +180,7 @@ describe('#AlertingService', () => {
         },
       });
       await expect(
-        alerting.fireAction(savedObjectsClient, 'mock-action', { baz: false })
+        alerting.fireAction({ savedObjectsClient, id: 'mock-action', params: { baz: false } })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Connector \\"non-registered-connector\\" is not registered"`
       );

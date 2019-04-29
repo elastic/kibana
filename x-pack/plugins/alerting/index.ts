@@ -8,9 +8,11 @@ import Hapi from 'hapi';
 import mappings from './mappings.json';
 import { AlertingService, createActionRoute } from './server';
 
+import { APP_ID } from './common/constants';
+
 export function alerting(kibana: any) {
   return new kibana.Plugin({
-    id: 'alerting',
+    id: APP_ID,
     require: ['kibana', 'elasticsearch'],
     init(server: Hapi.Server) {
       const alertingService = new AlertingService();

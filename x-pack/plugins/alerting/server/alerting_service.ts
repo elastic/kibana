@@ -18,6 +18,12 @@ interface Action {
   connectorOptionsSecrets: { [key: string]: any };
 }
 
+interface FireActionOptions {
+  id: string;
+  params: { [key: string]: any };
+  savedObjectsClient: SavedObjectsClient;
+}
+
 export class AlertingService {
   private connectors: {
     [id: string]: ConnectorExecutor;
@@ -47,20 +53,17 @@ export class AlertingService {
     return await savedObjectsClient.create<any>('action', data, { id });
   }
 
-  public async fireAction(
-    savedObjectsClient: SavedObjectsClient,
-    id: string,
-    params: { [key: string]: any }
-  ) {
+  public async fireAction({ id, params, savedObjectsClient }: FireActionOptions) {
     const action = await savedObjectsClient.get('action', id);
     const executor = this.connectors[action.attributes.connectorId];
     if (!executor) {
       throw Boom.badRequest(`Connector "${action.attributes.connectorId}" is not registered`);
     }
-    const connectorOptions = {
-      ...(action.attributes.connectorOptions || {}),
-      ...(action.attributes.connectorOptionsSecrets || {}),
-    };
+    const connectorOptions = Object.assign(
+      {},
+      action.attributes.connectorOptions,
+      action.attributes.connectorOptionsSecrets
+    );
     return await executor(connectorOptions, params);
   }
 }

@@ -7,12 +7,14 @@
 import Joi from 'joi';
 import Hapi from 'hapi';
 import { AlertingService } from '../alerting_service';
+import { APP_ID } from '../../common/constants';
 
 interface Server extends Hapi.Server {
   alerting: AlertingService;
 }
 
 interface CreateActionRequest extends Hapi.Request {
+  server: Server;
   payload: {
     id: string;
     description: string;
@@ -20,13 +22,12 @@ interface CreateActionRequest extends Hapi.Request {
     connectorOptions: { [key: string]: any };
     connectorOptionsSecrets: { [key: string]: any };
   };
-  server: Server;
 }
 
 export function createActionRoute(server: any) {
   server.route({
     method: 'POST',
-    path: '/api/alerting/action',
+    path: `/api/${APP_ID}/action`,
     options: {
       validate: {
         payload: Joi.object().keys({
