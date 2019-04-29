@@ -36,21 +36,41 @@ export function withUptimeGraphQL<T, P = {}>(WrappedComponent: any, query: any) 
 
   return withApollo((props: Props) => {
     const { lastRefresh } = useContext(UptimeRefreshContext);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState<boolean>(true);
     const [data, setData] = useState<T | undefined>(undefined);
     const [errors, setErrors] = useState<GraphQLError[] | undefined>(undefined);
+    let updateState = (
+      loadingVal: boolean,
+      dataVal: T | undefined,
+      errorsVal: GraphQLError[] | undefined
+    ) => {
+      setLoading(loadingVal);
+      setData(dataVal);
+      setErrors(errorsVal);
+    };
     const { client, implementsCustomErrorState, variables } = props;
     const fetch = () => {
       setLoading(true);
       client.query<T>({ fetchPolicy: 'network-only', query, variables }).then((result: any) => {
-        setData(result.data);
-        setLoading(result.loading);
-        setErrors(result.errors);
+        updateState(result.loading, result.data, result.errors);
       });
     };
     useEffect(
       () => {
         fetch();
+
+        /**
+         * If the `then` handler in `fetch`'s promise is fired after
+         * this component has unmounted, it will try to set state on an
+         * unmounted component, which indicates a memory leak and will trigger
+         * React warnings.
+         *
+         * We counteract this side effect by providing a cleanup function that will
+         * reassign the update function to do nothing with the returned values.
+         */
+        return () => {
+          updateState = () => {};
+        };
       },
       [variables, lastRefresh]
     );

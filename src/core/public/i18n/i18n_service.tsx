@@ -267,6 +267,10 @@ export class I18nService {
     return setup;
   }
 
+  public start() {
+    return this.setup();
+  }
+
   public stop() {
     // nothing to do here currently
   }
@@ -285,3 +289,5 @@ export interface I18nSetup {
    */
   Context: ({ children }: { children: React.ReactNode }) => JSX.Element;
 }
+
+export type I18nStart = I18nSetup;
