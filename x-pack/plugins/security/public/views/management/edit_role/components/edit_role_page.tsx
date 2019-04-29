@@ -123,7 +123,7 @@ class EditRolePageUI extends Component<Props, State> {
     const props: HTMLProps<HTMLDivElement> = {
       tabIndex: 0,
     };
-    if (isReservedRole(this.props.role) || !isRoleEnabled(this.props.role)) {
+    if (isReservedRole(this.props.role)) {
       titleText = (
         <FormattedMessage
           id="xpack.security.management.editRole.viewingRoleTitle"
