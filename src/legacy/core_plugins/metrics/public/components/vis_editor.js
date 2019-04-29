@@ -198,8 +198,6 @@ class VisEditor extends Component {
               onChange={this.handleChange}
               getConfig={this.getConfig}
               indexPatterns={this.state.indexPatterns}
-              dateRangeFrom={this.state.dateRangeFrom}
-              dateRangeTo={this.state.dateRangeTo}
             />
           </div>
         </div>
