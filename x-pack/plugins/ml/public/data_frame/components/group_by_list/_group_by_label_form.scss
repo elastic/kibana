@@ -1,0 +1,17 @@
+.mlGroupByLabel--button {
+  width: $euiSizeL;
+}
+
+.mlGroupByLabel--text {
+  min-width: 0;
+}
+
+.mlGroupByLabel--interval {
+  max-width: 25%;
+}
+
+.mlGroupByLabel__text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
