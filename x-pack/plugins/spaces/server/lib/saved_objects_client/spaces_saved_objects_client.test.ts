@@ -8,10 +8,10 @@ import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { Space } from '../../../common/model/space';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 import { SpacesService } from '../../new_platform/spaces_service';
-import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
+import { SavedObjectsService, KibanaConfig } from '../../../../../../src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
-import { ElasticsearchServiceSetup } from 'src/core/server';
+import { ElasticsearchServiceSetup } from '../../../../../../src/core/server';
 
 const config: any = {
   'server.basePath': '/',

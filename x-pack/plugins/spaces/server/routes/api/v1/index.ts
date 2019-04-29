@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
+import {
+  SavedObjectsService,
+  KibanaConfig,
+} from '../../../../../../../src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initPrivateSpacesApi } from './spaces';

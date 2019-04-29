@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ElasticsearchServiceSetup, Headers } from 'src/core/server';
-import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { first } from 'rxjs/operators';
+import { SavedObjectsService, KibanaConfig } from '../../../../../../src/legacy/server/kbn_server';
+import { Logger, ElasticsearchServiceSetup, Headers } from '../../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';

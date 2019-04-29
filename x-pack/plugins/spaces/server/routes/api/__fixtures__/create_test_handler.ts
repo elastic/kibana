@@ -7,8 +7,8 @@
 import * as Rx from 'rxjs';
 import { Server } from 'hapi';
 import { Legacy } from 'kibana';
-import { ElasticsearchServiceSetup } from 'src/core/server';
-import { KibanaConfig } from 'src/legacy/server/kbn_server';
+import { ElasticsearchServiceSetup } from '../../../../../../../src/core/server';
+import { KibanaConfig } from '../../../../../../../src/legacy/server/kbn_server';
 import { SecurityPlugin } from '../../../../../security';
 import { SpacesClient } from '../../../lib/spaces_client';
 import { createSpaces } from './create_spaces';

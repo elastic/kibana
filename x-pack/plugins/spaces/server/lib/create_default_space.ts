@@ -6,9 +6,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { ElasticsearchServiceSetup } from 'src/core/server';
 import { first } from 'rxjs/operators';
+import { SavedObjectsService } from '../../../../../src/legacy/server/kbn_server';
+import { ElasticsearchServiceSetup } from '../../../../../src/core/server';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 
 interface Deps {

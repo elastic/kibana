@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServerRoute } from 'hapi';
+import { KibanaConfig, SavedObjectsService } from '../../../../../src/legacy/server/kbn_server';
 import {
   Logger,
   HttpServiceSetup,
   PluginInitializerContext,
   ElasticsearchServiceSetup,
-} from 'src/core/server';
-import { KibanaConfig, SavedObjectsService } from 'src/legacy/server/kbn_server';
-import { ServerRoute } from 'hapi';
+} from '../../../../../src/core/server';
 import { XPackMainPlugin } from '../../../xpack_main/xpack_main';
 import { createDefaultSpace } from '../lib/create_default_space';
 // @ts-ignore

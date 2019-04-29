@@ -13,7 +13,7 @@ import { XPackMainPlugin } from '../../../../xpack_main/xpack_main';
 import { SecurityPlugin } from '../../../../security';
 import { SpacesAuditLogger } from '../audit_logger';
 import { SpacesServiceSetup } from '../../new_platform/spaces_service/spaces_service';
-import { ElasticsearchServiceSetup } from 'src/core/server';
+import { ElasticsearchServiceSetup } from '../../../../../../src/core/server';
 
 describe('onRequestInterceptor', () => {
   const sandbox = sinon.sandbox.create();

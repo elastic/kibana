@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, Headers } from 'src/core/server';
-import { SavedObjectsService } from 'src/legacy/server/kbn_server';
+import { Logger, Headers } from '../../../../../../../src/core/server';
+import { SavedObjectsService } from '../../../../../../../src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
 import { initDeleteSpacesApi } from './delete';
