@@ -30,6 +30,7 @@ import brushHandler from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 import chrome from 'ui/chrome';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
@@ -71,22 +72,21 @@ class VisEditor extends Component {
     COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
   */
   fetchIndexPatterns = async () => {
-    let selectedIndexPatternsfromSavedObjects = this.state.indexPatterns;
-    const allIndexPatterns = await chrome.getSavedObjectsClient().find({
+    const searchIndexPattern = this.props.model.index_pattern
+      ? this.props.model.index_pattern
+      : this.props.model.default_index_pattern;
+    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
       type: 'index-pattern',
-      perPage: 100,
+      fields: ['title', 'fields'],
+      search: `"${searchIndexPattern}"`,
+      search_fields: ['title'],
     });
-    // We now filter the collection of indexPatterns to the one that's selected or default to the default index pattern
-    if (allIndexPatterns && allIndexPatterns.savedObjects) {
-      let selectedIndexPatternString = this.state.model.default_index_pattern;
-      if (this.state.model.index_pattern) {
-        selectedIndexPatternString = this.state.model.index_pattern;
-      }
-      selectedIndexPatternsfromSavedObjects = allIndexPatterns.savedObjects.filter(
-        pattern => pattern.attributes.title === selectedIndexPatternString
-      );
+    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+      indexPattern => indexPattern.attributes.title === searchIndexPattern
+    );
+    if (exactMatch) {
+      this.setState({ indexPattern: getFromSavedObject(exactMatch) });
     }
-    return selectedIndexPatternsfromSavedObjects;
   };
 
   updateVisState = debounce(() => {
@@ -124,11 +124,7 @@ class VisEditor extends Component {
         );
       }
       // Fetch a whole new collection of index patterns and set the selected one on state.
-      this.fetchIndexPatterns().then(selectedIndexPattern =>
-        this.setState({
-          indexPatterns: selectedIndexPattern,
-        })
-      );
+      await this.fetchIndexPatterns();
     }
 
     this.setState({
