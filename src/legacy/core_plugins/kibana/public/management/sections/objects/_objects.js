@@ -27,7 +27,7 @@ import { uiModules } from 'ui/modules';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { ObjectsTable } from './components/objects_table';
-import { getInAppUrl } from './lib/get_in_app_url';
+import { canViewInApp, getInAppUrl } from './lib/in_app_url';
 import { I18nContext } from 'ui/i18n';
 
 import { getIndexBreadcrumbs } from './breadcrumbs';
@@ -40,6 +40,7 @@ function updateObjectsTable($scope, $injector, i18n) {
   const $http = $injector.get('$http');
   const kbnUrl = $injector.get('kbnUrl');
   const config = $injector.get('config');
+  const uiCapabilites = chrome.getInjected('uiCapabilities');
 
   const savedObjectsClient = Private(SavedObjectsClientProvider);
   const services = savedObjectManagementRegistry.all().map(obj => $injector.get(obj.service));
@@ -64,6 +65,7 @@ function updateObjectsTable($scope, $injector, i18n) {
           perPageConfig={config.get('savedObjects:perPage')}
           basePath={chrome.getBasePath()}
           newIndexPatternUrl={kbnUrl.eval('#/management/kibana/index_pattern')}
+          uiCapabilities={uiCapabilites}
           getEditUrl={(id, type) => {
             if (type === 'index-pattern' || type === 'indexPatterns') {
               return kbnUrl.eval(`#/management/kibana/index_patterns/${id}`);
@@ -78,6 +80,9 @@ function updateObjectsTable($scope, $injector, i18n) {
             }
 
             return kbnUrl.eval(`#/management/kibana/objects/${serviceName}/${id}`);
+          }}
+          canGoInApp={(type) => {
+            return canViewInApp(uiCapabilites, type);
           }}
           goInApp={(id, type) => {
             kbnUrl.change(getInAppUrl(id, type));

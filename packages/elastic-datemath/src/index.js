@@ -20,7 +20,7 @@
 import moment from 'moment';
 
 const unitsMap = {
-  'ms': { weight: 1, type: 'fixed', base: 1 },
+  ms: { weight: 1, type: 'fixed', base: 1 },
   s: { weight: 2, type: 'fixed', base: 1000 },
   m: { weight: 3, type: 'mixed', base: 1000 * 60 },
   h: { weight: 4, type: 'mixed', base: 1000 * 60 * 60 },

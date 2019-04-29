@@ -25,8 +25,9 @@ import Agg from '../aggs/agg';
 
 export default function createAggRowRender(props) {
   return (row, index, items) => {
-    const { panel, model, fields } = props;
+    const { panel, model, fields, uiRestrictions } = props;
     const changeHandler = seriesChangeHandler(props, items);
+
     return (
       <Agg
         key={row.id}
@@ -39,6 +40,7 @@ export default function createAggRowRender(props) {
         panel={panel}
         series={model}
         siblings={items}
+        uiRestrictions={uiRestrictions}
         sortData={row.id}
       />
     );

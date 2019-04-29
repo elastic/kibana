@@ -10,6 +10,7 @@ import { AbstractESSource } from './es_source';
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { AggConfigs } from 'ui/vis/agg_configs';
 import { i18n } from '@kbn/i18n';
+import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
 
 const TERMS_AGG_NAME = 'join';
 
@@ -72,6 +73,10 @@ export class ESJoinSource extends AbstractESSource {
 
   getIndexPatternIds() {
     return  [this._descriptor.indexPatternId];
+  }
+
+  getTerm() {
+    return this._descriptor.term;
   }
 
   _formatMetricKey(metric) {
@@ -179,5 +184,17 @@ export class ESJoinSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+  }
+
+  async createESTooltipProperty(propertyName, rawValue) {
+    try {
+      const indexPattern = await this._getIndexPattern();
+      if (!indexPattern) {
+        return null;
+      }
+      return new ESTooltipProperty(propertyName, rawValue, indexPattern);
+    } catch (e) {
+      return null;
+    }
   }
 }

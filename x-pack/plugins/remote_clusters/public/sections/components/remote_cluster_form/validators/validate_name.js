@@ -8,7 +8,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 export function validateName(name) {
-  if (name == null || !name.trim()) {
+  if (!name || !name.trim()) {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.form.errors.nameMissing"
@@ -17,11 +17,26 @@ export function validateName(name) {
     );
   }
 
-  if (name.match(/[^a-zA-Z\d\-_]/)) {
+  if (name.includes(' ')) {
+    return (
+      <FormattedMessage
+        id="xpack.remoteClusters.form.errors.illegalSpace"
+        defaultMessage="Spaces are not allowed in the name."
+      />
+    );
+  }
+
+  const illegalCharacters = name.match(/[^a-zA-Z\d\-_]/g);
+  if (illegalCharacters) {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.form.errors.illegalCharacters"
-        defaultMessage="Name contains invalid characters."
+        defaultMessage="Remove the {characterListLength, plural, one {character} other {characters}}
+          {characterList} from the name."
+        values={{
+          characterList: <strong>{illegalCharacters.join(' ')}</strong>,
+          characterListLength: illegalCharacters.length,
+        }}
       />
     );
   }

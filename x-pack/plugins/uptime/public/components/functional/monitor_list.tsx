@@ -28,14 +28,23 @@ import moment from 'moment';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { LatestMonitor, MonitorSeriesPoint } from '../../../common/graphql/types';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { monitorListQuery } from '../../queries';
 import { MonitorSparkline } from './monitor_sparkline';
 
-interface MonitorListProps {
-  successColor: string;
-  dangerColor: string;
-  loading: boolean;
-  monitors: LatestMonitor[];
+interface MonitorListQueryResult {
+  // TODO: clean up this ugly result data shape, there should be no nesting
+  monitorStatus?: {
+    monitors: LatestMonitor[];
+  };
 }
+
+interface MonitorListProps {
+  dangerColor: string;
+  linkParameters?: string;
+}
+
+type Props = UptimeGraphQLQueryProps<MonitorListQueryResult> & MonitorListProps;
 
 const MONITOR_LIST_DEFAULT_PAGINATION = 10;
 
@@ -44,7 +53,7 @@ const monitorListPagination = {
   pageSizeOptions: [5, 10, 20, 50],
 };
 
-export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps) => (
+export const MonitorListComponent = ({ dangerColor, data, linkParameters, loading }: Props) => (
   <EuiPanel paddingSize="s">
     <EuiTitle size="xs">
       <h5>
@@ -90,7 +99,10 @@ export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps
           }),
           render: (id: string, monitor: LatestMonitor) => (
             <EuiLink>
-              <Link data-test-subj={`monitor-page-link-${id}`} to={`/monitor/${id}`}>
+              <Link
+                data-test-subj={`monitor-page-link-${id}`}
+                to={`/monitor/${id}${linkParameters}`}
+              >
                 {monitor.ping && monitor.ping.monitor && monitor.ping.monitor.name
                   ? monitor.ping.monitor.name
                   : id}
@@ -129,8 +141,13 @@ export const MonitorList = ({ dangerColor, loading, monitors }: MonitorListProps
         },
       ]}
       loading={loading}
-      items={monitors}
+      items={(data && data.monitorStatus && data.monitorStatus.monitors) || undefined}
       pagination={monitorListPagination}
     />
   </EuiPanel>
+);
+
+export const MonitorList = withUptimeGraphQL<MonitorListQueryResult, MonitorListProps>(
+  MonitorListComponent,
+  monitorListQuery
 );

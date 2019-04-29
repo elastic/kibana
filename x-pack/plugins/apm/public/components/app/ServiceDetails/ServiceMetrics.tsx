@@ -18,7 +18,7 @@ import { useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { useTransactionOverviewCharts } from '../../../hooks/useTransactionOverviewCharts';
 import { loadErrorDistribution } from '../../../services/rest/apm/error_groups';
-import { IUrlParams } from '../../../store/urlParams';
+import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { SyncChartGroup } from '../../shared/charts/SyncChartGroup';
 import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ErrorDistribution } from '../ErrorGroupDetails/Distribution';
@@ -31,11 +31,14 @@ interface ServiceMetricsProps {
 }
 
 export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
-  const { serviceName, start, end, errorGroupId, kuery } = urlParams;
+  const { serviceName, start, end, kuery } = urlParams;
   const { data: errorDistributionData } = useFetcher(
-    () =>
-      loadErrorDistribution({ serviceName, start, end, errorGroupId, kuery }),
-    [serviceName, start, end, errorGroupId, kuery]
+    () => {
+      if (serviceName && start && end) {
+        return loadErrorDistribution({ serviceName, start, end, kuery });
+      }
+    },
+    [serviceName, start, end, kuery]
   );
 
   const { data: transactionOverviewChartsData } = useTransactionOverviewCharts(
@@ -51,6 +54,7 @@ export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
   return (
     <React.Fragment>
       <TransactionCharts
+        hasMLJob={false}
         charts={transactionOverviewChartsData}
         urlParams={urlParams}
         location={location}

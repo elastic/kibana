@@ -128,6 +128,7 @@ export class FilterEditor extends Component {
             </EuiTextColor>
           </p>
         </EuiText>
+
       );
     }
 
@@ -175,9 +176,12 @@ export class FilterEditor extends Component {
           </h5>
         </EuiTitle>
 
+        <EuiSpacer size="m"/>
+
         {this._renderQuery()}
 
         {this._renderQueryPopover()}
+
       </Fragment>
     );
   }

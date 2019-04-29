@@ -21,6 +21,7 @@ import mappings from './mappings';
 import { makeMlUsageCollector } from './server/lib/ml_telemetry';
 import { notificationRoutes } from './server/routes/notification_settings';
 import { systemRoutes } from './server/routes/system';
+import { dataFrameRoutes } from './server/routes/data_frame';
 import { dataRecognizer } from './server/routes/modules';
 import { dataVisualizerRoutes } from './server/routes/data_visualizer';
 import { calendars } from './server/routes/calendars';
@@ -79,6 +80,30 @@ export const ml = (kibana) => {
         xpackMainPlugin.info.feature(thisPlugin.id).registerLicenseCheckResultsGenerator(checkLicense);
       });
 
+      xpackMainPlugin.registerFeature({
+        id: 'ml',
+        name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
+          defaultMessage: 'Machine Learning',
+        }),
+        icon: 'machineLearningApp',
+        navLinkId: 'ml',
+        app: ['ml', 'kibana'],
+        catalogue: ['ml'],
+        privileges: {},
+        reserved: {
+          privilege: {
+            savedObject: {
+              all: [],
+              read: []
+            },
+            ui: [],
+          },
+          description: i18n.translate('xpack.ml.feature.reserved.description', {
+            defaultMessage: 'To grant users access, you should also assign either the machine_learning_user or machine_learning_admin role.'
+          })
+        }
+      });
+
       // Add server routes and initialize the plugin here
       const commonRouteConfig = {
         pre: [
@@ -104,6 +129,7 @@ export const ml = (kibana) => {
       annotationRoutes(server, commonRouteConfig);
       jobRoutes(server, commonRouteConfig);
       dataFeedRoutes(server, commonRouteConfig);
+      dataFrameRoutes(server, commonRouteConfig);
       indicesRoutes(server, commonRouteConfig);
       jobValidationRoutes(server, commonRouteConfig);
       notificationRoutes(server, commonRouteConfig);

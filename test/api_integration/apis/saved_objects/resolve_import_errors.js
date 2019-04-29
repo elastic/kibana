@@ -113,6 +113,7 @@ export default function ({ getService }) {
           type: 'visualization',
           attributes: {
             title: 'My favorite vis',
+            visState: '{}',
           },
           references: [
             {
@@ -230,6 +231,7 @@ export default function ({ getService }) {
             type: 'visualization',
             attributes: {
               title: 'My favorite vis',
+              visState: '{}',
             },
             references: [
               {

@@ -67,7 +67,7 @@ export class WorkpadHeader extends React.PureComponent {
           />
           <EuiModalFooter>
             <EuiButton size="s" onClick={() => setShowElementModal(false)}>
-              Dismiss
+              Close
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
@@ -141,6 +141,7 @@ export class WorkpadHeader extends React.PureComponent {
                     fill
                     size="s"
                     iconType="vector"
+                    data-test-subj="add-element-button"
                     onClick={() => setShowElementModal(true)}
                   >
                     Add element

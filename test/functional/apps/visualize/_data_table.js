@@ -24,7 +24,6 @@ export default function ({ getService, getPageObjects }) {
   const inspector = getService('inspector');
   const retry = getService('retry');
   const filterBar = getService('filterBar');
-  const renderable = getService('renderable');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'timePicker']);
 
   const fromTime = '2015-09-19 06:31:44.000';
@@ -54,7 +53,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow applying changed params', async () => {
       await PageObjects.visualize.setNumericInterval('1', { append: true });
-      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      const interval = await PageObjects.visualize.getNumericInterval();
       expect(interval).to.be('20001');
       const isApplyButtonEnabled = await PageObjects.visualize.isApplyEnabled();
       expect(isApplyButtonEnabled).to.be(true);
@@ -62,7 +61,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should allow reseting changed params', async () => {
       await PageObjects.visualize.clickReset();
-      const interval = await PageObjects.visualize.getInputTypeParam('interval');
+      const interval = await PageObjects.visualize.getNumericInterval();
       expect(interval).to.be('2000');
     });
 
@@ -124,7 +123,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setInterval('Daily');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.visualize.getTableVisData();
       log.debug(data.split('\n'));
       expect(data.trim().split('\n')).to.be.eql([
@@ -144,7 +142,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.selectField('@timestamp');
       await PageObjects.visualize.setInterval('Daily');
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
@@ -155,8 +152,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should correctly filter for applied time filter on the main timefield', async () => {
       await filterBar.addFilter('@timestamp', 'is between', '2015-09-19', '2015-09-21');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
@@ -165,8 +161,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should correctly filter for pinned filters', async () => {
       await filterBar.toggleFilterPinned('@timestamp');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await renderable.waitForRender();
+      await PageObjects.visualize.waitForVisualizationRenderingStabilized();
       const data = await PageObjects.visualize.getTableVisData();
       expect(data.trim().split('\n')).to.be.eql([
         '2015-09-20', '4,757',
@@ -232,7 +227,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should apply correct filter', async () => {
         await PageObjects.visualize.filterOnTableCell(1, 3);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualizationRenderingStabilized();
         const data = await PageObjects.visualize.getTableVisContent();
         expect(data).to.be.eql([
           [ 'png', '1,373' ],

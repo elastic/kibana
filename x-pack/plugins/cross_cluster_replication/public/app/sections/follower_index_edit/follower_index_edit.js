@@ -141,7 +141,7 @@ export class FollowerIndexEdit extends PureComponent {
               {...routing.getRouterLinkProps('/follower_indices')}
               iconType="arrowLeft"
               flush="left"
-              data-test-subj="ccrFollowerIndexFormViewListLink"
+              data-test-subj="viewListFollowerIndexButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexEditForm.viewFollowerIndicesButtonLabel"

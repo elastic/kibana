@@ -42,7 +42,8 @@ const TopNSeries = injectI18n(function (props) {
     disableAdd,
     selectedTab,
     visible,
-    intl
+    intl,
+    uiRestrictions,
   } = props;
 
   const handleChange = createTextHandler(onChange);
@@ -55,7 +56,7 @@ const TopNSeries = injectI18n(function (props) {
   if (visible) {
     let seriesBody;
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
+      const handleSort = data => {
         const metrics = data.map(id => model.metrics.find(m => m.id === id));
         props.onChange({ metrics });
       };
@@ -76,6 +77,7 @@ const TopNSeries = injectI18n(function (props) {
               fields={fields}
               panel={panel}
               model={model}
+              uiRestrictions={uiRestrictions}
             />
           </div>
         </div>
@@ -226,6 +228,7 @@ TopNSeries.propTypes = {
   toggleVisible: PropTypes.func,
   visible: PropTypes.bool,
   togglePanelActivation: PropTypes.func,
+  uiRestrictions: PropTypes.object,
 };
 
 export default TopNSeries;

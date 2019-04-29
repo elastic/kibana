@@ -32,7 +32,7 @@ export const saveLifecyclePolicy = (lifecycle, isNew) => async () => {
 
   const uiMetrics = getUiMetricsForPhases(lifecycle.phases);
   uiMetrics.push(isNew ? UIM_POLICY_CREATE : UIM_POLICY_UPDATE);
-  trackUiMetric(uiMetrics.join(','));
+  trackUiMetric(uiMetrics);
 
   const message = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.successfulSaveMessage',
     {

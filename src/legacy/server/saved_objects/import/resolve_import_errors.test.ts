@@ -141,6 +141,7 @@ Object {
             "title": "My Visualization",
           },
           "id": "3",
+          "migrationVersion": Object {},
           "references": Array [],
           "type": "visualization",
         },
@@ -196,6 +197,7 @@ Object {
             "title": "My Index Pattern",
           },
           "id": "1",
+          "migrationVersion": Object {},
           "references": Array [],
           "type": "index-pattern",
         },
@@ -260,6 +262,7 @@ Object {
             "title": "My Dashboard",
           },
           "id": "4",
+          "migrationVersion": Object {},
           "references": Array [
             Object {
               "id": "13",

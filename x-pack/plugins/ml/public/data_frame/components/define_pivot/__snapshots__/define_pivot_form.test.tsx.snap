@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Data Frame: <DefinePivotForm /> Minimal initialization 1`] = `
+<div>
+  <ContextProvider
+    value={
+      Object {
+        "fields": Array [],
+        "title": "the-index-pattern-title",
+      }
+    }
+  >
+    <Component
+      onChange={[Function]}
+    />
+  </ContextProvider>
+</div>
+`;

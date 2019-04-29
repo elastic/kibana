@@ -17,15 +17,21 @@
  * under the License.
  */
 
-import { CoreSetup } from '..';
+import { CoreSetup, CoreStart } from '..';
 import { PluginName } from '../../server';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_system';
 import { PluginWrapper } from './plugin';
-import { createPluginInitializerContext, createPluginSetupContext } from './plugin_context';
+import {
+  createPluginInitializerContext,
+  createPluginSetupContext,
+  createPluginStartContext,
+} from './plugin_context';
 
 /** @internal */
 export type PluginsServiceSetupDeps = CoreSetup;
+/** @internal */
+export type PluginsServiceStartDeps = CoreStart;
 
 /** @internal */
 export interface PluginsServiceSetup {
@@ -62,34 +68,35 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     // Load plugin bundles
     await this.loadPluginBundles(deps.basePath.addToPath);
 
-    // Setup each plugin with correct dependencies
+    // Setup each plugin with required and optional plugin contracts
     const contracts = new Map<string, unknown>();
     for (const [pluginName, plugin] of this.plugins.entries()) {
-      const dependencies = new Set([
-        ...plugin.requiredDependencies,
-        ...plugin.optionalDependencies.filter(optPlugin => this.plugins.get(optPlugin)),
+      const pluginDeps = new Set([
+        ...plugin.requiredPlugins,
+        ...plugin.optionalPlugins.filter(optPlugin => this.plugins.get(optPlugin)),
       ]);
 
-      const dependencyContracts = [...dependencies.keys()].reduce(
-        (depContracts, dependency) => {
+      const pluginDepContracts = [...pluginDeps.keys()].reduce(
+        (depContracts, dependencyName) => {
           // Only set if present. Could be absent if plugin does not have client-side code or is a
-          // missing optional dependency.
-          if (contracts.get(dependency) !== undefined) {
-            depContracts[dependency] = contracts.get(dependency);
+          // missing optional plugin.
+          if (contracts.has(dependencyName)) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
           }
 
           return depContracts;
         },
-        {} as { [dep: string]: unknown }
+        {} as Record<PluginName, unknown>
       );
 
       contracts.set(
         pluginName,
         await plugin.setup(
           createPluginSetupContext(this.coreContext, deps, plugin),
-          dependencyContracts
+          pluginDepContracts
         )
       );
+
       this.satupPlugins.push(pluginName);
     }
 
@@ -97,8 +104,43 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     return { contracts };
   }
 
+  public async start(deps: PluginsServiceStartDeps) {
+    // Setup each plugin with required and optional plugin contracts
+    const contracts = new Map<string, unknown>();
+    for (const [pluginName, plugin] of this.plugins.entries()) {
+      const pluginDeps = new Set([
+        ...plugin.requiredPlugins,
+        ...plugin.optionalPlugins.filter(optPlugin => this.plugins.get(optPlugin)),
+      ]);
+
+      const pluginDepContracts = [...pluginDeps.keys()].reduce(
+        (depContracts, dependencyName) => {
+          // Only set if present. Could be absent if plugin does not have client-side code or is a
+          // missing optional plugin.
+          if (contracts.has(dependencyName)) {
+            depContracts[dependencyName] = contracts.get(dependencyName);
+          }
+
+          return depContracts;
+        },
+        {} as Record<PluginName, unknown>
+      );
+
+      contracts.set(
+        pluginName,
+        await plugin.start(
+          createPluginStartContext(this.coreContext, deps, plugin),
+          pluginDepContracts
+        )
+      );
+    }
+
+    // Expose start contracts
+    return { contracts };
+  }
+
   public async stop() {
-    // Stop plugins in reverse dependency order.
+    // Stop plugins in reverse topological order.
     for (const pluginName of this.satupPlugins.reverse()) {
       this.plugins.get(pluginName)!.stop();
     }

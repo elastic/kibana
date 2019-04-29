@@ -8,9 +8,7 @@ import { InfraFrameworkAdapter } from '../../lib';
 
 export class InfraTestingFrameworkAdapter implements InfraFrameworkAdapter {
   public appState?: object;
-  public dateFormat?: string;
   public kbnVersion?: string;
-  public scaledDateFormat?: string;
   public timezone?: string;
 
   constructor() {

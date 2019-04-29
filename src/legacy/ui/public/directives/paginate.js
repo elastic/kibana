@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import { uiModules } from '../modules';
-import paginateControlsTemplate from '../partials/paginate_controls.html';
+import paginateControlsTemplate from './partials/paginate_controls.html';
 
 uiModules.get('kibana')
   .directive('paginate', function ($parse, $compile, i18n) {
