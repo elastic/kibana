@@ -18,9 +18,8 @@
  */
 
 import sinon from 'sinon';
-import { ToastsSetup } from '../../../../../core/public';
+import { ToastsApi } from '../../../../../core/public';
 import { uiSettingsServiceMock, i18nServiceMock } from '../../../../../core/public/mocks';
-
 import { ToastNotifications } from './toast_notifications';
 
 function toastDeps() {
@@ -48,7 +47,7 @@ function toastDeps() {
 describe('ToastNotifications', () => {
   describe('interface', () => {
     function setup() {
-      return { toastNotifications: new ToastNotifications(new ToastsSetup(toastDeps())) };
+      return { toastNotifications: new ToastNotifications(new ToastsApi(toastDeps())) };
     }
 
     describe('add method', () => {

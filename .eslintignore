@@ -20,7 +20,6 @@ bower_components
 /packages/*/target
 /packages/eslint-config-kibana
 /packages/kbn-es-query/src/kuery/ast/kuery.js
-/packages/kbn-es-query/src/kuery/ast/legacy_kuery.js
 /packages/kbn-pm/dist
 /packages/kbn-plugin-generator/sao_template/template
 /packages/kbn-ui-framework/dist
