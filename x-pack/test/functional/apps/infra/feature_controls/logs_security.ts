@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('logs security', () => {
     before(async () => {
@@ -72,6 +73,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
           await testSubjects.existOrFail('configureSourceButton');
+        });
+
+        it(`doesn't show read-only badge`, async () => {
+          await globalNav.badgeMissingOrFail();
         });
       });
     });
@@ -133,6 +138,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           await testSubjects.existOrFail('infraLogsPage');
           await testSubjects.existOrFail('logsViewSetupInstructionsButton');
           await testSubjects.missingOrFail('configureSourceButton');
+        });
+
+        it(`shows read-only badge`, async () => {
+          await globalNav.badgeExistsOrFail('Read only');
         });
       });
     });
