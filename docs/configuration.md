@@ -103,3 +103,9 @@ Labels that will be added to the backport pull request. These are often useful i
 Example: `["backport", "apm-team"]`
 
 CLI: `--labels myLabel --labels myOtherLabel`
+
+#### `prDescription`
+
+Text that will be added to the pull request body.
+
+CLI: `--prDescription "skip-ci"`
