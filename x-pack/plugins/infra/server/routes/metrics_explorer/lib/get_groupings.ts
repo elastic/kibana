@@ -30,7 +30,6 @@ export const getGroupings = async (
       pageInfo: { total: 0, afterKey: null },
     };
   }
-
   const limit = options.limit || 9;
   const params = {
     index: options.indexPattern,
@@ -48,6 +47,11 @@ export const getGroupings = async (
                 },
               },
             },
+            ...options.metrics
+              .filter(m => m.field)
+              .map(m => ({
+                exists: { field: m.field },
+              })),
           ] as object[],
         },
       },
