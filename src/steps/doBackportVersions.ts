@@ -22,7 +22,8 @@ export function doBackportVersions(
   commits: Commit[],
   branches: string[],
   username: string,
-  labels: string[]
+  labels: string[],
+  prDescription: string | undefined
 ) {
   return sequentially(branches, async branch => {
     try {
@@ -32,7 +33,8 @@ export function doBackportVersions(
         commits,
         branch,
         username,
-        labels
+        labels,
+        prDescription
       );
       log(`View pull request: ${pullRequest.html_url}`);
     } catch (e) {
@@ -52,7 +54,8 @@ export async function doBackportVersion(
   commits: Commit[],
   baseBranch: string,
   username: string,
-  labels: string[] = []
+  labels: string[] = [],
+  prDescription: string | undefined
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
@@ -84,7 +87,12 @@ export async function doBackportVersion(
   );
 
   return withSpinner({ text: 'Creating pull request' }, async () => {
-    const payload = getPullRequestPayload(baseBranch, commits, username);
+    const payload = getPullRequestPayload(
+      baseBranch,
+      commits,
+      username,
+      prDescription
+    );
     const pullRequest = await createPullRequest(owner, repoName, payload);
     if (labels.length > 0) {
       await addLabelsToPullRequest(owner, repoName, pullRequest.number, labels);
@@ -178,7 +186,8 @@ function getPullRequestTitle(baseBranch: string, commits: Commit[]) {
 export function getPullRequestPayload(
   baseBranch: string,
   commits: Commit[],
-  username: string
+  username: string,
+  prDescription: string | undefined
 ) {
   const featureBranch = getFeatureBranchName(baseBranch, commits);
   const commitRefs = commits
@@ -188,9 +197,11 @@ export function getPullRequestPayload(
     })
     .join('\n');
 
+  const bodySuffix = prDescription ? `\n\n${prDescription}` : '';
+
   return {
     title: getPullRequestTitle(baseBranch, commits),
-    body: `Backports the following commits to ${baseBranch}:\n${commitRefs}`,
+    body: `Backports the following commits to ${baseBranch}:\n${commitRefs}${bodySuffix}`,
     head: `${username}:${featureBranch}`,
     base: `${baseBranch}`
   };

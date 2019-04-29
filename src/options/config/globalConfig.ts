@@ -5,6 +5,7 @@ import { getGlobalConfigPath, getReposPath } from '../../services/env';
 interface GlobalConfig {
   username?: string;
   accessToken?: string;
+  prDescription?: string;
 
   // the following are overwritable by project config:
   all?: boolean;

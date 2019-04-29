@@ -56,7 +56,8 @@ describe('doBackportVersion', () => {
         commits,
         '6.x',
         'sqren',
-        ['backport']
+        ['backport'],
+        'myPrSuffix'
       );
     });
 
@@ -76,7 +77,7 @@ describe('doBackportVersion', () => {
         {
           title: '[6.x] myCommitMessage | myOtherCommitMessage',
           body:
-            'Backports the following commits to 6.x:\n - myCommitMessage (#1000)\n - myOtherCommitMessage (#2000)',
+            'Backports the following commits to 6.x:\n - myCommitMessage (#1000)\n - myOtherCommitMessage (#2000)\n\nmyPrSuffix',
           head: 'sqren:backport/6.x/pr-1000_pr-2000',
           base: '6.x'
         }
@@ -99,9 +100,15 @@ describe('doBackportVersion', () => {
         }
       ];
 
-      await doBackportVersion('elastic', 'kibana', commits, '6.x', 'sqren', [
-        'backport'
-      ]);
+      await doBackportVersion(
+        'elastic',
+        'kibana',
+        commits,
+        '6.x',
+        'sqren',
+        ['backport'],
+        undefined
+      );
     });
 
     it('should create pull request and add labels', () => {
@@ -160,7 +167,8 @@ describe('doBackportVersion', () => {
         commits,
         '6.x',
         'sqren',
-        ['backport']
+        ['backport'],
+        undefined
       );
 
       return { logSpy, execSpy, promise };

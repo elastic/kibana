@@ -234,7 +234,7 @@ Object {
   "patch": Array [],
   "post": Array [
     Object {
-      "data": "{\\"title\\":\\"[6.2] myCommitMessage\\",\\"body\\":\\"Backports the following commits to 6.2:\\\\n - myCommitMessage (#myPullRequestNumber)\\",\\"head\\":\\"sqren:backport/6.2/pr-myPullRequestNumber\\",\\"base\\":\\"6.2\\"}",
+      "data": "{\\"title\\":\\"[6.2] myCommitMessage\\",\\"body\\":\\"Backports the following commits to 6.2:\\\\n - myCommitMessage (#myPullRequestNumber)\\\\n\\\\nmyPrDescription\\",\\"head\\":\\"sqren:backport/6.2/pr-myPullRequestNumber\\",\\"base\\":\\"6.2\\"}",
       "headers": Object {
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json;charset=utf-8",

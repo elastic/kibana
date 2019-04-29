@@ -46,6 +46,7 @@ export function validateOptions({
   multiple,
   multipleBranches,
   multipleCommits,
+  prDescription,
   sha,
   upstream,
   username
@@ -83,6 +84,7 @@ export function validateOptions({
     multiple,
     multipleBranches,
     multipleCommits,
+    prDescription,
     sha,
     upstream,
     username

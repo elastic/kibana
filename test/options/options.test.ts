@@ -9,6 +9,7 @@ const validOptions = {
   multiple: false,
   multipleBranches: true,
   multipleCommits: false,
+  prDescription: undefined,
   sha: undefined,
   upstream: 'elastic/kibana',
   username: 'sqren'

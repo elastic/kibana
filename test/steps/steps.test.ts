@@ -147,14 +147,9 @@ describe('run through steps', () => {
     });
 
     await initSteps({
-      username: 'sqren',
-      branches: [],
-      sha: undefined,
       accessToken: 'myAccessToken',
-      multiple: false,
-      multipleBranches: false,
-      multipleCommits: false,
-      upstream,
+      all: false,
+      branches: [],
       branchChoices: [
         { name: '6.x' },
         { name: '6.0' },
@@ -162,8 +157,14 @@ describe('run through steps', () => {
         { name: '5.5' },
         { name: '5.4' }
       ],
-      all: false,
-      labels: []
+      labels: [],
+      multiple: false,
+      multipleBranches: false,
+      multipleCommits: false,
+      prDescription: 'myPrDescription',
+      sha: undefined,
+      upstream,
+      username: 'sqren'
     });
   });
 
@@ -183,7 +184,7 @@ describe('run through steps', () => {
   it('createPullRequest should be called with correct args', () => {
     expect(github.createPullRequest).toHaveBeenCalledWith('elastic', 'kibana', {
       base: '6.2',
-      body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequestNumber)`,
+      body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequestNumber)\n\nmyPrDescription`,
       head: 'sqren:backport/6.2/pr-myPullRequestNumber',
       title: '[6.2] myCommitMessage'
     });
