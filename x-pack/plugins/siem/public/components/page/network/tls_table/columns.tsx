@@ -4,11 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
+import moment from 'moment';
 import { TlsNode } from '../../../../graphql/types';
 import { Columns } from '../../../load_more_table';
 
-import * as i18n from './translations';
 import { getRowItemDraggables, getRowItemDraggable } from '../../../tables/helpers';
+import { LocalizedDateTooltip } from '../../../localized_date_tooltip';
+import { PreferenceFormattedDate } from '../../../formatted_date';
+
+import * as i18n from './translations';
 
 export const getTlsColumns = (
   tableId: string
@@ -88,6 +93,11 @@ export const getTlsColumns = (
         rowItems: notAfter,
         attrName: 'tls.server_certificate.not_after',
         idPrefix: `${tableId}-${_id}-table-notAfter`,
+        render: validUntil => (
+          <LocalizedDateTooltip date={moment(new Date(validUntil)).toDate()}>
+            <PreferenceFormattedDate value={new Date(validUntil)} />
+          </LocalizedDateTooltip>
+        ),
       }),
   },
 ];

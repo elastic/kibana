@@ -80,7 +80,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   </IpOverviewQuery>
                   <EuiSpacer size="s" />
                   <EuiHorizontalRule margin="xs" />
-                  <EuiSpacer size="s" />
+                  <EuiSpacer />
 
                   <DomainsQuery
                     endDate={to}
@@ -109,7 +109,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       />
                     )}
                   </DomainsQuery>
-                  <EuiSpacer size="s" />
+
+                  <EuiSpacer />
 
                   <UsersQuery
                     endDate={to}
@@ -136,7 +137,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       />
                     )}
                   </UsersQuery>
-                  <EuiSpacer size="s" />
+
+                  <EuiSpacer />
 
                   <TlsQuery
                     endDate={to}

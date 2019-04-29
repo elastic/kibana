@@ -40,10 +40,10 @@ import {
   IpOverviewHit,
   OverviewHit,
   TlsBuckets,
+  UsersBucketsItem,
 } from './types';
 
 import { buildTlsQuery } from './query_tls.dsl';
-import { UsersBucketsItem } from './types';
 
 import { buildUsersQuery } from './query_users.dsl';
 

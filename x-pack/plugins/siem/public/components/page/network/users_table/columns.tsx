@@ -31,7 +31,7 @@ export const getUsersColumns = (
       getRowItemDraggable({
         rowItem: userName,
         attrName: 'user.name',
-        idPrefix: `${tableId}-table-${flowTarget}-user-${userName}`,
+        idPrefix: `${tableId}-table-${flowTarget}-user`,
       }),
   },
   {

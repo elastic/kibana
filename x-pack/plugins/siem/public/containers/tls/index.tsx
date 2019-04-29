@@ -79,7 +79,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
-          const tls = getOr([], `source.Tls.edges`, data);
+          const tls = getOr([], 'source.Tls.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newCursor: string) => ({
             variables: {
