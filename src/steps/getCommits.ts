@@ -1,5 +1,9 @@
 import { BackportOptions } from '../options/options';
-import { fetchCommitBySha, fetchCommitsByAuthor } from '../services/github';
+import {
+  fetchCommitBySha,
+  fetchCommitsByAuthor,
+  getShortSha
+} from '../services/github';
 import { promptForCommits } from '../services/prompts';
 import isEmpty from 'lodash.isempty';
 import ora = require('ora');
@@ -25,7 +29,7 @@ export async function getCommitBySha(
   repoName: string,
   sha: string
 ) {
-  const spinner = ora(`Loading commit "${sha}"`).start();
+  const spinner = ora(`Loading commit "${getShortSha(sha)}"`).start();
   try {
     const commit = await fetchCommitBySha(owner, repoName, sha);
     spinner.stop();

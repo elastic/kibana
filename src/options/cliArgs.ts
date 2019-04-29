@@ -8,6 +8,7 @@ export function getOptionsFromCliArgs(
 ) {
   const cliArgs = yargs(argv)
     .usage('$0 [args]')
+    .wrap(Math.max(100, Math.min(120, yargs.terminalWidth())))
     .option('accessToken', {
       default: configOptions.accessToken,
       description: 'Github access token',

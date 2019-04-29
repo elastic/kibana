@@ -59,7 +59,7 @@ Array [
     [Function],
   ],
   Array [
-    "git cherry-pick commitSha",
+    "git cherry-pick myCommitSha",
     Object {
       "cwd": "/myHomeDir/.backport/repositories/elastic/kibana",
       "maxBuffer": 104857600,

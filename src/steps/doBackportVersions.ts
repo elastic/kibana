@@ -3,7 +3,8 @@ import { confirmPrompt } from '../services/prompts';
 import {
   addLabelsToPullRequest,
   createPullRequest,
-  Commit
+  Commit,
+  getShortSha
 } from '../services/github';
 import { HandledError } from '../services/HandledError';
 import { getRepoPath } from '../services/env';
@@ -116,18 +117,14 @@ function getFeatureBranchName(baseBranch: string, commits: Commit[]) {
   return `backport/${baseBranch}/${refValues}`;
 }
 
-function getShortSha(commit: Commit) {
-  return commit.sha.slice(0, 7);
-}
-
 export function getReferenceLong(commit: Commit) {
-  return commit.pullNumber ? `#${commit.pullNumber}` : getShortSha(commit);
+  return commit.pullNumber ? `#${commit.pullNumber}` : getShortSha(commit.sha);
 }
 
 function getReferenceShort(commit: Commit) {
   return commit.pullNumber
     ? `pr-${commit.pullNumber}`
-    : `commit-${getShortSha(commit)}`;
+    : `commit-${getShortSha(commit.sha)}`;
 }
 
 async function cherrypickAndConfirm(
@@ -135,7 +132,7 @@ async function cherrypickAndConfirm(
   repoName: string,
   sha: string
 ) {
-  const spinner = ora(`Cherry-picking commit ${sha}`).start();
+  const spinner = ora(`Cherry-picking commit ${getShortSha(sha)}`).start();
   try {
     await cherrypick({ owner, repoName, sha });
     spinner.succeed();

@@ -102,7 +102,7 @@ describe('run through steps', () => {
       .mockResolvedValueOnce({
         promptResult: {
           message: 'myCommitMessage',
-          sha: 'commitSha',
+          sha: 'myCommitSha',
           pullNumber: 'myPullRequestNumber'
         }
       })
@@ -169,8 +169,7 @@ describe('run through steps', () => {
   });
 
   it('should make correct requests', () => {
-    // TODO: Make PR to DefinitelyTypes to add history to mock object
-    expect((axiosMock as any).history).toMatchSnapshot();
+    expect(axiosMock.history).toMatchSnapshot();
   });
 
   it('getCommit should be called with correct args', () => {

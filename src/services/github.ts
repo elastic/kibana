@@ -18,6 +18,10 @@ export interface Commit {
   pullNumber?: number;
 }
 
+export function getShortSha(sha: string) {
+  return sha.slice(0, 7);
+}
+
 let accessToken: string;
 function getCommitMessage(message: string) {
   return message.split('\n')[0].trim();
