@@ -10,13 +10,11 @@ export const TOP_DNS_DOMAINS = i18n.translate('xpack.siem.networkDnsTable.title'
   defaultMessage: 'Top DNS Domains',
 });
 
-export const UNIT_SINGULAR = i18n.translate('xpack.siem.networkDnsTable.unitSingular', {
-  defaultMessage: 'Domain',
-});
-
-export const UNIT_PLURAL = i18n.translate('xpack.siem.networkDnsTable.unitPlural', {
-  defaultMessage: 'Domains',
-});
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.networkDnsTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {Domain} other {Domains}}`,
+  });
 
 export const TOOLTIP = i18n.translate('xpack.siem.networkDnsTable.helperTooltip', {
   defaultMessage:

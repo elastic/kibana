@@ -13,13 +13,11 @@ export const TRANSPORT_LAYER_SECURITY = i18n.translate(
   }
 );
 
-export const UNIT_SINGULAR = i18n.translate('xpack.siem.network.ipDetails.tlsTable.unitSingular', {
-  defaultMessage: 'Issuer',
-});
-
-export const UNIT_PLURAL = i18n.translate('xpack.siem.network.ipDetails.tlsTable.unitPlural', {
-  defaultMessage: 'Issuers',
-});
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.network.ipDetails.tlsTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {Issuer} other {Issuers}}`,
+  });
 
 // Columns
 export const ISSUER = i18n.translate('xpack.siem.network.ipDetails.tlsTable.columns.issuerTitle', {

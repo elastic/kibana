@@ -10,13 +10,11 @@ export const HOSTS = i18n.translate('xpack.siem.hostsTable.hostsTitle', {
   defaultMessage: 'Hosts',
 });
 
-export const UNIT_SINGULAR = i18n.translate('xpack.siem.hostsTable.unitSingular', {
-  defaultMessage: 'Host',
-});
-
-export const UNIT_PLURAL = i18n.translate('xpack.siem.hostsTable.unitPlural', {
-  defaultMessage: 'Hosts',
-});
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.hostsTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {Host} other {Hosts}}`,
+  });
 
 export const NAME = i18n.translate('xpack.siem.hostsTable.nameTitle', {
   defaultMessage: 'Name',

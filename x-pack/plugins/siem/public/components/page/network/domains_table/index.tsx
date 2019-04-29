@@ -121,7 +121,7 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
           />
         }
         headerTitle={i18n.DOMAINS}
-        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

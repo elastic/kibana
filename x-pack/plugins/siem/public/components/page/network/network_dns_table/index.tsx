@@ -95,7 +95,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         }
         headerTitle={i18n.TOP_DNS_DOMAINS}
         headerTooltip={i18n.TOOLTIP}
-        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

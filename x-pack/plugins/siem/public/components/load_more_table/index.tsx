@@ -206,7 +206,7 @@ export class LoadMoreTable<T, U, V, W, X, Y, Z, AA, AB> extends React.PureCompon
           )}
 
           <HeaderPanel
-            subtitle={`Showing: ${headerCount} ${headerUnit}`}
+            subtitle={`${i18n.SHOWING}: ${headerCount} ${headerUnit}`}
             title={headerTitle}
             tooltip={headerTooltip}
           >

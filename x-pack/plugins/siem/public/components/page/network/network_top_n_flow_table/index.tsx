@@ -155,7 +155,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           </EuiFlexGroup>
         }
         headerTitle={i18n.TOP_TALKERS}
-        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

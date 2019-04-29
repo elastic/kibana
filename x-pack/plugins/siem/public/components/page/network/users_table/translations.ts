@@ -10,16 +10,11 @@ export const USERS = i18n.translate('xpack.siem.network.ipDetails.usersTable.use
   defaultMessage: 'Users',
 });
 
-export const UNIT_SINGULAR = i18n.translate(
-  'xpack.siem.network.ipDetails.usersTable.unitSingular',
-  {
-    defaultMessage: 'User',
-  }
-);
-
-export const UNIT_PLURAL = i18n.translate('xpack.siem.network.ipDetails.usersTable.unitPlural', {
-  defaultMessage: 'Users',
-});
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.network.ipDetails.usersTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {User} other {Users}}`,
+  });
 
 // Columns
 export const USER_NAME = i18n.translate(

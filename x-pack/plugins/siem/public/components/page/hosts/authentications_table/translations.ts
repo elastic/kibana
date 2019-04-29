@@ -13,13 +13,11 @@ export const AUTHENTICATIONS = i18n.translate(
   }
 );
 
-export const UNIT_SINGULAR = i18n.translate('xpack.siem.authenticationsTable.unitSingular', {
-  defaultMessage: 'User',
-});
-
-export const UNIT_PLURAL = i18n.translate('xpack.siem.authenticationsTable.unitPlural', {
-  defaultMessage: 'Users',
-});
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.authenticationsTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {User} other {Users}}`,
+  });
 
 export const LAST_SUCCESSFUL_SOURCE = i18n.translate(
   'xpack.siem.authenticationsTable.lastSuccessfulSource',

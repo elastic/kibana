@@ -123,7 +123,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerTooltip={i18n.TOOLTIP}
-        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}
