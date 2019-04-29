@@ -22,7 +22,7 @@ exports[`Home component should render 1`] = `
   </EuiFlexGroup>
   <EuiSpacer />
   <FilterBar />
-  <withRouter(HistoryTabsWithoutRouter)
+  <HistoryTabs
     tabs={
       Array [
         Object {
