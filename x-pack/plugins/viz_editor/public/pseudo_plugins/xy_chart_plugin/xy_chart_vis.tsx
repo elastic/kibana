@@ -32,6 +32,7 @@ type XScaleTypes = ScaleType.Ordinal | ScaleType.Linear | ScaleType.Time;
 function xAxisScale({ type }: { type: string }): XScaleTypes {
   switch (type) {
     case 'string':
+    case 'boolean':
       return ScaleType.Ordinal;
     case 'number':
       return ScaleType.Linear;

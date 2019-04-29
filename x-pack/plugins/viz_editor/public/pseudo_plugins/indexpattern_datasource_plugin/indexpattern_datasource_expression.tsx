@@ -41,12 +41,34 @@ function columnTypesFunction() {
         return col1Parts[col1Parts.length - 1] < col2Parts[col2Parts.length - 1] ? -1 : 1;
       });
 
+      const typedColumns = columns.slice(0, types.length).map((column: any, index: number) => ({
+        ...column,
+        type: types[index],
+      }));
+
+      const columnTypeMap: any = {};
+      typedColumns.forEach(({ id, type }) => {
+        columnTypeMap[id] = type;
+      });
+
+      function mapCellValue(key: any, value: any) {
+        if (columnTypeMap[key] === 'boolean') {
+          return value ? 'True' : 'False';
+        } else {
+          return value;
+        }
+      }
+
       return {
         ...context,
-        columns: columns.slice(0, types.length).map((column: any, index: number) => ({
-          ...column,
-          type: types[index],
-        })),
+        rows: context.rows.map((row: any) => {
+          const newRow: any = {};
+          Object.keys(row).forEach(key => {
+            newRow[key] = mapCellValue(key, row[key]);
+          });
+          return newRow;
+        }),
+        columns: typedColumns,
       };
     },
   };
