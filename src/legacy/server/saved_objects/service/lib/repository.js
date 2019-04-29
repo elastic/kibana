@@ -39,6 +39,7 @@ export class SavedObjectsRepository {
       migrator,
       allowedTypes = [],
       onBeforeWrite = () => {},
+      onBeforeRead = () => {},
     } = options;
 
     // It's important that we migrate documents / mark them as up-to-date
@@ -58,6 +59,8 @@ export class SavedObjectsRepository {
     this._allowedTypes = allowedTypes;
 
     this._onBeforeWrite = onBeforeWrite;
+    this._onBeforeRead = onBeforeRead;
+
     this._unwrappedCallCluster = async (...args) => {
       await migrator.awaitMigration();
       return callCluster(...args);
@@ -104,7 +107,7 @@ export class SavedObjectsRepository {
 
       const response = await this._writeToCluster(method, {
         id: raw._id,
-        index: this._index,
+        index: this._getIndexForType(type),
         refresh: 'wait_for',
         body: raw._source,
       });
@@ -648,7 +651,16 @@ export class SavedObjectsRepository {
 
   async _writeToCluster(method, params) {
     try {
-      await this._onBeforeWrite();
+      await this._onBeforeWrite(method, params);
+      return await this._callCluster(method, params);
+    } catch (err) {
+      throw decorateEsError(err);
+    }
+  }
+
+  async _readFromCluster(method, params) {
+    try {
+      await this._onBeforeRead(method, params);
       return await this._callCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
@@ -661,6 +673,15 @@ export class SavedObjectsRepository {
     } catch (err) {
       throw decorateEsError(err);
     }
+  }
+
+  _getIndexForType(type) {
+    return (
+      (this._schema.definition &&
+        this._schema.definition[type] &&
+        this._schema.definition[type].indexPattern) ||
+      this._index
+    );
   }
 
   _getCurrentTime() {

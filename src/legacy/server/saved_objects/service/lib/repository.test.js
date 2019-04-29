@@ -214,6 +214,11 @@ describe('SavedObjectsRepository', () => {
           type: 'keyword',
         },
       },
+      baz: {
+        properties: {
+          type: 'keyword',
+        },
+      },
       'index-pattern': {
         properties: {
           someField: {
@@ -249,6 +254,7 @@ describe('SavedObjectsRepository', () => {
     globaltype: { isNamespaceAgnostic: true },
     foo: { isNamespaceAgnostic: true },
     bar: { isNamespaceAgnostic: true },
+    baz: { indexPattern: 'beats' },
     hiddenType: { isNamespaceAgnostic: true, hidden: true },
   });
 
@@ -356,6 +362,36 @@ describe('SavedObjectsRepository', () => {
       expect(callAdminCluster).toHaveBeenCalledTimes(1);
       expect(callAdminCluster).toHaveBeenCalledWith('index', expect.any(Object));
       expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+    });
+
+    it('should use default index', async () => {
+      await savedObjectsRepository.create('index-pattern', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
+
+      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+      expect(onBeforeWrite).toHaveBeenCalledWith(
+        'index',
+        expect.objectContaining({
+          index: '.kibana-test',
+        })
+      );
+    });
+
+    it('should use custom index', async () => {
+      await savedObjectsRepository.create('baz', {
+        id: 'logstash-*',
+        title: 'Logstash',
+      });
+
+      expect(onBeforeWrite).toHaveBeenCalledTimes(1);
+      expect(onBeforeWrite).toHaveBeenCalledWith(
+        'index',
+        expect.objectContaining({
+          index: 'beats',
+        })
+      );
     });
 
     it('migrates the doc', async () => {
@@ -1063,7 +1099,7 @@ describe('SavedObjectsRepository', () => {
 
       expect(getSearchDslNS.getSearchDsl).toHaveBeenCalledWith(mappings, schema, {
         namespace: 'my-namespace',
-        type: ['config', 'index-pattern', 'dashboard'],
+        type: ['config', 'baz', 'index-pattern', 'dashboard'],
       });
 
       expect(callAdminCluster).toHaveBeenCalledWith('deleteByQuery', {
@@ -1964,6 +2000,200 @@ describe('SavedObjectsRepository', () => {
         expect(errors.isNotAuthorizedError(error)).toBe(true);
       }
     });
+  });
+
+  describe('types on custom index', () => {
+    it("should error when attempting to 'update' an unsupported type", async () => {
+      await expect(
+        savedObjectsRepository.update('hiddenType', 'bogus', { title: 'some title' })
+      ).rejects.toEqual(new Error('Saved object [hiddenType/bogus] not found'));
+    });
+
+    // it("should error when attempting to 'get' an unsupported type", async () => {
+    //   await expect(savedObjectsRepository.get('hiddenType')).rejects.toEqual(
+    //     new Error('Not Found')
+    //   );
+    // });
+
+    // it("should return an error object when attempting to 'create' an unsupported type", async () => {
+    //   await expect(
+    //     savedObjectsRepository.create('hiddenType', { title: 'some title' })
+    //   ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
+    // });
+
+    // it("should return an error object when attempting to 'bulkGet' an unsupported type", async () => {
+    //   callAdminCluster.mockReturnValue({
+    //     docs: [
+    //       {
+    //         id: 'one',
+    //         type: 'config',
+    //         _primary_term: 1,
+    //         _seq_no: 1,
+    //         found: true,
+    //         _source: {
+    //           updated_at: mockTimestamp,
+    //         },
+    //       },
+    //       {
+    //         id: 'bad',
+    //         type: 'config',
+    //         found: false,
+    //       },
+    //     ],
+    //   });
+    //   const { saved_objects: savedObjects } = await savedObjectsRepository.bulkGet([
+    //     { id: 'one', type: 'config' },
+    //     { id: 'bad', type: 'config' },
+    //     { id: 'four', type: 'hiddenType' },
+    //   ]);
+    //   expect(savedObjects).toEqual([
+    //     {
+    //       id: 'one',
+    //       type: 'config',
+    //       updated_at: mockTimestamp,
+    //       references: [],
+    //       version: 'WzEsMV0=',
+    //     },
+    //     {
+    //       error: {
+    //         message: 'Not found',
+    //         statusCode: 404,
+    //       },
+    //       id: 'bad',
+    //       type: 'config',
+    //     },
+    //     {
+    //       id: 'four',
+    //       error: {
+    //         error: 'Bad Request',
+    //         message: "Unsupported saved object type: 'hiddenType': Bad Request",
+    //         statusCode: 400,
+    //       },
+    //       type: 'hiddenType',
+    //     },
+    //   ]);
+    // });
+
+    // it("should not return hidden saved ojects when attempting to 'find' support and unsupported types", async () => {
+    //   callAdminCluster.mockReturnValue({
+    //     hits: {
+    //       total: 1,
+    //       hits: [
+    //         {
+    //           _id: 'one',
+    //           _source: {
+    //             updated_at: mockTimestamp,
+    //             type: 'config',
+    //           },
+    //           references: [],
+    //         },
+    //       ],
+    //     },
+    //   });
+    //   const results = await savedObjectsRepository.find({ type: ['hiddenType', 'config'] });
+    //   expect(results).toEqual({
+    //     total: 1,
+    //     saved_objects: [
+    //       {
+    //         id: 'one',
+    //         references: [],
+    //         type: 'config',
+    //         updated_at: mockTimestamp,
+    //       },
+    //     ],
+    //     page: 1,
+    //     per_page: 20,
+    //   });
+    // });
+
+    // it("should return empty results when attempting to 'find' an unsupported type", async () => {
+    //   callAdminCluster.mockReturnValue({
+    //     hits: {
+    //       total: 0,
+    //       hits: [],
+    //     },
+    //   });
+    //   const results = await savedObjectsRepository.find({ type: 'hiddenType' });
+    //   expect(results).toEqual({
+    //     total: 0,
+    //     saved_objects: [],
+    //     page: 1,
+    //     per_page: 20,
+    //   });
+    // });
+
+    // it("should return empty results when attempting to 'find' more than one unsupported types", async () => {
+    //   const findParams = { type: ['hiddenType', 'hiddenType2'] };
+    //   callAdminCluster.mockReturnValue({
+    //     status: 200,
+    //     hits: {
+    //       total: 0,
+    //       hits: [],
+    //     },
+    //   });
+    //   const results = await savedObjectsRepository.find(findParams);
+    //   expect(results).toEqual({
+    //     total: 0,
+    //     saved_objects: [],
+    //     page: 1,
+    //     per_page: 20,
+    //   });
+    // });
+
+    // it("should error when attempting to 'delete' hidden types", async () => {
+    //   await expect(savedObjectsRepository.delete('hiddenType')).rejects.toEqual(
+    //     new Error('Not Found')
+    //   );
+    // });
+
+    // it("should error when attempting to 'bulkCreate' an unsupported type", async () => {
+    //   callAdminCluster.mockReturnValue({
+    //     items: [
+    //       {
+    //         index: {
+    //           _id: 'one',
+    //           _seq_no: 1,
+    //           _primary_term: 1,
+    //           _type: 'config',
+    //           attributes: {
+    //             title: 'Test One',
+    //           },
+    //         },
+    //       },
+    //     ],
+    //   });
+    //   const results = await savedObjectsRepository.bulkCreate([
+    //     { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+    //     { type: 'hiddenType', id: 'two', attributes: { title: 'Test Two' } },
+    //   ]);
+    //   expect(results).toEqual({
+    //     saved_objects: [
+    //       {
+    //         type: 'config',
+    //         id: 'one',
+    //         attributes: { title: 'Test One' },
+    //         references: [],
+    //         version: 'WzEsMV0=',
+    //         updated_at: mockTimestamp,
+    //       },
+    //       {
+    //         error: {
+    //           error: 'Bad Request',
+    //           message: "Unsupported saved object type: 'hiddenType': Bad Request",
+    //           statusCode: 400,
+    //         },
+    //         id: 'two',
+    //         type: 'hiddenType',
+    //       },
+    //     ],
+    //   });
+    // });
+
+    // it("should error when attempting to 'incrementCounter' for an unsupported type", async () => {
+    //   await expect(
+    //     savedObjectsRepository.incrementCounter('hiddenType', 'doesntmatter', 'fieldArg')
+    //   ).rejects.toEqual(new Error("Unsupported saved object type: 'hiddenType': Bad Request"));
+    // });
   });
 
   describe('unsupported types', () => {
