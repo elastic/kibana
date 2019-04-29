@@ -112,4 +112,98 @@ const firstLastSeenSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, firstLastSeenSchema];
+const tlsSchema = gql`
+  enum TlsFields {
+    _id
+  }
+  type TlsNode {
+    _id: String
+    timestamp: Date
+    alternativeNames: [String!]
+    notAfter: [String!]
+    commonNames: [String!]
+    ja3: [String!]
+    issuerNames: [String!]
+  }
+  input TlsSortField {
+    field: TlsFields!
+    direction: Direction!
+  }
+  type TlsEdges {
+    node: TlsNode!
+    cursor: CursorType!
+  }
+  type TlsData {
+    edges: [TlsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfo!
+  }
+  extend type Source {
+    Tls(
+      filterQuery: String
+      id: String
+      ip: String!
+      pagination: PaginationInput!
+      sort: TlsSortField!
+      flowTarget: FlowTarget!
+      timerange: TimerangeInput!
+    ): TlsData!
+  }
+`;
+
+const usersSchema = gql`
+  enum UsersFields {
+    name
+    count
+  }
+
+  input UsersSortField {
+    field: UsersFields!
+    direction: Direction!
+  }
+
+  type UsersItem {
+    name: String
+    id: ToStringArray
+    groupId: ToStringArray
+    groupName: ToStringArray
+    count: Float
+  }
+
+  type UsersNode {
+    _id: String
+    timestamp: Date
+    user: UsersItem
+  }
+
+  type UsersEdges {
+    node: UsersNode!
+    cursor: CursorType!
+  }
+
+  type UsersData {
+    edges: [UsersEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfo!
+  }
+
+  extend type Source {
+    Users(
+      filterQuery: String
+      id: String
+      ip: String!
+      pagination: PaginationInput!
+      sort: UsersSortField!
+      flowTarget: FlowTarget!
+      timerange: TimerangeInput!
+    ): UsersData!
+  }
+`;
+
+export const ipDetailsSchemas = [
+  ipOverviewSchema,
+  domainsSchema,
+  firstLastSeenSchema,
+  tlsSchema,
+  usersSchema,
+];

@@ -16,7 +16,7 @@
 
 export type ToStringArray = string[];
 
-export type Date = any;
+export type Date = string;
 
 export type ToNumberArray = number[];
 
@@ -66,6 +66,10 @@ export interface Source {
   Domains: DomainsData;
 
   DomainFirstLastSeen: FirstLastSeenDomain;
+
+  Tls: TlsData;
+
+  Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -958,6 +962,70 @@ export interface FirstLastSeenDomain {
   lastSeen?: Date | null;
 }
 
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  alternativeNames?: string[] | null;
+
+  notAfter?: string[] | null;
+
+  commonNames?: string[] | null;
+
+  ja3?: string[] | null;
+
+  issuerNames?: string[] | null;
+}
+
+export interface UsersData {
+  edges: UsersEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface UsersEdges {
+  node: UsersNode;
+
+  cursor: CursorType;
+}
+
+export interface UsersNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  user?: UsersItem | null;
+}
+
+export interface UsersItem {
+  name?: string | null;
+
+  id?: ToStringArray | null;
+
+  groupId?: ToStringArray | null;
+
+  groupName?: ToStringArray | null;
+
+  count?: number | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1099,7 +1167,7 @@ export interface UncommonProcessItem {
 
   process: ProcessEcsFields;
 
-  host: HostEcsFields[];
+  hosts: HostEcsFields[];
 
   user?: UserEcsFields | null;
 }
@@ -1151,6 +1219,18 @@ export interface HostsSortField {
 
 export interface DomainsSortField {
   field: DomainsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
+
+  direction: Direction;
+}
+
+export interface UsersSortField {
+  field: UsersFields;
 
   direction: Direction;
 }
@@ -1270,6 +1350,36 @@ export interface DomainFirstLastSeenSourceArgs {
 
   flowTarget: FlowTarget;
 }
+export interface TlsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
+}
+export interface UsersSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: UsersSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
+}
 export interface KpiNetworkSourceArgs {
   id?: string | null;
 
@@ -1388,6 +1498,15 @@ export enum NetworkDirectionEcs {
   outgoing = 'outgoing',
   listening = 'listening',
   unknown = 'unknown',
+}
+
+export enum TlsFields {
+  _id = '_id',
+}
+
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
 }
 
 export enum NetworkTopNFlowFields {
@@ -3360,6 +3479,86 @@ export namespace GetTimelineQuery {
   };
 }
 
+export namespace GetTlsQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: string | null;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInput;
+    sort: TlsSortField;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Tls: Tls;
+  };
+
+  export type Tls = {
+    __typename?: 'TlsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'TlsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'TlsNode';
+
+    _id?: string | null;
+
+    alternativeNames?: string[] | null;
+
+    commonNames?: string[] | null;
+
+    ja3?: string[] | null;
+
+    issuerNames?: string[] | null;
+
+    notAfter?: string[] | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
 export namespace GetUncommonProcessesQuery {
   export type Variables = {
     sourceId: string;
@@ -3411,7 +3610,7 @@ export namespace GetUncommonProcessesQuery {
 
     user?: User | null;
 
-    host: Host[];
+    hosts: Hosts[];
   };
 
   export type Process = {
@@ -3430,10 +3629,94 @@ export namespace GetUncommonProcessesQuery {
     name?: ToStringArray | null;
   };
 
-  export type Host = {
+  export type Hosts = {
     __typename?: 'HostEcsFields';
 
     name?: ToStringArray | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
+export namespace GetUsersQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: string | null;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInput;
+    sort: UsersSortField;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Users: Users;
+  };
+
+  export type Users = {
+    __typename?: 'UsersData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'UsersEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'UsersNode';
+
+    user?: User | null;
+  };
+
+  export type User = {
+    __typename?: 'UsersItem';
+
+    name?: string | null;
+
+    id?: ToStringArray | null;
+
+    groupId?: ToStringArray | null;
+
+    groupName?: ToStringArray | null;
+
+    count?: number | null;
   };
 
   export type Cursor = {

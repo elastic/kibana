@@ -42,7 +42,7 @@ describe('Load More Events Table Component', () => {
             totalCount={mockData.Events.totalCount}
             tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />

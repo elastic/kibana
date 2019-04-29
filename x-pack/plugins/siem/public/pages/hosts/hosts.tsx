@@ -66,7 +66,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       data={hosts}
                       totalCount={totalCount}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
                     />
@@ -98,7 +98,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       loading={loading}
                       data={uncommonProcesses}
                       totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
@@ -123,7 +123,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       loading={loading}
                       data={authentications}
                       totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
@@ -148,7 +148,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       data={events!}
                       loading={loading}
                       totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                      nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                       tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
                       hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loadMore={loadMore}

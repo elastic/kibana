@@ -39,7 +39,7 @@ describe('Load More Table Component', () => {
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
               loadMore={loadMore}
               type={hostsModel.HostsType.page}
             />
@@ -60,7 +60,7 @@ describe('Load More Table Component', () => {
               data={mockData.Hosts.edges}
               totalCount={mockData.Hosts.totalCount}
               hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
               loadMore={loadMore}
               type={hostsModel.HostsType.page}
             />
@@ -78,7 +78,7 @@ describe('Load More Table Component', () => {
                 data={mockData.Hosts.edges}
                 totalCount={mockData.Hosts.totalCount}
                 hasNextPage={getOr(false, 'hasNextPage', mockData.Hosts.pageInfo)!}
-                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)!}
+                nextCursor={getOr(null, 'endCursor.value', mockData.Hosts.pageInfo)}
                 loadMore={loadMore}
                 type={hostsModel.HostsType.page}
               />
