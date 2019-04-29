@@ -16,19 +16,19 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
   const SAVED_OBJECT_WITH_SECRET_TYPE = 'saved-object-with-secret';
 
-  async function getRawSavedObjectAttributes(id: string) {
-    const {
-      _source: { [SAVED_OBJECT_WITH_SECRET_TYPE]: savedObject },
-    } = await es.get({
-      id: `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`,
-      type: '_doc',
-      index: '.kibana',
-    });
+  function runTests(getURLAPIBaseURL: () => string, generateRawID: (id: string) => string) {
+    async function getRawSavedObjectAttributes(id: string) {
+      const {
+        _source: { [SAVED_OBJECT_WITH_SECRET_TYPE]: savedObject },
+      } = await es.get({
+        id: generateRawID(id),
+        type: '_doc',
+        index: '.kibana',
+      });
 
-    return savedObject;
-  }
+      return savedObject;
+    }
 
-  describe('within a default space', () => {
     let savedObjectOriginalAttributes: {
       publicProperty: string;
       publicPropertyExcludedFromAAD: string;
@@ -36,7 +36,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     };
 
     let savedObject: SavedObject;
-
     beforeEach(async () => {
       savedObjectOriginalAttributes = {
         publicProperty: chance.string(),
@@ -45,19 +44,12 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       };
 
       const { body } = await supertest
-        .post(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}`)
+        .post(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: savedObjectOriginalAttributes }, {})
         .expect(200);
 
       savedObject = body;
-    });
-
-    afterEach(async () => {
-      await supertest
-        .delete(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
     });
 
     it('#create encrypts attributes and strips them from response', async () => {
@@ -78,9 +70,57 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       );
     });
 
+    it('#bulkCreate encrypts attributes and strips them from response', async () => {
+      const bulkCreateParams = [
+        {
+          type: SAVED_OBJECT_WITH_SECRET_TYPE,
+          attributes: {
+            publicProperty: chance.string(),
+            publicPropertyExcludedFromAAD: chance.string(),
+            privateProperty: chance.string(),
+          },
+        },
+        {
+          type: SAVED_OBJECT_WITH_SECRET_TYPE,
+          attributes: {
+            publicProperty: chance.string(),
+            publicPropertyExcludedFromAAD: chance.string(),
+            privateProperty: chance.string(),
+          },
+        },
+      ];
+
+      const {
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .post(`${getURLAPIBaseURL()}_bulk_create`)
+        .set('kbn-xsrf', 'xxx')
+        .send(bulkCreateParams)
+        .expect(200);
+
+      expect(savedObjects).to.have.length(bulkCreateParams.length);
+      for (let index = 0; index < savedObjects.length; index++) {
+        const attributesFromResponse = savedObjects[index].attributes;
+        const attributesFromRequest = bulkCreateParams[index].attributes;
+        const rawAttributes = await getRawSavedObjectAttributes(savedObjects[index].id);
+
+        expect(attributesFromResponse).to.eql({
+          publicProperty: attributesFromRequest.publicProperty,
+          publicPropertyExcludedFromAAD: attributesFromRequest.publicPropertyExcludedFromAAD,
+        });
+
+        expect(rawAttributes.publicProperty).to.be(attributesFromRequest.publicProperty);
+        expect(rawAttributes.publicPropertyExcludedFromAAD).to.be(
+          attributesFromRequest.publicPropertyExcludedFromAAD
+        );
+        expect(rawAttributes.privateProperty).to.not.be.empty();
+        expect(rawAttributes.privateProperty).to.not.be(attributesFromRequest.privateProperty);
+      }
+    });
+
     it('#get strips encrypted attributes from response', async () => {
       const { body: response } = await supertest
-        .get(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
+        .get(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .expect(200);
 
       expect(response.attributes).to.eql({
@@ -90,13 +130,32 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
     });
 
     it('#find strips encrypted attributes from response', async () => {
-      const { body: response } = await supertest
-        .get(`/api/saved_objects/_find?type=${SAVED_OBJECT_WITH_SECRET_TYPE}`)
+      const {
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .get(`${getURLAPIBaseURL()}_find?type=${SAVED_OBJECT_WITH_SECRET_TYPE}`)
         .expect(200);
 
-      expect(response.saved_objects).to.have.length(1);
-      expect(response.saved_objects[0].id).to.be(savedObject.id);
-      expect(response.saved_objects[0].attributes).to.eql({
+      expect(savedObjects).to.have.length(1);
+      expect(savedObjects[0].id).to.be(savedObject.id);
+      expect(savedObjects[0].attributes).to.eql({
+        publicProperty: savedObjectOriginalAttributes.publicProperty,
+        publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
+      });
+    });
+
+    it('#bulkGet strips encrypted attributes from response', async () => {
+      const {
+        body: { saved_objects: savedObjects },
+      } = await supertest
+        .post(`${getURLAPIBaseURL()}_bulk_get`)
+        .set('kbn-xsrf', 'xxx')
+        .send([{ type: savedObject.type, id: savedObject.id }])
+        .expect(200);
+
+      expect(savedObjects).to.have.length(1);
+      expect(savedObjects[0].id).to.be(savedObject.id);
+      expect(savedObjects[0].attributes).to.eql({
         publicProperty: savedObjectOriginalAttributes.publicProperty,
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
@@ -110,7 +169,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       };
 
       const { body: response } = await supertest
-        .put(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
+        .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes }, {})
         .expect(200);
@@ -132,7 +191,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
     it('#getDecryptedAsInternalUser decrypts and returns all attributes', async () => {
       const { body: decryptedResponse } = await supertest
-        .get(`/api/eso/v1/get-decrypted-as-internal-user/${savedObject.id}`)
+        .get(`${getURLAPIBaseURL()}get-decrypted-as-internal-user/${savedObject.id}`)
         .expect(200);
 
       expect(decryptedResponse.attributes).to.eql(savedObjectOriginalAttributes);
@@ -142,7 +201,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const updatedAttributes = { publicPropertyExcludedFromAAD: chance.string() };
 
       const { body: response } = await supertest
-        .put(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
+        .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes }, {})
         .expect(200);
@@ -152,7 +211,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       });
 
       const { body: decryptedResponse } = await supertest
-        .get(`/api/eso/v1/get-decrypted-as-internal-user/${savedObject.id}`)
+        .get(`${getURLAPIBaseURL()}get-decrypted-as-internal-user/${savedObject.id}`)
         .expect(200);
 
       expect(decryptedResponse.attributes).to.eql({
@@ -165,7 +224,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
       const updatedAttributes = { publicProperty: chance.string() };
 
       const { body: response } = await supertest
-        .put(`/api/saved_objects/${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
+        .put(`${getURLAPIBaseURL()}${SAVED_OBJECT_WITH_SECRET_TYPE}/${savedObject.id}`)
         .set('kbn-xsrf', 'xxx')
         .send({ attributes: updatedAttributes }, {})
         .expect(200);
@@ -176,12 +235,50 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
 
       // Bad request means that we successfully detected "EncryptionError" (not unexpected one).
       await supertest
-        .get(`/api/eso/v1/get-decrypted-as-internal-user/${savedObject.id}`)
+        .get(`${getURLAPIBaseURL()}get-decrypted-as-internal-user/${savedObject.id}`)
         .expect(400, {
           statusCode: 400,
           error: 'Bad Request',
           message: 'Failed to encrypt attributes',
         });
+    });
+  }
+
+  describe('encrypted saved objects API', () => {
+    afterEach(async () => {
+      await es.deleteByQuery({
+        index: '.kibana',
+        q: `type:${SAVED_OBJECT_WITH_SECRET_TYPE}`,
+        refresh: true,
+      });
+    });
+
+    describe('within a default space', () => {
+      runTests(() => '/api/saved_objects/', id => `${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`);
+    });
+
+    describe('within a custom space', () => {
+      const SPACE_ID = 'eso';
+
+      before(async () => {
+        await supertest
+          .post('/api/spaces/space')
+          .set('kbn-xsrf', 'xxx')
+          .send({ id: SPACE_ID, name: SPACE_ID })
+          .expect(200);
+      });
+
+      after(async () => {
+        await supertest
+          .delete(`/api/spaces/space/${SPACE_ID}`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+      });
+
+      runTests(
+        () => `/s/${SPACE_ID}/api/saved_objects/`,
+        id => `${SPACE_ID}:${SAVED_OBJECT_WITH_SECRET_TYPE}:${id}`
+      );
     });
   });
 }

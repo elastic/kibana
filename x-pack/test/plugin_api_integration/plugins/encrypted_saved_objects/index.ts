@@ -19,7 +19,7 @@ export default function esoPlugin(kibana: any) {
     init(server: Legacy.Server) {
       server.route({
         method: 'GET',
-        path: '/api/eso/v1/get-decrypted-as-internal-user/{id}',
+        path: '/api/saved_objects/get-decrypted-as-internal-user/{id}',
         async handler(request: Request) {
           const namespace = server.plugins.spaces && server.plugins.spaces.getSpaceId(request);
           try {

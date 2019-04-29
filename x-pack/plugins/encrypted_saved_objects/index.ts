@@ -41,7 +41,7 @@ export const encryptedSavedObjects = (kibana: any) =>
         {
           config: {
             auditLogEnabled: config.get<boolean>(`${CONFIG_PREFIX}.audit.enabled`),
-            encryptionKey: config.get<string>(`${CONFIG_PREFIX}.encryptionKey`),
+            encryptionKey: config.get<string | undefined>(`${CONFIG_PREFIX}.encryptionKey`),
           },
           savedObjects: server.savedObjects,
           elasticsearch: server.plugins.elasticsearch,
