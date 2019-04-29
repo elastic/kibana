@@ -43,7 +43,7 @@ import { CoreSystem } from '__kibanaCore__'
 const rootDomElement = document.createElement('div');
 document.body.appendChild(rootDomElement)
 
-new CoreSystem({
+const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
@@ -113,5 +113,11 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).setup()
+})
+
+coreSystem
+  .setup()
+  .then(() => {
+    return coreSystem.start();
+  });
 `;
