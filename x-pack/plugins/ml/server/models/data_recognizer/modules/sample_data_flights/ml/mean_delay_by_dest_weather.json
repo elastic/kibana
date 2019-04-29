@@ -6,13 +6,13 @@
     "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "Mean flight delay time",
-        "function": "mean",
+        "detector_description": "Mean flight delay time by airline carrier",
+        "function": "high_mean",
 	"field_name": "FlightDelayMin",
-	"partition_field_name": "DestWeather"
+	"partition_field_name": "Carrier"
       }
     ],
-    "influencers": ["Carrier", "DestWeather"]
+    "influencers": ["Carrier", "DestWeather", "OriginWeather"]
   },
   "analysis_limits": {
     "model_memory_limit": "10mb"
