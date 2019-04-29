@@ -17,17 +17,12 @@ import {
   EuiLink,
   EuiSpacer,
   EuiSwitch,
-  EuiText,
   EuiTitle,
   EuiIcon,
 } from '@elastic/eui';
 
 import { Repository, RepositoryType, EmptyRepository } from '../../../../common/types';
-import {
-  REPOSITORY_TYPES,
-  DEFAULT_REPOSITORY_TYPES,
-  PLUGIN_REPOSITORY_TYPES,
-} from '../../../../common/constants';
+import { REPOSITORY_TYPES } from '../../../../common/constants';
 
 import { useAppDependencies } from '../../index';
 import { documentationLinksService } from '../../services/documentation';
@@ -132,17 +127,15 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
         ? repository.settings.delegateType
         : repository.type) === type;
     const displayName = textService.getRepositoryTypeName(type);
-    const isAvailable = repositoryTypes.includes(type);
 
     return (
       <EuiFlexItem
-        className={`ssrRepositoryFormTypeCardWrapper
-          ${!isAvailable ? 'ssrRepositoryFormTypeCardWrapper--disabled' : ''}`}
+        className="ssrRepositoryFormTypeCardWrapper"
         key={index}
         tabIndex={0}
-        onClick={() => (isAvailable ? onTypeChange(type) : false)}
+        onClick={() => onTypeChange(type)}
         onKeyDown={({ key }) => {
-          if (isAvailable && key === 'Enter') {
+          if (key === 'Enter') {
             onTypeChange(type);
           }
         }}
@@ -165,16 +158,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
               />{' '}
               <EuiIcon type="link" />
             </EuiLink>
-          }
-          footer={
-            !isAvailable ? (
-              <EuiText size="s" color="subdued">
-                <FormattedMessage
-                  id="xpack.snapshotRestore.repositoryForm.fields.typePluginRequiredDescription"
-                  defaultMessage="Plugin required"
-                />
-              </EuiText>
-            ) : null
           }
         />
       </EuiFlexItem>
@@ -209,9 +192,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
 
     return (
       <EuiFlexGrid columns={3}>
-        {[...DEFAULT_REPOSITORY_TYPES, ...PLUGIN_REPOSITORY_TYPES].map(
-          (type: RepositoryType, index: number) => renderTypeCard(type, index)
-        )}
+        {repositoryTypes.map((type: RepositoryType, index: number) => renderTypeCard(type, index))}
       </EuiFlexGrid>
     );
   };

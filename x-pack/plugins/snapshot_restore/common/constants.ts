@@ -37,9 +37,9 @@ export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
 ];
 
 export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [
-  REPOSITORY_TYPES.azure,
   REPOSITORY_TYPES.s3,
   REPOSITORY_TYPES.hdfs,
+  REPOSITORY_TYPES.azure,
   REPOSITORY_TYPES.gcs,
 ];
 

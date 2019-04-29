@@ -12,18 +12,8 @@
   }
 }
 
-.ssrRepositoryFormTypeCardWrapper--disabled {
-  .ssrRepositoryFormTypeCard {
-    cursor: default;
-    opacity: .7;
-  }
-
-}
-
-.ssrRepositoryFormTypeCardWrapper:not(.ssrRepositoryFormTypeCardWrapper--disabled) {
-  &:focus .ssrRepositoryFormTypeCard:not(.ssrRepositoryFormTypeCard--selected),
-  .ssrRepositoryFormTypeCard:not(.ssrRepositoryFormTypeCard--selected):hover {
-    @include euiBottomShadowMedium;
-    transform: translateY(-2px);
-  }
+.ssrRepositoryFormTypeCardWrapper:focus .ssrRepositoryFormTypeCard:not(.ssrRepositoryFormTypeCard--selected),
+.ssrRepositoryFormTypeCard:not(.ssrRepositoryFormTypeCard--selected):hover {
+  @include euiBottomShadowMedium;
+  transform: translateY(-2px);
 }
