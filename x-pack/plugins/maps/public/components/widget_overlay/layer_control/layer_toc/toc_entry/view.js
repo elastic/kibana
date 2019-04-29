@@ -213,7 +213,6 @@ export class TOCEntry extends React.Component {
   }
 
   render() {
-    console.log('TOCEntry');
     return (
       <div
         className="mapTocEntry"
