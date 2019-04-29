@@ -82,9 +82,8 @@ const withElementsLoadedTelemetry = <P extends object>(
         );
 
         if (
-          workpadElementCount > 0 &&
-          resolvedArgsAreForWorkpad &&
-          telemetryElementCounts.pending === 0
+          workpadElementCount === 0 ||
+          (resolvedArgsAreForWorkpad && telemetryElementCounts.pending === 0)
         ) {
           setHasReported(true);
         } else {

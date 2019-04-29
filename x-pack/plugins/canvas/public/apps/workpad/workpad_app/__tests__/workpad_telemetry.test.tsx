@@ -200,4 +200,31 @@ describe('Elements Loaded Telemetry', () => {
 
     expect(trackMetric).toBeCalledWith(WorkpadLoadedMetric);
   });
+
+  it('does not track if workpad has no elements', () => {
+    const otherWorkpad = {
+      id: 'otherworkpad',
+      pages: [],
+    };
+
+    const resolvedArgs = {};
+
+    const { rerender } = render(
+      <Component
+        telemetryElementCounts={readyCounts}
+        telemetryResolvedArgs={resolvedArgs}
+        workpad={otherWorkpad}
+      />
+    );
+
+    rerender(
+      <Component
+        telemetryElementCounts={readyCounts}
+        telemetryResolvedArgs={resolvedArgs}
+        workpad={otherWorkpad}
+      />
+    );
+
+    expect(trackMetric).not.toBeCalled();
+  });
 });
