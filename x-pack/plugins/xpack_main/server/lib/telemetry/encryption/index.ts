@@ -5,3 +5,4 @@
  */
 
 export { encryptTelemetry } from './encrypt';
+export { canReadUnencryptedTelemetryData } from './get_privilege';

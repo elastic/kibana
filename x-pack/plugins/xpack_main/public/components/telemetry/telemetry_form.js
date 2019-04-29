@@ -72,7 +72,12 @@ export class TelemetryForm extends Component {
     return (
       <Fragment>
         {showExample &&
-          <OptInExampleFlyout fetchTelemetry={() => telemetryOptInProvider.fetchExample()} onClose={this.toggleExample} />
+          <OptInExampleFlyout
+            fetchTelemetry={() => telemetryOptInProvider.fetchExample()}
+            getErrorCodes={() => telemetryOptInProvider.getErrorCodes()}
+            getReadRoles={() => telemetryOptInProvider.getReadRoles()}
+            onClose={this.toggleExample}
+          />
         }
         <EuiPanel paddingSize="l">
           <EuiForm>

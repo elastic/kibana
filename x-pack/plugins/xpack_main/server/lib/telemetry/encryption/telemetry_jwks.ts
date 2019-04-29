@@ -10,21 +10,21 @@ export const telemetryJWKS: PublicJWKS = {
   keys: [
     {
       kty: 'RSA',
-      kid: 'kibana_dev',
-      use: 'enc',
-      alg: 'RSA-OAEP',
-      e: 'AQAB',
-      n:
-        'kxa9RFxodOb5DPO4m87sXlp82-V1UD6fguSKmJgvMIcK7BsOmgFyYlWC6m23WfGkkR02fi6WlgBXx2PsZIr3dKCzA6O3KaJSzTh09VWANnSk2A0s6k-1Qe8Hyr8QKjtWjRYiUPJ0uB5sZZ0143RR1szFS17bIZn3VxT4RS9SDzvCkh5QYFJnHqTokIrdMc_DYIOjvC7mxCvqwhbh2vDVvovcn2d7xN8WPV2Ax1Sf9D9lvMcUO5DN-08VHLjm7eX_NKZXf21qRXqXQyQnsGWMdMeke5x5PWvl0ckv3Ip7YsaBLNH3HcId2gVx9QnnxlVb16oGWqu_t7wuOkKpSoiBNQ'
-    },
-    {
-      kty: 'RSA',
       kid: 'kibana',
       use: 'enc',
       alg: 'RSA-OAEP',
       e: 'AQAB',
       n:
-        'sF8XTRkCq13LTMeQG8R69nmiwjA9Pxj-R_DkaUTbfGMQebLJZAT1dhyaphoXUXson1nurSXFS7CKktR0cgrh17_Ngw1o0YooYKEGy9V6c1vMytNQ-PH3gTIP_kVx-ceKuwkLj9g36PLt9GDT8lxdxqB350acLzFuaoNmzfI76tkr0vwh2dBdt2n_h5szyvRAcmVSJDfi1G-DqsOivrSlIgOIsrzPcwHobONYq24M2Jaa5YYtSKsybUixaymFoqllaDa2PiYx9VaDQ712vDR4jjPnXHS8k6gPZcHDDscuYfnbedwiaiVjWBA8Is0TXdLd2cr3uV_URCBIQjPGJXllOw'
+        'xYYa5XzvENaAzElCxQurloQM2KEQ058YSjZqmOwa-IN-EZMSUaYPY3qfYCG78ioRaKTHq4mgnkyrDKgjY_1pWKytiRD61FG2ZUeOCwzydnqO8Qpz2vFnibEHkZBRsKkLHgm90RgGpcXfz8vwxkz_nu59aWy5Qr7Ct99H0pEV1HoiCvy5Yw3QfWSAeV-3DWmq_0kX49tqk5yZE-vKnUhNMgqM22lMFTE5-vlaeHgv4ZcvCQx_HrOeea8LyZa5YOdqN-9st0g0G-aWp3CNI2-KJlMUTBAfIAtjwmJ-8QlgeIB1aA7OI2Ceh3kd4dNLesGdLvZ0y4f8IMOsO1dsRWSEsQ',
+    },
+    {
+      kty: 'RSA',
+      kid: 'kibana_dev',
+      use: 'enc',
+      alg: 'RSA-OAEP',
+      e: 'AQAB',
+      n:
+        'juVHivsYFznjrDC449oL3xKVTvux_7dEgBGOgJdfzA2R2GspEAOzupT-VkBnqrJnRP_lznM8bQIvvst1f_DNQ1me_Lr9u9cwL5Vq6SWlmw_u9ur_-ewkShU4tBoJDArksOS-ciTaUJoMaxanb7jWexp0pCDlrLrQyAOCnKQL701mD1gdT4rIw7F-jkb5fLUNUVzOGaGyVy6DHAHZx7Tnyw8rswhyRVvuS73imbRp9XcdOFhBDOeSbrSuZGqrVCjoIlWw-UsiW2ueRd8brBoOIHSmTOMIrIMjpPmzMFRKyCvvhnbjrw8j3fQtFII8urhXCVAw8aIHZhiBc5t9ZuwbJw',
     },
   ],
 };

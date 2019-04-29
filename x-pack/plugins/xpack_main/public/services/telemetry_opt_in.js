@@ -5,6 +5,7 @@
  */
 
 import moment from 'moment';
+import { TELEMETRY_READ_ROLES, TELEMETRY_NO_READ_ACCESS_ERR_CODE } from '../../common/constants';
 
 export function TelemetryOptInProvider($injector, chrome) {
 
@@ -12,7 +13,10 @@ export function TelemetryOptInProvider($injector, chrome) {
   const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
 
-  return {
+  const provider = {
+    getReadRoles: () => TELEMETRY_READ_ROLES,
+    getErrorCodes: ()  => ({ noReadAccess: TELEMETRY_NO_READ_ACCESS_ERR_CODE }),
+    canUserRead: (role) => provider.getReadRoles().includes(role),
     getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled) => {
       const $http = $injector.get('$http');
@@ -38,4 +42,6 @@ export function TelemetryOptInProvider($injector, chrome) {
       });
     }
   };
+
+  return provider;
 }

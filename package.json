@@ -99,6 +99,7 @@
     "@elastic/filesaver": "1.1.2",
     "@elastic/good": "8.1.1-kibana2",
     "@elastic/numeral": "2.3.2",
+    "@elastic/request-crypto": "^1.0.0",
     "@elastic/ui-ace": "0.2.3",
     "@kbn/babel-code-parser": "1.0.0",
     "@kbn/babel-preset": "1.0.0",

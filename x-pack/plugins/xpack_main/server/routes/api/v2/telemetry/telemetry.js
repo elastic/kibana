@@ -6,12 +6,8 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/telemetry';
-
-export function isAllowedToViewUnencryptedTelemetryData(req) {
-  const { roles } = req.auth.credentials;
-  return roles.some(role => /superuser|remote_monitoring_collector|remote_monitoring_agent/.test(role));
-}
+import { getAllStats, getLocalStats, encryptTelemetry, canReadUnencryptedTelemetryData } from '../../../../lib/telemetry';
+import { TELEMETRY_NO_READ_ACCESS_ERR_CODE } from '../../../../../common/constants';
 
 /**
  * Get the telemetry data.
@@ -101,16 +97,14 @@ export function telemetryRoute(server) {
 
       try {
         if (unencrypted) {
-          const isAllowed = unencrypted && isAllowedToViewUnencryptedTelemetryData(req);
-          if(!isAllowed) {
-            return h.response({ code: 'T001' }).code(500);
+          const { roles } = req.auth.credentials;
+          if(!canReadUnencryptedTelemetryData(roles)) {
+            return h.response({ code: TELEMETRY_NO_READ_ACCESS_ERR_CODE }).code(500);
           }
-        }
-        const usageData = await getTelemetry(req, config, start, end);
-        if (unencrypted) {
-          return usageData;
+          return getTelemetry(req, config, start, end);
         }
 
+        const usageData = await getTelemetry(req, config, start, end);
         return encryptTelemetry(config, usageData);
       } catch (err) {
         if (config.get('env.dev')) {

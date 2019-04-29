@@ -9,10 +9,7 @@ import { telemetryJWKS } from './telemetry_jwks';
 
 export function getKID(config: any): string {
   const isDev = config.get('env.dev');
-  if (!isDev) {
-    return 'kibana_prod';
-  }
-  return 'kibana_dev';
+  return isDev ? 'kibana_dev' : 'kibana';
 }
 
 export async function encryptTelemetry(config: any, payload: any): Promise<string> {

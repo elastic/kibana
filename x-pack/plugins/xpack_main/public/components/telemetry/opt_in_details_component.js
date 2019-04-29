@@ -24,14 +24,6 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n/react';
 
-export function isUnprivilegedUser(err) {
-  try {
-    return err.data.code === 'T001';
-  } catch (_) {
-    return false;
-  }
-}
-
 /**
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
@@ -47,6 +39,14 @@ export class OptInExampleFlyout extends Component {
      * Callback function with no parameters that closes this flyout.
      */
     onClose: PropTypes.func.isRequired,
+    /**
+     * returns a list of telemetry error Codes
+     */
+    getErrorCodes: PropTypes.func.isRequired,
+    /**
+     *  returns a list of roles privileged to read unencrypted telemetry data.
+     */
+    getReadRoles: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -54,22 +54,32 @@ export class OptInExampleFlyout extends Component {
     this.state = {
       data: null,
       isLoading: true,
-      unprivilegedUser: false,
+      hasPrivilegeToRead: false,
     };
   }
 
   componentDidMount() {
-    this.props.fetchTelemetry()
+    const { getErrorCodes, fetchTelemetry } = this.props;
+
+    fetchTelemetry()
       .then(response => this.setState({ data: Array.isArray(response.data) ? response.data : null, isLoading: false }))
       .catch(err => {
+        let hasPrivilegeToRead = true;
+        try {
+          const errorCodes = getErrorCodes();
+          hasPrivilegeToRead = err.data.code !== errorCodes.noReadAccess;
+        } catch (err) {
+          // swallaw error to show it in UI
+        }
         this.setState({
           isLoading: false,
-          unprivilegedUser: isUnprivilegedUser(err),
+          hasPrivilegeToRead,
         });
       });
   }
 
-  renderBody({ data, isLoading, unprivilegedUser }) {
+  renderBody({ data, isLoading, hasPrivilegeToRead }) {
+    const { getReadRoles } = this.props;
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -80,7 +90,7 @@ export class OptInExampleFlyout extends Component {
       );
     }
 
-    if (unprivilegedUser) {
+    if (!hasPrivilegeToRead) {
       return (
         <EuiCallOut
           title={<FormattedMessage
@@ -92,10 +102,8 @@ export class OptInExampleFlyout extends Component {
         >
           <FormattedMessage
             id="xpack.main.telemetry.callout.errorUnprivilegedUserDescription"
-            defaultMessage="Only users with the following roles are allowed to see unencrypted cluster statistics: {privilegedRoles}."
-            values={{
-              privilegedRoles: ['superuser', 'remote_monitoring_collector', 'remote_monitoring_agent'],
-            }}
+            defaultMessage="Only users with the following roles are allowed to see unencrypted cluster statistics: {readRoles}."
+            values={{ readRoles: getReadRoles() }}
           />
         </EuiCallOut>
       );
