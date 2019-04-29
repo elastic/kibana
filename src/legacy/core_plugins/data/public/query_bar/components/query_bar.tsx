@@ -361,7 +361,6 @@ export class QueryBarUI extends Component<Props, State> {
 
   public onInputChange = (value: string) => {
     const hasValue = Boolean(value.trim());
-
     this.setState({
       query: {
         query: value,
@@ -515,7 +514,6 @@ export class QueryBarUI extends Component<Props, State> {
       method: 'POST',
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
-
     this.props.store.set('kibana.userQueryLanguage', language);
     this.props.onSubmit({
       query: {

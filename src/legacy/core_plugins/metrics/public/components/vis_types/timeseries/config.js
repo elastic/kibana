@@ -47,7 +47,7 @@ const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const handleSubmit = (query) => {
-    props.onChange({ filter: query.query.query });
+    props.onChange({ filter: query.query });
   };
   const defaults = {
     fill: '',
@@ -323,13 +323,15 @@ const TimeseriesConfig = injectI18n(function (props) {
           fullWidth
         >
           <QueryBar
-            query={{ language: 'lucene', query: model.filter }}
+            query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter }}
             screenTitle={'TSVB'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}
             indexPatterns={model.index_pattern || model.default_index_pattern}
             store={localStorage || {}}
             showDatePicker={false}
+            dateRangeFrom={props.dateRangeFrom}
+            dateRangeTo={props.dateRangeTo}
           />
 
         </EuiFormRow>

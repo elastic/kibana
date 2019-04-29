@@ -24,11 +24,6 @@ import * as collectionActions from '../lib/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
-/*
-  The relative imports are messy.
-  import { QueryBar } from '../../../../../ui/public/query_bar/components/query_bar.tsx';
-  import { Storage } from '../../../../../ui/public/storage/storage.ts';
-*/
 import { QueryBar } from 'ui/query_bar';
 import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
