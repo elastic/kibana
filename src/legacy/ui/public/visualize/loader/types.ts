@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { Vis } from 'plugins/visualizations';
 import { SearchSource } from '../../courier';
 import { PersistedState } from '../../persisted_state';
 import { AppState } from '../../state_management/app_state';
-import { Vis } from '../../vis';
 
 export interface TimeRange {
   from: string;

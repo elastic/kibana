@@ -31,8 +31,8 @@ You should also register the visualization with `VisTypesRegistryProvider`.
 
 ["source","js"]
 -----------
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
@@ -98,7 +98,8 @@ activate those changes, that you actually use in your `render` method.
 
 ["source","js"]
 -----------
-import { Status } from 'ui/vis/update_status';
+import { visualizations } from 'plugins/visualizations';
+const { Status } = visualizations.visTypes.updateStatus;
 
 // ...
 return  VisFactory.createBaseVisualization({
@@ -142,8 +143,8 @@ re-render or fetch new data.
 
 ["source","js"]
 -----------
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 class MyVisualization {
    constructor(el, vis) {
@@ -238,7 +239,8 @@ You can make your controller take extra configuration which is passed to the edi
 
 ["source","js"]
 -----------
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 class MyEditorController {
     constructor(el, vis) {
@@ -306,7 +308,8 @@ It's up to function to decide when it wants to issue a new request or return pre
 
 ["source","js"]
 -----------
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 const myRequestHandler = async (vis, { appState, uiState, timeRange }) => {
   const data = ... parse ...
@@ -381,7 +384,8 @@ Function should return the transformed data object that visualization can consum
 
 ["source","js"]
 -----------
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 const myResponseHandler = (vis, response) => {
    // transform the response (based on vis object?)

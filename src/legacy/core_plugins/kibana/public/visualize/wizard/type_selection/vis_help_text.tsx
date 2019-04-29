@@ -22,7 +22,7 @@ import React from 'react';
 
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
-import { VisType } from 'ui/vis';
+import { VisType } from 'plugins/visualizations';
 
 interface VisHelpTextProps {
   visType: VisType;

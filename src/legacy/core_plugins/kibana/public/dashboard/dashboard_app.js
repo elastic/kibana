@@ -53,11 +53,13 @@ import * as filterActions from 'plugins/kibana/discover/doc_table/actions/filter
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { ContextMenuActionsRegistryProvider } from 'ui/embeddable';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+
+import { visualizations } from 'plugins/visualizations';
+const { VisTypesRegistryProvider } = visualizations.visTypes;
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

@@ -33,7 +33,6 @@ import React from 'react';
 import angular from 'angular';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { toastNotifications } from 'ui/notify';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
@@ -54,6 +53,9 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+
+import { visualizations } from 'plugins/visualizations';
+const { VisTypesRegistryProvider } = visualizations.visTypes;
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {

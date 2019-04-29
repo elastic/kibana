@@ -24,7 +24,8 @@ import { derivativeMetricAgg } from '../../metrics/derivative';
 import { cumulativeSumMetricAgg } from '../../metrics/cumulative_sum';
 import { movingAvgMetricAgg } from '../../metrics/moving_avg';
 import { serialDiffMetricAgg } from '../../metrics/serial_diff';
-import { VisProvider } from '../../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [

@@ -23,8 +23,9 @@ import expect from '@kbn/expect';
 import fixtures from 'fixtures/fake_hierarchical_data';
 import { LegacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { VisProvider } from 'ui/vis';
 import { tabifyAggResponse } from 'ui/agg_response/tabify';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 
 describe('AggTableGroup Directive', function () {
 

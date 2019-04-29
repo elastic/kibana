@@ -21,9 +21,10 @@ import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 
-import { VisProvider } from 'ui/vis';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import MetricVisProvider from '../metric_vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 
 describe('metric vis', () => {
   let setup = null;

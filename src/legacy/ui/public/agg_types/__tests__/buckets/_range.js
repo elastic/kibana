@@ -21,7 +21,8 @@ import { values } from 'lodash';
 import ngMock from 'ng_mock';
 import expect from '@kbn/expect';
 import resp from 'fixtures/agg_resp/range';
-import { VisProvider } from '../../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Range Agg', function () {

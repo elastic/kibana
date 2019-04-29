@@ -22,7 +22,7 @@ import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 
 import { AggConfig } from 'ui/vis';
-import { Vis } from '../../../vis';
+import { Vis } from 'plugins/visualizations';
 import { Filters, Query } from '../types';
 
 interface QueryGeohashBoundsParams {

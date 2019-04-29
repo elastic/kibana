@@ -18,9 +18,9 @@
  */
 
 import { MarkdownVisWrapper } from './markdown_vis_controller';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 import markdownVisParamsTemplate from './markdown_vis_params.html';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 // we need to load the css ourselves
 

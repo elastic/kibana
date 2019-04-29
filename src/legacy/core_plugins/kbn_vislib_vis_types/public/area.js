@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider } = visualizations.visTypes;
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import pointSeriesTemplate from './editors/point_series.html';
 

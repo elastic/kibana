@@ -23,7 +23,8 @@ import ngMock from 'ng_mock';
 import $ from 'jquery';
 import { VegaVisualizationProvider } from '../vega_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import { ImageComparator } from 'test_utils/image_comparator';
 
 import vegaliteGraph from '!!raw-loader!./vegalite_graph.hjson';
@@ -56,7 +57,7 @@ describe('VegaVisualizations', () => {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private) => {
 
-    Vis = Private(visModule.VisProvider);
+    Vis = Private(VisProvider);
     VegaVisualization = Private(VegaVisualizationProvider);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 

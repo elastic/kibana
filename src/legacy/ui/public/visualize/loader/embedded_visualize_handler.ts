@@ -23,6 +23,7 @@ import * as Rx from 'rxjs';
 import { share } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
+import { Vis } from 'plugins/visualizations';
 // @ts-ignore untyped dependency
 import { registries } from '../../../../core_plugins/interpreter/public/registries';
 import { Inspector } from '../../inspector';
@@ -32,7 +33,7 @@ import { IPrivate } from '../../private';
 import { RenderCompleteHelper } from '../../render_complete';
 import { AppState } from '../../state_management/app_state';
 import { timefilter } from '../../timefilter';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { RequestHandlerParams } from '../../vis';
 import { PipelineDataLoader } from './pipeline_data_loader';
 import { visualizationLoader } from './visualization_loader';
 import { VisualizeDataLoader } from './visualize_data_loader';

@@ -18,11 +18,11 @@
  */
 
 import { i18n }  from '@kbn/i18n';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
-import { Status } from 'ui/vis/update_status';
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+
+import { visualizations } from 'plugins/visualizations';
+const { defaultFeedbackMessage, VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
+const { Status } = visualizations.visTypes.updateStatus;
 
 import { VegaRequestHandlerProvider } from './vega_request_handler';
 import { VegaVisualizationProvider } from './vega_visualization';

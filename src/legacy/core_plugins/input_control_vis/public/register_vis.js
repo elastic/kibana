@@ -17,13 +17,12 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { defaultFeedbackMessage, VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
+const { Status } = visualizations.visTypes.updateStatus;
 import { VisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
-import { Status } from 'ui/vis/update_status';
 import { i18n } from '@kbn/i18n';
 
 function InputControlVisProvider(Private) {

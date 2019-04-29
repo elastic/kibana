@@ -21,7 +21,8 @@ import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { CoordinateMapsVisualizationProvider } from '../coordinate_maps_visualization';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import { ImageComparator } from 'test_utils/image_comparator';
 import dummyESResponse from './dummy_es_response.json';
 import initial from './initial.png';
@@ -70,7 +71,7 @@ describe('CoordinateMapsVisualizationTest', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
 
-    Vis = Private(visModule.VisProvider);
+    Vis = Private(VisProvider);
     CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 

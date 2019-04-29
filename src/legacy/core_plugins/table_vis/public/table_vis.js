@@ -22,12 +22,12 @@ import './table_vis_controller';
 import './table_vis_params';
 import './agg_table';
 import './agg_table/agg_table_group';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
+const { VisFiltersProvider } = visualizations.visFilters;
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import tableVisTemplate from './table_vis.html';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { LegacyResponseHandlerProvider as legacyResponseHandlerProvider } from 'ui/vis/response_handlers/legacy';
-import { VisFiltersProvider } from 'ui/vis/vis_filters';
 
 // we need to load the css ourselves
 

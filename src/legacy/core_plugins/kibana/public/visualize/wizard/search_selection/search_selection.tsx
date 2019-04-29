@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { VisType } from 'ui/vis';
+import { VisType } from 'plugins/visualizations';
 
 import { SavedObjectFinder } from 'ui/saved_objects/components/saved_object_finder';
 

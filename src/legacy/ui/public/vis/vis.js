@@ -29,7 +29,7 @@
 
 import { EventEmitter } from 'events';
 import _ from 'lodash';
-import { VisTypesRegistryProvider } from '../registry/vis_types';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { AggConfigs } from './agg_configs';
 import { PersistedState } from '../persisted_state';
 import { FilterBarQueryFilterProvider } from '../filter_bar/query_filter';

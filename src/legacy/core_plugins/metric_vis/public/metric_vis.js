@@ -18,9 +18,9 @@
  */
 
 import './metric_vis_params';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
 import { MetricVisComponent } from './metric_vis_controller';
 // we need to load the css ourselves

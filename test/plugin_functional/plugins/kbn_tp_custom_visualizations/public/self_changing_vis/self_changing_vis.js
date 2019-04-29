@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 import { SelfChangingEditor } from './self_changing_editor';
 import { SelfChangingComponent } from './self_changing_components';

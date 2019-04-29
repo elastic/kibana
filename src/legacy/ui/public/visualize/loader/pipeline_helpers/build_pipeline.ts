@@ -21,7 +21,8 @@ import { cloneDeep } from 'lodash';
 // @ts-ignore
 import { setBounds } from 'ui/agg_types/buckets/date_histogram';
 import { SearchSource } from 'ui/courier';
-import { AggConfig, Vis, VisParams, VisState } from 'ui/vis';
+import { AggConfig } from 'ui/vis';
+import { Vis, VisParams, VisState } from 'plugins/visualizations';
 import moment from 'moment';
 
 interface SchemaFormat {

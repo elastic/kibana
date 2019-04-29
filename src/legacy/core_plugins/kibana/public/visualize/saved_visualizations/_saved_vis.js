@@ -25,9 +25,9 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import { VisProvider } from 'ui/vis';
+import { visualizations } from 'plugins/visualizations';
+const { updateOldState, VisProvider } = visualizations.visTypes;
 import { uiModules } from 'ui/modules';
-import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisualizeConstants } from '../visualize_constants';
 import { createLegacyClass } from 'ui/utils/legacy_class';
 import { SavedObjectProvider } from 'ui/saved_objects/saved_object';

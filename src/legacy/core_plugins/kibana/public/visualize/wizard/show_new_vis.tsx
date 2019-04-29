@@ -21,7 +21,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { I18nContext } from 'ui/i18n';
-import { VisType } from 'ui/vis';
+import { VisType } from 'plugins/visualizations';
 import { NewVisModal } from './new_vis_modal';
 
 interface ShowNewVisModalParams {

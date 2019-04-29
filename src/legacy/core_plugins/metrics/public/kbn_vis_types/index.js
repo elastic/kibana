@@ -19,11 +19,10 @@
 
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
+import { visualizations } from 'plugins/visualizations';
+const { defaultFeedbackMessage, VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 
 // register the provider with the visTypes registry so that other know it exists
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
 
 export default function MetricsVisProvider(Private, i18n) {

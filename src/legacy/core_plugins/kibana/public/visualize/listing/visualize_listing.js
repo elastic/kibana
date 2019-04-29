@@ -21,7 +21,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+
+import { visualizations } from 'plugins/visualizations';
+const { VisTypesRegistryProvider } = visualizations.visTypes;
+
 import chrome from 'ui/chrome';
 import { wrapInI18nContext } from 'ui/i18n';
 

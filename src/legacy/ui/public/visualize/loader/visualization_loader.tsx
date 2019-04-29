@@ -21,8 +21,8 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { Vis } from 'plugins/visualizations';
 import { PersistedState } from '../../persisted_state';
-import { Vis } from '../../vis';
 import { Visualization } from '../components/visualization';
 
 interface VisualizationLoaderParams {

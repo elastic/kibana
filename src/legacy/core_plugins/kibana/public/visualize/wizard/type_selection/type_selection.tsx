@@ -35,7 +35,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { memoizeLast } from 'ui/utils/memoize';
-import { VisType } from 'ui/vis';
+import { VisType } from 'plugins/visualizations';
 import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';

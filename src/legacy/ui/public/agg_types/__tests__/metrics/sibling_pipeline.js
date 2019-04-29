@@ -24,7 +24,8 @@ import { bucketSumMetricAgg } from '../../metrics/bucket_sum';
 import { bucketAvgMetricAgg } from '../../metrics/bucket_avg';
 import { bucketMinMetricAgg } from '../../metrics/bucket_min';
 import { bucketMaxMetricAgg } from '../../metrics/bucket_max';
-import { VisProvider } from '../../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
 
 const metrics = [

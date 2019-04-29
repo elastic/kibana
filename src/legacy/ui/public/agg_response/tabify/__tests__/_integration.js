@@ -22,7 +22,8 @@ import fixtures from 'fixtures/fake_hierarchical_data';
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
-import { VisProvider } from '../../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('tabifyAggResponse Integration', function () {

@@ -24,7 +24,7 @@ import { settingsGet } from './new_vis_modal.test.mocks';
 
 import { NewVisModal } from './new_vis_modal';
 
-import { VisType } from 'ui/vis';
+import { VisType } from 'plugins/visualizations';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {

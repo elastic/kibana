@@ -20,9 +20,9 @@
 import { get } from 'lodash';
 import React from 'react';
 
+import { Vis } from 'plugins/visualizations';
 import { PersistedState } from '../../persisted_state';
 import { memoizeLast } from '../../utils/memoize';
-import { Vis } from '../../vis';
 import { VisualizationChart } from './visualization_chart';
 import { VisualizationNoResults } from './visualization_noresults';
 import { VisualizationRequestError } from './visualization_requesterror';

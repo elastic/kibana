@@ -19,7 +19,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { identity } from 'lodash';
-import { AggConfig, Vis } from 'ui/vis';
+import { AggConfig } from 'ui/vis';
+import { Vis } from 'plugins/visualizations';
+
 // @ts-ignore
 import { FieldFormat } from '../../../../field_formats/field_format';
 // @ts-ignore

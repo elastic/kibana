@@ -19,7 +19,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { VisType } from 'ui/vis';
+import { VisType } from 'plugins/visualizations';
 
 interface VisTypeIconProps {
   visType: VisType;

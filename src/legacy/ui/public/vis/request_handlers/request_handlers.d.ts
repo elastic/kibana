@@ -17,13 +17,13 @@
  * under the License.
  */
 
+import { Vis } from 'plugins/visualizations';
 import { SearchSource } from '../../courier';
 import { QueryFilter } from '../../filter_bar/query_filter';
 import { Adapters } from '../../inspector/types';
 import { PersistedState } from '../../persisted_state';
 import { Filters, Query, TimeRange } from '../../visualize';
 import { AggConfigs } from '../agg_configs';
-import { Vis } from '../vis';
 
 export interface RequestHandlerParams {
   searchSource: SearchSource;

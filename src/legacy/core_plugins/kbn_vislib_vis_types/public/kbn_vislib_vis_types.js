@@ -17,7 +17,8 @@
  * under the License.
  */
 
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { VisTypesRegistryProvider } = visualizations.visTypes;
 
 import histogramVisTypeProvider from './histogram';
 import lineVisTypeProvider from './line';

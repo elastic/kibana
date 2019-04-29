@@ -18,13 +18,13 @@
  */
 
 import './region_map_vis_params';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
+const { Status } = visualizations.visTypes.updateStatus;
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 import { RegionMapsVisualizationProvider } from './region_map_visualization';
-import { Status } from 'ui/vis/update_status';
 import { ORIGIN } from '../../../../legacy/core_plugins/tile_map/common/origin';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config, i18n) {

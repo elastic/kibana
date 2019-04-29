@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { VisType } from '../vis';
+import { VisType } from 'plugins/visualizations';
 import { uiRegistry, UIRegistry } from './_registry';
 
 interface VisTypesRegistryAccessors {

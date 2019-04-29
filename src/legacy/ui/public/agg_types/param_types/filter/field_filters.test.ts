@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Vis } from 'ui/vis';
+import { Vis } from 'plugins/visualizations';
 import { AggTypeFieldFilters } from './field_filters';
 
 describe('AggTypeFieldFilters', () => {

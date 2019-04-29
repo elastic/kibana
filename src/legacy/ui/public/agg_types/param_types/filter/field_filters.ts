@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { Vis } from 'plugins/visualizations';
 import { FieldParamType } from '../';
 import { IndexPattern } from '../../../index_patterns';
-import { AggConfig, Vis } from '../../../vis';
+import { AggConfig } from '../../../vis';
 
 type AggTypeFieldFilter = (
   field: any,

@@ -18,7 +18,8 @@
  */
 
 import './_saved_vis';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { VisTypesRegistryProvider } = visualizations.visTypes;
 import { uiModules } from 'ui/modules';
 import { SavedObjectLoader, SavedObjectsClientProvider } from 'ui/saved_objects';
 import { savedObjectManagementRegistry } from '../../management/saved_object_registry';

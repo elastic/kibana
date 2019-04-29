@@ -19,6 +19,9 @@
 import { isEqual } from 'lodash';
 
 import { getVisParams } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
+
+import { Vis } from 'plugins/visualizations';
+
 import { VisRequestHandlersRegistryProvider as RequestHandlersProvider } from '../../registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider as ResponseHandlerProvider } from '../../registry/vis_response_handlers';
 
@@ -29,7 +32,6 @@ import {
   RequestHandlerParams,
   ResponseHandler,
   ResponseHandlerDescription,
-  Vis,
 } from '../../vis';
 
 import { VisResponseData } from './types';

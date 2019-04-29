@@ -18,11 +18,11 @@
  */
 
 import './tag_cloud_vis_params';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
+const { Status } = visualizations.visTypes.updateStatus;
 import { Schemas } from 'ui/vis/editors/default/schemas';
 import { TagCloudVisualization } from './tag_cloud_visualization';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { Status } from 'ui/vis/update_status';
 
 VisTypesRegistryProvider.register(function (Private, i18n) {
 

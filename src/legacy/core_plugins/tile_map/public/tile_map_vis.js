@@ -21,11 +21,11 @@ import { i18n } from '@kbn/i18n';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import './editors/tile_map_vis_params';
 import { supports } from 'ui/utils/supports';
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
+const { Status } = visualizations.visTypes.updateStatus;
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { Schemas } from 'ui/vis/editors/default/schemas';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import { Status } from 'ui/vis/update_status';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { convertToGeoJson } from 'ui/vis/map/convert_to_geojson';
 

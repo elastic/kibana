@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
+import { visualizations } from 'plugins/visualizations';
+const { VisFactoryProvider, VisTypesRegistryProvider } = visualizations.visTypes;
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 

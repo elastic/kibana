@@ -23,7 +23,8 @@ import _ from 'lodash';
 import { RegionMapsVisualizationProvider } from '../region_map_visualization';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
-import * as visModule from 'ui/vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import { ImageComparator } from 'test_utils/image_comparator';
 import worldJson from './world.json';
 import EMS_CATALOGUE from '../../../../ui/public/vis/__tests__/map/ems_mocks/sample_manifest.json';
@@ -83,7 +84,7 @@ describe('RegionMapsVisualizationTests', function () {
   let getManifestStub;
   beforeEach(ngMock.inject((Private, $injector) => {
 
-    Vis = Private(visModule.VisProvider);
+    Vis = Private(VisProvider);
     RegionMapsVisualization = Private(RegionMapsVisualizationProvider);
     indexPattern = Private(LogstashIndexPatternStubProvider);
 

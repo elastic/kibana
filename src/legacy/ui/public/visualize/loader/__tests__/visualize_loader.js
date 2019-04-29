@@ -28,7 +28,8 @@ import { setupAndTeardownInjectorStub } from 'test_utils/stub_get_active_injecto
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
-import { VisProvider } from '../../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import { getVisualizeLoader } from '../visualize_loader';
 import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 import { Inspector } from '../../../inspector/inspector';

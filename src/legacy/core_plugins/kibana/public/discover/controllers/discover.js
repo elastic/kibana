@@ -39,7 +39,6 @@ import { timefilter } from 'ui/timefilter';
 import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
-import { VisProvider } from 'ui/vis';
 import { VislibSeriesResponseHandlerProvider } from 'ui/vis/response_handlers/vislib';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
@@ -69,6 +68,9 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
+
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',

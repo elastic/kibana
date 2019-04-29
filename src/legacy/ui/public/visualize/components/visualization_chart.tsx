@@ -21,11 +21,11 @@ import React from 'react';
 import * as Rx from 'rxjs';
 import { debounceTime, filter, share, switchMap, tap } from 'rxjs/operators';
 
+import { Vis, VisualizationController, visualizations } from 'plugins/visualizations';
 import { PersistedState } from '../../persisted_state';
 import { dispatchRenderComplete, dispatchRenderStart } from '../../render_complete';
 import { ResizeChecker } from '../../resize_checker';
-import { Vis, VisualizationController } from '../../vis';
-import { getUpdateStatus } from '../../vis/update_status';
+const { getUpdateStatus } = visualizations.visTypes.updateStatus;
 
 interface VisualizationChartProps {
   onInit?: () => void;

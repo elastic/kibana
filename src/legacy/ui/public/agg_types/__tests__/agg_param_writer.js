@@ -18,7 +18,8 @@
  */
 
 import _ from 'lodash';
-import { VisProvider } from '../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import { aggTypes } from '..';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

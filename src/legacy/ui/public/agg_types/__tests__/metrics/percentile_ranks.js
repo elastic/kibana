@@ -20,7 +20,8 @@
 import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { percentileRanksMetricAgg } from '../../metrics/percentile_ranks';
-import { VisProvider } from '../../../vis';
+import { visualizations } from 'plugins/visualizations';
+const { VisProvider } = visualizations.visTypes;
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('AggTypesMetricsPercentileRanksProvider class', function () {

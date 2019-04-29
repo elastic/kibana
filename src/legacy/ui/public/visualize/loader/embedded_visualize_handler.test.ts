@@ -18,9 +18,10 @@
  */
 import { mockDataLoaderFetch, timefilter } from './embedded_visualize_handler.test.mocks';
 
+import { Vis } from 'plugins/visualizations';
 // @ts-ignore
 import MockState from '../../../../../fixtures/mock_state';
-import { RequestHandlerParams, Vis } from '../../vis';
+import { RequestHandlerParams } from '../../vis';
 import { VisResponseData } from './types';
 
 import { Inspector } from '../../inspector';
