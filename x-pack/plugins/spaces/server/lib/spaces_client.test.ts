@@ -5,6 +5,8 @@
  */
 
 import { SpacesClient } from './spaces_client';
+import { AuthorizationService } from '../../../security/server/lib/authorization/service';
+import { actionsFactory } from '../../../security/server/lib/authorization/actions';
 
 const createMockAuditLogger = () => {
   return {
@@ -17,17 +19,30 @@ const createMockDebugLogger = () => {
   return jest.fn();
 };
 
+interface MockedAuthorization extends AuthorizationService {
+  mode: {
+    useRbacForRequest: jest.Mock<any>;
+  };
+}
 const createMockAuthorization = () => {
   const mockCheckPrivilegesAtSpace = jest.fn();
   const mockCheckPrivilegesAtSpaces = jest.fn();
   const mockCheckPrivilegesGlobally = jest.fn();
 
-  const mockAuthorization = {
-    actions: {
-      login: 'action:login',
-      space: {
-        manage: 'space:manage',
-      },
+  // mocking base path
+  const mockConfig = { get: jest.fn().mockReturnValue('/') };
+  const mockAuthorization: MockedAuthorization = {
+    actions: actionsFactory(mockConfig),
+    application: '',
+    checkPrivilegesDynamicallyWithRequest: jest.fn().mockImplementation(() => {
+      throw new Error(
+        'checkPrivilegesDynamicallyWithRequest should not be called from this test suite'
+      );
+    }),
+    privileges: {
+      get: jest.fn().mockImplementation(() => {
+        throw new Error('privileges.get() should not be called from this test suite');
+      }),
     },
     checkPrivilegesWithRequest: jest.fn(() => ({
       atSpaces: mockCheckPrivilegesAtSpaces,
@@ -105,7 +120,7 @@ describe('#getAll', () => {
       mockCallWithRequestRepository.find.mockReturnValue({
         saved_objects: savedObjects,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
       const maxSpaces = 1234;
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': 1234,
@@ -149,7 +164,7 @@ describe('#getAll', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': 1234,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -202,7 +217,7 @@ describe('#getAll', () => {
           saved_objects: savedObjects,
         }),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -257,7 +272,7 @@ describe('#getAll', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': 1234,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -297,7 +312,7 @@ describe('#canEnumerateSpaces', () => {
       const mockAuditLogger = createMockAuditLogger();
       const mockDebugLogger = createMockDebugLogger();
       const authorization = null;
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -322,7 +337,7 @@ describe('#canEnumerateSpaces', () => {
       const mockDebugLogger = createMockDebugLogger();
       const { mockAuthorization } = createMockAuthorization();
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(false);
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -352,7 +367,7 @@ describe('#canEnumerateSpaces', () => {
         username,
         hasAllRequested: false,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -386,7 +401,7 @@ describe('#canEnumerateSpaces', () => {
         username,
         hasAllRequested: true,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -437,7 +452,7 @@ describe('#get', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(savedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -467,7 +482,7 @@ describe('#get', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(savedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -500,7 +515,7 @@ describe('#get', () => {
         username,
         hasAllRequested: false,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -533,7 +548,7 @@ describe('#get', () => {
         username,
         hasAllRequested: true,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
       const mockInternalRepository = {
         get: jest.fn().mockReturnValue(savedObject),
       };
@@ -615,7 +630,7 @@ describe('#create', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': maxSpaces,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -656,7 +671,7 @@ describe('#create', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': maxSpaces,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -697,7 +712,7 @@ describe('#create', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': maxSpaces,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -740,7 +755,7 @@ describe('#create', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': maxSpaces,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -777,7 +792,7 @@ describe('#create', () => {
         username,
         hasAllRequested: false,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -820,7 +835,7 @@ describe('#create', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': maxSpaces,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -872,7 +887,7 @@ describe('#create', () => {
       const mockConfig = createMockConfig({
         'xpack.spaces.maxSpaces': maxSpaces,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -949,7 +964,7 @@ describe('#update', () => {
         update: jest.fn(),
         get: jest.fn().mockReturnValue(savedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -980,7 +995,7 @@ describe('#update', () => {
         update: jest.fn(),
         get: jest.fn().mockReturnValue(savedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1014,7 +1029,7 @@ describe('#update', () => {
         username,
       });
       mockAuthorization.mode.useRbacForRequest.mockReturnValue(true);
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1051,7 +1066,7 @@ describe('#update', () => {
         update: jest.fn(),
         get: jest.fn().mockReturnValue(savedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1109,7 +1124,7 @@ describe('#delete', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(reservedSavedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1138,7 +1153,7 @@ describe('#delete', () => {
         deleteByNamespace: jest.fn(),
       };
 
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1169,7 +1184,7 @@ describe('#delete', () => {
       const mockCallWithRequestRepository = {
         get: jest.fn().mockReturnValue(reservedSavedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1200,7 +1215,7 @@ describe('#delete', () => {
         deleteByNamespace: jest.fn(),
       };
 
-      const request = Symbol();
+      const request = Symbol() as any;
 
       const client = new SpacesClient(
         mockAuditLogger as any,
@@ -1234,7 +1249,7 @@ describe('#delete', () => {
         username,
         hasAllRequested: false,
       });
-      const request = Symbol();
+      const request = Symbol() as any;
       const client = new SpacesClient(
         mockAuditLogger as any,
         mockDebugLogger,
@@ -1269,7 +1284,7 @@ describe('#delete', () => {
       const mockInternalRepository = {
         get: jest.fn().mockReturnValue(reservedSavedObject),
       };
-      const request = Symbol();
+      const request = Symbol() as any;
       const client = new SpacesClient(
         mockAuditLogger as any,
         mockDebugLogger,
@@ -1308,7 +1323,7 @@ describe('#delete', () => {
         deleteByNamespace: jest.fn(),
       };
 
-      const request = Symbol();
+      const request = Symbol() as any;
       const client = new SpacesClient(
         mockAuditLogger as any,
         mockDebugLogger,
