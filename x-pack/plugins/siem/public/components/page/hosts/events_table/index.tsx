@@ -79,7 +79,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.EVENTS}
-      headerUnit={totalCount === 1 ? 'Event' : 'Events'}
+      headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

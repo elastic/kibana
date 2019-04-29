@@ -89,7 +89,7 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.USERS}
-        headerUnit={totalCount === 1 ? 'User' : 'Users'}
+        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

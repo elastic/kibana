@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -124,13 +123,7 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         headerCount={totalCount}
         headerTitle={i18n.HOSTS}
         headerTooltip={i18n.TOOLTIP}
-        headerUnit={
-          totalCount === 1 ? (
-            <FormattedMessage id="xpack.siem.hosts.hostsTable.unitSingular" defaultMessage="Host" />
-          ) : (
-            <FormattedMessage id="xpack.siem.hosts.hostsTable.unitPlural" defaultMessage="Hosts" />
-          )
-        }
+        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

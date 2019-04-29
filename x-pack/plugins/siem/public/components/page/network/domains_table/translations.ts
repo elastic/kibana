@@ -10,6 +10,17 @@ export const DOMAINS = i18n.translate('xpack.siem.network.ipDetails.domainsTable
   defaultMessage: 'Domains',
 });
 
+export const UNIT_SINGULAR = i18n.translate(
+  'xpack.siem.network.ipDetails.domainsTable.unitSingular',
+  {
+    defaultMessage: 'Domain',
+  }
+);
+
+export const UNIT_PLURAL = i18n.translate('xpack.siem.network.ipDetails.domainsTable.unitPlural', {
+  defaultMessage: 'Domains',
+});
+
 // Columns
 export const DOMAIN_NAME = i18n.translate(
   'xpack.siem.network.ipDetails.domainsTable.columns.domainNameTitle',

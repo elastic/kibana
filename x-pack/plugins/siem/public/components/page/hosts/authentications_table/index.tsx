@@ -82,7 +82,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.AUTHENTICATIONS}
-      headerUnit={totalCount === 1 ? 'User' : 'Users'}
+      headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

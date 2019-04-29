@@ -10,6 +10,14 @@ export const TOP_TALKERS = i18n.translate('xpack.siem.networkTopNFlowTable.title
   defaultMessage: 'Top Talkers',
 });
 
+export const UNIT_SINGULAR = i18n.translate('xpack.siem.networkTopNFlowTable.unitSingular', {
+  defaultMessage: 'IP',
+});
+
+export const UNIT_PLURAL = i18n.translate('xpack.siem.networkTopNFlowTable.unitPlural', {
+  defaultMessage: 'IPs',
+});
+
 export const SOURCE_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.sourceIpTitle', {
   defaultMessage: 'Source IP',
 });

@@ -83,7 +83,7 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       hasNextPage={hasNextPage}
       headerCount={totalCount}
       headerTitle={i18n.UNCOMMON_PROCESSES}
-      headerUnit={totalCount === 1 ? 'Process' : 'Processes'}
+      headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}

@@ -70,11 +70,6 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const Sup = styled.sup`
-  vertical-align: super;
-  padding: 0 5px;
-`;
-
 class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
   public render() {
     const {
@@ -100,7 +95,7 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         }
         headerTitle={i18n.TOP_DNS_DOMAINS}
         headerTooltip={i18n.TOOLTIP}
-        headerUnit={totalCount === 1 ? 'Domain' : 'Domains'}
+        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

@@ -84,7 +84,7 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
-        headerUnit={totalCount === 1 ? 'Issuer' : 'Issuers'}
+        headerUnit={totalCount === 1 ? i18n.UNIT_SINGULAR : i18n.UNIT_PLURAL}
         itemsPerRow={rowItems}
         limit={limit}
         loading={loading}

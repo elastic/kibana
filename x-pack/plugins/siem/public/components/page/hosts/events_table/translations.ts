@@ -10,6 +10,14 @@ export const EVENTS = i18n.translate('xpack.siem.eventsTable.eventsTitle', {
   defaultMessage: 'Events',
 });
 
+export const UNIT_SINGULAR = i18n.translate('xpack.siem.eventsTable.unitSingular', {
+  defaultMessage: 'Event',
+});
+
+export const UNIT_PLURAL = i18n.translate('xpack.siem.eventsTable.unitPlural', {
+  defaultMessage: 'Events',
+});
+
 export const HOST_NAME = i18n.translate('xpack.siem.eventsTable.hostsNameTitle', {
   defaultMessage: 'Host Name',
 });
