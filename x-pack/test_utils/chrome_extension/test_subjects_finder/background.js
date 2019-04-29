@@ -14,6 +14,9 @@ chrome.runtime.onInstalled.addListener(function () {
       conditions: [
         new chrome.declarativeContent.PageStateMatcher({
           pageUrl: { hostEquals: 'localhost' },
+        }),
+        new chrome.declarativeContent.PageStateMatcher({
+          pageUrl: { hostEquals: 'kibana-dev' },
         })
       ],
       actions: [new chrome.declarativeContent.ShowPageAction()]
