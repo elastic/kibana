@@ -63,7 +63,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
     content = (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryList.loadingRepositories"
+          id="xpack.snapshotRestore.repositoryList.loadingRepositoriesDescription"
           defaultMessage="Loading repositories…"
         />
       </SectionLoading>
@@ -73,7 +73,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
       <SectionError
         title={
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryList.errorLoadingRepositories"
+            id="xpack.snapshotRestore.repositoryList.LoadingRepositoriesErrorMessage"
             defaultMessage="Error loading repositories"
           />
         }
@@ -88,7 +88,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
           <h1>
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryList.emptyPromptTitle"
-              defaultMessage="Register your first snapshot repository"
+              defaultMessage="You don't have any repositories yet"
             />
           </h1>
         }
@@ -97,7 +97,7 @@ export const RepositoryList: React.FunctionComponent<RouteComponentProps<MatchPa
             <p>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryList.emptyPromptDescription"
-                defaultMessage="Use snapshot repositories to perform snapshot and restore operations."
+                defaultMessage="You need a repository to store your snapshots."
               />
             </p>
           </Fragment>

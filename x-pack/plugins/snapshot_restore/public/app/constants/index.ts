@@ -5,7 +5,11 @@
  */
 
 export const BASE_PATH = '/management/elasticsearch/snapshot_restore';
+export const DEFAULT_SECTION: Section = 'repositories';
 export type Section = 'repositories' | 'snapshots';
+
+// Set a minimum request duration to avoid strange UI flickers
+export const MINIMUM_TIMEOUT_MS = 300;
 
 export enum REPOSITORY_DOC_PATHS {
   default = 'modules-snapshots.html',

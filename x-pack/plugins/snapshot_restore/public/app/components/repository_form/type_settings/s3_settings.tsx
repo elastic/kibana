@@ -16,6 +16,7 @@ import {
 import { Repository, S3Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: S3Repository;
@@ -47,6 +48,9 @@ export const S3Settings: React.FunctionComponent<Props> = ({
       bufferSize,
       cannedAcl,
       storageClass,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
+      readonly,
     },
   } = repository;
 
@@ -71,51 +75,6 @@ export const S3Settings: React.FunctionComponent<Props> = ({
 
   return (
     <Fragment>
-      {/* Bucket field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeS3.bucketTitle"
-                defaultMessage="Bucket"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeS3.bucketDescription"
-            defaultMessage="The name of the bucket to be used for snapshots. Required."
-          />
-        }
-        idAria="s3RepositoryBucketDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeS3.bucketLabel"
-              defaultMessage="Bucket"
-            />
-          }
-          fullWidth
-          describedByIds={['s3RepositoryBucketDescription']}
-          isInvalid={Boolean(hasErrors && settingErrors.bucket)}
-          error={settingErrors.bucket}
-        >
-          <EuiFieldText
-            defaultValue={bucket || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                bucket: e.target.value,
-              });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
       {/* Client field */}
       <EuiDescribedFormGroup
         title={
@@ -131,7 +90,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.clientDescription"
-            defaultMessage="The name of client to use to connect to S3."
+            defaultMessage="The name of the AWS S3 client."
           />
         }
         idAria="s3RepositoryClientDescription"
@@ -161,6 +120,51 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
+      {/* Bucket field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.bucketTitle"
+                defaultMessage="Bucket"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.bucketDescription"
+            defaultMessage="The name of the AWS S3 bucket to use for snapshots."
+          />
+        }
+        idAria="s3RepositoryBucketDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeS3.bucketLabel"
+              defaultMessage="Bucket (required)"
+            />
+          }
+          fullWidth
+          describedByIds={['s3RepositoryBucketDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.bucket)}
+          error={settingErrors.bucket}
+        >
+          <EuiFieldText
+            defaultValue={bucket || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                bucket: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
       {/* Base path field */}
       <EuiDescribedFormGroup
         title={
@@ -176,7 +180,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.basePathDescription"
-            defaultMessage="Specifies the path within bucket to repository data. Base path should omit the leading forward slash."
+            defaultMessage="The bucket path to the repository data."
           />
         }
         idAria="s3RepositoryBasePathDescription"
@@ -213,7 +217,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeS3.compressTitle"
-                defaultMessage="Compress"
+                defaultMessage="Snapshot compression"
               />
             </h3>
           </EuiTitle>
@@ -221,9 +225,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.compressDescription"
-            defaultMessage="Turns on compression of the snapshot files.
-              Compression is applied only to metadata files (index mapping and settings).
-              Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="s3RepositoryCompressDescription"
@@ -240,7 +242,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeS3.compressLabel"
-                defaultMessage="Enable compression"
+                defaultMessage="Compress snapshots"
               />
             }
             checked={!(compress === false)}
@@ -268,8 +270,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.chunkSizeDescription"
-            defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="s3RepositoryChunkSizeDescription"
@@ -286,6 +287,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -314,7 +316,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.serverSideEncryptionDescription"
-            defaultMessage="Encrypt files on server side using AES256 algorithm."
+            defaultMessage="Encrypts files on the server using AES256 algorithm."
           />
         }
         idAria="s3RepositoryServerSideEncryptionDescription"
@@ -331,7 +333,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeS3.serverSideEncryptionLabel"
-                defaultMessage="Enable server-side encryption"
+                defaultMessage="Server-side encryption"
               />
             }
             checked={!!serverSideEncryption}
@@ -359,10 +361,8 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.bufferSizeDescription"
-            defaultMessage="Minimum threshold below which the chunk is uploaded using a single request.
-              Beyond this threshold, the S3 repository will use the AWS Multipart Upload API to split
-              the chunk into several parts, each of the specified buffer size length,
-              and to upload each part in its own request."
+            defaultMessage="Beyond this minimum threshold, the S3 repository will use the AWS Multipart Upload API
+              to split the chunk into several parts and upload each in its own request."
           />
         }
         idAria="s3RepositoryBufferSizeDescription"
@@ -379,6 +379,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           describedByIds={['s3RepositoryBufferSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
           error={settingErrors.bufferSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={bufferSize || ''}
@@ -407,7 +408,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.cannedAclDescription"
-            defaultMessage="When the S3 repository creates buckets and objects, it adds the canned ACL into the buckets and objects."
+            defaultMessage="The canned ACL to add to new S3 buckets and objects."
           />
         }
         idAria="s3RepositoryCannedAclDescription"
@@ -453,9 +454,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeS3.storageClassDescription"
-            defaultMessage="Sets the S3 storage class for objects stored in the snapshot repository.
-              Changing this setting on an existing repository only affects the storage class for newly created objects,
-              resulting in a mixed usage of storage classes."
+            defaultMessage="The storage class for new objects in the S3 repository."
           />
         }
         idAria="s3RepositoryStorageClassDescription"
@@ -482,6 +481,143 @@ export const S3Settings: React.FunctionComponent<Props> = ({
               });
             }}
             fullWidth
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max snapshot bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.maxSnapshotBytesTitle"
+                defaultMessage="Max snapshot bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.maxSnapshotBytesDescription"
+            defaultMessage="The rate for creating snapshots for each node."
+          />
+        }
+        idAria="s3RepositoryMaxSnapshotBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeS3.maxSnapshotBytesLabel"
+              defaultMessage="Max snapshot bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['s3RepositoryMaxSnapshotBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
+          error={settingErrors.maxSnapshotBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxSnapshotBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxSnapshotBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Max restore bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.maxRestoreBytesTitle"
+                defaultMessage="Max restore bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.maxRestoreBytesDescription"
+            defaultMessage="The snapshot restore rate for each node."
+          />
+        }
+        idAria="s3RepositoryMaxRestoreBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeS3.maxRestoreBytesLabel"
+              defaultMessage="Max restore bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['s3RepositoryMaxRestoreBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+          error={settingErrors.maxRestoreBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxRestoreBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxRestoreBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
+      {/* Readonly field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.readonlyTitle"
+                defaultMessage="Read-only"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeS3.readonlyDescription"
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
+          />
+        }
+        idAria="s3RepositoryReadonlyDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          hasEmptyLabelSpace={true}
+          fullWidth
+          describedByIds={['s3RepositoryReadonlyDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.readonly)}
+          error={settingErrors.readonly}
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeS3.readonlyLabel"
+                defaultMessage="Read-only repository"
+              />
+            }
+            checked={!!readonly}
+            onChange={e => {
+              updateRepositorySettings({
+                readonly: e.target.checked,
+              });
+            }}
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

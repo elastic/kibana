@@ -48,7 +48,7 @@ export const RepositoryVerificationBadge: React.FunctionComponent<Props> = ({
     <EuiHealth color="warning">
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryVerification.verificationErrorValue"
-        defaultMessage="Error"
+        defaultMessage="Not connected"
       />
     </EuiHealth>
   );

@@ -7,7 +7,18 @@
 import React, { useEffect } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageBody,
+  EuiPageContent,
+  EuiSpacer,
+  EuiTab,
+  EuiTabs,
+  EuiTitle,
+  EuiText,
+} from '@elastic/eui';
 
 import { BASE_PATH, Section } from '../../constants';
 import { useAppDependencies } from '../../index';
@@ -15,6 +26,7 @@ import { breadcrumbService } from '../../services/navigation';
 
 import { RepositoryList } from './repository_list';
 import { SnapshotList } from './snapshot_list';
+import { documentationLinksService } from '../../services/documentation';
 
 interface MatchParams {
   section: Section;
@@ -68,15 +80,40 @@ export const SnapshotRestoreHome: React.FunctionComponent<RouteComponentProps<Ma
     <EuiPageBody>
       <EuiPageContent>
         <EuiTitle size="l">
-          <h1>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={true}>
+              <h1>
+                <FormattedMessage
+                  id="xpack.snapshotRestore.home.snapshotRestoreTitle"
+                  defaultMessage="Snapshot Repositories"
+                />
+              </h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href={documentationLinksService.getRepositoryTypeDocUrl()}
+                target="_blank"
+                iconType="help"
+              >
+                <FormattedMessage
+                  id="xpack.snapshotRestore.home.snapshotRestoreDocsLinkText"
+                  defaultMessage="Snapshot docs"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiTitle size="s">
+          <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.snapshotRestore.home.snapshotRestoreTitle"
-              defaultMessage="Snapshot and Restore"
+              id="xpack.snapshotRestore.home.snapshotRestoreDescription"
+              defaultMessage="Use repositories to store backups of your Elasticsearch indices and clusters."
             />
-          </h1>
+          </EuiText>
         </EuiTitle>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         <EuiTabs>
           {tabs.map(tab => (

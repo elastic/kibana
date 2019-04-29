@@ -60,11 +60,13 @@ export const TabFailures: React.SFC<Props> = ({ indexFailures, snapshotState }) 
             <div key={`${shardId}${reason}`}>
               <EuiText size="xs">
                 <p>
-                  <FormattedMessage
-                    id="xpack.snapshotRestore.snapshotDetails.failureShardTitle"
-                    defaultMessage="Shard {shardId}"
-                    values={{ shardId }}
-                  />
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.snapshotRestore.snapshotDetails.failureShardTitle"
+                      defaultMessage="Shard {shardId}"
+                      values={{ shardId }}
+                    />
+                  </strong>
                 </p>
               </EuiText>
 

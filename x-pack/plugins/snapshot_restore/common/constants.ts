@@ -6,7 +6,7 @@
 import { LICENSE_TYPE_BASIC, LicenseType } from '../../../common/constants';
 import { RepositoryType } from './types';
 
-const PLUGIN_NAME = 'Snapshot and Restore';
+const PLUGIN_NAME = 'Snapshot Repositories';
 
 export const PLUGIN = {
   ID: 'snapshot_restore',
@@ -30,10 +30,10 @@ export enum REPOSITORY_TYPES {
   gcs = 'gcs',
 }
 
+// Deliberately do not include `source` as a default repository since we treat it as a flag
 export const DEFAULT_REPOSITORY_TYPES: RepositoryType[] = [
   REPOSITORY_TYPES.fs,
   REPOSITORY_TYPES.url,
-  REPOSITORY_TYPES.source,
 ];
 
 export const PLUGIN_REPOSITORY_TYPES: RepositoryType[] = [

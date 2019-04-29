@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Repository } from '../../../../common/types';
+import { Repository } from '../../common/types';
 
 /**
  * Utility to remove empty fields ("") from repository settings

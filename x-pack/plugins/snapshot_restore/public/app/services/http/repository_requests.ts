@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { API_BASE_PATH } from '../../../../common/constants';
-import { Repository } from '../../../../common/types';
+import { Repository, EmptyRepository } from '../../../../common/types';
+import { MINIMUM_TIMEOUT_MS } from '../../constants';
 import { httpService } from './http';
 import { sendRequest, useRequest } from './use_request';
 
@@ -13,6 +14,7 @@ export const loadRepositories = () => {
     path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'get',
     initialData: [],
+    timeout: MINIMUM_TIMEOUT_MS,
   });
 };
 
@@ -31,7 +33,7 @@ export const loadRepositoryTypes = () => {
   });
 };
 
-export const addRepository = async (newRepository: Repository) => {
+export const addRepository = async (newRepository: Repository | EmptyRepository) => {
   return sendRequest({
     path: httpService.addBasePath(`${API_BASE_PATH}repositories`),
     method: 'put',
@@ -39,7 +41,7 @@ export const addRepository = async (newRepository: Repository) => {
   });
 };
 
-export const editRepository = async (editedRepository: Repository) => {
+export const editRepository = async (editedRepository: Repository | EmptyRepository) => {
   return sendRequest({
     path: httpService.addBasePath(
       `${API_BASE_PATH}repositories/${encodeURIComponent(editedRepository.name)}`

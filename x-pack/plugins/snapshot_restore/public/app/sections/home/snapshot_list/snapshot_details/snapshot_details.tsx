@@ -117,7 +117,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
       ? {
           data: {
             error: translate('xpack.snapshotRestore.snapshotDetails.errorSnapshotNotFound', {
-              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or that repository doesn't exist.`,
+              defaultMessage: `Either the snapshot '{snapshotId}' doesn't exist in the repository '{repositoryName}' or the repository doesn't exist.`,
               values: {
                 snapshotId,
                 repositoryName,
@@ -143,7 +143,7 @@ const SnapshotDetailsUi: React.FunctionComponent<Props> = ({
     content = (
       <SectionLoading>
         <FormattedMessage
-          id="xpack.snapshotRestore.snapshotDetails.loadingLabel"
+          id="xpack.snapshotRestore.snapshotDetails.loadingSnapshotDescription"
           defaultMessage="Loading snapshot…"
         />
       </SectionLoading>

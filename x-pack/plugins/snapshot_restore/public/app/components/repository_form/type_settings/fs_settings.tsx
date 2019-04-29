@@ -10,13 +10,13 @@ import {
   EuiDescribedFormGroup,
   EuiFieldText,
   EuiFormRow,
-  EuiSpacer,
   EuiSwitch,
   EuiTitle,
 } from '@elastic/eui';
 import { FSRepository, Repository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
 import { RepositorySettingsValidation } from '../../../services/validation';
+import { textService } from '../../../services/text';
 
 interface Props {
   repository: FSRepository;
@@ -33,10 +33,9 @@ export const FSSettings: React.FunctionComponent<Props> = ({
   settingErrors,
 }) => {
   const {
-    core: {
-      i18n: { FormattedMessage },
-    },
+    core: { i18n },
   } = useAppDependencies();
+  const { FormattedMessage } = i18n;
   const {
     settings: {
       location,
@@ -58,7 +57,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeFS.locationTitle"
-                defaultMessage="Location"
+                defaultMessage="File system location"
               />
             </h3>
           </EuiTitle>
@@ -66,13 +65,8 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <Fragment>
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeFS.locationDescription"
-              defaultMessage="File system location. Required."
-            />
-            <EuiSpacer size="m" />
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryFor.typeFS.urlFilePathDescription"
-              defaultMessage="This location (or one of its parent directories) must be registered in the {settingKey} setting on all master and data nodes."
+              id="xpack.snapshotRestore.repositoryFor.typeFS.locationDescription"
+              defaultMessage="The location must be registered in the {settingKey} setting on all master and data nodes."
               values={{
                 settingKey: <EuiCode>path.repo</EuiCode>,
               }}
@@ -86,7 +80,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           label={
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryForm.typeFS.locationLabel"
-              defaultMessage="Location"
+              defaultMessage="Location (required)"
             />
           }
           fullWidth
@@ -113,7 +107,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeFS.compressTitle"
-                defaultMessage="Compress"
+                defaultMessage="Snapshot compression"
               />
             </h3>
           </EuiTitle>
@@ -121,9 +115,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.compressDescription"
-            defaultMessage="Turns on compression of the snapshot files.
-              Compression is applied only to metadata files (index mapping and settings).
-              Data files are not compressed."
+            defaultMessage="Compresses the index mapping and setting files for snapshots. Data files are not compressed."
           />
         }
         idAria="fsRepositoryCompressDescription"
@@ -140,7 +132,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeFS.compressLabel"
-                defaultMessage="Enable compression"
+                defaultMessage="Compress snapshots"
               />
             }
             checked={!!compress}
@@ -168,8 +160,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.chunkSizeDescription"
-            defaultMessage="Big files can be broken down into chunks during snapshotting if needed.
-              The chunk size can be specified in bytes or by using size value notation, i.e. 1g, 10m, 5k."
+            defaultMessage="Breaks files into smaller units when taking snapshots."
           />
         }
         idAria="fsRepositoryChunkSizeDescription"
@@ -186,6 +177,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryChunkSizeDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.chunkSize)}
           error={settingErrors.chunkSize}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={chunkSize || ''}
@@ -193,51 +185,6 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             onChange={e => {
               updateRepositorySettings({
                 chunkSize: e.target.value,
-              });
-            }}
-          />
-        </EuiFormRow>
-      </EuiDescribedFormGroup>
-
-      {/* Max restore bytes field */}
-      <EuiDescribedFormGroup
-        title={
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.snapshotRestore.repositoryForm.typeFS.maxRestoreBytesTitle"
-                defaultMessage="Max restore bytes per second"
-              />
-            </h3>
-          </EuiTitle>
-        }
-        description={
-          <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeFS.maxRestoreBytesDescription"
-            defaultMessage="Throttles per node restore rate."
-          />
-        }
-        idAria="fsRepositoryMaxRestoreBytesDescription"
-        fullWidth
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.typeFS.maxRestoreBytesLabel"
-              defaultMessage="Max restore bytes per second"
-            />
-          }
-          fullWidth
-          describedByIds={['fsRepositoryMaxRestoreBytesDescription']}
-          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
-          error={settingErrors.maxRestoreBytesPerSec}
-        >
-          <EuiFieldText
-            defaultValue={maxRestoreBytesPerSec || ''}
-            fullWidth
-            onChange={e => {
-              updateRepositorySettings({
-                maxRestoreBytesPerSec: e.target.value,
               });
             }}
           />
@@ -259,7 +206,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.maxSnapshotBytesDescription"
-            defaultMessage="Throttles per node snapshot rate."
+            defaultMessage="The rate for creating snapshots for each node."
           />
         }
         idAria="fsRepositoryMaxSnapshotBytesDescription"
@@ -276,6 +223,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
           describedByIds={['fsRepositoryMaxSnapshotBytesDescription']}
           isInvalid={Boolean(hasErrors && settingErrors.maxSnapshotBytesPerSec)}
           error={settingErrors.maxSnapshotBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
         >
           <EuiFieldText
             defaultValue={maxSnapshotBytesPerSec || ''}
@@ -289,6 +237,52 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
+      {/* Max restore bytes field */}
+      <EuiDescribedFormGroup
+        title={
+          <EuiTitle size="s">
+            <h3>
+              <FormattedMessage
+                id="xpack.snapshotRestore.repositoryForm.typeFS.maxRestoreBytesTitle"
+                defaultMessage="Max restore bytes per second"
+              />
+            </h3>
+          </EuiTitle>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.typeFS.maxRestoreBytesDescription"
+            defaultMessage="The snapshot restore rate for each node."
+          />
+        }
+        idAria="fsRepositoryMaxRestoreBytesDescription"
+        fullWidth
+      >
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.typeFS.maxRestoreBytesLabel"
+              defaultMessage="Max restore bytes per second"
+            />
+          }
+          fullWidth
+          describedByIds={['fsRepositoryMaxRestoreBytesDescription']}
+          isInvalid={Boolean(hasErrors && settingErrors.maxRestoreBytesPerSec)}
+          error={settingErrors.maxRestoreBytesPerSec}
+          helpText={textService.getSizeNotationHelpText()}
+        >
+          <EuiFieldText
+            defaultValue={maxRestoreBytesPerSec || ''}
+            fullWidth
+            onChange={e => {
+              updateRepositorySettings({
+                maxRestoreBytesPerSec: e.target.value,
+              });
+            }}
+          />
+        </EuiFormRow>
+      </EuiDescribedFormGroup>
+
       {/* Readonly field */}
       <EuiDescribedFormGroup
         title={
@@ -296,7 +290,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             <h3>
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeFS.readonlyTitle"
-                defaultMessage="Readonly"
+                defaultMessage="Read-only"
               />
             </h3>
           </EuiTitle>
@@ -304,7 +298,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
         description={
           <FormattedMessage
             id="xpack.snapshotRestore.repositoryForm.typeFS.readonlyDescription"
-            defaultMessage="Makes repository read-only."
+            defaultMessage="Only one cluster should have write access to this repository. All other clusters should be read-only."
           />
         }
         idAria="fsRepositoryReadonlyDescription"
@@ -321,7 +315,7 @@ export const FSSettings: React.FunctionComponent<Props> = ({
             label={
               <FormattedMessage
                 id="xpack.snapshotRestore.repositoryForm.typeFS.readonlyLabel"
-                defaultMessage="Enable readonly"
+                defaultMessage="Read-only repository"
               />
             }
             checked={!!readonly}

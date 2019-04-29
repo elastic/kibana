@@ -12,6 +12,7 @@ import {
   S3Repository,
   GCSRepository,
   HDFSRepository,
+  EmptyRepository,
 } from '../../../../common/types';
 import { REPOSITORY_TYPES } from '../../../../common/constants';
 
@@ -28,23 +29,40 @@ export interface RepositorySettingsValidation {
   [key: string]: string[];
 }
 
-export const validateRepository = (repository: Repository): RepositoryValidation => {
+export const validateRepository = (
+  repository: Repository | EmptyRepository,
+  validateSettings: boolean = true
+): RepositoryValidation => {
   const { name, type, settings } = repository;
   const { i18n } = textService;
   const validation: RepositoryValidation = {
     isValid: true,
     errors: {},
   };
-  const settingsValidation = validateRepositorySettings(type, settings);
 
-  if (Object.keys(settingsValidation).length) {
-    validation.errors.settings = settingsValidation;
+  if (validateSettings) {
+    const settingsValidation = validateRepositorySettings(type, settings);
+
+    if (Object.keys(settingsValidation).length) {
+      validation.errors.settings = settingsValidation;
+    }
   }
 
   if (isStringEmpty(name)) {
     validation.errors.name = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.nameRequired', {
-        defaultMessage: 'Repository name is required',
+        defaultMessage: 'Repository name is required.',
+      }),
+    ];
+  }
+
+  if (
+    isStringEmpty(type) ||
+    (type === REPOSITORY_TYPES.source && isStringEmpty(settings.delegateType))
+  ) {
+    validation.errors.type = [
+      i18n.translate('xpack.snapshotRestore.repositoryValidation.delegateTypeRequired', {
+        defaultMessage: 'Type is required.',
       }),
     ];
   }
@@ -56,12 +74,12 @@ export const validateRepository = (repository: Repository): RepositoryValidation
   return validation;
 };
 
-const isStringEmpty = (str: string): boolean => {
+const isStringEmpty = (str: string | null): boolean => {
   return str ? !Boolean(str.trim()) : true;
 };
 
 const validateRepositorySettings = (
-  type: RepositoryType,
+  type: RepositoryType | null,
   settings: Repository['settings']
 ): RepositorySettingsValidation => {
   switch (type) {
@@ -70,7 +88,7 @@ const validateRepositorySettings = (
     case REPOSITORY_TYPES.url:
       return validateReadonlyRepositorySettings(settings);
     case REPOSITORY_TYPES.source:
-      return validateRepositorySettings(settings.delegate_type, settings);
+      return validateRepositorySettings(settings.delegateType, settings);
     case REPOSITORY_TYPES.s3:
       return validateS3RepositorySettings(settings);
     case REPOSITORY_TYPES.gcs:
@@ -92,7 +110,7 @@ const validateFSRepositorySettings = (
   if (isStringEmpty(location)) {
     validation.location = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.locationRequired', {
-        defaultMessage: 'Location is required',
+        defaultMessage: 'Location is required.',
       }),
     ];
   }
@@ -108,7 +126,7 @@ const validateReadonlyRepositorySettings = (
   if (isStringEmpty(url)) {
     validation.url = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.urlRequired', {
-        defaultMessage: 'URL is required',
+        defaultMessage: 'URL is required.',
       }),
     ];
   }
@@ -124,7 +142,7 @@ const validateS3RepositorySettings = (
   if (isStringEmpty(bucket)) {
     validation.bucket = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.bucketRequired', {
-        defaultMessage: 'Bucket is required',
+        defaultMessage: 'Bucket is required.',
       }),
     ];
   }
@@ -140,7 +158,7 @@ const validateGCSRepositorySettings = (
   if (isStringEmpty(bucket)) {
     validation.bucket = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.bucketRequired', {
-        defaultMessage: 'Bucket is required',
+        defaultMessage: 'Bucket is required.',
       }),
     ];
   }
@@ -156,14 +174,14 @@ const validateHDFSRepositorySettings = (
   if (isStringEmpty(uri)) {
     validation.uri = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.uriRequired', {
-        defaultMessage: 'URI is required',
+        defaultMessage: 'URI is required.',
       }),
     ];
   }
   if (isStringEmpty(path)) {
     validation.path = [
       i18n.translate('xpack.snapshotRestore.repositoryValidation.pathRequired', {
-        defaultMessage: 'Path is required',
+        defaultMessage: 'Path is required.',
       }),
     ];
   }

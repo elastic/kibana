@@ -6,9 +6,8 @@
 import React from 'react';
 
 import { REPOSITORY_TYPES } from '../../../../../common/constants';
-import { Repository, RepositoryType } from '../../../../../common/types';
+import { Repository, RepositoryType, EmptyRepository } from '../../../../../common/types';
 import { useAppDependencies } from '../../../index';
-import { cleanSettings } from '../../../services/utils';
 import { RepositorySettingsValidation } from '../../../services/validation';
 import { SectionError } from '../../index';
 
@@ -20,7 +19,7 @@ import { ReadonlySettings } from './readonly_settings';
 import { S3Settings } from './s3_settings';
 
 interface Props {
-  repository: Repository;
+  repository: Repository | EmptyRepository;
   updateRepository: (updatedFields: Partial<Repository>) => void;
   settingErrors: RepositorySettingsValidation;
 }
@@ -41,19 +40,19 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
   ): void => {
     if (replaceSettings) {
       updateRepository({
-        settings: cleanSettings(updatedSettings),
+        settings: updatedSettings,
       });
     } else {
       updateRepository({
         settings: {
           ...settings,
-          ...cleanSettings(updatedSettings),
+          ...updatedSettings,
         },
       });
     }
   };
 
-  const typeSettingsMap: { [key in RepositoryType]: any } = {
+  const typeSettingsMap: { [key: string]: any } = {
     [REPOSITORY_TYPES.fs]: FSSettings,
     [REPOSITORY_TYPES.url]: ReadonlySettings,
     [REPOSITORY_TYPES.azure]: AzureSettings,
@@ -62,7 +61,11 @@ export const TypeSettings: React.FunctionComponent<Props> = ({
     [REPOSITORY_TYPES.s3]: S3Settings,
   };
 
-  const renderTypeSettings = (repositoryType: RepositoryType) => {
+  const renderTypeSettings = (repositoryType: RepositoryType | null) => {
+    if (!repositoryType) {
+      return null;
+    }
+
     const RepositorySettings = typeSettingsMap[repositoryType];
     if (RepositorySettings) {
       return (

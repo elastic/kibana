@@ -6,7 +6,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 
 interface Props {
   children: React.ReactNode;
@@ -14,16 +14,9 @@ interface Props {
 
 export const SectionLoading: React.FunctionComponent<Props> = ({ children }) => {
   return (
-    <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiLoadingSpinner size="m" />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiText>
-          <EuiTextColor color="subdued">{children}</EuiTextColor>
-        </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiEmptyPrompt
+      title={<EuiLoadingSpinner size="xl" />}
+      body={<EuiText color="subdued">{children}</EuiText>}
+    />
   );
 };

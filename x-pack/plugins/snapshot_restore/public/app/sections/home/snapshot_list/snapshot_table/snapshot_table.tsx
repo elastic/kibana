@@ -5,9 +5,10 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiInMemoryTable, EuiLink, Query } from '@elastic/eui';
+import { EuiButton, EuiInMemoryTable, EuiLink, Query, EuiLoadingSpinner } from '@elastic/eui';
 
 import { SnapshotDetails } from '../../../../../../common/types';
+import { SNAPSHOT_STATE } from '../../../../constants';
 import { useAppDependencies } from '../../../../index';
 import { formatDate } from '../../../../services/text';
 import { linkToRepository } from '../../../../services/navigation';
@@ -78,15 +79,20 @@ export const SnapshotTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       width: '100px',
-      render: (durationInMillis: number) => (
-        <DataPlaceholder data={durationInMillis}>
-          <FormattedMessage
-            id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
-            defaultMessage="{seconds}s"
-            values={{ seconds: Math.ceil(durationInMillis / 1000) }}
-          />
-        </DataPlaceholder>
-      ),
+      render: (durationInMillis: number, { state }: SnapshotDetails) => {
+        if (state === SNAPSHOT_STATE.IN_PROGRESS) {
+          return <EuiLoadingSpinner size="m" />;
+        }
+        return (
+          <DataPlaceholder data={durationInMillis}>
+            <FormattedMessage
+              id="xpack.snapshotRestore.snapshotList.table.durationColumnValueLabel"
+              defaultMessage="{seconds}s"
+              values={{ seconds: Math.ceil(durationInMillis / 1000) }}
+            />
+          </DataPlaceholder>
+        );
+      },
     },
     {
       field: 'indices',

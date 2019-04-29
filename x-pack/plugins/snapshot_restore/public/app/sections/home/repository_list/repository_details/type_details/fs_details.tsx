@@ -44,24 +44,12 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     },
   ];
 
-  if (readonly !== undefined) {
-    listItems.push({
-      title: (
-        <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.readonlyLabel"
-          defaultMessage="Readonly"
-        />
-      ),
-      description: String(readonly),
-    });
-  }
-
   if (compress !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.typeFS.compressLabel"
-          defaultMessage="Compress"
+          defaultMessage="Snapshot compression"
         />
       ),
       description: String(compress),
@@ -80,6 +68,18 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
+  if (maxSnapshotBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeFS.maxSnapshotBytesLabel"
+          defaultMessage="Max snapshot bytes per second"
+        />
+      ),
+      description: maxSnapshotBytesPerSec,
+    });
+  }
+
   if (maxRestoreBytesPerSec !== undefined) {
     listItems.push({
       title: (
@@ -92,15 +92,15 @@ export const FSDetails: React.FunctionComponent<Props> = ({ repository }) => {
     });
   }
 
-  if (maxSnapshotBytesPerSec !== undefined) {
+  if (readonly !== undefined) {
     listItems.push({
       title: (
         <FormattedMessage
-          id="xpack.snapshotRestore.repositoryDetails.typeFS.maxSnapshotBytesLabel"
-          defaultMessage="Max snapshot bytes per second"
+          id="xpack.snapshotRestore.repositoryDetails.typeFS.readonlyLabel"
+          defaultMessage="Read-only"
         />
       ),
-      description: maxSnapshotBytesPerSec,
+      description: String(readonly),
     });
   }
 

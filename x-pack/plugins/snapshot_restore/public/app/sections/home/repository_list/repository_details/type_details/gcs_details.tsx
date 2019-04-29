@@ -22,7 +22,16 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
   } = useAppDependencies();
 
   const {
-    settings: { bucket, client, basePath, compress, chunkSize },
+    settings: {
+      bucket,
+      client,
+      basePath,
+      compress,
+      chunkSize,
+      readonly,
+      maxRestoreBytesPerSec,
+      maxSnapshotBytesPerSec,
+    },
   } = repository;
 
   const listItems = [
@@ -66,7 +75,7 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
       title: (
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.typeGCS.compressLabel"
-          defaultMessage="Compress"
+          defaultMessage="Snapshot compression"
         />
       ),
       description: String(compress),
@@ -82,6 +91,42 @@ export const GCSDetails: React.FunctionComponent<Props> = ({ repository }) => {
         />
       ),
       description: String(chunkSize),
+    });
+  }
+
+  if (maxSnapshotBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeGCS.maxSnapshotBytesLabel"
+          defaultMessage="Max snapshot bytes per second"
+        />
+      ),
+      description: maxSnapshotBytesPerSec,
+    });
+  }
+
+  if (maxRestoreBytesPerSec !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeGCS.maxRestoreBytesLabel"
+          defaultMessage="Max restore bytes per second"
+        />
+      ),
+      description: maxRestoreBytesPerSec,
+    });
+  }
+
+  if (readonly !== undefined) {
+    listItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.snapshotRestore.repositoryDetails.typeGCS.readonlyLabel"
+          defaultMessage="Read-only"
+        />
+      ),
+      description: String(readonly),
     });
   }
 
