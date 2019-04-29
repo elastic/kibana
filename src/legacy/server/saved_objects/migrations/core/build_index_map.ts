@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectsSchemaDefinition } from '../../schema';
 import { MappingProperties } from 'src/legacy/server/mappings';
+import { SavedObjectsSchemaDefinition } from '../../schema';
 
 /*
  * This file contains logic to convert savedObjectSchemas into a dictonary of indexes and documents

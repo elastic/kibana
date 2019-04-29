@@ -106,7 +106,7 @@ export class KibanaMigrator {
         obsoleteIndexTemplatePattern: 'kibana_index_template*',
       });
     });
-    console.log(this.indexMap);
+
     if (migrators.length === 0) {
       throw new Error(`Migrations failed to run, no mappings found or Kibana is not "ready".`);
     }
