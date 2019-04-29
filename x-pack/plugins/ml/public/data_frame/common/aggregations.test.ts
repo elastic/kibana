@@ -13,6 +13,10 @@ describe('Data Frame: Aggregations', () => {
     expect(isAggName('avg[responsetime]')).toEqual(false);
     expect(isAggName('avg<responsetime>')).toEqual(false);
     expect(isAggName('avg responsetime')).toEqual(true);
+    expect(isAggName(' ')).toEqual(false);
+    expect(isAggName(' avg responsetime')).toEqual(false);
+    expect(isAggName('avg responsetime ')).toEqual(false);
+    expect(isAggName(' avg responsetime ')).toEqual(false);
     expect(isAggName('date_histogram(@timestamp')).toEqual(true);
   });
 });

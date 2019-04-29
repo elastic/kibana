@@ -113,7 +113,8 @@ export const PopoverForm: React.SFC<Props> = ({
     aggNameError = i18n.translate(
       'xpack.ml.dataframe.groupBy.popoverForm.aggNameInvalidCharError',
       {
-        defaultMessage: 'Invalid name. The characters "[", "]", and ">" are not allowed.',
+        defaultMessage:
+          'Invalid name. The characters "[", "]", and ">" are not allowed and the name must not start or end with a space character.',
       }
     );
   }
