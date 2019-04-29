@@ -9,10 +9,6 @@ import React from 'react';
 import { pure } from 'recompose';
 import styled from 'styled-components';
 
-const FlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: 12px;
-`;
-
 export interface HeaderPanelProps {
   children?: React.ReactNode;
   statType?: string;
@@ -26,8 +22,8 @@ export const HeaderPanel = pure<HeaderPanelProps>(({ children, subtitle, title, 
     <EuiFlexItem>
       <EuiTitle>
         <h2 data-test-subj="page_headline_title">
-          {title}
-          {tooltip && <EuiIconTip content={tooltip} position="top" />}
+          {title}{' '}
+          {tooltip && <EuiIconTip color="subdued" content={tooltip} position="top" size="l" />}
         </h2>
       </EuiTitle>
 
@@ -39,3 +35,7 @@ export const HeaderPanel = pure<HeaderPanelProps>(({ children, subtitle, title, 
     {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
   </FlexGroup>
 ));
+
+const FlexGroup = styled(EuiFlexGroup)`
+  margin-bottom: 12px;
+`;
