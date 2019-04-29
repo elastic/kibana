@@ -11,36 +11,23 @@ import { getPlugins } from './get_plugins';
  * all public and server tests, so a special var must be used for "index" tests
  * paths: `plugins / pluginName / __tests__ / ** / *.js`
  */
-function getPluginPaths(plugins, opts = {}) {
-  const testPath = opts.tests ? '__tests__/**' : '';
-
-  return plugins.reduce((paths, pluginName) => {
-    const plugin = pluginName.trim();
-    const commonPath = `${plugin}/common`;
-    const serverPath = `${plugin}/**/server`;
-    const publicPath = `${plugin}/**/public`;
-
-    const indexPaths = `plugins/${plugin}/${testPath}/*.js`; // index and helpers
-    const commonPaths = `plugins/${commonPath}/**/${testPath}/*.js`;
-    const serverPaths = `plugins/${serverPath}/**/${testPath}/*.js`;
-    const publicPaths = `plugins/${publicPath}/**/${testPath}/*.js`;
-
-    paths = paths.concat([indexPaths, commonPaths, serverPaths]);
-
-    if (opts.browser) {
-      paths = paths.concat(publicPaths);
-    }
-
-    return paths;
-  }, []);
-}
-
-export function forPlugins() {
-  const plugins = getPlugins();
-  return getPluginPaths(plugins, { browser: true });
-}
-
 export function forPluginServerTests() {
-  const plugins = getPlugins();
-  return getPluginPaths(plugins, { tests: true });
+  return getPlugins().reduce((paths, pluginName) => {
+    const plugin = pluginName.trim();
+    return [
+      ...paths,
+
+      // index and helpers
+      `plugins/${plugin}/__tests__/**/*.js`,
+
+      // only include tests in the root common directory
+      `plugins/${plugin}/common/**/__tests__/**/*.js`,
+
+      // include tests in any server directory
+      `plugins/${plugin}/**/server/**/__tests__/**/*.js`,
+
+      // custom paths for canvas
+      ...(plugin === 'canvas' ? ['plugins/canvas/canvas_plugin_src/**/__tests__/**/*.js'] : []),
+    ];
+  }, []);
 }

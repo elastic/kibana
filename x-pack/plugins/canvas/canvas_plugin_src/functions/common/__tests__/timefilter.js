@@ -5,20 +5,9 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
 import { timefilter } from '../timefilter';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { emptyFilter } from './fixtures/test_filters';
-
-let clock = null;
-
-beforeEach(function() {
-  clock = sinon.useFakeTimers();
-});
-
-afterEach(function() {
-  clock.restore();
-});
 
 describe('timefilter', () => {
   const fn = functionWrapper(timefilter);

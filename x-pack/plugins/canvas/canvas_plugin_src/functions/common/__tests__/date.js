@@ -5,22 +5,11 @@
  */
 
 import expect from '@kbn/expect';
-import sinon from 'sinon';
 import { date } from '../date';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 
 describe('date', () => {
   const fn = functionWrapper(date);
-
-  let clock;
-  // stubbed date constructor to check current dates match when no args are passed in
-  beforeEach(() => {
-    clock = sinon.useFakeTimers();
-  });
-
-  afterEach(() => {
-    clock.restore();
-  });
 
   it('returns a date in ms from a date string with the provided format', () => {
     expect(fn(null, { value: '20111031', format: 'YYYYMMDD' })).to.be(1320019200000);
