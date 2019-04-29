@@ -25,19 +25,14 @@ import {
 } from '../../../public';
 import { AngleAxisEditor } from './angleaxis_editor';
 import { SliceAxisEditor } from './sliceaxis_editor';
+import { PieChartVisModel, PLUGIN_NAME, updatePieState } from './types';
+import { getTypeForOperation } from '../../common';
 
-const PLUGIN_NAME = 'pie_chart';
-
-interface PieChartPrivateState {
-  sliceAxis: Axis;
-  angleAxis: Axis;
-}
-
-type PieChartVisModel = VisModel<'pieChart', PieChartPrivateState>;
-
-const updatePieState = updatePrivateState<'pieChart', PieChartPrivateState>('pieChart');
-
-function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<PieChartVisModel>) {
+function configPanel({
+  visModel,
+  onChangeVisModel,
+  getSuggestions: getAllSuggestions,
+}: VisualizationPanelProps<PieChartVisModel>) {
   const {
     private: {
       pieChart: { sliceAxis, angleAxis },
@@ -53,6 +48,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
             operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
+            getSuggestions={getAllSuggestions}
           />
         ))}
       </div>
@@ -64,6 +60,7 @@ function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<Pie
             operationId={col}
             visModel={visModel}
             onChangeVisModel={onChangeVisModel}
+            getSuggestions={getAllSuggestions}
           />
         ))}
       </div>
@@ -145,11 +142,14 @@ function getSuggestions(visModel: PieChartVisModel): Suggestion[] {
     return [];
   }
   const prefilledVisModel = prefillPrivateState(visModel as UnknownVisModel) as PieChartVisModel;
+  const sliceAxisType = firstQuery
+    ? getTypeForOperation(firstQuery.select[1], visModel.datasource!.fields)
+    : 'undefined';
   return [
     {
       pluginName: PLUGIN_NAME,
       previewExpression: toExpression(prefilledVisModel, 'preview'),
-      score: 0.5,
+      score: sliceAxisType === 'boolean' ? 0.9 : 0.5,
       visModel: prefilledVisModel,
       title: 'Standard Pie Chart',
       iconType: 'visPie',
