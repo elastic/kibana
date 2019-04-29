@@ -1,0 +1,27 @@
+{
+  "name": "spec-to-console",
+  "version": "0.0.0",
+  "description": "ES REST spec -> Console autocomplete",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "jest",
+    "format": "prettier **/*.js --write"
+  },
+  "author": "",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/jbudz/spec-to-console/issues"
+  },
+  "homepage": "https://github.com/jbudz/spec-to-console#readme",
+  "devDependencies": {
+    "jest": "^24.1.0",
+    "prettier": "^1.14.3"
+  },
+  "dependencies": {
+    "commander": "^2.11.0",
+    "glob": "^7.1.2"
+  }
+}
