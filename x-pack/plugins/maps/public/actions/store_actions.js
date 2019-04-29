@@ -156,6 +156,15 @@ export function addLayer(layerDescriptor) {
   };
 }
 
+// Do not use when rendering a map. Method exists to enable selectors for getLayerList when
+// rendering is not needed.
+export function addLayerWithoutDataSync(layerDescriptor) {
+  return {
+    type: ADD_LAYER,
+    layer: layerDescriptor,
+  };
+}
+
 function setLayerDataLoadErrorStatus(layerId, errorMessage) {
   return dispatch => {
     dispatch({
@@ -505,6 +514,19 @@ export function setLayerQuery(id, query) {
       id,
       propName: 'query',
       newValue: query,
+    });
+
+    dispatch(syncDataForLayer(id));
+  };
+}
+
+export function setLayerApplyGlobalQuery(id, applyGlobalQuery) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'applyGlobalQuery',
+      newValue: applyGlobalQuery,
     });
 
     dispatch(syncDataForLayer(id));
