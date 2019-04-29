@@ -14,6 +14,8 @@ import { TestProviders } from '../../mock';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { cloneDeep } from 'lodash/fp';
 
+import * as i18n from './translations';
+
 let localSource: Array<{
   request: {};
   result: {
@@ -49,7 +51,7 @@ describe('Hosts', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).toContain('Setup Instructions');
+      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
     });
 
     test('it renders the Setup Instructions text when auditbeat index is not available', async () => {
@@ -66,7 +68,7 @@ describe('Hosts', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).toContain('Setup Instructions');
+      expect(wrapper.text()).toContain(i18n.SETUP_INSTRUCTIONS);
     });
 
     test('it DOES NOT render the Setup Instructions text when auditbeat index is available', async () => {
@@ -83,7 +85,7 @@ describe('Hosts', () => {
       // Why => https://github.com/apollographql/react-apollo/issues/1711
       await new Promise(resolve => setTimeout(resolve));
       wrapper.update();
-      expect(wrapper.text()).not.toContain('Setup Instructions');
+      expect(wrapper.text()).not.toContain(i18n.SETUP_INSTRUCTIONS);
     });
   });
 });

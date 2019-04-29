@@ -54,9 +54,7 @@ export const NotesCount = pure<{
   noteIds: string[];
 }>(({ noteIds }) => (
   <EuiTitle size="s">
-    <TitleText>
-      {noteIds.length} Note{noteIds.length === 1 ? '' : 's'}
-    </TitleText>
+    <TitleText>{i18n.NOTE(noteIds.length)}</TitleText>
   </EuiTitle>
 ));
 
