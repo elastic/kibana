@@ -3322,17 +3322,10 @@
   dependencies:
     "@types/retry" "*"
 
-<<<<<<< HEAD
-"@types/papaparse@^4.5.9":
-  version "4.5.9"
-  resolved "https://registry.yarnpkg.com/@types/papaparse/-/papaparse-4.5.9.tgz#ff887bd362f57cd0c87320d2de38ac232bb55e81"
-  integrity sha512-8Pmxp2IEd/y58tOIsiZkCbAkcKI7InYVpwZFVKJyweCVnqnVahKXVjfSo6gvxUVykQsJvtWB+s6Kc60znVfQVw==
-=======
 "@types/papaparse@^4.5.5":
   version "4.5.6"
   resolved "https://registry.yarnpkg.com/@types/papaparse/-/papaparse-4.5.6.tgz#05e4d1b97dd25065235777c49bd43685f066bf5f"
   integrity sha512-k+n8uR0yJtexBSzwNmxrOkgTlPImFWU3J1Ye7DjkqZIOXyypUxuWvo6xlOfTfYbgPDebrdYmysiuSb6UMvP6FQ==
->>>>>>> elastic
   dependencies:
     "@types/node" "*"
 
