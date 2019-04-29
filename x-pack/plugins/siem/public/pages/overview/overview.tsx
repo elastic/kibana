@@ -23,10 +23,13 @@ import * as i18n from './translations';
 const basePath = chrome.getBasePath();
 
 export const OverviewComponent = pure(() => (
-  <WithSource sourceId="default" indexTypes={[IndexType.FILEBEAT, IndexType.PACKETBEAT]}>
-    {({ filebeatIndicesExist, auditbeatIndicesExist }) =>
-      indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) &&
-      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) ? (
+  <WithSource
+    sourceId="default"
+    indexTypes={[IndexType.FILEBEAT, IndexType.AUDITBEAT, IndexType.PACKETBEAT]}
+  >
+    {({ auditbeatIndicesExist, filebeatIndicesExist }) =>
+      indicesExistOrDataTemporarilyUnavailable(auditbeatIndicesExist) &&
+      indicesExistOrDataTemporarilyUnavailable(filebeatIndicesExist) ? (
         <GlobalTime>
           {({ to, from, setQuery }) => (
             <EuiFlexGroup>
