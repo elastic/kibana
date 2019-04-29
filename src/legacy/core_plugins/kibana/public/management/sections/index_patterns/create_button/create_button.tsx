@@ -64,7 +64,7 @@ class CreateButtonComponent extends Component<Props, State> {
       return null;
     }
 
-    if (!uiCapabilities.indexPatterns.createNew) {
+    if (!uiCapabilities.indexPatterns.save) {
       return null;
     }
 
