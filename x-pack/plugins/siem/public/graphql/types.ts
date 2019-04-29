@@ -2444,7 +2444,7 @@ export namespace GetKpiHostsQuery {
   export type HostsHistogram = {
     __typename?: 'HistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
@@ -2452,7 +2452,7 @@ export namespace GetKpiHostsQuery {
   export type AuthSuccessHistogram = {
     __typename?: 'HistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
@@ -2460,7 +2460,7 @@ export namespace GetKpiHostsQuery {
   export type AuthFailureHistogram = {
     __typename?: 'HistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
@@ -2468,7 +2468,7 @@ export namespace GetKpiHostsQuery {
   export type UniqueSourceIpsHistogram = {
     __typename?: 'HistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
@@ -2476,7 +2476,7 @@ export namespace GetKpiHostsQuery {
   export type UniqueDestinationIpsHistogram = {
     __typename?: 'HistogramData';
 
-    x?: string | null;
+    x?: number | null;
 
     y?: number | null;
   };
