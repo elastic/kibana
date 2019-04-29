@@ -11,7 +11,6 @@ import styled from 'styled-components';
 
 export interface HeaderPanelProps {
   children?: React.ReactNode;
-  statType?: string;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   tooltip?: string;
