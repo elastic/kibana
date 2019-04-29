@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
@@ -43,6 +43,14 @@ function sortColumns(groupByArr: PivotGroupByConfig[]) {
     }
     return a.localeCompare(b);
   };
+}
+
+function usePrevious(value: any) {
+  const ref = useRef(null);
+  useEffect(() => {
+    ref.current = value;
+  });
+  return ref.current;
 }
 
 const PreviewTitle = () => (
@@ -91,9 +99,19 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
     dataFramePreviewData.length > 0
       ? Object.keys(dataFramePreviewData[0]).sort(sortColumns(groupByArr))[0]
       : undefined;
-  useEffect(() => setClearTable(true), [firstColumnName]);
-  if (clearTable) {
-    setTimeout(() => setClearTable(false), 0);
+
+  const firstColumnNameChanged = usePrevious(firstColumnName) !== firstColumnName;
+  useEffect(() => {
+    if (firstColumnNameChanged) {
+      setClearTable(true);
+    }
+    if (clearTable) {
+      setTimeout(() => setClearTable(false), 0);
+    }
+  });
+
+  if (firstColumnNameChanged) {
+    return null;
   }
 
   if (status === PIVOT_PREVIEW_STATUS.ERROR) {
