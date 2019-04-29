@@ -288,6 +288,7 @@ class CodeContent extends React.PureComponent<Props> {
                     <h3>Recent Commits</h3>
                   </EuiTitle>
                   <EuiButton
+                    size="s"
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${encodeRevisionString(
                       revision
                     )}/${path || ''}`}

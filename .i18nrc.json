@@ -20,6 +20,7 @@
     "timelion": "src/legacy/core_plugins/timelion",
     "tagCloud": "src/legacy/core_plugins/tagcloud",
     "tsvb": "src/legacy/core_plugins/metrics",
+    "kbnESQuery": "packages/kbn-es-query",
     "xpack.apm": "x-pack/plugins/apm",
     "xpack.beatsManagement": "x-pack/plugins/beats_management",
     "xpack.crossClusterReplication": "x-pack/plugins/cross_cluster_replication",

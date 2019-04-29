@@ -4,16 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import sinon from 'sinon';
-import axios from 'axios';
+import { getRouter } from '../../public/crud_app/services';
+import { setupEnvironment, pageHelpers, nextTick } from './helpers';
+import { JOBS } from './helpers/constants';
 
-import { registerTestBed, nextTick } from '../../../../test_utils';
-import { createRollupJobsStore } from '../../public/crud_app/store';
-import { setHttp, registerRouter, getRouter } from '../../public/crud_app/services';
-import { JobList } from '../../public/crud_app/sections/job_list';
-
-// axios has a $http like interface so using it to simulate $http
-setHttp(axios.create());
+jest.mock('ui/index_patterns', () => {
+  const { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE } = require.requireActual('../../../../../src/legacy/ui/public/index_patterns/constants'); // eslint-disable-line max-len
+  return { INDEX_PATTERN_ILLEGAL_CHARACTERS_VISIBLE };
+});
 
 jest.mock('ui/chrome', () => ({
   addBasePath: (path) => path ? path : 'api/rollup',
@@ -30,6 +28,10 @@ jest.mock('ui/chrome', () => ({
   }
 }));
 
+jest.mock('../../../../../src/legacy/core_plugins/ui_metric/public', () => ({
+  trackUiMetric: jest.fn(),
+}));
+
 jest.mock('../../public/crud_app/services', () => {
   const services = require.requireActual('../../public/crud_app/services');
   return {
@@ -38,83 +40,35 @@ jest.mock('../../public/crud_app/services', () => {
   };
 });
 
-const loadJobsMock = {
-  jobs: [{
-    config: {
-      id: 'my-rollup-job',
-      index_pattern: 'kibana_sample*',
-      rollup_index: 'rollup-index',
-      cron: '0 0 0 ? * 7',
-      groups: {
-        date_histogram: {
-          interval: '24h',
-          field: 'timestamp',
-          delay: '1d',
-          time_zone: 'UTC'
-        }
-      },
-      metrics: [],
-      timeout: '20s',
-      page_size: 1000
-    },
-    status: {
-      job_state: 'stopped',
-      upgraded_doc_id: true
-    },
-    stats: {
-      pages_processed: 0,
-      documents_processed: 0,
-      rollups_indexed: 0,
-      trigger_count: 0,
-      index_time_in_ms: 0,
-      index_total: 0,
-      index_failures: 0,
-      search_time_in_ms: 0,
-      search_total: 0,
-      search_failures: 0
-    }
-  }]
-};
+const { setup } = pageHelpers.jobList;
 
 describe('<JobList />', () => {
   describe('detail panel', () => {
     let server;
+    let httpRequestsMockHelpers;
     let component;
-    let getMetadataFromEuiTable;
+    let table;
     let exists;
 
-    const testBedOptions = {
-      memoryRouter: {
-        onRouter: (router) =>  {
-          // register our react memory router
-          registerRouter(router);
-        }
-      }
-    };
+    beforeAll(() => {
+      ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    });
+
+    afterAll(() => {
+      server.restore();
+    });
 
     beforeEach(async () => {
-      server = sinon.fakeServer.create();
-      server.respondImmediately = true;
+      httpRequestsMockHelpers.setLoadJobsResponse(JOBS);
 
-      // Mock load job list
-      server.respondWith('GET', '/api/rollup/jobs', [
-        200,
-        { 'Content-Type': 'application/json' },
-        JSON.stringify(loadJobsMock),
-      ]);
-
-      // Mock all other HTTP Requests
-      server.respondWith([200, {}, '']);
-
-      const initTestBed = registerTestBed(JobList, {}, createRollupJobsStore());
-      ({ component, exists, getMetadataFromEuiTable } = initTestBed(undefined, testBedOptions));
+      ({ component, exists, table } = setup());
 
       await nextTick(); // We need to wait next tick for the mock server response to comes in
       component.update();
     });
 
     test('should open the detail panel when clicking on a job in the table', () => {
-      const { rows } = getMetadataFromEuiTable('rollupJobsListTable');
+      const { rows } = table.getMetaData('rollupJobsListTable');
       const button = rows[0].columns[1].reactWrapper.find('button');
 
       expect(exists('rollupJobDetailFlyout')).toBe(false); // make sure it is not shown
@@ -125,7 +79,7 @@ describe('<JobList />', () => {
     });
 
     test('should add the Job id to the route query params when opening the detail panel', () => {
-      const { rows } = getMetadataFromEuiTable('rollupJobsListTable');
+      const { rows } = table.getMetaData('rollupJobsListTable');
       const button = rows[0].columns[1].reactWrapper.find('button');
 
       expect(getRouter().history.location.search).toEqual('');
@@ -136,7 +90,7 @@ describe('<JobList />', () => {
         jobs: [{
           config: { id: jobId },
         }],
-      } = loadJobsMock;
+      } = JOBS;
       expect(getRouter().history.location.search).toEqual(`?job=${jobId}`);
     });
 
