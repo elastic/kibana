@@ -29,12 +29,13 @@ uiModules
     ['agg', { watchDepth: 'collection' }],
     ['aggParam', { watchDepth: 'reference' }],
     ['aggParams', { watchDepth: 'collection' }],
+    ['editorConfig', { watchDepth: 'collection' }],
     ['indexedFields', { watchDepth: 'collection' }],
     ['paramEditor', { wrapApply: false }],
     ['onChange', { watchDepth: 'reference' }],
     ['setTouched', { watchDepth: 'reference' }],
     ['setValidity', { watchDepth: 'reference' }],
-    'isInvalid',
+    'showValidation',
     'value',
   ]))
   .directive('visAggParamEditor', function (config) {
@@ -59,8 +60,9 @@ uiModules
             agg="agg"
             agg-params="agg.params"
             agg-param="aggParam"
+            editor-config="editorConfig"
             indexed-fields="indexedFields"
-            is-invalid="isInvalid"
+            show-validation="showValidation"
             value="paramValue"
             on-change="onChange"
             set-touched="setTouched"
@@ -78,8 +80,8 @@ uiModules
           $scope.$bind('indexedFields', attr.indexedFields);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
-          let _isInvalid = false;
           $scope.config = config;
+          $scope.showValidation = false;
 
           $scope.optionEnabled = function (option) {
             if (option && isFunction(option.enabled)) {
@@ -106,7 +108,7 @@ uiModules
               return ngModelCtrl.$touched;
             }, (value) => {
               if (value) {
-                showValidation();
+                $scope.showValidation = true;
               }
             }, true);
             $scope.paramValue = $scope.agg.params[$scope.aggParam.name];
@@ -116,23 +118,19 @@ uiModules
             // This is obviously not a good code quality, but without using scope binding (which we can't see above)
             // to bind function values, this is right now the best temporary fix, until all of this will be gone.
             $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
-            showValidation();
+
+            $scope.showValidation = true;
             ngModelCtrl.$setDirty();
           };
 
           $scope.setTouched = () => {
             ngModelCtrl.$setTouched();
-            showValidation();
+            $scope.showValidation = true;
           };
 
           $scope.setValidity = (isValid) => {
-            _isInvalid = !isValid;
             ngModelCtrl.$setValidity(`agg${$scope.agg.id}${$scope.aggParam.name}`, isValid);
           };
-
-          function showValidation() {
-            $scope.isInvalid = _isInvalid;
-          }
         }
       }
     };
