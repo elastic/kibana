@@ -6,32 +6,35 @@
 
 import gql from 'graphql-tag';
 
-export const uncommonProcessesQuery = gql`
-  query GetUncommonProcessesQuery(
+export const tlsQuery = gql`
+  query GetTlsQuery(
     $sourceId: ID!
-    $timerange: TimerangeInput!
-    $pagination: PaginationInput!
     $filterQuery: String
+    $flowTarget: FlowTarget!
+    $ip: String!
+    $pagination: PaginationInput!
+    $sort: TlsSortField!
+    $timerange: TimerangeInput!
   ) {
     source(id: $sourceId) {
       id
-      UncommonProcesses(timerange: $timerange, pagination: $pagination, filterQuery: $filterQuery) {
+      Tls(
+        filterQuery: $filterQuery
+        flowTarget: $flowTarget
+        ip: $ip
+        pagination: $pagination
+        sort: $sort
+        timerange: $timerange
+      ) {
         totalCount
         edges {
           node {
             _id
-            instances
-            process {
-              args
-              name
-            }
-            user {
-              id
-              name
-            }
-            hosts {
-              name
-            }
+            alternativeNames
+            commonNames
+            ja3
+            issuerNames
+            notAfter
           }
           cursor {
             value

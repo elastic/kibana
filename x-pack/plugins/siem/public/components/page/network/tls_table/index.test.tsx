@@ -14,10 +14,10 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
-import { NetworkDnsTable } from '.';
-import { mockData } from './mock';
+import { TlsTable } from '.';
+import { mockTlsData } from './mock';
 
-describe('NetworkTopNFlow Table Component', () => {
+describe('Tls Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
 
@@ -27,18 +27,18 @@ describe('NetworkTopNFlow Table Component', () => {
     store = createStore(state);
   });
 
-  describe('rendering', () => {
-    test('it renders the default NetworkTopNFlow table', () => {
+  describe('Rendering', () => {
+    test('it renders the default Domains table', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
-          <NetworkDnsTable
+          <TlsTable
+            totalCount={1}
             loading={false}
-            data={mockData.NetworkDns.edges}
-            totalCount={mockData.NetworkDns.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
             loadMore={loadMore}
-            type={networkModel.NetworkType.page}
+            data={mockTlsData.edges}
+            hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
+            type={networkModel.NetworkType.details}
           />
         </ReduxStoreProvider>
       );
@@ -47,27 +47,26 @@ describe('NetworkTopNFlow Table Component', () => {
     });
   });
 
-  describe('Sorting', () => {
+  describe('Sorting on Table', () => {
     test('when you click on the column header, you should show the sorting icon', () => {
       const wrapper = mount(
         <MockedProvider>
           <TestProviders store={store}>
-            <NetworkDnsTable
+            <TlsTable
+              totalCount={1}
               loading={false}
-              data={mockData.NetworkDns.edges}
-              totalCount={mockData.NetworkDns.totalCount}
-              hasNextPage={getOr(false, 'hasNextPage', mockData.NetworkDns.pageInfo)!}
-              nextCursor={getOr(null, 'endCursor.value', mockData.NetworkDns.pageInfo)}
               loadMore={loadMore}
-              type={networkModel.NetworkType.page}
+              data={mockTlsData.edges}
+              hasNextPage={getOr(false, 'hasNextPage', mockTlsData.pageInfo)!}
+              nextCursor={getOr(null, 'endCursor.value', mockTlsData.pageInfo)}
+              type={networkModel.NetworkType.details}
             />
           </TestProviders>
         </MockedProvider>
       );
-
-      expect(store.getState().network.page.queries!.dns.dnsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
         direction: 'desc',
-        field: 'queryCount',
+        field: '_id',
       });
 
       wrapper
@@ -77,16 +76,17 @@ describe('NetworkTopNFlow Table Component', () => {
 
       wrapper.update();
 
-      expect(store.getState().network.page.queries!.dns.dnsSortField).toEqual({
+      expect(store.getState().network.details.queries!.tls.tlsSortField).toEqual({
         direction: 'asc',
-        field: 'dnsName',
+        field: '_id',
       });
+
       expect(
         wrapper
           .find('.euiTable thead tr th button')
           .first()
-          .find('svg')
-      ).toBeTruthy();
+          .text()
+      ).toEqual('SHA1 FingerprintClick to sort in descending order');
     });
   });
 });

@@ -24,15 +24,18 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { FlowTarget, IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
+import { TlsTable } from '../../components/page/network/tls_table';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
+import { TlsQuery } from '../../containers/tls';
 import { UsersTable } from '../../components/page/network/users_table';
 import { UsersQuery } from '../../containers/users';
 
 const basePath = chrome.getBasePath();
 
 const DomainsTableManage = manageQuery(DomainsTable);
+const TlsTableManage = manageQuery(TlsTable);
 const UsersTableManage = manageQuery(UsersTable);
 
 interface IPDetailsComponentReduxProps {
@@ -77,7 +80,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   </IpOverviewQuery>
                   <EuiSpacer size="s" />
                   <EuiHorizontalRule margin="xs" />
-                  <EuiSpacer size="s" />
+                  <EuiSpacer />
 
                   <DomainsQuery
                     endDate={to}
@@ -98,7 +101,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         ip={ip}
                         loading={loading}
                         loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                         refetch={refetch}
                         setQuery={setQuery}
                         totalCount={totalCount}
@@ -106,7 +109,8 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       />
                     )}
                   </DomainsQuery>
-                  <EuiSpacer size="s" />
+
+                  <EuiSpacer />
 
                   <UsersQuery
                     endDate={to}
@@ -120,11 +124,9 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
                       <UsersTableManage
                         data={users}
-                        indexPattern={indexPattern}
                         id={id}
                         flowTarget={flowTarget}
                         hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                        ip={ip}
                         loading={loading}
                         loadMore={loadMore}
                         nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
@@ -135,6 +137,33 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       />
                     )}
                   </UsersQuery>
+
+                  <EuiSpacer />
+
+                  <TlsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={decodeIpv6(ip)}
+                    sourceId="default"
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  >
+                    {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                      <TlsTableManage
+                        data={tls}
+                        id={id}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        totalCount={totalCount}
+                        type={networkModel.NetworkType.details}
+                      />
+                    )}
+                  </TlsQuery>
                 </>
               )}
             </GlobalTime>

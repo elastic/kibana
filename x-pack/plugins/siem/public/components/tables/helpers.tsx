@@ -14,6 +14,49 @@ import { Provider } from '../timeline/data_providers/provider';
 import { defaultToEmptyTag, getEmptyTagValue } from '../empty_value';
 import { MoreRowItems } from '../page';
 
+export const getRowItemDraggable = ({
+  rowItem,
+  attrName,
+  idPrefix,
+  render,
+}: {
+  rowItem: string | null | undefined;
+  attrName: string;
+  idPrefix: string;
+  render?: (item: string) => JSX.Element;
+  displayCount?: number;
+  maxOverflow?: number;
+}): JSX.Element => {
+  if (rowItem != null) {
+    const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
+    return (
+      <DraggableWrapper
+        key={id}
+        dataProvider={{
+          and: [],
+          enabled: true,
+          id,
+          name: rowItem,
+          excluded: false,
+          kqlQuery: '',
+          queryMatch: { field: attrName, value: rowItem },
+        }}
+        render={(dataProvider, _, snapshot) =>
+          snapshot.isDragging ? (
+            <DragEffects>
+              <Provider dataProvider={dataProvider} />
+            </DragEffects>
+          ) : (
+            <>{render ? render(rowItem) : rowItem}</>
+          )
+        }
+      />
+    );
+  } else {
+    return getEmptyTagValue();
+  }
+};
+
 export const getRowItemDraggables = ({
   rowItems,
   attrName,
@@ -22,50 +65,54 @@ export const getRowItemDraggables = ({
   displayCount = 5,
   maxOverflow = 5,
 }: {
-  rowItems: string[];
+  rowItems: string[] | null | undefined;
   attrName: string;
   idPrefix: string;
   render?: (item: string) => JSX.Element;
   displayCount?: number;
   maxOverflow?: number;
 }): JSX.Element => {
-  const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
-    const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
-    return (
-      <React.Fragment key={id}>
-        {index !== 0 ? <>,&nbsp;</> : null}
-        <DraggableWrapper
-          key={id}
-          dataProvider={{
-            and: [],
-            enabled: true,
-            id,
-            name: rowItem,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: { field: attrName, value: rowItem },
-          }}
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              <>{render ? render(rowItem) : rowItem}</>
-            )
-          }
-        />
-      </React.Fragment>
-    );
-  });
+  if (rowItems != null && rowItems.length > 0) {
+    const draggables = rowItems.slice(0, displayCount).map((rowItem, index) => {
+      const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}`);
+      return (
+        <React.Fragment key={id}>
+          {index !== 0 ? <>,&nbsp;</> : null}
+          <DraggableWrapper
+            key={id}
+            dataProvider={{
+              and: [],
+              enabled: true,
+              id,
+              name: rowItem,
+              excluded: false,
+              kqlQuery: '',
+              queryMatch: { field: attrName, value: rowItem },
+            }}
+            render={(dataProvider, _, snapshot) =>
+              snapshot.isDragging ? (
+                <DragEffects>
+                  <Provider dataProvider={dataProvider} />
+                </DragEffects>
+              ) : (
+                <>{render ? render(rowItem) : rowItem}</>
+              )
+            }
+          />
+        </React.Fragment>
+      );
+    });
 
-  return draggables.length > 0 ? (
-    <>
-      {draggables} {getRowItemOverflow(rowItems, idPrefix, displayCount, maxOverflow)}
-    </>
-  ) : (
-    getEmptyTagValue()
-  );
+    return draggables.length > 0 ? (
+      <>
+        {draggables} {getRowItemOverflow(rowItems, idPrefix, displayCount, maxOverflow)}
+      </>
+    ) : (
+      getEmptyTagValue()
+    );
+  } else {
+    return getEmptyTagValue();
+  }
 };
 
 export const getRowItemOverflow = (

@@ -112,6 +112,45 @@ const firstLastSeenSchema = gql`
   }
 `;
 
+const tlsSchema = gql`
+  enum TlsFields {
+    _id
+  }
+  type TlsNode {
+    _id: String
+    timestamp: Date
+    alternativeNames: [String!]
+    notAfter: [String!]
+    commonNames: [String!]
+    ja3: [String!]
+    issuerNames: [String!]
+  }
+  input TlsSortField {
+    field: TlsFields!
+    direction: Direction!
+  }
+  type TlsEdges {
+    node: TlsNode!
+    cursor: CursorType!
+  }
+  type TlsData {
+    edges: [TlsEdges!]!
+    totalCount: Float!
+    pageInfo: PageInfo!
+  }
+  extend type Source {
+    Tls(
+      filterQuery: String
+      id: String
+      ip: String!
+      pagination: PaginationInput!
+      sort: TlsSortField!
+      flowTarget: FlowTarget!
+      timerange: TimerangeInput!
+    ): TlsData!
+  }
+`;
+
 const usersSchema = gql`
   enum UsersFields {
     name
@@ -161,4 +200,10 @@ const usersSchema = gql`
   }
 `;
 
-export const ipDetailsSchemas = [ipOverviewSchema, domainsSchema, firstLastSeenSchema, usersSchema];
+export const ipDetailsSchemas = [
+  ipOverviewSchema,
+  domainsSchema,
+  firstLastSeenSchema,
+  tlsSchema,
+  usersSchema,
+];

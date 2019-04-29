@@ -1,5 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
+<Component>
+  <Connect(DraggableWrapperComponent)
+    dataProvider={
+      Object {
+        "and": Array [],
+        "enabled": true,
+        "excluded": false,
+        "id": "idPrefix-attrName-item1",
+        "kqlQuery": "",
+        "name": "item1",
+        "queryMatch": Object {
+          "field": "attrName",
+          "value": "item1",
+        },
+      }
+    }
+    key="idPrefix-attrName-item1"
+    render={[Function]}
+  />
+</Component>
+`;
+
 exports[`Table Helpers #getRowItemDraggables it returns correctly against snapshot 1`] = `
 <Component>
   <Connect(DraggableWrapperComponent)

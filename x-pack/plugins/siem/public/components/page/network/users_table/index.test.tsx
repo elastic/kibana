@@ -12,7 +12,7 @@ import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
 import { FlowTarget } from '../../../../graphql/types';
-import { mockIndexPattern, mockGlobalState, TestProviders } from '../../../../mock';
+import { mockGlobalState, TestProviders } from '../../../../mock';
 import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
@@ -20,7 +20,6 @@ import { mockUsersData } from './mock';
 
 describe('Users Table Component', () => {
   const loadMore = jest.fn();
-  const ip = '10.10.10.10';
   const state: State = mockGlobalState;
 
   let store = createStore(state);
@@ -34,8 +33,6 @@ describe('Users Table Component', () => {
       const wrapper = shallow(
         <ReduxStoreProvider store={store}>
           <UsersTable
-            indexPattern={mockIndexPattern}
-            ip={ip}
             totalCount={1}
             loading={false}
             loadMore={loadMore}
@@ -58,8 +55,6 @@ describe('Users Table Component', () => {
         <MockedProvider>
           <TestProviders store={store}>
             <UsersTable
-              indexPattern={mockIndexPattern}
-              ip={ip}
               totalCount={1}
               loading={false}
               loadMore={loadMore}

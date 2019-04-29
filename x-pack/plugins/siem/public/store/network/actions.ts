@@ -12,6 +12,7 @@ import {
   FlowTarget,
   NetworkDnsSortField,
   NetworkTopNFlowSortField,
+  TlsSortField,
   UsersSortField,
 } from '../../graphql/types';
 import { KueryFilterQuery, SerializedFilterQuery } from '../model';
@@ -81,6 +82,15 @@ export const updateDomainsFlowDirection = actionCreator<{
 export const updateDomainsSort = actionCreator<{
   domainsSortField: DomainsSortField;
 }>('UPDATE_DOMAINS_SORT');
+
+// TLS Table Actions
+export const updateTlsSort = actionCreator<{
+  tlsSortField: TlsSortField;
+}>('UPDATE_TLS_SORT');
+
+export const updateTlsLimit = actionCreator<{
+  limit: number;
+}>('UPDATE_TLS_LIMIT');
 
 // Users Table Actions
 export const updateUsersLimit = actionCreator<{

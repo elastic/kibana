@@ -35,7 +35,7 @@ describe('Authentication Table Component', () => {
             data={mockData.Authentications.edges}
             totalCount={mockData.Authentications.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />

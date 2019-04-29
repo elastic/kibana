@@ -16,7 +16,7 @@
 
 export type ToStringArray = string[];
 
-export type Date = any;
+export type Date = string;
 
 export type ToNumberArray = number[];
 
@@ -66,6 +66,8 @@ export interface Source {
   Domains: DomainsData;
 
   DomainFirstLastSeen: FirstLastSeenDomain;
+
+  Tls: TlsData;
 
   Users: UsersData;
 
@@ -960,6 +962,36 @@ export interface FirstLastSeenDomain {
   lastSeen?: Date | null;
 }
 
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  alternativeNames?: string[] | null;
+
+  notAfter?: string[] | null;
+
+  commonNames?: string[] | null;
+
+  ja3?: string[] | null;
+
+  issuerNames?: string[] | null;
+}
+
 export interface UsersData {
   edges: UsersEdges[];
 
@@ -1135,7 +1167,7 @@ export interface UncommonProcessItem {
 
   process: ProcessEcsFields;
 
-  host: HostEcsFields[];
+  hosts: HostEcsFields[];
 
   user?: UserEcsFields | null;
 }
@@ -1187,6 +1219,12 @@ export interface HostsSortField {
 
 export interface DomainsSortField {
   field: DomainsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
 
   direction: Direction;
 }
@@ -1311,6 +1349,21 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+}
+export interface TlsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 }
 export interface UsersSourceArgs {
   filterQuery?: string | null;
@@ -1445,6 +1498,10 @@ export enum NetworkDirectionEcs {
   outgoing = 'outgoing',
   listening = 'listening',
   unknown = 'unknown',
+}
+
+export enum TlsFields {
+  _id = '_id',
 }
 
 export enum UsersFields {
@@ -3422,6 +3479,86 @@ export namespace GetTimelineQuery {
   };
 }
 
+export namespace GetTlsQuery {
+  export type Variables = {
+    sourceId: string;
+    filterQuery?: string | null;
+    flowTarget: FlowTarget;
+    ip: string;
+    pagination: PaginationInput;
+    sort: TlsSortField;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    Tls: Tls;
+  };
+
+  export type Tls = {
+    __typename?: 'TlsData';
+
+    totalCount: number;
+
+    edges: Edges[];
+
+    pageInfo: PageInfo;
+  };
+
+  export type Edges = {
+    __typename?: 'TlsEdges';
+
+    node: Node;
+
+    cursor: Cursor;
+  };
+
+  export type Node = {
+    __typename?: 'TlsNode';
+
+    _id?: string | null;
+
+    alternativeNames?: string[] | null;
+
+    commonNames?: string[] | null;
+
+    ja3?: string[] | null;
+
+    issuerNames?: string[] | null;
+
+    notAfter?: string[] | null;
+  };
+
+  export type Cursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+
+  export type PageInfo = {
+    __typename?: 'PageInfo';
+
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+  };
+}
+
 export namespace GetUncommonProcessesQuery {
   export type Variables = {
     sourceId: string;
@@ -3473,7 +3610,7 @@ export namespace GetUncommonProcessesQuery {
 
     user?: User | null;
 
-    host: Host[];
+    hosts: Hosts[];
   };
 
   export type Process = {
@@ -3492,7 +3629,7 @@ export namespace GetUncommonProcessesQuery {
     name?: ToStringArray | null;
   };
 
-  export type Host = {
+  export type Hosts = {
     __typename?: 'HostEcsFields';
 
     name?: ToStringArray | null;
