@@ -12,7 +12,12 @@
               aria-level="1"
               ng-if="showPluginBreadcrumbs">
               <div class="kuiLocalBreadcrumb">
-                <a class="kuiLocalBreadcrumb__link" href="#">Map</a>
+                <a
+                  class="kuiLocalBreadcrumb__link"
+                  href="#"
+                  i18n-id="xpack.maps.mapController.mapsBreadcrumbLabel"
+                  i18n-default-message="Maps"
+                ></a>
               </div>
               <div class="kuiLocalBreadcrumb">
                 {{ getMapTitle() }}

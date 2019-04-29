@@ -83,4 +83,44 @@ describe('getUpgradeAssistantStatus', () => {
     expect(result).toHaveProperty('readyForUpgrade', true);
     expect(result).toHaveProperty('cluster', []);
   });
+
+  it('filters out TLS deprecation on Cloud', async () => {
+    deprecationsResponse = {
+      cluster_settings: [
+        {
+          level: 'warning',
+          message: 'TLS v1.0 has been removed from default TLS/SSL protocols',
+          url: 'https://...',
+        },
+      ],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {},
+    };
+
+    const result = await getUpgradeAssistantStatus(callWithRequest, {} as any, true);
+
+    expect(result).toHaveProperty('readyForUpgrade', true);
+    expect(result).toHaveProperty('cluster', []);
+  });
+
+  it('filters out GCS Repository settings deprecation on Cloud', async () => {
+    deprecationsResponse = {
+      cluster_settings: [
+        {
+          level: 'warning',
+          message: 'GCS Repository settings changed',
+          url: 'https://...',
+        },
+      ],
+      node_settings: [],
+      ml_settings: [],
+      index_settings: {},
+    };
+
+    const result = await getUpgradeAssistantStatus(callWithRequest, {} as any, true);
+
+    expect(result).toHaveProperty('readyForUpgrade', true);
+    expect(result).toHaveProperty('cluster', []);
+  });
 });

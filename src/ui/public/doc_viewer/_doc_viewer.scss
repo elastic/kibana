@@ -26,3 +26,11 @@
 .kbnDocViewer__field {
   white-space: nowrap;
 }
+
+.theme-dark {
+  @import '@elastic/eui/src/themes/k6/k6_colors_dark';
+
+  .kbnDocViewer__content {
+    background-color: $euiColorEmptyShade;
+  }
+}

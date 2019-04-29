@@ -22,7 +22,7 @@ const chmod = promisify(fs.chmod);
  * @param  {String} installsPath
  * @return {Promise<undefined>}
  */
-export async function installBrowser(logger, browserConfig, browserType, installsPath) {
+export async function installBrowser(logger, browserConfig, browserType, installsPath, queueTimeout) {
   const browser = BROWSERS_BY_TYPE[browserType];
   const pkg = browser.paths.packages.find(p => p.platforms.includes(process.platform));
 
@@ -40,5 +40,5 @@ export async function installBrowser(logger, browserConfig, browserType, install
     await chmod(binaryPath, '755');
   }
 
-  return browser.createDriverFactory(binaryPath, logger, browserConfig);
+  return browser.createDriverFactory(binaryPath, logger, browserConfig, queueTimeout);
 }

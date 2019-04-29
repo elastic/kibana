@@ -157,9 +157,25 @@ export const dateHistogramBucketAgg = new BucketAggType({
     },
     {
       name: 'time_zone',
-      default: () => {
-        const isDefaultTimezone = config.isDefault('dateFormat:tz');
-        return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      default: undefined,
+      // We don't ever want this parameter to be serialized out (when saving or to URLs)
+      // since we do all the logic handling it "on the fly" in the `write` method, to prevent
+      // time_zones being persisted into saved_objects
+      serialize: () => undefined,
+      write: (agg, output) => {
+        // If a time_zone has been set explicitly always prefer this.
+        let tz = agg.params.time_zone;
+        if (!tz && agg.params.field) {
+          // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
+          // field requires a specific time_zone
+          tz = _.get(agg.getIndexPattern(), ['typeMeta', 'aggs', 'date_histogram', agg.params.field.name, 'time_zone']);
+        }
+        if (!tz) {
+          // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
+          const isDefaultTimezone = config.isDefault('dateFormat:tz');
+          tz = isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+        }
+        output.params.time_zone = tz;
       },
     },
     {

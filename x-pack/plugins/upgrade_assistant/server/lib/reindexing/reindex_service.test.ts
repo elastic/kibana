@@ -98,6 +98,7 @@ describe('reindexService', () => {
           index: [
             {
               names: ['anIndex', `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`],
+              allow_restricted_indices: true,
               privileges: ['all'],
             },
             {
@@ -121,6 +122,7 @@ describe('reindexService', () => {
           index: [
             {
               names: ['.ml-anomalies', `.reindexed-v${CURRENT_MAJOR_VERSION}-ml-anomalies`],
+              allow_restricted_indices: true,
               privileges: ['all'],
             },
             {
@@ -151,6 +153,7 @@ describe('reindexService', () => {
                 `reindexed-v${CURRENT_MAJOR_VERSION}-anIndex`,
                 'anIndex',
               ],
+              allow_restricted_indices: true,
               privileges: ['all'],
             },
             {
@@ -174,6 +177,7 @@ describe('reindexService', () => {
           index: [
             {
               names: ['.watches', `.reindexed-v${CURRENT_MAJOR_VERSION}-watches`],
+              allow_restricted_indices: true,
               privileges: ['all'],
             },
             {

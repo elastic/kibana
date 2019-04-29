@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# ** THIS IS AN AUTO-GENERATED FILE **
+#
 
 # Run Kibana, using environment variables to set longopts defining Kibana's
 # configuration.
@@ -34,6 +37,7 @@ kibana_vars=(
     elasticsearch.ssl.verificationMode
     elasticsearch.startupTimeout
     elasticsearch.username
+    elasticsearch.url
     i18n.locale
     kibana.defaultAppId
     kibana.index

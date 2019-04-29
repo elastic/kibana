@@ -65,13 +65,7 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }) {
       // Since we use ACE editor and that isn't really storing its value inside
       // a textarea we must really select all text and remove it, and cannot use
       // clearValue().
-      if (process.platform === 'darwin') {
-        await browser.pressKeys([Keys.COMMAND, 'a']); // Select all Mac
-      } else {
-        await browser.pressKeys([Keys.CONTROL, 'a']); // Select all for everything else
-      }
-      await browser.pressKeys(Keys.NULL); // Release modifier keys
-      await browser.pressKeys(Keys.BACKSPACE); // Delete all content
+      await input.clearValueWithKeyboard();
       await input.type(markdown);
       await PageObjects.visualize.waitForRenderingCount(prevRenderingCount + 1);
     }

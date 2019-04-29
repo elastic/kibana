@@ -14,8 +14,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         <div
           className="euiPopover euiPopover--anchorDownRight"
           id="sortPopover"
-          onClick={[Function]}
           onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"
@@ -233,8 +236,11 @@ exports[`ErrorGroupOverview -> List should render empty state 1`] = `
         <div
           className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
           id="customizablePagination"
-          onClick={[Function]}
           onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"
@@ -329,8 +335,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         <div
           className="euiPopover euiPopover--anchorDownRight"
           id="sortPopover"
-          onClick={[Function]}
           onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"
@@ -898,8 +907,11 @@ exports[`ErrorGroupOverview -> List should render with data 1`] = `
         <div
           className="euiPopover euiPopover--anchorUpRight euiPopover--withTitle"
           id="customizablePagination"
-          onClick={[Function]}
           onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
         >
           <div
             className="euiPopover__anchor"

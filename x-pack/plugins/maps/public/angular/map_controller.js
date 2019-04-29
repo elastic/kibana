@@ -201,6 +201,10 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }
   });
 
+  $scope.getMapTitle = function () {
+    return $scope.map.title;
+  };
+  // k7design breadcrumbs
   // TODO subscribe to store change and change when store updates title
   chrome.breadcrumbs.set([
     { text: i18n.translate('xpack.maps.mapController.mapsBreadcrumbLabel', {
@@ -208,6 +212,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
     }), href: '#' },
     { text: $scope.map.title }
   ]);
+  config.watch('k7design', (val) => $scope.showPluginBreadcrumbs = !val);
 
   async function doSave(saveOptions) {
     const store = getStore();

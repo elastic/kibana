@@ -31,7 +31,7 @@ import { timefilter } from 'ui/timefilter';
 
 const config = chrome.getUiSettingsClient();
 
-describe('params', function () {
+describe('date_histogram params', function () {
 
   let paramWriter;
   let writeInterval;
@@ -150,6 +150,12 @@ describe('params', function () {
       config.get.withArgs('dateFormat:tz').returns('Europe/Riga');
       const output = paramWriter.write({});
       expect(output.params).to.have.property('time_zone', 'Europe/Riga');
+    });
+
+    it('should use the fixed time_zone from the index pattern typeMeta', () => {
+      _.set(paramWriter.indexPattern, ['typeMeta', 'aggs', 'date_histogram', timeField, 'time_zone'], 'Europe/Rome');
+      const output = paramWriter.write({ field: timeField });
+      expect(output.params).to.have.property('time_zone', 'Europe/Rome');
     });
 
     afterEach(() => {

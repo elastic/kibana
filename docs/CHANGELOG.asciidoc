@@ -14,6 +14,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-6.7.2>>
 * <<release-notes-6.7.1>>
 * <<release-notes-6.7.0>>
 * <<release-notes-6.6.2>>
@@ -85,13 +86,74 @@ This section summarizes the changes in each release.
 //=== Known Issues
 ////
 
+
+[[release-notes-6.7.2]]
+== {kib} 6.7.2
+
+coming[6.7.2]
+
+See <<breaking-changes, breaking changes>> for the changes to be aware of 
+when migrating your application from one version of {kib} to another.
+
+
+[float]
+[[enhancement-6.7.2]]
+=== Enhancements
+Platform::
+* Updates `zh-CN.json` translation {pull}35020[#35020]
+
+[float]
+[[bug-6.7.2]]
+=== Bug fixes
+Canvas::
+* Excludes assets from Canvas usage query {pull}34516[#34516]
+* Recreates handlers and resets completed state on expression change {pull}33900[#33900]
+* Prevents grouping while mouse is down {pull}34448[#34448]
+* Waits for DOM element to exist {pull}34475[#34475]
+Cross-Cluster Replication::
+* Allows user to use CCR when security is not enabled. {pull}35333[#35333]
+Discover::
+* Adds dark theme for doc viewer to fix dashboard dark mode issue {pull}34632[#34632]
+Geo::
+* Fixes breadcrumbs in Maps application {pull}34270[#34270]
+* Clears data load error when layer gets correct data {pull}34484[#34484]
+Index Lifecycle Management::
+* Removes "Beta" badge {pull}34454[#34454]
+* Fixes crash when zero replicas configured in a phase for policy {pull}34480[#34480]
+Infrastructure::
+* Fixes metrics chart tooltip alignment {pull}34749[#34749]
+Machine Learning::
+* Ensures that the cardinality warning in the multi metric job wizard is only shown on validity fail {pull}34874[#34874]
+Monitoring::
+* Protects against fields not existing in Logstash Nodes listing {pull}34939[#34939]
+* Fixes field name for "Events Ingested" in Logstash Node List page {pull}35122[#35122]
+Upgrade Assistant::
+* Ignores additional warnings handled by Cloud {pull}35005[#35005]
+* Shows different interstitial text when cluster is upgraded {pull}34762[#34762]
+* Specifies `allow_restricted_indices` for `_has_privileges` {pull}35125[#35125]
+Visualizations::
+* Fixes filtering on split bucket values in data table visualization {pull}33886[#33886]
+* Changes sample data to use `auto_expand_replicas` of `0-1` {pull}33736[#33736]
+* Fixes time zone behavior in visualizations {pull}34795[#34795]
+* Fixes timepicker problem in Firefox {pull}35279[#35279]
+
+
+
+
 [[release-notes-6.7.1]]
 == {kib} 6.7.1
 
-coming[6.7.1]
 
 See <<breaking-changes, breaking changes>> for the changes to be aware of 
 when migrating your application from one version of Kibana to another.
+
+[float]
+=== Known issues
+
+Monitoring::
+* If you have a version 7.0 monitoring cluster, a version 6.7 production
+cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in 
+{kib}. {issue}34357[#34357]
 
 [float]
 [[enhancement--6.7.1]]
@@ -107,36 +169,39 @@ Canvas::
 
 Canvas::
 * Fixes hover on key-based page back and forth {pull}33631[#33631]
-
 Geo::
 * Coerces string doc-values to numbers if used in styling {pull}33657[#33657]
-
-Kibana App::
-* Fixes missing formatting for values in table titles {pull}33566[#33566]
-* Allows editing of `editorState` in data panel {pull}33305[#33305]
-* Fixes issue with dark theme and visualization legends {pull}34199[#34199]
-
 Machine Learning::
 * Fixes check to determine whether telemetry is enabled {pull}33975[#33975]
-
 Monitoring::
 * Ensures the Pipelines page uses `reactNodeId` {pull}33798[#33798]
 * Improves performance of the Logstash Pipeline Viewer {pull}33793[#33793]
-
 Platform::
 * Uses `credentials: same-origin` for fetching translations JSON {pull}34036[#34036]
-
 Security::
 * Fixes ID validation in Space API {pull}33716[#33716]
 * Forces user to re-authenticate if token refresh fails with 400 status code {pull}33774[#33774]
-
 Uptime::
 * Removes crosshair synchronization to avoid display bug {pull}33660[#33660]
+Visualizations:: 
+* Fixes missing formatting for values in table titles {pull}33566[#33566]
+* Allows editing of `editorState` in data panel {pull}33305[#33305]
+* Fixes issue with dark theme and visualization legends {pull}34199[#34199]
+* Fixes specificity issue with dark theme and visualization legends {pull}34199[#34199]
+
+
 
 
 [[release-notes-6.7.0]]
 == {kib} 6.7.0
 
+[float]
+=== Known issues
+
+Monitoring::
+* If you have a version 7.0 monitoring cluster, a version 6.7 production
+cluster and {kib} version 6.7.0 or 6.7.1, you cannot see the monitoring data in 
+{kib}. {issue}34357[#34357]
 
 [float]
 [[breaking-6.7.0]]

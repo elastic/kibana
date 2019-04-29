@@ -17,9 +17,10 @@
  * under the License.
  */
 
+import archiver from 'archiver';
 import fs from 'fs';
 import { createHash } from 'crypto';
-import { resolve, dirname, isAbsolute } from 'path';
+import { resolve, dirname, isAbsolute, sep } from 'path';
 import { createGunzip } from 'zlib';
 import { inspect } from 'util';
 
@@ -202,4 +203,16 @@ export async function untar(source, destination, extractOptions = {}) {
       path: destination
     }),
   ]);
+}
+
+export async function compress(type, options = {}, source, destination) {
+  const output = fs.createWriteStream(destination);
+  const archive = archiver(type, options);
+  const name = source.split(sep).slice(-1)[0];
+
+  archive.pipe(output);
+
+  return archive
+    .directory(source, name)
+    .finalize();
 }

@@ -14,7 +14,6 @@ import { getPolicyPath } from '../../../../services/navigation';
 import { flattenPanelTree } from '../../../../services/flatten_panel_tree';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import {
-  EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiLink,
@@ -453,26 +452,14 @@ export class PolicyTableUi extends Component {
               <Fragment>
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="m">
-                      <EuiFlexItem grow={false}>
-                        <EuiTitle size="l">
-                          <h1>
-                            <FormattedMessage
-                              id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
-                              defaultMessage="Index lifecycle policies"
-                            />
-                          </h1>
-                        </EuiTitle>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBetaBadge
-                          label={intl.formatMessage({
-                            id: 'xpack.indexLifecycleMgmt.policyTable.sectionHeadingBetaBadgeText',
-                            defaultMessage: 'Beta',
-                          })}
+                    <EuiTitle size="l">
+                      <h1>
+                        <FormattedMessage
+                          id="xpack.indexLifecycleMgmt.policyTable.sectionHeading"
+                          defaultMessage="Index Lifecycle Policies"
                         />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                      </h1>
+                    </EuiTitle>
                   </EuiFlexItem>
                   {totalNumberOfPolicies ? (
                     <EuiFlexItem grow={false}>{this.renderCreatePolicyButton()}</EuiFlexItem>
