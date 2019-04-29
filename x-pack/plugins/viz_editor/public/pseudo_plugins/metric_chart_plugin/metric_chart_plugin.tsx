@@ -41,7 +41,7 @@ function configPanel({
   const onDropField = (field: DatasourceField) => {
     const firstQuery = Object.values(visModel.queries)[0];
     const firstQueryKey = Object.keys(visModel.queries)[0];
-    const possibleOperator = field.type === 'number' ? 'avg' : getOperatorsForField(field)[0];
+    const possibleOperator = field.type === 'number' ? 'sum' : getOperatorsForField(field)[0];
     const possibleOperation = fieldToOperation(field, possibleOperator);
     const isMultiOperation = isApplicableForCardinality(firstQuery.select[0].operator, 'multi');
     const extendedQueryState = {

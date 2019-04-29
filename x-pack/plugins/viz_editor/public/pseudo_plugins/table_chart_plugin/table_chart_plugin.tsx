@@ -12,10 +12,12 @@ import {
   Suggestion,
   VisModel,
   VisualizationPanelProps,
+  isApplicableForCardinality,
 } from '../..';
 import { DatasourceField, fieldToOperation } from '../../../common';
 import { Draggable } from '../../common/components/draggable';
 import { AxisEditor } from './axis_editor';
+import { DroppablePane } from '../../frame/main/droppable_pane';
 
 const PLUGIN_NAME = 'table_chart';
 
@@ -54,7 +56,7 @@ function configPanel({
       {firstQuery.select.map((operation, index) => (
         <React.Fragment key={index}>
           <div className="configPanel-axis">
-            <span className="configPanel-axis-title">Add dimension</span>
+            <span className="configPanel-axis-title">Add column</span>
             <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField(index)}>
               Drop another field here
             </Draggable>
@@ -70,7 +72,7 @@ function configPanel({
         </React.Fragment>
       ))}
       <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Add dimension</span>
+        <span className="configPanel-axis-title">Add column</span>
         <Draggable
           canHandleDrop={(f: DatasourceField) => true}
           onDrop={onDropField(firstQuery.select.length)}
@@ -125,7 +127,32 @@ function getSuggestionsForField(
   field: DatasourceField,
   visModel: TableChartVisModel
 ): Suggestion[] {
-  return [];
+  if (visModel.editorPlugin === PLUGIN_NAME) {
+    const firstQueryKey = Object.keys(visModel.queries)[0];
+    const firstQuery = visModel.queries[firstQueryKey];
+    const possibleOperator = field.type === 'number' ? 'sum' : getOperatorsForField(field)[0];
+    const possibleOperation = fieldToOperation(field, possibleOperator);
+    const updatedVisModel = {
+      ...visModel,
+      queries: {
+        ...visModel.queries,
+        [firstQueryKey]: { ...firstQuery, select: [possibleOperation, ...firstQuery.select] },
+      },
+    };
+    const prefilledState = prefillPrivateState(updatedVisModel);
+
+    return [buildSuggestion(prefilledState, 0.95)];
+  } else {
+    return [];
+  }
+}
+
+function WorkspacePanel({ children, ...props }: any) {
+  return (
+    <DroppablePane {...props} useFirstSuggestion>
+      {children}
+    </DroppablePane>
+  );
 }
 
 export const config: EditorPlugin<TableChartVisModel> = {
@@ -134,5 +161,6 @@ export const config: EditorPlugin<TableChartVisModel> = {
   ConfigPanel: configPanel,
   getChartSuggestions,
   getSuggestionsForField,
+  WorkspacePanel,
   getInitialState: currentState => prefillPrivateState(currentState),
 };
