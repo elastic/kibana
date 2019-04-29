@@ -46,6 +46,7 @@ describe('TelemetryForm', () => {
         query={{ text: '' }}
         onQueryMatchChange={jest.fn()}
         telemetryOptInProvider={buildTelemetryOptInProvider()}
+        enableSaving={true}
       />)
     ).toMatchSnapshot();
   });
