@@ -7,7 +7,7 @@
     "detectors": [
       {
         "detector_description": "Low visitor count",
-        "function": "low_count",
+        "function": "low_count"
       }
     ],
     "influencers": []

@@ -8,7 +8,7 @@
       {
         "detector_description": "Count of distinct client IPs",
         "function": "distinct_count",
-	      "field" : "clientip"
+	      "field_name" : "clientip"
       }
     ],
     "influencers": ["clientip"]
