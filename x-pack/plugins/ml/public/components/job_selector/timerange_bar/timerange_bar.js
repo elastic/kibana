@@ -9,16 +9,28 @@
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
 import {
+  EuiProgress,
   EuiToolTip
 } from '@elastic/eui';
 
 export function TimeRangeBar({
+  isRunning,
   timerange
 }) {
   const style = {
     width: timerange.widthPx,
     marginLeft: timerange.fromPx
   };
+
+  if (isRunning) {
+    // set to gantt bar width so it shows up
+    return (
+      <div style={{ width: '299px' }}>
+        <EuiProgress size="xs" color="subdued" />
+      </div>
+    );
+  }
+
   return (
     <EuiToolTip
       position="top"
@@ -35,6 +47,7 @@ export function TimeRangeBar({
 }
 
 TimeRangeBar.propTypes = {
+  isRunning: PropTypes.bool,
   timerange: PropTypes.shape({
     widthPx: PropTypes.number,
     label: PropTypes.string,

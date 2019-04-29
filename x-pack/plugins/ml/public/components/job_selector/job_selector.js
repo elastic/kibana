@@ -10,7 +10,6 @@ import React, { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import moment from 'moment';
 
-import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { JobSelectorTable } from './job_selector_table/';
 import { timefilter } from 'ui/timefilter';
@@ -28,7 +27,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiLink,
-  EuiLoadingSpinner,
   EuiSwitch,
   EuiText,
   EuiTitle
@@ -85,18 +83,6 @@ export function JobSelector({
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   useEffect(() => {
-    if (selectedIds.length === 0) {
-      let selected = [];
-      mlJobService.loadJobs()
-        .then((resp) => {
-          if (resp.jobs.length) {
-            selected = [resp.jobs[0].job_id];
-            setSelectedIds(selected);
-            jobSelectService.next({ selection: selected });
-          }
-          // TODO: broadcast that there are no jobs. Explorer updates with noJobsSelected
-        });
-    }
     // listen for update from Single Metric Viewer
     const subscription = jobSelectService.subscribe(({ selection, resetSelection }) => {
       if (resetSelection === true) {
@@ -438,7 +424,6 @@ export function JobSelector({
 
   return (
     <div className="mlJobSelectorBar">
-      {selectedIds.length === 0 && <EuiLoadingSpinner size="s" />}
       {selectedIds.length > 0 && renderJobSelectionBar()}
       {renderFlyout()}
     </div>
