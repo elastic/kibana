@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { EuiButton, EuiHorizontalRule, EuiIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import styled from 'styled-components';
 
@@ -24,14 +25,17 @@ export class HelpMenuComponent extends React.PureComponent {
         <EuiTitle size="xxs">
           <h6>
             <Icon type="securityAnalyticsApp" />
-            SIEM Application Help
+            <FormattedMessage
+              id="xpack.siem.chrome.help.title"
+              defaultMessage="SIEM Application Help"
+            />
           </h6>
         </EuiTitle>
 
         <EuiSpacer />
 
         <EuiButton iconType="popout" href="https://discuss.elastic.co/" target="_blank">
-          Submit feedback
+          <FormattedMessage id="xpack.siem.chrome.help.feedback" defaultMessage="Submit feedback" />
         </EuiButton>
       </>
     );
