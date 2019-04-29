@@ -193,6 +193,7 @@ describe('PingList component', () => {
         data={{ allPings }}
         onUpdateApp={jest.fn()}
         onSelectedStatusUpdate={jest.fn()}
+        selectedOption="down"
       />
     );
     expect(component).toMatchSnapshot();

@@ -53,6 +53,7 @@ export default function savedObjectsManagementTests({
                   'visualization',
                   'search',
                   'dashboard',
+                  'telemetry',
                   'timelion-sheet',
                   'url',
                   'infrastructure-ui-source',
@@ -87,7 +88,7 @@ export default function savedObjectsManagementTests({
             expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
             expect(uiCapabilities.value!.savedObjectsManagement).to.eql(
               savedObjectsManagementBuilder.build({
-                all: ['foo'],
+                all: ['foo', 'telemetry'],
                 read: ['index-pattern', 'config'],
               })
             );

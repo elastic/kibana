@@ -5,7 +5,7 @@
  */
 
 import Joi from 'joi';
-import { cloneDeep, difference } from 'lodash';
+import { cloneDeep, difference, uniq } from 'lodash';
 import { UICapabilities } from 'ui/capabilities';
 
 export interface FeatureKibanaPrivileges {
@@ -124,7 +124,9 @@ export class FeatureRegistry {
       throw new Error(`Feature with id ${feature.id} is already registered.`);
     }
 
-    this.features[feature.id] = feature as Feature;
+    const featureCopy: Feature = cloneDeep(feature as Feature);
+
+    this.features[feature.id] = applyAutomaticPrivilegeGrants(featureCopy as Feature);
   }
 
   public getAll(): Feature[] {
@@ -192,5 +194,34 @@ function validateFeature(feature: FeatureWithAllOrReadPrivileges) {
         }
       }
     );
+  });
+}
+
+function applyAutomaticPrivilegeGrants(feature: Feature): Feature {
+  const { all: allPrivilege, read: readPrivilege } = feature.privileges;
+  const reservedPrivilege = feature.reserved ? feature.reserved.privilege : null;
+
+  applyAutomaticAllPrivilegeGrants(allPrivilege, reservedPrivilege);
+  applyAutomaticReadPrivilegeGrants(readPrivilege);
+
+  return feature;
+}
+
+function applyAutomaticAllPrivilegeGrants(...allPrivileges: Array<FeatureKibanaPrivileges | null>) {
+  allPrivileges.forEach(allPrivilege => {
+    if (allPrivilege) {
+      allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
+      allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config']);
+    }
+  });
+}
+
+function applyAutomaticReadPrivilegeGrants(
+  ...readPrivileges: Array<FeatureKibanaPrivileges | null>
+) {
+  readPrivileges.forEach(readPrivilege => {
+    if (readPrivilege) {
+      readPrivilege.savedObject.read = uniq([...readPrivilege.savedObject.read, 'config']);
+    }
   });
 }
