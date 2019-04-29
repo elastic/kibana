@@ -621,21 +621,21 @@
     "ephemeral_id": "00b8757e-a217-486e-86f4-68497fa7f6df",
     "http_address": "127.0.0.1:9601",
     "host": "Shaunaks-MacBook-Pro.local",
-    "pipeline": {
-      "workers": 8,
-      "batch_size": 125
-    },
+    "pipeline": { "workers": 8, "batch_size": 125 },
     "availability": false,
-    "events": {
-      "filtered": 75125,
-      "in": 78006,
-      "duration_in_millis": 3729551,
-      "out": 75125
-    },
-    "reloads": {
-      "successes": 0,
-      "failures": 0
-    },
+    "events": { "filtered": 75125, "in": 78006, "duration_in_millis": 3729551, "out": 75125 },
+    "reloads": { "successes": 0, "failures": 0 },
     "uptime": 502472
+  },
+  "clusterStatus": {
+    "node_count": 2,
+    "events_in_total": 120439,
+    "events_out_total": 114557,
+    "avg_memory": 2075918336,
+    "avg_memory_used": 595127568,
+    "max_uptime": 502472,
+    "pipeline_count": 4,
+    "queue_types": { "memory": 4, "persisted": 0 },
+    "versions": ["7.0.0-alpha1"]
   }
 }
