@@ -85,7 +85,7 @@ export function apm(kibana: any) {
             catalogue: ['apm'],
             savedObject: {
               all: [],
-              read: ['config']
+              read: []
             },
             ui: ['show', 'save']
           },
@@ -94,7 +94,7 @@ export function apm(kibana: any) {
             catalogue: ['apm'],
             savedObject: {
               all: [],
-              read: ['config']
+              read: []
             },
             ui: ['show']
           }
