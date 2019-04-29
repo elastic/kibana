@@ -586,13 +586,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await input.type(newValue);
     }
 
-    async setNumericInterval(newValue, { append } = {}) {
-      const input = await find.byCssSelector('input[name="interval"]');
-      if (!append) {
-        await input.clearValue();
+    async getNumericInterval(agg = 2) {
+      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
+      return await intervalElement.getProperty('value');
+    }
+
+    async setNumericInterval(newValue, { append } = {}, agg = 2) {
+      if (append) {
+        await testSubjects.append(`visEditorInterval${agg}`, String(newValue));
+      } else {
+        await testSubjects.setValue(`visEditorInterval${agg}`, String(newValue));
       }
-      await input.type(newValue + '');
-      await PageObjects.common.sleep(1000);
     }
 
     async setSize(newValue) {
@@ -871,6 +875,22 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
         log.debug('chartData[i] =' + chartData[i]);
       }
       return chartData;
+    }
+
+    /*
+    ** This method returns the paths that compose an area chart.
+    */
+    async getAreaChartPaths(dataLabel) {
+      const path = await retry.try(
+        async () => await find.byCssSelector(`path[data-label="${dataLabel}"]`, defaultFindTimeout * 2)
+      );
+      const data = await path.getAttribute('d');
+      log.debug(data);
+      // This area chart data starts with a 'M'ove to a x,y location, followed
+      // by a bunch of 'L'ines from that point to the next.  Those points are
+      // the values we're going to use to calculate the data values we're testing.
+      // So git rid of the one 'M' and split the rest on the 'L's.
+      return data.split('L');
     }
 
     // The current test shows dots, not a line.  This function gets the dots and normalizes their height.

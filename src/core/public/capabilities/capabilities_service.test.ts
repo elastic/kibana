@@ -32,7 +32,7 @@ describe('#start', () => {
       } as any,
     });
     const service = new CapabilitiesService();
-    const startContract = service.setup({ injectedMetadata: injectedMetadata.setup() });
+    const startContract = service.start({ injectedMetadata: injectedMetadata.start() });
     expect(startContract.getCapabilities()).toEqual({
       foo: 'bar',
       bar: 'baz',
@@ -51,7 +51,7 @@ describe('#start', () => {
       } as any,
     });
     const service = new CapabilitiesService();
-    const startContract = service.setup({ injectedMetadata: injectedMetadata.setup() });
+    const startContract = service.start({ injectedMetadata: injectedMetadata.start() });
     const capabilities = startContract.getCapabilities();
 
     // @ts-ignore TypeScript knows this shouldn't be possible

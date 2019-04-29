@@ -7,7 +7,7 @@
 import theme from '@elastic/eui/dist/eui_theme_light.json';
 import React, { Fragment } from 'react';
 import styled from 'styled-components';
-import { idx } from '../../../../common/idx';
+import { idx } from '@kbn/elastic-idx';
 import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import { fontFamilyCode, fontSize, px, units } from '../../../style/variables';
 
