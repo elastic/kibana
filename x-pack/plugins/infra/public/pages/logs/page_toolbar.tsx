@@ -37,7 +37,6 @@ export const LogsToolbar = injectI18n(({ intl }) => {
   } = useContext(LogViewConfiguration.Context);
 
   const { setSurroundingLogsId } = useContext(LogFlyout.Context);
-  
   return (
     <Toolbar>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -57,11 +56,11 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                     loadSuggestions={loadSuggestions}
                     onChange={(expression: string) => {
                       setSurroundingLogsId(null);
-                      setFilterQueryDraftFromKueryExpression(expression)
+                      setFilterQueryDraftFromKueryExpression(expression);
                     }}
                     onSubmit={(expression: string) => {
                       setSurroundingLogsId(null);
-                      applyFilterQueryFromKueryExpression(expression)
+                      applyFilterQueryFromKueryExpression(expression);
                     }}
                     placeholder={intl.formatMessage({
                       id: 'xpack.infra.logsPage.toolbar.kqlSearchFieldPlaceholder',

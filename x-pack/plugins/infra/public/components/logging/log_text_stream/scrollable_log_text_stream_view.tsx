@@ -171,7 +171,9 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                       item={item}
                       scale={scale}
                       wrap={wrap}
-                      isHighlighted={highlightedItem ? (item.logEntry.gid === highlightedItem) : false}
+                      isHighlighted={
+                        highlightedItem ? item.logEntry.gid === highlightedItem : false
+                      }
                     />
                   )}
                 </MeasurableItemView>

@@ -14,13 +14,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import moment from 'moment';
 import React from 'react';
-
 import euiStyled from '../../../../../common/eui_styled_components';
 import { TimeKey } from '../../../common/time';
 import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 import { InfraLoadingPanel } from '../loading';
-import moment from 'moment';
 
 interface Props {
   flyoutItem: InfraLogItem | null;
@@ -33,14 +32,21 @@ interface Props {
 }
 
 export const LogFlyout = injectI18n(
-  ({ flyoutItem, loading, setFlyoutVisibility, setFilter, setTarget, setSurroundingLogsId, intl }: Props) => {
+  ({
+    flyoutItem,
+    loading,
+    setFlyoutVisibility,
+    setFilter,
+    setTarget,
+    setSurroundingLogsId,
+    intl,
+  }: Props) => {
     const handleFilter = (field: InfraLogItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;
       setFilter(filter);
 
       if (flyoutItem && flyoutItem.timestamp && flyoutItem.tiebreaker) {
         const timestampMoment = moment(flyoutItem.timestamp);
-        
         if (timestampMoment.isValid()) {
           setTarget({
             time: timestampMoment.valueOf(),

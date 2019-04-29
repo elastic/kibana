@@ -140,7 +140,8 @@ export class InfraLogEntriesDomain {
     return {
       id: document._id,
       index: document._index,
-      timestamp: documentTimestamp && typeof documentTimestamp === 'string' ? documentTimestamp : null,
+      timestamp:
+        documentTimestamp && typeof documentTimestamp === 'string' ? documentTimestamp : null,
       tiebreaker: document.sort[0],
       fields: sortBy(
         [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],

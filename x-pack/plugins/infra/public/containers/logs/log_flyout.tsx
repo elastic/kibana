@@ -19,12 +19,12 @@ export enum FlyoutVisibility {
 }
 
 interface FlyoutOptionsUrlState {
-  flyoutId?: string | null,
-  flyoutVisibility?: string | null,
+  flyoutId?: string | null;
+  flyoutVisibility?: string | null;
   surroundingLogsId?: string | null;
 }
 
-export const useLogFlyout = ({ sourceId } : { sourceId : string} ) => {
+export const useLogFlyout = ({ sourceId }: { sourceId: string }) => {
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
   const [flyoutItem, setFlyoutItem] = useState<InfraLogItem | null>(null);
@@ -60,14 +60,18 @@ export const useLogFlyout = ({ sourceId } : { sourceId : string} ) => {
   const isLoading = useMemo(
     () => {
       return loadFlyoutItemRequest.state === 'pending';
-    }, [loadFlyoutItemRequest.state]
+    },
+    [loadFlyoutItemRequest.state]
   );
 
-  useEffect(() => {
-    if (flyoutId) {
-      loadFlyoutItem();
-    }
-  }, [loadFlyoutItem, flyoutId])
+  useEffect(
+    () => {
+      if (flyoutId) {
+        loadFlyoutItem();
+      }
+    },
+    [loadFlyoutItem, flyoutId]
+  );
 
   return {
     flyoutVisible,
@@ -84,13 +88,14 @@ export const useLogFlyout = ({ sourceId } : { sourceId : string} ) => {
 export const LogFlyout = createContainer(useLogFlyout);
 
 export const WithFlyoutOptionsUrlState = () => {
-  const { 
+  const {
     flyoutVisible,
     setFlyoutVisibility,
     flyoutId,
     setFlyoutId,
     surroundingLogsId,
-    setSurroundingLogsId } = useContext(LogFlyout.Context);
+    setSurroundingLogsId,
+  } = useContext(LogFlyout.Context);
 
   return (
     <UrlStateContainer
@@ -130,7 +135,7 @@ export const WithFlyoutOptionsUrlState = () => {
         }
       }}
     />
-  )
+  );
 };
 
 const mapToUrlState = (value: any): FlyoutOptionsUrlState | undefined =>
@@ -147,7 +152,7 @@ const mapToFlyoutIdState = (subject: any) => {
 };
 const mapToSurroundingLogsIdState = (subject: any) => {
   return subject && isString(subject) ? subject : undefined;
-}
+};
 const mapToFlyoutVisibilityState = (subject: any) => {
   if (subject) {
     if (subject === 'visible') {

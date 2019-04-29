@@ -174,9 +174,7 @@ export class InfraKibanaLogEntriesAdapter implements LogEntriesAdapter {
       terminate_after: 1,
       body: {
         size: 1,
-        sort: [
-          {[sourceConfiguration.fields.tiebreaker] : 'desc'}
-        ],
+        sort: [{ [sourceConfiguration.fields.tiebreaker]: 'desc' }],
         query: {
           ids: {
             values: [id],

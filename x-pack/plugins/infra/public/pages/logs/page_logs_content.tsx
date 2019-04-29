@@ -16,7 +16,10 @@ import { PageContent } from '../../components/page';
 import { WithSummary } from '../../containers/logs/log_summary';
 import { LogViewConfiguration } from '../../containers/logs/log_view_configuration';
 import { WithLogFilter, WithLogFilterUrlState } from '../../containers/logs/with_log_filter';
-import { LogFlyout as LogFlyoutState, WithFlyoutOptionsUrlState } from '../../containers/logs/log_flyout';
+import {
+  LogFlyout as LogFlyoutState,
+  WithFlyoutOptionsUrlState,
+} from '../../containers/logs/log_flyout';
 import { WithLogMinimapUrlState } from '../../containers/logs/with_log_minimap';
 import { WithLogPositionUrlState } from '../../containers/logs/with_log_position';
 import { WithLogPosition } from '../../containers/logs/with_log_position';
@@ -29,7 +32,8 @@ import { LogsToolbar } from './page_toolbar';
 export const LogsPageLogsContent: React.FunctionComponent = () => {
   const { derivedIndexPattern } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
-  const { setFlyoutVisibility,
+  const {
+    setFlyoutVisibility,
     flyoutVisible,
     setFlyoutId,
     surroundingLogsId,
@@ -49,7 +53,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithLogPosition>
         {({ jumpToTargetPosition }) => (
           <WithLogFilter indexPattern={derivedIndexPattern}>
-            {({ applyFilterQueryFromKueryExpression }) => (
+            {({ applyFilterQueryFromKueryExpression }) =>
               flyoutVisible ? (
                 <LogFlyout
                   setFilter={applyFilterQueryFromKueryExpression}
@@ -60,7 +64,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   loading={isLoading}
                 />
               ) : null
-            )}
+            }
           </WithLogFilter>
         )}
       </WithLogPosition>
