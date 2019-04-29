@@ -19,7 +19,7 @@ export function ServiceDetails() {
   const { serviceName, start, end, kuery } = urlParams;
   const { data: serviceDetailsData } = useFetcher(
     () => {
-      if (serviceName && start && start && end) {
+      if (serviceName && start && end) {
         return loadServiceDetails({ serviceName, start, end, kuery });
       }
     },

@@ -57,7 +57,7 @@ export function useServiceMetricCharts(urlParams: IUrlParams) {
         });
       }
     },
-    [serviceName, , start, end, kuery]
+    [serviceName, start, end, kuery]
   );
 
   const memoizedData = useMemo(

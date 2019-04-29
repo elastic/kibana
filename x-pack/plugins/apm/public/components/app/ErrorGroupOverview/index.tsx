@@ -36,7 +36,6 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
     serviceName,
     start,
     end,
-    errorGroupId,
     kuery,
     sortField,
     sortDirection
@@ -44,10 +43,15 @@ const ErrorGroupOverview: React.SFC<ErrorGroupOverviewProps> = ({
   const { data: errorDistributionData } = useFetcher(
     () => {
       if (serviceName && start && end) {
-        return loadErrorDistribution({ serviceName, start, end });
+        return loadErrorDistribution({
+          serviceName,
+          start,
+          end,
+          kuery
+        });
       }
     },
-    [serviceName, start, end, errorGroupId, kuery]
+    [serviceName, start, end, kuery]
   );
 
   const { data: errorGroupListData } = useFetcher(

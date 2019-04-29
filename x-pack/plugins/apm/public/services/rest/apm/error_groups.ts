@@ -21,7 +21,7 @@ export async function loadErrorGroupList({
   serviceName: string;
   start: string;
   end: string;
-  kuery?: string;
+  kuery: string | undefined;
   sortField?: string;
   sortDirection?: string;
 }) {
@@ -48,7 +48,7 @@ export async function loadErrorGroupDetails({
   start: string;
   end: string;
   errorGroupId: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<ErrorGroupAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/errors/${errorGroupId}`,
@@ -70,7 +70,7 @@ export async function loadErrorDistribution({
   serviceName: string;
   start: string;
   end: string;
-  kuery?: string;
+  kuery: string | undefined;
   errorGroupId?: string;
 }) {
   const pathname = errorGroupId

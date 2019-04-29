@@ -11,14 +11,7 @@ import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 export function useTransactionOverviewCharts(urlParams: IUrlParams) {
-  const {
-    serviceName,
-    transactionType,
-    start,
-    end,
-
-    kuery
-  } = urlParams;
+  const { serviceName, start, end, transactionType, kuery } = urlParams;
 
   const { data, error, status } = useFetcher(
     () => {

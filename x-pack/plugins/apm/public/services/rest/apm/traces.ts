@@ -34,7 +34,7 @@ export async function loadTraceList({
 }: {
   start: string;
   end: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<TraceListAPIResponse>({
     pathname: '/api/apm/traces',

@@ -17,7 +17,7 @@ export async function loadMetricsChartDataForService({
   serviceName: string;
   start: string;
   end: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<MetricsChartAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/metrics/charts`,

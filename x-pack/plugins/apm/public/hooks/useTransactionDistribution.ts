@@ -18,11 +18,11 @@ const INITIAL_DATA = {
 export function useTransactionDistribution(urlParams: IUrlParams) {
   const {
     serviceName,
+    start,
+    end,
     transactionType,
     transactionId,
     traceId,
-    start,
-    end,
     transactionName,
     kuery
   } = urlParams;
@@ -32,24 +32,24 @@ export function useTransactionDistribution(urlParams: IUrlParams) {
       if (serviceName && start && end && transactionType && transactionName) {
         return loadTransactionDistribution({
           serviceName,
-          transactionType,
-          transactionId,
-          traceId,
           start,
           end,
+          transactionType,
           transactionName,
+          transactionId,
+          traceId,
           kuery
         });
       }
     },
     [
       serviceName,
-      transactionType,
-      transactionId,
-      traceId,
       start,
       end,
+      transactionType,
       transactionName,
+      transactionId,
+      traceId,
       kuery
     ]
   );

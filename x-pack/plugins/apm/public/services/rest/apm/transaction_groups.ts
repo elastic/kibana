@@ -21,7 +21,7 @@ export async function loadTransactionList({
   start: string;
   end: string;
   transactionType: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return await callApi<TransactionListAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}`,
@@ -50,7 +50,7 @@ export async function loadTransactionDistribution({
   transactionName: string;
   transactionId?: string;
   traceId?: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<ITransactionDistributionAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
@@ -79,7 +79,7 @@ export async function loadTransactionDetailsCharts({
   end: string;
   transactionType: string;
   transactionName: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<TimeSeriesAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/${encodeURIComponent(
@@ -104,7 +104,7 @@ export async function loadTransactionOverviewCharts({
   start: string;
   end: string;
   transactionType?: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   const pathname = transactionType
     ? `/api/apm/services/${serviceName}/transaction_groups/${transactionType}/charts`

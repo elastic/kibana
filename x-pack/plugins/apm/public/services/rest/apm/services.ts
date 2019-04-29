@@ -16,7 +16,7 @@ export async function loadServiceList({
 }: {
   start: string;
   end: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<ServiceListAPIResponse>({
     pathname: `/api/apm/services`,
@@ -37,7 +37,7 @@ export async function loadServiceDetails({
   serviceName: string;
   start: string;
   end: string;
-  kuery?: string;
+  kuery: string | undefined;
 }) {
   return callApi<ServiceAPIResponse>({
     pathname: `/api/apm/services/${serviceName}`,

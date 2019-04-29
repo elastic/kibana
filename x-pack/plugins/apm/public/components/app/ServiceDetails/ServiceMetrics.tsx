@@ -31,14 +31,14 @@ interface ServiceMetricsProps {
 }
 
 export function ServiceMetrics({ urlParams, location }: ServiceMetricsProps) {
-  const { serviceName, start, end, errorGroupId, kuery } = urlParams;
+  const { serviceName, start, end, kuery } = urlParams;
   const { data: errorDistributionData } = useFetcher(
     () => {
       if (serviceName && start && end) {
-        return loadErrorDistribution({ serviceName, start, end });
+        return loadErrorDistribution({ serviceName, start, end, kuery });
       }
     },
-    [serviceName, start, end, errorGroupId, kuery]
+    [serviceName, start, end, kuery]
   );
 
   const { data: transactionOverviewChartsData } = useTransactionOverviewCharts(
