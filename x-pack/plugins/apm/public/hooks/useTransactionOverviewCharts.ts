@@ -6,29 +6,25 @@
 
 import { useMemo } from 'react';
 import { loadTransactionOverviewCharts } from '../services/rest/apm/transaction_groups';
-import { getTransactionCharts } from '../store/selectors/chartSelectors';
-import { IUrlParams } from '../store/urlParams';
+import { getTransactionCharts } from '../selectors/chartSelectors';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
 
 export function useTransactionOverviewCharts(urlParams: IUrlParams) {
-  const {
-    serviceName,
-    transactionType,
-    start,
-    end,
-
-    kuery
-  } = urlParams;
+  const { serviceName, start, end, transactionType, kuery } = urlParams;
 
   const { data, error, status } = useFetcher(
-    () =>
-      loadTransactionOverviewCharts({
-        serviceName,
-        start,
-        end,
-        transactionType,
-        kuery
-      }),
+    () => {
+      if (serviceName && start && end) {
+        return loadTransactionOverviewCharts({
+          serviceName,
+          start,
+          end,
+          transactionType,
+          kuery
+        });
+      }
+    },
     [serviceName, start, end, transactionType, kuery]
   );
 
