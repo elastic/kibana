@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -14,7 +13,6 @@ import { ActionCreator } from 'typescript-fsa';
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { CountBadge } from '../../index';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
@@ -95,35 +93,26 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     return (
       <LoadMoreTable
         columns={getNetworkDnsColumns(type)}
-        loadingTitle={i18n.TOP_DNS_DOMAINS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
         hasNextPage={hasNextPage}
+        headerCount={totalCount}
+        headerSupplement={
+          <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
+        }
+        headerTitle={i18n.TOP_DNS_DOMAINS}
+        headerTooltip={i18n.TOOLTIP}
+        headerUnit={totalCount === 1 ? 'Domain' : 'Domains'}
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.TOP_DNS_DOMAINS}
+        loadMore={() => loadMore(nextCursor)}
         onChange={this.onChange}
-        updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
+        pageOfItems={data}
         sorting={{
           field: `node.${dnsSortField.field}`,
           direction: dnsSortField.direction,
         }}
-        title={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <h3>
-                {i18n.TOP_DNS_DOMAINS}
-                <Sup>
-                  <EuiIconTip content={i18n.TOOLTIP} position="right" />
-                </Sup>
-                <CountBadge color="hollow">{totalCount}</CountBadge>
-              </h3>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
+        updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
       />
     );
   }

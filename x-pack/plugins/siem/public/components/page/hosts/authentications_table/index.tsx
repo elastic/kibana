@@ -5,7 +5,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
-import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n/react';
 import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';

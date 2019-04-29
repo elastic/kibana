@@ -45,6 +45,7 @@ interface BasicTableProps<T> {
   columns: Array<Columns<T>>;
   hasNextPage: boolean;
   headerCount: number;
+  headerSupplement?: React.ReactElement;
   headerTitle: string | React.ReactElement;
   headerTooltip?: string;
   headerUnit: string | React.ReactElement;
@@ -98,6 +99,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       columns,
       hasNextPage,
       headerCount,
+      headerSupplement,
       headerTitle,
       headerTooltip,
       headerUnit,
@@ -172,7 +174,9 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
             subtitle={`Showing: ${headerCount} ${headerUnit}`}
             title={headerTitle}
             tooltip={headerTooltip}
-          />
+          >
+            {headerSupplement}
+          </HeaderPanel>
 
           <BasicTable
             items={pageOfItems}

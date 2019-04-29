@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -22,7 +21,6 @@ import {
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
-import { CountBadge } from '../../index';
 
 import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
@@ -113,38 +111,27 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
           type,
           DomainsTableId
         )}
-        loadingTitle={i18n.DOMAINS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
         hasNextPage={hasNextPage}
+        headerCount={totalCount}
+        headerSupplement={
+          <FlowDirectionSelect
+            id={DomainsTableId}
+            selectedDirection={flowDirection}
+            onChangeDirection={this.onChangeDomainsDirection}
+          />
+        }
+        headerTitle={i18n.DOMAINS}
+        headerUnit={totalCount === 1 ? 'Domain' : 'Domains'}
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.DOMAINS}
+        loadMore={() => loadMore(nextCursor)}
         onChange={this.onChange}
+        pageOfItems={data}
         sorting={getSortField(domainsSortField, flowTarget)}
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
-        }
-        title={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <h3>
-                    {i18n.DOMAINS}
-                    <CountBadge color="hollow">{totalCount}</CountBadge>
-                  </h3>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <FlowDirectionSelect
-                id={DomainsTableId}
-                selectedDirection={flowDirection}
-                onChangeDirection={this.onChangeDomainsDirection}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         }
       />
     );

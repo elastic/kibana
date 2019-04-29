@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
 import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
