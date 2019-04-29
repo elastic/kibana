@@ -18,6 +18,7 @@ import _ from 'lodash';
 
 export function JsonUploadAndParse(props) {
   const {
+    appName,
     boolIndexData = false,
     onIndexAddSuccess,
     onIndexAddError,
@@ -49,7 +50,7 @@ export function JsonUploadAndParse(props) {
     if (boolIndexData && !indexRequestInFlight && parsedFile
       && !_.isEqual(indexedFile, parsedFile)) {
       setIndexRequestInFlight(true);
-      triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType)
+      triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType, appName)
         .then(
           resp => {
             if (resp.success) {
@@ -83,7 +84,7 @@ export function JsonUploadAndParse(props) {
     }
   }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
     parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
-    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange]
+    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange, appName]
   );
 
   return (

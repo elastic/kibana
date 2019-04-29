@@ -17,6 +17,7 @@ export function ClientFileCreateSourceEditor({
 }) {
   return (
     <JsonUploadAndParse
+      appName={'Maps'}
       onFileUpload={previewGeojsonFile}
       onFileRemove={onRemove}
       boolIndexData={boolIndexData}

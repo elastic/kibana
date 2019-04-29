@@ -14,8 +14,9 @@ import { getGeoJsonIndexingDetails } from './geo_processing';
 const CHUNK_SIZE = 10000;
 const IMPORT_RETRIES = 5;
 const basePath = chrome.addBasePath('/api/fileupload');
+const fileType = 'json';
 
-export async function triggerIndexing(parsedFile, preIndexTransform, indexName, dataType) {
+export async function triggerIndexing(parsedFile, preIndexTransform, indexName, dataType, appName) {
   if (!parsedFile) {
     throw('No file imported');
     return;
@@ -30,6 +31,7 @@ export async function triggerIndexing(parsedFile, preIndexTransform, indexName, 
     id = index.id;
   } else {
     const createdIndex = await writeToIndex({
+      appName,
       id: undefined,
       data: [],
       index: indexName,
@@ -74,6 +76,7 @@ function getIndexingDetails(processor, parsedFile, dataType) {
 function writeToIndex(indexingDetails) {
   const paramString = (indexingDetails.id !== undefined) ? `?id=${indexingDetails.id}` : '';
   const {
+    appName,
     index,
     data,
     settings,
@@ -90,7 +93,9 @@ function writeToIndex(indexingDetails) {
       settings,
       mappings,
       ingestPipeline,
-    }
+      fileType,
+      ...(appName ? { app: appName } : {})
+    },
   });
 }
 
