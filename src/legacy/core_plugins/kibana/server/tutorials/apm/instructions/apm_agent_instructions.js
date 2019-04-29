@@ -471,7 +471,7 @@ export const createDotNetAgentInstructions = (apmServerUrl = '', secretToken = '
     title: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.title', {
       defaultMessage: 'Download the APM agent',
     }),
-    textPre: i18n.translate('kbn.server.tutorials.apm.javaClient.download.textPre', {
+    textPre: i18n.translate('kbn.server.tutorials.apm.dotNetClient.download.textPre', {
       defaultMessage: '**Warning: The .NET agent is currently in Beta and not meant for production use.** \n\n \
       Add the the agent package(s) from [NuGet]({allNuGetPacakgesLink}) to your .NET application. There are multiple \
       NuGet packages available for different use cases. \n\n  For an ASP.NET Core application with Entity Framework \
