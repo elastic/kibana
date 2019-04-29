@@ -271,10 +271,4 @@ export const migrations = {
       return doc;
     },
   },
-  config: {
-    '8.0.0': doc => {
-      delete doc['xPack:defaultAdminEmail'];
-      return doc;
-    }
-  }
 };
