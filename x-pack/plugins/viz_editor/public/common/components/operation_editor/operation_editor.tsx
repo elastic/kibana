@@ -110,7 +110,7 @@ export function OperationEditor<T extends SelectOperation>(props: OperationEdito
         button={button}
         isOpen={state.isOpen}
         closePopover={close}
-        anchorPosition="leftCenter"
+        anchorPosition="leftUp"
         withTitle
       >
         <EuiFlexGroup>
