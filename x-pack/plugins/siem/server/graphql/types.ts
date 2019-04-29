@@ -1162,11 +1162,11 @@ export interface OverviewNetworkData {
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd: number;
+  auditbeatAuditd?: number | null;
 
-  auditbeatFIM: number;
+  auditbeatFIM?: number | null;
 
-  auditbeatLogin: number;
+  auditbeatLogin?: number | null;
 
   auditbeatPackage?: number | null;
 
@@ -5438,11 +5438,11 @@ export namespace OverviewNetworkDataResolvers {
 
 export namespace OverviewHostDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: AuditbeatAuditdResolver<number, TypeParent, Context>;
+    auditbeatAuditd?: AuditbeatAuditdResolver<number | null, TypeParent, Context>;
 
-    auditbeatFIM?: AuditbeatFimResolver<number, TypeParent, Context>;
+    auditbeatFIM?: AuditbeatFimResolver<number | null, TypeParent, Context>;
 
-    auditbeatLogin?: AuditbeatLoginResolver<number, TypeParent, Context>;
+    auditbeatLogin?: AuditbeatLoginResolver<number | null, TypeParent, Context>;
 
     auditbeatPackage?: AuditbeatPackageResolver<number | null, TypeParent, Context>;
 
@@ -5452,17 +5452,17 @@ export namespace OverviewHostDataResolvers {
   }
 
   export type AuditbeatAuditdResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatFimResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatLoginResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
