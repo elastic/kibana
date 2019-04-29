@@ -29,7 +29,11 @@ describe('Load More Table Component', () => {
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -48,7 +52,11 @@ describe('Load More Table Component', () => {
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -69,7 +77,11 @@ describe('Load More Table Component', () => {
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
       wrapper.setState({ isEmptyTable: false });
@@ -90,7 +102,11 @@ describe('Load More Table Component', () => {
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -114,7 +130,11 @@ describe('Load More Table Component', () => {
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -143,7 +163,11 @@ describe('Load More Table Component', () => {
           hasNextPage={false}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -162,7 +186,11 @@ describe('Load More Table Component', () => {
           hasNextPage={true}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -185,7 +213,11 @@ describe('Load More Table Component', () => {
           hasNextPage={true}
           itemsPerRow={[]}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -207,7 +239,11 @@ describe('Load More Table Component', () => {
           itemsPerRow={rowItems}
           sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -228,7 +264,11 @@ describe('Load More Table Component', () => {
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -252,7 +292,11 @@ describe('Load More Table Component', () => {
           hasNextPage={true}
           itemsPerRow={rowItems}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
@@ -283,7 +327,11 @@ describe('Load More Table Component', () => {
           itemsPerRow={rowItems}
           sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
         />
       );
 
