@@ -11,8 +11,9 @@ import routing from '../../../public/app/services/routing';
 
 import { AUTO_FOLLOW_PATTERN_EDIT_NAME } from './constants';
 
-const testBedOptions = {
+const testBedConfig = {
   memoryRouter: {
+    store: ccrStore,
     onRouter: (router) => routing.reactRouter = router,
     // The auto-follow pattern id to fetch is read from the router ":id" param
     // so we first set it in our initial entries
@@ -22,7 +23,7 @@ const testBedOptions = {
   }
 };
 
-const initTestBed = registerTestBed(AutoFollowPatternEdit, { options: testBedOptions, store: ccrStore });
+const initTestBed = registerTestBed(AutoFollowPatternEdit, testBedConfig);
 
 export const setup = (props) => {
   const testBed = initTestBed(props);
