@@ -23,6 +23,7 @@ import {
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
+  SET_LAYER_STYLE_META,
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
@@ -288,6 +289,14 @@ export function map(state = INITIAL_STATE, action) {
       const styleLayerId = action.layerId;
       return updateLayerInList(state, styleLayerId, 'style',
         { ...action.style });
+    case SET_LAYER_STYLE_META:
+      const { layerId, styleMeta } = action;
+      const index = getLayerIndex(state.layerList, layerId);
+      if (index === -1) {
+        return state;
+      }
+
+      return updateLayerInList(state, layerId, 'style', { ...state.layerList[index].style, __styleMeta: styleMeta });
     default:
       return state;
   }
