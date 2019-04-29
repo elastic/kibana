@@ -43,7 +43,6 @@ import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
-import { fieldsService } from '../../../../../services/field_service';
 
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
@@ -756,11 +755,6 @@ module
 
     initAgg();
     createFields($scope, indexPattern);
-    // testing function
-    fieldsService.initializeFromIndexPattern(indexPattern).then(() => {
-      console.log(fieldsService.fields);
-      console.log(fieldsService.aggs);
-    });
 
     $scope.loadVis();
 
