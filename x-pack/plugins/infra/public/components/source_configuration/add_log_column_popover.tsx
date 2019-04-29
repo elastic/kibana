@@ -29,11 +29,12 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
     () => [
       {
         optionProps: {
+          append: <BuiltinBadge />,
+          'data-test-subj': 'addTimestampLogColumn',
           // this key works around EuiSelectable using a lowercased label as
           // key, which leads to conflicts with field names
           key: 'timestamp',
           label: 'Timestamp',
-          append: <BuiltinBadge />,
         },
         columnConfiguration: {
           timestampColumn: {
@@ -43,11 +44,12 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
       },
       {
         optionProps: {
+          'data-test-subj': 'addMessageLogColumn',
+          append: <BuiltinBadge />,
           // this key works around EuiSelectable using a lowercased label as
           // key, which leads to conflicts with field names
           key: 'message',
           label: 'Message',
-          append: <BuiltinBadge />,
         },
         columnConfiguration: {
           messageColumn: {
@@ -57,6 +59,7 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
       },
       ...availableFields.map<SelectableColumnOption>(field => ({
         optionProps: {
+          'data-test-subj': `addFieldLogColumn addFieldLogColumn:${field}`,
           // this key works around EuiSelectable using a lowercased label as
           // key, which leads to conflicts with fields that only differ in the
           // case (e.g. the metricbeat mongodb module)
@@ -93,18 +96,16 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
     [addLogColumn, availableColumnOptions]
   );
 
-  const selectableListProps = useMemo(
-    () => ({
-      showIcons: false,
-    }),
-    []
-  );
-
   return (
     <EuiPopover
       anchorPosition="downRight"
       button={
-        <EuiButton isDisabled={isDisabled} iconType="plusInCircle" onClick={openPopover}>
+        <EuiButton
+          data-test-subj="addLogColumnButton"
+          isDisabled={isDisabled}
+          iconType="plusInCircle"
+          onClick={openPopover}
+        >
           <FormattedMessage
             id="xpack.infra.sourceConfiguration.addLogColumnButtonLabel"
             defaultMessage="Add Column"
@@ -123,10 +124,11 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
         onChange={handleColumnSelection}
         options={availableOptions}
         searchable
+        searchProps={searchProps}
         singleSelection
       >
         {(list, search) => (
-          <SelectableContent>
+          <SelectableContent data-test-subj="addLogColumnPopover">
             <EuiPopoverTitle>{search}</EuiPopoverTitle>
             {list}
           </SelectableContent>
@@ -134,6 +136,14 @@ export const AddLogColumnButtonAndPopover: React.FunctionComponent<{
       </EuiSelectable>
     </EuiPopover>
   );
+};
+
+const searchProps = {
+  'data-test-subj': 'fieldSearchInput',
+};
+
+const selectableListProps = {
+  showIcons: false,
 };
 
 const usePopoverVisibilityState = (initialState: boolean) => {

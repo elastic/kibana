@@ -84,6 +84,31 @@ export default ({ getPageObjects, getService }: KibanaFunctionalTestDefaultProvi
 
         expect(logStreamEntryColumns).to.have.length(3);
       });
+
+      it('can change the log columns', async () => {
+        await pageObjects.infraLogs.openSourceConfigurationFlyout();
+        await infraSourceConfigurationFlyout.switchToLogsTab();
+
+        await infraSourceConfigurationFlyout.removeAllLogColumns();
+        await infraSourceConfigurationFlyout.addTimestampLogColumn();
+        await infraSourceConfigurationFlyout.addFieldLogColumn('host.name');
+
+        await infraSourceConfigurationFlyout.saveConfiguration();
+        await infraSourceConfigurationFlyout.closeFlyout();
+      });
+
+      it('renders the changed log columns', async () => {
+        const logStreamEntries = await infraLogStream.getStreamEntries();
+
+        expect(logStreamEntries.length).to.be.greaterThan(0);
+
+        const firstLogStreamEntry = logStreamEntries[0];
+        const logStreamEntryColumns = await infraLogStream.getLogColumnsOfStreamEntry(
+          firstLogStreamEntry
+        );
+
+        expect(logStreamEntryColumns).to.have.length(2);
+      });
     });
   });
 };

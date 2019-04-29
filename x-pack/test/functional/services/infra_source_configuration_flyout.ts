@@ -4,9 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import testSubjSelector from '@kbn/test-subj-selector';
-
 import { KibanaFunctionalTestDefaultProviders } from '../../types/providers';
+import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 export function InfraSourceConfigurationFlyoutProvider({
   getService,
@@ -16,42 +15,96 @@ export function InfraSourceConfigurationFlyoutProvider({
   const testSubjects = getService('testSubjects');
 
   return {
+    /**
+     * Tab navigation
+     */
     async switchToIndicesAndFieldsTab() {
-      await find.clickByCssSelector(
-        `${testSubjSelector('sourceConfigurationFlyout')} #indicesAndFieldsTab`
-      );
+      await (await find.descendantDisplayedByCssSelector(
+        '#indicesAndFieldsTab',
+        await this.getFlyout()
+      )).click();
       await testSubjects.find('sourceConfigurationNameSectionTitle');
     },
-
     async switchToLogsTab() {
-      await find.clickByCssSelector(`${testSubjSelector('sourceConfigurationFlyout')} #logsTab`);
+      await (await find.descendantDisplayedByCssSelector(
+        '#logsTab',
+        await this.getFlyout()
+      )).click();
       await testSubjects.find('sourceConfigurationLogColumnsSectionTitle');
     },
 
+    /**
+     * Indices and fields
+     */
     async getNameInput() {
-      return await testSubjects.find('nameInput');
+      return await testSubjects.findDescendant('nameInput', await this.getFlyout());
     },
-
     async getLogIndicesInput() {
-      return await testSubjects.find('logIndicesInput');
+      return await testSubjects.findDescendant('logIndicesInput', await this.getFlyout());
     },
-
     async getMetricIndicesInput() {
-      return await testSubjects.find('metricIndicesInput');
+      return await testSubjects.findDescendant('metricIndicesInput', await this.getFlyout());
     },
 
+    /**
+     * Logs
+     */
+    async getAddLogColumnButton(): Promise<WebElementWrapper> {
+      return await testSubjects.findDescendant('addLogColumnButton', await this.getFlyout());
+    },
+    async getAddLogColumnPopover(): Promise<WebElementWrapper> {
+      return await testSubjects.find('addLogColumnPopover');
+    },
+    async addTimestampLogColumn() {
+      await (await this.getAddLogColumnButton()).click();
+      await (await testSubjects.findDescendant(
+        'addTimestampLogColumn',
+        await this.getAddLogColumnPopover()
+      )).click();
+    },
+    async addFieldLogColumn(fieldName: string) {
+      await (await this.getAddLogColumnButton()).click();
+      const popover = await this.getAddLogColumnPopover();
+      await (await testSubjects.findDescendant('fieldSearchInput', popover)).type(fieldName);
+      await (await testSubjects.findDescendant(`addFieldLogColumn:${fieldName}`, popover)).click();
+    },
+    async getLogColumnPanels(): Promise<WebElementWrapper[]> {
+      return await testSubjects.findAllDescendant('logColumnPanel', await this.getFlyout());
+    },
+    async removeLogColumn(columnIndex: number) {
+      const logColumnPanel = (await this.getLogColumnPanels())[columnIndex];
+      await (await testSubjects.findDescendant('removeLogColumnButton', logColumnPanel)).click();
+      await testSubjects.waitForDeleted(logColumnPanel);
+    },
+    async removeAllLogColumns() {
+      for (const _ of await this.getLogColumnPanels()) {
+        await this.removeLogColumn(0);
+      }
+    },
+
+    /**
+     * Form and flyout
+     */
+    async getFlyout() {
+      return await testSubjects.find('sourceConfigurationFlyout');
+    },
     async saveConfiguration() {
-      await testSubjects.click('updateSourceConfigurationButton');
+      await (await testSubjects.findDescendant(
+        'updateSourceConfigurationButton',
+        await this.getFlyout()
+      )).click();
 
       await retry.try(async () => {
-        const element = await testSubjects.find('updateSourceConfigurationButton');
+        const element = await testSubjects.findDescendant(
+          'updateSourceConfigurationButton',
+          await this.getFlyout()
+        );
         return !(await element.isEnabled());
       });
     },
-
     async closeFlyout() {
-      const flyout = await testSubjects.find('sourceConfigurationFlyout');
-      await testSubjects.click('closeFlyoutButton');
+      const flyout = await this.getFlyout();
+      await (await testSubjects.findDescendant('closeFlyoutButton', flyout)).click();
       await testSubjects.waitForDeleted(flyout);
     },
   };

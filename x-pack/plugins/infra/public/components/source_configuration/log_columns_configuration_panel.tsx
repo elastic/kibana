@@ -134,7 +134,7 @@ const FieldLogColumnConfigurationPanel: React.FunctionComponent<{
     remove,
   },
 }) => (
-  <EuiPanel>
+  <EuiPanel data-test-subj={`logColumnPanel fieldLogColumnPanel fieldLogColumnPanel:${field}`}>
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>
         <FormattedMessage
@@ -157,7 +157,9 @@ const ExplainedLogColumnConfigurationPanel: React.FunctionComponent<{
   helpText: React.ReactNode;
   removeColumn: () => void;
 }> = ({ fieldName, helpText, removeColumn }) => (
-  <EuiPanel>
+  <EuiPanel
+    data-test-subj={`logColumnPanel builtInLogColumnPanel builtInLogColumnPanel:${fieldName}`}
+  >
     <EuiFlexGroup>
       <EuiFlexItem grow={1}>{fieldName}</EuiFlexItem>
       <EuiFlexItem grow={3}>
@@ -184,6 +186,7 @@ const RemoveLogColumnButton = injectI18n<{
     <EuiButtonIcon
       aria-label={removeColumnLabel}
       color="danger"
+      data-test-subj="removeLogColumnButton"
       iconType="trash"
       onClick={onClick}
       title={removeColumnLabel}
