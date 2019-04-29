@@ -92,7 +92,7 @@ export class Plugin {
     xpackMainPlugin.info.feature(this.pluginId).registerLicenseCheckResultsGenerator(checkLicense);
 
     const spacesAuditLogger = new SpacesAuditLogger(
-      this.initializerContext.config,
+      this.initializerContext.legacyConfig,
       new AuditLogger(core.http.server, 'spaces')
     );
 

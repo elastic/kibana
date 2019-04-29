@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import * as Rx from 'rxjs';
 import { resolve } from 'path';
 import KbnServer, { Server } from '../../../src/legacy/server/kbn_server';
 import { HttpServiceSetup } from '../../../src/core/server';
@@ -24,6 +25,7 @@ import {
   SpacesHttpServiceSetup,
 } from './server/new_platform/plugin';
 import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
+import { SpacesConfig } from './server/new_platform/config';
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
@@ -116,6 +118,15 @@ export const spaces = (kibana: Record<string, any>) =>
       const kbnServer = (server as unknown) as KbnServer;
       const initializerContext = ({
         legacyConfig: server.config(),
+        config: {
+          create: (ConfigClass: typeof SpacesConfig) => {
+            return Rx.of(
+              new ConfigClass({
+                maxSpaces: server.config().get('xpack.spaces.maxSpaces'),
+              })
+            );
+          },
+        },
         logger: {
           get: (context: string) => ({
             debug: (message: any) => server.log([context, 'debug'], message),
