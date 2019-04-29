@@ -37,7 +37,6 @@ class VisEditor extends Component {
   constructor(props) {
     super(props);
     const { vis } = props;
-    // what else is on vis and where can I find the code?
     this.appState = vis.API.getAppState();
     this.state = {
       model: props.visParams,
@@ -67,25 +66,27 @@ class VisEditor extends Component {
   /*
     Retrieving the index pattern objects that are available.
     We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
-    NOTE/QUESTION: Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
+    CAUTION: There can be cases where the index-pattern-string, used by a tsvb visualization, doesn’t correspond to a saved index pattern object.
+    Because of this, Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
     COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
   */
   fetchIndexPatterns = async () => {
-    let selectedIndexPatternfromSavedObject = this.state.indexPatterns;
-    const allIndexPatternObjects = await chrome.getSavedObjectsClient().find({
+    let selectedIndexPatternsfromSavedObjects = this.state.indexPatterns;
+    const allIndexPatterns = await chrome.getSavedObjectsClient().find({
       type: 'index-pattern',
       perPage: 100,
     });
     // We now filter the collection of indexPatterns to the one that's selected or default to the default index pattern
-    if (allIndexPatternObjects && allIndexPatternObjects.savedObjects) {
-      const selectedIndexPatternName = this.state.model.index_pattern
-        ? this.state.model.index_pattern
-        : this.state.model.default_index_pattern;
-      selectedIndexPatternfromSavedObject = allIndexPatternObjects.savedObjects.filter(
-        pattern => pattern.attributes.title === selectedIndexPatternName
+    if (allIndexPatterns && allIndexPatterns.savedObjects) {
+      let selectedIndexPatternString = this.state.model.default_index_pattern;
+      if (this.state.model.index_pattern) {
+        selectedIndexPatternString = this.state.model.index_pattern;
+      }
+      selectedIndexPatternsfromSavedObjects = allIndexPatterns.savedObjects.filter(
+        pattern => pattern.attributes.title === selectedIndexPatternString
       );
     }
-    return selectedIndexPatternfromSavedObject;
+    return selectedIndexPatternsfromSavedObjects;
   };
 
   updateVisState = debounce(() => {
@@ -198,6 +199,8 @@ class VisEditor extends Component {
               onChange={this.handleChange}
               getConfig={this.getConfig}
               indexPatterns={this.state.indexPatterns}
+              dateRangeFrom={this.state.dateRangeFrom}
+              dateRangeTo={this.state.dateRangeTo}
             />
           </div>
         </div>
