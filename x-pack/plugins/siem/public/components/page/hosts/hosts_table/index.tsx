@@ -32,7 +32,6 @@ import {
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-// import { TableTitle } from '../../table_title';
 
 interface OwnProps {
   data: HostsEdges[];
@@ -94,7 +93,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     Columns<OsFields['name']>,
     Columns<OsFields['version']>
   ];
-  // private memoizedTitle: (totalCount: number) => JSX.Element;
   private memoizedSorting: (
     trigger: string,
     sortField: HostsFields,
@@ -104,7 +102,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   constructor(props: HostsTableProps) {
     super(props);
     this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
-    // this.memoizedTitle = memoizeOne(this.getTitle);
     this.memoizedSorting = memoizeOne(this.getSorting);
   }
 
@@ -143,7 +140,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         pageOfItems={data}
         sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
         updateLimitPagination={this.wrappedUpdateLimitPagination}
-        // title={this.memoizedTitle(totalCount)}
       />
     );
   }
@@ -153,10 +149,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     sortField: HostsFields,
     direction: Direction
   ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
-
-  // private getTitle = (totalCount: number): JSX.Element => (
-  //   <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
-  // );
 
   private wrappedUpdateLimitPagination = (newLimit: number) =>
     this.props.updateLimitPagination({ limit: newLimit, hostsType: this.props.type });
