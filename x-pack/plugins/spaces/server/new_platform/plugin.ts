@@ -47,6 +47,8 @@ export interface SpacesCoreSetup {
 }
 
 export interface PluginsSetup {
+  // TODO: Spaces has a circular dependency with Security right now.
+  // Security is not yet available when init runs, so this is wrapped in a function for the time being.
   getSecurity: () => SecurityPlugin;
   xpackMain: XPackMainPlugin;
   // TODO: this is temporary for `watchLicenseAndStatusToInitialize`
