@@ -7,13 +7,12 @@
 import _ from 'lodash';
 import { connect } from 'react-redux';
 import { TOCEntry } from './view';
-import { getIsReadOnly, updateFlyout, FLYOUT_STATE } from '../../../../../store/ui';
+import { getIsReadOnly } from '../../../../../store/ui';
 import {
   fitToLayerExtent,
-  setSelectedLayer,
   toggleLayerVisible,
-  removeTransientLayer,
   cloneLayer,
+  openLayerDetailsPanel,
 } from '../../../../../actions/store_actions';
 
 import { hasDirtyState, getSelectedLayer } from '../../../../../selectors/map_selectors';
@@ -22,33 +21,17 @@ function mapStateToProps(state = {}) {
   return {
     isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
-    getSelectedLayerSelector: () => {
-      return getSelectedLayer(state);
-    },
-    hasDirtyStateSelector: () => {
-      return hasDirtyState(state);
-    }
+    selectedLayer: getSelectedLayer(state),
+    hasDirtyStateSelector: hasDirtyState(state),
   };
 }
 
-function mapDispatchToProps(dispatch) {
-  return ({
-    openLayerPanel: async layerId => {
-      await dispatch(removeTransientLayer());
-      await dispatch(setSelectedLayer(layerId));
-      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
-    },
-    toggleVisible: layerId => {
-      dispatch(toggleLayerVisible(layerId));
-    },
-    fitToBounds: layerId => {
-      dispatch(fitToLayerExtent(layerId));
-    },
-    cloneLayer: layerId => {
-      dispatch(cloneLayer(layerId));
-    }
-  });
-}
+const mapDispatchToProps = {
+  cloneLayer,
+  fitToBounds: fitToLayerExtent,
+  openLayerPanel: openLayerDetailsPanel,
+  toggleVisible: toggleLayerVisible,
+};
 
 const connectedTOCEntry = connect(mapStateToProps, mapDispatchToProps)(TOCEntry);
 export { connectedTOCEntry as TOCEntry };
