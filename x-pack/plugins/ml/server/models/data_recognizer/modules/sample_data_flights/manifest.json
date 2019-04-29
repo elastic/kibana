@@ -1,7 +1,7 @@
 {
   "id": "sample_data_flights",
   "title": "Kibana sample data flights",
-  "description": "Find anomalies in Kibana Sample Data for Flights",
+  "description": "Find anomalies in Kibana sample data for flights",
   "type": "Sample Dataset",
   "logoFile": "logo.json",
   "defaultIndexPattern": "kibana_sample_data_flights",
