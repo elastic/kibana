@@ -1,8 +1,0 @@
-[[console-settings]]
-=== Settings
-
-Console has multiple settings you can set. All of them are available in the Settings panel. To open the panel
-click on the cog icon on the top right.
-
-.Settings Panel
-image::images/settings.png["Setting Panel"]

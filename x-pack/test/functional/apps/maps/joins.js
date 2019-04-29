@@ -82,12 +82,30 @@ export default function ({ getPageObjects, getService }) {
 
     });
 
-    describe('inspector', () => {
+    describe('query bar', () => {
+      before(async () => {
+        await PageObjects.maps.setAndSubmitQuery('prop1 < 10 or _index : "geo_shapes*"');
+      });
+
       afterEach(async () => {
         await inspector.close();
       });
 
-      it('should contain terms aggregation elasticsearch request', async () => {
+      it('should apply query to join request', async () => {
+        await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
+        const requestStats = await inspector.getTableData();
+        const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
+        expect(totalHits).to.equal('3');
+        const hits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits');
+        expect(hits).to.equal('0'); // aggregation requests do not return any documents
+        const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
+        expect(indexPatternName).to.equal('meta_for_geo_shapes*');
+      });
+
+      it('should not apply query to join request when apply global query is disabled', async () => {
+        await PageObjects.maps.openLayerPanel('geo_shapes*');
+        await PageObjects.maps.disableApplyGlobalQuery();
+
         await PageObjects.maps.openInspectorRequest('meta_for_geo_shapes*.shape_name');
         const requestStats = await inspector.getTableData();
         const totalHits =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Hits (total)');
@@ -96,6 +114,13 @@ export default function ({ getPageObjects, getService }) {
         expect(hits).to.equal('0'); // aggregation requests do not return any documents
         const indexPatternName =  PageObjects.maps.getInspectorStatRowHit(requestStats, 'Index pattern');
         expect(indexPatternName).to.equal('meta_for_geo_shapes*');
+      });
+    });
+
+
+    describe('inspector', () => {
+      afterEach(async () => {
+        await inspector.close();
       });
 
       it('should not contain any elasticsearch request after layer is deleted', async () => {

@@ -20,7 +20,7 @@
 import { ChromeHelpExtension, ChromeSetup } from '../../../../../core/public';
 
 let newPlatformChrome: ChromeSetup;
-export function __newPlatformInit__(instance: ChromeSetup) {
+export function __newPlatformSetup__(instance: ChromeSetup) {
   if (newPlatformChrome) {
     throw new Error('ui/chrome/api/help_extension is already initialized');
   }

@@ -20,10 +20,10 @@
 import { FlyoutService } from './flyout';
 
 import { FlyoutRef } from '..';
-import { I18nSetup } from '../i18n';
+import { I18nStart } from '../i18n';
 
-interface Deps {
-  i18n: I18nSetup;
+interface StartDeps {
+  i18n: I18nStart;
 }
 
 /** @internal */
@@ -34,7 +34,7 @@ export class OverlayService {
     this.flyoutService = new FlyoutService(targetDomElement);
   }
 
-  public setup({ i18n }: Deps): OverlaySetup {
+  public start({ i18n }: StartDeps): OverlayStart {
     return {
       openFlyout: this.flyoutService.openFlyout.bind(this.flyoutService, i18n),
     };
@@ -42,7 +42,7 @@ export class OverlayService {
 }
 
 /** @public */
-export interface OverlaySetup {
+export interface OverlayStart {
   openFlyout: (
     flyoutChildren: React.ReactNode,
     flyoutProps?: {

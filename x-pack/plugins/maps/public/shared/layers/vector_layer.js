@@ -11,6 +11,7 @@ import { LeftInnerJoin } from './joins/left_inner_join';
 import { FEATURE_ID_PROPERTY_NAME, SOURCE_DATA_ID_ORIGIN } from '../../../common/constants';
 import _ from 'lodash';
 import { JoinTooltipProperty } from './tooltips/join_tooltip_property';
+import { isRefreshOnlyQuery } from './util/is_refresh_only_query';
 
 const EMPTY_FEATURE_COLLECTION = {
   type: 'FeatureCollection',
@@ -116,8 +117,8 @@ export class VectorLayer extends AbstractLayer {
     return this._getBoundsBasedOnData();
   }
 
-  async getStringFields() {
-    return await this._source.getStringFields();
+  async getLeftJoinFields() {
+    return await this._source.getLeftJoinFields();
   }
 
   async getSourceName() {
@@ -207,10 +208,18 @@ export class VectorLayer extends AbstractLayer {
     let updateDueToQuery = false;
     let updateDueToFilters = false;
     let updateDueToLayerQuery = false;
+    let updateDueToApplyGlobalQuery = false;
     if (isQueryAware) {
-      updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
-      updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      updateDueToApplyGlobalQuery = meta.applyGlobalQuery !== searchFilters.applyGlobalQuery;
       updateDueToLayerQuery = !_.isEqual(meta.layerQuery, searchFilters.layerQuery);
+      if (searchFilters.applyGlobalQuery) {
+        updateDueToQuery = !_.isEqual(meta.query, searchFilters.query);
+        updateDueToFilters = !_.isEqual(meta.filters, searchFilters.filters);
+      } else {
+        // Global filters and query are not applied to layer search request so no re-fetch required.
+        // Exception is "Refresh" query.
+        updateDueToQuery = isRefreshOnlyQuery(meta.query, searchFilters.query);
+      }
     }
 
     let updateDueToPrecisionChange = false;
@@ -227,6 +236,7 @@ export class VectorLayer extends AbstractLayer {
       && !updateDueToQuery
       && !updateDueToFilters
       && !updateDueToLayerQuery
+      && !updateDueToApplyGlobalQuery
       && !updateDueToPrecisionChange;
   }
 
@@ -236,22 +246,27 @@ export class VectorLayer extends AbstractLayer {
     const sourceDataId = join.getSourceId();
     const requestToken = Symbol(`layer-join-refresh:${ this.getId()} - ${sourceDataId}`);
 
+    const searchFilters = {
+      ...dataFilters,
+      applyGlobalQuery: this.getApplyGlobalQuery(),
+    };
+    const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, searchFilters);
+    if (canSkip) {
+      const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
+      const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
+      return {
+        dataHasChanged: false,
+        join: join,
+        propertiesMap: propertiesMap
+      };
+    }
+
     try {
-      const canSkip = await this._canSkipSourceUpdate(joinSource, sourceDataId, dataFilters);
-      if (canSkip) {
-        const sourceDataRequest = this._findDataRequestForSource(sourceDataId);
-        const propertiesMap = sourceDataRequest ? sourceDataRequest.getData() : null;
-        return {
-          dataHasChanged: false,
-          join: join,
-          propertiesMap: propertiesMap
-        };
-      }
-      startLoading(sourceDataId, requestToken, dataFilters);
+      startLoading(sourceDataId, requestToken, searchFilters);
       const leftSourceName = await this.getSourceName();
       const {
         propertiesMap
-      } = await joinSource.getPropertiesMap(dataFilters, leftSourceName, join.getLeftFieldName());
+      } = await joinSource.getPropertiesMap(searchFilters, leftSourceName, join.getLeftFieldName());
       stopLoading(sourceDataId, requestToken, propertiesMap);
       return {
         dataHasChanged: true,
@@ -289,7 +304,8 @@ export class VectorLayer extends AbstractLayer {
       ...dataFilters,
       fieldNames: _.uniq(fieldNames).sort(),
       geogridPrecision: this._source.getGeoGridPrecision(dataFilters.zoom),
-      layerQuery: this.getQuery()
+      layerQuery: this.getQuery(),
+      applyGlobalQuery: this.getApplyGlobalQuery(),
     };
   }
 
