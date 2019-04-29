@@ -6,12 +6,12 @@
     "detectors": [
       {
         "detector_description": "Mean total sales",
-        "function": "mean",
+        "function": "high_sum",
 	"field_name": "taxful_total_price",
-	"partition_field_name": "geoip.continent_name"
+	"over_field_name": "customer_full_name.keyword"
       }
     ],
-    "influencers": ["customer_full_name.keyword", "geoip.continent_name"]
+    "influencers": ["customer_full_name.keyword", "category.keyword"]
   },
   "analysis_limits": {
     "model_memory_limit": "10mb"

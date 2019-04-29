@@ -14,15 +14,15 @@
   },
   "jobs": [
     {
-      "id": "mean_taxful_total_price",
-      "file": "mean_taxful_total_price.json"
+      "id": "high_sum_total_sales",
+      "file": "high_sum_total_sales.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-mean_taxful_total_price",
-      "file": "datafeed_mean_taxful_total_price.json",
-      "job_id": "mean_taxful_total_price"
+      "id": "datafeed-high_sum_total_sales",
+      "file": "datafeed_high_sum_total_sales.json",
+      "job_id": "high_sum_total_sales"
     }
   ],
   "kibana": {
