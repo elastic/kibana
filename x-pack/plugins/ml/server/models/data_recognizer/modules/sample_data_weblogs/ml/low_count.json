@@ -1,18 +1,16 @@
 
 {
-  "groups": [],
-  "description": "Kibana sample web logs data : find anomalies in the average file size",
+  "groups": ["kibana-sample-logs"],
+  "description": "Kibana sample web logs data : find anomalies in the visitor count",
   "analysis_config" : {
     "bucket_span": "1h",
     "detectors": [
       {
-        "detector_description": "Mean bytes transmitted",
-        "function": "mean",
-	"field_name": "bytes",
-	"partition_field_name": "extension.keyword"
+        "detector_description": "Low visitor count",
+        "function": "low_count",
       }
     ],
-    "influencers": ["extension.keyword", "clientip"]
+    "influencers": []
   },
   "analysis_limits": {
     "model_memory_limit": "10mb"

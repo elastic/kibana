@@ -14,15 +14,33 @@
   },
   "jobs": [
     {
-      "id": "mean_bytes_by_file_extension",
-      "file": "mean_bytes_by_file_extension.json"
+      "id": "low_count",
+      "file": "low_count.json"
+    },
+    {
+      "id": "count_by_response_code",
+      "file": "count_by_response_code.json"
+    },
+    {
+      "id": "distinct_count_ip",
+      "file": "distinct_count_ip.json"
     }
   ],
   "datafeeds": [
     {
-      "id": "datafeed-mean_bytes_by_file_extension",
-      "file": "datafeed_mean_bytes_by_file_extension.json",
-      "job_id": "mean_bytes_by_file_extension"
+      "id": "datafeed-low_count",
+      "file": "datafeed_low_count.json",
+      "job_id": "low_count"
+    },
+    {
+      "id": "datafeed-count_by_response_code",
+      "file": "datafeed_count_by_response_code.json",
+      "job_id": "count_by_response_code"
+    },
+    {
+      "id": "datafeed-distinct_count_ip",
+      "file": "datafeed_distinct_count_ip.json",
+      "job_id": "distinct_count_ip"
     }
   ],
   "kibana": {
