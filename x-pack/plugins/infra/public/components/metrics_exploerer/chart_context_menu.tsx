@@ -19,7 +19,7 @@ import { SourceQuery } from '../../graphql/types';
 interface Props {
   intl: InjectedIntl;
   options: MetricsExplorerOptions;
-  onFilter: (query: string) => void;
+  onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
 }
@@ -27,9 +27,12 @@ interface Props {
 export const MetricsExplorerChartContextMenu = injectI18n(
   ({ intl, onFilter, options, series, source }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
+    const supportFiltering = options.groupBy != null && onFilter != null;
     const handleFilter = useCallback(
       () => {
-        if (options.groupBy) {
+        // onFilter needs check for Typescript even though it's
+        // covered by supportFiltering variable
+        if (supportFiltering && onFilter) {
           onFilter(`${options.groupBy}: "${series.id}"`);
         }
         setPopoverState(false);
@@ -39,11 +42,9 @@ export const MetricsExplorerChartContextMenu = injectI18n(
 
     const tsvbUrl = createTSVBLink(source, options, series);
 
-    const panels: EuiContextMenuPanelDescriptor[] = [
-      {
-        id: 0,
-        title: '',
-        items: [
+    // Only display the "Add Filter" option if it's supported
+    const filterByItem = supportFiltering
+      ? [
           {
             name: intl.formatMessage({
               id: 'xpack.infra.metricsExplorer.filterByLabel',
@@ -51,12 +52,22 @@ export const MetricsExplorerChartContextMenu = injectI18n(
             }),
             onClick: handleFilter,
           },
+        ]
+      : [];
+
+    const panels: EuiContextMenuPanelDescriptor[] = [
+      {
+        id: 0,
+        title: '',
+        items: [
+          ...filterByItem,
           {
             name: intl.formatMessage({
               id: 'xpack.infra.metricsExplorer.openInTSVB',
               defaultMessage: 'Open in Visualize',
             }),
             href: tsvbUrl,
+            disabled: options.metrics.length === 0,
           },
         ],
       },

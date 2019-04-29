@@ -136,4 +136,86 @@ describe('useMetricsExplorerData Hook', () => {
     expect(nextSeries).toBeDefined();
     expect(nextSeries.length).toBe(6);
   });
+
+  it('should reset error upon recovery', async () => {
+    const error = new Error('Network Error');
+    mockedFetch.post.mockRejectedValue(error);
+    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    expect(result.current.data).toBe(null);
+    expect(result.current.error).toEqual(null);
+    expect(result.current.loading).toBe(true);
+    await waitForNextUpdate();
+    expect(result.current.data).toEqual(null);
+    expect(result.current.error).toEqual(error);
+    expect(result.current.loading).toBe(false);
+    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    rerender({
+      options,
+      source,
+      derivedIndexPattern,
+      timeRange,
+      afterKey: null,
+      signal: 2,
+    });
+    await waitForNextUpdate();
+    expect(result.current.data).toEqual(resp);
+    expect(result.current.loading).toBe(false);
+    expect(result.current.error).toBe(null);
+  });
+
+  it('should not paginate on option change', async () => {
+    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    expect(result.current.data).toBe(null);
+    expect(result.current.loading).toBe(true);
+    await waitForNextUpdate();
+    expect(result.current.data).toEqual(resp);
+    expect(result.current.loading).toBe(false);
+    const { series, pageInfo } = result.current.data!;
+    expect(series).toBeDefined();
+    expect(series.length).toBe(3);
+    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    rerender({
+      options: {
+        ...options,
+        aggregation: MetricsExplorerAggregation.count,
+        metrics: [{ aggregation: MetricsExplorerAggregation.count }],
+      },
+      source,
+      derivedIndexPattern,
+      timeRange,
+      afterKey: pageInfo.afterKey!,
+      signal: 1,
+    });
+    expect(result.current.loading).toBe(true);
+    await waitForNextUpdate();
+    expect(result.current.data).toEqual(resp);
+    expect(result.current.loading).toBe(false);
+  });
+
+  it('should not paginate on time change', async () => {
+    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    const { result, waitForNextUpdate, rerender } = renderUseMetricsExplorerDataHook();
+    expect(result.current.data).toBe(null);
+    expect(result.current.loading).toBe(true);
+    await waitForNextUpdate();
+    expect(result.current.data).toEqual(resp);
+    expect(result.current.loading).toBe(false);
+    const { series, pageInfo } = result.current.data!;
+    expect(series).toBeDefined();
+    expect(series.length).toBe(3);
+    mockedFetch.post.mockResolvedValue({ data: resp } as any);
+    rerender({
+      options,
+      source,
+      derivedIndexPattern,
+      timeRange: { from: 'now-1m', to: 'now', interval: '>=1m' },
+      afterKey: pageInfo.afterKey!,
+      signal: 1,
+    });
+    expect(result.current.loading).toBe(true);
+    await waitForNextUpdate();
+    expect(result.current.data).toEqual(resp);
+    expect(result.current.loading).toBe(false);
+  });
 });

@@ -13,6 +13,7 @@ import { first } from 'lodash';
 import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
+import { EuiSeriesChart } from '@elastic/eui/lib/experimental';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import euiStyled from '../../../../../common/eui_styled_components';
@@ -35,12 +36,12 @@ interface Props {
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
 export const MetricsExplorerChart = injectI18n(
-  ({ source, options, series, title, onFilter, height = 200, width = '100%' }: Props) => {
+  ({ intl, source, options, series, title, onFilter, height = 200, width = '100%' }: Props) => {
     const { metrics } = options;
     const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
     return (
       <React.Fragment>
-        {title ? (
+        {options.groupBy ? (
           <EuiTitle size="xs">
             <EuiFlexGroup>
               <EuiFlexItem grow={1}>
@@ -56,20 +57,35 @@ export const MetricsExplorerChart = injectI18n(
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiTitle>
-        ) : null}
+        ) : (
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <MetricsExplorerChartContextMenu options={options} series={series} source={source} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         <div style={{ height, width }}>
-          <Chart>
-            {metrics.map((metric, id) => (
-              <MetricLineSeries key={id} metric={metric} id={id} series={series} />
-            ))}
-            <Axis
-              id={getAxisId('timestamp')}
-              position={Position.Bottom}
-              showOverlappingTicks={true}
-              tickFormat={dateFormatter}
+          {series.rows.length > 0 ? (
+            <Chart>
+              {metrics.map((metric, id) => (
+                <MetricLineSeries key={id} metric={metric} id={id} series={series} />
+              ))}
+              <Axis
+                id={getAxisId('timestamp')}
+                position={Position.Bottom}
+                showOverlappingTicks={true}
+                tickFormat={dateFormatter}
+              />
+              <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
+            </Chart>
+          ) : (
+            <EuiSeriesChart
+              statusText={intl.formatMessage({
+                id: 'xpack.infra.metricsExplorer',
+                defaultMessage: 'Missing data for request.',
+              })}
             />
-            <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
-          </Chart>
+          )}
         </div>
       </React.Fragment>
     );

@@ -90,6 +90,7 @@ export function useMetricsExplorerData(
             }
             setLastOptions(options);
             setLastTimerange(timerange);
+            setError(null);
           }
         } catch (e) {
           setError(e);

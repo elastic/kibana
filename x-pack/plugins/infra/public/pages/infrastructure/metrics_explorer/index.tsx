@@ -17,6 +17,8 @@ import { MetricsExplorerToolbar } from '../../../components/metrics_exploerer/to
 import { useMetricsExplorerData } from '../../../containers/metrics_explorer/use_metrics_explorer_data';
 import { MetricsExplorerOptionsContainer } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { SourceQuery } from '../../../../common/graphql/types';
+import { ErrorPage } from '../../../components/error_page';
+import { NoData } from '../../../components/empty_states';
 
 interface MetricsExplorerPageProps {
   intl: InjectedIntl;
@@ -97,15 +99,16 @@ export const MetricsExplorerPage = injectI18n(
     const handleAggregationChange = useCallback(
       (aggregation: MetricsExplorerAggregation) => {
         setAfterKey(null);
-        setOptions({
-          ...options,
-          aggregation,
-          metrics: options.metrics.map(metric => ({
-            ...metric,
-            aggregation:
-              aggregation === MetricsExplorerAggregation.count ? metric.aggregation : aggregation,
-          })),
-        });
+        const metrics =
+          aggregation === MetricsExplorerAggregation.count
+            ? [{ aggregation }]
+            : options.metrics
+                .filter(metric => metric.aggregation !== MetricsExplorerAggregation.count)
+                .map(metric => ({
+                  ...metric,
+                  aggregation,
+                }));
+        setOptions({ ...options, aggregation, metrics });
       },
       [options]
     );
@@ -136,7 +139,20 @@ export const MetricsExplorerPage = injectI18n(
           onMetricsChange={handleMetricsChange}
           onAggregationChange={handleAggregationChange}
         />
-        {(error && error.message) || (
+        {error ? (
+          <NoData
+            titleText="Whoops!"
+            bodyText={intl.formatMessage(
+              {
+                id: 'xpack.infra.metricsExplorer.errorMessage',
+                defaultMessage: 'It looks like the request failed with "{message}"',
+              },
+              { message: error.message }
+            )}
+            onRefetch={handleRefresh}
+            refetchText="Try Again"
+          />
+        ) : (
           <MetricsExplorerCharts
             loading={loading}
             data={data}
