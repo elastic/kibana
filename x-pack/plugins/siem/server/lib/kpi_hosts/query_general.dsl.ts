@@ -50,19 +50,19 @@ export const buildGeneralQuery = ({
               should: [
                 {
                   exists: {
-                    field: 'host.name'
-                  }
-                }
+                    field: 'host.name',
+                  },
+                },
               ],
-              minimum_should_match: 1
-            }
+              minimum_should_match: 1,
+            },
           },
           aggregations: {
             hosts_over_time: {
               auto_date_histogram: {
                 field: '@timestamp',
-                buckets: '6'
-              },  
+                buckets: '6',
+              },
             },
           },
         },
@@ -77,19 +77,19 @@ export const buildGeneralQuery = ({
               should: [
                 {
                   exists: {
-                    field: 'source.ip'
-                  }
-                }
+                    field: 'source.ip',
+                  },
+                },
               ],
-              minimum_should_match: 1
-            }
+              minimum_should_match: 1,
+            },
           },
           aggregations: {
             ips_over_time: {
               auto_date_histogram: {
                 field: '@timestamp',
-                buckets: 6
-              },  
+                buckets: 6,
+              },
             },
           },
         },
@@ -104,19 +104,19 @@ export const buildGeneralQuery = ({
               should: [
                 {
                   exists: {
-                    field: 'destination.ip'
-                  }
-                }
+                    field: 'destination.ip',
+                  },
+                },
               ],
-              minimum_should_match: 1
-            }
+              minimum_should_match: 1,
+            },
           },
           aggregations: {
             ips_over_time: {
               auto_date_histogram: {
                 field: '@timestamp',
-                buckets: 6
-              },  
+                buckets: 6,
+              },
             },
           },
         },

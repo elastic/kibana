@@ -34,29 +34,30 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             },
           })
           .then(resp => {
-            
             const kpiHosts = resp.data.source.KpiHosts;
             expect(kpiHosts!.hosts).to.equal(1);
-            expect(kpiHosts!.hostsHistogram).to.eql([{
-                "x": 1549728000000,
-                "y": 1574,
-                "__typename": "HistogramData"
+            expect(kpiHosts!.hostsHistogram).to.eql([
+              {
+                x: 1549728000000,
+                y: 1574,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549738800000,
-                "y": 0,
-                "__typename": "HistogramData"
+                x: 1549738800000,
+                y: 0,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549749600000,
-                "y": 1302,
-                "__typename": "HistogramData"
+                x: 1549749600000,
+                y: 1302,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549760400000,
-                "y": 3281,
-                "__typename": "HistogramData"
-              }]);
+                x: 1549760400000,
+                y: 3281,
+                __typename: 'HistogramData',
+              },
+            ]);
             expect(kpiHosts!.authSuccess).to.be(0);
             expect(kpiHosts!.authSuccessHistogram).to.eql([]);
             expect(kpiHosts!.authFailure).to.equal(0);
@@ -64,48 +65,48 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             expect(kpiHosts!.uniqueSourceIps).to.equal(121);
             expect(kpiHosts!.uniqueSourceIpsHistogram).to.eql([
               {
-                "x": 1549728000000,
-                "y": 1574,
-                "__typename": "HistogramData"
+                x: 1549728000000,
+                y: 1574,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549738800000,
-                "y": 0,
-                "__typename": "HistogramData"
+                x: 1549738800000,
+                y: 0,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549749600000,
-                "y": 1302,
-                "__typename": "HistogramData"
+                x: 1549749600000,
+                y: 1302,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549760400000,
-                "y": 3281,
-                "__typename": "HistogramData"
-              }
+                x: 1549760400000,
+                y: 3281,
+                __typename: 'HistogramData',
+              },
             ]);
             expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
             expect(kpiHosts!.uniqueDestinationIpsHistogram).to.eql([
               {
-                "x": 1549728000000,
-                "y": 1574,
-                "__typename": "HistogramData"
+                x: 1549728000000,
+                y: 1574,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549738800000,
-                "y": 0,
-                "__typename": "HistogramData"
+                x: 1549738800000,
+                y: 0,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549749600000,
-                "y": 1302,
-                "__typename": "HistogramData"
+                x: 1549749600000,
+                y: 1302,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549760400000,
-                "y": 3281,
-                "__typename": "HistogramData"
-              }
+                x: 1549760400000,
+                y: 3281,
+                __typename: 'HistogramData',
+              },
             ]);
           });
       });
@@ -134,26 +135,28 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
           .then(resp => {
             const kpiHosts = resp.data.source.KpiHosts;
             expect(kpiHosts!.hosts).to.equal(1);
-            expect(kpiHosts!.hostsHistogram).to.eql([{
-                "x": 1549728000000,
-                "y": 1574,
-                "__typename": "HistogramData"
+            expect(kpiHosts!.hostsHistogram).to.eql([
+              {
+                x: 1549728000000,
+                y: 1574,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549738800000,
-                "y": 0,
-                "__typename": "HistogramData"
+                x: 1549738800000,
+                y: 0,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549749600000,
-                "y": 1302,
-                "__typename": "HistogramData"
+                x: 1549749600000,
+                y: 1302,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549760400000,
-                "y": 3281,
-                "__typename": "HistogramData"
-              }]);
+                x: 1549760400000,
+                y: 3281,
+                __typename: 'HistogramData',
+              },
+            ]);
             expect(kpiHosts!.authSuccess).to.be(0);
             expect(kpiHosts!.authSuccessHistogram).to.eql([]);
             expect(kpiHosts!.authFailure).to.equal(0);
@@ -161,48 +164,48 @@ const kpiHostsTests: KbnTestProvider = ({ getService }) => {
             expect(kpiHosts!.uniqueSourceIps).to.equal(121);
             expect(kpiHosts!.uniqueSourceIpsHistogram).to.eql([
               {
-                "x": 1549728000000,
-                "y": 1574,
-                "__typename": "HistogramData"
+                x: 1549728000000,
+                y: 1574,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549738800000,
-                "y": 0,
-                "__typename": "HistogramData"
+                x: 1549738800000,
+                y: 0,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549749600000,
-                "y": 1302,
-                "__typename": "HistogramData"
+                x: 1549749600000,
+                y: 1302,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549760400000,
-                "y": 3281,
-                "__typename": "HistogramData"
-              }
+                x: 1549760400000,
+                y: 3281,
+                __typename: 'HistogramData',
+              },
             ]);
             expect(kpiHosts!.uniqueDestinationIps).to.equal(154);
             expect(kpiHosts!.uniqueDestinationIpsHistogram).to.eql([
               {
-                "x": 1549728000000,
-                "y": 1574,
-                "__typename": "HistogramData"
+                x: 1549728000000,
+                y: 1574,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549738800000,
-                "y": 0,
-                "__typename": "HistogramData"
+                x: 1549738800000,
+                y: 0,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549749600000,
-                "y": 1302,
-                "__typename": "HistogramData"
+                x: 1549749600000,
+                y: 1302,
+                __typename: 'HistogramData',
               },
               {
-                "x": 1549760400000,
-                "y": 3281,
-                "__typename": "HistogramData"
-              }
+                x: 1549760400000,
+                y: 3281,
+                __typename: 'HistogramData',
+              },
             ]);
           });
       });

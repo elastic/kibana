@@ -11,7 +11,8 @@ import * as React from 'react';
 import { StatItemsComponent, StatItemsProps } from '.';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
-import { EuiHorizontalRule } from '@elastic/eui';
+import { EuiHorizontalRule, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 describe('Stat Items', () => {
   describe('loading', () => {
@@ -22,7 +23,7 @@ describe('Stat Items', () => {
             key: 'networkEvents',
             description: 'NETWORK_EVENTS',
             value: null,
-            color: '#000000'
+            color: '#000000',
           },
         ],
         isLoading: true,
@@ -31,10 +32,50 @@ describe('Stat Items', () => {
       const wrapper = shallow(<StatItemsComponent {...mockStatItemsData} />);
       expect(toJson(wrapper)).toMatchSnapshot();
     });
-
   });
 
-  describe('rendering', () => {
+  describe('rendering kpis without charts', () => {
+    const mockStatItemsData: StatItemsProps = {
+      fields: [
+        {
+          key: 'uniqueSourcePrivateIps',
+          value: null,
+        },
+      ],
+      description: 'UNIQUE_PRIVATE_IPS',
+      isLoading: false,
+      key: 'mock-keys',
+    };
+    let wrapper: ReactWrapper;
+    beforeAll(() => {
+      wrapper = mount(<StatItemsComponent {...mockStatItemsData} />);
+    });
+    test('it renders the default widget', () => {
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+
+    test('should handle multiple titles', () => {
+      expect(wrapper.find('[data-test-subj="stat-title"]').filter(EuiFlexGroup)).toHaveLength(1);
+    });
+
+    test('should not render color indicators', () => {
+      expect(wrapper.find(EuiIcon)).toHaveLength(0);
+    });
+
+    test('should render barChart', () => {
+      expect(wrapper.find(BarChart)).toHaveLength(0);
+    });
+
+    test('should render areaChart', () => {
+      expect(wrapper.find(AreaChart)).toHaveLength(0);
+    });
+
+    test('should render spliter', () => {
+      expect(wrapper.find(EuiHorizontalRule)).toHaveLength(0);
+    });
+  });
+
+  describe('rendering kpis with charts', () => {
     const mockStatItemsData: StatItemsProps = {
       fields: [
         {
@@ -80,19 +121,21 @@ describe('Stat Items', () => {
     };
     let wrapper: ReactWrapper;
     beforeAll(() => {
-      
       wrapper = mount(<StatItemsComponent {...mockStatItemsData} />);
-    })
+    });
     test('it renders the default widget', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
 
     test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]')).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="stat-title"]').filter(EuiFlexGroup)).toHaveLength(2);
+    });
+
+    test('should render color indicators', () => {
+      expect(wrapper.find(EuiIcon)).toHaveLength(2);
     });
 
     test('should render barChart', () => {
-      
       expect(wrapper.find(BarChart)).toHaveLength(1);
     });
 
@@ -100,7 +143,7 @@ describe('Stat Items', () => {
       expect(wrapper.find(AreaChart)).toHaveLength(1);
     });
 
-    test('should render spliter', () => {    
+    test('should render spliter', () => {
       expect(wrapper.find(EuiHorizontalRule)).toHaveLength(1);
     });
   });

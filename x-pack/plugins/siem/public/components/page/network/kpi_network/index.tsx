@@ -24,64 +24,64 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
     fields: [
       {
         key: 'networkEvents',
-        description: i18n.NETWORK_EVENTS,
         value: null,
       },
     ],
+    description: i18n.NETWORK_EVENTS,
   },
   {
     fields: [
       {
         key: 'uniqueFlowId',
-        description: i18n.UNIQUE_ID,
         value: null,
       },
     ],
+    description: i18n.UNIQUE_ID,
   },
   {
     fields: [
       {
         key: 'activeAgents',
-        description: i18n.ACTIVE_AGENTS,
         value: null,
       },
     ],
+    description: i18n.ACTIVE_AGENTS,
   },
   {
     fields: [
       {
         key: 'uniqueSourcePrivateIps',
-        description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
         value: null,
       },
     ],
+    description: i18n.UNIQUE_SOURCE_PRIVATE_IPS,
   },
   {
     fields: [
       {
         key: 'uniqueDestinationPrivateIps',
-        description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
         value: null,
       },
     ],
+    description: i18n.UNIQUE_DESTINATION_PRIVATE_IPS,
   },
   {
     fields: [
       {
         key: 'dnsQueries',
-        description: i18n.DNS_QUERIES,
         value: null,
       },
     ],
+    description: i18n.DNS_QUERIES,
   },
   {
     fields: [
       {
         key: 'tlsHandshakes',
-        description: i18n.TLS_HANDSHAKES,
         value: null,
       },
     ],
+    description: i18n.TLS_HANDSHAKES,
   },
 ];
 

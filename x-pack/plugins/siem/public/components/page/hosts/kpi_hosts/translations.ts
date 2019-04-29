@@ -27,20 +27,20 @@ export const AUTHENTICATION_FAILURE = i18n.translate(
   }
 );
 
-export const AUTHENTICATION = i18n.translate(
-  'xpack.siem.kpiHosts.source.authenticationTitle',
-  {
-    defaultMessage: 'User Authentications',
-  }
-);
+export const AUTHENTICATION = i18n.translate('xpack.siem.kpiHosts.source.authenticationTitle', {
+  defaultMessage: 'User Authentications',
+});
 
 export const ACTIVE_USERS = i18n.translate('xpack.siem.kpiHosts.source.activeUsersTitle', {
   defaultMessage: 'Active Users',
 });
 
-export const UNIQUE_PRIVATE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniquePrivateIpsTitle', {
-  defaultMessage: 'Unique Private IPs',
-});
+export const UNIQUE_PRIVATE_IPS = i18n.translate(
+  'xpack.siem.kpiHosts.source.uniquePrivateIpsTitle',
+  {
+    defaultMessage: 'Unique Private IPs',
+  }
+);
 
 export const UNIQUE_SOURCE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniqueSourceIpsTitle', {
   defaultMessage: 'Source',

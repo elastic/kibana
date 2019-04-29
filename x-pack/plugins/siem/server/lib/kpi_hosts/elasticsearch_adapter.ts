@@ -33,19 +33,47 @@ export class ElasticsearchKpiHostsAdapter implements KpiHostsAdapter {
 
     return {
       hosts: getOr(null, 'responses.0.aggregations.hosts.value', response),
-      hostsHistogram: getOr(null, 'responses.0.aggregations.hosts_hostogram.hosts_over_time.buckets', response),
-      authSuccess: getOr(null, 'responses.1.aggregations.authentication_success.doc_count', response),
-      authSuccessHistogram: getOr(null, 'responses.1.aggregations.authentication_success.attempts_over_time.buckets', response),
-      authFailure: getOr(null, 'responses.1.aggregations.authentication_failure.doc_count', response),
-      authFailureHistogram: getOr(null, 'responses.1.aggregations.authentication_failure.attempts_over_time.buckets', response),
+      hostsHistogram: getOr(
+        null,
+        'responses.0.aggregations.hosts_hostogram.hosts_over_time.buckets',
+        response
+      ),
+      authSuccess: getOr(
+        null,
+        'responses.1.aggregations.authentication_success.doc_count',
+        response
+      ),
+      authSuccessHistogram: getOr(
+        null,
+        'responses.1.aggregations.authentication_success.attempts_over_time.buckets',
+        response
+      ),
+      authFailure: getOr(
+        null,
+        'responses.1.aggregations.authentication_failure.doc_count',
+        response
+      ),
+      authFailureHistogram: getOr(
+        null,
+        'responses.1.aggregations.authentication_failure.attempts_over_time.buckets',
+        response
+      ),
       uniqueSourceIps: getOr(null, 'responses.0.aggregations.unique_source_ips.value', response),
-      uniqueSourceIpsHistogram: getOr(null, 'responses.0.aggregations.unique_source_ips_hostogram.ips_over_time.buckets', response),
+      uniqueSourceIpsHistogram: getOr(
+        null,
+        'responses.0.aggregations.unique_source_ips_hostogram.ips_over_time.buckets',
+        response
+      ),
       uniqueDestinationIps: getOr(
         null,
         'responses.0.aggregations.unique_destination_ips.value',
         response
       ),
-      uniqueDestinationIpsHistogram: getOr(null, 'responses.0.aggregations.unique_destination_ips_hostogram.ips_over_time.buckets', response),
+      uniqueDestinationIpsHistogram: getOr(
+        null,
+        'responses.0.aggregations.unique_destination_ips_hostogram.ips_over_time.buckets',
+        response
+      ),
     };
   }
 }
