@@ -162,10 +162,14 @@ export function CustomSelectionTable({
   }
 
   function renderSelectAll(mobile) {
+    const selectAll = i18n.translate('xpack.ml.jobSelector.customTable.selectAllCheckboxLabel', {
+      defaultMessage: 'Select all'
+    });
+
     return (
       <EuiCheckbox
         id="selectAllCheckbox"
-        label={mobile ? 'Select all' : null}
+        label={mobile ? selectAll : null}
         checked={areAllItemsSelected()}
         onChange={toggleAll}
         type={mobile ? null : 'inList'}
@@ -318,7 +322,9 @@ export function CustomSelectionTable({
             defaultQuery={query}
             box={{
               incremental: true,
-              placeholder: 'Search...'
+              placeholder: i18n.translate('xpack.ml.jobSelector.customTable.searchBarPlaceholder', {
+                defaultMessage: 'Search...'
+              })
             }}
             filters={filters}
             onChange={handleQueryChange}

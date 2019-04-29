@@ -518,12 +518,12 @@ export function normalizeTimes(jobs) {
   const min = Math.min(...jobs.map(job => +job.timeRange.from));
   const max = Math.max(...jobs.map(job => +job.timeRange.to));
 
-  const gantScale = d3.scale.linear().domain([min, max]).range([1, 299]);
+  const ganttScale = d3.scale.linear().domain([min, max]).range([1, 299]);
 
   jobs.forEach(job => {
     if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
-      job.timeRange.fromPx = gantScale(job.timeRange.from);
-      job.timeRange.toPx = gantScale(job.timeRange.to);
+      job.timeRange.fromPx = ganttScale(job.timeRange.from);
+      job.timeRange.toPx = ganttScale(job.timeRange.to);
       job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
 
       job.timeRange.toMoment = moment(job.timeRange.to);

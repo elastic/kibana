@@ -358,10 +358,7 @@ export function JobSelector({
           aria-labelledby="Job Selection"
           size="l"
         >
-          <EuiFlyoutHeader
-            hasBorder
-            className="mlJobSelectorFlyoutHeader"
-          >
+          <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
               <h2 id="flyoutTitle">
                 {i18n.translate('xpack.ml.jobSelector.flyoutTitle', {
@@ -409,7 +406,7 @@ export function JobSelector({
               timeseriesOnly={timeseriesOnly}
             />
           </EuiFlyoutBody>
-          <EuiFlyoutFooter className="mlJobSelectorFlyoutFooter">
+          <EuiFlyoutFooter>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButton

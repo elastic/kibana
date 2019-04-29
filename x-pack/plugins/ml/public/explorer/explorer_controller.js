@@ -208,10 +208,7 @@ module.controller('MlExplorerController', function (
 
   // Listen for changes to job selection.
   $scope.jobSelectionUpdateInProgress = false;
-  // $scope.mlJobSelectService.listenJobSelectionChange($scope, (event, selectedJobIds) => {
-  //   $scope.jobSelectionUpdateInProgress = true;
-  //   jobSelectionUpdate(EXPLORER_ACTION.JOB_SELECTION_CHANGE, { fullJobs: mlJobService.jobs, selectedJobIds });
-  // });
+
   mlJobSelectService.subscribe(({ selection }) => {
     if (selection !== undefined) {
       $scope.jobSelectionUpdateInProgress = true;

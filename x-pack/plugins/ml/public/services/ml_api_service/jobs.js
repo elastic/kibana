@@ -25,10 +25,7 @@ export const jobs = {
   jobsWithTimerange() {
     return http({
       url: `${basePath}/jobs/jobs_with_timerange`,
-      method: 'POST',
-      data: {
-        thing: 'test',
-      }
+      method: 'POST'
     });
   },
 

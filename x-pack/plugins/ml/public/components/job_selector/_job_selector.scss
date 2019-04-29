@@ -3,22 +3,17 @@
   background-color: $euiColorLightShade
 }
 
-.mlJobSelectorFlyoutHeader, .mlJobSelectorFlyoutFooter {
-  padding-bottom: $euiSizeXS;
-  padding-top: $euiSizeXS;
-}
-
 .mlJobSelectorFlyoutBody > .euiFlyoutBody__overflow {
   padding-top: $euiSizeS;
 }
 
-.mlJobSelector__gantBar {
+.mlJobSelector__ganttBar {
   background-color: #79adda;
   height: 14px;
   border-radius: 2px;
 }
 
-.mlJobSelector__gantBarBackEdge {
+.mlJobSelector__ganttBarBackEdge {
   height: 18px;
   border-left: 1px solid #d6d6d6;
   border-right: 1px solid #d6d6d6;
@@ -26,7 +21,7 @@
   padding-top: 9px;
 }
 
-.mlJobSelector__gantBarDashed {
+.mlJobSelector__ganttBarDashed {
   height: 1px;
   border-top: 1px dashed #d6d6d6;
   // set to width of gant bar total range

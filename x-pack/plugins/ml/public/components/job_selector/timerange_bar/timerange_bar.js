@@ -25,10 +25,10 @@ export function TimeRangeBar({
       content={timerange.label}
     >
       <Fragment>
-        <div className="mlJobSelector__gantBarBackEdge">
-          <div className="mlJobSelector__gantBarDashed" />
+        <div className="mlJobSelector__ganttBarBackEdge">
+          <div className="mlJobSelector__ganttBarDashed" />
         </div>
-        <div style={style} className="mlJobSelector__gantBar"/>
+        <div style={style} className="mlJobSelector__ganttBar"/>
       </Fragment>
     </EuiToolTip>
   );
