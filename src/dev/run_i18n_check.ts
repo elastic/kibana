@@ -115,7 +115,7 @@ run(
           task: untrackedMessagesTask,
         },
         {
-          title: 'Extracting Default Messages',
+          title: 'Validating Default Messages',
           task: extractDefaultMessagesTask,
         },
         {
