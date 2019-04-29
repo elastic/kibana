@@ -27,7 +27,7 @@ import { Source } from '../../containers/source';
 import { LogsToolbar } from './page_toolbar';
 
 export const LogsPageLogsContent: React.FunctionComponent = () => {
-  const { derivedIndexPattern, sourceId } = useContext(Source.Context);
+  const { derivedIndexPattern } = useContext(Source.Context);
   const { intervalSize, textScale, textWrap } = useContext(LogViewConfiguration.Context);
   const { setFlyoutVisibility,
     flyoutVisible,
