@@ -14,7 +14,7 @@ import { initPrivateSpacesApi } from './spaces';
 import { SpacesServiceSetup } from '../../../new_platform/spaces_service/spaces_service';
 import { SpacesHttpServiceSetup } from '../../../new_platform/plugin';
 
-type InterfaceExcept<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 interface RouteDeps {
   xpackMain: XPackMainPlugin;
@@ -24,7 +24,7 @@ interface RouteDeps {
   config: KibanaConfig;
 }
 
-export interface PrivateRouteDeps extends InterfaceExcept<RouteDeps, 'xpackMain'> {
+export interface PrivateRouteDeps extends Omit<RouteDeps, 'xpackMain'> {
   routePreCheckLicenseFn: any;
 }
 
