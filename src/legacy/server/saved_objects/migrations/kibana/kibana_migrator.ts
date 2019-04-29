@@ -97,7 +97,7 @@ export class KibanaMigrator {
         batchSize: config.get('migrations.batchSize'),
         callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
         documentMigrator: this.documentMigrator,
-        index: index,
+        index,
         log: this.log,
         mappingProperties: this.indexMap[index],
         pollInterval: config.get('migrations.pollInterval'),
