@@ -343,13 +343,13 @@ class CodeContent extends React.PureComponent<Props> {
           );
         }
         return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame">
+          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
             <Editor showBlame={false} />
           </EuiFlexGroup>
         );
       case PathTypes.blame:
         return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame">
+          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
             <Editor showBlame={true} />
           </EuiFlexGroup>
         );
