@@ -175,8 +175,6 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
             tooltip={headerTooltip}
           />
 
-          <EuiSpacer />
-
           <EuiBasicTable
             items={pageOfItems}
             columns={columns}

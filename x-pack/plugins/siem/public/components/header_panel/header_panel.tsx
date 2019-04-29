@@ -7,6 +7,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
+
+const FlexGroup = styled(EuiFlexGroup)`
+  margin-bottom: 12px;
+`;
 
 export interface HeaderPanelProps {
   children?: React.ReactNode;
@@ -17,7 +22,7 @@ export interface HeaderPanelProps {
 }
 
 export const HeaderPanel = pure<HeaderPanelProps>(({ children, subtitle, title, tooltip }) => (
-  <EuiFlexGroup alignItems="center">
+  <FlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiTitle>
         <h2 data-test-subj="page_headline_title">
@@ -32,5 +37,5 @@ export const HeaderPanel = pure<HeaderPanelProps>(({ children, subtitle, title, 
     </EuiFlexItem>
 
     {children && <EuiFlexItem grow={false}>{children}</EuiFlexItem>}
-  </EuiFlexGroup>
+  </FlexGroup>
 ));
