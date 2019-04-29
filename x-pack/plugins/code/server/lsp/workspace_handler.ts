@@ -4,7 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Clone, Commit, Error as GitError, Repository, Reset, TreeEntry } from '@elastic/nodegit';
+import {
+  Commit,
+  Error as GitError,
+  Repository,
+  Reset,
+  TreeEntry,
+  // @ts-ignore
+  Worktree,
+  // @ts-ignore
+  WorktreeAddOptions,
+} from '@elastic/nodegit';
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
@@ -376,6 +386,7 @@ export class WorkspaceHandler {
     const workspaceDir = await this.revisionDir(repositoryUri, revision);
     this.log.info(`clone workspace ${workspaceDir} from url ${bareRepo.path()}`);
     const parentDir = path.dirname(workspaceDir);
+    const name = path.basename(workspaceDir);
     // on windows, git clone will failed if parent folder is not exists;
     await new Promise((resolve, reject) =>
       mkdirp(parentDir, err => {
@@ -386,7 +397,10 @@ export class WorkspaceHandler {
         }
       })
     );
-    return await Clone.clone(bareRepo.path(), workspaceDir);
+    // Create the worktree and open it as Repository.
+    const wt = await Worktree.add(bareRepo, `workspace-${name}`, workspaceDir, {});
+    // @ts-ignore
+    return await Repository.openFromWorktree(wt);
   }
 
   private setWorkspaceRevision(workspaceRepo: Repository, headCommit: Commit) {
