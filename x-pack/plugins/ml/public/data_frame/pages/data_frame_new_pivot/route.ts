@@ -7,7 +7,7 @@
 import uiRoutes from 'ui/routes';
 
 // @ts-ignore
-import { checkFullLicense } from '../../../license/check_license';
+import { checkBasicLicense } from '../../../license/check_license';
 // @ts-ignore
 import { checkGetJobsPrivilege } from '../../../privilege/check_privilege';
 // @ts-ignore
@@ -21,7 +21,7 @@ uiRoutes.when('/data_frame/new_job/step/pivot?', {
   template,
   k7Breadcrumbs: getDataFrameCreateBreadcrumbs,
   resolve: {
-    CheckLicense: checkFullLicense,
+    CheckLicense: checkBasicLicense,
     privileges: checkGetJobsPrivilege,
     indexPattern: loadCurrentIndexPattern,
   },
