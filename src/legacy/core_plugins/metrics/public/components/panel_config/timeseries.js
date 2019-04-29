@@ -43,6 +43,8 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import chrome from 'ui/chrome';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 /*
 QueryBarInput will be the text input, the language switcher, and autocomplete.
 import { QueryBarInput } from 'ui/query_bar';
@@ -51,18 +53,46 @@ import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 const localStorage = new Storage(window.localStorage);
 class TimeseriesPanelConfigUi extends Component {
-
   constructor(props) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = {
+      selectedTab: 'data',
+      indexPattern: ''
+    };
   }
-
+  componentDidMount() {
+    this.fetchIndexPatterns(this.props.model.index_pattern ? this.props.model.index_pattern : this.props.model.default_index_pattern);
+  }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
-  handleSubmit = (query) => {
+  handleSubmit = query => {
     this.props.onChange({ filter: query.query });
-  }
+  };
+  /*
+    Retrieving the index pattern objects that are available.
+    We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
+    CAUTION: There can be cases where the index-pattern-string, used by a tsvb visualization, doesn’t correspond to a saved index pattern object.
+    Because of this, Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
+    COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
+  */
+  fetchIndexPatterns = async () => {
+    const searchIndexPattern = this.props.model.index_pattern
+      ? this.props.model.index_pattern
+      : this.props.model.default_index_pattern;
+    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${searchIndexPattern}"`,
+      search_fields: ['title'],
+    });
+    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+      indexPattern => indexPattern.attributes.title === searchIndexPattern
+    );
+    if (exactMatch) {
+      this.setState({ indexPattern: getFromSavedObject(exactMatch) });
+    }
+  };
 
   render() {
     const defaults = {
@@ -70,7 +100,7 @@ class TimeseriesPanelConfigUi extends Component {
       axis_max: '',
       axis_min: '',
       legend_position: 'right',
-      show_grid: 1
+      show_grid: 1,
     };
     const model = { ...defaults, ...this.props.model };
     const { selectedTab } = this.state;
@@ -81,42 +111,65 @@ class TimeseriesPanelConfigUi extends Component {
 
     const positionOptions = [
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.positionOptions.rightLabel', defaultMessage: 'Right' }),
-        value: 'right'
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.positionOptions.rightLabel',
+          defaultMessage: 'Right',
+        }),
+        value: 'right',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.positionOptions.leftLabel', defaultMessage: 'Left' }),
-        value: 'left'
-      }
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.positionOptions.leftLabel',
+          defaultMessage: 'Left',
+        }),
+        value: 'left',
+      },
     ];
     const selectedPositionOption = positionOptions.find(option => {
       return model.axis_position === option.value;
     });
     const scaleOptions = [
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.scaleOptions.normalLabel', defaultMessage: 'Normal' }),
-        value: 'normal'
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.scaleOptions.normalLabel',
+          defaultMessage: 'Normal',
+        }),
+        value: 'normal',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.scaleOptions.logLabel', defaultMessage: 'Log' }),
-        value: 'log' }
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.scaleOptions.logLabel',
+          defaultMessage: 'Log',
+        }),
+        value: 'log',
+      },
     ];
     const selectedAxisScaleOption = scaleOptions.find(option => {
       return model.axis_scale === option.value;
     });
+
     const legendPositionOptions = [
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.legendPositionOptions.rightLabel', defaultMessage: 'Right' }),
-        value: 'right'
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.legendPositionOptions.rightLabel',
+          defaultMessage: 'Right',
+        }),
+        value: 'right',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.legendPositionOptions.leftLabel', defaultMessage: 'Left' }),
-        value: 'left'
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.legendPositionOptions.leftLabel',
+          defaultMessage: 'Left',
+        }),
+        value: 'left',
       },
       {
-        label: intl.formatMessage({ id: 'tsvb.timeseries.legendPositionOptions.bottomLabel', defaultMessage: 'Bottom' }),
-        value: 'bottom'
-      }
+        label: intl.formatMessage({
+          id: 'tsvb.timeseries.legendPositionOptions.bottomLabel',
+          defaultMessage: 'Bottom',
+        }),
+        value: 'bottom',
+      },
     ];
     const selectedLegendPosOption = legendPositionOptions.find(option => {
       return model.legend_position === option.value;
@@ -148,10 +201,7 @@ class TimeseriesPanelConfigUi extends Component {
           <EuiPanel>
             <EuiTitle size="s">
               <span>
-                <FormattedMessage
-                  id="tsvb.timeseries.optionsTab.dataLabel"
-                  defaultMessage="Data"
-                />
+                <FormattedMessage id="tsvb.timeseries.optionsTab.dataLabel" defaultMessage="Data" />
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
@@ -167,10 +217,12 @@ class TimeseriesPanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('panelFilter')}
-                  label={(<FormattedMessage
-                    id="tsvb.timeseries.optionsTab.panelFilterLabel"
-                    defaultMessage="Panel filter"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.timeseries.optionsTab.panelFilterLabel"
+                      defaultMessage="Panel filter"
+                    />
+                  }
                   fullWidth
                 >
                   {/*
@@ -178,11 +230,14 @@ class TimeseriesPanelConfigUi extends Component {
                     Do I need to change the model to accept an object for filters and queries that has a language key?
                    */}
                   <QueryBar
-                    query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter.query }}
+                    query={{
+                      language: model.filter.language ? model.filter.language : 'lucene',
+                      query: model.filter.query,
+                    }}
                     screenTitle={'PanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}
-                    indexPatterns={this.props.indexPatterns}
+                    indexPatterns={[this.state.indexPattern]}
                     store={localStorage || {}}
                     showDatePicker={false}
                   />
@@ -222,38 +277,38 @@ class TimeseriesPanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('axisMin')}
-                  label={(<FormattedMessage
-                    id="tsvb.timeseries.optionsTab.axisMinLabel"
-                    defaultMessage="Axis min"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.timeseries.optionsTab.axisMinLabel"
+                      defaultMessage="Axis min"
+                    />
+                  }
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('axis_min')}
-                    value={model.axis_min}
-                  />
+                  <EuiFieldText onChange={handleTextChange('axis_min')} value={model.axis_min} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('axisMax')}
-                  label={(<FormattedMessage
-                    id="tsvb.timeseries.optionsTab.axisMaxLabel"
-                    defaultMessage="Axis max"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.timeseries.optionsTab.axisMaxLabel"
+                      defaultMessage="Axis max"
+                    />
+                  }
                 >
-                  <EuiFieldText
-                    onChange={handleTextChange('axis_max')}
-                    value={model.axis_max}
-                  />
+                  <EuiFieldText onChange={handleTextChange('axis_max')} value={model.axis_max} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('axisPos')}
-                  label={(<FormattedMessage
-                    id="tsvb.timeseries.optionsTab.axisPositionLabel"
-                    defaultMessage="Axis position"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.timeseries.optionsTab.axisPositionLabel"
+                      defaultMessage="Axis position"
+                    />
+                  }
                 >
                   <EuiComboBox
                     isClearable={false}
@@ -267,10 +322,12 @@ class TimeseriesPanelConfigUi extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('axisScale')}
-                  label={(<FormattedMessage
-                    id="tsvb.timeseries.optionsTab.axisScaleLabel"
-                    defaultMessage="Axis scale"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.timeseries.optionsTab.axisScaleLabel"
+                      defaultMessage="Axis scale"
+                    />
+                  }
                 >
                   <EuiComboBox
                     isClearable={false}
@@ -343,11 +400,7 @@ class TimeseriesPanelConfigUi extends Component {
                 </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <YesNo
-                  value={model.show_grid}
-                  name="show_grid"
-                  onChange={this.props.onChange}
-                />
+                <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
@@ -357,19 +410,10 @@ class TimeseriesPanelConfigUi extends Component {
     return (
       <div>
         <EuiTabs size="s">
-          <EuiTab
-            isSelected={selectedTab === 'data'}
-            onClick={() => this.switchTab('data')}
-          >
-            <FormattedMessage
-              id="tsvb.timeseries.dataTab.dataButtonLabel"
-              defaultMessage="Data"
-            />
+          <EuiTab isSelected={selectedTab === 'data'} onClick={() => this.switchTab('data')}>
+            <FormattedMessage id="tsvb.timeseries.dataTab.dataButtonLabel" defaultMessage="Data" />
           </EuiTab>
-          <EuiTab
-            isSelected={selectedTab === 'options'}
-            onClick={() => this.switchTab('options')}
-          >
+          <EuiTab isSelected={selectedTab === 'options'} onClick={() => this.switchTab('options')}>
             <FormattedMessage
               id="tsvb.timeseries.optionsTab.panelOptionsButtonLabel"
               defaultMessage="Panel options"
@@ -389,8 +433,6 @@ class TimeseriesPanelConfigUi extends Component {
       </div>
     );
   }
-
-
 }
 
 TimeseriesPanelConfigUi.propTypes = {
