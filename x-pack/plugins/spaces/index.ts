@@ -24,7 +24,7 @@ import {
   SpacesCoreSetup,
   SpacesHttpServiceSetup,
 } from './server/new_platform/plugin';
-import { initSpacesRequestInterceptors } from './server/lib/request_inteceptors';
+import { initSpacesRequestInterceptors } from './server/lib/request_interceptors';
 
 export const spaces = (kibana: Record<string, any>) =>
   new kibana.Plugin({
