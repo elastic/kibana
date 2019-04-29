@@ -26,33 +26,34 @@ import { i18n } from '@kbn/i18n';
 function SizeParamEditor({
   value,
   setValue,
-  isInvalid,
+  showValidation,
   setValidity,
   setTouched,
 }: AggParamEditorProps<number | ''>) {
   const label = i18n.translate('common.ui.aggTypes.sizeLabel', {
     defaultMessage: 'Size',
   });
+  const isValid = Number(value) > 0;
 
   useEffect(
     () => {
-      setValidity(Number(value) > 0);
+      setValidity(isValid);
     },
-    [value]
+    [isValid]
   );
 
   return (
     <EuiFormRow
       label={label}
       fullWidth={true}
-      isInvalid={isInvalid}
+      isInvalid={showValidation ? !isValid : false}
       className="visEditorSidebar__aggParamFormRow"
     >
       <EuiFieldNumber
         value={isUndefined(value) ? '' : value}
         onChange={ev => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value))}
         fullWidth={true}
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
         onBlur={setTouched}
         min={1}
         data-test-subj="sizeParamEditor"
