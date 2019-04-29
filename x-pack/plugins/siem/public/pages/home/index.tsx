@@ -24,6 +24,7 @@ import { AppSettings } from '../../components/app_settings';
 import { AutoSizer } from '../../components/auto_sizer';
 import { DragDropContextWrapper } from '../../components/drag_and_drop/drag_drop_context_wrapper';
 import { Flyout, flyoutHeaderHeight } from '../../components/flyout';
+import { HelpMenu } from '../../components/help_menu';
 import { LinkToPage } from '../../components/link_to';
 import { SiemNavigation } from '../../components/navigation';
 import { PageHeadline } from '../../components/page_headline';
@@ -83,6 +84,7 @@ export const HomePage = pure(() => (
                   <FixEuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">
                     <EuiFlexItem grow={false}>
                       <SiemNavigation />
+                      <HelpMenu />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiFlexGroup alignItems="center" wrap={false} gutterSize="s">
