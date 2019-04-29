@@ -20,6 +20,12 @@
 import { parseInterval } from '../utils/parse_interval';
 import { leastCommonInterval } from '../vis/lib/least_common_interval';
 
+/**
+ * Check a string if it's a valid JSON.
+ *
+ * @param {string} value a string that should be validated
+ * @returns {boolean} true if value is a valid JSON or if value is an empty string, or a string with whitespaces, otherwise false
+ */
 function isValidJson(value: string): boolean {
   if (!value || value.length === 0) {
     return true;

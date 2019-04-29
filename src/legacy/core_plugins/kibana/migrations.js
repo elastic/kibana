@@ -119,7 +119,13 @@ const migrateDateHistogramAggregation = doc => {
           delete agg.params.customBucket.params.customInterval;
         }
       });
-      doc.attributes.visState = JSON.stringify(visState);
+      return {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          visState: JSON.stringify(visState),
+        }
+      };
     }
   }
   return doc;

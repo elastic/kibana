@@ -37,13 +37,33 @@ function TimeIntervalParamEditor({
   editorConfig,
   value,
   setValue,
-  isInvalid,
-  setTouched,
+  showValidation,
   setValidity,
 }: AggParamEditorProps<string>) {
+  const timeBase: string = get(editorConfig, 'interval.timeBase');
+  const options = timeBase
+    ? []
+    : (aggParam.options || []).reduce(
+        (filtered: ComboBoxOption[], option: AggParamOption) => {
+          if (option.enabled ? option.enabled(agg) : true) {
+            filtered.push({ label: option.display, key: option.val });
+          }
+          return filtered;
+        },
+        [] as ComboBoxOption[]
+      );
+
+  let selectedOptions: ComboBoxOption[] = [];
+  let definedOption: ComboBoxOption | undefined;
+  if (value) {
+    definedOption = find(options, { key: value });
+    selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
+  }
+
+  const isValid = value ? (definedOption ? true : parseInterval(value, timeBase)) : false;
   const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
   const scaledHepText =
-    interval && interval.scaled && !isInvalid ? (
+    interval && interval.scaled && isValid ? (
       <strong className="eui-displayBlock">
         <FormattedMessage
           id="common.ui.aggTypes.timeInterval.scaledHelpText"
@@ -65,29 +85,9 @@ function TimeIntervalParamEditor({
     </>
   );
 
-  const timeBase: string = get(editorConfig, 'interval.timeBase');
-  const options = timeBase
-    ? []
-    : (aggParam.options || []).reduce(
-        (filtered: ComboBoxOption[], option: AggParamOption) => {
-          if (option.enabled ? option.enabled(agg) : true) {
-            filtered.push({ label: option.display, key: option.val });
-          }
-          return filtered;
-        },
-        [] as ComboBoxOption[]
-      );
-
-  let selectedOptions: ComboBoxOption[] = [];
-  let definedOption: ComboBoxOption | undefined;
-  if (value) {
-    definedOption = find(options, { key: value });
-    selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
-  }
-
   const errors = [];
 
-  if (isInvalid && value) {
+  if (!isValid && value) {
     errors.push(
       i18n.translate('common.ui.aggTypes.timeInterval.invalidFormatErrorMessage', {
         defaultMessage: 'Invalid interval format.',
@@ -97,28 +97,27 @@ function TimeIntervalParamEditor({
 
   const onCustomInterval = (customValue: string) => {
     const normalizedCustomValue = customValue.trim();
-    const isValid = normalizedCustomValue ? parseInterval(normalizedCustomValue, timeBase) : false;
-
-    setValidity(isValid);
     setValue(normalizedCustomValue);
-    setTouched();
-    if (isValid) agg.write();
+
+    if (normalizedCustomValue ? parseInterval(normalizedCustomValue, timeBase) : false) {
+      agg.write();
+    }
   };
 
   const onChange = (opts: EuiComboBoxOptionProps[]) => {
     const selectedOpt: ComboBoxOption = get(opts, '0');
-
-    setValidity(!!selectedOpt);
     setValue(selectedOpt ? selectedOpt.key : selectedOpt);
-    setTouched();
-    if (selectedOpt) agg.write();
+
+    if (selectedOpt) {
+      agg.write();
+    }
   };
 
   useEffect(
     () => {
-      setValidity(value ? (definedOption ? true : parseInterval(value, timeBase)) : false);
+      setValidity(isValid);
     },
-    [value]
+    [isValid]
   );
 
   return (
@@ -127,7 +126,7 @@ function TimeIntervalParamEditor({
       error={errors}
       fullWidth={true}
       helpText={helpText}
-      isInvalid={isInvalid}
+      isInvalid={showValidation ? !isValid : false}
       label={i18n.translate('common.ui.aggTypes.timeInterval.minimumIntervalLabel', {
         defaultMessage: 'Minimum interval',
       })}
@@ -135,7 +134,7 @@ function TimeIntervalParamEditor({
       <EuiComboBox
         fullWidth={true}
         data-test-subj="visEditorInterval"
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
         noSuggestions={!!timeBase}
         onChange={onChange}
         onCreateOption={onCustomInterval}

@@ -58,7 +58,8 @@ export const dateHistogramBucketAgg = new BucketAggType({
     try {
       output = this.params.write(agg);
     } catch (e) {
-      // if interval is invalid, return empty string
+      // if interval is invalid, return empty string and log an error
+      console.log(e.toString()); // eslint-disable-line no-console
       return '';
     }
     const field = agg.getFieldDisplayName();
@@ -122,7 +123,9 @@ export const dateHistogramBucketAgg = new BucketAggType({
       editorComponent: TimeIntervalParamEditor,
       deserialize: function (state, agg) {
         // For upgrading from 7.0.x to 7.1.x - intervals are now stored as key of options or custom value
-        if (state === 'custom') return _.get(agg, 'params.customInterval');
+        if (state === 'custom') {
+          return _.get(agg, 'params.customInterval');
+        }
 
         const interval = _.find(intervalOptions, { val: state });
 
