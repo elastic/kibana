@@ -5,6 +5,8 @@
  */
 
 import { openSans } from '../../../../common/lib/fonts';
+import { Style } from '../../types';
+
 // converts the output of the font function to a flot font spec
 // for font spec, see https://github.com/flot/flot/blob/master/API.md#customizing-the-axes
 export const defaultSpec = {
@@ -16,7 +18,7 @@ export const defaultSpec = {
   color: '#000',
 };
 
-export const getFontSpec = argFont => {
+export const getFontSpec = (argFont: Style) => {
   if (!argFont || !argFont.spec) {
     return defaultSpec;
   }
@@ -26,8 +28,8 @@ export const getFontSpec = argFont => {
   const lHeight = typeof lineHeight === 'string' && Number(lineHeight.replace('px', ''));
 
   return {
-    size: !isNaN(size) ? size : defaultSpec.size,
-    lHeight: !isNaN(size) ? lHeight : defaultSpec.lHeight,
+    size: size && !isNaN(size) ? size : defaultSpec.size,
+    lHeight: size && !isNaN(size) ? lHeight : defaultSpec.lHeight,
     style: fontStyle || defaultSpec.style,
     weight: fontWeight || defaultSpec.weight,
     family: fontFamily || defaultSpec.family,

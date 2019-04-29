@@ -43,7 +43,7 @@ export function palette(): NullContextFunctionSpec<'palette', Arguments, Return>
         options: [true, false],
       },
       reverse: {
-        type: ['boolean'],
+        types: ['boolean'],
         default: false,
         help: 'Reverse the palette',
         options: [true, false],

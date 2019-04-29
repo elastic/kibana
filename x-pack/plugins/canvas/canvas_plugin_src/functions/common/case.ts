@@ -17,33 +17,35 @@ interface Case {
   result: any;
 }
 
-export const caseFn: FunctionFactory<'case', Arguments, Promise<Case>> = () => ({
-  name: 'case',
-  type: 'case',
-  help: 'Build a case (including a condition/result) to pass to the switch function',
-  args: {
-    when: {
-      aliases: ['_'],
-      resolve: false,
-      help:
-        'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+export function caseFn(): FunctionSpec<'case', Arguments, Promise<Case>> {
+  return {
+    name: 'case',
+    type: 'case',
+    help: 'Build a case (including a condition/result) to pass to the switch function',
+    args: {
+      when: {
+        aliases: ['_'],
+        resolve: false,
+        help:
+          'This value is compared to the context to see if the condition is met. It is overridden by the "if" argument if both are provided.',
+      },
+      if: {
+        types: ['boolean'],
+        help:
+          'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
+      },
+      then: {
+        resolve: false,
+        help: 'The value to return if the condition is met',
+      },
     },
-    if: {
-      types: ['boolean'],
-      help:
-        'This value is used as whether or not the condition is met. It overrides the unnamed argument if both are provided.',
+    fn: async (context, args) => {
+      const matches = await doesMatch(context, args);
+      const result = matches ? await getResult(context, args) : null;
+      return { type: 'case', matches, result };
     },
-    then: {
-      resolve: false,
-      help: 'The value to return if the condition is met',
-    },
-  },
-  fn: async (context, args) => {
-    const matches = await doesMatch(context, args);
-    const result = matches ? await getResult(context, args) : null;
-    return { type: 'case', matches, result };
-  },
-});
+  };
+}
 
 async function doesMatch(context: any, args: Arguments) {
   if (typeof args.if !== 'undefined') {
