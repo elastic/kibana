@@ -116,7 +116,7 @@ export class FollowerIndicesList extends PureComponent {
                 {...routing.getRouterLinkProps('/follower_indices/add')}
                 fill
                 iconType="plusInCircle"
-                data-test-subj="ccrCreateFollowerIndexButton"
+                data-test-subj="createFollowerIndexButton"
               >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.followerIndexList.addFollowerButtonLabel"
@@ -204,7 +204,7 @@ export class FollowerIndicesList extends PureComponent {
             {...routing.getRouterLinkProps('/follower_indices/add')}
             fill
             iconType="plusInCircle"
-            data-test-subj="ccrFollowerIndexEmptyPromptCreateButton"
+            data-test-subj="createFollowerIndexButton"
           >
             <FormattedMessage
               id="xpack.crossClusterReplication.addFollowerButtonLabel"
@@ -212,14 +212,14 @@ export class FollowerIndicesList extends PureComponent {
             />
           </EuiButton>
         }
-        data-test-subj="ccrFollowerIndexEmptyPrompt"
+        data-test-subj="emptyPrompt"
       />
     );
   }
 
   renderLoading() {
     return (
-      <SectionLoading dataTestSubj="ccrFollowerIndexLoading">
+      <SectionLoading dataTestSubj="followerIndexLoading">
         <FormattedMessage
           id="xpack.crossClusterReplication.followerIndexList.loadingTitle"
           defaultMessage="Loading follower indices..."

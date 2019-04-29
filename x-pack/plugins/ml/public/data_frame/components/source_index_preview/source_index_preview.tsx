@@ -50,6 +50,8 @@ import { SOURCE_INDEX_STATUS, useSourceIndexData } from './use_source_index_data
 
 type ItemIdToExpandedRowMap = Dictionary<JSX.Element>;
 
+const CELL_CLICK_ENABLED = false;
+
 // Defining our own ENUM here.
 // EUI's SortDirection wasn't usable as a union type
 // required for the Sorting interface.
@@ -191,7 +193,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       truncateText: true,
     } as Dictionary<any>;
 
-    if (cellClick) {
+    if (CELL_CLICK_ENABLED && cellClick) {
       column.render = (d: string) => (
         <EuiButtonEmpty size="xs" onClick={() => cellClick(`${k}:(${d})`)}>
           {d}

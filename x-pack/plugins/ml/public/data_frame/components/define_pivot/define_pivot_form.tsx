@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, Fragment, SFC, useContext, useEffect, useState } from 'react';
 
 import {
-  EuiComboBoxOptionProps,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,30 +20,30 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
+import { dictionaryToArray } from '../../../../common/types/common';
 import { DropDown } from '../../components/aggregation_dropdown/dropdown';
 import { AggListForm } from '../../components/aggregation_list';
-import { GroupByList } from '../../components/group_by_list/list';
+import { GroupByListForm } from '../../components/group_by_list';
 import { SourceIndexPreview } from '../../components/source_index_preview';
 import { PivotPreview } from './pivot_preview';
 
-import { Dictionary } from '../../../../common/types/common';
 import {
   DropDownLabel,
-  DropDownOption,
   getPivotQuery,
+  groupByConfigHasInterval,
+  IndexPatternContext,
   Label,
-  OptionsDataElement,
-  pivotSupportedAggs,
-  PIVOT_SUPPORTED_AGGS,
+  PivotAggsConfig,
+  PivotGroupByConfig,
+  PivotGroupByConfigDict,
 } from '../../common';
 
-import { IndexPatternContext } from '../../common';
-import { FIELD_TYPE } from './common';
+import { getPivotDropdownOptions } from './common';
 
 export interface DefinePivotExposedState {
   aggList: Label[];
-  aggs: OptionsDataElement[];
-  groupBy: Label[];
+  aggs: PivotAggsConfig[];
+  groupByList: PivotGroupByConfigDict;
   search: string;
   valid: boolean;
 }
@@ -55,8 +54,8 @@ const emptySearch = '';
 export function getDefaultPivotState(): DefinePivotExposedState {
   return {
     aggList: [] as Label[],
-    aggs: [] as OptionsDataElement[],
-    groupBy: [] as Label[],
+    aggs: [] as PivotAggsConfig[],
+    groupByList: {} as PivotGroupByConfigDict,
     search: defaultSearch,
     valid: false,
   };
@@ -76,10 +75,6 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     return null;
   }
 
-  const fields = indexPattern.fields
-    .filter(field => field.aggregatable === true)
-    .map(field => ({ name: field.name, type: field.type }));
-
   // The search filter
   const [search, setSearch] = useState(defaults.search);
 
@@ -94,17 +89,29 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
   };
 
   // The list of selected group by fields
-  const [groupBy, setGroupBy] = useState(defaults.groupBy as Label[]);
+  const [groupByList, setGroupByList] = useState(defaults.groupByList);
+
+  const {
+    groupByOptions,
+    groupByOptionsData,
+    aggOptions,
+    aggOptionsData,
+  } = getPivotDropdownOptions(indexPattern);
+
+  const addGroupByInterval = (label: Label, item: PivotGroupByConfig) => {
+    groupByList[label] = item;
+    setGroupByList({ ...groupByList });
+  };
 
   const addGroupBy = (d: DropDownLabel[]) => {
     const label: Label = d[0].label;
-    const newList = uniq([...groupBy, label]);
-    setGroupBy(newList);
+    groupByList[label] = groupByOptionsData[label];
+    setGroupByList({ ...groupByList });
   };
 
   const deleteGroupBy = (label: Label) => {
-    const newList = groupBy.filter(l => l !== label);
-    setGroupBy(newList);
+    delete groupByList[label];
+    setGroupByList({ ...groupByList });
   };
 
   // The list of selected aggregations
@@ -121,48 +128,24 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
     setAggList(newList);
   };
 
-  // The available fields for group by
-  const groupByOptions: EuiComboBoxOptionProps[] = [];
-  fields.forEach(field => {
-    const o: DropDownLabel = { label: field.name };
-    groupByOptions.push(o);
-  });
-
-  // The available aggregations
-  const aggOptions: EuiComboBoxOptionProps[] = [];
-  const aggOptionsData: Dictionary<OptionsDataElement> = {};
-
-  fields.forEach(field => {
-    const o: DropDownOption = { label: field.name, options: [] };
-    pivotSupportedAggs.forEach(agg => {
-      if (
-        (agg === PIVOT_SUPPORTED_AGGS.CARDINALITY &&
-          (field.type === FIELD_TYPE.STRING || field.type === FIELD_TYPE.IP)) ||
-        (agg !== PIVOT_SUPPORTED_AGGS.CARDINALITY && field.type === FIELD_TYPE.NUMBER)
-      ) {
-        const label = `${agg}(${field.name})`;
-        o.options.push({ label });
-        const formRowLabel = `${agg}_${field.name}`;
-        aggOptionsData[label] = { agg, field: field.name, formRowLabel };
-      }
-    });
-    aggOptions.push(o);
-  });
-
   const pivotAggs = aggList.map(l => aggOptionsData[l]);
-  const pivotGroupBy = groupBy;
+  const pivotGroupByArr = dictionaryToArray(groupByList);
   const pivotQuery = getPivotQuery(search);
 
-  const valid = pivotGroupBy.length > 0 && aggList.length > 0;
-
+  const valid = pivotGroupByArr.length > 0 && aggList.length > 0;
   useEffect(
     () => {
-      onChange({ aggList, aggs: pivotAggs, groupBy: pivotGroupBy, search, valid });
+      onChange({ aggList, aggs: pivotAggs, groupByList, search, valid });
     },
     [
       aggList,
       pivotAggs.map(d => `${d.agg} ${d.field} ${d.formRowLabel}`).join(' '),
-      pivotGroupBy,
+      pivotGroupByArr
+        .map(
+          d =>
+            `${d.agg} ${d.field} ${groupByConfigHasInterval(d) ? d.interval : ''} ${d.formRowLabel}`
+        )
+        .join(' '),
       search,
       valid,
     ]
@@ -194,7 +177,11 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
             })}
           >
             <Fragment>
-              <GroupByList list={pivotGroupBy} deleteHandler={deleteGroupBy} />
+              <GroupByListForm
+                list={groupByList}
+                onChange={addGroupByInterval}
+                deleteHandler={deleteGroupBy}
+              />
               <DropDown
                 changeHandler={addGroupBy}
                 options={groupByOptions}
@@ -245,7 +232,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
       <EuiFlexItem>
         <SourceIndexPreview cellClick={addToSearch} query={pivotQuery} />
         <EuiSpacer size="l" />
-        <PivotPreview aggs={pivotAggs} groupBy={pivotGroupBy} query={pivotQuery} />
+        <PivotPreview aggs={pivotAggs} groupBy={groupByList} query={pivotQuery} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
