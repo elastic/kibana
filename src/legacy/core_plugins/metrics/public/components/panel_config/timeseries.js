@@ -26,11 +26,6 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
-/*
-  These imports are nasty
-*/
-// import { QueryBar } from '../../../../../ui/public/query_bar/components/query_bar.tsx';
-// import { Storage } from '../../../../../ui/public/storage/storage.ts';
 import { Storage } from 'ui/storage';
 import { QueryBar } from 'ui/query_bar';
 import {
@@ -66,7 +61,7 @@ class TimeseriesPanelConfigUi extends Component {
     this.setState({ selectedTab });
   }
   handleSubmit = (query) => {
-    this.props.onChange({ filter: query.query.query });
+    this.props.onChange({ filter: query.query });
   }
 
   render() {
@@ -178,8 +173,12 @@ class TimeseriesPanelConfigUi extends Component {
                   />)}
                   fullWidth
                 >
+                  {/*
+                    query prop for QueryBar needs a language value, if this is hard-coded, the toggle does not stick
+                    Do I need to change the model to accept an object for filters and queries that has a language key?
+                   */}
                   <QueryBar
-                    query={{ language: 'lucene', query: model.filter }}
+                    query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter.query }}
                     screenTitle={'PanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}

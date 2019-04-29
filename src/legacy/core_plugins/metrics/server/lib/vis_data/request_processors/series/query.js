@@ -43,12 +43,7 @@ export default function query(req, panel, series, esQueryConfig, indexPattern) {
     doc.query.bool.must.push(timerange);
 
     if (panel.filter) {
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     if (series.filter) {
