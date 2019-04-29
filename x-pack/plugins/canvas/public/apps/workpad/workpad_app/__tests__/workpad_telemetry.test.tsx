@@ -154,8 +154,7 @@ describe('Elements Loaded Telemetry', () => {
       />
     );
 
-    expect(trackMetric).toBeCalledWith(WorkpadLoadedMetric);
-    expect(trackMetric).toBeCalledWith(WorkpadLoadedWithErrorsMetric);
+    expect(trackMetric).toBeCalledWith([WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
   });
 
   it('tracks when the workpad changes and is loaded', () => {

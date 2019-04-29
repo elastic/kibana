@@ -6,7 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
-import { trackUiMetric } from '../../../lib/ui_metric';
+import { trackCanvasUiMetric } from '../../../lib/ui_metric';
 // @ts-ignore
 import { getElementCounts } from '../../../state/selectors/workpad';
 // @ts-ignore
@@ -59,7 +59,7 @@ function areAllElementsInResolvedArgs(workpad: Workpad, resolvedArgs: ResolvedAr
 
 const withElementsLoadedTelemetry = <P extends object>(
   Component: React.ComponentType<P>,
-  trackMetric: (metric: string) => void = trackUiMetric
+  trackMetric: (metric: string | string[]) => void = trackCanvasUiMetric
 ) => {
   return function ElementsLoadedTelemetry(props: P & ElementsLoadedTelemetryProps) {
     const { telemetryElementCounts, workpad, telemetryResolvedArgs, ...other } = props;
@@ -95,9 +95,10 @@ const withElementsLoadedTelemetry = <P extends object>(
         telemetryElementCounts.pending === 0 &&
         resolvedArgsAreForWorkpad
       ) {
-        trackMetric(WorkpadLoadedMetric);
         if (telemetryElementCounts.error > 0) {
-          trackMetric(WorkpadLoadedWithErrorsMetric);
+          trackMetric([WorkpadLoadedMetric, WorkpadLoadedWithErrorsMetric]);
+        } else {
+          trackMetric(WorkpadLoadedMetric);
         }
 
         setHasReported(true);
