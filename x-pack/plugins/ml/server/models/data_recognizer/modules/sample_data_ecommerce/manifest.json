@@ -1,6 +1,6 @@
 {
   "id": "sample_data_ecommerce",
-  "title": "Kibana Sample Data Ecommerce",
+  "title": "Kibana sample data eCommerce",
   "description": "Find anomalies in Kibana Sample Data for Ecommerce",
   "type": "Sample Dataset",
   "logoFile": "logo.json",
