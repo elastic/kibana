@@ -36,6 +36,14 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
     });
   }, []);
 
+  if (state.indexPatterns.length && !visModel.datasource) {
+    onChangeVisModel({
+      ...visModel,
+      // TODO: There is a default index pattern preference that is being ignored here
+      datasource: state.indexPatterns[0],
+    });
+  }
+
   const indexPatternsAsSelections = state.indexPatterns.map(({ title }) => ({
     label: title,
   }));
