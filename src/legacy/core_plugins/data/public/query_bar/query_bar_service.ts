@@ -37,7 +37,9 @@ export class QueryBarService {
         fromUser,
         toUser,
       },
-      QueryBar,
+      ui: {
+        QueryBar,
+      },
     };
   }
 

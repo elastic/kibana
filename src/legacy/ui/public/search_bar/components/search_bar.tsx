@@ -29,7 +29,7 @@ import { IndexPattern } from 'ui/index_patterns';
 import { Storage } from 'ui/storage';
 
 import { data } from 'plugins/data';
-const { QueryBar } = data.query;
+const { QueryBar } = data.query.ui;
 
 interface Query {
   query: string;
