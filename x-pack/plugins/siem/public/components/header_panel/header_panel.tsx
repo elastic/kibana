@@ -18,7 +18,7 @@ export interface HeaderPanelProps {
   statType?: string;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
-  tooltip: string;
+  tooltip?: string;
 }
 
 export const HeaderPanel = pure<HeaderPanelProps>(({ children, subtitle, title, tooltip }) => (

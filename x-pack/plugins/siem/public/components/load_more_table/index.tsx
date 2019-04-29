@@ -47,7 +47,7 @@ interface BasicTableProps<T> {
   hasNextPage: boolean;
   headerCount: number;
   headerTitle: string | React.ReactElement;
-  headerTooltip: string;
+  headerTooltip?: string;
   headerUnit: string | React.ReactElement;
   itemsPerRow?: ItemsPerRow[];
   limit: number;
