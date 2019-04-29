@@ -5,7 +5,12 @@
  */
 
 import React from 'react';
-import { ColumnOperation, DatasourceField, fieldToOperation } from '../../../common';
+import {
+  ColumnOperation,
+  DatasourceField,
+  FieldOperation,
+  fieldToOperation,
+} from '../../../common';
 import {
   Axis,
   EditorPlugin,
@@ -18,6 +23,7 @@ import {
   VisModel,
   VisualizationPanelProps,
 } from '../../../public';
+import { getTypeForOperation, isApplicableForCardinality } from '../../common';
 import { AxisEditor } from './axis_editor';
 
 interface ScatterChartPrivateState {
@@ -85,14 +91,15 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
 
   const {
     private: {
-      scatterChart: { xAxis, yAxis, hasDate },
+      scatterChart: { xAxis, yAxis },
     },
   } = visModel;
 
   const xColumn = selectOperation(xAxis.columns[0], visModel);
   const yColumn = selectOperation(yAxis.columns[0], visModel);
 
-  const xScaleType = hasDate ? 'time' : 'linear';
+  const xScaleType =
+    getTypeForOperation(xColumn!, visModel.datasource!.fields) === 'date' ? 'time' : 'linear';
 
   const scatterSpec = `
   {
@@ -100,6 +107,11 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
     "data": [{
       "name": "table",
       "values": EXPRESSION_DATA_HERE
+      ${
+        xScaleType === 'time'
+          ? `,"format": { "type": "json", "parse": { "${xColumn ? xColumn.id : ''}": "date" }}`
+          : ''
+      }
     }],
 
     "scales": [
@@ -108,7 +120,7 @@ function toExpression(visModel: ScatterChartVisModel, mode: 'edit' | 'view' | 'p
         "type": "${xScaleType}",
         "round": true,
         "nice": true,
-        "zero": true,
+        "zero": ${xScaleType === 'time' ? 'false' : 'true'},
         "domain": {"data": "table", "field": "${xColumn && xColumn.id}"},
         "range": "width"
       },
@@ -204,10 +216,13 @@ function getChartSuggestions(visModel: ScatterChartVisModel): Suggestion[] {
   if (!visModel.datasource || (firstQuery && firstQuery.select.length < 2)) {
     return [];
   }
-  const containsNonNumberColumns = getTypes(firstQuery, visModel.datasource.fields).some(
-    type => type !== 'number'
+  const containsNonNumericColumns = getTypes(firstQuery, visModel.datasource.fields).some(
+    type => type !== 'number' && type !== 'date'
   );
-  if (containsNonNumberColumns) {
+  const containsBuckets = firstQuery.select.some(
+    ({ operator }) => !isApplicableForCardinality(operator, 'single')
+  );
+  if (containsNonNumericColumns || containsBuckets) {
     return [];
   }
   const prefilledVisModel = prefillPrivateState(
@@ -245,7 +260,22 @@ function getSuggestionsForField(
 
   let hasDate = false;
 
-  if (datasource && datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
+  const firstQuery = Object.values(visModel.queries)[0];
+  if (
+    datasource &&
+    firstQuery &&
+    (firstQuery.select[0] as FieldOperation).argument &&
+    getTypeForOperation(firstQuery.select[0], datasource.fields) === 'number'
+  ) {
+    select[0] = {
+      ...(fieldToOperation(
+        datasource.fields.find(
+          f => f.name === (firstQuery.select[0] as FieldOperation).argument.field
+        )!,
+        'column'
+      ) as ColumnOperation),
+    };
+  } else if (datasource && datasource!.timeFieldName && datasource!.timeFieldName !== field.name) {
     hasDate = true;
     select[1] = {
       ...(fieldToOperation(

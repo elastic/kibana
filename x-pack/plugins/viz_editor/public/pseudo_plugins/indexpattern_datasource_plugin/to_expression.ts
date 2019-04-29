@@ -79,7 +79,7 @@ function queryToEsAggsConfigs(query: Query): any {
 }
 
 function fixBucketAggsWithoutMetricColumn(aggs: any[]) {
-  const onlySegments = aggs.every(agg => agg.schema === 'segment');
+  const onlySegments = aggs.every(agg => agg && agg.schema === 'segment');
   if (onlySegments) {
     return [
       ...aggs,
