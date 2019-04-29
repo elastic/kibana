@@ -5,10 +5,11 @@
  */
 
 import Boom from 'boom';
+import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { PublicRouteDeps } from '.';
+import { PublicRouteDeps, PublicRouteRequestFacade } from '.';
 
 export function initPostSpacesApi(deps: PublicRouteDeps) {
   const { http, log, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
@@ -16,12 +17,12 @@ export function initPostSpacesApi(deps: PublicRouteDeps) {
   http.route({
     method: 'POST',
     path: '/api/spaces/space',
-    async handler(request: any) {
+    async handler(request: PublicRouteRequestFacade) {
       log.debug(`Inside POST /api/spaces/space`);
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = spacesService.scopedClient(request);
 
-      const space = request.payload;
+      const space = request.payload as Space;
 
       try {
         log.debug(`Attempting to create space`);

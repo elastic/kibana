@@ -9,7 +9,7 @@ import { Space } from '../../../../common/model/space';
 import { wrapError } from '../../../lib/errors';
 import { spaceSchema } from '../../../lib/space_schema';
 import { SpacesClient } from '../../../lib/spaces_client';
-import { PublicRouteDeps } from '.';
+import { PublicRouteDeps, PublicRouteRequestFacade } from '.';
 
 export function initPutSpacesApi(deps: PublicRouteDeps) {
   const { http, spacesService, savedObjects, routePreCheckLicenseFn } = deps;
@@ -17,11 +17,11 @@ export function initPutSpacesApi(deps: PublicRouteDeps) {
   http.route({
     method: 'PUT',
     path: '/api/spaces/space/{id}',
-    async handler(request: any) {
+    async handler(request: PublicRouteRequestFacade) {
       const { SavedObjectsClient } = savedObjects;
       const spacesClient: SpacesClient = spacesService.scopedClient(request);
 
-      const space: Space = request.payload;
+      const space: Space = request.payload as Space;
       const id = request.params.id;
 
       let result: Space;

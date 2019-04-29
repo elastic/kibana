@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'src/core/server';
+import { Logger, Headers } from 'src/core/server';
 import { SavedObjectsService } from 'src/legacy/server/kbn_server';
 import { XPackMainPlugin } from '../../../../../xpack_main/xpack_main';
 import { routePreCheckLicense } from '../../../lib/route_pre_check_license';
@@ -27,6 +27,13 @@ interface RouteDeps {
 
 export interface PublicRouteDeps extends InterfaceExcept<RouteDeps, 'xpackMain'> {
   routePreCheckLicenseFn: any;
+}
+
+export interface PublicRouteRequestFacade {
+  headers?: Headers;
+  params: Record<string, any>;
+  payload: Record<string, any>;
+  getBasePath: () => string;
 }
 
 export function initPublicSpacesApi({ xpackMain, ...rest }: RouteDeps) {

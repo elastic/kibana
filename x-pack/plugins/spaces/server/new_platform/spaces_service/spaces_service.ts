@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Request } from 'hapi';
-import { Logger, ElasticsearchServiceSetup } from 'src/core/server';
+
+import { Logger, ElasticsearchServiceSetup, Headers } from 'src/core/server';
 import { SavedObjectsService, KibanaConfig } from 'src/legacy/server/kbn_server';
 import { first } from 'rxjs/operators';
 import { DEFAULT_SPACE_ID } from '../../../common/constants';
@@ -12,12 +12,17 @@ import { SecurityPlugin } from '../../../../security';
 import { SpacesClient } from '../../lib/spaces_client';
 import { getSpaceIdFromPath } from '../../lib/spaces_url_parser';
 
+interface RequestFacade {
+  headers?: Headers;
+  getBasePath: () => string;
+}
+
 export interface SpacesServiceSetup {
-  scopedClient(request: Record<string, any>): SpacesClient;
+  scopedClient(request: RequestFacade): SpacesClient;
 
-  getSpaceId(request: Record<string, any>): string;
+  getSpaceId(request: RequestFacade): string;
 
-  isInDefaultSpace(request: Record<string, any>): boolean;
+  isInDefaultSpace(request: RequestFacade): boolean;
 }
 
 interface CacheEntry {
@@ -51,7 +56,7 @@ export class SpacesService {
   }: SpacesServiceDeps): Promise<SpacesServiceSetup> {
     const adminClient = await elasticsearch.adminClient$.pipe(first()).toPromise();
     return {
-      getSpaceId: (request: Record<string, any>) => {
+      getSpaceId: (request: RequestFacade) => {
         if (!this.contextCache.has(request)) {
           this.populateCache(request);
         }
@@ -59,14 +64,14 @@ export class SpacesService {
         const { spaceId } = this.contextCache.get(request) as CacheEntry;
         return spaceId;
       },
-      isInDefaultSpace: (request: any) => {
+      isInDefaultSpace: (request: RequestFacade) => {
         if (!this.contextCache.has(request)) {
           this.populateCache(request);
         }
 
         return this.contextCache.get(request)!.isInDefaultSpace;
       },
-      scopedClient: (request: Request) => {
+      scopedClient: (request: RequestFacade) => {
         const internalRepository = savedObjects.getSavedObjectsRepository(
           adminClient.callAsInternalUser
         );
@@ -94,7 +99,7 @@ export class SpacesService {
     };
   }
 
-  private populateCache(request: Record<string, any>) {
+  private populateCache(request: RequestFacade) {
     const spaceId = getSpaceIdFromPath(request.getBasePath(), this.serverBasePath);
 
     this.contextCache.set(request, {
