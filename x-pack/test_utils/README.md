@@ -1,19 +1,19 @@
-# Testbed Test Utils
+# Testbed utils
 
 The Testbed is a small library to help testing React components. It is most usefull when testing application "sections" (or pages) in **integration** 
-than unit test single components.
+than when unit testing single components in isolation.
 
 ## Motivation
 
-We dediced (the Elasticsearch UI team) to build this small abstraction to help with our "client integration" testing. By testing complete "pages" 
-we get to test our components in a way that is closer to how a user would interact with the application in a browser. It also gives us more confidence in 
-our tests, compared to unit testing our components in isolation, and avoids testing implementation details. 
+We dediced (the Elasticsearch UI team) to build this small abstraction to help with our "client integration" testing. When testing complete "pages" 
+we get to test our application in a way that is closer to how a user would interact with it in a browser. It also gives us more confidence in 
+our tests and avoids testing implementation details. 
 
-We obviously have to mock the HTTP requests made from the client to the Node.js API server, but with a good **API integration test** coverage of those 
-endpoints, we can reduce the functional tests to a minium.
+We test everything up to the HTTP Requests made from the client to the Node.js API server. Those requets need to be mocked. This means that with a good 
+**API integration test** coverage of those  endpoints, we can reduce the functional tests to a minium.
 
 With this in mind, we needed a way to easily mount a component on a React Router `<Route>` (this component could possibily have _child_ routes and 
-need access to the browser URL parameters). In order to solve that, the Testbed wraps the component aournd a `MemoryRouter`.
+need access to the browser URL parameters and query params). In order to solve that, the Testbed wraps the component around a `MemoryRouter`.
 
 On the other side, the majority of our current applications use Redux as state management so we needed a simple way to wrap our component under test 
 inside a redux store provider.
@@ -21,7 +21,7 @@ inside a redux store provider.
 ## How to use it
 
 At the top of your test file (you only need to declare it once), register a new Testbed by providing a React Component an an optional configuration object. 
-As you can see, you receive in return a function that you will have to call to mount the component in your tests.
+You receive in return a function that you need to call to mount the component in your test.
 
 **Example 1**
 
@@ -31,9 +31,9 @@ As you can see, you receive in return a function that you will have to call to m
 import { registerTestBed } from '../../../../test_utils';
 import { RemoteClusterList } from '../../app/sections/remote_cluster_list';
 import { remoteClustersStore } from '../../app/store';
-import routing from '../services/routing';
+import routing from '../../app/services/routing';
 
-const config = {´
+const config = {
   memoryRouter: {
     onRouter(router) {
       routing.registerRouter(router); // send the router instance to the routing service
@@ -83,19 +83,19 @@ Instantiate a new TestBed to test a React component. The arguments it receives a
 
 The `testBedConfig` has the following properties (all **optional**)
 
-- `defaultProps` The default props to pass to the mounted component. Those props can be overriden when calling the `setup()` callback.
+- `defaultProps` The default props to pass to the mounted component. Those props can be overriden when calling the `setup([props])` callback
 - `memoryRouter` Configuration object for the react-router `MemoryRouter` with the following properties
-  - `wrapComponent` Flag to add or no the `MemoryRouter`. If set to `false`, there won't be any router and the component won't be wrapped on a `<Route />`. (default: `true`)
-  - `initialEntries` The React Router **initial entries** setting ([see doc](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md))
+  - `wrapComponent` Flag to provide or not a `MemoryRouter`. If set to `false`, there won't be any router and the component won't be added on a `<Route />`. (default: `true`)
+  - `initialEntries` The React Router **initial entries** setting. (default: `['/']`. [see doc](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md))
   - `initialIndex` The React Router **initial index** setting (default: `0`)
   - `componentRoutePath` The route **path** for the mounted component (default: `"/"`)
-  - `onRouter` A callBack that will be called with the React Router instance once it is mounted
+  - `onRouter` A callBack that will be called with the React Router instance when the component is mounted
 - `store` An redux store. You can also provide a function that returns a store. (default: `null`)
 
 
 ## `setup([props])`
 
-When registering a Testbed, you receive in return a setup function. This function accepts one optional argument
+When registering a Testbed, you receive in return a setup function. This function accepts one optional argument:
 
 - `props` (optional) Props to pass to the mounted component.
 
@@ -117,7 +117,8 @@ The mounted component. It is an enzyme **reactWrapper**.
 
 #### `exists(testSubject)`
 
-Pass it a `data-test-subj` and it will return true if it exists or false if it does not exist.
+Pass it a `data-test-subj` and it will return true if it exists or false if it does not exist. You can provide a nested path to access the
+test subject by separating the parent and child with a dot (e.g. `myForm.followerIndexName`).
 
 ```js
 const { exists } = setup();
@@ -126,7 +127,8 @@ expect(exists('myTestSubject')).toBe(true);
 
 #### `find(testDataSubject)`
 
-Pass it a `test-data-subj` and it will return an Enzyme reactWrapper of the node.
+Pass it a `test-data-subj` and it will return an Enzyme reactWrapper of the node. You can provide a nested path to access the
+test subject by separating the parent and child with a dot (e.g. `myForm.followerIndexName`).
 
 ```js
 const { find } = setup();
@@ -161,11 +163,12 @@ describe('<RemoteClusterList />', () => {
 
 #### `table`
 
-An object with the following methods
+An object with the following methods:
 
 ##### `getMetaData(testSubject)`
 
-Parse an EUI table and return meta data information about its rows and columns. It returns an object with two properties:
+Parse an EUI table and return meta data information about its rows and columns. You can provide a nested path to access the
+test subject by separating the parent and child with a dot (e.g. `mySection.myTable`). It returns an object with two properties:
 
 - `tableCellsValues` a two dimensional array of rows + columns with the text content of each cell of the table
 - `rows` an array of row objects. A row object has the following two properties:
@@ -189,8 +192,8 @@ Parse an EUI table and return meta data information about its rows and columns. 
 
 ```js
 const { table: { getMetaData } } = setup();
-
 const { tableCellsValues } = getMetaData('myTable');
+
 expect(tableCellsValues).toEqual([
   ['Row 0, column 0'], ['Row 0, column 1'],
   ['Row 1, column 0'], ['Row 1, column 1'],
@@ -199,11 +202,12 @@ expect(tableCellsValues).toEqual([
 
 #### `form`
 
-An object with the following methods
+An object with the following methods:
 
 ##### `setInputValue(input, value, isAsync)`
 
-Set the value of a form input. The input can either be a test subject (a string) or an Enzyme react wrapper.
+Set the value of a form input. The input can either be a test subject (a string) or an Enzyme react wrapper. If you specify a test subject, 
+you can provide a nested path to access it by separating the parent and child with a dot (e.g. `myForm.followerIndexName`).
 
 `isAsync`: flag that will return a Promise that resolves on the next "tick". This is useful if updating the input triggers 
 an async operation (like a HTTP request) and we need it to resolve so the DOM gets updated (default: `false`).
@@ -220,10 +224,10 @@ Select a form checkbox.
 
 Toggle an Eui Switch.
 
-##### `setComboBoxValue(testSubject)`
+##### `setComboBoxValue(testSubject, value)`
 
 The EUI `<EuiComboBox />` component is special in the sense that it needs the keyboard ENTER key to be pressed
-in order to register its value. This helper takes care of that.
+in order to register the value provided. This helper takes care of that.
 
 ##### `getErrorsMessages()`
 
