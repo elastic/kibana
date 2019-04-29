@@ -2,38 +2,42 @@
 [[canvas-create-workpad]]
 == Create a new workpad
 
-Canvas is a creative space for presenting data that allows you to combine colors, 
-shapes, text, to bring dynamic, multi-page, pixel-perfect, data displays to screens
-large and small. 
+Canvas is a creative space for presenting data. You can create a Canvas workpad 
+to combine colors, shapes, and text, to bring dynamic, pixel-perfect data displays 
+to screens large and small. 
 
 A Canvas workpad is your drawing space. In this tutorial, you'll learn how to create
 and configure your own workpad, and add text, data elements, and visual assets. 
 
-Before you start this tutorial, you will need to have your own {es} data source 
-connected in {kib}, or you can add on of the {kib} <<add-sample-data, sample data sets>>. 
+Before you start, you will need to have your own {es} data source connected in {kib}, 
+or you can use one of {kib}'s <<add-sample-data, sample data sets>>. 
 
 [float]
 === Starting a new project
-Open *Canvas*. Click the *Templates* tab to create a new project from a light or 
+Open *Canvas*. Click *Templates* to create a new project from a light or 
 dark template; templates include placeholder text, images, and styles to help you
 get started. You can also click *Create workpad* to start from scratch.
 
 [float]
 === Working with elements
-Elements are the individual components that can be placed on a workpad and configured
-to suit your presentation. You can use elements to add text, logos, and images to your
-presentation. An element can also be connected to a data source to display live data. 
+Elements are individual components that can be placed on a workpad, and configured
+to suit your presentation. You can use elements to add text, logos, and images.
+An element can also be connected to a data source to display live data in your workpad. 
 
-Add text::  
+[role="screenshot"]
+image::canvas/images/canvas-element-editor.png[]
+
+
+Adding text::  
 * Click *Add element* on the top right, and select *Markdown* to add a text box to your workpad.
 * Click on the text box in the workpad to reveal the *Markdown* menu on the right hand
 side. From this menu you can add text content, and configure text styles.
 
-Add assets:: 
+Adding assets:: 
 * Click *Manage assets* to import new images
 * Select an image from your library and <isert icon> to add an image element to your workpad
 
-Present your data:: 
+Displaying data:: 
 * Click *Add element* to choose from available data elements, such as a coordinate plot, 
 line chart, pie chart, etc. Select an element type to add it to your workpad.
 * Click on the element in the workpad to open the sidebar editor. The editor enables
@@ -41,9 +45,19 @@ you to can edit *Display* information for this element, and well as its *Data* s
 * You can also open the *Expression editor* on the bottom right to bypass the sidebar
 editor and edit the expression associated with an element directly.
 
-
 [float]
 === Working with data sources 
+From the sidebar editor, Click *Data* > *Change your data source*. 
+
+There are four types of data sources to choose from: 
+
+* Timelion
+* Demo data
+* Elasticsearch SQL
+* Elasticsearch raw documents 
+Click Data > Change your data source.
+Talk about the available options (Timelion, Elasticsearch SQL for aggregations, and Elasticsearch raw documents)
+
 
 
 
@@ -55,5 +69,6 @@ Next, click *+* on the righthand side to add a new page.
 
 [float]
 === Sharing your workpad
+
 
 

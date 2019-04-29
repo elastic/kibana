@@ -7,7 +7,7 @@ Each sample data set includes a Canvas workpad to go along with the data. Once y
 added the data, open *Canvas* and click the name of the *[eCommerce] Revenue Tracking* workpad.
 
 [role="screenshot"]
-image::images/canvas-ecommerce.png[]
+image::canvas/images/canvas-ecommerce.png[]
 
 Let's make a copy of this workpad so we don't have to worry about making a mess 
 of it in this tutorial. 
@@ -55,9 +55,9 @@ Speaking of pages, Canvas workpads can have multiple pages:
 of the page. You'll see a whole new view of the the eCommerce data.
 . Click the *Page 2 of 2* text to see a live preview of all of the pages in your 
 workpad.
-. Click the (+) button to create a new, blank page.
+. Click *+* to create a new page.
 . Click the *Add element* button in the top right hand corner of the page.
-. Add an *Area Chart.*
+. Add an *Area Chart*.
 +
 [role="screenshot"]
 image::images/canvas_workpad_3_page.png[]
