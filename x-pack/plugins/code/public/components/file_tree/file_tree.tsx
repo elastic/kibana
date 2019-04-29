@@ -253,7 +253,7 @@ export class CodeFileTree extends React.Component<Props> {
 const mapStateToProps = (state: RootState) => ({
   node: state.file.tree,
   openedPaths: state.file.openedPaths,
-  treeLoading: state.file.loading,
+  treeLoading: state.file.rootFileTreeLoading,
 });
 
 const mapDispatchToProps = {

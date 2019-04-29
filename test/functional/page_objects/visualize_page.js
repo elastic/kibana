@@ -586,13 +586,17 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await input.type(newValue);
     }
 
-    async setNumericInterval(newValue, { append } = {}) {
-      const input = await find.byCssSelector('input[name="interval"]');
-      if (!append) {
-        await input.clearValue();
+    async getNumericInterval(agg = 2) {
+      const intervalElement = await testSubjects.find(`visEditorInterval${agg}`);
+      return await intervalElement.getProperty('value');
+    }
+
+    async setNumericInterval(newValue, { append } = {}, agg = 2) {
+      if (append) {
+        await testSubjects.append(`visEditorInterval${agg}`, String(newValue));
+      } else {
+        await testSubjects.setValue(`visEditorInterval${agg}`, String(newValue));
       }
-      await input.type(newValue + '');
-      await PageObjects.common.sleep(1000);
     }
 
     async setSize(newValue, aggId) {
