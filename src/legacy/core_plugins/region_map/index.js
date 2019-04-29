@@ -22,6 +22,7 @@ import { resolve } from 'path';
 export default function (kibana) {
 
   return new kibana.Plugin({
+    require: ['visualizations'],
     uiExports: {
       visTypes: ['plugins/region_map/region_map_vis'],
       interpreter: ['plugins/region_map/region_map_fn'],

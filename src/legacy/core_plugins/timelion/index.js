@@ -26,7 +26,7 @@ const experimentalLabel = i18n.translate('timelion.uiSettings.experimentalLabel'
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'visualizations'],
 
     config(Joi) {
       return Joi.object({

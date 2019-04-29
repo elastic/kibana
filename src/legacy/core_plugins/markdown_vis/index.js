@@ -23,6 +23,7 @@ export default function (kibana) {
 
   return new kibana.Plugin({
 
+    require: ['visualizations'],
     uiExports: {
       visTypes: [
         'plugins/markdown_vis/markdown_vis'

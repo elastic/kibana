@@ -21,6 +21,7 @@ import { resolve } from 'path';
 
 export default function (kibana) {
   return new kibana.Plugin({
+    require: ['visualizations'],
     uiExports: {
       visTypes: [
         'plugins/input_control_vis/register_vis'

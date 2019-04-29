@@ -22,6 +22,7 @@ import { resolve } from 'path';
 export default function (kibana) {
 
   return new kibana.Plugin({
+    require: ['visualizations'],
     uiExports: {
       visTypes: ['plugins/tagcloud/tag_cloud_vis'],
       interpreter: ['plugins/tagcloud/tag_cloud_fn'],

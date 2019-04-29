@@ -21,7 +21,7 @@ import { resolve } from 'path';
 
 export default kibana => new kibana.Plugin({
   id: 'vega',
-  require: ['elasticsearch'],
+  require: ['elasticsearch', 'visualizations'],
 
   uiExports: {
     visTypes: ['plugins/vega/vega_type'],

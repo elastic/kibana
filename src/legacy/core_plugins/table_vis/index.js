@@ -22,6 +22,7 @@ import { resolve } from 'path';
 export default function (kibana) {
 
   return new kibana.Plugin({
+    require: ['visualizations'],
     uiExports: {
       visTypes: [
         'plugins/table_vis/table_vis'
