@@ -80,7 +80,7 @@ class TimeseriesPanelConfigUi extends Component {
     this.setState({ selectedTab });
   }
   handleSubmit = (query) => {
-    this.props.onChange({ filter: query.query.query });
+    this.props.onChange({ filter: query.query });
   }
 
   render() {
@@ -215,6 +215,10 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
+                  {/*
+                    query prop for QueryBar needs a language value, if this is hard-coded, the toggle does not stick
+                    Do I need to change the model to accept an object for filters and queries that has a language key?
+                   */}
                   <QueryBar
                     query={{
                       language: model.filter.language ? model.filter.language : 'kuery',

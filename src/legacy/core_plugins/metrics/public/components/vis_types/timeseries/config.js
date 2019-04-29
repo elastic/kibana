@@ -336,6 +336,8 @@ const TimeseriesConfig = injectI18n(function (props) {
             indexPatterns={[props.indexPatternForQuery]}
             store={localStorage || {}}
             showDatePicker={false}
+            dateRangeFrom={props.dateRangeFrom}
+            dateRangeTo={props.dateRangeTo}
           />
 
         </EuiFormRow>
