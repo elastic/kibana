@@ -143,6 +143,8 @@ export const spaces = (kibana: Record<string, any>) =>
 
       const plugins = {
         xpackMain: server.plugins.xpack_main,
+        // TODO: Spaces has a circular dependency with Security right now.
+        // Security is not yet available when init runs, so this is wrapped in a function for the time being.
         getSecurity: () => server.plugins.security,
         spaces: this,
       };
