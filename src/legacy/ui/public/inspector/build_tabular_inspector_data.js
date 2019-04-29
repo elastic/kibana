@@ -18,7 +18,8 @@
  */
 
 import { set } from 'lodash';
-import { createFilter } from '../vis/vis_filters';
+import { visualizations } from 'plugins/visualizations';
+const { createFilter } = visualizations.visFilters;
 import { FormattedData } from './adapters/data';
 
 /**
