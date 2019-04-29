@@ -18,6 +18,7 @@ import { formatDateTimeLocal } from '../../../common/formatting';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Reason } from './reason';
+import { capabilities } from 'ui/capabilities';
 
 const columnTimestampTitle = i18n.translate('xpack.monitoring.logs.listing.timestampTitle', {
   defaultMessage: 'Timestamp'
@@ -154,9 +155,10 @@ export class Logs extends PureComponent {
   }
 
   renderCallout() {
+    const uiCapabilities = capabilities.get();
+    const show = uiCapabilities.logs && uiCapabilities.logs.show;
     const { logs: { enabled }, nodeId, clusterUuid, indexUuid } = this.props;
-
-    if (!enabled) {
+    if (!enabled || !show) {
       return null;
     }
 
