@@ -8,15 +8,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 
@@ -80,66 +72,56 @@ export const PopoverForm: React.SFC<Props> = ({
   const formValid = validAggName;
 
   return (
-    <EuiForm>
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ width: 200 }}>
-          <EuiFormRow
-            error={!validAggName && [aggNameError]}
-            isInvalid={!validAggName}
-            label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.nameLabel', {
-              defaultMessage: 'Aggregation name',
-            })}
-          >
-            <EuiFieldText
-              defaultValue={aggName}
-              isInvalid={!validAggName}
-              onChange={e => setAggName(e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        {availableAggs.length > 0 && (
-          <EuiFlexItem style={{ width: 150 }}>
-            <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.aggLabel', {
-                defaultMessage: 'Aggregation',
-              })}
-            >
-              <EuiSelect
-                options={availableAggs}
-                value={agg}
-                onChange={e => setAgg(e.target.value as PIVOT_SUPPORTED_AGGS)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        {availableFields.length > 0 && (
-          <EuiFlexItem style={{ width: 150 }}>
-            <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.fieldLabel', {
-                defaultMessage: 'Field',
-              })}
-            >
-              <EuiSelect
-                options={availableFields}
-                value={field}
-                onChange={e => setField(e.target.value)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton
-              isDisabled={!formValid}
-              onClick={() => onChange({ ...defaultData, aggName, agg, field })}
-            >
-              {i18n.translate('xpack.ml.dataframe.agg.popoverForm.submitButtonLabel', {
-                defaultMessage: 'Apply',
-              })}
-            </EuiButton>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiForm style={{ width: '300px' }}>
+      <EuiFormRow
+        error={!validAggName && [aggNameError]}
+        isInvalid={!validAggName}
+        label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.nameLabel', {
+          defaultMessage: 'Aggregation name',
+        })}
+      >
+        <EuiFieldText
+          defaultValue={aggName}
+          isInvalid={!validAggName}
+          onChange={e => setAggName(e.target.value)}
+        />
+      </EuiFormRow>
+      {availableAggs.length > 0 && (
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.aggLabel', {
+            defaultMessage: 'Aggregation',
+          })}
+        >
+          <EuiSelect
+            options={availableAggs}
+            value={agg}
+            onChange={e => setAgg(e.target.value as PIVOT_SUPPORTED_AGGS)}
+          />
+        </EuiFormRow>
+      )}
+      {availableFields.length > 0 && (
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.agg.popoverForm.fieldLabel', {
+            defaultMessage: 'Field',
+          })}
+        >
+          <EuiSelect
+            options={availableFields}
+            value={field}
+            onChange={e => setField(e.target.value)}
+          />
+        </EuiFormRow>
+      )}
+      <EuiFormRow hasEmptyLabelSpace>
+        <EuiButton
+          isDisabled={!formValid}
+          onClick={() => onChange({ ...defaultData, aggName, agg, field })}
+        >
+          {i18n.translate('xpack.ml.dataframe.agg.popoverForm.submitButtonLabel', {
+            defaultMessage: 'Apply',
+          })}
+        </EuiButton>
+      </EuiFormRow>
     </EuiForm>
   );
 };

@@ -8,15 +8,7 @@ import React, { useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  EuiButton,
-  EuiFieldText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  EuiSelect,
-} from '@elastic/eui';
+import { EuiButton, EuiFieldText, EuiForm, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { dictionaryToArray } from '../../../../common/types/common';
 
@@ -145,86 +137,74 @@ export const PopoverForm: React.SFC<Props> = ({
   }
 
   return (
-    <EuiForm>
-      <EuiFlexGroup>
-        <EuiFlexItem style={{ width: 200 }}>
-          <EuiFormRow
-            error={!validAggName && [aggNameError]}
-            isInvalid={!validAggName}
-            label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.nameLabel', {
-              defaultMessage: 'Group by name',
-            })}
-          >
-            <EuiFieldText
-              defaultValue={aggName}
-              isInvalid={!validAggName}
-              onChange={e => setAggName(e.target.value)}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        {availableAggs.length > 0 && (
-          <EuiFlexItem style={{ width: 150 }}>
-            <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.groupby.popoverForm.aggLabel', {
-                defaultMessage: 'Aggregation',
-              })}
-            >
-              <EuiSelect
-                options={availableAggs}
-                value={agg}
-                onChange={e => setAgg(e.target.value as PivotSupportedGroupByAggs)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        {availableFields.length > 0 && (
-          <EuiFlexItem style={{ width: 150 }}>
-            <EuiFormRow
-              label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.fieldLabel', {
-                defaultMessage: 'Field',
-              })}
-            >
-              <EuiSelect
-                options={availableFields}
-                value={field}
-                onChange={e => setField(e.target.value)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        {groupByConfigHasInterval(defaultData) && (
-          <EuiFlexItem grow={false} style={{ width: 100 }}>
-            <EuiFormRow
-              error={
-                !validInterval && [
-                  i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalError', {
-                    defaultMessage: 'Invalid interval.',
-                  }),
-                ]
-              }
-              isInvalid={!validInterval}
-              label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalLabel', {
-                defaultMessage: 'Interval',
-              })}
-            >
-              <EuiFieldText
-                defaultValue={interval}
-                isInvalid={!validInterval}
-                onChange={e => setInterval(e.target.value)}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
-              {i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.submitButtonLabel', {
-                defaultMessage: 'Apply',
-              })}
-            </EuiButton>
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <EuiForm style={{ width: '300px' }}>
+      <EuiFormRow
+        error={!validAggName && [aggNameError]}
+        isInvalid={!validAggName}
+        label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.nameLabel', {
+          defaultMessage: 'Group by name',
+        })}
+      >
+        <EuiFieldText
+          defaultValue={aggName}
+          isInvalid={!validAggName}
+          onChange={e => setAggName(e.target.value)}
+        />
+      </EuiFormRow>
+      {availableAggs.length > 0 && (
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.groupby.popoverForm.aggLabel', {
+            defaultMessage: 'Aggregation',
+          })}
+        >
+          <EuiSelect
+            options={availableAggs}
+            value={agg}
+            onChange={e => setAgg(e.target.value as PivotSupportedGroupByAggs)}
+          />
+        </EuiFormRow>
+      )}
+      {availableFields.length > 0 && (
+        <EuiFormRow
+          label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.fieldLabel', {
+            defaultMessage: 'Field',
+          })}
+        >
+          <EuiSelect
+            options={availableFields}
+            value={field}
+            onChange={e => setField(e.target.value)}
+          />
+        </EuiFormRow>
+      )}
+      {groupByConfigHasInterval(defaultData) && (
+        <EuiFormRow
+          error={
+            !validInterval && [
+              i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalError', {
+                defaultMessage: 'Invalid interval.',
+              }),
+            ]
+          }
+          isInvalid={!validInterval}
+          label={i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.intervalLabel', {
+            defaultMessage: 'Interval',
+          })}
+        >
+          <EuiFieldText
+            defaultValue={interval}
+            isInvalid={!validInterval}
+            onChange={e => setInterval(e.target.value)}
+          />
+        </EuiFormRow>
+      )}
+      <EuiFormRow hasEmptyLabelSpace>
+        <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
+          {i18n.translate('xpack.ml.dataframe.groupBy.popoverForm.submitButtonLabel', {
+            defaultMessage: 'Apply',
+          })}
+        </EuiButton>
+      </EuiFormRow>
     </EuiForm>
   );
 };
