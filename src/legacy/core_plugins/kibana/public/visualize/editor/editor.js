@@ -56,7 +56,6 @@ import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
 
 import { data } from 'plugins/data';
 data.search.loadLegacyDirectives();
-data.query.loadLegacyDirectives();
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
