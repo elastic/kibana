@@ -11,6 +11,26 @@ See also <<release-highlights>> and <<release-notes>>.
 
 coming[7.1.0]
 
+* <<breaking_71_index_pattern_changes>>
+
+
+[float]
+[[breaking_71_index_pattern_changes]]
+=== Index pattern changes 
+
+[float]
+==== Time-based internal index patterns queried as wildcard index patterns
+*Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
+you could no longer create time-based interval index patterns, but they continued 
+to function as expected. In 7.1, functionality has changed such that {kib} will 
+automatically query a time-based interval index pattern as a wildcard index pattern.
+Support for time-based index patterns will be removed in 8.0. You can migrate your 
+time-based index patterns to a wildcard pattern to prepare for this change.
+
+*Impact:* If you query a time-based index pattern, that query will now be performed 
+on the root wildcard term. For example, a query on an index pattern such as 
+`[logstash-]YYYY.MM.DD` will now query all indices that match `logstash-*`.
+
 //NOTE: The notable-breaking-changes tagged regions are re-used in the
 //Installation and Upgrade Guide
 
