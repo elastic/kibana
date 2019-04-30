@@ -26,6 +26,8 @@ import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
 import { Router } from './router';
+import { deepFreeze, RecursiveReadonly } from './lib/deep_freeze';
+
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
@@ -33,7 +35,7 @@ import {
 
 export interface HttpServerSetup {
   server: Server;
-  options: ServerOptions;
+  options: RecursiveReadonly<ServerOptions>;
   registerRouter: (router: Router) => void;
   /**
    * Define custom authentication and/or authorization mechanism for incoming requests.
@@ -76,7 +78,7 @@ export class HttpServer {
     this.server = createServer(serverOptions);
 
     return {
-      options: serverOptions,
+      options: deepFreeze(serverOptions),
       registerRouter: this.registerRouter.bind(this),
       registerOnRequest: this.registerOnRequest.bind(this),
       registerAuth: <T>(

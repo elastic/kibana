@@ -58,7 +58,7 @@ export class Server {
       plugins: pluginsSetup,
     };
 
-    this.legacy.setup(coreSetup);
+    await this.legacy.setup(coreSetup);
 
     return coreSetup;
   }
