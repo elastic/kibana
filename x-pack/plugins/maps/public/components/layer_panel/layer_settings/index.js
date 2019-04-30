@@ -12,12 +12,14 @@ import {
   updateLayerMaxZoom,
   updateLayerMinZoom,
   updateLayerAlpha,
+  setLayerApplyGlobalQuery,
 } from '../../../actions/store_actions';
 
 function mapStateToProps(state = {}) {
   const selectedLayer = getSelectedLayer(state);
   return {
     alpha: selectedLayer.getAlpha(),
+    applyGlobalQuery: selectedLayer.getApplyGlobalQuery(),
     label: selectedLayer.getLabel(),
     layerId: selectedLayer.getId(),
     maxZoom: selectedLayer.getMaxZoom(),
@@ -32,6 +34,9 @@ function mapDispatchToProps(dispatch) {
     updateMinZoom: (id, minZoom) => dispatch(updateLayerMinZoom(id, minZoom)),
     updateMaxZoom: (id, maxZoom) => dispatch(updateLayerMaxZoom(id, maxZoom)),
     updateAlpha: (id, alpha) => dispatch(updateLayerAlpha(id, alpha)),
+    setLayerApplyGlobalQuery: (layerId, applyGlobalQuery) => {
+      dispatch(setLayerApplyGlobalQuery(layerId, applyGlobalQuery));
+    }
   };
 }
 
