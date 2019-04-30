@@ -20,11 +20,10 @@
 import { Legacy } from 'kibana';
 import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 import { IPrivate } from 'ui/private';
-import { SavedVisualizations } from '../types';
-import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
-
 import { visualizations } from 'plugins/visualizations';
 const { VisTypesRegistryProvider } = visualizations.visTypes;
+import { SavedVisualizations } from '../types';
+import { VisualizeEmbeddableFactory } from './visualize_embeddable_factory';
 
 export function visualizeEmbeddableFactoryProvider(Private: IPrivate) {
   const VisualizeEmbeddableFactoryProvider = (
