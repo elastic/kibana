@@ -11,7 +11,7 @@ import { EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { DataFrameJobListRow } from './common';
-import { JobDetailsPane, Section } from './job_details_pane';
+import { JobDetailsPane, SectionConfig } from './job_details_pane';
 import { JobJsonPane } from './job_json_pane';
 
 function getItemDescription(value: any) {
@@ -27,18 +27,18 @@ interface Props {
 }
 
 export const ExpandedRow: SFC<Props> = ({ item }) => {
-  const state: Section = {
+  const state: SectionConfig = {
     title: 'State',
-    items: Object.entries(item.state).map((key, value) => {
-      return { title: key.toString(), description: getItemDescription(value) };
+    items: Object.entries(item.state).map(s => {
+      return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
     position: 'left',
   };
 
-  const stats: Section = {
+  const stats: SectionConfig = {
     title: 'Stats',
-    items: Object.entries(item.stats).map((key, value) => {
-      return { title: key.toString(), description: getItemDescription(value) };
+    items: Object.entries(item.stats).map(s => {
+      return { title: s[0].toString(), description: getItemDescription(s[1]) };
     }),
     position: 'right',
   };

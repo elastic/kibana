@@ -22,7 +22,7 @@ interface DeleteActionProps {
   deleteJob(d: DataFrameJobListRow): void;
 }
 
-const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => {
+export const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const closeModal = () => setModalVisible(false);

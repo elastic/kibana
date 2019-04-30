@@ -19,17 +19,17 @@ export interface SectionItem {
   title: string;
   description: string;
 }
-export interface Section {
+export interface SectionConfig {
   title: string;
   position: 'left' | 'right';
   items: SectionItem[];
 }
 
 interface SectionProps {
-  section: Section;
+  section: SectionConfig;
 }
 
-const Section: SFC<SectionProps> = ({ section }) => {
+export const Section: SFC<SectionProps> = ({ section }) => {
   if (section.items.length === 0) {
     return null;
   }
@@ -45,7 +45,7 @@ const Section: SFC<SectionProps> = ({ section }) => {
 };
 
 interface JobDetailsPaneProps {
-  sections: Section[];
+  sections: SectionConfig[];
 }
 
 export const JobDetailsPane: SFC<JobDetailsPaneProps> = ({ sections }) => {
