@@ -38,7 +38,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ES_TYPES } from '../../../../common/es_types';
 
-const RESTRICT_FIELDS = [ES_TYPES.number];
+const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
