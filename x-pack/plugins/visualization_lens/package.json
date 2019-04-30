@@ -1,11 +1,11 @@
 {
   "author": "Elastic",
-  "name": "visualization_editor",
+  "name": "visualization_lens",
   "version": "7.0.0",
   "private": true,
   "license": "Elastic-License",
   "devDependencies": {},
   "dependencies": {
-    "@elastic/charts": "^3.11.0"
+    "@elastic/charts": "^4.0.0"
   }
 }

@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const PLUGIN_ID = 'visualization_editor';
+export const PLUGIN_ID = 'visualization_lens';
