@@ -19,17 +19,16 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import React, { useCallback, useContext, useMemo } from 'react';
 
-import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import { Source } from '../../containers/source';
 import { FieldsConfigurationPanel } from './fields_configuration_panel';
 import { IndicesConfigurationPanel } from './indices_configuration_panel';
 import { NameConfigurationPanel } from './name_configuration_panel';
-import { useIndicesConfigurationFormState } from './indices_configuration_form_state';
-import { useLogColumnsConfigurationFormState } from './log_columns_configuration_form_state';
 import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel';
 import { SourceConfigurationFlyoutState } from './source_configuration_flyout_state';
+import { useSourceConfigurationFormState } from './source_configuration_form_state';
 
 const noop = () => undefined;
 
@@ -49,117 +48,43 @@ export const SourceConfigurationFlyout = injectI18n(
       isLoading,
       updateSourceConfiguration,
     } = useContext(Source.Context);
-    const configuration = source && source.configuration;
     const availableFields = useMemo(
       () => (source && source.status ? source.status.indexFields.map(field => field.name) : []),
       [source]
     );
 
-    const indicesConfigurationFormState = useIndicesConfigurationFormState({
-      initialFormState: useMemo(
-        () =>
-          configuration
-            ? {
-                name: configuration.name,
-                description: configuration.description,
-                logAlias: configuration.logAlias,
-                metricAlias: configuration.metricAlias,
-                containerField: configuration.fields.container,
-                hostField: configuration.fields.host,
-                messageField: configuration.fields.message,
-                podField: configuration.fields.pod,
-                tiebreakerField: configuration.fields.tiebreaker,
-                timestampField: configuration.fields.timestamp,
-              }
-            : undefined,
-        [configuration]
-      ),
-    });
-    const logColumnsConfigurationFormState = useLogColumnsConfigurationFormState({
-      initialFormState: useMemo(
-        () =>
-          configuration
-            ? {
-                logColumns: configuration.logColumns,
-              }
-            : undefined,
-        [configuration]
-      ),
-    });
-
-    const errors = useMemo(
-      () => [...indicesConfigurationFormState.errors, ...logColumnsConfigurationFormState.errors],
-      [indicesConfigurationFormState.errors, logColumnsConfigurationFormState.errors]
-    );
-
-    const resetForms = useCallback(
-      () => {
-        indicesConfigurationFormState.resetForm();
-        logColumnsConfigurationFormState.resetForm();
-      },
-      [indicesConfigurationFormState.resetForm, logColumnsConfigurationFormState.formState]
-    );
-
-    const isFormDirty = useMemo(
-      () =>
-        indicesConfigurationFormState.isFormDirty || logColumnsConfigurationFormState.isFormDirty,
-      [indicesConfigurationFormState.isFormDirty, logColumnsConfigurationFormState.isFormDirty]
-    );
-
-    const isFormValid = useMemo(
-      () =>
-        indicesConfigurationFormState.isFormValid && logColumnsConfigurationFormState.isFormValid,
-      [indicesConfigurationFormState.isFormValid, logColumnsConfigurationFormState.isFormValid]
-    );
+    const {
+      addLogColumn,
+      indicesConfigurationProps,
+      logColumnConfigurationProps,
+      errors,
+      resetForm,
+      isFormDirty,
+      isFormValid,
+      formState,
+      formStateChanges,
+    } = useSourceConfigurationFormState(source && source.configuration);
 
     const persistUpdates = useCallback(
       async () => {
         if (sourceExists) {
-          await updateSourceConfiguration({
-            name: indicesConfigurationFormState.formStateChanges.name,
-            description: indicesConfigurationFormState.formStateChanges.description,
-            logAlias: indicesConfigurationFormState.formStateChanges.logAlias,
-            metricAlias: indicesConfigurationFormState.formStateChanges.metricAlias,
-            fields: {
-              container: indicesConfigurationFormState.formStateChanges.containerField,
-              host: indicesConfigurationFormState.formStateChanges.hostField,
-              pod: indicesConfigurationFormState.formStateChanges.podField,
-              tiebreaker: indicesConfigurationFormState.formStateChanges.tiebreakerField,
-              timestamp: indicesConfigurationFormState.formStateChanges.timestampField,
-            },
-            logColumns: logColumnsConfigurationFormState.formStateChanges.logColumns,
-          });
+          await updateSourceConfiguration(formStateChanges);
         } else {
-          await createSourceConfiguration({
-            name: indicesConfigurationFormState.formState.name,
-            description: indicesConfigurationFormState.formState.description,
-            logAlias: indicesConfigurationFormState.formState.logAlias,
-            metricAlias: indicesConfigurationFormState.formState.metricAlias,
-            fields: {
-              container: indicesConfigurationFormState.formState.containerField,
-              host: indicesConfigurationFormState.formState.hostField,
-              pod: indicesConfigurationFormState.formState.podField,
-              tiebreaker: indicesConfigurationFormState.formState.tiebreakerField,
-              timestamp: indicesConfigurationFormState.formState.timestampField,
-            },
-            logColumns: logColumnsConfigurationFormState.formState.logColumns,
-          });
+          await createSourceConfiguration(formState);
         }
-        resetForms();
+        resetForm();
       },
       [
         sourceExists,
         updateSourceConfiguration,
         createSourceConfiguration,
-        resetForms,
-        indicesConfigurationFormState.formState,
-        indicesConfigurationFormState.formStateChanges,
-        logColumnsConfigurationFormState.formState,
-        logColumnsConfigurationFormState.formStateChanges,
+        resetForm,
+        formState,
+        formStateChanges,
       ]
     );
 
-    if (!isVisible || !configuration) {
+    if (!isVisible || !source || !source.configuration) {
       return null;
     }
 
@@ -175,25 +100,25 @@ export const SourceConfigurationFlyout = injectI18n(
             <EuiSpacer />
             <NameConfigurationPanel
               isLoading={isLoading}
-              nameFieldProps={indicesConfigurationFormState.fieldProps.name}
+              nameFieldProps={indicesConfigurationProps.name}
               readOnly={!shouldAllowEdit}
             />
             <EuiSpacer />
             <IndicesConfigurationPanel
               isLoading={isLoading}
-              logAliasFieldProps={indicesConfigurationFormState.fieldProps.logAlias}
-              metricAliasFieldProps={indicesConfigurationFormState.fieldProps.metricAlias}
+              logAliasFieldProps={indicesConfigurationProps.logAlias}
+              metricAliasFieldProps={indicesConfigurationProps.metricAlias}
               readOnly={!shouldAllowEdit}
             />
             <EuiSpacer />
             <FieldsConfigurationPanel
-              containerFieldProps={indicesConfigurationFormState.fieldProps.containerField}
-              hostFieldProps={indicesConfigurationFormState.fieldProps.hostField}
+              containerFieldProps={indicesConfigurationProps.containerField}
+              hostFieldProps={indicesConfigurationProps.hostField}
               isLoading={isLoading}
-              podFieldProps={indicesConfigurationFormState.fieldProps.podField}
+              podFieldProps={indicesConfigurationProps.podField}
               readOnly={!shouldAllowEdit}
-              tiebreakerFieldProps={indicesConfigurationFormState.fieldProps.tiebreakerField}
-              timestampFieldProps={indicesConfigurationFormState.fieldProps.timestampField}
+              tiebreakerFieldProps={indicesConfigurationProps.tiebreakerField}
+              timestampFieldProps={indicesConfigurationProps.timestampField}
             />
           </>
         ),
@@ -208,10 +133,10 @@ export const SourceConfigurationFlyout = injectI18n(
           <>
             <EuiSpacer />
             <LogColumnsConfigurationPanel
-              addLogColumn={logColumnsConfigurationFormState.addLogColumn}
+              addLogColumn={addLogColumn}
               availableFields={availableFields}
               isLoading={isLoading}
-              logColumnConfiguration={logColumnsConfigurationFormState.logColumnConfigurationProps}
+              logColumnConfiguration={logColumnConfigurationProps}
             />
           </>
         ),
@@ -279,7 +204,7 @@ export const SourceConfigurationFlyout = injectI18n(
                   iconType="cross"
                   isDisabled={isLoading}
                   onClick={() => {
-                    resetForms();
+                    resetForm();
                     hide();
                   }}
                 >
