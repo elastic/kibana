@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
+import { ControlSettings } from './control_settings';
 import { RefreshControl } from './refresh_control';
 import { FullscreenControl } from './fullscreen_control';
 import { WorkpadExport } from './workpad_export';
@@ -98,6 +99,9 @@ export class WorkpadHeader extends React.PureComponent {
         <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <ControlSettings />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <RefreshControl />
               </EuiFlexItem>

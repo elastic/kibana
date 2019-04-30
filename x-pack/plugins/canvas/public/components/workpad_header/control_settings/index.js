@@ -5,19 +5,19 @@
  */
 
 import { connect } from 'react-redux';
-import { fetchAllRenderables } from '../../../state/actions/elements';
-import { getInFlight } from '../../../state/selectors/resolved_args';
-import { RefreshControl as Component } from './refresh_control';
+import { setRefreshInterval } from '../../../state/actions/workpad';
+import { getRefreshInterval } from '../../../state/selectors/workpad';
+import { ControlSettings as Component } from './control_settings';
 
 const mapStateToProps = state => ({
-  inFlight: getInFlight(state),
+  refreshInterval: getRefreshInterval(state),
 });
 
 const mapDispatchToProps = {
-  doRefresh: fetchAllRenderables,
+  setRefreshInterval,
 };
 
-export const RefreshControl = connect(
+export const ControlSettings = connect(
   mapStateToProps,
   mapDispatchToProps
 )(Component);

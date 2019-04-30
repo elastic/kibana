@@ -23,20 +23,19 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { timeDurationString } from '../../../lib/time_duration';
+import { RefreshControl } from '../refresh_control';
 
 export class AutoRefreshControls extends Component {
   static propTypes = {
-    inFlight: PropTypes.bool.isRequired,
     refreshInterval: PropTypes.number,
     setRefresh: PropTypes.func.isRequired,
     disableInterval: PropTypes.func.isRequired,
-    doRefresh: PropTypes.func.isRequired,
   };
 
   refreshInput = null;
 
   render() {
-    const { inFlight, refreshInterval, setRefresh, doRefresh, disableInterval } = this.props;
+    const { refreshInterval, setRefresh, disableInterval } = this.props;
 
     return (
       <div>
@@ -61,9 +60,7 @@ export class AutoRefreshControls extends Component {
             </EuiDescriptionList>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" fill iconType="refresh" onClick={doRefresh} isDisabled={inFlight}>
-              Refresh
-            </EuiButton>
+            <RefreshControl />
           </EuiFlexItem>
         </EuiFlexGroup>
 
