@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LatestMonitor } from '../../../common/graphql/types';
 import { IntegrationLink } from './integration_link';
-import { getApmHref } from '../../lib/helper';
+import { getApmHref, getInfraContainerHref, getInfraKubernetesHref } from '../../lib/helper';
 
 interface MonitorListActionsPopoverProps {
   basePath: string;
@@ -28,7 +28,9 @@ export const MonitorListActionsPopover = ({
 }: MonitorListActionsPopoverProps) => {
   const popoverId = `${monitor.id.key}_popover`;
   const [popoverIsVisible, setPopoverIsVisible] = useState<boolean>(false);
-  const domain = get(ping, 'url.domain', '');
+  const domain = get<string>(ping, 'url.domain', '');
+  const podUid = get<string | undefined>(ping, 'kubernetes.pod.uid', undefined);
+  const containerId = get<string | undefined>(ping, 'container.id', undefined);
   return (
     <EuiPopover
       button={
@@ -51,7 +53,7 @@ export const MonitorListActionsPopover = ({
       id={popoverId}
       isOpen={popoverIsVisible}
     >
-      <EuiFlexGroup>
+      <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <IntegrationLink
             ariaLabel={i18n.translate('xpack.uptime.apmIntegrationAction.description', {
@@ -74,6 +76,64 @@ export const MonitorListActionsPopover = ({
                   'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain.',
                 values: {
                   domain,
+                },
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IntegrationLink
+            ariaLabel={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.description',
+              {
+                defaultMessage: `Check Infrastructure UI for this monitor's pod UID`,
+                description: 'This value is shown to users when they hover over the link icon.',
+              }
+            )}
+            href={getInfraKubernetesHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            iconType="infraApp"
+            message={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.message',
+              {
+                defaultMessage: 'Check Infra for pod UID',
+                description:
+                  'A message explaining that this link will take the user to the Infrastructure UI filtered for the monitor Pod UID.',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.kubernetes.tooltip',
+              {
+                defaultMessage: 'Click here to check Infrastructure UI for pod UID "{podUid}".',
+                values: {
+                  podUid,
+                },
+              }
+            )}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <IntegrationLink
+            ariaLabel={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.docker.description',
+              {
+                defaultMessage: `Check Infrastructure UI for this monitor's container ID`,
+              }
+            )}
+            href={getInfraContainerHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            iconType="infraApp"
+            message={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.container.message',
+              {
+                defaultMessage: 'Check Infra for container ID',
+              }
+            )}
+            tooltipContent={i18n.translate(
+              'xpack.uptime.monitorList.infraIntegrationAction.docker.tooltip',
+              {
+                defaultMessage:
+                  'Click her to check Infrastructure UI for container ID "{containerId}"',
+                values: {
+                  containerId,
                 },
               }
             )}

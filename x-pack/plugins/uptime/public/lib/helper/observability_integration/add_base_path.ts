@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getApmHref } from './get_apm_href';
-export { getInfraContainerHref, getInfraKubernetesHref } from './get_infra_href';
+export const addBasePath = (basePath: string, url: string) =>
+  `${basePath.length > 0 ? '/${basePath' : ''}${url}`;
