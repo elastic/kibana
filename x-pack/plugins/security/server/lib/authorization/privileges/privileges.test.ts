@@ -333,7 +333,12 @@ describe('features', () => {
         all: [
           actions.login,
           actions.version,
-          ...(expectManageFeatureControls ? [actions.api.get('manage_feature_controls')] : []),
+          ...(expectManageFeatureControls
+            ? [
+                actions.ui.get('featureControls', 'manage'),
+                actions.api.get('manage_feature_controls'),
+              ]
+            : []),
           ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
           actions.app.get('app-1'),
           actions.app.get('app-2'),
@@ -418,7 +423,12 @@ describe('features', () => {
       expect(actual).toHaveProperty(`${group}.all`, [
         actions.login,
         actions.version,
-        ...(expectManageFeatureControls ? [actions.api.get('manage_feature_controls')] : []),
+        ...(expectManageFeatureControls
+          ? [
+              actions.ui.get('featureControls', 'manage'),
+              actions.api.get('manage_feature_controls'),
+            ]
+          : []),
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
         actions.ui.get('catalogue', 'bar-catalogue-1'),
         actions.ui.get('catalogue', 'bar-catalogue-2'),
@@ -749,7 +759,12 @@ describe('features', () => {
       expect(actual).toHaveProperty(`${group}.all`, [
         actions.login,
         actions.version,
-        ...(expectManageFeatureControls ? [actions.api.get('manage_feature_controls')] : []),
+        ...(expectManageFeatureControls
+          ? [
+              actions.ui.get('featureControls', 'manage'),
+              actions.api.get('manage_feature_controls'),
+            ]
+          : []),
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
         actions.allHack,
       ]);
