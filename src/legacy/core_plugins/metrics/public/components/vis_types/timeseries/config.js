@@ -322,15 +322,19 @@ const TimeseriesConfig = injectI18n(function (props) {
           />)}
           fullWidth
         >
-          <div>HELLO</div>
-          {/* <QueryBar
-            query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter.query }}
+          <QueryBar
+            query={{ language: (model.filter.language ? model.filter.language : 'lucene'), query: model.filter.query }}
             screenTitle={'TSVBDataConfigTab'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}
             indexPatterns={model.index_pattern ? model.index_pattern : model.default_index_pattern}
             store={localStorage || {}}
             showDatePicker={false}
+          />
+          {/* <EuiFieldText
+            onChange={handleTextChange('filter')}
+            value={model.filter}
+            fullWidth
           /> */}
 
         </EuiFormRow>
