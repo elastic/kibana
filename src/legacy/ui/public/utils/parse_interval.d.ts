@@ -17,4 +17,6 @@
  * under the License.
  */
 
-export function parseInterval(interval: string): number | null;
+import moment from 'moment';
+
+export function parseInterval(interval: string): moment.Duration | null;

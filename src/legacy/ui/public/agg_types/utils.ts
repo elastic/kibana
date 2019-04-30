@@ -49,11 +49,11 @@ function isValidJson(value: string): boolean {
   }
 }
 
-function check(value: string, baseInterval?: string) {
+function isValidInterval(value: string, baseInterval: string) {
   if (baseInterval) {
-    return _parseWithBase(value, baseInterval) === true;
+    return _parseWithBase(value, baseInterval);
   } else {
-    return parseInterval(value) != null;
+    return parseInterval(value) !== null;
   }
 }
 
@@ -69,4 +69,4 @@ function _parseWithBase(value: string, baseInterval: string) {
   }
 }
 
-export { isValidJson, check as parseInterval };
+export { isValidJson, isValidInterval };

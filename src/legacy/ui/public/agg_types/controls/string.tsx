@@ -40,11 +40,6 @@ function StringParamEditor({
     [isValid]
   );
 
-  const onChange = (ev: React.ChangeEvent<HTMLInputElement>) => {
-    const textValue = ev.target.value;
-    setValidity(aggParam.required ? !!textValue : true);
-    setValue(textValue);
-  };
   return (
     <EuiFormRow
       label={aggParam.displayName || aggParam.name}
@@ -55,7 +50,7 @@ function StringParamEditor({
       <EuiFieldText
         value={value || ''}
         data-test-subj={`visEditorStringInput${agg.id}${aggParam.name}`}
-        onChange={onChange}
+        onChange={ev => setValue(ev.target.value)}
         fullWidth={true}
         onBlur={setTouched}
         isInvalid={showValidation ? !isValid : false}

@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { AggParamEditorProps } from '../../vis/editors/default';
 import { AggParamOption } from '../agg_param';
-import { parseInterval } from '../utils';
+import { isValidInterval } from '../utils';
 
 interface ComboBoxOption extends EuiComboBoxOptionProps {
   key: string;
@@ -55,14 +55,15 @@ function TimeIntervalParamEditor({
 
   let selectedOptions: ComboBoxOption[] = [];
   let definedOption: ComboBoxOption | undefined;
+  let isValid = false;
   if (value) {
     definedOption = find(options, { key: value });
     selectedOptions = definedOption ? [definedOption] : [{ label: value, key: 'custom' }];
+    isValid = !!(definedOption || isValidInterval(value, timeBase));
   }
 
-  const isValid = value ? (definedOption ? true : parseInterval(value, timeBase)) : false;
   const interval = get(agg, 'buckets.getInterval') && agg.buckets.getInterval();
-  const scaledHepText =
+  const scaledHelpText =
     interval && interval.scaled && isValid ? (
       <strong className="eui-displayBlock">
         <FormattedMessage
@@ -80,7 +81,7 @@ function TimeIntervalParamEditor({
 
   const helpText = (
     <>
-      {scaledHepText}
+      {scaledHelpText}
       {get(editorConfig, 'interval.help') || selectOptionHelpText}
     </>
   );
@@ -99,7 +100,7 @@ function TimeIntervalParamEditor({
     const normalizedCustomValue = customValue.trim();
     setValue(normalizedCustomValue);
 
-    if (normalizedCustomValue ? parseInterval(normalizedCustomValue, timeBase) : false) {
+    if (normalizedCustomValue && isValidInterval(normalizedCustomValue, timeBase)) {
       agg.write();
     }
   };
