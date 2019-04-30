@@ -38,6 +38,7 @@ describe('has()', () => {
     const connectorService = new ConnectorService();
     expect(connectorService.has('console')).toEqual(true);
     expect(connectorService.has('slack')).toEqual(true);
+    expect(connectorService.has('email')).toEqual(true);
   });
 
   test('returns true after registering a connector', () => {
@@ -45,5 +46,43 @@ describe('has()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({ id: 'my-connector', executor });
     expect(connectorService.has('my-connector'));
+  });
+});
+
+describe('execute()', () => {
+  test('calls the executor with proper params', async () => {
+    const executor = jest.fn().mockResolvedValueOnce({ success: true });
+    const connectorService = new ConnectorService();
+    connectorService.register({ id: 'my-connector', executor });
+    await connectorService.execute('my-connector', { foo: true }, { bar: false });
+    expect(executor).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      Object {
+        "foo": true,
+      },
+      Object {
+        "bar": false,
+      },
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+
+  test('throws error if connector not registered', async () => {
+    const connectorService = new ConnectorService();
+    await expect(
+      connectorService.execute('my-connector', { foo: true }, { bar: false })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Connector \\"my-connector\\" is not registered."`
+    );
   });
 });

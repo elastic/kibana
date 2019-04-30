@@ -6,3 +6,4 @@
 
 export { consoleConnector } from './console';
 export { slackConnector } from './slack';
+export { emailConnector } from './email';
