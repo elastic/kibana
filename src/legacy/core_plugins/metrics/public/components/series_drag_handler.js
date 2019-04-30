@@ -52,7 +52,6 @@ SeriesDragHandler.defaultProps = {
 };
 
 SeriesDragHandler.propTypes = {
+  hideDragHandler: PropTypes.bool,
   dragHandleProps: PropTypes.object.isRequired,
-  showDragHandler: PropTypes.boolean,
 };
-

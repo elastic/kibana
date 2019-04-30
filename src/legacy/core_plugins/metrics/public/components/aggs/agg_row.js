@@ -23,7 +23,7 @@ import { last } from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
-import { SeriesDragHandler } from '../series_drag_hanler';
+import { SeriesDragHandler } from '../series_drag_handler';
 
 function AggRowUi(props) {
   let iconType = 'eyeClosed';

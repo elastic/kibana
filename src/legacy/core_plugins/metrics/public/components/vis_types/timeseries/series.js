@@ -23,7 +23,7 @@ import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import { Aggs } from '../../../components/aggs/aggs';
 import SeriesConfig from './config';
-import { SeriesDragHandler } from '../../series_drag_hanler';
+import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import Split from '../../split';
 import createTextHandler from '../../lib/create_text_handler';

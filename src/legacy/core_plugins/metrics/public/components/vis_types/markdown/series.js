@@ -26,7 +26,7 @@ import createTextHandler from '../../lib/create_text_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Aggs } from '../../aggs/aggs';
-import { SeriesDragHandler } from '../../series_drag_hanler';
+import { SeriesDragHandler } from '../../series_drag_handler';
 
 function MarkdownSeriesUi(props) {
   const {

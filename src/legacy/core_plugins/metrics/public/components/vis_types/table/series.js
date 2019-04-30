@@ -21,7 +21,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
-import { SeriesDragHandler } from '../../series_drag_hanler';
+import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';

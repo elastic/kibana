@@ -23,7 +23,7 @@ import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import Split from '../../split';
-import { SeriesDragHandler } from '../../series_drag_hanler';
+import { SeriesDragHandler } from '../../series_drag_handler';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButtonIcon } from '@elastic/eui';
 import createTextHandler from '../../lib/create_text_handler';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
