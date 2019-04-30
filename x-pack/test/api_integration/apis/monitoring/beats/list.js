@@ -50,12 +50,9 @@ export default function ({ getService }) {
               name: 'spicy.local',
               type: 'Filebeat',
               output: 'Elasticsearch',
-              //total_events_rate: 0.35437158469945357,
-              //bytes_sent_rate: 530713.5601092896,
               total_events_rate: 0.018032786885245903,
               bytes_sent_rate: 24135.450546448086,
               errors: 0,
-              //memory: 27209376,
               memory: 30680648,
               version: '7.0.0-alpha1',
             },
@@ -72,10 +69,6 @@ export default function ({ getService }) {
             }
           ]
         };
-
-        console.log('...BODY:', JSON.stringify(body));
-        console.log('...EXPECTED:', JSON.stringify(expected));
-
         expect(body).to.eql(expected);
       });
     });
