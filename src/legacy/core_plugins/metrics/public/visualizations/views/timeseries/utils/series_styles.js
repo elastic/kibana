@@ -43,12 +43,14 @@ export const getAreaSeriesStyles = ({ points, lines, color }) => ({
   curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
 });
 
-export const getBarSeriesStyles = ({ bars: { show, lineWidth } }) => ({
+export const getBarSeriesStyles = ({ show, lineWidth, fill }, color) => ({
   barSeriesStyle: {
     border: {
-      visible: show,
+      stroke: color,
       strokeWidth: lineWidth,
+      visible: show,
     },
+    opacity: fill
   },
   curve: CurveType.LINEAR,
 });

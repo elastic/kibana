@@ -35,7 +35,7 @@ export function BarSeriesDecorator({
   yScaleType,
 }) {
   const id = getSpecId(seriesId);
-  const seriesStyle = getBarSeriesStyles({ bars });
+  const seriesStyle = getBarSeriesStyles(bars, color);
   const seriesSettings = {
     id,
     groupId: getGroupId(groupId),

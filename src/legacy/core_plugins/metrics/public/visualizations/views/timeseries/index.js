@@ -85,7 +85,20 @@ export const TimeSeries = ({
       }
 
       {
-        series.map(({ id, label, bars, lines, data, hideInLegend, xScaleType, yScaleType, groupId, color, stack, points }) => {
+        series.map(({
+          id,
+          label,
+          bars,
+          lines,
+          data,
+          hideInLegend,
+          xScaleType,
+          yScaleType,
+          groupId,
+          color,
+          stack,
+          points
+        }) => {
           if (bars.show) {
             return (
               <BarSeriesDecorator
