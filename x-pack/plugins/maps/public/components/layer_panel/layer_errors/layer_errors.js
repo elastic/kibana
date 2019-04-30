@@ -31,7 +31,7 @@ export function LayerErrors({ layer }) {
           {layer.getErrors()}
         </p>
       </EuiCallOut>
-      <EuiSpacer margin="m"/>
+      <EuiSpacer size="m"/>
     </Fragment>
   );
 }

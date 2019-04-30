@@ -60,6 +60,7 @@ export function getPathParams(pathname: string = '') {
   const paths = getPathAsArray(pathname);
   const pageName = paths[1];
 
+  // TODO: use react router's real match params instead of guessing the path order
   switch (pageName) {
     case 'transactions':
       return {
@@ -80,6 +81,9 @@ export function getPathParams(pathname: string = '') {
         serviceName: paths[0]
       };
     default:
-      return {};
+      return {
+        processorEvent: 'transaction',
+        serviceName: paths[0]
+      };
   }
 }

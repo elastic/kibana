@@ -77,6 +77,7 @@ export class LegacyPlatformService {
     require('ui/chrome/api/controls').__newPlatformSetup__(chrome);
     require('ui/chrome/api/help_extension').__newPlatformSetup__(chrome);
     require('ui/chrome/api/theme').__newPlatformSetup__(chrome);
+    require('ui/chrome/api/badge').__newPlatformSetup__(chrome);
     require('ui/chrome/api/breadcrumbs').__newPlatformSetup__(chrome);
     require('ui/chrome/services/global_nav_state').__newPlatformSetup__(chrome);
 

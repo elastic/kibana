@@ -23,7 +23,7 @@ exports[`Should render source settings editor 1`] = `
       </EuiFlexItem>
     </EuiFlexGroup>
     <EuiSpacer
-      margin="m"
+      size="m"
     />
     <div>
       mockSourceEditor

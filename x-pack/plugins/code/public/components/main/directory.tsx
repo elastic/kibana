@@ -4,7 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiTitle, IconType } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTitle,
+  IconType,
+  EuiLoadingSpinner,
+  EuiSpacer,
+} from '@elastic/eui';
 import React from 'react';
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom';
 import { FileTree, FileTreeItemType } from '../../../model';
@@ -32,8 +41,8 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
         data-test-subj={`codeFileExplorerNode-${n.name}`}
       >
         <div className="code-directory__node">
-          <EuiIcon type={typeIconMap[n.type]} />
-          <EuiText size="s" className="code-fileNodeName eui-textTruncate">
+          <EuiIcon type={typeIconMap[n.type]} color="subdued" />
+          <EuiText size="xs" className="code-fileNodeName eui-textTruncate">
             {n.name}
           </EuiText>
         </div>
@@ -58,6 +67,7 @@ const DirectoryNodes = (props: DirectoryNodesProps) => {
 
 interface Props extends RouteComponentProps<MainRouteParams> {
   node?: FileTree;
+  loading: boolean;
 }
 
 export const Directory = withRouter((props: Props) => {
@@ -78,10 +88,21 @@ export const Directory = withRouter((props: Props) => {
   const folderList = (
     <DirectoryNodes nodes={folders} title="Directories" getUrl={getUrl(PathTypes.tree)} />
   );
-  return (
-    <EuiFlexGroup direction="column">
+  const children = props.loading ? (
+    <div>
+      <EuiSpacer size="xl" />
+      <EuiSpacer size="xl" />
+      <EuiText textAlign="center">Loading...</EuiText>
+      <EuiSpacer size="m" />
+      <EuiText textAlign="center">
+        <EuiLoadingSpinner size="xl" />
+      </EuiText>
+    </div>
+  ) : (
+    <React.Fragment>
       {files.length > 0 && fileList}
       {folders.length > 0 && folderList}
-    </EuiFlexGroup>
+    </React.Fragment>
   );
+  return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
 });
