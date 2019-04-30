@@ -19,55 +19,24 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 
 import {
   getSpecId,
   getGroupId,
   ScaleType,
   CurveType,
-  AreaSeries,
   BarSeries,
 } from '@elastic/charts';
 
-const isBarSeries = props => get(props, 'bars.show', false);
-const getComponent = isBar => isBar ? BarSeries : AreaSeries;
-
-const getAreaFillStyles = ({ points, lines, color }) => ({
-  areaSeriesStyle: {
-    line: {
-      visible: Boolean(lines),
-      stroke: '',
-      strokeWidth: get(lines, 'lineWidth', 0),
-    },
-    area: {
-      fill: color,
-      opacity: get(lines, 'fill', 1),
-      visible: true,
-    },
-    point: {
-      visible: Boolean(points),
-      radius: get(points, 'radius', 0.5),
-      opacity: 1,
-      stroke: '',
-      strokeWidth: get(points, 'lineWidth', 0),
-    },
-  },
-  curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
-});
-
-const getBarsFillStyles = ({ bars }) => ({
+const getBarSeriesStyles = ({ bars: { show, lineWidth } }) => ({
   barSeriesStyle: {
     border: {
-      visible: Boolean(bars),
-      stroke: '',
-      strokeWidth: get(bars, 'lineWidth', 0),
+      visible: show,
+      strokeWidth: lineWidth,
     },
   },
   curve: CurveType.LINEAR,
 });
-
-const calculateLineSeriesStyles = (isBar, props) => isBar ? getBarsFillStyles(props) : getAreaFillStyles(props);
 
 const calculateCustomSeriesColors = (color, specId) => {
   const map = new Map();
@@ -83,12 +52,9 @@ const calculateCustomSeriesColors = (color, specId) => {
   return map;
 };
 
-export const Series = (props) => {
+export function BarSeriesDecorator(props) {
   const id = getSpecId(props.label + props.id);
-  const isBar = isBarSeries(props);
-  const Component = getComponent(isBar);
-  const lineSeriesStyles = calculateLineSeriesStyles(isBar, props);
-
+  const seriesStyle = getBarSeriesStyles(props);
   const seriesSettings = {
     id,
     name: props.label,
@@ -103,15 +69,15 @@ export const Series = (props) => {
     yScaleToDataExtent: false,
     hideInLegend: props.hideInLegend,
     customSeriesColors: calculateCustomSeriesColors(props.color, id),
-    ...lineSeriesStyles,
+    ...seriesStyle,
   };
 
   return (
-    <Component {...seriesSettings} />
+    <BarSeries {...seriesSettings} />
   );
-};
+}
 
-Series.propTypes = {
+BarSeriesDecorator.propTypes = {
   hideInLegend: PropTypes.bool,
   id: PropTypes.string,
   xScaleType: PropTypes.string,
@@ -124,7 +90,7 @@ Series.propTypes = {
   color: PropTypes.string,
 };
 
-Series.defaultProps = {
+BarSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,
   xScaleType: ScaleType.Time,
   bars: {},

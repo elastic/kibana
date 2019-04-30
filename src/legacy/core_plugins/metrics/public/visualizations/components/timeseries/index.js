@@ -17,4 +17,141 @@
  * under the License.
  */
 
-export { TimeSeries } from './timeseries';
+import React from 'react';
+import PropTypes from 'prop-types';
+import moment from 'moment';
+import {
+  Axis,
+  Chart,
+  Position,
+  Settings,
+  getAxisId,
+  getGroupId,
+  DARK_THEME,
+  LIGHT_THEME,
+  getAnnotationId,
+  AnnotationDomainTypes,
+  LineAnnotation
+} from '@elastic/charts';
+import { EuiIcon } from '@elastic/eui';
+import { AreaSeriesDecorator } from './decorators/area_decorator';
+import { BarSeriesDecorator } from './decorators/bar_decorator';
+import { GRID_LINE_CONFIG, ICON_TYPES_MAP } from '../../constants';
+
+function generateAnnotationData(values) {
+  return values.map(({ key, docs }) => ({
+    dataValue: key,
+    details: docs[0],
+    header: moment(key).format('MMM DD, YYYY hh:mm A')
+  }));
+}
+
+export const TimeSeries = ({
+  isDarkMode,
+  showGrid,
+  legend,
+  legendPosition,
+  xAxisLabel,
+  series,
+  yaxes,
+  onBrush,
+  xAxisFormatter,
+  annotations
+}) => {
+  return (
+    <Chart renderer="canvas" className="tvbVisTimeSeries" >
+      <Settings
+        showLegend={legend}
+        legendPosition={legendPosition}
+        onBrushEnd={onBrush}
+        animateData={false}
+        theme={isDarkMode ? DARK_THEME : LIGHT_THEME}
+      />
+
+      { annotations.map(({ id, data, icon, color }) => {
+        const dataValues = generateAnnotationData(data);
+        const style = { line: { stroke: color, } };
+
+        return (
+          <LineAnnotation
+            key={id}
+            annotationId={getAnnotationId(id)}
+            domainType={AnnotationDomainTypes.XDomain}
+            dataValues={dataValues}
+            marker={<EuiIcon type={ICON_TYPES_MAP[icon] || 'asterisk'} />}
+            style={style}
+          />
+        );})
+      }
+
+      {
+        series.map(({ id, label, bars, lines, ...rest }) => {
+          if (bars.show) {
+            return (
+              <BarSeriesDecorator
+                key={`${id}-${label}`}
+                id={id}
+                label={label}
+                bars={bars}
+                {...rest}
+              />
+            );
+          }
+
+          if (lines.show) {
+            return (
+              <AreaSeriesDecorator
+                key={`${id}-${label}`}
+                id={id}
+                label={label}
+                lines={lines}
+                {...rest}
+              />
+            );
+          }
+        })
+      }
+
+      { yaxes.map(({ id, groupId, position, tickFormatter, min, max }) => (
+        <Axis
+          key={id}
+          groupId={getGroupId(groupId)}
+          id={getAxisId(id)}
+          position={position}
+          domain={{ min, max }}
+          showGridLines={showGrid}
+          gridLineStyle={GRID_LINE_CONFIG}
+          tickFormat={tickFormatter}
+        />))
+      }
+
+      <Axis
+        id={getAxisId('bottom')}
+        position={Position.Bottom}
+        title={xAxisLabel}
+        tickFormat={xAxisFormatter}
+        showGridLines={showGrid}
+        gridLineStyle={GRID_LINE_CONFIG}
+      />
+    </Chart>
+  );
+};
+
+TimeSeries.defaultProps = {
+  showGrid: true,
+  legend: true,
+  legendPosition: 'right'
+};
+
+TimeSeries.propTypes = {
+  isDarkMode: PropTypes.bool,
+  showGrid: PropTypes.bool,
+  legend: PropTypes.bool,
+  legendPosition: PropTypes.string,
+  xAxisLabel: PropTypes.string,
+  series: PropTypes.array,
+  yaxes: PropTypes.array,
+  onBrush: PropTypes.func,
+  xAxisFormatter: PropTypes.func,
+  annotations: PropTypes.array,
+};
