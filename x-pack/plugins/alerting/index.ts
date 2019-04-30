@@ -16,9 +16,11 @@ export function alerting(kibana: any) {
     configPrefix: 'xpack.alerting',
     require: ['kibana', 'elasticsearch'],
     config(Joi: any) {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      });
+      return Joi.object()
+        .keys({
+          enabled: Joi.boolean().default(true),
+        })
+        .default();
     },
     init(server: Hapi.Server) {
       const alertingEnabled = server.config().get('xpack.alerting.enabled');
