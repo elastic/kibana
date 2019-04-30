@@ -21,7 +21,7 @@ interface PostMessageParams extends DefaulParams {
   channel: string;
 }
 
-type SlackParams = PostMessageParams;
+type SlackParams = PostMessageParams | DefaulParams;
 
 export const slackConnector = {
   id: 'slack',
@@ -48,8 +48,8 @@ export const slackConnector = {
       case 'post-message':
         await slack.chat.postMessage({
           token: connectorOptions.token,
-          text: params.message,
-          channel: params.channel,
+          text: (params as PostMessageParams).message,
+          channel: (params as PostMessageParams).channel,
         });
         break;
       default:
