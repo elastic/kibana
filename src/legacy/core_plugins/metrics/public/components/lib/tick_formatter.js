@@ -18,36 +18,61 @@
  */
 
 import handlebars from 'handlebars/dist/handlebars';
-import { durationInputOptions } from './durations';
-import { capitalize, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { fieldFormats } from 'ui/registry/field_formats';
 
-const durationsLookup = durationInputOptions.reduce((acc, row) => {
-  acc[row.value] = row.label;
-  return acc;
-}, {});
+const inputFormat = {
+  'ps': 'picoseconds',
+  'ns': 'nanoseconds',
+  'us': 'microseconds',
+  'ms': 'milliseconds',
+  's': 'seconds',
+  'm': 'minutes',
+  'h': 'hours',
+  'd': 'days',
+  'w': 'weeks',
+  'M': 'months',
+  'Y': 'years',
+};
+
+const outputFormat = {
+  'humanize': 'humanize',
+  'ms': 'asMilliseconds',
+  's': 'asSeconds',
+  'm': 'asMinutes',
+  'h': 'asHours',
+  'd': 'asDays',
+  'w': 'asWeeks',
+  'M': 'asMonths',
+  'Y': 'asYears',
+};
+
+const isDuration = (format) => {
+  const input = Object.keys(inputFormat).join('');
+  const output = Object.keys(outputFormat).join('');
+
+  return new RegExp(`[${input}]+,[${output}]+,\\d+`).test(format);
+};
 
 export default (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
   const render = handlebars.compile(template, { knownHelpersOnly: true });
-  const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+,\d+/;
   let formatter;
-  if (durationFormatTest.test(format)) {
+
+  if (isDuration(format)) {
     const [from, to, decimals] = format.split(',');
-    const inputFormat = durationsLookup[from];
-    const outputFormat = `as${capitalize(durationsLookup[to])}`;
     const DurationFormat = fieldFormats.getType('duration');
+
     formatter = new DurationFormat({
-      inputFormat,
-      outputFormat,
-      outputPrecision: decimals
+      inputFormat: inputFormat[from],
+      outputFormat: outputFormat[to],
+      outputPrecision: decimals,
     });
   } else {
     let FieldFormat = fieldFormats.getType(format);
     if (FieldFormat) {
       formatter = new FieldFormat(null, getConfig);
-    }
-    else {
+    } else {
       FieldFormat = fieldFormats.getType('number');
       formatter = new FieldFormat({ pattern: format }, getConfig);
     }
