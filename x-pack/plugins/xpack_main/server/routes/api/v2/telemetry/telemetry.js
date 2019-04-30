@@ -94,13 +94,14 @@ export function telemetryRoute(server) {
       const start = req.payload.timeRange.min;
       const end = req.payload.timeRange.max;
       const unencrypted = req.payload.unencrypted;
+      const isDev = config.get('env.dev');
 
       try {
         const usageData = await getTelemetry(req, config, start, end, unencrypted);
         if (unencrypted) return usageData;
-        return encryptTelemetry(config, usageData);
+        return encryptTelemetry(usageData, isDev);
       } catch (err) {
-        if (config.get('env.dev')) {
+        if (isDev) {
           // don't ignore errors when running in dev mode
           return boomify(err, { statusCode: err.status });
         } else {

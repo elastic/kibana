@@ -7,13 +7,12 @@
 import { createRequestEncryptor } from '@elastic/request-crypto';
 import { telemetryJWKS } from './telemetry_jwks';
 
-export function getKID(config: any): string {
-  const isDev = config.get('env.dev');
-  return isDev ? 'kibana_dev' : 'kibana';
+export function getKID(isProd = false): string {
+  return isProd ? 'kibana' : 'kibana_dev';
 }
 
-export async function encryptTelemetry(config: any, payload: any): Promise<string> {
-  const kid = getKID(config);
+export async function encryptTelemetry(payload: any, isProd = false): Promise<string> {
+  const kid = getKID(isProd);
   const encryptor = await createRequestEncryptor(telemetryJWKS);
   return encryptor.encrypt(kid, payload);
 }

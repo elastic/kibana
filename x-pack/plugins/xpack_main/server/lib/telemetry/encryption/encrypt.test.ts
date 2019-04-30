@@ -5,45 +5,33 @@
  */
 
 import { telemetryJWKS } from './telemetry_jwks';
-
-const encryptMock = jest.fn();
-
-const mockCreateRequestEncryptor = jest.fn().mockResolvedValue({
-  encrypt: encryptMock,
-});
+import { encryptTelemetry, getKID } from './encrypt';
+import { createRequestEncryptor } from '@elastic/request-crypto';
 
 jest.mock('@elastic/request-crypto', () => ({
-  createRequestEncryptor: mockCreateRequestEncryptor,
-}));
-
-import { encryptTelemetry, getKID } from './encrypt';
-
-const createMockServer = (mode: 'dev' | 'prod') => ({
-  config: () => ({
-    get: () => mode === 'dev',
+  createRequestEncryptor: jest.fn().mockResolvedValue({
+    encrypt: jest.fn(),
   }),
-});
+}));
 
 describe('getKID', () => {
   it(`returns 'kibana_dev' kid for development`, async () => {
-    const mockServer = createMockServer('dev');
-    const kid = getKID(mockServer);
+    const isProd = false;
+    const kid = getKID(isProd);
     expect(kid).toBe('kibana_dev');
   });
 
   it(`returns 'kibana_prod' kid for development`, async () => {
-    const mockServer = createMockServer('prod');
-    const kid = getKID(mockServer);
-    expect(kid).toBe('kibana_prod');
+    const isProd = true;
+    const kid = getKID(isProd);
+    expect(kid).toBe('kibana');
   });
 });
 
 describe('encryptTelemetry', () => {
   it('encrypts payload', async () => {
-    const mockServer = createMockServer('prod');
     const payload = { some: 'value' };
-    await encryptTelemetry(mockServer, payload);
-    expect(mockCreateRequestEncryptor).toBeCalledWith(telemetryJWKS);
-    expect(encryptMock).toBeCalled();
+    await encryptTelemetry(payload, true);
+    expect(createRequestEncryptor).toBeCalledWith(telemetryJWKS);
   });
 });
