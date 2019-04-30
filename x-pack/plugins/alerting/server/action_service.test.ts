@@ -77,6 +77,33 @@ describe('create()', () => {
   });
 });
 
+describe('get()', () => {
+  test('calls savedObjectsClient with id', async () => {
+    const expectedResult = Symbol();
+    const connectorService = new ConnectorService();
+    const actionService = new ActionService(connectorService);
+    savedObjectsClient.get.mockResolvedValueOnce(expectedResult);
+    const result = await actionService.get(savedObjectsClient, '1');
+    expect(result).toEqual(expectedResult);
+    expect(savedObjectsClient.get).toMatchInlineSnapshot(`
+[MockFunction] {
+  "calls": Array [
+    Array [
+      "action",
+      "1",
+    ],
+  ],
+  "results": Array [
+    Object {
+      "type": "return",
+      "value": Promise {},
+    },
+  ],
+}
+`);
+  });
+});
+
 describe('fire()', () => {
   test('fires an action with all given parameters', async () => {
     const connectorService = new ConnectorService();

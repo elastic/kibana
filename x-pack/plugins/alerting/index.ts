@@ -13,13 +13,28 @@ import { APP_ID } from './common/constants';
 export function alerting(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,
+    configPrefix: 'xpack.alerting',
     require: ['kibana', 'elasticsearch'],
+    config(Joi: any) {
+      return Joi.object({
+        enabled: Joi.boolean().default(true),
+      });
+    },
     init(server: Hapi.Server) {
+      const alertingEnabled = server.config().get('xpack.alerting.enabled');
+
+      if (!alertingEnabled) {
+        server.log(['info', 'alerting'], 'Alerting app disabled by configuration');
+        return;
+      }
+
       const connectorService = new ConnectorService();
       const actionService = new ActionService(connectorService);
       const alertService = new AlertService();
+
       // Routes
       createActionRoute(server);
+
       // Register service to server
       server.decorate('server', 'alerting', () => ({
         alerts: alertService,

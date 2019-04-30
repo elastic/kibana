@@ -37,8 +37,12 @@ export class ActionService {
     return await savedObjectsClient.create<any>('action', data, { id });
   }
 
+  public async get(savedObjectsClient: SavedObjectsClient, id: string) {
+    return await savedObjectsClient.get('action', id);
+  }
+
   public async fire({ id, params, savedObjectsClient }: FireActionOptions) {
-    const action = await savedObjectsClient.get('action', id);
+    const action = await this.get(savedObjectsClient, id);
     const connectorOptions = Object.assign(
       {},
       action.attributes.connectorOptions,
