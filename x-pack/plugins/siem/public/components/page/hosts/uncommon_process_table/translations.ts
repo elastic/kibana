@@ -6,6 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const UNCOMMON_PROCESSES = i18n.translate(
+  'xpack.siem.authenticationsTable.uncommonProcessTable',
+  {
+    defaultMessage: 'Uncommon Processes',
+  }
+);
+
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.uncommonProcessTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {Process} other {Processes}}`,
+  });
+
 export const HOSTS = i18n.translate('xpack.siem.uncommonProcessTable.hostsTitle', {
   defaultMessage: 'Hosts',
 });
@@ -35,13 +48,6 @@ export const LAST_USER = i18n.translate('xpack.siem.uncommonProcessTable.lastUse
 export const NAME = i18n.translate('xpack.siem.uncommonProcessTable.nameTitle', {
   defaultMessage: 'Name',
 });
-
-export const UNCOMMON_PROCESSES = i18n.translate(
-  'xpack.siem.authenticationsTable.uncommonProcessTable',
-  {
-    defaultMessage: 'Uncommon Processes',
-  }
-);
 
 export const ROWS_5 = i18n.translate('xpack.siem.uncommonProcessTable.rows', {
   values: { numRows: 5 },

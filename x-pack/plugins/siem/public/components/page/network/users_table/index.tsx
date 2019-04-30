@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -13,7 +12,6 @@ import { ActionCreator } from 'redux';
 import { FlowTarget, UsersEdges, UsersFields, UsersSortField } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../../load_more_table';
-import { CountBadge } from '../../index';
 
 import { getUsersColumns } from './columns';
 import * as i18n from './translations';
@@ -88,30 +86,19 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
     return (
       <LoadMoreTable
         columns={getUsersColumns(flowTarget, usersTableId)}
-        loadingTitle={i18n.USERS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
         hasNextPage={hasNextPage}
+        headerCount={totalCount}
+        headerTitle={i18n.USERS}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.USERS}
+        loadMore={() => loadMore(nextCursor)}
         onChange={this.onChange}
+        pageOfItems={data}
         sorting={getSortField(usersSortField)}
         updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
-        title={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <h3>
-                    {i18n.USERS}
-                    <CountBadge color="hollow">{totalCount}</CountBadge>
-                  </h3>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
       />
     );
   }

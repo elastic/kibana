@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -81,20 +80,18 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
   }) => (
     <LoadMoreTable
       columns={getUncommonColumns()}
-      loadingTitle={i18n.UNCOMMON_PROCESSES}
-      loading={loading}
-      pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
-      limit={limit}
       hasNextPage={hasNextPage}
+      headerCount={totalCount}
+      headerTitle={i18n.UNCOMMON_PROCESSES}
+      headerUnit={i18n.UNIT(totalCount)}
       itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadingTitle={i18n.UNCOMMON_PROCESSES}
+      loadMore={() => loadMore(nextCursor)}
+      pageOfItems={data}
       updateLimitPagination={newLimit =>
         updateLimitPagination({ limit: newLimit, hostsType: type })
-      }
-      title={
-        <h3>
-          {i18n.UNCOMMON_PROCESSES} <EuiBadge color="hollow">{totalCount}</EuiBadge>
-        </h3>
       }
     />
   )

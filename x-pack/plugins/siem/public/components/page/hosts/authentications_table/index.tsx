@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge, EuiToolTip } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n/react';
 import { has } from 'lodash/fp';
 import React from 'react';
@@ -79,20 +79,18 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
   }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns()}
-      loadingTitle={i18n.AUTHENTICATIONS}
-      loading={loading}
-      pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
-      limit={limit}
       hasNextPage={hasNextPage}
+      headerCount={totalCount}
+      headerTitle={i18n.AUTHENTICATIONS}
+      headerUnit={i18n.UNIT(totalCount)}
       itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadingTitle={i18n.AUTHENTICATIONS}
+      loadMore={() => loadMore(nextCursor)}
+      pageOfItems={data}
       updateLimitPagination={newLimit =>
         updateLimitPagination({ limit: newLimit, hostsType: type })
-      }
-      title={
-        <h3>
-          {i18n.AUTHENTICATIONS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
-        </h3>
       }
     />
   )

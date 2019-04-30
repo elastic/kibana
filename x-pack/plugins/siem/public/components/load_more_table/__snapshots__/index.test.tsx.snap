@@ -7,14 +7,16 @@ exports[`Load More Table Component rendering it renders the default load more ta
   paddingSize="m"
 >
   <styled.div>
-    <EuiTitle
-      size="s"
+    <pure(Component)
+      subtitle="Showing: 1 Test Unit"
+      title="Hosts"
+      tooltip="My test tooltip"
     >
-      <h3>
-        Hosts
-      </h3>
-    </EuiTitle>
-    <EuiBasicTable
+      <p>
+        My test supplement.
+      </p>
+    </pure(Component)>
+    <Styled(EuiBasicTable)
       columns={
         Array [
           Object {
@@ -75,9 +77,7 @@ exports[`Load More Table Component rendering it renders the default load more ta
           },
         ]
       }
-      noItemsMessage="No items found"
       onChange={[Function]}
-      responsive={true}
       sorting={null}
     />
     <styled.div>

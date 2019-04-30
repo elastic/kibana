@@ -31,7 +31,6 @@ import {
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import { TableTitle } from '../../table_title';
 
 interface OwnProps {
   data: HostsEdges[];
@@ -93,7 +92,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     Columns<OsFields['name']>,
     Columns<OsFields['version']>
   ];
-  private memoizedTitle: (totalCount: number) => JSX.Element;
   private memoizedSorting: (
     trigger: string,
     sortField: HostsFields,
@@ -103,7 +101,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   constructor(props: HostsTableProps) {
     super(props);
     this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
-    this.memoizedTitle = memoizeOne(this.getTitle);
     this.memoizedSorting = memoizeOne(this.getSorting);
   }
 
@@ -122,17 +119,20 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     return (
       <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}
-        loadingTitle={i18n.HOSTS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={this.wrappedLoadMore}
-        limit={limit}
         hasNextPage={hasNextPage}
+        headerCount={totalCount}
+        headerTitle={i18n.HOSTS}
+        headerTooltip={i18n.TOOLTIP}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.HOSTS}
+        loadMore={this.wrappedLoadMore}
         onChange={this.onChange}
-        updateLimitPagination={this.wrappedUpdateLimitPagination}
+        pageOfItems={data}
         sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
-        title={this.memoizedTitle(totalCount)}
+        updateLimitPagination={this.wrappedUpdateLimitPagination}
       />
     );
   }
@@ -142,10 +142,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     sortField: HostsFields,
     direction: Direction
   ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
-
-  private getTitle = (totalCount: number): JSX.Element => (
-    <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
-  );
 
   private wrappedUpdateLimitPagination = (newLimit: number) =>
     this.props.updateLimitPagination({ limit: newLimit, hostsType: this.props.type });

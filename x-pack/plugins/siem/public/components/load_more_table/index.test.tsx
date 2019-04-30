@@ -21,15 +21,19 @@ describe('Load More Table Component', () => {
       const wrapper = shallow(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -40,15 +44,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={true}
-          pageOfItems={[]}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={1}
+          loading={true}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={[]}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -61,15 +69,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
       wrapper.setState({ isEmptyTable: false });
@@ -82,15 +94,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -106,15 +122,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -135,15 +155,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={2}
           hasNextPage={false}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={2}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -154,15 +178,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={2}
           hasNextPage={true}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={2}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -177,15 +205,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={2}
           hasNextPage={true}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={[]}
+          limit={2}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -197,17 +229,21 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={sortedHosts}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={jest.fn()}
-          limit={2}
           hasNextPage={true}
-          onChange={mockOnChange}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={2}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={jest.fn()}
+          onChange={mockOnChange}
+          pageOfItems={mockData.Hosts.edges}
           sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -220,15 +256,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={1}
           hasNextPage={mockData.Hosts.pageInfo.hasNextPage!}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -244,15 +284,19 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
-          limit={2}
           hasNextPage={true}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={2}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={() => loadMore(mockData.Hosts.pageInfo.endCursor)}
+          pageOfItems={mockData.Hosts.edges}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
@@ -273,17 +317,21 @@ describe('Load More Table Component', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={sortedHosts}
-          loadingTitle="Hosts"
-          loading={false}
-          pageOfItems={mockData.Hosts.edges}
-          loadMore={jest.fn()}
-          limit={2}
           hasNextPage={true}
-          onChange={mockOnChange}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
           itemsPerRow={rowItems}
+          limit={2}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={jest.fn()}
+          onChange={mockOnChange}
+          pageOfItems={mockData.Hosts.edges}
           sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           updateLimitPagination={newlimit => updateLimitPagination({ limit: newlimit })}
-          title={<h3>Hosts</h3>}
         />
       );
 
