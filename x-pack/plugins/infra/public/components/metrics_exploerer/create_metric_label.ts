@@ -10,8 +10,5 @@ import {
 } from '../../../server/routes/metrics_explorer/types';
 
 export const createMetricLabel = (metric: MetricsExplorerMetric) => {
-  if (metric.aggregation === MetricsExplorerAggregation.count) {
-    return 'count()';
-  }
   return `${metric.aggregation}(${metric.field || ''})`;
 };
