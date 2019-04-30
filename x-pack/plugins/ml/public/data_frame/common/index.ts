@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+export * from './aggregations';
 export * from './dropdown';
 export * from './index_pattern_context';
 export * from './pivot_aggs';
