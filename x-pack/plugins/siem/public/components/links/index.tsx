@@ -30,7 +30,7 @@ export const IPDetailsLink = pure<{ children?: React.ReactNode; ip: string }>(
 // External Links
 export const GoogleLink = pure<{ children?: React.ReactNode; link: string }>(
   ({ children, link }) => (
-    <EuiLink href={`https://www.google.com/search?q=${encodeURI(link)}`} target="_blank">
+    <EuiLink href={`https://www.google.com/search?q=${encodeURIComponent(link)}`} target="_blank">
       {children ? children : link}
     </EuiLink>
   )
@@ -42,7 +42,9 @@ export const PortOrServiceNameLink = pure<{
 }>(({ children, portOrServiceName }) => (
   <EuiLink
     data-test-subj="port-or-service-name-link"
-    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${portOrServiceName}`}
+    href={`https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=${encodeURIComponent(
+      String(portOrServiceName)
+    )}`}
     target="_blank"
   >
     {children ? children : portOrServiceName}
@@ -53,7 +55,7 @@ export const Ja3FingerprintLink = pure<{ children?: React.ReactNode; ja3Fingerpr
   ({ children, ja3Fingerprint }) => (
     <EuiLink
       data-test-subj="ja3-fingerprint-link"
-      href={`https://sslbl.abuse.ch/ja3-fingerprints/${encodeURI(ja3Fingerprint)}`}
+      href={`https://sslbl.abuse.ch/ja3-fingerprints/${encodeURIComponent(ja3Fingerprint)}`}
       target="_blank"
     >
       {children ? children : ja3Fingerprint}
@@ -67,7 +69,9 @@ export const CertificateFingerprintLink = pure<{
 }>(({ children, certificateFingerprint }) => (
   <EuiLink
     data-test-subj="certificate-fingerprint-link"
-    href={`https://sslbl.abuse.ch/ssl-certificates/sha1/${encodeURI(certificateFingerprint)}`}
+    href={`https://sslbl.abuse.ch/ssl-certificates/sha1/${encodeURIComponent(
+      certificateFingerprint
+    )}`}
     target="_blank"
   >
     {children ? children : certificateFingerprint}
@@ -77,7 +81,7 @@ export const CertificateFingerprintLink = pure<{
 export const ReputationLink = pure<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (
     <EuiLink
-      href={`https://www.talosintelligence.com/reputation_center/lookup?search=${encodeURI(
+      href={`https://www.talosintelligence.com/reputation_center/lookup?search=${encodeURIComponent(
         domain
       )}`}
       target="_blank"
@@ -89,7 +93,10 @@ export const ReputationLink = pure<{ children?: React.ReactNode; domain: string 
 
 export const VirusTotalLink = pure<{ children?: React.ReactNode; link: string }>(
   ({ children, link }) => (
-    <EuiLink href={`https://www.virustotal.com/#/search/${encodeURI(link)}`} target="_blank">
+    <EuiLink
+      href={`https://www.virustotal.com/#/search/${encodeURIComponent(link)}`}
+      target="_blank"
+    >
       {children ? children : link}
     </EuiLink>
   )
@@ -97,7 +104,7 @@ export const VirusTotalLink = pure<{ children?: React.ReactNode; link: string }>
 
 export const WhoIsLink = pure<{ children?: React.ReactNode; domain: string }>(
   ({ children, domain }) => (
-    <EuiLink href={`https://www.iana.org/whois?q=${encodeURI(domain)}`} target="_blank">
+    <EuiLink href={`https://www.iana.org/whois?q=${encodeURIComponent(domain)}`} target="_blank">
       {children ? children : domain}
     </EuiLink>
   )

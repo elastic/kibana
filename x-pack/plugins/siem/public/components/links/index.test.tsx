@@ -17,6 +17,9 @@ import {
   ReputationLink,
   VirusTotalLink,
   WhoIsLink,
+  CertificateFingerprintLink,
+  Ja3FingerprintLink,
+  PortOrServiceNameLink,
 } from '.';
 
 describe('Custom Links', () => {
@@ -72,28 +75,28 @@ describe('Custom Links', () => {
   describe('GoogleLink', () => {
     test('it renders text passed in as value', () => {
       const wrapper = mountWithIntl(
-        <GoogleLink link={'http:/example.com/'}>{'Example Link'}</GoogleLink>
+        <GoogleLink link={'http://example.com/'}>{'Example Link'}</GoogleLink>
       );
       expect(wrapper.text()).toEqual('Example Link');
     });
 
     test('it renders props passed in as link', () => {
       const wrapper = mountWithIntl(
-        <GoogleLink link={'http:/example.com/'}>{'Example Link'}</GoogleLink>
+        <GoogleLink link={'http://example.com/'}>{'Example Link'}</GoogleLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual(
-        'https://www.google.com/search?q=http:/example.com/'
+        'https://www.google.com/search?q=http%3A%2F%2Fexample.com%2F'
       );
     });
 
     test("it encodes <script>alert('XSS')</script>", () => {
       const wrapper = mountWithIntl(
-        <GoogleLink link={"http:/example.com?q=<script>alert('XSS')</script>"}>
+        <GoogleLink link={"http://example.com?q=<script>alert('XSS')</script>"}>
           {'Example Link'}
         </GoogleLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.google.com/search?q=http:/example.com?q=%3Cscript%3Ealert('XSS')%3C/script%3E"
+        "https://www.google.com/search?q=http%3A%2F%2Fexample.com%3Fq%3D%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
     });
   });
@@ -120,7 +123,7 @@ describe('Custom Links', () => {
         <ReputationLink domain={"<script>alert('XSS')</script>"}>{'Example Link'}</ReputationLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C/script%3E"
+        "https://www.talosintelligence.com/reputation_center/lookup?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
     });
   });
@@ -143,7 +146,7 @@ describe('Custom Links', () => {
         <VirusTotalLink link={"<script>alert('XSS')</script>"}>{'Example Link'}</VirusTotalLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C/script%3E"
+        "https://www.virustotal.com/#/search/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
     });
   });
@@ -164,7 +167,107 @@ describe('Custom Links', () => {
         <WhoIsLink domain={"<script>alert('XSS')</script>"}>{'Example Link'}</WhoIsLink>
       );
       expect(wrapper.find('a').prop('href')).toEqual(
-        "https://www.iana.org/whois?q=%3Cscript%3Ealert('XSS')%3C/script%3E"
+        "https://www.iana.org/whois?q=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
+      );
+    });
+  });
+
+  describe('CertificateFingerprintLink', () => {
+    test('it renders link text', () => {
+      const wrapper = mountWithIntl(
+        <CertificateFingerprintLink certificateFingerprint={'abcd'}>
+          {'Example Link'}
+        </CertificateFingerprintLink>
+      );
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders correct href', () => {
+      const wrapper = mountWithIntl(
+        <CertificateFingerprintLink certificateFingerprint={'abcd'}>
+          {'Example Link'}
+        </CertificateFingerprintLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://sslbl.abuse.ch/ssl-certificates/sha1/abcd'
+      );
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <CertificateFingerprintLink certificateFingerprint={"<script>alert('XSS')</script>"}>
+          {'Example Link'}
+        </CertificateFingerprintLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://sslbl.abuse.ch/ssl-certificates/sha1/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
+      );
+    });
+  });
+
+  describe('Ja3FingerprintLink', () => {
+    test('it renders link text', () => {
+      const wrapper = mountWithIntl(
+        <Ja3FingerprintLink ja3Fingerprint={'abcd'}>{'Example Link'}</Ja3FingerprintLink>
+      );
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders correct href', () => {
+      const wrapper = mountWithIntl(
+        <Ja3FingerprintLink ja3Fingerprint={'abcd'}>{'Example Link'}</Ja3FingerprintLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://sslbl.abuse.ch/ja3-fingerprints/abcd'
+      );
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <Ja3FingerprintLink ja3Fingerprint={"<script>alert('XSS')</script>"}>
+          {'Example Link'}
+        </Ja3FingerprintLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://sslbl.abuse.ch/ja3-fingerprints/%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
+      );
+    });
+  });
+
+  describe('PortOrServiceNameLink', () => {
+    test('it renders link text', () => {
+      const wrapper = mountWithIntl(
+        <PortOrServiceNameLink portOrServiceName={443}>{'Example Link'}</PortOrServiceNameLink>
+      );
+      expect(wrapper.text()).toEqual('Example Link');
+    });
+
+    test('it renders correct href when port is a number', () => {
+      const wrapper = mountWithIntl(
+        <PortOrServiceNameLink portOrServiceName={443}>{'Example Link'}</PortOrServiceNameLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=443'
+      );
+    });
+
+    test('it renders correct href when port is a string', () => {
+      const wrapper = mountWithIntl(
+        <PortOrServiceNameLink portOrServiceName={'80'}>{'Example Link'}</PortOrServiceNameLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        'https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=80'
+      );
+    });
+
+    test("it encodes <script>alert('XSS')</script>", () => {
+      const wrapper = mountWithIntl(
+        <PortOrServiceNameLink portOrServiceName={"<script>alert('XSS')</script>"}>
+          {'Example Link'}
+        </PortOrServiceNameLink>
+      );
+      expect(wrapper.find('a').prop('href')).toEqual(
+        "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
     });
   });

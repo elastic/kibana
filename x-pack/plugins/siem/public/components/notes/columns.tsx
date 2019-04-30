@@ -29,7 +29,7 @@ interface Column {
 export const columns: Column[] = [
   {
     field: 'note',
-    name: i18n.NOTE,
+    name: i18n.NOTE(1),
     sortable: true,
     truncateText: false,
     render: (_, { created, note, user }) => (

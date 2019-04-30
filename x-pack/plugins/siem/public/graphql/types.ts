@@ -1133,11 +1133,11 @@ export interface OverviewNetworkData {
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd: number;
+  auditbeatAuditd?: number | null;
 
-  auditbeatFIM: number;
+  auditbeatFIM?: number | null;
 
-  auditbeatLogin: number;
+  auditbeatLogin?: number | null;
 
   auditbeatPackage?: number | null;
 
@@ -2628,11 +2628,11 @@ export namespace GetOverviewHostQuery {
   export type OverviewHost = {
     __typename?: 'OverviewHostData';
 
-    auditbeatAuditd: number;
+    auditbeatAuditd?: number | null;
 
-    auditbeatFIM: number;
+    auditbeatFIM?: number | null;
 
-    auditbeatLogin: number;
+    auditbeatLogin?: number | null;
 
     auditbeatPackage?: number | null;
 

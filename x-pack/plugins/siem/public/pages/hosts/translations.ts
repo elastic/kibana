@@ -11,7 +11,7 @@ export const HOSTS = i18n.translate('xpack.siem.hosts.hosts', {
 });
 
 export const NO_AUDITBEAT_INDICES = i18n.translate('xpack.siem.hosts.noAuditBeatIndicies', {
-  defaultMessage: "Looks like you don't have any auditbeat indices.",
+  defaultMessage: "Looks like you don't have any Auditbeat indices.",
 });
 
 export const KQL_PLACE_HOLDER = i18n.translate('xpack.siem.hosts.kqlPlaceHolder', {

@@ -58,7 +58,7 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the source is NOT content', () => {
+    test('it returns false when the source is NOT content', () => {
       expect(
         sourceIsContent({
           destination: { droppableId: `${droppableIdPrefix}.timelineProviders.timeline`, index: 0 },
@@ -92,7 +92,7 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the draggable is NOT content', () => {
+    test('it returns false when the draggable is NOT content', () => {
       expect(
         draggableIsContent({
           destination: null,
@@ -129,7 +129,7 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the reason is NOT DROP', () => {
+    test('it returns false when the reason is NOT DROP', () => {
       expect(
         reasonIsDrop({
           destination: {
@@ -169,7 +169,7 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the destination is null', () => {
+    test('it returns false when the destination is null', () => {
       expect(
         destinationIsTimelineProviders({
           destination: null,
@@ -185,7 +185,7 @@ describe('helpers', () => {
       ).toEqual(false);
     });
 
-    test('it returns returns false when the destination is NOT timelineProviders', () => {
+    test('it returns false when the destination is NOT timelineProviders', () => {
       expect(
         destinationIsTimelineProviders({
           destination: {
@@ -225,7 +225,7 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the destination is null', () => {
+    test('it returns false when the destination is null', () => {
       expect(
         destinationIsTimelineButton({
           destination: null,
@@ -241,7 +241,7 @@ describe('helpers', () => {
       ).toEqual(false);
     });
 
-    test('it returns returns false when the destination is NOT a flyout button', () => {
+    test('it returns false when the destination is NOT a flyout button', () => {
       expect(
         destinationIsTimelineButton({
           destination: {
@@ -378,7 +378,7 @@ describe('helpers', () => {
       ).toEqual(true);
     });
 
-    test('it returns returns false when the reason is NOT DROP', () => {
+    test('it returns false when the reason is NOT DROP', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: {
@@ -397,7 +397,7 @@ describe('helpers', () => {
       ).toEqual(false);
     });
 
-    test('it returns returns false when the draggable is NOT content', () => {
+    test('it returns false when the draggable is NOT content', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: null,
@@ -413,7 +413,7 @@ describe('helpers', () => {
       ).toEqual(false);
     });
 
-    test('it returns returns false when the the source is NOT content', () => {
+    test('it returns false when the the source is NOT content', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: { droppableId: DROPPABLE_ID_TIMELINE_PROVIDERS, index: 0 },
@@ -426,7 +426,7 @@ describe('helpers', () => {
       ).toEqual(false);
     });
 
-    test('it returns returns false when the the destination is NOT timeline providers', () => {
+    test('it returns false when the the destination is NOT timeline providers', () => {
       expect(
         providerWasDroppedOnTimeline({
           destination: {
