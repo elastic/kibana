@@ -53,7 +53,8 @@ interface BasicTableProps<T> {
   sorting?: SortingBasicTable;
   totalCount: number;
   title: string | React.ReactElement;
-  updateLimitPagination: (limit: number, activePage: number) => void;
+  updateActivePage: (activePage: number) => void;
+  updateLimitPagination: (limit: number) => void;
 }
 
 export interface Columns<T> {
@@ -79,6 +80,7 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
     sorting = null,
     totalCount,
     title,
+    updateActivePage,
     updateLimitPagination,
   }) => {
     const [activePage, setActivePage] = useState(0);
@@ -104,6 +106,7 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
     const goToPage = (newActivePage: number) => {
       setActivePage(newActivePage);
       loadMore(newActivePage);
+      updateActivePage(newActivePage);
     };
     if (!isEmpty(pageOfItems) && isEmptyTable) {
       setEmptyTable(false);
@@ -141,7 +144,8 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
           icon={limit === item.numberOfRow ? 'check' : 'empty'}
           onClick={() => {
             closePopover();
-            updateLimitPagination(item.numberOfRow, activePage);
+            updateLimitPagination(item.numberOfRow);
+            updateActivePage(0); // reset results to first page
           }}
         >
           {item.text}

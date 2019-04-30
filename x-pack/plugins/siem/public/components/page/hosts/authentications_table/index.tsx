@@ -20,8 +20,9 @@ import { getEmptyTagValue } from '../../../empty_value';
 import { HostDetailsLink, IPDetailsLink } from '../../../links';
 import { Columns, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
 import { Provider } from '../../../timeline/data_providers/provider';
-
 import * as i18n from './translations';
+
+const tableType = hostsModel.HostsTableType.authentications;
 
 interface OwnProps {
   data: AuthenticationsEdges[];
@@ -36,9 +37,15 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: ActionCreator<{
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
+  updateTableLimit: ActionCreator<{
     limit: number;
     hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
   }>;
 }
 
@@ -66,7 +73,16 @@ const rowItems: ItemsPerRow[] = [
 ];
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
-  ({ data, limit, loading, loadMore, totalCount, updateLimitPagination, type }) => (
+  ({
+    data,
+    limit,
+    loading,
+    loadMore,
+    totalCount,
+    updateTableActivePage,
+    updateTableLimit,
+    type,
+  }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns()}
       loadingTitle={i18n.AUTHENTICATIONS}
@@ -77,9 +93,17 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       itemsPerRow={rowItems}
       totalCount={totalCount}
       updateLimitPagination={newLimit =>
-        updateLimitPagination({
+        updateTableLimit({
           hostsType: type,
           limit: newLimit,
+          tableType,
+        })
+      }
+      updateActivePage={(newPage: number) =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
         })
       }
       title={
@@ -102,7 +126,8 @@ const makeMapStateToProps = () => {
 export const AuthenticationTable = connect(
   makeMapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateAuthenticationsLimit,
+    updateTableActivePage: hostsActions.updateTableActivePage,
+    updateTableLimit: hostsActions.updateTableLimit,
   }
 )(AuthenticationTableComponent);
 

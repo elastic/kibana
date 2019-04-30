@@ -33,6 +33,7 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface AuthenticationsComponentReduxProps {
   limit: number;
+  activePage: number;
 }
 
 type AuthenticationsProps = OwnProps & AuthenticationsComponentReduxProps;
@@ -51,7 +52,17 @@ class AuthenticationsComponentQuery extends QueryTemplate<
       startDate,
       endDate,
       limit,
+      activePage = 0,
     } = this.props;
+    console.log('activePage', activePage);
+    const cursorStart = activePage * limit;
+    const pagination = {
+      activePage,
+      cursor: String(cursorStart),
+      limit: limit + cursorStart,
+      tiebreaker: null,
+    };
+
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
         query={authenticationsQuery}
@@ -64,12 +75,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          pagination: {
-            limit,
-            activePage: 0,
-            cursor: null,
-            tiebreaker: null,
-          },
+          pagination,
           filterQuery: createFilter(filterQuery),
         }}
       >
@@ -78,6 +84,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => {
             const cursorStart = newActivePage * limit;
+            console.log('LIMIT', limit);
             return {
               variables: {
                 pagination: {

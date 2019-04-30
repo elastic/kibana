@@ -7,7 +7,7 @@
 import { ApolloQueryResult } from 'apollo-client';
 import React from 'react';
 import { FetchMoreOptions, FetchMoreQueryOptions, OperationVariables } from 'react-apollo';
-
+import { PaginationInput } from '../graphql/types';
 import { ESQuery } from '../../common/typed_json';
 
 export interface QueryTemplateProps {
@@ -27,16 +27,14 @@ type PromiseApolloQueryResult = Promise<ApolloQueryResult<any>>;
 export class QueryTemplate<
   T extends QueryTemplateProps,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  TData = any,
+  TData = any & PaginationInput,
   TVariables = OperationVariables
-> extends React.PureComponent<T, TData, TVariables> {
+> extends React.Component<T, PaginationInput, TVariables> {
   private fetchMore!: (
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
   ) => PromiseApolloQueryResult;
 
-  private fetchMoreOptions!: (
-    newActivePage: number
-  ) => FetchMoreOptionsArgs<TData, TVariables>;
+  private fetchMoreOptions!: (newActivePage: number) => FetchMoreOptionsArgs<TData, TVariables>;
 
   public constructor(props: T) {
     super(props);
