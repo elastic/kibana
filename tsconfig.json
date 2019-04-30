@@ -6,6 +6,9 @@
       "kibana": ["./kibana"],
       "kibana/public": ["src/core/public"],
       "kibana/server": ["src/core/server"],
+      "plugins/*": [
+        "src/legacy/core_plugins/*/public/"
+      ],
       "ui/*": [
         "src/legacy/ui/public/*"
       ],
