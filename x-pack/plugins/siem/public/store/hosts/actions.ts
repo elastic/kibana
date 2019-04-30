@@ -25,18 +25,10 @@ export const updateTableLimit = actionCreator<{
   tableType: HostsTableType;
 }>('UPDATE_TABLE_LIMIT');
 
-export const updateHostsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_HOSTS_LIMIT'
-);
-
 export const updateHostsSort = actionCreator<{
   sort: HostsSortField;
   hostsType: HostsType;
 }>('UPDATE_HOSTS_SORT');
-
-export const updateEventsLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_EVENTS_LIMIT'
-);
 
 export const setHostsFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;

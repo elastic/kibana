@@ -22,14 +22,14 @@ import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 
+const tableType = hostsModel.HostsTableType.events;
+
 interface OwnProps {
   data: Ecs[];
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
   tiebreaker: string;
   totalCount: number;
-  loadMore: (cursor: string, tiebreaker: string) => void;
+  loadMore: (newActivePage: number, tiebreaker?: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -38,7 +38,16 @@ interface EventsTableReduxProps {
 }
 
 interface EventsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
+  updateTableLimit: ActionCreator<{
+    limit: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
 }
 
 type EventsTableProps = OwnProps & EventsTableReduxProps & EventsTableDispatchProps;
@@ -65,28 +74,38 @@ const rowItems: ItemsPerRow[] = [
 const EventsTableComponent = pure<EventsTableProps>(
   ({
     data,
-    hasNextPage,
     limit,
     loading,
     loadMore,
     tiebreaker,
     totalCount,
-    nextCursor,
-    updateLimitPagination,
+    updateTableActivePage,
+    updateTableLimit,
     type,
   }) => (
     <LoadMoreTable
       columns={getEventsColumns()}
-      loadingTitle={i18n.EVENTS}
-      loading={loading}
-      pageOfItems={data}
-      loadMore={() => loadMore(nextCursor, tiebreaker)}
-      limit={limit}
-      hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadingTitle={i18n.EVENTS}
+      loadMore={newActivePage => loadMore(newActivePage, tiebreaker)}
+      pageOfItems={data}
       updateLimitPagination={newLimit =>
-        updateLimitPagination({ limit: newLimit, hostsType: type })
+        updateTableLimit({
+          hostsType: type,
+          limit: newLimit,
+          tableType,
+        })
       }
+      updateActivePage={newPage =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        })
+      }
+      totalCount={totalCount}
       title={
         <h3>
           {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
@@ -107,7 +126,8 @@ const makeMapStateToProps = () => {
 export const EventsTable = connect(
   makeMapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateEventsLimit,
+    updateTableActivePage: hostsActions.updateTableActivePage,
+    updateTableLimit: hostsActions.updateTableLimit,
   }
 )(EventsTableComponent);
 

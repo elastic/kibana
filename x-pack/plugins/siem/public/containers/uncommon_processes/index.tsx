@@ -47,7 +47,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      activePage = 0,
+      activePage,
       children,
       endDate,
       filterQuery,
@@ -75,28 +75,26 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
         {({ data, loading, fetchMore, refetch }) => {
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => {
-            return {
-              variables: {
-                pagination: generateTablePaginationOptions(newActivePage, limit),
-              },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                return {
-                  ...fetchMoreResult,
-                  source: {
-                    ...fetchMoreResult.source,
-                    UncommonProcesses: {
-                      ...fetchMoreResult.source.UncommonProcesses,
-                      edges: [...fetchMoreResult.source.UncommonProcesses.edges],
-                    },
+          this.setFetchMoreOptions((newActivePage: number) => ({
+            variables: {
+              pagination: generateTablePaginationOptions(newActivePage, limit),
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) {
+                return prev;
+              }
+              return {
+                ...fetchMoreResult,
+                source: {
+                  ...fetchMoreResult.source,
+                  UncommonProcesses: {
+                    ...fetchMoreResult.source.UncommonProcesses,
+                    edges: [...fetchMoreResult.source.UncommonProcesses.edges],
                   },
-                };
-              },
-            };
-          });
+                },
+              };
+            },
+          }));
           return children({
             id,
             loading,

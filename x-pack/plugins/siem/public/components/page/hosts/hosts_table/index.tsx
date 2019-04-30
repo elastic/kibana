@@ -31,14 +31,14 @@ import { getHostsColumns } from './columns';
 import * as i18n from './translations';
 import { TableTitle } from '../../table_title';
 
+const tableType = hostsModel.HostsTableType.hosts;
+
 interface OwnProps {
   data: HostsEdges[];
   loading: boolean;
   indexPattern: StaticIndexPattern;
-  hasNextPage: boolean;
-  nextCursor: string;
   totalCount: number;
-  loadMore: (newActivePage: number) => void;
+  loadMore: (newActivePage: number, tiebreaker?: string) => void;
   type: hostsModel.HostsType;
 }
 
@@ -49,7 +49,16 @@ interface HostsTableReduxProps {
 }
 
 interface HostsTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
+  updateTableLimit: ActionCreator<{
+    limit: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
   updateHostsSort: ActionCreator<{
     sort: HostsSortField;
     hostsType: hostsModel.HostsType;
@@ -104,13 +113,15 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     const {
       data,
       direction,
-      hasNextPage,
       indexPattern,
       limit,
       loading,
+      loadMore,
       totalCount,
       sortField,
       type,
+      updateTableActivePage,
+      updateTableLimit,
     } = this.props;
     return (
       <LoadMoreTable
@@ -118,14 +129,27 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
         loadingTitle={i18n.HOSTS}
         loading={loading}
         pageOfItems={data}
-        loadMore={this.wrappedLoadMore}
+        loadMore={newActivePage => loadMore(newActivePage)}
         limit={limit}
-        hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
         onChange={this.onChange}
-        updateLimitPagination={this.wrappedUpdateLimitPagination}
+        updateLimitPagination={newLimit =>
+          updateTableLimit({
+            hostsType: type,
+            limit: newLimit,
+            tableType,
+          })
+        }
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            hostsType: type,
+            tableType,
+          })
+        }
         sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
         title={this.memoizedTitle(totalCount)}
+        totalCount={totalCount}
       />
     );
   }
@@ -139,11 +163,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private getTitle = (totalCount: number): JSX.Element => (
     <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
   );
-
-  private wrappedUpdateLimitPagination = (newLimit: number) =>
-    this.props.updateLimitPagination({ limit: newLimit, hostsType: this.props.type });
-
-  private wrappedLoadMore = () => this.props.loadMore(this.props.nextCursor);
 
   private getMemoizeHostsColumns = (
     type: hostsModel.HostsType,
@@ -198,7 +217,8 @@ const makeMapStateToProps = () => {
 export const HostsTable = connect(
   makeMapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateHostsLimit,
+    updateTableActivePage: hostsActions.updateTableActivePage,
+    updateTableLimit: hostsActions.updateTableLimit,
     updateHostsSort: hostsActions.updateHostsSort,
   }
 )(HostsTableComponent);

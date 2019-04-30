@@ -56,6 +56,7 @@ export const sharedSchema = gql`
 
   type PageInfo {
     activePage: Float
+    tiebreaker: String
   }
 
   enum IndexType {

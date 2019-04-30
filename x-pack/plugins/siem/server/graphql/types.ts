@@ -311,6 +311,8 @@ export interface CursorType {
 
 export interface PageInfo {
   activePage?: number | null;
+
+  tiebreaker?: string | null;
 }
 
 export interface EventsData {
@@ -2452,10 +2454,17 @@ export namespace CursorTypeResolvers {
 export namespace PageInfoResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
     activePage?: ActivePageResolver<number | null, TypeParent, Context>;
+
+    tiebreaker?: TiebreakerResolver<string | null, TypeParent, Context>;
   }
 
   export type ActivePageResolver<
     R = number | null,
+    Parent = PageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type TiebreakerResolver<
+    R = string | null,
     Parent = PageInfo,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;

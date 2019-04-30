@@ -56,7 +56,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                   startDate={from}
                   type={hostsModel.HostsType.page}
                 >
-                  {({ hosts, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  {({ hosts, totalCount, loading, loadMore, id, refetch }) => (
                     <HostsTableManage
                       id={id}
                       indexPattern={indexPattern}
@@ -65,8 +65,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       loading={loading}
                       data={hosts}
                       totalCount={totalCount}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
                     />
@@ -86,7 +84,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                     uncommonProcesses,
                     totalCount,
                     loading,
-                    pageInfo,
                     loadMore,
                     id,
                     refetch,
@@ -98,8 +95,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       loading={loading}
                       data={uncommonProcesses}
                       totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
                     />
@@ -115,7 +110,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                   startDate={from}
                   type={hostsModel.HostsType.page}
                 >
-                  {({ authentications, totalCount, loading, pageInfo, loadMore, id, refetch }) => (
+                  {({ authentications, totalCount, loading, loadMore, id, refetch }) => (
                     <AuthenticationTableManage
                       id={id}
                       refetch={refetch}
@@ -123,8 +118,6 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       loading={loading}
                       data={authentications}
                       totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
                     />
@@ -148,9 +141,7 @@ const HostsComponent = pure<HostsComponentProps>(({ filterQuery }) => (
                       data={events!}
                       loading={loading}
                       totalCount={totalCount}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loadMore={loadMore}
                       type={hostsModel.HostsType.page}
                     />

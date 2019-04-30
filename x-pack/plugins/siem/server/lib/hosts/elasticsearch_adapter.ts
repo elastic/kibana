@@ -38,15 +38,15 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       'search',
       buildHostsQuery(options)
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.host_count.value', response);
     const buckets: HostAggEsItem[] = getOr([], 'aggregations.host_data.buckets', response);
     const hostsEdges = buckets.map(bucket => formatHostEdgesData(options.fields, bucket));
-    const hasNextPage = hostsEdges.length === limit + 1;
-    const beginning = cursor != null ? parseInt(cursor, 10) : 0;
+
+    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
     const edges = hostsEdges.splice(beginning, limit - beginning);
 
-    return { edges, totalCount, pageInfo: { hasNextPage, endCursor: { value: String(limit) } } };
+    return { edges, totalCount, pageInfo: { activePage: activePage ? activePage : 0 } };
   }
 
   public async getHostDetails(

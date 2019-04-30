@@ -73,16 +73,22 @@ export class ElasticsearchEventsAdapter implements EventsAdapter {
             count: item.doc_count,
           }))
         : [];
-    const { limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'hits.total.value', response);
     const hits = response.hits.hits;
     const eventsEdges: EcsEdges[] = hits.map(hit =>
       formatEventsData(options.fields, hit, eventFieldsMap)
     );
-    const hasNextPage = eventsEdges.length === limit + 1;
-    const edges = hasNextPage ? eventsEdges.splice(0, limit) : eventsEdges;
-    const lastCursor = get('cursor', last(edges));
-    return { kpiEventType, edges, totalCount, pageInfo: { hasNextPage, endCursor: lastCursor } };
+
+    const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
+    const edges = eventsEdges.splice(beginning, limit - beginning);
+    const tiebreaker = get('cursor.tiebreaker', last(edges));
+    return {
+      kpiEventType,
+      edges,
+      totalCount,
+      pageInfo: { activePage: activePage ? activePage : 0, tiebreaker },
+    };
   }
 
   public async getTimelineData(

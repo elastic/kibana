@@ -4,12 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const generateTablePaginationOptions = (activePage: number, limit: number) => {
+export const generateTablePaginationOptions = (
+  activePage: number,
+  limit: number,
+  tiebreaker?: string | null
+) => {
   const cursorStart = activePage * limit;
   return {
     activePage,
     cursor: String(cursorStart),
     limit: limit + cursorStart,
-    tiebreaker: null,
+    tiebreaker,
   };
-}
+};

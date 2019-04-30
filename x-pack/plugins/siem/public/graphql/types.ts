@@ -282,6 +282,8 @@ export interface CursorType {
 
 export interface PageInfo {
   activePage?: number | null;
+
+  tiebreaker?: string | null;
 }
 
 export interface EventsData {

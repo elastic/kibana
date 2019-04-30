@@ -12,8 +12,6 @@ import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 import {
   applyHostsFilterQuery,
   setHostsFilterQueryDraft,
-  updateEventsLimit,
-  updateHostsLimit,
   updateHostsSort,
   updateTableActivePage,
   updateTableLimit,
@@ -77,31 +75,6 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
         ...state[hostsType].queries,
         [tableType]: {
           ...state[hostsType].queries[tableType],
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateHostsLimit, (state, { limit, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      queries: {
-        ...state[hostsType].queries,
-        hosts: {
-          ...state[hostsType].queries.hosts,
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateEventsLimit, (state, { limit, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      queries: {
-        ...state[hostsType].queries,
-        events: {
           limit,
         },
       },

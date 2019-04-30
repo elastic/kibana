@@ -28,7 +28,7 @@ interface OwnProps {
   data: AuthenticationsEdges[];
   loading: boolean;
   totalCount: number;
-  loadMore: (newActivePage: number) => void;
+  loadMore: (newActivePage: number, tiebreaker?: string) => void;
   type: hostsModel.HostsType;
 }
 

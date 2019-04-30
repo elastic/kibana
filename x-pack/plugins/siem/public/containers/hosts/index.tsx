@@ -17,6 +17,7 @@ import {
   HostsFields,
   PageInfo,
 } from '../../graphql/types';
+import { generateTablePaginationOptions } from '../../components/load_more_table/helpers';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter } from '../helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
@@ -46,6 +47,7 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface HostsComponentReduxProps {
   limit: number;
+  activePage: number;
   sortField: HostsFields;
   direction: Direction;
 }
@@ -69,6 +71,7 @@ class HostsComponentQuery extends QueryTemplate<
 
   public render() {
     const {
+      activePage,
       id = 'hostsQuery',
       children,
       direction,
@@ -90,11 +93,7 @@ class HostsComponentQuery extends QueryTemplate<
         direction,
         field: sortField,
       },
-      pagination: {
-        limit,
-        cursor: null,
-        tiebreaker: null,
-      },
+      pagination: generateTablePaginationOptions(activePage, limit),
       filterQuery: createFilter(filterQuery),
     };
     return (
@@ -106,12 +105,9 @@ class HostsComponentQuery extends QueryTemplate<
       >
         {({ data, loading, fetchMore, refetch }) => {
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -123,7 +119,7 @@ class HostsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Hosts: {
                     ...fetchMoreResult.source.Hosts,
-                    edges: [...prev.source.Hosts.edges, ...fetchMoreResult.source.Hosts.edges],
+                    edges: [...fetchMoreResult.source.Hosts.edges],
                   },
                 },
               };

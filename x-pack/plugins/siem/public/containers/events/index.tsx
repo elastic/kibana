@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { Direction, Ecs, GetEventsQuery, PageInfo } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
+import { generateTablePaginationOptions } from '../../components/load_more_table/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { eventsQuery } from './index.gql_query';
@@ -20,7 +21,7 @@ export interface EventsArgs {
   id: string;
   events: Ecs[];
   loading: boolean;
-  loadMore: (cursor: string, tiebreaker: string) => void;
+  loadMore: (newActivePage: number, tiebreaker?: string) => void;
   pageInfo: PageInfo;
   refetch: inputsModel.Refetch;
   totalCount: number;
@@ -33,6 +34,7 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface EventsComponentReduxProps {
   limit: number;
+  activePage: number;
 }
 
 type EventsProps = OwnProps & EventsComponentReduxProps;
@@ -44,13 +46,14 @@ class EventsComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
+      activePage,
       children,
+      endDate,
       filterQuery,
       id = 'eventsQuery',
       limit,
       sourceId,
       startDate,
-      endDate,
     } = this.props;
     return (
       <Query<GetEventsQuery.Query, GetEventsQuery.Variables>
@@ -60,11 +63,7 @@ class EventsComponentQuery extends QueryTemplate<
         variables={{
           filterQuery: createFilter(filterQuery),
           sourceId,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
+          pagination: generateTablePaginationOptions(activePage, limit),
           sortField: {
             sortFieldId: 'timestamp',
             direction: Direction.desc,
@@ -79,13 +78,9 @@ class EventsComponentQuery extends QueryTemplate<
         {({ data, loading, fetchMore, refetch }) => {
           const events = getOr([], 'source.Events.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
+          this.setFetchMoreOptions((newActivePage: number, tiebreaker?: string) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                tiebreaker,
-                limit,
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit, tiebreaker),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -97,7 +92,7 @@ class EventsComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Events: {
                     ...fetchMoreResult.source.Events,
-                    edges: [...prev.source.Events.edges, ...fetchMoreResult.source.Events.edges],
+                    edges: [...fetchMoreResult.source.Events.edges],
                   },
                 },
               };

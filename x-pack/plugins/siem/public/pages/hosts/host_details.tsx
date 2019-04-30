@@ -89,15 +89,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     type={type}
                   >
-                    {({
-                      authentications,
-                      totalCount,
-                      loading,
-                      pageInfo,
-                      loadMore,
-                      id,
-                      refetch,
-                    }) => (
+                    {({ authentications, totalCount, loading, loadMore, id, refetch }) => (
                       <AuthenticationTableManage
                         id={id}
                         refetch={refetch}
@@ -120,15 +112,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     filterQuery={getFilterQuery(hostName, filterQueryExpression, indexPattern)}
                     type={type}
                   >
-                    {({
-                      uncommonProcesses,
-                      totalCount,
-                      loading,
-                      pageInfo,
-                      loadMore,
-                      id,
-                      refetch,
-                    }) => {
+                    {({ uncommonProcesses, totalCount, loading, loadMore, id, refetch }) => {
                       return (
                         <UncommonProcessTableManage
                           id={id}
@@ -137,7 +121,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                           loading={loading}
                           data={uncommonProcesses}
                           totalCount={totalCount}
-                          activePage={getOr(0, 'activePage', pageInfo)!}
                           loadMore={loadMore}
                           type={type}
                         />
@@ -162,9 +145,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         data={events!}
                         loading={loading}
                         totalCount={totalCount}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                         tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                         loadMore={loadMore}
                         type={type}
                       />

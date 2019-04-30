@@ -23,7 +23,7 @@ export interface AuthenticationArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (newActivePage: number) => void;
+  loadMore: (newActivePage: number, tiebreaker?: string) => void;
   refetch: inputsModel.Refetch;
 }
 
@@ -46,7 +46,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      activePage = 0,
+      activePage,
       children,
       endDate,
       filterQuery,
@@ -75,28 +75,26 @@ class AuthenticationsComponentQuery extends QueryTemplate<
         {({ data, loading, fetchMore, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newActivePage: number) => {
-            return {
-              variables: {
-                pagination: generateTablePaginationOptions(newActivePage, limit),
-              },
-              updateQuery: (prev, { fetchMoreResult }) => {
-                if (!fetchMoreResult) {
-                  return prev;
-                }
-                return {
-                  ...fetchMoreResult,
-                  source: {
-                    ...fetchMoreResult.source,
-                    Authentications: {
-                      ...fetchMoreResult.source.Authentications,
-                      edges: [...fetchMoreResult.source.Authentications.edges],
-                    },
+          this.setFetchMoreOptions((newActivePage: number) => ({
+            variables: {
+              pagination: generateTablePaginationOptions(newActivePage, limit),
+            },
+            updateQuery: (prev, { fetchMoreResult }) => {
+              if (!fetchMoreResult) {
+                return prev;
+              }
+              return {
+                ...fetchMoreResult,
+                source: {
+                  ...fetchMoreResult.source,
+                  Authentications: {
+                    ...fetchMoreResult.source.Authentications,
+                    edges: [...fetchMoreResult.source.Authentications.edges],
                   },
-                };
-              },
-            };
-          });
+                },
+              };
+            },
+          }));
           return children({
             id,
             refetch,
