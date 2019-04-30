@@ -46,7 +46,7 @@ class FilterItemsUi extends Component {
     };
   }
   handleSubmit = (model, query) => {
-    const part = { filter: query.query.query };
+    const part = { filter: query.query };
     collectionActions.handleChange(this.props, _.assign({}, model, part));
   }
   renderRow(row, i, items) {
@@ -76,7 +76,7 @@ class FilterItemsUi extends Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <QueryBar
-            query={{ language: 'lucene', query: model.filter }}
+            query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFiltersFilter'}
             onSubmit={(query) => this.handleSubmit(model, query)}
             appName={'VisEditor'}
