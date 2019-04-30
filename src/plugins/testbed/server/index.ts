@@ -19,13 +19,7 @@
 
 import { map, mergeMap } from 'rxjs/operators';
 
-import {
-  Logger,
-  PluginInitializerContext,
-  PluginName,
-  PluginSetupContext,
-  PluginStartContext,
-} from 'kibana/server';
+import { Logger, PluginInitializerContext, PluginName, PluginSetupContext } from 'kibana/server';
 import { TestBedConfig } from './config';
 
 class Plugin {
@@ -52,20 +46,6 @@ class Plugin {
       pingElasticsearch$: setupContext.elasticsearch.adminClient$.pipe(
         mergeMap(client => client.callAsInternalUser('ping'))
       ),
-    };
-  }
-
-  public start(startContext: PluginStartContext, deps: Record<PluginName, unknown>) {
-    this.log.debug(
-      `Starting up TestBed testbed with core contract [${Object.keys(
-        startContext
-      )}] and deps [${Object.keys(deps)}]`
-    );
-
-    return {
-      getStartContext() {
-        return startContext;
-      },
     };
   }
 

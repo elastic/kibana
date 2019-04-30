@@ -25,7 +25,6 @@ import {
   HttpServiceStart,
   ConfigService,
   PluginsServiceSetup,
-  PluginsServiceStart,
 } from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
@@ -87,7 +86,6 @@ export default class KbnServer {
       core: {
         http: HttpServiceStart;
       };
-      plugins: PluginsServiceStart;
     };
     stop: null;
     params: {

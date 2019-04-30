@@ -35,7 +35,7 @@ import { ElasticsearchServiceSetup } from '../elasticsearch';
 import { HttpServiceStart } from '../http';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { DiscoveredPlugin, DiscoveredPluginInternal } from '../plugins';
-import { PluginsServiceSetup, PluginsServiceStart } from '../plugins/plugins_service';
+import { PluginsServiceSetup } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 const MockKbnServer: jest.Mock<KbnServer> = KbnServer as any;
@@ -52,7 +52,6 @@ let setupDeps: {
 
 let startDeps: {
   http: HttpServiceStart;
-  plugins: PluginsServiceStart;
 };
 
 const logger = loggingServiceMock.create();
@@ -82,9 +81,6 @@ beforeEach(() => {
   startDeps = {
     http: {
       isListening: () => true,
-    },
-    plugins: {
-      contracts: new Map(),
     },
   };
 
@@ -321,9 +317,6 @@ describe('once LegacyService is set up without connection info', () => {
     http: {
       isListening: () => false,
     },
-    plugins: {
-      contracts: new Map(),
-    },
   };
   beforeEach(async () => {
     await legacyService.setup(setupDeps);
@@ -386,9 +379,6 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
       http: {
         isListening: () => false,
       },
-      plugins: {
-        contracts: new Map(),
-      },
     });
 
     expect(MockClusterManager.create.mock.calls).toMatchSnapshot(
@@ -416,9 +406,6 @@ describe('once LegacyService is set up in `devClusterMaster` mode', () => {
     await devClusterLegacyService.start({
       http: {
         isListening: () => false,
-      },
-      plugins: {
-        contracts: new Map(),
       },
     });
 

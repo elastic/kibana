@@ -67,7 +67,6 @@ export default class KbnServer {
         core: {
           http: startDeps.http,
         },
-        plugins: startDeps.plugins,
       },
       stop: null,
       params: {

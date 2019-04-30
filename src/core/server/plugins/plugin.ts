@@ -21,7 +21,7 @@ import { join } from 'path';
 import typeDetect from 'type-detect';
 import { ConfigPath } from '../config';
 import { Logger } from '../logging';
-import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from './plugin_context';
+import { PluginInitializerContext, PluginSetupContext } from './plugin_context';
 
 /**
  * Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays
@@ -129,14 +129,11 @@ export interface DiscoveredPluginInternal extends DiscoveredPlugin {
  *
  * @public
  */
-export interface Plugin<
-  TSetup,
-  TStart,
-  TPluginsSetup extends Record<PluginName, unknown> = {},
-  TPluginsStart extends Record<PluginName, unknown> = {}
-> {
-  setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
-  start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
+export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
+  setup: (
+    pluginSetupContext: PluginSetupContext,
+    plugins: TPluginsSetup
+  ) => TSetup | Promise<TSetup>;
   stop?: () => void;
 }
 
@@ -146,12 +143,9 @@ export interface Plugin<
  *
  * @public
  */
-export type PluginInitializer<
-  TSetup,
-  TStart,
-  TPluginsSetup extends Record<PluginName, unknown> = {},
-  TPluginsStart extends Record<PluginName, unknown> = {}
-> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+export type PluginInitializer<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> = (
+  coreContext: PluginInitializerContext
+) => Plugin<TSetup, TPluginsSetup>;
 
 /**
  * Lightweight wrapper around discovered plugin that is responsible for instantiating
@@ -161,9 +155,7 @@ export type PluginInitializer<
  */
 export class PluginWrapper<
   TSetup = unknown,
-  TStart = unknown,
-  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>,
-  TPluginsStart extends Record<PluginName, unknown> = Record<PluginName, unknown>
+  TPluginsSetup extends Record<PluginName, unknown> = Record<PluginName, unknown>
 > {
   public readonly name: PluginManifest['id'];
   public readonly configPath: PluginManifest['configPath'];
@@ -174,7 +166,7 @@ export class PluginWrapper<
 
   private readonly log: Logger;
 
-  private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  private instance?: Plugin<TSetup, TPluginsSetup>;
 
   constructor(
     public readonly path: string,
@@ -206,21 +198,6 @@ export class PluginWrapper<
   }
 
   /**
-   * Calls `start` function exposed by the initialized plugin.
-   * @param startContext Context that consists of various core services tailored specifically
-   * for the `start` lifecycle event.
-   * @param plugins The dictionary where the key is the dependency name and the value
-   * is the contract returned by the dependency's `start` function.
-   */
-  public async start(startContext: PluginStartContext, plugins: TPluginsStart) {
-    if (this.instance === undefined) {
-      throw new Error(`Plugin "${this.name}" can't be started since it isn't set up.`);
-    }
-
-    return await this.instance.start(startContext, plugins);
-  }
-
-  /**
    * Calls optional `stop` function exposed by the plugin initializer.
    */
   public async stop() {
@@ -247,7 +224,7 @@ export class PluginWrapper<
     }
 
     const { plugin: initializer } = pluginDefinition as {
-      plugin: PluginInitializer<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+      plugin: PluginInitializer<TSetup, TPluginsSetup>;
     };
     if (!initializer || typeof initializer !== 'function') {
       throw new Error(`Definition of plugin "${this.name}" should be a function (${this.path}).`);
