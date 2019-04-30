@@ -13,8 +13,8 @@ interface IndexPatternWithType extends IndexPattern {
   type?: string;
 }
 
-// called in the angular routing resolve block to initialize up the
-// newJobCapsService
+// called in the angular routing resolve block to initialize the
+// newJobCapsService with the currently selected index pattern
 export function loadNewJobCapabilities(indexPatterns: any, $route: Record<string, any>) {
   return new Promise(resolve => {
     indexPatterns
