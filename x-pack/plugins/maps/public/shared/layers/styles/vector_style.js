@@ -132,37 +132,29 @@ export class VectorStyle extends AbstractStyle {
 
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
     const features = _.get(sourceDataRequest.getData(), 'features', []);
-
     if (features.length === 0) {
       return {};
     }
 
-    const styles = this.getProperties();
-    const dynamicFields = [];
-    Object.keys(styles).forEach(styleName => {
-      const { type, options } = styles[styleName];
-      if (type === VectorStyle.STYLE_TYPE.DYNAMIC
-        && options.field && options.field.name) {
-        // TODO avoid adding duplicate field names
-        dynamicFields.push({
-          fieldName: options.field.name,
+    const scaledFields = this._getDynamicPropertiesArray()
+      .map(({ options }) => {
+        return {
+          name: options.field.name,
           min: Infinity,
           max: -Infinity
-        });
-      }
-    });
+        };
+      });
 
     let isPointsOnly = true;
     features.forEach(feature => {
       if (isPointsOnly && feature.geometry.type !== 'Point') {
         isPointsOnly = false;
       }
-
-      dynamicFields.forEach(dynamicField => {
-        const newValue = parseFloat(feature.properties[dynamicField.fieldName]);
+      scaledFields.forEach(scaledField => {
+        const newValue = parseFloat(feature.properties[scaledField.name]);
         if (!isNaN(newValue)) {
-          dynamicField.min = Math.min(dynamicField.min, newValue);
-          dynamicField.max = Math.max(dynamicField.max, newValue);
+          scaledField.min = Math.min(scaledField.min, newValue);
+          scaledField.max = Math.max(scaledField.max, newValue);
         }
       });
     });
@@ -171,11 +163,12 @@ export class VectorStyle extends AbstractStyle {
       isPointsOnly
     };
 
-    dynamicFields.forEach(({ min, max, fieldName }) => {
+    scaledFields.forEach(({ min, max, name }) => {
       if (min !== Infinity && max !== -Infinity) {
-        featuresMeta[fieldName] = {
+        featuresMeta[name] = {
           min,
           max,
+          delta: max - min,
         };
       }
     });
@@ -204,11 +197,27 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties || {};
   }
 
-  _isPropertyDynamic(property) {
-    if (!this._descriptor.properties[property]) {
-      return false;
-    }
-    return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
+  _getDynamicPropertiesArray() {
+    const styles = this.getProperties();
+    return Object.keys(styles)
+      .map(styleName => {
+        const { type, options } = styles[styleName];
+        return {
+          styleName,
+          type,
+          options
+        };
+      })
+      .filter(({ styleName }) => {
+        return this._isPropertyDynamic(styleName);
+      });
+  }
+
+  _isPropertyDynamic(propertyName) {
+    const { type, options } = _.get(this._descriptor, ['properties', propertyName], {});
+    return type === VectorStyle.STYLE_TYPE.DYNAMIC
+      && options.field
+      && options.field.name;
   }
 
   _getIsPointsOnly = () => {
@@ -216,16 +225,7 @@ export class VectorStyle extends AbstractStyle {
   }
 
   _getFieldRange = (fieldName) => {
-    const fieldRange = _.get(this._descriptor, ['__styleMeta', fieldName]);
-    if (!fieldRange) {
-      return;
-    }
-
-    return {
-      min: fieldRange.min,
-      max: fieldRange.max,
-      delta: fieldRange.max - fieldRange.min
-    };
+    return _.get(this._descriptor, ['__styleMeta', fieldName]);
   }
 
   getIcon = () => {
@@ -274,44 +274,40 @@ export class VectorStyle extends AbstractStyle {
   }
 
   addScaledPropertiesBasedOnStyle(featureCollection) {
-    const styles = this.getProperties();
-    const dynamicStyles = [];
-    Object.keys(styles).forEach(styleName => {
-      const { type, options } = styles[styleName];
-      if (type === VectorStyle.STYLE_TYPE.DYNAMIC
-        && options.field && options.field.name) {
+    if (!featureCollection || featureCollection.length === 0) {
+      return false;
+    }
 
-        const fieldName = options.field.name;
-        const fieldRange = this._getFieldRange(fieldName);
-        if (fieldRange) {
-          dynamicStyles.push({
-            styleName,
-            fieldName,
-            computedFieldName: VectorStyle.getComputedFieldName(fieldName),
-            delta: fieldRange.delta,
-            min: fieldRange.min,
-          });
-        }
-      }
-    });
+    const scaledFields = this._getDynamicPropertiesArray()
+      .map(({ options }) => {
+        const name = options.field.name;
+        return {
+          name,
+          range: this._getFieldRange(name),
+          computedName: VectorStyle.getComputedFieldName(name),
+        };
+      })
+      .filter(({ range }) => {
+        return range;
+      });
 
-    if (dynamicStyles.length === 0 || !featureCollection || featureCollection.length === 0) {
+    if (scaledFields.length === 0) {
       return false;
     }
 
     //scale to [0,1] domain
     featureCollection.features.forEach(feature => {
-      dynamicStyles.forEach(({ fieldName, computedFieldName, delta, min }) => {
-        const unscaledValue = parseFloat(feature.properties[fieldName]);
+      scaledFields.forEach(({ name, range, computedName }) => {
+        const unscaledValue = parseFloat(feature.properties[name]);
         let scaledValue;
         if (isNaN(unscaledValue)) {//cannot scale
           scaledValue = -1;//put outside range
-        } else if (delta === 0) {//values are identical
+        } else if (range.delta === 0) {//values are identical
           scaledValue = 1;//snap to end of color range
         } else {
-          scaledValue = (feature.properties[fieldName] - min) / delta;
+          scaledValue = (feature.properties[name] - range.min) / range.delta;
         }
-        feature.properties[computedFieldName] = scaledValue;
+        feature.properties[computedName] = scaledValue;
       });
     });
 
