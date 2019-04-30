@@ -26,7 +26,11 @@ export class GeojsonFileSource extends AbstractVectorSource {
   }
 
   static viewIndexedData = (addAndViewSource, inspectorAdapters) => {
-    return ({ fields, id }) => {
+    return ({ fields, id, success }) => {
+      if (!success) {
+        console.error('Unable to view indexed data');
+        return;
+      }
       const indexPatternId = id;
       const geoFieldArr = fields.filter(
         field => ['geo_point', 'geo_shape'].includes(field.type)
@@ -58,7 +62,7 @@ export class GeojsonFileSource extends AbstractVectorSource {
   };
 
   static renderEditor({ onPreviewSource, inspectorAdapters, addAndViewSource,
-    boolIndexData, onRemove, onIndexReadyStatusChange }) {
+    boolIndexData, onRemove, onIndexReadyStatusChange, setFailures }) {
     return (
       <ClientFileCreateSourceEditor
         previewGeojsonFile={
@@ -76,6 +80,11 @@ export class GeojsonFileSource extends AbstractVectorSource {
         boolIndexData={boolIndexData}
         onRemove={onRemove}
         onIndexReadyStatusChange={onIndexReadyStatusChange}
+        onIndexAddSuccess={indexAddResp => {
+          if (indexAddResp.failures && indexAddResp.failures.length) {
+            setFailures && setFailures(indexAddResp.failures);
+          }
+        }}
       />
     );
   }

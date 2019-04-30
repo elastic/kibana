@@ -84,6 +84,14 @@ export function JsonUploadAndParse(props) {
       })();
     }
 
+  }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
+    parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
+    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange, appName,
+    boolCreateIndexPattern, indexPattern, onIndexPatternCreateError,
+    onIndexPatternCreateSuccess]
+  );
+
+  useEffect(() => {
     // Determine index options
     if (parsedFile) {
       if (typeof preIndexTransform === 'object') {
@@ -102,12 +110,7 @@ export function JsonUploadAndParse(props) {
         }
       }
     }
-  }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
-    parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
-    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange, appName,
-    boolCreateIndexPattern, indexPattern, onIndexPatternCreateError,
-    onIndexPatternCreateSuccess]
-  );
+  }, [parsedFile, preIndexTransform]);
 
   return (
     <EuiForm>

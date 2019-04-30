@@ -14,16 +14,18 @@ export function ClientFileCreateSourceEditor({
   viewIndexedData,
   onRemove,
   onIndexReadyStatusChange,
+  onIndexAddSuccess,
 }) {
   return (
     <JsonUploadAndParse
       appName={'Maps'}
+      boolIndexData={boolIndexData}
       onFileUpload={previewGeojsonFile}
       onFileRemove={onRemove}
-      boolIndexData={boolIndexData}
+      onIndexReadyStatusChange={onIndexReadyStatusChange}
       preIndexTransform={'geo'}
       onIndexPatternCreateSuccess={viewIndexedData}
-      onIndexReadyStatusChange={onIndexReadyStatusChange}
+      onIndexAddSuccess={onIndexAddSuccess}
     />
   );
 }

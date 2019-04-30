@@ -126,7 +126,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
   const chunks = chunk(data, CHUNK_SIZE);
 
   let success = true;
-  const failures = [];
+  let failures = [];
   let error;
   let docCount = 0;
 
@@ -156,6 +156,7 @@ async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings })
 
       retries--;
     }
+    failures = [...failures, ...resp.failures];
 
     if (resp.success) {
       docCount = resp.docCount;
@@ -193,7 +194,7 @@ export async function createIndexPattern(indexPatternName) {
       fields: indexPattern.fields
     };
   } catch (error) {
-    console.error(error);
+    console.error(`Error creating index pattern: ${error}`);
     return {
       success: false,
       error,
