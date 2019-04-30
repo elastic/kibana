@@ -21,13 +21,12 @@ import { Server as HapiServer } from 'hapi';
 import { combineLatest, ConnectableObservable, EMPTY, Subscription } from 'rxjs';
 import { first, map, mergeMap, publishReplay, tap } from 'rxjs/operators';
 import { CoreService } from '../../types';
+import { CoreSetup, CoreStart } from '../../server';
 import { Config } from '../config';
 import { CoreContext } from '../core_context';
 import { DevConfig } from '../dev';
-import { ElasticsearchServiceSetup } from '../elasticsearch';
-import { BasePathProxyServer, HttpConfig, HttpServiceSetup } from '../http';
+import { BasePathProxyServer, HttpConfig } from '../http';
 import { Logger } from '../logging';
-import { PluginsServiceSetup } from '../plugins/plugins_service';
 import { LegacyPlatformProxy } from './legacy_platform_proxy';
 
 interface LegacyKbnServer {
@@ -35,12 +34,6 @@ interface LegacyKbnServer {
   listen: () => Promise<void>;
   ready: () => Promise<void>;
   close: () => Promise<void>;
-}
-
-interface SetupDeps {
-  elasticsearch: ElasticsearchServiceSetup;
-  http?: HttpServiceSetup;
-  plugins: PluginsServiceSetup;
 }
 
 function getLegacyRawConfig(config: Config) {
@@ -60,13 +53,20 @@ export class LegacyService implements CoreService {
   private readonly log: Logger;
   private kbnServer?: LegacyKbnServer;
   private configSubscription?: Subscription;
+  private setupDeps?: CoreSetup;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('legacy-service');
   }
-
-  public async setup(deps: SetupDeps) {
-    this.log.debug('setting up legacy service');
+  public async setup(setupDeps: CoreSetup) {
+    this.setupDeps = setupDeps;
+  }
+  public async start(startDeps: CoreStart) {
+    const { setupDeps } = this;
+    if (!setupDeps) {
+      throw new Error('Legacy service is not setup yet.');
+    }
+    this.log.debug('starting legacy service');
 
     const update$ = this.coreContext.configService.getConfig$().pipe(
       tap(config => {
@@ -89,7 +89,7 @@ export class LegacyService implements CoreService {
             await this.createClusterManager(config);
             return;
           }
-          return await this.createKbnServer(config, deps);
+          return await this.createKbnServer(config, setupDeps, startDeps);
         })
       )
       .toPromise();
@@ -130,7 +130,7 @@ export class LegacyService implements CoreService {
     );
   }
 
-  private async createKbnServer(config: Config, { elasticsearch, http, plugins }: SetupDeps) {
+  private async createKbnServer(config: Config, setupDeps: CoreSetup, startDeps: CoreStart) {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const KbnServer = require('../../../legacy/server/kbn_server');
     const kbnServer: LegacyKbnServer = new KbnServer(getLegacyRawConfig(config), {
@@ -139,17 +139,15 @@ export class LegacyService implements CoreService {
       // bridge with the "legacy" Kibana. If server isn't run (e.g. if process is
       // managed by ClusterManager or optimizer) then we won't have that info,
       // so we can't start "legacy" server either.
-      serverOptions:
-        http !== undefined
-          ? {
-              ...http.options,
-              listener: this.setupProxyListener(http.server),
-            }
-          : { autoListen: false },
+      serverOptions: startDeps.http.isListening()
+        ? {
+            ...setupDeps.http.options,
+            listener: this.setupProxyListener(setupDeps.http.server),
+          }
+        : { autoListen: false },
       handledConfigPaths: await this.coreContext.configService.getUsedPaths(),
-      http,
-      elasticsearch,
-      plugins,
+      setupDeps,
+      startDeps,
     });
 
     // The kbnWorkerType check is necessary to prevent the repl

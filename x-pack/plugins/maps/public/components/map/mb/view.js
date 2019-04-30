@@ -227,8 +227,12 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('mouseout', () => {
       throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
       this.props.clearMouseCoordinates();
-    });
 
+      this._updateHoverTooltipState.cancel();
+      if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+        this.props.setTooltipState(null);
+      }
+    });
 
     this._mbMap.on('mousemove', this._updateHoverTooltipState);
     this._mbMap.on('click', this._lockTooltip);
@@ -274,7 +278,7 @@ export class MBMapContainer extends React.Component {
     const tooltipLayer = this.props.layerList.find(layer => {
       return layer.getId() === this.props.tooltipState.layerId;
     });
-    const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
+    const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
     const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
     this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
   }
