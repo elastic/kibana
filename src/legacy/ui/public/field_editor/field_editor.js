@@ -317,13 +317,10 @@ export class FieldEditorComponent extends PureComponent {
   renderType() {
     const { field, fieldTypes } = this.state;
     const { intl } = this.props;
-    const hasTypeConflict = field.conflictDescriptions && typeof field.conflictDescriptions === 'object';
 
     return (
       <EuiFormRow
         label={intl.formatMessage({ id: 'common.ui.fieldEditor.typeLabel', defaultMessage: 'Type' })}
-        helpText={hasTypeConflict && this.renderTypeConflict(field.conflictDescriptions)}
-        fullWidth={hasTypeConflict}
       >
         <EuiSelect
           value={field.type}
@@ -340,10 +337,14 @@ export class FieldEditorComponent extends PureComponent {
 
   /**
    * renders a warning and a table of conflicting indices
-   * in case there a indices with different types
+   * in case there are indices with different types
    */
-  renderTypeConflict(conflictDescriptions) {
+  renderTypeConflict() {
     const { intl } = this.props;
+    const { field = {} } = this.state;
+    if (!field.conflictDescriptions || !typeof field.conflictDescriptions === 'object') {
+      return null;
+    }
 
     const columns = [{
       field: 'type',
@@ -351,22 +352,22 @@ export class FieldEditorComponent extends PureComponent {
       width: '100px',
     }, {
       field: 'indices',
-      name: intl.formatMessage({ id: 'common.ui.fieldEditor.indexNameLabel', defaultMessage: 'Index Names' })
+      name: intl.formatMessage({ id: 'common.ui.fieldEditor.indexNameLabel', defaultMessage: 'Index names' })
     }];
 
     const items = Object
-      .entries(conflictDescriptions)
+      .entries(field.conflictDescriptions)
       .map(([type, indices]) => ({
         type,
         indices: Array.isArray(indices) ? indices.join(', ') : ''
       }));
 
     return (
-      <span>
+      <div>
         <EuiCallOut
           color="warning"
           iconType="alert"
-          title={<FormattedMessage id="common.ui.fieldEditor.fieldTypeConflict" defaultMessage="Field Type Conflict"/>}
+          title={<FormattedMessage id="common.ui.fieldEditor.fieldTypeConflict" defaultMessage="Field type conflict"/>}
           size="s"
         >
           <FormattedMessage
@@ -375,11 +376,13 @@ export class FieldEditorComponent extends PureComponent {
           The indices per type are as follows:"
           />
         </EuiCallOut>
+        <EuiSpacer size="m" />
         <EuiBasicTable
           items={items}
           columns={columns}
         />
-      </span>
+        <EuiSpacer size="m" />
+      </div>
     );
   }
 
@@ -771,6 +774,7 @@ export class FieldEditorComponent extends PureComponent {
           {this.renderName()}
           {this.renderLanguage()}
           {this.renderType()}
+          {this.renderTypeConflict()}
           {this.renderFormat()}
           {this.renderPopularity()}
           {this.renderScript()}
