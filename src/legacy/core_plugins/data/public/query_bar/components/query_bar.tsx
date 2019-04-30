@@ -45,13 +45,13 @@ import { EuiSuperUpdateButton } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { documentationLinks } from 'ui/documentation_links';
 import { Toast, toastNotifications } from 'ui/notify';
-
 import {
   AutocompleteSuggestion,
   AutocompleteSuggestionType,
   getAutocompleteProvider,
-} from '../../autocomplete_providers';
-import chrome from '../../chrome';
+} from 'ui/autocomplete_providers';
+import chrome from 'ui/chrome';
+
 import { fromUser, matchPairs, toUser } from '../lib';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { SuggestionsComponent } from './typeahead/suggestions_component';
@@ -585,7 +585,7 @@ export class QueryBarUI extends Component<Props, State> {
                   <div className="kuiLocalSearchAssistedInput">
                     <EuiFieldText
                       placeholder={this.props.intl.formatMessage({
-                        id: 'common.ui.queryBar.searchInputPlaceholder',
+                        id: 'data.query.queryBar.searchInputPlaceholder',
                         defaultMessage: 'Search',
                       })}
                       value={this.state.query.query}
@@ -604,7 +604,7 @@ export class QueryBarUI extends Component<Props, State> {
                       spellCheck={false}
                       aria-label={this.props.intl.formatMessage(
                         {
-                          id: 'common.ui.queryBar.searchInputAriaLabel',
+                          id: 'data.query.queryBar.searchInputAriaLabel',
                           defaultMessage:
                             'You are on search box of {previouslyTranslatedPageTitle} page. Start typing to search and filter the {pageType}',
                         },
@@ -726,21 +726,21 @@ export class QueryBarUI extends Component<Props, State> {
     ) {
       const toast = toastNotifications.addWarning({
         title: intl.formatMessage({
-          id: 'common.ui.queryBar.luceneSyntaxWarningTitle',
+          id: 'data.query.queryBar.luceneSyntaxWarningTitle',
           defaultMessage: 'Lucene syntax warning',
         }),
         text: (
           <div>
             <p>
               <FormattedMessage
-                id="common.ui.queryBar.luceneSyntaxWarningMessage"
+                id="data.query.queryBar.luceneSyntaxWarningMessage"
                 defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
                have Kibana Query Language (KQL) selected. Please review the KQL docs {link}."
                 values={{
                   link: (
                     <EuiLink href={documentationLinks.query.kueryQuerySyntax} target="_blank">
                       <FormattedMessage
-                        id="common.ui.queryBar.syntaxOptionsDescription.docsLinkText"
+                        id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
                         defaultMessage="here"
                       />
                     </EuiLink>
