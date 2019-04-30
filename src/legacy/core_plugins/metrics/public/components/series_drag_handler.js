@@ -37,6 +37,9 @@ export class SeriesDragHandler extends PureComponent {
             >
               <EuiIcon
                 className="tvbSeries__sortHandle"
+                aria-label={i18n.translate('tsvb.sort.dragToSortAriaLabel', {
+                  defaultMessage: 'Drag to sort',
+                })}
                 type="grab"
               />
             </EuiToolTip>
