@@ -88,7 +88,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
       loadingTitle={i18n.AUTHENTICATIONS}
       loading={loading}
       pageOfItems={data}
-      loadMore={(newActivePage: number) => loadMore(newActivePage)}
+      loadMore={newActivePage => loadMore(newActivePage)}
       limit={limit}
       itemsPerRow={rowItems}
       totalCount={totalCount}
@@ -99,7 +99,7 @@ const AuthenticationTableComponent = pure<AuthenticationTableProps>(
           tableType,
         })
       }
-      updateActivePage={(newPage: number) =>
+      updateActivePage={newPage =>
         updateTableActivePage({
           activePage: newPage,
           hostsType: type,

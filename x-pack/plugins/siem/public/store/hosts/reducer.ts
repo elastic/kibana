@@ -7,7 +7,7 @@
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 
 import { Direction, HostsFields } from '../../graphql/types';
-import { DEFAULT_TABLE_LIMIT } from '../constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyHostsFilterQuery,
@@ -17,7 +17,6 @@ import {
   updateHostsSort,
   updateTableActivePage,
   updateTableLimit,
-  updateUncommonProcessesLimit,
 } from './actions';
 import { HostsModel } from './model';
 
@@ -26,30 +25,30 @@ export type HostsState = HostsModel;
 export const initialHostsState: HostsState = {
   page: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: 0 },
+      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
       hosts: {
-        activePage: 0,
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         direction: Direction.desc,
         sortField: HostsFields.lastSeen,
       },
-      events: { activePage: 0, limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { activePage: 0, limit: DEFAULT_TABLE_LIMIT },
+      events: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,
   },
   details: {
     queries: {
-      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: 0 },
+      authentications: { limit: DEFAULT_TABLE_LIMIT, activePage: DEFAULT_TABLE_ACTIVE_PAGE },
       hosts: {
-        activePage: 0,
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         direction: Direction.desc,
         sortField: HostsFields.lastSeen,
       },
-      events: { activePage: 0, limit: DEFAULT_TABLE_LIMIT },
-      uncommonProcesses: { activePage: 0, limit: DEFAULT_TABLE_LIMIT },
+      events: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
+      uncommonProcesses: { activePage: DEFAULT_TABLE_ACTIVE_PAGE, limit: DEFAULT_TABLE_LIMIT },
     },
     filterQuery: null,
     filterQueryDraft: null,
@@ -103,18 +102,6 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
       queries: {
         ...state[hostsType].queries,
         events: {
-          limit,
-        },
-      },
-    },
-  }))
-  .case(updateUncommonProcessesLimit, (state, { limit, hostsType }) => ({
-    ...state,
-    [hostsType]: {
-      ...state[hostsType],
-      queries: {
-        ...state[hostsType].queries,
-        uncommonProcesses: {
           limit,
         },
       },

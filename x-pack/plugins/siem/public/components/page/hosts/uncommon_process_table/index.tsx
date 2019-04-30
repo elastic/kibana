@@ -22,10 +22,11 @@ import { Provider } from '../../../timeline/data_providers/provider';
 
 import * as i18n from './translations';
 
+const tableType = hostsModel.HostsTableType.uncommonProcesses;
+
 interface OwnProps {
   data: UncommonProcessesEdges[];
   loading: boolean;
-  activePage: number;
   totalCount: number;
   loadMore: (newActivePage: number) => void;
   type: hostsModel.HostsType;
@@ -36,7 +37,16 @@ interface UncommonProcessTableReduxProps {
 }
 
 interface UncommonProcessTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
+  updateTableLimit: ActionCreator<{
+    limit: number;
+    hostsType: hostsModel.HostsType;
+    tableType: hostsModel.HostsTableType;
+  }>;
 }
 
 type UncommonProcessTableProps = OwnProps &
@@ -71,7 +81,16 @@ export const getArgs = (args: string[] | null | undefined): string | null => {
 };
 
 const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
-  ({ data, limit, loading, loadMore, totalCount, type, updateLimitPagination }) => (
+  ({
+    data,
+    limit,
+    loading,
+    loadMore,
+    totalCount,
+    type,
+    updateTableActivePage,
+    updateTableLimit,
+  }) => (
     <LoadMoreTable
       columns={getUncommonColumns()}
       loadingTitle={i18n.UNCOMMON_PROCESSES}
@@ -82,7 +101,14 @@ const UncommonProcessTableComponent = pure<UncommonProcessTableProps>(
       itemsPerRow={rowItems}
       totalCount={totalCount}
       updateLimitPagination={newLimit =>
-        updateLimitPagination({ limit: newLimit, hostsType: type })
+        updateTableLimit({ limit: newLimit, hostsType: type, tableType })
+      }
+      updateActivePage={(newPage: number) =>
+        updateTableActivePage({
+          activePage: newPage,
+          hostsType: type,
+          tableType,
+        })
       }
       title={
         <h3>
@@ -104,7 +130,8 @@ const makeMapStateToProps = () => {
 export const UncommonProcessTable = connect(
   makeMapStateToProps,
   {
-    updateLimitPagination: hostsActions.updateUncommonProcessesLimit,
+    updateTableActivePage: hostsActions.updateTableActivePage,
+    updateTableLimit: hostsActions.updateTableLimit,
   }
 )(UncommonProcessTableComponent);
 

@@ -38,10 +38,6 @@ export const updateEventsLimit = actionCreator<{ limit: number; hostsType: Hosts
   'UPDATE_EVENTS_LIMIT'
 );
 
-export const updateUncommonProcessesLimit = actionCreator<{ limit: number; hostsType: HostsType }>(
-  'UPDATE_UNCOMMONPROCESSES_LIMIT'
-);
-
 export const setHostsFilterQueryDraft = actionCreator<{
   filterQueryDraft: KueryFilterQuery;
   hostsType: HostsType;

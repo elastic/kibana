@@ -12,6 +12,7 @@ import { connect } from 'react-redux';
 import { AuthenticationsEdges, GetAuthenticationsQuery, PageInfo } from '../../graphql/types';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
+import { generateTablePaginationOptions } from '../../components/load_more_table/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { authenticationsQuery } from './index.gql_query';
@@ -45,23 +46,15 @@ class AuthenticationsComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'authenticationQuery',
+      activePage = 0,
       children,
+      endDate,
       filterQuery,
+      id = 'authenticationQuery',
+      limit,
       sourceId,
       startDate,
-      endDate,
-      limit,
-      activePage = 0,
     } = this.props;
-    console.log('activePage', activePage);
-    const cursorStart = activePage * limit;
-    const pagination = {
-      activePage,
-      cursor: String(cursorStart),
-      limit: limit + cursorStart,
-      tiebreaker: null,
-    };
 
     return (
       <Query<GetAuthenticationsQuery.Query, GetAuthenticationsQuery.Variables>
@@ -75,7 +68,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          pagination,
+          pagination: generateTablePaginationOptions(activePage, limit),
           filterQuery: createFilter(filterQuery),
         }}
       >
@@ -83,15 +76,9 @@ class AuthenticationsComponentQuery extends QueryTemplate<
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => {
-            const cursorStart = newActivePage * limit;
-            console.log('LIMIT', limit);
             return {
               variables: {
-                pagination: {
-                  cursor: String(cursorStart),
-                  limit: limit + cursorStart,
-                  activePage: newActivePage,
-                },
+                pagination: generateTablePaginationOptions(newActivePage, limit),
               },
               updateQuery: (prev, { fetchMoreResult }) => {
                 if (!fetchMoreResult) {

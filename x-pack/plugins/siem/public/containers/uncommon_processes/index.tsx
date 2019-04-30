@@ -10,8 +10,10 @@ import { Query } from 'react-apollo';
 import { connect } from 'react-redux';
 
 import { GetUncommonProcessesQuery, PageInfo, UncommonProcessesEdges } from '../../graphql/types';
+import { generateTablePaginationOptions } from '../../components/load_more_table/helpers';
 import { hostsModel, hostsSelectors, inputsModel, State } from '../../store';
 import { createFilter, getDefaultFetchPolicy } from '../helpers';
+
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { uncommonProcessesQuery } from './index.gql_query';
@@ -33,6 +35,7 @@ export interface OwnProps extends QueryTemplateProps {
 
 export interface UncommonProcessesComponentReduxProps {
   limit: number;
+  activePage: number;
 }
 
 type UncommonProcessesProps = OwnProps & UncommonProcessesComponentReduxProps;
@@ -44,13 +47,14 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'uncommonProcessesQuery',
+      activePage = 0,
       children,
+      endDate,
       filterQuery,
+      id = 'uncommonProcessesQuery',
+      limit,
       sourceId,
       startDate,
-      endDate,
-      limit,
     } = this.props;
     return (
       <Query<GetUncommonProcessesQuery.Query, GetUncommonProcessesQuery.Variables>
@@ -64,11 +68,7 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
             from: startDate!,
             to: endDate!,
           },
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
+          pagination: generateTablePaginationOptions(activePage, limit),
           filterQuery: createFilter(filterQuery),
         }}
       >
@@ -76,14 +76,9 @@ class UncommonProcessesComponentQuery extends QueryTemplate<
           const uncommonProcesses = getOr([], 'source.UncommonProcesses.edges', data);
           this.setFetchMore(fetchMore);
           this.setFetchMoreOptions((newActivePage: number) => {
-            const cursorStart = newActivePage * limit;
             return {
               variables: {
-                pagination: {
-                  cursor: String(cursorStart),
-                  limit: limit + cursorStart,
-                  activePage: newActivePage,
-                },
+                pagination: generateTablePaginationOptions(newActivePage, limit),
               },
               updateQuery: (prev, { fetchMoreResult }) => {
                 if (!fetchMoreResult) {
