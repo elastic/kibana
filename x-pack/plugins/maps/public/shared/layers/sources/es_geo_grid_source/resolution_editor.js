@@ -12,12 +12,29 @@ import {
   EuiFlexItem,
   EuiFormLabel
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 const OPTIONS = [
-  { value: GRID_RESOLUTION.COARSE, inputDisplay: 'coarse' },
-  { value: GRID_RESOLUTION.FINE, inputDisplay: 'fine' },
-  { value: GRID_RESOLUTION.MOST_FINE, inputDisplay: 'finest' }
+  {
+    value: GRID_RESOLUTION.COARSE,
+    inputDisplay: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
+      defaultMessage: 'coarse'
+    })
+  },
+  { value: GRID_RESOLUTION.FINE,
+    inputDisplay: i18n.translate('xpack.maps.source.esGrid.fineDropdownOption', {
+      defaultMessage: 'fine'
+    })
+
+  },
+  {
+    value: GRID_RESOLUTION.MOST_FINE,
+    inputDisplay: i18n.translate('xpack.maps.source.esGrid.finestDropdownOption', {
+      defaultMessage: 'finest'
+    })
+  }
 ];
 
 export function ResolutionEditor({ resolution, onChange }) {
@@ -26,7 +43,10 @@ export function ResolutionEditor({ resolution, onChange }) {
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={true}>
           <EuiFormLabel style={{ marginBottom: 0 }}>
-              Grid resolution
+            <FormattedMessage
+              id="xpack.maps.geoGrid.resolutionLabel"
+              defaultMessage="Grid resolution"
+            />
           </EuiFormLabel>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -26,122 +26,142 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { MonitorChart } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
+import { UptimeGraphQLQueryProps, withUptimeGraphQL } from '../higher_order';
+import { monitorChartsQuery } from '../../queries';
 
-interface MonitorChartsProps {
-  checkDomainLimits: number[];
-  crosshairLocation: number;
-  danger: string;
-  durationDomainLimits: number[];
-  monitorChartData: MonitorChart;
-  primary: string;
-  secondary: string;
-  updateCrosshairLocation: (crosshairLocation: number) => void;
+interface MonitorChartsQueryResult {
+  monitorChartsData?: MonitorChart;
 }
 
-export const MonitorCharts = ({
-  checkDomainLimits,
-  crosshairLocation,
-  danger,
-  durationDomainLimits,
-  monitorChartData: { durationArea, durationLine, status },
-  primary,
-  secondary,
-  updateCrosshairLocation,
-}: MonitorChartsProps) => (
-  <Fragment>
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
-              defaultMessage="Monitor Duration ms"
-              description="The 'ms' is an abbreviation for milliseconds."
-            />
-          </h4>
-        </EuiTitle>
+interface MonitorChartsProps {
+  danger: string;
+  mean: string;
+  range: string;
+  success: string;
+}
 
-        <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
-          <EuiSeriesChart
-            margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-            width={500}
-            height={200}
-            xType={EuiSeriesChartUtils.SCALE.TIME}
-            xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-            yDomain={durationDomainLimits}
-            crosshairValue={crosshairLocation}
-            onCrosshairUpdate={updateCrosshairLocation}
-          >
-            <EuiAreaSeries
-              color={secondary}
-              name={i18n.translate(
-                'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
-                {
-                  defaultMessage: 'Duration range',
-                }
-              )}
-              data={durationArea.map(({ x, yMin, yMax }) => ({
-                x,
-                y0: microsToMillis(yMin),
-                y: microsToMillis(yMax),
-              }))}
-              curve="curveBasis"
-            />
-            <EuiLineSeries
-              color={primary}
-              name={i18n.translate(
-                'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
-                {
-                  defaultMessage: 'Mean duration',
-                }
-              )}
-              data={durationLine.map(({ x, y }) => ({
-                x,
-                y: microsToMillis(y),
-              }))}
-            />
-          </EuiSeriesChart>
-        </EuiPanel>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiTitle size="xs">
-          <h4>
-            <FormattedMessage
-              id="xpack.uptime.monitorCharts.checkStatus.title"
-              defaultMessage="Check status"
-            />
-          </h4>
-        </EuiTitle>
-        <EuiPanel style={{ maxWidth: 520, maxHeight: 220 }}>
-          <EuiSeriesChart
-            margins={{ left: 60, right: 40, top: 10, bottom: 40 }}
-            width={500}
-            height={200}
-            xType={EuiSeriesChartUtils.SCALE.TIME}
-            xCrosshairFormat="YYYY-MM-DD hh:mmZ"
-            stackBy="y"
-            crosshairValue={crosshairLocation}
-            onCrosshairUpdate={updateCrosshairLocation}
-            yDomain={checkDomainLimits}
-          >
-            <EuiAreaSeries
-              name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
-                defaultMessage: 'Up count',
-              })}
-              data={status.map(({ x, up }) => ({ x, y: up }))}
-              curve="curveBasis"
-              color={primary}
-            />
-            <EuiAreaSeries
-              name={i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.downCountLabel', {
-                defaultMessage: 'Down count',
-              })}
-              data={status.map(({ x, down }) => ({ x, y: down }))}
-              color={danger}
-            />
-          </EuiSeriesChart>
-        </EuiPanel>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </Fragment>
+type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResult>;
+
+export const MonitorChartsComponent = ({ danger, data, mean, range, success }: Props) => {
+  if (data && data.monitorChartsData) {
+    const {
+      monitorChartsData: { durationArea, durationLine, status, durationMaxValue, statusMaxCount },
+    } = data;
+
+    const durationMax = microsToMillis(durationMaxValue);
+    // These limits provide domain sizes for the charts
+    const checkDomainLimits = [0, statusMaxCount];
+    const durationDomainLimits = [0, durationMax ? durationMax : 0];
+    return (
+      <Fragment>
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" style={{ height: 248 }}>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.monitorDuration.titleLabel"
+                    defaultMessage="Monitor duration in milliseconds"
+                    description="The 'ms' is an abbreviation for milliseconds."
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSeriesChart
+                margins={{ left: 64, right: 0, top: 16, bottom: 32 }}
+                height={200}
+                xType={EuiSeriesChartUtils.SCALE.TIME}
+                xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+                yDomain={durationDomainLimits}
+                animateData={false}
+              >
+                <EuiAreaSeries
+                  color={range}
+                  name={i18n.translate(
+                    'xpack.uptime.monitorCharts.monitorDuration.series.durationRangeLabel',
+                    {
+                      defaultMessage: 'Duration range',
+                    }
+                  )}
+                  data={durationArea.map(({ x, yMin, yMax }) => ({
+                    x,
+                    y0: microsToMillis(yMin),
+                    y: microsToMillis(yMax),
+                  }))}
+                  curve="curveBasis"
+                />
+                <EuiLineSeries
+                  color={mean}
+                  lineSize={2}
+                  name={i18n.translate(
+                    'xpack.uptime.monitorCharts.monitorDuration.series.meanDurationLabel',
+                    {
+                      defaultMessage: 'Mean duration',
+                    }
+                  )}
+                  data={durationLine.map(({ x, y }) => ({
+                    x,
+                    y: microsToMillis(y),
+                  }))}
+                />
+              </EuiSeriesChart>
+            </EuiPanel>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiPanel paddingSize="s" style={{ height: 248 }}>
+              <EuiTitle size="xs">
+                <h4>
+                  <FormattedMessage
+                    id="xpack.uptime.monitorCharts.checkStatus.title"
+                    defaultMessage="Check status"
+                  />
+                </h4>
+              </EuiTitle>
+              <EuiSeriesChart
+                margins={{ left: 64, right: 0, top: 16, bottom: 32 }}
+                height={200}
+                xType={EuiSeriesChartUtils.SCALE.TIME}
+                xCrosshairFormat="YYYY-MM-DD hh:mmZ"
+                stackBy="y"
+                yDomain={checkDomainLimits}
+                animateData={false}
+              >
+                <EuiAreaSeries
+                  name={i18n.translate(
+                    'xpack.uptime.monitorCharts.checkStatus.series.upCountLabel',
+                    {
+                      defaultMessage: 'Up count',
+                    }
+                  )}
+                  data={status.map(({ x, up }) => ({ x, y: up || 0 }))}
+                  color={success}
+                />
+                <EuiAreaSeries
+                  name={i18n.translate(
+                    'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
+                    {
+                      defaultMessage: 'Down count',
+                    }
+                  )}
+                  data={status.map(({ x, down }) => ({ x, y: down || 0 }))}
+                  color={danger}
+                />
+              </EuiSeriesChart>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </Fragment>
+    );
+  }
+  return (
+    <Fragment>
+      {i18n.translate('xpack.uptime.monitorCharts.loadingMessage', {
+        defaultMessage: 'Loading…',
+      })}
+    </Fragment>
+  );
+};
+
+export const MonitorCharts = withUptimeGraphQL<MonitorChartsQueryResult, MonitorChartsProps>(
+  MonitorChartsComponent,
+  monitorChartsQuery
 );

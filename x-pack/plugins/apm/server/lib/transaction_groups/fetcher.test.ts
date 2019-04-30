@@ -24,7 +24,8 @@ describe('transactionGroupsFetcher', () => {
             case 'xpack.apm.ui.transactionGroupBucketSize':
               return 100;
           }
-        })
+        }),
+        has: () => true
       }
     };
     const bodyQuery = { my: 'bodyQuery' };

@@ -26,41 +26,54 @@ export function RetryProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   return new class Retry {
-    public async tryForTime<T>(timeout: number, block: () => Promise<T>) {
+    public async tryForTime<T>(
+      timeout: number,
+      block: () => Promise<T>,
+      onFailureBlock?: () => Promise<T>
+    ) {
       return await retryForSuccess(log, {
         timeout,
         methodName: 'retry.tryForTime',
         block,
+        onFailureBlock,
       });
     }
 
-    public async try<T>(block: () => Promise<T>) {
+    public async try<T>(block: () => Promise<T>, onFailureBlock?: () => Promise<T>) {
       return await retryForSuccess(log, {
         timeout: config.get('timeouts.try'),
         methodName: 'retry.try',
         block,
+        onFailureBlock,
       });
     }
 
     public async waitForWithTimeout(
       description: string,
       timeout: number,
-      block: () => Promise<boolean>
+      block: () => Promise<boolean>,
+      onFailureBlock?: () => Promise<any>
     ) {
       await retryForTruthy(log, {
         timeout,
         methodName: 'retry.waitForWithTimeout',
         description,
         block,
+        onFailureBlock,
       });
     }
 
-    public async waitFor(description: string, block: () => Promise<boolean>) {
+    public async waitFor(
+      description: string,
+      block: () => Promise<boolean>,
+      onFailureBlock?: () => Promise<any>
+    ) {
       await retryForTruthy(log, {
         timeout: config.get('timeouts.waitFor'),
         methodName: 'retry.waitFor',
         description,
         block,
+        onFailureBlock,
       });
     }
   }();

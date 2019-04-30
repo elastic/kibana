@@ -17,8 +17,14 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { ResponseObject, Server } from 'hapi';
 
+import {
+  ElasticsearchServiceSetup,
+  HttpServiceSetup,
+  ConfigService,
+  PluginsServiceSetup,
+} from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -27,6 +33,11 @@ import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
+  has(key: string): boolean;
+}
+
+export interface UiApp {
+  getId(): string;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -43,6 +54,8 @@ declare module 'hapi' {
     config: () => KibanaConfig;
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
+    injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
+    getHiddenUiAppById(appId: string): UiApp;
   }
 
   interface Request {
@@ -50,12 +63,30 @@ declare module 'hapi' {
     getBasePath(): string;
     getUiSettingsService(): any;
   }
+
+  interface ResponseToolkit {
+    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
+  }
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
-
+type Unpromise<T> = T extends Promise<infer U> ? U : T;
+// eslint-disable-next-line import/no-default-export
 export default class KbnServer {
-  public readonly core: any;
+  public readonly newPlatform: {
+    setup: {
+      core: {
+        elasticsearch: ElasticsearchServiceSetup;
+        http?: HttpServiceSetup;
+      };
+      plugins: PluginsServiceSetup;
+    };
+    stop: null;
+    params: {
+      serverOptions: ElasticsearchServiceSetup;
+      handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
+    };
+  };
   public server: Server;
   public inject: Server['inject'];
 

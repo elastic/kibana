@@ -220,7 +220,7 @@ describe('ElasticIndex', () => {
             expect(arg.body).toEqual({
               mappings: {
                 dynamic: 'strict',
-                properties: { foo: 'bar' },
+                properties: { foo: { type: 'keyword' } },
               },
               settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
@@ -264,7 +264,7 @@ describe('ElasticIndex', () => {
         indexName: '.ze-index',
         mappings: {
           dynamic: 'strict',
-          properties: { foo: 'bar' },
+          properties: { foo: { type: 'keyword' } },
         },
       };
       await Index.convertToAlias(callCluster as any, info, '.muchacha', 10);
@@ -286,7 +286,7 @@ describe('ElasticIndex', () => {
             expect(arg.body).toEqual({
               mappings: {
                 dynamic: 'strict',
-                properties: { foo: 'bar' },
+                properties: { foo: { type: 'keyword' } },
               },
               settings: { auto_expand_replicas: '0-1', number_of_shards: 1 },
             });
@@ -323,7 +323,7 @@ describe('ElasticIndex', () => {
         indexName: '.ze-index',
         mappings: {
           dynamic: 'strict',
-          properties: { foo: 'bar' },
+          properties: { foo: { type: 'keyword' } },
         },
       };
       await expect(Index.convertToAlias(callCluster as any, info, '.muchacha', 10)).rejects.toThrow(

@@ -2,37 +2,13 @@
 
 exports[`it renders without crashing 1`] = `
 <Fragment>
-  <EuiHorizontalRule
-    margin="l"
-    size="full"
-  />
+  <EuiHorizontalRule />
   <EuiFlexGroup
-    alignItems="stretch"
     className="index-privilege-form"
-    component="div"
-    direction="row"
-    gutterSize="l"
-    justifyContent="flexStart"
-    responsive={true}
-    wrap={false}
   >
-    <EuiFlexItem
-      component="div"
-      grow={true}
-    >
-      <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
-        direction="row"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
-      >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+    <EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem>
           <EuiFormRow
             describedByIds={Array []}
             fullWidth={true}
@@ -41,10 +17,11 @@ exports[`it renders without crashing 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Indices"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.indicesFormRowLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.indicesFormRowLabel"
                 values={Object {}}
               />
             }
+            labelType="label"
           >
             <EuiComboBox
               compressed={false}
@@ -60,10 +37,7 @@ exports[`it renders without crashing 1`] = `
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiFormRow
             describedByIds={Array []}
             fullWidth={true}
@@ -71,10 +45,11 @@ exports[`it renders without crashing 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Privileges"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.privilegesFormRowLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.privilegesFormRowLabel"
                 values={Object {}}
               />
             }
+            labelType="label"
           >
             <EuiComboBox
               compressed={false}
@@ -86,60 +61,49 @@ exports[`it renders without crashing 1`] = `
               options={
                 Array [
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "all",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "monitor",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "read",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "create",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "delete",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "write",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "delete_index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "create_index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "view_index_metadata",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "read_cross_cluster",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage_follow_index",
                   },
                   Object {
-                    "isGroupLabelOption": false,
                     "label": "manage_ilm",
+                  },
+                  Object {
+                    "label": "manage_leader_index",
                   },
                 ]
               }
@@ -148,61 +112,32 @@ exports[`it renders without crashing 1`] = `
             />
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
-          <EuiFormRow
-            className="indexPrivilegeForm__grantedFieldsRow"
-            describedByIds={Array []}
-            fullWidth={true}
-            hasEmptyLabelSpace={false}
-            helpText={
-              <FormattedMessage
-                defaultMessage="If no fields are granted, then users assigned to this role will not be able to see any data for this index."
-                id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowHelpText"
-                values={Object {}}
-              />
-            }
+      </EuiFlexGroup>
+      <EuiSpacer />
+      <EuiFlexGroup
+        direction="column"
+      >
+        <EuiFlexItem>
+          <EuiSwitch
+            checked={false}
+            compressed={true}
+            data-test-subj="restrictFieldsQuery0"
             label={
               <FormattedMessage
-                defaultMessage="Granted fields (optional)"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.grantedFieldsFormRowLabel"
+                defaultMessage="Grant access to specific fields"
+                id="xpack.security.management.editRoles.indexPrivilegeForm.grantFieldPrivilegesLabel"
                 values={Object {}}
               />
             }
-          >
-            <EuiComboBox
-              compressed={false}
-              data-test-subj="fieldInput0"
-              fullWidth={false}
-              isClearable={true}
-              isDisabled={false}
-              onChange={[Function]}
-              onCreateOption={[Function]}
-              options={Array []}
-              selectedOptions={Array []}
-              singleSelection={false}
-            />
-          </EuiFormRow>
+            onChange={[Function]}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer
-        size="l"
-      />
+      <EuiSpacer />
       <EuiFlexGroup
-        alignItems="stretch"
-        component="div"
         direction="column"
-        gutterSize="l"
-        justifyContent="flexStart"
-        responsive={true}
-        wrap={false}
       >
-        <EuiFlexItem
-          component="div"
-          grow={true}
-        >
+        <EuiFlexItem>
           <EuiSwitch
             checked={false}
             compressed={true}
@@ -210,7 +145,7 @@ exports[`it renders without crashing 1`] = `
             label={
               <FormattedMessage
                 defaultMessage="Grant read privileges to specific documents"
-                id="xpack.security.management.editRoles.indexPrivilegeForm.grantReadPrivilegesLabel"
+                id="xpack.security.management.editRole.indexPrivilegeForm.grantReadPrivilegesLabel"
                 values={Object {}}
               />
             }
@@ -220,13 +155,13 @@ exports[`it renders without crashing 1`] = `
       </EuiFlexGroup>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFormRow
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={true}
+        labelType="label"
       >
         <EuiButtonIcon
           aria-label="Delete index privilege"

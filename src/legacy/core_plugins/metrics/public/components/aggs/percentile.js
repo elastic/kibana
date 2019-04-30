@@ -64,10 +64,12 @@ class PercentilesUi extends Component {
       <EuiFlexItem grow={false}>
         <EuiFieldNumber
           aria-label={intl.formatMessage({ id: 'tsvb.percentile.percentileAriaLabel', defaultMessage: 'Percentile' })}
-          placeholder={intl.formatMessage({ id: 'tsvb.percentile.percentilePlaceholder', defaultMessage: 'Percentile' })}
+          placeholder={0}
+          max={100}
+          min={0}
           step={1}
           onChange={this.handleTextChange(model, 'value')}
-          value={Number(model.value)}
+          value={model.value === '' ? '' : Number(model.value)}
         />
       </EuiFlexItem>
     );

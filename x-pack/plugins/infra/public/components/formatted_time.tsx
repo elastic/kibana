@@ -5,8 +5,9 @@
  */
 
 import moment from 'moment';
-import React from 'react';
-import { WithKibanaChrome } from '../containers/with_kibana_chrome';
+import React, { useMemo } from 'react';
+
+import { useKibanaUiSetting } from '../utils/use_kibana_ui_setting';
 
 interface FormattedTimeProps {
   time: number; // Unix time (milliseconds)
@@ -21,8 +22,17 @@ const getFormattedTime = (
   return userFormat ? moment(time).format(userFormat) : moment(time).format(fallbackFormat);
 };
 
-export const FormattedTime: React.SFC<FormattedTimeProps> = ({ time, fallbackFormat }) => (
-  <WithKibanaChrome>
-    {({ dateFormat }) => <span>{getFormattedTime(time, dateFormat, fallbackFormat)}</span>}
-  </WithKibanaChrome>
-);
+export const FormattedTime: React.FunctionComponent<FormattedTimeProps> = ({
+  time,
+  fallbackFormat,
+}) => {
+  const [dateFormat] = useKibanaUiSetting('dateFormat');
+  const formattedTime = useMemo(() => getFormattedTime(time, dateFormat, fallbackFormat), [
+    getFormattedTime,
+    time,
+    dateFormat,
+    fallbackFormat,
+  ]);
+
+  return <span>{formattedTime}</span>;
+};

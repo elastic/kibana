@@ -22,22 +22,19 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function AppsMenuProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const retry = getService('retry');
-  const globalNav = getService('globalNav');
 
   return new class AppsMenu {
     /**
      * Get the text and href from each of the links in the apps menu
      */
     public async readLinks() {
-      await this.ensureMenuOpen();
-      const appMenu = await testSubjects.find('navDrawer&expanded appsMenu');
+      const appMenu = await testSubjects.find('navDrawer');
       const $ = await appMenu.parseDomContent();
 
       const links: Array<{
         text: string;
         href: string;
-      }> = $.findTestSubjects('appLink')
+      }> = $.findTestSubjects('navDrawerAppsMenuLink')
         .toArray()
         .map((link: any) => {
           return {
@@ -46,7 +43,6 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
           };
         });
 
-      await this.ensureMenuClosed();
       return links;
     }
 
@@ -65,30 +61,12 @@ export function AppsMenuProvider({ getService }: FtrProviderContext) {
     public async clickLink(name: string) {
       try {
         log.debug(`click "${name}" app link`);
-        await this.ensureMenuOpen();
-        const container = await testSubjects.find('navDrawer&expanded appsMenu');
-        const link = await container.findByPartialLinkText(name);
+        const container = await testSubjects.find('navDrawer');
+        // Text content is not visible or selectable (0px width) so we use an attr with th same value
+        const link = await container.findByCssSelector(`[aria-label='${name}']`);
         await link.click();
       } finally {
-        await this.ensureMenuClosed();
-      }
-    }
-
-    private async ensureMenuClosed() {
-      await globalNav.moveMouseToLogo();
-      await retry.waitFor(
-        'apps drawer closed',
-        async () => await testSubjects.exists('navDrawer&collapsed')
-      );
-    }
-
-    private async ensureMenuOpen() {
-      if (!(await testSubjects.exists('navDrawer&expanded'))) {
-        await testSubjects.moveMouseTo('navDrawer');
-        await retry.waitFor(
-          'apps drawer open',
-          async () => await testSubjects.exists('navDrawer&expanded')
-        );
+        // Intentionally empty
       }
     }
   }();

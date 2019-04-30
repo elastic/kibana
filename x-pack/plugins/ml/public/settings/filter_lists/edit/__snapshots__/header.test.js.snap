@@ -4,34 +4,20 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Create new filter list"
@@ -42,12 +28,10 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -81,6 +65,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -94,28 +79,19 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   </EuiFormRow>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           A test filter list
         </p>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -135,34 +111,20 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Create new filter list"
@@ -173,12 +135,10 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -216,6 +176,7 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
         values={Object {}}
       />
     }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -229,24 +190,15 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   </EuiFormRow>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiTextColor
           color="subdued"
-          component="span"
         >
           <FormattedMessage
             defaultMessage="Add a description"
@@ -257,7 +209,6 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -276,34 +227,20 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Filter list {filterId}"
@@ -318,12 +255,10 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -346,24 +281,15 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiTextColor
           color="subdued"
-          component="span"
         >
           <FormattedMessage
             defaultMessage="Add a description"
@@ -374,7 +300,6 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -386,10 +311,7 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   <EuiSpacer
     size="s"
   />
-  <EuiText
-    grow={true}
-    size="m"
-  >
+  <EuiText>
     <p>
       <FormattedMessage
         defaultMessage="This filter list is not used by any jobs."
@@ -408,34 +330,20 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
 <Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
               <FormattedMessage
                 defaultMessage="Filter list {filterId}"
@@ -450,12 +358,10 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
               <FormattedMessage
@@ -478,28 +384,19 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           A test filter list
         </p>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <InjectIntl(EditDescriptionPopover)
@@ -515,10 +412,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
   <div
     className="ml-filter-list-usage"
   >
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="This filter list is used in"
         id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
@@ -533,10 +427,7 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
         ]
       }
     />
-    <EuiText
-      grow={true}
-      size="m"
-    >
+    <EuiText>
       <FormattedMessage
         defaultMessage="across"
         id="xpack.ml.settings.filterLists.editFilterList.acrossText"

@@ -10,11 +10,17 @@ import {
   EuiPanel,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSwitch,
+  EuiRange,
+  EuiToolTip,
 } from '@elastic/eui';
 import { ExpressionInput } from '../expression_input';
+
+const minFontSize = 12;
+const maxFontSize = 32;
 
 export const Expression = ({
   functionDefinitions,
@@ -25,17 +31,41 @@ export const Expression = ({
   error,
   isAutocompleteEnabled,
   toggleAutocompleteEnabled,
+  fontSize,
+  setFontSize,
+  isCompact,
+  toggleCompactView,
 }) => {
   return (
-    <EuiPanel className="canvasTray__panel">
+    <EuiPanel
+      className={`canvasTray__panel canvasExpression--${isCompact ? 'compactSize' : 'fullSize'}`}
+    >
       <ExpressionInput
+        fontSize={fontSize}
+        isCompact={isCompact}
         functionDefinitions={functionDefinitions}
         error={error}
         value={formState.expression}
         onChange={updateValue}
         isAutocompleteEnabled={isAutocompleteEnabled}
       />
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
+      <div className="canvasExpression--controls">
+        <EuiToolTip content={isCompact ? 'Maximize' : 'Minimize'}>
+          <EuiButtonIcon
+            size="s"
+            onClick={toggleCompactView}
+            iconType="expand"
+            color="subdued"
+            aria-label="Toggle expression window height"
+          />
+        </EuiToolTip>
+      </div>
+      <EuiFlexGroup
+        className="canvasExpression--settings"
+        justifyContent="spaceBetween"
+        alignItems="center"
+        gutterSize="l"
+      >
         <EuiFlexItem grow={false}>
           <EuiSwitch
             id="autocompleteOptIn"
@@ -45,19 +75,46 @@ export const Expression = ({
             onChange={toggleAutocompleteEnabled}
           />
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem style={{ fontSize: `${minFontSize}px` }} grow={false}>
+              A
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiRange
+                value={fontSize}
+                min={minFontSize}
+                step={4}
+                max={maxFontSize}
+                onChange={e => setFontSize(e.target.value)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} style={{ fontSize: `${maxFontSize}px` }}>
+              A
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiButtonEmpty size="s" color={formState.dirty ? 'danger' : 'primary'} onClick={done}>
-              {formState.dirty ? 'Cancel' : 'Close'}
-            </EuiButtonEmpty>
-            <EuiButton
-              fill
-              disabled={!!error}
-              onClick={() => setExpression(formState.expression)}
-              size="s"
-            >
-              Run
-            </EuiButton>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                color={formState.dirty ? 'danger' : 'primary'}
+                onClick={done}
+              >
+                {formState.dirty ? 'Cancel' : 'Close'}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                fill
+                disabled={!!error}
+                onClick={() => setExpression(formState.expression)}
+                size="s"
+              >
+                Run
+              </EuiButton>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>

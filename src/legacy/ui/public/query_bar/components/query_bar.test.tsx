@@ -17,57 +17,12 @@
  * under the License.
  */
 
-const mockChromeFactory = jest.fn(() => {
-  return {
-    getBasePath: () => `foo`,
-    getUiSettingsClient: () => {
-      return {
-        get: (key: string) => {
-          switch (key) {
-            case 'history:limit':
-              return 10;
-            default:
-              throw new Error(`Unexpected config key: ${key}`);
-          }
-        },
-      };
-    },
-  };
-});
-
-const mockPersistedLog = {
-  add: jest.fn(),
-  get: jest.fn(() => ['response:200']),
-};
-
-const mockPersistedLogFactory = jest.fn<jest.Mocked<typeof mockPersistedLog>, any>(() => {
-  return mockPersistedLog;
-});
-
-const mockGetAutocompleteSuggestions = jest.fn(() => Promise.resolve([]));
-const mockAutocompleteProvider = jest.fn(() => mockGetAutocompleteSuggestions);
-const mockGetAutocompleteProvider = jest.fn(() => mockAutocompleteProvider);
-
-jest.mock('ui/chrome', () => mockChromeFactory());
-jest.mock('../../chrome', () => mockChromeFactory());
-jest.mock('ui/persisted_log', () => ({
-  PersistedLog: mockPersistedLogFactory,
-}));
-jest.mock('../../metadata', () => ({
-  metadata: {
-    branch: 'foo',
-  },
-}));
-jest.mock('../../autocomplete_providers', () => ({
-  getAutocompleteProvider: mockGetAutocompleteProvider,
-}));
-
-import _ from 'lodash';
-// Using doMock to avoid hoisting so that I can override only the debounce method in lodash
-jest.doMock('lodash', () => ({
-  ..._,
-  debounce: (func: () => any) => func,
-}));
+import {
+  mockGetAutocompleteProvider,
+  mockGetAutocompleteSuggestions,
+  mockPersistedLog,
+  mockPersistedLogFactory,
+} from 'ui/query_bar/components/query_bar.test.mocks';
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
@@ -114,6 +69,7 @@ const mockIndexPattern = {
     {
       name: 'response',
       type: 'number',
+      esTypes: ['integer'],
       aggregatable: true,
       filterable: true,
       searchable: true,
@@ -132,6 +88,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         intl={null as any}
@@ -147,6 +104,7 @@ describe('QueryBar', () => {
         query={luceneQuery}
         onSubmit={noop}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         intl={null as any}
@@ -162,6 +120,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
@@ -178,6 +137,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
@@ -197,6 +157,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={mockCallback}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={mockStorage}
         disableAutoFocus={true}
@@ -229,6 +190,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={mockCallback}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
@@ -261,6 +223,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}
@@ -287,6 +250,7 @@ describe('QueryBar', () => {
         query={kqlQuery}
         onSubmit={noop}
         appName={'discover'}
+        screenTitle={'Another Screen'}
         indexPatterns={[mockIndexPattern]}
         store={createMockStorage()}
         disableAutoFocus={true}

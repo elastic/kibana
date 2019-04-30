@@ -1,0 +1,23 @@
+<td>
+  <div
+    data-cell-content
+    class="kbnTableCellFilter__hover"
+  >
+    <span class="kbnTableCellFilter">
+      <span
+        data-test-subj="filterForCellValue"
+        ng-click="onFilterClick($event, false)"
+        class="fa fa-search-plus"
+        tooltip="{{ ::'tableVis.directives.tableCellFilter.filterForValueTooltip' | i18n: {defaultMessage: 'Filter for value'} }}"
+        tooltip-append-to-body="1"
+      ></span>
+
+      <span
+        ng-click="onFilterClick($event, true)"
+        class="fa fa-search-minus"
+        tooltip="{{ ::'tableVis.directives.tableCellFilter.filterOutValueTooltip' | i18n: {defaultMessage: 'Filter out value'} }}"
+        tooltip-append-to-body="1"
+      ></span>
+    </span>
+  </div>
+</td>

@@ -20,15 +20,14 @@
 import _ from 'lodash';
 import chrome from '../../chrome';
 import moment from 'moment-timezone';
-import '../../filters/field_type';
-import '../../validate_date_interval';
+import '../directives/validate_date_interval';
 import { BucketAggType } from './_bucket_agg_type';
 import { TimeBuckets } from '../../time_buckets';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { intervalOptions } from './_interval_options';
 import intervalTemplate from '../controls/time_interval.html';
 import { timefilter } from '../../timefilter';
-import dropPartialTemplate from '../controls/drop_partials.html';
+import { DropPartialsParamEditor } from '../controls/drop_partials';
 import { i18n } from '@kbn/i18n';
 
 const config = chrome.getUiSettingsClient();
@@ -156,16 +155,36 @@ export const dateHistogramBucketAgg = new BucketAggType({
     },
     {
       name: 'time_zone',
-      default: () => {
-        const isDefaultTimezone = config.isDefault('dateFormat:tz');
-        return isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+      default: undefined,
+      // We don't ever want this parameter to be serialized out (when saving or to URLs)
+      // since we do all the logic handling it "on the fly" in the `write` method, to prevent
+      // time_zones being persisted into saved_objects
+      serialize: () => undefined,
+      write: (agg, output) => {
+        // If a time_zone has been set explicitly always prefer this.
+        let tz = agg.params.time_zone;
+        if (!tz && agg.params.field) {
+          // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
+          // field requires a specific time_zone
+          tz = _.get(agg.getIndexPattern(), ['typeMeta', 'aggs', 'date_histogram', agg.params.field.name, 'time_zone']);
+        }
+        if (!tz) {
+          // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
+          const isDefaultTimezone = config.isDefault('dateFormat:tz');
+          tz = isDefaultTimezone ? detectedTimezone || tzOffset : config.get('dateFormat:tz');
+        }
+        output.params.time_zone = tz;
       },
     },
     {
       name: 'drop_partials',
       default: false,
       write: _.noop,
-      editor: dropPartialTemplate,
+      editorComponent: DropPartialsParamEditor,
+      shouldShow: agg => {
+        const field = agg.params.field;
+        return field && field.name && field.name === agg.getIndexPattern().timeFieldName;
+      },
     },
 
     {

@@ -12,5 +12,5 @@ export const schemas = [...serverSchemas];
 
 // this default export is used to feed the combined types to the gql-gen tool
 // which generates the corresponding typescript types
-// tslint:disable-next-line:no-default-export
+// eslint-disable-next-line import/no-default-export
 export default buildSchemaFromTypeDefinitions(schemas);

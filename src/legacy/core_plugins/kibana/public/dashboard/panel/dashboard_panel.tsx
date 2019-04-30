@@ -36,8 +36,8 @@ import { PanelHeader } from './panel_header';
 
 export interface DashboardPanelProps {
   viewOnlyMode: boolean;
-  onPanelFocused?: (panelIndex: PanelId) => {};
-  onPanelBlurred?: (panelIndex: PanelId) => {};
+  onPanelFocused?: (panelIndex: PanelId) => void;
+  onPanelBlurred?: (panelIndex: PanelId) => void;
   error?: string | object;
   destroy: () => void;
   containerState: ContainerState;
@@ -71,7 +71,7 @@ class DashboardPanelUi extends React.Component<DashboardPanelUiProps, State> {
         ? null
         : props.intl.formatMessage({
             id: 'kbn.dashboard.panel.noEmbeddableFactoryErrorMessage',
-            defaultMessage: 'No factory found for embeddable',
+            defaultMessage: 'The feature to render this panel is missing.',
           }),
     };
 

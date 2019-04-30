@@ -15,7 +15,7 @@ import { ConfigurationBlock } from '../../common/domain_types';
 interface ComponentProps {
   configs: {
     error?: string | undefined;
-    blocks: ConfigurationBlock[];
+    list: ConfigurationBlock[];
     page: number;
     total: number;
   };
@@ -30,7 +30,7 @@ const pagination = {
 
 const ConfigListUi: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
-    items={props.configs.blocks || []}
+    items={props.configs.list || []}
     itemId="id"
     pagination={{
       ...pagination,

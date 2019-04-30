@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { showApiError } from '../../services/api_errors';
 import { createAction } from 'redux-actions';
 import { loadPolicies } from '../../services/api';
-import { SET_PHASE_DATA } from '../constants';
+import { SET_PHASE_DATA } from '../../constants';
 export const fetchedPolicies = createAction('FETCHED_POLICIES');
 export const setSelectedPolicy = createAction('SET_SELECTED_POLICY');
 export const unsetSelectedPolicy = createAction('UNSET_SELECTED_POLICY');

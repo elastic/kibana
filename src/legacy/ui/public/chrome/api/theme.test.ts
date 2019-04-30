@@ -19,17 +19,12 @@
 
 import * as Rx from 'rxjs';
 
-import { __newPlatformInit__, initChromeThemeApi } from './theme';
+import { chromeServiceMock } from '../../../../../core/public/mocks';
+import { __newPlatformSetup__, initChromeThemeApi } from './theme';
 
-const newPlatformChrome = {
-  setBrand: jest.fn(),
-  getBrand$: jest.fn(),
-  addApplicationClass: jest.fn(),
-  removeApplicationClass: jest.fn(),
-  getApplicationClasses$: jest.fn(),
-};
+const newPlatformChrome = chromeServiceMock.createSetupContract();
 
-__newPlatformInit__(newPlatformChrome as any);
+__newPlatformSetup__(newPlatformChrome);
 
 function setup() {
   const brand$ = new Rx.BehaviorSubject({ logo: 'foo', smallLogo: 'foo' });

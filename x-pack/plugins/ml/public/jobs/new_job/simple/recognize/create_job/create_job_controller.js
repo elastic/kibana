@@ -25,6 +25,7 @@ import { CreateRecognizerJobsServiceProvider } from './create_job_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
+import { toastNotifications } from 'ui/notify';
 import { timefilter } from 'ui/timefilter';
 
 uiRoutes
@@ -358,6 +359,23 @@ module
               });
             }
             resolve();
+          })
+          .catch((err) => {
+            console.log('Error setting up module', err);
+            toastNotifications.addWarning({
+              title: i18n('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningTitle', {
+                defaultMessage: 'Error setting up module {moduleId}',
+                values: { moduleId }
+              }),
+              text: i18n('xpack.ml.newJob.simple.recognize.moduleSetupFailedWarningDescription', {
+                defaultMessage: 'An error occurred trying to create the {count, plural, one {job} other {jobs}} in the module.',
+                values: {
+                  count: $scope.formConfig.jobs.length
+                }
+              })
+            });
+            $scope.overallState = SAVE_STATE.FAILED;
+            $scope.$applyAsync();
           });
       });
     }

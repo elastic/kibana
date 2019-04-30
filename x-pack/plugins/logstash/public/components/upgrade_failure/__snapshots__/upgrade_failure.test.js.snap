@@ -160,33 +160,20 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
             >
               <EuiTextColor
                 color="subdued"
-                component="span"
               >
                 <span
                   className="euiTextColor euiTextColor--subdued"
                 >
-                  <EuiTitle
-                    size="m"
-                    textTransform="none"
-                  >
+                  <EuiTitle>
                     <UpgradeFailureTitle
                       className="euiTitle euiTitle--medium"
                       titleText="Upgrade failed"
                     >
-                      <EuiFlexGroup
-                        alignItems="stretch"
-                        component="div"
-                        direction="row"
-                        gutterSize="l"
-                        justifyContent="flexStart"
-                        responsive={true}
-                        wrap={false}
-                      >
+                      <EuiFlexGroup>
                         <div
                           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            component="div"
                             grow={false}
                           >
                             <div
@@ -224,16 +211,12 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
-                            component="div"
                             grow={false}
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiTitle
-                                size="m"
-                                textTransform="none"
-                              >
+                              <EuiTitle>
                                 <h2
                                   className="euiTitle euiTitle--medium"
                                 >
@@ -253,10 +236,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                       className="euiSpacer euiSpacer--m"
                     />
                   </EuiSpacer>
-                  <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  <EuiText>
                     <div
                       className="euiText euiText--medium"
                     >
@@ -293,19 +273,12 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                 upgradeButtonText="Try again"
               >
                 <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
                   justifyContent="flexStart"
-                  responsive={true}
-                  wrap={false}
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
-                      component="div"
                       grow={false}
                     >
                       <div
@@ -316,6 +289,7 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                           fill={true}
                           iconSide="left"
                           onClick={[MockFunction]}
+                          size="m"
                           type="button"
                         >
                           <button
@@ -337,7 +311,6 @@ exports[`UpgradeFailure component passes expected text for new pipeline 1`] = `
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem
-                      component="div"
                       grow={false}
                     >
                       <div
@@ -545,33 +518,20 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
             >
               <EuiTextColor
                 color="subdued"
-                component="span"
               >
                 <span
                   className="euiTextColor euiTextColor--subdued"
                 >
-                  <EuiTitle
-                    size="m"
-                    textTransform="none"
-                  >
+                  <EuiTitle>
                     <UpgradeFailureTitle
                       className="euiTitle euiTitle--medium"
                       titleText="Time for an upgrade!"
                     >
-                      <EuiFlexGroup
-                        alignItems="stretch"
-                        component="div"
-                        direction="row"
-                        gutterSize="l"
-                        justifyContent="flexStart"
-                        responsive={true}
-                        wrap={false}
-                      >
+                      <EuiFlexGroup>
                         <div
                           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            component="div"
                             grow={false}
                           >
                             <div
@@ -609,16 +569,12 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
-                            component="div"
                             grow={false}
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiTitle
-                                size="m"
-                                textTransform="none"
-                              >
+                              <EuiTitle>
                                 <h2
                                   className="euiTitle euiTitle--medium"
                                 >
@@ -638,10 +594,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                       className="euiSpacer euiSpacer--m"
                     />
                   </EuiSpacer>
-                  <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  <EuiText>
                     <div
                       className="euiText euiText--medium"
                     >
@@ -678,19 +631,12 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                 upgradeButtonText="Upgrade"
               >
                 <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
                   justifyContent="flexStart"
-                  responsive={true}
-                  wrap={false}
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
-                      component="div"
                       grow={false}
                     >
                       <div
@@ -701,6 +647,7 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                           fill={true}
                           iconSide="left"
                           onClick={[MockFunction]}
+                          size="m"
                           type="button"
                         >
                           <button
@@ -722,7 +669,6 @@ exports[`UpgradeFailure component passes expected text for not manual upgrade 1`
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem
-                      component="div"
                       grow={false}
                     >
                       <div
@@ -930,33 +876,20 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
             >
               <EuiTextColor
                 color="subdued"
-                component="span"
               >
                 <span
                   className="euiTextColor euiTextColor--subdued"
                 >
-                  <EuiTitle
-                    size="m"
-                    textTransform="none"
-                  >
+                  <EuiTitle>
                     <UpgradeFailureTitle
                       className="euiTitle euiTitle--medium"
                       titleText="Upgrade failed"
                     >
-                      <EuiFlexGroup
-                        alignItems="stretch"
-                        component="div"
-                        direction="row"
-                        gutterSize="l"
-                        justifyContent="flexStart"
-                        responsive={true}
-                        wrap={false}
-                      >
+                      <EuiFlexGroup>
                         <div
                           className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                         >
                           <EuiFlexItem
-                            component="div"
                             grow={false}
                           >
                             <div
@@ -994,16 +927,12 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                             </div>
                           </EuiFlexItem>
                           <EuiFlexItem
-                            component="div"
                             grow={false}
                           >
                             <div
                               className="euiFlexItem euiFlexItem--flexGrowZero"
                             >
-                              <EuiTitle
-                                size="m"
-                                textTransform="none"
-                              >
+                              <EuiTitle>
                                 <h2
                                   className="euiTitle euiTitle--medium"
                                 >
@@ -1023,10 +952,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                       className="euiSpacer euiSpacer--m"
                     />
                   </EuiSpacer>
-                  <EuiText
-                    grow={true}
-                    size="m"
-                  >
+                  <EuiText>
                     <div
                       className="euiText euiText--medium"
                     >
@@ -1063,19 +989,12 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                 upgradeButtonText="Try again"
               >
                 <EuiFlexGroup
-                  alignItems="stretch"
-                  component="div"
-                  direction="row"
-                  gutterSize="l"
                   justifyContent="flexStart"
-                  responsive={true}
-                  wrap={false}
                 >
                   <div
                     className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                   >
                     <EuiFlexItem
-                      component="div"
                       grow={false}
                     >
                       <div
@@ -1086,6 +1005,7 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                           fill={true}
                           iconSide="left"
                           onClick={[MockFunction]}
+                          size="m"
                           type="button"
                         >
                           <button
@@ -1107,7 +1027,6 @@ exports[`UpgradeFailure component passes expected text for not new pipeline 1`] 
                       </div>
                     </EuiFlexItem>
                     <EuiFlexItem
-                      component="div"
                       grow={false}
                     >
                       <div

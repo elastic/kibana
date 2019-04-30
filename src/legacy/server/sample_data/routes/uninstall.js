@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import Joi from 'joi';
-
+import { usage } from '../usage';
 import { createIndexName } from './lib/create_index_name';
 
 export const createUninstallRoute = () => ({
@@ -27,15 +27,15 @@ export const createUninstallRoute = () => ({
   method: 'DELETE',
   config: {
     validate: {
-      params: Joi.object().keys({
-        id: Joi.string().required(),
-      }).required()
+      params: Joi.object()
+        .keys({
+          id: Joi.string().required(),
+        })
+        .required(),
     },
     handler: async (request, h) => {
-      const server = request.server;
-      const sampleDataset = server.getSampleDatasets().find(({ id }) => {
-        return id === request.params.id;
-      });
+      const { server, params } = request;
+      const sampleDataset = server.getSampleDatasets().find(({ id }) => id === params.id);
 
       if (!sampleDataset) {
         return h.response().code(404);
@@ -50,23 +50,31 @@ export const createUninstallRoute = () => ({
         try {
           await callWithRequest(request, 'indices.delete', { index: index });
         } catch (err) {
-          return h.response(`Unable to delete sample data index "${index}", error: ${err.message}`).code(err.status);
+          return h
+            .response(`Unable to delete sample data index "${index}", error: ${err.message}`)
+            .code(err.status);
         }
       }
 
-      const deletePromises = sampleDataset.savedObjects.map((savedObjectJson) => {
-        return request.getSavedObjectsClient().delete(savedObjectJson.type, savedObjectJson.id);
-      });
+      const deletePromises = sampleDataset.savedObjects.map(({ type, id }) =>
+        request.getSavedObjectsClient().delete(type, id)
+      );
+
       try {
         await Promise.all(deletePromises);
       } catch (err) {
         // ignore 404s since users could have deleted some of the saved objects via the UI
         if (_.get(err, 'output.statusCode') !== 404) {
-          return h.response(`Unable to delete sample dataset saved objects, error: ${err.message}`).code(403);
+          return h
+            .response(`Unable to delete sample dataset saved objects, error: ${err.message}`)
+            .code(403);
         }
       }
 
+      // track the usage operation in a non-blocking way
+      usage(request).addUninstall(params.id);
+
       return {};
-    }
-  }
+    },
+  },
 });

@@ -189,6 +189,22 @@ export function MeterGaugeProvider() {
       const totalWidth = Math.abs(radius(0) - radius(1));
       const bgPadding = totalWidth * (1 - this.gaugeConfig.style.bgWidth) / 2;
       const gaugePadding = totalWidth * (1 - this.gaugeConfig.style.width) / 2;
+
+      /**
+       * Function to calculate the free space in the center of the gauge. This takes into account
+       * whether ticks are enabled or not.
+       *
+       * This is calculated using the inner diameter (radius(1) * 2) of the gauge.
+       * If ticks/scale are enabled we need to still subtract the tick length * 2 to make space for a tick
+       * on every side. If ticks/scale are disabled, the radius(1) function actually leaves space for the scale,
+       * so we add that free space (which is expressed via the paddings, we just use the larger of those) to the diameter.
+       */
+      const getInnerFreeSpace = () => (radius(1) * 2) -
+        (this.gaugeConfig.scale.show
+          ? this.gaugeConfig.scale.tickLength * 2
+          : -Math.max(bgPadding, gaugePadding) * 2
+        );
+
       const arc = d3.svg.arc()
         .startAngle(minAngle)
         .endAngle(function (d) {
@@ -200,7 +216,6 @@ export function MeterGaugeProvider() {
         .outerRadius(function (d, i, j) {
           return Math.max(0, radius(j) - gaugePadding);
         });
-
 
       const bgArc = d3.svg.arc()
         .startAngle(minAngle)
@@ -241,6 +256,35 @@ export function MeterGaugeProvider() {
       const smallContainer = svg.node().getBBox().height < 70;
       let hiddenLabels = smallContainer;
 
+      // If the value label is hidden we later want to hide also all other labels
+      // since they don't make sense as long as the actual value is hidden.
+      let valueLabelHidden = false;
+
+      gauges
+        .append('text')
+        .attr('class', 'chart-label')
+        .attr('y', -5)
+        .text(d => {
+          if (this.gaugeConfig.percentageMode) {
+            const percentage = Math.round(100 * (d.y - min) / (max - min));
+            return `${percentage}%`;
+          }
+          return data.yAxisFormatter(d.y);
+        })
+        .attr('style', 'dominant-baseline: central;')
+        .style('text-anchor', 'middle')
+        .style('font-size', '2em')
+        .style('display', function () {
+          const textLength = this.getBBox().width;
+          // The text is too long if it's larger than the inner free space minus a couple of random pixels for padding.
+          const textTooLong = textLength >= getInnerFreeSpace() - 6;
+          if (textTooLong) {
+            hiddenLabels = true;
+            valueLabelHidden = true;
+          }
+          return textTooLong ? 'none' : 'initial';
+        });
+
       if (this.gaugeConfig.labels.show) {
         svg
           .append('text')
@@ -269,32 +313,9 @@ export function MeterGaugeProvider() {
             if (textTooLong) {
               hiddenLabels = true;
             }
-            return smallContainer || textTooLong ? 'none' : 'initial';
+            return valueLabelHidden || smallContainer || textTooLong ? 'none' : 'initial';
           });
       }
-
-      gauges
-        .append('text')
-        .attr('class', 'chart-label')
-        .attr('y', -5)
-        .text(d => {
-          if (this.gaugeConfig.percentageMode) {
-            const percentage = Math.round(100 * (d.y - min) / (max - min));
-            return `${percentage}%`;
-          }
-          return data.yAxisFormatter(d.y);
-        })
-        .attr('style', 'dominant-baseline: central;')
-        .style('text-anchor', 'middle')
-        .style('font-size', '2em')
-        .style('display', function () {
-          const textLength = this.getBBox().width;
-          const textTooLong = textLength > maxRadius;
-          if (textTooLong) {
-            hiddenLabels = true;
-          }
-          return textTooLong ? 'none' : 'initial';
-        });
 
       if (this.gaugeConfig.scale.show) {
         this.drawScale(svg, radius(1), angle);

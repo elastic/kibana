@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -136,7 +136,7 @@ export function bulkCreateTestSuiteFactory(es: any, esArchiver: any, supertest: 
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_create dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_create,action:saved_objects/globaltype/bulk_create,action:saved_objects/visualization/bulk_create`,
+      message: `Unable to bulk_create dashboard,globaltype,visualization`,
     });
   };
 

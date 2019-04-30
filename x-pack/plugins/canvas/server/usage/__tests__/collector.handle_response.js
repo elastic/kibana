@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { handleResponse } from '../collector';
 import { workpads } from '../../../__tests__/fixtures/workpads';
 

@@ -18,7 +18,7 @@
  */
 
 import $ from 'jquery';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { fieldFormats } from 'ui/registry/field_formats';
 describe('Url Format', function () {
 

@@ -130,14 +130,17 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
     }
   }
 
-  componentWillUpdate() {
+  previousJobId = undefined;
+  componentDidUpdate() {
     if (
+      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
+      this.previousJobId !== this.props.jobs[0].job_id &&
       this.props.annotations === undefined &&
       this.state.isLoading === false &&
-      Array.isArray(this.props.jobs) && this.props.jobs.length > 0 &&
       this.state.jobId !== this.props.jobs[0].job_id
     ) {
       annotationsRefresh$.next(true);
+      this.previousJobId = this.props.jobs[0].job_id;
     }
   }
 
@@ -266,6 +269,7 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
             defaultMessage="No annotations created for this job"
           />}
           iconType="iInCircle"
+          role="alert"
         >
           {this.state.jobId && isTimeSeriesViewJob(this.getJob(this.state.jobId)) &&
             <p>
@@ -298,7 +302,8 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
           id: 'xpack.ml.annotationsTable.annotationColumnName',
           defaultMessage: 'Annotation',
         }),
-        sortable: true
+        sortable: true,
+        width: '50%',
       },
       {
         field: 'timestamp',
@@ -318,24 +323,6 @@ const AnnotationsTable = injectI18n(class AnnotationsTable extends Component {
         }),
         dataType: 'date',
         render: renderDate,
-        sortable: true,
-      },
-      {
-        field: 'create_time',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.creationDateColumnName',
-          defaultMessage: 'Creation date',
-        }),
-        dataType: 'date',
-        render: renderDate,
-        sortable: true,
-      },
-      {
-        field: 'create_username',
-        name: intl.formatMessage({
-          id: 'xpack.ml.annotationsTable.createdByColumnName',
-          defaultMessage: 'Created by',
-        }),
         sortable: true,
       },
       {

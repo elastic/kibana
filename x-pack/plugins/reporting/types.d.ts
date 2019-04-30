@@ -14,6 +14,7 @@ type SavedObjectClient = any;
 export interface KbnServer {
   info: { protocol: string };
   config: () => ConfigObject;
+  expose: () => void;
   plugins: Record<string, any>;
   route: any;
   log: any;
@@ -104,5 +105,37 @@ export interface ReportingJob {
 export interface JobDoc {
   output: any;
   jobtype: string;
-  payload: any;
+  payload: ReportingJob;
+}
+
+export interface JobSource {
+  _id: string;
+  _source: JobDoc;
+}
+
+export interface ESQueueWorker {
+  on: (event: string, handler: any) => void;
+}
+
+export type ESQueueWorkerExecuteFn = (job: JobDoc, cancellationToken: any) => void;
+
+export interface ExportType {
+  jobType: string;
+  createJobFactory: any;
+  executeJobFactory: (server: KbnServer) => ESQueueWorkerExecuteFn;
+}
+
+export interface ESQueueWorkerOptions {
+  kibanaName: string;
+  kibanaId: string;
+  interval: number;
+  intervalErrorMultiplier: number;
+}
+
+export interface ESQueueInstance {
+  registerWorker: (
+    jobtype: string,
+    workerFn: any,
+    workerOptions: ESQueueWorkerOptions
+  ) => ESQueueWorker;
 }

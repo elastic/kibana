@@ -81,6 +81,7 @@ class FollowerIndexPauseProviderUi extends PureComponent {
             defaultMessage: 'Pause replication',
           })}
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="pauseReplicationConfirmation"
         >
           {hasCustomSettings && (
             <p>

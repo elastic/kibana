@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { addToSiri } from '../_add_to_siri';
 
 describe('addToSiri', function () {
@@ -65,5 +65,19 @@ describe('addToSiri', function () {
     expect(series.get(id).label).to.be(label);
     expect(series.get(id).values).to.have.length(1);
     expect(series.get(id).values[0]).to.be(point);
+  });
+
+  it('correctly sets id and rawId', function () {
+    const series = new Map();
+    const id = 'id-id2';
+
+    const point = {};
+    addToSiri(series, point, id);
+
+    expect(series.has(id)).to.be(true);
+    expect(series.get(id)).to.be.an('object');
+    expect(series.get(id).label).to.be(id);
+    expect(series.get(id).rawId).to.be(id);
+    expect(series.get(id).id).to.be('id2');
   });
 });

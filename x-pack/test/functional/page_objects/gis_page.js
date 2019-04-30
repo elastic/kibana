@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
+
 export function GisPageProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'header', 'timePicker']);
 
@@ -16,6 +18,14 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const comboBox = getService('comboBox');
 
   class GisPage {
+
+    constructor() {
+      this.basePath = '';
+    }
+
+    setBasePath(basePath) {
+      this.basePath = basePath;
+    }
 
     async setAbsoluteRange(start, end) {
       await PageObjects.timePicker.setAbsoluteRange(start, end);
@@ -51,11 +61,31 @@ export function GisPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    // Since there are no DOM indicators that signal when map pan and zoom actions are complete,
+    // this method waits until the map view has stabilized, signaling that the panning/zooming is complete.
+    // Pass origView parameter when the new map view determinition is async
+    // so method knows when panning/zooming has started.
+    async waitForMapPanAndZoom(origView) {
+      await retry.try(async () => {
+        log.debug('Waiting for map pan and zoom to complete');
+        const prevView = await this.getView();
+        await PageObjects.common.sleep(1000);
+        const currentView = await this.getView();
+        if (origView && _.isEqual(origView, currentView)) {
+          throw new Error('Map pan and zoom has not started yet');
+        }
+        if (!_.isEqual(prevView, currentView)) {
+          throw new Error('Map is still panning and zooming');
+        }
+      });
+      await this.waitForLayersToLoad();
+    }
+
     async waitForLayersToLoad() {
       log.debug('Wait for layers to load');
       const tableOfContents = await testSubjects.find('mapLayerTOC');
       await retry.try(async () => {
-        await tableOfContents.waitForDeletedByClassName('euiLoadingSpinner');
+        await tableOfContents.waitForDeletedByCssSelector('.euiLoadingSpinner');
       });
     }
 
@@ -107,6 +137,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.clickWhenNotDisabled('confirmSaveSavedObjectButton');
     }
 
+    async expectMissingSaveButton() {
+      await testSubjects.missingOrFail('mapSaveButton');
+    }
+
+    async expectMissingCreateNewButton() {
+      await testSubjects.missingOrFail('newMapLink');
+    }
+
+    async expectMissingAddLayerButton() {
+      await testSubjects.missingOrFail('addLayerButton');
+    }
+
+    async expectExistAddLayerButton() {
+      await testSubjects.existOrFail('addLayerButton');
+    }
+
     async onMapListingPage() {
       log.debug(`onMapListingPage`);
       const exists = await testSubjects.exists('mapsListingPage');
@@ -138,7 +184,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const onPage = await this.onMapListingPage();
       if (!onPage) {
         await retry.try(async () => {
-          await PageObjects.common.navigateToUrl('maps', '/');
+          await PageObjects.common.navigateToUrl('maps', '/', { basePath: this.basePath });
           const onMapListingPage = await this.onMapListingPage();
           if (!onMapListingPage) throw new Error('Not on map listing page.');
         });
@@ -169,7 +215,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
       await testSubjects.click('submitViewButton');
-      await this.waitForLayersToLoad();
+      await this.waitForMapPanAndZoom();
     }
 
     async getView() {
@@ -179,7 +225,11 @@ export function GisPageProvider({ getService, getPageObjects }) {
       const lon = await testSubjects.getAttribute('longitudeInput', 'value');
       const zoom = await testSubjects.getAttribute('zoomInput', 'value');
       await testSubjects.click('toggleSetViewVisibilityButton');
-      return { lat, lon, zoom };
+      return {
+        lat: parseFloat(lat),
+        lon: parseFloat(lon),
+        zoom: parseFloat(zoom)
+      };
     }
 
     async toggleLayerVisibility(layerName) {
@@ -190,9 +240,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
 
     async clickFitToBounds(layerName) {
       log.debug(`Fit to bounds, layer: ${layerName}`);
+      const origView = await this.getView();
       await this.openLayerTocActionsPanel(layerName);
       await testSubjects.click('fitToBoundsButton');
-      await this.waitForLayersToLoad();
+      await this.waitForMapPanAndZoom(origView);
     }
 
     async openLayerTocActionsPanel(layerName) {
@@ -206,6 +257,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
     async openLayerPanel(layerName) {
       log.debug(`Open layer panel, layer: ${layerName}`);
       await testSubjects.click(`mapOpenLayerButton${layerName}`);
+    }
+
+    async disableApplyGlobalQuery() {
+      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        await retry.try(async () => {
+          log.debug(`disabling applyGlobalQuery`);
+          await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
+          const isStillSelected = await element.isSelected();
+          if (isStillSelected) {
+            throw new Error('applyGlobalQuery not disabled');
+          }
+        });
+        await this.waitForLayersToLoad();
+      }
     }
 
     async doesLayerExist(layerName) {
@@ -228,6 +295,19 @@ export function GisPageProvider({ getService, getPageObjects }) {
       if (cancelExists) {
         await testSubjects.click('layerAddCancelButton');
       }
+    }
+
+    async setLayerQuery(layerName, query) {
+      await this.openLayerPanel(layerName);
+      await testSubjects.click('mapLayerPanelOpenFilterEditorButton');
+      const filterEditorContainer = await testSubjects.find('mapFilterEditor');
+      const queryBarInFilterEditor = await testSubjects.findDescendant('queryInput', filterEditorContainer);
+      await queryBarInFilterEditor.click();
+      const input = await find.activeElement();
+      await input.clearValue();
+      await input.type(query);
+      await testSubjects.click('mapFilterEditorSubmitButton');
+      await this.waitForLayersToLoad();
     }
 
     async selectVectorSource() {

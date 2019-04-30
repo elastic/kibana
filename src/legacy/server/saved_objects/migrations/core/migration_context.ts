@@ -25,8 +25,9 @@
  */
 
 import { SavedObjectsSerializer } from '../../serialization';
+import { MappingProperties } from './../../../mappings';
 import { buildActiveMappings } from './build_active_mappings';
-import { CallCluster, MappingProperties } from './call_cluster';
+import { CallCluster } from './call_cluster';
 import { VersionedTransformer } from './document_migrator';
 import { fetchInfo, FullIndexInfo } from './elastic_index';
 import { LogFn, Logger, MigrationLogger } from './migration_logger';

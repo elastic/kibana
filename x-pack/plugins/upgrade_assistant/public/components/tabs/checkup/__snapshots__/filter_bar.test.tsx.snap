@@ -2,7 +2,6 @@
 
 exports[`FilterBar renders 1`] = `
 <EuiFlexItem
-  component="div"
   grow={false}
 >
   <EuiFilterGroup>

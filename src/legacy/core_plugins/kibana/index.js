@@ -69,9 +69,6 @@ export default function (kibana) {
         id: 'kibana',
         title: 'Kibana',
         listed: false,
-        description: i18n.translate('kbn.kibanaDescription', {
-          defaultMessage: 'the kibana you know and love'
-        }),
         main: 'plugins/kibana/kibana',
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -83,9 +80,6 @@ export default function (kibana) {
           }),
           order: -1003,
           url: `${kbnBaseUrl}#/discover`,
-          description: i18n.translate('kbn.discoverDescription', {
-            defaultMessage: 'interactively explore your data'
-          }),
           icon: 'plugins/kibana/assets/discover.svg',
           euiIconType: 'discoverApp',
         }, {
@@ -95,9 +89,6 @@ export default function (kibana) {
           }),
           order: -1002,
           url: `${kbnBaseUrl}#/visualize`,
-          description: i18n.translate('kbn.visualizeDescription', {
-            defaultMessage: 'design data visualizations'
-          }),
           icon: 'plugins/kibana/assets/visualize.svg',
           euiIconType: 'visualizeApp',
         }, {
@@ -113,9 +104,6 @@ export default function (kibana) {
           // the url above in order to preserve the original url for BWC. The subUrlBase helps the Chrome api nav
           // to determine what url to use for the app link.
           subUrlBase: `${kbnBaseUrl}#/dashboard`,
-          description: i18n.translate('kbn.dashboardDescription', {
-            defaultMessage: 'compose visualizations for much win'
-          }),
           icon: 'plugins/kibana/assets/dashboard.svg',
           euiIconType: 'dashboardApp',
         }, {
@@ -125,9 +113,6 @@ export default function (kibana) {
           }),
           order: 9001,
           url: '/app/kibana#/dev_tools',
-          description: i18n.translate('kbn.devToolsDescription', {
-            defaultMessage: 'development tools'
-          }),
           icon: 'plugins/kibana/assets/wrench.svg',
           euiIconType: 'devToolsApp',
         }, {
@@ -137,9 +122,6 @@ export default function (kibana) {
           }),
           order: 9003,
           url: `${kbnBaseUrl}#/management`,
-          description: i18n.translate('kbn.managementDescription', {
-            defaultMessage: 'define index patterns, change config, and more'
-          }),
           icon: 'plugins/kibana/assets/settings.svg',
           euiIconType: 'managementApp',
           linkToLastSubUrl: false
@@ -150,12 +132,67 @@ export default function (kibana) {
         'kql-telemetry': {
           isNamespaceAgnostic: true,
         },
+        'sample-data-telemetry': {
+          isNamespaceAgnostic: true,
+        },
       },
 
       injectDefaultVars(server, options) {
+        const { savedObjects } = server;
+
         return {
           kbnIndex: options.index,
-          kbnBaseUrl
+          kbnBaseUrl,
+          uiCapabilities: {
+            discover: {
+              show: true,
+              createShortUrl: true,
+              save: true,
+            },
+            visualize: {
+              show: true,
+              createShortUrl: true,
+              delete: true,
+              save: true,
+            },
+            dashboard: {
+              createNew: true,
+              show: true,
+              showWriteControls: true,
+            },
+            catalogue: {
+              discover: true,
+              dashboard: true,
+              visualize: true,
+              console: true,
+              advanced_settings: true,
+              index_patterns: true,
+            },
+            advancedSettings: {
+              save: true
+            },
+            indexPatterns: {
+              createNew: true,
+            },
+            savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
+              ...acc,
+              [type]: {
+                delete: true,
+                edit: true,
+                read: true,
+              }
+            }), {}),
+            management: {
+              /*
+               * Management settings correspond to management section/link ids, and should not be changed
+               * without also updating those definitions.
+               */
+              kibana: {
+                settings: true,
+                index_patterns: true,
+              },
+            }
+          }
         };
       },
 

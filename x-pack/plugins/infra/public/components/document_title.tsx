@@ -21,13 +21,16 @@ const wrapWithSharedState = () => {
   const TITLE_SUFFIX = ' - Kibana';
 
   return class extends React.Component<DocumentTitleProps, DocumentTitleState> {
-    public readonly state = {
-      index: titles.push('') - 1,
-    };
-
     public componentDidMount() {
-      this.pushTitle(this.getTitle(this.props.title));
-      this.updateDocumentTitle();
+      this.setState(
+        () => {
+          return { index: titles.push('') - 1 };
+        },
+        () => {
+          this.pushTitle(this.getTitle(this.props.title));
+          this.updateDocumentTitle();
+        }
+      );
     }
 
     public componentDidUpdate() {
@@ -53,7 +56,7 @@ const wrapWithSharedState = () => {
     }
 
     private removeTitle() {
-      titles.splice(this.state.index, 1);
+      titles.pop();
     }
 
     private updateDocumentTitle() {

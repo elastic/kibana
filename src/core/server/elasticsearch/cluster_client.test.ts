@@ -19,29 +19,19 @@
 
 import { ElasticsearchConfig } from './elasticsearch_config';
 
-const MockClient = jest.fn();
-jest.mock('elasticsearch', () => ({
-  // Jest types don't include `requireActual` right now.
-  ...(jest as any).requireActual('elasticsearch'),
-  Client: MockClient,
-}));
-
-const MockScopedClusterClient = jest.fn();
-jest.mock('./scoped_cluster_client', () => ({
-  ScopedClusterClient: MockScopedClusterClient,
-}));
-
-const mockParseElasticsearchClientConfig = jest.fn();
-jest.mock('./elasticsearch_client_config', () => ({
-  parseElasticsearchClientConfig: mockParseElasticsearchClientConfig,
-}));
+import {
+  MockClient,
+  mockParseElasticsearchClientConfig,
+  MockScopedClusterClient,
+} from './cluster_client.test.mocks';
 
 import { errors } from 'elasticsearch';
 import { get } from 'lodash';
 import { Logger } from '../logging';
-import { logger } from '../logging/__mocks__';
+import { loggingServiceMock } from '../logging/logging_service.mock';
 import { ClusterClient } from './cluster_client';
 
+const logger = loggingServiceMock.create();
 afterEach(() => jest.clearAllMocks());
 
 test('#constructor creates client with parsed config', () => {

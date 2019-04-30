@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { UiNavLink } from '../ui_nav_link';
 
@@ -29,7 +29,6 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
         euiIconType: 'discoverApp',
         hidden: true,
@@ -43,7 +42,6 @@ describe('UiNavLink', () => {
         order: spec.order,
         url: spec.url,
         subUrlBase: spec.url,
-        description: spec.description,
         icon: spec.icon,
         euiIconType: spec.euiIconType,
         hidden: spec.hidden,
@@ -60,7 +58,6 @@ describe('UiNavLink', () => {
         id: 'kibana:discover',
         title: 'Discover',
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
@@ -74,7 +71,6 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
         linkToLastSubUrl: false
       };
@@ -89,7 +85,6 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
@@ -103,7 +98,6 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
@@ -117,7 +111,6 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
       };
       const link = new UiNavLink(spec);
@@ -131,7 +124,6 @@ describe('UiNavLink', () => {
         title: 'Discover',
         order: -1003,
         url: '/app/kibana#/discover',
-        description: 'interactively explore your data',
         icon: 'plugins/kibana/assets/discover.svg',
       };
       const link = new UiNavLink(spec);

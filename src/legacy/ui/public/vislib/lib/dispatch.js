@@ -244,33 +244,9 @@ export function VislibLibDispatchProvider(Private, config) {
     addBrushEvent(svg) {
       if (!this.isBrushable()) return;
 
-      const self = this;
       const xScale = this.handler.categoryAxes[0].getScale();
-      const brush = this.createBrush(xScale, svg);
+      this.createBrush(xScale, svg);
 
-      function simulateClickWithBrushEnabled(d, i) {
-        if (!validBrushClick(d3.event)) return;
-
-        if (isQuantitativeScale(xScale)) {
-          const bar = d3.select(this);
-          const startX = d3.mouse(svg.node());
-          const startXInv = xScale.invert(startX[0]);
-
-          // Reset the brush value
-          brush.extent([startXInv, startXInv]);
-
-          // Magic!
-          // Need to call brush on svg to see brush when brushing
-          // while on top of bars.
-          // Need to call brush on bar to allow the click event to be registered
-          svg.call(brush);
-          bar.call(brush);
-        } else {
-          self.emit('click', self.eventResponse(d, i));
-        }
-      }
-
-      return this.addEvent('mousedown', simulateClickWithBrushEnabled);
     }
 
     /**
@@ -375,22 +351,6 @@ export function VislibLibDispatchProvider(Private, config) {
 
         return brush;
       }
-    }
-  }
-
-  /**
-   * Determine if d3.Scale is quantitative
-   *
-   * @param element {d3.Scale}
-   * @method isQuantitativeScale
-   * @returns {boolean}
-   */
-  function isQuantitativeScale(scale) {
-    //Invert is a method that only exists on quantitative scales
-    if (scale.invert) {
-      return true;
-    } else {
-      return false;
     }
   }
 

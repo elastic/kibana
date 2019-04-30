@@ -5,7 +5,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('cross cluster replication', () => {
+  describe('cross-cluster replication', () => {
     loadTestFile(require.resolve('./auto_follow_pattern'));
     loadTestFile(require.resolve('./follower_indices'));
   });

@@ -10,68 +10,53 @@ exports[`render 1`] = `
   ownFocus={true}
   size="m"
 >
-  <EuiFlyoutBody>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
-      size="s"
-      textTransform="none"
+      size="m"
     >
-      <h1>
+      <h2>
         <FormattedMessage
-          defaultMessage="Add Panels"
+          defaultMessage="Add panels"
           id="kbn.dashboard.topNav.addPanelsTitle"
           values={Object {}}
         />
-      </h1>
+      </h2>
     </EuiTitle>
-    <EuiTabs
-      expand={false}
-      size="m"
-    >
-      <EuiTab
-        data-test-subj="addVisualizationTab"
-        disabled={false}
-        isSelected={true}
-        key="vis"
-        onClick={[Function]}
-      >
-        Visualization
-      </EuiTab>
-      <EuiTab
-        data-test-subj="addSavedSearchTab"
-        disabled={false}
-        isSelected={false}
-        key="search"
-        onClick={[Function]}
-      >
-        Saved Search
-      </EuiTab>
-    </EuiTabs>
-    <EuiSpacer
-      size="s"
-    />
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
     <SavedObjectFinder
-      callToActionButton={
+      noItemsMessage="No matching objects found."
+      onChoose={[Function]}
+      savedObjectMetaData={Array []}
+      showFilter={true}
+    />
+  </EuiFlyoutBody>
+  <EuiFlyoutFooter>
+    <EuiFlexGroup
+      justifyContent="flexEnd"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
         <EuiButton
           color="primary"
           data-test-subj="addNewSavedObjectLink"
-          fill={false}
+          fill={true}
           iconSide="left"
           onClick={[Function]}
+          size="m"
           type="button"
         >
           <FormattedMessage
-            defaultMessage="Add new Visualization"
-            id="kbn.dashboard.topNav.addPanel.addNewVisualizationButtonLabel"
+            defaultMessage="Create new visualization"
+            id="kbn.dashboard.topNav.addPanel.createNewVisualizationButtonLabel"
             values={Object {}}
           />
         </EuiButton>
-      }
-      key="visSavedObjectFinder"
-      noItemsMessage="No matching visualizations found."
-      onChoose={[Function]}
-      savedObjectType="visualization"
-      visTypes={Object {}}
-    />
-  </EuiFlyoutBody>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlyoutFooter>
 </EuiFlyout>
 `;

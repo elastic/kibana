@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import isEsCompatibleWithKibana from '../is_es_compatible_with_kibana';
 

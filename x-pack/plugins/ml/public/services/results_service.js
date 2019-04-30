@@ -268,7 +268,8 @@ function getTopInfluencers(
   earliestMs,
   latestMs,
   maxFieldValues = 10,
-  influencers = []) {
+  influencers = [],
+  influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, influencers: {} };
 
@@ -308,6 +309,10 @@ function getTopInfluencers(
           query: jobIdFilterStr
         }
       });
+    }
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
     }
 
     // Add a should query to filter for each of the specified influencers.
@@ -563,7 +568,8 @@ function getInfluencerValueMaxScoreByTime(
   earliestMs,
   latestMs,
   interval,
-  maxResults) {
+  maxResults,
+  influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, results: {} };
 
@@ -602,6 +608,10 @@ function getInfluencerValueMaxScoreByTime(
           query: jobIdFilterStr
         }
       });
+    }
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
     }
 
     if (influencerFieldValues && influencerFieldValues.length > 0) {
@@ -816,7 +826,7 @@ function getRecordInfluencers(jobIds, threshold, earliestMs, latestMs, maxResult
 // 'fieldValue' properties. The influencer array uses 'should' for the nested bool query,
 // so this returns record level results which have at least one of the influencers.
 // Pass an empty array or ['*'] to search over all job IDs.
-function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults) {
+function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, latestMs, maxResults, influencersFilterQuery) {
   return new Promise((resolve, reject) => {
     const obj = { success: true, records: [] };
 
@@ -856,6 +866,10 @@ function getRecordsForInfluencer(jobIds, influencers, threshold, earliestMs, lat
           query: jobIdFilterStr
         }
       });
+    }
+
+    if (influencersFilterQuery !== undefined) {
+      boolCriteria.push(influencersFilterQuery);
     }
 
     // Add a nested query to filter for each of the specified influencers.

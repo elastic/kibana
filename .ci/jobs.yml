@@ -1,7 +1,6 @@
 JOB:
   - kibana-intake
   - x-pack-intake
-  # make sure all kibana-ciGRoups are listed in tasks/function_test_groups.js
   - kibana-ciGroup1
   - kibana-ciGroup2
   - kibana-ciGroup3

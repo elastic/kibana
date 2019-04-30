@@ -23,12 +23,12 @@
     </button>
 
     <!-- description -->
-    <span ng-if="!editorOpen && aggForm.$valid" class="visEditorSidebar__collapsibleTitleDescription" title="{{describe()}}">
+    <span ng-if="!editorOpen && aggForm.softErrorCount() < 1" class="visEditorSidebar__collapsibleTitleDescription" title="{{describe()}}">
       {{ describe() }}
     </span>
 
     <!-- error -->
-    <span ng-if="!editorOpen && aggForm.$invalid" class="visEditorSidebar__collapsibleTitleDescription visEditorSidebar__collapsibleTitleDescription--danger" title="{{aggForm.describeErrors()}}">
+    <span ng-if="!editorOpen && aggForm.softErrorCount() > 0" class="visEditorSidebar__collapsibleTitleDescription visEditorSidebar__collapsibleTitleDescription--danger" title="{{aggForm.describeErrors()}}">
       {{ aggForm.describeErrors() }}
     </span>
 

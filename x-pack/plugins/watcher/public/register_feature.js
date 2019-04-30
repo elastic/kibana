@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'watcher',
-    title: 'Watcher',
+    title: 'Watcher', // This is a product name so we don't translate it.
     description: i18n.translate('xpack.watcher.watcherDescription', {
       defaultMessage: 'Detect changes in your data by creating, managing, and monitoring alerts.'
     }),

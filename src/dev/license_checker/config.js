@@ -105,5 +105,5 @@ export const LICENSE_OVERRIDES = {
   'walk@2.3.9': ['MIT'],
 
   // TODO remove this once we upgrade past or equal to v1.0.2
-  'babel-plugin-mock-imports@0.0.5': ['MIT']
+  'babel-plugin-mock-imports@1.0.1': ['MIT']
 };

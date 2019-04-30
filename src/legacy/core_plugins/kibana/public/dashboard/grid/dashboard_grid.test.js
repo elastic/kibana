@@ -88,6 +88,6 @@ test('adjusts z-index of focused panel to be higher than siblings', () => {
   const panelElements = component.find('Connect(InjectIntl(DashboardPanelUi))');
   panelElements.first().prop('onPanelFocused')('1');
   const [gridItem1, gridItem2] = component.update().findWhere(el => el.key() === '1' || el.key() === '2');
-  expect(gridItem1.props.style.zIndex).toEqual('2');
+  expect(gridItem1.props.style.zIndex).toEqual(2);
   expect(gridItem2.props.style.zIndex).toEqual('auto');
 });

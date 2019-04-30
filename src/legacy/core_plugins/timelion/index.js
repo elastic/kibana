@@ -41,9 +41,6 @@ export default function (kibana) {
       app: {
         title: 'Timelion',
         order: -1000,
-        description: i18n.translate('timelion.appDescription', {
-          defaultMessage: 'Time series expressions for everything'
-        }),
         icon: 'plugins/timelion/icon.svg',
         euiIconType: 'timelionApp',
         main: 'plugins/timelion/app',
@@ -62,11 +59,20 @@ export default function (kibana) {
       visTypes: [
         'plugins/timelion/vis'
       ],
+      interpreter: ['plugins/timelion/timelion_vis_fn'],
       home: [
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-
+      injectDefaultVars() {
+        return {
+          uiCapabilities: {
+            timelion: {
+              save: true,
+            }
+          }
+        };
+      },
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {

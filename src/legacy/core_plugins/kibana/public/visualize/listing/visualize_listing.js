@@ -18,8 +18,7 @@
  */
 
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import 'ui/pager_control';
-import 'ui/pager';
+import 'ui/directives/kbn_href';
 import { uiModules } from 'ui/modules';
 import { timefilter } from 'ui/timefilter';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';

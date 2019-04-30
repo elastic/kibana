@@ -14,7 +14,7 @@ export const ElementConfig = ({ elementStats }) => {
   }
 
   const { total, ready, error } = elementStats;
-  const progress = Math.round(((ready + error) / total) * 100);
+  const progress = total > 0 ? Math.round(((ready + error) / total) * 100) : 100;
 
   return (
     <Fragment>

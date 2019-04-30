@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { buildEsQuery } from '../build_es_query';
 import indexPattern from '../../__fixtures__/index_pattern_response.json';
 import { fromKueryExpression, toElasticsearchQuery } from '../../kuery';
@@ -100,6 +100,36 @@ describe('build query', function () {
 
       const result = buildEsQuery(indexPattern, queries, filters, config);
 
+      expect(result).to.eql(expectedResult);
+    });
+
+    it('should use the default time zone set in the Advanced Settings in queries and filters', function () {
+      const queries = [
+        { query: '@timestamp:"2019-03-23T13:18:00"', language: 'kuery' },
+        { query: '@timestamp:"2019-03-23T13:18:00"', language: 'lucene' }
+      ];
+      const filters = [
+        { match_all: {}, meta: { type: 'match_all' } }
+      ];
+      const config = {
+        allowLeadingWildcards: true,
+        queryStringOptions: {},
+        ignoreFilterIfFieldNotInIndex: false,
+        dateFormatTZ: 'Africa/Johannesburg',
+      };
+
+      const expectedResult = {
+        bool: {
+          must: [
+            decorateQuery(luceneStringToDsl('@timestamp:"2019-03-23T13:18:00"'), config.queryStringOptions, config.dateFormatTZ),
+            { match_all: {} }
+          ],
+          filter: [toElasticsearchQuery(fromKueryExpression('@timestamp:"2019-03-23T13:18:00"'), indexPattern, config)],
+          should: [],
+          must_not: [],
+        }
+      };
+      const result = buildEsQuery(indexPattern, queries, filters, config);
       expect(result).to.eql(expectedResult);
     });
 

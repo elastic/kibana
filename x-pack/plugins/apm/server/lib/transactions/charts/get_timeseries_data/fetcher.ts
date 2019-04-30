@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  AggregationSearchResponse,
-  ESFilter,
-  SearchParams
-} from 'elasticsearch';
+import { ESFilter, SearchParams } from 'elasticsearch';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -17,6 +13,7 @@ import {
   TRANSACTION_RESULT,
   TRANSACTION_TYPE
 } from '../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../typings/common';
 import { getBucketSize } from '../../../helpers/get_bucket_size';
 import { rangeFilter } from '../../../helpers/range_filter';
 import { Setup } from '../../../helpers/setup_request';
@@ -68,8 +65,7 @@ interface Aggs {
   };
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
+export type ESResponse = PromiseReturnType<typeof timeseriesFetcher>;
 export function timeseriesFetcher({
   serviceName,
   transactionType,
@@ -80,7 +76,7 @@ export function timeseriesFetcher({
   transactionType?: string;
   transactionName?: string;
   setup: Setup;
-}): Promise<ESResponse> {
+}) {
   const { start, end, esFilterQuery, client, config } = setup;
   const { intervalString } = getBucketSize(start, end, 'auto');
 

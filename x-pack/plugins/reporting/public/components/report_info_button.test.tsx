@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const mockJobQueueClient = { getInfo: jest.fn() };
-jest.mock('../lib/job_queue_client', () => ({ jobQueueClient: mockJobQueueClient }));
+import { mockJobQueueClient } from './report_info_button.test.mocks';
 
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';

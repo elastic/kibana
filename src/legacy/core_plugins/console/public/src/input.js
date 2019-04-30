@@ -17,7 +17,6 @@
  * under the License.
  */
 
-const $ = require('jquery');
 require('brace');
 require('brace/ext/searchbox');
 import  Autocomplete from './autocomplete';
@@ -65,37 +64,6 @@ export function initializeInput($el, $actionsEl, $copyAsCurlEl, output, openDocu
       input.moveToNextRequestEdge();
     }
   });
-
-
-  /**
-   * COPY AS CURL
-   */
-  (function setupClipboard() {
-    function copyText(text) {
-      const node = $(`<textarea style="height:1px"></textarea`)
-        .val(text)
-        .appendTo(document.body)
-        .select();
-      document.execCommand('copy');
-      node.remove();
-    }
-
-    if (!document.queryCommandSupported('copy')) {
-      $copyAsCurlEl.hide();
-      return;
-    }
-
-    $copyAsCurlEl.click(() => {
-      copyText($copyAsCurlEl.attr('data-clipboard-text'));
-    });
-
-    input.$actions.on('mouseenter', function () {
-      if ($(this).hasClass('open')) return;
-      input.getRequestsAsCURL(text => {
-        $copyAsCurlEl.attr('data-clipboard-text', text);
-      });
-    });
-  }());
 
   /**
    * Setup the "send" shortcut

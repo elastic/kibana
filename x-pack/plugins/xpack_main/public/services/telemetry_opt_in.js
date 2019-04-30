@@ -6,12 +6,13 @@
 
 import moment from 'moment';
 import { TELEMETRY_READ_ROLES, TELEMETRY_NO_READ_ACCESS_ERR_CODE } from '../../common/constants';
+import { setCanTrackUiMetrics } from 'ui/ui_metric';
 
 export function TelemetryOptInProvider($injector, chrome) {
-
   const Notifier = $injector.get('Notifier');
   const notify = new Notifier();
   let currentOptInStatus = $injector.get('telemetryOptedIn');
+  setCanTrackUiMetrics(currentOptInStatus);
 
   const provider = {
     getReadRoles: () => TELEMETRY_READ_ROLES,
@@ -19,6 +20,8 @@ export function TelemetryOptInProvider($injector, chrome) {
     canUserRead: (role) => provider.getReadRoles().includes(role),
     getOptIn: () => currentOptInStatus,
     setOptIn: async (enabled) => {
+      setCanTrackUiMetrics(enabled);
+
       const $http = $injector.get('$http');
 
       try {

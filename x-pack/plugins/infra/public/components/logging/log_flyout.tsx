@@ -15,7 +15,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraLogItem, InfraLogItemField } from '../../graphql/types';
 import { InfraLoadingPanel } from '../loading';
 interface Props {
@@ -105,7 +106,7 @@ export const LogFlyout = injectI18n(
   }
 );
 
-export const InfraFlyoutLoadingPanel = styled.div`
+export const InfraFlyoutLoadingPanel = euiStyled.div`
   position: absolute;
   top: 0;
   right: 0;
