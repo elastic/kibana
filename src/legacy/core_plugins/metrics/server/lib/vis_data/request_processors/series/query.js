@@ -47,12 +47,6 @@ export default function query(req, panel, series, esQueryConfig, indexPattern) {
     }
 
     if (series.filter) {
-      // doc.query.bool.must.push({
-      //   query_string: {
-      //     query: series.filter,
-      //     analyze_wildcard: true,
-      //   },
-      // });
       doc.query.bool.must.push(buildEsQuery(indexPattern, [series.filter], [], esQueryConfig));
     }
 
