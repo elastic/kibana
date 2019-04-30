@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
+// @ts-ignore
 import { trackCanvasUiMetric } from '../../../lib/ui_metric';
 // @ts-ignore
 import { getElementCounts } from '../../../state/selectors/workpad';
