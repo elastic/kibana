@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
-import { loadLicense } from '../../../../services/rest/xpack';
+import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
+import { loadLicense } from '../../services/rest/xpack';
 import { InvalidLicenseNotification } from './InvalidLicenseNotification';
 
 const initialLicense = {
@@ -17,7 +17,7 @@ const initialLicense = {
 };
 export const LicenseContext = React.createContext(initialLicense);
 
-export const LicenseCheck: React.FC = ({ children }) => {
+export const LicenseProvider: React.FC = ({ children }) => {
   const { data = initialLicense, status } = useFetcher(() => loadLicense(), []);
   const hasValidLicense = data.license.is_active;
 
