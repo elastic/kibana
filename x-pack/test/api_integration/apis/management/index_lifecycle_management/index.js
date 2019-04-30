@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+
 export default function ({ loadTestFile }) {
-  describe('management', () => {
-    loadTestFile(require.resolve('./advanced_settings'));
-    loadTestFile(require.resolve('./cross_cluster_replication'));
-    loadTestFile(require.resolve('./remote_clusters'));
-    loadTestFile(require.resolve('./rollup'));
+  describe('index', () => {
     loadTestFile(require.resolve('./index_lifecycle_management'));
   });
 }
