@@ -114,12 +114,6 @@ export function createPluginInitializerContext(
   };
 }
 
-// Added to improve http typings as make { http: Required<HttpSetup> }
-// Http service is disabled, when Kibana runs in optimizer mode or as dev cluster managed by cluster master.
-// In theory no plugins shouldn try to access http dependency in this case.
-function preventAccess() {
-  throw new Error('Cannot use http contract when http server not started');
-}
 /**
  * This returns a facade for `CoreContext` that will be exposed to the plugin `setup` method.
  * This facade should be safe to use only within `setup` itself.
@@ -144,14 +138,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       adminClient$: deps.elasticsearch.adminClient$,
       dataClient$: deps.elasticsearch.dataClient$,
     },
-    http: deps.http
-      ? {
-          registerAuth: deps.http.registerAuth,
-          registerOnRequest: deps.http.registerOnRequest,
-        }
-      : {
-          registerAuth: preventAccess,
-          registerOnRequest: preventAccess,
-        },
+    http: {
+      registerAuth: deps.http.registerAuth,
+      registerOnRequest: deps.http.registerOnRequest,
+    },
   };
 }
