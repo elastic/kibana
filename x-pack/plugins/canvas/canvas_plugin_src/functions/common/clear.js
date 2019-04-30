@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const clear = () => ({
-  name: 'clear',
-  type: 'null',
-  help: 'Clears context and returns null',
-  args: {},
-  fn: () => null,
-});
+export function clear() {
+  return {
+    name: 'clear',
+    type: 'null',
+    help: 'Clears context and returns null',
+    args: {},
+    fn: () => null,
+  };
+}
