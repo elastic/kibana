@@ -6,16 +6,18 @@
 
 import { ServiceAPIResponse } from '../../../../server/lib/services/get_service';
 import { ServiceListAPIResponse } from '../../../../server/lib/services/get_services';
-import { MissingArgumentsError } from '../../../hooks/useFetcher';
-import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
-export async function loadServiceList({ start, end, kuery }: IUrlParams) {
-  if (!(start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+export async function loadServiceList({
+  start,
+  end,
+  kuery
+}: {
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<ServiceListAPIResponse>({
     pathname: `/api/apm/services`,
     query: {
@@ -31,11 +33,12 @@ export async function loadServiceDetails({
   start,
   end,
   kuery
-}: IUrlParams) {
-  if (!(serviceName && start && end)) {
-    throw new MissingArgumentsError();
-  }
-
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<ServiceAPIResponse>({
     pathname: `/api/apm/services/${serviceName}`,
     query: {
