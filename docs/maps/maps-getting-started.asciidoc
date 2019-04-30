@@ -189,7 +189,7 @@ A panel opens with a list of objects that you can add to the dashboard.  You'll 
 . Click the name of your saved map or the *[Logs] Total Requests and Bytes* map included with the sample data set to add a map to the dashboard.
 . Set the *Types* select to *Visualization*.
 . Click *[Logs] Heatmap* to add a heatmap to the dashboard.
-. Click on the *[Logs] Visitors by OS* visualization to add the pie chart to the dashboard.
+. Click *[Logs] Visitors by OS* to add a pie chart to the dashboard.
 . Click the *x* to close the *Add panels* flyout.
 +
 Your dashboard should look like this:
