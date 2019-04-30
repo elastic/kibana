@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import {
   SET_SELECTED_LAYER,
   SET_TRANSIENT_LAYER,
@@ -23,6 +24,7 @@ import {
   SET_QUERY,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
+  SET_LAYER_STYLE_META,
   SET_JOINS,
   TOUCH_LAYER,
   UPDATE_SOURCE_PROP,
@@ -39,7 +41,7 @@ import {
   SET_TOOLTIP_STATE
 } from '../actions/store_actions';
 
-import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
+import { TRACKED_LAYER_DESCRIPTOR } from './util';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -288,6 +290,14 @@ export function map(state = INITIAL_STATE, action) {
       const styleLayerId = action.layerId;
       return updateLayerInList(state, styleLayerId, 'style',
         { ...action.style });
+    case SET_LAYER_STYLE_META:
+      const { layerId, styleMeta } = action;
+      const index = getLayerIndex(state.layerList, layerId);
+      if (index === -1) {
+        return state;
+      }
+
+      return updateLayerInList(state, layerId, 'style', { ...state.layerList[index].style, __styleMeta: styleMeta });
     default:
       return state;
   }
@@ -389,7 +399,7 @@ function findLayerById(state, id) {
 
 function trackCurrentLayerState(state, layerId) {
   const layer = findLayerById(state, layerId);
-  const layerCopy = copyPersistentState(layer);
+  const layerCopy = _.cloneDeep(layer);
   return updateLayerInList(state, layerId, TRACKED_LAYER_DESCRIPTOR, layerCopy);
 }
 
@@ -413,12 +423,8 @@ function rollbackTrackedLayerState(state, layerId) {
   if (!layer) {
     return state;
   }
-  const trackedLayerDescriptor = layer[TRACKED_LAYER_DESCRIPTOR];
 
-  //this assumes that any nested temp-state in the layer-descriptor (e.g. of styles), is not relevant and can be recovered easily (e.g. this is not the case for __dataRequests)
-  //That assumption is true in the context of this app, but not generalizable.
-  //consider rewriting copyPersistentState to only strip the first level of temp state.
-  const rolledbackLayer = { ...layer, ...trackedLayerDescriptor };
+  const rolledbackLayer = { ...layer[TRACKED_LAYER_DESCRIPTOR] };
   delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
 
   return {
