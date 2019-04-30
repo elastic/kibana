@@ -27,7 +27,7 @@ export default function splitByFilter(req, panel, series, esQueryConfig, indexPa
     const builtEsQuery = buildEsQuery(indexPattern, [series.filter], [], esQueryConfig);
     console.log('builtEsQuery:', builtEsQuery);
     console.log('builtEsQuery.bool.must[0]', builtEsQuery.bool.must[0]); // { query_string: { query: 'response.keyword:200', analyze_wildcard: true } }
-    _.set(doc, `aggs.${series.id}.filter.query_string.query`, buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)); // Replaced the series.filter value with the esQuery
+    _.set(doc, `aggs.${series.id}.filter`, buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)); // Replaced the series.filter value with the esQuery
     // _.set(doc, `aggs.${series.id}.filter.query_string.query`, series.filter || '*');
     // _.set(doc, `aggs.${series.id}.filter.query_string.analyze_wildcard`, true);
     return next(doc);

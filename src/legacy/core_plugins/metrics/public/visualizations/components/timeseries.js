@@ -29,7 +29,6 @@ import eventBus from '../lib/events';
 import reactcss from 'reactcss';
 
 class Timeseries extends Component {
-
   constructor(props) {
     super(props);
     const values = this.getLastValues(props);

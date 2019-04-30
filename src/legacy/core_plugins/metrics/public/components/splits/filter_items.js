@@ -84,13 +84,6 @@ class FilterItemsUi extends Component {
             store={localStorage || {}}
             showDatePicker={false}
           />
-          {/* <EuiFieldText
-            placeholder={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterPlaceholder', defaultMessage: 'Filter' })}
-            aria-label={intl.formatMessage({ id: 'tsvb.splits.filterItems.filterAriaLabel', defaultMessage: 'Filter' })}
-            onChange={this.handleChange(model, 'filter')}
-            value={model.filter}
-            fullWidth
-          /> */}
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
