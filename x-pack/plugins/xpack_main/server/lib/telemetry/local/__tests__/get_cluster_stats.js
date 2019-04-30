@@ -10,7 +10,12 @@ import sinon from 'sinon';
 import { TIMEOUT } from '../constants';
 import { getClusterStats } from '../get_cluster_stats';
 
-export function mockGetClusterStats(callCluster, clusterStats) {
+export function mockGetClusterStats(callCluster, clusterStats, req) {
+  callCluster.withArgs(req, 'cluster.stats', {
+    timeout: TIMEOUT
+  })
+    .returns(clusterStats);
+
   callCluster.withArgs('cluster.stats', {
     timeout: TIMEOUT
   })

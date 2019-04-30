@@ -15,7 +15,16 @@ import {
   handleXPack,
 } from '../get_xpack';
 
-function mockGetXPackLicense(callCluster, license) {
+function mockGetXPackLicense(callCluster, license, req) {
+  callCluster.withArgs(req, 'transport.request', {
+    method: 'GET',
+    path: '/_license',
+    query: {
+      local: 'true'
+    }
+  })
+    .returns(license.then(response => ({ license: response })));
+
   callCluster.withArgs('transport.request', {
     method: 'GET',
     path: '/_license',
@@ -27,7 +36,16 @@ function mockGetXPackLicense(callCluster, license) {
     .returns(license.then(response => ({ license: response })));
 }
 
-function mockGetXPackUsage(callCluster, usage) {
+function mockGetXPackUsage(callCluster, usage, req) {
+  callCluster.withArgs(req, 'transport.request', {
+    method: 'GET',
+    path: '/_xpack/usage',
+    query: {
+      master_timeout: TIMEOUT
+    }
+  })
+    .returns(usage);
+
   callCluster.withArgs('transport.request', {
     method: 'GET',
     path: '/_xpack/usage',
@@ -44,10 +62,11 @@ function mockGetXPackUsage(callCluster, usage) {
  * @param {Function} callCluster Sinon function mock.
  * @param {Promise} license Promised license response.
  * @param {Promise} usage Promised usage response.
+ * @param {Object} usage reqeust object.
  */
-export function mockGetXPack(callCluster, license, usage) {
-  mockGetXPackLicense(callCluster, license);
-  mockGetXPackUsage(callCluster, usage);
+export function mockGetXPack(callCluster, license, usage, req) {
+  mockGetXPackLicense(callCluster, license, req);
+  mockGetXPackUsage(callCluster, usage, req);
 }
 
 describe('get_xpack', () => {
