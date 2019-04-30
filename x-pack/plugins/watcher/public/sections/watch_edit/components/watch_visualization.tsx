@@ -24,7 +24,7 @@ import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { getWatchVisualizationData } from '../../../lib/api';
@@ -95,7 +95,7 @@ const getTimeBuckets = (watch: any) => {
 const WatchVisualizationUi = () => {
   const { watch } = useContext(WatchContext);
   const [watchVisualizationData, setWatchVisualizationData] = useState<any>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const loadWatchVisualizationData = async () => {
     const domain = getDomain(watch);
     const timeBuckets = new TimeBuckets();
@@ -107,7 +107,6 @@ const WatchVisualizationUi = () => {
       interval,
       timezone: getTimezone(),
     });
-    setIsLoading(true);
     const { visualizeData } = (await getWatchVisualizationData(watch, visualizeOptions)) as any;
     setIsLoading(false);
     setWatchVisualizationData(visualizeData || {});
@@ -146,7 +145,7 @@ const WatchVisualizationUi = () => {
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceAround">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="xl" />
+            <EuiLoadingChart size="xl" />
           </EuiFlexItem>
         </EuiFlexGroup>
 
