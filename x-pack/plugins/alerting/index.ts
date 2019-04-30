@@ -6,7 +6,7 @@
 
 import Hapi from 'hapi';
 import mappings from './mappings.json';
-import { AlertingService, createActionRoute } from './server';
+import { createActionRoute, AlertService, ActionService, ConnectorService } from './server';
 
 import { APP_ID } from './common/constants';
 
@@ -15,11 +15,17 @@ export function alerting(kibana: any) {
     id: APP_ID,
     require: ['kibana', 'elasticsearch'],
     init(server: Hapi.Server) {
-      const alertingService = new AlertingService();
+      const connectorService = new ConnectorService();
+      const actionService = new ActionService(connectorService);
+      const alertService = new AlertService();
       // Routes
       createActionRoute(server);
       // Register service to server
-      server.decorate('server', 'alerting', () => alertingService);
+      server.decorate('server', 'alerting', () => ({
+        alerts: alertService,
+        actions: actionService,
+        connectors: connectorService,
+      }));
     },
     uiExports: {
       mappings,

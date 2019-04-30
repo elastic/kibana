@@ -6,11 +6,17 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
-import { AlertingService } from '../alerting_service';
+import { ActionService } from '../action_service';
+import { AlertService } from '../alert_service';
+import { ConnectorService } from '../connector_service';
 import { APP_ID } from '../../common/constants';
 
 interface Server extends Hapi.Server {
-  alerting: AlertingService;
+  alerting: () => {
+    actions: ActionService;
+    alerts: AlertService;
+    connectors: ConnectorService;
+  };
 }
 
 interface CreateActionRequest extends Hapi.Request {
@@ -41,7 +47,7 @@ export function createActionRoute(server: any) {
     },
     async handler(request: CreateActionRequest) {
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.alerting.createAction(savedObjectsClient, request.payload);
+      return await request.server.alerting().actions.create(savedObjectsClient, request.payload);
     },
   });
 }

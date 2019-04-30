@@ -8,7 +8,10 @@ interface ConsoleParams {
   message: string;
 }
 
-export async function consoleConnector(connectorOptions: any, { message }: ConsoleParams) {
-  // eslint-disable-next-line no-console
-  console.log(message);
-}
+export const consoleConnector = {
+  id: 'console',
+  async executor(connectorOptions: any, { message }: ConsoleParams) {
+    // eslint-disable-next-line no-console
+    console.log(message);
+  },
+};

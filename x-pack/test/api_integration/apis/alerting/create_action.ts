@@ -112,7 +112,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message: 'Connector unregistered-connector not registered',
+            message: 'Connector "unregistered-connector" is not registered.',
           });
         });
     });
