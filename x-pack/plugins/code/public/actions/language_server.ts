@@ -19,3 +19,5 @@ export const requestInstallLanguageServerFailed = createAction<Error>(
 );
 
 export const installLanguageServerSuccess = createAction<any>('INSTALL LANGUAGE SERVERS SUCCESS');
+
+export const languageServerInitializing = createAction('LANGUAGE SERVER INITIALIZING');
