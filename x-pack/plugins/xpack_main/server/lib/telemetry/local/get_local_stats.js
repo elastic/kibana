@@ -61,11 +61,10 @@ export function getLocalStatsWithCaller(server, callCluster) {
  * @param {Boolean} useRequestUser callWithRequest, otherwise callWithInternalUser
  * @return {Promise} The cluster object containing telemetry.
  */
-export function getLocalStats(req, useRequestUser) {
+export function getLocalStats(req, { useInternalUser = false } = {}) {
   const { server } = req;
   const { callWithRequest, callWithInternalUser } = server.plugins.elasticsearch.getCluster('data');
-  const callCluster = useRequestUser ?
-    (...args) => callWithRequest(req, ...args) : callWithInternalUser;
+  const callCluster = useInternalUser ? callWithInternalUser : (...args) => callWithRequest(req, ...args);
 
   return getLocalStatsWithCaller(server, callCluster);
 }

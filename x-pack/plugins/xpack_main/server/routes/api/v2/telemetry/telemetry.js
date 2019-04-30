@@ -17,14 +17,15 @@ import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/te
  * @param {String} end The end time of the request.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getTelemetry(req, config, start, end, useRequestUser, statsGetters = {}) {
+export async function getTelemetry(req, config, start, end, willEncryptData, statsGetters = {}) {
   const { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = statsGetters;
   let response = [];
+  const useInternalUser = !willEncryptData;
 
   if (config.get('xpack.monitoring.enabled')) {
     try {
       // attempt to collect stats from multiple clusters in monitoring data
-      response = await _getAllStats(req, start, end);
+      response = await _getAllStats(req, start, end, { useInternalUser });
     } catch (err) {
       // no-op
     }
@@ -32,7 +33,7 @@ export async function getTelemetry(req, config, start, end, useRequestUser, stat
 
   if (!Array.isArray(response) || response.length === 0) {
     // return it as an array for a consistent API response
-    response = [await _getLocalStats(req, useRequestUser)];
+    response = [await _getLocalStats(req, { useInternalUser })];
   }
 
   return response;
