@@ -37,6 +37,7 @@ describe('has()', () => {
   test('returns true for default connectors', () => {
     const connectorService = new ConnectorService();
     expect(connectorService.has('console')).toEqual(true);
+    expect(connectorService.has('slack')).toEqual(true);
   });
 
   test('returns true after registering a connector', () => {

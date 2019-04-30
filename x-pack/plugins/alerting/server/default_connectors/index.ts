@@ -5,3 +5,4 @@
  */
 
 export { consoleConnector } from './console';
+export { slackConnector } from './slack';

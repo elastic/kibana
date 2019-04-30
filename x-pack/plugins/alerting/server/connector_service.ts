@@ -5,7 +5,7 @@
  */
 
 import Boom from 'boom';
-import { consoleConnector } from './default_connectors';
+import { consoleConnector, slackConnector } from './default_connectors';
 
 interface Connector {
   id: string;
@@ -17,6 +17,7 @@ export class ConnectorService {
 
   constructor() {
     this.register(consoleConnector);
+    this.register(slackConnector);
   }
 
   public has(connectorId: string) {
