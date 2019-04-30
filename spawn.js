@@ -125,6 +125,14 @@ const start = async function () {
     cmdLogs += data;
   }
 
+  const [code] = await Promise.race([
+    new Promise(resolve => ls.once('close', resolve)),
+    new Promise((resolve, reject) => ls.once('error', reject))
+  ]);
+  console.log('CODE CODE CODE');
+  console.log(code);
+  console.log('CODE CODE CODE');
+
   ls.on('close', (code) => {
     const logs = prettyLogs(cmdLogs);
     let annotations = [];
