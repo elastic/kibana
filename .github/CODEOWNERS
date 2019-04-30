@@ -46,5 +46,6 @@
 /src/legacy/core_plugins/metrics/  @elastic/kibana-tsvb-external
 
 # Operations
-/src/optimize/ @elastic/kibana-operations
 /src/dev/ @elastic/kibana-operations
+/src/setup_node_env/ @elastic/kibana-operations
+/src/optimize/ @elastic/kibana-operations
