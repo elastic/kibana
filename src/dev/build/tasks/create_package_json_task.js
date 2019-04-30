@@ -86,6 +86,7 @@ export const RemoveWorkspacesTask = {
     const path = build.resolvePath('package.json');
     const pkg = JSON.parse(await read(path));
 
+    delete pkg.resolutions;
     delete pkg.workspaces;
 
     await write(

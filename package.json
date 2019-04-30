@@ -80,7 +80,8 @@
     "**/@types/node": "10.12.27",
     "**/@types/hapi": "^17.0.18",
     "**/typescript": "^3.3.3333",
-    "**/@elastic/eui/**/core-js": "2.5.3"
+    "**/@elastic/eui/**/core-js": "2.5.3",
+    "**/normalize-url": "1.9.1"
   },
   "workspaces": {
     "packages": [
