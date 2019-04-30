@@ -177,7 +177,7 @@ these resources helpful:
 [role="xpack"]
 [[maps-embedding]]
 === Adding the map to a dashboard
-Add your saved map to a {kibana-ref}/dashboard.html[dashboard] to view geospatial data along side bar charts, pie charts, and other visualizations.
+You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
 . In the side navigation, click *Dashboard*.
 . Click *Create new dashboard*.
