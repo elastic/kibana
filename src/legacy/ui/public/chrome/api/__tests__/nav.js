@@ -18,10 +18,12 @@
  */
 
 import expect from '@kbn/expect';
+import sinon from 'sinon';
 
 import { initChromeNavApi } from '../nav';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { KibanaParsedUrl } from '../../../url/kibana_parsed_url';
+import { getNewPlatform } from 'ui/new_platform';
 
 const basePath = '/someBasePath';
 
@@ -38,38 +40,28 @@ function init(customInternals = { basePath }) {
   return { chrome, internals };
 }
 
+
 describe('chrome nav apis', function () {
-  describe('#getNavLinkById', () => {
-    it('retrieves the correct nav link, given its ID', () => {
-      const appUrlStore = new StubBrowserStorage();
-      const nav = [
-        { id: 'kibana:discover', title: 'Discover' }
-      ];
-      const {
-        chrome
-      } = init({ appUrlStore, nav });
+  let coreNavLinks;
+  let fakedLinks = [];
 
-      const navLink = chrome.getNavLinkById('kibana:discover');
-      expect(navLink).to.eql(nav[0]);
-    });
-
-    it('throws an error if the nav link with the given ID is not found', () => {
-      const appUrlStore = new StubBrowserStorage();
-      const nav = [
-        { id: 'kibana:discover', title: 'Discover' }
-      ];
-      const {
-        chrome
-      } = init({ appUrlStore, nav });
-
-      let errorThrown = false;
-      try {
-        chrome.getNavLinkById('nonexistent');
-      } catch (e) {
-        errorThrown = true;
+  beforeEach(() => {
+    coreNavLinks = getNewPlatform().start.core.chrome.navLinks;
+    sinon.stub(coreNavLinks, 'update').callsFake((linkId, updateAttrs) => {
+      const link = fakedLinks.find(({ id }) => id === linkId);
+      for (const key of Object.keys(updateAttrs)) {
+        link[key] = updateAttrs[key];
       }
-      expect(errorThrown).to.be(true);
+      return link;
     });
+    sinon.stub(coreNavLinks, 'getAll').callsFake(() => fakedLinks);
+    sinon.stub(coreNavLinks, 'get').callsFake((linkId) => fakedLinks.find(({ id }) => id === linkId));
+  });
+
+  afterEach(() => {
+    coreNavLinks.update.restore();
+    coreNavLinks.getAll.restore();
+    coreNavLinks.get.restore();
   });
 
   describe('#untrackNavLinksForDeletedSavedObjects', function () {
@@ -79,94 +71,119 @@ describe('chrome nav apis', function () {
 
     it('should clear last url when last url contains link to deleted saved object', function () {
       const appUrlStore = new StubBrowserStorage();
-      const nav = [
-        {
-          id: appId,
-          title: 'Discover',
-          linkToLastSubUrl: true,
-          lastSubUrl: `${appUrl}?id=${deletedId}`,
-          url: appUrl
-        }
-      ];
+      fakedLinks = [{
+        id: appId,
+        title: 'Discover',
+        url: `${appUrl}?id=${deletedId}`,
+        appUrl
+      }];
+
       const {
         chrome
-      } = init({ appUrlStore, nav });
+      } = init({
+        appUrlStore,
+        nav: [{
+          id: appId,
+          linkToLastSubUrl: true,
+        }]
+      });
 
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
-      expect(chrome.getNavLinkById('appId').lastSubUrl).to.be(appUrl);
+      expect(coreNavLinks.update.calledWith(appId, { url: appUrl })).to.be(true);
     });
 
     it('should not clear last url when last url does not contains link to deleted saved object', function () {
       const lastUrl = `${appUrl}?id=anotherSavedObjectId`;
       const appUrlStore = new StubBrowserStorage();
-      const nav = [
-        {
-          id: appId,
-          title: 'Discover',
-          linkToLastSubUrl: true,
-          lastSubUrl: lastUrl,
-          url: appUrl
-        }
-      ];
+      fakedLinks = [{
+        id: appId,
+        title: 'Discover',
+        url: lastUrl,
+        appUrl
+      }];
+
       const {
         chrome
-      } = init({ appUrlStore, nav });
+      } = init({
+        appUrlStore,
+        nav: [{
+          id: appId,
+          linkToLastSubUrl: true
+        }]
+      });
 
       chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
-      expect(chrome.getNavLinkById(appId).lastSubUrl).to.be(lastUrl);
+      expect(coreNavLinks.update.calledWith(appId, { url: appUrl })).to.be(false);
     });
   });
 
   describe('internals.trackPossibleSubUrl()', function () {
     it('injects the globalState of the current url to all links for the same app', function () {
       const appUrlStore = new StubBrowserStorage();
-      const nav = [
+      fakedLinks = [
         {
-          url: 'https://localhost:9200/app/kibana#discover',
-          subUrlBase: 'https://localhost:9200/app/kibana#discover'
+          id: 'kibana:discover',
+          appUrl: 'https://localhost:9200/app/kibana#discover',
         },
         {
-          url: 'https://localhost:9200/app/kibana#visualize',
-          subUrlBase: 'https://localhost:9200/app/kibana#visualize'
+          id: 'kibana:visualize',
+          appUrl: 'https://localhost:9200/app/kibana#visualize',
         },
         {
-          url: 'https://localhost:9200/app/kibana#dashboards',
-          subUrlBase: 'https://localhost:9200/app/kibana#dashboard'
+          id: 'kibana:dashboard',
+          appUrl: 'https://localhost:9200/app/kibana#dashboards',
         },
-      ].map(l => {
-        l.lastSubUrl = l.url;
-        return l;
-      });
+      ];
 
       const {
         internals
-      } = init({ appUrlStore, nav });
+      } = init({
+        appUrlStore,
+        nav: [
+          {
+            id: 'kibana:discover',
+            subUrlBase: '/app/kibana#discover'
+          },
+          {
+            id: 'kibana:visualize',
+            subUrlBase: '/app/kibana#visualize'
+          },
+          {
+            id: 'kibana:dashboard',
+            subUrlBase: '/app/kibana#dashboard'
+          },
+        ]
+      });
 
       internals.trackPossibleSubUrl('https://localhost:9200/app/kibana#dashboard?_g=globalstate');
-      expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/app/kibana#discover?_g=globalstate');
-      expect(internals.nav[0].active).to.be(false);
 
-      expect(internals.nav[1].lastSubUrl).to.be('https://localhost:9200/app/kibana#visualize?_g=globalstate');
-      expect(internals.nav[1].active).to.be(false);
+      expect(fakedLinks[0].url).to.be('https://localhost:9200/app/kibana#discover?_g=globalstate');
+      expect(fakedLinks[0].active).to.be(false);
 
-      expect(internals.nav[2].lastSubUrl).to.be('https://localhost:9200/app/kibana#dashboard?_g=globalstate');
-      expect(internals.nav[2].active).to.be(true);
+      expect(fakedLinks[1].url).to.be('https://localhost:9200/app/kibana#visualize?_g=globalstate');
+      expect(fakedLinks[1].active).to.be(false);
+
+      expect(fakedLinks[2].url).to.be('https://localhost:9200/app/kibana#dashboard?_g=globalstate');
+      expect(fakedLinks[2].active).to.be(true);
     });
   });
 
-  describe('internals.trackSubUrlForApp()', function () {
+  describe('chrome.trackSubUrlForApp()', function () {
     it('injects a manual app url', function () {
       const appUrlStore = new StubBrowserStorage();
-      const nav = [
-        {
-          id: 'kibana:visualize',
-          url: 'https://localhost:9200/app/kibana#visualize',
-          lastSubUrl: 'https://localhost:9200/app/kibana#visualize',
-          subUrlBase: 'https://localhost:9200/app/kibana#visualize'
-        }
-      ];
+      fakedLinks = [{
+        id: 'kibana:visualize',
+        appUrl: 'https://localhost:9200/app/kibana#visualize',
+        url: 'https://localhost:9200/app/kibana#visualize',
+      }];
 
-      const { chrome, internals } = init({ appUrlStore, nav });
+      const { chrome } = init({
+        appUrlStore,
+        nav: [{
+          id: 'kibana:visualize',
+          subUrlBase: '/app/kibana#visualize'
+        }]
+      });
 
       const basePath = '/xyz';
       const appId = 'kibana';
@@ -177,7 +194,7 @@ describe('chrome nav apis', function () {
 
       const kibanaParsedUrl = new KibanaParsedUrl({ basePath, appId, appPath, hostname, port, protocol });
       chrome.trackSubUrlForApp('kibana:visualize', kibanaParsedUrl);
-      expect(internals.nav[0].lastSubUrl).to.be('https://localhost:9200/xyz/app/kibana#visualize/1234?_g=globalstate');
+      expect(coreNavLinks.update.calledWith('kibana:visualize', { url: 'https://localhost:9200/xyz/app/kibana#visualize/1234?_g=globalstate' })).to.be(true);
     });
   });
 });

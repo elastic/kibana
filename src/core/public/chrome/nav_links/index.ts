@@ -17,9 +17,5 @@
  * under the License.
  */
 
-import chrome from 'ui/chrome';
-
-const timelionUiEnabled = chrome.getInjected('timelionUiEnabled');
-if (timelionUiEnabled === false && chrome.navLinkExists('timelion')) {
-  chrome.getNavLinkById('timelion').hidden = true;
-}
+export { ChromeNavLink } from './nav_link';
+export { NavLinksService } from './nav_links_service';

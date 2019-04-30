@@ -52,12 +52,10 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { UICapabilities } from 'ui/capabilities';
-import chrome, { NavLink } from 'ui/chrome';
+import chrome from 'ui/chrome';
 import { HelpExtension } from 'ui/chrome';
 import { RecentlyAccessedHistoryItem } from 'ui/persisted_log';
 import { ChromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
-import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -65,7 +63,12 @@ import { HeaderHelpMenu } from './header_help_menu';
 import { HeaderNavControls } from './header_nav_controls';
 
 import { NavControlSide } from '../';
-import { ChromeBadge, ChromeBreadcrumb } from '../../../../../../../core/public';
+import {
+  ChromeBadge,
+  ChromeBreadcrumb,
+  ChromeNavLink,
+  BasePathStart,
+} from '../../../../../../../core/public';
 
 interface Props {
   appTitle?: string;
@@ -73,13 +76,13 @@ interface Props {
   breadcrumbs$: Rx.Observable<ChromeBreadcrumb[]>;
   homeHref: string;
   isVisible: boolean;
-  navLinks$: Rx.Observable<NavLink[]>;
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
+  addBasePath: BasePathStart['addToPath'];
   recentlyAccessed$: Rx.Observable<RecentlyAccessedHistoryItem[]>;
   forceAppSwitcherNavigation$: Rx.Observable<boolean>;
   helpExtension$: Rx.Observable<HelpExtension>;
   navControls: ChromeHeaderNavControlsRegistry;
   intl: InjectedIntl;
-  uiCapabilities: UICapabilities;
 }
 
 // Providing a buffer between the limit and the cut off index
@@ -88,11 +91,11 @@ const TRUNCATE_LIMIT: number = 64;
 const TRUNCATE_AT: number = 58;
 
 function extendRecentlyAccessedHistoryItem(
-  navLinks: NavLink[],
+  navLinks: ChromeNavLink[],
   recentlyAccessed: RecentlyAccessedHistoryItem
 ) {
-  const href = relativeToAbsolute(chrome.addBasePath(recentlyAccessed.link));
-  const navLink = navLinks.find(nl => href.startsWith(nl.subUrlBase));
+  const href = chrome.addBasePath(recentlyAccessed.link);
+  const navLink = navLinks.find(nl => href.startsWith(nl.appUrl));
 
   let titleAndAriaLabel = recentlyAccessed.label;
   if (navLink) {
@@ -114,10 +117,10 @@ function extendRecentlyAccessedHistoryItem(
   };
 }
 
-function extendNavLink(navLink: NavLink) {
+function extendNavLink(navLink: ChromeNavLink) {
   return {
     ...navLink,
-    href: navLink.lastSubUrl && !navLink.active ? navLink.lastSubUrl : navLink.url,
+    href: navLink.url && !navLink.active ? navLink.url : navLink.appUrl,
   };
 }
 
@@ -218,13 +221,13 @@ class HeaderUI extends Component<Props, State> {
   public render() {
     const {
       appTitle,
+      addBasePath,
       badge$,
       breadcrumbs$,
       isVisible,
       navControls,
       helpExtension$,
       intl,
-      uiCapabilities,
     } = this.props;
     const { navLinks, recentlyAccessed } = this.state;
 
@@ -235,31 +238,27 @@ class HeaderUI extends Component<Props, State> {
     const leftNavControls = navControls.bySide[NavControlSide.Left];
     const rightNavControls = navControls.bySide[NavControlSide.Right];
 
-    let navLinksArray = navLinks.map(navLink =>
-      navLink.hidden || !uiCapabilities.navLinks[navLink.id]
-        ? null
-        : {
-            key: navLink.id,
-            label: navLink.title,
-            href: navLink.href,
-            iconType: navLink.euiIconType,
-            icon:
-              !navLink.euiIconType && navLink.icon ? (
-                <EuiImage
-                  size="s"
-                  alt=""
-                  aria-hidden={true}
-                  url={chrome.addBasePath(`/${navLink.icon}`)}
-                />
-              ) : (
-                undefined
-              ),
-            isActive: navLink.active,
-            'data-test-subj': 'navDrawerAppsMenuLink',
-          }
-    );
-    // filter out the null items
-    navLinksArray = navLinksArray.filter(item => item !== null);
+    const navLinksArray = navLinks
+      .filter(navLink => !navLink.hidden)
+      .map(navLink => ({
+        key: navLink.id,
+        label: navLink.title,
+        href: addBasePath(navLink.href),
+        iconType: navLink.euiIconType,
+        icon:
+          !navLink.euiIconType && navLink.icon ? (
+            <EuiImage
+              size="s"
+              alt=""
+              aria-hidden={true}
+              url={chrome.addBasePath(`/${navLink.icon}`)}
+            />
+          ) : (
+            undefined
+          ),
+        isActive: navLink.active,
+        'data-test-subj': 'navDrawerAppsMenuLink',
+      }));
 
     const recentLinksArray = [
       {

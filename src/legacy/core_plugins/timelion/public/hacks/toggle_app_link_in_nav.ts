@@ -17,21 +17,11 @@
  * under the License.
  */
 
-import 'ui/autoload/styles';
-import 'ui/i18n';
-import chrome from 'ui/chrome';
 import { onStart } from 'ui/new_platform';
-import { destroyStatusPage, renderStatusPage } from './components/render';
 
 onStart(({ core }) => {
-  core.chrome.navLinks.enableForcedAppSwitcherNavigation();
+  const timelionUiEnabled = core.injectedMetadata.getInjectedVar('timelionUiEnabled');
+  if (timelionUiEnabled === false) {
+    core.chrome.navLinks.update('timelion', { hidden: true });
+  }
 });
-
-chrome
-  .setRootTemplate(require('plugins/status_page/status_page.html'))
-  .setRootController('ui', function ($scope, buildNum, buildSha) {
-    $scope.$$postDigest(() => {
-      renderStatusPage(buildNum, buildSha.substr(0, 8));
-      $scope.$on('$destroy', destroyStatusPage);
-    });
-  });

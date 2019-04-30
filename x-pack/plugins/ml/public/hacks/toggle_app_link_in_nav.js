@@ -7,19 +7,20 @@
 
 
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import chrome from 'ui/chrome';
 import { uiModules } from 'ui/modules';
+import { onStart } from 'ui/new_platform';
 
 uiModules.get('xpack/ml').run((Private) => {
   const xpackInfo = Private(XPackInfoProvider);
-  if (!chrome.navLinkExists('ml')) return;
 
-  const navLink = chrome.getNavLinkById('ml');
+  const navLinkUpdates = {};
   // hide by default, only show once the xpackInfo is initialized
-  navLink.hidden = true;
+  navLinkUpdates.hidden = true;
   const showAppLink = xpackInfo.get('features.ml.showLinks', false);
-  navLink.hidden = !showAppLink;
+  navLinkUpdates.hidden = !showAppLink;
   if (showAppLink) {
-    navLink.disabled = !xpackInfo.get('features.ml.isAvailable', false);
+    navLinkUpdates.disabled = !xpackInfo.get('features.ml.isAvailable', false);
   }
+
+  onStart(({ core }) => core.chrome.navLinks.update('ml', navLinkUpdates));
 });

@@ -16,6 +16,7 @@ export interface CoreStart
 |  --- | --- | --- |
 |  [application](./kibana-plugin-public.corestart.application.md) | <code>ApplicationStart</code> | [ApplicationStart](./kibana-plugin-public.applicationstart.md) |
 |  [basePath](./kibana-plugin-public.corestart.basepath.md) | <code>BasePathStart</code> | [BasePathStart](./kibana-plugin-public.basepathstart.md) |
+|  [chrome](./kibana-plugin-public.corestart.chrome.md) | <code>ChromeStart</code> | [ChromeStart](./kibana-plugin-public.chromestart.md) |
 |  [i18n](./kibana-plugin-public.corestart.i18n.md) | <code>I18nStart</code> | [I18nStart](./kibana-plugin-public.i18nstart.md) |
 |  [injectedMetadata](./kibana-plugin-public.corestart.injectedmetadata.md) | <code>InjectedMetadataStart</code> | [InjectedMetadataStart](./kibana-plugin-public.injectedmetadatastart.md) |
 |  [notifications](./kibana-plugin-public.corestart.notifications.md) | <code>NotificationsStart</code> | [NotificationsStart](./kibana-plugin-public.notificationsstart.md) |

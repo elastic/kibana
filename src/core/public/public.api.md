@@ -87,10 +87,28 @@ export interface ChromeBreadcrumb {
 // @public (undocumented)
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
+// @public (undocumented)
+export interface ChromeNavLink {
+    readonly active?: boolean;
+    readonly appUrl: string;
+    readonly disabled?: boolean;
+    readonly euiIconType?: string;
+    readonly hidden?: boolean;
+    readonly icon?: string;
+    readonly id: string;
+    readonly order: number;
+    readonly title: string;
+    readonly tooltip?: string;
+    readonly url?: string;
+}
+
 // Warning: (ae-forgotten-export) The symbol "ChromeService" needs to be exported by the entry point index.d.ts
 // 
 // @public (undocumented)
 export type ChromeSetup = ReturnType<ChromeService['setup']>;
+
+// @public (undocumented)
+export type ChromeStart = ReturnType<ChromeService['start']>;
 
 // @internal (undocumented)
 export interface CoreContext {
@@ -126,6 +144,8 @@ export interface CoreStart {
     application: ApplicationStart;
     // (undocumented)
     basePath: BasePathStart;
+    // (undocumented)
+    chrome: ChromeStart;
     // (undocumented)
     i18n: I18nStart;
     // (undocumented)
@@ -270,6 +290,8 @@ export interface LegacyNavLink {
     // (undocumented)
     id: string;
     // (undocumented)
+    lastSubUrl?: string;
+    // (undocumented)
     order: number;
     // (undocumented)
     title: string;
@@ -401,8 +423,8 @@ export interface UiSettingsState {
 
 // Warnings were encountered during analysis:
 // 
-// src/core/public/injected_metadata/injected_metadata_service.ts:48:7 - (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
-// src/core/public/injected_metadata/injected_metadata_service.ts:49:7 - (ae-forgotten-export) The symbol "DiscoveredPlugin" needs to be exported by the entry point index.d.ts
+// src/core/public/injected_metadata/injected_metadata_service.ts:49:7 - (ae-forgotten-export) The symbol "PluginName" needs to be exported by the entry point index.d.ts
+// src/core/public/injected_metadata/injected_metadata_service.ts:50:7 - (ae-forgotten-export) The symbol "DiscoveredPlugin" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
