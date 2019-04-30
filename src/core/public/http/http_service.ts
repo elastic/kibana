@@ -52,7 +52,7 @@ export class HttpService {
         headers: {
           'kbn-version': injectedMetadata.getKibanaVersion(),
           'Content-Type': 'application/json',
-        }
+        },
       }, options);
       const url = format({
         pathname: prependBasePath ? basePath.addToPath(path) : path,
@@ -64,7 +64,7 @@ export class HttpService {
         'Content-Type' in options.headers &&
         options.headers['Content-Type'] === undefined
       ) {
-        delete options.headers['Content-Type'];
+        delete fetchOptions.headers['Content-Type'];
       }
 
       let response;
