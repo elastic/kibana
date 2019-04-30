@@ -18,7 +18,7 @@
  */
 
 import _ from 'lodash';
-
+// TODO: Update as well.
 export default function splitByTerm(req, panel) {
   return next => doc => {
     panel.series.filter(c => c.aggregate_by && c.aggregate_function).forEach(column => {
