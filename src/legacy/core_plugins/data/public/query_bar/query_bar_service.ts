@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { once } from 'lodash';
 import { QueryBar } from './components/query_bar';
 import { fromUser } from './lib/from_user';
 import { toUser } from './lib/to_user';
-import { once } from 'lodash';
 
 // @ts-ignore
 import { setupDirective } from './directive';

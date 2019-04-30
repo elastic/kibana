@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { SearchBar } from './components/search_bar';
 import { once } from 'lodash';
+import { SearchBar } from './components/search_bar';
 
 // @ts-ignore
 import { setupDirective } from './directive';
