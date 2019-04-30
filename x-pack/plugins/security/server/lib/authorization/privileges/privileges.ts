@@ -62,6 +62,7 @@ export function privilegesFactory(actions: Actions, xpackMainPlugin: XPackMainPl
           all: [
             actions.login,
             actions.version,
+            actions.api.get('manage_feature_controls'),
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             ...allActions,
