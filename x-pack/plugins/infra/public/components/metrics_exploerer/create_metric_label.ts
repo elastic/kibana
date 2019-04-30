@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  MetricsExplorerAggregation,
-  MetricsExplorerMetric,
-} from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerMetric } from '../../../server/routes/metrics_explorer/types';
 
 export const createMetricLabel = (metric: MetricsExplorerMetric) => {
   return `${metric.aggregation}(${metric.field || ''})`;
