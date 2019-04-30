@@ -6,18 +6,18 @@
 
 import { encode } from 'rison-node';
 import uuid from 'uuid';
-import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
+import { colorTransformer, MetricsExplorerColor } from '../../../../common/color_palette';
 import {
   MetricsExplorerSeries,
   MetricsExplorerAggregation,
-} from '../../../server/routes/metrics_explorer/types';
+} from '../../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
-} from '../../containers/metrics_explorer/use_metrics_explorer_options';
+} from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
-import { InfraFormatterType } from '../../lib/lib';
-import { SourceQuery } from '../../graphql/types';
+import { InfraFormatterType } from '../../../lib/lib';
+import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 
 const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {

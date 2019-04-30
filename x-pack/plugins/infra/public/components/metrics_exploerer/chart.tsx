@@ -17,7 +17,7 @@ import { EuiSeriesChart } from '@elastic/eui/lib/experimental';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import euiStyled from '../../../../../common/eui_styled_components';
-import { createFormatterForMetric } from './create_formatter_for_metric';
+import { createFormatterForMetric } from './lib/create_formatter_for_metric';
 import { MetricLineSeries } from './line_series';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';

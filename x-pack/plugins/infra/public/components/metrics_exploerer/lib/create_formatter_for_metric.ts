@@ -7,9 +7,9 @@
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
-} from '../../../server/routes/metrics_explorer/types';
-import { createFormatter } from '../../utils/formatters';
-import { InfraFormatterType } from '../../lib/lib';
+} from '../../../../server/routes/metrics_explorer/types';
+import { createFormatter } from '../../../utils/formatters';
+import { InfraFormatterType } from '../../../lib/lib';
 import { metricToFormat } from './metric_to_format';
 export const createFormatterForMetric = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {

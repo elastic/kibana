@@ -15,7 +15,7 @@ import {
 import '@elastic/charts/dist/style.css';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import { colorTransformer, MetricsExplorerColor } from '../../../common/color_palette';
-import { createMetricLabel } from './create_metric_label';
+import { createMetricLabel } from './lib/create_metric_label';
 import { MetricsExplorerOptionsMetric } from '../../containers/metrics_explorer/use_metrics_explorer_options';
 
 interface Props {

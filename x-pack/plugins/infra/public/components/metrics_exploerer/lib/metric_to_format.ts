@@ -8,8 +8,8 @@ import { last } from 'lodash';
 import {
   MetricsExplorerAggregation,
   MetricsExplorerMetric,
-} from '../../../server/routes/metrics_explorer/types';
-import { InfraFormatterType } from '../../lib/lib';
+} from '../../../../server/routes/metrics_explorer/types';
+import { InfraFormatterType } from '../../../lib/lib';
 export const metricToFormat = (metric?: MetricsExplorerMetric) => {
   if (metric && metric.field) {
     const suffix = last(metric.field.split(/\./));

@@ -5,7 +5,7 @@
  */
 
 import { createFormatterForMetric } from './create_formatter_for_metric';
-import { MetricsExplorerAggregation } from '../../../server/routes/metrics_explorer/types';
+import { MetricsExplorerAggregation } from '../../../../server/routes/metrics_explorer/types';
 describe('createFormatterForMetric()', () => {
   it('should just work for count', () => {
     const metric = { aggregation: MetricsExplorerAggregation.count };
