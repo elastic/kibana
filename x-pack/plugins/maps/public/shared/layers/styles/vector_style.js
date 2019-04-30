@@ -26,17 +26,19 @@ export class VectorStyle extends AbstractStyle {
 
   constructor(descriptor = {}) {
     super();
-    this._descriptor = VectorStyle.createDescriptor(descriptor);
+    this._descriptor = {
+      ...descriptor,
+      ...VectorStyle.createDescriptor(descriptor.properties),
+    };
   }
 
   static canEdit(styleInstance) {
     return styleInstance.constructor === VectorStyle;
   }
 
-  static createDescriptor({ properties = {}, __styleMeta = {} }) {
+  static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
-      __styleMeta,
       properties: { ...getDefaultStaticProperties(), ...properties }
     };
   }
