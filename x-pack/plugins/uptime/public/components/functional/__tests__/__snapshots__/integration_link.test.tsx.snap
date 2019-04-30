@@ -3,12 +3,24 @@
 exports[`IntegrationLink component renders without errors 1`] = `
 <EuiLink
   aria-label="foo"
-  color="primary"
+  color="subdued"
   href="/app/foo?kuery=localhost"
   type="button"
 >
-  <EuiIcon
-    type="apmApp"
-  />
+  <EuiFlexGroup>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiToolTip
+        delay="regular"
+        position="top"
+      >
+        <EuiIcon
+          type="apmApp"
+        />
+      </EuiToolTip>
+    </EuiFlexItem>
+    <EuiFlexItem />
+  </EuiFlexGroup>
 </EuiLink>
 `;
