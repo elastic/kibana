@@ -1,55 +1,48 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditFilterListHeader renders the header when creating a new filter list with ID, description and items set 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
-              Create new filter list
+              <FormattedMessage
+                defaultMessage="Create new filter list"
+                id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
+                values={Object {}}
+              />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
-              15
-               
-              items
-               in total
+              <FormattedMessage
+                defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
+                id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
+                values={
+                  Object {
+                    "totalItemCount": 15,
+                  }
+                }
+              />
             </p>
           </EuiTextColor>
         </EuiFlexItem>
@@ -65,7 +58,14 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     hasEmptyLabelSpace={false}
     helpText="Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores; must start and end with an alphanumeric character"
     isInvalid={false}
-    label="Filter list ID"
+    label={
+      <FormattedMessage
+        defaultMessage="Filter list ID"
+        id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -79,31 +79,23 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   </EuiFormRow>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           A test filter list
         </p>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EditDescriptionPopover
+      <InjectIntl(EditDescriptionPopover)
+        canCreateFilter={true}
         description="A test filter list"
         updateDescription={[MockFunction]}
       />
@@ -112,59 +104,52 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   <EuiSpacer
     size="s"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`EditFilterListHeader renders the header when creating a new filter list with the ID not set 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
-              Create new filter list
+              <FormattedMessage
+                defaultMessage="Create new filter list"
+                id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
+                values={Object {}}
+              />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
-              0
-               
-              items
-               in total
+              <FormattedMessage
+                defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
+                id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
+                values={
+                  Object {
+                    "totalItemCount": 0,
+                  }
+                }
+              />
             </p>
           </EuiTextColor>
         </EuiFlexItem>
@@ -184,7 +169,14 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
     fullWidth={false}
     hasEmptyLabelSpace={false}
     isInvalid={true}
-    label="Filter list ID"
+    label={
+      <FormattedMessage
+        defaultMessage="Filter list ID"
+        id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
+        values={Object {}}
+      />
+    }
+    labelType="label"
   >
     <EuiFieldText
       compressed={false}
@@ -198,34 +190,29 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   </EuiFormRow>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiTextColor
           color="subdued"
-          component="span"
         >
-          Add a description
+          <FormattedMessage
+            defaultMessage="Add a description"
+            id="xpack.ml.settings.filterLists.editFilterList.addDescriptionText"
+            values={Object {}}
+          />
         </EuiTextColor>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EditDescriptionPopover
+      <InjectIntl(EditDescriptionPopover)
+        canCreateFilter={true}
         updateDescription={[MockFunction]}
       />
     </EuiFlexItem>
@@ -233,59 +220,56 @@ exports[`EditFilterListHeader renders the header when creating a new filter list
   <EuiSpacer
     size="s"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`EditFilterListHeader renders the header when editing an existing unused filter list with no description or items 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
-              Filter list test_filter_list
+              <FormattedMessage
+                defaultMessage="Filter list {filterId}"
+                id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
+                values={
+                  Object {
+                    "filterId": "test_filter_list",
+                  }
+                }
+              />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
-              0
-               
-              items
-               in total
+              <FormattedMessage
+                defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
+                id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
+                values={
+                  Object {
+                    "totalItemCount": 0,
+                  }
+                }
+              />
             </p>
           </EuiTextColor>
         </EuiFlexItem>
@@ -297,34 +281,29 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <EuiTextColor
           color="subdued"
-          component="span"
         >
-          Add a description
+          <FormattedMessage
+            defaultMessage="Add a description"
+            id="xpack.ml.settings.filterLists.editFilterList.addDescriptionText"
+            values={Object {}}
+          />
         </EuiTextColor>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EditDescriptionPopover
+      <InjectIntl(EditDescriptionPopover)
+        canCreateFilter={true}
         updateDescription={[MockFunction]}
       />
     </EuiFlexItem>
@@ -332,72 +311,68 @@ exports[`EditFilterListHeader renders the header when editing an existing unused
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <EuiText
-      grow={true}
-      size="m"
-    >
-      <p>
-        This filter list is not used by any jobs.
-      </p>
-    </EuiText>
-    <EuiSpacer
-      size="s"
-    />
-  </React.Fragment>
-</React.Fragment>
+  <EuiText>
+    <p>
+      <FormattedMessage
+        defaultMessage="This filter list is not used by any jobs."
+        id="xpack.ml.settings.filterLists.editFilterList.filterIsNotUsedInJobsDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
 `;
 
 exports[`EditFilterListHeader renders the header when editing an existing used filter list with description and items set 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
-    gutterSize="l"
     justifyContent="spaceBetween"
-    responsive={true}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
       <EuiFlexGroup
         alignItems="baseline"
-        component="div"
-        direction="row"
         gutterSize="m"
-        justifyContent="flexStart"
         responsive={false}
-        wrap={false}
       >
         <EuiFlexItem
-          component="div"
           grow={false}
         >
-          <EuiTitle
-            size="m"
-            textTransform="none"
-          >
+          <EuiTitle>
             <h1>
-              Filter list test_filter_list
+              <FormattedMessage
+                defaultMessage="Filter list {filterId}"
+                id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
+                values={
+                  Object {
+                    "filterId": "test_filter_list",
+                  }
+                }
+              />
             </h1>
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem
-          component="div"
-          grow={true}
+          grow={false}
         >
           <EuiTextColor
             color="subdued"
-            component="span"
           >
             <p>
-              15
-               
-              items
-               in total
+              <FormattedMessage
+                defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
+                id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
+                values={
+                  Object {
+                    "totalItemCount": 15,
+                  }
+                }
+              />
             </p>
           </EuiTextColor>
         </EuiFlexItem>
@@ -409,31 +384,23 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
   />
   <EuiFlexGroup
     alignItems="baseline"
-    component="div"
-    direction="row"
     gutterSize="s"
-    justifyContent="flexStart"
     responsive={false}
-    wrap={false}
   >
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EuiText
-        grow={true}
-        size="m"
-      >
+      <EuiText>
         <p>
           A test filter list
         </p>
       </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
-      component="div"
       grow={false}
     >
-      <EditDescriptionPopover
+      <InjectIntl(EditDescriptionPopover)
+        canCreateFilter={true}
         description="A test filter list"
         updateDescription={[MockFunction]}
       />
@@ -442,42 +409,42 @@ exports[`EditFilterListHeader renders the header when editing an existing used f
   <EuiSpacer
     size="s"
   />
-  <React.Fragment>
-    <div
-      className="ml-filter-list-usage"
-    >
-      <EuiText
-        grow={true}
-        size="m"
-      >
-        This filter list is used in
-      </EuiText>
-      <FilterListUsagePopover
-        entityType="detector"
-        entityValues={
-          Array [
-            "mean CPUUtilization",
-          ]
-        }
+  <div
+    className="ml-filter-list-usage"
+  >
+    <EuiText>
+      <FormattedMessage
+        defaultMessage="This filter list is used in"
+        id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
+        values={Object {}}
       />
-      <EuiText
-        grow={true}
-        size="m"
-      >
-        across
-      </EuiText>
-      <FilterListUsagePopover
-        entityType="job"
-        entityValues={
-          Array [
-            "cloudwatch",
-          ]
-        }
-      />
-    </div>
-    <EuiSpacer
-      size="s"
+    </EuiText>
+    <FilterListUsagePopover
+      entityType="detector"
+      entityValues={
+        Array [
+          "mean CPUUtilization",
+        ]
+      }
     />
-  </React.Fragment>
-</React.Fragment>
+    <EuiText>
+      <FormattedMessage
+        defaultMessage="across"
+        id="xpack.ml.settings.filterLists.editFilterList.acrossText"
+        values={Object {}}
+      />
+    </EuiText>
+    <FilterListUsagePopover
+      entityType="job"
+      entityValues={
+        Array [
+          "cloudwatch",
+        ]
+      }
+    />
+  </div>
+  <EuiSpacer
+    size="s"
+  />
+</Fragment>
 `;

@@ -9,6 +9,15 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 
 export class FullscreenControl extends React.PureComponent {
+  keyHandler = action => {
+    const enterFullscreen = action === 'FULLSCREEN';
+    const exitFullscreen = this.props.isFullscreen && action === 'FULLSCREEN_EXIT';
+
+    if (enterFullscreen || exitFullscreen) {
+      this.toggleFullscreen();
+    }
+  };
+
   toggleFullscreen = () => {
     const { setFullscreen, isFullscreen } = this.props;
     setFullscreen(!isFullscreen);
@@ -17,14 +26,15 @@ export class FullscreenControl extends React.PureComponent {
   render() {
     const { children, isFullscreen } = this.props;
 
-    const keyHandler = action => {
-      if (action === 'FULLSCREEN' || (isFullscreen && action === 'FULLSCREEN_EXIT'))
-        this.toggleFullscreen();
-    };
-
     return (
       <span>
-        <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global isolate />
+        <Shortcuts
+          name="PRESENTATION"
+          handler={this.keyHandler}
+          targetNodeSelector="body"
+          global
+          isolate
+        />
         {children({ isFullscreen, toggleFullscreen: this.toggleFullscreen })}
       </span>
     );

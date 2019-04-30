@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import aero from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const BorderConnection = ({ transformMatrix, width, height }) => {
   const newStyle = {
@@ -15,7 +15,7 @@ export const BorderConnection = ({ transformMatrix, width, height }) => {
     marginLeft: -width / 2,
     marginTop: -height / 2,
     position: 'absolute',
-    transform: aero.dom.matrixToCSS(transformMatrix),
+    transform: matrixToCSS(transformMatrix),
   };
   return <div className="canvasBorder--connection canvasLayoutAnnotation" style={newStyle} />;
 };

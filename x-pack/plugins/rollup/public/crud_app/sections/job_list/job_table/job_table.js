@@ -7,7 +7,7 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { i18n }  from '@kbn/i18n';
-import { injectI18n } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 
 import {
   EuiCheckbox,
@@ -25,9 +25,12 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 
+import { UIM_SHOW_DETAILS_CLICK } from '../../../../../common';
+import { trackUiMetric } from '../../../services';
 import { JobActionMenu, JobStatus } from '../../components';
 
 const COLUMNS = [{
@@ -35,11 +38,13 @@ const COLUMNS = [{
     defaultMessage: 'ID',
   }),
   fieldName: 'id',
+  isSortable: true,
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.statusHeader', {
     defaultMessage: 'Status',
   }),
   fieldName: 'status',
+  isSortable: true,
   render: ({ status, rollupCron }) => {
     return (
       <EuiToolTip placement="top" content={`Cron: ${rollupCron}`}>
@@ -53,51 +58,50 @@ const COLUMNS = [{
   }),
   truncateText: true,
   fieldName: 'indexPattern',
+  isSortable: true,
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.rollupIndexHeader', {
     defaultMessage: 'Rollup index',
   }),
   truncateText: true,
   fieldName: 'rollupIndex',
+  isSortable: true,
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.delayHeader', {
     defaultMessage: 'Delay',
   }),
   fieldName: 'rollupDelay',
+  isSortable: true,
   render: ({ rollupDelay }) => rollupDelay || 'None',
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.intervalHeader', {
     defaultMessage: 'Interval',
   }),
   fieldName: 'dateHistogramInterval',
+  isSortable: true,
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.groupsHeader', {
     defaultMessage: 'Groups',
   }),
+  fieldName: 'groups',
+  isSortable: false,
   truncateText: true,
-  render: job => {
-    const { histogram, terms } = job;
-    const humanizedGroupNames = [];
-
-    if (histogram.length) {
-      humanizedGroupNames.push('histogram');
-    }
-
-    if (terms.length) {
-      humanizedGroupNames.push('terms');
-    }
-
-    if (humanizedGroupNames.length) {
-      humanizedGroupNames[0] = humanizedGroupNames[0].replace(/^\w/, char => char.toUpperCase());
-      return humanizedGroupNames.join(', ');
-    }
-
-    return '';
-  },
+  render: job => (
+    ['histogram', 'terms'].reduce((text, field) => {
+      if (job[field].length) {
+        return text
+          ? `${text}, ${field}`
+          : field.replace(/^\w/, char => char.toUpperCase());
+      }
+      return text;
+    }, '')
+  )
 }, {
   name: i18n.translate('xpack.rollupJobs.jobTable.headers.metricsHeader', {
     defaultMessage: 'Metrics',
   }),
+  fieldName: 'metrics',
+  isSortable: false,
   truncateText: true,
   render: job => {
     const { metrics } = job;
@@ -117,6 +121,7 @@ export class JobTableUi extends Component {
     filter: PropTypes.string.isRequired,
     sortField: PropTypes.string.isRequired,
     isSortAscending: PropTypes.bool.isRequired,
+    openDetailPanel: PropTypes.func.isRequired,
     closeDetailPanel: PropTypes.func.isRequired,
     filterChanged: PropTypes.func.isRequired,
     pageChanged: PropTypes.func.isRequired,
@@ -226,16 +231,16 @@ export class JobTableUi extends Component {
 
   buildHeader() {
     const { sortField, isSortAscending } = this.props;
-    return COLUMNS.map(({ name, fieldName }) => {
+    return COLUMNS.map(({ name, fieldName, isSortable }) => {
       const isSorted = sortField === fieldName;
 
       return (
         <EuiTableHeaderCell
           key={name}
-          onSort={fieldName ? () => this.onSort(fieldName) : undefined}
+          onSort={isSortable ? () => this.onSort(fieldName) : undefined}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
-          data-test-subj={`jobTableHeaderCell-${name}`}
+          data-test-subj={`jobTableHeaderCell-${fieldName}`}
         >
           {name}
         </EuiTableHeaderCell>
@@ -250,11 +255,11 @@ export class JobTableUi extends Component {
       const value = render ? render(job) : job[fieldName];
       let content;
 
-      if (name === 'ID') {
+      if (fieldName === 'id') {
         content = (
           <EuiLink
-            data-test-subj="rollupTableJobLink"
             onClick={() => {
+              trackUiMetric(UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(job.id);
             }}
           >
@@ -265,25 +270,18 @@ export class JobTableUi extends Component {
         content = <span>{value}</span>;
       }
 
-      let wrappedContent;
-
-      if (truncateText) {
-        wrappedContent = (
-          <EuiToolTip content={value}>
-            {content}
-          </EuiToolTip>
-        );
-      } else {
-        wrappedContent = content;
-      }
-
       return (
         <EuiTableRowCell
           key={`${job.id}-${name}`}
-          data-test-subj={`jobTableCell-${name}`}
+          data-test-subj={`jobTableCell-${fieldName}`}
           truncateText={truncateText}
         >
-          {wrappedContent}
+          {truncateText
+            ? (
+              <EuiToolTip content={value}>
+                {content}
+              </EuiToolTip>
+            ) : content }
         </EuiTableRowCell>
       );
     });
@@ -298,6 +296,7 @@ export class JobTableUi extends Component {
       return (
         <EuiTableRow
           key={`${id}-row`}
+          data-test-subj="jobTableRow"
         >
           <EuiTableRowCellCheckbox key={`checkbox-${id}`}>
             <EuiCheckbox
@@ -307,7 +306,7 @@ export class JobTableUi extends Component {
               onChange={() => {
                 this.toggleItem(id);
               }}
-              data-test-subj="indexTableRowCheckbox"
+              data-test-subj={`indexTableRowCheckbox-${id}`}
             />
           </EuiTableRowCellCheckbox>
 
@@ -379,7 +378,7 @@ export class JobTableUi extends Component {
         <EuiSpacer size="m" />
 
         {jobs.length > 0 ? (
-          <EuiTable>
+          <EuiTable data-test-subj="rollupJobsListTable">
             <EuiTableHeader>
               <EuiTableHeaderCellCheckbox>
                 <EuiCheckbox
@@ -397,9 +396,14 @@ export class JobTableUi extends Component {
             </EuiTableBody>
           </EuiTable>
         ) : (
-          <div>
-            No rollup jobs to show
-          </div>
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.rollupJobs.jobTable.noJobsMatchSearchMessage"
+                defaultMessage="No rollup jobs match your search"
+              />
+            </p>
+          </EuiText>
         )}
 
         <EuiSpacer size="m" />

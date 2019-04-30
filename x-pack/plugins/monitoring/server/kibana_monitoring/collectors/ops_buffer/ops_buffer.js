@@ -6,7 +6,6 @@
 
 import { LOGGING_TAG, KIBANA_MONITORING_LOGGING_TAG } from '../../../../common/constants';
 import { EventRoller } from './event_roller';
-import { getOSInfo } from './get_os_info';
 import { CloudDetector } from '../../../cloud';
 
 /**
@@ -17,7 +16,10 @@ import { CloudDetector } from '../../../cloud';
 export function opsBuffer(server) {
   // determine the cloud service in the background
   const cloudDetector = new CloudDetector();
-  cloudDetector.detectCloudService();
+
+  if(server.config().get('xpack.monitoring.tests.cloud_detector.enabled')) {
+    cloudDetector.detectCloudService();
+  }
 
   const eventRoller = new EventRoller();
 
@@ -38,7 +40,7 @@ export function opsBuffer(server) {
       if (eventRollup && eventRollup.os) {
         eventRollup.os = {
           ...eventRollup.os,
-          ...(await getOSInfo())
+          ...(await server.getOSInfo())
         };
       }
 

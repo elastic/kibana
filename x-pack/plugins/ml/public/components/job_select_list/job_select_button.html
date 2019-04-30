@@ -1,5 +1,9 @@
 <div style='display: flex;' class="ml-job-select-btn-container">
-  <div class="ml-job-select-btn-label">Job</div>
+  <div
+    class="ml-job-select-btn-label"
+    i18n-id="xpack.ml.jobSelectButton.jobTitle"
+    i18n-default-message="Job"
+  ></div>
   <div style="flex:0 0 auto;">
     <div  popover-placement="bottom"
           popover-placement="bottom"
@@ -7,8 +11,13 @@
           popover-append-to-body="false"
           popover-trigger="click"
           class="ml-job-select-btn"
-          tooltip="{{description.txt}} selected"
-          aria-label="Job selection menu"
+          tooltip="{{ 'xpack.ml.jobSelectButton.jobSelectionMenuButtonTooltip' | i18n: {
+            defaultMessage: '{description} selected',
+            values: {
+              description: description.txt,
+            }
+          } }}"
+          aria-label="{{:: 'xpack.ml.jobSelectButton.jobSelectionMenuButtonAriaLabel' | i18n: { defaultMessage: 'Job selection menu' } }}"
           ng-click='createMenu()'
           kbn-accessible-click>
     <span class="ml-job-select-btn-text">{{description.txt}}</span>

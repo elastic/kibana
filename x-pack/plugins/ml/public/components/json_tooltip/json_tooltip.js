@@ -8,13 +8,14 @@
 
 // component for placing an icon with a popover tooltip anywhere on a page
 // the id will match an entry in tooltips.json
-import tooltips from './tooltips.json';
+import { getTooltips } from './tooltips';
 import PropTypes from 'prop-types';
 import React from 'react';
 
 import { EuiIconTip } from '@elastic/eui';
 
 export const JsonTooltip = ({ id, position }) => {
+  const tooltips = getTooltips();
   const text = (tooltips[id]) ? tooltips[id].text : '';
   return (
     <span aria-hidden="true" className="ml-info-icon">

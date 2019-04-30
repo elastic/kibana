@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export function DashboardExpectProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -28,13 +28,6 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
 
   return new class DashboardExpect {
-    async pieSliceCount(expectedCount) {
-      log.debug(`DashboardExpect.expectPieSliceCount(${expectedCount})`);
-      await retry.try(async () => {
-        const slicesCount = await PageObjects.dashboard.getPieSliceCount();
-        expect(slicesCount).to.be(expectedCount);
-      });
-    }
 
     async panelCount(expectedCount) {
       log.debug(`DashboardExpect.panelCount(${expectedCount})`);
@@ -42,6 +35,14 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
         const panelCount = await PageObjects.dashboard.getPanelCount();
         expect(panelCount).to.be(expectedCount);
       });
+    }
+
+    async visualizationsArePresent(vizList) {
+      log.debug('Checking all visualisations are present on dashsboard');
+      let notLoaded = await PageObjects.dashboard.getNotLoadedVisualizations(vizList);
+      // TODO: Determine issue occasionally preventing 'geo map' from loading
+      notLoaded = notLoaded.filter(x => x !== 'Rendering Test: geo map');
+      expect(notLoaded).to.be.empty();
     }
 
     async selectedLegendColorCount(color, expectedCount) {
@@ -68,10 +69,12 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
       });
     }
 
-    async fieldSuggestionIndexPatterns(expectedIndexPatterns) {
-      log.debug(`DashboardExpect.fieldSuggestionIndexPatterns(${expectedIndexPatterns})`);
-      const indexPatterns = await filterBar.getFilterFieldIndexPatterns();
-      expect(indexPatterns).to.eql(expectedIndexPatterns);
+    async fieldSuggestions(expectedFields) {
+      log.debug(`DashboardExpect.fieldSuggestions(${expectedFields})`);
+      const fields = await filterBar.getFilterEditorFields();
+      expectedFields.forEach(expectedField => {
+        expect(fields).to.contain(expectedField);
+      });
     }
 
     async legendValuesToExist(legendValues) {

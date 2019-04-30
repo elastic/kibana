@@ -1,0 +1,22 @@
+<input
+  input-focus
+  aria-label="{{ ::'timelion.intervals.customIntervalAriaLabel' | i18n: { defaultMessage: 'Custom interval' } }}"
+  class="kuiTextInput timInterval__input"
+  ng-show="interval === 'other'"
+  ng-class="{ 'timInterval__input--compact': interval === 'other' }"
+  ng-model="otherInterval"
+><select
+  id="timelionInterval"
+  aria-label="{{ ::'timelion.intervals.selectIntervalAriaLabel' | i18n: { defaultMessage: 'Select interval' } }}"
+  class="form-control timInterval__presets"
+  ng-class="{ 'timInterval__presets--compact': interval === 'other'}"
+  ng-model="interval"
+>
+  <option
+    ng-repeat="intervalOption in intervalOptions"
+    aria-label="{{::intervalLabels[intervalOption]}}"
+    value="{{::intervalOption}}"
+  >
+      {{::intervalOption}}
+  </option>
+</select>

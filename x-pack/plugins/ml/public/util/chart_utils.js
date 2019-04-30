@@ -24,10 +24,16 @@ export const SCHEDULED_EVENT_SYMBOL_HEIGHT = 5;
 const MAX_LABEL_WIDTH = 100;
 
 export function chartLimits(data = []) {
-  const limits = { max: 0, min: 0 };
+  const domain = d3.extent(data, (d) => {
+    let metricValue = d.value;
+    if (metricValue === null && d.anomalyScore !== undefined && d.actual !== undefined) {
+      // If an anomaly coincides with a gap in the data, use the anomaly actual value.
+      metricValue = Array.isArray(d.actual) ? d.actual[0] : d.actual;
+    }
+    return metricValue;
+  });
+  const limits = { max: domain[1], min: domain[0] };
 
-  limits.max = d3.max(data, (d) => d.value);
-  limits.min = d3.min(data, (d) => d.value);
   if (limits.max === limits.min) {
     limits.max = d3.max(data, (d) => {
       if (d.typical) {
@@ -134,21 +140,40 @@ const POPULATION_DISTRIBUTION_ENABLED = true;
 
 // get the chart type based on its configuration
 export function getChartType(config) {
+  let chartType = CHART_TYPE.SINGLE_METRIC;
   if (
     EVENT_DISTRIBUTION_ENABLED &&
     config.functionDescription === 'rare' &&
     (config.entityFields.some(f => f.fieldType === 'over') === false)
   ) {
-    return CHART_TYPE.EVENT_DISTRIBUTION;
+    chartType = CHART_TYPE.EVENT_DISTRIBUTION;
   } else if (
     POPULATION_DISTRIBUTION_ENABLED &&
     config.functionDescription !== 'rare' &&
-    config.entityFields.some(f => f.fieldType === 'over')
+    config.entityFields.some(f => f.fieldType === 'over') &&
+    config.metricFunction !== null  // Event distribution chart relies on the ML function mapping to an ES aggregation
   ) {
-    return CHART_TYPE.POPULATION_DISTRIBUTION;
+    chartType = CHART_TYPE.POPULATION_DISTRIBUTION;
   }
 
-  return CHART_TYPE.SINGLE_METRIC;
+  if (chartType === CHART_TYPE.EVENT_DISTRIBUTION || chartType === CHART_TYPE.POPULATION_DISTRIBUTION) {
+    // Check that the config does not use script fields defined in the datafeed config.
+    if (config.datafeedConfig !== undefined && config.datafeedConfig.script_fields !== undefined) {
+      const scriptFields = Object.keys(config.datafeedConfig.script_fields);
+      const checkFields = config.entityFields.map(entity => entity.fieldName);
+      if (config.metricFieldName) {
+        checkFields.push(config.metricFieldName);
+      }
+      const usesScriptFields =
+        (checkFields.find(fieldName => scriptFields.includes(fieldName)) !== undefined);
+      if (usesScriptFields === true) {
+        // Only single metric chart type supports query of model plot data.
+        chartType = CHART_TYPE.SINGLE_METRIC;
+      }
+    }
+  }
+
+  return chartType;
 }
 
 export function getExploreSeriesLink(series) {
@@ -196,7 +221,6 @@ export function getExploreSeriesLink(series) {
       detectorIndex: series.detectorIndex,
       entities: entityCondition,
     },
-    filters: [],
     query: {
       query_string: {
         analyze_wildcard: true,

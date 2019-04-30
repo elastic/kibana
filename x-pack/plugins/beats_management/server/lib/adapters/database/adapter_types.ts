@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { FrameworkRequest, FrameworkUser } from '../framework/adapter_types';
+
 export interface DatabaseAdapter {
-  putTemplate(user: FrameworkUser, params: DatabasePutTemplateParams): Promise<any>;
   get<Source>(
     user: FrameworkUser,
     params: DatabaseGetParams
@@ -22,12 +22,21 @@ export interface DatabaseAdapter {
     user: FrameworkUser,
     params: DatabaseDeleteDocumentParams
   ): Promise<DatabaseDeleteDocumentResponse>;
+  deleteByQuery(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseDeleteDocumentResponse>;
   mget<T>(user: FrameworkUser, params: DatabaseMGetParams): Promise<DatabaseMGetResponse<T>>;
   bulk(
     user: FrameworkUser,
     params: DatabaseBulkIndexDocumentsParams
   ): Promise<DatabaseBulkResponse>;
   search<T>(user: FrameworkUser, params: DatabaseSearchParams): Promise<DatabaseSearchResponse<T>>;
+  searchAll<T>(
+    user: FrameworkUser,
+    params: DatabaseSearchParams
+  ): Promise<DatabaseSearchResponse<T>>;
+  putTemplate(name: string, template: any): Promise<any>;
 }
 
 export interface DatabaseKbnESCluster {
@@ -62,8 +71,8 @@ export interface DatabaseSearchParams extends DatabaseGenericParams {
   size?: number;
   sort?: DatabaseNameList;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   terminateAfter?: number;
   stats?: DatabaseNameList;
   suggestField?: string;
@@ -88,11 +97,11 @@ export interface DatabaseSearchResponse<T> {
     max_score: number;
     hits: Array<{
       _index: string;
-      _type: string;
       _id: string;
       _score: number;
       _source: T;
-      _version?: number;
+      _seq_no?: number;
+      _primary_term?: number;
       _explanation?: DatabaseExplanation;
       fields?: any;
       highlight?: any;
@@ -118,9 +127,9 @@ export interface DatabaseShardsResponse {
 
 export interface DatabaseGetDocumentResponse<Source> {
   _index: string;
-  _type: string;
   _id: string;
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   found: boolean;
   _source: Source;
 }
@@ -138,11 +147,10 @@ export interface DatabaseBulkIndexDocumentsParams extends DatabaseGenericParams 
   refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
-  type?: string;
   fields?: DatabaseNameList;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   pipeline?: string;
   index?: string;
 }
@@ -153,10 +161,9 @@ export interface DatabaseMGetParams extends DatabaseGenericParams {
   realtime?: boolean;
   refresh?: boolean;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
   index: string;
-  type?: string;
 }
 
 export interface DatabaseMGetResponse<T> {
@@ -174,37 +181,36 @@ export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
-  version?: number;
-  versionType?: DatabaseVersionType;
+  ifSeqNo?: number;
+  ifPrimaryTerm?: number;
   index: string;
-  type: string;
   id: string;
 }
 
 export interface DatabaseIndexDocumentResponse {
   found: boolean;
   _index: string;
-  _type: string;
   _id: string;
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   result: string;
 }
 
 export interface DatabaseUpdateDocumentResponse {
   found: boolean;
   _index: string;
-  _type: string;
   _id: string;
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   result: string;
 }
 
 export interface DatabaseDeleteDocumentResponse {
   found: boolean;
   _index: string;
-  _type: string;
   _id: string;
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   result: string;
 }
 
@@ -217,12 +223,11 @@ export interface DatabaseIndexDocumentParams<T> extends DatabaseGenericParams {
   timeout?: string;
   timestamp?: Date | number;
   ttl?: string;
-  version?: number;
-  versionType?: DatabaseVersionType;
+  ifSeqNo?: number;
+  ifPrimaryTerm?: number;
   pipeline?: string;
   id?: string;
   index: string;
-  type: string;
   body: T;
 }
 
@@ -238,12 +243,11 @@ export interface DatabaseCreateDocumentParams extends DatabaseGenericParams {
   timeout?: string;
   timestamp?: Date | number;
   ttl?: string;
-  version?: number;
-  versionType?: DatabaseVersionType;
+  ifSeqNo?: number;
+  ifPrimaryTerm?: number;
   pipeline?: string;
   id?: string;
   index: string;
-  type: string;
 }
 
 export interface DatabaseCreateDocumentResponse {
@@ -257,10 +261,9 @@ export interface DatabaseDeleteDocumentParams extends DatabaseGenericParams {
   refresh?: DatabaseRefresh;
   routing?: string;
   timeout?: string;
-  version?: number;
-  versionType?: DatabaseVersionType;
+  ifSeqNo?: number;
+  ifPrimaryTerm?: number;
   index: string;
-  type: string;
   id: string;
 }
 
@@ -272,18 +275,16 @@ export interface DatabaseGetParams extends DatabaseGenericParams {
   refresh?: boolean;
   routing?: string;
   _source?: DatabaseNameList;
-  _sourceExcludes?: DatabaseNameList;
-  _sourceIncludes?: DatabaseNameList;
-  version?: number;
-  versionType?: DatabaseVersionType;
+  _sourceExclude?: DatabaseNameList;
+  _source_includes?: DatabaseNameList;
+  ifSeqNo?: number;
+  ifPrimaryTerm?: number;
   id: string;
   index: string;
-  type: string;
 }
 
 export type DatabaseNameList = string | string[] | boolean;
 export type DatabaseRefresh = boolean | 'true' | 'false' | 'wait_for' | '';
-export type DatabaseVersionType = 'internal' | 'external' | 'external_gte' | 'force';
 export type ExpandWildcards = 'open' | 'closed' | 'none' | 'all';
 export type DefaultOperator = 'AND' | 'OR';
 export type DatabaseConflicts = 'abort' | 'proceed';
@@ -302,6 +303,7 @@ export interface DatabaseDeleteDocumentResponse {
   _index: string;
   _type: string;
   _id: string;
-  _version: number;
+  _seq_no: number;
+  _primary_term: number;
   result: string;
 }

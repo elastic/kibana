@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import { editorConfigProviders } from 'ui/vis/editors/config/editor_config_providers';
 
@@ -25,13 +25,6 @@ export function initEditorConfig() {
         missingBucket: {
           hidden: true
         },
-        orderBy: {
-          fixedValue: '_key',
-          hidden: true
-        },
-        orderAgg: {
-          hidden: true,
-        }
       };
     }
 
@@ -59,12 +52,8 @@ export function initEditorConfig() {
 
     // Set date histogram time zone based on rollup capabilities
     if (aggTypeName === 'date_histogram') {
-      const timezone = fieldAgg.time_zone || 'UTC';
       const interval = fieldAgg.interval;
       return {
-        time_zone: {
-          fixedValue: timezone,
-        },
         interval: {
           fixedValue: 'custom',
         },

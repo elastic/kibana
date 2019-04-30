@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { toastNotifications } from 'ui/notify';
 import { formatMsg } from 'ui/notify/lib/format_msg';
-import { get } from 'lodash';
 
 const getToast = (err, opts = {}) => {
   const errData = get(err, 'response') || err;
@@ -14,7 +14,9 @@ const getToast = (err, opts = {}) => {
   const { title, ...rest } = opts;
   let text = null;
 
-  if (title) text = errMsg;
+  if (title) {
+    text = errMsg;
+  }
 
   return {
     ...rest,
@@ -26,7 +28,7 @@ const getToast = (err, opts = {}) => {
 export const notify = {
   /*
    * @param {(string | Object)} err: message or Error object
-   * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/master/src/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
+   * @param {Object} opts: option to override toast title or icon, see https://github.com/elastic/kibana/blob/master/src/legacy/ui/public/notify/toasts/TOAST_NOTIFICATIONS.md
    */
   error(err, opts) {
     toastNotifications.addDanger(getToast(err, opts));

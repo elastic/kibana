@@ -81,6 +81,10 @@ export const createGraphqlOperationReducer = <State, Data, Variables, Error = Ap
   reduceSuccess: (
     state: State | undefined,
     action: Action<ResolveDonePayload<Variables, Data>>
+  ) => State | undefined = state => state,
+  reduceFailure: (
+    state: State | undefined,
+    action: Action<ResolveFailedPayload<Variables, Error>>
   ) => State | undefined = state => state
 ) =>
   reducerWithInitialState(initialState)
@@ -125,6 +129,7 @@ export const createGraphqlOperationReducer = <State, Data, Variables, Error = Ap
           variables: action.payload.params,
         },
       },
+      data: reduceFailure(state.data, action),
     }))
     .build();
 
@@ -160,17 +165,32 @@ export const createGraphqlQueryEpic = <Data, Variables, Error = ApolloError>(
 export const createGraphqlStateSelectors = <State>(
   selectState: (parentState: any) => GraphqlState<State> = parentState => parentState
 ) => {
-  const selectData = createSelector(selectState, state => state.data);
+  const selectData = createSelector(
+    selectState,
+    state => state.data
+  );
 
-  const selectLoadingProgress = createSelector(selectState, state => state.current);
+  const selectLoadingProgress = createSelector(
+    selectState,
+    state => state.current
+  );
   const selectLoadingProgressOperationInfo = createSelector(
     selectLoadingProgress,
     progress => (isRunningLoadingProgress(progress) ? progress.parameters : null)
   );
-  const selectIsLoading = createSelector(selectLoadingProgress, isRunningLoadingProgress);
-  const selectIsIdle = createSelector(selectLoadingProgress, isIdleLoadingProgress);
+  const selectIsLoading = createSelector(
+    selectLoadingProgress,
+    isRunningLoadingProgress
+  );
+  const selectIsIdle = createSelector(
+    selectLoadingProgress,
+    isIdleLoadingProgress
+  );
 
-  const selectLoadingResult = createSelector(selectState, state => state.last);
+  const selectLoadingResult = createSelector(
+    selectState,
+    state => state.last
+  );
   const selectLoadingResultOperationInfo = createSelector(
     selectLoadingResult,
     result => (!isUninitializedLoadingResult(result) ? result.parameters : null)
@@ -179,9 +199,18 @@ export const createGraphqlStateSelectors = <State>(
     selectLoadingResult,
     result => (!isUninitializedLoadingResult(result) ? result.time : null)
   );
-  const selectIsUninitialized = createSelector(selectLoadingResult, isUninitializedLoadingResult);
-  const selectIsSuccess = createSelector(selectLoadingResult, isSuccessLoadingResult);
-  const selectIsFailure = createSelector(selectLoadingResult, isFailureLoadingResult);
+  const selectIsUninitialized = createSelector(
+    selectLoadingResult,
+    isUninitializedLoadingResult
+  );
+  const selectIsSuccess = createSelector(
+    selectLoadingResult,
+    isSuccessLoadingResult
+  );
+  const selectIsFailure = createSelector(
+    selectLoadingResult,
+    isFailureLoadingResult
+  );
 
   const selectLoadingState = createSelector(
     selectLoadingProgress,

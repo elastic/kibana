@@ -7,7 +7,7 @@
       "hits": 0,
       "description": "",
       "panelsJSON": "[{\"gridData\":{\"h\":3,\"i\":\"1\",\"w\":6,\"x\":0,\"y\":0},\"id\":\"3fe22200-3dcb-11e8-8660-4d65aa086b3c\",\"panelIndex\":\"1\",\"type\":\"visualization\",\"version\":\"6.2.4\"}]",
-      "optionsJSON": "{\"darkTheme\":false,\"hidePanelTitles\":false,\"useMargins\":true}",
+      "optionsJSON": "{\"hidePanelTitles\":false,\"useMargins\":true}",
       "version": 1,
       "timeRestore": true,
       "timeTo": "Tue Apr 09 2018 23:00:00 GMT-0500",

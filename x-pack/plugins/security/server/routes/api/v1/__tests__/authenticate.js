@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Boom from 'boom';
 import Joi from 'joi';
 import sinon from 'sinon';
@@ -36,7 +36,6 @@ describe('Authentication routes', () => {
     let loginRoute;
     let request;
     let authenticateStub;
-    let authorizationModeStub;
 
     beforeEach(() => {
       loginRoute = serverStub.route
@@ -44,15 +43,14 @@ describe('Authentication routes', () => {
         .firstCall
         .args[0];
 
-      request = {
+      request = requestFixture({
         headers: {},
         payload: { username: 'user', password: 'password' }
-      };
+      });
 
       authenticateStub = serverStub.plugins.security.authenticate.withArgs(
-        sinon.match(BasicCredentials.decorateRequest({ headers: {} }, 'user', 'password'))
+        sinon.match(BasicCredentials.decorateRequest(request, 'user', 'password'))
       );
-      authorizationModeStub = serverStub.plugins.security.authorization.mode;
     });
 
     it('correctly defines route.', async () => {
@@ -117,34 +115,15 @@ describe('Authentication routes', () => {
     });
 
     describe('authentication succeeds', () => {
-      const getDeprecationMessage = username =>
-        `${username} relies on index privileges on the Kibana index. This is deprecated and will be removed in Kibana 7.0`;
 
-      it(`returns user data and doesn't log deprecation warning if authorization.mode.useRbacForRequest returns true.`, async () => {
+      it(`returns user data`, async () => {
         const user = { username: 'user' };
         authenticateStub.returns(
           Promise.resolve(AuthenticationResult.succeeded(user))
         );
-        authorizationModeStub.useRbacForRequest.returns(true);
 
         await loginRoute.handler(request, hStub);
 
-        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
-        sinon.assert.neverCalledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
-        sinon.assert.calledOnce(hStub.response);
-      });
-
-      it(`returns user data and logs deprecation warning if authorization.mode.useRbacForRequest returns false.`, async () => {
-        const user = { username: 'user' };
-        authenticateStub.returns(
-          Promise.resolve(AuthenticationResult.succeeded(user))
-        );
-        authorizationModeStub.useRbacForRequest.returns(false);
-
-        await loginRoute.handler(request, hStub);
-
-        sinon.assert.calledWithExactly(authorizationModeStub.useRbacForRequest, request);
-        sinon.assert.calledWith(serverStub.log, ['warning', 'deprecated', 'security'], getDeprecationMessage(user.username));
         sinon.assert.calledOnce(hStub.response);
       });
     });
@@ -316,17 +295,15 @@ describe('Authentication routes', () => {
       const unhandledException = new Error('Something went wrong.');
       serverStub.plugins.security.authenticate.throws(unhandledException);
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.output.payload).to.eql({
-            statusCode: 500,
-            error: 'Internal Server Error',
-            message: 'An internal server error occurred'
-          });
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.output.payload).to.eql({
+        statusCode: 500,
+        error: 'Internal Server Error',
+        message: 'An internal server error occurred'
+      });
     });
 
     it('returns 401 if authentication fails.', async () => {
@@ -335,14 +312,12 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.failed(failureReason))
       );
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be(failureReason.message);
-          expect(response.output.statusCode).to.be(401);
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.message).to.be(failureReason.message);
+      expect(response.output.statusCode).to.be(401);
     });
 
     it('returns 401 if authentication is not handled.', async () => {
@@ -350,30 +325,25 @@ describe('Authentication routes', () => {
         Promise.resolve(AuthenticationResult.notHandled())
       );
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be('Unauthorized');
-          expect(response.output.statusCode).to.be(401);
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.message).to.be('Unauthorized');
+      expect(response.output.statusCode).to.be(401);
     });
 
-    it('returns 403 if there an active session exists.', async () => {
+    it('returns 401 if authentication completes with unexpected result.', async () => {
       serverStub.plugins.security.authenticate.returns(
         Promise.resolve(AuthenticationResult.succeeded({}))
       );
 
-      return samlAcsRoute
-        .handler(request, hStub)
-        .catch((response) => {
-          sinon.assert.notCalled(hStub.redirect);
-          expect(response.isBoom).to.be(true);
-          expect(response.message).to.be('Sorry, you already have an active Kibana session. ' +
-                'If you want to start a new one, please logout from the existing session first.');
-          expect(response.output.statusCode).to.be(403);
-        });
+      const response = await samlAcsRoute.handler(request, hStub);
+
+      sinon.assert.notCalled(hStub.redirect);
+      expect(response.isBoom).to.be(true);
+      expect(response.message).to.be('Unauthorized');
+      expect(response.output.statusCode).to.be(401);
     });
 
     it('redirects if required by the authentication process.', async () => {

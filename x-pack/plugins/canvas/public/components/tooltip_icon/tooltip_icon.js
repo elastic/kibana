@@ -16,7 +16,9 @@ export const TooltipIcon = ({ icon = 'info', ...rest }) => {
     info: { type: 'iInCircle', color: 'default' },
   };
 
-  if (!Object.keys(icons).includes(icon)) throw new Error(`Unsupported icon type: ${icon}`);
+  if (!Object.keys(icons).includes(icon)) {
+    throw new Error(`Unsupported icon type: ${icon}`);
+  }
 
   return <EuiIconTip {...rest} type={icons[icon].type} color={icons[icon].color} />;
 };

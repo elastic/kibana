@@ -5,26 +5,17 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { SelectSeverity } from './select_severity';
-
-
-const severityService = {
-  state: {
-    'threshold': { color: '#d2e9f7', display: 'warning', val: 0 },
-    get: () => ({ color: '#d2e9f7', display: 'warning', val: 0 }),
-    set: () => ({
-      changed: () => {}
-    })
-  }
-};
 
 describe('SelectSeverity', () => {
 
   test('creates correct severity options and initial selected value', () => {
-    const wrapper = shallow(<SelectSeverity mlSelectSeverityService={severityService}/>);
-    const options = wrapper.props().options;
-    const defaultSelectedValue = wrapper.props().valueOfSelected;
+    const wrapper = shallowWithIntl(<SelectSeverity/>);
+    const select = wrapper.first().shallow();
+
+    const options = select.instance().getOptions();
+    const defaultSelectedValue = wrapper.props().severity.display;
 
     expect(defaultSelectedValue).toBe('warning');
     expect(options.length).toEqual(4);
@@ -64,13 +55,14 @@ describe('SelectSeverity', () => {
   });
 
   test('state for currently selected value is updated correctly on click', () => {
-    const wrapper = shallow(<SelectSeverity mlSelectSeverityService={severityService} />);
+    const wrapper = shallowWithIntl(<SelectSeverity/>);
+    const select = wrapper.first().shallow();
 
-    const defaultSelectedValue = wrapper.props().valueOfSelected;
+    const defaultSelectedValue = wrapper.props().severity.display;
     expect(defaultSelectedValue).toBe('warning');
 
-    wrapper.simulate('change', 'critical');
-    const updatedSelectedValue = wrapper.props().valueOfSelected;
+    select.simulate('change', 'critical');
+    const updatedSelectedValue = wrapper.props().severity.display;
     expect(updatedSelectedValue).toBe('critical');
   });
 

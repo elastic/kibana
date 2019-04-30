@@ -58,11 +58,13 @@ interface ActionCreators {
 
 type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends () => infer R
   ? () => R
-  : WrappedActionCreator extends (payload: infer A) => infer R ? (payload: A) => R : never;
+  : WrappedActionCreator extends (payload: infer A) => infer R
+  ? (payload: A) => R
+  : never;
 
 export const bindPlainActionCreators = <WrappedActionCreators extends ActionCreators>(
   actionCreators: WrappedActionCreators
 ) => (dispatch: Dispatch) =>
-  bindActionCreators(actionCreators, dispatch) as {
+  (bindActionCreators(actionCreators, dispatch) as unknown) as {
     [P in keyof WrappedActionCreators]: PlainActionCreator<WrappedActionCreators[P]>
   };

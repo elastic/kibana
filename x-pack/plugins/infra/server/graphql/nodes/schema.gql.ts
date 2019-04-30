@@ -10,24 +10,18 @@ export const nodesSchema: any = gql`
   type InfraNodeMetric {
     name: InfraMetricType!
     value: Float!
+    avg: Float!
+    max: Float!
   }
 
   type InfraNodePath {
     value: String!
+    label: String!
   }
 
   type InfraNode {
     path: [InfraNodePath!]!
     metric: InfraNodeMetric!
-  }
-
-  input InfraTimerangeInput {
-    "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
-    interval: String!
-    "The end of the timerange"
-    to: Float!
-    "The beginning of the timerange"
-    from: Float!
   }
 
   enum InfraOperator {
@@ -59,6 +53,7 @@ export const nodesSchema: any = gql`
     hosts
     pods
     containers
+    custom
   }
 
   input InfraPathInput {

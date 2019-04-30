@@ -10,25 +10,36 @@ import { InMemoryCache, IntrospectionFragmentMatcher } from 'apollo-cache-inmemo
 import { ApolloClient } from 'apollo-client';
 import { HttpLink } from 'apollo-link-http';
 
-import introspectionQueryResultData from '../../../plugins/infra/common/graphql/introspection.json';
+import introspectionQueryResultData from '../../../plugins/infra/public/graphql/introspection.json';
 
-export function InfraOpsGraphQLProvider({ getService }) {
+export function InfraOpsGraphQLClientProvider({ getService }) {
+  return new InfraOpsGraphQLClientFactoryProvider({ getService })();
+}
+
+export function InfraOpsGraphQLClientFactoryProvider({ getService }) {
   const config = getService('config');
-  const kbnURL = formatUrl(config.get('servers.kibana'));
+  const [superUsername, superPassword] = config.get('servers.elasticsearch.auth').split(':');
 
-  return new ApolloClient({
-    cache: new InMemoryCache({
-      fragmentMatcher: new IntrospectionFragmentMatcher({
-        introspectionQueryResultData,
-      }),
-    }),
-    link: new HttpLink({
+  return function ({ username = superUsername, password = superPassword, basePath = null } = {}) {
+    const kbnURLWithoutAuth = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+    const httpLink = new HttpLink({
       credentials: 'same-origin',
       fetch,
       headers: {
         'kbn-xsrf': 'xxx',
+        authorization: `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
       },
-      uri: `${kbnURL}/api/infra/graphql`,
-    }),
-  });
+      uri: `${kbnURLWithoutAuth}${basePath || ''}/api/infra/graphql`,
+    });
+
+    return new ApolloClient({
+      cache: new InMemoryCache({
+        fragmentMatcher: new IntrospectionFragmentMatcher({
+          introspectionQueryResultData,
+        }),
+      }),
+      link: httpLink,
+    });
+  };
 }

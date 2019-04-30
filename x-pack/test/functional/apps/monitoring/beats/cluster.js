@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getLifecycleMethods } from '../_get_lifecycle_methods';
 
 export default function ({ getService, getPageObjects }) {
@@ -15,8 +15,8 @@ export default function ({ getService, getPageObjects }) {
 
     before(async () => {
       await setup('monitoring/beats', {
-        from: '2017-12-19 17:14:09',
-        to: '2017-12-19 18:15:09',
+        from: '2017-12-19 17:14:09.000',
+        to: '2017-12-19 18:15:09.000',
       });
     });
 

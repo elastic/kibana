@@ -4,11 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import Joi from 'joi';
-import { omit } from 'lodash';
-import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
-import { CMServerLibs } from '../../lib/lib';
-import { wrapEsError } from '../../utils/error_wrappers';
-import { ReturnedConfigurationBlock } from './../../../common/domain_types';
+import { ConfigurationBlock } from '../../../common/domain_types';
+import { BaseReturnType, ReturnTypeList } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
+import { CMServerLibs } from '../../lib/types';
 
 export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
   method: 'GET',
@@ -18,65 +17,45 @@ export const createGetBeatConfigurationRoute = (libs: CMServerLibs) => ({
       headers: Joi.object({
         'kbn-beats-access-token': Joi.string().required(),
       }).options({ allowUnknown: true }),
-      query: Joi.object({
-        validSetting: Joi.boolean().default(true),
-      }),
     },
     auth: false,
   },
-  handler: async (request: any, h: any) => {
+  handler: async (
+    request: FrameworkRequest
+  ): Promise<BaseReturnType | ReturnTypeList<ConfigurationBlock>> => {
     const beatId = request.params.beatId;
     const accessToken = request.headers['kbn-beats-access-token'];
 
-    let beat;
-    let tags;
-    try {
-      beat = await libs.beats.getById(libs.framework.internalUser, beatId);
-      if (beat === null) {
-        return h.response({ message: `Beat "${beatId}" not found` }).code(404);
-      }
-
-      const isAccessTokenValid = beat.access_token === accessToken;
-      if (!isAccessTokenValid) {
-        return h.response({ message: 'Invalid access token' }).code(401);
-      }
-
-      let newStatus: CMBeat['config_status'] = 'OK';
-      if (!request.query.validSetting) {
-        newStatus = 'ERROR';
-      }
-
-      await libs.beats.update(libs.framework.internalUser, beat.id, {
-        config_status: newStatus,
-        last_checkin: new Date(),
-      });
-
-      tags = await libs.tags.getTagsWithIds(libs.framework.internalUser, beat.tags || []);
-    } catch (err) {
-      return wrapEsError(err);
+    let configurationBlocks: ConfigurationBlock[];
+    const beat = await libs.beats.getById(libs.framework.internalUser, beatId);
+    if (beat === null) {
+      return { error: { message: `Beat "${beatId}" not found`, code: 404 }, success: false };
     }
 
-    const configurationBlocks = tags.reduce(
-      (blocks: ReturnedConfigurationBlock[], tag: BeatTag) => {
-        blocks = blocks.concat(
-          tag.configuration_blocks.reduce(
-            (acc: ReturnedConfigurationBlock[], block: ConfigurationBlock) => {
-              acc.push({
-                ...omit(block, ['configs']),
-                config: block.configs[0],
-              });
-              return acc;
-            },
-            []
-          )
-        );
-        return blocks;
-      },
-      []
-    );
+    const isAccessTokenValid = beat.access_token === accessToken;
+    if (!isAccessTokenValid) {
+      return { error: { message: 'Invalid access token', code: 401 }, success: false };
+    }
+
+    await libs.beats.update(libs.framework.internalUser, beat.id, {
+      last_checkin: new Date(),
+    });
+
+    if (beat.tags) {
+      const result = await libs.configurationBlocks.getForTags(
+        libs.framework.internalUser,
+        beat.tags,
+        -1
+      );
+
+      configurationBlocks = result.blocks;
+    } else {
+      configurationBlocks = [];
+    }
 
     return {
-      configuration_blocks: configurationBlocks,
+      list: configurationBlocks,
+      success: true,
     };
   },
 });

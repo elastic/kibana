@@ -6,15 +6,13 @@
 
 export const filebeatNginxRules = [
   {
+    // pre-ECS
     when: {
-      exists: ['nginx.access'],
+      exists: ['nginx.access.method'],
     },
     format: [
       {
-        constant: 'nginx',
-      },
-      {
-        constant: ' ',
+        constant: '[nginx][access] ',
       },
       {
         field: 'nginx.access.remote_ip',
@@ -54,6 +52,54 @@ export const filebeatNginxRules = [
       },
       {
         field: 'nginx.access.body_sent.bytes',
+      },
+    ],
+  },
+  {
+    // ECS
+    when: {
+      values: {
+        'event.dataset': 'nginx.error',
+      },
+    },
+    format: [
+      {
+        constant: '[nginx]',
+      },
+      {
+        constant: '[',
+      },
+      {
+        field: 'log.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'message',
+      },
+    ],
+  },
+  {
+    // pre-ECS
+    when: {
+      exists: ['nginx.error.message'],
+    },
+    format: [
+      {
+        constant: '[nginx]',
+      },
+      {
+        constant: '[',
+      },
+      {
+        field: 'nginx.error.level',
+      },
+      {
+        constant: '] ',
+      },
+      {
+        field: 'nginx.error.message',
       },
     ],
   },

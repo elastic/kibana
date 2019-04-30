@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -29,15 +29,6 @@ interface UpdateTestDefinition {
 }
 
 export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/update] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/update] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFound = (type: string, id: string, spaceId = DEFAULT_SPACE_ID) => (resp: {
     [key: string]: any;
   }) => {
@@ -60,7 +51,7 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to update ${type}, missing action:saved_objects/${type}/update`,
+      message: `Unable to update ${type}`,
     });
   };
 
@@ -83,10 +74,11 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: resp.body.id,
       type: 'globaltype',
       updated_at: resp.body.updated_at,
-      version: 2,
+      version: resp.body.version,
       attributes: {
         name: 'My second favorite',
       },
+      references: [],
     });
   };
 
@@ -107,10 +99,11 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: resp.body.id,
       type: 'visualization',
       updated_at: resp.body.updated_at,
-      version: 2,
+      version: resp.body.version,
       attributes: {
         title: 'My second favorite vis',
       },
+      references: [],
     });
   };
 
@@ -183,7 +176,6 @@ export function updateTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   updateTest.only = makeUpdateTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     createExpectDoesntExistNotFound,
     createExpectSpaceAwareNotFound,
     expectDoesntExistRbacForbidden,

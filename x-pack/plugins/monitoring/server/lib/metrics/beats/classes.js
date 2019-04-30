@@ -145,14 +145,14 @@ export class BeatsCpuUtilizationMetric extends BeatsMetric {
       bucketSizeInSeconds
     ) => {
       if (metricDeriv) {
-        const { normalized_value: metricDerivNormalizedValue } = metricDeriv;
+        const { value } = metricDeriv;
         const bucketSizeInMillis = bucketSizeInSeconds * 1000;
 
         if (
-          metricDerivNormalizedValue >= 0 &&
-          metricDerivNormalizedValue !== null
+          value >= 0 &&
+          value !== null
         ) {
-          return metricDerivNormalizedValue / bucketSizeInMillis * 100;
+          return value / bucketSizeInMillis * 100;
         }
       }
       return null;

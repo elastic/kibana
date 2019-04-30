@@ -5,15 +5,16 @@
  */
 
 import Joi from 'joi';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { ReturnTypeBulkAction } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
-import { wrapEsError } from '../../utils/error_wrappers';
+import { CMServerLibs } from '../../lib/types';
 
-// TODO: write to Kibana audit log file
+// TODO: write to Kibana audit log file https://github.com/elastic/kibana/issues/26024
 export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/agents_tags/removals',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   requiredRoles: ['beats_admin'],
   config: {
     validate: {
@@ -27,15 +28,29 @@ export const createTagRemovalsRoute = (libs: CMServerLibs) => ({
       }).required(),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeBulkAction> => {
     const { removals } = request.payload;
 
-    try {
-      const response = await libs.beats.removeTagsFromBeats(request.user, removals);
-      return response;
-    } catch (err) {
-      // TODO move this to kibana route thing in adapter
-      return wrapEsError(err);
-    }
+    const response = await libs.beats.removeTagsFromBeats(request.user, removals);
+
+    return {
+      success: true,
+      results: response.removals.map(removal => ({
+        success: removal.status && removal.status >= 200 && removal.status < 300,
+        error:
+          !removal.status || removal.status >= 300
+            ? {
+                code: removal.status || 400,
+                message: removal.result,
+              }
+            : undefined,
+        result:
+          removal.status && removal.status >= 200 && removal.status < 300
+            ? {
+                message: removal.result,
+              }
+            : undefined,
+      })),
+    } as ReturnTypeBulkAction;
   },
 });

@@ -1,0 +1,562 @@
+/*
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+
+import { ObjectsTable, POSSIBLE_TYPES } from '../objects_table';
+import { Flyout } from '../components/flyout/';
+import { Relationships } from '../components/relationships/';
+
+jest.mock('ui/kfetch', () => ({ kfetch: jest.fn() }));
+
+jest.mock('../components/header', () => ({
+  Header: () => 'Header',
+}));
+
+jest.mock('ui/errors', () => ({
+  SavedObjectNotFound: class SavedObjectNotFound extends Error {
+    constructor(options) {
+      super();
+      for (const option in options) {
+        if (options.hasOwnProperty(option)) {
+          this[option] = options[option];
+        }
+      }
+    }
+  },
+}));
+
+jest.mock('ui/chrome', () => ({
+  addBasePath: () => ''
+}));
+
+jest.mock('../../../lib/fetch_export_objects', () => ({
+  fetchExportObjects: jest.fn(),
+}));
+
+jest.mock('../../../lib/fetch_export_by_type', () => ({
+  fetchExportByType: jest.fn(),
+}));
+
+jest.mock('../../../lib/get_saved_object_counts', () => ({
+  getSavedObjectCounts: jest.fn().mockImplementation(() => {
+    return {
+      'index-pattern': 0,
+      'visualization': 0,
+      'dashboard': 0,
+      'search': 0,
+    };
+  })
+}));
+
+jest.mock('@elastic/filesaver', () => ({
+  saveAs: jest.fn(),
+}));
+
+jest.mock('../../../lib/get_relationships', () => ({
+  getRelationships: jest.fn(),
+}));
+
+jest.mock('ui/notify', () => ({}));
+
+const allSavedObjects = [
+  {
+    id: '1',
+    type: 'index-pattern',
+    attributes: {
+      title: `MyIndexPattern*`
+    }
+  },
+  {
+    id: '2',
+    type: 'search',
+    attributes: {
+      title: `MySearch`
+    }
+  },
+  {
+    id: '3',
+    type: 'dashboard',
+    attributes: {
+      title: `MyDashboard`
+    }
+  },
+  {
+    id: '4',
+    type: 'visualization',
+    attributes: {
+      title: `MyViz`
+    }
+  },
+];
+
+const $http = () => {};
+$http.post = jest.fn().mockImplementation(() => ([]));
+const defaultProps = {
+  savedObjectsClient: {
+    find: jest.fn().mockImplementation(({ type }) => {
+      // We pass in a single type when fetching counts
+      if (type && !Array.isArray(type)) {
+        return {
+          total: 1,
+          savedObjects: [
+            {
+              id: '1',
+              type,
+              attributes: {
+                title: `Title${type}`
+              }
+            },
+          ]
+        };
+      }
+
+      return {
+        total: allSavedObjects.length,
+        savedObjects: allSavedObjects,
+      };
+    }),
+  },
+  indexPatterns: {
+    cache: {
+      clearAll: jest.fn(),
+    }
+  },
+  $http,
+  basePath: '',
+  newIndexPatternUrl: '',
+  kbnIndex: '',
+  services: [],
+  getEditUrl: () => {},
+  canGoInApp: () => {},
+  goInApp: () => {},
+  uiCapabilities: {
+    savedObjectsManagement: {
+      'index-pattern': {
+        read: true
+      },
+      visualization: {
+        read: true
+      },
+      dashboard: {
+        read: true
+      },
+      search: {
+        read: true
+      }
+    }
+  },
+  canDeleteSavedObjectTypes: [
+    'index-pattern',
+    'visualization',
+    'dashboard',
+    'search'
+  ]
+};
+
+let addDangerMock;
+let addSuccessMock;
+
+describe('ObjectsTable', () => {
+  beforeEach(() => {
+    defaultProps.savedObjectsClient.find.mockClear();
+    // mock _.debounce to fire immediately with no internal timer
+    require('lodash').debounce = function (func) {
+      function debounced(...args) {
+        return func.apply(this, args);
+      }
+      return debounced;
+    };
+    addDangerMock = jest.fn();
+    addSuccessMock = jest.fn();
+    require('ui/notify').toastNotifications = {
+      addDanger: addDangerMock,
+      addSuccess: addSuccessMock,
+    };
+  });
+
+  it('should render normally', async () => {
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...defaultProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should add danger toast when find fails', async () => {
+    const savedObjectsClientWithFindError = {
+      find: () => {
+        throw new Error('Simulated find error');
+      }
+    };
+    const customizedProps = { ...defaultProps, savedObjectsClient: savedObjectsClientWithFindError };
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...customizedProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(addDangerMock).toHaveBeenCalled();
+  });
+
+  it('should filter find operation based on the uiCapabilities', async () => {
+    const uiCapabilities = {
+      savedObjectsManagement: {
+        'index-pattern': {
+          read: false,
+        },
+        visualization: {
+          read: false,
+        },
+        dashboard: {
+          read: false,
+        },
+        search: {
+          read: true,
+        }
+      }
+    };
+    const customizedProps = { ...defaultProps, uiCapabilities };
+    const component = shallowWithIntl(
+      <ObjectsTable.WrappedComponent
+        {...customizedProps}
+        perPageConfig={15}
+      />
+    );
+
+    // Ensure all promises resolve
+    await new Promise(resolve => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(defaultProps.savedObjectsClient.find).toHaveBeenCalledWith(expect.objectContaining({
+      type: ['search']
+    }));
+  });
+
+  describe('export', () => {
+    it('should export selected objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' }
+      ];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+        _id: obj.id,
+        _type: obj._type,
+        _source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        }))
+      };
+
+      const { fetchExportObjects } = require('../../../lib/fetch_export_objects');
+
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+          savedObjectsClient={mockSavedObjectsClient}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().onExport(true);
+
+      expect(fetchExportObjects).toHaveBeenCalledWith(mockSelectedSavedObjects, true);
+      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
+    });
+
+    it('should allow the user to choose when exporting all', async () => {
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.find('Header').prop('onExportAll')();
+      component.update();
+
+      expect(component.find('EuiModal')).toMatchSnapshot();
+    });
+
+    it('should export all', async () => {
+      const { fetchExportByType } = require('../../../lib/fetch_export_by_type');
+      const { saveAs } = require('@elastic/filesaver');
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set up mocks
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByType.mockImplementation(() => blob);
+
+      await component.instance().onExportAll();
+
+      expect(fetchExportByType).toHaveBeenCalledWith(POSSIBLE_TYPES, true);
+      expect(saveAs).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(addSuccessMock).toHaveBeenCalledWith({ title: 'Your file is downloading in the background' });
+    });
+  });
+
+  describe('import', () => {
+    it('should show the flyout', async () => {
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.instance().showImportFlyout();
+      component.update();
+
+      expect(component.find(Flyout)).toMatchSnapshot();
+    });
+
+    it('should hide the flyout', async () => {
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.instance().hideImportFlyout();
+      component.update();
+
+      expect(component.find(Flyout).length).toBe(0);
+    });
+  });
+
+  describe('relationships', () => {
+    it('should fetch relationships', async () => {
+      const { getRelationships } = require('../../../lib/get_relationships');
+
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().getRelationships('search', '1');
+      const savedObjectTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
+    });
+
+    it('should fetch relationships filtered based on the uiCapabilities', async () => {
+      const { getRelationships } = require('../../../lib/get_relationships');
+
+      const uiCapabilities = {
+        savedObjectsManagement: {
+          'index-pattern': {
+            read: false,
+          },
+          visualization: {
+            read: false,
+          },
+          dashboard: {
+            read: false,
+          },
+          search: {
+            read: true,
+          }
+        }
+      };
+      const customizedProps = { ...defaultProps, uiCapabilities };
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...customizedProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().getRelationships('search', '1');
+      const savedObjectTypes = ['search'];
+      expect(getRelationships).toHaveBeenCalledWith('search', '1', savedObjectTypes, defaultProps.$http, defaultProps.basePath);
+    });
+
+    it('should show the flyout', async () => {
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.instance().onShowRelationships('1', 'search', 'MySearch');
+      component.update();
+
+      expect(component.find(Relationships)).toMatchSnapshot();
+      expect(component.state('relationshipId')).toBe('1');
+      expect(component.state('relationshipType')).toBe('search');
+      expect(component.state('relationshipTitle')).toBe('MySearch');
+    });
+
+    it('should hide the flyout', async () => {
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      component.instance().onHideRelationships();
+      component.update();
+
+      expect(component.find(Relationships).length).toBe(0);
+      expect(component.state('relationshipId')).toBe(undefined);
+      expect(component.state('relationshipType')).toBe(undefined);
+      expect(component.state('relationshipTitle')).toBe(undefined);
+    });
+  });
+
+  describe('delete', () => {
+    it('should show a confirm modal', async () => {
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+        />
+      );
+
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern', title: 'Title 1' },
+        { id: '3', type: 'dashboard', title: 'Title 2' }
+      ];
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+    });
+
+    it('should delete selected objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+        { id: '3', type: 'dashboard' }
+      ];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map(obj => ({
+        id: obj.id,
+        type: obj.type,
+        source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+        delete: jest.fn(),
+      };
+
+      const component = shallowWithIntl(
+        <ObjectsTable.WrappedComponent
+          {...defaultProps}
+          savedObjectsClient={mockSavedObjectsClient}
+        />
+      );
+
+      // Ensure all promises resolve
+      await new Promise(resolve => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().delete();
+
+      expect(defaultProps.indexPatterns.cache.clearAll).toHaveBeenCalled();
+      expect(mockSavedObjectsClient.bulkGet).toHaveBeenCalledWith(mockSelectedSavedObjects);
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[0].type, mockSavedObjects[0].id);
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith(mockSavedObjects[1].type, mockSavedObjects[1].id);
+      expect(component.state('selectedSavedObjects').length).toBe(0);
+    });
+  });
+});

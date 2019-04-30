@@ -5,57 +5,36 @@
  */
 
 import {
+  EuiBasicTable,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiHorizontalRule,
   EuiPortal,
+  EuiSpacer,
+  EuiTabbedContent,
   EuiTitle
 } from '@elastic/eui';
-import { get } from 'lodash';
-import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { get, keys } from 'lodash';
+import React, { Fragment } from 'react';
 import styled from 'styled-components';
-
-// @ts-ignore
-import {
-  SERVICE_LANGUAGE_NAME,
-  SPAN_HEX_ID,
-  SPAN_ID
-} from '../../../../../../../../common/constants';
-import { px, unit } from '../../../../../../../style/variables';
-
-// @ts-ignore
-import Stacktrace from '../../../../../../shared/Stacktrace';
-
+import { idx } from '@kbn/elastic-idx';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import { Transaction } from '../../../../../../../../typings/es_schemas/ui/Transaction';
+import { DiscoverSpanLink } from '../../../../../../shared/Links/DiscoverLinks/DiscoverSpanLink';
+import { Stacktrace } from '../../../../../../shared/Stacktrace';
+import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
+import { ResponsiveFlyout } from '../ResponsiveFlyout';
 import { DatabaseContext } from './DatabaseContext';
 import { HttpContext } from './HttpContext';
 import { StickySpanProperties } from './StickySpanProperties';
 
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
-import { Span } from '../../../../../../../../typings/Span';
-import { DiscoverButton } from '../../../../../../shared/DiscoverButton';
-import { FlyoutTopLevelProperties } from '../FlyoutTopLevelProperties';
-
-const StackTraceContainer = styled.div`
-  margin-top: ${px(unit)};
+const TagName = styled.div`
+  font-weight: bold;
 `;
-
-function getDiscoverQuery(span: Span) {
-  return {
-    _a: {
-      interval: 'auto',
-      query: {
-        language: 'lucene',
-        query:
-          span.version === 'v2'
-            ? `${SPAN_HEX_ID}:"${span.span.hex_id}"`
-            : `${SPAN_ID}:"${span.span.id}"`
-      }
-    }
-  };
-}
 
 interface Props {
   span?: Span;
@@ -73,26 +52,46 @@ export function SpanFlyout({
   if (!span) {
     return null;
   }
+
   const stackframes = span.span.stacktrace;
-  const codeLanguage: string = get(span, SERVICE_LANGUAGE_NAME);
-  const dbContext = span.context.db;
-  const httpContext = span.context.http;
+  const codeLanguage = idx(parentTransaction, _ => _.service.language.name);
+  const dbContext = idx(span, _ => _.span.db);
+  const httpContext = idx(span, _ => _.span.http);
+  const spanLabels = span.labels;
+  const labels = keys(spanLabels).map(key => ({
+    key,
+    value: get(spanLabels, key)
+  }));
 
   return (
     <EuiPortal>
-      <EuiFlyout onClose={onClose} size="m" ownFocus={true}>
+      <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTitle>
-                <h2>Span details</h2>
+                <h2>
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
+                    {
+                      defaultMessage: 'Span details'
+                    }
+                  )}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <DiscoverButton query={getDiscoverQuery(span)}>
-                {`View span in Discover`}
-              </DiscoverButton>
+              <DiscoverSpanLink span={span}>
+                <EuiButtonEmpty iconType="discoverApp">
+                  {i18n.translate(
+                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                    {
+                      defaultMessage: 'View span in Discover'
+                    }
+                  )}
+                </EuiButtonEmpty>
+              </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
@@ -103,11 +102,57 @@ export function SpanFlyout({
           <EuiHorizontalRule />
           <HttpContext httpContext={httpContext} />
           <DatabaseContext dbContext={dbContext} />
-          <StackTraceContainer>
-            <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-          </StackTraceContainer>
+          <EuiTabbedContent
+            tabs={[
+              {
+                id: 'stack-trace',
+                name: i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+                  {
+                    defaultMessage: 'Stack Trace'
+                  }
+                ),
+                content: (
+                  <Fragment>
+                    <EuiSpacer size="l" />
+                    <Stacktrace
+                      stackframes={stackframes}
+                      codeLanguage={codeLanguage}
+                    />
+                  </Fragment>
+                )
+              },
+              {
+                id: 'labels',
+                name: i18n.translate(
+                  'xpack.apm.propertiesTable.tabs.labelsLabel',
+                  {
+                    defaultMessage: 'Labels'
+                  }
+                ),
+                content: (
+                  <Fragment>
+                    <EuiBasicTable
+                      columns={[
+                        {
+                          name: '',
+                          field: 'key',
+                          render: (key: string) => <TagName>{key}</TagName>
+                        },
+                        {
+                          name: '',
+                          field: 'value'
+                        }
+                      ]}
+                      items={labels}
+                    />
+                  </Fragment>
+                )
+              }
+            ]}
+          />
         </EuiFlyoutBody>
-      </EuiFlyout>
+      </ResponsiveFlyout>
     </EuiPortal>
   );
 }

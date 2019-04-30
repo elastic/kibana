@@ -4,13 +4,12 @@ exports[`DocumentationHelpLink renders the link 1`] = `
 <a
   className="documentation-help-link"
   href="http://fullUrl"
-  rel="noopener noreferrer"
+  rel="noopener"
   target="_blank"
 >
   Label Text
    
   <EuiIcon
-    size="m"
     type="popout"
   />
 </a>

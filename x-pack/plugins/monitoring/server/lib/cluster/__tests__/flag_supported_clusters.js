@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { flagSupportedClusters } from '../flag_supported_clusters';
 
@@ -35,6 +35,7 @@ const mockReq = (log, queryResult = {}) => {
 };
 const goldLicense = () => ({ license: { type: 'gold' } });
 const basicLicense = () => ({ license: { type: 'basic' } });
+const standaloneCluster = () => ({ cluster_uuid: '__standalone_cluster__' });
 
 describe('Flag Supported Clusters', () => {
   describe('With multiple clusters in the monitoring data', () => {
@@ -58,7 +59,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found all non-basic cluster licenses. All clusters will be supported.'
           );
         });
@@ -94,12 +95,12 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Detected all clusters in monitoring data have basic license. Checking for supported admin cluster UUID for Kibana kibana-1234.'
           );
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found basic license admin cluster UUID for Monitoring UI support: supported_cluster_uuid.'
           );
         });
@@ -136,10 +137,122 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
           );
         });
+    });
+
+    describe('involving an standalone cluster', () => {
+      it('should ignore the standalone cluster in calculating supported basic clusters', () => {
+        const logStub = sinon.stub();
+        const req = mockReq(logStub, {
+          hits: {
+            hits: [ { _source: { cluster_uuid: 'supported_cluster_uuid' } } ]
+          }
+        });
+        const kbnIndices = [];
+        const clusters = [
+          { cluster_uuid: 'supported_cluster_uuid', ...basicLicense() },
+          { cluster_uuid: 'unsupported_cluster_uuid', ...basicLicense() },
+          { ...standaloneCluster() }
+        ];
+
+        return flagSupportedClusters(req, kbnIndices)(clusters)
+          .then(resultClusters => {
+            expect(resultClusters).to.eql([
+              {
+                cluster_uuid: 'supported_cluster_uuid',
+                isSupported: true,
+                ...basicLicense()
+              },
+              {
+                cluster_uuid: 'unsupported_cluster_uuid',
+                ...basicLicense()
+              },
+              {
+                ...standaloneCluster(),
+                isSupported: true,
+              }
+            ]);
+            sinon.assert.calledWith(
+              logStub,
+              ['debug', 'monitoring', 'supported-clusters'],
+              'Found basic license admin cluster UUID for Monitoring UI support: supported_cluster_uuid.'
+            );
+          });
+      });
+
+      it('should ignore the standalone cluster in calculating supported mixed license clusters', () => {
+        const logStub = sinon.stub();
+        const req = mockReq(logStub);
+        const kbnIndices = [];
+        const clusters = [
+          { cluster_uuid: 'supported_cluster_uuid', ...goldLicense() },
+          { cluster_uuid: 'unsupported_cluster_uuid', ...basicLicense() },
+          { ...standaloneCluster() }
+        ];
+
+        return flagSupportedClusters(req, kbnIndices)(clusters)
+          .then(resultClusters => {
+            expect(resultClusters).to.eql([
+              {
+                cluster_uuid: 'supported_cluster_uuid',
+                isSupported: true,
+                ...goldLicense()
+              },
+              {
+                cluster_uuid: 'unsupported_cluster_uuid',
+                ...basicLicense()
+              },
+              {
+                ...standaloneCluster(),
+                isSupported: true,
+              }
+            ]);
+            sinon.assert.calledWith(
+              logStub,
+              ['debug', 'monitoring', 'supported-clusters'],
+              'Found some basic license clusters in monitoring data. Only non-basic will be supported.'
+            );
+          });
+      });
+
+      it('should ignore the standalone cluster in calculating supported non-basic clusters', () => {
+        const logStub = sinon.stub();
+        const req = mockReq(logStub);
+        const kbnIndices = [];
+        const clusters = [
+          { cluster_uuid: 'supported_cluster_uuid_1', ...goldLicense() },
+          { cluster_uuid: 'supported_cluster_uuid_2', ...goldLicense() },
+          { ...standaloneCluster() }
+        ];
+
+        return flagSupportedClusters(req, kbnIndices)(clusters)
+          .then(resultClusters => {
+            expect(resultClusters).to.eql([
+              {
+                cluster_uuid: 'supported_cluster_uuid_1',
+                isSupported: true,
+                ...goldLicense()
+              },
+              {
+                cluster_uuid: 'supported_cluster_uuid_2',
+                isSupported: true,
+                ...goldLicense()
+              },
+              {
+                ...standaloneCluster(),
+                isSupported: true,
+              }
+            ]);
+            sinon.assert.calledWith(
+              logStub,
+              ['debug', 'monitoring', 'supported-clusters'],
+              'Found all non-basic cluster licenses. All clusters will be supported.'
+            );
+          });
+      });
     });
   });
 
@@ -158,7 +271,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found single cluster in monitoring data.'
           );
         });
@@ -175,7 +288,7 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found single cluster in monitoring data.'
           );
         });
@@ -193,10 +306,29 @@ describe('Flag Supported Clusters', () => {
           ]);
           sinon.assert.calledWith(
             logStub,
-            ['debug', 'monitoring-ui', 'supported-clusters'],
+            ['debug', 'monitoring', 'supported-clusters'],
             'Found single cluster in monitoring data.'
           );
         });
+    });
+
+    describe('involving an standalone cluster', () => {
+      it('should ensure it is supported', () => {
+        const req = mockReq(logStub);
+        const kbnIndices = [];
+        const clusters = [{ ...standaloneCluster() }];
+        return flagSupportedClusters(req, kbnIndices)(clusters)
+          .then(result => {
+            expect(result).to.eql([
+              { ...standaloneCluster(), isSupported: true, }
+            ]);
+            sinon.assert.calledWith(
+              logStub,
+              ['debug', 'monitoring', 'supported-clusters'],
+              'Found single cluster in monitoring data.'
+            );
+          });
+      });
     });
   });
 });

@@ -9,7 +9,7 @@ import {
   InfraMetricData,
   InfraNodeType,
   InfraTimerangeInput,
-} from '../../../../common/graphql/types';
+} from '../../../graphql/types';
 
 import { InfraSourceConfiguration } from '../../sources';
 import { InfraFrameworkRequest } from '../framework';
@@ -35,8 +35,8 @@ export enum InfraMetricModelMetricType {
   min = 'min',
   calculation = 'calculation',
   cardinality = 'cardinality',
-  series_agg = 'series_agg',
-  positive_only = 'positive_only',
+  series_agg = 'series_agg', // eslint-disable-line @typescript-eslint/camelcase
+  positive_only = 'positive_only', // eslint-disable-line @typescript-eslint/camelcase
   derivative = 'derivative',
   count = 'count',
 }
@@ -71,7 +71,7 @@ export interface InfraMetricModelBasicMetric {
 export interface InfraMetricModelSeriesAgg {
   id: string;
   function: string;
-  type: InfraMetricModelMetricType.series_agg;
+  type: InfraMetricModelMetricType.series_agg; // eslint-disable-line @typescript-eslint/camelcase
 }
 
 export interface InfraMetricModelDerivative {

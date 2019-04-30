@@ -104,15 +104,12 @@ export const SidebarComponent = ({
                       </EuiToolTip>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        position="bottom"
-                        content="Duplicate this element into a new layer"
-                      >
+                      <EuiToolTip position="bottom" content="Clone the selected element">
                         <EuiButtonIcon
                           color="text"
                           iconType="copy"
                           onClick={() => duplicateElement()}
-                          aria-label="Duplicate this element into a new layer"
+                          aria-label="Clone the selected element"
                         />
                       </EuiToolTip>
                     </EuiFlexItem>
@@ -121,7 +118,7 @@ export const SidebarComponent = ({
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+          <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />
         </div>
       )}
     </div>

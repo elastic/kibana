@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { ConditionExpression } from './condition_expression';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 
 export function ConditionsSection({
@@ -55,7 +56,10 @@ export function ConditionsSection({
       <EuiButtonEmpty
         onClick={() => addCondition()}
       >
-        Add new condition
+        <FormattedMessage
+          id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
+          defaultMessage="Add new condition"
+        />
       </EuiButtonEmpty>
     </React.Fragment>
   );

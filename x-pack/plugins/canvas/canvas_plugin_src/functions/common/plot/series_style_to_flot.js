@@ -7,7 +7,9 @@
 import { get } from 'lodash';
 
 export const seriesStyleToFlot = seriesStyle => {
-  if (!seriesStyle) return {};
+  if (!seriesStyle) {
+    return {};
+  }
 
   const lines = get(seriesStyle, 'lines');
   const bars = get(seriesStyle, 'bars');
@@ -42,8 +44,12 @@ export const seriesStyleToFlot = seriesStyle => {
     },
   };
 
-  if (stack) flotStyle.stack = stack;
-  if (color) flotStyle.color = color;
+  if (stack) {
+    flotStyle.stack = stack;
+  }
+  if (color) {
+    flotStyle.color = color;
+  }
 
   return flotStyle;
 };

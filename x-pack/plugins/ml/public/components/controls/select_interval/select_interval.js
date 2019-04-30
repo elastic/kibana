@@ -9,19 +9,36 @@
 /*
  * React component for rendering a select element with various aggregation interval levels.
  */
-import _ from 'lodash';
+
+import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { BehaviorSubject } from 'rxjs';
 
 import {
   EuiSelect
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import { injectObservablesAsProps } from '../../../util/observable_utils';
 
 const OPTIONS = [
-  { value: 'auto', text: 'Auto' },
-  { value: 'hour', text: '1 hour' },
-  { value: 'day', text: '1 day' },
-  { value: 'second', text: 'Show all' }
+  {
+    value: 'auto',
+    text: i18n.translate('xpack.ml.controls.selectInterval.autoLabel', { defaultMessage: 'Auto' })
+  },
+  {
+    value: 'hour',
+    text: i18n.translate('xpack.ml.controls.selectInterval.hourLabel', { defaultMessage: '1 hour' })
+  },
+  {
+    value: 'day',
+    text: i18n.translate('xpack.ml.controls.selectInterval.dayLabel', { defaultMessage: '1 day' })
+  },
+  {
+    value: 'second',
+    text: i18n.translate('xpack.ml.controls.selectInterval.showAllLabel', { defaultMessage: 'Show all' })
+  }
 ];
 
 function optionValueToInterval(value) {
@@ -38,29 +55,16 @@ function optionValueToInterval(value) {
   return interval;
 }
 
-class SelectInterval extends Component {
-  constructor(props) {
-    super(props);
+export const interval$ = new BehaviorSubject(optionValueToInterval(OPTIONS[0].value));
 
-    // Restore the interval from the state, or default to auto.
-    this.mlSelectIntervalService = this.props.mlSelectIntervalService;
-    const intervalState = this.mlSelectIntervalService.state.get('interval');
-    const intervalValue = _.get(intervalState, 'val', 'auto');
-    const interval = optionValueToInterval(intervalValue);
-    this.mlSelectIntervalService.state.set('interval', interval);
-
-    this.state = {
-      value: interval.val
-    };
-  }
+class SelectIntervalUnwrapped extends Component {
+  static propTypes = {
+    interval: PropTypes.object.isRequired,
+  };
 
   onChange = (e) => {
-    this.setState({
-      value: e.target.value,
-    });
-
     const interval = optionValueToInterval(e.target.value);
-    this.mlSelectIntervalService.state.set('interval', interval).changed();
+    interval$.next(interval);
   };
 
   render() {
@@ -68,11 +72,16 @@ class SelectInterval extends Component {
       <EuiSelect
         options={OPTIONS}
         className="ml-select-interval"
-        value={this.state.value}
+        value={this.props.interval.val}
         onChange={this.onChange}
       />
     );
   }
 }
+
+const SelectInterval = injectObservablesAsProps(
+  { interval: interval$ },
+  SelectIntervalUnwrapped
+);
 
 export { SelectInterval };

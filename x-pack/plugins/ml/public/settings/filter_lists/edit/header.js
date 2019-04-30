@@ -24,10 +24,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 import { EditDescriptionPopover } from '../components/edit_description_popover';
 import { FilterListUsagePopover } from '../components/filter_list_usage_popover';
 
-export function EditFilterListHeader({
+export const EditFilterListHeader = injectI18n(function ({
+  canCreateFilter,
   filterId,
   totalItemCount,
   description,
@@ -35,23 +38,44 @@ export function EditFilterListHeader({
   newFilterId,
   isNewFilterIdInvalid,
   updateNewFilterId,
-  usedBy }) {
+  usedBy,
+  intl }) {
 
-  const title = (filterId !== undefined) ? `Filter list ${filterId}` : 'Create new filter list';
+  const title = (filterId !== undefined) ? (
+    <FormattedMessage
+      id="xpack.ml.settings.filterLists.editFilterHeader.filterListTitle"
+      defaultMessage="Filter list {filterId}"
+      values={{
+        filterId,
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.ml.settings.filterLists.editFilterHeader.createFilterListTitle"
+      defaultMessage="Create new filter list"
+    />
+  );
 
   let idField;
   let descriptionField;
   let usedByElement;
 
   if (filterId === undefined) {
-    const msg = 'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;' +
-      ' must start and end with an alphanumeric character';
+    const msg = intl.formatMessage({
+      id: 'xpack.ml.settings.filterLists.editFilterHeader.allowedCharactersDescription',
+      defaultMessage: 'Use lowercase alphanumerics (a-z and 0-9), hyphens or underscores;' +
+      ' must start and end with an alphanumeric character',
+    });
     const helpText = (isNewFilterIdInvalid === false) ? msg : undefined;
     const error = (isNewFilterIdInvalid === true) ? [msg] : undefined;
 
     idField = (
       <EuiFormRow
-        label="Filter list ID"
+        label={
+          <FormattedMessage
+            id="xpack.ml.settings.filterLists.editFilterHeader.filterListIdAriaLabel"
+            defaultMessage="Filter list ID"
+          />}
         helpText={helpText}
         error={error}
         isInvalid={isNewFilterIdInvalid}
@@ -78,7 +102,10 @@ export function EditFilterListHeader({
     descriptionField = (
       <EuiText>
         <EuiTextColor color="subdued">
-          Add a description
+          <FormattedMessage
+            id="xpack.ml.settings.filterLists.editFilterList.addDescriptionText"
+            defaultMessage="Add a description"
+          />
         </EuiTextColor>
       </EuiText>
     );
@@ -90,14 +117,20 @@ export function EditFilterListHeader({
         <React.Fragment>
           <div className="ml-filter-list-usage">
             <EuiText>
-              This filter list is used in
+              <FormattedMessage
+                id="xpack.ml.settings.filterLists.editFilterList.filterIsUsedInJobsDescription"
+                defaultMessage="This filter list is used in"
+              />
             </EuiText>
             <FilterListUsagePopover
               entityType="detector"
               entityValues={usedBy.detectors}
             />
             <EuiText>
-              across
+              <FormattedMessage
+                id="xpack.ml.settings.filterLists.editFilterList.acrossText"
+                defaultMessage="across"
+              />
             </EuiText>
             <FilterListUsagePopover
               entityType="job"
@@ -112,7 +145,10 @@ export function EditFilterListHeader({
         <React.Fragment>
           <EuiText>
             <p>
-              This filter list is not used by any jobs.
+              <FormattedMessage
+                id="xpack.ml.settings.filterLists.editFilterList.filterIsNotUsedInJobsDescription"
+                defaultMessage="This filter list is not used by any jobs."
+              />
             </p>
           </EuiText>
           <EuiSpacer size="s"/>
@@ -131,9 +167,17 @@ export function EditFilterListHeader({
                 <h1>{title}</h1>
               </EuiTitle>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
-                <p>{totalItemCount} {(totalItemCount !== 1) ? 'items' : 'item'} in total</p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.ml.settings.filterLists.editFilterList.totalItemsDescription"
+                    defaultMessage="{totalItemCount, plural, one {# item} other {# items}} in total"
+                    values={{
+                      totalItemCount,
+                    }}
+                  />
+                </p>
               </EuiTextColor>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -147,6 +191,7 @@ export function EditFilterListHeader({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EditDescriptionPopover
+            canCreateFilter={canCreateFilter}
             description={description}
             updateDescription={updateDescription}
           />
@@ -156,9 +201,10 @@ export function EditFilterListHeader({
       {usedByElement}
     </React.Fragment>
   );
+});
 
-}
-EditFilterListHeader.propTypes = {
+EditFilterListHeader.WrappedComponent.propTypes = {
+  canCreateFilter: PropTypes.bool.isRequired,
   filterId: PropTypes.string,
   newFilterId: PropTypes.string,
   isNewFilterIdInvalid: PropTypes.bool,
@@ -168,3 +214,5 @@ EditFilterListHeader.propTypes = {
   updateDescription: PropTypes.func.isRequired,
   usedBy: PropTypes.object
 };
+
+EditFilterListHeader.displayName = 'EditFilterListHeader';

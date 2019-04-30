@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { escapeQuotes, escapeKuery } from '../escape_kuery';
 
 describe('Kuery escape', function () {
@@ -47,6 +47,12 @@ describe('Kuery escape', function () {
   it('should escape both keywords and special characters', function () {
     const value = 'Hello, world, and <nice> to meet you!';
     const expected = 'Hello, world, \\and \\<nice\\> to meet you!';
+    expect(escapeKuery(value)).to.be(expected);
+  });
+
+  it('should escape newlines and tabs', () => {
+    const value = 'This\nhas\tnewlines\r\nwith\ttabs';
+    const expected = 'This\\nhas\\tnewlines\\r\\nwith\\ttabs';
     expect(escapeKuery(value)).to.be(expected);
   });
 });

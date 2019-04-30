@@ -6,4 +6,10 @@
 
 export const INDEX_NAMES = {
   BEATS: '.management-beats',
+  EVENTS: '.management-beats-events-*',
+  EVENTS_ALIAS: '.management-beats-events',
+};
+
+export const POLICY_NAMES = {
+  EVENTS: '.beats-management-events-retention',
 };

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from "react";
-import { EuiCodeEditor } from "@elastic/eui";
+import React from 'react';
+import { EuiCodeEditor } from '@elastic/eui';
 
 import 'brace/theme/textmate';
 

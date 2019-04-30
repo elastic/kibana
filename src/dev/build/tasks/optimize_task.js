@@ -46,9 +46,13 @@ export const OptimizeBuildTask = {
 
     await exec(log, kibanaScript, kibanaArgs, {
       cwd: build.resolvePath('.'),
+      env: {
+        FORCE_DLL_CREATION: 'true',
+        NODE_OPTIONS: '--max-old-space-size=2048'
+      },
     });
 
     // clean up temporary node install
-    await deleteAll(log, [tempNodeInstallDir]);
+    await deleteAll([tempNodeInstallDir], log);
   },
 };

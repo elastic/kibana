@@ -25,7 +25,7 @@ import { createPlatform } from './platform';
 
 export async function getConfig({ isRelease, targetAllPlatforms, versionQualifier }) {
   const pkgPath = resolve(__dirname, '../../../../package.json');
-  const pkg = require(pkgPath);
+  const pkg = require(pkgPath); // eslint-disable-line import/no-dynamic-require
   const repoRoot = dirname(pkgPath);
   const nodeVersion = pkg.engines.node;
 

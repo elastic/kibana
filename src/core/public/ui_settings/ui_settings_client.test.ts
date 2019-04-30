@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { materialize, take, toArray } from 'rxjs/operators';
+
 import { UiSettingsClient } from './ui_settings_client';
 
 function setup(options: { defaults?: any; initialSettings?: any } = {}) {
@@ -26,18 +28,15 @@ function setup(options: { defaults?: any; initialSettings?: any } = {}) {
     settings: {},
   }));
 
-  const onUpdateError = jest.fn();
-
   const config = new UiSettingsClient({
     defaults,
     initialSettings,
     api: {
       batchSet,
     } as any,
-    onUpdateError,
   });
 
-  return { config, batchSet, onUpdateError };
+  return { config, batchSet };
 }
 
 describe('#get', () => {
@@ -76,6 +75,82 @@ describe('#get', () => {
   it("throws on unknown properties that don't have a value yet.", () => {
     const { config } = setup();
     expect(() => config.get('throwableProperty')).toThrowErrorMatchingSnapshot();
+  });
+});
+
+describe('#get$', () => {
+  it('emits the current value when called', async () => {
+    const { config } = setup();
+    const values = await config
+      .get$('dateFormat')
+      .pipe(
+        take(1),
+        toArray()
+      )
+      .toPromise();
+
+    expect(values).toEqual(['Browser']);
+  });
+
+  it('emits an error notification if the key is unknown', async () => {
+    const { config } = setup();
+    const values = await config
+      .get$('unknown key')
+      .pipe(materialize())
+      .toPromise();
+
+    expect(values).toMatchInlineSnapshot(`
+Notification {
+  "error": [Error: Unexpected \`config.get("unknown key")\` call on unrecognized configuration setting "unknown key".
+Setting an initial value via \`config.set("unknown key", value)\` before attempting to retrieve
+any custom setting value for "unknown key" may fix this issue.
+You can use \`config.get("unknown key", defaultValue)\`, which will just return
+\`defaultValue\` when the key is unrecognized.],
+  "hasValue": false,
+  "kind": "E",
+  "value": undefined,
+}
+`);
+  });
+
+  it('emits the new value when it changes', async () => {
+    const { config } = setup();
+
+    setTimeout(() => {
+      config.set('dateFormat', 'new format');
+    }, 10);
+
+    const values = await config
+      .get$('dateFormat')
+      .pipe(
+        take(2),
+        toArray()
+      )
+      .toPromise();
+
+    expect(values).toEqual(['Browser', 'new format']);
+  });
+
+  it('emits the default override if no value is set, or if the value is removed', async () => {
+    const { config } = setup();
+
+    setTimeout(() => {
+      config.set('dateFormat', 'new format');
+    }, 10);
+
+    setTimeout(() => {
+      config.remove('dateFormat');
+    }, 20);
+
+    const values = await config
+      .get$('dateFormat', 'my default')
+      .pipe(
+        take(3),
+        toArray()
+      )
+      .toPromise();
+
+    expect(values).toEqual(['my default', 'new format', 'my default']);
   });
 });
 

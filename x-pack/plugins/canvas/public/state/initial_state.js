@@ -5,6 +5,7 @@
  */
 
 import { get } from 'lodash';
+import { capabilities } from 'ui/capabilities';
 import { getDefaultWorkpad } from './defaults';
 
 export const getInitialState = path => {
@@ -12,9 +13,15 @@ export const getInitialState = path => {
     app: {}, // Kibana stuff in here
     assets: {}, // assets end up here
     transient: {
-      canUserWrite: true,
+      canUserWrite: capabilities.get().canvas.save,
+      elementStats: {
+        total: 0,
+        ready: 0,
+        pending: 0,
+        error: 0,
+      },
       fullscreen: false,
-      selectedElement: null,
+      selectedToplevelNodes: [],
       resolvedArgs: {},
       refresh: {
         interval: 0,
@@ -22,16 +29,18 @@ export const getInitialState = path => {
       // values in resolvedArgs should live under a unique index so they can be looked up.
       // The ID of the element is a great example.
       // In there will live an object with a status (string), value (any), and error (Error) property.
-      // If the state is 'error', the error proprty will be the error object, the value will not change
+      // If the state is 'error', the error property will be the error object, the value will not change
       // See the resolved_args reducer for more information.
     },
     persistent: {
-      schemaVersion: 1,
+      schemaVersion: 2,
       workpad: getDefaultWorkpad(),
     },
   };
 
-  if (!path) return state;
+  if (!path) {
+    return state;
+  }
 
   return get(state, path);
 };

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FrameworkAuthenticatedUser } from '../framework/adapter_types';
+import { FrameworkAuthenticatedUser, FrameworkUser } from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class MemoryTokensAdapter implements CMTokensAdapter {
@@ -14,7 +14,7 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     this.tokenDB = tokenDB;
   }
 
-  public async deleteEnrollmentToken(enrollmentToken: string) {
+  public async deleteEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {
     const index = this.tokenDB.findIndex(token => token.token === enrollmentToken);
 
     if (index > -1) {
@@ -22,13 +22,16 @@ export class MemoryTokensAdapter implements CMTokensAdapter {
     }
   }
 
-  public async getEnrollmentToken(tokenString: string): Promise<TokenEnrollmentData> {
+  public async getEnrollmentToken(
+    user: FrameworkUser,
+    tokenString: string
+  ): Promise<TokenEnrollmentData> {
     return new Promise<TokenEnrollmentData>(resolve => {
       return resolve(this.tokenDB.find(token => token.token === tokenString));
     });
   }
 
-  public async upsertTokens(user: FrameworkAuthenticatedUser, tokens: TokenEnrollmentData[]) {
+  public async insertTokens(user: FrameworkAuthenticatedUser, tokens: TokenEnrollmentData[]) {
     tokens.forEach(token => {
       const existingIndex = this.tokenDB.findIndex(t => t.token === token.token);
       if (existingIndex !== -1) {

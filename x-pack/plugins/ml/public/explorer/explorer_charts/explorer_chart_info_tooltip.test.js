@@ -5,7 +5,7 @@
  */
 
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { ExplorerChartInfoTooltip } from './explorer_chart_info_tooltip';
@@ -22,7 +22,7 @@ describe('ExplorerChartTooltip', () => {
       jobId: 'mock-job-id'
     };
 
-    const wrapper = shallow(<ExplorerChartInfoTooltip {...infoTooltip} />);
+    const wrapper = shallowWithIntl(<ExplorerChartInfoTooltip.WrappedComponent {...infoTooltip} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

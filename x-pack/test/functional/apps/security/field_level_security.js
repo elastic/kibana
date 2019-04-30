@@ -4,24 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { indexBy } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const remote = getService('remote');
+  const browser = getService('browser');
   const retry = getService('retry');
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
-      await esArchiver.loadIfNeeded('security/flstest');
-      await esArchiver.load('empty_kibana');
-      remote.setWindowSize(1600, 1000);
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.createIndexPattern('flstest', null);
+      await esArchiver.loadIfNeeded('security/flstest/data'); //( data)
+      await esArchiver.load('security/flstest/kibana'); //(savedobject)
+      browser.setWindowSize(1600, 1000);
     });
 
     it('should add new role viewssnrole', async function () {
@@ -29,10 +26,10 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.security.clickElasticsearchRoles();
       await PageObjects.security.addRole('viewssnrole', {
         elasticsearch: {
-          "indices": [{
-            "names": ["flstest"],
-            "privileges": ["read", "view_index_metadata"],
-            "field_security": { "grant": ["customer_ssn", "customer_name", "customer_region", "customer_type"] }
+          'indices': [{
+            'names': ['flstest'],
+            'privileges': ['read', 'view_index_metadata'],
+            'field_security': { 'grant': ['customer_ssn', 'customer_name', 'customer_region', 'customer_type'] }
           }]
         },
         kibana: {
@@ -50,10 +47,10 @@ export default function ({ getService, getPageObjects }) {
     it('should add new role view_no_ssn_role', async function () {
       await PageObjects.security.addRole('view_no_ssn_role', {
         elasticsearch: {
-          "indices": [{
-            "names": ["flstest"],
-            "privileges": ["read", "view_index_metadata"],
-            "field_security": { "grant": ["customer_name", "customer_region", "customer_type"] }
+          'indices': [{
+            'names': ['flstest'],
+            'privileges': ['read', 'view_index_metadata'],
+            'field_security': { 'grant': ['customer_name', 'customer_region', 'customer_type'] }
           }]
         },
         kibana: {
@@ -101,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
       expect(rowData).to
-        .be('customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type:customer_type _index:flstest _score:1');
+        .be('customer_ssn:444.555.6666 customer_name:ABC Company customer_region:WEST _id:2 _type:_doc _index:flstest _score:0');
     });
 
     it('user customer2 should not see ssn', async function () {
@@ -113,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
         expect(hitCount).to.be('2');
       });
       const rowData = await PageObjects.discover.getDocTableIndex(1);
-      expect(rowData).to.be('customer_name:ABC Company customer_region:WEST _id:2 _type:customer_type _index:flstest _score:1');
+      expect(rowData).to.be('customer_name:ABC Company customer_region:WEST _id:2 _type:_doc _index:flstest _score:0');
     });
 
     after(async function () {

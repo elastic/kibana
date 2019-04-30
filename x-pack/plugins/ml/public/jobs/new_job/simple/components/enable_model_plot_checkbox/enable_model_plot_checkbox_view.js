@@ -18,6 +18,7 @@ import {
 
 import { JsonTooltip } from '../../../../../components/json_tooltip/json_tooltip';
 
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class EnableModelPlotCheckbox extends Component {
   constructor(props) {
@@ -28,7 +29,10 @@ export class EnableModelPlotCheckbox extends Component {
     };
   }
 
-  warningTitle = 'Proceed with caution!';
+  warningTitle = (<FormattedMessage
+    id="xpack.ml.newJob.simple.enableModelPlot.proceedWithCautionWarningTitle"
+    defaultMessage="Proceed with caution!"
+  />);
 
   onChange = (e) => {
     this.setState({

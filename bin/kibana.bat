@@ -14,7 +14,7 @@ If Not Exist "%NODE%" (
   Exit /B 1
 )
 
-"%NODE%" %NODE_OPTIONS% --no-warnings "%DIR%\src\cli" %*
+"%NODE%" --no-warnings --max-http-header-size=65536 %NODE_OPTIONS% "%DIR%\src\cli" %*
 
 :finally
 

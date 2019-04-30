@@ -7,7 +7,7 @@
 // Mock the mlJobService that is used for testing custom URLs.
 jest.mock('../../../services/job_service.js', () => 'mlJobService');
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { CustomUrlEditor } from './editor';
@@ -61,8 +61,8 @@ function prepareTest(customUrl, setEditCustomUrlFn) {
     queryEntityFieldNames,
   };
 
-  const wrapper = shallow(
-    <CustomUrlEditor {...props} />
+  const wrapper = shallowWithIntl(
+    <CustomUrlEditor.WrappedComponent {...props} />
   );
 
   return wrapper;

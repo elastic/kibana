@@ -22,6 +22,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 /**
  * React component for displaying the example data associated with the Telemetry opt-in banner.
  */
@@ -67,12 +69,19 @@ export class OptInExampleFlyout extends Component {
     if (data === null) {
       return (
         <EuiCallOut
-          title="Error loading cluster statistics"
+          title={<FormattedMessage
+            id="xpack.main.telemetry.callout.errorLoadingClusterStatisticsTitle"
+            defaultMessage="Error loading cluster statistics"
+          />}
           color="danger"
           iconType="cross"
         >
-          An unexpected error occured while attempting to fetch the cluster statistics. This can occur because Elasticsearch
-          failed, Kibana failed, or there is a network error. Check Kibana, then reload the page and try again.
+          <FormattedMessage
+            id="xpack.main.telemetry.callout.errorLoadingClusterStatisticsDescription"
+            defaultMessage="An unexpected error occured while attempting to fetch the cluster statistics.
+              This can occur because Elasticsearch failed, Kibana failed, or there is a network error.
+              Check Kibana, then reload the page and try again."
+          />
         </EuiCallOut>
       );
     }
@@ -94,13 +103,21 @@ export class OptInExampleFlyout extends Component {
         >
           <EuiFlyoutHeader>
             <EuiTitle>
-              <h2>Cluster statistics</h2>
+              <h2>
+                <FormattedMessage
+                  id="xpack.main.telemetry.callout.clusterStatisticsTitle"
+                  defaultMessage="Cluster statistics"
+                />
+              </h2>
             </EuiTitle>
             <EuiTextColor color="subdued">
               <EuiText>
-                This is an example of the basic cluster statistics that we&rsquo;ll collect.
-                It includes the number of indices, shards, and nodes.
-                It also includes high-level usage statistics, such as whether monitoring is turned on.
+                <FormattedMessage
+                  id="xpack.main.telemetry.callout.clusterStatisticsDescription"
+                  defaultMessage="This is an example of the basic cluster statistics that we'll collect.
+                  It includes the number of indices, shards, and nodes.
+                  It also includes high-level usage statistics, such as whether monitoring is turned on."
+                />
               </EuiText>
             </EuiTextColor>
           </EuiFlyoutHeader>

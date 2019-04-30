@@ -5,17 +5,18 @@
  */
 
 import React from 'react';
-import { InfraMetricData } from '../../../common/graphql/types';
+import { InfraMetricData, InfraTimerangeInput } from '../../graphql/types';
 import { InfraMetricLayoutSection } from '../../pages/metrics/layouts/types';
-import { metricTimeActions } from '../../store';
 import { sections } from './sections';
 
 interface Props {
   section: InfraMetricLayoutSection;
   metrics: InfraMetricData[];
-  onChangeRangeTime?: (time: metricTimeActions.MetricRangeTimeState) => void;
+  onChangeRangeTime?: (time: InfraTimerangeInput) => void;
   crosshairValue?: number;
   onCrosshairUpdate?: (crosshairValue: number) => void;
+  isLiveStreaming?: boolean;
+  stopLiveStreaming?: () => void;
 }
 
 export class Section extends React.PureComponent<Props> {
@@ -30,6 +31,8 @@ export class Section extends React.PureComponent<Props> {
         onChangeRangeTime: this.props.onChangeRangeTime,
         crosshairValue: this.props.crosshairValue,
         onCrosshairUpdate: this.props.onCrosshairUpdate,
+        isLiveStreaming: this.props.isLiveStreaming,
+        stopLiveStreaming: this.props.stopLiveStreaming,
       };
     }
     const Component = sections[this.props.section.type];

@@ -29,6 +29,7 @@ import { ml } from '../../../../../services/ml_api_service';
 import { GroupList } from './group_list';
 import { NewGroupInput } from './new_group_input';
 import { mlMessageBarService } from '../../../../../components/messagebar/messagebar_service';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 function createSelectedGroups(jobs, groups) {
   const jobIds = jobs.map(j => j.id);
@@ -54,7 +55,13 @@ function createSelectedGroups(jobs, groups) {
   return selectedGroups;
 }
 
-export class GroupSelector extends Component {
+export const GroupSelector = injectI18n(class GroupSelector extends Component {
+  static propTypes = {
+    jobs: PropTypes.array.isRequired,
+    allJobIds: PropTypes.array.isRequired,
+    refreshJobs: PropTypes.func.isRequired,
+  };
+
   constructor(props) {
     super(props);
 
@@ -191,6 +198,7 @@ export class GroupSelector extends Component {
   }
 
   render() {
+    const { intl } = this.props;
     const {
       groups,
       selectedGroups,
@@ -199,17 +207,22 @@ export class GroupSelector extends Component {
     const button = (
       <EuiToolTip
         position="bottom"
-        content={`Edit job groups`}
+        content={<FormattedMessage
+          id="xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonTooltip"
+          defaultMessage="Edit job groups"
+        />}
       >
         <EuiButtonIcon
           iconType="indexEdit"
-          aria-label="Edit job groups"
+          aria-label={intl.formatMessage({
+            id: 'xpack.ml.jobsList.multiJobActions.groupSelector.editJobGroupsButtonAriaLabel',
+            defaultMessage: 'Edit job groups'
+          })}
           onClick={() => this.togglePopover()}
           disabled={this.canUpdateJob === false}
         />
       </EuiToolTip>
     );
-    const s = (this.props.jobs.length > 1 ? 's' : '');
 
     return (
       <EuiPopover
@@ -220,7 +233,13 @@ export class GroupSelector extends Component {
         closePopover={() => this.closePopover()}
       >
         <div className="group-selector">
-          <EuiPopoverTitle>Apply groups to job{s}</EuiPopoverTitle>
+          <EuiPopoverTitle>
+            <FormattedMessage
+              id="xpack.ml.jobsList.multiJobActions.groupSelector.applyGroupsToJobTitle"
+              defaultMessage="Apply groups to {jobsCount, plural, one {job} other {jobs}}"
+              values={{ jobsCount: this.props.jobs.length }}
+            />
+          </EuiPopoverTitle>
 
           <GroupList
             groups={groups}
@@ -245,7 +264,10 @@ export class GroupSelector extends Component {
                   onClick={this.applyChanges}
                   isDisabled={(edited === false)}
                 >
-                  Apply
+                  <FormattedMessage
+                    id="xpack.ml.jobsList.multiJobActions.groupSelector.applyButtonLabel"
+                    defaultMessage="Apply"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -254,9 +276,4 @@ export class GroupSelector extends Component {
       </EuiPopover>
     );
   }
-}
-GroupSelector.propTypes = {
-  jobs: PropTypes.array.isRequired,
-  allJobIds: PropTypes.array.isRequired,
-  refreshJobs: PropTypes.func.isRequired,
-};
+});

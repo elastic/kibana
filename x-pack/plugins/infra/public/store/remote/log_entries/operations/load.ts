@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LogEntries as LogEntriesQuery } from '../../../../../common/graphql/types';
+import { LogEntries as LogEntriesQuery } from '../../../../graphql/types';
 import {
   createGraphqlOperationActionCreators,
   createGraphqlOperationReducer,
@@ -24,7 +24,12 @@ export const loadEntriesReducer = createGraphqlOperationReducer(
   operationKey,
   initialLogEntriesState,
   loadEntriesActionCreators,
-  (state, action) => action.payload.result.data.source.logEntriesAround
+  (state, action) => action.payload.result.data.source.logEntriesAround,
+  () => ({
+    entries: [],
+    hasMoreAfter: false,
+    hasMoreBefore: false,
+  })
 );
 
 export const loadEntriesEpic = createGraphqlQueryEpic(logEntriesQuery, loadEntriesActionCreators);

@@ -8,7 +8,10 @@ import Joi from 'joi';
 import { getClustersFromRequest } from '../../../../lib/cluster/get_clusters_from_request';
 import { verifyMonitoringAuth } from '../../../../lib/elasticsearch/verify_monitoring_auth';
 import { handleError } from '../../../../lib/errors';
-import { prefixIndexPattern } from '../../../../lib/ccs_utils';
+import {
+  INDEX_PATTERN_FILEBEAT
+} from '../../../../../common/constants';
+import { getIndexPatterns } from '../../../../lib/cluster/get_index_patterns';
 
 export function clustersRoute(server) {
   /*
@@ -36,18 +39,7 @@ export function clustersRoute(server) {
       // the monitoring data. `try/catch` makes it a little more explicit.
       try {
         await verifyMonitoringAuth(req);
-
-        // wildcard means to search _all_ clusters
-        const ccs = '*';
-        const config = server.config();
-        const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
-        const kbnIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.kibana.index_pattern', ccs);
-        const lsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.logstash.index_pattern', ccs);
-        const beatsIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
-        const apmIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.beats.index_pattern', ccs);
-        const alertsIndex = prefixIndexPattern(config, 'xpack.monitoring.cluster_alerts.index', ccs);
-        const indexPatterns = { esIndexPattern, kbnIndexPattern, lsIndexPattern, beatsIndexPattern, apmIndexPattern, alertsIndex };
-
+        const indexPatterns = getIndexPatterns(server, { filebeatIndexPattern: INDEX_PATTERN_FILEBEAT });
         clusters = await getClustersFromRequest(req, indexPatterns);
       } catch (err) {
         throw handleError(err, req);

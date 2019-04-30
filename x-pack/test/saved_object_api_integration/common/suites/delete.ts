@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -29,15 +29,6 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/write/delete] is unauthorized for user [${username}]: [security_exception] action [indices:data/write/delete] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFound = (spaceId: string, type: string, id: string) => (resp: {
     [key: string]: any;
   }) => {
@@ -52,7 +43,7 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to delete ${type}, missing action:saved_objects/${type}/delete`,
+      message: `Unable to delete ${type}`,
     });
   };
 
@@ -130,7 +121,6 @@ export function deleteTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   deleteTest.only = makeDeleteTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     createExpectSpaceAwareNotFound,
     createExpectUnknownDocNotFound,
     deleteTest,

@@ -7,37 +7,33 @@
 import { flatten, get } from 'lodash';
 import { INDEX_NAMES } from '../../../../common/constants';
 import { DatabaseAdapter } from '../database/adapter_types';
-import { BackendFrameworkAdapter, FrameworkUser } from '../framework/adapter_types';
+import { FrameworkUser } from '../framework/adapter_types';
 import { CMTokensAdapter, TokenEnrollmentData } from './adapter_types';
 
 export class ElasticsearchTokensAdapter implements CMTokensAdapter {
-  private database: DatabaseAdapter;
-  private framework: BackendFrameworkAdapter;
+  constructor(private readonly database: DatabaseAdapter) {}
 
-  constructor(database: DatabaseAdapter, framework: BackendFrameworkAdapter) {
-    this.database = database;
-    this.framework = framework;
-  }
-
-  public async deleteEnrollmentToken(enrollmentToken: string) {
+  public async deleteEnrollmentToken(user: FrameworkUser, enrollmentToken: string) {
     const params = {
       id: `enrollment_token:${enrollmentToken}`,
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
-    await this.database.delete(this.framework.internalUser, params);
+    await this.database.delete(user, params);
   }
 
-  public async getEnrollmentToken(tokenString: string): Promise<TokenEnrollmentData> {
+  public async getEnrollmentToken(
+    user: FrameworkUser,
+    tokenString: string
+  ): Promise<TokenEnrollmentData> {
     const params = {
       id: `enrollment_token:${tokenString}`,
       ignore: [404],
       index: INDEX_NAMES.BEATS,
-      type: '_doc',
     };
 
-    const response = await this.database.get(this.framework.internalUser, params);
+    const response = await this.database.get(user, params);
+
     const tokenDetails = get<TokenEnrollmentData>(response, '_source.enrollment_token', {
       expires_on: '0',
       token: null,
@@ -53,7 +49,7 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
     );
   }
 
-  public async upsertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
+  public async insertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]) {
     const body = flatten(
       tokens.map(token => [
         { index: { _id: `enrollment_token:${token.token}` } },
@@ -64,12 +60,16 @@ export class ElasticsearchTokensAdapter implements CMTokensAdapter {
       ])
     );
 
-    await this.database.bulk(user, {
+    const result = await this.database.bulk(user, {
       body,
       index: INDEX_NAMES.BEATS,
       refresh: 'wait_for',
-      type: '_doc',
     });
+
+    if (result.errors) {
+      throw new Error(result.items[0].result);
+    }
+
     return tokens;
   }
 }

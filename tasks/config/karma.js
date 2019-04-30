@@ -85,16 +85,20 @@ module.exports = function (grunt) {
 
       // list of files / patterns to load in the browser
       files: [
-        'http://localhost:5610/bundles/vendors.bundle.js',
+        'http://localhost:5610/test_bundle/built_css.css',
+
+        'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
         'http://localhost:5610/bundles/tests.bundle.js',
 
-        'http://localhost:5610/bundles/vendors.style.css',
-        'http://localhost:5610/bundles/tests.style.css'
+        'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+        'http://localhost:5610/bundles/tests.style.css',
       ],
 
       proxies: {
         '/tests/': 'http://localhost:5610/tests/',
-        '/bundles/': 'http://localhost:5610/bundles/'
+        '/bundles/': 'http://localhost:5610/bundles/',
+        '/built_assets/dlls/': 'http://localhost:5610/built_assets/dlls/',
+        '/test_bundle/': 'http://localhost:5610/test_bundle/'
       },
 
       client: {
@@ -167,7 +171,7 @@ module.exports = function (grunt) {
    *  a test is running in by searching for the "ready to load tests for shard X"
    *  log message.
    *
-   *  [1]: src/ui/public/test_harness/test_sharding/setup_test_sharding.js
+   *  [1]: src/legacy/ui/public/test_harness/test_sharding/setup_test_sharding.js
    */
   times(TOTAL_CI_SHARDS, i => {
     const n = i + 1;
@@ -175,13 +179,13 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
-          'http://localhost:5610/bundles/vendors.bundle.js',
-          'http://localhost:5610/bundles/commons.bundle.js',
+          'http://localhost:5610/test_bundle/built_css.css',
+
+          'http://localhost:5610/built_assets/dlls/vendors.bundle.dll.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
 
-          'http://localhost:5610/bundles/vendors.style.css',
-          'http://localhost:5610/bundles/commons.style.css',
-          'http://localhost:5610/bundles/tests.style.css'
+          'http://localhost:5610/built_assets/dlls/vendors.style.dll.css',
+          'http://localhost:5610/bundles/tests.style.css',
         ]
       }
     };

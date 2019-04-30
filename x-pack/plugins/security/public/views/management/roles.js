@@ -8,14 +8,16 @@ import _ from 'lodash';
 import routes from 'ui/routes';
 import { toastNotifications } from 'ui/notify';
 import { toggle, toggleSort } from 'plugins/security/lib/util';
-import { isRoleEnabled } from 'plugins/security/lib/role';
+import { isRoleEnabled } from 'plugins/security/lib/role_utils';
 import template from 'plugins/security/views/management/roles.html';
 import 'plugins/security/services/shield_role';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { ROLES_PATH, EDIT_ROLES_PATH } from './management_urls';
+import { getRolesBreadcrumbs } from './breadcrumbs';
 
 routes.when(ROLES_PATH, {
   template,
+  k7Breadcrumbs: getRolesBreadcrumbs,
   resolve: {
     roles(ShieldRole, kbnUrl, Promise, Private) {
       // $promise is used here because the result is an ngResource, not a promise itself
@@ -101,11 +103,11 @@ routes.when(ROLES_PATH, {
     }
 
     $scope.reversedTooltip = i18n('xpack.security.management.roles.reversedTooltip', {
-      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+      defaultMessage: `Reserved roles are built-in. You can't remove or modify them.`,
     });
 
     $scope.reversedAriaLabel = i18n('xpack.security.management.roles.reversedAriaLabel', {
-      defaultMessage: 'Reserved roles are built-in and cannot be removed or modified. Only the password may be changed.',
+      defaultMessage: `Reserved roles are built-in. You can't remove or modify them.`,
     });
 
   },

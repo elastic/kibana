@@ -59,6 +59,7 @@ export const metricSet = [
       'apm_responses_errors_forbidden',
       'apm_responses_errors_concurrency',
       'apm_responses_errors_closed',
+      'apm_responses_errors_internal',
     ],
     name: 'apm_responses_errors'
   },

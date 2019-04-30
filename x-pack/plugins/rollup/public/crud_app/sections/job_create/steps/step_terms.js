@@ -80,7 +80,7 @@ export class StepTermsUi extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="rollupJobCreateTermsTitle">
               <h3>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepTermsTitle"
@@ -110,6 +110,7 @@ export class StepTermsUi extends Component {
               href={termsDetailsUrl}
               target="_blank"
               iconType="help"
+              data-test-subj="rollupJobCreateTermsDocsButton"
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepTerms.readDocsButtonLabel"
@@ -138,8 +139,10 @@ export class StepTermsUi extends Component {
               fields={termsFields}
               selectedFields={terms}
               onSelectField={this.onSelectField}
+              dataTestSubj="rollupJobTermsFieldChooser"
             />
           )}
+          dataTestSubj="rollupJobTermsFieldList"
         />
       </Fragment>
     );

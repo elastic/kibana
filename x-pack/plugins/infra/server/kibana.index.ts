@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { Server } from 'hapi';
 import JoiNamespace from 'joi';
 import { initInfraServer } from './infra_server';
@@ -20,6 +21,65 @@ export const initServerWithKibana = (kbnServer: KbnServer) => {
 
   // Register a function with server to manage the collection of usage stats
   kbnServer.usage.collectorSet.register(UsageCollector.getUsageCollector(kbnServer));
+
+  const xpackMainPlugin = kbnServer.plugins.xpack_main;
+  xpackMainPlugin.registerFeature({
+    id: 'infrastructure',
+    name: i18n.translate('xpack.infra.featureRegistry.linkInfrastructureTitle', {
+      defaultMessage: 'Infrastructure',
+    }),
+    icon: 'infraApp',
+    navLinkId: 'infra:home',
+    app: ['infra', 'kibana'],
+    catalogue: ['infraops'],
+    privileges: {
+      all: {
+        api: ['infra'],
+        savedObject: {
+          all: ['infrastructure-ui-source'],
+          read: [],
+        },
+        ui: ['show', 'configureSource'],
+      },
+      read: {
+        api: ['infra'],
+        savedObject: {
+          all: [],
+          read: ['infrastructure-ui-source'],
+        },
+        ui: ['show'],
+      },
+    },
+  });
+
+  xpackMainPlugin.registerFeature({
+    id: 'logs',
+    name: i18n.translate('xpack.infra.featureRegistry.linkLogsTitle', {
+      defaultMessage: 'Logs',
+    }),
+    icon: 'loggingApp',
+    navLinkId: 'infra:logs',
+    app: ['infra', 'kibana'],
+    catalogue: ['infralogging'],
+    privileges: {
+      all: {
+        api: ['infra'],
+        savedObject: {
+          all: ['infrastructure-ui-source'],
+          read: [],
+        },
+        ui: ['show', 'configureSource'],
+      },
+      read: {
+        api: ['infra'],
+        savedObject: {
+          all: [],
+          read: ['infrastructure-ui-source'],
+        },
+        ui: ['show'],
+      },
+    },
+  });
 };
 
 export const getConfigSchema = (Joi: typeof JoiNamespace) => {
@@ -38,11 +98,6 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
     }),
   });
 
-  const InfraSourceConfigSchema = InfraDefaultSourceConfigSchema.keys({
-    metricAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'metricAlias').required(),
-    logAlias: Joi.reach(InfraDefaultSourceConfigSchema, 'logAlias').required(),
-  });
-
   const InfraRootConfigSchema = Joi.object({
     enabled: Joi.boolean().default(true),
     query: Joi.object({
@@ -53,7 +108,6 @@ export const getConfigSchema = (Joi: typeof JoiNamespace) => {
       .keys({
         default: InfraDefaultSourceConfigSchema,
       })
-      .pattern(/.*/, InfraSourceConfigSchema)
       .default(),
   }).default();
 

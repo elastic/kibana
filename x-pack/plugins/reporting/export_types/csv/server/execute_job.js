@@ -9,12 +9,16 @@ import { oncePerServer } from '../../../server/lib/once_per_server';
 import { createTaggedLogger } from '../../../server/lib/create_tagged_logger';
 import { createGenerateCsv } from './lib/generate_csv';
 import { fieldFormatMapFactory } from './lib/field_format_map';
+import { i18n } from '@kbn/i18n';
 
 function executeJobFn(server) {
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
   const crypto = cryptoFactory(server);
   const config = server.config();
-  const logger = createTaggedLogger(server, ['reporting', 'csv', 'debug']);
+  const logger = {
+    debug: createTaggedLogger(server, ['reporting', 'csv', 'debug']),
+    warn: createTaggedLogger(server, ['reporting', 'csv', 'warning']),
+  };
   const generateCsv = createGenerateCsv(logger);
   const serverBasePath = config.get('server.basePath');
 
@@ -26,15 +30,22 @@ function executeJobFn(server) {
       metaFields,
       conflictedTypesFields,
       headers: serializedEncryptedHeaders,
-      basePath
+      basePath,
     } = job;
 
     let decryptedHeaders;
     try {
       decryptedHeaders = await crypto.decrypt(serializedEncryptedHeaders);
-    } catch (e) {
+    } catch (err) {
       throw new Error(
-        'Failed to decrypt report job data. Please ensure that xpack.reporting.encryptionKey is set and re-generate this report.'
+        i18n.translate(
+          'xpack.reporting.exportTypes.csv.executeJob.failedToDecryptReportJobDataErrorMessage',
+          {
+            defaultMessage:
+              'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+            values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
+          }
+        )
       );
     }
 
@@ -51,38 +62,56 @@ function executeJobFn(server) {
     };
     const savedObjects = server.savedObjects;
     const savedObjectsClient = savedObjects.getScopedSavedObjectsClient(fakeRequest);
-    const uiSettings = server.uiSettingsServiceFactory({
-      savedObjectsClient
+    const uiConfig = server.uiSettingsServiceFactory({
+      savedObjectsClient,
     });
 
-    const fieldFormats = await server.fieldFormatServiceFactory(uiSettings);
-    const formatsMap = fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+    const [formatsMap, uiSettings] = await Promise.all([
+      (async () => {
+        const fieldFormats = await server.fieldFormatServiceFactory(uiConfig);
+        return fieldFormatMapFactory(indexPatternSavedObject, fieldFormats);
+      })(),
+      (async () => {
+        const [separator, quoteValues, timezone] = await Promise.all([
+          uiConfig.get('csv:separator'),
+          uiConfig.get('csv:quoteValues'),
+          uiConfig.get('dateFormat:tz'),
+        ]);
 
-    const separator = await uiSettings.get('csv:separator');
-    const quoteValues = await uiSettings.get('csv:quoteValues');
-    const maxSizeBytes = config.get('xpack.reporting.csv.maxSizeBytes');
-    const scroll = config.get('xpack.reporting.csv.scroll');
+        if (timezone === 'Browser') {
+          logger.warn(
+            `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
+          );
+        }
 
-    const { content, maxSizeReached } = await generateCsv({
+        return {
+          separator,
+          quoteValues,
+          timezone,
+        };
+      })(),
+    ]);
+
+    const { content, maxSizeReached, size } = await generateCsv({
       searchRequest,
       fields,
-      formatsMap,
       metaFields,
       conflictedTypesFields,
       callEndpoint,
       cancellationToken,
+      formatsMap,
       settings: {
-        separator,
-        quoteValues,
-        maxSizeBytes,
-        scroll
-      }
+        ...uiSettings,
+        maxSizeBytes: config.get('xpack.reporting.csv.maxSizeBytes'),
+        scroll: config.get('xpack.reporting.csv.scroll'),
+      },
     });
 
     return {
       content_type: 'text/csv',
       content,
-      max_size_reached: maxSizeReached
+      max_size_reached: maxSizeReached,
+      size,
     };
   };
 }

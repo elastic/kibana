@@ -5,33 +5,37 @@
  */
 
 import _ from 'lodash';
-import chrome from 'ui/chrome';
 import routes from 'ui/routes';
+import { capabilities } from 'ui/capabilities';
+import { kfetch } from 'ui/kfetch';
 import { fatalError } from 'ui/notify';
 import template from 'plugins/security/views/management/edit_role/edit_role.html';
-import 'angular-ui-select';
+import 'ui/angular_ui_select';
 import 'plugins/security/services/application_privilege';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
-import 'plugins/security/services/shield_privileges';
 import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 import { SpacesManager } from '../../../../../spaces/public/lib';
-import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
+import { getEditRoleBreadcrumbs, getCreateRoleBreadcrumbs } from '../breadcrumbs';
 
 import { EditRolePage } from './components';
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { KibanaAppPrivileges } from '../../../../common/model/kibana_privilege';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 routes.when(`${EDIT_ROLES_PATH}/:name?`, {
   template,
+  k7Breadcrumbs: ($injector, $route) => $injector.invoke(
+    $route.current.params.name
+      ? getEditRoleBreadcrumbs
+      : getCreateRoleBreadcrumbs
+  ),
   resolve: {
     role($route, ShieldRole, kbnUrl, Promise, Notifier) {
       const name = $route.current.params.name;
@@ -59,10 +63,7 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
             indices: [],
             run_as: [],
           },
-          kibana: {
-            global: [],
-            space: {},
-          },
+          kibana: [],
           _unrecognized_applications: [],
         }));
       }
@@ -84,6 +85,12 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
         return new SpacesManager($http, chrome).getSpaces();
       }
       return [];
+    },
+    privileges() {
+      return  kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+    },
+    features() {
+      return kfetch({ method: 'get', pathname: '/api/features/v1' });
     }
   },
   controllerAs: 'editRole',
@@ -94,10 +101,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
     const role = $route.current.locals.role;
 
     const xpackInfo = Private(XPackInfoProvider);
-    const userProfile = Private(UserProfileProvider);
     const allowDocumentLevelSecurity = xpackInfo.get('features.security.allowRoleDocumentLevelSecurity');
     const allowFieldLevelSecurity = xpackInfo.get('features.security.allowRoleFieldLevelSecurity');
-    const rbacApplication = chrome.getInjected('rbacApplication');
 
     if (role.elasticsearch.indices.length === 0) {
       const emptyOption = {
@@ -107,7 +112,8 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
 
       if (allowFieldLevelSecurity) {
         emptyOption.field_security = {
-          grant: ['*']
+          grant: ['*'],
+          except: [],
         };
       }
 
@@ -122,28 +128,29 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       users,
       indexPatterns,
       spaces,
+      privileges,
+      features,
     } = $route.current.locals;
 
-    $scope.$$postDigest(() => {
+    $scope.$$postDigest(async () => {
       const domNode = document.getElementById('editRoleReactRoot');
 
       render(
-        <I18nProvider>
+        <I18nContext>
           <EditRolePage
             runAsUsers={users}
             role={role}
-            kibanaAppPrivileges={KibanaAppPrivileges}
             indexPatterns={indexPatterns}
-            rbacEnabled={true}
-            rbacApplication={rbacApplication}
             httpClient={$http}
             allowDocumentLevelSecurity={allowDocumentLevelSecurity}
             allowFieldLevelSecurity={allowFieldLevelSecurity}
             spaces={spaces}
             spacesEnabled={enableSpaceAwarePrivileges}
-            userProfile={userProfile}
+            uiCapabilities={capabilities.get()}
+            features={features}
+            privileges={privileges}
           />
-        </I18nProvider>, domNode);
+        </I18nContext>, domNode);
 
       // unmount react on controller destroy
       $scope.$on('$destroy', () => {

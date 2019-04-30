@@ -4,44 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import theme from '@elastic/eui/dist/eui_theme_light.json';
+import { i18n } from '@kbn/i18n';
+import { tint } from 'polished';
 import React, { Fragment } from 'react';
-import styled from 'styled-components';
-import {
-  borderRadius,
-  colors,
-  fontFamilyCode,
-  px,
-  unit,
-  units
-} from '../../../../../../../style/variables';
-
+// @ts-ignore
+import sql from 'react-syntax-highlighter/dist/languages/sql';
 import SyntaxHighlighter, {
   registerLanguage
   // @ts-ignore
 } from 'react-syntax-highlighter/dist/light';
-
 // @ts-ignore
 import { xcode } from 'react-syntax-highlighter/dist/styles';
-
-// @ts-ignore
-import sql from 'react-syntax-highlighter/dist/languages/sql';
-
-import { EuiTitle } from '@elastic/eui';
-import { DbContext } from '../../../../../../../../typings/Span';
+import styled from 'styled-components';
+import { Span } from '../../../../../../../../typings/es_schemas/ui/Span';
+import {
+  borderRadius,
+  fontFamilyCode,
+  fontSize,
+  px,
+  unit,
+  units
+} from '../../../../../../../style/variables';
+import { TruncateHeightSection } from './TruncateHeightSection';
 
 registerLanguage('sql', sql);
 
 const DatabaseStatement = styled.div`
-  margin-top: ${px(unit)};
   padding: ${px(units.half)} ${px(unit)};
-  background: ${colors.yellow};
+  background: ${tint(0.1, theme.euiColorWarning)}
   border-radius: ${borderRadius};
-  border: 1px solid ${colors.gray4};
+  border: 1px solid ${theme.euiColorLightShade};
   font-family: ${fontFamilyCode};
+  font-size: ${fontSize};
 `;
 
+const dbSyntaxLineHeight = unit * 1.5;
+
 interface Props {
-  dbContext?: DbContext;
+  dbContext?: NonNullable<Span['span']>['db'];
 }
 
 export function DatabaseContext({ dbContext }: Props) {
@@ -56,24 +58,35 @@ export function DatabaseContext({ dbContext }: Props) {
   return (
     <Fragment>
       <EuiTitle size="xs">
-        <h3>Database statement</h3>
+        <h3>
+          {i18n.translate(
+            'xpack.apm.transactionDetails.spanFlyout.databaseStatementTitle',
+            {
+              defaultMessage: 'Database statement'
+            }
+          )}
+        </h3>
       </EuiTitle>
+      <EuiSpacer size="m" />
       <DatabaseStatement>
-        <SyntaxHighlighter
-          language={'sql'}
-          style={xcode}
-          customStyle={{
-            color: null,
-            background: null,
-            padding: null,
-            lineHeight: px(unit * 1.5),
-            whiteSpace: 'pre-wrap',
-            overflowX: 'scroll'
-          }}
-        >
-          {dbContext.statement}
-        </SyntaxHighlighter>
+        <TruncateHeightSection previewHeight={10 * dbSyntaxLineHeight}>
+          <SyntaxHighlighter
+            language={'sql'}
+            style={xcode}
+            customStyle={{
+              color: null,
+              background: null,
+              padding: null,
+              lineHeight: px(dbSyntaxLineHeight),
+              whiteSpace: 'pre-wrap',
+              overflowX: 'scroll'
+            }}
+          >
+            {dbContext.statement}
+          </SyntaxHighlighter>
+        </TruncateHeightSection>
       </DatabaseStatement>
+      <EuiSpacer size="l" />
     </Fragment>
   );
 }

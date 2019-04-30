@@ -5,15 +5,18 @@
  */
 
 import * as Joi from 'joi';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { CMBeat } from '../../../common/domain_types';
+import { ReturnTypeList } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
-import { wrapEsError } from '../../utils/error_wrappers';
+import { CMServerLibs } from '../../lib/types';
 
 export const createListAgentsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/agents/{listByAndValue*}',
   requiredRoles: ['beats_admin'],
+  licenseRequired: REQUIRED_LICENSES,
+
   validate: {
     headers: Joi.object({
       'kbn-beats-enrollment-token': Joi.string().required(),
@@ -24,8 +27,7 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  licenseRequired: true,
-  handler: async (request: FrameworkRequest) => {
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<CMBeat>> => {
     const listByAndValueParts = request.params.listByAndValue
       ? request.params.listByAndValue.split('/')
       : [];
@@ -37,27 +39,22 @@ export const createListAgentsRoute = (libs: CMServerLibs) => ({
       listByValue = listByAndValueParts[1];
     }
 
-    try {
-      let beats: CMBeat[];
+    let beats: CMBeat[];
 
-      switch (listBy) {
-        case 'tag':
-          beats = await libs.beats.getAllWithTag(request.user, listByValue || '');
-          break;
+    switch (listBy) {
+      case 'tag':
+        beats = await libs.beats.getAllWithTag(request.user, listByValue || '');
+        break;
 
-        default:
-          beats = await libs.beats.getAll(
-            request.user,
-            request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
-          );
+      default:
+        beats = await libs.beats.getAll(
+          request.user,
+          request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
+        );
 
-          break;
-      }
-
-      return { beats };
-    } catch (err) {
-      // TODO move this to kibana route thing in adapter
-      return wrapEsError(err);
+        break;
     }
+
+    return { list: beats, success: true, page: -1, total: -1 };
   },
 });

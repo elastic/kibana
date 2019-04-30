@@ -14,10 +14,11 @@ interface StreamItemProps {
   item: StreamItem;
   scale: TextScale;
   wrap: boolean;
+  openFlyoutWithItem: (id: string) => void;
 }
 
 export const LogTextStreamItemView = React.forwardRef<Element, StreamItemProps>(
-  ({ item, scale, wrap }, ref) => {
+  ({ item, scale, wrap, openFlyoutWithItem }, ref) => {
     switch (item.kind) {
       case 'logEntry':
         return (
@@ -27,6 +28,7 @@ export const LogTextStreamItemView = React.forwardRef<Element, StreamItemProps>(
             searchResult={item.searchResult}
             scale={scale}
             wrap={wrap}
+            openFlyoutWithItem={openFlyoutWithItem}
           />
         );
     }

@@ -6,7 +6,7 @@
 
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
-import { compose, withState, getContext, withHandlers } from 'recompose';
+import { pure, compose, withState, getContext, withHandlers } from 'recompose';
 
 import {
   getWorkpad,
@@ -26,6 +26,7 @@ const mapStateToProps = state => ({
 });
 
 export const Toolbar = compose(
+  pure,
   connect(mapStateToProps),
   getContext({
     router: PropTypes.object,
@@ -40,5 +41,6 @@ export const Toolbar = compose(
       props.router.navigateTo('loadWorkpad', { id: props.workpadId, page: pageNumber });
     },
   }),
-  withState('tray', 'setTray', props => props.tray)
+  withState('tray', 'setTray', props => props.tray),
+  withState('showWorkpadManager', 'setShowWorkpadManager', false)
 )(Component);

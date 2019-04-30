@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
 set -e
-source "$(dirname $0)/../../src/dev/ci_setup/setup.sh"
-source "$(dirname $0)/../../src/dev/ci_setup/git_setup.sh"
-source "$(dirname $0)/../../src/dev/ci_setup/java_setup.sh"
+
+function report {
+  if [[ -z "$PR_SOURCE_BRANCH" ]]; then
+    node src/dev/failed_tests/cli
+  else
+    echo "Failure issues not created on pull requests"
+  fi
+}
+
+trap report EXIT
 
 export TEST_BROWSER_HEADLESS=1
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
-"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --from=source --dev;
+
+"$(FORCE_COLOR=0 yarn bin)/grunt" jenkins:unit --dev;

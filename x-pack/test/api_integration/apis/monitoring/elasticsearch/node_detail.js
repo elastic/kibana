@@ -4,14 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import nodeDetailFixture from './fixtures/node_detail';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  describe('node detail', () => {
+  describe('node detail', function () {
+    // TODO: https://github.com/elastic/stack-monitoring/issues/31
+    this.tags(['skipCloud']);
+
     const archive = 'monitoring/singlecluster-three-nodes-shard-relocation';
     const timeRange = {
       min: '2017-10-05T20:31:48.000Z',

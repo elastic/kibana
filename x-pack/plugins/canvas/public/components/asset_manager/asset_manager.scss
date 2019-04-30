@@ -1,5 +1,4 @@
 .canvasAssetManager {
-
   .canvasAssetManager__modalHeader {
     flex-wrap: wrap;
   }
@@ -15,8 +14,6 @@
     flex-grow: 0;
     min-width: 40%;
     align-items: center;
-    justify-content: flex-end;
-    padding-right: $euiSize;
 
     @include euiBreakpoint('xs', 's') {
       flex-grow: 1;
@@ -27,20 +24,32 @@
     margin: 0;
   }
 
-  // ASSETS LIST
-
-  .canvasAssetManager__asset {
-    text-align: center;
-    overflow: hidden; // hides image from outer panel boundaries
+  .canvasAssetManager__fileUploadWrapper {
+    justify-content: flex-end;
+    padding-right: $euiSize;
   }
 
-  .canvasAssetManager__thumb {
+  .canvasAssetManager__modalFooter {
+    justify-content: space-between;
+  }
+
+  .canvasAssetManager__emptyPanel {
+    max-width: 400px;
+    margin: $euiSizeXL auto 0;
+  }
+}
+
+.canvasAsset {
+  text-align: center;
+  overflow: hidden; // hides image from outer panel boundaries
+
+  .canvasAsset__thumb {
     margin: -$euiSizeS;
     margin-bottom: 0;
     font-size: 0; // eliminates any extra space around img
   }
 
-  .canvasAssetManager__img {
+  .canvasAsset__img {
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;

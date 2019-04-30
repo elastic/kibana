@@ -1,10 +1,9 @@
 .canvasTray {
-  max-height: 400px;
   flex-direction: column;
   @include euiBottomShadowFlat;
 }
 
 .canvasTray__panel {
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
   border-radius: 0;
 }

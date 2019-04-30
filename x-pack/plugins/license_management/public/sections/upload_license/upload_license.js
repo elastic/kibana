@@ -112,19 +112,19 @@ export class UploadLicense extends React.PureComponent {
     const { currentLicenseType, applying } = this.props;
     return (
       <Fragment>
-        <EuiTitle className="eui-textCenter" size="l">
-          <h1>
-            <FormattedMessage
-              id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
-              defaultMessage="Upload your license"
-            />
-          </h1>
-        </EuiTitle>
-
-        <EuiSpacer />
-
         <EuiPageContent horizontalPosition="center" verticalPosition="center">
           <EuiPageContentBody>
+            <EuiTitle size="m">
+              <h1>
+                <FormattedMessage
+                  id="xpack.licenseMgmt.uploadLicense.uploadLicenseTitle"
+                  defaultMessage="Upload your license"
+                />
+              </h1>
+            </EuiTitle>
+
+            <EuiSpacer />
+
             {this.acknowledgeModal()}
 
             <EuiText>

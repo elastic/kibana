@@ -49,6 +49,10 @@ export function QueryBarProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async clickQuerySubmitButton() {
+      await testSubjects.click('querySubmitButton');
+    }
+
   }
 
   return new QueryBar();

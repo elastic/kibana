@@ -10,7 +10,7 @@ import { render } from 'react-dom';
 import { uiModules } from 'ui/modules';
 import { Beat } from 'plugins/monitoring/components/beats/beat';
 import { timefilter } from 'ui/timefilter';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nContext } from 'ui/i18n';
 
 const uiModule = uiModules.get('monitoring/directives', []);
 uiModule.directive('monitoringBeatsBeat', () => {
@@ -31,13 +31,13 @@ uiModule.directive('monitoringBeatsBeat', () => {
 
       scope.$watch('data', (data = {}) => {
         render((
-          <I18nProvider>
+          <I18nContext>
             <Beat
               summary={data.summary}
               metrics={data.metrics}
               onBrush={onBrush}
             />
-          </I18nProvider>
+          </I18nContext>
         ), $el[0]);
       });
 

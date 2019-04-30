@@ -7,7 +7,7 @@
 import moment from 'moment';
 import React from 'react';
 
-import { InfraMetricType, InfraPathType } from '../../common/graphql/types';
+import { InfraMetricType, InfraPathType } from '../graphql/types';
 import {
   InfraFormatterType,
   InfraOptions,
@@ -18,7 +18,6 @@ import { RendererFunction } from '../utils/typed_react';
 
 const initialState = {
   options: {
-    sourceId: 'default',
     timerange: {
       interval: '1m',
       to: moment.utc().valueOf(),
@@ -56,19 +55,11 @@ const initialState = {
         rules: [
           {
             value: 0,
-            color: '#D9D9D9',
-          },
-          {
-            value: 0.65,
-            color: '#00B3A4',
-          },
-          {
-            value: 0.8,
-            color: '#E6C220',
+            color: '#D3DAE6',
           },
           {
             value: 1,
-            color: '#DB1374',
+            color: '#3185FC',
           },
         ],
       },
@@ -82,7 +73,7 @@ interface WithOptionsProps {
 
 type State = Readonly<typeof initialState>;
 
-export const withOptions = <P extends InfraOptions>(WrappedComponent: React.ComponentType<P>) => (
+export const withOptions = (WrappedComponent: React.ComponentType<InfraOptions>) => (
   <WithOptions>{args => <WrappedComponent {...args} />}</WithOptions>
 );
 

@@ -17,7 +17,6 @@ const puid = new Puid();
 function formatJobObject(job) {
   return {
     index: job._index,
-    type: job._type,
     id: job._id,
   };
 }
@@ -49,18 +48,19 @@ export class Worker extends events.EventEmitter {
     super();
 
     this.id = puid.generate();
+    this.kibanaId = opts.kibanaId;
+    this.kibanaName = opts.kibanaName;
     this.queue = queue;
-    this.client = opts.client || this.queue.client;
+    this._client = this.queue.client;
     this.jobtype = type;
     this.workerFn = workerFn;
     this.checkSize = opts.size || 10;
-    this.doctype = opts.doctype || constants.DEFAULT_SETTING_DOCTYPE;
 
     this.debug = getLogger(opts, this.id, 'debug');
     this.warn = getLogger(opts, this.id, 'warn');
 
     this._running = true;
-    this.debug(`Created worker for job type ${this.jobtype}`);
+    this.debug(`Created worker for ${this.jobtype} jobs`);
 
     this._poller = new Poller({
       functionToPoll: () => {
@@ -84,7 +84,6 @@ export class Worker extends events.EventEmitter {
       id: this.id,
       index: this.queue.index,
       jobType: this.jobType,
-      doctype: this.doctype,
     };
   }
 
@@ -120,13 +119,15 @@ export class Worker extends events.EventEmitter {
       started_at: startTime,
       process_expiration: expirationTime,
       status: constants.JOB_STATUS_PROCESSING,
+      kibana_id: this.kibanaId,
+      kibana_name: this.kibanaName,
     };
 
-    return this.client.update({
+    return this._client.callWithInternalUser('update', {
       index: job._index,
-      type: job._type,
       id: job._id,
-      version: job._version,
+      if_seq_no: job._seq_no,
+      if_primary_term: job._primary_term,
       body: { doc }
     })
       .then((response) => {
@@ -159,11 +160,11 @@ export class Worker extends events.EventEmitter {
       output: docOutput,
     });
 
-    return this.client.update({
+    return this._client.callWithInternalUser('update', {
       index: job._index,
-      type: job._type,
       id: job._id,
-      version: job._version,
+      if_seq_no: job._seq_no,
+      if_primary_term: job._primary_term,
       body: { doc }
     })
       .then(() => true)
@@ -184,6 +185,7 @@ export class Worker extends events.EventEmitter {
       docOutput.content = output.content;
       docOutput.content_type = output.content_type || unknownMime;
       docOutput.max_size_reached = output.max_size_reached;
+      docOutput.size = output.size;
     } else {
       docOutput.content = output || defaultOutput;
       docOutput.content_type = unknownMime;
@@ -199,27 +201,32 @@ export class Worker extends events.EventEmitter {
       // run the worker's workerFn
       let isResolved = false;
       const cancellationToken = new CancellationToken();
-      Promise.resolve(this.workerFn.call(null, job._source.payload, cancellationToken))
-        .then((res) => {
+      const jobSource = job._source;
+
+      Promise.resolve(this.workerFn.call(null, job, jobSource.payload, cancellationToken))
+        .then(res => {
           isResolved = true;
           resolve(res);
         })
-        .catch((err) => {
+        .catch(err => {
           isResolved = true;
           reject(err);
         });
 
       // fail if workerFn doesn't finish before timeout
+      const { timeout } = jobSource;
       setTimeout(() => {
         if (isResolved) return;
 
         cancellationToken.cancel();
         this.warn(`Timeout processing job ${job._id}`);
-        reject(new WorkerTimeoutError(`Worker timed out, timeout = ${job._source.timeout}`, {
-          timeout: job._source.timeout,
-          jobId: job._id,
-        }));
-      }, job._source.timeout);
+        reject(
+          new WorkerTimeoutError(`Worker timed out, timeout = ${timeout}`, {
+            jobId: job._id,
+            timeout,
+          })
+        );
+      }, timeout);
     });
 
     return workerOutput.then((output) => {
@@ -235,11 +242,11 @@ export class Worker extends events.EventEmitter {
         output: docOutput
       };
 
-      return this.client.update({
+      return this._client.callWithInternalUser('update', {
         index: job._index,
-        type: job._type,
         id: job._id,
-        version: job._version,
+        if_seq_no: job._seq_no,
+        if_primary_term: job._primary_term,
         body: { doc }
       })
         .then(() => {
@@ -254,6 +261,7 @@ export class Worker extends events.EventEmitter {
           if (err.statusCode === 409) return false;
           this.warn(`Failure saving job output ${job._id}`, err);
           this.emit(constants.EVENT_WORKER_JOB_UPDATE_ERROR, this._formatErrorParams(err, job));
+          return this._failJob(job, (err.message) ? err.message : false);
         });
     }, (jobErr) => {
       if (!jobErr) {
@@ -345,21 +353,24 @@ export class Worker extends events.EventEmitter {
   _getPendingJobs() {
     const nowTime = moment().toISOString();
     const query = {
+      seq_no_primary_term: true,
       _source: {
         excludes: [ 'output.content' ]
       },
       query: {
-        constant_score: {
+        bool: {
           filter: {
             bool: {
-              filter: { term: { jobtype: this.jobtype } },
+              minimum_should_match: 1,
               should: [
                 { term: { status: 'pending' } },
-                { bool: {
-                  filter: [
-                    { term: { status: 'processing' } },
-                    { range: { process_expiration: { lte: nowTime } } }
-                  ] }
+                {
+                  bool: {
+                    must: [
+                      { term: { status: 'processing' } },
+                      { range: { process_expiration: { lte: nowTime } } }
+                    ]
+                  }
                 }
               ]
             }
@@ -373,10 +384,8 @@ export class Worker extends events.EventEmitter {
       size: this.checkSize
     };
 
-    return this.client.search({
+    return this._client.callWithInternalUser('search', {
       index: `${this.queue.index}-*`,
-      type: this.doctype,
-      version: true,
       body: query
     })
       .then((results) => {

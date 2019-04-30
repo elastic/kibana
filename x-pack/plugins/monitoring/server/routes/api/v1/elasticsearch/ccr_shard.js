@@ -10,6 +10,7 @@ import Joi from 'joi';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
 import { getMetrics } from '../../../../lib/details/get_metrics';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 
 function getFormattedLeaderIndex(leaderIndex) {
   let leader = leaderIndex;
@@ -92,7 +93,7 @@ export function ccrShardRoute(server) {
       const index = req.params.index;
       const shardId = req.params.shardId;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.elasticsearch.index_pattern', ccs);
+      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       const filters = [
         {

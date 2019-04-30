@@ -4,22 +4,26 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import React from 'react';
-
 import {
-  EuiSpacer,
+  EuiSpacer
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 import { FieldTypeIcon } from '../../../components/field_type_icon';
+import { getMLJobTypeAriaLabel } from '../../../util/field_types_utils';
 
 export function FieldStatsCard({ field }) {
-
-  const percent = Math.round(field.percent * 100) / 100;
 
   let type = field.type;
   if (type === 'double' || type === 'long') {
     type = 'number';
+  }
+
+  const typeAriaLabel = getMLJobTypeAriaLabel(type);
+  const cardTitleAriaLabel = [field.name];
+  if (typeAriaLabel) {
+    cardTitleAriaLabel.unshift(typeAriaLabel);
   }
 
   return (
@@ -29,8 +33,14 @@ export function FieldStatsCard({ field }) {
           <div
             className={`ml-field-title-bar ${type}`}
           >
-            <FieldTypeIcon type={type} />
-            <div className="field-name">{field.name}</div>
+            <FieldTypeIcon type={type} needsAria={false} />
+            <div
+              className="field-name"
+              tabIndex="0"
+              aria-label={`${cardTitleAriaLabel.join(', ')}`}
+            >
+              {field.name}
+            </div>
           </div>
 
           <div className="card-contents">
@@ -38,19 +48,49 @@ export function FieldStatsCard({ field }) {
               <React.Fragment>
                 <div className="stats">
                   <div className="stat">
-                    <i className="fa fa-files-o" aria-hidden="true" /> {field.count} document{(field.count > 1) ? 's' : ''} ({percent}%)
+                    <i className="fa fa-files-o" aria-hidden="true" />&nbsp;
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.fieldStatsCard.documentsCountDescription"
+                      defaultMessage="{fieldCount, plural, zero {# document} one {# document} other {# documents}} ({fieldPercent}%)"
+                      values={{
+                        fieldCount: field.count,
+                        fieldPercent: field.percent,
+                      }}
+                    />
                   </div>
                   <div className="stat">
-                    <i className="fa fa-cubes" aria-hidden="true" /> {field.cardinality} distinct value{(field.cardinality > 1) ? 's' : ''}
+                    <i className="fa fa-cubes" aria-hidden="true" />&nbsp;
+                    <FormattedMessage
+                      id="xpack.ml.fileDatavisualizer.fieldStatsCard.distinctCountDescription"
+                      defaultMessage="{fieldCardinality} distinct {fieldCardinality, plural, zero {value} one {value} other {values}}"
+                      values={{
+                        fieldCardinality: field.cardinality,
+                      }}
+                    />
                   </div>
 
                   {
-                    (field.mean_value) &&
+                    (field.median_value) &&
                     <React.Fragment>
                       <div>
-                        <div className="stat min heading">min</div>
-                        <div className="stat median heading">median</div>
-                        <div className="stat max heading">max</div>
+                        <div className="stat min heading">
+                          <FormattedMessage
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.minTitle"
+                            defaultMessage="min"
+                          />
+                        </div>
+                        <div className="stat median heading">
+                          <FormattedMessage
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.medianTitle"
+                            defaultMessage="median"
+                          />
+                        </div>
+                        <div className="stat max heading">
+                          <FormattedMessage
+                            id="xpack.ml.fileDatavisualizer.fieldStatsCard.maxTitle"
+                            defaultMessage="max"
+                          />
+                        </div>
                       </div>
                       <div>
                         <div className="stat min heading">{field.min_value}</div>
@@ -68,7 +108,12 @@ export function FieldStatsCard({ field }) {
                     <EuiSpacer size="s" />
 
                     <div className="stats">
-                      <div className="stat">top values</div>
+                      <div className="stat">
+                        <FormattedMessage
+                          id="xpack.ml.fileDatavisualizer.fieldStatsCard.topStatsValuesDescription"
+                          defaultMessage="top values"
+                        />
+                      </div>
                       {field.top_hits.map(({ count, value }) => {
                         const pcnt = Math.round(((count / field.count) * 100) * 100) / 100;
                         return (
@@ -93,7 +138,10 @@ export function FieldStatsCard({ field }) {
             {(field.count === 0) &&
               <div className="stats">
                 <div className="stat">
-                  No field information available
+                  <FormattedMessage
+                    id="xpack.ml.fileDatavisualizer.fieldStatsCard.noFieldInformationAvailableDescription"
+                    defaultMessage="No field information available"
+                  />
                 </div>
               </div>
             }

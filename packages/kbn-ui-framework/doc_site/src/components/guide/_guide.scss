@@ -4,7 +4,7 @@ html {
 
 .guideBody {
   height: 100%;
-  background-color: #000000;
+  background-color: $euiColorFullShade;
   margin: 0;
   min-width: $guideMinWidth;
 }
@@ -61,7 +61,7 @@ html {
   display: flex;
   justify-content: center;
   flex: 1 0 auto;
-  background-color: #ffffff;
+  background-color: $euiColorEmptyShade;
 }
 
   .guideContentPage__hint {
@@ -74,7 +74,7 @@ html {
     padding: 30px;
     margin: 20px;
     border-radius: 4px;
-    background-color: #e8e8e8;
+    background-color: $euiColorLightestShade;
     line-height: $guideLineHeight;
   }
 
@@ -96,11 +96,11 @@ html {
 }
 
 .guideWarning {
-  border-left: 5px solid #e8488b;
+  border-left: 5px solid $euiColorAccent;
   margin-top: 19px;
   padding: 0 14px;
   line-height: 21px;
-  color: #e8488b;
+  color: $euiColorAccent;
 }
 
 .guideBreak {

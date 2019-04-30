@@ -15,7 +15,6 @@ function getCardinalityOfFields(callWithRequest, payload) {
   const fs = fieldsServiceProvider(callWithRequest);
   const {
     index,
-    types,
     fieldNames,
     query,
     timeFieldName,
@@ -23,7 +22,6 @@ function getCardinalityOfFields(callWithRequest, payload) {
     latestMs } = payload;
   return fs.getCardinalityOfFields(
     index,
-    types,
     fieldNames,
     query,
     timeFieldName,

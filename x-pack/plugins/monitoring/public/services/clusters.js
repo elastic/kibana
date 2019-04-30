@@ -7,6 +7,18 @@
 import { uiModules } from 'ui/modules';
 import { ajaxErrorHandlersProvider } from 'plugins/monitoring/lib/ajax_error_handler';
 import { timefilter } from 'ui/timefilter';
+import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../common/constants';
+
+function formatClusters(clusters) {
+  return clusters.map(formatCluster);
+}
+
+function formatCluster(cluster) {
+  if (cluster.cluster_uuid === STANDALONE_CLUSTER_CLUSTER_UUID) {
+    cluster.cluster_name = 'Standalone Cluster';
+  }
+  return cluster;
+}
 
 const uiModule = uiModules.get('monitoring/clusters');
 uiModule.service('monitoringClusters', ($injector) => {
@@ -30,9 +42,9 @@ uiModule.service('monitoringClusters', ($injector) => {
       .then(response => response.data)
       .then(data => {
         if (clusterUuid) {
-          return data[0]; // return single cluster
+          return formatCluster(data[0]); // return single cluster
         }
-        return data; // return set of clusters
+        return formatClusters(data); // return set of clusters
       })
       .catch(err => {
         const Private = $injector.get('Private');

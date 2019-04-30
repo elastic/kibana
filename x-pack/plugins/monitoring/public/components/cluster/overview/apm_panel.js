@@ -39,7 +39,7 @@ function ApmPanelUi(props) {
       url="apm"
       title={props.intl.formatMessage({ id: 'xpack.monitoring.cluster.overview.apmPanel.apmTitle', defaultMessage: 'APM' })}
     >
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { TelemetryForm } from './telemetry_form';
 import { TelemetryOptInProvider } from '../../services/telemetry_opt_in';
 
@@ -40,12 +40,13 @@ const buildTelemetryOptInProvider = () => {
 
 describe('TelemetryForm', () => {
   it('renders as expected', () => {
-    expect(shallow(
+    expect(shallowWithIntl(
       <TelemetryForm
         spacesEnabled={false}
         query={{ text: '' }}
         onQueryMatchChange={jest.fn()}
         telemetryOptInProvider={buildTelemetryOptInProvider()}
+        enableSaving={true}
       />)
     ).toMatchSnapshot();
   });

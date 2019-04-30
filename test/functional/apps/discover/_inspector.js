@@ -17,12 +17,13 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const inspector = getService('inspector');
 
   const STATS_ROW_NAME_INDEX = 0;
   const STATS_ROW_VALUE_INDEX = 1;
@@ -39,7 +40,6 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.load('discover');
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
@@ -47,21 +47,21 @@ export default function ({ getService, getPageObjects }) {
     });
 
     afterEach(async () => {
-      await PageObjects.visualize.closeInspector();
+      await inspector.close();
     });
 
     it('should display request stats with no results', async () => {
-      await PageObjects.visualize.openInspector();
-      const requestStats = await PageObjects.visualize.getInspectorTableData();
+      await inspector.open();
+      const requestStats = await inspector.getTableData();
 
       expect(getHitCount(requestStats)).to.be('0');
     });
 
     it('should display request stats with results', async () => {
-      await PageObjects.header.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
+      await PageObjects.timePicker.setAbsoluteRange('2015-09-19 06:31:44.000', '2015-09-23 18:31:44.000');
 
-      await PageObjects.visualize.openInspector();
-      const requestStats = await PageObjects.visualize.getInspectorTableData();
+      await inspector.open();
+      const requestStats = await inspector.getTableData();
 
       expect(getHitCount(requestStats)).to.be('14004');
     });

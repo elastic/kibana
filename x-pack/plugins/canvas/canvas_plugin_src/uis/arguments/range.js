@@ -23,7 +23,7 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
       step={step}
       showLabels
       showInput
-      value={`${argValue}`}
+      value={argValue}
       onChange={handleChange}
     />
   );
@@ -31,7 +31,7 @@ const RangeArgInput = ({ typeInstance, onValueChange, argValue }) => {
 
 RangeArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.number.isRequired,
+  argValue: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   typeInstance: PropTypes.shape({
     options: PropTypes.shape({
       min: PropTypes.number.isRequired,

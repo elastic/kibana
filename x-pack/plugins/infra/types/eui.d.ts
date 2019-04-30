@@ -9,10 +9,14 @@
  *       package includes them.
  */
 
-import { CommonProps, EuiToolTipPosition } from '@elastic/eui';
+declare module '@elastic/eui' {
+  export const EuiWrappingPopover: React.SFC<any>;
+}
+
+import { IconType, ToolTipPositions } from '@elastic/eui';
+import { CommonProps } from '@elastic/eui/src/components/common';
 import moment from 'moment';
 import { MouseEventHandler, ReactType, Ref } from 'react';
-import { ReactDatePickerProps } from 'react-datepicker';
 import { JsonObject } from '../common/typed_json';
 
 declare module '@elastic/eui' {
@@ -34,63 +38,12 @@ declare module '@elastic/eui' {
   export type EuiHeaderSectionSide = 'left' | 'right';
   type EuiHeaderSectionProps = CommonProps & {
     side?: EuiHeaderSectionSide;
+    grow?: boolean;
   };
   export const EuiHeaderSection: React.SFC<EuiHeaderSectionProps>;
 
   type EuiHeaderBreadcrumbsProps = EuiBreadcrumbsProps;
   export const EuiHeaderBreadcrumbs: React.SFC<EuiHeaderBreadcrumbsProps>;
-
-  type EuiDatePickerProps = CommonProps &
-    Pick<
-      ReactDatePickerProps,
-      Exclude<
-        keyof ReactDatePickerProps,
-        | 'monthsShown'
-        | 'showWeekNumbers'
-        | 'fixedHeight'
-        | 'dropdownMode'
-        | 'useShortMonthInDropdown'
-        | 'todayButton'
-        | 'timeCaption'
-        | 'disabledKeyboardNavigation'
-        | 'isClearable'
-        | 'withPortal'
-        | 'ref'
-        | 'placeholderText'
-        | 'selected'
-      >
-    > & {
-      fullWidth?: boolean;
-      inputRef?: Ref<Element | ReactType>;
-      injectTimes?: moment.Moment[];
-      isInvalid?: boolean;
-      isLoading?: boolean;
-      selected?: moment.Moment | null | undefined;
-      placeholder?: string;
-      shadow?: boolean;
-      calendarContainer?: React.ReactNode;
-      onChange?: (date: moment.Moment | null) => void;
-      startDate?: moment.Moment | undefined;
-      endDate?: moment.Moment | undefined;
-    };
-  export const EuiDatePicker: React.SFC<EuiDatePickerProps>;
-
-  type EuiFilterGroupProps = CommonProps;
-  export const EuiFilterGroup: React.SFC<EuiFilterGroupProps>;
-
-  type EuiFilterButtonProps = CommonProps & {
-    color?: ButtonColor;
-    href?: string;
-    iconSide?: ButtonIconSide;
-    iconType?: IconType;
-    isDisabled?: boolean;
-    isSelected?: boolean;
-    onClick: MouseEventHandler<HTMLElement>;
-    rel?: string;
-    target?: string;
-    type?: string;
-  };
-  export const EuiFilterButton: React.SFC<EuiFilterButtonProps>;
 
   interface EuiOutsideClickDetectorProps {
     children: React.ReactNode;
@@ -141,8 +94,6 @@ declare module '@elastic/eui' {
     children: React.ReactNode;
   };
 
-  export const EuiErrorBoundary: React.SFC<EuiErrorBoundaryProps>;
-
   type EuiSizesResponsive = 'xs' | 's' | 'm' | 'l' | 'xl';
   type EuiResponsiveProps = CommonProps & {
     children: React.ReactNode;
@@ -153,24 +104,18 @@ declare module '@elastic/eui' {
 
   export const EuiShowFor: React.SFC<EuiResponsiveProps>;
 
-  type EuiDatePickerRangeProps = CommonProps & {
-    startDateControl: React.ReactNode;
-    endDateControl: React.ReactNode;
-    iconType?: IconType | boolean;
-    fullWidth?: boolean;
-    disabled?: boolean;
-    isLoading?: boolean;
-    dateFormat?: string;
+  type EuiInMemoryTableProps = CommonProps & {
+    items?: any;
+    columns?: any;
+    sorting?: any;
+    search?: any;
+    selection?: any;
+    pagination?: any;
+    itemId?: any;
+    isSelectable?: any;
+    loading?: any;
+    hasActions?: any;
+    message?: any;
   };
-
-  export const EuiDatePickerRange: React.SFC<EuiDatePickerRangeProps>;
-
-  export type EuiBetaBadgeProps = CommonProps & {
-    iconType?: IconType;
-    label: React.ReactNode;
-    title?: string;
-    tooltipContent?: React.ReactNode;
-    tooltipPosition?: EuiToolTipPosition;
-  };
-  export const EuiBetaBadge: React.SFC<EuiBetaBadgeProps>;
+  export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
 }

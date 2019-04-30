@@ -19,30 +19,37 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import 'brace/mode/yaml';
 import 'brace/theme/github';
-import { isEqual } from 'lodash';
 import React from 'react';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { ConfigList } from '../config_list';
-import { AssignmentActionType, Table } from '../table';
-import { BeatsTableType } from '../table';
-import { tagConfigAssignmentOptions } from '../table';
+import { AssignmentActionType, BeatsTableType, Table, tagConfigActions } from '../table';
 import { ConfigView } from './config_view';
 import { TagBadge } from './tag_badge';
 
 interface TagEditProps {
-  mode: 'edit' | 'create';
-  tag: Pick<BeatTag, Exclude<keyof BeatTag, 'last_updated'>>;
-  onDetachBeat: (beatIds: string[]) => void;
+  tag: BeatTag;
+  configuration_blocks: {
+    error?: string | undefined;
+    list: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
+  onConfigListChange: (index: number, size: number) => void;
+  onDetachBeat?: (beatIds: string[]) => void;
   onTagChange: (field: keyof BeatTag, value: string) => any;
-  attachedBeats: CMBeat[] | null;
+  onConfigAddOrEdit: (block: ConfigurationBlock) => any;
+  onConfigRemoved: (block: ConfigurationBlock) => any;
+  attachedBeats?: CMBeat[];
 }
 
 interface TagEditState {
   showFlyout: boolean;
   tableRef: any;
-  selectedConfigIndex?: number;
+  selectedConfig?: ConfigurationBlock;
 }
 
 export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
@@ -56,83 +63,98 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
   }
 
   public render() {
-    const { tag, attachedBeats } = this.props;
+    const { tag, attachedBeats, configuration_blocks } = this.props;
+
     return (
       <div>
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Tag details</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagDetailsTitle"
+                  defaultMessage="Tag details"
+                />
+              </h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                A tag is a group of configuration blocks that you can apply to one or more Beats.
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagDetailsDescription"
+                  defaultMessage="A tag is a group of configuration blocks that you can apply to one or more Beats."
+                />
               </p>
             </EuiText>
             <div>
-              <TagBadge tag={{ color: tag.color || '#FF0', id: tag.id }} />
+              <TagBadge tag={tag} />
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiForm>
               <EuiFormRow
-                label="Tag Name"
-                isInvalid={!!this.getNameError(tag.id)}
-                error={this.getNameError(tag.id) || undefined}
+                label={
+                  <FormattedMessage
+                    id="xpack.beatsManagement.tag.tagNameLabel"
+                    defaultMessage="Tag Name"
+                  />
+                }
+                isInvalid={!!this.getNameError(tag.name)}
+                error={this.getNameError(tag.name) || undefined}
               >
                 <EuiFieldText
                   name="name"
-                  isInvalid={!!this.getNameError(tag.id)}
-                  onChange={this.updateTag('id')}
-                  disabled={this.props.mode === 'edit'}
-                  value={tag.id}
-                  placeholder="Tag name (required)"
+                  isInvalid={!!this.getNameError(tag.name)}
+                  onChange={this.updateTag('name')}
+                  value={tag.name}
+                  placeholder={i18n.translate('xpack.beatsManagement.tag.tagNamePlaceholder', {
+                    defaultMessage: 'Tag name (required)',
+                  })}
                 />
               </EuiFormRow>
-              {this.props.mode === 'create' && (
-                <EuiFormRow label="Tag Color">
-                  <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
-                </EuiFormRow>
-              )}
+              <EuiFormRow
+                label={i18n.translate('xpack.beatsManagement.tag.tagColorLabel', {
+                  defaultMessage: 'Tag Color',
+                })}
+              >
+                <EuiColorPicker color={tag.color} onChange={this.updateTag('color')} />
+              </EuiFormRow>
             </EuiForm>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiHorizontalRule />
-
-        <EuiFlexGroup
-          alignItems={
-            tag.configuration_blocks && tag.configuration_blocks.length ? 'stretch' : 'center'
-          }
-        >
+        <EuiFlexGroup alignItems="stretch">
           <EuiFlexItem>
             <EuiTitle size="xs">
-              <h3>Configuration blocks</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagConfigurationsTitle"
+                  defaultMessage="Configuration blocks"
+                />
+              </h3>
             </EuiTitle>
             <EuiText color="subdued">
               <p>
-                A tag can have configuration blocks for different types of Beats. For example, a tag
-                can have two Metricbeat configuration blocks and one Filebeat input configuration
-                block.
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.tagConfigurationsDescription"
+                  defaultMessage="A tag can have configuration blocks for different types of Beats. For example, a tag
+                  can have two Metricbeat configuration blocks and one Filebeat input configuration block."
+                />
               </p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
               <ConfigList
-                configs={tag.configuration_blocks}
-                onConfigClick={(action: string, config: ConfigurationBlock) => {
-                  const selectedIndex = tag.configuration_blocks.findIndex(c => {
-                    return isEqual(config, c);
-                  });
+                onTableChange={this.props.onConfigListChange}
+                configs={configuration_blocks} // eslint-disable-line @typescript-eslint/camelcase
+                onConfigClick={(action: string, block: ConfigurationBlock) => {
                   if (action === 'delete') {
-                    const configs = [...tag.configuration_blocks];
-                    configs.splice(selectedIndex, 1);
-                    this.updateTag('configuration_blocks', configs);
+                    this.props.onConfigRemoved(block);
                   } else {
                     this.setState({
                       showFlyout: true,
-                      selectedConfigIndex: selectedIndex,
+                      selectedConfig: block,
                     });
                   }
                 }}
@@ -143,7 +165,10 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
                   this.setState({ showFlyout: true });
                 }}
               >
-                Add configuration block
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.addConfigurationButtonLabel"
+                  defaultMessage="Add configuration block"
+                />
               </EuiButton>
             </div>
           </EuiFlexItem>
@@ -154,42 +179,29 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
             <EuiHorizontalRule />
 
             <EuiTitle size="xs">
-              <h3>Beats with this tag</h3>
+              <h3>
+                <FormattedMessage
+                  id="xpack.beatsManagement.tag.beatsAssignedToTagTitle"
+                  defaultMessage="Beats with this tag"
+                />
+              </h3>
             </EuiTitle>
             <Table
-              assignmentOptions={{
-                schema: tagConfigAssignmentOptions,
-                items: [],
-                type: 'primary',
-                actionHandler: this.handleAssignmentActions,
-              }}
+              actions={tagConfigActions}
+              actionHandler={this.handleAssignmentActions}
               items={attachedBeats}
               ref={this.state.tableRef}
               type={BeatsTableType}
             />
           </div>
         )}
-
         {this.state.showFlyout && (
           <ConfigView
-            configBlock={
-              this.state.selectedConfigIndex !== undefined
-                ? tag.configuration_blocks[this.state.selectedConfigIndex]
-                : undefined
-            }
-            onClose={() => this.setState({ showFlyout: false, selectedConfigIndex: undefined })}
-            onSave={(config: any) => {
-              this.setState({ showFlyout: false, selectedConfigIndex: undefined });
-              if (this.state.selectedConfigIndex !== undefined) {
-                const configs = [...tag.configuration_blocks];
-                configs[this.state.selectedConfigIndex] = config;
-                this.updateTag('configuration_blocks', configs);
-              } else {
-                this.updateTag('configuration_blocks', [
-                  ...(tag.configuration_blocks || []),
-                  config,
-                ]);
-              }
+            configBlock={this.state.selectedConfig}
+            onClose={() => this.setState({ showFlyout: false, selectedConfig: undefined })}
+            onSave={(config: ConfigurationBlock) => {
+              this.setState({ showFlyout: false, selectedConfig: undefined });
+              this.props.onConfigAddOrEdit(config);
             }}
           />
         )}
@@ -199,7 +211,9 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
 
   private getNameError = (name: string) => {
     if (name && name !== '' && name.search(/^[a-zA-Z0-9-]+$/) === -1) {
-      return 'Tag name must consist of letters, numbers, and dashes only';
+      return i18n.translate('xpack.beatsManagement.tag.tagName.validationErrorMessage', {
+        defaultMessage: 'Tag name must consist of letters, numbers, and dashes only',
+      });
     } else {
       return false;
     }
@@ -209,11 +223,12 @@ export class TagEdit extends React.PureComponent<TagEditProps, TagEditState> {
     switch (action) {
       case AssignmentActionType.Delete:
         const { selection } = this.state.tableRef.current.state;
-        this.props.onDetachBeat(selection.map((beat: any) => beat.id));
+        if (this.props.onDetachBeat) {
+          this.props.onDetachBeat(selection.map((beat: any) => beat.id));
+        }
     }
   };
 
-  // TODO this should disable save button on bad validations
   private updateTag = (key: keyof BeatTag, value?: any) =>
     value !== undefined
       ? this.props.onTagChange(key, value)

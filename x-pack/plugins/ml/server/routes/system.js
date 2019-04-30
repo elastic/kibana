@@ -8,6 +8,7 @@
 
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { callWithInternalUserFactory } from '../client/call_with_internal_user_factory';
+import { mlLog } from '../client/log';
 
 import { wrapError } from '../client/errors';
 import Boom from 'boom';
@@ -26,7 +27,8 @@ export function systemRoutes(server, commonRouteConfig) {
         if (typeof resp.nodes === 'object') {
           Object.keys(resp.nodes).forEach((k) => {
             if (resp.nodes[k].attributes !== undefined) {
-              if (resp.nodes[k].attributes['ml.enabled'] === 'true') {
+              const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
+              if (maxOpenJobs !== null && maxOpenJobs > 0) {
                 count++;
               }
             }
@@ -39,20 +41,45 @@ export function systemRoutes(server, commonRouteConfig) {
   server.route({
     method: 'POST',
     path: '/api/ml/_has_privileges',
-    handler(request) {
+    async handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
-      // isSecurityDisabled will return true if it is a basic license
-      // this will cause the subsequent ml.privilegeCheck to fail.
-      // therefore, check for a basic license first and report that security
-      // is disabled because its not available on basic
-      if (isBasicLicense(server) || isSecurityDisabled(server)) {
-        // if xpack.security.enabled has been explicitly set to false
-        // return that security is disabled and don't call the privilegeCheck endpoint
-        return { securityDisabled: true };
-      } else {
-        const body = request.payload;
-        return callWithRequest('ml.privilegeCheck', { body })
-          .catch(resp => wrapError(resp));
+      try {
+        let upgradeInProgress = false;
+        try {
+          const info = await callWithRequest('ml.info');
+          // if ml indices are currently being migrated, upgrade_mode will be set to true
+          // pass this back with the privileges to allow for the disabling of UI controls.
+          upgradeInProgress = (info.upgrade_mode === true);
+        } catch (error) {
+          // if the ml.info check fails, it could be due to the user having insufficient privileges
+          // most likely they do not have the ml_user role and therefore will be blocked from using
+          // ML at all. However, we need to catch this error so the privilege check doesn't fail.
+          if (error.status === 403) {
+            mlLog('info', 'Unable to determine whether upgrade is being performed due to insufficient user privileges');
+          } else {
+            mlLog('warning', 'Unable to determine whether upgrade is being performed');
+          }
+        }
+
+        // isSecurityDisabled will return true if it is a basic license
+        // this will cause the subsequent ml.privilegeCheck to fail.
+        // therefore, check for a basic license first and report that security
+        // is disabled because its not available on basic
+        if (isBasicLicense(server) || isSecurityDisabled(server)) {
+          // if xpack.security.enabled has been explicitly set to false
+          // return that security is disabled and don't call the privilegeCheck endpoint
+          return {
+            securityDisabled: true,
+            upgradeInProgress
+          };
+        } else {
+          const body = request.payload;
+          const resp = await callWithRequest('ml.privilegeCheck', { body });
+          resp.upgradeInProgress = upgradeInProgress;
+          return resp;
+        }
+      } catch (error) {
+        return wrapError(error);
       }
     },
     config: {

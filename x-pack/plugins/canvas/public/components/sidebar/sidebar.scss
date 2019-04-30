@@ -15,7 +15,6 @@
   animation: sidebarPop $euiAnimSpeedFast $euiAnimSlightResistance;
 }
 
-
 .canvasSidebarFlyout {
   width: 350px;
   min-width: 350px;
@@ -24,6 +23,10 @@
 .canvasSidebar__elementButtons {
   background: darken($euiColorLightestShade, 5%);
   margin-bottom: $euiSizeS;
+}
+
+.canvasSidebar__panel-noMinWidth .euiButton {
+  min-width: 0;
 }
 
 @keyframes sidebarPop {

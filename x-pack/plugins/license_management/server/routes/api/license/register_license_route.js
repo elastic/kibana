@@ -5,16 +5,9 @@
  */
 
 import { putLicense } from '../../../lib/license';
-import { wrapEsError } from '../../../lib/wrap_es_error';
 
-export function registerLicenseRoute(server) {
-  const xpackInfo = server.plugins.xpack_main.info;
-  server.route({
-    path: '/api/license',
-    method: 'PUT',
-    handler: (request) => {
-      return putLicense(request, xpackInfo)
-        .catch(e => wrapEsError(e));
-    }
+export function registerLicenseRoute(router, xpackInfo) {
+  router.put('', (request) => {
+    return putLicense(request, xpackInfo);
   });
 }

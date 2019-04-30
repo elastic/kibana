@@ -4,26 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AggregationSearchResponse } from 'elasticsearch';
-import { StringMap } from 'x-pack/plugins/apm/typings/common';
+import { SearchParams } from 'elasticsearch';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_NAME
-} from '../../../common/constants';
-import { Transaction } from '../../../typings/Transaction';
+} from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType, StringMap } from '../../../typings/common';
+import { Transaction } from '../../../typings/es_schemas/ui/Transaction';
 import { Setup } from '../helpers/setup_request';
 
 interface Bucket {
   key: string;
   doc_count: number;
-  avg: {
-    value: number;
-  };
-  p95: {
-    values: {
-      '95.0': number;
-    };
-  };
+  avg: { value: number };
+  p95: { values: { '95.0': number } };
+  sum: { value: number };
   sample: {
     hits: {
       total: number;
@@ -41,14 +36,10 @@ interface Aggs {
   };
 }
 
-export type ESResponse = AggregationSearchResponse<void, Aggs>;
-
-export function transactionGroupsFetcher(
-  setup: Setup,
-  bodyQuery: StringMap
-): Promise<ESResponse> {
+export type ESResponse = PromiseReturnType<typeof transactionGroupsFetcher>;
+export function transactionGroupsFetcher(setup: Setup, bodyQuery: StringMap) {
   const { esFilterQuery, client, config } = setup;
-  const params = {
+  const params: SearchParams = {
     index: config.get<string>('apm_oss.transactionIndices'),
     body: {
       size: 0,
@@ -56,21 +47,25 @@ export function transactionGroupsFetcher(
       aggs: {
         transactions: {
           terms: {
-            field: `${TRANSACTION_NAME}.keyword`,
-            order: { avg: 'desc' },
-            size: 100
+            field: TRANSACTION_NAME,
+            order: { sum: 'desc' },
+            size: config.get<number>('xpack.apm.ui.transactionGroupBucketSize')
           },
           aggs: {
             sample: {
               top_hits: {
                 size: 1,
-                sort: [{ '@timestamp': { order: 'desc' } }]
+                sort: [
+                  { _score: 'desc' }, // sort by _score to ensure that buckets with sampled:true ends up on top
+                  { '@timestamp': { order: 'desc' } }
+                ]
               }
             },
             avg: { avg: { field: TRANSACTION_DURATION } },
             p95: {
               percentiles: { field: TRANSACTION_DURATION, percents: [95] }
-            }
+            },
+            sum: { sum: { field: TRANSACTION_DURATION } }
           }
         }
       }

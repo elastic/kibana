@@ -13,7 +13,10 @@ import {
   isDetailPanelOpen,
   showSystemIndices,
   getSortField,
-  isSortAscending
+  isSortAscending,
+  getIndicesAsArray,
+  indicesLoading,
+  getTableState
 } from '../../../../store/selectors';
 import {
   filterChanged,
@@ -23,12 +26,16 @@ import {
   pageSizeChanged,
   sortChanged,
   showSystemIndicesChanged,
+  loadIndices,
+  reloadIndices,
+  toggleChanged
 } from '../../../../store/actions';
 
 import { IndexTable as PresentationComponent } from './index_table';
 
 const mapStateToProps = (state) => {
   return {
+    allIndices: getIndicesAsArray(state),
     isDetailPanelOpen: isDetailPanelOpen(state),
     detailPanelIndexName: getDetailPanelIndexName(state),
     indices: getPageOfIndices(state),
@@ -36,7 +43,9 @@ const mapStateToProps = (state) => {
     filter: getFilter(state),
     showSystemIndices: showSystemIndices(state),
     sortField: getSortField(state),
-    isSortAscending: isSortAscending(state)
+    isSortAscending: isSortAscending(state),
+    indicesLoading: indicesLoading(state),
+    toggleNameToVisibleMap: getTableState(state).toggleNameToVisibleMap
   };
 };
 
@@ -57,11 +66,20 @@ const mapDispatchToProps = (dispatch) => {
     showSystemIndicesChanged: (showSystemIndices) => {
       dispatch(showSystemIndicesChanged({ showSystemIndices }));
     },
+    toggleChanged: (toggleName, toggleValue) => {
+      dispatch(toggleChanged({ toggleName, toggleValue }));
+    },
     openDetailPanel: (indexName) => {
       dispatch(openDetailPanel({ indexName }));
     },
     closeDetailPanel: () => {
       dispatch(closeDetailPanel());
+    },
+    loadIndices: () => {
+      dispatch(loadIndices());
+    },
+    reloadIndices: () => {
+      dispatch(reloadIndices());
     }
   };
 };

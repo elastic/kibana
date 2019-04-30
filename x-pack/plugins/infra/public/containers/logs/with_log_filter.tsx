@@ -7,10 +7,17 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
+import { StaticIndexPattern } from 'ui/index_patterns';
 import { logFilterActions, logFilterSelectors, State } from '../../store';
+import { FilterQuery } from '../../store/local/log_filter';
+import { convertKueryToElasticSearchQuery } from '../../utils/kuery';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 import { replaceStateKeyInQueryString, UrlStateContainer } from '../../utils/url_state';
+
+interface WithLogFilterProps {
+  indexPattern: StaticIndexPattern;
+}
 
 const withLogFilter = connect(
   (state: State) => ({
@@ -18,20 +25,31 @@ const withLogFilter = connect(
     filterQueryDraft: logFilterSelectors.selectLogFilterQueryDraft(state),
     isFilterQueryDraftValid: logFilterSelectors.selectIsLogFilterQueryDraftValid(state),
   }),
-  bindPlainActionCreators({
-    applyFilterQuery: logFilterActions.applyLogFilterQuery,
-    applyFilterQueryFromKueryExpression: (expression: string) =>
-      logFilterActions.applyLogFilterQuery({
-        kind: 'kuery',
-        expression,
-      }),
-    setFilterQueryDraft: logFilterActions.setLogFilterQueryDraft,
-    setFilterQueryDraftFromKueryExpression: (expression: string) =>
-      logFilterActions.setLogFilterQueryDraft({
-        kind: 'kuery',
-        expression,
-      }),
-  })
+  (dispatch, ownProps: WithLogFilterProps) =>
+    bindPlainActionCreators({
+      applyFilterQuery: (query: FilterQuery) =>
+        logFilterActions.applyLogFilterQuery({
+          query,
+          serializedQuery: convertKueryToElasticSearchQuery(
+            query.expression,
+            ownProps.indexPattern
+          ),
+        }),
+      applyFilterQueryFromKueryExpression: (expression: string) =>
+        logFilterActions.applyLogFilterQuery({
+          query: {
+            kind: 'kuery',
+            expression,
+          },
+          serializedQuery: convertKueryToElasticSearchQuery(expression, ownProps.indexPattern),
+        }),
+      setFilterQueryDraft: logFilterActions.setLogFilterQueryDraft,
+      setFilterQueryDraftFromKueryExpression: (expression: string) =>
+        logFilterActions.setLogFilterQueryDraft({
+          kind: 'kuery',
+          expression,
+        }),
+    })(dispatch)
 );
 
 export const WithLogFilter = asChildFunctionRenderer(withLogFilter);
@@ -42,8 +60,10 @@ export const WithLogFilter = asChildFunctionRenderer(withLogFilter);
 
 type LogFilterUrlState = ReturnType<typeof logFilterSelectors.selectLogFilterQuery>;
 
-export const WithLogFilterUrlState = () => (
-  <WithLogFilter>
+type WithLogFilterUrlStateProps = WithLogFilterProps;
+
+export const WithLogFilterUrlState: React.SFC<WithLogFilterUrlStateProps> = ({ indexPattern }) => (
+  <WithLogFilter indexPattern={indexPattern}>
     {({ applyFilterQuery, filterQuery }) => (
       <UrlStateContainer
         urlState={filterQuery}

@@ -21,12 +21,18 @@ export interface JobContent {
 }
 
 export interface JobInfo {
+  kibana_name: string;
+  kibana_id: string;
+  browser_type: string;
   created_at: string;
   priority: number;
   jobtype: string;
   created_by: string;
   timeout: number;
-  output: { content_type: string };
+  output: {
+    content_type: string;
+    size: number;
+  };
   process_expiration: string;
   completed_at: string;
   payload: {

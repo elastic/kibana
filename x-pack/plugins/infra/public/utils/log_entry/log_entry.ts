@@ -6,8 +6,8 @@
 
 import { bisector } from 'd3-array';
 
-import { LogEntries as LogEntriesQuery } from '../../../common/graphql/types';
 import { compareToTimeKey, getIndexAtTimeKey, TimeKey } from '../../../common/time';
+import { LogEntries as LogEntriesQuery } from '../../graphql/types';
 
 export type LogEntry = LogEntriesQuery.Entries;
 

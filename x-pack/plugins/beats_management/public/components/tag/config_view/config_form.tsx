@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 // @ts-ignore
-import Formsy, { addValidationRule, FieldValue, FormData } from 'formsy-react';
-import yaml from 'js-yaml';
+import { i18n } from '@kbn/i18n';
+import Formsy from 'formsy-react';
 import { get } from 'lodash';
 import React from 'react';
-import { ConfigurationBlock } from '../../../../common/domain_types';
-import { YamlConfigSchema } from '../../../lib/lib';
+import { ConfigBlockSchema, ConfigurationBlock } from '../../../../common/domain_types';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,
@@ -18,51 +17,19 @@ import {
   FormsyEuiSelect,
 } from '../../inputs';
 
-addValidationRule('isHosts', (form: FormData, values: FieldValue | string[]) => {
-  // TODO add more validation
-  return true;
-});
-
-addValidationRule('isString', (values: FormData, value: FieldValue) => {
-  return true;
-});
-
-addValidationRule('isPeriod', (values: FormData, value: FieldValue) => {
-  // TODO add more validation
-  return true;
-});
-
-addValidationRule('isPath', (values: FormData, value: FieldValue) => {
-  // TODO add more validation
-  return value && value.length > 0;
-});
-
-addValidationRule('isPaths', (values: FormData, value: FieldValue) => {
-  // TODO add more validation
-  return true;
-});
-
-addValidationRule('isYaml', (values: FormData, value: FieldValue) => {
-  try {
-    const stuff = yaml.safeLoad(value || '');
-    if (typeof stuff === 'string') {
-      return false;
-    }
-    return true;
-  } catch (e) {
-    return false;
-  }
-});
-
 interface ComponentProps {
   values: ConfigurationBlock;
-  schema: YamlConfigSchema[];
+  schema: ConfigBlockSchema;
   id: string;
   onSubmit?: (modal: any) => any;
   canSubmit(canIt: boolean): any;
 }
 
-export class ConfigForm extends React.Component<ComponentProps, any> {
+interface ComponentState {
+  canSubmit: boolean;
+}
+
+class ConfigFormUi extends React.Component<ComponentProps, ComponentState> {
   private form = React.createRef<HTMLButtonElement>();
   constructor(props: ComponentProps) {
     super(props);
@@ -105,7 +72,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
           onValid={this.enableButton}
           onInvalid={this.disableButton}
         >
-          {this.props.schema.map(schema => {
+          {this.props.schema.configs.map(schema => {
             switch (schema.ui.type) {
               case 'input':
                 return (
@@ -114,7 +81,7 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     id={schema.id}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
@@ -122,7 +89,6 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     helpText={schema.ui.helpText}
                     placeholder={schema.ui.placeholder}
                     label={schema.ui.label}
-                    validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required || false}
                   />
@@ -135,14 +101,13 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     disabled={!this.props.onSubmit}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
                     placeholder={schema.ui.placeholder}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required || false}
                   />
@@ -155,14 +120,13 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     disabled={!this.props.onSubmit}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
                     placeholder={schema.ui.placeholder}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
                   />
@@ -176,15 +140,19 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     disabled={!this.props.onSubmit}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
-                    options={[{ value: '', text: 'Please Select An Option' }].concat(
-                      schema.options || []
-                    )}
-                    validations={schema.validations}
+                    options={[
+                      {
+                        value: '',
+                        text: i18n.translate('xpack.beatsManagement.table.selectOptionLabel', {
+                          defaultMessage: 'Please Select An Option',
+                        }),
+                      },
+                    ].concat(schema.options || [])}
                     validationError={schema.error}
                     required={schema.required}
                   />
@@ -198,20 +166,38 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
                     id={schema.id}
                     defaultValue={get(
                       this.props,
-                      `values.configs[0].${schema.id}`,
+                      `values.config.${schema.id}`,
                       schema.defaultValue
                     )}
                     name={schema.id}
                     helpText={schema.ui.helpText}
                     label={schema.ui.label}
                     options={schema.options ? schema.options : []}
-                    validations={schema.validations}
                     validationError={schema.error}
                     required={schema.required}
                   />
                 );
             }
           })}
+          {this.props.schema && (
+            <FormsyEuiCodeEditor
+              mode="yaml"
+              disabled={!this.props.onSubmit}
+              id={'other'}
+              defaultValue={get(this.props, `values.config.other`, '')}
+              name={'other'}
+              helpText={i18n.translate('xpack.beatsManagement.config.otherConfigDescription', {
+                defaultMessage: 'Use YAML format to specify other settings for the Filebeat Input',
+              })}
+              label={i18n.translate('xpack.beatsManagement.config.otherConfigLabel', {
+                defaultMessage: 'Other Config',
+              })}
+              validationError={i18n.translate('xpack.beatsManagement.config.other.error', {
+                defaultMessage: 'Use valid YAML format',
+              })}
+              required={false}
+            />
+          )}
           {this.props.onSubmit && (
             <button
               type="submit"
@@ -225,3 +211,4 @@ export class ConfigForm extends React.Component<ComponentProps, any> {
     );
   }
 }
+export const ConfigForm = ConfigFormUi;

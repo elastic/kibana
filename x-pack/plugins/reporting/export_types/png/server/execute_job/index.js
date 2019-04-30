@@ -5,10 +5,16 @@
  */
 
 import * as Rx from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { mergeMap, catchError, map, takeUntil } from 'rxjs/operators';
 import { oncePerServer } from '../../../../server/lib/once_per_server';
 import { generatePngObservableFactory } from '../lib/generate_png';
-import { decryptJobHeaders, omitBlacklistedHeaders, getConditionalHeaders, addForceNowQuerystring } from '../../../common/execute_job/';
+import {
+  decryptJobHeaders,
+  omitBlacklistedHeaders,
+  getConditionalHeaders,
+  addForceNowQuerystring,
+} from '../../../common/execute_job/';
 
 function executeJobFn(server) {
   const generatePngObservable = generatePngObservableFactory(server);
@@ -16,7 +22,18 @@ function executeJobFn(server) {
   return function executeJob(jobToExecute, cancellationToken) {
     const process$ = Rx.of({ job: jobToExecute, server }).pipe(
       mergeMap(decryptJobHeaders),
-      catchError(() => Rx.throwError('Failed to decrypt report job data. Please re-generate this report.')),
+      catchError(err =>
+        Rx.throwError(
+          i18n.translate(
+            'xpack.reporting.exportTypes.png.compShim.failedToDecryptReportJobDataErrorMessage',
+            {
+              defaultMessage:
+                'Failed to decrypt report job data. Please ensure that {encryptionKey} is set and re-generate this report. {err}',
+              values: { encryptionKey: 'xpack.reporting.encryptionKey', err: err.toString() },
+            }
+          )
+        )
+      ),
       map(omitBlacklistedHeaders),
       map(getConditionalHeaders),
       mergeMap(addForceNowQuerystring),
@@ -26,15 +43,14 @@ function executeJobFn(server) {
       }),
       map(buffer => ({
         content_type: 'image/png',
-        content: buffer.toString('base64')
+        content: buffer.toString('base64'),
+        size: buffer.byteLength,
       }))
     );
 
     const stop$ = Rx.fromEventPattern(cancellationToken.on);
 
-    return process$.pipe(
-      takeUntil(stop$)
-    ).toPromise();
+    return process$.pipe(takeUntil(stop$)).toPromise();
   };
 }
 

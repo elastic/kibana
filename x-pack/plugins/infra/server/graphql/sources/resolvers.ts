@@ -4,31 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraSourceResolvers, QueryResolvers } from '../../../common/graphql/types';
-import { InfraResolvedResult, InfraResolverWithFields } from '../../lib/adapters/framework';
-import { InfraContext } from '../../lib/infra_types';
+import { convertChangeToUpdater } from '../../../common/source_configuration';
+import { InfraSourceResolvers, MutationResolvers, QueryResolvers } from '../../graphql/types';
 import { InfraSourceStatus } from '../../lib/source_status';
 import { InfraSources } from '../../lib/sources';
+import {
+  ChildResolverOf,
+  InfraResolverOf,
+  InfraResolverWithFields,
+  ResultOf,
+} from '../../utils/typed_resolvers';
 
 export type QuerySourceResolver = InfraResolverWithFields<
   QueryResolvers.SourceResolver,
-  null,
-  InfraContext,
-  'id' | 'configuration'
+  'id' | 'version' | 'updatedAt' | 'configuration'
 >;
 
 export type QueryAllSourcesResolver = InfraResolverWithFields<
   QueryResolvers.AllSourcesResolver,
-  null,
-  InfraContext,
-  'id' | 'configuration'
+  'id' | 'version' | 'updatedAt' | 'configuration'
 >;
 
-export type InfraSourceStatusResolver = InfraResolverWithFields<
-  InfraSourceResolvers.StatusResolver,
-  InfraResolvedResult<QuerySourceResolver>,
-  InfraContext,
-  never
+export type InfraSourceStatusResolver = ChildResolverOf<
+  InfraResolverOf<InfraSourceResolvers.StatusResolver<ResultOf<QuerySourceResolver>>>,
+  QuerySourceResolver
+>;
+
+export type MutationCreateSourceResolver = InfraResolverOf<
+  MutationResolvers.CreateSourceResolver<{
+    source: ResultOf<QuerySourceResolver>;
+  }>
+>;
+
+export type MutationDeleteSourceResolver = InfraResolverOf<MutationResolvers.DeleteSourceResolver>;
+
+export type MutationUpdateSourceResolver = InfraResolverOf<
+  MutationResolvers.UpdateSourceResolver<{
+    source: ResultOf<QuerySourceResolver>;
+  }>
 >;
 
 interface SourcesResolversDeps {
@@ -46,23 +59,22 @@ export const createSourcesResolvers = (
   InfraSource: {
     status: InfraSourceStatusResolver;
   };
+  Mutation: {
+    createSource: MutationCreateSourceResolver;
+    deleteSource: MutationDeleteSourceResolver;
+    updateSource: MutationUpdateSourceResolver;
+  };
 } => ({
   Query: {
-    async source(root, args) {
-      const requestedSourceConfiguration = await libs.sources.getConfiguration(args.id);
+    async source(root, args, { req }) {
+      const requestedSourceConfiguration = await libs.sources.getSourceConfiguration(req, args.id);
 
-      return {
-        id: args.id,
-        configuration: requestedSourceConfiguration,
-      };
+      return requestedSourceConfiguration;
     },
-    async allSources() {
-      const sourceConfigurations = await libs.sources.getAllConfigurations();
+    async allSources(root, args, { req }) {
+      const sourceConfigurations = await libs.sources.getAllSourceConfigurations(req);
 
-      return Object.entries(sourceConfigurations).map(([sourceName, sourceConfiguration]) => ({
-        id: sourceName,
-        configuration: sourceConfiguration,
-      }));
+      return sourceConfigurations;
     },
   },
   InfraSource: {
@@ -70,4 +82,54 @@ export const createSourcesResolvers = (
       return source;
     },
   },
+  Mutation: {
+    async createSource(root, args, { req }) {
+      const sourceConfiguration = await libs.sources.createSourceConfiguration(
+        req,
+        args.id,
+        compactObject({
+          ...args.source,
+          fields: args.source.fields ? compactObject(args.source.fields) : undefined,
+        })
+      );
+
+      return {
+        source: sourceConfiguration,
+      };
+    },
+    async deleteSource(root, args, { req }) {
+      await libs.sources.deleteSourceConfiguration(req, args.id);
+
+      return {
+        id: args.id,
+      };
+    },
+    async updateSource(root, args, { req }) {
+      const updaters = args.changes.map(convertChangeToUpdater);
+
+      const updatedSourceConfiguration = await libs.sources.updateSourceConfiguration(
+        req,
+        args.id,
+        updaters
+      );
+
+      return {
+        source: updatedSourceConfiguration,
+      };
+    },
+  },
 });
+
+type CompactObject<T> = { [K in keyof T]: NonNullable<T[K]> };
+
+const compactObject = <T>(obj: T): CompactObject<T> =>
+  Object.entries(obj).reduce<CompactObject<T>>(
+    (accumulatedObj, [key, value]) =>
+      typeof value === 'undefined' || value === null
+        ? accumulatedObj
+        : {
+            ...(accumulatedObj as any),
+            [key]: value,
+          },
+    {} as CompactObject<T>
+  );

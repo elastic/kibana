@@ -12,7 +12,9 @@ import { historyProvider } from './history_provider';
 let router;
 
 export function routerProvider(routes) {
-  if (router) return router;
+  if (router) {
+    return router;
+  }
 
   const baseRouter = createRouter(routes);
   const history = historyProvider(getWindow());
@@ -22,7 +24,9 @@ export function routerProvider(routes) {
 
   const getState = (name, params, state) => {
     // given a path, assuming params is the state
-    if (isPath(name)) return params || history.getLocation().state;
+    if (isPath(name)) {
+      return params || history.getLocation().state;
+    }
     return state || history.getLocation().state;
   };
 
@@ -31,7 +35,9 @@ export function routerProvider(routes) {
     const method = replace ? 'replace' : 'push';
 
     // given a path, go there directly
-    if (isPath(name)) return history[method](currentState, name);
+    if (isPath(name)) {
+      return history[method](currentState, name);
+    }
     history[method](currentState, baseRouter.create(name, params));
   };
 
@@ -51,8 +57,9 @@ export function routerProvider(routes) {
       updateLocation(name, params, state, true);
     },
     onPathChange(fn) {
-      if (componentListener != null)
+      if (componentListener != null) {
         throw new Error('Only one route component listener is allowed');
+      }
 
       const execOnMatch = location => {
         const { pathname } = location;
@@ -69,7 +76,9 @@ export function routerProvider(routes) {
 
       // on path changes, fire the path change handler
       componentListener = history.onChange((locationObj, prevLocationObj) => {
-        if (locationObj.pathname !== prevLocationObj.pathname) execOnMatch(locationObj);
+        if (locationObj.pathname !== prevLocationObj.pathname) {
+          execOnMatch(locationObj);
+        }
       });
 
       // initially fire the path change handler

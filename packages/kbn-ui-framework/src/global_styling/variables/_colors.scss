@@ -1,52 +1,42 @@
 // True colors
 
-$kuiColorBlue: #0079a5;
-$kuiColorTeal: #00A69B;
-$kuiColorRed: #A30000;
-$kuiColorLightestGray: #F5F5F5;
-$kuiColorLightGray: #D9D9D9;
-$kuiColorMediumGray: #999;
-$kuiColorDarkGray: #666;
-$kuiColorDarkestGray: #3F3F3F;
-$kuiColorBlack: #000;
-$kuiColorWhite: #FFF;
-$kuiColorEmptyShade: $kuiColorWhite;
-$kuiColorLightestShade: lighten($kuiColorLightGray, 5%);
+$kuiColorBlue: $euiColorPrimary;
+$kuiColorTeal: $euiColorSecondary;
+$kuiColorRed: $euiColorDanger;
+$kuiColorLightestGray: $euiColorLightestShade;
+$kuiColorLightGray: $euiColorLightShade;
+$kuiColorMediumGray: $euiColorMediumShade;
+$kuiColorDarkGray: $euiColorDarkShade;
+$kuiColorDarkestGray: $euiColorDarkestShade;
+$kuiColorBlack: $euiColorFullShade;
+$kuiColorWhite: $euiColorGhost;
+$kuiColorEmptyShade: $euiColorEmptyShade;
+$kuiColorLightestShade: $euiColorLightestShade;
 
 // Normal colors
 
-$kuiTextColor: #2d2d2d;
-$kuiLinkColor: $kuiColorBlue;
+$kuiTextColor: $euiTextColor;
+$kuiLinkColor: $euiColorPrimary;
 $kuiLinkColor-isHover: darken($kuiLinkColor, 10%);
 $kuiInputTextColor: $kuiTextColor;
-$kuiInputBackgroundColor: $kuiColorWhite;
-$kuiInputBorderColor: $kuiColorLightGray;
-
-// Dark theme colors
-
-$kuiTextColor--darkTheme: #cecece;
-$kuiBackgroundColor--darkTheme: #777777;
-$kuiLinkColor--darkTheme: #b7e2ea;
-$kuiLinkColor-isHover--darkTheme: #def2f6;
-$kuiInputTextColor--darkTheme: $kuiTextColor--darkTheme;
-$kuiInputBackgroundColor--darkTheme: #444444;
-$kuiInputBorderColor--darkTheme: $kuiInputBackgroundColor--darkTheme;
+$kuiInputBackgroundColor: $euiFormBackgroundColor;
+$kuiInputBorderColor: $euiFormBorderColor;
 
 // Colors
 
-$kuiInfoColor: #3fa8c7;
-$kuiInactiveColor: #c3c3c3;
-$kuiSuccessColor: #417505;
-$kuiWarningColor: #ec9800;
-$kuiDangerColor: $kuiColorRed;
-$kuiFocusColor: $kuiColorBlue;
+$kuiInfoColor: $euiColorPrimary;
+$kuiInactiveColor: $euiColorLightShade;
+$kuiSuccessColor: $euiColorSecondary;
+$kuiWarningColor: $euiColorWarning;
+$kuiDangerColor: $euiColorDanger;
+$kuiFocusColor: $euiColorPrimary;
 $kuiFocusAltBackgroundColor: rgba($kuiInfoColor, 0.2);
-$kuiFocusDangerColor: #ff523c;
-$kuiFocusWarningColor: #ffa500;
-$kuiFocusBackgroundColor: #ffffff;
-$kuiFontColor: #191E23;
-$kuiSubduedTextColor: $kuiColorDarkGray;
-$kuiLinkHoverColor: #006E8A;
-$kuiSelectedBorderColor: $kuiColorBlue;
-$kuiDangerBorderColor: $kuiDangerColor;
-$kuiFormControlBorderColor: #DEDEDE;
+$kuiFocusDangerColor: $euiColorDanger;
+$kuiFocusWarningColor: $euiColorWarning;
+$kuiFocusBackgroundColor: $euiColorEmptyShade;
+$kuiFontColor: $euiTextColor;
+$kuiSubduedTextColor: $euiColorDarkShade;
+$kuiLinkHoverColor: darken($euiColorPrimary, 10%);
+$kuiSelectedBorderColor: $euiColorPrimary;
+$kuiDangerBorderColor: $euiColorDanger;
+$kuiFormControlBorderColor: transparentize($euiColorFullShade, .9);

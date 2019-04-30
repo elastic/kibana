@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { last } from 'lodash';
-import { isNumber } from 'lodash';
+import { get, isNumber, last, max, sum } from 'lodash';
 import moment from 'moment';
-import { InfraNode, InfraNodeMetric } from '../../../../../common/graphql/types';
+
+import { InfraMetricType, InfraNode, InfraNodeMetric } from '../../../../graphql/types';
 import { InfraBucket, InfraNodeRequestOptions } from '../adapter_types';
 import { getBucketSizeInSeconds } from './get_bucket_size_in_seconds';
 
@@ -32,6 +32,21 @@ const findLastFullBucket = (
   }, last(buckets));
 };
 
+const getMetricValueFromBucket = (type: InfraMetricType) => (bucket: InfraBucket) => {
+  const metric = bucket[type];
+  return (metric && (metric.normalized_value || metric.value)) || 0;
+};
+
+function calculateMax(bucket: InfraBucket, type: InfraMetricType) {
+  const { buckets } = bucket.timeseries;
+  return max(buckets.map(getMetricValueFromBucket(type))) || 0;
+}
+
+function calculateAvg(bucket: InfraBucket, type: InfraMetricType) {
+  const { buckets } = bucket.timeseries;
+  return sum(buckets.map(getMetricValueFromBucket(type))) / buckets.length || 0;
+}
+
 function createNodeMetrics(
   options: InfraNodeRequestOptions,
   node: InfraBucket,
@@ -43,11 +58,11 @@ function createNodeMetrics(
   if (!lastBucket) {
     throw new Error('Date histogram returned an empty set of buckets.');
   }
-  const metricObj = lastBucket[metric.type];
-  const value = (metricObj && (metricObj.normalized_value || metricObj.value)) || 0;
   return {
     name: metric.type,
-    value,
+    value: getMetricValueFromBucket(metric.type)(lastBucket),
+    max: calculateMax(bucket, metric.type),
+    avg: calculateAvg(bucket, metric.type),
   };
 }
 
@@ -56,8 +71,9 @@ export function createNodeItem(
   node: InfraBucket,
   bucket: InfraBucket
 ): InfraNode {
+  const nodeDetails = get(node, ['nodeDetails', 'buckets', 0]);
   return {
     metric: createNodeMetrics(options, node, bucket),
-    path: [{ value: node.key }],
+    path: [{ value: node.key, label: get(nodeDetails, 'key', node.key) }],
   } as InfraNode;
 }

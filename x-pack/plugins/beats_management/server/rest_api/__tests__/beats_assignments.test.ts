@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CMServerLibs } from '../../lib/lib';
+import { CMServerLibs } from '../../lib/types';
 import { HapiBackendFrameworkAdapter } from './../../lib/adapters/framework/hapi_framework_adapter';
 import { testHarnes } from './test_harnes';
 
@@ -19,10 +19,8 @@ describe('assign_tags_to_beats', () => {
   beforeEach(async () => await testHarnes.loadData());
 
   it('should add a single tag to a single beat', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -35,14 +33,12 @@ describe('assign_tags_to_beats', () => {
     });
 
     expect(statusCode).toEqual(200);
-    expect(result.assignments).toEqual([{ status: 200, result: 'updated' }]);
+    expect(result.results).toEqual([{ success: true, result: { message: 'updated' } }]);
   });
 
   it('should not re-add an existing tag to a beat', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -56,11 +52,9 @@ describe('assign_tags_to_beats', () => {
 
     expect(statusCode).toEqual(200);
 
-    expect(result.assignments).toEqual([{ status: 200, result: 'updated' }]);
+    expect(result.results).toEqual([{ success: true, result: { message: 'updated' } }]);
 
-    let beat;
-
-    beat = await serverLibs.beats.getById(
+    const beat = await serverLibs.beats.getById(
       {
         kind: 'internal',
       },
@@ -70,10 +64,8 @@ describe('assign_tags_to_beats', () => {
   });
 
   it('should add a single tag to a multiple beats', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -87,9 +79,9 @@ describe('assign_tags_to_beats', () => {
 
     expect(statusCode).toEqual(200);
 
-    expect(result.assignments).toEqual([
-      { status: 200, result: 'updated' },
-      { status: 200, result: 'updated' },
+    expect(result.results).toEqual([
+      { success: true, result: { message: 'updated' } },
+      { success: true, result: { message: 'updated' } },
     ]);
 
     let beat;
@@ -114,10 +106,8 @@ describe('assign_tags_to_beats', () => {
   });
 
   it('should add multiple tags to a single beat', async () => {
-    const {
-      result,
-      statusCode,
-    } = await (serverLibs.framework as HapiBackendFrameworkAdapter).injectRequstForTesting({
+    const { result, statusCode } = await ((serverLibs.framework as any)
+      .adapter as HapiBackendFrameworkAdapter).injectRequstForTesting({
       method: 'POST',
       url: '/api/beats/agents_tags/assignments',
       headers: {
@@ -131,9 +121,9 @@ describe('assign_tags_to_beats', () => {
 
     expect(statusCode).toEqual(200);
 
-    expect(result.assignments).toEqual([
-      { status: 200, result: 'updated' },
-      { status: 200, result: 'updated' },
+    expect(result.results).toEqual([
+      { success: true, result: { message: 'updated' } },
+      { success: true, result: { message: 'updated' } },
     ]);
 
     const beat = await serverLibs.beats.getById(

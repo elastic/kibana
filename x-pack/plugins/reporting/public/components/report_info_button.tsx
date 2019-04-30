@@ -15,8 +15,9 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import React, { Component, Fragment } from 'react';
+import { USES_HEADLESS_JOB_TYPES } from '../../common/constants';
 import { JobInfo, jobQueueClient } from '../lib/job_queue_client';
 
 interface Props {
@@ -32,6 +33,7 @@ interface State {
 }
 
 const NA = 'n/a';
+const UNKNOWN = 'unknown';
 
 const getDimensions = (info: JobInfo) => {
   const defaultDimensions = { width: null, height: null };
@@ -73,7 +75,12 @@ export class ReportInfoButton extends Component<Props, State> {
       return null;
     }
 
-    // TODO browser type
+    const jobType = get(info, 'jobtype', NA);
+    const processedBy =
+      has(info, 'kibana_name') && has(info, 'kibana_id')
+        ? `${info.kibana_name} (${info.kibana_id})`
+        : UNKNOWN;
+
     // TODO queue method (clicked UI, watcher, etc)
     const jobInfoParts = {
       datetimes: [
@@ -92,6 +99,10 @@ export class ReportInfoButton extends Component<Props, State> {
         {
           title: 'Completed At',
           description: get(info, 'completed_at', NA),
+        },
+        {
+          title: 'Processed By',
+          description: processedBy,
         },
         {
           title: 'Browser Timezone',
@@ -117,11 +128,15 @@ export class ReportInfoButton extends Component<Props, State> {
         },
         {
           title: 'Job Type',
-          description: get(info, 'jobtype', NA),
+          description: jobType,
         },
         {
           title: 'Content Type',
           description: get(info, 'output.content_type') || NA,
+        },
+        {
+          title: 'Size in Bytes',
+          description: get(info, 'output.size') || NA,
         },
       ],
       status: [
@@ -144,6 +159,12 @@ export class ReportInfoButton extends Component<Props, State> {
         {
           title: 'Status',
           description: get(info, 'status', NA),
+        },
+        {
+          title: 'Browser Type',
+          description: USES_HEADLESS_JOB_TYPES.includes(jobType)
+            ? get(info, 'browser_type', UNKNOWN)
+            : NA,
         },
       ],
     };

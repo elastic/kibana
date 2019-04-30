@@ -1,0 +1,15 @@
+<div class="form-group">
+  <label
+    id="visEditorPercentileLabel{{agg.id}}"
+    i18n-id="common.ui.aggTypes.percentsLabel"
+    i18n-default-message="Percents"
+  ></label>
+  <kbn-number-list
+    ng-model="agg.params.percents"
+    unit-name="percent"
+    range="[0,100]"
+    validate-ascending-order="false"
+    labelledby-id="visEditorPercentileLabel{{agg.id}}"
+    >
+  </kbn-number-list>
+</div>

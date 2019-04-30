@@ -46,10 +46,6 @@
       border-left: $kuiSize solid transparent;
       border-right: $kuiSize solid transparent;
       border-bottom: $kuiSize solid $kuiBorderColor;
-
-      @include darkTheme {
-        border-bottom-color: $kuiInputBorderColor--darkTheme;
-      }
     }
 
     // This part of the arrow matches the panel.
@@ -64,20 +60,12 @@
       width: 0;
       border-left: $kuiSize solid transparent;
       border-right: $kuiSize solid transparent;
-      border-bottom: $kuiSize solid #ffffff;
-
-      @include darkTheme {
-        border-bottom-color: $kuiBackgroundColor--darkTheme;
-      }
+      border-bottom: $kuiSize solid $euiColorEmptyShade;
     }
   }
 
 .kuiPopover--withTitle .kuiPopover__panel:after {
   border-bottom-color: $kuiColorLightestShade;
-
-  @include darkTheme {
-    border-bottom-color: $kuiBackgroundColor--darkTheme;
-  }
 }
 
 // Positions the menu and arrow to the left of the parent.

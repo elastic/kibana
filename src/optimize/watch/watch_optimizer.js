@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import BaseOptimizer from '../base_optimizer';
+import { createBundlesRoute } from '../bundles_route';
+import { DllCompiler } from '../dynamic_dll_plugin';
+import { fromRoot } from '../../legacy/utils';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-
-import BaseOptimizer from '../base_optimizer';
-
-import { createBundlesRoute } from '../bundles_route';
 
 export const STATUS = {
   RUNNING: 'optimizer running',
@@ -34,7 +34,6 @@ export const STATUS = {
 export default class WatchOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
-    this.log = opts.log || (() => null);
     this.prebuild = opts.prebuild || false;
     this.watchCache = opts.watchCache;
     this.status$ = new Rx.ReplaySubject(1);
@@ -50,10 +49,8 @@ export default class WatchOptimizer extends BaseOptimizer {
     // log status changes
     this.status$.subscribe(this.onStatusChangeHandler);
     await this.uiBundles.resetBundleDir();
-    await this.initCompiler();
+    await super.init();
 
-    this.compiler.plugin('watch-run', this.compilerRunStartHandler);
-    this.compiler.plugin('done', this.compilerDoneHandler);
     this.compiler.watch({ aggregateTimeout: 200 }, this.compilerWatchErrorHandler);
 
     if (this.prebuild) {
@@ -61,6 +58,52 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
 
     this.initializing = false;
+  }
+
+  /**
+   *
+   * Extends the base_optimizer registerCompilerHooks function
+   * calling extended function also adding a new register function
+   *
+   * It gets called by super.init()
+  */
+  registerCompilerHooks() {
+    super.registerCompilerHooks();
+    this.registerCompilerWatchRunHook();
+  }
+
+  registerCompilerWatchRunHook() {
+    this.compiler.hooks.watchRun.tap('watch_optimizer-watchRun', () => {
+      this.status$.next({
+        type: STATUS.RUNNING
+      });
+    });
+  }
+
+  registerCompilerDoneHook() {
+    super.registerCompilerDoneHook();
+
+    this.compiler.hooks.done.tap('watch_optimizer-done', stats => {
+      if (stats.compilation.needAdditionalPass) {
+        return;
+      }
+
+      this.initialBuildComplete = true;
+      const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
+
+      if (this.isFailure(stats)) {
+        this.status$.next({
+          type: STATUS.FAILURE,
+          seconds,
+          error: this.failedStatsToError(stats)
+        });
+      } else {
+        this.status$.next({
+          type: STATUS.SUCCESS,
+          seconds,
+        });
+      }
+    });
   }
 
   bindToServer(server, basePath) {
@@ -73,8 +116,10 @@ export default class WatchOptimizer extends BaseOptimizer {
     });
 
     server.route(createBundlesRoute({
-      bundlesPath: this.compiler.outputPath,
-      basePublicPath: basePath
+      regularBundlesPath: this.compiler.outputPath,
+      dllBundlesPath: DllCompiler.getRawDllConfig().outputPath,
+      basePublicPath: basePath,
+      builtCssPath: fromRoot('built_assets/css'),
     }));
   }
 
@@ -100,14 +145,6 @@ export default class WatchOptimizer extends BaseOptimizer {
     }
   }
 
-  compilerRunStartHandler = (watchingCompiler, cb) => {
-    this.status$.next({
-      type: STATUS.RUNNING
-    });
-
-    cb();
-  }
-
   compilerWatchErrorHandler = (error) => {
     if (error) {
       this.status$.next({
@@ -115,40 +152,20 @@ export default class WatchOptimizer extends BaseOptimizer {
         error
       });
     }
-  }
-
-  compilerDoneHandler = (stats) => {
-    this.initialBuildComplete = true;
-    const seconds = parseFloat((stats.endTime - stats.startTime) / 1000).toFixed(2);
-
-    if (stats.hasErrors() || stats.hasWarnings()) {
-      this.status$.next({
-        type: STATUS.FAILURE,
-        seconds,
-        error: this.failedStatsToError(stats)
-      });
-    } else {
-      this.status$.next({
-        type: STATUS.SUCCESS,
-        seconds,
-      });
-    }
-  }
+  };
 
   onStatusChangeHandler = ({ type, seconds, error }) => {
     switch (type) {
       case STATUS.RUNNING:
         if (!this.initialBuildComplete) {
-          this.log(['info', 'optimize'], {
-            tmpl: 'Optimization started',
+          this.logWithMetadata(['info', 'optimize'], `Optimization started`, {
             bundles: this.uiBundles.getIds()
           });
         }
         break;
 
       case STATUS.SUCCESS:
-        this.log(['info', 'optimize'], {
-          tmpl: 'Optimization <%= status %> in <%= seconds %> seconds',
+        this.logWithMetadata(['info', 'optimize'], `Optimization success in ${seconds} seconds`, {
           bundles: this.uiBundles.getIds(),
           status: 'success',
           seconds
@@ -159,8 +176,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         // errors during initialization to the server, unlike the rest of the
         // errors produced here. Lets not muddy the console with extra errors
         if (!this.initializing) {
-          this.log(['fatal', 'optimize'], {
-            tmpl: 'Optimization <%= status %> in <%= seconds %> seconds<%= err %>',
+          this.logWithMetadata(['fatal', 'optimize'], `Optimization failed in ${seconds} seconds${error}`, {
             bundles: this.uiBundles.getIds(),
             status: 'failed',
             seconds,
@@ -170,7 +186,7 @@ export default class WatchOptimizer extends BaseOptimizer {
         break;
 
       case STATUS.FATAL:
-        this.log('fatal', error);
+        this.logWithMetadata('fatal', error);
         process.exit(1);
         break;
     }

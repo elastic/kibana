@@ -4,26 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { set } from 'lodash';
 import { MissingRequiredError } from '../error_missing_required';
 import { ElasticsearchMetric } from '../metrics';
-import { createTypeFilter, createQuery } from '../create_query.js';
+import { createQuery } from '../create_query.js';
 
 let metric;
-
-
-describe('Create Type Filter', () => {
-  it('Builds a type filter syntax', () => {
-    const typeFilter = createTypeFilter('my_type');
-    expect(typeFilter).to.eql({
-      bool: { should: [
-        { term: { _type: 'my_type' } },
-        { term: { type: 'my_type' } }
-      ] }
-    });
-  });
-});
 
 describe('Create Query', () => {
   beforeEach(() => {
@@ -97,7 +84,7 @@ describe('Create Query', () => {
     const options = { type: 'test-type-yay', metric };
     const result = createQuery(options);
     let expected = {};
-    expected = set(expected, 'bool.filter[0].bool.should', [ { term: { _type: 'test-type-yay' } }, { term: { type: 'test-type-yay' } } ]);
+    expected = set(expected, 'bool.filter[0].term', { type: 'test-type-yay' });
     expect(result).to.be.eql(expected);
   });
 
@@ -111,7 +98,7 @@ describe('Create Query', () => {
     };
     const result = createQuery(options);
     let expected = {};
-    expected = set(expected, 'bool.filter[0].bool.should', [ { term: { _type: 'test-type-yay' } }, { term: { type: 'test-type-yay' } } ]);
+    expected = set(expected, 'bool.filter[0].term', { type: 'test-type-yay' });
     expected = set(expected, 'bool.filter[1].term', {
       'source_node.uuid': 'abc123'
     });

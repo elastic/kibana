@@ -51,20 +51,6 @@
       font-size: inherit;
     }
 
-    .filter-button {
-      opacity: 0.3;
-      min-width: 14px;
-
-      .euiIcon {
-        width: 14px;
-        height: 14px;
-      }
-    }
-
-    .filter-button:hover {
-      opacity: 1;
-    }
-
     .detector-rules-icon {
       margin-left: $euiSizeXS;
       opacity: 0.5;
@@ -75,9 +61,29 @@
     min-width: 150px;
   }
 
+  .mlAnomalyCategoryExamples__header {
+    display: inline;
+  }
+
+  .mlAnomalyCategoryExamples__link {
+    width: 100%;
+  }
+
   .category-example {
     display: block;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mlAnomalyCategoryExamples {
+    padding: $euiSizeL;
+  }
+
+  .mlAnomalyCategoryExamples__item {
+    display: block;
+    white-space: wrap;
+    font-family: $euiCodeFontFamily;
   }
 
   .interim-result {
@@ -95,17 +101,15 @@
         margin-top: 0px;
         flex-basis: 15%;
         font-size: inherit;
+        line-height: 1.5rem;
+        @include euiTextTruncate;
       }
 
       .euiDescriptionList__description {
         margin-top: 0px;
         flex-basis: 85%;
         font-size: inherit;
-      }
-
-      .filter-button {
-        -webkit-transform: translateY(-1px);
-        transform: translateY(-1px);
+        line-height: 1.5rem;
       }
 
     }

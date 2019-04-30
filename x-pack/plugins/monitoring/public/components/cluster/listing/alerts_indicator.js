@@ -5,9 +5,8 @@
  */
 
 import React from 'react';
-import { Tooltip } from 'plugins/monitoring/components/tooltip';
 import { mapSeverity } from 'plugins/monitoring/components/alerts/map_severity';
-import { EuiHealth } from '@elastic/eui';
+import { EuiHealth, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
 const HIGH_SEVERITY = 2000;
@@ -41,24 +40,23 @@ function AlertsIndicatorUi({ alerts, intl }) {
     })();
 
     return (
-      <Tooltip text={tooltipText} placement="bottom" trigger="hover">
+      <EuiToolTip content={tooltipText} position="bottom" trigger="hover">
         <EuiHealth color={severityIcon.color} data-test-subj="alertIcon">
           <FormattedMessage
             id="xpack.monitoring.cluster.listing.alertsInticator.alertsTooltip"
             defaultMessage="Alerts"
           />
         </EuiHealth>
-      </Tooltip>
+      </EuiToolTip>
     );
   }
 
   return (
-    <Tooltip
-      text={intl.formatMessage({
+    <EuiToolTip
+      content={intl.formatMessage({
         id: 'xpack.monitoring.cluster.listing.alertsInticator.clearStatusTooltip',
         defaultMessage: 'Cluster status is clear!' })}
-      placement="bottom"
-      trigger="hover"
+      position="bottom"
     >
       <EuiHealth color="success" data-test-subj="alertIcon">
         <FormattedMessage
@@ -66,7 +64,7 @@ function AlertsIndicatorUi({ alerts, intl }) {
           defaultMessage="Clear"
         />
       </EuiHealth>
-    </Tooltip>
+    </EuiToolTip>
   );
 }
 

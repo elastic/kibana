@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButton } from '@elastic/eui';
+import { AuthenticationStatePage } from 'plugins/security/components/authentication_state_page';
 // @ts-ignore
 import template from 'plugins/security/views/logged_out/logged_out.html';
 import React from 'react';
 import { render } from 'react-dom';
 import 'ui/autoload/styles';
 import chrome from 'ui/chrome';
-import './logged_out.less';
-
-import { LoggedOutPage } from './components';
+import { I18nContext } from 'ui/i18n';
 
 chrome
   .setVisible(false)
@@ -20,6 +21,22 @@ chrome
   .setRootController('logout', ($scope: any) => {
     $scope.$$postDigest(() => {
       const domNode = document.getElementById('reactLoggedOutRoot');
-      render(<LoggedOutPage addBasePath={chrome.addBasePath} />, domNode);
+      render(
+        <I18nContext>
+          <AuthenticationStatePage
+            title={
+              <FormattedMessage
+                id="xpack.security.loggedOut.title"
+                defaultMessage="Successfully logged out"
+              />
+            }
+          >
+            <EuiButton href={chrome.addBasePath('/')}>
+              <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Login" />
+            </EuiButton>
+          </AuthenticationStatePage>
+        </I18nContext>,
+        domNode
+      );
     });
   });

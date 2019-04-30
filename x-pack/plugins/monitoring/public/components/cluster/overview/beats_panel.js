@@ -52,7 +52,7 @@ function BeatsPanelUi(props) {
       url="beats"
       title={props.intl.formatMessage({ id: 'xpack.monitoring.cluster.overview.beatsPanel.beatsTitle', defaultMessage: 'Beats' })}
     >
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={4}>
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="s">

@@ -1,18 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`it renders without crashing 1`] = `
-<EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
-  justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
->
+<EuiFlexGroup>
   <EuiFlexItem
-    component="div"
-    grow={true}
     key="clusterPrivs"
   >
     <EuiComboBox
@@ -24,60 +14,67 @@ exports[`it renders without crashing 1`] = `
       options={
         Array [
           Object {
-            "isGroupLabelOption": false,
             "label": "all",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_security",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_index_templates",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_pipeline",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ingest_pipelines",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "transport_client",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ml",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor_ml",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_watcher",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "monitor_watcher",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "read_ccr",
           },
           Object {
-            "isGroupLabelOption": false,
             "label": "manage_ccr",
+          },
+          Object {
+            "label": "manage_ilm",
+          },
+          Object {
+            "label": "read_ilm",
+          },
+          Object {
+            "label": "monitor_rollup",
+          },
+          Object {
+            "label": "manage_rollup",
+          },
+          Object {
+            "label": "manage_token",
+          },
+          Object {
+            "label": "manage_saml",
+          },
+          Object {
+            "label": "create_snapshot",
           },
         ]
       }

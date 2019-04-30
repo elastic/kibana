@@ -24,20 +24,25 @@ wherever possible.
 have breaking changes in any version of Kibana, or it might even be removed
 entirely.
 
+NOTE: You cannot access these APIs via the Console in Kibana.
+
 [float]
 == APIs
+* <<features-api>>
 * <<spaces-api>>
 * <<role-management-api>>
 * <<saved-objects-api>>
 * <<dashboard-import-api>>
 * <<logstash-configuration-management-api>>
 * <<url-shortening-api>>
+* <<upgrade-assistant-api>>
 --
 
+include::api/features.asciidoc[]
 include::api/spaces-management.asciidoc[]
 include::api/role-management.asciidoc[]
 include::api/saved-objects.asciidoc[]
 include::api/dashboard-import.asciidoc[]
 include::api/logstash-configuration-management.asciidoc[]
 include::api/url-shortening.asciidoc[]
-
+include::api/upgrade-assistant.asciidoc[]

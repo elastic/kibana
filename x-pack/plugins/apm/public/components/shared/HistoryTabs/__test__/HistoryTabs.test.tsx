@@ -4,21 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
 import { EuiTab } from '@elastic/eui';
-import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
+import { shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
-import { MemoryRouter } from 'react-router-dom';
-import {
-  HistoryTabs,
-  HistoryTabsProps,
-  HistoryTabsWithoutRouter,
-  IHistoryTab
-} from '..';
+import { HistoryTabs, HistoryTabsProps, IHistoryTab } from '..';
+import * as hooks from '../../../../hooks/useLocation';
+import { history } from '../../../../utils/history';
+
+type PropsOf<Component> = Component extends React.SFC<infer Props>
+  ? Props
+  : never;
+type EuiTabProps = PropsOf<typeof EuiTab>;
 
 describe('HistoryTabs', () => {
   let mockLocation: any;
-  let mockHistory: any;
   let testTabs: IHistoryTab[];
   let testProps: HistoryTabsProps;
 
@@ -26,9 +25,8 @@ describe('HistoryTabs', () => {
     mockLocation = {
       pathname: ''
     };
-    mockHistory = {
-      push: jest.fn()
-    };
+
+    jest.spyOn(hooks, 'useLocation').mockImplementation(() => mockLocation);
 
     const Content = (props: { name: string }) => <div>{props.name}</div>;
 
@@ -36,57 +34,49 @@ describe('HistoryTabs', () => {
       {
         name: 'One',
         path: '/one',
-        component: () => <Content name="one" />
+        render: props => <Content {...props} name="one" />
       },
       {
         name: 'Two',
         path: '/two',
-        component: () => <Content name="two" />
+        render: () => <Content name="two" />
       },
       {
         name: 'Three',
         path: '/three',
-        component: () => <Content name="three" />
+        render: () => <Content name="three" />
       }
     ];
 
-    testProps = ({
-      location: mockLocation,
-      history: mockHistory,
+    testProps = {
       tabs: testTabs
-    } as unknown) as HistoryTabsProps;
+    } as HistoryTabsProps;
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('should render correctly', () => {
     mockLocation.pathname = '/two';
-    const wrapper = shallow(<HistoryTabsWithoutRouter {...testProps} />);
+    const wrapper = shallow(<HistoryTabs {...testProps} />);
     expect(wrapper).toMatchSnapshot();
 
-    const tabs: ShallowWrapper<EuiTab> = wrapper.find(EuiTab);
+    const tabs: ShallowWrapper<EuiTabProps> = wrapper.find(EuiTab);
     expect(tabs.at(0).props().isSelected).toEqual(false);
     expect(tabs.at(1).props().isSelected).toEqual(true);
     expect(tabs.at(2).props().isSelected).toEqual(false);
   });
 
-  it('should change the selected item on tab click', () => {
-    const wrapper = mount(
-      <MemoryRouter initialEntries={['/two']}>
-        <HistoryTabs tabs={testTabs} />
-      </MemoryRouter>
-    );
-
-    expect(wrapper.find('Content')).toMatchSnapshot();
+  it('should push a new state onto history on tab click', () => {
+    const pushSpy = jest.spyOn(history, 'push');
+    const wrapper = shallow(<HistoryTabs tabs={testTabs} />);
 
     wrapper
       .find(EuiTab)
       .at(2)
       .simulate('click');
 
-    const tabs: ReactWrapper<EuiTab> = wrapper.find(EuiTab);
-    expect(tabs.at(0).props().isSelected).toEqual(false);
-    expect(tabs.at(1).props().isSelected).toEqual(false);
-    expect(tabs.at(2).props().isSelected).toEqual(true);
-
-    expect(wrapper.find('Content')).toMatchSnapshot();
+    expect(pushSpy).toHaveBeenCalledWith({ pathname: '/three' });
   });
 });

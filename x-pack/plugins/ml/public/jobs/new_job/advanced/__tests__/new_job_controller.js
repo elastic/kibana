@@ -6,7 +6,7 @@
 
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 describe('ML - Advanced Job Wizard - New Job Controller', () => {
   beforeEach(() => {

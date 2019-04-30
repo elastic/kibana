@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EnableModelPlotCallout } from './enable_model_plot_callout_view.js';
 
 const message = 'Test message';
@@ -13,7 +13,7 @@ const message = 'Test message';
 describe('EnableModelPlotCallout', () => {
 
   test('Callout is rendered correctly with message', () => {
-    const wrapper = mount(<EnableModelPlotCallout message={message} />);
+    const wrapper = mountWithIntl(<EnableModelPlotCallout message={message} />);
     const calloutText = wrapper.find('EuiText');
 
     expect(calloutText.text()).toBe(message);

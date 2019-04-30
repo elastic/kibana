@@ -7,6 +7,7 @@
 
 import { detectorToString } from 'plugins/ml/util/string_utils';
 import { formatValues, filterObjects } from './format_values';
+import { i18n } from '@kbn/i18n';
 
 export function extractJobDetails(job) {
 
@@ -15,14 +16,18 @@ export function extractJobDetails(job) {
   }
 
   const general = {
-    title: 'General',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.generalTitle', {
+      defaultMessage: 'General'
+    }),
     position: 'left',
     items: filterObjects(job, true).map(formatValues)
   };
 
 
   const customUrl = {
-    title: 'Custom URLs',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.customUrlsTitle', {
+      defaultMessage: 'Custom URLs'
+    }),
     position: 'right',
     items: []
   };
@@ -31,7 +36,9 @@ export function extractJobDetails(job) {
   }
 
   const node = {
-    title: 'Node',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.nodeTitle', {
+      defaultMessage: 'Node'
+    }),
     position: 'right',
     items: []
   };
@@ -39,8 +46,27 @@ export function extractJobDetails(job) {
     node.items.push(['name', job.node.name]);
   }
 
+  const calendars = {
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.calendarsTitle', {
+      defaultMessage: 'Calendars'
+    }),
+    position: 'right',
+    items: []
+  };
+  if (job.calendars) {
+    calendars.items = job.calendars.map(c => ['', c]);
+    // remove the calendars list from the general section
+    // so not to show it twice.
+    const i = general.items.findIndex(item => item[0] === 'calendars');
+    if (i >= 0) {
+      general.items.splice(i, 1);
+    }
+  }
+
   const detectors = {
-    title: 'Detectors',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.detectorsTitle', {
+      defaultMessage: 'Detectors'
+    }),
     position: 'left',
     items: []
   };
@@ -55,31 +81,41 @@ export function extractJobDetails(job) {
   }
 
   const influencers = {
-    title: 'Influencers',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.influencersTitle', {
+      defaultMessage: 'Influencers'
+    }),
     position: 'left',
     items: job.analysis_config.influencers.map(i => ['', i])
   };
 
   const analysisConfig = {
-    title: 'Analysis config',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.analysisConfigTitle', {
+      defaultMessage: 'Analysis config'
+    }),
     position: 'left',
     items: filterObjects(job.analysis_config)
   };
 
   const analysisLimits = {
-    title: 'Analysis limits',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.analysisLimitsTitle', {
+      defaultMessage: 'Analysis limits'
+    }),
     position: 'left',
     items: filterObjects(job.analysis_limits)
   };
 
   const dataDescription = {
-    title: 'Data description',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.dataDescriptionTitle', {
+      defaultMessage: 'Data description'
+    }),
     position: 'right',
     items: filterObjects(job.data_description)
   };
 
   const datafeed = {
-    title: 'Datafeed',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.datafeedTitle', {
+      defaultMessage: 'Datafeed'
+    }),
     position: 'left',
     items: filterObjects(job.datafeed_config, true, true)
   };
@@ -88,13 +124,17 @@ export function extractJobDetails(job) {
   }
 
   const counts = {
-    title: 'Counts',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.countsTitle', {
+      defaultMessage: 'Counts'
+    }),
     position: 'left',
     items: filterObjects(job.data_counts).map(formatValues)
   };
 
   const modelSizeStats = {
-    title: 'Model size stats',
+    title: i18n.translate('xpack.ml.jobsList.jobDetails.modelSizeStatsTitle', {
+      defaultMessage: 'Model size stats'
+    }),
     position: 'right',
     items: filterObjects(job.model_size_stats).map(formatValues)
   };
@@ -103,6 +143,7 @@ export function extractJobDetails(job) {
     general,
     customUrl,
     node,
+    calendars,
     detectors,
     influencers,
     analysisConfig,

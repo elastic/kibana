@@ -73,7 +73,9 @@ Array [
         },
         "status": "green",
       },
+      "logs": undefined,
     },
+    "isCcrEnabled": undefined,
     "isPrimary": true,
     "isSupported": true,
     "kibana": Object {
@@ -175,7 +177,9 @@ Array [
         },
         "status": "green",
       },
+      "logs": undefined,
     },
+    "isCcrEnabled": undefined,
     "isPrimary": false,
     "isSupported": true,
     "kibana": Object {
@@ -282,7 +286,9 @@ Array [
         },
         "status": "green",
       },
+      "logs": undefined,
     },
+    "isCcrEnabled": undefined,
     "isPrimary": false,
     "isSupported": true,
     "kibana": Object {
@@ -384,7 +390,9 @@ Array [
         },
         "status": "green",
       },
+      "logs": undefined,
     },
+    "isCcrEnabled": undefined,
     "isPrimary": false,
     "isSupported": true,
     "kibana": Object {

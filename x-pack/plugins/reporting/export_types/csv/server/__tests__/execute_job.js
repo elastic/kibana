@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import Puid from 'puid';
 import sinon from 'sinon';
 import nodeCrypto from '@elastic/node-crypto';
 
 import { CancellationToken } from '../../../../server/lib/esqueue/helpers/cancellation_token';
-import { FieldFormat } from  '../../../../../../../src/ui/field_formats/field_format.js';
-import { FieldFormatsService } from  '../../../../../../../src/ui/field_formats/field_formats_service.js';
-import { createStringFormat } from  '../../../../../../../src/core_plugins/kibana/common/field_formats/types/string.js';
+import { FieldFormat } from  '../../../../../../../src/legacy/ui/field_formats/field_format.js';
+import { FieldFormatsService } from  '../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';
+import { createStringFormat } from  '../../../../../../../src/legacy/core_plugins/kibana/common/field_formats/types/string.js';
 
 import { executeJobFactory } from '../execute_job';
 
@@ -461,7 +461,7 @@ describe('CSV Execute Job', function () {
       const executeJob = executeJobFactory(mockServer);
       const jobParams = {
         headers: encryptedHeaders,
-        fields: [ 'one and a half', 'two', "three-and-four", "five & six" ],
+        fields: [ 'one and a half', 'two', 'three-and-four', 'five & six' ],
         searchRequest: { index: null, body: null }
       };
       const { content } = await executeJob(jobParams, cancellationToken);
@@ -473,7 +473,7 @@ describe('CSV Execute Job', function () {
       const executeJob = executeJobFactory(mockServer);
       const jobParams = {
         headers: encryptedHeaders,
-        fields: [ 'one and a half', 'two', "three-and-four", "five & six" ],
+        fields: [ 'one and a half', 'two', 'three-and-four', 'five & six' ],
         searchRequest: { index: null, body: null }
       };
       const { content } = await executeJob(jobParams, cancellationToken);

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraMetric } from '../../../../common/graphql/types';
+import { EuiTheme } from '../../../../../../common/eui_styled_components';
+import { InfraMetric } from '../../../graphql/types';
 import { InfraFormatterType } from '../../../lib/lib';
 
 export enum InfraMetricLayoutVisualizationType {
@@ -54,4 +55,4 @@ export interface InfraMetricLayout {
   sections: InfraMetricLayoutSection[];
 }
 
-export type InfraMetricLayoutCreator = (theme: { eui: any }) => InfraMetricLayout[];
+export type InfraMetricLayoutCreator = (theme: EuiTheme) => InfraMetricLayout[];

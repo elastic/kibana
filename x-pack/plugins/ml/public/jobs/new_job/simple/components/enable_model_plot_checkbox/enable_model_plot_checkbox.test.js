@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
+import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EnableModelPlotCheckbox } from './enable_model_plot_checkbox_view.js';
 
 const defaultProps = {
@@ -18,7 +18,7 @@ const defaultProps = {
 describe('EnableModelPlotCheckbox', () => {
 
   test('checkbox default is rendered correctly', () => {
-    const wrapper = mount(<EnableModelPlotCheckbox {...defaultProps} />);
+    const wrapper = mountWithIntl(<EnableModelPlotCheckbox {...defaultProps} />);
     const checkbox = wrapper.find({ type: 'checkbox' });
     const label = wrapper.find('label');
 
@@ -30,7 +30,7 @@ describe('EnableModelPlotCheckbox', () => {
     const mockOnChange = jest.fn();
     defaultProps.onCheckboxChange = mockOnChange;
 
-    const wrapper = mount(<EnableModelPlotCheckbox {...defaultProps} />);
+    const wrapper = mountWithIntl(<EnableModelPlotCheckbox {...defaultProps} />);
     const checkbox = wrapper.find({ type: 'checkbox' });
 
     checkbox.simulate('change', { target: { checked: true } });

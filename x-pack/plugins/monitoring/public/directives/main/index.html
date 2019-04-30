@@ -2,32 +2,6 @@
   <kbn-top-nav name="{{ monitoringMain.name }}-nav">
     <!-- Transcluded elements. -->
     <div data-transclude-slots>
-      <!-- Breadcrumbs. -->
-      <!-- NOTE: The KBN breadCrumbs directive does not work for Monitoring usecase.
-      Breadcrumbs can't be automatically derived because the directive doesn't
-      automatically know to show the Clusters breadcrumb. We recreate the
-      structure and styles manually -->
-      <div data-transclude-slot="topLeftCorner">
-        <div
-          ng-if="showPluginBreadcrumbs"
-          class="kuiLocalBreadcrumbs">
-          <div ng-repeat="crumb in monitoringMain.breadcrumbs" class="kuiLocalBreadcrumb">
-            <a
-              ng-if="crumb.url"
-              kbn-href="{{ crumb.url }}"
-              class="kuiLocalBreadcrumb__link"
-              data-test-subj="{{ crumb.testSubj }}"
-            >
-              {{ crumb.label }}
-            </a>
-
-            <span ng-if="!crumb.url">
-              {{ crumb.label }}
-            </span>
-          </div>
-        </div>
-      </div>
-
       <!-- Tabs -->
       <div data-transclude-slot="bottomRow">
         <div ng-if="monitoringMain.inElasticsearch" class="kuiLocalTabs" role="navigation">
@@ -64,7 +38,7 @@
             i18n-default-message="Jobs"
           ></a>
           <a
-            ng-if="!monitoringMain.instance"
+            ng-if="(monitoringMain.isCcrEnabled || monitoringMain.isActiveTab('ccr')) && !monitoringMain.instance"
             kbn-href="#/elasticsearch/ccr"
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('ccr')}"
@@ -194,11 +168,11 @@
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.isActiveTab('pipelines')}"
           >
-            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
             <span
               i18n-id="xpack.monitoring.logstashNavigation.pipelinesLinkText"
               i18n-default-message="Pipelines"
             ></span>
+            <span class="kuiIcon fa-flask monTabs--icon" tooltip="Beta feature" />
           </a>
           <a
             ng-if="monitoringMain.instance"
@@ -215,11 +189,11 @@
             class="kuiLocalTab"
             ng-class="{'kuiLocalTab-isSelected': monitoringMain.page === 'pipelines'}"
           >
-            <span class="kuiIcon fa-flask betaIcon" tooltip="Beta Feature" />
             <span
               i18n-id="xpack.monitoring.logstashNavigation.instance.pipelinesLinkText"
               i18n-default-message="Pipelines"
             ></span>
+            <span class="kuiIcon fa-flask fa-sm monTabs--icon" tooltip="Beta feature" />
           </a>
           <a
             ng-if="monitoringMain.instance"
@@ -230,30 +204,16 @@
             i18n-default-message="Advanced"
           >
           </a>
-          <div
-            ng-if="monitoringMain.pipelineVersions"
-            class="kuiFlexGroup kuiFlexGroup--gutterMedium"
-          >
-            <h1 class="kuiTitle kuiFlexItem">{{ monitoringMain.pipelineId }}</h1>
-            <select
-              ng-model="monitoringMain.pipelineHash"
-              class="kuiSelect kuiFlexItem"
-              ng-change="monitoringMain.onChangePipelineHash()"
-            >
-              <option
-                ng-repeat="version in monitoringMain.pipelineVersions"
-                ng-value="version.hash"
-                i18n-id="xpack.monitoring.logstashNavigation.pipelineVersionDescription"
-                i18n-default-message="Version active {relativeLastSeen} and first seen {relativeFirstSeen}"
-                i18n-values="{relativeLastSeen: version.relativeLastSeen, relativeFirstSeen: version.relativeFirstSeen}"
-              >
-              </option>
-            </select>
+          <div 
+            class="kuiLocalTab" 
+            ng-if="monitoringMain.pipelineVersions.length" 
+            id="dropdown-elm" 
+            ng-init="monitoringMain.dropdownLoadedHandler()">
           </div>
         </div>
 
         <div ng-if="monitoringMain.inOverview" class="kuiLocalTabs" role="navigation">
-          <a class="kuiLocalTab" data-test-subj="clusterName">{{ cluster.cluster_name }}</a>
+          <a class="kuiLocalTab" data-test-subj="clusterName">{{ pageData.cluster_name }}</a>
         </div>
 
         <div ng-if="monitoringMain.inAlerts" class="kuiLocalTabs" role="navigation">

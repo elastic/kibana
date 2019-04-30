@@ -27,6 +27,8 @@ import {
   EuiText
 } from '@elastic/eui';
 
+import { FormattedMessage } from '@kbn/i18n/react';
+
 import { metadata } from 'ui/metadata';
 // metadata.branch corresponds to the version used in documentation links.
 const jobTipsUrl = `https://www.elastic.co/guide/en/kibana/${metadata.branch}/job-tips.html`;
@@ -82,7 +84,14 @@ const statusToEuiIconType = (status) => {
   }
 };
 
-const Link = ({ url }) => (<EuiLink href={url} target="_BLANK">Learn more</EuiLink>);
+const Link = ({ url }) => (
+  <EuiLink href={url} target="_BLANK">
+    <FormattedMessage
+      id="xpack.ml.validateJob.learnMoreLinkText"
+      defaultMessage="Learn more"
+    />
+  </EuiLink>
+);
 Link.propTypes = {
   url: PropTypes.string.isRequired
 };
@@ -100,6 +109,7 @@ Message.propTypes = {
     url: PropTypes.string
   })
 };
+
 
 const Callout = ({ message }) => (
   <React.Fragment>
@@ -142,7 +152,10 @@ const Modal = ({ close, title, children }) => (
           size="s"
           fill
         >
-          Close
+          <FormattedMessage
+            id="xpack.ml.validateJob.modal.closeButtonLabel"
+            defaultMessage="Close"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
@@ -230,23 +243,46 @@ class ValidateJob extends Component {
           isDisabled={isDisabled}
           isLoading={this.state.ui.isLoading}
         >
-          Validate Job
+          <FormattedMessage
+            id="xpack.ml.validateJob.validateJobButtonLabel"
+            defaultMessage="Validate Job"
+          />
         </EuiButton>
 
         {!isDisabled && this.state.ui.isModalVisible &&
           <Modal
             close={this.closeModal}
-            title={`Validate job ${this.state.title}`}
+            title={<FormattedMessage
+              id="xpack.ml.validateJob.modal.validateJobTitle"
+              defaultMessage="Validate job {title}"
+              values={{ title: this.state.title }}
+            />}
           >
             {this.state.data.messages.map(
               (m, i) => <Callout key={`${m.id}_${i}`} message={m} />
             )}
             <EuiText>
-              Job validation performs certain checks against job configurations and underlying source data
-              and provides specific advice on how to adjust settings that are more likely to produce insightful results.
+              <FormattedMessage
+                id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
+                defaultMessage="Job validation performs certain checks against job configurations and underlying source data
+                  and provides specific advice on how to adjust settings that are more likely to produce insightful results."
+              />
             </EuiText>
             <EuiText>
-              For more information, see <EuiLink href={jobTipsUrl} target="_blank">Machine Learning Job Tips</EuiLink>.
+              <FormattedMessage
+                id="xpack.ml.validateJob.modal.linkToJobTipsText"
+                defaultMessage="For more information, see {mlJobTipsLink}."
+                values={{
+                  mlJobTipsLink: (
+                    <EuiLink href={jobTipsUrl} target="_blank">
+                      <FormattedMessage
+                        id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
+                        defaultMessage="Machine Learning Job Tips"
+                      />
+                    </EuiLink>
+                  )
+                }}
+              />
             </EuiText>
           </Modal>
         }

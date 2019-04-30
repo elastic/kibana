@@ -22,6 +22,10 @@ export class MaxSizeStringBuilder {
     return false;
   }
 
+  getSizeInBytes() {
+    return this._size;
+  }
+
   getString() {
     return this._buffer.slice(0, this._size).toString();
   }

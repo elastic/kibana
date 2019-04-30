@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME
-} from 'x-pack/plugins/apm/common/constants';
-import { StickyProperties } from 'x-pack/plugins/apm/public/components/shared/StickyProperties';
-import { TransactionLink } from 'x-pack/plugins/apm/public/components/shared/TransactionLink';
-import { KibanaLink } from 'x-pack/plugins/apm/public/utils/url';
-import { Transaction } from 'x-pack/plugins/apm/typings/Transaction';
+} from '../../../../../../../common/elasticsearch_fieldnames';
+import { Transaction } from '../../../../../../../typings/es_schemas/ui/Transaction';
+import { APMLink } from '../../../../../shared/Links/APMLink';
+import { TransactionLink } from '../../../../../shared/Links/TransactionLink';
+import { StickyProperties } from '../../../../../shared/StickyProperties';
 
 interface Props {
   transaction?: Transaction;
@@ -25,20 +26,21 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
 
   const stickyProperties = [
     {
-      label: 'Service',
+      label: i18n.translate('xpack.apm.transactionDetails.serviceLabel', {
+        defaultMessage: 'Service'
+      }),
       fieldName: SERVICE_NAME,
       val: (
-        <KibanaLink
-          pathname={'/app/apm'}
-          hash={`/${transaction.context.service.name}`}
-        >
-          {transaction.context.service.name}
-        </KibanaLink>
+        <APMLink path={`/${transaction.service.name}`}>
+          {transaction.service.name}
+        </APMLink>
       ),
       width: '50%'
     },
     {
-      label: 'Transaction',
+      label: i18n.translate('xpack.apm.transactionDetails.transactionLabel', {
+        defaultMessage: 'Transaction'
+      }),
       fieldName: TRANSACTION_NAME,
       val: (
         <TransactionLink transaction={transaction}>

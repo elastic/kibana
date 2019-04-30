@@ -28,7 +28,7 @@ jest.mock('../../../services/ml_api_service', () => ({
   }
 }));
 
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 
 import { RuleActionPanel } from './rule_action_panel';
@@ -122,7 +122,7 @@ describe('RuleActionPanel', () => {
       ruleIndex: 0,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <RuleActionPanel {...props} />
     );
 
@@ -136,7 +136,7 @@ describe('RuleActionPanel', () => {
       ruleIndex: 1,
     };
 
-    const component = shallow(
+    const component = shallowWithIntl(
       <RuleActionPanel {...props} />
     );
 
@@ -150,7 +150,7 @@ describe('RuleActionPanel', () => {
       ruleIndex: 1,
     };
 
-    const wrapper = shallow(
+    const wrapper = shallowWithIntl(
       <RuleActionPanel {...props} />
     );
     wrapper.setState({ showAddToFilterListLink: true });

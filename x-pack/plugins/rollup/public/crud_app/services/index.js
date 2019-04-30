@@ -19,6 +19,11 @@ export {
 } from './api_errors';
 
 export {
+  listBreadcrumb,
+  createBreadcrumb,
+} from './breadcrumbs';
+
+export {
   cronExpressionToParts,
   cronPartsToExpression,
   MINUTE,
@@ -87,3 +92,7 @@ export {
 export {
   sortTable,
 } from './sort_table';
+
+export {
+  trackUiMetric,
+} from './track_ui_metric';

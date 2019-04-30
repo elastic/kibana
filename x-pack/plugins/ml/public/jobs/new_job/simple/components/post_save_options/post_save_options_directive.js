@@ -14,7 +14,7 @@ import template from './post_save_options.html';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml');
 
-module.directive('mlPostSaveOptions', function (Private) {
+module.directive('mlPostSaveOptions', function (Private, i18n) {
   return {
     restrict: 'AE',
     replace: false,
@@ -43,7 +43,11 @@ module.directive('mlPostSaveOptions', function (Private) {
       };
 
       $scope.apply = function () {
-        postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch);
+        postSaveService.apply($scope.jobId, $scope.runInRealtime, $scope.createWatch, i18n)
+          .catch(() => {})
+          .then(() => {
+            $scope.$applyAsync();
+          });
       };
     }
   };

@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
 export default function ({ getService, getPageObjects }) {
-  const remote = getService('remote');
+  const browser = getService('browser');
   const esArchiver = getService('esArchiver');
   const random = getService('random');
   const pipelineList = getService('pipelineList');
@@ -19,19 +19,19 @@ export default function ({ getService, getPageObjects }) {
     let originalWindowSize;
 
     before(async () => {
-      originalWindowSize = await remote.getWindowSize();
-      await remote.setWindowSize(1600, 1000);
+      originalWindowSize = await browser.getWindowSize();
+      await browser.setWindowSize(1600, 1000);
       await esArchiver.load('logstash/example_pipelines');
       await PageObjects.logstash.gotoPipelineList();
     });
 
     after(async () => {
       await esArchiver.unload('logstash/example_pipelines');
-      await remote.setWindowSize(originalWindowSize.width, originalWindowSize.height);
+      await browser.setWindowSize(originalWindowSize.width, originalWindowSize.height);
     });
 
     it('shows example pipelines', async () => {
-      const rows = await pipelineList.getRowsFromTable();
+      const rows = await pipelineList.readRows();
       const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
 
       for (const time of rows.map(row => row.lastModified)) {
@@ -67,14 +67,14 @@ export default function ({ getService, getPageObjects }) {
         // select all
         await pipelineList.clickSelectAll();
 
-        for (const row of await pipelineList.getRowsFromTable()) {
+        for (const row of await pipelineList.readRows()) {
           expect(row).to.have.property('selected', true);
         }
 
         // unselect all
         await pipelineList.clickSelectAll();
 
-        for (const row of await pipelineList.getRowsFromTable()) {
+        for (const row of await pipelineList.readRows()) {
           expect(row).to.have.property('selected', false);
         }
       });
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
     describe('filter', () => {
       it('filters the pipeline list', async () => {
         await pipelineList.setFilter('tweets');
-        const rows = await pipelineList.getRowsFromTable();
+        const rows = await pipelineList.readRows();
 
         expect(rows).to.have.length(1);
         expect(rows[0]).to.have.property('id', 'tweets_and_beats');
@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('takes user to the second page', async () => {
         await pipelineList.clickNextPage();
-        const rows = await pipelineList.getRowsFromTable();
+        const rows = await pipelineList.readRows();
         const rowsWithoutTime = rows.map(row => omit(row, 'lastModified'));
 
         for (const time of rows.map(row => row.lastModified)) {

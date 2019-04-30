@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { DEFAULT_SPACE_ID } from '../../../../plugins/spaces/common/constants';
 import { getIdPrefix, getUrlPrefix } from '../lib/space_test_utils';
@@ -42,15 +42,6 @@ const createBulkRequests = (spaceId: string) => [
 ];
 
 export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string) => (resp: { [key: string]: any }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      // eslint-disable-next-line max-len
-      message: `action [indices:data/read/mget] is unauthorized for user [${username}]: [security_exception] action [indices:data/read/mget] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectNotFoundResults = (spaceId: string) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql({
       saved_objects: [
@@ -78,6 +69,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -87,7 +79,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
     expect(resp.body).to.eql({
       statusCode: 403,
       error: 'Forbidden',
-      message: `Unable to bulk_get dashboard,globaltype,visualization, missing action:saved_objects/dashboard/bulk_get,action:saved_objects/globaltype/bulk_get,action:saved_objects/visualization/bulk_get`,
+      message: `Unable to bulk_get dashboard,globaltype,visualization`,
     });
   };
 
@@ -97,6 +89,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
         {
           id: `${getIdPrefix(spaceId)}dd7caf20-9efd-11e7-acb3-3dab96693fab`,
           type: 'visualization',
+          migrationVersion: resp.body.saved_objects[0].migrationVersion,
           updated_at: '2017-09-21T18:51:23.794Z',
           version: resp.body.saved_objects[0].version,
           attributes: {
@@ -108,6 +101,13 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
             uiStateJSON: resp.body.saved_objects[0].attributes.uiStateJSON,
             kibanaSavedObjectMeta: resp.body.saved_objects[0].attributes.kibanaSavedObjectMeta,
           },
+          references: [
+            {
+              name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
+              type: 'index-pattern',
+              id: `${getIdPrefix(spaceId)}91200a00-9efd-11e7-acb3-3dab96693fab`,
+            },
+          ],
         },
         {
           id: `${getIdPrefix(spaceId)}does not exist`,
@@ -125,6 +125,7 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
           attributes: {
             name: 'My favorite global object',
           },
+          references: [],
         },
       ],
     });
@@ -157,7 +158,6 @@ export function bulkGetTestSuiteFactory(esArchiver: any, supertest: SuperTest<an
 
   return {
     bulkGetTest,
-    createExpectLegacyForbidden,
     createExpectNotFoundResults,
     createExpectResults,
     expectRbacForbidden,

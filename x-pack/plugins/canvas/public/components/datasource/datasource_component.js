@@ -43,9 +43,13 @@ export class DatasourceComponent extends PureComponent {
 
   componentDidUpdate(prevProps) {
     const { args, resetArgs, datasource, selectDatasource } = this.props;
-    if (!isEqual(prevProps.args, args)) resetArgs();
+    if (!isEqual(prevProps.args, args)) {
+      resetArgs();
+    }
 
-    if (!isEqual(prevProps.datasource, datasource)) selectDatasource(datasource);
+    if (!isEqual(prevProps.datasource, datasource)) {
+      selectDatasource(datasource);
+    }
   }
 
   getDatasourceFunctionNode = (name, args) => ({
@@ -96,8 +100,9 @@ export class DatasourceComponent extends PureComponent {
       setInvalid,
     } = this.props;
 
-    if (selecting)
+    if (selecting) {
       return <DatasourceSelector datasources={datasources} onSelect={this.setSelectedDatasource} />;
+    }
 
     const datasourcePreview = previewing ? (
       <DatasourcePreview

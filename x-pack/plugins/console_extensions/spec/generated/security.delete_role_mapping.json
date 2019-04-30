@@ -1,0 +1,18 @@
+{
+  "security.delete_role_mapping": {
+    "url_params": {
+      "refresh": [
+        "true",
+        "false",
+        "wait_for"
+      ]
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_security/role_mapping/{name}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-role-mapping.html"
+  }
+}

@@ -1,7 +1,8 @@
+[role="xpack"]
 [[canvas-getting-started]]
 == Getting started with Canvas
 
-beta[]Your best bet to getting started with Canvas is to check out one 
+Your best bet to getting started with Canvas is to check out one 
 (or all) of the sample data sets that ship with {kib}. 
 
 . Click the {kib} logo in the upper left hand corner of your browser to navigate 

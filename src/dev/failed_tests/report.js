@@ -19,7 +19,7 @@
 
 import xml2js from 'xml2js';
 import vfs from 'vinyl-fs';
-import es from 'event-stream';
+import { createMapStream } from '../../legacy/utils/streams';
 import { getGithubClient, markdownMetadata, paginate } from '../github_utils';
 import { find } from 'lodash';
 import stripAnsi from 'strip-ansi';
@@ -32,16 +32,19 @@ const BUILD_URL = process.env.BUILD_URL;
 /**
  * Parses junit XML files into JSON
  */
-const mapXml = es.map((file, cb) => {
+const mapXml = createMapStream((file) => new Promise((resolve, reject) => {
   xml2js.parseString(file.contents.toString(), (err, result) => {
-    cb(null, result);
+    if (err) {
+      return reject(err);
+    }
+    resolve(result);
   });
-});
+}));
 
 /**
  * Filters all testsuites to find failed testcases
  */
-const filterFailures = es.map((testSuite, cb) => {
+const filterFailures = createMapStream((testSuite) => {
   // Grab the failures. Reporters may report multiple testsuites in a single file.
   const testFiles = testSuite.testsuites
     ? testSuite.testsuites.testsuite
@@ -64,16 +67,16 @@ const filterFailures = es.map((testSuite, cb) => {
 
   console.log(`Found ${failures.length} test failures`);
 
-  cb(null, failures);
+  return failures;
 });
 
 /**
  * Creates and updates github issues for the given testcase failures.
  */
 const updateGithubIssues = (githubClient, issues) => {
-  return es.map(async (failureCases, cb) => {
+  return createMapStream(async (failureCases) => {
 
-    const issueOps = failureCases.map(async (failureCase) => {
+    await Promise.all(failureCases.map(async (failureCase) => {
       const existingIssue = find(issues, (issue) => {
         return markdownMetadata.get(issue.body, 'test.class') === failureCase.classname &&
           markdownMetadata.get(issue.body, 'test.name') === failureCase.name;
@@ -121,19 +124,16 @@ const updateGithubIssues = (githubClient, issues) => {
 
         console.log(`Created issue ${newIssue.data.html_url}`);
       }
-    });
+    }));
 
-    Promise
-      .all(issueOps)
-      .then(() => cb(null, failureCases))
-      .catch(e => cb(e));
+    return failureCases;
   });
 };
 
 /**
  * Scans all junit XML files in ./target/junit/ and reports any found test failures to Github Issues.
  */
-export async function reportFailedTests(done) {
+export async function reportFailedTests() {
   const githubClient = getGithubClient();
   const issues = await paginate(githubClient, githubClient.issues.getForRepo({
     owner: GITHUB_OWNER,
@@ -148,5 +148,5 @@ export async function reportFailedTests(done) {
     .pipe(mapXml)
     .pipe(filterFailures)
     .pipe(updateGithubIssues(githubClient, issues))
-    .on('done', done);
+    .on('done', () => console.log(`Finished reporting test failures.`));
 }

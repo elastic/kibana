@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Storage } from 'ui/storage';
 import { connect } from 'react-redux';
 import {
   compose,
@@ -16,10 +15,15 @@ import {
   renderComponent,
 } from 'recompose';
 import { fromExpression } from '@kbn/interpreter/common';
+import { Storage } from 'ui/storage';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { getFunctionDefinitions } from '../../lib/function_definitions';
 import { getWindow } from '../../lib/get_window';
+import {
+  LOCALSTORAGE_AUTOCOMPLETE_ENABLED,
+  LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE,
+} from '../../../common/lib/constants';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 
@@ -45,7 +49,9 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId } = stateProps;
   const allProps = { ...ownProps, ...stateProps, ...dispatchProps };
 
-  if (!element) return allProps;
+  if (!element) {
+    return allProps;
+  }
 
   const { expression } = element;
 
@@ -83,13 +89,21 @@ export const Expression = compose(
     dirty: false,
   })),
   withState('isAutocompleteEnabled', 'setIsAutocompleteEnabled', () => {
-    const setting = storage.get('kibana.canvas.isAutocompleteEnabled');
+    const setting = storage.get(LOCALSTORAGE_AUTOCOMPLETE_ENABLED);
     return setting === null ? true : setting;
   }),
+  withState('fontSize', 'setFontSize', () => {
+    const fontSize = storage.get(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE);
+    return fontSize === null ? 16 : fontSize;
+  }),
+  withState('isCompact', 'setCompact', true),
   withHandlers({
     toggleAutocompleteEnabled: ({ isAutocompleteEnabled, setIsAutocompleteEnabled }) => () => {
-      storage.set('kibana.canvas.isAutocompleteEnabled', !isAutocompleteEnabled);
+      storage.set(LOCALSTORAGE_AUTOCOMPLETE_ENABLED, !isAutocompleteEnabled);
       setIsAutocompleteEnabled(!isAutocompleteEnabled);
+    },
+    toggleCompactView: ({ isCompact, setCompact }) => () => {
+      setCompact(!isCompact);
     },
     updateValue: ({ setFormState }) => expression => {
       setFormState({
@@ -103,6 +117,10 @@ export const Expression = compose(
         dirty: false,
       }));
       setExpression(exp);
+    },
+    setFontSize: ({ setFontSize }) => size => {
+      storage.set(LOCALSTORAGE_EXPRESSION_EDITOR_FONT_SIZE, size);
+      setFontSize(size);
     },
   }),
   expressionLifecycle,

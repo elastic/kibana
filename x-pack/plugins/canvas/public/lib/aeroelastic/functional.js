@@ -12,7 +12,7 @@
  * @param {*[][]} arrays
  * @returns *[]
  */
-const flatten = arrays => [].concat(...arrays);
+export const flatten = arrays => [].concat(...arrays);
 
 /**
  * identity
@@ -20,7 +20,7 @@ const flatten = arrays => [].concat(...arrays);
  * @param d
  * @returns d
  */
-const identity = d => d;
+export const identity = d => d;
 
 /**
  * map
@@ -32,19 +32,7 @@ const identity = d => d;
  * @param {Function} fun
  * @returns {function(*): *}
  */
-const map = fun => array => array.map(value => fun(value));
-
-/**
- * log
- *
- * @param d
- * @param {Function} printerFun
- * @returns d
- */
-const log = (d, printerFun = identity) => {
-  console.log(printerFun(d));
-  return d;
-};
+export const map = fun => array => array.map(value => fun(value));
 
 /**
  * disjunctiveUnion
@@ -54,7 +42,7 @@ const log = (d, printerFun = identity) => {
  * @param {*[]} set2
  * @returns *[]
  */
-const disjunctiveUnion = (keyFun, set1, set2) =>
+export const disjunctiveUnion = (keyFun, set1, set2) =>
   set1
     .filter(s1 => !set2.find(s2 => keyFun(s2) === keyFun(s1)))
     .concat(set2.filter(s2 => !set1.find(s1 => keyFun(s1) === keyFun(s2))));
@@ -65,32 +53,38 @@ const disjunctiveUnion = (keyFun, set1, set2) =>
  * @param {number} b
  * @returns {number} the mean of the two parameters
  */
-const mean = (a, b) => (a + b) / 2;
+export const mean = (a, b) => (a + b) / 2;
 
-const shallowEqual = (a, b) => {
-  if (a === b) return true;
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+export const shallowEqual = (a, b) => {
+  if (a === b) {
+    return true;
+  }
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) {
+      return false;
+    }
+  }
   return true;
 };
 
-const not = fun => (...args) => !fun(...args);
+export const not = fun => (...args) => !fun(...args);
 
-const removeDuplicates = (idFun, a) =>
+export const removeDuplicates = (idFun, a) =>
   a.filter((d, i) => a.findIndex(s => idFun(s) === idFun(d)) === i);
 
-const epsilon = 1 / 1000;
-const applyTolerance = d => Math.round(d / epsilon) * epsilon;
+export const arrayToMap = a => Object.assign({}, ...a.map(d => ({ [d]: true })));
 
-module.exports = {
-  applyTolerance,
-  disjunctiveUnion,
-  flatten,
-  identity,
-  log,
-  map,
-  mean,
-  not,
-  removeDuplicates,
-  shallowEqual,
+export const subMultitree = (pk, fk, elements, inputRoots) => {
+  const getSubgraphs = roots => {
+    const children = flatten(roots.map(r => elements.filter(e => fk(e) === pk(r))));
+    if (children.length) {
+      return [...roots, ...getSubgraphs(children, elements)];
+    } else {
+      return roots;
+    }
+  };
+  return getSubgraphs(inputRoots);
 };

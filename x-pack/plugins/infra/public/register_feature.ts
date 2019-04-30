@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { I18nServiceType } from '@kbn/i18n/angular';
 import {
   FeatureCatalogueCategory,
   FeatureCatalogueRegistryProvider,
@@ -11,22 +12,30 @@ import {
 
 const APP_ID = 'infra';
 
-FeatureCatalogueRegistryProvider.register(() => ({
+FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
   id: 'infraops',
-  title: 'Infrastructure',
-  description:
-    'Explore infrastructure metrics and logs for common servers, containers, and services.',
+  title: i18n('xpack.infra.registerFeatures.infraOpsTitle', {
+    defaultMessage: 'Infrastructure',
+  }),
+  description: i18n('xpack.infra.registerFeatures.infraOpsDescription', {
+    defaultMessage:
+      'Explore infrastructure metrics and logs for common servers, containers, and services.',
+  }),
   icon: 'infraApp',
-  path: `/app/${APP_ID}#home`,
+  path: `/app/${APP_ID}#infrastructure`,
   showOnHomePage: true,
   category: FeatureCatalogueCategory.DATA,
 }));
 
-FeatureCatalogueRegistryProvider.register(() => ({
+FeatureCatalogueRegistryProvider.register((i18n: I18nServiceType) => ({
   id: 'infralogging',
-  title: 'Logs',
-  description:
-    'Stream logs in real time or scroll through historical views in a console-like experience.',
+  title: i18n('xpack.infra.registerFeatures.logsTitle', {
+    defaultMessage: 'Logs',
+  }),
+  description: i18n('xpack.infra.registerFeatures.logsDescription', {
+    defaultMessage:
+      'Stream logs in real time or scroll through historical views in a console-like experience.',
+  }),
   icon: 'loggingApp',
   path: `/app/${APP_ID}#logs`,
   showOnHomePage: true,

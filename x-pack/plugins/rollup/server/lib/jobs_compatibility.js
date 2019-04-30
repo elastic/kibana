@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import { isEqual } from 'lodash';
 
@@ -53,12 +53,12 @@ export function mergeJobConfigurations(jobs = []) {
         const aggName = agg.agg;
         const aggDoesntExist = !allAggs[aggName];
         const fieldDoesntExist = allAggs[aggName] && !allAggs[aggName][fieldName];
-        const aggIsntDateHistogram = aggName !== 'date_histogram';
+        const isDateHistogramAgg = aggName === 'date_histogram';
 
         // If we currently don't have this aggregation, add it.
         // Special case for date histogram, since there can only be one
         // date histogram field.
-        if(aggDoesntExist || (fieldDoesntExist && aggIsntDateHistogram)) {
+        if(aggDoesntExist || (fieldDoesntExist && !isDateHistogramAgg)) {
           allAggs[aggName] = allAggs[aggName] || {};
           allAggs[aggName][fieldName] = { ...agg };
         }

@@ -2,16 +2,9 @@
 
 exports[`UpgradeFailureActions component renders component as expected 1`] = `
 <EuiFlexGroup
-  alignItems="stretch"
-  component="div"
-  direction="row"
-  gutterSize="l"
   justifyContent="flexStart"
-  responsive={true}
-  wrap={false}
 >
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButton
@@ -19,13 +12,13 @@ exports[`UpgradeFailureActions component renders component as expected 1`] = `
       fill={true}
       iconSide="left"
       onClick={[MockFunction]}
+      size="m"
       type="button"
     >
       upgrade button text
     </EuiButton>
   </EuiFlexItem>
   <EuiFlexItem
-    component="div"
     grow={false}
   >
     <EuiButtonEmpty
@@ -34,7 +27,11 @@ exports[`UpgradeFailureActions component renders component as expected 1`] = `
       onClick={[MockFunction]}
       type="button"
     >
-      Go back
+      <FormattedMessage
+        defaultMessage="Go back"
+        id="xpack.logstash.upgradeFailureActions.goBackButtonLabel"
+        values={Object {}}
+      />
     </EuiButtonEmpty>
   </EuiFlexItem>
 </EuiFlexGroup>

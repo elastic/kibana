@@ -6,7 +6,8 @@
 
 import { scaleTime } from 'd3-scale';
 import * as React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface TimeRulerProps {
   end: number;
@@ -43,14 +44,15 @@ export const TimeRuler: React.SFC<TimeRulerProps> = ({ end, height, start, tickC
 
 TimeRuler.displayName = 'TimeRuler';
 
-const TimeRulerTickLabel = styled.text`
-  font-size: ${props => props.theme.eui.euiFontSizeXs};
+const TimeRulerTickLabel = euiStyled.text`
+  font-size: ${props => props.theme.eui.euiFontSizeXS};
   line-height: ${props => props.theme.eui.euiLineHeight};
-  color: ${props => props.theme.eui.euiTextColor};
+  fill: ${props => props.theme.eui.textColors.subdued};
 `;
 
-const TimeRulerGridLine = styled.line`
-  stroke: ${props => props.theme.eui.euiColorMediumShade};
+const TimeRulerGridLine = euiStyled.line`
+  stroke: ${props =>
+    props.theme.darkMode ? props.theme.eui.euiColorDarkShade : props.theme.eui.euiColorMediumShade};
   stroke-dasharray: 2, 2;
   stroke-opacity: 0.5;
   stroke-width: 1px;

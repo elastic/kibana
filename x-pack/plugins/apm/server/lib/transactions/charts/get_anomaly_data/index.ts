@@ -18,13 +18,23 @@ export async function getAnomalySeries({
   setup
 }: {
   serviceName: string;
-  transactionType: string;
+  transactionType?: string;
   transactionName?: string;
   timeSeriesDates: number[];
   setup: Setup;
 }) {
   // don't fetch anomalies for transaction details page
   if (transactionName) {
+    return;
+  }
+
+  // don't fetch anomalies without a type
+  if (!transactionType) {
+    return;
+  }
+
+  // don't fetch anomalies if kuery filter is applied
+  if (setup.esFilterQuery) {
     return;
   }
 

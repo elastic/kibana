@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { interpretAst } from '@kbn/interpreter/public';
+import { interpretAst } from 'plugins/interpreter/interpreter';
 import { fromExpression, getType } from '@kbn/interpreter/common';
 import { notify } from './notify';
 
@@ -21,7 +21,9 @@ import { notify } from './notify';
 export function runInterpreter(ast, context = null, options = {}) {
   return interpretAst(ast, context)
     .then(renderable => {
-      if (getType(renderable) === 'render') return renderable;
+      if (getType(renderable) === 'render') {
+        return renderable;
+      }
 
       if (options.castToRender) {
         return runInterpreter(fromExpression('render'), renderable, {

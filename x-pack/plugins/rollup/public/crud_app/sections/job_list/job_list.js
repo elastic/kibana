@@ -7,6 +7,8 @@
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
   EuiButton,
@@ -14,8 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { CRUD_APP_BASE_PATH } from '../../constants';
-import { getRouterLinkProps, extractQueryParams } from '../../services';
+import { getRouterLinkProps, extractQueryParams, listBreadcrumb } from '../../services';
 
 import {
   JobTable,
@@ -44,7 +44,7 @@ export class JobListUi extends Component {
     loadJobs: PropTypes.func,
     refreshJobs: PropTypes.func,
     openDetailPanel: PropTypes.func,
-    jobs: PropTypes.array,
+    hasJobs: PropTypes.bool,
     isLoading: PropTypes.bool,
   }
 
@@ -71,9 +71,11 @@ export class JobListUi extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {};
-
     props.loadJobs();
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb ]);
+
+    this.state = {};
   }
 
   componentDidMount() {
@@ -90,12 +92,12 @@ export class JobListUi extends Component {
 
   getHeaderSection() {
     return (
-      <EuiPageContentHeaderSection>
+      <EuiPageContentHeaderSection data-test-subj="jobListPageHeader">
         <EuiTitle size="l">
           <h1>
             <FormattedMessage
               id="xpack.rollupJobs.jobListTitle"
-              defaultMessage="Rollup jobs"
+              defaultMessage="Rollup Jobs"
             />
           </h1>
         </EuiTitle>
@@ -114,6 +116,7 @@ export class JobListUi extends Component {
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="jobListNoPermission"
           title={title}
           color="warning"
           iconType="help"
@@ -145,6 +148,7 @@ export class JobListUi extends Component {
         {this.getHeaderSection()}
         <EuiSpacer size="m" />
         <EuiCallOut
+          data-test-subj="jobListError"
           title={title}
           color="danger"
           iconType="alert"
@@ -158,6 +162,7 @@ export class JobListUi extends Component {
   renderEmpty() {
     return (
       <EuiEmptyPrompt
+        data-test-subj="jobListEmptyPrompt"
         iconType="indexRollupApp"
         title={(
           <h1>
@@ -180,6 +185,7 @@ export class JobListUi extends Component {
         }
         actions={
           <EuiButton
+            data-test-subj="createRollupJobButton"
             {...getRouterLinkProps(`${CRUD_APP_BASE_PATH}/create`)}
             fill
             iconType="plusInCircle"
@@ -194,37 +200,33 @@ export class JobListUi extends Component {
     );
   }
 
+  renderLoading() {
+    return (
+      <EuiFlexGroup
+        justifyContent="flexStart"
+        alignItems="center"
+        gutterSize="s"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false} data-test-subj="jobListLoading">
+          <EuiText>
+            <EuiTextColor color="subdued">
+              <FormattedMessage
+                id="xpack.rollupJobs.jobList.loadingTitle"
+                defaultMessage="Loading rollup jobs..."
+              />
+            </EuiTextColor>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   renderList() {
     const { isLoading } = this.props;
-
-    let table;
-
-    if (isLoading) {
-      table = (
-        <EuiFlexGroup
-          justifyContent="flexStart"
-          alignItems="center"
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="m" />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiText>
-              <EuiTextColor color="subdued">
-                <FormattedMessage
-                  id="xpack.rollupJobs.jobList.loadingTitle"
-                  defaultMessage="Loading rollup jobs..."
-                />
-              </EuiTextColor>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    } else {
-      table = <JobTable />;
-    }
 
     return (
       <Fragment>
@@ -241,7 +243,7 @@ export class JobListUi extends Component {
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
 
-        {table}
+        {isLoading ? this.renderLoading() : <JobTable />}
 
         <DetailPanel />
       </Fragment>
@@ -249,7 +251,7 @@ export class JobListUi extends Component {
   }
 
   render() {
-    const { isLoading, jobs, jobLoadError } = this.props;
+    const { isLoading, hasJobs, jobLoadError } = this.props;
 
     let content;
 
@@ -259,23 +261,21 @@ export class JobListUi extends Component {
       } else {
         content = this.renderError(jobLoadError);
       }
-    } else if (!isLoading && !jobs.length) {
+    } else if (!isLoading && !hasJobs) {
       content = this.renderEmpty();
     } else {
       content = this.renderList();
     }
 
     return (
-      <EuiPage>
-        <EuiPageBody>
-          <EuiPageContent>
-            {content}
-          </EuiPageContent>
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageContent
+        horizontalPosition="center"
+        className="rollupJobsListPanel"
+      >
+        {content}
+      </EuiPageContent>
     );
   }
 }
 
 export const JobList = injectI18n(JobListUi);
-

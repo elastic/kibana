@@ -6,10 +6,9 @@
 
 import Joi from 'joi';
 
-import { InfraConfigurationAdapter } from './adapter_types';
+import { InfraBaseConfiguration, InfraConfigurationAdapter } from './adapter_types';
 
-export class InfraKibanaConfigurationAdapter<Configuration>
-  implements InfraConfigurationAdapter<Configuration> {
+export class InfraKibanaConfigurationAdapter implements InfraConfigurationAdapter {
   private readonly server: ServerWithConfig;
 
   constructor(server: any) {
@@ -28,16 +27,15 @@ export class InfraKibanaConfigurationAdapter<Configuration>
     }
 
     const configuration = config.get('xpack.infra') || {};
-    const configurationWithDefaults = {
+    const configurationWithDefaults: InfraBaseConfiguration = {
       enabled: true,
       query: {
         partitionSize: 75,
         partitionFactor: 1.2,
         ...(configuration.query || {}),
       },
-      sources: {},
       ...configuration,
-    } as Configuration;
+    };
 
     // we assume this to be the configuration because Kibana would have already validated it
     return configurationWithDefaults;

@@ -1,7 +1,7 @@
 .canvas.canvasContainer {
   display: flex;
   flex-grow: 1;
-  background-color: $euiColorLightestShade;
+  background-color: $euiPageBackgroundColor;
 }
 
 .canvasContainer--loading {
@@ -14,11 +14,13 @@
 }
 
 .canvasCheckered {
+  background-color: $euiColorGhost;
   background-image: linear-gradient(45deg, #ddd 25%, transparent 25%),
     linear-gradient(-45deg, #ddd 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #ddd 75%),
     linear-gradient(-45deg, transparent 75%, #ddd 75%);
   background-size: 8px 8px;
+  position: relative;
 }
 
 .canvasTextArea--code {

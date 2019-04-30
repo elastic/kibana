@@ -12,7 +12,9 @@ export const DatetimeInput = compose(
   withState('strValue', 'setStrValue', ({ moment }) => moment.format('YYYY-MM-DD HH:mm:ss')),
   lifecycle({
     componentWillReceiveProps({ moment, setStrValue, setValid }) {
-      if (this.props.moment.isSame(moment)) return;
+      if (this.props.moment.isSame(moment)) {
+        return;
+      }
       setStrValue(moment.format('YYYY-MM-DD HH:mm:ss'));
       setValid(true);
     },

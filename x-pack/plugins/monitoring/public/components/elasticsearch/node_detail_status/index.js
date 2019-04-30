@@ -26,8 +26,12 @@ function NodeDetailStatusUI({ stats, intl }) {
 
   const metrics = [
     {
+      label: intl.formatMessage({
+        id: 'xpack.monitoring.elasticsearch.nodeDetailStatus.transportAddress',
+        defaultMessage: 'Transport Address',
+      }),
       value: transportAddress,
-      dataTestSubj: 'transportAddress'
+      'data-test-subj': 'transportAddress'
     },
     {
       label: intl.formatMessage({
@@ -36,7 +40,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         javaVirtualMachine: 'JVM'
       }),
       value: formatMetric(usedHeap, '0,0.[00]', '%', { prependSpace: false }),
-      dataTestSubj: 'jvmHeap'
+      'data-test-subj': 'jvmHeap'
     },
     {
       label: intl.formatMessage({
@@ -44,7 +48,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         defaultMessage: 'Free Disk Space',
       }),
       value: formatMetric(freeSpace, '0.0 b'),
-      dataTestSubj: 'freeDiskSpace'
+      'data-test-subj': 'freeDiskSpace'
     },
     {
       label: intl.formatMessage({
@@ -52,7 +56,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         defaultMessage: 'Documents',
       }),
       value: formatMetric(documents, '0.[0]a'),
-      dataTestSubj: 'documentCount'
+      'data-test-subj': 'documentCount'
     },
     {
       label: intl.formatMessage({
@@ -60,7 +64,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         defaultMessage: 'Data',
       }),
       value: formatMetric(dataSize, '0.0 b'),
-      dataTestSubj: 'dataSize'
+      'data-test-subj': 'dataSize'
     },
     {
       label: intl.formatMessage({
@@ -68,7 +72,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         defaultMessage: 'Indices',
       }),
       value: formatMetric(indexCount, 'int_commas'),
-      dataTestSubj: 'indicesCount'
+      'data-test-subj': 'indicesCount'
     },
     {
       label: intl.formatMessage({
@@ -76,7 +80,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         defaultMessage: 'Shards',
       }),
       value: formatMetric(totalShards, 'int_commas'),
-      dataTestSubj: 'shardsCount'
+      'data-test-subj': 'shardsCount'
     },
     {
       label: intl.formatMessage({
@@ -84,7 +88,7 @@ function NodeDetailStatusUI({ stats, intl }) {
         defaultMessage: 'Type',
       }),
       value: nodeTypeLabel,
-      dataTestSubj: 'nodeType'
+      'data-test-subj': 'nodeType'
     }
   ];
 

@@ -29,7 +29,7 @@ import { HttpConfig } from './http_config';
  */
 export function getServerOptions(config: HttpConfig, { configureTLS = true } = {}) {
   // Note that all connection options configured here should be exactly the same
-  // as in the legacy platform server (see `src/server/http/index`). Any change
+  // as in the legacy platform server (see `src/legacy/server/http/index`). Any change
   // SHOULD BE applied in both places. The only exception is TLS-specific options,
   // that are configured only here.
   const options: ServerOptions = {
@@ -85,7 +85,7 @@ export function createServer(options: ServerOptions) {
   server.listener.keepAliveTimeout = 120e3;
   server.listener.on('clientError', (err, socket) => {
     if (socket.writable) {
-      socket.end(new Buffer('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
+      socket.end(Buffer.from('HTTP/1.1 400 Bad Request\r\n\r\n', 'ascii'));
     } else {
       socket.destroy(err);
     }

@@ -14,12 +14,30 @@
     "sampled": true,
     "span_count": {
       "started": 1,
-      "dropped": {
-        "total": 0
-      }
+      "dropped": 0
     },
     "id": "e070bc3c732087f8",
     "name": "APIRestController#orders"
+  },
+  "service": {
+    "language": {
+      "version": "10.0.2",
+      "name": "Java"
+    },
+    "runtime": {
+      "name": "Java",
+      "version": "10.0.2"
+    },
+    "name": "opbeans-java",
+    "agent": {
+      "name": "java",
+      "version": "0.7.0-SNAPSHOT"
+    }
+  },
+  "process": {
+    "ppid": 10060,
+    "title": "/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home/bin/java",
+    "pid": 10069
   },
   "context": {
     "request": {
@@ -60,26 +78,6 @@
       "platform": "Srens-MacBook-Pro.local",
       "ip": "172.18.0.1",
       "hostname": "Mac OS X"
-    },
-    "process": {
-      "ppid": 10060,
-      "title": "/Library/Java/JavaVirtualMachines/jdk-10.0.2.jdk/Contents/Home/bin/java",
-      "pid": 10069
-    },
-    "service": {
-      "language": {
-        "version": "10.0.2",
-        "name": "Java"
-      },
-      "runtime": {
-        "name": "Java",
-        "version": "10.0.2"
-      },
-      "name": "opbeans-java",
-      "agent": {
-        "name": "java",
-        "version": "0.7.0-SNAPSHOT"
-      }
     }
   },
   "beat": {
@@ -88,6 +86,6 @@
     "hostname": "361022bff072"
   },
   "host": {
-    "name": "361022bff072"
+    "hostname": "361022bff072"
   }
 }

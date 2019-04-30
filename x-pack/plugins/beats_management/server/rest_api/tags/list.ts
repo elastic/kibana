@@ -5,14 +5,17 @@
  */
 
 import * as Joi from 'joi';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
 import { BeatTag } from '../../../common/domain_types';
-import { CMServerLibs } from '../../lib/lib';
-import { wrapEsError } from '../../utils/error_wrappers';
+import { ReturnTypeList } from '../../../common/return_types';
+import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
+import { CMServerLibs } from '../../lib/types';
 
 export const createListTagsRoute = (libs: CMServerLibs) => ({
   method: 'GET',
   path: '/api/beats/tags',
   requiredRoles: ['beats_admin'],
+  licenseRequired: REQUIRED_LICENSES,
   validate: {
     headers: Joi.object({
       'kbn-beats-enrollment-token': Joi.string().required(),
@@ -23,18 +26,12 @@ export const createListTagsRoute = (libs: CMServerLibs) => ({
       ESQuery: Joi.string(),
     }),
   },
-  licenseRequired: true,
-  handler: async (request: any) => {
-    let tags: BeatTag[];
-    try {
-      tags = await libs.tags.getAll(
-        request.user
-        // request.query ? JSON.parse(request.query.ESQuery) : undefined
-      );
-    } catch (err) {
-      return wrapEsError(err);
-    }
+  handler: async (request: FrameworkRequest): Promise<ReturnTypeList<BeatTag>> => {
+    const tags = await libs.tags.getAll(
+      request.user,
+      request.query && request.query.ESQuery ? JSON.parse(request.query.ESQuery) : undefined
+    );
 
-    return tags;
+    return { list: tags, success: true, page: -1, total: -1 };
   },
 });

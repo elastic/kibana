@@ -10,9 +10,14 @@ import React, {
   Component, Fragment
 } from 'react';
 
+import {
+  EuiTitle
+} from '@elastic/eui';
+
 import { ResultLinks } from '../job_actions';
 import { MultiJobActionsMenu } from './actions_menu';
 import { GroupSelector } from './group_selector';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export class MultiJobActions extends Component {
   constructor(props) {
@@ -22,13 +27,23 @@ export class MultiJobActions extends Component {
   }
 
   render() {
-    const s = (this.props.selectedJobs.length > 1) ? 's' : '';
     const jobsSelected = (this.props.selectedJobs.length > 0);
     return (
       <div className={`multi-select-actions${jobsSelected ? '' : '-no-display'}`}>
         {jobsSelected &&
           <Fragment>
-            <span className="jobs-selected-title">{this.props.selectedJobs.length} job{s} selected</span>
+            <EuiTitle
+              size="s"
+              style={{ display: 'inline' }}
+            >
+              <h3>
+                <FormattedMessage
+                  id="xpack.ml.jobsList.multiJobsActions.jobsSelectedLabel"
+                  defaultMessage="{selectedJobsCount, plural, one {# job} other {# jobs}}   selected"
+                  values={{ selectedJobsCount: this.props.selectedJobs.length }}
+                />
+              </h3>
+            </EuiTitle>
             <div className="actions-border-large" />
             <ResultLinks jobs={this.props.selectedJobs} />
 

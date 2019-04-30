@@ -13,10 +13,9 @@ import {
   createRootEpic,
   initialState,
   logEntriesSelectors,
+  logFilterSelectors,
   logPositionSelectors,
-  metricTimeSelectors,
   reducer,
-  sharedSelectors,
   State,
   waffleTimeSelectors,
 } from '.';
@@ -45,13 +44,10 @@ export function createStore({ apolloClient, observableApi }: StoreDependencies) 
     selectHasMoreLogEntriesAfterEnd: logEntriesSelectors.selectHasMoreAfterEnd,
     selectHasMoreLogEntriesBeforeStart: logEntriesSelectors.selectHasMoreBeforeStart,
     selectIsAutoReloadingLogEntries: logPositionSelectors.selectIsAutoReloading,
-    selectLogFilterQueryAsJson: sharedSelectors.selectLogFilterQueryAsJson,
+    selectLogFilterQueryAsJson: logFilterSelectors.selectLogFilterQueryAsJson,
     selectLogTargetPosition: logPositionSelectors.selectTargetPosition,
     selectVisibleLogMidpointOrTarget: logPositionSelectors.selectVisibleMidpointOrTarget,
-    selectVisibleLogSummary: logPositionSelectors.selectVisibleSummary,
     selectWaffleTimeUpdatePolicyInterval: waffleTimeSelectors.selectTimeUpdatePolicyInterval,
-    selectMetricTimeUpdatePolicyInterval: metricTimeSelectors.selectTimeUpdatePolicyInterval,
-    selectMetricRangeFromTimeRange: metricTimeSelectors.selectRangeFromTimeRange,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(

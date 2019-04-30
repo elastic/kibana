@@ -11,14 +11,13 @@ import cloneDeep from 'lodash/lang/cloneDeep';
 import debounce from 'lodash/function/debounce';
 import { i18n } from '@kbn/i18n';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
 import {
-  EuiBreadcrumbs,
   EuiCallOut,
   EuiLoadingKibana,
   EuiOverlayMask,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiPageContentHeader,
   EuiSpacer,
@@ -28,11 +27,11 @@ import {
 
 import { fatalError } from 'ui/notify';
 
-import { CRUD_APP_BASE_PATH } from '../../constants';
 import {
-  getRouterLinkProps,
   validateIndexPattern,
   formatFields,
+  listBreadcrumb,
+  createBreadcrumb,
 } from '../../services';
 
 import { Navigation } from './navigation';
@@ -87,6 +86,8 @@ export class JobCreateUi extends Component {
 
   constructor(props) {
     super(props);
+
+    chrome.breadcrumbs.set([ MANAGEMENT_BREADCRUMB, listBreadcrumb, createBreadcrumb ]);
 
     const stepsFields = mapValues(stepIdToStepConfigMap, step => cloneDeep(step.defaultFields || {}));
 
@@ -191,8 +192,18 @@ export class JobCreateUi extends Component {
         )];
       }
 
-      const formattedNumericFields = formatFields(numericFields, 'numeric');
-      const formattedKeywordFields = formatFields(keywordFields, 'keyword');
+      const formattedNumericFields = formatFields(
+        numericFields,
+        i18n.translate('xpack.rollupJobs.create.numericTypeField', { defaultMessage: 'numeric' })
+      );
+      const formattedKeywordFields = formatFields(
+        keywordFields,
+        i18n.translate('xpack.rollupJobs.create.keywordTypeField', { defaultMessage: 'keyword' })
+      );
+      const formattedDateFields = formatFields(
+        indexPatternDateFields,
+        i18n.translate('xpack.rollupJobs.create.dateTypeField', { defaultMessage: 'date' })
+      );
 
       function sortFields(a, b) {
         const nameA = a.name.toUpperCase();
@@ -215,7 +226,11 @@ export class JobCreateUi extends Component {
       ].sort(sortFields);
 
       const indexPatternHistogramFields = [ ...formattedNumericFields ].sort(sortFields);
-      const indexPatternMetricsFields = [ ...formattedNumericFields ].sort(sortFields);
+
+      const indexPatternMetricsFields = [
+        ...formattedNumericFields,
+        ...formattedDateFields,
+      ].sort(sortFields);
 
       this.setState({
         indexPatternAsyncErrors,
@@ -286,6 +301,7 @@ export class JobCreateUi extends Component {
         !this.canGoToStep(stepId)
         || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId)
       ),
+      'data-test-subj': index === indexOfCurrentStep ? `createRollupStep${index + 1}--active` : `createRollupStep${index + 1}`,
     }));
   }
 
@@ -440,29 +456,12 @@ export class JobCreateUi extends Component {
   render() {
     const { isSaving, saveError } = this.props;
 
-    const breadcrumbs = [{
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.jobsText"
-          defaultMessage="Rollup jobs"
-        />
-      ),
-      ...getRouterLinkProps(CRUD_APP_BASE_PATH),
-    }, {
-      text: (
-        <FormattedMessage
-          id="xpack.rollupJobs.create.breadcrumbs.createText"
-          defaultMessage="Create"
-        />
-      ),
-    }];
-
     let savingFeedback;
 
     if (isSaving) {
       savingFeedback = (
         <EuiOverlayMask>
-          <EuiLoadingKibana size="xl"/>
+          <EuiLoadingKibana size="xl" />
         </EuiOverlayMask>
       );
     }
@@ -505,41 +504,31 @@ export class JobCreateUi extends Component {
 
     return (
       <Fragment>
-        <EuiPage>
-          <EuiPageBody>
-            <EuiPageContent
-              horizontalPosition="center"
-              className="rollupJobWizardPage"
-            >
-              <EuiBreadcrumbs breadcrumbs={breadcrumbs} responsive={false} />
-              <EuiSpacer size="xs" />
+        <EuiPageContent>
+          <EuiPageContentHeader>
+            <EuiTitle size="m">
+              <h1>
+                <FormattedMessage
+                  id="xpack.rollupJobs.createTitle"
+                  defaultMessage="Create rollup job"
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageContentHeader>
 
-              <EuiPageContentHeader>
-                <EuiTitle size="l">
-                  <h1>
-                    <FormattedMessage
-                      id="xpack.rollupJobs.createTitle"
-                      defaultMessage="Create rollup job"
-                    />
-                  </h1>
-                </EuiTitle>
-              </EuiPageContentHeader>
+          {saveErrorFeedback}
 
-              {saveErrorFeedback}
+          <EuiStepsHorizontal steps={this.getSteps()} />
 
-              <EuiStepsHorizontal steps={this.getSteps()} />
+          <EuiSpacer />
 
-              <EuiSpacer />
+          {this.renderCurrentStep()}
 
-              {this.renderCurrentStep()}
+          <EuiSpacer size="l" />
 
-              <EuiSpacer size="l" />
+          {this.renderNavigation()}
 
-              {this.renderNavigation()}
-            </EuiPageContent>
-          </EuiPageBody>
-        </EuiPage>
-
+        </EuiPageContent>
         {savingFeedback}
       </Fragment>
     );

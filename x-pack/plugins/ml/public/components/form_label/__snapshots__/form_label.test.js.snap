@@ -1,28 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FormLabel Basic initialization 1`] = `
-<React.Fragment>
+<Fragment>
   <label
     className="euiFormLabel"
     id="ml_aria_label_undefined"
   />
-  <Component
+  <JsonTooltip
     position="top"
   />
-</React.Fragment>
+</Fragment>
 `;
 
 exports[`FormLabel Full initialization 1`] = `
-<React.Fragment>
+<Fragment>
   <label
     className="euiFormLabel"
     id="ml_aria_label_uid"
   >
     Label Text
   </label>
-  <Component
+  <JsonTooltip
     id="uid"
     position="top"
   />
-</React.Fragment>
+</Fragment>
 `;

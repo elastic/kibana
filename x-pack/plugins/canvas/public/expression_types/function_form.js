@@ -28,7 +28,9 @@ export class FunctionForm extends BaseForm {
     const { argType, expressionIndex } = passedProps;
 
     // TODO: show some information to the user than an argument was skipped
-    if (!arg || skipRender) return null;
+    if (!arg || skipRender) {
+      return null;
+    }
 
     const renderArgWithProps = (argValue, valueIndex) =>
       arg.render({
@@ -43,7 +45,9 @@ export class FunctionForm extends BaseForm {
 
     // render the argument's template, wrapped in a remove control
     // if the argument is required but not included, render the control anyway
-    if (!argValues && arg.required) return renderArgWithProps({ type: undefined, value: '' }, 0);
+    if (!argValues && arg.required) {
+      return renderArgWithProps({ type: undefined, value: '' }, 0);
+    }
 
     // render all included argument controls
     return argValues && argValues.map(renderArgWithProps);
@@ -55,8 +59,12 @@ export class FunctionForm extends BaseForm {
     const { arg, argValues, skipRender } = dataArg;
 
     // skip arguments that aren't defined in the expression type schema
-    if (!arg || arg.required || skipRender) return null;
-    if (argValues && !arg.multi) return null;
+    if (!arg || arg.required || skipRender) {
+      return null;
+    }
+    if (argValues && !arg.multi) {
+      return null;
+    }
 
     const value = arg.default == null ? null : fromExpression(arg.default, 'argument');
 
@@ -74,7 +82,9 @@ export class FunctionForm extends BaseForm {
     // Don't instaniate these until render time, to give the registries a chance to populate.
     const argInstances = this.args.map(argSpec => new Arg(argSpec));
 
-    if (!isPlainObject(args)) throw new Error(`Form "${this.name}" expects "args" object`);
+    if (!isPlainObject(args)) {
+      throw new Error(`Form "${this.name}" expects "args" object`);
+    }
 
     // get a mapping of arg values from the expression and from the renderable's schema
     const argNames = uniq(argInstances.map(arg => arg.name).concat(Object.keys(args)));
@@ -99,7 +109,9 @@ export class FunctionForm extends BaseForm {
       const argumentForms = compact(resolvedDataArgs.map(d => this.renderArg(props, d)));
       const addableArgs = compact(resolvedDataArgs.map(d => this.getAddableArg(props, d)));
 
-      if (!addableArgs.length && !argumentForms.length) return null;
+      if (!addableArgs.length && !argumentForms.length) {
+        return null;
+      }
 
       return (
         <SidebarSection>

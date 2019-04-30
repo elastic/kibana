@@ -18,7 +18,6 @@ export const mappings = {
           },
         },
       },
-      id: { type: 'text', index: false },
       '@timestamp': { type: 'date' },
       '@created': { type: 'date' },
     },

@@ -6,13 +6,19 @@
 
 import React from 'react';
 import { EuiButton, EuiButtonEmpty, EuiIconTip, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { PIPELINE_LIST } from './constants';
 
 function getColumns(openPipeline, clonePipeline) {
   return [
     {
       field: 'id',
-      name: 'Id',
+      name: (
+        <FormattedMessage
+          id="xpack.logstash.pipelinesTable.idColumnLabel"
+          defaultMessage="Id"
+        />
+      ),
       sortable: true,
       render: (id, { isCentrallyManaged }) => {
         const openPipelineClicked = () => openPipeline(id);
@@ -33,20 +39,35 @@ function getColumns(openPipeline, clonePipeline) {
     },
     {
       field: 'description',
-      name: 'Description',
+      name: (
+        <FormattedMessage
+          id="xpack.logstash.pipelinesTable.descriptionColumnLabel"
+          defaultMessage="Description"
+        />
+      ),
       render: description => <span data-test-subj="cellDescription">{description}</span>,
       sortable: true,
       truncateText: true,
     },
     {
       field: 'lastModifiedHumanized',
-      name: 'Last Modified',
+      name: (
+        <FormattedMessage
+          id="xpack.logstash.pipelinesTable.lastModifiedColumnLabel"
+          defaultMessage="Last Modified"
+        />
+      ),
       render: lastModified => <span data-test-subj="cellLastModified">{lastModified}</span>,
       sortable: true,
     },
     {
       field: 'username',
-      name: 'Modified By',
+      name: (
+        <FormattedMessage
+          id="xpack.logstash.pipelinesTable.modifiedByColumnLabel"
+          defaultMessage="Modified By"
+        />
+      ),
       render: username => <span data-test-subj="cellUsername">{username}</span>,
       sortable: true,
     },
@@ -64,7 +85,10 @@ function getColumns(openPipeline, clonePipeline) {
             onClick={cloneClicked}
             size="xs"
           >
-            Clone
+            <FormattedMessage
+              id="xpack.logstash.pipelinesTable.cloneButtonLabel"
+              defaultMessage="Clone"
+            />
           </EuiButtonEmpty>
         ) : null;
       },
@@ -74,7 +98,7 @@ function getColumns(openPipeline, clonePipeline) {
   ];
 }
 
-export function PipelinesTable({
+function PipelinesTableUi({
   clonePipeline,
   createPipeline,
   isReadOnly,
@@ -86,6 +110,7 @@ export function PipelinesTable({
   pipelines,
   selection,
   pageIndex,
+  intl,
 }) {
   const pagination = {
     pageIndex,
@@ -96,7 +121,12 @@ export function PipelinesTable({
 
   const selectableMessage = (selectable, { id }) =>
     selectable
-      ? `Select pipeline "${id}"`
+      ? intl.formatMessage({
+        id: 'xpack.logstash.pipelinesTable.selectablePipelineMessage',
+        defaultMessage: `Select pipeline "{id}"`
+      }, {
+        id,
+      })
       : PIPELINE_LIST.PIPELINE_NOT_CENTRALLY_MANAGED_TOOLTIP_TEXT;
 
   const selectionOptions = isSelectable
@@ -116,7 +146,10 @@ export function PipelinesTable({
         onClick={onDeleteSelectedPipelines}
         data-test-subj="btnDeletePipeline"
       >
-        Delete
+        <FormattedMessage
+          id="xpack.logstash.pipelinesTable.deleteButtonLabel"
+          defaultMessage="Delete"
+        />
       </EuiButton>
     ) : null;
 
@@ -126,7 +159,12 @@ export function PipelinesTable({
       {
         type: 'field_value_selection',
         field: 'id',
-        name: 'Filter by ID',
+        name: (
+          <FormattedMessage
+            id="xpack.logstash.pipelinesTable.filterByIdLabel"
+            defaultMessage="Filter by ID"
+          />
+        ),
         multiSelect: false,
         options: pipelines.map(({ id }) => {
           return {
@@ -146,7 +184,10 @@ export function PipelinesTable({
         onClick={createPipeline}
         data-test-subj="btnAdd"
       >
-        Create pipeline
+        <FormattedMessage
+          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
+          defaultMessage="Create pipeline"
+        />
       </EuiButton>
     ),
   };
@@ -165,6 +206,11 @@ export function PipelinesTable({
       search={search}
       selection={selectionOptions}
       sorting={true}
+      rowProps={{
+        'data-test-subj': 'row'
+      }}
     />
   );
 }
+
+export const PipelinesTable = injectI18n(PipelinesTableUi);

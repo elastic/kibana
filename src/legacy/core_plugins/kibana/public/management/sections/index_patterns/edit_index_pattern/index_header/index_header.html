@@ -1,0 +1,59 @@
+<div class="kuiBar kuiVerticalRhythm">
+  <div class="kuiBarSection">
+    <!-- Index pattern name -->
+    <h1
+      class="euiTitle euiTitle--medium"
+      data-test-subj="indexPatternTitle"
+    >
+      <span
+        aria-hidden="true"
+        ng-if="defaultIndex === indexPattern.id"
+        class="kuiIcon fa-star"
+      ></span>
+      {{indexPattern.title}}
+    </h1>
+  </div>
+
+  <div class="kuiBarSection">
+    <button
+      ng-if="setDefault"
+      ng-click="setDefault()"
+      aria-label="{{::'kbn.management.editIndexPattern.setDefaultAria' | i18n: { defaultMessage: 'Set as default index' } }}"
+      tooltip="{{::'kbn.management.editIndexPattern.setDefaultTooltip' | i18n: { defaultMessage: 'Set as default index' } }}"
+      class="kuiButton kuiButton--basic"
+      data-test-subj="setDefaultIndexPatternButton"
+    >
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-star"
+      ></span>
+    </button>
+
+    <button
+      ng-if="refreshFields"
+      ng-click="refreshFields()"
+      aria-label="{{::'kbn.management.editIndexPattern.refreshAria' | i18n: { defaultMessage: 'Reload field list' } }}"
+      tooltip="{{::'kbn.management.editIndexPattern.refreshTooltip' | i18n: { defaultMessage: 'Refresh field list' } }}"
+      class="kuiButton kuiButton--basic"
+    >
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-refresh"
+      ></span>
+    </button>
+
+    <button
+      ng-if="delete"
+      ng-click="delete()"
+      aria-label="{{::'kbn.management.editIndexPattern.removeAria' | i18n: { defaultMessage: 'Remove index pattern' } }}"
+      tooltip="{{::'kbn.management.editIndexPattern.removeTooltip' | i18n: { defaultMessage: 'Remove index pattern' } }}"
+      class="kuiButton kuiButton--danger"
+      data-test-subj="deleteIndexPatternButton"
+    >
+      <span
+        aria-hidden="true"
+        class="kuiIcon fa-trash"
+      ></span>
+    </button>
+  </div>
+</div>

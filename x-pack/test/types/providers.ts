@@ -4,18 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface EsArchiverOptions {
-  skipExisting?: boolean;
-}
-
-export interface EsArchiver {
-  load(archiveName: string, options?: EsArchiverOptions): Promise<void>;
-  unload(archiveName: string): Promise<void>;
-}
+import { EsArchiver } from '../../../src/es_archiver';
+import { UptimeProvider } from '../functional/services/uptime';
 
 export interface KibanaFunctionalTestDefaultProviders {
   getService(serviceName: 'esArchiver'): EsArchiver;
+  getService(serviceName: 'uptime'): ReturnType<typeof UptimeProvider>;
   getService(serviceName: string): any;
   getPageObjects(pageObjectNames: string[]): any;
   loadTestFile(path: string): void;
+  readConfigFile(path: string): any;
 }

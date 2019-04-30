@@ -28,27 +28,33 @@ class ArgTemplateFormComponent extends React.Component {
     errorTemplate: PropTypes.oneOfType([PropTypes.element, PropTypes.func]).isRequired,
   };
 
-  static domNode = null;
-
   componentWillUpdate(prevProps) {
     //see if error state changed
-    if (this.props.error !== prevProps.error) this.props.handlers.destroy();
+    if (this.props.error !== prevProps.error) {
+      this.props.handlers.destroy();
+    }
   }
   componentDidUpdate() {
-    if (this.props.error) return this.renderErrorTemplate();
-    this.renderTemplate(this.domNode);
+    if (this.props.error) {
+      return this._renderErrorTemplate();
+    }
+    this._renderTemplate(this._domNode);
   }
 
   componentWillUnmount() {
     this.props.handlers.destroy();
   }
 
-  renderTemplate = domNode => {
+  _domNode = null;
+
+  _renderTemplate = domNode => {
     const { template, argumentProps, handlers } = this.props;
-    if (template) return template(domNode, argumentProps, handlers);
+    if (template) {
+      return template(domNode, argumentProps, handlers);
+    }
   };
 
-  renderErrorTemplate = () => {
+  _renderErrorTemplate = () => {
     const { errorTemplate, argumentProps } = this.props;
     return React.createElement(errorTemplate, argumentProps);
   };
@@ -56,15 +62,19 @@ class ArgTemplateFormComponent extends React.Component {
   render() {
     const { template, error } = this.props;
 
-    if (error) return this.renderErrorTemplate();
+    if (error) {
+      return this._renderErrorTemplate();
+    }
 
-    if (!template) return null;
+    if (!template) {
+      return null;
+    }
 
     return (
       <RenderToDom
         render={domNode => {
-          this.domNode = domNode;
-          this.renderTemplate(domNode);
+          this._domNode = domNode;
+          this._renderTemplate(domNode);
         }}
       />
     );

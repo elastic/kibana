@@ -7,7 +7,8 @@
 import { handleActions } from 'redux-actions';
 import { set, del } from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
-import * as actions from '../actions/transient';
+import * as pageActions from '../actions/pages';
+import * as transientActions from '../actions/transient';
 import { removeElements } from '../actions/elements';
 import { setRefreshInterval } from '../actions/workpad';
 
@@ -18,29 +19,45 @@ export const transientReducer = handleActions(
     [restoreHistory]: transientState => set(transientState, 'resolvedArgs', {}),
 
     [removeElements]: (transientState, { payload: { elementIds } }) => {
-      const { selectedElement } = transientState;
+      const { selectedToplevelNodes } = transientState;
       return del(
         {
           ...transientState,
-          selectedElement: elementIds.indexOf(selectedElement) === -1 ? selectedElement : null,
+          selectedToplevelNodes: selectedToplevelNodes.filter(n => elementIds.indexOf(n) < 0),
         },
         ['resolvedArgs', elementIds]
       );
     },
 
-    [actions.setCanUserWrite]: (transientState, { payload }) => {
-      return set(transientState, 'canUserWrite', Boolean(payload));
+    [transientActions.setFirstLoad]: (transientState, { payload }) => {
+      return set(transientState, 'isFirstLoad', Boolean(payload));
     },
 
-    [actions.setFullscreen]: (transientState, { payload }) => {
+    [transientActions.setFullscreen]: (transientState, { payload }) => {
       return set(transientState, 'fullscreen', Boolean(payload));
     },
 
-    [actions.selectElement]: (transientState, { payload }) => {
+    [transientActions.setElementStats]: (transientState, { payload }) => {
+      return set(transientState, 'elementStats', payload);
+    },
+
+    [transientActions.selectToplevelNodes]: (transientState, { payload }) => {
       return {
         ...transientState,
-        selectedElement: payload || null,
+        selectedToplevelNodes: payload,
       };
+    },
+
+    [pageActions.setPage]: transientState => {
+      return { ...transientState, selectedToplevelNodes: [] };
+    },
+
+    [pageActions.addPage]: transientState => {
+      return { ...transientState, selectedToplevelNodes: [] };
+    },
+
+    [pageActions.duplicatePage]: transientState => {
+      return { ...transientState, selectedToplevelNodes: [] };
     },
 
     [setRefreshInterval]: (transientState, { payload }) => {

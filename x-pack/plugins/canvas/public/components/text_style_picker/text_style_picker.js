@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiSpacer, EuiButtonGroup } from '@elastic/eui';
 import { FontPicker } from '../font_picker';
-import { ColorPickerMini } from '../color_picker_mini';
+import { ColorPickerPopover } from '../color_picker_popover';
 import { fontSizes } from './font_sizes';
 
 export const TextStylePicker = ({
@@ -63,6 +63,11 @@ export const TextStylePicker = ({
     ['italic']: Boolean(italic),
     ['underline']: Boolean(underline),
   };
+
+  if (!isNaN(size) && fontSizes.indexOf(Number(size)) === -1) {
+    fontSizes.push(Number(size));
+    fontSizes.sort((a, b) => a - b);
+  }
 
   const doChange = (propName, value) => {
     onChange({
@@ -131,7 +136,7 @@ export const TextStylePicker = ({
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ fontSize: 0 }}>
-          <ColorPickerMini
+          <ColorPickerPopover
             value={color}
             onChange={value => doChange('color', value)}
             colors={colors}

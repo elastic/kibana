@@ -32,30 +32,8 @@ Drawer.
 Add a `debugger` line to create a breakpoint, and then:
 
   ```
-  gulp sync && mocha debug --compilers js:babel-register /pathto/kibana/plugins/monitoring/pathto/__tests__/testfile.js
+  gulp sync && mocha debug --compilers js:@babel/register /pathto/kibana/plugins/monitoring/pathto/__tests__/testfile.js
   ```
-
-## Deploying
-
-Monitoring is part of XPack, and only a single XPack artifact needs to be
-deployed. Previously, the instructions to deploy were:
-
-> The `release task` creates archives and uploads them to
-download.elasticsearch.org/elasticsearch/monitoring/VERSION. You will need S3
-credentials in `$HOME/.aws-config.json`. Format as so:
-
-> ```
-> {
->   "key":"MY_KEY_HERE",
->   "secret":"your/long/secret/string"
-> }
-> ```
-
-> To upload the current archive as the "latest" release, use:
-
-> ```
-> gulp release
-> ```
 
 ## Multicluster Setup for Development
 
@@ -107,5 +85,5 @@ cluster.
 
 1. Start a Kibana instance connected to the Monitoring cluster (for running queries in Sense on Monitoring data):
   ```
-  % ./bin/kibana --config config/kibana.dev.yml --elasticsearch.url http://localhost:9210 --server.name monitoring-kibana --server.port 5611
+  % ./bin/kibana --config config/kibana.dev.yml --elasticsearch.hosts http://localhost:9210 --server.name monitoring-kibana --server.port 5611
   ```

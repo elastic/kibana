@@ -7,8 +7,15 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
-import { InfraMetricInput, InfraMetricType, InfraPathType } from '../../../common/graphql/types';
-import { InfraNodeType } from '../../../server/lib/adapters/nodes';
+
+import { isBoolean, isNumber } from 'lodash';
+import {
+  InfraMetricInput,
+  InfraMetricType,
+  InfraNodeType,
+  InfraPathType,
+} from '../../graphql/types';
+import { InfraGroupByOptions } from '../../lib/lib';
 import { State, waffleOptionsActions, waffleOptionsSelectors } from '../../store';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
@@ -16,12 +23,20 @@ import { UrlStateContainer } from '../../utils/url_state';
 
 const selectOptionsUrlState = createSelector(
   waffleOptionsSelectors.selectMetric,
+  waffleOptionsSelectors.selectView,
   waffleOptionsSelectors.selectGroupBy,
   waffleOptionsSelectors.selectNodeType,
-  (metric, groupBy, nodeType) => ({
+  waffleOptionsSelectors.selectCustomOptions,
+  waffleOptionsSelectors.selectBoundsOverride,
+  waffleOptionsSelectors.selectAutoBounds,
+  (metric, view, groupBy, nodeType, customOptions, boundsOverride, autoBounds) => ({
     metric,
     groupBy,
     nodeType,
+    view,
+    customOptions,
+    boundsOverride,
+    autoBounds,
   })
 );
 
@@ -30,12 +45,20 @@ export const withWaffleOptions = connect(
     metric: waffleOptionsSelectors.selectMetric(state),
     groupBy: waffleOptionsSelectors.selectGroupBy(state),
     nodeType: waffleOptionsSelectors.selectNodeType(state),
+    view: waffleOptionsSelectors.selectView(state),
+    customOptions: waffleOptionsSelectors.selectCustomOptions(state),
+    boundsOverride: waffleOptionsSelectors.selectBoundsOverride(state),
+    autoBounds: waffleOptionsSelectors.selectAutoBounds(state),
     urlState: selectOptionsUrlState(state),
   }),
   bindPlainActionCreators({
     changeMetric: waffleOptionsActions.changeMetric,
     changeGroupBy: waffleOptionsActions.changeGroupBy,
     changeNodeType: waffleOptionsActions.changeNodeType,
+    changeView: waffleOptionsActions.changeView,
+    changeCustomOptions: waffleOptionsActions.changeCustomOptions,
+    changeBoundsOverride: waffleOptionsActions.changeBoundsOverride,
+    changeAutoBounds: waffleOptionsActions.changeAutoBounds,
   })
 );
 
@@ -49,11 +72,24 @@ interface WaffleOptionsUrlState {
   metric?: ReturnType<typeof waffleOptionsSelectors.selectMetric>;
   groupBy?: ReturnType<typeof waffleOptionsSelectors.selectGroupBy>;
   nodeType?: ReturnType<typeof waffleOptionsSelectors.selectNodeType>;
+  view?: ReturnType<typeof waffleOptionsSelectors.selectView>;
+  customOptions?: ReturnType<typeof waffleOptionsSelectors.selectCustomOptions>;
+  bounds?: ReturnType<typeof waffleOptionsSelectors.selectBoundsOverride>;
+  auto?: ReturnType<typeof waffleOptionsSelectors.selectAutoBounds>;
 }
 
 export const WithWaffleOptionsUrlState = () => (
   <WithWaffleOptions>
-    {({ changeMetric, urlState, changeGroupBy, changeNodeType }) => (
+    {({
+      changeMetric,
+      urlState,
+      changeGroupBy,
+      changeNodeType,
+      changeView,
+      changeCustomOptions,
+      changeAutoBounds,
+      changeBoundsOverride,
+    }) => (
       <UrlStateContainer
         urlState={urlState}
         urlStateKey="waffleOptions"
@@ -68,6 +104,18 @@ export const WithWaffleOptionsUrlState = () => (
           if (newUrlState && newUrlState.nodeType) {
             changeNodeType(newUrlState.nodeType);
           }
+          if (newUrlState && newUrlState.view) {
+            changeView(newUrlState.view);
+          }
+          if (newUrlState && newUrlState.customOptions) {
+            changeCustomOptions(newUrlState.customOptions);
+          }
+          if (newUrlState && newUrlState.bounds) {
+            changeBoundsOverride(newUrlState.bounds);
+          }
+          if (newUrlState && newUrlState.auto) {
+            changeAutoBounds(newUrlState.auto);
+          }
         }}
         onInitialize={initialUrlState => {
           if (initialUrlState && initialUrlState.metric) {
@@ -78,6 +126,18 @@ export const WithWaffleOptionsUrlState = () => (
           }
           if (initialUrlState && initialUrlState.nodeType) {
             changeNodeType(initialUrlState.nodeType);
+          }
+          if (initialUrlState && initialUrlState.view) {
+            changeView(initialUrlState.view);
+          }
+          if (initialUrlState && initialUrlState.customOptions) {
+            changeCustomOptions(initialUrlState.customOptions);
+          }
+          if (initialUrlState && initialUrlState.bounds) {
+            changeBoundsOverride(initialUrlState.bounds);
+          }
+          if (initialUrlState && initialUrlState.auto) {
+            changeAutoBounds(initialUrlState.auto);
           }
         }}
       />
@@ -91,6 +151,10 @@ const mapToUrlState = (value: any): WaffleOptionsUrlState | undefined =>
         metric: mapToMetricUrlState(value.metric),
         groupBy: mapToGroupByUrlState(value.groupBy),
         nodeType: mapToNodeTypeUrlState(value.nodeType),
+        view: mapToViewUrlState(value.view),
+        customOptions: mapToCustomOptionsUrlState(value.customOptions),
+        bounds: mapToBoundsOverideUrlState(value.boundsOverride),
+        auto: mapToAutoBoundsUrlState(value.autoBounds),
       }
     : undefined;
 
@@ -100,6 +164,15 @@ const isInfraMetricInput = (subject: any): subject is InfraMetricInput => {
 
 const isInfraPathInput = (subject: any): subject is InfraPathType => {
   return subject != null && subject.type != null && InfraPathType[subject.type] != null;
+};
+
+const isInfraGroupByOption = (subject: any): subject is InfraGroupByOptions => {
+  return (
+    subject != null &&
+    subject.text != null &&
+    subject.field != null &&
+    InfraPathType[subject.type] != null
+  );
 };
 
 const mapToMetricUrlState = (subject: any) => {
@@ -112,4 +185,22 @@ const mapToGroupByUrlState = (subject: any) => {
 
 const mapToNodeTypeUrlState = (subject: any) => {
   return subject && InfraNodeType[subject] ? subject : undefined;
+};
+
+const mapToViewUrlState = (subject: any) => {
+  return subject && ['map', 'table'].includes(subject) ? subject : undefined;
+};
+
+const mapToCustomOptionsUrlState = (subject: any) => {
+  return subject && Array.isArray(subject) && subject.every(isInfraGroupByOption)
+    ? subject
+    : undefined;
+};
+
+const mapToBoundsOverideUrlState = (subject: any) => {
+  return subject != null && isNumber(subject.max) && isNumber(subject.min) ? subject : undefined;
+};
+
+const mapToAutoBoundsUrlState = (subject: any) => {
+  return subject != null && isBoolean(subject) ? subject : undefined;
 };

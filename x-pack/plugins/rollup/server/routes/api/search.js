@@ -1,8 +1,8 @@
 /*
-* Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-* or more contributor license agreements. Licensed under the Elastic License;
-* you may not use this file except in compliance with the Elastic License.
-*/
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
 
 import { callWithRequestFactory } from '../../lib/call_with_request_factory';
 import { isEsErrorFactory } from '../../lib/is_es_error_factory';
@@ -26,6 +26,7 @@ export function registerSearchRoute(server) {
         const requests = request.payload.map(({ index, query }) => (
           callWithRequest('rollup.search', {
             index,
+            rest_total_hits_as_int: true,
             body: query,
           })
         ));

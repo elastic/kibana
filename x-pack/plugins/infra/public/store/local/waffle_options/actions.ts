@@ -5,11 +5,15 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { InfraMetricInput, InfraPathInput } from '../../../../common/graphql/types';
-import { InfraNodeType } from '../../../../server/lib/adapters/nodes';
+import { InfraMetricInput, InfraNodeType, InfraPathInput } from '../../../graphql/types';
+import { InfraGroupByOptions, InfraWaffleMapBounds } from '../../../lib/lib';
 
 const actionCreator = actionCreatorFactory('x-pack/infra/local/waffle_options');
 
 export const changeMetric = actionCreator<InfraMetricInput>('CHANGE_METRIC');
 export const changeGroupBy = actionCreator<InfraPathInput[]>('CHANGE_GROUP_BY');
+export const changeCustomOptions = actionCreator<InfraGroupByOptions[]>('CHANGE_CUSTOM_OPTIONS');
 export const changeNodeType = actionCreator<InfraNodeType>('CHANGE_NODE_TYPE');
+export const changeView = actionCreator<string>('CHANGE_VIEW');
+export const changeBoundsOverride = actionCreator<InfraWaffleMapBounds>('CHANGE_BOUNDS_OVERRIDE');
+export const changeAutoBounds = actionCreator<boolean>('CHANGE_AUTO_BOUNDS');

@@ -13,7 +13,7 @@ import {
   EuiFieldNumber,
   EuiSuperSelect,
 } from '@elastic/eui';
-import { ColorPickerMini } from '../../../components/color_picker_mini';
+import { ColorPickerPopover } from '../../../components/color_picker_popover';
 
 const styles = [
   'none',
@@ -34,12 +34,18 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
   const radiusVal = radius ? radius.replace('px', '') : '';
 
   const namedChange = name => val => {
-    if (name === 'borderWidth') return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
+    if (name === 'borderWidth') {
+      return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
+    }
     if (name === 'borderStyle') {
-      if (val === '') return onChange('border', `0px`);
+      if (val === '') {
+        return onChange('border', `0px`);
+      }
       return onChange('border', `${borderWidth} ${val} ${borderColor}`);
     }
-    if (name === 'borderRadius') return onChange('borderRadius', `${val}px`);
+    if (name === 'borderRadius') {
+      return onChange('borderRadius', `${val}px`);
+    }
 
     onChange(name, val);
   };
@@ -81,7 +87,7 @@ export const BorderForm = ({ value, radius, onChange, colors }) => {
 
       <EuiFlexItem grow={1}>
         <EuiFormRow label="Color" style={{ fontSize: 0 }}>
-          <ColorPickerMini
+          <ColorPickerPopover
             value={borderColor}
             onChange={borderColorChange}
             colors={colors}

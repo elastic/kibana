@@ -5,8 +5,8 @@
  */
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { mount, shallow } from 'enzyme';
 import React from 'react';
+import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { LoginState } from '../../../../../common/login_state';
 import { BasicLoginForm } from './basic_login_form';
 
@@ -14,6 +14,7 @@ const createMockHttp = ({ simulateError = false } = {}) => {
   return {
     post: jest.fn(async () => {
       if (simulateError) {
+        // eslint-disable-next-line no-throw-literal
         throw {
           data: {
             statusCode: 401,
@@ -43,8 +44,14 @@ describe('BasicLoginForm', () => {
     const mockWindow = {};
     const loginState = createLoginState();
     expect(
-      shallow(
-        <BasicLoginForm http={mockHttp} window={mockWindow} loginState={loginState} next={''} />
+      shallowWithIntl(
+        <BasicLoginForm.WrappedComponent
+          http={mockHttp}
+          window={mockWindow}
+          loginState={loginState}
+          next={''}
+          intl={null as any}
+        />
       )
     ).toMatchSnapshot();
   });
@@ -54,13 +61,14 @@ describe('BasicLoginForm', () => {
     const mockWindow = {};
     const loginState = createLoginState();
 
-    const wrapper = shallow(
-      <BasicLoginForm
+    const wrapper = shallowWithIntl(
+      <BasicLoginForm.WrappedComponent
         http={mockHttp}
         window={mockWindow}
         loginState={loginState}
         next={''}
         infoMessage={'Hey this is an info message'}
+        intl={null as any}
       />
     );
 
@@ -72,8 +80,14 @@ describe('BasicLoginForm', () => {
     const mockWindow = {};
     const loginState = createLoginState();
 
-    const wrapper = mount(
-      <BasicLoginForm http={mockHttp} window={mockWindow} loginState={loginState} next={''} />
+    const wrapper = mountWithIntl(
+      <BasicLoginForm.WrappedComponent
+        http={mockHttp}
+        window={mockWindow}
+        loginState={loginState}
+        next={''}
+        intl={null as any}
+      />
     );
 
     wrapper.find('input[name="username"]').simulate('change', { target: { value: 'username' } });

@@ -7,7 +7,6 @@
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
 import { toastNotifications } from 'ui/notify';
-import 'ui/dirty_prompt';
 import template from './json_watch_edit.html';
 import 'plugins/watcher/components/kbn_tabs';
 import 'plugins/watcher/components/watch_history_item_detail';

@@ -5,6 +5,7 @@
  */
 
 
+import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
 import {
@@ -19,7 +20,7 @@ import {
 import { MLJobEditor, EDITOR_MODE } from '../../../jobs/jobs_list/components/ml_job_editor';
 const EDITOR_HEIGHT = '300px';
 
-export function AdvancedSettings({
+function AdvancedSettingsUi({
   index,
   indexPattern,
   initialized,
@@ -35,27 +36,45 @@ export function AdvancedSettings({
   onPipelineStringChange,
   indexNameError,
   indexPatternNameError,
+  intl,
 }) {
 
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Index name"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameLabel"
+            defaultMessage="Index name"
+          />
+        }
         isInvalid={indexNameError !== ''}
         error={[indexNameError]}
       >
         <EuiFieldText
-          placeholder="index name"
+          placeholder={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNamePlaceholder',
+            defaultMessage: 'index name'
+          })}
           value={index}
           disabled={(initialized === true)}
           onChange={onIndexChange}
           isInvalid={indexNameError !== ''}
+          aria-label={intl.formatMessage({
+            id: 'xpack.ml.fileDatavisualizer.advancedImportSettings.indexNameAriaLabel',
+            defaultMessage: 'Index name, required field'
+          })}
         />
       </EuiFormRow>
 
       <EuiCheckbox
         id="createIndexPattern"
-        label="Create index pattern"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.createIndexPatternLabel"
+            defaultMessage="Create index pattern"
+          />
+        }
         checked={(createIndexPattern === true)}
         disabled={(initialized === true)}
         onChange={onCreateIndexPatternChange}
@@ -64,7 +83,12 @@ export function AdvancedSettings({
       <EuiSpacer size="s" />
 
       <EuiFormRow
-        label="Index pattern name"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexPatternNameLabel"
+            defaultMessage="Index pattern name"
+          />
+        }
         disabled={(createIndexPattern === false || initialized === true)}
         isInvalid={indexPatternNameError !== ''}
         error={[indexPatternNameError]}
@@ -109,11 +133,18 @@ export function AdvancedSettings({
   );
 }
 
+export const AdvancedSettings = injectI18n(AdvancedSettingsUi);
+
 function IndexSettings({ initialized, data, onChange }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Index settings"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.indexSettingsLabel"
+            defaultMessage="Index settings"
+          />
+        }
         disabled={(initialized === true)}
         fullWidth
       >
@@ -134,7 +165,12 @@ function Mappings({ initialized, data, onChange }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Mappings"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.mappingsLabel"
+            defaultMessage="Mappings"
+          />
+        }
         disabled={(initialized === true)}
         fullWidth
       >
@@ -155,7 +191,12 @@ function IngestPipeline({ initialized, data, onChange }) {
   return (
     <React.Fragment>
       <EuiFormRow
-        label="Ingest pipeline"
+        label={
+          <FormattedMessage
+            id="xpack.ml.fileDatavisualizer.advancedImportSettings.ingestPipelineLabel"
+            defaultMessage="Ingest pipeline"
+          />
+        }
         disabled={(initialized === true)}
         fullWidth
       >

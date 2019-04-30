@@ -18,7 +18,7 @@ export {
 } from './beats';
 export {
   clusterRoute,
-  clustersRoute
+  clustersRoute,
 } from './cluster';
 export {
   esIndexRoute,
@@ -54,3 +54,4 @@ export {
   logstashOverviewRoute,
   logstashPipelineRoute
 } from './logstash';
+export * from './setup';

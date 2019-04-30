@@ -11,14 +11,13 @@ import template from 'plugins/spaces/views/nav_control/nav_control.html';
 import { NavControlPopover } from 'plugins/spaces/views/nav_control/nav_control_popover';
 // @ts-ignore
 import { PathProvider } from 'plugins/xpack_main/services/path';
-import { UserProfileProvider } from 'plugins/xpack_main/services/user_profile';
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { render, unmountComponentAtNode } from 'react-dom';
+import ReactDOM from 'react-dom';
 import { NavControlSide } from 'ui/chrome/directives/header_global_nav';
+import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { uiModules } from 'ui/modules';
-// @ts-ignore
 import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_controls';
 // @ts-ignore
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
@@ -46,7 +45,6 @@ let spacesManager: SpacesManager;
 module.controller(
   'spacesNavController',
   ($scope: any, $http: any, chrome: any, Private: any, activeSpace: any) => {
-    const userProfile = Private(UserProfileProvider);
     const pathProvider = Private(PathProvider);
 
     const domNode = document.getElementById(`spacesNavReactRoot`);
@@ -59,13 +57,14 @@ module.controller(
     $scope.$parent.$watch('isVisible', function isVisibleWatcher(isVisible: boolean) {
       if (isVisible && !mounted && !pathProvider.isUnauthenticated()) {
         render(
-          <NavControlPopover
-            spacesManager={spacesManager}
-            activeSpace={activeSpace}
-            userProfile={userProfile}
-            anchorPosition={'rightCenter'}
-            buttonClass={SpacesGlobalNavButton}
-          />,
+          <I18nContext>
+            <NavControlPopover
+              spacesManager={spacesManager}
+              activeSpace={activeSpace}
+              anchorPosition={'rightCenter'}
+              buttonClass={SpacesGlobalNavButton}
+            />
+          </I18nContext>,
           domNode
         );
         mounted = true;
@@ -101,7 +100,6 @@ chromeHeaderNavControlsRegistry.register(
     order: 1000,
     side: NavControlSide.Left,
     render(el: HTMLElement) {
-      const userProfile = Private(UserProfileProvider);
       const pathProvider = Private(PathProvider);
 
       if (pathProvider.isUnauthenticated()) {
@@ -113,13 +111,14 @@ chromeHeaderNavControlsRegistry.register(
       spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
       ReactDOM.render(
-        <NavControlPopover
-          spacesManager={spacesManager}
-          activeSpace={activeSpace}
-          userProfile={userProfile}
-          anchorPosition="downLeft"
-          buttonClass={SpacesHeaderNavButton}
-        />,
+        <I18nContext>
+          <NavControlPopover
+            spacesManager={spacesManager}
+            activeSpace={activeSpace}
+            anchorPosition="downLeft"
+            buttonClass={SpacesHeaderNavButton}
+          />
+        </I18nContext>,
         el
       );
     },

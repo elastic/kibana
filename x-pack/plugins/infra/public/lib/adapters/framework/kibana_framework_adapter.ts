@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { IModule, IScope } from 'angular';
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
@@ -24,9 +26,7 @@ const BREADCRUMBS_ELEMENT_ID = 'react-infra-breadcrumbs';
 
 export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   public appState: object;
-  public dateFormat?: string;
   public kbnVersion?: string;
-  public scaledDateFormat?: string;
   public timezone?: string;
 
   private adapterService: KibanaAdapterServiceProvider;
@@ -117,7 +117,7 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
       template: `
         <div
           id="${ROOT_ELEMENT_ID}"
-          style="display: flex; flex-direction: column; align-items: stretch; flex: 1 0 0%; overflow: hidden;"
+          class="infReactRoot"
         ></div>
       `,
     }));
@@ -131,8 +131,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
     ) => {
       this.timezone = Private(this.timezoneProvider)();
       this.kbnVersion = kbnVersion;
-      this.dateFormat = config.get('dateFormat');
-      this.scaledDateFormat = config.get('dateFormat:scaled');
     });
 
     uiRoutes.enable();
@@ -145,7 +143,6 @@ export class InfraKibanaFrameworkAdapter implements InfraFrameworkAdapter {
   };
 }
 
-// tslint:disable-next-line: max-classes-per-file
 class KibanaAdapterServiceProvider {
   public serviceRefs: InfraKibanaAdapterServiceRefs | null = null;
   public bufferedCalls: Array<InfraBufferedKibanaServiceCall<InfraKibanaAdapterServiceRefs>> = [];

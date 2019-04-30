@@ -12,7 +12,7 @@ import { BulkUploader } from './bulk_uploader';
  * - Ops Events - essentially Kibana's /api/status
  * - Usage Stats - essentially Kibana's /api/stats
  * - Kibana Settings - select uiSettings
- * @param {Object} kbnServer manager of Kibana services - see `src/server/kbn_server` in Kibana core
+ * @param {Object} kbnServer manager of Kibana services - see `src/legacy/server/kbn_server` in Kibana core
  * @param {Object} server HapiJS server instance
  */
 export function initBulkUploader(kbnServer, server) {

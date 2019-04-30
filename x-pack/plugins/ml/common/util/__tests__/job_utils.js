@@ -6,12 +6,13 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   calculateDatafeedFrequencyDefaultSeconds,
   isTimeSeriesViewJob,
   isTimeSeriesViewDetector,
-  isTimeSeriesViewFunction,
+  isSourceDataChartableForDetector,
+  isModelPlotChartableForDetector,
   getPartitioningFieldNames,
   isModelPlotEnabled,
   isJobVersionGte,
@@ -158,47 +159,145 @@ describe('ML - job utils', () => {
 
   });
 
-  describe('isTimeSeriesViewFunction', () => {
+  describe('isSourceDataChartableForDetector', () => {
 
-    it('returns true for expected functions', () => {
-      expect(isTimeSeriesViewFunction('count')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('non_zero_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_non_zero_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_non_zero_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('distinct_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_distinct_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_distinct_count')).to.be(true);
-      expect(isTimeSeriesViewFunction('metric')).to.be(true);
-      expect(isTimeSeriesViewFunction('mean')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_mean')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_mean')).to.be(true);
-      expect(isTimeSeriesViewFunction('median')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_median')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_median')).to.be(true);
-      expect(isTimeSeriesViewFunction('min')).to.be(true);
-      expect(isTimeSeriesViewFunction('max')).to.be(true);
-      expect(isTimeSeriesViewFunction('sum')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_sum')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_sum')).to.be(true);
-      expect(isTimeSeriesViewFunction('non_null_sum')).to.be(true);
-      expect(isTimeSeriesViewFunction('low_non_null_sum')).to.be(true);
-      expect(isTimeSeriesViewFunction('high_non_null_sum')).to.be(true);
-      expect(isTimeSeriesViewFunction('rare')).to.be(true);
+    const job = {
+      analysis_config: {
+        detectors: [
+          { function: 'count' },  // 0
+          { function: 'low_count' },  // 1
+          { function: 'high_count' },  // 2
+          { function: 'non_zero_count' },  // 3
+          { function: 'low_non_zero_count' },  // 4
+          { function: 'high_non_zero_count' },  // 5
+          { function: 'distinct_count' },  // 6
+          { function: 'low_distinct_count' },  // 7
+          { function: 'high_distinct_count' },  // 8
+          { function: 'metric' },  // 9
+          { function: 'mean' },  // 10
+          { function: 'low_mean' },  // 11
+          { function: 'high_mean' },  // 12
+          { function: 'median' },  // 13
+          { function: 'low_median' },  // 14
+          { function: 'high_median' },  // 15
+          { function: 'min' },  // 16
+          { function: 'max' },  // 17
+          { function: 'sum' },  // 18
+          { function: 'low_sum' },  // 19
+          { function: 'high_sum' },  // 20
+          { function: 'non_null_sum' },  // 21
+          { function: 'low_non_null_sum' },  // 22
+          { function: 'high_non_null_sum' },  // 23
+          { function: 'rare' },  // 24
+          { function: 'count', 'by_field_name': 'mlcategory',  },  // 25
+          { function: 'count', 'by_field_name': 'hrd',  },   // 26
+          { function: 'freq_rare' },  // 27
+          { function: 'info_content' },  // 28
+          { function: 'low_info_content' },  // 29
+          { function: 'high_info_content' },  // 30
+          { function: 'varp' },  // 31
+          { function: 'low_varp' },  // 32
+          { function: 'high_varp' },  // 33
+          { function: 'time_of_day' },  // 34
+          { function: 'time_of_week' },  // 35
+          { function: 'lat_long' },  // 36
+          { function: 'mean', 'field_name': 'NetworkDiff' }, //37
+        ]
+      },
+      datafeed_config: {
+        script_fields: {
+          hrd: {
+            script: {
+              inline: 'return domainSplit(doc["query"].value, params).get(1);',
+              lang: 'painless'
+            }
+          },
+          NetworkDiff: {
+            script: {
+              source: 'doc["NetworkOut"].value - doc["NetworkIn"].value',
+              lang: 'painless'
+            }
+          }
+        }
+      }
+    };
+
+    it('returns true for expected detectors', () => {
+      expect(isSourceDataChartableForDetector(job, 0)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 1)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 2)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 3)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 4)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 5)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 6)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 7)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 8)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 9)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 10)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 11)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 12)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 13)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 14)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 15)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 16)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 17)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 18)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 19)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 20)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 21)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 22)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 23)).to.be(true);
+      expect(isSourceDataChartableForDetector(job, 24)).to.be(true);
     });
 
-    it('returns false for expected functions', () => {
-      expect(isTimeSeriesViewFunction('freq_rare')).to.be(false);
-      expect(isTimeSeriesViewFunction('info_content')).to.be(false);
-      expect(isTimeSeriesViewFunction('low_info_content')).to.be(false);
-      expect(isTimeSeriesViewFunction('high_info_content')).to.be(false);
-      expect(isTimeSeriesViewFunction('varp')).to.be(false);
-      expect(isTimeSeriesViewFunction('low_varp')).to.be(false);
-      expect(isTimeSeriesViewFunction('high_varp')).to.be(false);
-      expect(isTimeSeriesViewFunction('time_of_day')).to.be(false);
-      expect(isTimeSeriesViewFunction('time_of_week')).to.be(false);
-      expect(isTimeSeriesViewFunction('lat_long')).to.be(false);
+    it('returns false for expected detectors', () => {
+      expect(isSourceDataChartableForDetector(job, 25)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 26)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 27)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 28)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 29)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 30)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 31)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 32)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 33)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 34)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 35)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 36)).to.be(false);
+      expect(isSourceDataChartableForDetector(job, 37)).to.be(false);
+    });
+  });
+
+  describe('isModelPlotChartableForDetector', () => {
+    const job1 = {
+      analysis_config: {
+        detectors: [
+          { function: 'count' }
+        ]
+      }
+    };
+
+    const job2 = {
+      analysis_config: {
+        detectors: [
+          { function: 'count' },
+          { function: 'info_content' }
+        ]
+      },
+      model_plot_config: {
+        enabled: true
+      }
+    };
+
+    it('returns false when model plot is not enabled', () => {
+      expect(isModelPlotChartableForDetector(job1, 0)).to.be(false);
+    });
+
+    it('returns true for count detector when model plot is enabled', () => {
+      expect(isModelPlotChartableForDetector(job2, 0)).to.be(true);
+    });
+
+    it('returns true for info_content detector when model plot is enabled', () => {
+      expect(isModelPlotChartableForDetector(job2, 1)).to.be(true);
     });
   });
 

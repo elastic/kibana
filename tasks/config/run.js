@@ -39,7 +39,6 @@ module.exports = function (grunt) {
       args: [
         ...runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss'],
 
-        '--env.name=development',
         '--logging.json=false',
 
         ...flags,
@@ -57,12 +56,12 @@ module.exports = function (grunt) {
   }
 
   const browserTestServerFlags = [
+    '--env.name=development',
     '--plugins.initialize=false',
     '--optimize.bundleFilter=tests',
     '--server.port=5610',
   ];
 
-  const esFrom = process.env.TEST_ES_FROM || 'source';
   return {
     // used by the test and jenkins:unit tasks
     //    runs the eslint script to check for linting errors
@@ -71,6 +70,13 @@ module.exports = function (grunt) {
       args: [
         require.resolve('../../scripts/eslint'),
         '--no-cache'
+      ]
+    },
+
+    sasslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/sasslint')
       ]
     },
 
@@ -84,21 +90,30 @@ module.exports = function (grunt) {
       ]
     },
 
-    // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
-    tslint: {
+    // used by the test tasks
+    //    runs the check_core_api_changes script to ensure API changes are explictily accepted
+    checkCoreApiChanges: {
       cmd: process.execPath,
       args: [
-        require.resolve('../../scripts/tslint')
+        require.resolve('../../scripts/check_core_api_changes')
       ]
     },
 
     // used by the test and jenkins:unit tasks
-    //    runs the tslint script to check for Typescript linting errors
+    //    runs the typecheck script to check for Typescript type errors
     typeCheck: {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/type_check')
+      ]
+    },
+
+    // used by the test and jenkins:unit tasks
+    //    ensures that all typescript files belong to a typescript project
+    checkTsProjects: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/check_ts_projects')
       ]
     },
 
@@ -108,6 +123,7 @@ module.exports = function (grunt) {
       cmd: process.execPath,
       args: [
         require.resolve('../../scripts/i18n_check'),
+        '--ignore-missing',
       ]
     },
 
@@ -175,7 +191,6 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/api_integration/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
       ],
@@ -187,7 +202,17 @@ module.exports = function (grunt) {
         'scripts/functional_tests',
         '--config', 'test/server_integration/http/ssl/config.js',
         '--config', 'test/server_integration/http/ssl_redirect/config.js',
-        '--esFrom', esFrom,
+        '--bail',
+        '--debug',
+        '--kibana-install-dir', KIBANA_INSTALL_DIR,
+      ],
+    },
+
+    interpreterFunctionalTestsRelease: {
+      cmd: process.execPath,
+      args: [
+        'scripts/functional_tests',
+        '--config', 'test/interpreter_functional/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,
@@ -199,12 +224,9 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/plugin_functional/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
         '--kibana-install-dir', KIBANA_INSTALL_DIR,
-        '--',
-        '--server.maxPayloadBytes=1648576',
       ],
     },
 
@@ -213,16 +235,12 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config', 'test/functional/config.js',
-        '--esFrom', esFrom,
         '--bail',
         '--debug',
-        '--',
-        '--server.maxPayloadBytes=1648576', //default is 1048576
       ],
     },
 
     ...getFunctionalTestGroupRunConfigs({
-      esFrom,
       kibanaInstallDir: KIBANA_INSTALL_DIR
     })
   };

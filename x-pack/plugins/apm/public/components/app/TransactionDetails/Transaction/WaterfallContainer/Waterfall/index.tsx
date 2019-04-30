@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Location } from 'history';
 import React, { Component } from 'react';
 // @ts-ignore
 import { StickyContainer } from 'react-sticky';
 import styled from 'styled-components';
-
-import { IUrlParams } from '../../../../../../store/urlParams';
-
-// @ts-ignore
-import { fromQuery, history, toQuery } from '../../../../../../utils/url';
+import { IUrlParams } from '../../../../../../context/UrlParamsContext/types';
 // @ts-ignore
 import Timeline from '../../../../../shared/charts/Timeline';
+import {
+  APMQueryParams,
+  fromQuery,
+  toQuery
+} from '../../../../../shared/Links/url_helpers';
+import { history } from '../../../../../../utils/history';
 import { AgentMark } from '../get_agent_marks';
 import { SpanFlyout } from './SpanFlyout';
 import { TransactionFlyout } from './TransactionFlyout';
@@ -42,7 +45,7 @@ interface Props {
   agentMarks: AgentMark[];
   urlParams: IUrlParams;
   waterfall: IWaterfall;
-  location: any;
+  location: Location;
   serviceColors: IServiceColors;
 }
 
@@ -61,8 +64,13 @@ export class Waterfall extends Component<Props> {
     });
   };
 
-  public getWaterfallItem = (item: IWaterfallItem) => {
+  public renderWaterfallItem = (item: IWaterfallItem) => {
     const { serviceColors, waterfall, urlParams }: Props = this.props;
+
+    const errorCount =
+      item.docType === 'transaction'
+        ? waterfall.errorCountByTransactionId[item.transaction.transaction.id]
+        : 0;
 
     return (
       <WaterfallItem
@@ -72,13 +80,14 @@ export class Waterfall extends Component<Props> {
         item={item}
         totalDuration={waterfall.duration}
         isSelected={item.id === urlParams.waterfallItemId}
+        errorCount={errorCount}
         onClick={() => this.onOpenFlyout(item)}
       />
     );
   };
 
   public getFlyOut = () => {
-    const { waterfall, location, urlParams } = this.props;
+    const { waterfall, urlParams } = this.props;
 
     const currentItem =
       urlParams.waterfallItemId &&
@@ -107,9 +116,8 @@ export class Waterfall extends Component<Props> {
           <TransactionFlyout
             transaction={currentItem.transaction}
             onClose={this.onCloseFlyout}
-            location={location}
-            urlParams={urlParams}
-            waterfall={waterfall}
+            traceRootDuration={waterfall.traceRootDuration}
+            errorCount={currentItem.errorCount}
           />
         );
       default:
@@ -120,7 +128,7 @@ export class Waterfall extends Component<Props> {
   public render() {
     const { waterfall } = this.props;
     const itemContainerHeight = 58; // TODO: This is a nasty way to calculate the height of the svg element. A better approach should be found
-    const waterfallHeight = itemContainerHeight * waterfall.items.length;
+    const waterfallHeight = itemContainerHeight * waterfall.orderedItems.length;
 
     return (
       <Container>
@@ -137,7 +145,7 @@ export class Waterfall extends Component<Props> {
               paddingTop: TIMELINE_MARGINS.top
             }}
           >
-            {waterfall.items.map(this.getWaterfallItem)}
+            {waterfall.orderedItems.map(this.renderWaterfallItem)}
           </div>
         </StickyContainer>
 
@@ -146,7 +154,7 @@ export class Waterfall extends Component<Props> {
     );
   }
 
-  private setQueryParams(params: Partial<IUrlParams>) {
+  private setQueryParams(params: APMQueryParams) {
     const { location } = this.props;
     history.replace({
       ...location,

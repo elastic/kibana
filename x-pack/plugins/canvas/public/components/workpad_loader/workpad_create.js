@@ -12,10 +12,10 @@ export const WorkpadCreate = ({ createPending, onCreate, ...rest }) => (
   <EuiButton
     {...rest}
     iconType="plusInCircle"
-    size="s"
     fill
     onClick={onCreate}
     isLoading={createPending}
+    data-test-subj="create-workpad-button"
   >
     Create workpad
   </EuiButton>

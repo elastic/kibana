@@ -1,0 +1,53 @@
+<h2
+  class="kuiLocalDropdownTitle"
+  i18n-id="console.historyPage.pageTitle"
+  i18n-default-message="History"
+></h2>
+
+<div class="conHistory__body">
+  <ul
+    class="list-group conHistory__reqs"
+    tabindex="0"
+    role="listbox"
+    aria-activedescendant="historyReq{{ history.selectedIndex }}"
+    scrollto-activedescendant
+    ng-keydown="history.onKeyDown($event)"
+    aria-label="{{:: 'console.historyPage.requestListAriaLabel' | i18n: { defaultMessage: 'History of sent requests' } }}"
+  >
+    <li
+      class="list-group-item conHistory__req"
+      role="option"
+      ng-repeat="req in history.reqs"
+      id="historyReq{{$index}}"
+      ng-class="{ 'conHistory__req-selected': history.viewingReq === req }"
+      ng-click="history.selectedReq = req; history.viewingReq = req; history.selectedIndex = $index"
+      ng-mouseenter="history.viewingReq = req"
+      ng-mouseleave="history.viewingReq = history.selectedReq"
+      ng-dblclick="history.restore(req)"
+      aria-label="{{:: 'console.historyPage.itemOfRequestListAriaLabel' | i18n: { defaultMessage: 'Request: {historyItem}', values: { historyItem: history.describeReq(req) },} }}"
+      aria-selected="{{ history.selectedReq === req }}"
+    >
+      {{ history.describeReq(req) }}
+      <span class="conHistory__reqIcon"><i class="fa fa-chevron-right"></i></span>
+    </li>
+  </ul>
+
+  <sense-history-viewer class="conHistory__viewer" req="history.viewingReq" />
+</div>
+
+<div class="conHistory__footer">
+  <button
+    class="kuiButton kuiButton--danger"
+    ng-click="history.clear()"
+    i18n-id="console.historyPage.clearHistoryButtonLabel"
+    i18n-default-message="Clear"
+  ></button>
+  <button
+    class="kuiButton kuiButton--primary"
+    ng-disabled="!history.selectedReq"
+    ng-click="history.restore()"
+    i18n-id="console.historyPage.applyHistoryButtonLabel"
+    i18n-default-message="Apply"
+  >
+  </button>
+</div>

@@ -38,6 +38,7 @@ interface JsonObject {
   [key: string]: JsonValue;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface JsonArray extends Array<JsonValue> {}
 
 export function fromKueryExpression(
@@ -46,3 +47,5 @@ export function fromKueryExpression(
 ): KueryNode;
 
 export function toElasticsearchQuery(node: KueryNode, indexPattern: StaticIndexPattern): JsonObject;
+
+export function doesKueryExpressionHaveLuceneSyntaxError(expression: string): boolean;

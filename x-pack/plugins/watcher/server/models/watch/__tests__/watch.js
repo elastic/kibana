@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import proxyquire from 'proxyquire';
 import { WATCH_TYPES } from '../../../../common/constants';

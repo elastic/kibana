@@ -1,8 +1,8 @@
 [role="xpack"]
 [[using-kibana-with-security]]
-== Configuring Security in {kib}
+== Configuring security in {kib}
 ++++
-<titleabbrev>Configuring Security</titleabbrev>
+<titleabbrev>Configuring security</titleabbrev>
 ++++
 
 {kib} users have to log in when {security} is enabled on your cluster. You
@@ -73,8 +73,7 @@ xpack.security.sessionTimeout: 600000
 
 . Restart {kib}.
 
-[[kibana-roles]]
-. Choose an authentication mechanism and grant users the privileges they need to
+. [[kibana-roles]]Choose an authentication mechanism and grant users the privileges they need to
 use {kib}.
 +
 --
@@ -91,7 +90,7 @@ role:
 
 [source,js]
 --------------------------------------------------------------------------------
-POST /_xpack/security/user/jacknich
+POST /_security/user/jacknich
 {
   "password" : "t0pS3cr3t",
   "roles" : [ "kibana_user" ]
@@ -126,4 +125,3 @@ NOTE: This must be a user who has been assigned the `kibana_user` role.
 include::authentication/index.asciidoc[]
 include::securing-communications/index.asciidoc[]
 include::audit-logging.asciidoc[]
-include::{kib-repo-dir}/settings/security-settings.asciidoc[]

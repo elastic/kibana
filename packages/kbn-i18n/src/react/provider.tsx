@@ -26,15 +26,38 @@ import { isPseudoLocale, translateUsingPseudoLocale } from '../core/pseudo_local
 import { injectI18n } from './inject';
 
 /**
+ * To translate label that includes nested `FormattedMessage` instances React Intl
+ * replaces them with special placeholders (@__uid__@ELEMENT-uid-counter@__uid__@)
+ * and maps them back with nested translations after `formatMessage` processes
+ * original string, so we shouldn't modify these special placeholders with pseudo
+ * translations otherwise React Intl won't be able to properly replace placeholders.
+ * It's implementation detail of the React Intl, but since pseudo localization is dev
+ * only feature we should be fine here.
+ * @param message
+ */
+function translateFormattedMessageUsingPseudoLocale(message: string) {
+  const formattedMessageDelimiter = message.match(/@__.{10}__@/);
+  if (formattedMessageDelimiter !== null) {
+    return message
+      .split(formattedMessageDelimiter[0])
+      .map(part => (part.startsWith('ELEMENT-') ? part : translateUsingPseudoLocale(part)))
+      .join(formattedMessageDelimiter[0]);
+  }
+
+  return translateUsingPseudoLocale(message);
+}
+
+/**
  * If pseudo locale is detected, default intl.formatMessage should be decorated
  * with the pseudo localization function.
  * @param child I18nProvider child component.
  */
-function wrapIntlFormatMessage(child: React.ReactNode) {
+function wrapIntlFormatMessage(child: React.ReactElement) {
   return React.createElement(
     injectI18n(({ intl }) => {
       const formatMessage = intl.formatMessage;
-      intl.formatMessage = (...args) => translateUsingPseudoLocale(formatMessage(...args));
+      intl.formatMessage = (...args) =>
+        translateFormattedMessageUsingPseudoLocale(formatMessage(...args));
 
       return React.Children.only(child);
     })
@@ -55,11 +78,10 @@ export class I18nProvider extends React.PureComponent {
         locale={i18n.getLocale()}
         messages={i18n.getTranslation().messages}
         defaultLocale={i18n.getDefaultLocale()}
-        formats={i18n.getTranslation().formats}
-        defaultFormats={i18n.getFormats()}
+        formats={i18n.getFormats()}
         textComponent={React.Fragment}
       >
-        {isPseudoLocale(i18n.getLocale())
+        {isPseudoLocale(i18n.getLocale()) && React.isValidElement(this.props.children)
           ? wrapIntlFormatMessage(this.props.children)
           : this.props.children}
       </IntlProvider>

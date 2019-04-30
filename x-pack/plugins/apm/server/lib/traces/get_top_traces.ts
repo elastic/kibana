@@ -7,47 +7,23 @@
 import {
   PARENT_ID,
   PROCESSOR_EVENT,
-  TRACE_ID,
   TRANSACTION_SAMPLED
-} from '../../../common/constants';
+} from '../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../typings/common';
+import { rangeFilter } from '../helpers/range_filter';
 import { Setup } from '../helpers/setup_request';
 import { getTransactionGroups } from '../transaction_groups';
-import { ITransactionGroup } from '../transaction_groups/transform';
 
-export type TraceListAPIResponse = ITransactionGroup[];
-
-export async function getTopTraces(
-  setup: Setup
-): Promise<TraceListAPIResponse> {
+export type TraceListAPIResponse = PromiseReturnType<typeof getTopTraces>;
+export async function getTopTraces(setup: Setup) {
   const { start, end } = setup;
 
   const bodyQuery = {
     bool: {
-      must: {
-        // this criterion safeguards against data that lacks a transaction
-        // parent ID but still is not a "trace" by way of not having a
-        // trace ID (e.g. old data before parent ID was implemented, etc)
-        exists: {
-          field: TRACE_ID
-        }
-      },
-      must_not: {
-        // no parent ID alongside a trace ID means this transaction is a
-        // "root" transaction, i.e. a trace
-        exists: {
-          field: PARENT_ID
-        }
-      },
+      // no parent ID means this transaction is a "root" transaction, i.e. a trace
+      must_not: { exists: { field: PARENT_ID } },
       filter: [
-        {
-          range: {
-            '@timestamp': {
-              gte: start,
-              lte: end,
-              format: 'epoch_millis'
-            }
-          }
-        },
+        { range: rangeFilter(start, end) },
         { term: { [PROCESSOR_EVENT]: 'transaction' } }
       ],
       should: [{ term: { [TRANSACTION_SAMPLED]: true } }]

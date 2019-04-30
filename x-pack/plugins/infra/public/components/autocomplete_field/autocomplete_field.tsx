@@ -11,10 +11,10 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
 
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
 
+import euiStyled from '../../../../../common/eui_styled_components';
 import { composeStateUpdaters } from '../../utils/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -83,6 +83,12 @@ export class AutocompleteField extends React.Component<
         </AutocompleteContainer>
       </EuiOutsideClickDetector>
     );
+  }
+
+  public componentDidMount() {
+    if (this.inputElement) {
+      this.inputElement.focus();
+    }
   }
 
   public componentDidUpdate(prevProps: AutocompleteFieldProps, prevState: AutocompleteFieldState) {
@@ -218,7 +224,7 @@ export class AutocompleteField extends React.Component<
 
   private updateSuggestions = () => {
     const inputCursorPosition = this.inputElement ? this.inputElement.selectionStart || 0 : 0;
-    this.props.loadSuggestions(this.props.value, inputCursorPosition, 10);
+    this.props.loadSuggestions(this.props.value, inputCursorPosition, 200);
   };
 }
 
@@ -231,8 +237,8 @@ const withPreviousSuggestionSelected = (
     props.suggestions.length === 0
       ? null
       : state.selectedIndex !== null
-        ? (state.selectedIndex + props.suggestions.length - 1) % props.suggestions.length
-        : Math.max(props.suggestions.length - 1, 0),
+      ? (state.selectedIndex + props.suggestions.length - 1) % props.suggestions.length
+      : Math.max(props.suggestions.length - 1, 0),
 });
 
 const withNextSuggestionSelected = (
@@ -244,8 +250,8 @@ const withNextSuggestionSelected = (
     props.suggestions.length === 0
       ? null
       : state.selectedIndex !== null
-        ? (state.selectedIndex + 1) % props.suggestions.length
-        : 0,
+      ? (state.selectedIndex + 1) % props.suggestions.length
+      : 0,
 });
 
 const withSuggestionAtIndexSelected = (suggestionIndex: number) => (
@@ -257,8 +263,8 @@ const withSuggestionAtIndexSelected = (suggestionIndex: number) => (
     props.suggestions.length === 0
       ? null
       : suggestionIndex >= 0 && suggestionIndex < props.suggestions.length
-        ? suggestionIndex
-        : 0,
+      ? suggestionIndex
+      : 0,
 });
 
 const withSuggestionsVisible = (state: AutocompleteFieldState) => ({
@@ -290,16 +296,18 @@ const FixedEuiFieldSearch: React.SFC<
     }
 > = EuiFieldSearch as any;
 
-const AutocompleteContainer = styled.div`
+const AutocompleteContainer = euiStyled.div`
   position: relative;
 `;
 
-const SuggestionsPanel = styled(EuiPanel).attrs({
+const SuggestionsPanel = euiStyled(EuiPanel).attrs({
   paddingSize: 'none',
   hasShadow: true,
 })`
   position: absolute;
   width: 100%;
   margin-top: 2px;
-  overflow: hidden;
+  overflow: hidden scroll;
+  z-index: ${props => props.theme.eui.euiZLevel1};
+  max-height: 322px;
 `;

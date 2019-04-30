@@ -29,13 +29,16 @@ export const staticColumn = () => ({
   },
   fn: (context, args) => {
     const rows = context.rows.map(row => ({ ...row, [args.name]: args.value }));
-    const type = getType(rows[0][args.name]);
+    const type = getType(args.value);
     const columns = [...context.columns];
     const existingColumnIndex = columns.findIndex(({ name }) => name === args.name);
     const newColumn = { name: args.name, type };
 
-    if (existingColumnIndex > -1) columns[existingColumnIndex] = newColumn;
-    else columns.push(newColumn);
+    if (existingColumnIndex > -1) {
+      columns[existingColumnIndex] = newColumn;
+    } else {
+      columns.push(newColumn);
+    }
 
     return {
       type: 'datatable',

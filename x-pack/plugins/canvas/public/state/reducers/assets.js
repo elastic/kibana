@@ -24,7 +24,9 @@ export const assetsReducer = handleActions(
     [setAssetValue]: (assetState, { payload }) => {
       const { id, value } = payload;
       const asset = get(assetState, [id]);
-      if (!asset) throw new Error(`Can not set asset data, id not found: ${id}`);
+      if (!asset) {
+        throw new Error(`Can not set asset data, id not found: ${id}`);
+      }
       return assign(assetState, id, { value });
     },
 

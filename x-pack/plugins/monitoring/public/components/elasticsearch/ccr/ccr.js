@@ -140,6 +140,9 @@ class CcrUI extends Component {
               )
             }
           ]}
+          executeQueryOptions={{
+            defaultFields: ['shardId']
+          }}
           sorting={true}
           pagination={pagination}
         />
@@ -239,6 +242,9 @@ class CcrUI extends Component {
         ]}
         items={items}
         pagination={pagination}
+        executeQueryOptions={{
+          defaultFields: ['index', 'follows']
+        }}
         sorting={sorting}
         itemId="id"
         itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}

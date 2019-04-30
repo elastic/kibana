@@ -41,8 +41,8 @@ describe('CLI cluster manager', () => {
           kill: jest.fn(),
         },
         isDead: jest.fn().mockReturnValue(false),
-        removeListener: jest.fn(),
-        addListener: jest.fn(),
+        off: jest.fn(),
+        on: jest.fn(),
         send: jest.fn()
       };
     });
@@ -105,8 +105,8 @@ describe('CLI cluster manager', () => {
 
         clusterManager = ClusterManager.create({}, {}, basePathProxyMock);
 
-        jest.spyOn(clusterManager.server, 'addListener');
-        jest.spyOn(clusterManager.server, 'removeListener');
+        jest.spyOn(clusterManager.server, 'on');
+        jest.spyOn(clusterManager.server, 'off');
 
         [[{ blockUntil, shouldRedirectFromOldBasePath }]] = basePathProxyMock.start.mock.calls;
       });
@@ -128,58 +128,58 @@ describe('CLI cluster manager', () => {
         clusterManager.server.crashed = true;
 
         await expect(blockUntil()).resolves.not.toBeDefined();
-        expect(clusterManager.server.addListener).not.toHaveBeenCalled();
-        expect(clusterManager.server.removeListener).not.toHaveBeenCalled();
+        expect(clusterManager.server.on).not.toHaveBeenCalled();
+        expect(clusterManager.server.off).not.toHaveBeenCalled();
       });
 
       test('`blockUntil()` resolves immediately if worker is already listening.', async () => {
         clusterManager.server.listening = true;
 
         await expect(blockUntil()).resolves.not.toBeDefined();
-        expect(clusterManager.server.addListener).not.toHaveBeenCalled();
-        expect(clusterManager.server.removeListener).not.toHaveBeenCalled();
+        expect(clusterManager.server.on).not.toHaveBeenCalled();
+        expect(clusterManager.server.off).not.toHaveBeenCalled();
       });
 
       test('`blockUntil()` resolves when worker crashes.', async () => {
         const blockUntilPromise = blockUntil();
 
-        expect(clusterManager.server.addListener).toHaveBeenCalledTimes(2);
-        expect(clusterManager.server.addListener).toHaveBeenCalledWith(
+        expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
+        expect(clusterManager.server.on).toHaveBeenCalledWith(
           'crashed',
           expect.any(Function)
         );
 
-        const [, [eventName, onCrashed]] = clusterManager.server.addListener.mock.calls;
+        const [, [eventName, onCrashed]] = clusterManager.server.on.mock.calls;
         // Check event name to make sure we call the right callback,
         // in Jest 23 we could use `toHaveBeenNthCalledWith` instead.
         expect(eventName).toBe('crashed');
-        expect(clusterManager.server.removeListener).not.toHaveBeenCalled();
+        expect(clusterManager.server.off).not.toHaveBeenCalled();
 
         onCrashed();
         await expect(blockUntilPromise).resolves.not.toBeDefined();
 
-        expect(clusterManager.server.removeListener).toHaveBeenCalledTimes(2);
+        expect(clusterManager.server.off).toHaveBeenCalledTimes(2);
       });
 
       test('`blockUntil()` resolves when worker starts listening.', async () => {
         const blockUntilPromise = blockUntil();
 
-        expect(clusterManager.server.addListener).toHaveBeenCalledTimes(2);
-        expect(clusterManager.server.addListener).toHaveBeenCalledWith(
+        expect(clusterManager.server.on).toHaveBeenCalledTimes(2);
+        expect(clusterManager.server.on).toHaveBeenCalledWith(
           'listening',
           expect.any(Function)
         );
 
-        const [[eventName, onListening]] = clusterManager.server.addListener.mock.calls;
+        const [[eventName, onListening]] = clusterManager.server.on.mock.calls;
         // Check event name to make sure we call the right callback,
         // in Jest 23 we could use `toHaveBeenNthCalledWith` instead.
         expect(eventName).toBe('listening');
-        expect(clusterManager.server.removeListener).not.toHaveBeenCalled();
+        expect(clusterManager.server.off).not.toHaveBeenCalled();
 
         onListening();
         await expect(blockUntilPromise).resolves.not.toBeDefined();
 
-        expect(clusterManager.server.removeListener).toHaveBeenCalledTimes(2);
+        expect(clusterManager.server.off).toHaveBeenCalledTimes(2);
       });
     });
   });

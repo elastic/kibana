@@ -7,7 +7,6 @@
 import { debounce, isEqual } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { InitAfterBindingsWorkaround } from 'ui/compat';
-import 'ui/dirty_prompt';
 import template from './threshold_watch_edit.html';
 import '../watch_edit_title_panel';
 import 'plugins/watcher/components/threshold_watch_expression';
@@ -22,7 +21,7 @@ import 'plugins/watcher/services/watch';
 import 'plugins/watcher/services/interval';
 import 'plugins/watcher/services/action_defaults';
 
-import dateMath from '@kbn/datemath';
+import dateMath from '@elastic/datemath';
 import { toastNotifications } from 'ui/notify';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { REFRESH_INTERVALS } from 'plugins/watcher/../common/constants';

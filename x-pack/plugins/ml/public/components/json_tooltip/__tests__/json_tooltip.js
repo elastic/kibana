@@ -5,14 +5,19 @@
  */
 
 import ngMock from 'ng_mock';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
-import tooltips from '../tooltips.json';
+import { getTooltips } from '../tooltips';
 
 describe('ML - <ml-info-icon>', () => {
   let $scope;
   let $compile;
   let $element;
+  let tooltips;
+
+  before(() => {
+    tooltips = getTooltips();
+  });
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(() => {

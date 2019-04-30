@@ -21,7 +21,7 @@ export function profileRoute(server, commonRouteConfig) {
         }).required()    //Joi validation
       }
     },
-    handler: (request) => {
+    handler: async (request) => {
 
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
       let parsed = request.payload.query;
@@ -33,18 +33,18 @@ export function profileRoute(server, commonRouteConfig) {
         type: request.payload.type,
         body: parsed
       };
-
-      callWithRequest(request, 'search', body).then((resp) => {
+      try {
+        const resp = await callWithRequest(request, 'search', body);
         return {
           ok: true,
           resp: resp
         };
-      }).catch((err) => {
+      } catch (err) {
         return {
           ok: false,
           err: err
         };
-      });
+      }
     }
   });
 

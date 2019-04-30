@@ -11,7 +11,7 @@ export interface TokenEnrollmentData {
 }
 
 export interface CMTokensAdapter {
-  deleteEnrollmentToken(enrollmentToken: string): Promise<void>;
-  getEnrollmentToken(enrollmentToken: string): Promise<TokenEnrollmentData>;
-  upsertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]): Promise<TokenEnrollmentData[]>;
+  deleteEnrollmentToken(user: FrameworkUser, enrollmentToken: string): Promise<void>;
+  getEnrollmentToken(user: FrameworkUser, enrollmentToken: string): Promise<TokenEnrollmentData>;
+  insertTokens(user: FrameworkUser, tokens: TokenEnrollmentData[]): Promise<TokenEnrollmentData[]>;
 }

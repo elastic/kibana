@@ -10,3 +10,7 @@
 /.env
 /.kibana-plugin-helpers.dev.*
 !/plugins/infra/**/target
+.cache
+
+# We don't want any yarn.lock files in here
+/yarn.lock

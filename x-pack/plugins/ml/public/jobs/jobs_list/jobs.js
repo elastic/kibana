@@ -9,7 +9,6 @@ import { JobsListView } from './components/jobs_list_view';
 import React from 'react';
 
 
-export const JobsPage = () => (
-  <JobsListView />
+export const JobsPage = (props) => (
+  <JobsListView {...props} />
 );
-

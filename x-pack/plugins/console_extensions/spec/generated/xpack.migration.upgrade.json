@@ -7,7 +7,7 @@
       "POST"
     ],
     "patterns": [
-      "_xpack/migration/upgrade/{indices}"
+      "_migration/upgrade/{indices}"
     ],
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migration-api-upgrade.html"
   }

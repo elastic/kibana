@@ -5,7 +5,7 @@
  */
 
 const { resolve } = require('path');
-const register = require('babel-register');
+const register = require('@babel/register');
 const options = {
   babelrc: false,
   presets: [require.resolve('@kbn/babel-preset/node_preset')],
@@ -21,6 +21,10 @@ const options = {
         {
           pattern: 'ui/notify',
           location: resolve(__dirname, '..', 'mocks', 'uiNotify'),
+        },
+        {
+          pattern: 'ui/storage',
+          location: resolve(__dirname, '..', 'mocks', 'uiStorage'),
         },
         {
           pattern: 'ui/url/absolute_to_parsed_url',

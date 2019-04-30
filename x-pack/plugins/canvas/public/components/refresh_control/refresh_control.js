@@ -4,21 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { Popover } from '../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 
 const getRefreshInterval = (val = '') => {
   // if it's a number, just use it directly
-  if (!isNaN(Number(val))) return val;
+  if (!isNaN(Number(val))) {
+    return val;
+  }
 
   // if it's a string, try to parse out the shorthand duration value
   const match = String(val).match(/^([0-9]{1,})([hmsd])$/);
 
   // TODO: do something better with improper input, like show an error...
-  if (!match) return;
+  if (!match) {
+    return;
+  }
 
   switch (match[2]) {
     case 's':
@@ -36,15 +40,8 @@ export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, 
   const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
 
   const popoverButton = handleClick => (
-    <EuiButtonEmpty size="s" onClick={handleClick}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {inFlight && (
-          <Fragment>
-            <EuiLoadingSpinner size="m" /> &nbsp;
-          </Fragment>
-        )}
-        Refresh
-      </div>
+    <EuiButtonEmpty onClick={handleClick}>
+      <div style={{ display: 'flex', alignItems: 'center' }}>Refresh</div>
     </EuiButtonEmpty>
   );
 

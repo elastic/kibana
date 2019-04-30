@@ -27,6 +27,7 @@ import {
   formatJSString,
   checkValuesProperty,
   createParserErrorMessage,
+  normalizePath,
   extractMessageValueFromNode,
 } from './utils';
 
@@ -105,6 +106,10 @@ describe('i18n utils', () => {
     } catch (error) {
       expect(createParserErrorMessage(content, error)).toMatchSnapshot();
     }
+  });
+
+  test('should normalizePath', () => {
+    expect(normalizePath(__dirname)).toMatchSnapshot();
   });
 
   test('should validate conformity of "values" and "defaultMessage"', () => {

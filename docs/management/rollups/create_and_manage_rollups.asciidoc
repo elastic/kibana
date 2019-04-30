@@ -1,3 +1,4 @@
+[role="xpack"]
 [[data-rollups]]
 == Working with rollup indices
 
@@ -14,7 +15,7 @@ historical data for use in visualizations and reports.
 Visualize and view it in a dashboard
 
 
-
+[role="xpack"]
 [[create-and-manage-rollup-job]]
 === Create and manage rollup jobs
 
@@ -78,3 +79,12 @@ You must first stop a rollup job before deleting it.
 
 [role="screenshot"]
 image::images/management_rollup_job_details.png[][Rollup job details]
+
+You can start, stop, and delete an existing rollup job, but edits are not supported. 
+If you want to make any changes, delete the existing job and create a new one with 
+the updated specifications. Be sure to use a different name for the new rollup job; 
+reusing the same name could lead to problems with mismatched job configurations. 
+More about logistical details for the {ref}/rollup-job-config.html[rollup job configuration] 
+can be found in the {es} documentation.
+
+

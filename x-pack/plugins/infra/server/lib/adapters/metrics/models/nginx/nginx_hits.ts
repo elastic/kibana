@@ -23,7 +23,7 @@ export const nginxHits: InfraMetricModelCreator = (timeField, indexPattern, inte
         },
       ],
       split_mode: 'filter',
-      filter: 'nginx.access.response_code:[200 TO 299]',
+      filter: 'http.response.status_code:[200 TO 299]',
     },
     {
       id: '300s',
@@ -34,7 +34,7 @@ export const nginxHits: InfraMetricModelCreator = (timeField, indexPattern, inte
         },
       ],
       split_mode: 'filter',
-      filter: 'nginx.access.response_code:[300 TO 399]',
+      filter: 'http.response.status_code:[300 TO 399]',
     },
     {
       id: '400s',
@@ -45,7 +45,7 @@ export const nginxHits: InfraMetricModelCreator = (timeField, indexPattern, inte
         },
       ],
       split_mode: 'filter',
-      filter: 'nginx.access.response_code:[400 TO 499]',
+      filter: 'http.response.status_code:[400 TO 499]',
     },
     {
       id: '500s',
@@ -56,7 +56,7 @@ export const nginxHits: InfraMetricModelCreator = (timeField, indexPattern, inte
         },
       ],
       split_mode: 'filter',
-      filter: 'nginx.access.response_code:[500 TO 599]',
+      filter: 'http.response.status_code:[500 TO 599]',
     },
   ],
 });

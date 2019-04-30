@@ -7,6 +7,8 @@
 import React from 'react';
 import { match as RouteMatch, Redirect, Route, Switch } from 'react-router-dom';
 
+import { Source } from '../../containers/source';
+import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeDetail } from './redirect_to_node_detail';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
 
@@ -19,17 +21,20 @@ export class LinkToPage extends React.Component<LinkToPageProps> {
     const { match } = this.props;
 
     return (
-      <Switch>
-        <Route
-          path={`${match.url}/:nodeType(host|container|pod)-logs/:nodeName`}
-          component={RedirectToNodeLogs}
-        />
-        <Route
-          path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeName`}
-          component={RedirectToNodeDetail}
-        />
-        <Redirect to="/home" />
-      </Switch>
+      <Source.Provider sourceId="default">
+        <Switch>
+          <Route
+            path={`${match.url}/:nodeType(host|container|pod)-logs/:nodeId`}
+            component={RedirectToNodeLogs}
+          />
+          <Route
+            path={`${match.url}/:nodeType(host|container|pod)-detail/:nodeId`}
+            component={RedirectToNodeDetail}
+          />
+          <Route path={`${match.url}/logs`} component={RedirectToLogs} />
+          <Redirect to="/infrastructure" />
+        </Switch>
+      </Source.Provider>
     );
   }
 }

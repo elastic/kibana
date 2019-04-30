@@ -5,7 +5,7 @@
 
 // Initialization block
 {
-  const { parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
+  const { errorOnLuceneSyntax, parseCursor, cursorSymbol, allowLeadingWildcards = true, helpers: { nodeTypes } } = options;
   const buildFunctionNode = nodeTypes.function.buildNodeWithArgumentNodes;
   const buildLiteralNode = nodeTypes.literal.buildNode;
   const buildWildcardNode = nodeTypes.wildcard.buildNode;
@@ -26,7 +26,8 @@ start
   }
 
 OrQuery
-  = left:AndQuery Or right:OrQuery {
+  = &{ return errorOnLuceneSyntax; } LuceneQuery
+  / left:AndQuery Or right:OrQuery {
     const cursor = [left, right].find(node => node.type === 'cursor');
     if (cursor) return cursor;
     return buildFunctionNode('or', [left, right]);
@@ -65,8 +66,11 @@ Expression
   / FieldValueExpression
   / ValueExpression
 
+Field "fieldName"
+  = Literal
+
 FieldRangeExpression
-  = field:Literal Space* operator:RangeOperator Space* value:(QuotedString / UnquotedLiteral) {
+  = field:Field Space* operator:RangeOperator Space* value:Literal {
     if (value.type === 'cursor') {
       return {
         ...value,
@@ -78,7 +82,7 @@ FieldRangeExpression
   }
 
 FieldValueExpression
-  = field:Literal Space* ':' Space* partial:ListOfValues {
+  = field:Field Space* ':' Space* partial:ListOfValues {
     if (partial.type === 'cursor') {
       return {
         ...partial,
@@ -153,7 +157,7 @@ NotListOfValues
   }
   / ListOfValues
 
-Value
+Value "value"
   = value:QuotedString {
     if (value.type === 'cursor') return value;
     const isPhrase = buildLiteralNode(true);
@@ -170,16 +174,19 @@ Value
     return (field) => buildFunctionNode('is', [field, value, isPhrase]);
   }
 
-Or
+Or "OR"
   = Space+ 'or'i Space+
+  / &{ return errorOnLuceneSyntax; } LuceneOr
 
-And
+And "AND"
   = Space+ 'and'i Space+
+  / &{ return errorOnLuceneSyntax; } LuceneAnd
 
-Not
+Not "NOT"
   = 'not'i Space+
+  / &{ return errorOnLuceneSyntax; } LuceneNot
 
-Literal
+Literal "literal"
   = QuotedString / UnquotedLiteral
 
 QuotedString
@@ -199,7 +206,8 @@ QuotedString
   }
 
 QuotedCharacter
-  = '\\' char:[\\"] { return char; }
+  = EscapedWhitespace
+  / '\\' char:[\\"] { return char; }
   / !Cursor char:[^"] { return char; }
 
 UnquotedLiteral
@@ -226,7 +234,8 @@ UnquotedLiteral
   }
 
 UnquotedCharacter
-  = EscapedSpecialCharacter
+  = EscapedWhitespace
+  / EscapedSpecialCharacter
   / EscapedKeyword
   / Wildcard
   / !SpecialCharacter !Keyword !Cursor char:. { return char; }
@@ -248,6 +257,11 @@ OptionalSpace
   }
   / Space*
 
+EscapedWhitespace
+  = '\\t' { return '\t'; }
+  / '\\r' { return '\r'; }
+  / '\\n' { return '\n'; }
+
 EscapedSpecialCharacter
   = '\\' char:SpecialCharacter { return char; }
 
@@ -266,8 +280,114 @@ RangeOperator
   / '<' { return 'lt'; }
   / '>' { return 'gt'; }
 
-Space
+Space "whitespace"
   = [\ \t\r\n]
 
 Cursor
   = &{ return parseCursor; } '@kuery-cursor@' { return cursorSymbol; }
+
+// Temporary error rules (to help users transition from Lucene... should be removed at some point)
+
+LuceneOr
+  =  Space* '||' Space* {
+    error('LuceneOr');
+  }
+
+LuceneAnd
+  = Space* '&&' Space* {
+    error('LuceneAnd');
+  }
+  / '+' {
+    error('LuceneAnd');
+  }
+
+LuceneNot
+  = '-' {
+    error('LuceneNot');
+  }
+  / '!' {
+    error('LuceneNot');
+  }
+
+LuceneQuery
+  = LuceneFieldQuery
+  / LuceneValue
+  / LuceneExists
+
+LuceneFieldQuery
+  = LuceneLiteral Space* ':' Space* LuceneValue
+
+LuceneValue
+  = LuceneRange
+  / LuceneWildcard
+  / LuceneRegex
+  / LuceneFuzzy
+  / LuceneProximity
+  / LuceneBoost
+
+LuceneExists
+  = '_exists_' Space* ':' Space* LuceneLiteral {
+    error('LuceneExists');
+  }
+
+LuceneRange
+  = RangeOperator Space* LuceneLiteral {
+    error('LuceneRange');
+  }
+  / LuceneRangeStart Space* LuceneLiteral LuceneTo LuceneLiteral LuceneRangeEnd {
+    error('LuceneRange');
+  }
+
+LuceneWildcard
+  = (LuceneUnquotedCharacter / '*')* '?' LuceneWildcard* {
+    error('LuceneWildcard');
+  }
+
+LuceneRegex
+  = '/' [^/]* '/' {
+    error('LuceneRegex');
+  }
+
+LuceneFuzzy
+  = LuceneUnquotedLiteral '~' [0-9]* {
+    error('LuceneFuzzy');
+  }
+
+LuceneProximity
+  = QuotedString '~' [0-9]* {
+    error('LuceneProximity');
+  }
+
+LuceneBoost
+  = LuceneLiteral '^' [0-9]* {
+    error('LuceneBoost');
+  }
+
+LuceneLiteral
+  = QuotedString / LuceneUnquotedLiteral
+
+LuceneUnquotedLiteral
+  = LuceneUnquotedCharacter+
+
+LuceneUnquotedCharacter
+  = EscapedWhitespace
+  / EscapedLuceneSpecialCharacter
+  / !LuceneSpecialCharacter !LuceneKeyword .
+
+LuceneKeyword
+  = Or / And / LuceneOr / LuceneAnd / LuceneNot / LuceneTo
+
+EscapedLuceneSpecialCharacter
+  = '\\' LuceneSpecialCharacter { return char; }
+
+LuceneSpecialCharacter
+  = '+' / '-' / '=' / '>' / '<' / '!' / '(' / ')' / '{' / '}' / '[' / ']' / '^' / '"' / '~' / '*' / '?' / ':' / '\\' / '/'
+
+LuceneTo
+  = Space+ 'TO' Space+
+
+LuceneRangeStart
+  = '[' / '{'
+
+LuceneRangeEnd
+  = ']' / '}'

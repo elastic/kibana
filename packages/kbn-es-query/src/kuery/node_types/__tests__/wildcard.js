@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import * as wildcard from '../wildcard';
 
 describe('kuery node types', function () {
@@ -79,6 +79,11 @@ describe('kuery node types', function () {
         expect(wildcard.test(node, 'bazbar')).to.be(false);
       });
 
+      it('should return a true even when the string has newlines or tabs', function () {
+        const node = wildcard.buildNode('foo*bar');
+        expect(wildcard.test(node, 'foo\nbar')).to.be(true);
+        expect(wildcard.test(node, 'foo\tbar')).to.be(true);
+      });
     });
 
     describe('hasLeadingWildcard', function () {

@@ -5,8 +5,10 @@
  */
 
 import { connect } from 'react-redux';
-import { duplicateElement, elementLayer } from '../../state/actions/elements';
+import { cloneSubgraphs } from '../../lib/clone_subgraphs';
+import { insertNodes, elementLayer } from '../../state/actions/elements';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
+import { selectToplevelNodes } from '../../state/actions/transient';
 
 import { Sidebar as Component } from './sidebar';
 
@@ -16,8 +18,13 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-  duplicateElement: (pageId, selectedElement) => () =>
-    dispatch(duplicateElement(selectedElement, pageId)),
+  duplicateElement: (pageId, selectedElement) => () => {
+    // gradually unifying code with copy/paste
+    // todo: more unification w/ copy/paste; group cloning
+    const newElements = cloneSubgraphs([selectedElement]);
+    dispatch(insertNodes(newElements, pageId));
+    dispatch(selectToplevelNodes(newElements.map(e => e.id)));
+  },
   elementLayer: (pageId, selectedElement) => movement =>
     dispatch(
       elementLayer({

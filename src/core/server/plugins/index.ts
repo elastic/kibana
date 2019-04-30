@@ -17,14 +17,16 @@
  * under the License.
  */
 
-import { ConfigService, Env } from '../config';
-import { LoggerFactory } from '../logging';
-import { PluginsService } from './plugins_service';
+export { PluginsService, PluginsServiceSetup } from './plugins_service';
 
-export class PluginsModule {
-  public readonly service: PluginsService;
-
-  constructor(private readonly configService: ConfigService, logger: LoggerFactory, env: Env) {
-    this.service = new PluginsService(env, logger, this.configService);
-  }
-}
+/** @internal */
+export { isNewPlatformPlugin } from './discovery';
+/** @internal */
+export {
+  DiscoveredPlugin,
+  DiscoveredPluginInternal,
+  Plugin,
+  PluginInitializer,
+  PluginName,
+} from './plugin';
+export { PluginInitializerContext, PluginSetupContext } from './plugin_context';

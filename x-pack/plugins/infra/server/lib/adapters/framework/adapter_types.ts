@@ -7,13 +7,14 @@
 import { SearchResponse } from 'elasticsearch';
 import { GraphQLSchema } from 'graphql';
 import { Lifecycle, ResponseToolkit, RouteOptions } from 'hapi';
-import { InfraMetricModel } from '../metrics/adapter_types';
+import { Legacy } from 'kibana';
 
-export * from '../../../../common/graphql/typed_resolvers';
 import { JsonObject } from '../../../../common/typed_json';
+import { InfraMetricModel } from '../metrics/adapter_types';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
+/* eslint-disable  @typescript-eslint/unified-signatures */
 export interface InfraBackendFrameworkAdapter {
   version: string;
   exposeStaticDir(urlPath: string, dir: string): void;
@@ -51,7 +52,8 @@ export interface InfraBackendFrameworkAdapter {
     method: string,
     options?: object
   ): Promise<InfraDatabaseSearchResponse>;
-  getIndexPatternsService(req: InfraFrameworkRequest<any>): InfraFrameworkIndexPatternsService;
+  getIndexPatternsService(req: InfraFrameworkRequest<any>): Legacy.IndexPatternsService;
+  getSavedObjectsService(): Legacy.SavedObjectsService;
   makeTSVBRequest(
     req: InfraFrameworkRequest,
     model: InfraMetricModel,
@@ -59,6 +61,7 @@ export interface InfraBackendFrameworkAdapter {
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
 }
+/* eslint-enable  @typescript-eslint/unified-signatures */
 
 export interface InfraFrameworkRequest<
   InternalRequest extends InfraWrappableRequest = InfraWrappableRequest
@@ -105,9 +108,18 @@ export interface InfraDatabaseResponse {
 
 export interface InfraDatabaseSearchResponse<Hit = {}, Aggregations = undefined>
   extends InfraDatabaseResponse {
+  _shards: {
+    total: number;
+    successful: number;
+    skipped: number;
+    failed: number;
+  };
   aggregations?: Aggregations;
   hits: {
-    total: number;
+    total: {
+      value: number;
+      relation: string;
+    };
     hits: Hit[];
   };
 }
@@ -150,9 +162,6 @@ export interface InfraDateRangeAggregationResponse {
 
 export interface InfraMetadataAggregationBucket {
   key: string;
-  names?: {
-    buckets: InfraMetadataAggregationBucket[];
-  };
 }
 
 export interface InfraMetadataAggregationResponse {
@@ -171,20 +180,6 @@ export interface InfraFieldDetails {
 
 export interface InfraFieldDef {
   [type: string]: InfraFieldDetails;
-}
-
-interface InfraFrameworkIndexFieldDescriptor {
-  name: string;
-  type: string;
-  searchable: boolean;
-  aggregatable: boolean;
-  readFromDocValues: boolean;
-}
-
-export interface InfraFrameworkIndexPatternsService {
-  getFieldsForWildcard(options: {
-    pattern: string | string[];
-  }): Promise<InfraFrameworkIndexFieldDescriptor[]>;
 }
 
 export interface InfraTSVBResponse {

@@ -6,10 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { flatten } from 'lodash';
-import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../../common/graphql/types';
+
+import { InfraMetric, InfraMetricData, InfraNodeType } from '../../../graphql/types';
 import { InfraBackendFrameworkAdapter, InfraFrameworkRequest } from '../framework';
 import { InfraMetricsAdapter, InfraMetricsRequestOptions } from './adapter_types';
 import { checkValidNode } from './lib/check_valid_node';
+import { InvalidNodeError } from './lib/errors';
 import { metricModels } from './models';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
@@ -28,10 +30,9 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
       [InfraNodeType.container]: options.sourceConfiguration.fields.container,
       [InfraNodeType.pod]: options.sourceConfiguration.fields.pod,
     };
-    const indexPattern = [
-      options.sourceConfiguration.metricAlias,
-      options.sourceConfiguration.logAlias,
-    ];
+    const indexPattern = `${options.sourceConfiguration.metricAlias},${
+      options.sourceConfiguration.logAlias
+    }`;
     const timeField = options.sourceConfiguration.fields.timestamp;
     const interval = options.timerange.interval;
     const nodeField = fields[options.nodeType];
@@ -45,7 +46,7 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
 
     const validNode = await checkValidNode(search, indexPattern, nodeField, options.nodeId);
     if (!validNode) {
-      throw new Error(
+      throw new InvalidNodeError(
         i18n.translate('xpack.infra.kibanaMetrics.nodeDoesNotExistErrorMessage', {
           defaultMessage: '{nodeId} does not exist.',
           values: {
@@ -63,7 +64,10 @@ export class KibanaMetricsAdapter implements InfraMetricsAdapter {
     return Promise.all(requests)
       .then(results => {
         return results.map(result => {
-          const metricIds = Object.keys(result).filter(k => k !== 'type');
+          const metricIds = Object.keys(result).filter(
+            k => !['type', 'uiRestrictions'].includes(k)
+          );
+
           return metricIds.map((id: string) => {
             const infraMetricId: InfraMetric = (InfraMetric as any)[id];
             if (!infraMetricId) {

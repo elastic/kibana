@@ -104,7 +104,7 @@ async function getReportingUsageWithinRange(callCluster, server, reportingAvaila
   return {
     _all: (total || total === 0) ? total : undefined,
     ...jobTypes,
-    "status": {
+    'status': {
       ...statusCounts
     }
   };

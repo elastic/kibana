@@ -1,0 +1,8 @@
+@import 'node_modules/@elastic/eui/src/components/form/variables';
+@import 'node_modules/@elastic/eui/src/components/form/mixins';
+
+@mixin tvbEditorRepeatingRow {
+  background-color: $euiColorLightestShade;
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeS;
+}

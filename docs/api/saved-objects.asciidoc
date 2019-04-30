@@ -9,6 +9,8 @@ documents directly to the `.kibana` index. *Do not do this!* Writing directly
 to the `.kibana` index is not safe and it _will_ result in corrupted data that
 permanently breaks Kibana in a future version.
 
+NOTE: You cannot access these endpoints via the Console in Kibana.
+
 * <<saved-objects-api-get>>
 * <<saved-objects-api-bulk-get>>
 * <<saved-objects-api-find>>
@@ -16,6 +18,9 @@ permanently breaks Kibana in a future version.
 * <<saved-objects-api-bulk-create>>
 * <<saved-objects-api-update>>
 * <<saved-objects-api-delete>>
+* <<saved-objects-api-export>>
+* <<saved-objects-api-import>>
+* <<saved-objects-api-resolve-import-errors>>
 
 include::saved-objects/get.asciidoc[]
 include::saved-objects/bulk_get.asciidoc[]
@@ -24,3 +29,6 @@ include::saved-objects/create.asciidoc[]
 include::saved-objects/bulk_create.asciidoc[]
 include::saved-objects/update.asciidoc[]
 include::saved-objects/delete.asciidoc[]
+include::saved-objects/export.asciidoc[]
+include::saved-objects/import.asciidoc[]
+include::saved-objects/resolve_import_errors.asciidoc[]

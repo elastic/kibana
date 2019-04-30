@@ -1,5 +1,5 @@
 // Should import both the EUI constants and any Kibana ones that are considered global
-@import 'ui/public/styles/styling_constants';
+@import 'src/legacy/ui/public/styles/styling_constants';
 
 // ML needs EUI card styling till it fully adopts React components
 @import '@elastic/eui/src/components/panel/variables';
@@ -24,19 +24,20 @@
   @import 'timeseriesexplorer/index';
 
   // Components
+  @import 'components/annotations/annotation_description_list/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/anomalies_table/index'; // SASSTODO: This file overwrites EUI directly
   @import 'components/chart_tooltip/index';
   @import 'components/confirm_modal/index';
   @import 'components/controls/index';
   @import 'components/data_recognizer/index';
   @import 'components/documentation_help_link/index';
+  @import 'components/entity_cell/index';
   @import 'components/field_data_card/index'; // SASSTODO: This file needs to be rewritten
   @import 'components/field_title_bar/index';
   @import 'components/field_type_icon/index';
   @import 'components/form_filter_input/index'; // SASSTODO: This file needs to be rewritten
   @import 'components/form_label/index';
   @import 'components/influencers_list/index';
-  @import 'components/item_select/index'; // SASSTODO: This file does some dangerous overwrites
   @import 'components/items_grid/index';
   @import 'components/job_group_select/index'; // SASSTODO: This file does some dangerous overwrites
   @import 'components/job_select_list/index'; // SASSTODO: This file does EXTREMELY DANGEROUS overwrites
@@ -46,6 +47,6 @@
   @import 'components/nav_menu/index';
   @import 'components/rule_editor/index'; // SASSTODO: This file overwrites EUI directly
 
-  // Hacks are last so they can ovwerite anything above if needed
+  // Hacks are last so they can overwrite anything above if needed
   @import 'hacks';
 }

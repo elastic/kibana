@@ -1,6 +1,6 @@
 [role="xpack"]
 [[graph-limitations]]
-== Graph Limitations
+== Graph limitations
 ++++
 <titleabbrev>Limitations</titleabbrev>
 ++++

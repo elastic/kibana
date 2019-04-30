@@ -41,8 +41,12 @@ export const csv = () => ({
       },
     };
 
-    if (delimiter != null) config.delimiter = delimiter;
-    if (newline != null) config.newline = newline;
+    if (delimiter != null) {
+      config.delimiter = delimiter;
+    }
+    if (newline != null) {
+      config.newline = newline;
+    }
 
     // TODO: handle errors, check output.errors
     const output = Papa.parse(csvString, config);

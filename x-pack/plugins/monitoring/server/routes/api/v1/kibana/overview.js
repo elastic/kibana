@@ -10,6 +10,7 @@ import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getMetrics } from '../../../../lib/details/get_metrics';
 import { metricSet } from './metric_set_overview';
 import { handleError } from '../../../../lib/errors';
+import { INDEX_PATTERN_KIBANA } from '../../../../../common/constants';
 
 export function kibanaOverviewRoute(server) {
   /**
@@ -36,7 +37,7 @@ export function kibanaOverviewRoute(server) {
       const config = server.config();
       const ccs = req.payload.ccs;
       const clusterUuid = req.params.clusterUuid;
-      const kbnIndexPattern = prefixIndexPattern(config, 'xpack.monitoring.kibana.index_pattern', ccs);
+      const kbnIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_KIBANA, ccs);
 
       try {
         const [ clusterStatus, metrics ] = await Promise.all([

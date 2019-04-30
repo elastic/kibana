@@ -23,3 +23,6 @@ export const sortChanged =
 
 export const showSystemIndicesChanged =
   createAction('INDEX_MANAGEMENT_SHOW_SYSTEM_INDICES_CHANGED');
+
+export const toggleChanged =
+  createAction('INDEX_MANAGEMENT_TOGGLE_CHANGED');

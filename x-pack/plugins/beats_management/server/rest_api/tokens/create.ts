@@ -6,16 +6,17 @@
 
 import Joi from 'joi';
 import { get } from 'lodash';
+import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { BaseReturnType, ReturnTypeBulkCreate } from '../../../common/return_types';
 import { FrameworkRequest } from '../../lib/adapters/framework/adapter_types';
-import { CMServerLibs } from '../../lib/lib';
-import { wrapEsError } from '../../utils/error_wrappers';
+import { CMServerLibs } from '../../lib/types';
 
 // TODO: write to Kibana audit log file
 const DEFAULT_NUM_TOKENS = 1;
 export const createTokensRoute = (libs: CMServerLibs) => ({
   method: 'POST',
   path: '/api/beats/enrollment_tokens',
-  licenseRequired: true,
+  licenseRequired: REQUIRED_LICENSES,
   requiredRoles: ['beats_admin'],
   config: {
     validate: {
@@ -27,15 +28,30 @@ export const createTokensRoute = (libs: CMServerLibs) => ({
       }).allow(null),
     },
   },
-  handler: async (request: FrameworkRequest) => {
+  handler: async (
+    request: FrameworkRequest
+  ): Promise<BaseReturnType | ReturnTypeBulkCreate<string>> => {
     const numTokens = get(request, 'payload.num_tokens', DEFAULT_NUM_TOKENS);
 
     try {
       const tokens = await libs.tokens.createEnrollmentTokens(request.user, numTokens);
-      return { tokens };
+      return {
+        results: tokens.map(token => ({
+          item: token,
+          success: true,
+          action: 'created',
+        })),
+        success: true,
+      };
     } catch (err) {
-      // TODO move this to kibana route thing in adapter
-      return wrapEsError(err);
+      libs.framework.log(err.message);
+      return {
+        error: {
+          message: 'An error occured, please check your Kibana logs',
+          code: 500,
+        },
+        success: false,
+      };
     }
   },
 });

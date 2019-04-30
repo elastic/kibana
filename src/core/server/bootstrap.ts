@@ -20,7 +20,7 @@
 import chalk from 'chalk';
 import { isMaster } from 'cluster';
 import { CliArgs, Env, RawConfigService } from './config';
-import { LegacyObjectToConfigAdapter } from './legacy_compat';
+import { LegacyObjectToConfigAdapter } from './legacy';
 import { Root } from './root';
 
 interface KibanaFeatures {
@@ -47,6 +47,11 @@ interface BootstrapArgs {
   features: KibanaFeatures;
 }
 
+/**
+ *
+ * @internal
+ * @param param0 - options
+ */
 export async function bootstrap({
   configs,
   cliArgs,
@@ -78,7 +83,7 @@ export async function bootstrap({
   }
 
   try {
-    await root.start();
+    await root.setup();
   } catch (err) {
     await shutdown(err);
   }
@@ -111,7 +116,7 @@ function onRootShutdown(reason?: any) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
-    // tslint:disable no-console
+    // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
   }
 

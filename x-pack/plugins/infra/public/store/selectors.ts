@@ -6,26 +6,18 @@
 
 import { createSelector } from 'reselect';
 
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
 import { getLogEntryAtTime } from '../utils/log_entry';
 import { globalizeSelectors } from '../utils/typed_redux';
 import {
+  flyoutOptionsSelectors as localFlyoutOptionsSelectors,
   logFilterSelectors as localLogFilterSelectors,
-  logMinimapSelectors as localLogMinimapSelectors,
   logPositionSelectors as localLogPositionSelectors,
-  logTextviewSelectors as localLogTextviewSelectors,
-  metricTimeSelectors as localMetricTimeSelectors,
   waffleFilterSelectors as localWaffleFilterSelectors,
   waffleOptionsSelectors as localWaffleOptionsSelectors,
   waffleTimeSelectors as localWaffleTimeSelectors,
 } from './local';
 import { State } from './reducer';
-import {
-  logEntriesSelectors as remoteLogEntriesSelectors,
-  logSummarySelectors as remoteLogSummarySelectors,
-  sourceSelectors as remoteSourceSelectors,
-} from './remote';
+import { logEntriesSelectors as remoteLogEntriesSelectors } from './remote';
 
 /**
  * local selectors
@@ -34,13 +26,11 @@ import {
 const selectLocal = (state: State) => state.local;
 
 export const logFilterSelectors = globalizeSelectors(selectLocal, localLogFilterSelectors);
-export const logMinimapSelectors = globalizeSelectors(selectLocal, localLogMinimapSelectors);
 export const logPositionSelectors = globalizeSelectors(selectLocal, localLogPositionSelectors);
-export const logTextviewSelectors = globalizeSelectors(selectLocal, localLogTextviewSelectors);
-export const metricTimeSelectors = globalizeSelectors(selectLocal, localMetricTimeSelectors);
 export const waffleFilterSelectors = globalizeSelectors(selectLocal, localWaffleFilterSelectors);
 export const waffleTimeSelectors = globalizeSelectors(selectLocal, localWaffleTimeSelectors);
 export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffleOptionsSelectors);
+export const flyoutOptionsSelectors = globalizeSelectors(selectLocal, localFlyoutOptionsSelectors);
 
 /**
  * remote selectors
@@ -49,8 +39,6 @@ export const waffleOptionsSelectors = globalizeSelectors(selectLocal, localWaffl
 const selectRemote = (state: State) => state.remote;
 
 export const logEntriesSelectors = globalizeSelectors(selectRemote, remoteLogEntriesSelectors);
-export const logSummarySelectors = globalizeSelectors(selectRemote, remoteLogSummarySelectors);
-export const sourceSelectors = globalizeSelectors(selectRemote, remoteSourceSelectors);
 
 /**
  * shared selectors
@@ -74,35 +62,5 @@ export const sharedSelectors = {
     logPositionSelectors.selectLastVisiblePosition,
     (entries, lastVisiblePosition) =>
       lastVisiblePosition ? getLogEntryAtTime(entries, lastVisiblePosition) : null
-  ),
-  selectLogFilterQueryAsJson: createSelector(
-    logFilterSelectors.selectLogFilterQuery,
-    sourceSelectors.selectDerivedIndexPattern,
-    (filterQuery, indexPattern) => {
-      try {
-        return filterQuery
-          ? JSON.stringify(
-              toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
-            )
-          : null;
-      } catch (err) {
-        return null;
-      }
-    }
-  ),
-  selectWaffleFilterQueryAsJson: createSelector(
-    waffleFilterSelectors.selectWaffleFilterQuery,
-    sourceSelectors.selectDerivedIndexPattern,
-    (filterQuery, indexPattern) => {
-      try {
-        return filterQuery
-          ? JSON.stringify(
-              toElasticsearchQuery(fromKueryExpression(filterQuery.expression), indexPattern)
-            )
-          : null;
-      } catch (err) {
-        return null;
-      }
-    }
   ),
 };

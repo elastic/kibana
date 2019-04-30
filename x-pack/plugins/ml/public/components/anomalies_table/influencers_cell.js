@@ -9,7 +9,14 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiButtonIcon,
+  EuiToolTip
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+
 
 /*
  * Component for rendering a list of record influencers inside a cell in the anomalies table.
@@ -32,6 +39,7 @@ export class InfluencersCell extends Component {
   renderInfluencers(influencers) {
     const numberToDisplay = (this.state.showAll === false) ? this.props.limit : influencers.length;
     const displayInfluencers = influencers.slice(0, numberToDisplay);
+    const { influencerFilter } = this.props;
 
     let othersCount = Math.max(influencers.length - numberToDisplay, 0);
     if (othersCount === 1) {
@@ -41,7 +49,45 @@ export class InfluencersCell extends Component {
     }
 
     const displayRows = displayInfluencers.map((influencer, index) => (
-      <div key={index}>{influencer.influencerFieldName}: {influencer.influencerFieldValue}</div>
+      <div key={index}>
+        {influencer.influencerFieldName}: {influencer.influencerFieldValue}
+        {influencerFilter !== undefined &&
+          <React.Fragment>
+            <EuiToolTip
+              content={<FormattedMessage
+                id="xpack.ml.anomaliesTable.influencersCell.addFilterTooltip"
+                defaultMessage="Add filter"
+              />}
+            >
+              <EuiButtonIcon
+                size="xs"
+                className="filter-button"
+                onClick={() => influencerFilter(influencer.influencerFieldName, influencer.influencerFieldValue, '+')}
+                iconType="plusInCircle"
+                aria-label={i18n.translate('xpack.ml.anomaliesTable.influencersCell.addFilterAriaLabel', {
+                  defaultMessage: 'Add filter'
+                })}
+              />
+            </EuiToolTip>
+            <EuiToolTip
+              content={<FormattedMessage
+                id="xpack.ml.anomaliesTable.influencersCell.removeFilterTooltip"
+                defaultMessage="Remove filter"
+              />}
+            >
+              <EuiButtonIcon
+                size="xs"
+                className="filter-button"
+                onClick={() => influencerFilter(influencer.influencerFieldName, influencer.influencerFieldValue, '-')}
+                iconType="minusInCircle"
+                aria-label={i18n.translate('xpack.ml.anomaliesTable.influencersCell.removeFilterAriaLabel', {
+                  defaultMessage: 'Remove filter'
+                })}
+              />
+            </EuiToolTip>
+          </React.Fragment>
+        }
+      </div>
     ));
 
 
@@ -60,7 +106,13 @@ export class InfluencersCell extends Component {
           <EuiLink
             onClick={() => this.toggleAllInfluencers()}
           >
-          and {othersCount} more
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.influencersCell.moreInfluencersLinkText"
+              defaultMessage="and {othersCount} more"
+              values={{
+                othersCount,
+              }}
+            />
           </EuiLink>
         </div>
       );
@@ -70,7 +122,10 @@ export class InfluencersCell extends Component {
           <EuiLink
             onClick={() => this.toggleAllInfluencers()}
           >
-          show less
+            <FormattedMessage
+              id="xpack.ml.anomaliesTable.influencersCell.showLessInfluencersLinkText"
+              defaultMessage="show less"
+            />
           </EuiLink>
         </div>
       );
@@ -100,6 +155,7 @@ export class InfluencersCell extends Component {
 }
 
 InfluencersCell.propTypes = {
+  influencerFilter: PropTypes.func,
   influencers: PropTypes.array,
   limit: PropTypes.number
 };

@@ -7,13 +7,12 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, getContext, withHandlers } from 'recompose';
-import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
 import { notify } from '../../lib/notify';
 import { canUserWrite } from '../../state/selectors/app';
 import { getWorkpad } from '../../state/selectors/workpad';
 import { getId } from '../../lib/get_id';
-import { setCanUserWrite } from '../../state/actions/transient';
+import { downloadWorkpad } from '../../lib/download_workpad';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = state => ({
@@ -21,18 +20,11 @@ const mapStateToProps = state => ({
   canUserWrite: canUserWrite(state),
 });
 
-const mapDispatchToProps = dispatch => ({
-  setCanUserWrite: canUserWrite => dispatch(setCanUserWrite(canUserWrite)),
-});
-
 export const WorkpadLoader = compose(
   getContext({
     router: PropTypes.object,
   }),
-  connect(
-    mapStateToProps,
-    mapDispatchToProps
-  ),
+  connect(mapStateToProps),
   withState('workpads', 'setWorkpads', null),
   withHandlers({
     // Workpad creation via navigation
@@ -44,9 +36,6 @@ export const WorkpadLoader = compose(
           props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
         } catch (err) {
           notify.error(err, { title: `Couldn't upload workpad` });
-          // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
-          // https://github.com/elastic/kibana/issues/20277
-          if (err.response.status === 403) props.setCanUserWrite(false);
         }
         return;
       }
@@ -65,15 +54,7 @@ export const WorkpadLoader = compose(
     },
 
     // Workpad import/export methods
-    downloadWorkpad: () => async workpadId => {
-      try {
-        const workpad = await workpadService.get(workpadId);
-        const jsonBlob = new Blob([JSON.stringify(workpad)], { type: 'application/json' });
-        fileSaver.saveAs(jsonBlob, `canvas-workpad-${workpad.name}-${workpad.id}.json`);
-      } catch (err) {
-        notify.error(err, { title: `Couldn't download workpad` });
-      }
-    },
+    downloadWorkpad: () => workpadId => downloadWorkpad(workpadId),
 
     // Clone workpad given an id
     cloneWorkpad: props => async workpadId => {
@@ -85,9 +66,6 @@ export const WorkpadLoader = compose(
         props.router.navigateTo('loadWorkpad', { id: workpad.id, page: 1 });
       } catch (err) {
         notify.error(err, { title: `Couldn't clone workpad` });
-        // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
-        // https://github.com/elastic/kibana/issues/20277
-        if (err.response.status === 403) props.setCanUserWrite(false);
       }
     },
 
@@ -110,13 +88,12 @@ export const WorkpadLoader = compose(
 
         const [passes, errors] = results.reduce(
           ([passes, errors], result) => {
-            if (result.id === loadedWorkpad && !result.err) redirectHome = true;
+            if (result.id === loadedWorkpad && !result.err) {
+              redirectHome = true;
+            }
 
             if (result.err) {
               errors.push(result.id);
-              // TODO: remove this and switch to checking user privileges when canvas loads when granular app privileges are introduced
-              // https://github.com/elastic/kibana/issues/20277
-              if (result.err.response.status === 403) props.setCanUserWrite(false);
             } else {
               passes.push(result.id);
             }
@@ -133,11 +110,15 @@ export const WorkpadLoader = compose(
           workpads: remainingWorkpads,
         };
 
-        if (errors.length > 0) notify.error("Couldn't delete all workpads");
+        if (errors.length > 0) {
+          notify.error("Couldn't delete all workpads");
+        }
 
         setWorkpads(workpadState);
 
-        if (redirectHome) props.router.navigateTo('home');
+        if (redirectHome) {
+          props.router.navigateTo('home');
+        }
 
         return errors.map(({ id }) => id);
       });

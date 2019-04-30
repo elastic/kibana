@@ -20,7 +20,9 @@ const collectFns = (ast, cb) => {
       // recurse the argumetns and update the set along the way
       Object.keys(cArguments).forEach(argName => {
         cArguments[argName].forEach(subAst => {
-          if (subAst != null) collectFns(subAst, cb);
+          if (subAst != null) {
+            collectFns(subAst, cb);
+          }
         });
       });
     });
@@ -29,7 +31,9 @@ const collectFns = (ast, cb) => {
 
 export function handleResponse({ hits }) {
   const workpadDocs = get(hits, 'hits', null);
-  if (workpadDocs == null) return;
+  if (workpadDocs == null) {
+    return;
+  }
 
   const functionSet = new Set();
 
@@ -137,12 +141,17 @@ export function registerCanvasUsageCollector(server) {
         size: 10000, // elasticsearch index.max_result_window default value
         index,
         ignoreUnavailable: true,
-        filterPath: ['hits.hits._source.canvas-workpad'],
+        filterPath: [
+          'hits.hits._source.canvas-workpad',
+          '-hits.hits._source.canvas-workpad.assets',
+        ],
         body: { query: { bool: { filter: { term: { type: CANVAS_TYPE } } } } },
       };
 
       const esResponse = await callCluster('search', searchParams);
-      if (get(esResponse, 'hits.hits.length') > 0) return handleResponse(esResponse);
+      if (get(esResponse, 'hits.hits.length') > 0) {
+        return handleResponse(esResponse);
+      }
     },
   });
 

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FlatObject } from '../../../app';
+import { FlatObject } from '../../../frontend_types';
 
 export interface RestAPIAdapter {
   get<ResponseData>(url: string, query?: FlatObject<object>): Promise<ResponseData>;

@@ -6,21 +6,9 @@
 
 import { globalizeSelectors } from '../../utils/typed_redux';
 import { logEntriesSelectors as innerLogEntriesSelectors } from './log_entries';
-import { logSummarySelectors as innerLogSummarySelectors } from './log_summary';
 import { RemoteState } from './reducer';
-import { sourceSelectors as innerSourceSelectors } from './source';
 
 export const logEntriesSelectors = globalizeSelectors(
   (state: RemoteState) => state.logEntries,
   innerLogEntriesSelectors
-);
-
-export const logSummarySelectors = globalizeSelectors(
-  (state: RemoteState) => state.logSummary,
-  innerLogSummarySelectors
-);
-
-export const sourceSelectors = globalizeSelectors(
-  (state: RemoteState) => state.source,
-  innerSourceSelectors
 );

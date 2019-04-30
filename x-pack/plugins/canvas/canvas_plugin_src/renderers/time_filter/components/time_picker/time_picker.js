@@ -11,7 +11,6 @@ import { EuiButton } from '@elastic/eui';
 import moment from 'moment';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
 import { DatetimeQuickList } from '../datetime_quick_list';
-import './time_picker.scss';
 
 export const quickRanges = [
   { from: 'now-24h', to: 'now', display: 'Last 24 hours' },

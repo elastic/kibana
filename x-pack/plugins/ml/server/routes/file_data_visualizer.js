@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-
 import { callWithRequestFactory } from '../client/call_with_request_factory';
 import { wrapError } from '../client/errors';
 import { fileDataVisualizerProvider, importDataProvider } from '../models/file_data_visualizer';
 import { MAX_BYTES } from '../../common/constants/file_datavisualizer';
+
+import { incrementFileDataVisualizerIndexCreationCount } from '../lib/ml_telemetry/ml_telemetry';
 
 function analyzeFiles(callWithRequest, data, overrides) {
   const { analyzeFile } = fileDataVisualizerProvider(callWithRequest);
@@ -44,6 +45,13 @@ export function fileDataVisualizerRoutes(server, commonRouteConfig) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { id } = request.query;
       const { index, data, settings, mappings, ingestPipeline } = request.payload;
+
+      // `id` being `undefined` tells us that this is a new import due to create a new index.
+      // follow-up import calls to just add additional data will include the `id` of the created
+      // index, we'll ignore those and don't increment the counter.
+      if (id === undefined) {
+        incrementFileDataVisualizerIndexCreationCount(server);
+      }
 
       return importData(callWithRequest, id, index, settings, mappings, ingestPipeline, data)
         .catch(wrapError);

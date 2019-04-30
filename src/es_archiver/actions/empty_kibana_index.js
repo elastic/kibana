@@ -18,9 +18,9 @@
  */
 import { migrateKibanaIndex, deleteKibanaIndices, createStats } from '../lib';
 
-export async function emptyKibanaIndexAction({ client, log }) {
+export async function emptyKibanaIndexAction({ client, log, kibanaUrl }) {
   const stats = createStats('emptyKibanaIndex', log);
   await deleteKibanaIndices({ client, stats });
-  await migrateKibanaIndex({ client, log, stats });
+  await migrateKibanaIndex({ client, log, stats, kibanaUrl });
   return stats;
 }

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { OptInExampleFlyout } from './opt_in_details_component';
 
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
-    expect(shallow(<OptInExampleFlyout fetchTelemetry={jest.fn(async () => ({ data: [] }))} onClose={jest.fn()} />)).toMatchSnapshot();
+    expect(shallowWithIntl(
+      <OptInExampleFlyout fetchTelemetry={jest.fn(async () => ({ data: [] }))} onClose={jest.fn()} />)
+    ).toMatchSnapshot();
   });
 });

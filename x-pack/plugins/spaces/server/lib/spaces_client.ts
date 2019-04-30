@@ -24,13 +24,13 @@ export class SpacesClient {
     if (this.useRbac()) {
       const checkPrivileges = this.authorization.checkPrivilegesWithRequest(this.request);
       const { hasAllRequested } = await checkPrivileges.globally(
-        this.authorization.actions.manageSpaces
+        this.authorization.actions.space.manage
       );
       this.debugLogger(`SpacesClient.canEnumerateSpaces, using RBAC. Result: ${hasAllRequested}`);
       return hasAllRequested;
     }
 
-    // If not RBAC, then we are legacy, and all legacy users can enumerate all spaces
+    // If not RBAC, then security isn't enabled and we can enumerate all spaces
     this.debugLogger(`SpacesClient.canEnumerateSpaces, NOT USING RBAC. Result: true`);
     return true;
   }
@@ -121,7 +121,7 @@ export class SpacesClient {
       this.debugLogger(`SpacesClient.create(), using RBAC. Checking if authorized globally`);
 
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.manageSpaces,
+        this.authorization.actions.space.manage,
         'create',
         'Unauthorized to create spaces'
       );
@@ -157,7 +157,7 @@ export class SpacesClient {
   public async update(id: string, space: Space) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.manageSpaces,
+        this.authorization.actions.space.manage,
         'update',
         'Unauthorized to update spaces'
       );
@@ -175,7 +175,7 @@ export class SpacesClient {
   public async delete(id: string) {
     if (this.useRbac()) {
       await this.ensureAuthorizedGlobally(
-        this.authorization.actions.manageSpaces,
+        this.authorization.actions.space.manage,
         'delete',
         'Unauthorized to delete spaces'
       );

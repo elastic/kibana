@@ -25,7 +25,7 @@ export class RenderWithFn extends React.Component {
       destroy: PropTypes.func.isRequired,
       onDestroy: PropTypes.func.isRequired,
     }),
-    config: PropTypes.object.isRequired,
+    config: PropTypes.object,
     size: PropTypes.object.isRequired,
     onError: PropTypes.func.isRequired,
   };
@@ -33,8 +33,6 @@ export class RenderWithFn extends React.Component {
   static defaultProps = {
     reuseNode: false,
   };
-
-  static domNode = null;
 
   componentDidMount() {
     this.firstRender = true;
@@ -44,33 +42,41 @@ export class RenderWithFn extends React.Component {
   componentWillReceiveProps({ renderFn }) {
     const newRenderFunction = renderFn !== this.props.renderFn;
 
-    if (newRenderFunction) this.resetRenderTarget(this.domNode);
+    if (newRenderFunction) {
+      this._resetRenderTarget(this._domNode);
+    }
   }
 
   shouldComponentUpdate(prevProps) {
-    return !isEqual(this.props.size, prevProps.size) || this.shouldFullRerender(prevProps);
+    return !isEqual(this.props.size, prevProps.size) || this._shouldFullRerender(prevProps);
   }
 
   componentDidUpdate(prevProps) {
     const { handlers, size } = this.props;
     // Config changes
-    if (this.shouldFullRerender(prevProps)) {
+    if (this._shouldFullRerender(prevProps)) {
       // This should be the only place you call renderFn besides the first time
-      this.callRenderFn();
+      this._callRenderFn();
     }
 
     // Size changes
-    if (!isEqual(size, prevProps.size)) return handlers.resize(size);
+    if (!isEqual(size, prevProps.size)) {
+      return handlers.resize(size);
+    }
   }
 
   componentWillUnmount() {
     this.props.handlers.destroy();
   }
 
-  callRenderFn = () => {
+  _domNode = null;
+
+  _callRenderFn = () => {
     const { handlers, config, renderFn, reuseNode, name: functionName } = this.props;
     // TODO: We should wait until handlers.done() is called before replacing the element content?
-    if (!reuseNode || !this.renderTarget) this.resetRenderTarget(this.domNode);
+    if (!reuseNode || !this.renderTarget) {
+      this._resetRenderTarget(this._domNode);
+    }
     // else if (!firstRender) handlers.destroy();
 
     const renderConfig = cloneDeep(config);
@@ -85,29 +91,35 @@ export class RenderWithFn extends React.Component {
     }
   };
 
-  resetRenderTarget = domNode => {
+  _resetRenderTarget = domNode => {
     const { handlers } = this.props;
 
-    if (!domNode) throw new Error('RenderWithFn can not reset undefined target node');
+    if (!domNode) {
+      throw new Error('RenderWithFn can not reset undefined target node');
+    }
 
     // call destroy on existing element
-    if (!this.firstRender) handlers.destroy();
+    if (!this.firstRender) {
+      handlers.destroy();
+    }
 
-    while (domNode.firstChild) domNode.removeChild(domNode.firstChild);
+    while (domNode.firstChild) {
+      domNode.removeChild(domNode.firstChild);
+    }
 
     this.firstRender = true;
-    this.renderTarget = this.createRenderTarget();
+    this.renderTarget = this._createRenderTarget();
     domNode.appendChild(this.renderTarget);
   };
 
-  createRenderTarget = () => {
+  _createRenderTarget = () => {
     const div = document.createElement('div');
     div.style.width = '100%';
     div.style.height = '100%';
     return div;
   };
 
-  shouldFullRerender = prevProps => {
+  _shouldFullRerender = prevProps => {
     // TODO: What a shitty hack. None of these props should update when you move the element.
     // This should be fixed at a higher level.
     return (
@@ -130,8 +142,8 @@ export class RenderWithFn extends React.Component {
         <RenderToDom
           style={{ height: '100%', width: '100%' }}
           render={domNode => {
-            this.domNode = domNode;
-            this.callRenderFn();
+            this._domNode = domNode;
+            this._callRenderFn();
           }}
         />
       </div>

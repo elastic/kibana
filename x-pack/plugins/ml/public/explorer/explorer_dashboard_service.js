@@ -11,31 +11,9 @@
  * components in the Explorer dashboard.
  */
 
-import { listenerFactoryProvider } from 'plugins/ml/factories/listener_factory';
+import { Subject } from 'rxjs';
 
-function mlExplorerDashboardServiceFactory() {
-  const service = {
-    allowCellRangeSelection: false
-  };
+export const ALLOW_CELL_RANGE_SELECTION = false;
 
-  const listenerFactory = listenerFactoryProvider();
-  const dragSelect = service.dragSelect = listenerFactory();
-  const swimlaneCellClick = service.swimlaneCellClick = listenerFactory();
-  const swimlaneDataChange = service.swimlaneDataChange = listenerFactory();
-  const swimlaneRenderDone = service.swimlaneRenderDone = listenerFactory();
-  const chartsInitDone = service.chartsInitDone = listenerFactory();
-  service.anomalyDataChange = listenerFactory();
-
-  service.init = function () {
-    // Clear out any old listeners.
-    dragSelect.unwatchAll();
-    swimlaneCellClick.unwatchAll();
-    swimlaneDataChange.unwatchAll();
-    swimlaneRenderDone.unwatchAll();
-    chartsInitDone.unwatchAll();
-  };
-
-  return service;
-}
-
-export const mlExplorerDashboardService = mlExplorerDashboardServiceFactory();
+export const dragSelect$ = new Subject();
+export const explorer$ = new Subject();

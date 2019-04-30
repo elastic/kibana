@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BasicLoginForm renders as expected 1`] = `
-<React.Fragment>
+<Fragment>
   <EuiPanel
     grow={true}
     hasShadow={false}
@@ -14,7 +14,14 @@ exports[`BasicLoginForm renders as expected 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Username"
+        label={
+          <FormattedMessage
+            defaultMessage="Username"
+            id="xpack.security.login.basicLoginForm.usernameFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
       >
         <EuiFieldText
           aria-required={true}
@@ -35,7 +42,14 @@ exports[`BasicLoginForm renders as expected 1`] = `
         describedByIds={Array []}
         fullWidth={false}
         hasEmptyLabelSpace={false}
-        label="Password"
+        label={
+          <FormattedMessage
+            defaultMessage="Password"
+            id="xpack.security.login.basicLoginForm.passwordFormRowLabel"
+            values={Object {}}
+          />
+        }
+        labelType="label"
       >
         <EuiFieldText
           aria-required={true}
@@ -59,11 +73,16 @@ exports[`BasicLoginForm renders as expected 1`] = `
         iconSide="left"
         isLoading={false}
         onClick={[Function]}
+        size="m"
         type="submit"
       >
-        Log in
+        <FormattedMessage
+          defaultMessage="Log in"
+          id="xpack.security.login.basicLoginForm.logInButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>
     </form>
   </EuiPanel>
-</React.Fragment>
+</Fragment>
 `;

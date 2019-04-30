@@ -7,8 +7,10 @@
 interface Numeral {
   (value?: unknown): Numeral;
   format: (pattern: string) => string;
+  unformat: (pattern: string) => number;
 }
 
+// eslint-disable-next-line no-var
 declare var numeral: Numeral;
 
 declare module '@elastic/numeral' {

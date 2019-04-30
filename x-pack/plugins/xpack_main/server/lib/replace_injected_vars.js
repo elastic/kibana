@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getTelemetryOptIn } from "./get_telemetry_opt_in";
-import { buildUserProfile } from './user_profile_registry';
+import { getTelemetryOptIn } from './get_telemetry_opt_in';
+import { populateUICapabilities } from './populate_ui_capabilities';
 
 export async function replaceInjectedVars(originalInjectedVars, request, server) {
   const xpackInfo = server.plugins.xpack_main.info;
-  const withXpackInfo = async () => ({
+
+  const originalInjectedVarsWithUICapabilities = {
     ...originalInjectedVars,
+    uiCapabilities: {
+      ...populateUICapabilities(server.plugins.xpack_main, originalInjectedVars.uiCapabilities),
+    }
+  };
+
+  const withXpackInfo = async () => ({
+    ...originalInjectedVarsWithUICapabilities,
     telemetryOptedIn: await getTelemetryOptIn(request),
     xpackInitialInfo: xpackInfo.isAvailable() ? xpackInfo.toJSON() : undefined,
-    userProfile: await buildUserProfile(request),
   });
 
   // security feature is disabled
@@ -23,7 +30,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
 
   // not enough license info to make decision one way or another
   if (!xpackInfo.isAvailable() || !xpackInfo.feature('security').getLicenseCheckResults()) {
-    return originalInjectedVars;
+    return originalInjectedVarsWithUICapabilities;
   }
 
   // authentication is not a thing you can do
@@ -33,7 +40,7 @@ export async function replaceInjectedVars(originalInjectedVars, request, server)
 
   // request is not authenticated
   if (!await server.plugins.security.isAuthenticated(request)) {
-    return originalInjectedVars;
+    return originalInjectedVarsWithUICapabilities;
   }
 
   // plugin enabled, license is appropriate, request is authenticated

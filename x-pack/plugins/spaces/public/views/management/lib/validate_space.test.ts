@@ -10,7 +10,23 @@ let validator: SpaceValidator;
 
 describe('validateSpaceName', () => {
   beforeEach(() => {
-    validator = new SpaceValidator({ shouldValidate: true });
+    validator = new SpaceValidator({
+      shouldValidate: true,
+      features: [
+        {
+          id: 'foo',
+          name: 'foo',
+          app: [],
+          privileges: {},
+        },
+        {
+          id: 'bar',
+          name: 'bar',
+          app: [],
+          privileges: {},
+        },
+      ],
+    });
   });
 
   test('it allows a name with special characters', () => {
@@ -30,7 +46,7 @@ describe('validateSpaceName', () => {
 
     expect(validator.validateSpaceName(space)).toEqual({
       isInvalid: true,
-      error: `Name is required`,
+      error: `Name is required.`,
     });
   });
 
@@ -42,7 +58,7 @@ describe('validateSpaceName', () => {
 
     expect(validator.validateSpaceName(space)).toEqual({
       isInvalid: true,
-      error: `Name is required`,
+      error: `Name is required.`,
     });
   });
 
@@ -54,7 +70,7 @@ describe('validateSpaceName', () => {
 
     expect(validator.validateSpaceName(space)).toEqual({
       isInvalid: true,
-      error: `Name must not exceed 1024 characters`,
+      error: `Name must not exceed 1024 characters.`,
     });
   });
 });
@@ -78,7 +94,7 @@ describe('validateSpaceDescription', () => {
 
     expect(validator.validateSpaceDescription(space)).toEqual({
       isInvalid: true,
-      error: `Description must not exceed 2000 characters`,
+      error: `Description must not exceed 2000 characters.`,
     });
   });
 });
@@ -102,7 +118,7 @@ describe('validateURLIdentifier', () => {
 
     expect(validator.validateURLIdentifier(space)).toEqual({
       isInvalid: true,
-      error: `URL identifier is required`,
+      error: `URL identifier is required.`,
     });
   });
 
@@ -114,7 +130,7 @@ describe('validateURLIdentifier', () => {
 
     expect(validator.validateURLIdentifier(space)).toEqual({
       isInvalid: true,
-      error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-"',
+      error: 'URL identifier can only contain a-z, 0-9, and the characters "_" and "-".',
     });
   });
 
@@ -125,5 +141,29 @@ describe('validateURLIdentifier', () => {
     };
 
     expect(validator.validateURLIdentifier(space)).toEqual({ isInvalid: false });
+  });
+});
+
+describe('validateSpaceFeatures', () => {
+  it('allows features to be disabled', () => {
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: ['foo'],
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({ isInvalid: false });
+  });
+
+  it('allows all features to be disabled', () => {
+    const space = {
+      id: '',
+      name: '',
+      disabledFeatures: ['foo', 'bar'],
+    };
+
+    expect(validator.validateEnabledFeatures(space)).toEqual({
+      isInvalid: false,
+    });
   });
 });

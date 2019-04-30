@@ -4,14 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
+
 async function parseResponse(request) {
   const response = await request;
   if (!response._scroll_id) {
-    throw new Error('Expected _scroll_id in the following Elasticsearch response: ' + JSON.stringify(response));
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedScrollIdErrorMessage', {
+      defaultMessage: 'Expected {scrollId} in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response), scrollId: '_scroll_id' }
+    }));
   }
 
   if (!response.hits) {
-    throw new Error('Expected hits in the following Elasticsearch response: ' + JSON.stringify(response));
+    throw new Error(i18n.translate('xpack.reporting.exportTypes.csv.hitIterator.expectedHitsErrorMessage', {
+      defaultMessage: 'Expected {hits} in the following Elasticsearch response: {response}',
+      values: { response: JSON.stringify(response), hits: 'hits' }
+    }));
   }
 
   return {
@@ -22,7 +30,7 @@ async function parseResponse(request) {
 
 export function createHitIterator(logger) {
   return async function* hitIterator(scrollSettings, callEndpoint, searchRequest, cancellationToken) {
-    logger('executing search request');
+    logger.debug('executing search request');
     function search(index, body) {
       return parseResponse(callEndpoint('search', {
         index,
@@ -33,7 +41,7 @@ export function createHitIterator(logger) {
     }
 
     function scroll(scrollId) {
-      logger('executing scroll request');
+      logger.debug('executing scroll request');
       return parseResponse(callEndpoint('scroll', {
         scrollId,
         scroll: scrollSettings.duration
@@ -41,7 +49,7 @@ export function createHitIterator(logger) {
     }
 
     function clearScroll(scrollId) {
-      logger('executing clearScroll request');
+      logger.debug('executing clearScroll request');
       return callEndpoint('clearScroll', {
         scrollId: [ scrollId ]
       });

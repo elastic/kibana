@@ -5,10 +5,11 @@
  */
 
 import { EuiDatePicker, EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import moment, { Moment } from 'moment';
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 
 const noop = () => undefined;
 
@@ -18,11 +19,12 @@ interface LogTimeControlsProps {
   stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
+  intl: InjectedIntl;
 }
 
-export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
+class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
   public render() {
-    const { currentTime, isLiveStreaming } = this.props;
+    const { currentTime, isLiveStreaming, intl } = this.props;
 
     const currentMoment = currentTime ? moment(currentTime) : null;
 
@@ -30,7 +32,14 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
       return (
         <EuiFilterGroup>
           <InlineWrapper>
-            <EuiDatePicker disabled onChange={noop} value="streaming..." />
+            <EuiDatePicker
+              disabled
+              onChange={noop}
+              value={intl.formatMessage({
+                id: 'xpack.infra.logs.streamingDescription',
+                defaultMessage: 'streaming…',
+              })}
+            />
           </InlineWrapper>
           <EuiFilterButton
             color="primary"
@@ -86,6 +95,8 @@ export class LogTimeControls extends React.PureComponent<LogTimeControlsProps> {
   };
 }
 
-const InlineWrapper = styled.div`
+export const LogTimeControls = injectI18n(LogTimeControlsUI);
+
+const InlineWrapper = euiStyled.div`
   display: inline-block;
 `;

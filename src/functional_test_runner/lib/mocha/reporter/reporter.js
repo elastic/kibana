@@ -54,7 +54,6 @@ export function MochaReporterProvider({ getService }) {
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
         setupJUnitReportGeneration(runner, {
           reportName: config.get('junit.reportName'),
-          rootDirectory: config.get('junit.rootDirectory')
         });
       }
     }
@@ -141,13 +140,9 @@ export function MochaReporterProvider({ getService }) {
     }
 
     onPass = test => {
-      let time = '';
-      if (test.speed !== 'fast') {
-        time = colors.speed(test.speed, ` (${ms(test.duration)})`);
-      }
-
+      const time = colors.speed(test.speed, ` (${ms(test.duration)})`);
       const pass = colors.pass(`${symbols.ok} pass`);
-      log.write(`- ${pass} ${time}`);
+      log.write(`- ${pass} ${time} "${test.fullTitle()}"`);
     }
 
     onFail = runnable => {

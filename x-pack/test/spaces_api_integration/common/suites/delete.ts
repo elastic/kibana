@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -26,16 +26,6 @@ interface DeleteTestDefinition {
 }
 
 export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbidden = (username: string, action: string) => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
-    });
-  };
-
   const createExpectResult = (expectedResult: any) => (resp: { [key: string]: any }) => {
     expect(resp.body).to.eql(expectedResult);
   };
@@ -201,7 +191,6 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
   deleteTest.only = makeDeleteTest(describe.only);
 
   return {
-    createExpectLegacyForbidden,
     createExpectResult,
     deleteTest,
     expectEmptyResult,

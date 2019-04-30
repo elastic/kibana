@@ -6,6 +6,8 @@
 
 import { get } from 'lodash';
 import { createQuery } from './create_query';
+import { INDEX_PATTERN_KIBANA, INDEX_PATTERN_BEATS, INDEX_PATTERN_LOGSTASH } from '../../../../../monitoring/common/constants';
+import { KIBANA_SYSTEM_ID, BEATS_SYSTEM_ID, APM_SYSTEM_ID, LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 
 /**
  * Update a counter associated with the {@code key}.
@@ -140,6 +142,24 @@ function mapToList(map, keyName) {
 }
 
 /**
+ * Returns the right index pattern to find monitoring documents based on the product id
+ *
+ * @param {*} product The product id, which should be in the constants file
+ */
+function getIndexPatternForStackProduct(product) {
+  switch (product) {
+    case KIBANA_SYSTEM_ID:
+      return INDEX_PATTERN_KIBANA;
+    case BEATS_SYSTEM_ID:
+    case APM_SYSTEM_ID:
+      return INDEX_PATTERN_BEATS;
+    case LOGSTASH_SYSTEM_ID:
+      return INDEX_PATTERN_LOGSTASH;
+  }
+  return null;
+}
+
+/**
  * Get statistics about selected Elasticsearch clusters, for the selected {@code product}.
  *
  * @param {Object} server The server instance
@@ -155,22 +175,36 @@ export function getHighLevelStats(server, callCluster, clusterUuids, start, end,
     .then(response => handleHighLevelStatsResponse(response, product));
 }
 
-/**
- * Fetch the high level stats to report for the {@code product}.
- *
- * @param {Object} server The server instance
- * @param {function} callCluster The callWithRequest or callWithInternalUser handler
- * @param {Array} indices The indices to use for the request
- * @param {Array} clusterUuids Cluster UUIDs to limit the request against
- * @param {Date} start Start time to limit the stats
- * @param {Date} end End time to limit the stats
- * @param {String} product The product to limit too ('kibana', 'logstash', 'beats')
- * @return {Promise} Response for the instances to fetch detailed for the product.
- */
-export function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
+export async function fetchHighLevelStats(server, callCluster, clusterUuids, start, end, product) {
   const config = server.config();
+  const isKibanaIndex = product === KIBANA_SYSTEM_ID;
+  const filters = [
+    { terms: { cluster_uuid: clusterUuids } },
+  ];
+
+  // we should supply this from a parameter in the future so that this remains generic
+  if (isKibanaIndex) {
+    const kibanaFilter = {
+      bool: {
+        should: [
+          { exists: { field: 'kibana_stats.usage.index' } },
+          {
+            bool: {
+              should: [
+                { range: { 'kibana_stats.kibana.version': { lt: '6.7.3' } } },
+                { term: { 'kibana_stats.kibana.version': '7.0.0' } },
+              ]
+            }
+          }
+        ],
+      }
+    };
+
+    filters.push(kibanaFilter);
+  }
+
   const params = {
-    index: config.get(`xpack.monitoring.${product}.index_pattern`),
+    index: getIndexPatternForStackProduct(product),
     size: config.get('xpack.monitoring.max_bucket_size'),
     ignoreUnavailable: true,
     filterPath: [
@@ -190,7 +224,7 @@ export function fetchHighLevelStats(server, callCluster, clusterUuids, start, en
         start,
         end,
         type: `${product}_stats`,
-        filters: [ { terms: { cluster_uuid: clusterUuids } } ]
+        filters,
       }),
       collapse: {
         // a more ideal field would be the concatenation of the uuid + transport address for duped UUIDs (copied installations)

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { getUrlPrefix } from '../lib/space_test_utils';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
@@ -27,16 +27,6 @@ interface CreateTestDefinition {
 }
 
 export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const createExpectLegacyForbiddenResponse = (username: string, action = 'write/index') => (resp: {
-    [key: string]: any;
-  }) => {
-    expect(resp.body).to.eql({
-      statusCode: 403,
-      error: 'Forbidden',
-      message: `action [indices:data/${action}] is unauthorized for user [${username}]: [security_exception] action [indices:data/${action}] is unauthorized for user [${username}]`,
-    });
-  };
-
   const expectConflictResponse = (resp: { [key: string]: any }) => {
     expect(resp.body).to.only.have.keys(['error', 'message', 'statusCode']);
     expect(resp.body.error).to.equal('Conflict');
@@ -50,6 +40,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: 'marketing',
       description: 'a description',
       color: '#5c5959',
+      disabledFeatures: [],
     });
   };
 
@@ -67,6 +58,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
       id: 'reserved',
       description: 'a description',
       color: '#5c5959',
+      disabledFeatures: [],
     });
   };
 
@@ -87,6 +79,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
             id: 'marketing',
             description: 'a description',
             color: '#5c5959',
+            disabledFeatures: [],
           })
           .expect(tests.newSpace.statusCode)
           .then(tests.newSpace.response);
@@ -102,6 +95,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               id: 'space_1',
               color: '#ffffff',
               description: 'a description',
+              disabledFeatures: [],
             })
             .expect(tests.alreadyExists.statusCode)
             .then(tests.alreadyExists.response);
@@ -119,6 +113,7 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
               description: 'a description',
               color: '#5c5959',
               _reserved: true,
+              disabledFeatures: [],
             })
             .expect(tests.reservedSpecified.statusCode)
             .then(tests.reservedSpecified.response);
@@ -132,7 +127,6 @@ export function createTestSuiteFactory(esArchiver: any, supertest: SuperTest<any
   createTest.only = makeCreateTest(describe.only);
 
   return {
-    createExpectLegacyForbiddenResponse,
     createTest,
     expectConflictResponse,
     expectNewSpaceResult,

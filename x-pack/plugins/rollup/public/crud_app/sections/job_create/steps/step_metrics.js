@@ -31,6 +31,22 @@ import {
   StepError,
 } from './components';
 
+const whiteListedMetricByFieldType = {
+  numeric: {
+    avg: true,
+    max: true,
+    min: true,
+    sum: true,
+    value_count: true,
+  },
+
+  date: {
+    max: true,
+    min: true,
+    value_count: true,
+  },
+};
+
 export class StepMetricsUi extends Component {
   static propTypes = {
     fields: PropTypes.object.isRequired,
@@ -47,12 +63,18 @@ export class StepMetricsUi extends Component {
       field: 'name',
       name: 'Field',
       sortable: true,
+      width: '240px',
+    }, {
+      field: 'type',
+      name: 'Type',
+      truncateText: true,
+      sortable: true,
+      width: '100px',
     }];
 
     const metricTypesConfig = [
       {
         type: 'avg',
-        name: '',
         label: (
           <FormattedMessage
             id="xpack.rollupJobs.create.stepMetrics.checkboxAverageLabel"
@@ -61,7 +83,6 @@ export class StepMetricsUi extends Component {
         ),
       }, {
         type: 'max',
-        name: '',
         label: (
           <FormattedMessage
             id="xpack.rollupJobs.create.stepMetrics.checkboxMaxLabel"
@@ -70,7 +91,6 @@ export class StepMetricsUi extends Component {
         ),
       }, {
         type: 'min',
-        name: '',
         label: (
           <FormattedMessage
             id="xpack.rollupJobs.create.stepMetrics.checkboxMinLabel"
@@ -79,7 +99,6 @@ export class StepMetricsUi extends Component {
         ),
       }, {
         type: 'sum',
-        name: '',
         label: (
           <FormattedMessage
             id="xpack.rollupJobs.create.stepMetrics.checkboxSumLabel"
@@ -88,32 +107,51 @@ export class StepMetricsUi extends Component {
         ),
       }, {
         type: 'value_count',
-        name: '',
         label: (
           <FormattedMessage
             id="xpack.rollupJobs.create.stepMetrics.checkboxValueCountLabel"
             defaultMessage="Value count"
           />
         ),
-      }];
+      },
+    ];
 
-    const metricTypeColumns = metricTypesConfig.map(({ type, name, label }) => ({
-      name,
-      render: ({ name: fieldName, types }) => {
-        const isSelected = types.includes(type);
+    this.listColumns = this.chooserColumns.concat({
+      type: 'metrics',
+      name: 'Metrics',
+      render: ({ name: fieldName, type: fieldType, types }) => {
+        const checkboxes = metricTypesConfig.map(({ type, label }) => {
+          const isAllowed = whiteListedMetricByFieldType[fieldType][type];
+
+          if (!isAllowed) {
+            return;
+          }
+
+          const isSelected = types.includes(type);
+
+          return (
+            <EuiFlexItem
+              grow={false}
+              key={`${fieldName}-${type}-checkbox`}
+            >
+              <EuiCheckbox
+                id={`${fieldName}-${type}-checkbox`}
+                data-test-subj={`rollupJobMetricsCheckbox-${type}`}
+                label={label}
+                checked={isSelected}
+                onChange={() => this.setMetric(fieldName, type, !isSelected)}
+              />
+            </EuiFlexItem>
+          );
+        }).filter(checkbox => checkbox !== undefined);
 
         return (
-          <EuiCheckbox
-            id={`${fieldName}-${type}-checkbox`}
-            label={label}
-            checked={isSelected}
-            onChange={() => this.setMetric(fieldName, type, !isSelected)}
-          />
+          <EuiFlexGroup wrap gutterSize="m">
+            {checkboxes}
+          </EuiFlexGroup>
         );
       },
-    }));
-
-    this.listColumns = this.chooserColumns.concat(metricTypeColumns);
+    });
   }
 
   onSelectField = (field) => {
@@ -123,7 +161,7 @@ export class StepMetricsUi extends Component {
     } = this.props;
 
     const newMetrics = metrics.concat({
-      name: field.name,
+      ...field,
       types: [],
     });
 
@@ -173,7 +211,7 @@ export class StepMetricsUi extends Component {
       <Fragment>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
+            <EuiTitle data-test-subj="rollupJobCreateMetricsTitle">
               <h3>
                 <FormattedMessage
                   id="xpack.rollupJobs.create.stepMetricsTitle"
@@ -202,6 +240,7 @@ export class StepMetricsUi extends Component {
               href={metricsDetailsUrl}
               target="_blank"
               iconType="help"
+              data-test-subj="rollupJobCreateMetricsDocsButton"
             >
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepMetrics.readDocsButtonLabel"
@@ -230,8 +269,10 @@ export class StepMetricsUi extends Component {
               fields={metricsFields}
               selectedFields={metrics}
               onSelectField={this.onSelectField}
+              dataTestSubj="rollupJobMetricsFieldChooser"
             />
           )}
+          dataTestSubj="rollupJobMetricsFieldList"
         />
 
         {this.renderErrors()}

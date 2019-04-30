@@ -1,7 +1,7 @@
 /*
  ******
  ****** This is a collection of CSS overrides that make Kibana look better for
- ****** generating PDF reports with Phantom.
+ ****** generating PDF reports with headless browser
  ******
  */
 
@@ -11,15 +11,16 @@
 
 /* elements can hide themselves when shared */
 .hide-for-sharing {
-  display: none;
+  display: none !important;
 }
 
 /* hide unusable controls */
-.global-nav,
+.kbnGlobalNav,
 kbn-top-nav,
-.toaster-container,
+.kbnToaster__container,
 filter-bar,
-::-webkit-scrollbar {
+::-webkit-scrollbar,
+.euiNavDrawer {
   display: none !important;
 }
 
@@ -35,7 +36,7 @@ filter-bar,
 /* hide unusable controls */
 discover-app .dscTimechart,
 discover-app .sidebar-container,
-discover-app .sidebar-collapser,
+discover-app .kbnCollapsibleSidebar__collapseButton,
 discover-app navbar[name="discover-search"],
 discover-app .discover-table-footer {
   display: none;
@@ -86,7 +87,7 @@ visualize-app .visEditor__canvas {
 
 /* hide unusable controls */
 .visualize .visLegend__toggle,
-.visualize .agg-table-controls/* export raw, export formatted, etc. */,
+.visualize .kbnAggTable__controls/* export raw, export formatted, etc. */,
 .visualize .leaflet-container .leaflet-top.leaflet-left/* tilemap controls */,
 .visualize paginate-controls {
   display: none;
@@ -117,7 +118,7 @@ visualize-app .visEditor__canvas {
  * reporting/export_types/printable_pdf/server/lib/screenshot.js or this will also hide the visualization
  * we want to capture.
  * 2. React grid item's transform affects the visualizations, even when they are using fixed positioning. Chrome seems
- * to handle this fine, but firefox moves the visualizations around, as I suspect Phantom since it had a problem.
+ * to handle this fine, but firefox moves the visualizations around.
  */
  dashboard-app .react-grid-item {
   height: 0 !important; /* 1. */

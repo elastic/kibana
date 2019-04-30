@@ -6,26 +6,42 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     Array [
       Object {
         "field": "id",
-        "name": "Id",
+        "name": <FormattedMessage
+          defaultMessage="Id"
+          id="xpack.logstash.pipelinesTable.idColumnLabel"
+          values={Object {}}
+        />,
         "render": [Function],
         "sortable": true,
       },
       Object {
         "field": "description",
-        "name": "Description",
+        "name": <FormattedMessage
+          defaultMessage="Description"
+          id="xpack.logstash.pipelinesTable.descriptionColumnLabel"
+          values={Object {}}
+        />,
         "render": [Function],
         "sortable": true,
         "truncateText": true,
       },
       Object {
         "field": "lastModifiedHumanized",
-        "name": "Last Modified",
+        "name": <FormattedMessage
+          defaultMessage="Last Modified"
+          id="xpack.logstash.pipelinesTable.lastModifiedColumnLabel"
+          values={Object {}}
+        />,
         "render": [Function],
         "sortable": true,
       },
       Object {
         "field": "username",
-        "name": "Modified By",
+        "name": <FormattedMessage
+          defaultMessage="Modified By"
+          id="xpack.logstash.pipelinesTable.modifiedByColumnLabel"
+          values={Object {}}
+        />,
         "render": [Function],
         "sortable": true,
       },
@@ -39,6 +55,7 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     ]
   }
   data-test-subj="pipelineTable"
+  executeQueryOptions={Object {}}
   isSelectable={true}
   itemId="id"
   items={
@@ -63,6 +80,11 @@ exports[`PipelinesTable component renders component as expected 1`] = `
     }
   }
   responsive={true}
+  rowProps={
+    Object {
+      "data-test-subj": "row",
+    }
+  }
   search={
     Object {
       "box": Object {
@@ -73,7 +95,11 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         Object {
           "field": "id",
           "multiSelect": false,
-          "name": "Filter by ID",
+          "name": <FormattedMessage
+            defaultMessage="Filter by ID"
+            id="xpack.logstash.pipelinesTable.filterByIdLabel"
+            values={Object {}}
+          />,
           "options": Array [
             Object {
               "name": "testPipeline",
@@ -92,9 +118,14 @@ exports[`PipelinesTable component renders component as expected 1`] = `
         iconSide="left"
         isDisabled={false}
         onClick={[MockFunction]}
+        size="m"
         type="button"
       >
-        Create pipeline
+        <FormattedMessage
+          defaultMessage="Create pipeline"
+          id="xpack.logstash.pipelinesTable.createPipelineButtonLabel"
+          values={Object {}}
+        />
       </EuiButton>,
     }
   }

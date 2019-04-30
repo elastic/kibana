@@ -4,9 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { functions as commonFunctions } from '../common';
 import { browser } from './browser';
 import { location } from './location';
-import { urlparam } from './urlparam';
 import { markdown } from './markdown';
+import { urlparam } from './urlparam';
 
-export const functions = [browser, location, urlparam, markdown];
+export const functions = [browser, location, markdown, urlparam, ...commonFunctions];

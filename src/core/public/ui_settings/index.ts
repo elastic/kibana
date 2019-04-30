@@ -17,6 +17,6 @@
  * under the License.
  */
 
-export { UiSettingsService, UiSettingsStartContract } from './ui_settings_service';
+export { UiSettingsService, UiSettingsSetup } from './ui_settings_service';
 export { UiSettingsClient } from './ui_settings_client';
 export { UiSettingsState } from './types';

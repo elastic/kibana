@@ -1,6 +1,6 @@
 {
   "index_patterns": [".management-beats"],
-  "version": 65000,
+  "version": 66000,
   "settings": {
     "index": {
       "number_of_shards": 1,
@@ -14,6 +14,28 @@
       "properties": {
         "type": {
           "type": "keyword"
+        },
+        "configuration_block": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "tag": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "config": {
+              "type": "keyword"
+            },
+            "last_updated": {
+              "type": "date"
+            }
+          }
         },
         "enrollment_token": {
           "properties": {
@@ -30,26 +52,14 @@
             "id": {
               "type": "keyword"
             },
+            "name": {
+              "type": "keyword"
+            },
             "color": {
               "type": "keyword"
             },
-            "last_updated": {
-              "type": "date"
-            },
-            "configuration_blocks": {
-              "type": "nested",
-              "properties": {
-                "type": {
-                  "type": "keyword"
-                },
-                "description": {
-                  "type": "text"
-                },
-                "configs": {
-                  "type": "nested",
-                  "dynamic": true
-                }
-              }
+            "hasConfigurationBlocksTypes": {
+              "type": "keyword"
             }
           }
         },

@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import * as React from 'react';
-import styled from 'styled-components';
+/* eslint-disable max-classes-per-file */
 
-import { RelativeTime } from './relative_time';
+import { EuiButtonEmpty, EuiIcon, EuiProgress, EuiText } from '@elastic/eui';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n/react';
+import * as React from 'react';
+
+import euiStyled from '../../../../../../common/eui_styled_components';
 
 interface LogTextStreamLoadingItemViewProps {
   alignment: 'top' | 'bottom';
@@ -53,10 +54,10 @@ export class LogTextStreamLoadingItemView extends React.PureComponent<
                 <EuiIcon type="clock" />
                 <FormattedMessage
                   id="xpack.infra.logs.lastStreamingUpdateText"
-                  defaultMessage=" last updated {lastUpdateTime} ago"
+                  defaultMessage=" last updated {lastUpdateTime}"
                   values={{
                     lastUpdateTime: (
-                      <RelativeTime time={lastStreamingUpdate} refreshInterval={1000} />
+                      <FormattedRelative value={lastStreamingUpdate} updateInterval={1000} />
                     ),
                   }}
                 />
@@ -113,20 +114,23 @@ interface ProgressEntryProps {
   isLoading: boolean;
 }
 
-// tslint:disable-next-line:max-classes-per-file
 class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
   public render() {
     const { alignment, children, className, color, isLoading } = this.props;
+    // NOTE: styled-components seems to make all props in EuiProgress required, so this
+    // style attribute hacking replaces styled-components here for now until that can be fixed
+    // see: https://github.com/elastic/eui/issues/1655
+    const alignmentStyle =
+      alignment === 'top' ? { top: 0, bottom: 'initial' } : { top: 'initial', bottom: 0 };
 
     return (
       <ProgressEntryWrapper className={className}>
-        <AlignedProgress
-          alignment={alignment}
+        <EuiProgress
+          style={alignmentStyle}
           color={color}
-          max={isLoading ? undefined : 1}
           size="xs"
-          value={isLoading ? undefined : 1}
           position="absolute"
+          {...(!isLoading ? { max: 1, value: 1 } : {})}
         />
         {children}
       </ProgressEntryWrapper>
@@ -134,20 +138,13 @@ class ProgressEntry extends React.PureComponent<ProgressEntryProps, {}> {
   }
 }
 
-const ProgressEntryWrapper = styled.div`
+const ProgressEntryWrapper = euiStyled.div`
   align-items: center;
   display: flex;
-  min-height: ${props => props.theme.eui.euiSizeXxl};
+  min-height: ${props => props.theme.eui.euiSizeXXL};
   position: relative;
 `;
 
-const ProgressMessage = styled.div`
+const ProgressMessage = euiStyled.div`
   padding: 8px 16px;
-`;
-
-const AlignedProgress = styled(EuiProgress).attrs<{
-  alignment: 'top' | 'bottom';
-}>({})`
-  top: ${props => (props.alignment === 'top' ? 0 : 'initial')};
-  bottom: ${props => (props.alignment === 'top' ? 'initial' : 0)};
 `;

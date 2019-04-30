@@ -6,51 +6,103 @@
 
 // @ts-ignore
 import { EuiBasicTable, EuiLink } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
+import { configBlockSchemas } from '../../common/config_schemas';
+import { translateConfigSchema } from '../../common/config_schemas_translations_map';
 import { ConfigurationBlock } from '../../common/domain_types';
-import { supportedConfigs } from '../config_schemas';
 
 interface ComponentProps {
-  configs: ConfigurationBlock[];
+  configs: {
+    error?: string | undefined;
+    list: ConfigurationBlock[];
+    page: number;
+    total: number;
+  };
   onConfigClick: (action: 'edit' | 'delete', config: ConfigurationBlock) => any;
+  onTableChange: (index: number, size: number) => void;
+  intl: InjectedIntl;
 }
+const pagination = {
+  pageSize: 5,
+  hidePerPageOptions: true,
+};
 
-export const ConfigList: React.SFC<ComponentProps> = props => (
+const ConfigListUi: React.SFC<ComponentProps> = props => (
   <EuiBasicTable
-    items={props.configs || []}
+    items={props.configs.list || []}
+    itemId="id"
+    pagination={{
+      ...pagination,
+      totalItemCount: props.configs.total,
+      pageIndex: props.configs.page,
+    }}
+    onChange={(
+      table: { page: { index: number; size: number } } = { page: { index: 0, size: 5 } }
+    ) => {
+      if (props.onTableChange) {
+        props.onTableChange(table.page.index, table.page.size);
+      }
+    }}
     columns={[
       {
         field: 'type',
-        name: 'Type',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.typeColumnName',
+          defaultMessage: 'Type',
+        }),
         truncateText: false,
-        render: (value: string, config: ConfigurationBlock) => {
-          const type = supportedConfigs.find((sc: any) => sc.value === config.type);
+        render: (type: string, config: ConfigurationBlock) => {
+          const translatedConfig = translateConfigSchema(configBlockSchemas).find(
+            sc => sc.id === type
+          );
 
           return (
             <EuiLink onClick={() => props.onConfigClick('edit', config)}>
-              {type ? type.text : config.type}
+              {translatedConfig ? translatedConfig.name : type}
             </EuiLink>
           );
         },
       },
       {
         field: 'module',
-        name: 'Module',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.moduleColumnName',
+          defaultMessage: 'Module',
+        }),
         truncateText: false,
-        render: (value: string) => {
-          return value || 'N/A';
+        render: (value: string, config: ConfigurationBlock) => {
+          return (
+            config.config._sub_type ||
+            props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tagTable.moduleColumn.notAvailibaleLabel',
+              defaultMessage: 'N/A',
+            })
+          );
         },
       },
       {
         field: 'description',
-        name: 'Description',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.descriptionColumnName',
+          defaultMessage: 'Description',
+        }),
       },
       {
-        name: 'Actions',
+        name: props.intl.formatMessage({
+          id: 'xpack.beatsManagement.tagTable.actionsColumnName',
+          defaultMessage: 'Actions',
+        }),
         actions: [
           {
-            name: 'Remove',
-            description: 'Remove this config from tag',
+            name: props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tagTable.actions.removeButtonAriaLabel',
+              defaultMessage: 'Remove',
+            }),
+            description: props.intl.formatMessage({
+              id: 'xpack.beatsManagement.tagTable.actions.removeTooltip',
+              defaultMessage: 'Remove this config from tag',
+            }),
             type: 'icon',
             icon: 'trash',
             onClick: (item: ConfigurationBlock) => props.onConfigClick('delete', item),
@@ -60,3 +112,5 @@ export const ConfigList: React.SFC<ComponentProps> = props => (
     ]}
   />
 );
+
+export const ConfigList = injectI18n(ConfigListUi);

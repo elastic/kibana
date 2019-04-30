@@ -17,46 +17,33 @@ export class InfraMetadataDomain {
   public async getMetadata(
     req: InfraFrameworkRequest,
     sourceId: string,
-    nodeName: string,
+    nodeId: string,
     nodeType: string
   ) {
-    const sourceConfiguration = await this.libs.sources.getConfiguration(sourceId);
-    const metricsPromise = this.adapter.getMetricMetadata(
-      req,
-      sourceConfiguration,
-      nodeName,
-      nodeType
-    );
-    const logsPromise = this.adapter.getLogMetadata(req, sourceConfiguration, nodeName, nodeType);
+    const { configuration } = await this.libs.sources.getSourceConfiguration(req, sourceId);
+    const metricsPromise = this.adapter.getMetricMetadata(req, configuration, nodeId, nodeType);
+    const logsPromise = this.adapter.getLogMetadata(req, configuration, nodeId, nodeType);
 
     const metrics = await metricsPromise;
     const logs = await logsPromise;
 
-    const metricMetadata = pickMetadata(metrics).map(entry => {
+    const metricMetadata = pickMetadata(metrics.buckets).map(entry => {
       return { name: entry, source: 'metrics' };
     });
 
-    const logMetadata = pickMetadata(logs).map(entry => {
+    const logMetadata = pickMetadata(logs.buckets).map(entry => {
       return { name: entry, source: 'logs' };
     });
 
-    return metricMetadata.concat(logMetadata);
+    const id = metrics.id || logs.id;
+    const name = metrics.name || logs.name || id;
+    return { id, name, features: metricMetadata.concat(logMetadata) };
   }
 }
 
 const pickMetadata = (buckets: InfraMetadataAggregationBucket[]): string[] => {
   if (buckets) {
-    const metadata = buckets
-      .map(module => {
-        if (module.names) {
-          return module.names.buckets.map(name => {
-            return `${module.key}.${name.key}`;
-          });
-        } else {
-          return [];
-        }
-      })
-      .reduce((a: string[], b: string[]) => a.concat(b), []);
+    const metadata = buckets.map(bucket => bucket.key);
     return metadata;
   } else {
     return [];

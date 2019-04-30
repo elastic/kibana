@@ -4,43 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SearchParams } from 'elasticsearch';
-import { TRACE_ID } from '../../../common/constants';
-import { Span } from '../../../typings/Span';
-import { Transaction } from '../../../typings/Transaction';
+import { PromiseReturnType } from '../../../typings/common';
+import { getTraceErrorsPerTransaction } from '../errors/get_trace_errors_per_transaction';
 import { Setup } from '../helpers/setup_request';
+import { getTraceItems } from './get_trace_items';
 
-export type TraceAPIResponse = Array<Transaction | Span>;
+export type TraceAPIResponse = PromiseReturnType<typeof getTrace>;
+export async function getTrace(traceId: string, setup: Setup) {
+  const [trace, errorsPerTransaction] = await Promise.all([
+    getTraceItems(traceId, setup),
+    getTraceErrorsPerTransaction(traceId, setup)
+  ]);
 
-export async function getTrace(
-  traceId: string,
-  setup: Setup
-): Promise<TraceAPIResponse> {
-  const { start, end, client, config } = setup;
-
-  const params: SearchParams = {
-    index: config.get('apm_oss.transactionIndices'),
-    body: {
-      size: 1000,
-      query: {
-        bool: {
-          filter: [
-            { term: { [TRACE_ID]: traceId } },
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                  format: 'epoch_millis'
-                }
-              }
-            }
-          ]
-        }
-      }
-    }
+  return {
+    trace,
+    errorsPerTransaction
   };
-
-  const resp = await client<Span | Transaction>('search', params);
-  return resp.hits.hits.map(hit => hit._source);
 }

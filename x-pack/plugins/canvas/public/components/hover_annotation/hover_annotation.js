@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import aero from '../../lib/aeroelastic';
+import { matrixToCSS } from '../../lib/dom';
 
 export const HoverAnnotation = ({ transformMatrix, width, height }) => {
   const newStyle = {
@@ -14,7 +14,7 @@ export const HoverAnnotation = ({ transformMatrix, width, height }) => {
     height,
     marginLeft: -width / 2,
     marginTop: -height / 2,
-    transform: aero.dom.matrixToCSS(transformMatrix),
+    transform: matrixToCSS(transformMatrix),
   };
   return <div className="canvasHoverAnnotation canvasLayoutAnnotation" style={newStyle} />;
 };

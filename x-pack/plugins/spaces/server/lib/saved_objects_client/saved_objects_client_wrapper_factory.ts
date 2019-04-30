@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectsClientWrapperFactory } from 'src/legacy/server/saved_objects';
 import { SpacesService } from '../create_spaces_service';
-import { SOCWrapperOptions } from './saved_objects_client_types';
 import { SpacesSavedObjectsClient } from './spaces_saved_objects_client';
 
 export function spacesSavedObjectsClientWrapperFactory(
   spacesService: SpacesService,
   types: string[]
-) {
-  return ({ client, request }: SOCWrapperOptions) =>
+): SavedObjectsClientWrapperFactory {
+  return ({ client, request }) =>
     new SpacesSavedObjectsClient({
       baseClient: client,
       request,

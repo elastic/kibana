@@ -37,6 +37,7 @@ interface State {
 }
 
 class SpaceSelectorUI extends Component<Props, State> {
+  private headerRef?: HTMLElement | null;
   constructor(props: Props) {
     super(props);
 
@@ -52,6 +53,14 @@ class SpaceSelectorUI extends Component<Props, State> {
 
     this.state = state;
   }
+
+  public setHeaderRef = (ref: HTMLElement | null) => {
+    this.headerRef = ref;
+    // forcing focus of header for screen readers to announce on page load
+    if (this.headerRef) {
+      this.headerRef.focus();
+    }
+  };
 
   public componentDidMount() {
     if (this.state.spaces.length === 0) {
@@ -93,7 +102,7 @@ class SpaceSelectorUI extends Component<Props, State> {
             </span>
 
             <EuiTitle size="l">
-              <h1>
+              <h1 tabIndex={0} ref={this.setHeaderRef}>
                 <FormattedMessage
                   id="xpack.spaces.spaceSelector.selectSpacesTitle"
                   defaultMessage="Select your space"
@@ -151,16 +160,18 @@ class SpaceSelectorUI extends Component<Props, State> {
     }
     return (
       <EuiFlexItem className="spcSpaceSelector__searchHolder">
-        <EuiFieldSearch
-          className="spcSpaceSelector__searchField"
-          placeholder={intl.formatMessage({
-            id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',
-            defaultMessage: 'Find a space',
-          })}
-          incremental={true}
-          // @ts-ignore
-          onSearch={this.onSearch}
-        />
+        {
+          // @ts-ignore onSearch doesn't exist on EuiFieldSearch
+          <EuiFieldSearch
+            className="spcSpaceSelector__searchField"
+            placeholder={intl.formatMessage({
+              id: 'xpack.spaces.spaceSelector.findSpacePlaceholder',
+              defaultMessage: 'Find a space',
+            })}
+            incremental={true}
+            onSearch={this.onSearch}
+          />
+        }
       </EuiFlexItem>
     );
   };

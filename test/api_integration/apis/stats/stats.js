@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 const assertStatsAndMetrics = body => {
   expect(body.kibana.name).to.be.a('string');
@@ -115,6 +115,18 @@ export default function ({ getService }) {
               expect(body.clusterUuid).to.be.a('string');
               expect(body.usage).to.be.an('object'); // no usage collectors have been registered so usage is an empty object
               assertStatsAndMetrics(body, true);
+            });
+        });
+      });
+
+      describe('exclude usage', () => {
+        it('should exclude usage from the API response', () => {
+          return supertest
+            .get('/api/stats?extended&exclude_usage')
+            .expect('Content-Type', /json/)
+            .expect(200)
+            .then(({ body }) => {
+              expect(body).to.not.have.property('usage');
             });
         });
       });

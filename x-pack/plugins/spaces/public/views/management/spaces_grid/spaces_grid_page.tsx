@@ -8,35 +8,38 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
   EuiInMemoryTable,
   EuiLink,
-  EuiPage,
-  EuiPageBody,
   EuiPageContent,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { capabilities } from 'ui/capabilities';
 // @ts-ignore
 import { toastNotifications } from 'ui/notify';
-
-import { SpacesNavState } from 'plugins/spaces/views/nav_control';
-import { UserProfile } from '../../../../../xpack_main/public/services/user_profile';
+import { Feature } from '../../../../../xpack_main/types';
 import { isReservedSpace } from '../../../../common';
+import { DEFAULT_SPACE_ID } from '../../../../common/constants';
 import { Space } from '../../../../common/model/space';
 import { SpaceAvatar } from '../../../components';
+import { getSpacesFeatureDescription } from '../../../lib/constants';
 import { SpacesManager } from '../../../lib/spaces_manager';
+import { SpacesNavState } from '../../nav_control';
 import { ConfirmDeleteModal } from '../components/confirm_delete_modal';
 import { SecureSpaceMessage } from '../components/secure_space_message';
 import { UnauthorizedPrompt } from '../components/unauthorized_prompt';
+import { getEnabledFeatures } from '../lib/feature_utils';
 
 interface Props {
   spacesManager: SpacesManager;
   spacesNavState: SpacesNavState;
-  userProfile: UserProfile;
+  features: Feature[];
   intl: InjectedIntl;
 }
 
@@ -66,19 +69,18 @@ class SpacesGridPageUI extends Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage restrictWidth className="spcGridPage">
-        <EuiPageBody>
-          <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
-          <SecureSpaceMessage userProfile={this.props.userProfile} />
-        </EuiPageBody>
+      <div className="spcGridPage">
+        <EuiPageContent horizontalPosition="center">{this.getPageContent()}</EuiPageContent>
+        <SecureSpaceMessage />
         {this.getConfirmDeleteModal()}
-      </EuiPage>
+      </div>
     );
   }
 
   public getPageContent() {
     const { intl } = this.props;
-    if (!this.props.userProfile.hasCapability('manageSpaces')) {
+
+    if (!capabilities.get().spaces.manage) {
       return <UnauthorizedPrompt />;
     }
 
@@ -86,18 +88,21 @@ class SpacesGridPageUI extends Component<Props, State> {
       <Fragment>
         <EuiFlexGroup justifyContent={'spaceBetween'}>
           <EuiFlexItem grow={false}>
-            <EuiText>
+            <EuiTitle size="m">
               <h1>
                 <FormattedMessage
                   id="xpack.spaces.management.spacesGridPage.spacesTitle"
                   defaultMessage="Spaces"
                 />
               </h1>
+            </EuiTitle>
+            <EuiText color="subdued" size="s">
+              <p>{getSpacesFeatureDescription()}</p>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>{this.getPrimaryActionButton()}</EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size={'xl'} />
+        <EuiSpacer size="l" />
 
         <EuiInMemoryTable
           itemId={'id'}
@@ -139,7 +144,7 @@ class SpacesGridPageUI extends Component<Props, State> {
       >
         <FormattedMessage
           id="xpack.spaces.management.spacesGridPage.createSpaceButtonLabel"
-          defaultMessage="Create space"
+          defaultMessage="Create a space"
         />
       </EuiButton>
     );
@@ -284,14 +289,6 @@ class SpacesGridPageUI extends Component<Props, State> {
         },
       },
       {
-        field: 'id',
-        name: intl.formatMessage({
-          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
-          defaultMessage: 'Identifier',
-        }),
-        sortable: true,
-      },
-      {
         field: 'description',
         name: intl.formatMessage({
           id: 'xpack.spaces.management.spacesGridPage.descriptionColumnName',
@@ -300,39 +297,104 @@ class SpacesGridPageUI extends Component<Props, State> {
         sortable: true,
       },
       {
+        field: 'disabledFeatures',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.management.spacesGridPage.featuresColumnName',
+          defaultMessage: 'Features',
+        }),
+        sortable: true,
+        render: (disabledFeatures: string[], record: Space) => {
+          const enabledFeatureCount = getEnabledFeatures(this.props.features, record).length;
+          if (enabledFeatureCount === this.props.features.length) {
+            return (
+              <FormattedMessage
+                id="xpack.spaces.management.spacesGridPage.allFeaturesEnabled"
+                defaultMessage="All features visible"
+              />
+            );
+          }
+          if (enabledFeatureCount === 0) {
+            return (
+              <EuiText color={'danger'}>
+                <FormattedMessage
+                  id="xpack.spaces.management.spacesGridPage.noFeaturesEnabled"
+                  defaultMessage="No features visible"
+                />
+              </EuiText>
+            );
+          }
+          return (
+            <FormattedMessage
+              id="xpack.spaces.management.spacesGridPage.someFeaturesEnabled"
+              defaultMessage="{enabledFeatureCount} / {totalFeatureCount} features visible"
+              values={{
+                enabledFeatureCount,
+                totalFeatureCount: this.props.features.length,
+              }}
+            />
+          );
+        },
+      },
+      {
+        field: 'id',
+        name: intl.formatMessage({
+          id: 'xpack.spaces.management.spacesGridPage.identifierColumnName',
+          defaultMessage: 'Identifier',
+        }),
+        sortable: true,
+        render(id: string) {
+          if (id === DEFAULT_SPACE_ID) {
+            return '';
+          }
+          return id;
+        },
+      },
+      {
         name: intl.formatMessage({
           id: 'xpack.spaces.management.spacesGridPage.actionsColumnName',
           defaultMessage: 'Actions',
         }),
         actions: [
           {
-            name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
-              defaultMessage: 'Edit',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.editSpaceActionDescription',
-              defaultMessage: 'Edit this space.',
-            }),
-            onClick: this.onEditSpaceClick,
-            type: 'icon',
-            icon: 'pencil',
-            color: 'primary',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.editSpaceActionName',
+                      defaultMessage: `Edit {spaceName}.`,
+                    },
+                    {
+                      spaceName: record.name,
+                    }
+                  )}
+                  color={'primary'}
+                  iconType={'pencil'}
+                  onClick={() => this.onEditSpaceClick(record)}
+                />
+              );
+            },
           },
           {
             available: (record: Space) => !isReservedSpace(record),
-            name: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
-              defaultMessage: 'Delete',
-            }),
-            description: intl.formatMessage({
-              id: 'xpack.spaces.management.spacesGridPage.deleteThisSpaceActionDescription',
-              defaultMessage: 'Delete this space.',
-            }),
-            onClick: this.onDeleteSpaceClick,
-            type: 'icon',
-            icon: 'trash',
-            color: 'danger',
+            render: (record: Space) => {
+              return (
+                <EuiButtonIcon
+                  aria-label={intl.formatMessage(
+                    {
+                      id: 'xpack.spaces.management.spacesGridPage.deleteActionName',
+                      defaultMessage: `Delete {spaceName}.`,
+                    },
+                    {
+                      spaceName: record.name,
+                    }
+                  )}
+                  color={'danger'}
+                  iconType={'trash'}
+                  onClick={() => this.onDeleteSpaceClick(record)}
+                />
+              );
+            },
           },
         ],
       },

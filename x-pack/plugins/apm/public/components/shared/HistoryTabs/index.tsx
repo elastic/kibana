@@ -4,46 +4,55 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore otherwise TS complains "Module ''@elastic/eui'' has no exported member 'EuiTab'"
-import { EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React from 'react';
-import { Route, RouteComponentProps, withRouter } from 'react-router-dom';
+import { matchPath, Route, RouteComponentProps } from 'react-router-dom';
+import { useLocation } from '../../../hooks/useLocation';
+import { history } from '../../../utils/history';
 
 export interface IHistoryTab {
   path: string;
-  name: string;
-  component: React.SFC | React.ComponentClass;
+  routePath?: string;
+  name: React.ReactNode;
+  render?: (props: RouteComponentProps) => React.ReactNode;
 }
 
-export interface HistoryTabsProps extends RouteComponentProps {
+export interface HistoryTabsProps {
   tabs: IHistoryTab[];
 }
 
-const HistoryTabsWithoutRouter = ({
-  tabs,
-  history,
-  location
-}: HistoryTabsProps) => {
+function isTabSelected(tab: IHistoryTab, currentPath: string) {
+  if (tab.routePath) {
+    return !!matchPath(currentPath, { path: tab.routePath, exact: true });
+  }
+  return currentPath === tab.path;
+}
+
+export function HistoryTabs({ tabs }: HistoryTabsProps) {
+  const location = useLocation();
   return (
     <React.Fragment>
       <EuiTabs>
-        {tabs.map(tab => (
+        {tabs.map((tab, i) => (
           <EuiTab
             onClick={() => history.push({ ...location, pathname: tab.path })}
-            isSelected={location.pathname === tab.path}
-            key={`${tab.path}--${tab.name}`}
+            isSelected={isTabSelected(tab, location.pathname)}
+            key={`${tab.path}--${i}`}
           >
             {tab.name}
           </EuiTab>
         ))}
       </EuiTabs>
-      {tabs.map(tab => (
-        <Route path={tab.path} component={tab.component} key={tab.path} />
-      ))}
+      <EuiSpacer />
+      {tabs.map(tab =>
+        tab.render ? (
+          <Route
+            path={tab.routePath || tab.path}
+            render={tab.render}
+            key={tab.path}
+          />
+        ) : null
+      )}
     </React.Fragment>
   );
-};
-
-const HistoryTabs = withRouter(HistoryTabsWithoutRouter);
-
-export { HistoryTabsWithoutRouter, HistoryTabs };
+}

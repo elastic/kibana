@@ -11,61 +11,60 @@ import { EuiToolTip } from '@elastic/eui';
 
 // don't use something like plugins/ml/../common
 // because it won't work with the jest tests
+import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { ML_JOB_FIELD_TYPES } from '../../../common/constants/field_types';
+import { i18n } from '@kbn/i18n';
 
-export function FieldTypeIcon({ tooltipEnabled = false, type }) {
-  let ariaLabel = '';
-  let iconClass = '';
+export const FieldTypeIcon = ({ tooltipEnabled = false, type, needsAria = true }) => {
+  const ariaLabel = getMLJobTypeAriaLabel(type);
+
+  if (ariaLabel === null) {
+    // All ml job field types should have associated aria labels.
+    // Once it is missing, it means that the passed *type* is not a valid field type.
+    // if type doesn't match one of ML_JOB_FIELD_TYPES
+    // don't render the component at all
+    return null;
+  }
+
+  const iconClass = ['field-type-icon'];
   let iconChar = '';
 
   switch (type) {
+
+    // icon class names
     case ML_JOB_FIELD_TYPES.BOOLEAN:
-      ariaLabel = 'boolean type';
-      iconClass = 'fa-adjust';
+      iconClass.push('kuiIcon', 'fa-adjust');
       break;
     case ML_JOB_FIELD_TYPES.DATE:
-      ariaLabel = 'date type';
-      iconClass = 'fa-clock-o';
-      break;
-    case ML_JOB_FIELD_TYPES.NUMBER:
-      ariaLabel = 'number type';
-      iconChar = '#';
+      iconClass.push('kuiIcon', 'fa-clock-o');
       break;
     case ML_JOB_FIELD_TYPES.GEO_POINT:
-      ariaLabel = 'geo_point type';
-      iconClass = 'fa-globe';
-      break;
-    case ML_JOB_FIELD_TYPES.KEYWORD:
-      ariaLabel = 'keyword type';
-      iconChar = 't';
+      iconClass.push('kuiIcon', 'fa-globe');
       break;
     case ML_JOB_FIELD_TYPES.TEXT:
-      ariaLabel = 'text type';
-      iconClass = 'fa-file-text-o';
+      iconClass.push('kuiIcon', 'fa-file-text-o');
       break;
     case ML_JOB_FIELD_TYPES.IP:
-      ariaLabel = 'IP type';
-      iconClass = 'fa-laptop';
+      iconClass.push('kuiIcon', 'fa-laptop');
+      break;
+
+    // icon chars
+    case ML_JOB_FIELD_TYPES.KEYWORD:
+      iconChar = 't';
+      break;
+    case ML_JOB_FIELD_TYPES.NUMBER:
+      iconChar = '#';
       break;
     case ML_JOB_FIELD_TYPES.UNKNOWN:
-      ariaLabel = 'Unknown type';
       iconChar = '?';
       break;
-    default:
-      // if type doesn't match one of ML_JOB_FIELD_TYPES
-      // don't render the component at all
-      return null;
-  }
-
-  let className = 'field-type-icon';
-  if (iconClass !== '') {
-    className += ' kuiIcon ' + iconClass;
   }
 
   const containerProps = {
     ariaLabel,
-    className,
-    iconChar
+    className: iconClass.join(' '),
+    iconChar,
+    needsAria
   };
 
   if (tooltipEnabled === true) {
@@ -73,14 +72,21 @@ export function FieldTypeIcon({ tooltipEnabled = false, type }) {
     // to support having another component directly inside the tooltip anchor
     // see https://github.com/elastic/eui/issues/839
     return (
-      <EuiToolTip position="left" content={`${type} type`}>
+      <EuiToolTip
+        position="left"
+        content={i18n.translate('xpack.ml.fieldTypeIcon.fieldTypeTooltip', {
+          defaultMessage: '{type} type',
+          values: { type }
+        })}
+      >
         <FieldTypeIconContainer {...containerProps} />
       </EuiToolTip>
     );
   }
 
   return <FieldTypeIconContainer {...containerProps} />;
-}
+};
+
 FieldTypeIcon.propTypes = {
   tooltipEnabled: PropTypes.bool,
   type: PropTypes.string
@@ -88,13 +94,25 @@ FieldTypeIcon.propTypes = {
 
 // If the tooltip is used, it will apply its events to its first inner child.
 // To pass on its properties we apply `rest` to the outer `span` element.
-function FieldTypeIconContainer({ ariaLabel, className, iconChar, ...rest }) {
+function FieldTypeIconContainer({
+  ariaLabel,
+  className,
+  iconChar,
+  needsAria,
+  ...rest
+}) {
+
+  const wrapperProps = { className };
+  if (needsAria && ariaLabel) {
+    wrapperProps['aria-label'] = ariaLabel;
+  }
+
   return (
-    <span className="field-type-icon-container" {...rest} tabIndex="0">
+    <span className="field-type-icon-container" {...rest}>
       {(iconChar === '') ? (
-        <span aria-label={ariaLabel} className={className} />
+        <span {...wrapperProps} />
       ) : (
-        <span aria-label={ariaLabel} className={className}>
+        <span {...wrapperProps}>
           <strong aria-hidden="true">{iconChar}</strong>
         </span>
       )}

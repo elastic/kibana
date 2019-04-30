@@ -24,21 +24,28 @@ export const withStreamItems = connect(
   }),
   bindPlainActionCreators({
     loadNewerEntries: logEntriesActions.loadNewerEntries,
+    reloadEntries: logEntriesActions.reloadEntries,
   })
 );
 
-export const WithStreamItems = asChildFunctionRenderer(withStreamItems);
+export const WithStreamItems = asChildFunctionRenderer(withStreamItems, {
+  onInitialize: props => {
+    if (!props.isReloading && !props.isLoadingMore) {
+      props.reloadEntries();
+    }
+  },
+});
 
 const selectItems = createSelector(
   logEntriesSelectors.selectEntries,
   logEntriesSelectors.selectIsReloadingEntries,
   logPositionSelectors.selectIsAutoReloading,
   // searchResultsSelectors.selectSearchResultsById,
-  (logEntries, isReloading, isAutoReloading /*, searchResults*/) =>
+  (logEntries, isReloading, isAutoReloading /* , searchResults */) =>
     isReloading && !isAutoReloading
       ? []
       : logEntries.map(logEntry =>
-          createLogEntryStreamItem(logEntry /*, searchResults[logEntry.gid] || null*/)
+          createLogEntryStreamItem(logEntry /* , searchResults[logEntry.gid] || null */)
         )
 );
 
@@ -64,5 +71,5 @@ const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string =>
   messageSegment.__typename === 'InfraLogMessageFieldSegment'
     ? messageSegment.value
     : messageSegment.__typename === 'InfraLogMessageConstantSegment'
-      ? messageSegment.constant
-      : 'failed to format message';
+    ? messageSegment.constant
+    : 'failed to format message';

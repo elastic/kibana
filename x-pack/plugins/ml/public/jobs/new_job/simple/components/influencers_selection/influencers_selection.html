@@ -1,6 +1,10 @@
 <div class="influencers-selection">
   <div>
-    <h4 class="euiTitle euiTitle--small">Key Fields (Influencers)</h4>
+    <h4
+      class="euiTitle euiTitle--small"
+      i18n-id="xpack.ml.newJob.simple.influencersSelection.keyFieldsTitle"
+      i18n-default-message="Key Fields (Influencers)"
+    ></h4>
     <div class="euiSpacer euiSpacer--s"></div>
   </div>
   <div class="row">
@@ -15,7 +19,7 @@
             multiple
             append-to-body=true
           >
-            <ui-select-match placeholder="Key fields">
+            <ui-select-match placeholder="{{ ::'xpack.ml.newJob.simple.influencersSelection.keyFieldsAriaLabel' | i18n: {defaultMessage: 'Key fields'} }}">
               <span ng-class="{'default-influencer': isDefaultInfluencer($item)}">
                 <ml-field-type-icon type="$item.mlType"></ml-field-type-icon>{{$item.name}}
               </span>

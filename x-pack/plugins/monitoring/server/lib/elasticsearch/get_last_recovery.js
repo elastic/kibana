@@ -36,7 +36,7 @@ export function filterOldShardActivity(startMs) {
  * @returns {Object[]} An array of shards representing active shard activity from {@code _source.index_recovery.shards}.
  */
 export function handleLastRecoveries(resp, start) {
-  if (resp.hits.total >= 1) {
+  if (resp.hits.hits.length === 1) {
     const data = _.get(resp.hits.hits[0], '_source.index_recovery.shards', []).filter(filterOldShardActivity(start.getTime()));
     data.sort((a, b) => b.start_time_in_millis - a.start_time_in_millis);
     return data;

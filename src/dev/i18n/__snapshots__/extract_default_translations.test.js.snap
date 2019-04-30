@@ -38,13 +38,6 @@ Array [
     },
   ],
   Array [
-    "plugin_1.id_6",
-    Object {
-      "description": "",
-      "message": "Message 6",
-    },
-  ],
-  Array [
     "plugin_1.id_7",
     Object {
       "description": undefined,
@@ -55,9 +48,17 @@ Array [
 `;
 
 exports[`dev/i18n/extract_default_translations throws on id collision 1`] = `
-"[37m[41m I18N ERROR [49m[39m Error in src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3/test_file.jsx
+Array [
+  "[37m[41m I18N ERROR [49m[39m Error in src/dev/i18n/__fixtures__/extract_default_translations/test_plugin_3/test_file.jsx
 Error: There is more than one default message for the same id \\"plugin_3.duplicate_id\\":
-\\"Message 1\\" and \\"Message 2\\""
+\\"Message 1\\" and \\"Message 2\\"",
+]
 `;
 
-exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `"Expected \\"wrong_plugin_namespace.message-id\\" id to have \\"plugin_2\\" namespace. See .i18nrc.json for the list of supported namespaces."`;
+exports[`dev/i18n/extract_default_translations throws on wrong message namespace 1`] = `
+Array [
+  Array [
+    [Error: Expected "wrong_plugin_namespace.message-id" id to have "plugin_2" namespace. See .i18nrc.json for the list of supported namespaces.],
+  ],
+]
+`;

@@ -1,0 +1,18 @@
+[role="xpack"]
+[[adding-policy-to-index]]
+=== Adding a policy to an index
+
+You can add a lifecycle policy to an index and view the status for indices 
+managed by a policy in *Management > {es} > Index Management*.  This page lists your 
+{es} indices, which you can filter by lifecycle status and lifecycle phase.  
+
+To add a policy, select the index name and then select *Manage > Add lifecycle policy*.
+You’ll see the policy name, the phase the index is in, the current 
+action, and if any errors occurred performing that action. 
+
+To remove a policy from an index, select *Manage > Remove lifecycle policy*.
+
+[role="screenshot"]
+image::images/index_management_add_policy.png[][UI for adding a policy to an index]
+
+

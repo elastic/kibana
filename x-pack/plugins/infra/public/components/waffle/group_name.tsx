@@ -5,8 +5,9 @@
  */
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-import { InfraPathType } from '../../../common/graphql/types';
+
+import euiStyled from '../../../../../common/eui_styled_components';
+import { InfraPathType } from '../../graphql/types';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../lib/lib';
 
 interface Props {
@@ -58,11 +59,11 @@ export class GroupName extends React.PureComponent<Props, {}> {
   };
 }
 
-const GroupNameContainer = styled.div`
+const GroupNameContainer = euiStyled.div`
   position: relative;
   text-align: center
   font-size: 16px;
-  margin-bottom: 5px; 
+  margin-bottom: 5px;
   top: 20px;
   display: flex;
   justify-content: center;
@@ -73,7 +74,7 @@ interface InnerProps {
   isChild?: boolean;
 }
 
-const Inner = styled<InnerProps, 'div'>('div')`
+const Inner = euiStyled<InnerProps, 'div'>('div')`
   border: 1px solid ${props => props.theme.eui.euiBorderColor};
   background-color: ${props =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};
@@ -85,7 +86,7 @@ const Inner = styled<InnerProps, 'div'>('div')`
   overflow: hidden;
 `;
 
-const Name = styled.div`
+const Name = euiStyled.div`
   flex: 1 1 auto;
   padding: 6px 10px;
   overflow: hidden;
@@ -93,7 +94,7 @@ const Name = styled.div`
   white-space: nowrap;
 `;
 
-const Count = styled.div`
+const Count = euiStyled.div`
   flex: 0 0 auto;
   border-left: 1px solid ${props => props.theme.eui.euiBorderColor};
   padding: 6px 10px;

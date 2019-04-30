@@ -37,6 +37,12 @@
     }
   }
 
+  .mlAnomalyExplorer__filterBar {
+    margin-bottom: $euiSize;
+    padding-right: $euiSize;
+    padding-left: $euiSize;
+  }
+
   .results-container {
     padding: $euiSize 0px $euiSize 0px;
 
@@ -62,7 +68,6 @@
 
     .panel-sub-title {
       color: $euiColorDarkShade;
-      display: inline-block;
       font-size: $euiFontSizeXS;
     }
   }
@@ -82,45 +87,6 @@
       position: relative;
       display: inline-block;
     }
-
-    button.dropdown-toggle {
-      // SASSTODO: Make a proper calc
-      min-width: 160px;
-      text-align: left;
-      margin-bottom: $euiSizeXS;
-
-      // SASSTODO: Make a proper selector
-      span {
-        font-size: $euiFontSizeXS;
-      }
-    }
-
-    // SASSTODO: Make a proper calc
-    button.dropdown-toggle.dropdown-toggle-narrow {
-      min-width: 60px;
-    }
-
-    button.dropdown-toggle:hover,
-    button.dropdown-toggle:focus {
-      color: $euiColorDarkShade;
-    }
-
-    .dropdown-menu {
-      font-size: $euiFontSizeXS;
-    }
-
-      // SASSTODO: Make a proper selector
-    .dropdown-menu > li > a {
-      color: $euiColorDarkShade;
-      text-decoration: none;
-    }
-
-    .dropdown-menu > li > a:hover,
-    .dropdown-menu > li > a:active,
-    .dropdown-menu > li > a:focus {
-      color: $euiColorEmptyShade;
-      box-shadow: none;
-    }
   }
 
   .ml-anomalies-controls {
@@ -137,49 +103,6 @@
     user-select: none;
     padding: 0;
     margin-bottom: $euiSizeS;
-
-    ml-explorer-swimlane {
-      width: 100%;
-      height: 250px;
-
-      & > .title {
-        background-color: $euiColorMediumShade;
-        color: $euiColorEmptyShade;
-        font-weight: $euiFontWeightBold;
-        margin-top: 0px;
-        border-radius: $euiSizeXS/ 2;
-        margin-bottom: $euiSizeXS;
-      }
-    }
-
-    ml-explorer-swimlane.ml-dragselect-dragging {
-      .sl-cell-inner,
-      .sl-cell-inner-dragselect {
-        opacity: 0.2;
-      }
-    }
-
-    ml-explorer-swimlane.ml-hide-range-selection {
-      div.ml-swimlanes {
-        div.lane {
-          div.cells-container {
-            .sl-cell.ds-selected {
-              .sl-cell-inner,
-              .sl-cell-inner-dragselect {
-                border-width: 0px;
-                opacity: 1;
-              }
-              .sl-cell-inner.sl-cell-inner-selected {
-                border-width: $euiSizeXS / 2;
-              }
-              .sl-cell-inner.sl-cell-inner-masked {
-                opacity: 0.2;
-              }
-            }
-          }
-        }
-      }
-    }
 
     div.ml-swimlanes {
       margin: 0px 0px 0px 10px;
@@ -351,5 +274,35 @@
       fill: $euiColorDarkShade;
     }
   }
+}
 
+/* using !important in the following rule because other related legacy rules have more specifity. */
+.mlDragselectDragging {
+  .sl-cell-inner,
+  .sl-cell-inner-dragselect {
+    opacity: 0.2 !important;
+  }
+}
+
+/* using !important in the following rule because other related legacy rules have more specifity. */
+.mlHideRangeSelection {
+  div.ml-swimlanes {
+    div.lane {
+      div.cells-container {
+        .sl-cell.ds-selected {
+          .sl-cell-inner,
+          .sl-cell-inner-dragselect {
+            border-width: 0px !important;
+            opacity: 1 !important;
+          }
+          .sl-cell-inner.sl-cell-inner-selected {
+            border-width: $euiSizeXS / 2 !important;
+          }
+          .sl-cell-inner.sl-cell-inner-masked {
+            opacity: 0.2 !important;
+          }
+        }
+      }
+    }
+  }
 }

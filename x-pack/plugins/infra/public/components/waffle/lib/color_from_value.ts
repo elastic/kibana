@@ -5,7 +5,7 @@
  */
 
 import { eq, first, gt, gte, last, lt, lte, sortBy } from 'lodash';
-import { mix } from 'polished';
+import { mix, parseToRgb, toColorString } from 'polished';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGradientLegend,
@@ -23,19 +23,27 @@ const OPERATOR_TO_FN = {
   [InfraWaffleMapRuleOperator.gt]: gt,
 };
 
+const convertToRgbString = (color: string) => {
+  return toColorString(parseToRgb(color));
+};
+
 export const colorFromValue = (
   legend: InfraWaffleMapLegend,
   value: number | string,
   bounds: InfraWaffleMapBounds,
-  defaultColor = 'rgba(0, 179, 164, 1)'
+  defaultColor = 'rgba(217, 217, 217, 1)'
 ): string => {
-  if (isInfraWaffleMapStepLegend(legend)) {
-    return calculateStepColor(legend, value, defaultColor);
+  try {
+    if (isInfraWaffleMapStepLegend(legend)) {
+      return convertToRgbString(calculateStepColor(legend, value, defaultColor));
+    }
+    if (isInfraWaffleMapGradientLegend(legend)) {
+      return convertToRgbString(calculateGradientColor(legend, value, bounds, defaultColor));
+    }
+    return defaultColor;
+  } catch (error) {
+    return defaultColor;
   }
-  if (isInfraWaffleMapGradientLegend(legend)) {
-    return calculateGradientColor(legend, value, bounds, defaultColor);
-  }
-  return defaultColor;
 };
 
 const normalizeValue = (min: number, max: number, value: number): number => {
@@ -45,7 +53,7 @@ const normalizeValue = (min: number, max: number, value: number): number => {
 export const calculateStepColor = (
   legend: InfraWaffleMapStepLegend,
   value: number | string,
-  defaultColor = 'rgba(0, 179, 164, 1)'
+  defaultColor = 'rgba(217, 217, 217, 1)'
 ): string => {
   return sortBy(legend.rules, 'sortBy').reduce((color: string, rule) => {
     const operatorFn = OPERATOR_TO_FN[rule.operator];

@@ -18,11 +18,11 @@
  */
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
-import { first, map, publishReplay, tap } from 'rxjs/operators';
+import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
 
-import { Server } from '..';
 import { Config, ConfigService, Env } from '../config';
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
+import { Server } from '../server';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
@@ -48,12 +48,12 @@ export class Root {
     this.server = new Server(this.configService, this.logger, this.env);
   }
 
-  public async start() {
-    this.log.debug('starting root');
+  public async setup() {
+    this.log.debug('setting up root');
 
     try {
       await this.setupLogging();
-      await this.server.start();
+      await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
       throw e;
@@ -88,10 +88,12 @@ export class Root {
 
   private async setupLogging() {
     // Stream that maps config updates to logger updates, including update failures.
-    const update$ = this.configService.atPath('logging', LoggingConfig).pipe(
+    const update$ = this.configService.getConfig$().pipe(
+      // always read the logging config when the underlying config object is re-read
+      switchMap(() => this.configService.atPath('logging', LoggingConfig)),
       map(config => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
-      // tslint:disable-next-line no-console
+      // eslint-disable-next-line no-console
       tap({ error: err => console.error('Configuring logger failed:', err) }),
       publishReplay(1)
     ) as ConnectableObservable<void>;

@@ -6,24 +6,29 @@
 
 import 'ngreact';
 
+import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('apps/ml', ['react']);
 
+import { getDataVisualizerBreadcrumbs } from '../breadcrumbs';
 import { checkBasicLicense } from 'plugins/ml/license/check_license';
 import { checkFindFileStructurePrivilege } from 'plugins/ml/privilege/check_privilege';
-import { initPromise } from 'plugins/ml/util/promise';
 
 import uiRoutes from 'ui/routes';
 
-const template = `<ml-nav-menu name="datavisualizer" /><datavisualizer-selector class="ml-datavisualizer-selector"/>`;
+const template = `
+  <div class="euiSpacer euiSpacer--s" />
+  <ml-nav-menu name="datavisualizer" />
+  <datavisualizer-selector />
+`;
 
 uiRoutes
   .when('/datavisualizer', {
     template,
+    k7Breadcrumbs: getDataVisualizerBreadcrumbs,
     resolve: {
       CheckLicense: checkBasicLicense,
       privileges: checkFindFileStructurePrivilege,
-      initPromise: initPromise(false)
     }
   });
 
@@ -33,5 +38,5 @@ import { DatavisualizerSelector } from './datavisualizer_selector';
 module.directive('datavisualizerSelector', function ($injector) {
   const reactDirective = $injector.get('reactDirective');
 
-  return reactDirective(DatavisualizerSelector, undefined, { restrict: 'E' }, { });
+  return reactDirective(wrapInI18nContext(DatavisualizerSelector), undefined, { restrict: 'E' }, { });
 });

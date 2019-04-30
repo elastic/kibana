@@ -25,9 +25,13 @@ export const switchFn = () => ({
     const cases = args.case || [];
     for (let i = 0; i < cases.length; i++) {
       const { matches, result } = await cases[i]();
-      if (matches) return result;
+      if (matches) {
+        return result;
+      }
     }
-    if (typeof args.default !== 'undefined') return await args.default();
+    if (typeof args.default !== 'undefined') {
+      return await args.default();
+    }
     return context;
   },
 });

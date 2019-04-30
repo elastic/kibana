@@ -27,7 +27,9 @@ export const AdvancedFailureComponent = props => {
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
 
-    if (valid) return onValueChange(fromExpression(argExpression.trim(), 'argument'));
+    if (valid) {
+      return onValueChange(fromExpression(argExpression.trim(), 'argument'));
+    }
   };
 
   const confirmReset = ev => {
@@ -51,12 +53,11 @@ export const AdvancedFailureComponent = props => {
         <EuiButton disabled={!valid} onClick={e => valueChange(e)} size="s" type="submit">
           Apply
         </EuiButton>
-        {defaultValue &&
-          defaultValue.length && (
-            <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
-              Reset
-            </EuiButtonEmpty>
-          )}
+        {defaultValue && defaultValue.length && (
+          <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
+            Reset
+          </EuiButtonEmpty>
+        )}
       </div>
     </EuiForm>
   );

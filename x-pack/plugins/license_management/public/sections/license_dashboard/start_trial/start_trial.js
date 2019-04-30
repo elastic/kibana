@@ -26,6 +26,7 @@ import { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } from 'ui/documentation_links';
 import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { optInToTelemetry } from '../../../lib/telemetry';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EXTERNAL_LINKS } from '../../../../common/constants';
 const esBase = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}`;
 const securityDocumentationLink = `${esBase}/security-settings.html`;
 
@@ -80,7 +81,7 @@ export class StartTrial extends React.PureComponent {
                       values={{
                         platinumLicenseFeaturesLinkText: (
                           <EuiLink
-                            href="https://www.elastic.co/subscriptions/xpack"
+                            href={EXTERNAL_LINKS.SUBSCRIPTIONS}
                             target="_blank"
                           >
                             <FormattedMessage
@@ -113,11 +114,12 @@ export class StartTrial extends React.PureComponent {
                     </li>
                     <li>
                       <FormattedMessage
-                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dateBaseConnectivityFeatureTitle"
-                        defaultMessage="{jdbcStandart} connectivity for {sqlDateBase}"
+                        id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.dataBaseConnectivityFeatureTitle"
+                        defaultMessage="{jdbcStandard} and {odbcStandard} connectivity for {sqlDataBase}"
                         values={{
-                          jdbcStandart: 'JDBC',
-                          sqlDateBase: 'SQL'
+                          jdbcStandard: 'JDBC',
+                          odbcStandard: 'ODBC',
+                          sqlDataBase: 'SQL'
                         }}
                       />
                     </li>
@@ -152,7 +154,7 @@ export class StartTrial extends React.PureComponent {
                       values={{
                         termsAndConditionsLinkText: (
                           <EuiLink
-                            href="https://elastic.co/legal/trial_license"
+                            href={EXTERNAL_LINKS.TRIAL_LICENSE}
                             target="_blank"
                           >
                             <FormattedMessage
@@ -225,7 +227,7 @@ export class StartTrial extends React.PureComponent {
           values={{
             platinumLicenseFeaturesLinkText: (
               <EuiLink
-                href="https://www.elastic.co/subscriptions/xpack"
+                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
                 target="_blank"
               >
                 <FormattedMessage
