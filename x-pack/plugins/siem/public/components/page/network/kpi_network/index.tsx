@@ -88,12 +88,12 @@ const fieldTitleMapping: Readonly<StatItems[]> = [
 export const KpiNetworkComponent = pure<KpiNetworkProps>(({ data, loading }) => {
   return (
     <EuiFlexGroup>
-      {fieldTitleMapping.map(card => (
+      {fieldTitleMapping.map(stat => (
         <StatItemsComponent
-          key={`kpi-network-summary-${card.fields[0].description}`}
+          key={`kpi-network-summary-${stat.fields[0].description}`}
           isLoading={loading}
-          description={card.description}
-          fields={addValueToFields(card.fields, data)}
+          description={stat.description}
+          fields={addValueToFields(stat.fields, data)}
         />
       ))}
     </EuiFlexGroup>

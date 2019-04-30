@@ -154,7 +154,7 @@ export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
         if (card.areaChart != null)
           statItemProps = {
             ...statItemProps,
-            areaChart: addValueToChart(card.areaChart, data),
+            areaChart: addValueToAreaChart(card.areaChart, data),
           };
 
         if (card.barChart != null)
@@ -172,7 +172,7 @@ export const KpiHostsComponent = pure<KpiHostsProps>(({ data, loading }) => {
 const addValueToFields = (fields: StatItem[], data: KpiHostsData): StatItem[] =>
   fields.map(field => ({ ...field, value: get(field.key, data) }));
 
-const addValueToChart = (fields: AreaChartData[], data: KpiHostsData): AreaChartData[] =>
+const addValueToAreaChart = (fields: AreaChartData[], data: KpiHostsData): AreaChartData[] =>
   fields
     .filter(field => get(field.key, data) != null)
     .map(field => ({ ...field, value: get(field.key, data) }));
