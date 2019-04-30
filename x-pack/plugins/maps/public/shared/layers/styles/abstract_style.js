@@ -12,10 +12,8 @@ export class AbstractStyle {
     };
   }
 
-  getDescriptorWithDynamicRanges(/* dataRequests */) {
-    return {
-      hasChanges: false,
-    };
+  pluckStyleMetaFromSourceDataRequest(/* sourceDataRequest */) {
+    return {};
   }
 
   getDescriptor() {

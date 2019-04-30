@@ -34,7 +34,7 @@ function FieldParamEditor({
   agg,
   aggParam,
   indexedFields = [],
-  isInvalid,
+  showValidation,
   value,
   setTouched,
   setValidity,
@@ -70,17 +70,19 @@ function FieldParamEditor({
     setTouched();
   }
 
+  const isValid = !!value && !!indexedFields.length;
+
   useEffect(
     () => {
-      setValidity(!!value);
+      setValidity(isValid);
     },
-    [value]
+    [isValid]
   );
 
   return (
     <EuiFormRow
       label={label}
-      isInvalid={isInvalid}
+      isInvalid={showValidation ? !isValid : false}
       fullWidth={true}
       error={errors}
       className="visEditorSidebar__aggParamFormRow"
@@ -94,7 +96,7 @@ function FieldParamEditor({
         selectedOptions={selectedOptions}
         singleSelection={{ asPlainText: true }}
         isClearable={false}
-        isInvalid={isInvalid}
+        isInvalid={showValidation ? !isValid : false}
         onChange={onChange}
         onBlur={setTouched}
         data-test-subj="visDefaultEditorField"

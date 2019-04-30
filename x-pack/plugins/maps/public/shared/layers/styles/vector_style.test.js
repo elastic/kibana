@@ -5,6 +5,7 @@
  */
 
 import { VectorStyle } from './vector_style';
+import { DataRequest } from '../util/data_request';
 
 describe('getDescriptorWithMissingStylePropsRemoved', () => {
   const fieldName = 'doIStillExist';
@@ -67,100 +68,129 @@ describe('getDescriptorWithMissingStylePropsRemoved', () => {
   });
 });
 
-describe('getDescriptorWithDynamicRanges', () => {
-  const dataRequests = [
-    {
+describe('pluckStyleMetaFromSourceDataRequest', () => {
+
+  describe('isPointsOnly', () => {
+    it('Should identify when feature collection only contains points', () => {
+      const sourceDataRequest = new DataRequest({
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              geometry: {
+                type: 'Point'
+              },
+              properties: {}
+            },
+            {
+              geometry: {
+                type: 'Point'
+              },
+              properties: {}
+            }
+          ],
+        }
+      });
+      const vectorStyle = new VectorStyle({});
+
+      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta).toEqual({ isPointsOnly: true });
+    });
+
+    it('Should identify when feature collection contains features other than points', () => {
+      const sourceDataRequest = new DataRequest({
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              geometry: {
+                type: 'Point'
+              },
+              properties: {}
+            },
+            {
+              geometry: {
+                type: 'Polygon'
+              },
+              properties: {}
+            }
+          ],
+        }
+      });
+      const vectorStyle = new VectorStyle({});
+
+      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta).toEqual({ isPointsOnly: false });
+    });
+  });
+
+  describe('scaled field range', () => {
+    const sourceDataRequest = new DataRequest({
       data: {
         type: 'FeatureCollection',
         features: [
           {
+            geometry: {
+              type: 'Point'
+            },
             properties: {
               myDynamicField: 1
             }
           },
           {
+            geometry: {
+              type: 'Point'
+            },
             properties: {
               myDynamicField: 10
             }
           }
         ],
       }
-    }
-  ];
-
-  it('Should not have changes when there are no dynamic properties', () => {
-    const vectorStyle = new VectorStyle({
-      properties: {
-        fillColor: {
-          type: VectorStyle.STYLE_TYPE.STATIC,
-          options: {}
-        }
-      }
     });
 
-    const { hasChanges } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
-    expect(hasChanges).toBe(false);
-  });
-
-  it('Should not have changes when no valid range found for dynamic property', () => {
-    const vectorStyle = new VectorStyle({
-      properties: {
-        fillColor: {
-          type: VectorStyle.STYLE_TYPE.DYNAMIC,
-          options: {
-            field: {
-              name: 'myDynamicFieldWithNoValues'
+    it('Should not extract scaled field range when scaled field has not values', () => {
+      const vectorStyle = new VectorStyle({
+        properties: {
+          fillColor: {
+            type: VectorStyle.STYLE_TYPE.DYNAMIC,
+            options: {
+              field: {
+                name: 'myDynamicFieldWithNoValues'
+              }
             }
           }
         }
-      }
+      });
+
+      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta).toEqual({ isPointsOnly: true });
     });
 
-    const { hasChanges } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
-    expect(hasChanges).toBe(false);
-  });
-
-  it('Should not have changes when no range is identical to previous range for dynamic property', () => {
-    const vectorStyle = new VectorStyle({
-      properties: {
-        fillColor: {
-          type: VectorStyle.STYLE_TYPE.DYNAMIC,
-          options: {
-            field: {
-              name: 'myDynamicField'
-            }
-          },
-          __range: {
-            min: 1,
-            max: 10
-          }
-        }
-      }
-    });
-
-    const { hasChanges } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
-    expect(hasChanges).toBe(false);
-  });
-
-  it('Should add range to style descriptor for dynamic property', () => {
-    const vectorStyle = new VectorStyle({
-      properties: {
-        fillColor: {
-          type: VectorStyle.STYLE_TYPE.DYNAMIC,
-          options: {
-            field: {
-              name: 'myDynamicField'
+    it('Should extract scaled field range', () => {
+      const vectorStyle = new VectorStyle({
+        properties: {
+          fillColor: {
+            type: VectorStyle.STYLE_TYPE.DYNAMIC,
+            options: {
+              field: {
+                name: 'myDynamicField'
+              }
             }
           }
         }
-      }
-    });
+      });
 
-    const { hasChanges, nextStyleDescriptor } = vectorStyle.getDescriptorWithDynamicRanges(dataRequests);
-    expect(hasChanges).toBe(true);
-    expect(nextStyleDescriptor.properties.fillColor.__range).toEqual({
-      max: 10,
-      min: 1
+      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta).toEqual({
+        isPointsOnly: true,
+        myDynamicField: {
+          delta: 9,
+          max: 10,
+          min: 1
+        }
+      });
     });
   });
+
 });

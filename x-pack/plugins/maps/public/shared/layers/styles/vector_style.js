@@ -17,10 +17,7 @@ import { VectorIcon, VectorStyleLegend } from './components/vector/legend';
 export class VectorStyle extends AbstractStyle {
 
   static type = 'VECTOR';
-  static STYLE_TYPE = {
-    DYNAMIC: 'DYNAMIC',
-    STATIC: 'STATIC'
-  };
+  static STYLE_TYPE = { 'DYNAMIC': 'DYNAMIC', 'STATIC': 'STATIC' };
 
   static getComputedFieldName(fieldName) {
     return `__kbn__scaled(${fieldName})`;
@@ -28,7 +25,10 @@ export class VectorStyle extends AbstractStyle {
 
   constructor(descriptor = {}) {
     super();
-    this._descriptor = VectorStyle.createDescriptor(descriptor.properties);
+    this._descriptor = {
+      ...descriptor,
+      ...VectorStyle.createDescriptor(descriptor.properties),
+    };
   }
 
   static canEdit(styleInstance) {
@@ -129,50 +129,52 @@ export class VectorStyle extends AbstractStyle {
     };
   }
 
-  getDescriptorWithDynamicRanges(dataRequests) {
-    const styles = this.getProperties();
-    const dynamicStyles = [];
-    Object.keys(styles).forEach(styleName => {
-      const { type, options } = styles[styleName];
-      if (type === VectorStyle.STYLE_TYPE.DYNAMIC
-        && options.field && options.field.name) {
-        dynamicStyles.push({
-          styleName,
-          fieldName: options.field.name
-        });
-      }
-    });
-
-    if (dynamicStyles.length === 0) {
-      return {
-        hasChanges: false,
-      };
+  pluckStyleMetaFromSourceDataRequest(sourceDataRequest) {
+    const features = _.get(sourceDataRequest.getData(), 'features', []);
+    if (features.length === 0) {
+      return {};
     }
 
-    for (let i = 0; i < dataRequests.length; i++) {
-      const { data } = dataRequests[i];
-      if (data && data.type === 'FeatureCollection') {
-        dynamicStyles.forEach(dynamicStyle => {
-          dynamicStyle.__range = VectorStyle.getMinMax(data.features, dynamicStyle.fieldName);
-        });
-        break;
+    const scaledFields = this._getDynamicPropertiesArray()
+      .map(({ options }) => {
+        return {
+          name: options.field.name,
+          min: Infinity,
+          max: -Infinity
+        };
+      });
+
+    let isPointsOnly = true;
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
+      if (isPointsOnly && feature.geometry.type !== 'Point') {
+        isPointsOnly = false;
+      }
+      for (let j = 0; j < scaledFields.length; j++) {
+        const scaledField = scaledFields[j];
+        const newValue = parseFloat(feature.properties[scaledField.name]);
+        if (!isNaN(newValue)) {
+          scaledField.min = Math.min(scaledField.min, newValue);
+          scaledField.max = Math.max(scaledField.max, newValue);
+        }
       }
     }
 
-    let hasChanges = false;
-    const updatedStyles = { ...styles };
-    dynamicStyles.forEach(({ styleName, __range }) => {
-      const prevRange = updatedStyles[styleName].__range;
-      if (__range.min !== Infinity && __range.max !== -Infinity && !_.isEqual(prevRange, __range)) {
-        hasChanges = true;
-        updatedStyles[styleName] = { ...updatedStyles[styleName], __range };
-      }
-    });
-
-    return {
-      hasChanges,
-      nextStyleDescriptor: VectorStyle.createDescriptor(updatedStyles)
+    const featuresMeta = {
+      isPointsOnly
     };
+
+    scaledFields.forEach(({ min, max, name }) => {
+      if (min !== Infinity && max !== -Infinity) {
+        featuresMeta[name] = {
+          min,
+          max,
+          delta: max - min,
+        };
+      }
+    });
+
+    return featuresMeta;
   }
 
   getSourceFieldNames() {
@@ -196,18 +198,40 @@ export class VectorStyle extends AbstractStyle {
     return this._descriptor.properties || {};
   }
 
-  _isPropertyDynamic(property) {
-    if (!this._descriptor.properties[property]) {
-      return false;
-    }
-    return this._descriptor.properties[property].type === VectorStyle.STYLE_TYPE.DYNAMIC;
+  _getDynamicPropertiesArray() {
+    const styles = this.getProperties();
+    return Object.keys(styles)
+      .map(styleName => {
+        const { type, options } = styles[styleName];
+        return {
+          styleName,
+          type,
+          options
+        };
+      })
+      .filter(({ styleName }) => {
+        return this._isPropertyDynamic(styleName);
+      });
   }
 
-  getIcon = (isPointsOnly = false) => {
+  _isPropertyDynamic(propertyName) {
+    const { type, options } = _.get(this._descriptor, ['properties', propertyName], {});
+    return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
+  }
+
+  _getIsPointsOnly = () => {
+    return _.get(this._descriptor, '__styleMeta.isPointsOnly', false);
+  }
+
+  _getFieldRange = (fieldName) => {
+    return _.get(this._descriptor, ['__styleMeta', fieldName]);
+  }
+
+  getIcon = () => {
     const styles = this.getProperties();
     return (
       <VectorIcon
-        isPointsOnly={isPointsOnly}
+        isPointsOnly={this._getIsPointsOnly()}
         fillColor={styles.fillColor}
         lineColor={styles.lineColor}
       />
@@ -217,104 +241,57 @@ export class VectorStyle extends AbstractStyle {
   getTOCDetails() {
     const styles = this.getProperties();
     const styleProperties = Object.keys(styles).map(styleName => {
-      const { type, options, __range } = styles[styleName];
+      const { type, options } = styles[styleName];
       return {
         name: styleName,
         type,
         options,
-        range: __range,
+        range: options && options.field && options.field.name ? this._getFieldRange(options.field.name) : null,
       };
     });
 
     return (<VectorStyleLegend styleProperties={styleProperties}/>);
   }
 
-  static getMinMax(features, fieldName) {
-    let min = Infinity;
-    let max = -Infinity;
-    features.forEach(feature => {
-      const newValue = parseFloat(feature.properties[fieldName]);
-      if (!isNaN(newValue)) {
-        min = Math.min(min, newValue);
-        max = Math.max(max, newValue);
-      }
-    });
-
-    return { min, max };
-  }
-
-  static computeScaledValues(featureCollection, field) {
-    const fieldName = field.name;
-    const features = featureCollection.features;
-    if (!features.length) {
+  addScaledPropertiesBasedOnStyle(featureCollection) {
+    if (!featureCollection || featureCollection.length === 0) {
       return false;
     }
 
-    const { min, max } = VectorStyle.getMinMax(features, fieldName);
-    const diff = max - min;
-    const propName = VectorStyle.getComputedFieldName(fieldName);
+    const scaledFields = this._getDynamicPropertiesArray()
+      .map(({ options }) => {
+        const name = options.field.name;
+        return {
+          name,
+          range: this._getFieldRange(name),
+          computedName: VectorStyle.getComputedFieldName(name),
+        };
+      })
+      .filter(({ range }) => {
+        return range;
+      });
+
+    if (scaledFields.length === 0) {
+      return false;
+    }
 
     //scale to [0,1] domain
-    features.forEach(feature => {
-      const unscaledValue = parseFloat(feature.properties[fieldName]);
-      let scaledValue;
-      if (isNaN(unscaledValue)) {//cannot scale
-        scaledValue = -1;//put outside range
-      } else if (diff === 0) {//values are identical
-        scaledValue = 1;//snap to end of color range
-      } else {
-        scaledValue = (feature.properties[fieldName] - min) / diff;
-      }
-      feature.properties[propName] =  scaledValue;
-      feature.properties[fieldName] =  unscaledValue;
+    featureCollection.features.forEach(feature => {
+      scaledFields.forEach(({ name, range, computedName }) => {
+        const unscaledValue = parseFloat(feature.properties[name]);
+        let scaledValue;
+        if (isNaN(unscaledValue)) {//cannot scale
+          scaledValue = -1;//put outside range
+        } else if (range.delta === 0) {//values are identical
+          scaledValue = 1;//snap to end of color range
+        } else {
+          scaledValue = (feature.properties[name] - range.min) / range.delta;
+        }
+        feature.properties[computedName] = scaledValue;
+      });
     });
-    featureCollection.computed.push(fieldName);
+
     return true;
-  }
-
-  addScaledPropertiesBasedOnStyle(featureCollection) {
-    if (
-      !this._isPropertyDynamic('fillColor') &&
-      !this._isPropertyDynamic('lineColor') &&
-      !this._isPropertyDynamic('iconSize') &&
-      !this._isPropertyDynamic('lineWidth')
-    ) {
-      return false;
-    }
-
-    if (!featureCollection) {
-      return false;
-    }
-
-    if (!featureCollection.computed) {
-      featureCollection.computed = [];
-    }
-
-    const dynamicFields = [];
-    //todo: should always be intialized really
-    //todo: don't hardcode styling properties. can be discovered automatically
-    //todo: this is adding duplicate fields..
-    if (this._descriptor.properties.fillColor && this._descriptor.properties.fillColor.options
-      && this._descriptor.properties.fillColor.options.field) {
-      dynamicFields.push(this._descriptor.properties.fillColor.options.field);
-    }
-    if (this._descriptor.properties.lineColor && this._descriptor.properties.lineColor.options
-      && this._descriptor.properties.lineColor.options.field) {
-      dynamicFields.push(this._descriptor.properties.lineColor.options.field);
-    }
-    if (this._descriptor.properties.iconSize && this._descriptor.properties.iconSize.options
-      && this._descriptor.properties.iconSize.options.field) {
-      dynamicFields.push(this._descriptor.properties.iconSize.options.field);
-    }
-    if (this._descriptor.properties.lineWidth && this._descriptor.properties.lineWidth.options
-      && this._descriptor.properties.lineWidth.options.field) {
-      dynamicFields.push(this._descriptor.properties.lineWidth.options.field);
-    }
-
-    const updateStatuses = dynamicFields.map((field) => {
-      return VectorStyle.computeScaledValues(featureCollection, field);
-    });
-    return updateStatuses.some(r => r === true);
   }
 
   _getMBDataDrivenColor({ fieldName, color }) {

@@ -8,11 +8,11 @@
         {
           "detector_description": "low_count",
           "function": "low_count",
-          "partition_field_name": "metricset.name"
+          "partition_field_name": "event.dataset"
         }
       ],
       "influencers": [
-        "metricset.name"
+        "event.dataset"
       ]
     },
     "analysis_limits": {

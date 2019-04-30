@@ -170,6 +170,7 @@ export const getSelectedLayerJoinDescriptors = createSelector(
     });
   });
 
+// Get list of unique index patterns used by all layers
 export const getUniqueIndexPatternIds = createSelector(
   getLayerList,
   (layerList) => {
@@ -181,10 +182,22 @@ export const getUniqueIndexPatternIds = createSelector(
   }
 );
 
+// Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  (layerList) => {
+    const indexPatternIds = [];
+    layerList.forEach(layer => {
+      indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+    });
+    return _.uniq(indexPatternIds);
+  }
+);
+
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some(layerDescriptor => {
     const currentState = copyPersistentState(layerDescriptor);
     const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
+    return (trackedState) ? !_.isEqual(currentState, copyPersistentState(trackedState)) : false;
   });
 });

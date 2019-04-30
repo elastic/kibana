@@ -36,7 +36,7 @@ import {
   setIsLayerTOCOpen,
   setOpenTOCDetails,
 } from '../store/ui';
-import { getUniqueIndexPatternIds } from '../selectors/map_selectors';
+import { getQueryableUniqueIndexPatternIds } from '../selectors/map_selectors';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { Inspector } from 'ui/inspector';
 import { DocTitleProvider } from 'ui/doc_title';
@@ -199,7 +199,7 @@ app.controller('GisMapController', ($scope, $route, config, kbnUrl, localStorage
       });
     }
 
-    const nextIndexPatternIds = getUniqueIndexPatternIds(store.getState());
+    const nextIndexPatternIds = getQueryableUniqueIndexPatternIds(store.getState());
     if (nextIndexPatternIds !== prevIndexPatternIds) {
       prevIndexPatternIds = nextIndexPatternIds;
       updateIndexPatterns(nextIndexPatternIds);

@@ -55,89 +55,93 @@ function combineAcross(datatableArray) {
   };
 }
 
-export const ply = () => ({
-  name: 'ply',
-  type: 'datatable',
-  help:
-    'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
-  context: {
-    types: ['datatable'],
-  },
-  args: {
-    by: {
-      types: ['string'],
-      help: 'The column to subdivide on',
-      multi: true,
-    },
-    expression: {
+export function ply() {
+  return {
+    name: 'ply',
+    type: 'datatable',
+    help:
+      'Subdivide a datatable and pass the resulting tables into an expression, then merge the output',
+    context: {
       types: ['datatable'],
-      resolve: false,
-      multi: true,
-      aliases: ['fn', 'function'],
-      help:
-        'An expression to pass each resulting data table into. Tips: \n' +
-        ' Expressions must return a datatable. Use `as` to turn literals into datatables.\n' +
-        ' Multiple expressions must return the same number of rows.' +
-        ' If you need to return a differing row count, pipe into another instance of ply.\n' +
-        ' If multiple expressions return the same columns, the last one wins.',
     },
-    // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
-    // The way the function below is written you can add as many arbitrary named args as you want.
-  },
-  fn: (context, args) => {
-    if (!args) {
-      return context;
-    }
-    let byColumns;
-    let originalDatatables;
+    args: {
+      by: {
+        types: ['string'],
+        help: 'The column to subdivide on',
+        multi: true,
+      },
+      expression: {
+        types: ['datatable'],
+        resolve: false,
+        multi: true,
+        aliases: ['fn', 'function'],
+        help:
+          'An expression to pass each resulting data table into. Tips: \n' +
+          ' Expressions must return a datatable. Use `as` to turn literals into datatables.\n' +
+          ' Multiple expressions must return the same number of rows.' +
+          ' If you need to return a differing row count, pipe into another instance of ply.\n' +
+          ' If multiple expressions return the same columns, the last one wins.',
+      },
+      // In the future it may make sense to add things like shape, or tooltip values, but I think what we have is good for now
+      // The way the function below is written you can add as many arbitrary named args as you want.
+    },
+    fn: (context, args) => {
+      if (!args) {
+        return context;
+      }
+      let byColumns;
+      let originalDatatables;
 
-    if (args.by) {
-      byColumns = args.by.map(by => {
-        const column = context.columns.find(column => column.name === by);
-        if (!column) {
-          throw new Error(`Column not found: '${by}'`);
-        }
-        return column;
-      });
-      const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
-      originalDatatables = Object.values(keyedDatatables).map(rows => ({
-        ...context,
-        rows,
-      }));
-    } else {
-      originalDatatables = [context];
-    }
-
-    const datatablePromises = originalDatatables.map(originalDatatable => {
-      let expressionResultPromises = [];
-
-      if (args.expression) {
-        expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
+      if (args.by) {
+        byColumns = args.by.map(by => {
+          const column = context.columns.find(column => column.name === by);
+          if (!column) {
+            throw new Error(`Column not found: '${by}'`);
+          }
+          return column;
+        });
+        const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
+        originalDatatables = Object.values(keyedDatatables).map(rows => ({
+          ...context,
+          rows,
+        }));
       } else {
-        expressionResultPromises.push(Promise.resolve(originalDatatable));
+        originalDatatables = [context];
       }
 
-      return Promise.all(expressionResultPromises).then(combineAcross);
-    });
+      const datatablePromises = originalDatatables.map(originalDatatable => {
+        let expressionResultPromises = [];
 
-    return Promise.all(datatablePromises).then(newDatatables => {
-      // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
-      const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
-      const rows = flatten(
-        newDatatables.map((dt, i) => {
-          const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
-          return dt.rows.map(row => ({
-            ...byColumnValues,
-            ...row,
-          }));
-        })
-      );
+        if (args.expression) {
+          expressionResultPromises = args.expression.map(expression =>
+            expression(originalDatatable)
+          );
+        } else {
+          expressionResultPromises.push(Promise.resolve(originalDatatable));
+        }
 
-      return {
-        type: 'datatable',
-        rows,
-        columns,
-      };
-    });
-  },
-});
+        return Promise.all(expressionResultPromises).then(combineAcross);
+      });
+
+      return Promise.all(datatablePromises).then(newDatatables => {
+        // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
+        const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
+        const rows = flatten(
+          newDatatables.map((dt, i) => {
+            const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
+            return dt.rows.map(row => ({
+              ...byColumnValues,
+              ...row,
+            }));
+          })
+        );
+
+        return {
+          type: 'datatable',
+          rows,
+          columns,
+        };
+      });
+    },
+  };
+}

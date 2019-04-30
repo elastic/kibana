@@ -21,7 +21,7 @@ export function installRoute(server: CodeServerRouter, lspService: LspService) {
     installationType: def.installationType,
     downloadUrl:
       typeof def.downloadUrl === 'function' ? def.downloadUrl(def, kibanaVersion) : def.downloadUrl,
-    pluginName: def.pluginName,
+    pluginName: def.installationPluginName,
   });
 
   server.route({

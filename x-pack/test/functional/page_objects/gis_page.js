@@ -268,6 +268,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText(`mapLayerTOCDetails${this.escapeLayerName(layerName)}`);
     }
 
+    async disableApplyGlobalQuery() {
+      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        await retry.try(async () => {
+          log.debug(`disabling applyGlobalQuery`);
+          await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
+          const isStillSelected = await element.isSelected();
+          if (isStillSelected) {
+            throw new Error('applyGlobalQuery not disabled');
+          }
+        });
+        await this.waitForLayersToLoad();
+      }
+    }
+
     async doesLayerExist(layerName) {
       return await testSubjects.exists(`mapLayerTOCDisplayName${this.escapeLayerName(layerName)}`);
     }
