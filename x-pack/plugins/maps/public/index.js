@@ -14,7 +14,7 @@ import 'uiExports/search';
 import 'uiExports/embeddableFactories';
 import 'ui/agg_types';
 
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import 'ui/kbn_top_nav';
@@ -43,6 +43,23 @@ app.directive('mapListing', function (reactDirective) {
 routes.enable();
 
 routes
+  .defaults(/.*/, {
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.maps.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('xpack.maps.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save maps',
+        }),
+        iconType: 'glasses'
+      };
+    }
+  })
   .when('/', {
     template: listingTemplate,
     controller($scope, gisMapSavedObjectLoader, config) {
@@ -53,7 +70,7 @@ routes
       $scope.delete = (ids) => {
         return gisMapSavedObjectLoader.delete(ids);
       };
-      $scope.readOnly = !uiCapabilities.maps.save;
+      $scope.readOnly = !capabilities.get().maps.save;
     },
     resolve: {
       hasMaps: function (kbnUrl) {
