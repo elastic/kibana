@@ -18,11 +18,19 @@
  */
 
 import _ from 'lodash';
-export default function splitByFilter(req, panel, series) {
+import { buildEsQuery } from '@kbn/es-query';
+
+export default function splitByFilter(req, panel, series, esQueryConfig, indexPattern) {
   return next => doc => {
     if (series.split_mode !== 'filter') return next(doc);
-    _.set(doc, `aggs.${series.id}.filter.query_string.query`, series.filter || '*');
-    _.set(doc, `aggs.${series.id}.filter.query_string.analyze_wildcard`, true);
+    // console.log('HELLO!, series.filter', series.filter)
+    const builtEsQuery = buildEsQuery(indexPattern, [series.filter], [], esQueryConfig);
+    console.log('builtEsQuery:', builtEsQuery);
+    console.log('builtEsQuery.bool.must[0]', builtEsQuery.bool.must[0]); // { query_string: { query: 'response.keyword:200', analyze_wildcard: true } }
+    _.set(doc, `aggs.${series.id}.filter.query_string.query`, buildEsQuery(indexPattern, [series.filter], [], esQueryConfig)); // Replaced the series.filter value with the esQuery
+    // _.set(doc, `aggs.${series.id}.filter.query_string.query`, series.filter || '*');
+    // _.set(doc, `aggs.${series.id}.filter.query_string.analyze_wildcard`, true);
     return next(doc);
   };
 }
+
