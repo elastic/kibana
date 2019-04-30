@@ -200,4 +200,28 @@ describe('FieldEditor', () => {
     component.update();
     expect(component).toMatchSnapshot();
   });
+
+  it('should show multiple type field warning with a table containing indices', async () => {
+    const testField = {
+      ...field,
+      name: 'test-conflict',
+      conflictDescriptions: {
+        long: ['index_name_1', 'index_name_2'],
+        text: ['index_name_3']
+      }
+    };
+    const component = shallowWithIntl(
+      <FieldEditorComponent
+        indexPattern={indexPattern}
+        field={testField}
+        helpers={helpers}
+      />
+    );
+
+    await new Promise(resolve => process.nextTick(resolve));
+    component.instance().onFieldChange('name', 'foobar');
+    component.update();
+    expect(component).toMatchSnapshot();
+  });
+
 });
