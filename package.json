@@ -89,7 +89,7 @@
     "mkdirp": "^0.5.1",
     "ora": "^3.4.0",
     "rimraf": "^2.6.3",
-    "strip-json-comments": "^2.0.1",
+    "strip-json-comments": "^3.0.0",
     "yargs": "^13.2.2"
   },
   "devDependencies": {
