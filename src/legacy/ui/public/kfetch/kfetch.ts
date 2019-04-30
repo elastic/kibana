@@ -22,12 +22,14 @@ import { merge } from 'lodash';
 import { KFetchError } from './kfetch_error';
 
 import { HttpSetup } from '../../../../core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { HttpRequestInit } from '../../../../core/public/http/types';
 
 export interface KFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
 
-export interface KFetchOptions extends RequestInit {
+export interface KFetchOptions extends HttpRequestInit {
   pathname: string;
   query?: KFetchQuery;
 }
@@ -100,18 +102,28 @@ function responseInterceptors(responsePromise: Promise<any>) {
 }
 
 export function withDefaultOptions(options?: KFetchOptions): KFetchOptions {
-  return merge(
+  const withDefaults = merge(
     {
       method: 'GET',
       credentials: 'same-origin',
       headers: {
-        ...(options && options.headers && options.headers.hasOwnProperty('Content-Type')
-          ? {}
-          : {
-              'Content-Type': 'application/json',
-            }),
+        'Content-Type': 'application/json',
       },
     },
     options
-  );
+  ) as KFetchOptions;
+
+  if (
+    options &&
+    options.headers &&
+    'Content-Type' in options.headers &&
+    options.headers['Content-Type'] === undefined
+  ) {
+    // TS thinks headers could be undefined here, but that isn't possible because
+    // of the merge above.
+    // @ts-ignore
+    withDefaults.headers['Content-Type'] = undefined;
+  }
+
+  return withDefaults;
 }

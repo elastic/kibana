@@ -200,16 +200,18 @@ describe('http requests', async () => {
   it('should make requests for NDJSON content', async () => {
     const { http } = setupService();
     const content = readFileSync(join(__dirname, '_import_objects.ndjson'), { encoding: 'utf-8' });
+    const body = new FormData();
 
+    body.append('file', content);
     fetchMock.post('*', {
       body: content,
       headers: { 'Content-Type': 'application/ndjson' },
     });
 
     const data = await http.post('/my/path', {
-      body: content,
+      body,
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': undefined,
       },
     });
 

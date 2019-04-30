@@ -21,6 +21,24 @@ import { BasePathSetup } from '../base_path';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 
+export interface HttpHeadersInit {
+  [name: string]: any;
+}
+export interface HttpRequestInit {
+  body?: BodyInit | null;
+  cache?: RequestCache;
+  credentials?: RequestCredentials;
+  headers?: HttpHeadersInit;
+  integrity?: string;
+  keepalive?: boolean;
+  method?: string;
+  mode?: RequestMode;
+  redirect?: RequestRedirect;
+  referrer?: string;
+  referrerPolicy?: ReferrerPolicy;
+  signal?: AbortSignal | null;
+  window?: any;
+}
 export interface Deps {
   basePath: BasePathSetup;
   injectedMetadata: InjectedMetadataSetup;
@@ -29,9 +47,10 @@ export interface Deps {
 export interface HttpFetchQuery {
   [key: string]: string | number | boolean | undefined;
 }
-export interface HttpFetchOptions extends RequestInit {
+export interface HttpFetchOptions extends HttpRequestInit {
   query?: HttpFetchQuery;
   prependBasePath?: boolean;
+  headers?: HttpHeadersInit;
 }
 export interface Abortable<T> {
   abort: () => Promise<T>;

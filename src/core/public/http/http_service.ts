@@ -44,28 +44,34 @@ export class HttpService {
   private readonly stop$ = new Rx.Subject();
 
   public setup({ basePath, injectedMetadata, fatalErrors }: Deps) {
-    const defaults: HttpFetchOptions = {
-      method: 'GET',
-      credentials: 'same-origin',
-      prependBasePath: true,
-      headers: {
-        'Content-Type': 'application/json',
-        'kbn-version': injectedMetadata.getKibanaVersion(),
-      },
-    };
-
     async function fetch(path: string, options: HttpFetchOptions = {}): Promise<HttpBody> {
-      const { query, prependBasePath, ...fetchOptions } = merge({}, defaults, options);
+      const { query, prependBasePath, ...fetchOptions } = merge({
+        method: 'GET',
+        credentials: 'same-origin',
+        prependBasePath: true,
+        headers: {
+          'kbn-version': injectedMetadata.getKibanaVersion(),
+          'Content-Type': 'application/json',
+        }
+      }, options);
       const url = format({
         pathname: prependBasePath ? basePath.addToPath(path) : path,
         query,
       });
 
+      if (
+        options.headers &&
+        'Content-Type' in options.headers &&
+        options.headers['Content-Type'] === undefined
+      ) {
+        delete options.headers['Content-Type'];
+      }
+
       let response;
       let body = null;
 
       try {
-        response = await window.fetch(url, fetchOptions);
+        response = await window.fetch(url, fetchOptions as RequestInit);
       } catch (err) {
         throw new HttpFetchError(err.message);
       }
