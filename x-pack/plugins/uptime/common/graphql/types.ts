@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* tslint:disable */
 
 // ====================================================
 // START: Typescript template
@@ -49,6 +49,8 @@ export interface Ping {
   /** The agent that recorded the ping */
   beat?: Beat | null;
 
+  container?: Container | null;
+
   docker?: Docker | null;
 
   ecs?: Ecs | null;
@@ -90,6 +92,22 @@ export interface Beat {
   timezone?: string | null;
 
   type?: string | null;
+}
+
+export interface Container {
+  id?: string | null;
+
+  image?: ContainerImage | null;
+
+  name?: string | null;
+
+  runtime?: string | null;
+}
+
+export interface ContainerImage {
+  name?: string | null;
+
+  tag?: string | null;
 }
 
 export interface Docker {
