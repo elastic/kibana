@@ -36,21 +36,22 @@ export const ExtractNodeBuildsTask = {
     await Promise.all(
       config.getNodePlatforms().map(async platform => {
         const { downloadPath, extractDir } = getNodeDownloadInfo(config, platform);
-
         // windows executable is not extractable, it's just an .exe file
-        // for performance reasons, do a copy-on-write by using the fs.constants.COPYFILE_FICLONE flag
         if (platform.isWindows()) {
           const destination = resolve(extractDir, 'node.exe');
-          await statAsync(downloadPath);
-          await mkdirpAsync(dirname(destination));
-          return await copyFileAsync(downloadPath, destination, fs.constants.COPYFILE_FICLONE);
+          return this.copyWindows(downloadPath, destination);
         }
 
         // all other downloads are tarballs
-        await untar(downloadPath, extractDir, {
-          strip: 1
-        });
+        return untar(downloadPath, extractDir, { strip: 1 });
       }),
     );
+  },
+  async copyWindows(source, destination) {
+    // ensure source exists before creating destination directory
+    await statAsync(source);
+    await mkdirpAsync(dirname(destination));
+    // for performance reasons, do a copy-on-write by using the fs.constants.COPYFILE_FICLONE flag
+    return await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
   },
 };
