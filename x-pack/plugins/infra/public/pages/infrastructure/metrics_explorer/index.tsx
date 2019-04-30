@@ -58,7 +58,7 @@ export const MetricsExplorerPage = injectI18n(
         />
         <MetricsExplorerToolbar
           derivedIndexPattern={derivedIndexPattern}
-          currentTimerange={currentTimerange}
+          timeRange={currentTimerange}
           options={options}
           onRefresh={handleRefresh}
           onTimeChange={handleTimeChange}
@@ -82,6 +82,7 @@ export const MetricsExplorerPage = injectI18n(
           />
         ) : (
           <MetricsExplorerCharts
+            timeRange={currentTimerange}
             loading={loading}
             data={data}
             source={source}

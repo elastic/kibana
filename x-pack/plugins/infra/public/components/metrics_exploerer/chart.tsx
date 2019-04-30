@@ -15,7 +15,10 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiSeriesChart } from '@elastic/eui/lib/experimental';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
-import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+} from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import euiStyled from '../../../../../common/eui_styled_components';
 import { createFormatterForMetric } from './helpers/create_formatter_for_metric';
 import { MetricLineSeries } from './line_series';
@@ -31,12 +34,23 @@ interface Props {
   options: MetricsExplorerOptions;
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
+  timeRange: MetricsExplorerTimeOptions;
 }
 
 const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
 export const MetricsExplorerChart = injectI18n(
-  ({ intl, source, options, series, title, onFilter, height = 200, width = '100%' }: Props) => {
+  ({
+    intl,
+    source,
+    options,
+    series,
+    title,
+    onFilter,
+    height = 200,
+    width = '100%',
+    timeRange,
+  }: Props) => {
     const { metrics } = options;
     const yAxisFormater = useCallback(createFormatterForMetric(first(metrics)), [options]);
     return (
@@ -49,6 +63,7 @@ export const MetricsExplorerChart = injectI18n(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <MetricsExplorerChartContextMenu
+                  timeRange={timeRange}
                   options={options}
                   series={series}
                   onFilter={onFilter}
@@ -60,7 +75,12 @@ export const MetricsExplorerChart = injectI18n(
         ) : (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <MetricsExplorerChartContextMenu options={options} series={series} source={source} />
+              <MetricsExplorerChartContextMenu
+                options={options}
+                series={series}
+                source={source}
+                timeRange={timeRange}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

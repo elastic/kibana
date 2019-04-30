@@ -25,7 +25,7 @@ import { MetricsExplorerAggregationPicker } from './aggregation';
 interface Props {
   intl: InjectedIntl;
   derivedIndexPattern: StaticIndexPattern;
-  currentTimerange: MetricsExplorerTimeOptions;
+  timeRange: MetricsExplorerTimeOptions;
   options: MetricsExplorerOptions;
   onRefresh: () => void;
   onTimeChange: (start: string, end: string) => void;
@@ -37,7 +37,7 @@ interface Props {
 
 export const MetricsExplorerToolbar = injectI18n(
   ({
-    currentTimerange,
+    timeRange,
     derivedIndexPattern,
     options,
     onTimeChange,
@@ -101,8 +101,8 @@ export const MetricsExplorerToolbar = injectI18n(
           </EuiFlexItem>
           <EuiFlexItem grow={false} style={{ marginRight: 5 }}>
             <EuiSuperDatePicker
-              start={currentTimerange.from}
-              end={currentTimerange.to}
+              start={timeRange.from}
+              end={timeRange.to}
               onTimeChange={({ start, end }) => onTimeChange(start, end)}
               onRefresh={onRefresh}
             />

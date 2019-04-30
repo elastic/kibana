@@ -14,13 +14,14 @@ import {
 import {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,
+  MetricsExplorerTimeOptions,
 } from '../../../containers/metrics_explorer/use_metrics_explorer_options';
 import { metricToFormat } from './metric_to_format';
 import { InfraFormatterType } from '../../../lib/lib';
 import { SourceQuery } from '../../../graphql/types';
 import { createMetricLabel } from './create_metric_label';
 
-const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
+export const metricsExplorerMetricToTSVBMetric = (metric: MetricsExplorerOptionsMetric) => {
   if (metric.aggregation === MetricsExplorerAggregation.rate) {
     const metricId = uuid.v1();
     const positiveOnlyId = uuid.v1();
@@ -81,7 +82,8 @@ const mapMetricToSeries = (metric: MetricsExplorerOptionsMetric) => {
 export const createTSVBLink = (
   source: SourceQuery.Query['source']['configuration'] | undefined,
   options: MetricsExplorerOptions,
-  series: MetricsExplorerSeries
+  series: MetricsExplorerSeries,
+  timeRange: MetricsExplorerTimeOptions
 ) => {
   const appState = {
     filters: [],
@@ -112,7 +114,7 @@ export const createTSVBLink = (
 
   const globalState = {
     refreshInterval: { pause: true, value: 0 },
-    time: { from: 'now-1h', to: 'now' },
+    time: { from: timeRange.from, to: timeRange.to },
   };
 
   return `../app/kibana#/visualize/create?type=metrics&_g=${encode(globalState)}&_a=${encode(

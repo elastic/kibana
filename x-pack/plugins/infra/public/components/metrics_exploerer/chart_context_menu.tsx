@@ -12,7 +12,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
-import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+} from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { SourceQuery } from '../../graphql/types';
 
@@ -22,10 +25,11 @@ interface Props {
   onFilter?: (query: string) => void;
   series: MetricsExplorerSeries;
   source: SourceQuery.Query['source']['configuration'] | undefined;
+  timeRange: MetricsExplorerTimeOptions;
 }
 
 export const MetricsExplorerChartContextMenu = injectI18n(
-  ({ intl, onFilter, options, series, source }: Props) => {
+  ({ intl, onFilter, options, series, source, timeRange }: Props) => {
     const [isPopoverOpen, setPopoverState] = useState(false);
     const supportFiltering = options.groupBy != null && onFilter != null;
     const handleFilter = useCallback(
@@ -40,7 +44,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
       [options, series.id, onFilter]
     );
 
-    const tsvbUrl = createTSVBLink(source, options, series);
+    const tsvbUrl = createTSVBLink(source, options, series, timeRange);
 
     // Only display the "Add Filter" option if it's supported
     const filterByItem = supportFiltering

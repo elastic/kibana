@@ -8,11 +8,15 @@ import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from 
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import React from 'react';
 import { MetricsExplorerResponse } from '../../../server/routes/metrics_explorer/types';
-import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimeOptions,
+} from '../../containers/metrics_explorer/use_metrics_explorer_options';
 import { InfraLoadingPanel } from '../loading';
 import { NoData } from '../empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 import { SourceQuery } from '../../graphql/types';
+import { timeRange } from '../../utils/fixtures/metrics_explorer';
 
 interface Props {
   loading: boolean;
@@ -23,6 +27,7 @@ interface Props {
   data: MetricsExplorerResponse | null;
   intl: InjectedIntl;
   source: SourceQuery.Query['source']['configuration'] | undefined;
+  timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = injectI18n(
   ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter, source }: Props) => {
@@ -73,6 +78,7 @@ export const MetricsExplorerCharts = injectI18n(
                 height={data.series.length > 1 ? 200 : 400}
                 series={series}
                 source={source}
+                timeRange={timeRange}
               />
             </EuiFlexItem>
           ))}
