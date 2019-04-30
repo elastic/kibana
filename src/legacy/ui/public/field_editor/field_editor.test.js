@@ -25,8 +25,10 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { FieldEditorComponent } from './field_editor';
 
 jest.mock('@elastic/eui', () => ({
+  EuiBasicTable: 'eui-basic-table',
   EuiButton: 'eui-button',
   EuiButtonEmpty: 'eui-button-empty',
+  EuiCallOut: 'eui-call-out',
   EuiCode: 'eui-code',
   EuiConfirmModal: 'eui-confirm-modal',
   EuiFieldNumber: 'eui-field-number',

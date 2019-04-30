@@ -1201,56 +1201,6 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-form-row>
     <eui-form-row
-      fullWidth={true}
-      helpText={
-        <span>
-          <UNDEFINED
-            color="warning"
-            iconType="alert"
-            size="s"
-            title={
-              <FormattedMessage
-                defaultMessage="Field Type Conflict"
-                id="common.ui.fieldEditor.fieldTypeConflict"
-                values={Object {}}
-              />
-            }
-          >
-            <FormattedMessage
-              defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
-              id="common.ui.fieldEditor.multiTypeLabelDesc"
-              values={Object {}}
-            />
-          </UNDEFINED>
-          <UNDEFINED
-            columns={
-              Array [
-                Object {
-                  "field": "type",
-                  "name": "Type",
-                  "width": "100px",
-                },
-                Object {
-                  "field": "indices",
-                  "name": "Index Names",
-                },
-              ]
-            }
-            items={
-              Array [
-                Object {
-                  "indices": "index_name_1, index_name_2",
-                  "type": "long",
-                },
-                Object {
-                  "indices": "index_name_3",
-                  "type": "text",
-                },
-              ]
-            }
-          />
-        </span>
-      }
       label="Type"
     >
       <eui-select
@@ -1280,6 +1230,59 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         value="number"
       />
     </eui-form-row>
+    <div>
+      <eui-call-out
+        color="warning"
+        iconType="alert"
+        size="s"
+        title={
+          <FormattedMessage
+            defaultMessage="Field type conflict"
+            id="common.ui.fieldEditor.fieldTypeConflict"
+            values={Object {}}
+          />
+        }
+      >
+        <FormattedMessage
+          defaultMessage="The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:"
+          id="common.ui.fieldEditor.multiTypeLabelDesc"
+          values={Object {}}
+        />
+      </eui-call-out>
+      <eui-spacer
+        size="m"
+      />
+      <eui-basic-table
+        columns={
+          Array [
+            Object {
+              "field": "type",
+              "name": "Type",
+              "width": "100px",
+            },
+            Object {
+              "field": "indices",
+              "name": "Index names",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "indices": "index_name_1, index_name_2",
+              "type": "long",
+            },
+            Object {
+              "indices": "index_name_3",
+              "type": "text",
+            },
+          ]
+        }
+      />
+      <eui-spacer
+        size="m"
+      />
+    </div>
     <eui-form-row
       helpText={
         <FormattedMessage
