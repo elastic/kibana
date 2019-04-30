@@ -54,10 +54,7 @@ export const domainsQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
         }
       }
     }

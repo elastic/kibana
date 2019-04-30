@@ -31,7 +31,7 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       'search',
       buildQuery(options)
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
     const hits: AuthenticationHit[] = getOr(
       [],
@@ -53,18 +53,13 @@ export class ElasticsearchAuthenticationAdapter implements AuthenticationsAdapte
       formatAuthenticationData(options.fields, hit, auditdFieldsMap)
     );
 
-    const hasNextPage = authenticationEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
     const edges = authenticationEdges.splice(beginning, limit - beginning);
     return {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage: activePage ? activePage : 0,
       },
     };
   }

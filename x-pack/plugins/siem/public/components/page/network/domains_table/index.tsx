@@ -36,7 +36,7 @@ interface OwnProps {
   ip: string;
   nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: networkModel.NetworkType;
 }
 

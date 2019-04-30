@@ -39,10 +39,6 @@ export const uncommonProcessesQuery = gql`
         }
         pageInfo {
           activePage
-          endCursor {
-            value
-          }
-          hasNextPage
         }
       }
     }

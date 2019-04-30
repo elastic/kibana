@@ -39,10 +39,7 @@ export const networkDnsQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
         }
       }
     }

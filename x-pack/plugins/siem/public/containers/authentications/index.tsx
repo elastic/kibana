@@ -22,7 +22,7 @@ export interface AuthenticationArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 
@@ -66,6 +66,7 @@ class AuthenticationsComponentQuery extends QueryTemplate<
           },
           pagination: {
             limit,
+            activePage: 0,
             cursor: null,
             tiebreaker: null,
           },
@@ -75,32 +76,33 @@ class AuthenticationsComponentQuery extends QueryTemplate<
         {({ data, loading, fetchMore, refetch }) => {
           const authentications = getOr([], 'source.Authentications.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
-            variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
-            },
-            updateQuery: (prev, { fetchMoreResult }) => {
-              if (!fetchMoreResult) {
-                return prev;
-              }
-              return {
-                ...fetchMoreResult,
-                source: {
-                  ...fetchMoreResult.source,
-                  Authentications: {
-                    ...fetchMoreResult.source.Authentications,
-                    edges: [
-                      ...prev.source.Authentications.edges,
-                      ...fetchMoreResult.source.Authentications.edges,
-                    ],
-                  },
+          this.setFetchMoreOptions((newActivePage: number) => {
+            const cursorStart = newActivePage * limit;
+            return {
+              variables: {
+                pagination: {
+                  cursor: String(cursorStart),
+                  limit: limit + cursorStart,
+                  activePage: newActivePage,
                 },
-              };
-            },
-          }));
+              },
+              updateQuery: (prev, { fetchMoreResult }) => {
+                if (!fetchMoreResult) {
+                  return prev;
+                }
+                return {
+                  ...fetchMoreResult,
+                  source: {
+                    ...fetchMoreResult.source,
+                    Authentications: {
+                      ...fetchMoreResult.source.Authentications,
+                      edges: [...fetchMoreResult.source.Authentications.edges],
+                    },
+                  },
+                };
+              },
+            };
+          });
           return children({
             id,
             refetch,

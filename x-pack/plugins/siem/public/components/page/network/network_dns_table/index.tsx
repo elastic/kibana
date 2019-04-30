@@ -25,7 +25,7 @@ interface OwnProps {
   loading: boolean;
   hasNextPage: boolean;
   nextCursor: string;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   totalCount: number;
   type: networkModel.NetworkType;
 }

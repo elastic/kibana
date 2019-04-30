@@ -27,7 +27,7 @@ export interface NetworkDnsArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 

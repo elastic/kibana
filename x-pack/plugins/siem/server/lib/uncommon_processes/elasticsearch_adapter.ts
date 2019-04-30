@@ -40,7 +40,6 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
     const uncommonProcessesEdges = hits.map(hit =>
       formatUncommonProcessesData(options.fields, hit, { ...processFieldsMap, ...userFieldsMap })
     );
-    const hasNextPage = uncommonProcessesEdges.length === limit + 1;
     const beginning = cursor != null ? parseInt(cursor!, 10) : 0;
     const edges = uncommonProcessesEdges.splice(beginning, limit - beginning);
     return {
@@ -48,7 +47,6 @@ export class ElasticsearchUncommonProcessesAdapter implements UncommonProcessesA
       totalCount,
       pageInfo: {
         activePage: activePage ? activePage : 0,
-        hasNextPage,
       },
     };
   }

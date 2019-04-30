@@ -282,12 +282,6 @@ export interface CursorType {
 
 export interface PageInfo {
   activePage?: number | null;
-
-  startCursor?: CursorType | null;
-
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
 }
 
 export interface EventsData {
@@ -1537,15 +1531,7 @@ export namespace GetAuthenticationsQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }
 
@@ -1677,15 +1663,7 @@ export namespace GetDomainsQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }
 
@@ -1725,17 +1703,7 @@ export namespace GetEventsQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
-
-    tiebreaker?: string | null;
+    activePage?: number | null;
   };
 
   export type Edges = {
@@ -2042,15 +2010,7 @@ export namespace GetHostsTableQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }
 
@@ -2351,15 +2311,7 @@ export namespace GetNetworkDnsQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }
 
@@ -2479,15 +2431,7 @@ export namespace GetNetworkTopNFlowQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }
 
@@ -2726,17 +2670,7 @@ export namespace GetTimelineQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
-
-    tiebreaker?: string | null;
+    activePage?: number | null;
   };
 
   export type Edges = {
@@ -3452,15 +3386,5 @@ export namespace GetUncommonProcessesQuery {
     __typename?: 'PageInfo';
 
     activePage?: number | null;
-
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
   };
 }

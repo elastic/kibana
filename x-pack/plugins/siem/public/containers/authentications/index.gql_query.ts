@@ -51,10 +51,7 @@ export const authenticationsQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
         }
       }
     }

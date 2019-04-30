@@ -105,8 +105,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         loading={loading}
                         data={authentications}
                         totalCount={totalCount}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        activePage={getOr(0, 'activePage', pageInfo)!}
                         loadMore={loadMore}
                         type={type}
                       />

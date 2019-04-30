@@ -72,11 +72,8 @@ const testNetworkTopNFlowSource = {
             }
           }
           pageInfo {
-            endCursor {
-              value
-            }
-            hasNextPage
-          }
+          activePage
+        }
         }
       }
     }
@@ -144,11 +141,8 @@ const testNetworkDnsSource = {
             }
           }
           pageInfo {
-            endCursor {
-              value
-            }
-            hasNextPage
-          }
+          activePage
+        }
         }
       }
     }

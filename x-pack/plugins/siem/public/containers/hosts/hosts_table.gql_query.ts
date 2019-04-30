@@ -41,10 +41,7 @@ export const HostsTableQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
         }
       }
     }

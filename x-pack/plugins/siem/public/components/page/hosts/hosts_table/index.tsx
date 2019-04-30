@@ -38,7 +38,7 @@ interface OwnProps {
   hasNextPage: boolean;
   nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: hostsModel.HostsType;
 }
 

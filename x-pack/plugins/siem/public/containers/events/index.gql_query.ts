@@ -24,11 +24,7 @@ export const eventsQuery = gql`
       ) {
         totalCount
         pageInfo {
-          endCursor {
-            value
-            tiebreaker
-          }
-          hasNextPage
+          activePage
         }
         edges {
           node {

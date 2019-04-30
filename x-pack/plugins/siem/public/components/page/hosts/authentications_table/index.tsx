@@ -26,10 +26,8 @@ import * as i18n from './translations';
 interface OwnProps {
   data: AuthenticationsEdges[];
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: hostsModel.HostsType;
 }
 
@@ -38,7 +36,10 @@ interface AuthenticationTableReduxProps {
 }
 
 interface AuthenticationTableDispatchProps {
-  updateLimitPagination: ActionCreator<{ limit: number; hostsType: hostsModel.HostsType }>;
+  updateLimitPagination: ActionCreator<{
+    limit: number;
+    hostsType: hostsModel.HostsType;
+  }>;
 }
 
 type AuthenticationTableProps = OwnProps &
@@ -65,28 +66,21 @@ const rowItems: ItemsPerRow[] = [
 ];
 
 const AuthenticationTableComponent = pure<AuthenticationTableProps>(
-  ({
-    data,
-    hasNextPage,
-    limit,
-    loading,
-    loadMore,
-    totalCount,
-    nextCursor,
-    updateLimitPagination,
-    type,
-  }) => (
+  ({ data, limit, loading, loadMore, totalCount, updateLimitPagination, type }) => (
     <LoadMoreTable
       columns={getAuthenticationColumns()}
       loadingTitle={i18n.AUTHENTICATIONS}
       loading={loading}
       pageOfItems={data}
-      loadMore={() => loadMore(nextCursor)}
+      loadMore={(newActivePage: number) => loadMore(newActivePage)}
       limit={limit}
-      hasNextPage={hasNextPage}
       itemsPerRow={rowItems}
+      totalCount={totalCount}
       updateLimitPagination={newLimit =>
-        updateLimitPagination({ limit: newLimit, hostsType: type })
+        updateLimitPagination({
+          hostsType: type,
+          limit: newLimit,
+        })
       }
       title={
         <h3>

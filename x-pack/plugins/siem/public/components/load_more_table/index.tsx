@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   EuiBasicTable,
   EuiButtonEmpty,
@@ -17,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { isEmpty, noop, getOr } from 'lodash/fp';
-import React from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
@@ -54,14 +53,7 @@ interface BasicTableProps<T> {
   sorting?: SortingBasicTable;
   totalCount: number;
   title: string | React.ReactElement;
-  updateLimitPagination: (limit: number) => void;
-}
-
-interface BasicTableState {
-  activePage: number;
-  isEmptyTable: boolean;
-  isPopoverOpen: boolean;
-  paginationLoading: boolean;
+  updateLimitPagination: (limit: number, activePage: number) => void;
 }
 
 export interface Columns<T> {
@@ -74,41 +66,48 @@ export interface Columns<T> {
   render?: (item: T) => void;
 }
 
-export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, BasicTableState> {
-  public readonly state = {
-    activePage: 0,
-    isEmptyTable: this.props.pageOfItems.length === 0,
-    isPopoverOpen: false,
-    paginationLoading: false,
-  }
-
-  static getDerivedStateFromProps(props: BasicTableProps<any>, state: BasicTableState) {
-    if (state.isEmptyTable && !isEmpty(props.pageOfItems)) {
-      return {
-        ...state,
-        isEmptyTable: false,
-      };
-    }
-    return null;
-  }
-
-  public render() {
-    const {
-      columns,
-      itemsPerRow,
-      limit,
-      loading,
-      loadingTitle,
-      onChange = noop,
-      pageOfItems,
-      sorting = null,
-      totalCount,
-      title,
-      updateLimitPagination,
-    } = this.props;
-    const { isEmptyTable } = this.state;
+export const LoadMoreTable = memo<BasicTableProps<any>>(
+  ({
+    columns,
+    itemsPerRow,
+    limit,
+    loading,
+    loadingTitle,
+    loadMore,
+    onChange = noop,
+    pageOfItems,
+    sorting = null,
+    totalCount,
+    title,
+    updateLimitPagination,
+  }) => {
+    const [activePage, setActivePage] = useState(0);
+    const [isEmptyTable, setEmptyTable] = useState(pageOfItems.length === 0);
+    const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
 
+    useEffect(
+      () => {
+        return setActivePage(0);
+      },
+      [limit]
+    );
+
+    const onButtonClick = () => {
+      setPopoverOpen(!isPopoverOpen);
+    };
+
+    const closePopover = () => {
+      setPopoverOpen(false);
+    };
+
+    const goToPage = (newActivePage: number) => {
+      setActivePage(newActivePage);
+      loadMore(newActivePage);
+    };
+    if (!isEmpty(pageOfItems) && isEmptyTable) {
+      setEmptyTable(false);
+    }
     if (loading && isEmptyTable) {
       return (
         <EuiPanel>
@@ -128,7 +127,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
         color="text"
         iconType="arrowDown"
         iconSide="right"
-        onClick={this.onButtonClick}
+        onClick={onButtonClick}
       >
         Rows: {limit}
       </EuiButtonEmpty>
@@ -136,13 +135,13 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
 
     const rowItems =
       itemsPerRow &&
-      itemsPerRow.map(item => (
+      itemsPerRow.map((item: ItemsPerRow) => (
         <EuiContextMenuItem
           key={item.text}
           icon={limit === item.numberOfRow ? 'check' : 'empty'}
           onClick={() => {
-            this.closePopover();
-            updateLimitPagination(item.numberOfRow);
+            closePopover();
+            updateLimitPagination(item.numberOfRow, activePage);
           }}
         >
           {item.text}
@@ -195,14 +194,11 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                     id="customizablePagination"
                     data-test-subj="loadingMoreSizeRowPopover"
                     button={button}
-                    isOpen={this.state.isPopoverOpen}
-                    closePopover={this.closePopover}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
                     panelPaddingSize="none"
                   >
-                    <EuiContextMenuPanel
-                      items={rowItems}
-                      data-test-subj="loadingMorePickSizeRow"
-                    />
+                    <EuiContextMenuPanel items={rowItems} data-test-subj="loadingMorePickSizeRow" />
                   </EuiPopover>
                 )}
               </EuiFlexItem>
@@ -216,8 +212,8 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
                   <EuiFlexItem grow={false}>
                     <EuiPagination
                       pageCount={pageCount}
-                      activePage={this.state.activePage}
-                      onPageClick={this.goToPage}
+                      activePage={activePage}
+                      onPageClick={goToPage}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -228,28 +224,7 @@ export class LoadMoreTable<T> extends React.PureComponent<BasicTableProps<T>, Ba
       </EuiPanel>
     );
   }
-
-  private onButtonClick = () => {
-    this.setState({
-      ...this.state,
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
-  };
-
-  private closePopover = () => {
-    this.setState({
-      ...this.state,
-      isPopoverOpen: false,
-    });
-  };
-
-  private goToPage = (activePage: number) => {
-    this.setState({
-      activePage,
-    });
-    this.props.loadMore(activePage);
-  };
-}
+);
 
 export const BasicTableContainer = styled.div`
   display: flex;

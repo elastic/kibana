@@ -60,10 +60,7 @@ export const networkTopNFlowQuery = gql`
           }
         }
         pageInfo {
-          endCursor {
-            value
-          }
-          hasNextPage
+          activePage
         }
       }
     }

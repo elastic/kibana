@@ -311,12 +311,6 @@ export interface CursorType {
 
 export interface PageInfo {
   activePage?: number | null;
-
-  startCursor?: CursorType | null;
-
-  endCursor?: CursorType | null;
-
-  hasNextPage?: boolean | null;
 }
 
 export interface EventsData {
@@ -2458,31 +2452,10 @@ export namespace CursorTypeResolvers {
 export namespace PageInfoResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = PageInfo> {
     activePage?: ActivePageResolver<number | null, TypeParent, Context>;
-
-    startCursor?: StartCursorResolver<CursorType | null, TypeParent, Context>;
-
-    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
-
-    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
   }
 
   export type ActivePageResolver<
     R = number | null,
-    Parent = PageInfo,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type StartCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type EndCursorResolver<
-    R = CursorType | null,
-    Parent = PageInfo,
-    Context = SiemContext
-  > = Resolver<R, Parent, Context>;
-  export type HasNextPageResolver<
-    R = boolean | null,
     Parent = PageInfo,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
