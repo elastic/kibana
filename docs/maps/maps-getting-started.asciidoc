@@ -183,8 +183,9 @@ You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view 
 . Click *Create new dashboard*.
 . Set the time range to *Last 7 days*.
 . Click *Add*.
-
++
 A panel opens with a list of objects that you can add to the dashboard.  You'll add a map and two visualizations.
++
 . Set the *Types* select to *Map*.
 . Click the name of your saved map or the *[Logs] Total Requests and Bytes* map included with the sample data set to add a map to the dashboard.
 . Set the *Types* select to *Visualization*.
@@ -197,21 +198,23 @@ Your dashboard should look like this:
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-==== Interact with visualizations to filter your map
-You can create dashboard filters by interacting with visualizations.
+==== Exploring your data using filters
 
-. Click on the *osx* pie slice in the *[Logs] Visitors by OS* panel.
-  .. The *machine.os.keyword: osx* filter pill is under the dashboard query bar
-  .. All dashboard panels including the map panel are filtered to only show documents where *machine.os.keyword* is *osx*
-. Click the *x* to remove the *machine.os.keyword: osx* filter pill
+You can apply filters to your dashboard to hone in on the data that you are most interested in.
+The dashboard is interactive--you can quickly create filters by clicking on the desired data in the map and visualizations.
+The panels are linked, so that when you apply a filter in one panel, the filter is applied to all panels on the dashboard.
 
-==== Interact with your map to filter visualilizations
-You can create dashboard filters by interacting with the map.
-
-. Move your mouse over the United States vector and click the mouse in the map panel.
+. In the *[Logs] Visitors by OS* visualization, click on the *osx* pie slice.
++
+Both the visualizations and map are filtered to only show documents where *machine.os.keyword* is *osx*.
+The *machine.os.keyword: osx* filter appears in the dashboard query bar.
++
+. Click the *x* to remove the *machine.os.keyword: osx* filter.
+. In the map, click in the United States vector.
 . Click plus image:maps/images/gs_plus_icon.png[] to the right of *iso2* row in the tooltip.
-  .. The *geo.src: US* filter pill is under the dashboard query bar
-  .. All dashboard panels including the visualization panels are filtered to only show documents where *geo.src* is *US*
++
+Both the visualizations and the map are filtered to only show documents where *geo.src* is *US*.
+The *geo.src: US* filter appears in the dashboard query bar.
 +
 Your dashboard should look like this:
 +
