@@ -78,28 +78,33 @@ export class KibanaMigrator {
     // Wait until the plugins have been found an initialized...
     await this.kbnServer.ready();
 
+    const config = server.config();
+    const indexMap = createIndexMap(
+      config.get('kibana.index'),
+      this.kbnServer.uiExports.savedObjectSchemas,
+      this.mappingProperties
+    );
+
     // We can't do anything if the elasticsearch plugin has been disabled.
     if (!server.plugins.elasticsearch) {
       server.log(
         ['warning', 'migration'],
         'The elasticsearch plugin is disabled. Skipping migrations.'
       );
-      return Object.keys(this.indexMap).map(() => ({ status: 'skipped' }));
+      return Object.keys(indexMap).map(() => ({ status: 'skipped' }));
     }
 
     // Wait until elasticsearch is green...
     await server.plugins.elasticsearch.waitUntilReady();
 
-    const config = server.config();
-
-    const migrators = Object.keys(this.indexMap).map(index => {
+    const migrators = Object.keys(indexMap).map(index => {
       return new IndexMigrator({
         batchSize: config.get('migrations.batchSize'),
         callCluster: server.plugins.elasticsearch!.getCluster('admin').callWithInternalUser,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,
-        mappingProperties: this.indexMap[index],
+        mappingProperties: indexMap[index],
         pollInterval: config.get('migrations.pollInterval'),
         scrollDuration: config.get('migrations.scrollDuration'),
         serializer: this.serializer,
@@ -115,9 +120,6 @@ export class KibanaMigrator {
   });
 
   private kbnServer: KbnServer;
-  private indexMap: {
-    [index: string]: MappingProperties;
-  };
   private documentMigrator: VersionedTransformer;
   private mappingProperties: MappingProperties;
   private log: LogFn;
@@ -132,19 +134,12 @@ export class KibanaMigrator {
    */
   constructor({ kbnServer }: { kbnServer: KbnServer }) {
     this.kbnServer = kbnServer;
-    const config = kbnServer.server.config();
 
     this.serializer = new SavedObjectsSerializer(
       new SavedObjectsSchema(kbnServer.uiExports.savedObjectSchemas)
     );
 
     this.mappingProperties = mergeProperties(kbnServer.uiExports.savedObjectMappings || []);
-
-    this.indexMap = createIndexMap(
-      config.get('kibana.index'),
-      kbnServer.uiExports.savedObjectSchemas,
-      this.mappingProperties
-    );
 
     this.log = (meta: string[], message: string) => kbnServer.server.log(meta, message);
 
