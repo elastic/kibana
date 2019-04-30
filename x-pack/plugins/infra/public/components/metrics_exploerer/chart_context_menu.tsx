@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import { MetricsExplorerOptions } from '../../containers/metrics_explorer/use_metrics_explorer_options';
-import { createTSVBLink } from './lib/create_tsvb_link';
+import { createTSVBLink } from './helpers/create_tsvb_link';
 import { SourceQuery } from '../../graphql/types';
 
 interface Props {
