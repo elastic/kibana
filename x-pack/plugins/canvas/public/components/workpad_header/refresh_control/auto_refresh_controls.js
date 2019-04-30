@@ -22,7 +22,7 @@ import {
   EuiFormLabel,
   EuiText,
 } from '@elastic/eui';
-import { timeDurationString } from '../../lib/time_duration';
+import { timeDurationString } from '../../../lib/time_duration';
 
 export class AutoRefreshControls extends Component {
   static propTypes = {

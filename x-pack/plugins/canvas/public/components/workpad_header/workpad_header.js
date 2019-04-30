@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 import { AssetManager } from '../asset_manager';
 import { ElementTypes } from '../element_types';
-import { WorkpadExport } from '../workpad_export';
-import { FullscreenControl } from '../fullscreen_control';
-import { RefreshControl } from '../refresh_control';
+import { RefreshControl } from './refresh_control';
+import { FullscreenControl } from './fullscreen_control';
+import { WorkpadExport } from './workpad_export';
 
 export class WorkpadHeader extends React.PureComponent {
   static propTypes = {

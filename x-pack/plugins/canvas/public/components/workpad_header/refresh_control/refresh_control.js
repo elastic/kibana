@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { Popover } from '../popover';
+import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 
 const getRefreshInterval = (val = '') => {
