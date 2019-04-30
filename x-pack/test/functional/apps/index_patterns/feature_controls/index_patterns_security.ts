@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const globalNav = getService('globalNav');
 
   describe('security', () => {
     before(async () => {
@@ -79,6 +80,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('createIndexPatternButton');
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global index_patterns read-only privileges', () => {
@@ -131,6 +136,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.settings.clickKibanaIndexPatterns();
         await testSubjects.existOrFail('indexPatternTable');
         await testSubjects.missingOrFail('createIndexPatternButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
     });
 
