@@ -309,9 +309,13 @@ export function VisualBuilderPageProvider({ getService, getPageObjects }: FtrPro
      * @returns {Promise<void>}
      * @memberof VisualBuilderPage
      */
-    public async checkTableExisting(): Promise<void> {
+    public async checkTableTabIsPresent(): Promise<void> {
       await testSubjects.existOrFail('visualizationLoader');
-      await testSubjects.existOrFail('noTSVBDataMessage');
+
+      const noDataExists = await testSubjects.exists('noTSVBDataMessage');
+      if (!noDataExists) {
+        await testSubjects.existOrFail('tableView');
+      }
     }
 
     /**

@@ -29,8 +29,8 @@ export default function({ getPageObjects }: FtrProviderContext) {
       beforeEach(async () => {
         await visualBuilder.resetPage('2015-09-22 06:00:00.000', '2015-09-22 11:00:00.000');
         await visualBuilder.clickTable();
-        // table preparation
-        await visualBuilder.checkTableExisting();
+
+        await visualBuilder.checkTableTabIsPresent();
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');
         await visualize.waitForVisualizationRenderingStabilized();
