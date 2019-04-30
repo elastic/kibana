@@ -20,12 +20,11 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { debounce } from 'lodash';
 import { TimeBuckets } from 'ui/time_buckets';
 import dateMath from '@elastic/datemath';
 import chrome from 'ui/chrome';
 import moment from 'moment-timezone';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { VisualizeOptions } from 'plugins/watcher/models/visualize_options';
 import { getWatchVisualizationData } from '../../../lib/api';
@@ -93,28 +92,32 @@ const getTimeBuckets = (watch: any) => {
   return timeBuckets;
 };
 
-const loadWatchVisualizationData = debounce(async (watch: any, setWatchVisualizationData: any) => {
-  const domain = getDomain(watch);
-  const timeBuckets = new TimeBuckets();
-  timeBuckets.setBounds(domain);
-  const interval = timeBuckets.getInterval().expression;
-  const visualizeOptions = new VisualizeOptions({
-    rangeFrom: domain.min,
-    rangeTo: domain.max,
-    interval,
-    timezone: getTimezone(),
-  });
-  const { visualizeData } = (await getWatchVisualizationData(watch, visualizeOptions)) as any;
-  setWatchVisualizationData(visualizeData || {});
-}, 500);
-
 const WatchVisualizationUi = () => {
   const { watch } = useContext(WatchContext);
   const [watchVisualizationData, setWatchVisualizationData] = useState<any>({});
-
+  const [isLoading, setIsLoading] = useState(false);
+  const loadWatchVisualizationData = async () => {
+    const domain = getDomain(watch);
+    const timeBuckets = new TimeBuckets();
+    timeBuckets.setBounds(domain);
+    const interval = timeBuckets.getInterval().expression;
+    const visualizeOptions = new VisualizeOptions({
+      rangeFrom: domain.min,
+      rangeTo: domain.max,
+      interval,
+      timezone: getTimezone(),
+    });
+    setIsLoading(true);
+    const { visualizeData } = (await getWatchVisualizationData(watch, visualizeOptions)) as any;
+    setIsLoading(false);
+    setWatchVisualizationData(visualizeData || {});
+  };
   useEffect(
     () => {
-      loadWatchVisualizationData(watch, setWatchVisualizationData);
+      const handler = setTimeout(loadWatchVisualizationData, 500);
+      return () => {
+        clearTimeout(handler);
+      };
     },
     [watch]
   );
@@ -137,8 +140,24 @@ const WatchVisualizationUi = () => {
     return customSeriesColors;
   };
 
+  if (isLoading) {
+    return (
+      <Fragment>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="xl" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+
+        <EuiSpacer size="m" />
+      </Fragment>
+    );
+  }
+
   const domain = getDomain(watch);
   const watchVisualizationDataKeys = Object.keys(watchVisualizationData);
+
   return (
     <Fragment>
       <EuiSpacer size="m" />
