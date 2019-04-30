@@ -28,6 +28,7 @@ import { PANEL_TYPES } from '../../common/panel_types';
 const MIN_CHART_HEIGHT = 250;
 
 class VisEditorVisualization extends Component {
+  debugger;
   constructor(props) {
     super(props);
     this.state = {
