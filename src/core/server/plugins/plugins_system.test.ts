@@ -24,6 +24,7 @@ import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginWrapper, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
@@ -57,7 +58,10 @@ let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = { elasticsearch: elasticsearchServiceMock.createSetupContract() };
+const setupDeps = {
+  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+  http: httpServiceMock.createSetupContract(),
+};
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
