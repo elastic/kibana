@@ -37,6 +37,7 @@ The first thing to do is to create a new map.
 
 . If you haven't already, open *Maps*.
 . On the maps list page, click *Create map*.
+. Set the time range to *Last 7 days*.
 +
 A new map is created using a base tile layer.
 +
@@ -93,23 +94,24 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 [[maps-add-elasticsearch-layer]]
 === Adding layers for {es} data
 
-You'll add two layers for {es} data. The first layer displays documents, and the
-second layer displays aggregated data.
-The raw documents appear when you zoom in the map to show smaller regions.
-The aggregated data
-appears when you zoom out the map to show larger amounts of the globe.
+To avoid overwhelming the user with too much data at once, you'll add two layers for {es} data.
+
+. The first layer will show aggregated data that represents many documents.
+The layer will appear when the user zooms out the map to show larger amounts of the globe.
+. The second layer will display individual documents.
+The layer will appear when the user zooms in the map to show smaller regions.
 
 ==== Add a vector layer from the document source
 
 This layer displays web log documents as points.
-The layer is only visible when you zoom in the map past zoom level 9.
+The layer is only visible when users zoom in the map past zoom level 9.
 
 . In the map legend, click *Add layer*.
 . Click the *Documents* data source.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Actual Requests`.
-. Set *Min zoom* to 9 and *Max zoom* to 24.
+. Set *Zoom range for layer visibility* to the range [9, 24].
 . Set *Layer transparency* to 1.
 . Set *Fill color* to *#2200ff*.
 . Click *Save & close*.
@@ -136,7 +138,7 @@ image::maps/images/grid_metrics_both.png[]
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Layer name* to `Total Requests and Bytes`.
-. Set *Min zoom* to 0 and *Max zoom* to 9.
+. Set *Zoom range for layer visibility* to the range [0, 9].
 . Set *Layer transparency* to 1.
 
 ===== Configure the aggregation metrics
@@ -166,13 +168,16 @@ Now that your map is complete, you'll want to save it so others can use it.
 . In the application toolbar, click *Save*.
 . Enter `Tutorial web logs map` for the title.
 . Click *Confirm Save*.
++
+You have completed the steps for re-creating the sample data map.
 
-You're now ready to start creating maps using your own data. You might find
-these resources helpful:
+*Next steps:*
 
-* <<heatmap-layer, Heat map layer>>
-* <<tile-layer, Tile layer>>
-* <<vector-layer, Vector layer>>
+* Continue with this tutorial and use your map in a Kibana Dashboard.
+* Create a map using your own data. You might find these resources helpful:
+** <<heatmap-layer, Heat map layer>>
+** <<tile-layer, Tile layer>>
+** <<vector-layer, Vector layer>>
 
 [role="xpack"]
 [[maps-embedding]]
