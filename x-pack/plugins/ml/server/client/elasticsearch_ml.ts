@@ -5,9 +5,6 @@
  */
 
 import { CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-// import { CallClusterWithRequest, CallClusterOptions } from 'src/legacy/core_plugins/elasticsearch';
-// import { Request } from 'src/legacy/server/kbn_server';
-// import { Client as ESClient } from 'elasticsearch';
 
 // TODO
 // this lib should similar to, or inherit from (if possible?) kibana/src/legacy/core_plugins/elasticsearch/index.d.ts
