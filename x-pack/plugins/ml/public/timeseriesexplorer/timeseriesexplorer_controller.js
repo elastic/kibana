@@ -175,8 +175,8 @@ module.controller('MlTimeSeriesExplorerController', function (
         }
         toastNotifications.addWarning(warningText);
       }
-      // TODO: removed -> || mlJobSelectService.groupIds.length -> replace functionality
-      if (selectedJobIds.length > 1) { // TODO: check for group ids in url
+
+      if (selectedJobIds.length > 1) {
       // if more than one job or a group has been loaded from the URL
         if (selectedJobIds.length > 1) {
         // if more than one job, select the first job from the selection.

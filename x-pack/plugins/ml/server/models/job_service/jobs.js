@@ -140,25 +140,41 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
-  async function jobsWithTimerange() {
-    const [JOBS, JOB_STATS] = [0, 1];
+  async function jobsWithTimerange(dateFormatTz) {
+    const [JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS] = [0, 1, 2, 3];
     const jobsMap = {};
     const groups = {};
     const groupsMap = {};
+    const datafeeds = {};
     let jobs = [];
 
     const requests = [
       callWithRequest('ml.jobs'),
       callWithRequest('ml.jobStats'),
+      callWithRequest('ml.datafeeds'),
+      callWithRequest('ml.datafeedStats')
     ];
 
     const results = await Promise.all(requests);
+
+    if (results[DATAFEEDS] && results[DATAFEEDS].datafeeds) {
+      results[DATAFEEDS].datafeeds.forEach((datafeed) => {
+        if (results[DATAFEED_STATS] && results[DATAFEED_STATS].datafeeds) {
+          const datafeedStats = results[DATAFEED_STATS].datafeeds.find(ds => (ds.datafeed_id === datafeed.datafeed_id));
+          if (datafeedStats) {
+            datafeed.state = datafeedStats.state;
+          }
+        }
+        datafeeds[datafeed.job_id] = datafeed;
+      });
+    }
 
     if (results[JOBS] && results[JOBS].jobs) {
       results[JOBS].jobs.forEach((job) => {
         jobsMap[job.job_id] = job.groups || [];
         job.id = job.job_id;
         job.timeRange = {};
+        job.datafeed_config = {};
         // Record stats for job
         if (results[JOB_STATS] && results[JOB_STATS].jobs) {
           const jobStats = results[JOB_STATS].jobs.find(js => (js.job_id === job.job_id));
@@ -171,11 +187,16 @@ export function jobsProvider(callWithRequest) {
             }
           }
         }
+
+        const datafeed = datafeeds[job.job_id];
+        if (datafeed !== undefined) {
+          job.datafeed_config = datafeed;
+        }
+
         jobs.push(job);
       });
 
-      jobs = normalizeTimes(jobs);
-
+      jobs = normalizeTimes(jobs, dateFormatTz);
       jobs.forEach((job) => {
       // Organize job by group
         if (job.groups !== undefined) {

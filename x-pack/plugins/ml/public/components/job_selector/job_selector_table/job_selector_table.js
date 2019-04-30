@@ -136,8 +136,8 @@ export function JobSelectorTable({
         label: 'time range',
         id: 'timerange',
         alignment: LEFT_ALIGNMENT,
-        render: ({ timeRange = {}, state }) => (
-          <TimeRangeBar timerange={timeRange} isRunning={state === 'started'} />
+        render: ({ timeRange = {}, datafeed_config: datafeedConfig }) => (
+          <TimeRangeBar timerange={timeRange} isRunning={datafeedConfig && datafeedConfig.state === 'started'} />
         )
       }
     ];

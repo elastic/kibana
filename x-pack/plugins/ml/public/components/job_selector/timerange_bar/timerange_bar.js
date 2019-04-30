@@ -8,28 +8,19 @@
 
 import React, { Fragment } from 'react';
 import { PropTypes } from 'prop-types';
-import {
-  EuiProgress,
-  EuiToolTip
-} from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
 export function TimeRangeBar({
   isRunning,
   timerange
 }) {
   const style = {
-    width: timerange.widthPx,
-    marginLeft: timerange.fromPx
+    width: (isRunning ? '299px' : timerange.widthPx),
+    marginLeft: (isRunning ? '1px' : timerange.fromPx)
   };
 
-  if (isRunning) {
-    // set to gantt bar width so it shows up
-    return (
-      <div style={{ width: '299px' }}>
-        <EuiProgress size="xs" color="subdued" />
-      </div>
-    );
-  }
+  const className =
+    `mlJobSelector__ganttBar${isRunning ? ' mlJobSelector__ganttBarRunning' : ''}`;
 
   return (
     <EuiToolTip
@@ -40,7 +31,7 @@ export function TimeRangeBar({
         <div className="mlJobSelector__ganttBarBackEdge">
           <div className="mlJobSelector__ganttBarDashed" />
         </div>
-        <div style={style} className="mlJobSelector__ganttBar"/>
+        <div style={style} className={className}/>
       </Fragment>
     </EuiToolTip>
   );

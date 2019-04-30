@@ -22,10 +22,13 @@ export const jobs = {
     });
   },
 
-  jobsWithTimerange() {
+  jobsWithTimerange(dateFormatTz) {
     return http({
       url: `${basePath}/jobs/jobs_with_timerange`,
-      method: 'POST'
+      method: 'POST',
+      data: {
+        dateFormatTz
+      }
     });
   },
 

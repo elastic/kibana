@@ -96,7 +96,8 @@ export function jobServiceRoutes(server, commonRouteConfig) {
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { jobsWithTimerange } = jobServiceProvider(callWithRequest);
-      return jobsWithTimerange()
+      const { dateFormatTz } = request.payload;
+      return jobsWithTimerange(dateFormatTz)
         .catch(resp => {
           wrapError(resp);
         });

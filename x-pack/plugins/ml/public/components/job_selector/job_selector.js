@@ -66,6 +66,7 @@ export function getBadge({ id, icon, isGroup = false, removeId, numJobs }) {
 const BADGE_LIMIT = 10;
 
 export function JobSelector({
+  config,
   globalState,
   jobSelectService,
   selectedJobIds,
@@ -110,8 +111,10 @@ export function JobSelector({
 
   function handleJobSelectionClick() {
     showFlyout();
+    const tzConfig = config.get('dateFormat:tz');
+    const dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
-    ml.jobs.jobsWithTimerange()
+    ml.jobs.jobsWithTimerange(dateFormatTz)
       .then((resp) => {
         setJobs(resp.jobs);
         setGroups(resp.groups);
@@ -375,7 +378,9 @@ export function JobSelector({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiSwitch
-                      label="Apply timerange"
+                      label={i18n.translate('xpack.ml.jobSelector.applyTimerangeSwitchLabel', {
+                        defaultMessage: 'Apply timerange'
+                      })}
                       checked={applyTimeRange}
                       onChange={handleTimerangeSwitchToggle}
                     />

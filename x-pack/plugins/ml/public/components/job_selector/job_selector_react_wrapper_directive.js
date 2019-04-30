@@ -20,7 +20,7 @@ const module = uiModules.get('apps/ml');
 
 
 module
-  .directive('mlJobSelectorReactWrapper', function ($injector, mlJobSelectService) {
+  .directive('mlJobSelectorReactWrapper', function ($injector, config, mlJobSelectService) {
     const globalState = $injector.get('globalState');
 
     function link(scope, element, attrs) {
@@ -32,6 +32,7 @@ module
       }
 
       const props = {
+        config,
         globalState,
         jobSelectService: mlJobSelectService,
         selectedJobIds,

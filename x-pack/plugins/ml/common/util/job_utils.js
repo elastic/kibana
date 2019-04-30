@@ -514,7 +514,7 @@ export function validateGroupNames(job) {
   };
 }
 
-export function normalizeTimes(jobs) {
+export function normalizeTimes(jobs, dateFormatTz) {
   const min = Math.min(...jobs.map(job => +job.timeRange.from));
   const max = Math.max(...jobs.map(job => +job.timeRange.to));
 
@@ -526,8 +526,8 @@ export function normalizeTimes(jobs) {
       job.timeRange.toPx = ganttScale(job.timeRange.to);
       job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
 
-      job.timeRange.toMoment = moment(job.timeRange.to);
-      job.timeRange.fromMoment = moment(job.timeRange.from);
+      job.timeRange.toMoment = moment(job.timeRange.to).tz(dateFormatTz);
+      job.timeRange.fromMoment = moment(job.timeRange.from).tz(dateFormatTz);
 
       const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
       const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
