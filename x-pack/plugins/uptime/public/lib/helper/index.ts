@@ -5,4 +5,3 @@
  */
 
 export { convertMicrosecondsToMilliseconds } from './convert_measurements';
-export { getApmIntegrationAction } from './observability_integrations';
