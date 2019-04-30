@@ -26,7 +26,7 @@ export default function navLinksTests({ getService }: KibanaFunctionalTestDefaul
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
         const uiCapabilities = await uiCapabilitiesService.getWithNavLinks(
-          null,
+          undefined,
           navLinksBuilder.all(),
           scenario.id
         );

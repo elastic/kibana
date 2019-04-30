@@ -17,7 +17,7 @@ export default function catalogueTests({ getService }: KibanaFunctionalTestDefau
   describe('catalogue', () => {
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
-        const uiCapabilities = await uiCapabilitiesService.get(null, scenario.id);
+        const uiCapabilities = await uiCapabilitiesService.get(undefined, scenario.id);
         switch (scenario.id) {
           case 'everything_space': {
             expect(uiCapabilities.success).to.be(true);
