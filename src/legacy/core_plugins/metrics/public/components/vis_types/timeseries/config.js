@@ -337,11 +337,6 @@ const TimeseriesConfig = injectI18n(function (props) {
             store={localStorage || {}}
             showDatePicker={false}
           />
-          {/* <EuiFieldText
-            onChange={handleTextChange('filter')}
-            value={model.filter}
-            fullWidth
-          /> */}
 
         </EuiFormRow>
       </EuiFlexItem>
