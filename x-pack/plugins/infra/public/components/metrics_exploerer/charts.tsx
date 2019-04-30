@@ -16,7 +16,6 @@ import { InfraLoadingPanel } from '../loading';
 import { NoData } from '../empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 import { SourceQuery } from '../../graphql/types';
-import { timeRange } from '../../utils/fixtures/metrics_explorer';
 
 interface Props {
   loading: boolean;
@@ -30,7 +29,7 @@ interface Props {
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = injectI18n(
-  ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter, source }: Props) => {
+  ({ loading, data, onLoadMore, options, onRefetch, intl, onFilter, source, timeRange }: Props) => {
     if (!data && loading) {
       return (
         <InfraLoadingPanel

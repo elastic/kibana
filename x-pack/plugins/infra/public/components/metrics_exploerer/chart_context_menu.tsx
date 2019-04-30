@@ -80,13 +80,20 @@ export const MetricsExplorerChartContextMenu = injectI18n(
     ];
     const handleClose = useCallback(() => setPopoverState(false), []);
     const handleOpen = useCallback(() => setPopoverState(true), []);
+    const actionAriaLabel = intl.formatMessage(
+      {
+        id: 'xpack.infra.metricsExplorer.actionsLabel.aria',
+        defaultMessage: 'Actions for {grouping}',
+      },
+      { grouping: series.id }
+    );
     const actionLabel = intl.formatMessage({
-      id: 'xpack.infra.metricsExplorer.chartActions',
+      id: 'xpack.infra.metricsExplorer.actionsLabel.button',
       defaultMessage: 'Actions',
     });
     const button = (
       <EuiButtonEmpty
-        aria-label={actionLabel}
+        contentProps={{ 'aria-label': actionAriaLabel }}
         onClick={handleOpen}
         size="s"
         iconType="arrowDown"
