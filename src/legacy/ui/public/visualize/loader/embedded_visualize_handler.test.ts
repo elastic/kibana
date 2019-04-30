@@ -27,6 +27,7 @@ import { VisResponseData } from './types';
 import { Inspector } from '../../inspector';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 
+class Foo {}
 describe('EmbeddedVisualizeHandler', () => {
   let handler: any;
   let div: HTMLElement;
@@ -34,7 +35,7 @@ describe('EmbeddedVisualizeHandler', () => {
   const mockVis: Vis = {
     title: 'My Vis',
     // @ts-ignore
-    type: 'foo',
+    type: Foo,
     getAggConfig: () => [],
     _setUiState: () => ({}),
     getUiState: () => new MockState(),

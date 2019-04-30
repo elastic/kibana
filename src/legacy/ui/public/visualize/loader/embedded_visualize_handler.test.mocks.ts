@@ -21,6 +21,13 @@ jest.useFakeTimers();
 
 import { EventEmitter } from 'events';
 
+// mocks for modules called by plugins/visualizations
+jest.mock('ui/vis', () => ({}));
+jest.mock('ui/vis/vis_factory', () => ({}));
+jest.mock('ui/vis/vis_filters', () => ({}));
+
+jest.mock('react-dom');
+
 jest.mock('ui/notify', () => ({
   toastNotifications: jest.fn(),
 }));

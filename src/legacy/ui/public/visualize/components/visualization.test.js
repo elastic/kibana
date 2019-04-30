@@ -19,6 +19,11 @@
 
 jest.useFakeTimers();
 
+// mocks for modules called by plugins/visualizations
+jest.mock('ui/vis', () => ({}));
+jest.mock('ui/vis/vis_factory', () => ({}));
+jest.mock('ui/vis/vis_filters', () => ({}));
+
 import React from 'react';
 import { render, mount } from 'enzyme';
 import { Visualization } from './visualization';
