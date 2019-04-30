@@ -260,8 +260,8 @@ export class AbstractLayer {
     };
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor(options);
+  renderStyleEditor(Style, options) {
+    return Style.renderEditor(options);
   }
 
   getIndexPatternIds() {
