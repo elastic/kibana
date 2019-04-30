@@ -407,7 +407,7 @@ export function updateSourceDataRequest(layerId, newData) {
       newData
     });
 
-    dispatch(refreshStyleMeta(layerId));
+    dispatch(updateStyleMeta(layerId));
   };
 }
 
@@ -428,7 +428,7 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
     //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
     dispatch(setLayerDataLoadErrorStatus(layerId, null));
 
-    dispatch(refreshStyleMeta(layerId));
+    dispatch(updateStyleMeta(layerId));
   };
 }
 
@@ -631,11 +631,11 @@ export function updateLayerStyle(layerId, styleDescriptor) {
     // syncDataForLayer may short circuit if no re-fetch is required:
     // 1) if no re-fetch: setDynamicRanges required to update dynamic range from last request state
     // 2) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
-    dispatch(refreshStyleMeta(layerId));
+    dispatch(updateStyleMeta(layerId));
   };
 }
 
-export function refreshStyleMeta(layerId) {
+export function updateStyleMeta(layerId) {
   return (dispatch, getState) => {
     const layer = getLayerById(layerId, getState());
     if (!layer) {

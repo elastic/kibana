@@ -146,18 +146,20 @@ export class VectorStyle extends AbstractStyle {
       });
 
     let isPointsOnly = true;
-    features.forEach(feature => {
+    for (let i = 0; i < features.length; i++) {
+      const feature = features[i];
       if (isPointsOnly && feature.geometry.type !== 'Point') {
         isPointsOnly = false;
       }
-      scaledFields.forEach(scaledField => {
+      for (let j = 0; j < scaledFields.length; j++) {
+        const scaledField = scaledFields[j];
         const newValue = parseFloat(feature.properties[scaledField.name]);
         if (!isNaN(newValue)) {
           scaledField.min = Math.min(scaledField.min, newValue);
           scaledField.max = Math.max(scaledField.max, newValue);
         }
-      });
-    });
+      }
+    }
 
     const featuresMeta = {
       isPointsOnly
@@ -215,9 +217,7 @@ export class VectorStyle extends AbstractStyle {
 
   _isPropertyDynamic(propertyName) {
     const { type, options } = _.get(this._descriptor, ['properties', propertyName], {});
-    return type === VectorStyle.STYLE_TYPE.DYNAMIC
-      && options.field
-      && options.field.name;
+    return type === VectorStyle.STYLE_TYPE.DYNAMIC && options.field && options.field.name;
   }
 
   _getIsPointsOnly = () => {
