@@ -6,7 +6,7 @@
 import React, { useCallback, useState } from 'react';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import {
-  EuiButtonIcon,
+  EuiButtonEmpty,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
@@ -50,6 +50,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
               id: 'xpack.infra.metricsExplorer.filterByLabel',
               defaultMessage: 'Add Filter',
             }),
+            icon: 'infraApp',
             onClick: handleFilter,
           },
         ]
@@ -58,7 +59,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
     const panels: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
-        title: '',
+        title: 'Actions',
         items: [
           ...filterByItem,
           {
@@ -67,6 +68,7 @@ export const MetricsExplorerChartContextMenu = injectI18n(
               defaultMessage: 'Open in Visualize',
             }),
             href: tsvbUrl,
+            icon: 'visualizeApp',
             disabled: options.metrics.length === 0,
           },
         ],
@@ -74,16 +76,20 @@ export const MetricsExplorerChartContextMenu = injectI18n(
     ];
     const handleClose = useCallback(() => setPopoverState(false), []);
     const handleOpen = useCallback(() => setPopoverState(true), []);
+    const actionLabel = intl.formatMessage({
+      id: 'xpack.infra.metricsExplorer.chartActions',
+      defaultMessage: 'Actions',
+    });
     const button = (
-      <EuiButtonIcon
-        aria-label={intl.formatMessage({
-          id: 'xpack.infra.metricsExplorer.chartOptions',
-          defaultMessage: 'Chart options',
-        })}
-        color="text"
-        iconType="gear"
+      <EuiButtonEmpty
+        aria-label={actionLabel}
         onClick={handleOpen}
-      />
+        size="s"
+        iconType="arrowDown"
+        iconSide="right"
+      >
+        {actionLabel}
+      </EuiButtonEmpty>
     );
     return (
       <EuiPopover

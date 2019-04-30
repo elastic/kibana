@@ -32,7 +32,7 @@ export const MetricsExplorerGroupBy = injectI18n(({ intl, options, onChange, fie
         defaultMessage: 'Everything',
       })}
       fullWidth
-      singleSelection={{ asPlainText: true }}
+      singleSelection={true}
       selectedOptions={(options.groupBy && [{ label: options.groupBy }]) || []}
       options={fields
         .filter(f => f.aggregatable && f.type === 'string')
