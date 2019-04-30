@@ -26,7 +26,7 @@ import { toastNotifications } from 'ui/notify';
 import { Space } from '../../../../../../spaces/common/model/space';
 import { Feature } from '../../../../../../xpack_main/types';
 import { KibanaPrivileges, RawKibanaPrivileges, Role } from '../../../../../common/model';
-import { isReadOnlyRole, isReservedRole, isRoleEnabled } from '../../../../lib/role_utils';
+import { isReadOnlyRole, isReservedRole } from '../../../../lib/role_utils';
 import { deleteRole, saveRole } from '../../../../objects';
 import { ROLES_PATH } from '../../management_urls';
 import { RoleValidationResult, RoleValidator } from '../lib/validate_role';
