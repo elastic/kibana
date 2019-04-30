@@ -17,6 +17,8 @@
  * under the License.
  */
 
-// @ts-ignore will be replaced shortly
-export { setupMocha } from './setup_mocha';
-export { runTests } from './run_tests';
+import { Result } from './result';
+
+export interface Reporter {
+  onComplete?: (results: Result[]) => Promise<void> | void;
+}

@@ -17,12 +17,32 @@
  * under the License.
  */
 
-// originally extracted from mocha https://git.io/v1PGh
+import { Matcher } from './matcher';
+import { Suite } from './suite';
+import { SuiteDefinition } from './suite_definition';
+import { Test, TestFn } from './test';
 
-export const ok = process.platform === 'win32'
-  ? '\u221A'
-  : '✓';
+export class TestDefinition {
+  public tags: string[] = [];
 
-export const err = process.platform === 'win32'
-  ? '\u00D7'
-  : '✖';
+  constructor(
+    public readonly name: string,
+    public readonly fn: TestFn,
+    public readonly parent: SuiteDefinition,
+    public readonly skip: boolean,
+    public readonly exclusive: boolean
+  ) {}
+
+  public finalize(matcher: Matcher, suite: Suite) {
+    const test = new Test(this.name, this.fn, suite, this.skip, this.exclusive, this.tags);
+    const { match, excluded } = matcher.match(this);
+
+    if (match) {
+      suite.tasks.push(test);
+    } else if (excluded) {
+      suite.excludedTasks.push(test);
+    }
+
+    return test;
+  }
+}

@@ -68,7 +68,7 @@ export default async function ({ readConfigFile }) {
       directory: resolve(__dirname, './tmp/screenshots'),
     }
 
-    // more settings, like timeouts, mochaOpts, etc are
+    // more settings, like timeouts, runner, etc are
     // defined in the config schema. See {blob}src/functional_test_runner/lib/config/schema.js[src/functional_test_runner/lib/config/schema.js]
   };
 }

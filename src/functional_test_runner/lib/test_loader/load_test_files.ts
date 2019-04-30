@@ -19,22 +19,45 @@
 
 import { isAbsolute } from 'path';
 
+import { ToolingLog } from '@kbn/dev-utils';
+
 import { loadTracer } from '../load_tracer';
-import { decorateMochaUi } from './decorate_mocha_ui';
+import { ProviderCollection } from '../providers';
+import { createFakeMochaUi } from './create_fake_mocha_ui';
+import { Matcher } from './matcher';
+import { TaskCollector } from './task_collector';
 
-/**
- *  Load an array of test files into a mocha instance
- *
- *  @param  {Mocha} mocha
- *  @param  {ToolingLog} log
- *  @param  {ProviderCollection} providers
- *  @param  {String} path
- *  @return {undefined} - mutates mocha, no return value
- */
-export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, excludePaths, updateBaselines }) => {
+interface Options {
+  testFiles: string[];
+  log: ToolingLog;
+  providers: ProviderCollection;
+  updateBaselines?: boolean;
+  excludePaths?: string[];
+  includeTags?: string[];
+  excludeTags?: string[];
+  grep?: string;
+  invertGrep?: boolean;
+}
+
+export function loadTestFiles({
+  testFiles,
+  log,
+  providers,
+  updateBaselines = false,
+  excludePaths = [],
+  includeTags = [],
+  excludeTags = [],
+  grep,
+  invertGrep = false,
+}: Options) {
   const pendingExcludes = new Set(excludePaths.slice(0));
+  const taskCollection = new TaskCollector();
+  const fakeMochaUi = createFakeMochaUi(taskCollection);
+  for (const [key, value] of Object.entries(fakeMochaUi)) {
+    (global as any)[key] = value;
+  }
 
-  const innerLoadTestFile = (path) => {
+  const innerLoadTestFile = (path: string) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
     }
@@ -48,27 +71,10 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, exclude
     loadTracer(path, `testFile[${path}]`, () => {
       log.verbose('Loading test file %s', path);
 
-      const testModule = require(path); // eslint-disable-line import/no-dynamic-require
-      const testProvider = testModule.__esModule
-        ? testModule.default
-        : testModule;
+      const testModule = require(path);
+      const testProvider = testModule.__esModule ? testModule.default : testModule;
 
-      runTestProvider(testProvider, path); // eslint-disable-line
-    });
-  };
-
-  const runTestProvider = (provider, path) => {
-    if (typeof provider !== 'function') {
-      throw new Error(`Default export of test files must be a function, got ${provider}`);
-    }
-
-    loadTracer(provider, `testProvider[${path}]`, () => {
-      // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
-
-      const context = decorateMochaUi(lifecycle, global);
-      mocha.suite.emit('pre-require', context, path, mocha);
-
-      const returnVal = provider({
+      const returnVal = testProvider({
         loadTestFile: innerLoadTestFile,
         getService: providers.getService,
         getPageObject: providers.getPageObject,
@@ -79,17 +85,33 @@ export const loadTestFiles = ({ mocha, log, lifecycle, providers, paths, exclude
       if (returnVal && typeof returnVal.then === 'function') {
         throw new TypeError('Default export of test files must not be an async function');
       }
-
-      mocha.suite.emit('require', returnVal, path, mocha);
-      mocha.suite.emit('post-require', global, path, mocha);
-
-      context.revertProxiedAssignments();
     });
   };
 
-  paths.forEach(innerLoadTestFile);
+  for (const testFile of testFiles) {
+    innerLoadTestFile(testFile);
+  }
 
   if (pendingExcludes.size) {
-    throw new Error(`After loading all test files some exclude paths were not consumed:${['', ...pendingExcludes].join('\n  -')}`);
+    throw new Error(
+      `After loading all test files some exclude paths were not consumed:${[
+        '',
+        ...pendingExcludes,
+      ].join('\n  -')}`
+    );
   }
-};
+
+  for (const key of Object.keys(fakeMochaUi)) {
+    delete (global as any)[key];
+  }
+
+  return taskCollection.rootSuite.finalize(
+    new Matcher({
+      excludeTags,
+      includeTags,
+      exclusive: taskCollection.rootSuite.hasAnyExclusiveChildren(),
+      grep,
+      invertGrep,
+    })
+  );
+}

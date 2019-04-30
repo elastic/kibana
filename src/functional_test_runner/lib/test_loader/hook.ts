@@ -17,8 +17,12 @@
  * under the License.
  */
 
-export { createLifecycle, Lifecycle } from './lifecycle';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests } from './run_tests';
-export { loadTestFiles, getFullName } from './test_loader';
+import { TestFn } from './test';
+
+export class Hook {
+  constructor(
+    public readonly name: string | undefined,
+    public readonly fn: TestFn,
+    public readonly type: 'before' | 'beforeEach' | 'afterEach' | 'after'
+  ) {}
+}

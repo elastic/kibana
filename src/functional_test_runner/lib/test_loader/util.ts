@@ -17,28 +17,33 @@
  * under the License.
  */
 
-export function createAssignmentProxy(object, interceptor) {
-  const originalValues = new Map();
+export const shareAnyItem = (a: any[], b: any[]) => {
+  if (!a.length || !b.length) {
+    return false;
+  }
 
-  return new Proxy(object, {
-    set(target, property, value) {
-      if (!originalValues.has(property)) {
-        originalValues.set(property, object[property]);
-      }
+  if (a.length < b.length) {
+    [a, b] = [b, a];
+  }
 
-      return Reflect.set(target, property, interceptor(property, value));
-    },
+  return a.some(aItem => b.includes(aItem));
+};
 
-    get(target, property) {
-      if (property === 'revertProxiedAssignments') {
-        return function () {
-          for (const [property, value] of originalValues) {
-            object[property] = value;
-          }
-        };
-      }
+interface Named {
+  name: string | undefined;
+  parent?: Named;
+}
 
-      return Reflect.get(target, property);
-    }
-  });
+export function getFullName(left: Named, right?: Named): string {
+  const leftName = left.parent ? getFullName(left.parent, left) : left.name;
+
+  if (!right || !right.name) {
+    return leftName || '';
+  }
+
+  if (!leftName) {
+    return right.name;
+  }
+
+  return `${leftName} ${right.name}`;
 }

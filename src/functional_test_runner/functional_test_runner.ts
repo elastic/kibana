@@ -18,21 +18,20 @@
  */
 
 import { ToolingLog } from '@kbn/dev-utils';
-import { Suite, Test } from './fake_mocha_types';
 
 import {
   createLifecycle,
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
-  setupMocha,
+  loadTestFiles,
+  getFullName,
   runTests,
   Config,
 } from './lib';
 
 export class FunctionalTestRunner {
   public readonly lifecycle = createLifecycle();
-  private closed = false;
 
   constructor(
     private readonly log: ToolingLog,
@@ -48,8 +47,8 @@ export class FunctionalTestRunner {
     });
   }
 
-  async run() {
-    return await this._run(async (config, coreProviders) => {
+  async runTests() {
+    return await this.exec(async (config, coreProviders) => {
       const providers = new ProviderCollection(this.log, [
         ...coreProviders,
         ...readProviderSpec('Service', config.get('services')),
@@ -58,16 +57,14 @@ export class FunctionalTestRunner {
 
       await providers.loadAll();
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-      await this.lifecycle.trigger('beforeTests');
+      const suite = this.loadRootSuite(config, providers);
       this.log.info('Starting tests');
-
-      return await runTests(this.lifecycle, mocha);
+      return await runTests(this.log, suite, this.lifecycle);
     });
   }
 
   async getTestStats() {
-    return await this._run(async (config, coreProviders) => {
+    return await this.exec(async (config, coreProviders) => {
       // replace the function of custom service providers so that they return
       // promise-like objects which never resolve, essentially disabling them
       // allowing us to load the test files and populate the mocha suites
@@ -85,61 +82,45 @@ export class FunctionalTestRunner {
         ...readStubbedProviderSpec('PageObject', config.get('pageObjects')),
       ]);
 
-      const mocha = await setupMocha(this.lifecycle, this.log, config, providers);
-
-      const countTests = (suite: Suite): number =>
-        suite.suites.reduce((sum, s) => sum + countTests(s), suite.tests.length);
-
+      const suite = this.loadRootSuite(config, providers);
       return {
-        testCount: countTests(mocha.suite),
-        excludedTests: mocha.excludedTests.map((t: Test) => t.fullTitle()),
+        testCount: suite.countTests(),
+        excludedTests: suite.getExcludedTests().map(test => getFullName(test)),
       };
     });
   }
 
-  async _run<T = any>(
-    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
-  ): Promise<T> {
-    let runErrorOccurred = false;
-
-    try {
-      const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
-      this.log.info('Config loaded');
-
-      if (config.get('testFiles').length === 0) {
-        throw new Error('No test files defined.');
-      }
-
-      // base level services that functional_test_runner exposes
-      const coreProviders = readProviderSpec('Service', {
-        lifecycle: () => this.lifecycle,
-        log: () => this.log,
-        config: () => config,
-      });
-
-      return await handler(config, coreProviders);
-    } catch (runError) {
-      runErrorOccurred = true;
-      throw runError;
-    } finally {
-      try {
-        await this.close();
-      } catch (closeError) {
-        if (runErrorOccurred) {
-          this.log.error('failed to close functional_test_runner');
-          this.log.error(closeError);
-        } else {
-          // eslint-disable-next-line no-unsafe-finally
-          throw closeError;
-        }
-      }
-    }
+  private loadRootSuite(config: Config, providers: ProviderCollection) {
+    return loadTestFiles({
+      testFiles: config.get('testFiles'),
+      log: this.log,
+      providers,
+      updateBaselines: config.get('updateBaselines'),
+      excludePaths: config.get('excludeTestFiles'),
+      includeTags: config.get('suiteTags.include'),
+      excludeTags: config.get('suiteTags.exclude'),
+      grep: config.get('runner.grep'),
+      invertGrep: config.get('runner.invert'),
+    });
   }
 
-  async close() {
-    if (this.closed) return;
+  private async exec<T = any>(
+    handler: (config: Config, coreProvider: ReturnType<typeof readProviderSpec>) => Promise<T>
+  ): Promise<T> {
+    const config = await readConfigFile(this.log, this.configFile, this.configOverrides);
+    this.log.info('Config loaded');
 
-    this.closed = true;
-    await this.lifecycle.trigger('cleanup');
+    if (config.get('testFiles').length === 0) {
+      throw new Error('No test files defined.');
+    }
+
+    // base level services that functional_test_runner exposes
+    const coreProviders = readProviderSpec('Service', {
+      lifecycle: () => this.lifecycle,
+      log: () => this.log,
+      config: () => config,
+    });
+
+    return await handler(config, coreProviders);
   }
 }

@@ -17,22 +17,11 @@
  * under the License.
  */
 
-import { bold, dim, green, yellow, red, cyan } from 'chalk';
+import { Hook, Test } from '../test_loader';
 
-export const suite = bold;
-export const pending = cyan;
-export const pass = green;
-export const fail = red;
-
-export function speed(name, txt) {
-  switch (name) {
-    case 'fast':
-      return green(txt);
-    case 'medium':
-      return yellow(txt);
-    case 'slow':
-      return red(txt);
-    default:
-      return dim(txt);
-  }
+export interface Result {
+  task: Test | Hook;
+  success: boolean;
+  ms: number;
+  error?: Error;
 }

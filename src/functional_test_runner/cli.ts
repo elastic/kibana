@@ -31,7 +31,7 @@ run(
       log,
       resolveConfigPath(flags.config as string),
       {
-        mochaOpts: {
+        runner: {
           bail: flags.bail,
           grep: flags.grep || undefined,
           invert: flags.invert,
@@ -45,41 +45,13 @@ run(
       }
     );
 
-    let teardownRun = false;
-    const teardown = async (err?: Error) => {
-      if (teardownRun) return;
-
-      teardownRun = true;
-      if (err) {
-        log.indent(-log.indent());
-        log.error(err);
-        process.exitCode = 1;
-      }
-
-      try {
-        await functionalTestRunner.close();
-      } finally {
-        process.exit();
-      }
-    };
-
-    process.on('unhandledRejection', err => teardown(err));
-    process.on('SIGTERM', () => teardown());
-    process.on('SIGINT', () => teardown());
-
-    try {
-      if (flags['test-stats']) {
-        process.stderr.write(
-          JSON.stringify(await functionalTestRunner.getTestStats(), null, 2) + '\n'
-        );
-      } else {
-        const failureCount = await functionalTestRunner.run();
-        process.exitCode = failureCount ? 1 : 0;
-      }
-    } catch (err) {
-      await teardown(err);
-    } finally {
-      await teardown();
+    if (flags['test-stats']) {
+      process.stderr.write(
+        JSON.stringify(await functionalTestRunner.getTestStats(), null, 2) + '\n'
+      );
+    } else {
+      // TODO: Set process.exitCode based on failure count, abort on ctrl-c
+      await functionalTestRunner.runTests();
     }
   },
   {

@@ -17,8 +17,23 @@
  * under the License.
  */
 
-export { createLifecycle, Lifecycle } from './lifecycle';
-export { readConfigFile, Config } from './config';
-export { readProviderSpec, ProviderCollection, Provider } from './providers';
-export { runTests } from './run_tests';
-export { loadTestFiles, getFullName } from './test_loader';
+import { Suite } from './suite';
+
+export type TestFn = () => Promise<void> | void;
+
+export class Test {
+  constructor(
+    public readonly name: string,
+    public readonly fn: TestFn,
+    public readonly parent: Suite,
+    public readonly skip: boolean,
+    public readonly exclusive: boolean,
+    public readonly tags: string[]
+  ) {}
+
+  public *ittrHooks(type: 'beforeEach' | 'afterEach') {
+    for (let parent: Suite | undefined = this.parent; parent; parent = parent.parent) {
+      yield* parent.ittrOwnHooks(type);
+    }
+  }
+}

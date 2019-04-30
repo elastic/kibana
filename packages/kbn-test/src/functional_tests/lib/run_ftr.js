@@ -22,7 +22,7 @@ import { CliError } from './run_cli';
 
 function createFtr({ configPath, options: { log, bail, grep, updateBaselines, suiteTags } }) {
   return new FunctionalTestRunner(log, configPath, {
-    mochaOpts: {
+    runner: {
       bail: !!bail,
       grep,
     },

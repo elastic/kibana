@@ -17,4 +17,31 @@
  * under the License.
  */
 
-export { MochaReporterProvider } from './reporter';
+/* eslint-env jest */
+
+export default () => {
+  before(jest.fn().mockName('root level before hook'));
+
+  describe('foo', function () {
+    this.tags('foo');
+
+    beforeEach(jest.fn().mockName('hook1'));
+    before('foo+bar', jest.fn().mockName('hook2'));
+
+    it('bar', jest.fn().mockName('test1'));
+
+    describe('baz', function () {
+      this.tags(['b', 'a', 'r', 'bar']);
+
+      it('box', jest.fn().mockName('test2'));
+      afterEach('boxen', jest.fn().mockName('hook3'));
+      it('box2', jest.fn().mockName('test3'));
+    });
+
+    it('bbar', jest.fn().mockName('test4')).tags(['b']);
+
+    after(jest.fn().mockName('after hook'));
+  });
+
+  after(jest.fn().mockName('root level after hook'));
+};

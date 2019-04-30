@@ -94,6 +94,7 @@ export const schema = Joi.object()
 
     timeouts: Joi.object()
       .keys({
+        test: Joi.number().default(INSPECTING ? Infinity : 360000),
         find: Joi.number().default(10000),
         try: Joi.number().default(120000),
         waitFor: Joi.number().default(20000),
@@ -118,14 +119,11 @@ export const schema = Joi.object()
       })
       .default(),
 
-    mochaOpts: Joi.object()
+    runner: Joi.object()
       .keys({
         bail: Joi.boolean().default(false),
         grep: Joi.string(),
         invert: Joi.boolean().default(false),
-        slow: Joi.number().default(30000),
-        timeout: Joi.number().default(INSPECTING ? Infinity : 360000),
-        ui: Joi.string().default('bdd'),
       })
       .default(),
 
