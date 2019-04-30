@@ -4,15 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const rowCount = () => ({
-  name: 'rowCount',
-  aliases: [],
-  type: 'number',
-  context: {
-    types: ['datatable'],
-  },
-  help:
-    'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
-  args: {},
-  fn: context => context.rows.length,
-});
+export function rowCount() {
+  return {
+    name: 'rowCount',
+    aliases: [],
+    type: 'number',
+    context: {
+      types: ['datatable'],
+    },
+    help:
+      'Return the number of rows. Pair with ply to get the count of unique column values, or combinations of unique column values.',
+    args: {},
+    fn: context => context.rows.length,
+  };
+}

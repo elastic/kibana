@@ -41,7 +41,7 @@ export interface PluginsServiceSetup {
 /** @internal */
 export interface PluginsServiceSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
-  http?: HttpServiceSetup;
+  http: HttpServiceSetup;
 }
 
 /** @internal */
@@ -79,6 +79,8 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
       uiPlugins: this.pluginsSystem.uiPlugins(),
     };
   }
+
+  public async start() {}
 
   public async stop() {
     this.log.debug('Stopping plugins service');

@@ -6,17 +6,26 @@
 
 import { Dictionary } from '../../../common/types/common';
 
+import { AggName, FieldName } from './aggregations';
+
 export enum PIVOT_SUPPORTED_GROUP_BY_AGGS {
   DATE_HISTOGRAM = 'date_histogram',
   HISTOGRAM = 'histogram',
   TERMS = 'terms',
 }
 
-type FieldName = string;
+export type PivotSupportedGroupByAggs =
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
+
+export type PivotSupportedGroupByAggsWithInterval =
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.HISTOGRAM
+  | PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM;
 
 interface GroupByConfigBase {
   field: FieldName;
-  formRowLabel: string;
+  aggName: AggName;
 }
 
 // Don't allow an interval of '0', but allow a float interval of '0.1' with a leading zero.
@@ -49,8 +58,8 @@ interface GroupByTerms extends GroupByConfigBase {
   agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS;
 }
 
-type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
-export type PivotGroupByConfig = GroupByConfigWithInterval | GroupByTerms;
+export type GroupByConfigWithInterval = GroupByDateHistogram | GroupByHistogram;
+export type PivotGroupByConfig = GroupByDateHistogram | GroupByHistogram | GroupByTerms;
 export type PivotGroupByConfigDict = Dictionary<PivotGroupByConfig>;
 
 export function groupByConfigHasInterval(arg: any): arg is GroupByConfigWithInterval {
