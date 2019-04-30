@@ -19,21 +19,21 @@
 
 import { Capabilities } from './capabilities_service';
 
-export function mergeCapabilities(sources: Array<Partial<Capabilities>>) {
-  const result: Capabilities = {
-    navLinks: {},
-    management: {},
-    catalogue: {},
-  };
+export const mergeCapabilities = (sources: Array<Partial<Capabilities>>) =>
+  sources.reduce(
+    (capabilities, source) => {
+      Object.entries(source).forEach(([key, value]) => {
+        capabilities[key] = {
+          ...value,
+          ...capabilities[key],
+        };
+      });
 
-  for (const source of sources) {
-    Object.entries(source).forEach(([key, value]) => {
-      result[key] = {
-        ...value,
-        ...result[key],
-      };
-    });
-  }
-
-  return result;
-}
+      return capabilities;
+    },
+    {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+    }
+  );

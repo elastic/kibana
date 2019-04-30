@@ -42,16 +42,12 @@ export class UICapabilitiesService {
   }
 
   public async get(
-    credentials: BasicCredentials | null,
+    credentials?: BasicCredentials,
     spaceId?: string
   ): Promise<GetUICapabilitiesResult> {
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
-    const requestOptions = credentials
-      ? {
-          auth: credentials,
-        }
-      : {};
+    const requestOptions = credentials ? { auth: credentials } : {};
     const response = await this.axios.get(`${spaceUrlPrefix}/app/kibana`, requestOptions);
 
     if (response.status === 302 && response.headers.location === '/') {
@@ -98,7 +94,7 @@ export class UICapabilitiesService {
   }
 
   public async getWithNavLinks(
-    credentials: BasicCredentials | null,
+    credentials?: BasicCredentials,
     navLinks: Record<string, boolean> = {},
     spaceId?: string
   ): Promise<GetUICapabilitiesResult> {
@@ -113,11 +109,7 @@ export class UICapabilitiesService {
 
     const spaceUrlPrefix = spaceId ? `/s/${spaceId}` : '';
     this.log.debug(`requesting ${spaceUrlPrefix}/app/kibana to parse the uiCapabilities`);
-    const requestOptions = credentials
-      ? {
-          auth: credentials,
-        }
-      : {};
+    const requestOptions = credentials ? { auth: credentials } : {};
     const response = await this.axios.post(
       `${spaceUrlPrefix}/api/capabilities`,
       { capabilities: { ...baseCapabilities, navLinks } },

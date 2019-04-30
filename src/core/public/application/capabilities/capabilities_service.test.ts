@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+// @ts-ignore
+import fetchMock from 'fetch-mock/es5/client';
+
 import { InjectedMetadataService } from '../../injected_metadata';
 import { CapabilitiesService } from './capabilities_service';
 import { basePathServiceMock } from '../../base_path/base_path_service.mock';
 
 describe('#start', () => {
-  let mockFetch: jest.Mock<any>;
   const basePath = basePathServiceMock.createStartContract();
   basePath.addToPath.mockImplementation(str => str);
   const injectedMetadata = new InjectedMetadataService({
@@ -37,23 +40,20 @@ describe('#start', () => {
   const apps = [{ id: 'app1' }, { id: 'app2', capabilities: { app2: { feature: true } } }] as any;
 
   beforeEach(() => {
-    mockFetch = jest.spyOn(global as any, 'fetch').mockImplementation((endpoint, options) =>
-      Promise.resolve({
-        status: 200,
-        json: () =>
-          Promise.resolve({ capabilities: JSON.parse((options as any).body).capabilities }),
-      })
-    );
+    fetchMock.post('/api/capabilities', (url: string, options: any) => ({
+      body: options.body,
+      status: 200,
+    }));
   });
 
   afterEach(() => {
-    mockFetch.mockRestore();
+    fetchMock.restore();
   });
 
   it('calls backend API with merged capabilities', async () => {
     const service = new CapabilitiesService();
     await service.start({ apps, basePath, injectedMetadata });
-    expect(mockFetch.mock.calls).toMatchInlineSnapshot(`
+    expect(fetchMock.calls()).toMatchInlineSnapshot(`
 Array [
   Array [
     "/api/capabilities",
@@ -95,11 +95,13 @@ Object {
   });
 
   it('filters available apps based on returned navLinks', async () => {
-    mockFetch.mockImplementationOnce((endpoint, options) =>
-      Promise.resolve({
+    fetchMock.post(
+      '/api/capabilities',
+      (url: string, options: any) => ({
+        body: JSON.stringify({ capabilities: { navLinks: { app1: true, app2: false } } }),
         status: 200,
-        json: () => Promise.resolve({ capabilities: { navLinks: { app1: true, app2: false } } }),
-      })
+      }),
+      { overwriteRoutes: true }
     );
     const service = new CapabilitiesService();
     expect((await service.start({ apps, basePath, injectedMetadata })).availableApps).toEqual([
@@ -107,7 +109,7 @@ Object {
     ]);
   });
 
-  it(`does not allow Capabilities to be modified`, async () => {
+  it('does not allow Capabilities to be modified', async () => {
     const service = new CapabilitiesService();
     const { capabilities } = await service.start({
       apps,

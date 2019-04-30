@@ -156,9 +156,9 @@ export class CoreSystem {
 
   public async start() {
     try {
-      const injectedMetadata = this.injectedMetadata.start();
-      const basePath = this.basePath.start({ injectedMetadata });
-      const i18n = this.i18n.start();
+      const injectedMetadata = await this.injectedMetadata.start();
+      const basePath = await this.basePath.start({ injectedMetadata });
+      const i18n = await this.i18n.start();
       const application = await this.application.start({ basePath, injectedMetadata });
 
       const notificationsTargetDomElement = document.createElement('div');
@@ -171,11 +171,11 @@ export class CoreSystem {
       this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
       this.rootDomElement.appendChild(this.overlayTargetDomElement);
 
-      const notifications = this.notifications.start({
+      const notifications = await this.notifications.start({
         i18n,
         targetDomElement: notificationsTargetDomElement,
       });
-      const overlays = this.overlay.start({ i18n });
+      const overlays = await this.overlay.start({ i18n });
 
       const core: CoreStart = {
         application,

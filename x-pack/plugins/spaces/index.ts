@@ -142,7 +142,7 @@ export const spaces = (kibana: Record<string, any>) =>
         getScopedClient: (request: Request) => {
           const adminCluster = server.plugins.elasticsearch.getCluster('admin');
           const { callWithRequest, callWithInternalUser } = adminCluster;
-          const callCluster = callWithRequest.bind(null, request);
+          const callCluster = callWithRequest.bind(adminCluster, request);
           const { savedObjects } = server;
           const internalRepository = savedObjects.getSavedObjectsRepository(callWithInternalUser);
           const callWithRequestRepository = savedObjects.getSavedObjectsRepository(callCluster);

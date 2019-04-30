@@ -108,6 +108,8 @@ export class CapabilitiesService {
       throw new Error(`Capabilities check failed.`);
     }
 
+    // throw res;
+
     const body = await res.json();
     const capabilities = deepFreeze(body.capabilities as Capabilities);
     const availableApps = apps.filter(app => capabilities.navLinks[app.id]);
