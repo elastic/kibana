@@ -7,13 +7,8 @@
 import moment from 'moment';
 import React from 'react';
 
-import { InfraMetricType, InfraPathType } from '../graphql/types';
-import {
-  InfraFormatterType,
-  InfraOptions,
-  InfraWaffleMapLegendMode,
-  // InfraWaffleMapRuleOperator,
-} from '../lib/lib';
+import { InfraSnapshotMetricType } from '../graphql/types';
+import { InfraFormatterType, InfraOptions, InfraWaffleMapLegendMode } from '../lib/lib';
 import { RendererFunction } from '../utils/typed_react';
 
 const initialState = {
@@ -29,27 +24,8 @@ const initialState = {
     wafflemap: {
       formatter: InfraFormatterType.percent,
       formatTemplate: '{{value}}',
-      metric: { type: InfraMetricType.cpu },
-      path: [{ type: InfraPathType.hosts }],
-      /*
-      legend: {
-        type: InfraWaffleMapLegendMode.step,
-        rules: [
-          {
-            value: 0,
-            color: '#00B3A4',
-            operator: InfraWaffleMapRuleOperator.gte,
-            label: 'Ok',
-          },
-          {
-            value: 10000,
-            color: '#DB1374',
-            operator: InfraWaffleMapRuleOperator.gte,
-            label: 'Over 10,000',
-          },
-        ],
-      },
-      */
+      metric: { type: InfraSnapshotMetricType.cpu },
+      groupBy: [],
       legend: {
         type: InfraWaffleMapLegendMode.gradient,
         rules: [

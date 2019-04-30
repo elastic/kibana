@@ -6,6 +6,7 @@
 
 import * as CSS from 'csstype';
 import { default } from 'react';
+import { IconType } from '@elastic/eui';
 import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
@@ -30,6 +31,16 @@ export interface Capabilities {
 // @public
 export interface CapabilitiesStart {
     getCapabilities: () => Capabilities;
+}
+
+// @public (undocumented)
+export interface ChromeBadge {
+    // (undocumented)
+    iconType?: IconType;
+    // (undocumented)
+    text: string;
+    // (undocumented)
+    tooltip: string;
 }
 
 // @public (undocumented)
