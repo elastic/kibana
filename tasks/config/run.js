@@ -64,13 +64,11 @@ module.exports = function (grunt) {
 
   const NODE = 'node';
   const scriptWithGithubChecks = ({ title, options, cmd, args }) => (
-    process.env.CHECKS_REPORTER_ACTIVE === 'true' &&
-    process.env.JOB_NAME &&
-    process.env.JOB_NAME.indexOf('elastic+kibana+pull-request') !== -1 ? {
-        options,
-        cmd: 'yarn',
-        args: ['run', 'github-checks-reporter', title, cmd, ...args],
-      } : { options, cmd, args });
+    process.env.CHECKS_REPORTER_ACTIVE === 'true' ? {
+      options,
+      cmd: 'yarn',
+      args: ['run', 'github-checks-reporter', title, cmd, ...args],
+    } : { options, cmd, args });
   const gruntTaskWithGithubChecks = (title, task) =>
     scriptWithGithubChecks({
       title,
