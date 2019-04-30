@@ -42,11 +42,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -62,16 +64,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -97,6 +102,7 @@ Suite {
             Hook {
               "fn": [MockFunction hook3],
               "name": "boxen",
+              "timeout": undefined,
               "type": "afterEach",
             },
           ],
@@ -169,11 +175,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -198,11 +206,13 @@ Suite {
         Hook {
           "fn": [MockFunction beforeEach],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction afterEach],
           "name": undefined,
+          "timeout": undefined,
           "type": "afterEach",
         },
       ],
@@ -228,6 +238,7 @@ Suite {
             Hook {
               "fn": [MockFunction after boxTest in baz],
               "name": undefined,
+              "timeout": undefined,
               "type": "after",
             },
           ],
@@ -287,11 +298,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -316,16 +329,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -343,6 +359,7 @@ Suite {
             Hook {
               "fn": [MockFunction hook3],
               "name": "boxen",
+              "timeout": undefined,
               "type": "afterEach",
             },
           ],
@@ -407,11 +424,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -429,6 +448,7 @@ Suite {
             Hook {
               "fn": [MockFunction hook3],
               "name": "boxen",
+              "timeout": undefined,
               "type": "afterEach",
             },
           ],
@@ -476,16 +496,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -527,11 +550,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -566,16 +591,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -593,6 +621,7 @@ Suite {
             Hook {
               "fn": [MockFunction hook3],
               "name": "boxen",
+              "timeout": undefined,
               "type": "afterEach",
             },
           ],
@@ -648,11 +677,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -668,16 +699,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -729,11 +763,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],
@@ -751,6 +787,7 @@ Suite {
             Hook {
               "fn": [MockFunction hook3],
               "name": "boxen",
+              "timeout": undefined,
               "type": "afterEach",
             },
           ],
@@ -798,16 +835,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -878,6 +918,7 @@ Suite {
             Hook {
               "fn": [MockFunction hook3],
               "name": "boxen",
+              "timeout": undefined,
               "type": "afterEach",
             },
           ],
@@ -908,16 +949,19 @@ Suite {
         Hook {
           "fn": [MockFunction hook1],
           "name": undefined,
+          "timeout": undefined,
           "type": "beforeEach",
         },
         Hook {
           "fn": [MockFunction hook2],
           "name": "foo+bar",
+          "timeout": undefined,
           "type": "before",
         },
         Hook {
           "fn": [MockFunction after hook],
           "name": undefined,
+          "timeout": undefined,
           "type": "after",
         },
       ],
@@ -935,11 +979,13 @@ Suite {
     Hook {
       "fn": [MockFunction root level before hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "before",
     },
     Hook {
       "fn": [MockFunction root level after hook],
       "name": undefined,
+      "timeout": undefined,
       "type": "after",
     },
   ],

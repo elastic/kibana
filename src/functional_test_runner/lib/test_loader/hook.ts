@@ -19,10 +19,20 @@
 
 import { TestFn } from './test';
 
+export type HookFn = TestFn;
+
+export type HookType = 'before' | 'beforeEach' | 'afterEach' | 'after';
+
 export class Hook {
+  public timeout?: number;
+
   constructor(
+    public readonly type: HookType,
     public readonly name: string | undefined,
-    public readonly fn: TestFn,
-    public readonly type: 'before' | 'beforeEach' | 'afterEach' | 'after'
+    public readonly fn: HookFn
   ) {}
+
+  setTimeout(ms: number) {
+    this.timeout = ms;
+  }
 }

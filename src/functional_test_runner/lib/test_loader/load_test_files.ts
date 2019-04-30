@@ -23,9 +23,9 @@ import { ToolingLog } from '@kbn/dev-utils';
 
 import { loadTracer } from '../load_tracer';
 import { ProviderCollection } from '../providers';
+import { SuiteDefinition } from './suite_definition';
 import { createFakeMochaUi } from './create_fake_mocha_ui';
 import { Matcher } from './matcher';
-import { TaskCollector } from './task_collector';
 
 interface Options {
   testFiles: string[];
@@ -51,8 +51,8 @@ export function loadTestFiles({
   invertGrep = false,
 }: Options) {
   const pendingExcludes = new Set(excludePaths.slice(0));
-  const taskCollection = new TaskCollector();
-  const fakeMochaUi = createFakeMochaUi(taskCollection);
+  const rootSuite = new SuiteDefinition(undefined, undefined, false, false);
+  const fakeMochaUi = createFakeMochaUi(rootSuite);
   for (const [key, value] of Object.entries(fakeMochaUi)) {
     (global as any)[key] = value;
   }
@@ -71,6 +71,7 @@ export function loadTestFiles({
     loadTracer(path, `testFile[${path}]`, () => {
       log.verbose('Loading test file %s', path);
 
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
       const testModule = require(path);
       const testProvider = testModule.__esModule ? testModule.default : testModule;
 
@@ -105,11 +106,11 @@ export function loadTestFiles({
     delete (global as any)[key];
   }
 
-  return taskCollection.rootSuite.finalize(
+  return rootSuite.finalize(
     new Matcher({
       excludeTags,
       includeTags,
-      exclusive: taskCollection.rootSuite.hasAnyExclusiveChildren(),
+      exclusive: rootSuite.hasAnyExclusiveChildren(),
       grep,
       invertGrep,
     })

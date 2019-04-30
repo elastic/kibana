@@ -24,7 +24,7 @@ export type TestFn = () => Promise<void> | void;
 export class Test {
   constructor(
     public readonly name: string,
-    public readonly fn: TestFn,
+    public readonly fn: TestFn | undefined,
     public readonly parent: Suite,
     public readonly skip: boolean,
     public readonly exclusive: boolean,

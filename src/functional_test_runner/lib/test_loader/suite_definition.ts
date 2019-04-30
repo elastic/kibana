@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Hook } from './hook';
+import { Hook, HookFn } from './hook';
 import { Matcher } from './matcher';
 import { Suite } from './suite';
 import { TestFn } from './test';
@@ -26,29 +26,41 @@ import { TestDefinition } from './test_definition';
 export class SuiteDefinition {
   public readonly tasks: Array<TestDefinition | SuiteDefinition> = [];
   public readonly hooks: Hook[] = [];
-  public tags: string[] = [];
 
   constructor(
     public readonly name: string | undefined,
     public readonly parent: SuiteDefinition | undefined,
     public readonly skip: boolean,
-    public readonly exclusive: boolean
+    public readonly exclusive: boolean,
+    public tags: string[] = []
   ) {}
 
-  public addChildSuite(name: string, skip: boolean, exclusive: boolean) {
-    const suite = new SuiteDefinition(name, this, skip, exclusive);
+  public addChildSuite(name: string, skip: boolean, exclusive: boolean, tags?: string[]) {
+    const suite = new SuiteDefinition(name, this, skip, exclusive, tags);
     this.tasks.push(suite);
     return suite;
   }
 
-  public addTest(name: string, fn: TestFn, skip: boolean, exclusive: boolean) {
-    const test = new TestDefinition(name, fn, this, skip, exclusive);
+  public addTest(
+    name: string,
+    fn: TestFn | undefined,
+    skip: boolean,
+    exclusive: boolean,
+    tags?: string[]
+  ) {
+    const test = new TestDefinition(name, fn, this, skip, exclusive, tags);
     this.tasks.push(test);
     return test;
   }
 
-  public addHook(name: string | undefined, fn: TestFn, type: Hook['type']) {
-    this.hooks.push(new Hook(name, fn, type));
+  public addHook(type: Hook['type'], name: string | undefined, fn: HookFn) {
+    const hook = new Hook(type, name, fn);
+    this.hooks.push(hook);
+    return hook;
+  }
+
+  public setTags(tags: string | string[]) {
+    this.tags = Array.isArray(tags) ? [...tags] : [tags];
   }
 
   public hasAnyExclusiveChildren() {

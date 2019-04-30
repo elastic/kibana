@@ -23,14 +23,15 @@ import { SuiteDefinition } from './suite_definition';
 import { Test, TestFn } from './test';
 
 export class TestDefinition {
-  public tags: string[] = [];
+  private timeout: number;
 
   constructor(
     public readonly name: string,
-    public readonly fn: TestFn,
+    public readonly fn: TestFn | undefined,
     public readonly parent: SuiteDefinition,
     public readonly skip: boolean,
-    public readonly exclusive: boolean
+    public readonly exclusive: boolean,
+    public tags: string[] = []
   ) {}
 
   public finalize(matcher: Matcher, suite: Suite) {
@@ -44,5 +45,13 @@ export class TestDefinition {
     }
 
     return test;
+  }
+
+  public setTags(tags: string | string[]) {
+    this.tags = Array.isArray(tags) ? [...tags] : [tags];
+  }
+
+  public setTimeout(ms: number) {
+    this.timeout = ms;
   }
 }

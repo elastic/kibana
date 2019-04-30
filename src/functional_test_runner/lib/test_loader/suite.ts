@@ -20,6 +20,8 @@
 import { Hook } from './hook';
 import { Test } from './test';
 
+export type SuiteFn = () => void;
+
 export class Suite {
   public readonly tasks: Array<Test | Suite> = [];
   public readonly excludedTasks: Array<Test | Suite> = [];
