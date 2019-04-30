@@ -184,7 +184,7 @@ export const MonitorListComponent = ({
           },
         ]}
         loading={loading}
-        items={(data && data.monitorStatus && data.monitorStatus.monitors) || undefined}
+        items={(data && data.monitorStatus && data.monitorStatus.monitors) || []}
         pagination={monitorListPagination}
       />
     </EuiPanel>
