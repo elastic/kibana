@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { ConnectorService } from './connector_service';
 
 test('automatically registers default connectors', () => {
@@ -25,6 +26,124 @@ describe('register()', () => {
     expect(() =>
       connectorService.register({ id: 'my-connector', executor })
     ).toThrowErrorMatchingInlineSnapshot(`"Connector \\"my-connector\\" is already registered."`);
+  });
+});
+
+describe('get()', () => {
+  test('returns connector', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      async executor() {},
+    });
+    const connector = connectorService.get('my-connector');
+    expect(connector).toMatchInlineSnapshot(`
+Object {
+  "executor": [Function],
+  "id": "my-connector",
+}
+`);
+  });
+
+  test(`throws an error when connector doesn't exist`, () => {
+    const connectorService = new ConnectorService();
+    expect(() => connectorService.get('my-connector')).toThrowErrorMatchingInlineSnapshot(
+      `"Connector \\"my-connector\\" is not registered."`
+    );
+  });
+});
+
+describe('validateParams()', () => {
+  test('should pass when validation not defined', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      async executor() {},
+    });
+    connectorService.validateParams('my-connector', {});
+  });
+
+  test('should validate and pass when params is valid', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async executor() {},
+    });
+    connectorService.validateParams('my-connector', { param1: 'value' });
+  });
+
+  test('should validate and throw error when params is invalid', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async executor() {},
+    });
+    expect(() =>
+      connectorService.validateParams('my-connector', {})
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
+  });
+});
+
+describe('validateConnectorOptions()', () => {
+  test('should pass when validation not defined', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      async executor() {},
+    });
+    connectorService.validateConnectorOptions('my-connector', {});
+  });
+
+  test('should validate and pass when connectorOptions is valid', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      validate: {
+        connectorOptions: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async executor() {},
+    });
+    connectorService.validateConnectorOptions('my-connector', { param1: 'value' });
+  });
+
+  test('should validate and throw error when connectorOptions is invalid', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      validate: {
+        connectorOptions: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async executor() {},
+    });
+    expect(() =>
+      connectorService.validateConnectorOptions('my-connector', {})
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
   });
 });
 
@@ -75,6 +194,48 @@ describe('execute()', () => {
   ],
 }
 `);
+  });
+
+  test('validates params', async () => {
+    const executor = jest.fn().mockResolvedValueOnce({ success: true });
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      executor,
+      validate: {
+        params: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+    });
+    await expect(
+      connectorService.execute('my-connector', {}, {})
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
+  });
+
+  test('validates connectorOptions', async () => {
+    const executor = jest.fn().mockResolvedValueOnce({ success: true });
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      executor,
+      validate: {
+        connectorOptions: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+    });
+    await expect(
+      connectorService.execute('my-connector', {}, {})
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
   });
 
   test('throws error if connector not registered', async () => {

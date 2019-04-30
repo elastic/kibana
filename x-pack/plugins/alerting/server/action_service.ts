@@ -34,6 +34,10 @@ export class ActionService {
     if (!this.connectorService.has(connectorId)) {
       throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
     }
+    this.connectorService.validateConnectorOptions(connectorId, {
+      ...data.connectorOptions,
+      ...data.connectorOptionsSecrets,
+    });
     return await savedObjectsClient.create<any>('action', data, { id });
   }
 

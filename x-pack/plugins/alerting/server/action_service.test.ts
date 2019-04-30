@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import { ConnectorService } from './connector_service';
 import { ActionService } from './action_service';
 
@@ -58,6 +59,33 @@ describe('create()', () => {
   ],
 }
 `);
+  });
+
+  test('validates connectorOptions', async () => {
+    const connectorService = new ConnectorService();
+    const actionService = new ActionService(connectorService);
+    connectorService.register({
+      id: 'my-connector',
+      validate: {
+        connectorOptions: Joi.object()
+          .keys({
+            param1: Joi.string().required(),
+          })
+          .required(),
+      },
+      async executor() {},
+    });
+    await expect(
+      actionService.create(savedObjectsClient, {
+        id: 'my-alert',
+        description: 'my description',
+        connectorId: 'my-connector',
+        connectorOptions: {},
+        connectorOptionsSecrets: {},
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"child \\"param1\\" fails because [\\"param1\\" is required]"`
+    );
   });
 
   test(`throws an error when connector doesn't exist`, async () => {

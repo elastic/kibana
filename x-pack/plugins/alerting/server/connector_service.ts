@@ -9,6 +9,10 @@ import { consoleConnector, emailConnector, slackConnector } from './default_conn
 
 interface Connector {
   id: string;
+  validate?: {
+    params?: any;
+    connectorOptions?: any;
+  };
   executor(connectorOptions: any, params: any): Promise<any>;
 }
 
@@ -21,8 +25,8 @@ export class ConnectorService {
     this.register(emailConnector);
   }
 
-  public has(connectorId: string) {
-    return !!this.connectors[connectorId];
+  public has(id: string) {
+    return !!this.connectors[id];
   }
 
   public register(connector: Connector) {
@@ -32,11 +36,40 @@ export class ConnectorService {
     this.connectors[connector.id] = connector;
   }
 
-  public async execute(connectorId: string, connectorOptions: any, params: any) {
-    const connector = this.connectors[connectorId];
+  public get(id: string) {
+    const connector = this.connectors[id];
     if (!connector) {
-      throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
+      throw Boom.badRequest(`Connector "${id}" is not registered.`);
     }
+    return connector;
+  }
+
+  public validateParams(id: string, params: any) {
+    const connector = this.get(id);
+    const validator = connector.validate && connector.validate.params;
+    if (validator) {
+      const { error } = validator.validate(params);
+      if (error) {
+        throw error;
+      }
+    }
+  }
+
+  public validateConnectorOptions(id: string, connectorOptions: any) {
+    const connector = this.get(id);
+    const validator = connector.validate && connector.validate.connectorOptions;
+    if (validator) {
+      const { error } = validator.validate(connectorOptions);
+      if (error) {
+        throw error;
+      }
+    }
+  }
+
+  public async execute(id: string, connectorOptions: any, params: any) {
+    const connector = this.get(id);
+    this.validateConnectorOptions(id, connectorOptions);
+    this.validateParams(id, params);
     return await connector.executor(connectorOptions, params);
   }
 }

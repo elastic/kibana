@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import slack from 'slack';
 
 interface SlackConnectorOptions {
@@ -24,6 +25,24 @@ type SlackParams = PostMessageParams;
 
 export const slackConnector = {
   id: 'slack',
+  validate: {
+    params: Joi.alternatives()
+      .try(
+        Joi.object()
+          .keys({
+            command: Joi.string().valid('post-message'),
+            message: Joi.string().required(),
+            channel: Joi.string().required(),
+          })
+          .required()
+      )
+      .required(),
+    connectorOptions: Joi.object()
+      .keys({
+        token: Joi.string().required(),
+      })
+      .required(),
+  },
   async executor(connectorOptions: SlackConnectorOptions, params: SlackParams) {
     switch (params.command) {
       case 'post-message':
