@@ -85,15 +85,22 @@ export const TimeSeries = ({
       }
 
       {
-        series.map(({ id, label, bars, lines, ...rest }) => {
+        series.map(({ id, label, bars, lines, data, hideInLegend, xScaleType, yScaleType, groupId, color, stack, points }) => {
           if (bars.show) {
             return (
               <BarSeriesDecorator
                 key={`${id}-${label}`}
-                id={id}
-                label={label}
+                seriesId={id}
+                groupId={groupId}
+                name={label}
+                data={data}
+                hideInLegend={hideInLegend}
                 bars={bars}
-                {...rest}
+                color={color}
+                stack={stack}
+                points={points}
+                xScaleType={xScaleType}
+                yScaleType={yScaleType}
               />
             );
           }
@@ -102,13 +109,22 @@ export const TimeSeries = ({
             return (
               <AreaSeriesDecorator
                 key={`${id}-${label}`}
-                id={id}
-                label={label}
+                seriesId={id}
+                groupId={groupId}
+                name={label}
+                data={data}
+                hideInLegend={hideInLegend}
                 lines={lines}
-                {...rest}
+                color={color}
+                stack={stack}
+                points={points}
+                xScaleType={xScaleType}
+                yScaleType={yScaleType}
               />
             );
           }
+
+          return null;
         })
       }
 

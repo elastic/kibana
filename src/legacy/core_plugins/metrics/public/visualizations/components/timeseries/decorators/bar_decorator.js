@@ -19,57 +19,38 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { getSpecId, getGroupId, ScaleType, BarSeries } from '@elastic/charts';
+import { calculateCustomSeriesColors, getBarSeriesStyles } from '../utils/series_styles';
 
-import {
-  getSpecId,
-  getGroupId,
-  ScaleType,
-  CurveType,
-  BarSeries,
-} from '@elastic/charts';
-
-const getBarSeriesStyles = ({ bars: { show, lineWidth } }) => ({
-  barSeriesStyle: {
-    border: {
-      visible: show,
-      strokeWidth: lineWidth,
-    },
-  },
-  curve: CurveType.LINEAR,
-});
-
-const calculateCustomSeriesColors = (color, specId) => {
-  const map = new Map();
-
-  map.set(
-    {
-      specId,
-      colorValues: [],
-    },
-    color,
-  );
-
-  return map;
-};
-
-export function BarSeriesDecorator(props) {
-  const id = getSpecId(props.label + props.id);
-  const seriesStyle = getBarSeriesStyles(props);
+export function BarSeriesDecorator({
+  seriesId,
+  groupId,
+  name,
+  data,
+  hideInLegend,
+  bars,
+  color,
+  stack,
+  xScaleType,
+  yScaleType,
+}) {
+  const id = getSpecId(seriesId);
+  const seriesStyle = getBarSeriesStyles({ bars });
   const seriesSettings = {
     id,
-    name: props.label,
-    groupId: getGroupId(props.groupId),
-    xScaleType: props.xScaleType,
-    yScaleType: props.yScaleType,
+    groupId: getGroupId(groupId),
+    name,
+    data,
+    hideInLegend,
+    ...seriesStyle,
     xAccessor: 0,
     yAccessors: [1],
     // todo: props.stack ???
-    stackAccessors: props.stack ? [0] : null,
-    data: props.data,
+    stackAccessors: stack ? [0] : null,
+    xScaleType,
+    yScaleType,
     yScaleToDataExtent: false,
-    hideInLegend: props.hideInLegend,
-    customSeriesColors: calculateCustomSeriesColors(props.color, id),
-    ...seriesStyle,
+    customSeriesColors: calculateCustomSeriesColors(color, id),
   };
 
   return (
@@ -78,22 +59,23 @@ export function BarSeriesDecorator(props) {
 }
 
 BarSeriesDecorator.propTypes = {
-  hideInLegend: PropTypes.bool,
-  id: PropTypes.string,
+  seriesId: PropTypes.string.isRequired,
+  groupId: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  data: PropTypes.arrayOf(PropTypes.number).isRequired,
+  hideInLegend: PropTypes.bool.isRequired,
+  bars: PropTypes.shape({
+    fill: PropTypes.number,
+    lineWidth: PropTypes.number,
+    show: PropTypes.boolean,
+  }),
+  color: PropTypes.string.isRequired,
+  stack: PropTypes.bool.isRequired,
   xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
-  groupId: PropTypes.string,
-  label: PropTypes.node,
-  data: PropTypes.array,
-  bars: PropTypes.object,
-  lines: PropTypes.object,
-  color: PropTypes.string,
 };
 
 BarSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,
   xScaleType: ScaleType.Time,
-  bars: {},
-  lines: {},
-  hideInLegend: false,
 };

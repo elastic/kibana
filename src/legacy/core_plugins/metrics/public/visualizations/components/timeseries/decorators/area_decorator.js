@@ -19,71 +19,39 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { getSpecId, getGroupId, ScaleType, AreaSeries } from '@elastic/charts';
+import { calculateCustomSeriesColors, getAreaSeriesStyles } from '../utils/series_styles';
 
-import {
-  getSpecId,
-  getGroupId,
-  ScaleType,
-  CurveType,
-  AreaSeries,
-} from '@elastic/charts';
-
-const getAreaSeriesStyles = ({ points, lines, color }) => ({
-  areaSeriesStyle: {
-    line: {
-      visible: Boolean(lines),
-      stroke: '',
-      strokeWidth: get(lines, 'lineWidth', 0),
-    },
-    area: {
-      fill: color,
-      opacity: get(lines, 'fill', 1),
-      visible: true,
-    },
-    point: {
-      visible: Boolean(points),
-      radius: get(points, 'radius', 0.5),
-      opacity: 1,
-      stroke: '',
-      strokeWidth: get(points, 'lineWidth', 0),
-    },
-  },
-  curve: lines.steps ? CurveType.CURVE_STEP : CurveType.LINEAR,
-});
-
-const calculateCustomSeriesColors = (color, specId) => {
-  const map = new Map();
-
-  map.set(
-    {
-      specId,
-      colorValues: [],
-    },
-    color,
-  );
-
-  return map;
-};
-
-export function AreaSeriesDecorator(props) {
-  const id = getSpecId(props.label + props.id);
-  const seriesStyle = getAreaSeriesStyles(props);
+export function AreaSeriesDecorator({
+  seriesId,
+  groupId,
+  name,
+  data,
+  hideInLegend,
+  lines,
+  color,
+  stack,
+  points,
+  xScaleType,
+  yScaleType,
+}) {
+  const id = getSpecId(seriesId);
+  const seriesStyle = getAreaSeriesStyles({ points, lines, color });
   const seriesSettings = {
     id,
-    name: props.label,
-    groupId: getGroupId(props.groupId),
-    xScaleType: props.xScaleType,
-    yScaleType: props.yScaleType,
+    groupId: getGroupId(groupId),
+    name,
+    data,
+    hideInLegend,
+    ...seriesStyle,
     xAccessor: 0,
     yAccessors: [1],
     // todo: props.stack ???
-    stackAccessors: props.stack ? [0] : null,
-    data: props.data,
+    stackAccessors: stack ? [0] : null,
+    xScaleType,
+    yScaleType,
     yScaleToDataExtent: false,
-    hideInLegend: props.hideInLegend,
-    customSeriesColors: calculateCustomSeriesColors(props.color, id),
-    ...seriesStyle,
+    customSeriesColors: calculateCustomSeriesColors(color, id),
   };
 
   return (
@@ -92,22 +60,29 @@ export function AreaSeriesDecorator(props) {
 }
 
 AreaSeriesDecorator.propTypes = {
-  hideInLegend: PropTypes.bool,
-  id: PropTypes.string,
+  seriesId: PropTypes.string.isRequired,
+  groupId: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+  data: PropTypes.arrayOf(PropTypes.number).isRequired,
+  hideInLegend: PropTypes.bool.isRequired,
+  lines: PropTypes.shape({
+    fill: PropTypes.number,
+    lineWidth: PropTypes.number,
+    show: PropTypes.bool,
+    steps: PropTypes.bool,
+  }).isRequired,
+  color: PropTypes.string.isRequired,
+  stack: PropTypes.bool.isRequired,
+  points: PropTypes.shape({
+    lineWidth: PropTypes.number,
+    radius: PropTypes.number,
+    show: PropTypes.bool,
+  }).isRequired,
   xScaleType: PropTypes.string,
   yScaleType: PropTypes.string,
-  groupId: PropTypes.string,
-  label: PropTypes.node,
-  data: PropTypes.array,
-  bars: PropTypes.object,
-  lines: PropTypes.object,
-  color: PropTypes.string,
 };
 
 AreaSeriesDecorator.defaultProps = {
   yScaleType: ScaleType.Linear,
   xScaleType: ScaleType.Time,
-  bars: {},
-  lines: {},
-  hideInLegend: false,
 };
