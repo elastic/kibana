@@ -355,9 +355,8 @@ export class VectorLayer extends AbstractLayer {
     }
 
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-    let sourceFeatureCollection = sourceResult.featureCollection;
 
-    if (sourceFeatureCollection && sourceFeatureCollection.features.length) {
+    if (sourceResult.featureCollection && sourceResult.featureCollection.features.length) {
       const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
       const activeJoinStates = joinStates.filter(joinState => {
         // Perform join when
@@ -369,11 +368,11 @@ export class VectorLayer extends AbstractLayer {
 
       if (activeJoinStates.length) {
         activeJoinStates.forEach(joinState => {
-          sourceFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
-            sourceFeatureCollection,
+          joinState.join.joinPropertiesToFeatureCollection(
+            sourceResult.featureCollection,
             joinState.propertiesMap);
         });
-        updateSourceData(sourceFeatureCollection);
+        updateSourceData(sourceResult.featureCollection);
       }
     }
   }

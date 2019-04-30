@@ -60,11 +60,6 @@ export class LeftInnerJoin {
         Object.assign(feature.properties,  propertiesMap.get(joinKey));
       }
     });
-
-    //Create a new instance.
-    //We use a reference check to determine whether the feature collection has changed and needs to be updated on the mapbox-gl source.
-    //We need to update because mapbox creates copies of the property object, that it then dispatches on tooltip-events.
-    return { ...featureCollection };
   }
 
   getRightJoinSource() {
