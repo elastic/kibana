@@ -37,9 +37,6 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           connectorOptions: {
             username: 'username',
           },
-          connectorOptionsSecrets: {
-            password: 'password',
-          },
         })
         .expect(200)
         .then((resp: any) => {
@@ -50,7 +47,6 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
               description: 'My action',
               connectorId: 'console',
               connectorOptions: { username: 'username' },
-              connectorOptionsSecrets: { password: 'password' },
             },
             references: [],
             updated_at: resp.body.updated_at,
@@ -70,9 +66,6 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           connectorOptions: {
             username: 'username',
           },
-          connectorOptionsSecrets: {
-            password: 'password',
-          },
         })
         .expect(200);
       await supertest
@@ -84,9 +77,6 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           connectorId: 'console',
           connectorOptions: {
             username: 'username',
-          },
-          connectorOptionsSecrets: {
-            password: 'password',
           },
         })
         .expect(409);
@@ -102,9 +92,6 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
           connectorId: 'unregistered-connector',
           connectorOptions: {
             username: 'username',
-          },
-          connectorOptionsSecrets: {
-            password: 'password',
           },
         })
         .expect(400)

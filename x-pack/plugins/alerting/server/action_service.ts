@@ -13,7 +13,6 @@ interface Action {
   description: string;
   connectorId: string;
   connectorOptions: { [key: string]: any };
-  connectorOptionsSecrets: { [key: string]: any };
 }
 
 interface FireActionOptions {
@@ -34,10 +33,7 @@ export class ActionService {
     if (!this.connectorService.has(connectorId)) {
       throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
     }
-    this.connectorService.validateConnectorOptions(connectorId, {
-      ...data.connectorOptions,
-      ...data.connectorOptionsSecrets,
-    });
+    this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
     return await savedObjectsClient.create<any>('action', data, { id });
   }
 
@@ -47,14 +43,9 @@ export class ActionService {
 
   public async fire({ id, params, savedObjectsClient }: FireActionOptions) {
     const action = await this.get(savedObjectsClient, id);
-    const connectorOptions = Object.assign(
-      {},
-      action.attributes.connectorOptions,
-      action.attributes.connectorOptionsSecrets
-    );
     return await this.connectorService.execute(
       action.attributes.connectorId,
-      connectorOptions,
+      action.attributes.connectorOptions,
       params
     );
   }

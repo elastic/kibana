@@ -26,7 +26,6 @@ interface CreateActionRequest extends Hapi.Request {
     description: string;
     connectorId: string;
     connectorOptions: { [key: string]: any };
-    connectorOptionsSecrets: { [key: string]: any };
   };
 }
 
@@ -41,7 +40,6 @@ export function createActionRoute(server: any) {
           description: Joi.string().required(),
           connectorId: Joi.string().required(),
           connectorOptions: Joi.object(),
-          connectorOptionsSecrets: Joi.object(),
         }),
       },
     },

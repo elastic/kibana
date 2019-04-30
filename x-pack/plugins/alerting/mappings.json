@@ -10,10 +10,6 @@
       "connectorOptions": {
         "dynamic": "true",
         "type": "object"
-      },
-      "connectorOptionsSecrets": {
-        "dynamic": "true",
-        "type": "object"
       }
     }
   }

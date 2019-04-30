@@ -32,7 +32,6 @@ describe('create()', () => {
       description: 'my description',
       connectorId: 'console',
       connectorOptions: {},
-      connectorOptionsSecrets: {},
     });
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
@@ -43,7 +42,6 @@ describe('create()', () => {
       Object {
         "connectorId": "console",
         "connectorOptions": Object {},
-        "connectorOptionsSecrets": Object {},
         "description": "my description",
       },
       Object {
@@ -81,7 +79,6 @@ describe('create()', () => {
         description: 'my description',
         connectorId: 'my-connector',
         connectorOptions: {},
-        connectorOptionsSecrets: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
@@ -97,7 +94,6 @@ describe('create()', () => {
         description: 'my description',
         connectorId: 'unregistered-connector',
         connectorOptions: {},
-        connectorOptionsSecrets: {},
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Connector \\"unregistered-connector\\" is not registered."`
@@ -145,9 +141,6 @@ describe('fire()', () => {
         connectorOptions: {
           foo: true,
         },
-        connectorOptionsSecrets: {
-          bar: false,
-        },
       },
     });
     const result = await actionService.fire({
@@ -161,7 +154,6 @@ describe('fire()', () => {
   "calls": Array [
     Array [
       Object {
-        "bar": false,
         "foo": true,
       },
       Object {
@@ -189,9 +181,6 @@ describe('fire()', () => {
         connectorId: 'non-registered-connector',
         connectorOptions: {
           foo: true,
-        },
-        connectorOptionsSecrets: {
-          bar: false,
         },
       },
     });
