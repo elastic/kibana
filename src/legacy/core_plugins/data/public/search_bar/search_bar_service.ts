@@ -18,6 +18,7 @@
  */
 
 import { SearchBar } from './components/search_bar';
+import { once } from 'lodash';
 
 // @ts-ignore
 import { setupDirective } from './directive';
@@ -32,7 +33,7 @@ export class SearchBarService {
       ui: {
         SearchBar,
       },
-      loadLegacyDirectives: _.once(setupDirective),
+      loadLegacyDirectives: once(setupDirective),
     };
   }
 

@@ -95,6 +95,21 @@ uiRoutes
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
       ),
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.discover.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.discover.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.discover.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save searches',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when('/discover/:id?', {
     template: indexTemplate,

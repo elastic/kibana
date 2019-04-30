@@ -21,7 +21,7 @@ import {
 } from '../../components/shared/Links/url_helpers';
 import { TIMEPICKER_DEFAULTS } from './constants';
 
-export function resolveUrlParams(location: Location, state: IUrlParams = {}) {
+export function resolveUrlParams(location: Location, state: IUrlParams) {
   const {
     processorEvent,
     serviceName,
