@@ -75,15 +75,3 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/telemetry-pri
  * @type {string}
  */
 export const KIBANA_LOCALIZATION_STATS_TYPE = 'localization';
-
-/**
- * List of user roles privileged to read unencrypted telemetry data.
- */
-
-export const TELEMETRY_READ_ROLES = [
-  'superuser',
-  'remote_monitoring_collector',
-  'remote_monitoring_agent',
-];
-
-export const TELEMETRY_NO_READ_ACCESS_ERR_CODE = 'T001';

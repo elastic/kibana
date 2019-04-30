@@ -32,7 +32,7 @@ describe('telemetry', () => {
       config.get.withArgs('xpack.monitoring.enabled').returns(true);
       _getAllStats.withArgs(req, start, end).returns(response);
 
-      expect(await getTelemetry(req, config, start, end, { _getAllStats, _getLocalStats })).to.be(response);
+      expect(await getTelemetry(req, config, start, end, false, { _getAllStats, _getLocalStats })).to.be(response);
 
       expect(config.get.calledOnce).to.be(true);
       expect(_getAllStats.calledOnce).to.be(true);
@@ -46,7 +46,7 @@ describe('telemetry', () => {
       _getAllStats.withArgs(req, start, end).returns([]);
       _getLocalStats.withArgs(req).returns(response);
 
-      expect(await getTelemetry(req, config, start, end, { _getAllStats, _getLocalStats })).to.eql([ response ]);
+      expect(await getTelemetry(req, config, start, end, false, { _getAllStats, _getLocalStats })).to.eql([ response ]);
 
       expect(config.get.calledOnce).to.be(true);
       expect(_getAllStats.calledOnce).to.be(true);
@@ -60,7 +60,7 @@ describe('telemetry', () => {
       _getAllStats.withArgs(req, start, end).returns({ not: 'an array' });
       _getLocalStats.withArgs(req).returns(response);
 
-      expect(await getTelemetry(req, config, start, end, { _getAllStats, _getLocalStats })).to.eql([ response ]);
+      expect(await getTelemetry(req, config, start, end, false, { _getAllStats, _getLocalStats })).to.eql([ response ]);
 
       expect(config.get.calledOnce).to.be(true);
       expect(_getAllStats.calledOnce).to.be(true);
@@ -73,7 +73,7 @@ describe('telemetry', () => {
       config.get.withArgs('xpack.monitoring.enabled').returns(false);
       _getLocalStats.withArgs(req).returns(response);
 
-      expect(await getTelemetry(req, config, start, end, { _getAllStats, _getLocalStats })).to.eql([ response ]);
+      expect(await getTelemetry(req, config, start, end, false, { _getAllStats, _getLocalStats })).to.eql([ response ]);
 
       expect(config.get.calledOnce).to.be(true);
       expect(_getAllStats.calledOnce).to.be(false);

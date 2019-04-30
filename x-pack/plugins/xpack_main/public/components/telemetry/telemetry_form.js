@@ -75,8 +75,6 @@ export class TelemetryForm extends Component {
         {showExample &&
           <OptInExampleFlyout
             fetchTelemetry={() => telemetryOptInProvider.fetchExample()}
-            getErrorCodes={() => telemetryOptInProvider.getErrorCodes()}
-            getReadRoles={() => telemetryOptInProvider.getReadRoles()}
             onClose={this.toggleExample}
           />
         }

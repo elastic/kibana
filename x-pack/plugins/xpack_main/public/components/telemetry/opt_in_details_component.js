@@ -39,14 +39,6 @@ export class OptInExampleFlyout extends Component {
      * Callback function with no parameters that closes this flyout.
      */
     onClose: PropTypes.func.isRequired,
-    /**
-     * returns a list of telemetry error Codes
-     */
-    getErrorCodes: PropTypes.func.isRequired,
-    /**
-     *  returns a list of roles privileged to read unencrypted telemetry data.
-     */
-    getReadRoles: PropTypes.func.isRequired,
   }
 
   constructor(props) {
@@ -59,27 +51,21 @@ export class OptInExampleFlyout extends Component {
   }
 
   componentDidMount() {
-    const { getErrorCodes, fetchTelemetry } = this.props;
-
-    fetchTelemetry()
-      .then(response => this.setState({ data: Array.isArray(response.data) ? response.data : null, isLoading: false }))
+    this.props.fetchTelemetry()
+      .then(response => this.setState({
+        data: Array.isArray(response.data) ? response.data : null,
+        isLoading: false,
+        hasPrivilegeToRead: true,
+      }))
       .catch(err => {
-        let hasPrivilegeToRead = true;
-        try {
-          const errorCodes = getErrorCodes();
-          hasPrivilegeToRead = err.data.code !== errorCodes.noReadAccess;
-        } catch (err) {
-          // swallaw error to show it in UI
-        }
         this.setState({
           isLoading: false,
-          hasPrivilegeToRead,
+          hasPrivilegeToRead: err.status !== 403,
         });
       });
   }
 
   renderBody({ data, isLoading, hasPrivilegeToRead }) {
-    const { getReadRoles } = this.props;
     if (isLoading) {
       return (
         <EuiFlexGroup justifyContent="spaceAround">
@@ -102,8 +88,7 @@ export class OptInExampleFlyout extends Component {
         >
           <FormattedMessage
             id="xpack.main.telemetry.callout.errorUnprivilegedUserDescription"
-            defaultMessage="Only users with the following roles are allowed to see unencrypted cluster statistics: {readRoles}."
-            values={{ readRoles: getReadRoles() }}
+            defaultMessage="You do not have access to see unencrypted cluster statistics."
           />
         </EuiCallOut>
       );

@@ -6,4 +6,4 @@
 
 export { getAllStats } from './monitoring';
 export { getLocalStats } from './local';
-export { encryptTelemetry, canReadUnencryptedTelemetryData } from './encryption';
+export { encryptTelemetry } from './encryption';

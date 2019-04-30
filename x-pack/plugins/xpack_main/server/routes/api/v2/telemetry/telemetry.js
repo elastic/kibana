@@ -6,8 +6,7 @@
 
 import Joi from 'joi';
 import { boomify } from 'boom';
-import { getAllStats, getLocalStats, encryptTelemetry, canReadUnencryptedTelemetryData } from '../../../../lib/telemetry';
-import { TELEMETRY_NO_READ_ACCESS_ERR_CODE } from '../../../../../common/constants';
+import { getAllStats, getLocalStats, encryptTelemetry } from '../../../../lib/telemetry';
 
 /**
  * Get the telemetry data.
@@ -18,7 +17,8 @@ import { TELEMETRY_NO_READ_ACCESS_ERR_CODE } from '../../../../../common/constan
  * @param {String} end The end time of the request.
  * @return {Promise} An array of telemetry objects.
  */
-export async function getTelemetry(req, config, start, end, { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = {}) {
+export async function getTelemetry(req, config, start, end, useRequestUser, statsGetters = {}) {
+  const { _getAllStats = getAllStats, _getLocalStats = getLocalStats } = statsGetters;
   let response = [];
 
   if (config.get('xpack.monitoring.enabled')) {
@@ -32,7 +32,7 @@ export async function getTelemetry(req, config, start, end, { _getAllStats = get
 
   if (!Array.isArray(response) || response.length === 0) {
     // return it as an array for a consistent API response
-    response = [await _getLocalStats(req)];
+    response = [await _getLocalStats(req, useRequestUser)];
   }
 
   return response;
@@ -96,23 +96,17 @@ export function telemetryRoute(server) {
       const unencrypted = req.payload.unencrypted;
 
       try {
-        if (unencrypted) {
-          const { roles } = req.auth.credentials;
-          if(!canReadUnencryptedTelemetryData(roles)) {
-            return h.response({ code: TELEMETRY_NO_READ_ACCESS_ERR_CODE }).code(500);
-          }
-          return getTelemetry(req, config, start, end);
-        }
-
-        const usageData = await getTelemetry(req, config, start, end);
+        const usageData = await getTelemetry(req, config, start, end, unencrypted);
+        if (unencrypted) return usageData;
         return encryptTelemetry(config, usageData);
       } catch (err) {
         if (config.get('env.dev')) {
-        // don't ignore errors when running in dev mode
+          // don't ignore errors when running in dev mode
           return boomify(err, { statusCode: err.status });
         } else {
-        // ignore errors, return empty set and a 200
-          return h.response([]).code(200);
+          const statusCode = unencrypted && err.status === 403 ? 403 : 200;
+          // ignore errors and return empty set
+          return h.response([]).code(statusCode);
         }
       }
     }
