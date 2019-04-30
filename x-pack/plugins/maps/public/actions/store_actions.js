@@ -355,8 +355,8 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
-export function setScrollZoom(scrollZoom) {
-  return { type: SET_SCROLL_ZOOM, scrollZoom };
+export function disableScrollZoom() {
+  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
 }
 
 export function fitToLayerExtent(layerId) {

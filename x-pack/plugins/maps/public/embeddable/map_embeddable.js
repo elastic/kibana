@@ -21,7 +21,7 @@ import {
   replaceLayerList,
   setQuery,
   setRefreshConfig,
-  setScrollZoom,
+  disableScrollZoom,
 } from '../actions/store_actions';
 import {
   DEFAULT_IS_LAYER_TOC_OPEN,
@@ -90,7 +90,7 @@ export class MapEmbeddable extends Embeddable {
   render(domNode, containerState) {
     this._store.dispatch(setReadOnly(true));
     this._store.dispatch(setFilterable(true));
-    this._store.dispatch(setScrollZoom(false));
+    this._store.dispatch(disableScrollZoom());
 
     if (_.has(this._embeddableConfig, 'isLayerTOCOpen')) {
       this._store.dispatch(setIsLayerTOCOpen(this._embeddableConfig.isLayerTOCOpen));
