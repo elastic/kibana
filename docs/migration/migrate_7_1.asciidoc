@@ -22,7 +22,7 @@ coming[7.1.0]
 ==== Time-based internal index patterns queried as wildcard index patterns
 *Details:* Time-based interval index patterns were deprecated in 5.x. In 6.x, 
 you could no longer create time-based interval index patterns, but they continued 
-to function as expected. In 7.0, functionality has changed such that {kib} will 
+to function as expected. In 7.1, functionality has changed such that {kib} will 
 automatically query a time-based interval index pattern as a wildcard index pattern.
 Support for time-based index patterns will be removed in 8.0. You can migrate your 
 time-based index patterns to a wildcard pattern to prepare for this change.
