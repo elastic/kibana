@@ -20,4 +20,4 @@
 import { AggConfig } from 'ui/vis/agg_config';
 
 export function isStringType(type: AggConfig): boolean;
-export const isType: (agg: AggConfig) => any;
+export function isType(type: string): (agg: AggConfig) => boolean;

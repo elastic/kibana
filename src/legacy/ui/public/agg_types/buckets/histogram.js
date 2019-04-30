@@ -26,7 +26,7 @@ import { BucketAggType } from './_bucket_agg_type';
 import { createFilterHistogram } from './create_filter/histogram';
 import { NumberIntervalParamEditor } from '../controls/number_interval';
 import { MinDocCountParamEditor } from '../controls/min_doc_count';
-import { ExtendBoundsParamEditor } from '../controls/extend_bounds';
+import { HasExtendedBoundsParamEditor } from '../controls/has_extended_bounds';
 import { ExtendedBoundsParamEditor } from '../controls/extended_bounds';
 import { i18n } from '@kbn/i18n';
 
@@ -160,9 +160,9 @@ export const histogramBucketAgg = new BucketAggType({
     },
 
     {
-      name: 'extend_bounds',
+      name: 'has_extended_bounds',
       default: false,
-      editorComponent: ExtendBoundsParamEditor,
+      editorComponent: HasExtendedBoundsParamEditor,
       write: () => {},
     },
 
@@ -176,13 +176,13 @@ export const histogramBucketAgg = new BucketAggType({
       write: function (aggConfig, output) {
         const { min, max } = aggConfig.params.extended_bounds;
 
-        if (aggConfig.params.extend_bounds &&
+        if (aggConfig.params.has_extended_bounds &&
           (min || min === 0) &&
           (max || max === 0)) {
           output.params.extended_bounds = { min, max };
         }
       },
-      shouldShow: aggConfig => aggConfig.params.extend_bounds
+      shouldShow: aggConfig => aggConfig.params.has_extended_bounds
     }
   ]
 });

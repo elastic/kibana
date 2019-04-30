@@ -23,7 +23,7 @@ import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { SwitchParamEditor } from './switch';
 import { isType } from '../buckets/migrate_include_exclude_format';
 
-function ExtendBoundsParamEditor(props: AggParamEditorProps<boolean>) {
+function HasExtendedBoundsParamEditor(props: AggParamEditorProps<boolean>) {
   useEffect(
     () => {
       props.setValue(props.value && props.agg.params.min_doc_count);
@@ -49,4 +49,4 @@ function ExtendBoundsParamEditor(props: AggParamEditorProps<boolean>) {
   );
 }
 
-export { ExtendBoundsParamEditor };
+export { HasExtendedBoundsParamEditor };
