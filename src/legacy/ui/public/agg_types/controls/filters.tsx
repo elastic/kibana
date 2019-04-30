@@ -35,7 +35,7 @@ interface FilterValue {
 
 function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<FilterValue[]>) {
   const [filters, setFilters] = useState(() =>
-    value.map(filter => ({ ...filter, id: filter.id || generateId() }))
+    value.map(filter => ({ ...filter, id: generateId() }))
   );
 
   const updateFilters = (updatedFilters: FilterValue[]) => {
@@ -44,8 +44,7 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
     setFilters(updatedFilters);
   };
 
-  const onAddFilter = () =>
-    updateFilters([...filters, { input: { query: '' }, label: '', id: generateId() }]);
+  const onAddFilter = () => updateFilters([...filters, { input: {}, label: '', id: generateId() }]);
   const onRemoveFilter = (id: string) => updateFilters(filters.filter(filter => filter.id !== id));
   const onChangeValue = (id: string, query: string, label: string) =>
     updateFilters(

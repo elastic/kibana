@@ -40,7 +40,7 @@ export const filtersBucketAgg = new BucketAggType({
     {
       name: 'filters',
       editorComponent: FiltersParamEditor,
-      default: [ { input: { query: '' }, label: '' } ],
+      default: [ { input: {}, label: '' } ],
       write: function (aggConfig, output) {
         const inFilters = aggConfig.params.filters;
         if (!_.size(inFilters)) return;
