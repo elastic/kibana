@@ -21,4 +21,4 @@ export { createLifecycle, Lifecycle } from './lifecycle';
 export { readConfigFile, Config } from './config';
 export { readProviderSpec, ProviderCollection, Provider } from './providers';
 export { runTests } from './run_tests';
-export { loadTestFiles, getFullName } from './test_loader';
+export { loadTests, getFullName } from './load_tests';

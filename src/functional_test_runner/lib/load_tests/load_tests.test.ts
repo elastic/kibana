@@ -22,14 +22,14 @@ import { resolve } from 'path';
 import { ToolingLog } from '@kbn/dev-utils';
 
 import { ProviderCollection } from '../providers';
-import { loadTestFiles } from './load_test_files';
+import { loadTests } from './load_tests';
 
 const log = new ToolingLog();
 const providers = new ProviderCollection(log, []);
 
 it('properly collects tests', () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,
@@ -153,7 +153,7 @@ Suite {
 
 it('removes non-exclusive tests when a .only is in use', () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/exclusive.js')],
       providers,
       log,
@@ -284,7 +284,7 @@ Suite {
 
 it(`excludes any test that isn't tagged with includeTags`, () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,
@@ -410,7 +410,7 @@ Suite {
 
 it(`excludes any test tagged with excludeTags`, () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,
@@ -536,7 +536,7 @@ Suite {
 
 it(`filters out tests without grep in there name somewhere`, () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,
@@ -662,7 +662,7 @@ Suite {
 
 it(`inverts the grep pattern`, () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,
@@ -749,7 +749,7 @@ Suite {
 
 it(`trims empty suites`, () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,
@@ -875,7 +875,7 @@ Suite {
 
 it(`returns nothing when all tests are excluded`, () => {
   expect(
-    loadTestFiles({
+    loadTests({
       testFiles: [resolve(__dirname, '__fixtures__/tests.js')],
       providers,
       log,

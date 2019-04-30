@@ -18,7 +18,7 @@
  */
 
 export { Hook } from './hook';
-export { loadTestFiles } from './load_test_files';
+export { loadTests } from './load_tests';
 export { Suite } from './suite';
 export { Test } from './test';
 export { getFullName } from './util';

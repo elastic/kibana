@@ -39,7 +39,7 @@ interface Options {
   invertGrep?: boolean;
 }
 
-export function loadTestFiles({
+export function loadTests({
   testFiles,
   log,
   providers,

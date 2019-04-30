@@ -24,7 +24,7 @@ import {
   readConfigFile,
   ProviderCollection,
   readProviderSpec,
-  loadTestFiles,
+  loadTests,
   getFullName,
   runTests,
   Config,
@@ -91,7 +91,7 @@ export class FunctionalTestRunner {
   }
 
   private loadRootSuite(config: Config, providers: ProviderCollection) {
-    return loadTestFiles({
+    return loadTests({
       testFiles: config.get('testFiles'),
       log: this.log,
       providers,
