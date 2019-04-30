@@ -18,6 +18,8 @@ const MOCHA_OPTIONS = {
 };
 
 export default (gulp, { mocha }) => {
+  const wtf = require('wtfnode');
+
   gulp.task('test', (cb) => {
     const preTasks = ['clean-test'];
     runSequence(preTasks, 'testserver', 'testbrowser', cb);
@@ -30,18 +32,19 @@ export default (gulp, { mocha }) => {
       'common/**/__tests__/**/*.js',
       'server/**/__tests__/**/*.js',
     ].concat(forPluginServerTests());
-    return gulp.src(globs, { read: false })
+    const x1 =  gulp.src(globs, { read: false })
       .pipe(mocha(MOCHA_OPTIONS));
+    wtf.dump();
+    return x1;
   });
 
   gulp.task('testbrowser', () => {
     return getEnabledPlugins().then(plugins => {
-      const wtf = require('wtfnode');
-      const x = pluginHelpers.run('testBrowser', {
+      const x2 = pluginHelpers.run('testBrowser', {
         plugins: plugins.join(','),
       });
       wtf.dump();
-      return x;
+      return x2;
     });
   });
 

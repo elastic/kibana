@@ -185,6 +185,10 @@ export default class KbnServer {
     }
 
     await this.server.stop();
+    setTimeout(() => {
+      require('wtfnode').dump();
+      process.exit(2);
+    }, 1000 * 60 * 60).unref();
   }
 
   async inject(opts) {
