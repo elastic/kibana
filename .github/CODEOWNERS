@@ -11,6 +11,11 @@
 # Canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
 
+# Code
+/x-pack/plugins/code/  @teams/code
+/x-pack/test/functional/apps/code/  @teams/code
+/x-pack/test/api_integration/apis/code/  @teams/code
+
 # Machine Learning
 /x-pack/plugins/ml/  @elastic/ml-ui
 

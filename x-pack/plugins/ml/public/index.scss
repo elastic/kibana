@@ -16,6 +16,7 @@
   @import 'app';
 
   // Sub applications
+  @import 'data_frame/index';
   @import 'datavisualizer/index';
   @import 'explorer/index'; // SASSTODO: This file needs to be rewritten
   @import 'file_datavisualizer/index';

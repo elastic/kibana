@@ -68,6 +68,11 @@ export class CollectorSet {
     return this._collectors.find(c => c.type === type);
   }
 
+  // isUsageCollector(x: UsageCollector | any): x is UsageCollector {
+  isUsageCollector(x) {
+    return x instanceof UsageCollector;
+  }
+
   /*
    * Call a bunch of fetch methods and then do them in bulk
    * @param {CollectorSet} collectorSet - a set of collectors to fetch. Default to all registered collectors
