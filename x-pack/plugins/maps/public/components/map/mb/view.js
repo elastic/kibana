@@ -197,7 +197,11 @@ export class MBMapContainer extends React.Component {
 
   async _initializeMap() {
 
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
+    this._mbMap = await createMbMapInstance({
+      node: this.refs.mapContainer,
+      initialView: this.props.goto ? this.props.goto.center : null,
+      scrollZoom: this.props.scrollZoom
+    });
 
     if (!this._isMounted) {
       return;

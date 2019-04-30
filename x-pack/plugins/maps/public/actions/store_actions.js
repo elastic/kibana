@@ -52,6 +52,7 @@ export const TRACK_CURRENT_LAYER_STATE = 'TRACK_CURRENT_LAYER_STATE';
 export const ROLLBACK_TO_TRACKED_LAYER_STATE = 'ROLLBACK_TO_TRACKED_LAYER_STATE';
 export const REMOVE_TRACKED_LAYER_STATE = 'REMOVE_TRACKED_LAYER_STATE';
 export const SET_TOOLTIP_STATE = 'SET_TOOLTIP_STATE';
+export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
@@ -354,6 +355,9 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
+export function disableScrollZoom() {
+  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
+}
 
 export function fitToLayerExtent(layerId) {
   return async function (dispatch, getState) {
