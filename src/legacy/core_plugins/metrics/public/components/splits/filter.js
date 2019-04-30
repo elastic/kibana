@@ -34,8 +34,8 @@ export const SplitByFilter = props => {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
-  const handleSubmit = (query) => {
-    onChange({ filter: query.query.query });
+  const handleSubmit = query => {
+    onChange({ filter: query.query });
   };
   return (
     <EuiFlexGroup alignItems="center">
@@ -63,7 +63,7 @@ export const SplitByFilter = props => {
           />)}
         >
           <QueryBar
-            query={{ language: 'lucene', query: model.filter }}
+            query={{ language: (model.filter.language ? model.filter.language : 'lucene'), query: model.filter.query }}
             screenTitle={'DataMetricsGroupByFilter'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}
