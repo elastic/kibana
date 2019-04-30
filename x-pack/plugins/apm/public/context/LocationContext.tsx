@@ -5,7 +5,7 @@
  */
 
 import { History, Location } from 'history';
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
 interface Props {
   history: History;
@@ -14,10 +14,18 @@ interface Props {
 const initialLocation = {} as Location;
 
 const LocationContext = createContext(initialLocation);
-const LocationProvider: React.FC<Props> = ({ history, ...props }) => {
+const LocationProvider: React.FC<Props> = ({ history, children }) => {
   const [location, setLocation] = useState(history.location);
-  history.listen(updatedLocation => setLocation(updatedLocation));
-  return <LocationContext.Provider {...props} value={location} />;
+
+  useEffect(() => {
+    const unlisten = history.listen(updatedLocation => {
+      setLocation(updatedLocation);
+    });
+
+    return unlisten;
+  }, []);
+
+  return <LocationContext.Provider children={children} value={location} />;
 };
 
 export { LocationContext, LocationProvider };

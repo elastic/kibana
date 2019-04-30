@@ -31,14 +31,14 @@ describe('Data Frame: Define Pivot Common', () => {
         },
       ],
       aggOptionsData: {
-        'avg(the-field)': { agg: 'avg', field: 'the-field', formRowLabel: 'avg_the-field' },
-        'max(the-field)': { agg: 'max', field: 'the-field', formRowLabel: 'max_the-field' },
-        'min(the-field)': { agg: 'min', field: 'the-field', formRowLabel: 'min_the-field' },
-        'sum(the-field)': { agg: 'sum', field: 'the-field', formRowLabel: 'sum_the-field' },
+        'avg(the-field)': { agg: 'avg', field: 'the-field', aggName: 'avg(the-field)' },
+        'max(the-field)': { agg: 'max', field: 'the-field', aggName: 'max(the-field)' },
+        'min(the-field)': { agg: 'min', field: 'the-field', aggName: 'min(the-field)' },
+        'sum(the-field)': { agg: 'sum', field: 'the-field', aggName: 'sum(the-field)' },
         'value_count(the-field)': {
           agg: 'value_count',
           field: 'the-field',
-          formRowLabel: 'value_count_the-field',
+          aggName: 'value_count(the-field)',
         },
       },
       groupByOptions: [{ label: 'histogram(the-field)' }],
@@ -46,7 +46,7 @@ describe('Data Frame: Define Pivot Common', () => {
         'histogram(the-field)': {
           agg: 'histogram',
           field: 'the-field',
-          formRowLabel: 'histogram_the-field',
+          aggName: 'histogram(the-field)',
           interval: '10',
         },
       },
