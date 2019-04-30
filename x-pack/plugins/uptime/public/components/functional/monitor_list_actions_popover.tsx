@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonIcon,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPopover,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
@@ -58,10 +51,22 @@ export const MonitorListActionsPopover = ({
       id={popoverId}
       isOpen={popoverIsVisible}
     >
-      <EuiFlexGrid>
+      <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiToolTip
-            content={i18n.translate(
+          <IntegrationLink
+            ariaLabel={i18n.translate('xpack.uptime.apmIntegrationAction.description', {
+              defaultMessage: 'Search APM for this monitor',
+              description:
+                'This value is shown to users when they hover over an icon that will take them to the APM app.',
+            })}
+            href={getApmHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
+            iconType="apmApp"
+            message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
+              defaultMessage: 'Check APM for domain',
+              description:
+                'A message explaining that when the user clicks the associated link, it will navigate to the APM app and search for the selected domain',
+            })}
+            tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.observabilityIntegrationsColumn.apmIntegrationLink.tooltip',
               {
                 defaultMessage: 'Click here to check APM for the domain "{domain}".',
@@ -72,29 +77,9 @@ export const MonitorListActionsPopover = ({
                 },
               }
             )}
-            position="top"
-          >
-            <IntegrationLink
-              ariaLabel={i18n.translate('xpack.uptime.apmIntegrationAction.description', {
-                defaultMessage: 'Search APM for this monitor',
-                description:
-                  'This value is shown to users when they hover over an icon that will take them to the APM app.',
-              })}
-              href={getApmHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
-              iconType="apmApp"
-            />
-          </EuiToolTip>
+          />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText size="s">
-            {i18n.translate('xpack.uptime.apmIntegrationAction.text', {
-              defaultMessage: 'Check APM for domain',
-              description:
-                'A message explaining that when the user clicks the associated link, it will navigate to the APM app and search for the selected domain',
-            })}
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGrid>
+      </EuiFlexGroup>
     </EuiPopover>
   );
 };

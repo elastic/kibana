@@ -4,17 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
 
 interface IntegrationLinkProps {
   ariaLabel: string;
   href: string;
   iconType: 'apmApp' | 'infraApp' | 'loggingApp';
+  message: string;
+  tooltipContent: string;
 }
 
-export const IntegrationLink = ({ ariaLabel, href, iconType }: IntegrationLinkProps) => (
-  <EuiLink aria-label={ariaLabel} href={href}>
-    <EuiIcon type={iconType} />
+export const IntegrationLink = ({
+  ariaLabel,
+  href,
+  iconType,
+  message,
+  tooltipContent,
+}: IntegrationLinkProps) => (
+  <EuiLink aria-label={ariaLabel} color="subdued" href={href}>
+    <EuiFlexGroup>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content={tooltipContent} position="top">
+          <EuiIcon type={iconType} />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem>{message}</EuiFlexItem>
+    </EuiFlexGroup>
   </EuiLink>
 );
