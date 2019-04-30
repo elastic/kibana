@@ -13,7 +13,7 @@ import { Dictionary } from '../../../../common/types/common';
 import {
   getDataFramePreviewRequest,
   groupByConfigHasInterval,
-  PivotAggsConfig,
+  PivotAggsConfigDict,
   PivotGroupByConfigDict,
   SimpleQuery,
 } from '../../common';
@@ -35,7 +35,7 @@ export interface UsePivotPreviewDataReturnType {
 export const usePivotPreviewData = (
   indexPattern: IndexPatternContextValue,
   query: SimpleQuery,
-  aggs: PivotAggsConfig[],
+  aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
 ): UsePivotPreviewDataReturnType => {
   const [errorMessage, setErrorMessage] = useState('');
@@ -43,10 +43,11 @@ export const usePivotPreviewData = (
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
 
   if (indexPattern !== null) {
+    const aggsArr = dictionaryToArray(aggs);
     const groupByArr = dictionaryToArray(groupBy);
 
     const getDataFramePreviewData = async () => {
-      if (aggs.length === 0 || groupByArr.length === 0) {
+      if (aggsArr.length === 0 || groupByArr.length === 0) {
         setDataFramePreviewData([]);
         return;
       }
@@ -54,7 +55,7 @@ export const usePivotPreviewData = (
       setErrorMessage('');
       setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
-      const request = getDataFramePreviewRequest(indexPattern.title, query, groupByArr, aggs);
+      const request = getDataFramePreviewRequest(indexPattern.title, query, groupByArr, aggsArr);
 
       try {
         const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(request);
@@ -73,13 +74,10 @@ export const usePivotPreviewData = (
       },
       [
         indexPattern.title,
-        aggs.map(a => `${a.agg} ${a.field} ${a.formRowLabel}`).join(' '),
+        aggsArr.map(a => `${a.agg} ${a.field} ${a.aggName}`).join(' '),
         groupByArr
           .map(
-            g =>
-              `${g.agg} ${g.field} ${g.formRowLabel} ${
-                groupByConfigHasInterval(g) ? g.interval : ''
-              }`
+            g => `${g.agg} ${g.field} ${g.aggName} ${groupByConfigHasInterval(g) ? g.interval : ''}`
           )
           .join(' '),
         query.query_string.query,

@@ -1,49 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`logs error if already set up 1`] = `
-Object {
-  "debug": Array [],
-  "error": Array [],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [
-    Array [
-      "Received new HTTP config after server was started. Config will **not** be applied.",
-    ],
+Array [
+  Array [
+    "Received new HTTP config after server was started. Config will **not** be applied.",
   ],
-}
-`;
-
-exports[`register route handler 1`] = `
-Object {
-  "debug": Array [
-    Array [
-      "registering route handler for [/foo]",
-    ],
-  ],
-  "error": Array [],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [],
-}
-`;
-
-exports[`throws if registering route handler after http server is set up 1`] = `
-Object {
-  "debug": Array [],
-  "error": Array [
-    Array [
-      "Received new router [/foo] after server was started. Router will **not** be applied.",
-    ],
-  ],
-  "fatal": Array [],
-  "info": Array [],
-  "log": Array [],
-  "trace": Array [],
-  "warn": Array [],
-}
+]
 `;

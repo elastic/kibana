@@ -12,12 +12,13 @@ exports[`Data Frame: <GroupByListForm /> Minimal initialization 1`] = `
       item={
         Object {
           "agg": "terms",
+          "aggName": "the-group-by-label",
           "field": "the-group-by-field",
-          "formRowLabel": "the-group-by-label",
         }
       }
       onChange={[Function]}
-      optionsDataId="the-options-data-id"
+      options={Object {}}
+      otherAggNames={Array []}
     />
   </EuiPanel>
   <EuiSpacer

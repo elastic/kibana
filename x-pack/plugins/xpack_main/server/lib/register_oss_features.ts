@@ -116,7 +116,7 @@ const kibanaFeatures: Feature[] = [
           all: [],
           read: [],
         },
-        ui: ['show'],
+        ui: ['show', 'save'],
       },
       read: {
         api: ['console'],
@@ -177,7 +177,7 @@ const kibanaFeatures: Feature[] = [
           all: ['index-pattern'],
           read: [],
         },
-        ui: ['createNew'],
+        ui: ['save'],
       },
       read: {
         savedObject: {

@@ -15,6 +15,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
+  const globalNav = getService('globalNav');
 
   describe('security feature controls', () => {
     before(async () => {
@@ -83,6 +84,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         expect(advancedSetting).to.be('America/Phoenix');
         await browser.refresh();
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global advanced_settings read-only privileges', () => {
@@ -134,6 +139,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`does not allow settings to be changed`, async () => {
         await PageObjects.settings.clickKibanaSettings();
         await PageObjects.settings.expectDisabledAdvancedSetting('dateFormat:tz');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
     });
 

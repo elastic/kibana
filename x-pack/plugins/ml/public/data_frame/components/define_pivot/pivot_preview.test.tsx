@@ -34,13 +34,15 @@ describe('Data Frame: <PivotPreview />', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      formRowLabel: 'the-group-by-label',
+      aggName: 'the-group-by-label',
     };
-    const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', formRowLabel: 'the-agg-label' },
-    ];
+    const agg: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-agg-field',
+      aggName: 'the-agg-label',
+    };
     const props = {
-      aggs,
+      aggs: { 'the-agg-name': agg },
       groupBy: { 'the-group-by-name': groupBy },
       query: getPivotQuery('the-query'),
     };
