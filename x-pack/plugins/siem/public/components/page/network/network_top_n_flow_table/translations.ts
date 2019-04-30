@@ -10,6 +10,12 @@ export const TOP_TALKERS = i18n.translate('xpack.siem.networkTopNFlowTable.title
   defaultMessage: 'Top Talkers',
 });
 
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.networkTopNFlowTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {IP} other {IPs}}`,
+  });
+
 export const SOURCE_IP = i18n.translate('xpack.siem.networkTopNFlowTable.column.sourceIpTitle', {
   defaultMessage: 'Source IP',
 });

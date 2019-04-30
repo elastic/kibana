@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEqual, last } from 'lodash/fp';
 import React from 'react';
@@ -23,7 +22,6 @@ import { networkActions, networkModel, networkSelectors, State } from '../../../
 import { FlowDirectionSelect } from '../../../flow_controls/flow_direction_select';
 import { FlowTargetSelect } from '../../../flow_controls/flow_target_select';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { CountBadge } from '../../index';
 
 import { getNetworkTopNFlowColumns } from './columns';
 import * as i18n from './translations';
@@ -122,48 +120,31 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           type,
           NetworkTopNFlowTableId
         )}
-        loadingTitle={i18n.TOP_TALKERS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
-        limit={limit}
         hasNextPage={hasNextPage}
-        itemsPerRow={rowItems}
-        onChange={this.onChange}
-        updateLimitPagination={newLimit =>
-          updateTopNFlowLimit({ limit: newLimit, networkType: type })
-        }
-        sorting={{ field, direction: topNFlowSort.direction }}
-        title={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <h3>
-                    {i18n.TOP_TALKERS}
-                    <CountBadge color="hollow">{totalCount}</CountBadge>
-                  </h3>
-                </EuiFlexItem>
-                <SelectTypeItem
-                  grow={false}
-                  data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
-                >
-                  <FlowTargetSelect
-                    id={NetworkTopNFlowTableId}
-                    isLoading={loading}
-                    selectedDirection={flowDirection}
-                    selectedTarget={flowTarget}
-                    displayTextOverride={[
-                      i18n.BY_SOURCE_IP,
-                      i18n.BY_DESTINATION_IP,
-                      i18n.BY_CLIENT_IP,
-                      i18n.BY_SERVER_IP,
-                    ]}
-                    updateFlowTargetAction={updateTopNFlowTarget}
-                  />
-                </SelectTypeItem>
-              </EuiFlexGroup>
+        headerCount={totalCount}
+        headerSupplement={
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <SelectTypeItem
+                grow={false}
+                data-test-subj={`${NetworkTopNFlowTableId}-select-flow-target`}
+              >
+                <FlowTargetSelect
+                  id={NetworkTopNFlowTableId}
+                  isLoading={loading}
+                  selectedDirection={flowDirection}
+                  selectedTarget={flowTarget}
+                  displayTextOverride={[
+                    i18n.BY_SOURCE_IP,
+                    i18n.BY_DESTINATION_IP,
+                    i18n.BY_CLIENT_IP,
+                    i18n.BY_SERVER_IP,
+                  ]}
+                  updateFlowTargetAction={updateTopNFlowTarget}
+                />
+              </SelectTypeItem>
             </EuiFlexItem>
+
             <EuiFlexItem grow={false}>
               <FlowDirectionSelect
                 id={NetworkTopNFlowTableId}
@@ -172,6 +153,19 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
               />
             </EuiFlexItem>
           </EuiFlexGroup>
+        }
+        headerTitle={i18n.TOP_TALKERS}
+        headerUnit={i18n.UNIT(totalCount)}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.TOP_TALKERS}
+        loadMore={() => loadMore(nextCursor)}
+        onChange={this.onChange}
+        pageOfItems={data}
+        sorting={{ field, direction: topNFlowSort.direction }}
+        updateLimitPagination={newLimit =>
+          updateTopNFlowLimit({ limit: newLimit, networkType: type })
         }
       />
     );
