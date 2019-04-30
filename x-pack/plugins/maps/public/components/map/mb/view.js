@@ -227,8 +227,12 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('mouseout', () => {
       throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
       this.props.clearMouseCoordinates();
-    });
 
+      this._updateHoverTooltipState.cancel();
+      if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+        this.props.setTooltipState(null);
+      }
+    });
 
     this._mbMap.on('mousemove', this._updateHoverTooltipState);
     this._mbMap.on('click', this._lockTooltip);
