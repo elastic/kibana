@@ -57,52 +57,44 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithFlyoutOptions>
         {({ showFlyout, setFlyoutItem }) => (
           <PageContent key={`${sourceId}-${version}`}>
-            <AutoSizer content>
-              {({ measureRef, content: { width = 0, height = 0 } }) => (
-                <LogPageEventStreamColumn innerRef={measureRef}>
-                  <WithLogPosition>
-                    {({
-                      isAutoReloading,
-                      jumpToTargetPosition,
-                      reportVisiblePositions,
-                      targetPosition,
-                    }) => (
-                      <WithStreamItems initializeOnMount={!isAutoReloading}>
-                        {({
-                          hasMoreAfterEnd,
-                          hasMoreBeforeStart,
-                          isLoadingMore,
-                          isReloading,
-                          items,
-                          lastLoadedTime,
-                          loadNewerEntries,
-                        }) => (
-                          <ScrollableLogTextStreamView
-                            hasMoreAfterEnd={hasMoreAfterEnd}
-                            hasMoreBeforeStart={hasMoreBeforeStart}
-                            height={height}
-                            isLoadingMore={isLoadingMore}
-                            isReloading={isReloading}
-                            isStreaming={isAutoReloading}
-                            items={items}
-                            jumpToTarget={jumpToTargetPosition}
-                            lastLoadedTime={lastLoadedTime}
-                            loadNewerItems={loadNewerEntries}
-                            reportVisibleInterval={reportVisiblePositions}
-                            scale={textScale}
-                            target={targetPosition}
-                            width={width}
-                            wrap={textWrap}
-                            setFlyoutItem={setFlyoutItem}
-                            showFlyout={showFlyout}
-                          />
-                        )}
-                      </WithStreamItems>
-                    )}
-                  </WithLogPosition>
-                </LogPageEventStreamColumn>
+            <WithLogPosition>
+              {({
+                isAutoReloading,
+                jumpToTargetPosition,
+                reportVisiblePositions,
+                targetPosition,
+              }) => (
+                <WithStreamItems initializeOnMount={!isAutoReloading}>
+                  {({
+                    hasMoreAfterEnd,
+                    hasMoreBeforeStart,
+                    isLoadingMore,
+                    isReloading,
+                    items,
+                    lastLoadedTime,
+                    loadNewerEntries,
+                  }) => (
+                    <ScrollableLogTextStreamView
+                      hasMoreAfterEnd={hasMoreAfterEnd}
+                      hasMoreBeforeStart={hasMoreBeforeStart}
+                      isLoadingMore={isLoadingMore}
+                      isReloading={isReloading}
+                      isStreaming={isAutoReloading}
+                      items={items}
+                      jumpToTarget={jumpToTargetPosition}
+                      lastLoadedTime={lastLoadedTime}
+                      loadNewerItems={loadNewerEntries}
+                      reportVisibleInterval={reportVisiblePositions}
+                      scale={textScale}
+                      target={targetPosition}
+                      wrap={textWrap}
+                      setFlyoutItem={setFlyoutItem}
+                      showFlyout={showFlyout}
+                    />
+                  )}
+                </WithStreamItems>
               )}
-            </AutoSizer>
+            </WithLogPosition>
             <AutoSizer content>
               {({ measureRef, content: { width = 0, height = 0 } }) => {
                 return (
@@ -134,13 +126,6 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
     </>
   );
 };
-
-const LogPageEventStreamColumn = euiStyled.div`
-  flex: 1 0 0%;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-`;
 
 const LogPageMinimapColumn = euiStyled.div`
   flex: 1 0 0%;

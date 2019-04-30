@@ -17,7 +17,6 @@ import {
   isTimestampColumn,
 } from '../../../utils/log_entry';
 import { TextScale } from '../../../../common/log_text_scale';
-import { FormattedTime } from '../../formatted_time';
 import { LogTextStreamItemDateField } from './item_date_field';
 import { LogTextStreamItemFieldField } from './item_field_field';
 import { LogTextStreamItemMessageField } from './item_message_field';
@@ -74,9 +73,8 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                 isHovered={isHovered}
                 key={`${columnIndex}`}
                 scale={scale}
-              >
-                <FormattedTime time={column.timestamp} />
-              </LogTextStreamItemDateField>
+                time={column.timestamp}
+              />
             );
           } else if (isMessageColumn(column)) {
             const viewDetailsLabel = intl.formatMessage({
