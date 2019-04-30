@@ -201,8 +201,8 @@ export const SourceConfigurationFlyout = injectI18n(
       {
         id: 'logsTab',
         name: intl.formatMessage({
-          id: 'xpack.infra.sourceConfiguration.sourceConfigurationLogsTabTitle',
-          defaultMessage: 'Log entries',
+          id: 'xpack.infra.sourceConfiguration.sourceConfigurationLogColumnsTabTitle',
+          defaultMessage: 'Log Columns',
         }),
         content: (
           <>
