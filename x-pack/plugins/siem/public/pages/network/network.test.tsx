@@ -16,6 +16,12 @@ import { cloneDeep } from 'lodash/fp';
 
 import * as i18n from './translations';
 
+jest.mock('ui/documentation_links', () => ({
+  documentationLinks: {
+    kibana: 'http://www.example.com',
+  },
+}));
+
 let localSource: Array<{
   request: {};
   result: {
