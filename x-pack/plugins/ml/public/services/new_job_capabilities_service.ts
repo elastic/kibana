@@ -6,7 +6,7 @@
 
 import { IndexPattern } from 'ui/index_patterns';
 import { Field, Aggregation, AggId, FieldId, NewJobCaps } from '../../common/types/fields';
-import { ml } from '../services/ml_api_service';
+import { ml } from './ml_api_service';
 
 // the type property is missing from the official IndexPattern interface
 interface IndexPatternWithType extends IndexPattern {
