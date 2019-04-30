@@ -72,6 +72,21 @@ require('ui/routes')
         ? getSavedSheetBreadcrumbs
         : getCreateBreadcrumbs
     ),
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.timelion.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('timelion.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('timelion.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save Timelion sheets',
+        }),
+        iconType: 'glasses'
+      };
+    },
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
