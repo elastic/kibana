@@ -158,7 +158,7 @@ const tooManyBucketsTooltip = (
 const tooLargeBucketsTooltip = (
   <FormattedMessage
     id="common.ui.aggTypes.timeInterval.createsTooLargeBucketsTooltip"
-    defaultMessage="This interval creates buckets that are too large to show in the selected time range, so it has been scaled up."
+    defaultMessage="This interval creates buckets that are too large to show in the selected time range, so it has been scaled down."
   />
 );
 const selectOptionHelpText = (
