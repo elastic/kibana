@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { InfraNodeType } from '../../../graphql/types';
-// TODO: Make NODE_REQUEST_PARTITION_SIZE configurable from kibana.yml
-export const NODE_REQUEST_PARTITION_SIZE = 75;
-export const NODE_REQUEST_PARTITION_FACTOR = 1.2;
+import { InfraNodeType } from '../graphql/types';
+
+// Used for metadata and snapshots resolvers to find the field that contains
+// a displayable name of a node.
+// Intentionally not the same as xpack.infra.sources.default.fields.{host,container,pod}.
+// TODO: consider moving this to source configuration too.
 export const NAME_FIELDS = {
   [InfraNodeType.host]: 'host.name',
   [InfraNodeType.pod]: 'kubernetes.pod.name',
