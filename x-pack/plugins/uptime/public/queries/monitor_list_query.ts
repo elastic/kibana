@@ -38,6 +38,7 @@ export const monitorListQueryString = `
             status
           }
           url {
+            domain
             full
           }
         }

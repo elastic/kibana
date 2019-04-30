@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`IntegrationLink component renders without errors 1`] = `
+<EuiLink
+  aria-label="foo"
+  color="primary"
+  href="/app/foo?kuery=localhost"
+  type="button"
+>
+  <EuiIcon
+    type="apmApp"
+  />
+</EuiLink>
+`;
