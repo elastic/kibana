@@ -325,24 +325,17 @@ const TimeseriesConfig = injectI18n(function (props) {
           fullWidth
         >
           <QueryBar
-<<<<<<< HEAD
             query={
               {
                 language: (model.filter && model.filter.language) ? model.filter.language : uiSettingsQueryLanguage,
                 query: (model.filter && model.filter.query) ? model.filter.query : ''
               }}
             screenTitle={'TSVBDataOptionsTab'}
-=======
-            query={{ language: model.filter.language ? model.filter.language : 'lucene', query: model.filter }}
-            screenTitle={'TSVB'}
->>>>>>> Gets KQL working in TSVB filter
             onSubmit={handleSubmit}
             appName={'VisEditor'}
             indexPatterns={[props.indexPatternForQuery]}
             store={localStorage || {}}
             showDatePicker={false}
-            dateRangeFrom={props.dateRangeFrom}
-            dateRangeTo={props.dateRangeTo}
           />
 
         </EuiFormRow>

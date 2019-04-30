@@ -90,6 +90,8 @@ class TimeseriesPanelConfigUi extends Component {
     CAUTION: There can be cases where the index-pattern-string, used by a tsvb visualization, doesn’t correspond to a saved index pattern object.
     Because of this, Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
     COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
+
+    NOTE: I tried to move this to it's own file but got stuck. Try again after implementing correctly everywhere else!
   */
   fetchIndexPatterns = async () => {
     const searchIndexPattern = this.props.model.index_pattern

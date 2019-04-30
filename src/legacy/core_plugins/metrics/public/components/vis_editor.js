@@ -72,9 +72,9 @@ class VisEditor extends Component {
     COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
   */
   fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.props.model.index_pattern
-      ? this.props.model.index_pattern
-      : this.props.model.default_index_pattern;
+    const searchIndexPattern = this.state.model.index_pattern
+      ? this.state.model.index_pattern
+      : this.state.model.default_index_pattern;
     const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
