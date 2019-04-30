@@ -53,7 +53,18 @@ export class Root {
 
     try {
       await this.setupLogging();
-      await this.server.setup();
+      return await this.server.setup();
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
+  }
+
+  public async start() {
+    this.log.debug('starting root');
+
+    try {
+      return await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;

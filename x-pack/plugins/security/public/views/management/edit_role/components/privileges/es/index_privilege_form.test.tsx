@@ -23,7 +23,6 @@ test('it renders without crashing', () => {
     indexPatterns: [],
     availableFields: [],
     isReadOnlyRole: false,
-    allowDelete: true,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -50,7 +49,6 @@ describe('delete button', () => {
     indexPatterns: [],
     availableFields: [],
     isReadOnlyRole: false,
-    allowDelete: true,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -59,19 +57,19 @@ describe('delete button', () => {
     intl: {} as any,
   };
 
-  test('it is hidden when allowDelete is false', () => {
+  test('it is hidden when isReadOnlyRole is true', () => {
     const testProps = {
       ...props,
-      allowDelete: false,
+      isReadOnlyRole: true,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(0);
   });
 
-  test('it is shown when allowDelete is true', () => {
+  test('it is shown when isReadOnlyRole is false', () => {
     const testProps = {
       ...props,
-      allowDelete: true,
+      isReadOnlyRole: false,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     expect(wrapper.find(EuiButtonIcon)).toHaveLength(1);
@@ -80,7 +78,7 @@ describe('delete button', () => {
   test('it invokes onDelete when clicked', () => {
     const testProps = {
       ...props,
-      allowDelete: true,
+      isReadOnlyRole: false,
     };
     const wrapper = mountWithIntl(<IndexPrivilegeForm {...testProps} />);
     wrapper.find(EuiButtonIcon).simulate('click');
@@ -102,7 +100,6 @@ describe(`document level security`, () => {
     indexPatterns: [],
     availableFields: [],
     isReadOnlyRole: false,
-    allowDelete: true,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),
@@ -161,7 +158,6 @@ describe('field level security', () => {
     indexPatterns: [],
     availableFields: [],
     isReadOnlyRole: false,
-    allowDelete: true,
     allowDocumentLevelSecurity: true,
     allowFieldLevelSecurity: true,
     validator: new RoleValidator(),

@@ -6,6 +6,8 @@
 
 import { Dictionary } from '../../../common/types/common';
 
+import { AggName, FieldName } from './aggregations';
+
 export enum PIVOT_SUPPORTED_AGGS {
   AVG = 'avg',
   CARDINALITY = 'cardinality',
@@ -41,12 +43,10 @@ type PivotAgg = {
 export type PivotAggDict = { [key in AggName]: PivotAgg };
 
 // The internal representation of an aggregation definition.
-type AggName = string;
-type FieldName = string;
 export interface PivotAggsConfig {
   agg: PivotAggSupportedAggs;
   field: FieldName;
-  formRowLabel: AggName;
+  aggName: AggName;
 }
 
 export type PivotAggsConfigDict = Dictionary<PivotAggsConfig>;
