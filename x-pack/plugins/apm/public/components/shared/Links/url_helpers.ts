@@ -68,11 +68,17 @@ function getQueryWithRisonParams(location: Location, query: RisonDecoded = {}) {
   const encodedG = rison.encode(combinedG);
   const encodedA = query._a ? rison.encode(query._a) : '';
 
-  return {
+  const queryWithRisonParams: QueryParams = {
     ...query,
     _g: encodedG,
     _a: encodedA
   };
+
+  if (currentQuery.kuery) {
+    queryWithRisonParams.kuery = currentQuery.kuery;
+  }
+
+  return queryWithRisonParams;
 }
 
 export interface KibanaHrefArgs {
