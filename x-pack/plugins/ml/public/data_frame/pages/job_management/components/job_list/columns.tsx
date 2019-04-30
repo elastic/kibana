@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiBadge, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getActions } from './actions';
@@ -66,6 +66,15 @@ export const getColumns = (
       name: i18n.translate('xpack.ml.dataframe.targetIndex', { defaultMessage: 'Target index' }),
       sortable: true,
       truncateText: true,
+    },
+    {
+      name: i18n.translate('xpack.ml.dataframe.status', { defaultMessage: 'Status' }),
+      sortable: true,
+      truncateText: true,
+      render(item: DataFrameJobListRow) {
+        const color = item.state.task_state === 'started' ? 'primary' : 'hollow';
+        return <EuiBadge color={color}>{item.state.task_state}</EuiBadge>;
+      },
     },
     {
       name: i18n.translate('xpack.ml.dataframe.tableActionLabel', { defaultMessage: 'Actions' }),

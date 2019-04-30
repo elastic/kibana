@@ -32,17 +32,20 @@ const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => 
   };
   const openModal = () => setModalVisible(true);
 
+  const buttonDeleteText = i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
+    defaultMessage: 'Stop',
+  });
   return (
     <Fragment>
       <EuiButtonEmpty
-        color="danger"
+        color="text"
         disabled={disabled}
         iconType="trash"
         onClick={openModal}
-        aria-label={i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
-          defaultMessage: 'Delete',
-        })}
-      />
+        aria-label={buttonDeleteText}
+      >
+        {buttonDeleteText}
+      </EuiButtonEmpty>
       {isModalVisible && (
         <EuiOverlayMask>
           <EuiConfirmModal
@@ -89,26 +92,35 @@ export const getActions = (getJobs: () => void) => {
       isPrimary: true,
       render: (item: DataFrameJobListRow) => {
         if (item.state.task_state !== DATA_FRAME_RUNNING_STATE.STARTED) {
+          const buttonStartText = i18n.translate('xpack.ml.dataframe.jobsList.startActionName', {
+            defaultMessage: 'Start',
+          });
           return (
             <EuiButtonEmpty
+              size="xs"
+              color="text"
               iconType="play"
               onClick={() => startJob(item)}
-              aria-label={i18n.translate('xpack.ml.dataframe.jobsList.startActionName', {
-                defaultMessage: 'Start',
-              })}
-            />
+              aria-label={buttonStartText}
+            >
+              {buttonStartText}
+            </EuiButtonEmpty>
           );
         }
 
+        const buttonStopText = i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
+          defaultMessage: 'Stop',
+        });
         return (
           <EuiButtonEmpty
-            color="danger"
+            size="xs"
+            color="text"
             iconType="stop"
             onClick={() => stopJob(item)}
-            aria-label={i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
-              defaultMessage: 'Stop',
-            })}
-          />
+            aria-label={buttonStopText}
+          >
+            {buttonStopText}
+          </EuiButtonEmpty>
         );
       },
     },
