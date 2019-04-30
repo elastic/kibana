@@ -184,7 +184,9 @@ fi
 ###
 ### github-checks-reporter kill switch. Remove to disable
 ###
-export CHECKS_REPORTER_ACTIVE=true
+if [[ "$JOB_NAME" = "elastic+kibana+pull-request"* ]] ; then
+  export CHECKS_REPORTER_ACTIVE=true
+fi
 
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
