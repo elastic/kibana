@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { LatestMonitor } from '../../../common/graphql/types';
 import { IntegrationLink } from './integration_link';
+import { getApmHref } from '../../lib/helper';
 
 interface MonitorListActionsPopoverProps {
   basePath: string;
@@ -79,11 +80,7 @@ export const MonitorListActionsPopover = ({
                 description:
                   'This value is shown to users when they hover over an icon that will take them to the APM app.',
               })}
-              href={`${
-                basePath && basePath.length ? `/${basePath}` : ''
-              }/app/apm#/services?kuery=${encodeURI(
-                `url.domain: "${get(monitor, 'ping.url.domain')}"`
-              )}&rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`}
+              href={getApmHref(monitor, basePath, dateRangeStart, dateRangeEnd)}
               iconType="apmApp"
             />
           </EuiToolTip>
