@@ -57,5 +57,13 @@ export const ExpandedRow: SFC<Props> = ({ item }) => {
       content: <JobJsonPane json={item.config} />,
     },
   ];
-  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />;
+  return (
+    <EuiTabbedContent
+      size="s"
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      onTabClick={() => {}}
+      expand={false}
+    />
+  );
 };

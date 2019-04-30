@@ -21,15 +21,11 @@ interface Props {
 export const JobJsonPane: SFC<Props> = ({ json }) => {
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem style={{ width: '100%' }}>
         <EuiSpacer size="s" />
-        <EuiCodeEditor
-          value={JSON.stringify(json, null, 2)}
-          readOnly={true}
-          mode="json"
-          width="100%"
-        />
+        <EuiCodeEditor value={JSON.stringify(json, null, 2)} readOnly={true} mode="json" />
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>&nbsp;</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
