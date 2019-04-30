@@ -51,7 +51,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
       <WithFlyoutOptionsUrlState />
       <LogsToolbar />
       <WithLogPosition>
-        {({ jumpToTargetPosition }) => (
+        {({ jumpToTargetPosition, stopLiveStreaming }) => (
           <WithLogFilter indexPattern={derivedIndexPattern}>
             {({ applyFilterQueryFromKueryExpression }) =>
               flyoutVisible ? (
@@ -62,6 +62,7 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                   setSurroundingLogsId={setSurroundingLogsId}
                   flyoutItem={flyoutItem}
                   loading={isLoading}
+                  stopLiveStreaming={stopLiveStreaming}
                 />
               ) : null
             }
