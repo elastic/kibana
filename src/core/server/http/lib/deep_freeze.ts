@@ -17,19 +17,26 @@
  * under the License.
  */
 
-import { createRoot } from '../../../../../test_utils/kbn_server';
+type Freezable = { [k: string]: any } | any[];
 
-(async function run() {
-  const root = createRoot(JSON.parse(process.env.CREATE_SERVER_OPTS));
+// if we define this inside RecursiveReadonly TypeScript complains
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface RecursiveReadonlyArray<T> extends Array<RecursiveReadonly<T>> {}
 
-  // We just need the server to run through startup so that it will
-  // log the deprecation messages. Once it has started up we close it
-  // to allow the process to exit naturally
-  try {
-    await root.setup();
-    await root.start();
-  } finally {
-    await root.shutdown();
+export type RecursiveReadonly<T> = T extends any[]
+  ? RecursiveReadonlyArray<T[number]>
+  : T extends object
+  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
+  : T;
+
+export function deepFreeze<T extends Freezable>(object: T) {
+  // for any properties that reference an object, makes sure that object is
+  // recursively frozen as well
+  for (const value of Object.values(object)) {
+    if (value !== null && typeof value === 'object') {
+      deepFreeze(value);
+    }
   }
 
-}());
+  return Object.freeze(object) as RecursiveReadonly<T>;
+}

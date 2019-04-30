@@ -22,6 +22,7 @@ import { ResponseObject, Server } from 'hapi';
 import {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
+  HttpServiceStart,
   ConfigService,
   PluginsServiceSetup,
 } from '../../core/server';
@@ -77,9 +78,14 @@ export default class KbnServer {
     setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
-        http?: HttpServiceSetup;
+        http: HttpServiceSetup;
       };
       plugins: PluginsServiceSetup;
+    };
+    start: {
+      core: {
+        http: HttpServiceStart;
+      };
     };
     stop: null;
     params: {
