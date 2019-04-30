@@ -63,7 +63,7 @@ AreaSeriesDecorator.propTypes = {
   seriesId: PropTypes.string.isRequired,
   groupId: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  data: PropTypes.arrayOf(PropTypes.number).isRequired,
+  data: PropTypes.arrayOf(PropTypes.arrayOf(PropTypes.number)).isRequired,
   hideInLegend: PropTypes.bool.isRequired,
   lines: PropTypes.shape({
     fill: PropTypes.number,
