@@ -30,7 +30,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
-import { documentationLinks } from '../../documentation_links/documentation_links';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const kueryQuerySyntaxDocs = documentationLinks.query.kueryQuerySyntax;
 
@@ -50,14 +50,14 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
 
   public render() {
     const luceneLabel = (
-      <FormattedMessage id="common.ui.queryBar.luceneLanguageName" defaultMessage="Lucene" />
+      <FormattedMessage id="data.query.queryBar.luceneLanguageName" defaultMessage="Lucene" />
     );
     const kqlLabel = (
-      <FormattedMessage id="common.ui.queryBar.kqlLanguageName" defaultMessage="KQL" />
+      <FormattedMessage id="data.query.queryBar.kqlLanguageName" defaultMessage="KQL" />
     );
     const kqlFullName = (
       <FormattedMessage
-        id="common.ui.queryBar.kqlFullLanguageName"
+        id="data.query.queryBar.kqlFullLanguageName"
         defaultMessage="Kibana Query Language"
       />
     );
@@ -81,7 +81,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
       >
         <EuiPopoverTitle>
           <FormattedMessage
-            id="common.ui.queryBar.syntaxOptionsTitle"
+            id="data.query.queryBar.syntaxOptionsTitle"
             defaultMessage="Syntax options"
           />
         </EuiPopoverTitle>
@@ -89,7 +89,7 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
           <EuiText>
             <p>
               <FormattedMessage
-                id="common.ui.queryBar.syntaxOptionsDescription"
+                id="data.query.queryBar.syntaxOptionsDescription"
                 defaultMessage="The {docsLink} (KQL) offers a simplified query
                 syntax and support for scripted fields. KQL also provides autocomplete if you have
                 a Basic license or above. If you turn off KQL, Kibana uses Lucene."
@@ -113,9 +113,9 @@ export class QueryLanguageSwitcher extends Component<Props, State> {
                 name="popswitch"
                 label={
                   this.props.language === 'kuery' ? (
-                    <FormattedMessage id="common.ui.queryBar.kqlOnLabel" defaultMessage="On" />
+                    <FormattedMessage id="data.query.queryBar.kqlOnLabel" defaultMessage="On" />
                   ) : (
-                    <FormattedMessage id="common.ui.queryBar.kqlOffLabel" defaultMessage="Off" />
+                    <FormattedMessage id="data.query.queryBar.kqlOffLabel" defaultMessage="Off" />
                   )
                 }
                 checked={this.props.language === 'kuery'}

@@ -21,18 +21,20 @@
 
 import 'ngreact';
 import { wrapInI18nContext } from 'ui/i18n';
-import { uiModules } from '../../modules';
+import { uiModules } from 'ui/modules';
 import { QueryBar } from '../components';
 
-const app = uiModules.get('app/kibana', ['react']);
+const app = uiModules.get('app/data', ['react']);
 
-app.directive('queryBar', (reactDirective, localStorage) => {
-  return reactDirective(
-    wrapInI18nContext(QueryBar),
-    undefined,
-    {},
-    {
-      store: localStorage,
-    }
-  );
-});
+export function setupDirective() {
+  app.directive('queryBar', (reactDirective, localStorage) => {
+    return reactDirective(
+      wrapInI18nContext(QueryBar),
+      undefined,
+      {},
+      {
+        store: localStorage,
+      }
+    );
+  });
+}
