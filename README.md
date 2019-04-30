@@ -17,7 +17,7 @@ Source: [https://en.wikipedia.org/wiki/Backporting](https://en.wikipedia.org/wik
 
 ## Who is this tool for?
 
-This tools is for anybody who are working on a codebase where they have to maintain multiple versions. If you manually cherry-pick commits from master and apply them to one or more branches, this tool might save you a lot of time.
+This tools is for anybody who is working on a codebase where they have to maintain multiple versions. If you manually cherry-pick commits from master and apply them to one or more branches, this tool might save you a lot of time.
 
 `backport` is a CLI that will ask you which commit(s) to backport and to which branch(es) and then cherry-pick accordingly, and create pull requests. It will always perform the git operation in a temporary folder (`~/.backport/repositories/`) separate from your working directory, thus never interfering with any unstages changes your might have.
 
@@ -30,13 +30,13 @@ OR
 
 - Docker
 
-## Install with Node
+## Install with Node (recommended)
 
 ```
 npm install -g backport
 ```
 
-After installation you must update the [global config](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson) in `~/.backport/config.json` with your Github username and a Github access token.
+After installation you should update the [global config](https://github.com/sqren/backport/blob/master/docs/configuration.md#global-config-backportconfigjson) in `~/.backport/config.json` with your Github username and a Github access token.
 
 ## Run via Docker
 
