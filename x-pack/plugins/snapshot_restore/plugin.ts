@@ -12,6 +12,6 @@ export class Plugin {
     const router = core.http.createRouter(API_BASE_PATH);
 
     // Register routes
-    registerRoutes(router);
+    registerRoutes(router, plugins);
   }
 }

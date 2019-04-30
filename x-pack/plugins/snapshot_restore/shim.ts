@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Legacy } from 'kibana';
 import { createRouter, Router } from '../../server/lib/create_router';
@@ -22,6 +23,12 @@ export interface Plugins {
   license: {
     registerLicenseChecker: typeof registerLicenseChecker;
   };
+  cloud: {
+    config: {
+      isCloudEnabled: boolean;
+    };
+  };
+  xpack_main: any;
 }
 
 export function createShim(
@@ -39,6 +46,12 @@ export function createShim(
       license: {
         registerLicenseChecker,
       },
+      cloud: {
+        config: {
+          isCloudEnabled: get(server.plugins, 'cloud.config.isCloudEnabled', false),
+        },
+      },
+      xpack_main: server.plugins.xpack_main,
     },
   };
 }
