@@ -44,8 +44,6 @@ import { ml } from 'plugins/ml/services/ml_api_service';
 import template from './create_job.html';
 import { timefilter } from 'ui/timefilter';
 
-import { newJobCapsService, loadNewJobCapabilities } from '../../../../../services/job_capabilities_service';
-
 uiRoutes
   .when('/jobs/new_job/simple/multi_metric', {
     template,
@@ -57,7 +55,6 @@ uiRoutes
       savedSearch: loadCurrentSavedSearch,
       checkMlNodesAvailable,
       loadNewJobDefaults,
-      newJobCaps: loadNewJobCapabilities,
     }
   });
 
@@ -70,10 +67,8 @@ module
     $timeout,
     Private,
     AppState,
-    $route,
     i18n) {
 
-    console.log(newJobCapsService.newJobCaps);
     timefilter.enableTimeRangeSelector();
     timefilter.disableAutoRefreshSelector();
     const msgs = mlMessageBarService;
