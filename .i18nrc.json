@@ -1,6 +1,7 @@
 {
   "paths": {
     "common.ui": "src/legacy/ui",
+    "data": "src/legacy/core_plugins/data",
     "server": "src/legacy/server",
     "console": "src/legacy/core_plugins/console",
     "core": "src/core",

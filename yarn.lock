@@ -4527,10 +4527,15 @@ angular-ui-ace@0.2.3:
   resolved "https://registry.yarnpkg.com/angular-ui-ace/-/angular-ui-ace-0.2.3.tgz#3cb903428100621a367fc7f641440e97a42a26d0"
   integrity sha1-PLkDQoEAYho2f8f2QUQOl6QqJtA=
 
-angular@1.6.9, angular@>=1.0.6:
+angular@>=1.0.6:
   version "1.6.9"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.9.tgz#bc812932e18909038412d594a5990f4bb66c0619"
   integrity sha512-6igWH2GIsxV+J38wNWCh8oyjaZsrIPIDO35twloIUyjlF2Yit6UyLAWujHP05ma/LFxTsx4NtYibRoMNBXPR1A==
+
+"angular@npm:@elastic/angular@1.6.9-kibana.0":
+  version "1.6.9-kibana.0"
+  resolved "https://registry.yarnpkg.com/@elastic/angular/-/angular-1.6.9-kibana.0.tgz#c29e72559c3f67ce923d04d7ac3c4381e3c495be"
+  integrity sha512-HAez04r9/KXtaITxiVFZ+ZG+ORhj4eCWqHFfK/aS4ws3g/4jDY5LZe3ovFCSseD8oIkfAanNaT+aXPzSr61byQ==
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -13183,10 +13188,10 @@ handlebars@4.0.12, handlebars@^4.0.1:
   optionalDependencies:
     uglify-js "^3.1.4"
 
-handlebars@4.0.13:
-  version "4.0.13"
-  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.0.13.tgz#89fc17bf26f46fd7f6f99d341d92efaae64f997d"
-  integrity sha512-uydY0jy4Z3wy/iGXsi64UtLD4t1fFJe16c/NFxsYE4WdQis8ZCzOXUZaPQNG0e5bgtLQV41QTfqBindhEjnpyQ==
+handlebars@4.0.14:
+  version "4.0.14"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.0.14.tgz#88de711eb693a5b783ae06065f9b91b0dd373a71"
+  integrity sha512-E7tDoyAA8ilZIV3xDJgl18sX3M8xB9/fMw8+mfW4msLW8jlX97bAnWgT3pmaNXuvzIEgSBMnAHfuXsB2hdzfow==
   dependencies:
     async "^2.5.0"
     optimist "^0.6.1"
@@ -13194,7 +13199,18 @@ handlebars@4.0.13:
   optionalDependencies:
     uglify-js "^3.1.4"
 
-handlebars@^4.0.13, handlebars@^4.1.0:
+handlebars@^4.0.14:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.1.2.tgz#b6b37c1ced0306b221e094fc7aca3ec23b131b67"
+  integrity sha512-nvfrjqvt9xQ8Z/w0ijewdD/vvWDTOweBUm96NTr66Wfvo1mJenBLwcYmPs3TIBP5ruzYGD7Hx/DaM9RmhroGPw==
+  dependencies:
+    neo-async "^2.6.0"
+    optimist "^0.6.1"
+    source-map "^0.6.1"
+  optionalDependencies:
+    uglify-js "^3.1.4"
+
+handlebars@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/handlebars/-/handlebars-4.1.0.tgz#0d6a6f34ff1f63cecec8423aa4169827bf787c3a"
   integrity sha512-l2jRuU1NAWK6AW5qqcTATWQJvNPEwkM7NEKSiv/gqOsoSQbVoWyqVEY5GS+XPQ88zLNmqASRpzfdm8d79hJS+w==
