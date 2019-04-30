@@ -40,6 +40,11 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           "render": [Function],
         },
         Object {
+          "field": "ping.url.full",
+          "name": "URL",
+          "render": [Function],
+        },
+        Object {
           "align": "right",
           "field": "upSeries",
           "name": "Downtime history",
@@ -47,17 +52,10 @@ exports[`MonitorList component renders a monitor list without errors 1`] = `
           "width": "180px",
         },
         Object {
-          "actions": Array [
-            Object {
-              "description": "Search APM for this monitor",
-              "icon": "apmApp",
-              "isPrimary": true,
-              "name": "APM",
-              "onClick": [Function],
-              "type": "icon",
-            },
-          ],
+          "align": "right",
+          "field": "ping",
           "name": "Integrations",
+          "render": [Function],
         },
       ]
     }
