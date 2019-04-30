@@ -22,7 +22,7 @@ import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Gauge from '../../../visualizations/components/gauge';
+import Gauge from '../../../visualizations/views/gauge';
 import getLastValue from '../../../../common/get_last_value';
 
 function getColors(props) {

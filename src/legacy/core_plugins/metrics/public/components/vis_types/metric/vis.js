@@ -22,7 +22,7 @@ import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import { createTickFormatter } from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Metric from '../../../visualizations/components/metric';
+import Metric from '../../../visualizations/views/metric';
 import getLastValue from '../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 

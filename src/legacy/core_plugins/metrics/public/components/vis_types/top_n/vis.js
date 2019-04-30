@@ -18,7 +18,7 @@
  */
 
 import { createTickFormatter } from '../../lib/tick_formatter';
-import TopN from '../../../visualizations/components/top_n';
+import TopN from '../../../visualizations/views/top_n';
 import getLastValue from '../../../../common/get_last_value';
 import { isBackgroundInverted } from '../../../../common/set_is_reversed';
 import replaceVars from '../../lib/replace_vars';
