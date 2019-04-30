@@ -7,21 +7,22 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { PIVOT_SUPPORTED_AGGS } from '../../common';
+import { PivotAggsConfig, PIVOT_SUPPORTED_AGGS } from '../../common';
 
 import { AggListForm, ListProps } from './list_form';
 
 describe('Data Frame: <AggListForm />', () => {
   test('Minimal initialization', () => {
+    const item: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-field',
+      aggName: 'the-form-row-label',
+    };
     const props: ListProps = {
-      list: ['the-agg'],
-      optionsData: {
-        'the-agg': {
-          agg: PIVOT_SUPPORTED_AGGS.AVG,
-          field: 'the-field',
-          formRowLabel: 'the-form-row-label',
-        },
-      },
+      list: { 'the-agg': item },
+      options: {},
+      deleteHandler() {},
+      onChange() {},
     };
 
     const wrapper = shallow(<AggListForm {...props} />);
