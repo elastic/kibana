@@ -81,6 +81,8 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapR
   ? map.waitingForMapReadyLayerList
   : [];
 
+export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
+
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
