@@ -56,6 +56,11 @@ export class GlobalToastList extends React.Component<Props, State> {
         data-test-subj="globalToastList"
         toasts={this.state.toasts}
         dismissToast={this.props.dismissToast}
+        /**
+         * This prop is overriden by the individual toasts that are added.
+         * Use `Infinity` here so that it's obvious a timeout hasn't been
+         * provided in development.
+         */
         toastLifeTimeMs={Infinity}
       />
     );
