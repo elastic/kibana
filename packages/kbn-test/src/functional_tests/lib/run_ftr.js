@@ -51,7 +51,7 @@ export async function assertNoneExcluded({ configPath, options }) {
 export async function runFtr({ configPath, options }) {
   const ftr = createFtr({ configPath, options });
 
-  const failureCount = await ftr.run();
+  const failureCount = await ftr.runTests();
   if (failureCount > 0) {
     throw new CliError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
