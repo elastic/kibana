@@ -34,24 +34,21 @@ describe('file upload plugin telemetry', () => {
     it('should create new telemetry if no telemetry exists', async () => {
       mockInit();
       await getTelemetry(server, internalRepository);
-      // Expect internalRepository.get to get called
       expect(internalRepository.get.mock.calls.length).toBe(1);
-      // Expect internalRepository.create to get called
       expect(internalRepository.create.mock.calls.length).toBe(1);
     });
 
     it('should get existing telemetry', async () => {
       mockInit({});
       await getTelemetry(server, internalRepository);
-      // Expect internalRepository.get to get called
+      expect(internalRepository.update.mock.calls.length).toBe(0);
       expect(internalRepository.get.mock.calls.length).toBe(1);
-      // Expect internalRepository.create NOT to get called
       expect(internalRepository.create.mock.calls.length).toBe(0);
     });
   });
 
   describe('updateTelemetry', () => {
-    it('total count should equal sum of all file counts', async () => {
+    it('should update existing telemetry', async () => {
       mockInit({
         attributes: {
           filesUploadedTotalCount: 2,
@@ -59,9 +56,7 @@ describe('file upload plugin telemetry', () => {
       });
       await updateTelemetry({ server, internalRepo: internalRepository });
       expect(internalRepository.update.mock.calls.length).toBe(1);
-      // Expect internalRepository.get to get called
-      expect(internalRepository.get.mock.calls.length).toBe(2);
-      // Expect internalRepository.create to get called
+      expect(internalRepository.get.mock.calls.length).toBe(1);
       expect(internalRepository.create.mock.calls.length).toBe(0);
     });
   });
