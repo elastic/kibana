@@ -32,12 +32,13 @@ const DeleteAction: SFC<DeleteActionProps> = ({ deleteJob, disabled, item }) => 
   };
   const openModal = () => setModalVisible(true);
 
-  const buttonDeleteText = i18n.translate('xpack.ml.dataframe.jobsList.stopActionName', {
-    defaultMessage: 'Stop',
+  const buttonDeleteText = i18n.translate('xpack.ml.dataframe.jobsList.deleteActionName', {
+    defaultMessage: 'Delete',
   });
   return (
     <Fragment>
       <EuiButtonEmpty
+        size="xs"
         color="text"
         disabled={disabled}
         iconType="trash"

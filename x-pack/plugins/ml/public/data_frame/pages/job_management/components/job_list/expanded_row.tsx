@@ -1,0 +1,61 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import React, { SFC } from 'react';
+
+import { EuiTabbedContent } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
+import { DataFrameJobListRow } from './common';
+import { JobDetailsPane, Section } from './job_details_pane';
+import { JobJsonPane } from './job_json_pane';
+
+function getItemDescription(value: any) {
+  if (typeof value === 'object') {
+    return JSON.stringify(value);
+  }
+
+  return value.toString();
+}
+
+interface Props {
+  item: DataFrameJobListRow;
+}
+
+export const ExpandedRow: SFC<Props> = ({ item }) => {
+  const state: Section = {
+    title: 'State',
+    items: Object.entries(item.state).map((key, value) => {
+      return { title: key.toString(), description: getItemDescription(value) };
+    }),
+    position: 'left',
+  };
+
+  const stats: Section = {
+    title: 'Stats',
+    items: Object.entries(item.stats).map((key, value) => {
+      return { title: key.toString(), description: getItemDescription(value) };
+    }),
+    position: 'right',
+  };
+
+  const tabs = [
+    {
+      id: 'job-details',
+      name: i18n.translate('xpack.ml.dataframe.jobsList.jobDetails.tabs.jobSettingsLabel', {
+        defaultMessage: 'Job details',
+      }),
+      content: <JobDetailsPane sections={[state, stats]} />,
+    },
+    {
+      id: 'job-json',
+      name: 'JSON',
+      content: <JobJsonPane json={item.config} />,
+    },
+  ];
+  return <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} onTabClick={() => {}} />;
+};

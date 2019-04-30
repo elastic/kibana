@@ -10,6 +10,7 @@ import { EuiBadge, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
 import { getActions } from './actions';
+import { ExpandedRow } from './expanded_row';
 
 export const getColumns = (
   getJobs: () => void,
@@ -22,7 +23,7 @@ export const getColumns = (
     if (itemIdToExpandedRowMap[item.config.id]) {
       delete itemIdToExpandedRowMap[item.config.id];
     } else {
-      itemIdToExpandedRowMap[item.config.id] = <div>EXPAND {item.config.id}</div>;
+      itemIdToExpandedRowMap[item.config.id] = <ExpandedRow item={item} />;
     }
     // spread to a new object otherwise the component wouldn't re-render
     setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
