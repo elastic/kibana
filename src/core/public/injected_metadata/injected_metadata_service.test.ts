@@ -30,7 +30,7 @@ describe('setup.getKibanaBuildNumber()', () => {
 
     expect(setup.getKibanaBuildNumber()).toBe('foo');
   });
-})
+});
 
 describe('setup.getCspConfig()', () => {
   it('returns injectedMetadata.csp', () => {

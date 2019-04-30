@@ -112,7 +112,6 @@ export class CoreSystem {
   }
 
   public async setup() {
-
     try {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
