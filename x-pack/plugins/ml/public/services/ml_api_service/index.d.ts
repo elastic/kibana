@@ -45,7 +45,7 @@ declare interface Ml {
     closeJobs(jobIds: string[]): Promise<object>;
     jobAuditMessages(jobId: string, from: string): Promise<object>;
     deletingJobTasks(): Promise<object>;
-    jobCaps(indexPatternTitle: string, isRollup: boolean): Promise<object>;
+    newJobCaps(indexPatternTitle: string, isRollup: boolean): Promise<object>;
   };
 }
 

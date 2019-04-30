@@ -107,10 +107,10 @@ export const jobs = {
     });
   },
 
-  jobCaps(indexPatternTitle, isRollup = false) {
+  newJobCaps(indexPatternTitle, isRollup = false) {
     const isRollupString = (isRollup ===  true) ? `?rollup=true` : '';
     return http({
-      url: `${basePath}/jobs/job_caps/${indexPatternTitle}${isRollupString}`,
+      url: `${basePath}/jobs/new_job_caps/${indexPatternTitle}${isRollupString}`,
       method: 'GET',
     });
   },

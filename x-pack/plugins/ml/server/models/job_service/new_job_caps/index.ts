@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { jobCapsProvider } from './job_caps';
+export { newJobCapsProvider } from './new_job_caps';

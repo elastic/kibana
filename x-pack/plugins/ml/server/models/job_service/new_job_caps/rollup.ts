@@ -9,9 +9,7 @@ import { SavedObject } from 'src/legacy/server/saved_objects/service/saved_objec
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 import { FieldId, AggId } from '../../../../common/types/fields';
 
-type agg = 'agg';
-
-export type RollupFields = { [id in FieldId]: [{ [key in agg]: AggId }] };
+export type RollupFields = Record<FieldId, [Record<'agg', AggId>]>;
 
 export interface RollupJob {
   job_id: string;

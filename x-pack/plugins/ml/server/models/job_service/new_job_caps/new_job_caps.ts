@@ -6,16 +6,18 @@
 
 import { Request } from 'src/legacy/server/kbn_server';
 import { CallWithRequestType } from '../../../client/elasticsearch_ml';
-import { Aggregation, Field } from '../../../../common/types/fields';
+import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
-import { AggAndFieldList } from './field_service';
 
-interface JobCaps {
-  [indexPattern: string]: AggAndFieldList;
+interface NewJobCapsResponse {
+  [indexPattern: string]: NewJobCaps;
 }
 
-export function jobCapsProvider(callWithRequest: CallWithRequestType, request: Request) {
-  async function jobCaps(indexPattern: string, isRollup: boolean = false): Promise<JobCaps> {
+export function newJobCapsProvider(callWithRequest: CallWithRequestType, request: Request) {
+  async function newJobCaps(
+    indexPattern: string,
+    isRollup: boolean = false
+  ): Promise<NewJobCapsResponse> {
     const fieldService = fieldServiceProvider(indexPattern, isRollup, callWithRequest, request);
     const { aggs, fields } = await fieldService.getData();
     convertForStringify(aggs, fields);
@@ -28,7 +30,7 @@ export function jobCapsProvider(callWithRequest: CallWithRequestType, request: R
     };
   }
   return {
-    jobCaps,
+    newJobCaps,
   };
 }
 

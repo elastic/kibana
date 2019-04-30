@@ -150,13 +150,13 @@ export function jobServiceRoutes(server, commonRouteConfig) {
 
   server.route({
     method: 'GET',
-    path: '/api/ml/jobs/job_caps/{indexPattern}',
+    path: '/api/ml/jobs/new_job_caps/{indexPattern}',
     handler(request) {
       const callWithRequest = callWithRequestFactory(server, request);
       const { indexPattern } = request.params;
       const isRollup = (request.query.rollup === 'true');
-      const { jobCaps } = jobServiceProvider(callWithRequest, request);
-      return jobCaps(indexPattern, isRollup)
+      const { newJobCaps } = jobServiceProvider(callWithRequest, request);
+      return newJobCaps(indexPattern, isRollup)
         .catch(resp => wrapError(resp));
     },
     config: {

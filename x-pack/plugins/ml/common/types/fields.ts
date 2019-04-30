@@ -31,3 +31,8 @@ export interface Aggregation {
   fieldIds?: FieldId[];
   fields?: Field[];
 }
+
+export interface NewJobCaps {
+  fields: Field[];
+  aggs: Aggregation[];
+}

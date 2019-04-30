@@ -6,7 +6,7 @@
 
 import { cloneDeep } from 'lodash';
 import { Request } from 'src/legacy/server/kbn_server';
-import { Field, Aggregation, FieldId } from '../../../../common/types/fields';
+import { Field, Aggregation, FieldId, NewJobCaps } from '../../../../common/types/fields';
 import { ES_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { rollupServiceProvider, RollupJob, RollupFields } from './rollup';
 import { aggregations } from './aggregations';
@@ -14,7 +14,6 @@ import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 
 const METRIC_AGG_TYPE: string = 'metrics';
 
-// TODO, is this list correct?
 const supportedTypes: string[] = [
   ES_FIELD_TYPES.DATE,
   ES_FIELD_TYPES.KEYWORD,
@@ -28,11 +27,6 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.SCALED_FLOAT,
   ES_FIELD_TYPES.SHORT,
 ];
-
-export interface AggAndFieldList {
-  aggs: Aggregation[];
-  fields: Field[];
-}
 
 export function fieldServiceProvider(
   indexPattern: string,
@@ -100,7 +94,7 @@ class FieldsService {
   // based on what is available in the rollup job
   // the _indexPattern will be replaced with a comma separated list
   // of index patterns from all of the rollup jobs
-  public async getData(): Promise<AggAndFieldList> {
+  public async getData(): Promise<NewJobCaps> {
     let rollupFields: RollupFields = {};
 
     if (this._isRollup) {
@@ -137,7 +131,7 @@ async function combineFieldsAndAggs(
   fields: Field[],
   aggs: Aggregation[],
   rollupFields: RollupFields
-): Promise<AggAndFieldList> {
+): Promise<NewJobCaps> {
   const textAndKeywordFields = getTextAndKeywordFields(fields);
   const numericalFields = getNumericalFields(fields);
 
