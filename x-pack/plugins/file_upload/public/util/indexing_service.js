@@ -16,61 +16,75 @@ const IMPORT_RETRIES = 5;
 const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
 
-export async function triggerIndexing(parsedFile, preIndexTransform, indexName, dataType, appName) {
+export async function indexData(parsedFile, preIndexTransform, indexName, dataType, appName) {
   if (!parsedFile) {
     throw('No file imported');
     return;
   }
-  const index = await checkIndex(indexName);
-  let id;
 
   // Perform any processing required on file prior to indexing
-  const indexingDetails = getIndexingDetails(preIndexTransform, parsedFile, dataType);
-
-  if (index.exists) {
-    id = index.id;
-  } else {
-    const createdIndex = await writeToIndex({
-      appName,
-      id: undefined,
-      data: [],
-      index: indexName,
-      ...indexingDetails // Everything from the util file
-    });
-    id = createdIndex.id;
+  const transformResult = transformDataByFormatForIndexing(preIndexTransform, parsedFile, dataType);
+  if (!transformResult.success) {
+    throw `Error transforming data: ${transformResult.error}`;
   }
 
-  await populateIndex({
+  // Create new index
+  const { indexingDetails } = transformResult;
+  const createdIndex = await writeToIndex({
+    appName,
+    ...indexingDetails,
+    id: undefined,
+    data: [],
+    index: indexName,
+  });
+  const { id } = createdIndex;
+  if (!id) {
+    throw `Error creating index`;
+  }
+
+  // Write to index
+  const indexWriteResults = await chunkDataAndWriteToIndex({
     id,
-    data: parsedFile,
     index: indexName,
     ...indexingDetails,
     settings: {},
     mappings: {},
   });
-  //create index pattern
-  return await createIndexPattern('', indexName);
+  return indexWriteResults;
 }
 
-function getIndexingDetails(processor, parsedFile, dataType) {
-  if (!processor) {
-    throw('No processor defined');
-    return;
-  }
+
+function transformDataByFormatForIndexing(transform, parsedFile, dataType) {
   let indexingDetails;
-  if (typeof processor === 'object') { // Custom processor
-    indexingDetails = processor.getIndexDetails(parsedFile);
-  } else {
-    switch(processor) {
+  if (!transform) {
+    return {
+      success: false,
+      error: 'No transform defined',
+    };
+  }
+  if (typeof transform !== 'object') {
+    switch(transform) {
       case 'geo':
-        return getGeoJsonIndexingDetails(parsedFile, dataType);
+        indexingDetails = getGeoJsonIndexingDetails(parsedFile, dataType);
         break;
       default:
-        console.error(`No handling defined for processor: ${processor}`);
-        return;
+        return {
+          success: false,
+          error: `No handling defined for transform: ${transform}`
+        };
     }
+  } else { // Custom transform
+    indexingDetails = transform.getIndexingDetails(parsedFile);
   }
-  return indexingDetails;
+  return indexingDetails
+    ? {
+      success: true,
+      indexingDetails
+    }
+    : {
+      success: false,
+      error: `Unknown error performing transform: ${transform}`,
+    };
 }
 
 function writeToIndex(indexingDetails) {
@@ -99,12 +113,12 @@ function writeToIndex(indexingDetails) {
   });
 }
 
-async function populateIndex({ id, index, data, mappings, settings }) {
-  if (!id || !index) {
+async function chunkDataAndWriteToIndex({ id, index, data, mappings, settings }) {
+  if (!index) {
     return {
       success: false,
-      error: i18n.translate('xpack.ml.fileDatavisualizer.importView.noIdOrIndexSuppliedErrorMessage', {
-        defaultMessage: 'no ID or index supplied'
+      error: i18n.translate('xpack.file_upload.noIndexSuppliedErrorMessage', {
+        defaultMessage: 'No index supplied'
       })
     };
   }
@@ -123,7 +137,7 @@ async function populateIndex({ id, index, data, mappings, settings }) {
       data: chunks[i],
       settings,
       mappings,
-      ingestPipeline: {}
+      ingestPipeline: {} // TODO: Support custom ingest pipelines
     };
 
     let retries = IMPORT_RETRIES;
@@ -154,24 +168,16 @@ async function populateIndex({ id, index, data, mappings, settings }) {
     }
   }
 
-  const result = {
+  return {
     success,
     failures,
     docCount,
+    ...(error ? { error } : {})
   };
-
-  if (success) {
-    console.log('yay!');
-  } else {
-    result.error = error;
-  }
-
-  return result;
 }
 
-async function createIndexPattern(indexPattern = '', index) {
+export async function createIndexPattern(indexPatternName) {
   const indexPatterns = await indexPatternService.get();
-  const indexPatternName = (indexPattern === '') ? index : indexPattern;
   try {
     Object.assign(indexPatterns, {
       id: '',
@@ -207,21 +213,6 @@ async function getIndexPatternId(name) {
   } else {
     return undefined;
   }
-}
-
-
-async function checkIndex(name) {
-  const indices = await getExistingIndices();
-  const existingIndex = indices.find(el => el.name === name);
-  return existingIndex
-    ? {
-      exists: true,
-      id: existingIndex.uuid
-    }
-    : {
-      exists: false,
-      id: null
-    };
 }
 
 export async function getExistingIndices() {

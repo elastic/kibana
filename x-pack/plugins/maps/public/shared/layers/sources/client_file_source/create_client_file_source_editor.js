@@ -22,7 +22,7 @@ export function ClientFileCreateSourceEditor({
       onFileRemove={onRemove}
       boolIndexData={boolIndexData}
       preIndexTransform={'geo'}
-      onIndexAddSuccess={viewIndexedData}
+      onIndexPatternCreateSuccess={viewIndexedData}
       onIndexReadyStatusChange={onIndexReadyStatusChange}
     />
   );

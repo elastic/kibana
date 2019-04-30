@@ -10,7 +10,7 @@ import {
   EuiForm,
 } from '@elastic/eui';
 import PropTypes from 'prop-types';
-import { triggerIndexing } from '../util/indexing_service';
+import { indexData, createIndexPattern } from '../util/indexing_service';
 import { getGeoIndexTypesForFeatures } from '../util/geo_processing';
 import { IndexSettings } from './index_settings';
 import { JsonIndexFilePicker } from './json_index_file_picker';
@@ -20,10 +20,13 @@ export function JsonUploadAndParse(props) {
   const {
     appName,
     boolIndexData = false,
-    onIndexAddSuccess,
-    onIndexAddError,
+    boolCreateIndexPattern = true,
     preIndexTransform,
     onIndexReadyStatusChange,
+    onIndexAddSuccess,
+    onIndexAddError,
+    onIndexPatternCreateSuccess,
+    onIndexPatternCreateError,
   } = props;
 
   // Local state for parsed file and indexed details
@@ -43,25 +46,42 @@ export function JsonUploadAndParse(props) {
       setIndexDataType(indexTypes[0]);
     }
 
-    // Index ready
     const indexReady = !!parsedFile && !!indexDataType && !!indexName && !hasIndexErrors;
     onIndexReadyStatusChange(indexReady);
 
-    if (boolIndexData && !indexRequestInFlight && parsedFile
-      && !_.isEqual(indexedFile, parsedFile)) {
+    const isNewFile = !_.isEqual(indexedFile, parsedFile);
+
+    if (boolIndexData && !indexRequestInFlight && parsedFile && isNewFile) {
       setIndexRequestInFlight(true);
-      triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType, appName)
-        .then(
-          resp => {
-            if (resp.success) {
-              setIndexedFile(parsedFile);
-              onIndexAddSuccess && onIndexAddSuccess(resp);
-            } else {
-              setIndexedFile(null);
-              onIndexAddError && onIndexAddError();
-            }
-            setIndexRequestInFlight(false);
-          });
+
+      (async () => {
+        // Index parsed file
+        const indexDataResponse = await
+        indexData(parsedFile, preIndexTransform,
+          indexName, indexDataType, appName);
+        const indexDataSuccess = indexDataResponse && indexDataResponse.success;
+        if (indexDataSuccess) {
+          setIndexedFile(parsedFile);
+          onIndexAddSuccess && onIndexAddSuccess(indexDataResponse);
+        } else {
+          setIndexedFile(null);
+          onIndexAddError && onIndexAddError();
+        }
+        setIndexRequestInFlight(false);
+
+        // Create Index Pattern
+        if (boolCreateIndexPattern && indexDataSuccess) {
+          const indexPatternCreateResponse =
+            await createIndexPattern(indexPattern || indexName);
+          const indexPatternCreateSuccess = indexPatternCreateResponse &&
+            indexPatternCreateResponse.success;
+          if (indexPatternCreateSuccess) {
+            onIndexPatternCreateSuccess && onIndexPatternCreateSuccess(indexPatternCreateResponse);
+          } else {
+            onIndexPatternCreateError && onIndexPatternCreateError(indexPatternCreateResponse);
+          }
+        }
+      })();
     }
 
     // Determine index options
@@ -84,7 +104,9 @@ export function JsonUploadAndParse(props) {
     }
   }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
     parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
-    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange, appName]
+    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange, appName,
+    boolCreateIndexPattern, indexPattern, onIndexPatternCreateError,
+    onIndexPatternCreateSuccess]
   );
 
   return (
