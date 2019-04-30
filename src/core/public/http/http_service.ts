@@ -45,15 +45,18 @@ export class HttpService {
 
   public setup({ basePath, injectedMetadata, fatalErrors }: Deps) {
     async function fetch(path: string, options: HttpFetchOptions = {}): Promise<HttpBody> {
-      const { query, prependBasePath, ...fetchOptions } = merge({
-        method: 'GET',
-        credentials: 'same-origin',
-        prependBasePath: true,
-        headers: {
-          'kbn-version': injectedMetadata.getKibanaVersion(),
-          'Content-Type': 'application/json',
+      const { query, prependBasePath, ...fetchOptions } = merge(
+        {
+          method: 'GET',
+          credentials: 'same-origin',
+          prependBasePath: true,
+          headers: {
+            'kbn-version': injectedMetadata.getKibanaVersion(),
+            'Content-Type': 'application/json',
+          },
         },
-      }, options);
+        options
+      );
       const url = format({
         pathname: prependBasePath ? basePath.addToPath(path) : path,
         query,
