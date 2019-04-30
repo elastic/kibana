@@ -36,7 +36,7 @@ Array [
         "debug": [MockFunction] {
           "calls": Array [
             Array [
-              "setting up legacy service",
+              "starting legacy service",
             ],
           ],
           "results": Array [

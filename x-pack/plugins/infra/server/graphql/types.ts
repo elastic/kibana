@@ -64,8 +64,6 @@ export interface InfraSource {
   logSummaryBetween: InfraLogSummaryInterval;
 
   logItem: InfraLogItem;
-  /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
-  map?: InfraResponse | null;
   /** A snapshot of nodes */
   snapshot?: InfraSnapshotResponse | null;
 
@@ -275,32 +273,6 @@ export interface InfraLogItemField {
   value: string;
 }
 
-export interface InfraResponse {
-  nodes: InfraNode[];
-}
-
-export interface InfraNode {
-  path: InfraNodePath[];
-
-  metric: InfraNodeMetric;
-}
-
-export interface InfraNodePath {
-  value: string;
-
-  label: string;
-}
-
-export interface InfraNodeMetric {
-  name: InfraMetricType;
-
-  value: number;
-
-  avg: number;
-
-  max: number;
-}
-
 export interface InfraSnapshotResponse {
   /** Nodes of type host, container or pod grouped by 0, 1 or 2 terms */
   nodes: InfraSnapshotNode[];
@@ -382,29 +354,6 @@ export interface InfraTimerangeInput {
   to: number;
   /** The beginning of the timerange */
   from: number;
-}
-
-export interface InfraPathInput {
-  /** The type of path */
-  type: InfraPathType;
-  /** The label to use in the results for the group by for the terms group by */
-  label?: string | null;
-  /** The field to group by from a terms aggregation, this is ignored by the filter type */
-  field?: string | null;
-  /** The fitlers for the filter group by */
-  filters?: InfraPathFilterInput[] | null;
-}
-/** A group by filter */
-export interface InfraPathFilterInput {
-  /** The label for the filter, this will be used as the group name in the final results */
-  label: string;
-  /** The query string query */
-  query: string;
-}
-
-export interface InfraMetricInput {
-  /** The type of metric */
-  type: InfraMetricType;
 }
 
 export interface InfraSnapshotGroupbyInput {
@@ -518,11 +467,6 @@ export interface LogSummaryBetweenInfraSourceArgs {
 export interface LogItemInfraSourceArgs {
   id: string;
 }
-export interface MapInfraSourceArgs {
-  timerange: InfraTimerangeInput;
-
-  filterQuery?: string | null;
-}
 export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
@@ -539,11 +483,6 @@ export interface MetricsInfraSourceArgs {
 }
 export interface IndexFieldsInfraSourceStatusArgs {
   indexType?: InfraIndexType | null;
-}
-export interface NodesInfraResponseArgs {
-  path: InfraPathInput[];
-
-  metric: InfraMetricInput;
 }
 export interface NodesInfraSnapshotResponseArgs {
   type: InfraNodeType;
@@ -585,25 +524,6 @@ export enum InfraNodeType {
   host = 'host',
 }
 
-export enum InfraPathType {
-  terms = 'terms',
-  filters = 'filters',
-  hosts = 'hosts',
-  pods = 'pods',
-  containers = 'containers',
-  custom = 'custom',
-}
-
-export enum InfraMetricType {
-  count = 'count',
-  cpu = 'cpu',
-  load = 'load',
-  memory = 'memory',
-  tx = 'tx',
-  rx = 'rx',
-  logRate = 'logRate',
-}
-
 export enum InfraSnapshotMetricType {
   count = 'count',
   cpu = 'cpu',
@@ -642,14 +562,6 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
-}
-
-export enum InfraOperator {
-  gt = 'gt',
-  gte = 'gte',
-  lt = 'lt',
-  lte = 'lte',
-  eq = 'eq',
 }
 
 // ====================================================
@@ -727,8 +639,6 @@ export namespace InfraSourceResolvers {
     logSummaryBetween?: LogSummaryBetweenResolver<InfraLogSummaryInterval, TypeParent, Context>;
 
     logItem?: LogItemResolver<InfraLogItem, TypeParent, Context>;
-    /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
-    map?: MapResolver<InfraResponse | null, TypeParent, Context>;
     /** A snapshot of nodes */
     snapshot?: SnapshotResolver<InfraSnapshotResponse | null, TypeParent, Context>;
 
@@ -828,17 +738,6 @@ export namespace InfraSourceResolvers {
   > = Resolver<R, Parent, Context, LogItemArgs>;
   export interface LogItemArgs {
     id: string;
-  }
-
-  export type MapResolver<
-    R = InfraResponse | null,
-    Parent = InfraSource,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, MapArgs>;
-  export interface MapArgs {
-    timerange: InfraTimerangeInput;
-
-    filterQuery?: string | null;
   }
 
   export type SnapshotResolver<
@@ -1501,94 +1400,6 @@ export namespace InfraLogItemFieldResolvers {
     Parent = InfraLogItemField,
     Context = InfraContext
   > = Resolver<R, Parent, Context>;
-}
-
-export namespace InfraResponseResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraResponse> {
-    nodes?: NodesResolver<InfraNode[], TypeParent, Context>;
-  }
-
-  export type NodesResolver<
-    R = InfraNode[],
-    Parent = InfraResponse,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context, NodesArgs>;
-  export interface NodesArgs {
-    path: InfraPathInput[];
-
-    metric: InfraMetricInput;
-  }
-}
-
-export namespace InfraNodeResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNode> {
-    path?: PathResolver<InfraNodePath[], TypeParent, Context>;
-
-    metric?: MetricResolver<InfraNodeMetric, TypeParent, Context>;
-  }
-
-  export type PathResolver<
-    R = InfraNodePath[],
-    Parent = InfraNode,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type MetricResolver<
-    R = InfraNodeMetric,
-    Parent = InfraNode,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-}
-
-export namespace InfraNodePathResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodePath> {
-    value?: ValueResolver<string, TypeParent, Context>;
-
-    label?: LabelResolver<string, TypeParent, Context>;
-  }
-
-  export type ValueResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type LabelResolver<R = string, Parent = InfraNodePath, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-}
-
-export namespace InfraNodeMetricResolvers {
-  export interface Resolvers<Context = InfraContext, TypeParent = InfraNodeMetric> {
-    name?: NameResolver<InfraMetricType, TypeParent, Context>;
-
-    value?: ValueResolver<number, TypeParent, Context>;
-
-    avg?: AvgResolver<number, TypeParent, Context>;
-
-    max?: MaxResolver<number, TypeParent, Context>;
-  }
-
-  export type NameResolver<
-    R = InfraMetricType,
-    Parent = InfraNodeMetric,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type ValueResolver<
-    R = number,
-    Parent = InfraNodeMetric,
-    Context = InfraContext
-  > = Resolver<R, Parent, Context>;
-  export type AvgResolver<R = number, Parent = InfraNodeMetric, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
-  export type MaxResolver<R = number, Parent = InfraNodeMetric, Context = InfraContext> = Resolver<
-    R,
-    Parent,
-    Context
-  >;
 }
 
 export namespace InfraSnapshotResponseResolvers {

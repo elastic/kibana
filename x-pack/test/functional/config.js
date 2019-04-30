@@ -193,7 +193,8 @@ export default async function ({ readConfigFile }) {
         '--xpack.xpack_main.telemetry.enabled=false',
         '--xpack.maps.showMapsInspectorAdapter=true',
         '--xpack.security.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"', // server restarts should not invalidate active sessions
-        '--xpack.code.security.enableGitCertCheck=false' // Disable git certificate check
+        '--xpack.code.security.enableGitCertCheck=false', // Disable git certificate check
+        '--timelion.ui.enabled=true',
       ],
     },
     uiSettings: {

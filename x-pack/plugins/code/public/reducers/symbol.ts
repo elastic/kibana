@@ -17,6 +17,7 @@ import {
   openSymbolPath,
   SymbolsPayload,
 } from '../actions';
+import { languageServerInitializing } from '../actions/language_server';
 
 const SPECIAL_SYMBOL_NAME = '{...}';
 const SPECIAL_CONTAINER_NAME = '';
@@ -35,6 +36,7 @@ export interface SymbolState {
   loading: boolean;
   lastRequestPath?: string;
   closedPaths: string[];
+  languageServerInitializing: boolean;
 }
 
 const initialState: SymbolState = {
@@ -42,6 +44,7 @@ const initialState: SymbolState = {
   loading: false,
   structureTree: {},
   closedPaths: [],
+  languageServerInitializing: false,
 };
 
 const sortSymbol = (a: SymbolWithMembers, b: SymbolWithMembers) => {
@@ -131,19 +134,18 @@ export const symbol = handleActions(
           ...state.symbols,
           [path]: data,
         };
+        draft.languageServerInitializing = false;
         draft.error = undefined;
       }),
-    [String(loadStructureFailed)]: (state: SymbolState, action: Action<any>) => {
-      if (action.payload) {
-        return produce<SymbolState>(state, draft => {
+    [String(loadStructureFailed)]: (state: SymbolState, action: Action<any>) =>
+      produce<SymbolState>(state, draft => {
+        if (action.payload) {
           draft.loading = false;
           draft.error = action.payload;
-        });
-      } else {
-        return state;
-      }
-    },
-    [String(closeSymbolPath)]: (state: SymbolState, action: any) =>
+        }
+        draft.languageServerInitializing = false;
+      }),
+    [String(closeSymbolPath)]: (state: SymbolState, action: Action<any>) =>
       produce<SymbolState>(state, (draft: SymbolState) => {
         const path = action.payload!;
         if (!state.closedPaths.includes(path)) {
@@ -156,6 +158,10 @@ export const symbol = handleActions(
         if (idx >= 0) {
           draft.closedPaths.splice(idx, 1);
         }
+      }),
+    [String(languageServerInitializing)]: (state: SymbolState) =>
+      produce<SymbolState>(state, draft => {
+        draft.languageServerInitializing = true;
       }),
   },
   initialState
