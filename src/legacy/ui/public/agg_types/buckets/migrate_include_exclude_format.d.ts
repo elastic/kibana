@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { AggConfig } from 'ui/vis/agg_config';
 
+export function isStringType(type: AggConfig): boolean;
 export const isType: (agg: AggConfig) => any;

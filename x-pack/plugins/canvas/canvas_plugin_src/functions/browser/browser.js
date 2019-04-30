@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const browser = () => ({
-  name: 'browser',
-  help: 'Force the interpreter to return to the browser',
-  args: {},
-  fn: context => context,
-});
+export function browser() {
+  return {
+    name: 'browser',
+    help: 'Force the interpreter to return to the browser',
+    args: {},
+    fn: context => context,
+  };
+}

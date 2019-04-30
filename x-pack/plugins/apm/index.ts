@@ -87,7 +87,7 @@ export function apm(kibana: any) {
               all: [],
               read: []
             },
-            ui: ['show']
+            ui: ['show', 'save']
           },
           read: {
             api: ['apm'],

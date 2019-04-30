@@ -11,6 +11,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../../types/provider
 export default function({ getPageObjects, getService }: KibanaFunctionalTestDefaultProviders) {
   const esArchiver = getService('esArchiver');
   const security: SecurityService = getService('security');
+  const globalNav = getService('globalNav');
   const PageObjects = getPageObjects([
     'common',
     'discover',
@@ -93,6 +94,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await testSubjects.existOrFail('discoverSaveButton', 20000);
       });
 
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
+
       it('Permalinks shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
@@ -146,6 +151,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('discover');
         await testSubjects.existOrFail('discoverNewButton', 10000);
         await testSubjects.missingOrFail('discoverSaveButton');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`doesn't show visualize button`, async () => {
