@@ -43,6 +43,23 @@ app.directive('mapListing', function (reactDirective) {
 routes.enable();
 
 routes
+  .defaults(/.*/, {
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.maps.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('xpack.maps.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('xpack.maps.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save maps',
+        }),
+        iconType: 'glasses'
+      };
+    }
+  })
   .when('/', {
     template: listingTemplate,
     controller($scope, gisMapSavedObjectLoader, config) {

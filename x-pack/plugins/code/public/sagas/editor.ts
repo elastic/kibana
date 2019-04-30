@@ -191,7 +191,7 @@ function* handleMainRouteChange(action: Action<Match>) {
   const isDir = pathType === PathTypes.tree;
   const openPath = isDir
     ? file
-    : file
+    : (file || '')
         .split('/')
         .slice(0, -1)
         .join('/');
@@ -200,7 +200,7 @@ function* handleMainRouteChange(action: Action<Match>) {
     fetchRepoTree({
       uri: repoUri,
       revision,
-      path: file,
+      path: file || '',
       parents: getPathOfTree(tree, (file || '').split('/')) === null,
       isDir,
     })

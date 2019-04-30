@@ -29,7 +29,11 @@ export function ServiceOverview() {
   const { urlParams } = useUrlParams();
   const { start, end, kuery } = urlParams;
   const { data = initalData } = useFetcher(
-    () => loadServiceList({ start, end, kuery }),
+    () => {
+      if (start && end) {
+        return loadServiceList({ start, end, kuery });
+      }
+    },
     [start, end, kuery]
   );
 
