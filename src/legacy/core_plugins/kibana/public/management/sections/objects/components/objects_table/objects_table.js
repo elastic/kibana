@@ -474,6 +474,7 @@ class ObjectsTableUI extends Component {
           }
           onCancel={onCancel}
           onConfirm={onConfirm}
+          buttonColor="danger"
           cancelButtonText={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"

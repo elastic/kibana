@@ -878,6 +878,7 @@ class FlyoutUI extends Component {
                 defaultMessage: 'Overwrite',
               },
             )}
+            buttonColor="danger"
             onCancel={this.overwriteSkipped.bind(this)}
             onConfirm={this.overwriteConfirmed.bind(this)}
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
