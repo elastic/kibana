@@ -221,6 +221,19 @@ export function uiRenderMixin(kbnServer, server, config) {
       ...kbnServer.newPlatform.setup.plugins.uiPlugins.public.entries()
     ].map(([id, plugin]) => ({ id, plugin }));
 
+    const injectedVars = await replaceInjectedVars(
+      request,
+      mergeVariables(
+        injectedVarsOverrides,
+        await server.getInjectedUiAppVars(app.getId()),
+        defaultInjectedVars,
+      ),
+    );
+
+    // TODO: move uiCapabilities to uiExport
+    // Deleting this for testing to verify that no consuming code is trying to read this value.
+    delete injectedVars.uiCapabilities;
+
     const nonce = await generateCSPNonce();
 
     const response = h.view('ui_app', {
@@ -242,14 +255,7 @@ export function uiRenderMixin(kbnServer, server, config) {
         csp: {
           warnLegacyBrowsers: config.get('csp.warnLegacyBrowsers'),
         },
-        vars: await replaceInjectedVars(
-          request,
-          mergeVariables(
-            injectedVarsOverrides,
-            await server.getInjectedUiAppVars(app.getId()),
-            defaultInjectedVars,
-          ),
-        ),
+        vars: injectedVars,
 
         uiPlugins,
 
