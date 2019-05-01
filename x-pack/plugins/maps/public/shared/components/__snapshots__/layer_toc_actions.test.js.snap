@@ -2,34 +2,30 @@
 
 exports[`LayerTocActions is rendered 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <div>
           icon mock
         </div>
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -95,34 +91,30 @@ exports[`LayerTocActions is rendered 1`] = `
 
 exports[`LayerTocActions should disable fit to data when supportsFitToBounds is false 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <div>
           icon mock
         </div>
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -188,34 +180,30 @@ exports[`LayerTocActions should disable fit to data when supportsFitToBounds is 
 
 exports[`LayerTocActions should display spinner when layer is loading 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <EuiLoadingSpinner
           size="m"
         />
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -281,34 +269,30 @@ exports[`LayerTocActions should display spinner when layer is loading 1`] = `
 
 exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <div>
           icon mock
         </div>
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -356,25 +340,21 @@ exports[`LayerTocActions should not show edit actions in read only mode 1`] = `
 
 exports[`LayerTocActions should provide feedback when layer is not visible because of current zoom level 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <EuiToolTip
           content="Map is at zoom level 0.
@@ -387,10 +367,10 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
           </div>
         </EuiToolTip>
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -456,34 +436,30 @@ exports[`LayerTocActions should provide feedback when layer is not visible becau
 
 exports[`LayerTocActions should show visible toggle when layer is not visible 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <div>
           icon mock
         </div>
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
@@ -549,25 +525,21 @@ exports[`LayerTocActions should show visible toggle when layer is not visible 1`
 
 exports[`LayerTocActions should show warning when layer has errors 1`] = `
 <EuiPopover
+  anchorClassName="mapLayTocActions__popoverAnchor"
   anchorPosition="leftUp"
   button={
     <EuiButtonEmpty
-      className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+      className="mapTocEntry__layerName eui-textLeft"
       color="text"
       data-test-subj="layerTocActionsPanelToggleButtonlayer1"
       flush="left"
       iconSide="left"
       onClick={[Function]}
       size="xs"
-      style={
-        Object {
-          "maxWidth": "19rem",
-        }
-      }
       type="button"
     >
       <span
-        className="eui-alignMiddle"
+        className="mapTocEntry__layerNameIcon"
       >
         <EuiIconTip
           aria-label="Load warning"
@@ -577,10 +549,10 @@ exports[`LayerTocActions should show warning when layer has errors 1`] = `
           type="alert"
         />
       </span>
-       
       layer 1
     </EuiButtonEmpty>
   }
+  className="mapLayTocActions"
   closePopover={[Function]}
   hasArrow={true}
   id="contextMenu"
