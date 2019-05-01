@@ -102,7 +102,7 @@ export const SourceConfigurationFlyout: React.FunctionComponent<
       hideCloseButton
       onClose={noop}
     >
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2 id="sourceConfigurationTitle">
             {shouldAllowEdit ? (

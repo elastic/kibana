@@ -11,7 +11,7 @@ exports[`renders DashboardCloneModal 1`] = `
     <EuiModalHeader>
       <EuiModalHeaderTitle>
         <FormattedMessage
-          defaultMessage="Clone Dashboard"
+          defaultMessage="Clone dashboard"
           id="kbn.dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
           values={Object {}}
         />
@@ -40,13 +40,11 @@ exports[`renders DashboardCloneModal 1`] = `
       />
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButton
+      <EuiButtonEmpty
         color="primary"
         data-test-subj="cloneCancelButton"
-        fill={false}
         iconSide="left"
         onClick={[Function]}
-        size="m"
         type="button"
       >
         <FormattedMessage
@@ -54,7 +52,7 @@ exports[`renders DashboardCloneModal 1`] = `
           id="kbn.dashboard.topNav.cloneModal.cancelButtonLabel"
           values={Object {}}
         />
-      </EuiButton>
+      </EuiButtonEmpty>
       <EuiButton
         color="primary"
         data-test-subj="cloneConfirmButton"
