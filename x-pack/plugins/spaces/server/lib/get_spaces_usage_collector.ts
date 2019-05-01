@@ -41,6 +41,7 @@ async function getSpacesUsage(callCluster: any, server: Server, spacesAvailable:
         disabledFeatures: {
           terms: {
             field: 'space.disabledFeatures',
+            include: knownFeatureIds,
             size: knownFeatureIds.length,
           },
         },
@@ -54,18 +55,19 @@ async function getSpacesUsage(callCluster: any, server: Server, spacesAvailable:
   const count = get(hits, 'total.value', 0);
   const disabledFeatureBuckets = get(aggregations, 'disabledFeatures.buckets', []);
 
+  const initialCounts = knownFeatureIds.reduce(
+    (acc, featureId) => ({ ...acc, [featureId]: 0 }),
+    {}
+  );
+
   const disabledFeatures: Record<string, number> = disabledFeatureBuckets.reduce(
     (acc, { key, doc_count }) => {
-      if (!acc.hasOwnProperty(key)) {
-        return acc;
-      }
-
       return {
         ...acc,
         [key]: doc_count,
       };
     },
-    knownFeatureIds.reduce((acc, featureId) => ({ ...acc, [featureId]: 0 }), {})
+    initialCounts
   );
 
   const usesFeatureControls = Object.values(disabledFeatures).some(

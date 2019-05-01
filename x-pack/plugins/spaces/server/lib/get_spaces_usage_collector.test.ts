@@ -128,17 +128,6 @@ describe('with a basic license', () => {
       feature2: 0,
     });
   });
-
-  test('calculates feature control usage with invalid features', async () => {
-    serverWithBasicLicenseMock.plugins.xpack_main.getFeatures.mockReturnValue([{ id: 'feature3' }]);
-
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithBasicLicenseMock);
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
-    expect(usageStats.usesFeatureControls).toBe(false);
-    expect(usageStats.disabledFeatures).toEqual({
-      feature3: 0,
-    });
-  });
 });
 
 describe('with no license', () => {
@@ -196,19 +185,6 @@ describe('with platinum license', () => {
     expect(usageStats.disabledFeatures).toEqual({
       feature1: 1,
       feature2: 0,
-    });
-  });
-
-  test('calculates feature control usage with invalid features', async () => {
-    serverWithPlatinumLicenseMock.plugins.xpack_main.getFeatures.mockReturnValue([
-      { id: 'feature3' },
-    ]);
-
-    const { fetch: getSpacesUsage } = getSpacesUsageCollector(serverWithPlatinumLicenseMock);
-    usageStats = await getSpacesUsage(defaultCallClusterMock);
-    expect(usageStats.usesFeatureControls).toBe(false);
-    expect(usageStats.disabledFeatures).toEqual({
-      feature3: 0,
     });
   });
 });
