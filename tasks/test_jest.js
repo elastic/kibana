@@ -38,7 +38,7 @@ module.exports = function (grunt) {
     };
 
     return new Promise((resolve, reject) => {
-      const proc = grunt.util.spawn(serverCmd, (error, result, code) => {
+      grunt.util.spawn(serverCmd, (error, result, code) => {
         if (error || code !== 0) {
           const error = new Error(`jest exited with code ${code}`);
           grunt.fail.fatal(error);
@@ -49,9 +49,6 @@ module.exports = function (grunt) {
         grunt.log.writeln(result);
         resolve();
       });
-      // jest uses stderr for output https://github.com/facebook/jest/issues/5064
-      console.log('hiya', Object.keys(proc));
-      proc.stderr.pipe(process.stdout);
     });
   }
 };
