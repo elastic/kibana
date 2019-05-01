@@ -14,15 +14,17 @@ import { initServicesApi } from '../routes/services';
 import { initTracesApi } from '../routes/traces';
 import { initTransactionGroupsApi } from '../routes/transaction_groups';
 import { initUIFiltersApi } from '../routes/ui_filters';
+import { initSettingsApi } from '../routes/settings';
 
 export class Plugin {
   public setup(core: InternalCoreSetup) {
-    initUIFiltersApi(core);
-    initTransactionGroupsApi(core);
-    initTracesApi(core);
-    initServicesApi(core);
     initErrorsApi(core);
     initMetricsApi(core);
+    initServicesApi(core);
+    initSettingsApi(core);
+    initTracesApi(core);
+    initTransactionGroupsApi(core);
+    initUIFiltersApi(core);
     makeApmUsageCollector(core as CoreSetupWithUsageCollector);
     ensureIndexPatternExists(core);
   }

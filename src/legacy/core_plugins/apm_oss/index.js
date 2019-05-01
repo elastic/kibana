@@ -32,24 +32,31 @@ export default function apmOss(kibana) {
         indexPattern: Joi.string().default('apm-*'),
 
         // ES Indices
-        sourcemapIndices: Joi.string().default('apm-*'),
+        cmIndex: Joi.string().default('.apm-cm'),
         errorIndices: Joi.string().default('apm-*'),
-        transactionIndices: Joi.string().default('apm-*'),
-        spanIndices: Joi.string().default('apm-*'),
         metricsIndices: Joi.string().default('apm-*'),
         onboardingIndices: Joi.string().default('apm-*'),
+        sourcemapIndices: Joi.string().default('apm-*'),
+        spanIndices: Joi.string().default('apm-*'),
+        transactionIndices: Joi.string().default('apm-*'),
       }).default();
     },
 
     init(server) {
-      server.expose('indexPatterns', _.uniq([
-        'sourcemapIndices',
-        'errorIndices',
-        'transactionIndices',
-        'spanIndices',
-        'metricsIndices',
-        'onboardingIndices'
-      ].map(type => server.config().get(`apm_oss.${type}`))));
-    }
+      server.expose(
+        'indexPatterns',
+        _.uniq(
+          [
+            'cmIndex',
+            'errorIndices',
+            'metricsIndices',
+            'onboardingIndices',
+            'sourcemapIndices',
+            'spanIndices',
+            'transactionIndices',
+          ].map(type => server.config().get(`apm_oss.${type}`))
+        )
+      );
+    },
   });
 }

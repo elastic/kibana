@@ -24,7 +24,7 @@ export interface APMSearchParams extends SearchParams {
 }
 
 export type ESClient = <T = void, U = void>(
-  type: string,
+  type: 'search' | 'index',
   params: APMSearchParams
 ) => Promise<AggregationSearchResponse<T, U>>;
 
@@ -89,31 +89,43 @@ function addFilterForLegacyData(
   return nextParams;
 }
 
+// add additional params for search (aka: read) requests
+async function getParamsForSearchRequest(
+  req: Legacy.Request,
+  params: APMSearchParams
+) {
+  const config = req.server.config();
+  const uiSettings = req.getUiSettingsService();
+  const apmIndices = getApmIndices(config);
+  const includeFrozen = await uiSettings.get('search:includeFrozen');
+  return {
+    ...addFilterForLegacyData(apmIndices, params), // filter out pre-7.0 data
+    ignore_throttled: !includeFrozen, // whether to query frozen indices or not
+    rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
+  };
+}
+
 export function setupRequest(req: Legacy.Request): Setup {
   const query = (req.query as unknown) as APMRequestQuery;
   const cluster = req.server.plugins.elasticsearch.getCluster('data');
-  const uiSettings = req.getUiSettingsService();
   const config = req.server.config();
-  const apmIndices = getApmIndices(config);
 
   const client: ESClient = async (type, params) => {
-    const includeFrozen = await uiSettings.get('search:includeFrozen');
-
-    const nextParams = {
-      ...addFilterForLegacyData(apmIndices, params), // filter out pre-7.0 data
-      ignore_throttled: !includeFrozen, // whether to query frozen indices or not
-      rest_total_hits_as_int: true // ensure that ES returns accurate hits.total with pre-6.6 format
-    };
+    const nextParams =
+      type === 'search' ? await getParamsForSearchRequest(req, params) : params;
 
     if (query._debug) {
-      console.log(`DEBUG ES QUERY:`);
-      console.log('includeFrozen: ', includeFrozen);
+      console.log(`--DEBUG ES QUERY--`);
       console.log(
         `${req.method.toUpperCase()} ${req.url.pathname} ${JSON.stringify(
           query
         )}`
       );
-      console.log(`GET ${nextParams.index}/_search`);
+      if (type === 'search') {
+        console.log(`GET ${nextParams.index}/_search`);
+      } else if (type === 'index') {
+        console.log(`PUT ${nextParams.index}`);
+      }
       console.log(JSON.stringify(nextParams.body, null, 4));
     }
 

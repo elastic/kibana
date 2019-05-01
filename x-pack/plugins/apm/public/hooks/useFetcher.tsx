@@ -29,16 +29,21 @@ export function useFetcher<Response>(
   useEffect(() => {
     let didCancel = false;
 
-    dispatchStatus({ id, isLoading: true });
-    setResult({
-      data: result.data, // preserve data from previous state while loading next state
-      status: FETCH_STATUS.LOADING,
-      error: undefined
-    });
-
     async function doFetch() {
+      const promise = fn();
+      if (!promise) {
+        return;
+      }
+
+      dispatchStatus({ id, isLoading: true });
+      setResult({
+        data: result.data, // preserve data from previous state while loading next state
+        status: FETCH_STATUS.LOADING,
+        error: undefined
+      });
+
       try {
-        const data = await fn();
+        const data = await promise;
         if (!didCancel) {
           dispatchStatus({ id, isLoading: false });
           setResult({
