@@ -3,7 +3,7 @@
 exports[`IntegrationLink component renders without errors 1`] = `
 <EuiLink
   aria-label="foo"
-  color="subdued"
+  color="primary"
   href="/app/foo?kuery=localhost"
   type="button"
 >
