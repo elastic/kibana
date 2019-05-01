@@ -78,24 +78,24 @@ export class KibanaMigrator {
     // Wait until the plugins have been found an initialized...
     await this.kbnServer.ready();
 
-    const config = server.config();
-    const indexMap = createIndexMap(
-      config.get('kibana.index'),
-      this.kbnServer.uiExports.savedObjectSchemas,
-      this.mappingProperties
-    );
-
     // We can't do anything if the elasticsearch plugin has been disabled.
     if (!server.plugins.elasticsearch) {
       server.log(
         ['warning', 'migration'],
         'The elasticsearch plugin is disabled. Skipping migrations.'
       );
-      return Object.keys(indexMap).map(() => ({ status: 'skipped' }));
+      return Object.keys(this.mappingProperties).map(() => ({ status: 'skipped' }));
     }
 
     // Wait until elasticsearch is green...
     await server.plugins.elasticsearch.waitUntilReady();
+
+    const config = server.config();
+    const indexMap = createIndexMap(
+      config.get('kibana.index'),
+      this.kbnServer.uiExports.savedObjectSchemas,
+      this.mappingProperties
+    );
 
     const migrators = Object.keys(indexMap).map(index => {
       return new IndexMigrator({
