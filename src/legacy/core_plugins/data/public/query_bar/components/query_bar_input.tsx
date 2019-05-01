@@ -237,6 +237,9 @@ export class QueryBarInputUI extends Component<Props, State> {
             this.selectSuggestion(this.state.suggestions[index]);
           } else {
             this.onSubmit(this.props.query);
+            this.setState({
+              isSuggestionsVisible: false,
+            });
           }
           break;
         case KEY_CODES.ESC:
