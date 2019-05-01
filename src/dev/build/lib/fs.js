@@ -174,12 +174,14 @@ export async function untar(source, destination, extractOptions = {}) {
   assertAbsolute(source);
   assertAbsolute(destination);
 
+  await mkdirpAsync(destination);
+
   await createPromiseFromStreams([
     fs.createReadStream(source),
     createGunzip(),
     tar.extract({
       ...extractOptions,
-      path: destination
+      cwd: destination
     }),
   ]);
 }
