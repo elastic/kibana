@@ -204,15 +204,6 @@ export default function (kibana) {
             return obj.attributes.url;
           },
         },
-        'sample-data-telemetry': {
-          isImportableAndExportable: false,
-        },
-        server: {
-          isImportableAndExportable: false,
-        },
-        'kql-telemetry': {
-          isImportableAndExportable: false,
-        },
         config: {
           isImportableAndExportable: true,
           getInAppUrl() {

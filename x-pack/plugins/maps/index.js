@@ -72,9 +72,6 @@ export function maps(kibana) {
             };
           },
         },
-        'maps-telemetry': {
-          isImportableAndExportable: false,
-        }
       },
       mappings,
       migrations,

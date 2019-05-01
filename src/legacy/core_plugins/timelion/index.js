@@ -69,13 +69,6 @@ export default function (kibana) {
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-      savedObjectsManagement: {
-        'timelion-sheet': {
-          // Timelion objects are saved as visualizations now and
-          // don't save objects as `timelion` type.
-          isImportableAndExportable: false,
-        },
-      },
 
       uiSettingDefaults: {
         'timelion:showTutorial': {

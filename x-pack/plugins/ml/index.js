@@ -55,11 +55,6 @@ export const ml = (kibana) => {
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
       hacks: ['plugins/ml/hacks/toggle_app_link_in_nav'],
-      savedObjectsManagement: {
-        'ml-telemetry': {
-          isImportableAndExportable: false,
-        }
-      },
       savedObjectSchemas: {
         'ml-telemetry': {
           isNamespaceAgnostic: true,
