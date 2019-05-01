@@ -22,13 +22,13 @@ import {
   mockGetAutocompleteSuggestions,
   mockPersistedLog,
   mockPersistedLogFactory,
-} from 'ui/query_bar/components/query_bar.test.mocks';
+} from './query_bar.test.mocks';
 
 import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
-import { QueryBar } from 'ui/query_bar';
-import { QueryLanguageSwitcher } from 'ui/query_bar/components/language_switcher';
+import { QueryBar } from './query_bar';
+import { QueryLanguageSwitcher } from './language_switcher';
 import { QueryBarUI } from './query_bar';
 
 const noop = () => {

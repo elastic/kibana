@@ -20,7 +20,7 @@
 import { mount, shallow } from 'enzyme';
 import React from 'react';
 import { AutocompleteSuggestion } from 'ui/autocomplete_providers';
-import { SuggestionComponent } from 'ui/query_bar/components/typeahead/suggestion_component';
+import { SuggestionComponent } from './suggestion_component';
 
 const noop = () => {
   return;
