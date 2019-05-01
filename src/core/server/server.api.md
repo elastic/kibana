@@ -74,6 +74,12 @@ export interface CoreSetup {
     plugins: PluginsServiceSetup;
 }
 
+// @public (undocumented)
+export interface CoreStart {
+    // (undocumented)
+    http: HttpServiceStart;
+}
+
 // @internal
 export interface DiscoveredPlugin {
     readonly configPath: ConfigPath;
@@ -108,7 +114,12 @@ export interface ElasticsearchServiceSetup {
 export type Headers = Record<string, string | string[] | undefined>;
 
 // @public (undocumented)
-export type HttpServiceSetup = HttpServerInfo;
+export type HttpServiceSetup = HttpServerSetup;
+
+// @public (undocumented)
+export interface HttpServiceStart {
+    isListening: () => boolean;
+}
 
 // @public (undocumented)
 export class KibanaRequest<Params, Query, Body> {
