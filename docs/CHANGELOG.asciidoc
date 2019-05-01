@@ -10,6 +10,7 @@
 
 This section summarizes the changes in each release.
 
+* <<release-notes-7.0.1>>
 * <<release-notes-7.0.0>>
 * <<release-notes-7.0.0-rc2>>
 * <<release-notes-7.0.0-rc1>>
@@ -18,6 +19,91 @@ This section summarizes the changes in each release.
 * <<release-notes-7.0.0-alpha1>>
 
 --
+
+
+[[release-notes-7.0.1]]
+== {kib} 7.0.1
+
+
+See <<breaking-changes, breaking changes>> for the changes to be aware of when migrating your application 
+from one version of Kibana to another.
+
+
+[float]
+[[enhancement-7.0.1]]
+=== Enhancements
+Management::
+* Enhances design for Search Profiler, including dark mode {pull}33445[#33445]
+Visualize::
+* Sets a default timeout for all "waitFor" methods {pull}34756[#34756]
+
+[float]
+[[bug-7.0.1]]
+=== Bug fixes
+APM:: 
+* Updates APM migration reindex script {pull}34801[#34801]
+Canvas::
+* Recreates handlers and resets completed state on expression change {pull}33900[#33900]
+* Fixes bad context check {pull}35621[#35621]
+Design::
+* Updates README for KUI to note deprecation {pull}34389[#34389]
+* Resets heading and p tags to EUI font reset {pull}33717[#33717]
+Console::
+* Changes autocomplete suggest for `number_of_shards` to default (1) {pull}35657[#35657]
+Cross-Cluster Replication::
+* Updates the Delete Remote Cluster API to support multiple comma-delimited clusters {pull}34595[#34595]
+* Allows user to use CCR when security is not enabled {pull}35333[#35333]
+* Retrieves paused state of follower index from ES instead of depending upon the client to provide it {pull}35342[#35342]
+* Fixes filling x-axis values for date histogram {pull}35247[#35247]
+Geo::
+* Updates map name in breadcrumb when changed {pull}34287[#34287]
+* Filters fields properly for join right field select {pull}35098[#35098]
+* Clears data load error when layer gets correct data {pull}34484[#34484]
+Index Lifecycle Management::
+* Fixes crash when zero replicas configured in a phase for policy {pull}34480[#34480]
+Infrastructure:: 
+* Fixes metrics chart tooltip alignment {pull}34749[#34749]
+* Sets [System][auth] program name correctly {pull}34212[#34212]
+Kibana Home & Add Data::
+* Adds documentation link to Functionbeat to fix Getting Started Guide {pull}35174[#35174]
+Machine Learning::
+* Ensures cardinality warning is only shown on validity fail {pull}34874[#34874]
+* Adds data-test-subj to some job management elements {pull}35284[#35284]
+* Ensures `viewByFieldName` is retained on Anomaly Explorer initialize {pull}35260[#35260]
+Monitoring::
+* Monitors internal telemetry collection {pull}34609[#34609]
+* Addresses shard allocation color mismatch {pull}34086[#34086]
+* Protects against fields not existing in Logstash Nodes listing {pull}34939[#34939]
+* Fixes field name for "Events Ingested" in Logstash Node List page {pull}35122[#35122]
+* Swaps KUI base class with EUI equivalent {pull}34644[#34644]
+* Allows empty and null key types {pull}35016[#35016]
+* Adds sorting to all columns {pull}35410[#35410]
+* Shows node name instead of UID in breadcrumbs {pull}35553[#35553]
+Observability::
+* Removes crosshair synchronization to avoid display bug {pull}33660[#33660]
+* Switches GQL field from Int to String {pull}33746[#33746]
+Operations::
+* Links stylesheets with `type=text/css` {pull}35546[#35546]
+* Deletes empty stylesheet for status page {pull}35540[#35540]
+* Enables delete of `watch_optimizer_cache_state.json` when data folder is outside of {kib} folder {pull}32446[#32446]
+* Fixes missing flag checks {pull}35187[#35187]
+* Adds ability to register callback for clean up {pull}35119[#35119]
+Platform::
+* Fixes import UI to not fail silently when a record other than index-pattern and search is missing {pull}33080[#33080]
+* Avoids validating saved object migrationVersion in tests where not needed {pull}35010[#35010]
+* Exclude usage stats when `exclude_usage` flag is specified {pull}35691[#35691]
+Upgrade Assistant::
+* Specifies `allow_restricted_indices` for `_has_privileges` {pull}35125[#35125]
+* Shows different interstitial text when cluster is upgraded {pull}34762[#34762]
+Visualizations::
+* Prevents saving the current timezone in visualizations {pull}34795[#34795]
+* Fixes timepicker problem in Firefox {pull}35279[#35279]
+* Fixes timepicker quick select {pull}34354[#34354]
+* Applies timezone correctly to formatted dates and ticks {pull}33831[#33831]
+
+
+
+
 
 [[release-notes-7.0.0]]
 == {kib} 7.0.0
