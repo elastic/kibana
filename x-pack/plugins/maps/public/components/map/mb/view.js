@@ -41,31 +41,23 @@ export class MBMapContainer extends React.Component {
       modes: mbDrawModes
     });
     this._mbDrawControlAdded = false;
-    this._mbCursor = null;
   }
 
   _onTooltipClose = () => {
     this.props.setTooltipState(null);
   };
 
-  _onPolygonSelectionChange = async (e) => {
+  _onDraw = async (e) => {
 
-    if (e.features.length) {
-      //when the user deselects, the filter gets applied.
+    if (!e.features.length) {
       return;
     }
-    const featureCollection = this._mbDrawControl.getAll();
     const geoField = this.props.drawState.geoField;
     const geoFieldType = this.props.drawState.geoFieldType;
     const indexPatternId = this.props.drawState.indexPatternId;
     this.props.disableDrawState();
 
-
-    if (!featureCollection.features.length) {
-      return;
-    }
-
-    const geoPolygonFilter = createShapeFilter(featureCollection.features[0].geometry, indexPatternId, geoField, geoFieldType);
+    const geoPolygonFilter = createShapeFilter(e.features[0].geometry, indexPatternId, geoField, geoFieldType);
     if (!geoPolygonFilter) {
       return;
     }
@@ -249,8 +241,8 @@ export class MBMapContainer extends React.Component {
     if (!this._mbDrawControlAdded) {
       return;
     }
-    // this._mbMap.getCanvas().style.cursor = this._mbCursor;
-    this._mbMap.off('draw.selectionchange', this._onPolygonSelectionChange);
+    this._mbMap.getCanvas().style.cursor = '';
+    this._mbMap.off('draw.create', this._onDraw);
     this._mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
 
@@ -259,12 +251,9 @@ export class MBMapContainer extends React.Component {
   _updateDrawControl() {
     if (!this._mbDrawControlAdded) {
       this._mbMap.addControl(this._mbDrawControl);
-      // this._mbCursor = this._mbMap.getCanvas().style.cursor;
-      // this._mbMap.getCanvas().style.cursor = 'crosshair';
-      this._mbMap.on('draw.selectionchange', this._onPolygonSelectionChange);
-      this._mbDrawControlAdded = true;
+      this._mbMap.getCanvas().style.cursor = 'crosshair';
+      this._mbMap.on('draw.create', this._onDraw);
     }
-
     const mbDrawMode = this.props.drawState.drawType === DRAW_STATE_DRAW_TYPE.POLYGON ?
       this._mbDrawControl.modes.DRAW_POLYGON : 'draw_rectangle';
     this._mbDrawControl.changeMode(mbDrawMode);
@@ -277,7 +266,6 @@ export class MBMapContainer extends React.Component {
       initialView: this.props.goto ? this.props.goto.center : null,
       scrollZoom: this.props.scrollZoom
     });
-    this._mbCursor = this._mbMap.getCanvas().style.cursor;
 
     if (!this._isMounted) {
       return;
