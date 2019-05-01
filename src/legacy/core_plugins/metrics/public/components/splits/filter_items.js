@@ -51,6 +51,7 @@ class FilterItemsUi extends Component {
     collectionActions.handleChange(this.props, _.assign({}, model, part));
   }
   renderRow(row, i, items) {
+    const indexPatterns = this.props.indexPatterns;
     const defaults = { filter: '', label: '' };
     const model = { ...defaults, ...row };
     const handleChange = (part) => {
@@ -85,7 +86,7 @@ class FilterItemsUi extends Component {
             screenTitle={'DataMetricsGroupByFiltersFilter'}
             onSubmit={(query) => this.handleSubmit(model, query)}
             appName={'VisEditor'}
-            indexPatterns={model.index_pattern || model.default_index_pattern}
+            indexPatterns={indexPatterns}
             store={localStorage || {}}
             showDatePicker={false}
           />
@@ -127,7 +128,8 @@ class FilterItemsUi extends Component {
 FilterItemsUi.propTypes = {
   name: PropTypes.string,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatterns: PropTypes.array,
 };
 
 const FilterItems = injectI18n(FilterItemsUi);
