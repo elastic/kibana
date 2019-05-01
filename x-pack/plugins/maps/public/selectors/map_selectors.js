@@ -81,6 +81,8 @@ export const getWaitingForMapReadyLayerListRaw = ({ map }) => map.waitingForMapR
   ? map.waitingForMapReadyLayerList
   : [];
 
+export const getScrollZoom = ({ map }) => map.mapState.scrollZoom;
+
 export const getMapExtent = ({ map }) => map.mapState.extent ?
   map.mapState.extent : {};
 
@@ -198,6 +200,6 @@ export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some(layerDescriptor => {
     const currentState = copyPersistentState(layerDescriptor);
     const trackedState = layerDescriptor[TRACKED_LAYER_DESCRIPTOR];
-    return (trackedState) ? !_.isEqual(currentState, trackedState) : false;
+    return (trackedState) ? !_.isEqual(currentState, copyPersistentState(trackedState)) : false;
   });
 });
