@@ -9,6 +9,7 @@ import { TransactionListAPIResponse } from '../../server/lib/transactions/get_to
 import { loadTransactionList } from '../services/rest/apm/transaction_groups';
 import { IUrlParams } from '../context/UrlParamsContext/types';
 import { useFetcher } from './useFetcher';
+import { useUiFilters } from './useUiFilters';
 
 const getRelativeImpact = (
   impact: number,
@@ -34,7 +35,8 @@ function getWithRelativeImpact(items: TransactionListAPIResponse) {
 }
 
 export function useTransactionList(urlParams: IUrlParams) {
-  const { serviceName, transactionType, start, end, kuery } = urlParams;
+  const { serviceName, transactionType, start, end } = urlParams;
+  const { uiFilters, uiFiltersKey } = useUiFilters();
   const { data = [], error, status } = useFetcher(
     () => {
       if (serviceName && start && end && transactionType) {
@@ -43,11 +45,11 @@ export function useTransactionList(urlParams: IUrlParams) {
           start,
           end,
           transactionType,
-          kuery
+          uiFilters
         });
       }
     },
-    [serviceName, start, end, transactionType, kuery]
+    [serviceName, start, end, transactionType, uiFiltersKey]
   );
 
   const memoizedData = useMemo(() => getWithRelativeImpact(data), [data]);

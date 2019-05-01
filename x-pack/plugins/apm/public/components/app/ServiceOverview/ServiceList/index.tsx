@@ -14,6 +14,7 @@ import { fontSizes, truncate } from '../../../../style/variables';
 import { asDecimal, asMillis } from '../../../../utils/formatters';
 import { APMLink } from '../../../shared/Links/APMLink';
 import { ITableColumn, ManagedTable } from '../../../shared/ManagedTable';
+import { TruncatedAnchorEuiToolTip } from './TruncatedAnchorEuiToolTip';
 
 interface Props {
   items?: ServiceListAPIResponse['items'];
@@ -55,6 +56,26 @@ export const SERVICE_COLUMNS: Array<
           {formatString(serviceName)}
         </AppLink>
       </EuiToolTip>
+    )
+  },
+  {
+    field: 'environments',
+    name: i18n.translate('xpack.apm.servicesTable.environmentColumnLabel', {
+      defaultMessage: 'Environment'
+    }),
+    sortable: true,
+    render: (environments: string[]) => (
+      <TruncatedAnchorEuiToolTip
+        id="service-environments-tooltip"
+        content={environments.map(env => (
+          <React.Fragment key={env}>
+            {env}
+            <br />
+          </React.Fragment>
+        ))}
+      >
+        <>{environments.join(',')}</>
+      </TruncatedAnchorEuiToolTip>
     )
   },
   {

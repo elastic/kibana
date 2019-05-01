@@ -31,7 +31,7 @@ export type ESClient = <T = void, U = void>(
 export interface Setup {
   start: number;
   end: number;
-  esFilterQuery?: ESFilter;
+  uiFiltersES: ESFilter[];
   client: ESClient;
   config: Legacy.KibanaConfig;
 }
@@ -40,7 +40,7 @@ interface APMRequestQuery {
   _debug: string;
   start: string;
   end: string;
-  esFilterQuery: string;
+  uiFiltersES?: string;
 }
 
 function getApmIndices(config: Legacy.KibanaConfig) {
@@ -123,7 +123,7 @@ export function setupRequest(req: Legacy.Request): Setup {
   return {
     start: moment.utc(query.start).valueOf(),
     end: moment.utc(query.end).valueOf(),
-    esFilterQuery: decodeEsQuery(query.esFilterQuery),
+    uiFiltersES: decodeEsQuery(query.uiFiltersES) || [],
     client,
     config
   };

@@ -16,6 +16,7 @@ import { loadServiceList } from '../../../services/rest/apm/services';
 import { NoServicesMessage } from './NoServicesMessage';
 import { ServiceList } from './ServiceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useUiFilters } from '../../../hooks/useUiFilters';
 
 const initalData = {
   items: [],
@@ -26,15 +27,17 @@ const initalData = {
 let hasDisplayedToast = false;
 
 export function ServiceOverview() {
-  const { urlParams } = useUrlParams();
-  const { start, end, kuery } = urlParams;
+  const {
+    urlParams: { start, end }
+  } = useUrlParams();
+  const { uiFilters, uiFiltersKey } = useUiFilters();
   const { data = initalData } = useFetcher(
     () => {
       if (start && end) {
-        return loadServiceList({ start, end, kuery });
+        return loadServiceList({ start, end, uiFilters });
       }
     },
-    [start, end, kuery]
+    [start, end, uiFiltersKey]
   );
 
   useEffect(

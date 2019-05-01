@@ -8,7 +8,7 @@ import React from 'react';
 import { LocationProvider } from '../../../../context/LocationContext';
 import { UrlParamsContext } from '../../../../context/UrlParamsContext';
 import { tick } from '../../../../utils/testHelpers';
-import { DatePicker } from '../DatePicker';
+import { DatePicker } from '../index';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { history } from '../../../../utils/history';
 import { mount } from 'enzyme';
