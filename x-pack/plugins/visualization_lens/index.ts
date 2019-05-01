@@ -37,7 +37,36 @@ export const visualizationLens = (kibana: any) => {
       }).default();
     },
 
-    init(server: Server) {},
+    init(server: Server) {
+      server.plugins.xpack_main.registerFeature({
+        id: PLUGIN_ID,
+        name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
+        icon: 'visualizeApp',
+        navLinkId: PLUGIN_ID,
+        app: [PLUGIN_ID, 'kibana'],
+        catalogue: [PLUGIN_ID],
+        privileges: {
+          all: {
+            api: [PLUGIN_ID],
+            catalogue: [PLUGIN_ID],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['show'],
+          },
+          read: {
+            api: [PLUGIN_ID],
+            catalogue: [PLUGIN_ID],
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: ['show'],
+          },
+        },
+      });
+    },
   });
 };
 
