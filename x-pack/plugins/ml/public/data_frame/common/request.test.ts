@@ -31,11 +31,11 @@ describe('Data Frame: Common', () => {
       {
         agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
         field: 'the-group-by-field',
-        formRowLabel: 'the-group-by-label',
+        aggName: 'the-group-by-label',
       },
     ];
     const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', formRowLabel: 'the-agg-label' },
+      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', aggName: 'the-agg-label' },
     ];
     const request = getDataFramePreviewRequest('the-index-pattern-title', query, groupBy, aggs);
 
@@ -55,14 +55,15 @@ describe('Data Frame: Common', () => {
     const groupBy: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      formRowLabel: 'the-group-by-label',
+      aggName: 'the-group-by-label',
     };
-    const aggs: PivotAggsConfig[] = [
-      { agg: PIVOT_SUPPORTED_AGGS.AVG, field: 'the-agg-field', formRowLabel: 'the-agg-label' },
-    ];
+    const agg: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-agg-field',
+      aggName: 'the-agg-label',
+    };
     const pivotState: DefinePivotExposedState = {
-      aggList: ['the-agg-name'],
-      aggs,
+      aggList: { 'the-agg-name': agg },
       groupByList: { 'the-group-by-name': groupBy },
       search: 'the-query',
       valid: true,

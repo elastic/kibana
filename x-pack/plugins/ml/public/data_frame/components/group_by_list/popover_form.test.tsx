@@ -7,9 +7,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../common';
+import { AggName, PIVOT_SUPPORTED_GROUP_BY_AGGS, PivotGroupByConfig } from '../../common';
 
-import { isIntervalValid, PopoverForm, supportedIntervalTypes } from './popover_form';
+import { isIntervalValid, PopoverForm } from './popover_form';
 
 describe('isIntervalValid()', () => {
   test('intervalType: histogram', () => {
@@ -73,15 +73,25 @@ describe('isIntervalValid()', () => {
   });
 });
 
-describe('Data Frame: <PopoverForm />', () => {
+describe('Data Frame: Group By <PopoverForm />', () => {
   test('Minimal initialization', () => {
-    const props = {
-      defaultInterval: '10m',
-      intervalType: 'date_histogram' as supportedIntervalTypes,
-      onChange(interval: string) {},
+    const defaultData: PivotGroupByConfig = {
+      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.DATE_HISTOGRAM,
+      aggName: 'the-agg-name',
+      field: 'the-field',
+      interval: '10m',
     };
+    const otherAggNames: AggName[] = [];
+    const onChange = (item: PivotGroupByConfig) => {};
 
-    const wrapper = shallow(<PopoverForm {...props} />);
+    const wrapper = shallow(
+      <PopoverForm
+        defaultData={defaultData}
+        otherAggNames={otherAggNames}
+        options={{}}
+        onChange={onChange}
+      />
+    );
 
     expect(wrapper).toMatchSnapshot();
   });

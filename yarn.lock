@@ -1317,6 +1317,18 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@elastic/elasticsearch@^7.0.0-rc.2":
+  version "7.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.0.0-rc.2.tgz#2fb07978d647a257af3976b170e3f61704ba0a18"
+  integrity sha512-NAivETj4KDzNhN/x+nqcnz4K/0wqqT6UicZP0ezCu1oRgia8xHcD6KxrDAiElexD2/z6vY1BkNqYju5Uel14eA==
+  dependencies:
+    debug "^4.1.1"
+    decompress-response "^4.2.0"
+    into-stream "^5.1.0"
+    ms "^2.1.1"
+    once "^1.4.0"
+    pump "^3.0.0"
+
 "@elastic/eui@0.0.23":
   version "0.0.23"
   resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.23.tgz#01a3d88aeaff175da5d42b70d407d08a32783f3d"
@@ -4527,10 +4539,15 @@ angular-ui-ace@0.2.3:
   resolved "https://registry.yarnpkg.com/angular-ui-ace/-/angular-ui-ace-0.2.3.tgz#3cb903428100621a367fc7f641440e97a42a26d0"
   integrity sha1-PLkDQoEAYho2f8f2QUQOl6QqJtA=
 
-angular@1.6.9, angular@>=1.0.6:
+angular@>=1.0.6:
   version "1.6.9"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.9.tgz#bc812932e18909038412d594a5990f4bb66c0619"
   integrity sha512-6igWH2GIsxV+J38wNWCh8oyjaZsrIPIDO35twloIUyjlF2Yit6UyLAWujHP05ma/LFxTsx4NtYibRoMNBXPR1A==
+
+"angular@npm:@elastic/angular@1.6.9-kibana.0":
+  version "1.6.9-kibana.0"
+  resolved "https://registry.yarnpkg.com/@elastic/angular/-/angular-1.6.9-kibana.0.tgz#c29e72559c3f67ce923d04d7ac3c4381e3c495be"
+  integrity sha512-HAez04r9/KXtaITxiVFZ+ZG+ORhj4eCWqHFfK/aS4ws3g/4jDY5LZe3ovFCSseD8oIkfAanNaT+aXPzSr61byQ==
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -9083,6 +9100,13 @@ decompress-response@^3.2.0, decompress-response@^3.3.0:
   dependencies:
     mimic-response "^1.0.0"
 
+decompress-response@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/decompress-response/-/decompress-response-4.2.0.tgz#805ca9d1d3cdf17a03951475ad6cdc93115cec3f"
+  integrity sha512-MHebOkORCgLW1ramLri5vzfR4r7HgXXrVkVr/eaPVRCtYWFUp9hNAuqsBxhpABbpqd7zY2IrjxXfTuaVrW0Z2A==
+  dependencies:
+    mimic-response "^2.0.0"
+
 decompress-tar@^4.0.0, decompress-tar@^4.1.0, decompress-tar@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/decompress-tar/-/decompress-tar-4.1.1.tgz#718cbd3fcb16209716e70a26b84e7ba4592e5af1"
@@ -11805,7 +11829,7 @@ fresh@0.5.2:
   resolved "https://registry.yarnpkg.com/fresh/-/fresh-0.5.2.tgz#3d8cadd90d976569fa835ab1f8e4b23a105605a7"
   integrity sha1-PYyt2Q2XZWn6g1qx+OSyOhBWBac=
 
-from2@^2.1.0, from2@^2.1.1:
+from2@^2.1.0, from2@^2.1.1, from2@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/from2/-/from2-2.3.0.tgz#8bfb5502bde4a4d36cfdeea007fcca21d7e382af"
   integrity sha1-i/tVAr3kpNNs/e6gB/zKIdfjgq8=
@@ -14323,6 +14347,14 @@ into-stream@^3.1.0:
   dependencies:
     from2 "^2.1.1"
     p-is-promise "^1.1.0"
+
+into-stream@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/into-stream/-/into-stream-5.1.0.tgz#b05f37d8fed05c06a0b43b556d74e53e5af23878"
+  integrity sha512-cbDhb8qlxKMxPBk/QxTtYg1DQ4CwXmadu7quG3B7nrJsgSncEreF2kwWKZFdnjc/lSNNIkFPsjI7SM0Cx/QXPw==
+  dependencies:
+    from2 "^2.3.0"
+    p-is-promise "^2.0.0"
 
 invariant@^2.0.0, invariant@^2.2.1, invariant@^2.2.2:
   version "2.2.2"
@@ -17736,6 +17768,11 @@ mimic-response@^1.0.0:
   resolved "https://registry.yarnpkg.com/mimic-response/-/mimic-response-1.0.1.tgz#4923538878eef42063cb8a3e3b0798781487ab1b"
   integrity sha512-j5EctnkH7amfV/q5Hgmoal1g2QHFJRraOtmx0JpIqkxhBhI/lJSl1nMpQ45hVarwNETOoWEimndZ4QK0RHxuxQ==
 
+mimic-response@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/mimic-response/-/mimic-response-2.0.0.tgz#996a51c60adf12cb8a87d7fb8ef24c2f3d5ebb46"
+  integrity sha512-8ilDoEapqA4uQ3TwS0jakGONKXVJqpy+RpM+3b7pLdOjghCrEiGp9SRkFbUHAmZW9vdnrENWHjaweIoTIJExSQ==
+
 mimos@4.x.x:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/mimos/-/mimos-4.0.0.tgz#76e3d27128431cb6482fd15b20475719ad626a5a"
@@ -19194,6 +19231,11 @@ p-is-promise@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/p-is-promise/-/p-is-promise-1.1.0.tgz#9c9456989e9f6588017b0434d56097675c3da05e"
   integrity sha1-nJRWmJ6fZYgBewQ01WCXZ1w9oF4=
+
+p-is-promise@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/p-is-promise/-/p-is-promise-2.1.0.tgz#918cebaea248a62cf7ffab8e3bca8c5f882fc42e"
+  integrity sha512-Y3W0wlRPK8ZMRbNq97l4M5otioeA5lm1z7bkNkxCka8HSPjR0xRWmpCmc9utiaLP9Jb1eD8BgeIxTW4AIF45Pg==
 
 p-limit@^1.0.0, p-limit@^1.1.0:
   version "1.3.0"
@@ -21170,10 +21212,10 @@ react-is@~16.3.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.3.2.tgz#f4d3d0e2f5fbb6ac46450641eb2e25bf05d36b22"
   integrity sha512-ybEM7YOr4yBgFd6w8dJqwxegqZGJNBZl6U27HnGKuTZmDvVrD5quWOK/wAnMywiZzW+Qsk+l4X2c70+thp/A8Q==
 
-react-lib-adler32@^1.0.0:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/react-lib-adler32/-/react-lib-adler32-1.0.1.tgz#01f7a0e24fe715580aadb8a827c39a850e1ccc4e"
-  integrity sha1-Afeg4k/nFVgKrbioJ8OahQ4czE4=
+react-lib-adler32@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/react-lib-adler32/-/react-lib-adler32-1.0.3.tgz#63df1aed274eabcc1c5067077ea281ec30888ba7"
+  integrity sha512-AqFqdt4cP0RPffHNjVHZ7tyIgnoSzNxgFhG8XKMXCtA1dZ72gTPO4iYFwWDKHqvE8sHS14rhltQTdbXU5G4BFA==
 
 react-lifecycles-compat@^3.0.0, react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   version "3.0.4"
@@ -24228,12 +24270,12 @@ strong-log-transformer@^2.1.0:
     minimist "^1.2.0"
     through "^2.3.4"
 
-style-it@2.1.2:
-  version "2.1.2"
-  resolved "https://registry.yarnpkg.com/style-it/-/style-it-2.1.2.tgz#57f557d31d1f65f9b0b699341e197dc72d3d1124"
-  integrity sha512-MFmrF8uxXeHMWvJWxc7byY3wurOb8SrlZUPNMUd3uTXkjy5Of9jQY49E18uVOClihpCm4IiDwcZRApCqhColng==
+style-it@^2.1.3:
+  version "2.1.3"
+  resolved "https://registry.yarnpkg.com/style-it/-/style-it-2.1.3.tgz#ab6b5e109a1e946d58639f8cd05aa52df7ef1ab1"
+  integrity sha512-QVpYgFoJXhxiuBEok05YTx0WB4AbGkIiMWuCEPLTjFf3tCeB15eqhqMOjJeIsXqZ8REvgsqVuL2u7eoYg0mXJw==
   dependencies:
-    react-lib-adler32 "^1.0.0"
+    react-lib-adler32 "^1.0.3"
 
 style-loader@0.23.1, style-loader@^0.23.1:
   version "0.23.1"

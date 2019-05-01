@@ -40,6 +40,10 @@ export const fieldToName = (field: string, intl: InjectedIntl) => {
       id: 'xpack.infra.groupByDisplayNames.provider',
       defaultMessage: 'Cloud Provider',
     }),
+    'service.type': intl.formatMessage({
+      id: 'xpack.infra.groupByDisplayNames.serviceType',
+      defaultMessage: 'Service Type',
+    }),
   };
   return LOOKUP[field] || field;
 };
