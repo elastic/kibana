@@ -334,10 +334,7 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectManageFeatureControls
-            ? [
-                actions.ui.get('featureControls', 'manage'),
-                actions.api.get('manage_feature_controls'),
-              ]
+            ? [actions.ui.get('featureControls', 'manage'), actions.api.get('features')]
             : []),
           ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
           actions.app.get('app-1'),
@@ -424,10 +421,7 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectManageFeatureControls
-          ? [
-              actions.ui.get('featureControls', 'manage'),
-              actions.api.get('manage_feature_controls'),
-            ]
+          ? [actions.ui.get('featureControls', 'manage'), actions.api.get('features')]
           : []),
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
         actions.ui.get('catalogue', 'bar-catalogue-1'),
@@ -760,10 +754,7 @@ describe('features', () => {
         actions.login,
         actions.version,
         ...(expectManageFeatureControls
-          ? [
-              actions.ui.get('featureControls', 'manage'),
-              actions.api.get('manage_feature_controls'),
-            ]
+          ? [actions.ui.get('featureControls', 'manage'), actions.api.get('features')]
           : []),
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
         actions.allHack,
