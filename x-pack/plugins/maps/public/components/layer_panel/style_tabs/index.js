@@ -16,7 +16,7 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-function mapStateToProps({}, props) {
+function mapStateToProps(state, props) {
   return {
     layer: props.layer
   };

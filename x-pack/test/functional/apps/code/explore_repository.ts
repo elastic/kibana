@@ -17,7 +17,11 @@ export default function exploreRepositoryFunctonalTests({
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const log = getService('log');
+  const find = getService('find');
+  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'header', 'security', 'code', 'home']);
+
+  const FIND_TIME = config.get('timeouts.find');
 
   describe('Code', () => {
     describe('Explore a repository', () => {
@@ -140,6 +144,36 @@ export default function exploreRepositoryFunctonalTests({
           expect(await testSubjects.exists('codeFileTreeNode-Directory-Icon-views-closed')).ok();
         });
         log.info('src folder closed');
+      });
+
+      it('highlight only one symbol', async () => {
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src')).ok();
+        });
+        await testSubjects.click('codeFileTreeNode-Directory-src');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-Directory-src/config')).ok();
+        });
+        await testSubjects.click('codeFileTreeNode-Directory-src/config');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeFileTreeNode-File-src/config/passport.ts')).ok();
+        });
+        await testSubjects.click('codeFileTreeNode-File-src/config/passport.ts');
+        await retry.try(async () => {
+          expect(await testSubjects.exists('codeStructureTreeTab')).ok();
+        });
+        await testSubjects.click('codeStructureTreeTab');
+        await retry.try(async () => {
+          expect(
+            await testSubjects.exists('"codeStructureTreeNode-User.findById() callback"')
+          ).ok();
+        });
+        await testSubjects.click('"codeStructureTreeNode-User.findById() callback"');
+
+        await retry.try(async () => {
+          const highlightSymbols = await find.allByCssSelector('.code-full-width-node', FIND_TIME);
+          expect(highlightSymbols).to.have.length(1);
+        });
       });
 
       it('click a breadcrumb should not affect the file tree', async () => {

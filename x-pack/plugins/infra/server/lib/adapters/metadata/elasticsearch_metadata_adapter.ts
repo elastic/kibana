@@ -11,8 +11,8 @@ import {
   InfraFrameworkRequest,
   InfraMetadataAggregationResponse,
 } from '../framework';
-import { NAME_FIELDS } from '../nodes/constants';
 import { InfraMetadataAdapter, InfraMetricsAdapterResponse } from './adapter_types';
+import { NAME_FIELDS } from '../../constants';
 
 export class ElasticsearchMetadataAdapter implements InfraMetadataAdapter {
   private framework: InfraBackendFrameworkAdapter;
