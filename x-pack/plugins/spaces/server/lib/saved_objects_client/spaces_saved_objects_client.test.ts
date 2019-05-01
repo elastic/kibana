@@ -172,6 +172,45 @@ const createMockClient = () => {
       });
     });
 
+    describe('#canBulkGet', () => {
+      test('throws error if objects type is space', async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(client.canBulkGet(['foo', 'space'])).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test('supplements options', async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.canBulkGet.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        const reqTypes = Object.freeze(['foo']);
+        // @ts-ignore
+        const actualReturnValue = await client.canBulkGet(reqTypes);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.canBulkGet).toHaveBeenCalledWith(reqTypes);
+      });
+    });
+
     describe('#find', () => {
       test(`throws error if options.namespace is specified`, async () => {
         const request = createMockRequest({ id: currentSpace.id });
@@ -289,6 +328,47 @@ const createMockClient = () => {
           type: ['foo', 'bar'],
           namespace: currentSpace.expectedNamespace,
         });
+      });
+    });
+
+    describe('#canFind', () => {
+      test('throws error if types contains space', async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.canFind.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(client.canFind(['space'])).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test('supplements types', async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.canFind.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        const reqTypes = Object.freeze(['foo', 'bar']);
+        // @ts-ignore
+        const actualReturnValue = await client.canFind(reqTypes);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.canFind).toHaveBeenCalledWith(reqTypes);
       });
     });
 
@@ -415,6 +495,45 @@ const createMockClient = () => {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
+      });
+    });
+
+    describe('#canBulkCreate', () => {
+      test('throws error if types contains space', async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        await expect(client.canBulkCreate(['foo', 'space'])).rejects.toThrowErrorMatchingSnapshot();
+      });
+
+      test('supplements options', async () => {
+        const request = createMockRequest({ id: currentSpace.id });
+        const baseClient = createMockClient();
+        const expectedReturnValue = Symbol();
+        baseClient.canBulkCreate.mockReturnValue(expectedReturnValue);
+        const spacesService = createSpacesService(server);
+
+        const client = new SpacesSavedObjectsClient({
+          request,
+          baseClient,
+          spacesService,
+          types,
+        });
+
+        const reqTypes = Object.freeze(['foo']);
+        // @ts-ignore
+        const actualReturnValue = await client.canBulkCreate(reqTypes);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.canBulkCreate).toHaveBeenCalledWith(reqTypes);
       });
     });
 
