@@ -24,7 +24,8 @@ import * as collectionActions from '../lib/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
-import { QueryBar } from 'ui/query_bar';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { EuiFieldText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { injectI18n } from '@kbn/i18n/react';
@@ -57,7 +58,11 @@ class FilterItemsUi extends Component {
       fn(_.assign({}, model, part));
     };
 
-    const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
+    const newFilter = () => ({
+      color: this.props.model.color,
+      id: uuid.v1(),
+      filter: { language: model.filter.language ? model.filter.language : 'lucene', query: '' },
+    });
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newFilter);
     const handleDelete = collectionActions.handleDelete

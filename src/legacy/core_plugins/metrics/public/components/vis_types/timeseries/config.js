@@ -24,7 +24,8 @@ import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { QueryBar } from 'ui/query_bar';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
 import { Storage } from 'ui/storage';
 import {
   htmlIdGenerator,

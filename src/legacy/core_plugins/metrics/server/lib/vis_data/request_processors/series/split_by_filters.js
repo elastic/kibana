@@ -25,8 +25,6 @@ export default function splitByFilter(req, panel, series, esQueryConfig, indexPa
       series.split_filters.forEach(filter => {
         const builtEsQuery = buildEsQuery(indexPattern, [series.filter], [], esQueryConfig);
         _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}`, builtEsQuery);
-        // _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}.query_string.query`, filter.filter || '*');
-        // _.set(doc, `aggs.${series.id}.filters.filters.${filter.id}.query_string.analyze_wildcard`, true);
       });
     }
     return next(doc);

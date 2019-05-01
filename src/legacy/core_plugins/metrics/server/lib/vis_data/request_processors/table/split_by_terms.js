@@ -18,13 +18,14 @@
  */
 
 import _ from 'lodash';
-// TODO: Update as well.
+// TODO: Update to use the esQueryBuilder
 export default function splitByTerm(req, panel) {
   return next => doc => {
     panel.series.filter(c => c.aggregate_by && c.aggregate_function).forEach(column => {
       _.set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
       _.set(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
       if (column.filter) {
+        // replace these with the object created by buildEsQuery (see ../series/split_by_filters)
         _.set(doc, `aggs.pivot.aggs.${column.id}.column_filter.filter.query_string.query`, column.filter);
         _.set(doc, `aggs.pivot.aggs.${column.id}.column_filter.filter.query_string.analyze_wildcard`, true);
       }
