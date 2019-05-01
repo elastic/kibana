@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('security', function () {
-    this.tags('ciGroup6');
+import { createTestConfig } from '../common/config';
 
-    loadTestFile(require.resolve('./basic_login'));
-    loadTestFile(require.resolve('./roles'));
-  });
-}
+// tslint:disable-next-line: no-default-export
+export default createTestConfig('security_and_spaces', { license: 'basic' });
