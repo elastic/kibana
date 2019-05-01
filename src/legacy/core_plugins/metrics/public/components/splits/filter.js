@@ -21,11 +21,11 @@ import createSelectHandler from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { QueryBar } from 'ui/query_bar';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
 import { Storage } from 'ui/storage';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 const localStorage = new Storage(window.localStorage);
 
 export const SplitByFilter = props => {
