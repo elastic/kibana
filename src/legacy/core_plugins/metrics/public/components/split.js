@@ -38,7 +38,6 @@ const SPLIT_MODES = {
   TERMS: 'terms',
   EVERYTHING: 'everything',
 };
-// add indexPattern fetching in here to pass down to SplitByFilter and SplitByFilters, we need to work off of the panel prop to get the index pattern name. The model passed down in here is only a partial version of the overall model.
 
 class Split extends Component {
   constructor(props) {
@@ -71,9 +70,7 @@ class Split extends Component {
     }
   }
   fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.props.panel.index_pattern
-      ? this.props.panel.index_pattern
-      : this.props.panel.default_index_pattern;
+    const searchIndexPattern = this.state.indexPatternAsString;
     const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
