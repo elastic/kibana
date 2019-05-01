@@ -20,7 +20,6 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiSpacer,
   EuiAccordion,
@@ -192,21 +191,23 @@ export class LayerPanel extends React.Component {
           </div>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody className="mapLayerPanel__body">
+        <div className="mapLayerPanel__body">
+          <div className="mapLayerPanel__bodyOverflow">
 
-          <LayerErrors/>
+            <LayerErrors/>
 
-          <LayerSettings/>
+            <LayerSettings/>
 
-          <SourceSettings/>
+            <SourceSettings/>
 
-          {this._renderFilterSection()}
+            {this._renderFilterSection()}
 
-          {this._renderJoinSection()}
+            {this._renderJoinSection()}
 
-          <StyleSettings/>
+            <StyleSettings/>
 
-        </EuiFlyoutBody>
+          </div>
+        </div>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
           <FlyoutFooter hasStateChanged={this.props.hasStateChanged}/>

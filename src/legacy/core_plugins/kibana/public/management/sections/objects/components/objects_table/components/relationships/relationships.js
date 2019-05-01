@@ -290,8 +290,8 @@ class RelationshipsUI extends Component {
 
     return (
       <EuiFlyout onClose={close}>
-        <EuiFlyoutHeader>
-          <EuiTitle>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
             <h2>
               <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
                 <EuiIcon
