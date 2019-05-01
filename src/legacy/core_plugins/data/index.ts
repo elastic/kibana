@@ -32,6 +32,10 @@ export default function DataPlugin(kibana: any) {
       }).default();
     },
     init: (server: Legacy.Server) => ({}),
+    uiExports: {
+      injectDefaultVars: () => ({}),
+      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
+    },
   };
 
   return new kibana.Plugin(config);

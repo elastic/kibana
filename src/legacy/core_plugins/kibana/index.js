@@ -272,7 +272,7 @@ export default function (kibana) {
               save: true
             },
             indexPatterns: {
-              createNew: true,
+              save: true,
             },
             savedObjectsManagement: savedObjects.types.reduce((acc, type) => ({
               ...acc,

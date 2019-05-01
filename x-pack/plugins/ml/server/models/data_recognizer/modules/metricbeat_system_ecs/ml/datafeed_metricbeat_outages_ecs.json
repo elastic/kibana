@@ -6,7 +6,7 @@
     "query": {
       "bool": {
         "must": {
-          "exists": { "field": "metricset.name" }
+          "exists": { "field": "event.dataset" }
         }
       }
     }
