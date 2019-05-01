@@ -24,8 +24,9 @@ export class VectorStyle extends AbstractStyle {
     return `__kbn__scaled(${fieldName})`;
   }
 
-  constructor(descriptor = {}) {
+  constructor(descriptor = {}, source) {
     super();
+    this._source = source;
     this._descriptor = {
       ...descriptor,
       ...VectorStyle.createDescriptor(descriptor.properties),
@@ -64,6 +65,7 @@ export class VectorStyle extends AbstractStyle {
         handlePropertyChange={handlePropertyChange}
         styleProperties={styleProperties}
         layer={layer}
+        source={this._source}
       />
     );
   }

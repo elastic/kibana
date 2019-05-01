@@ -13,11 +13,11 @@ import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
-export const VECTOR_FEATURE_TYPES: {
+export const VECTOR_FEATURE_TYPES = {
   POINT: 'POINT',
   LINE: 'LINE',
   POLYGON: 'POLYGON'
-}
+};
 
 export class AbstractVectorSource extends AbstractSource {
 
