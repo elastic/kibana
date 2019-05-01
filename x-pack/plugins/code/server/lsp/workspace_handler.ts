@@ -306,7 +306,7 @@ export class WorkspaceHandler {
       if (file) {
         const isValidPath = await this.checkFile(workspaceRepo, file);
         if (!isValidPath) {
-          throw new Error('invalid fle path in requests.');
+          throw new Error('invalid file path in requests.');
         }
       }
       return {

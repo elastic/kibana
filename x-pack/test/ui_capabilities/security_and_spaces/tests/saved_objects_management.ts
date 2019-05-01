@@ -59,6 +59,7 @@ export default function savedObjectsManagementTests({
                   'visualization',
                   'search',
                   'dashboard',
+                  'telemetry',
                   'timelion-sheet',
                   'url',
                   'infrastructure-ui-source',

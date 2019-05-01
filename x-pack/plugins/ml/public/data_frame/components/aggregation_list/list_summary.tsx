@@ -8,26 +8,22 @@ import React from 'react';
 
 import { EuiForm, EuiFormRow } from '@elastic/eui';
 
-import { Dictionary } from '../../../../common/types/common';
-
-interface OptionsDataElement {
-  agg: string;
-  field: string;
-  formRowLabel: string;
-}
+import { AggName, PivotAggsConfigDict } from '../../common';
 
 interface ListProps {
-  list: string[];
-  optionsData: Dictionary<OptionsDataElement>;
+  list: PivotAggsConfigDict;
   deleteHandler?(l: string): void;
 }
 
-export const AggListSummary: React.SFC<ListProps> = ({ list, optionsData }) => (
-  <EuiForm>
-    {list.map((l: string) => (
-      <EuiFormRow key={l} label={optionsData[l].formRowLabel}>
-        <span>{l}</span>
-      </EuiFormRow>
-    ))}
-  </EuiForm>
-);
+export const AggListSummary: React.SFC<ListProps> = ({ list }) => {
+  const listKeys = Object.keys(list);
+  return (
+    <EuiForm>
+      {listKeys.map((l: AggName) => (
+        <EuiFormRow key={l} label={list[l].aggName}>
+          <span>{l}</span>
+        </EuiFormRow>
+      ))}
+    </EuiForm>
+  );
+};

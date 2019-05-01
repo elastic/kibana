@@ -26,14 +26,16 @@ import { createServer, getServerOptions } from './http_tools';
 import { adoptToHapiAuthFormat, AuthenticationHandler } from './lifecycle/auth';
 import { adoptToHapiOnRequestFormat, OnRequestHandler } from './lifecycle/on_request';
 import { Router } from './router';
+
 import {
   SessionStorageCookieOptions,
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 
-export interface HttpServerInfo {
+export interface HttpServerSetup {
   server: Server;
   options: ServerOptions;
+  registerRouter: (router: Router) => void;
   /**
    * Define custom authentication and/or authorization mechanism for incoming requests.
    * Applied to all resources by default. Only one AuthenticationHandler can be registered.
@@ -61,19 +63,39 @@ export class HttpServer {
     return this.server !== undefined && this.server.listener.listening;
   }
 
-  public registerRouter(router: Router) {
+  private registerRouter(router: Router) {
     if (this.isListening()) {
       throw new Error('Routers can be registered only when HTTP server is stopped.');
     }
 
+    this.log.debug(`registering route handler for [${router.path}]`);
     this.registeredRouters.add(router);
   }
 
-  public async start(config: HttpConfig): Promise<HttpServerInfo> {
-    this.log.debug('starting http server');
-
+  public setup(config: HttpConfig): HttpServerSetup {
     const serverOptions = getServerOptions(config);
     this.server = createServer(serverOptions);
+
+    return {
+      options: serverOptions,
+      registerRouter: this.registerRouter.bind(this),
+      registerOnRequest: this.registerOnRequest.bind(this),
+      registerAuth: <T>(
+        fn: AuthenticationHandler<T>,
+        cookieOptions: SessionStorageCookieOptions<T>
+      ) => this.registerAuth(fn, cookieOptions, config.basePath),
+      // Return server instance with the connection options so that we can properly
+      // bridge core and the "legacy" Kibana internally. Once this bridge isn't
+      // needed anymore we shouldn't return the instance from this method.
+      server: this.server,
+    };
+  }
+
+  public async start(config: HttpConfig) {
+    if (this.server === undefined) {
+      throw new Error('Http server is not setup up yet');
+    }
+    this.log.debug('starting http server');
 
     this.setupBasePathRewrite(this.server, config);
 
@@ -94,19 +116,6 @@ export class HttpServer {
         config.rewriteBasePath ? config.basePath : ''
       }`
     );
-
-    // Return server instance with the connection options so that we can properly
-    // bridge core and the "legacy" Kibana internally. Once this bridge isn't
-    // needed anymore we shouldn't return anything from this method.
-    return {
-      server: this.server,
-      options: serverOptions,
-      registerOnRequest: this.registerOnRequest.bind(this),
-      registerAuth: <T>(
-        fn: AuthenticationHandler<T>,
-        cookieOptions: SessionStorageCookieOptions<T>
-      ) => this.registerAuth(fn, cookieOptions, config.basePath),
-    };
   }
 
   public async stop() {

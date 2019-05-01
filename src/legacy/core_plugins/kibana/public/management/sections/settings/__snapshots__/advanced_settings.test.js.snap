@@ -578,6 +578,7 @@ exports[`AdvancedSettings should render normally 1`] = `
     showNoResultsMessage={true}
   />
   <advanced_settings_page_footer
+    enableSaving={true}
     onQueryMatchChange={[Function]}
     query={
       Query {
@@ -738,6 +739,7 @@ exports[`AdvancedSettings should render read-only when saving is disabled 1`] = 
     showNoResultsMessage={true}
   />
   <advanced_settings_page_footer
+    enableSaving={false}
     onQueryMatchChange={[Function]}
     query={
       Query {
@@ -916,6 +918,7 @@ exports[`AdvancedSettings should render specific setting if given setting key 1`
     showNoResultsMessage={true}
   />
   <advanced_settings_page_footer
+    enableSaving={true}
     onQueryMatchChange={[Function]}
     query={
       Query {

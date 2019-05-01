@@ -40,6 +40,7 @@ export const SET_QUERY = 'SET_QUERY';
 export const TRIGGER_REFRESH_TIMER = 'TRIGGER_REFRESH_TIMER';
 export const UPDATE_LAYER_PROP = 'UPDATE_LAYER_PROP';
 export const UPDATE_LAYER_STYLE = 'UPDATE_LAYER_STYLE';
+export const SET_LAYER_STYLE_META = 'SET_LAYER_STYLE_META';
 export const TOUCH_LAYER = 'TOUCH_LAYER';
 export const UPDATE_SOURCE_PROP = 'UPDATE_SOURCE_PROP';
 export const SET_REFRESH_CONFIG = 'SET_REFRESH_CONFIG';
@@ -62,18 +63,13 @@ export const DRAW_STATE_DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
 };
+export const SET_SCROLL_ZOOM = 'SET_SCROLL_ZOOM';
 
 function getLayerLoadingCallbacks(dispatch, layerId) {
   return {
     startLoading: (dataId, requestToken, meta) => dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId, requestToken, data, meta) => dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
     onLoadError: (dataId, requestToken, errorMessage) => dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    onRefreshStyle: async () => {
-      await dispatch({
-        type: TOUCH_LAYER,
-        layerId: layerId
-      });
-    },
     updateSourceData: (newData) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     }
@@ -164,6 +160,15 @@ export function addLayer(layerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayer(layerDescriptor.id));
+  };
+}
+
+// Do not use when rendering a map. Method exists to enable selectors for getLayerList when
+// rendering is not needed.
+export function addLayerWithoutDataSync(layerDescriptor) {
+  return {
+    type: ADD_LAYER,
+    layer: layerDescriptor,
   };
 }
 
@@ -361,6 +366,9 @@ export function clearMouseCoordinates() {
   return { type: CLEAR_MOUSE_COORDINATES };
 }
 
+export function disableScrollZoom() {
+  return { type: SET_SCROLL_ZOOM, scrollZoom: false };
+}
 
 export function fitToLayerExtent(layerId) {
   return async function (dispatch, getState) {
@@ -406,12 +414,16 @@ export function startDataLoad(layerId, dataId, requestToken, meta = {}) {
 }
 
 export function updateSourceDataRequest(layerId, newData) {
-  return ({
-    type: UPDATE_SOURCE_DATA_REQUEST,
-    dataId: SOURCE_DATA_ID_ORIGIN,
-    layerId,
-    newData
-  });
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_SOURCE_DATA_REQUEST,
+      dataId: SOURCE_DATA_ID_ORIGIN,
+      layerId,
+      newData
+    });
+
+    dispatch(updateStyleMeta(layerId));
+  };
 }
 
 export function endDataLoad(layerId, dataId, requestToken, data, meta) {
@@ -425,10 +437,13 @@ export function endDataLoad(layerId, dataId, requestToken, data, meta) {
       meta,
       requestToken
     });
+
     //Clear any data-load errors when there is a succesful data return.
     //Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
     //This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
     dispatch(setLayerDataLoadErrorStatus(layerId, null));
+
+    dispatch(updateStyleMeta(layerId));
   };
 }
 
@@ -516,6 +531,19 @@ export function setLayerQuery(id, query) {
       id,
       propName: 'query',
       newValue: query,
+    });
+
+    dispatch(syncDataForLayer(id));
+  };
+}
+
+export function setLayerApplyGlobalQuery(id, applyGlobalQuery) {
+  return (dispatch) => {
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id,
+      propName: 'applyGlobalQuery',
+      newValue: applyGlobalQuery,
     });
 
     dispatch(syncDataForLayer(id));
@@ -614,8 +642,33 @@ export function updateLayerStyle(layerId, styleDescriptor) {
 
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(layerId));
+
+    // syncDataForLayer may short circuit if no re-fetch is required:
+    // 1) if no re-fetch: setDynamicRanges required to update dynamic range from last request state
+    // 2) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
+    dispatch(updateStyleMeta(layerId));
   };
 }
+
+export function updateStyleMeta(layerId) {
+  return (dispatch, getState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer) {
+      return;
+    }
+    const sourceDataRequest = layer.getSourceDataRequest();
+    const style = layer.getCurrentStyle();
+    if (!style || !sourceDataRequest) {
+      return;
+    }
+    dispatch({
+      type: SET_LAYER_STYLE_META,
+      layerId,
+      styleMeta: style.pluckStyleMetaFromSourceDataRequest(sourceDataRequest),
+    });
+  };
+}
+
 
 export function updateLayerStyleForSelectedLayer(styleDescriptor) {
   return (dispatch, getState) => {
