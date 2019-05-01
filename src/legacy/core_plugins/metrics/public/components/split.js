@@ -21,6 +21,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
+import chrome from 'ui/chrome';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
@@ -35,18 +37,57 @@ const SPLIT_MODES = {
   TERMS: 'terms',
   EVERYTHING: 'everything',
 };
+// add indexPattern fetching in here to pass down to SplitByFilter and SplitByFilters, we need to work off of the panel prop to get the index pattern name. The model passed down in here is only a partial version of the overall model.
 
 class Split extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      indexPatterns: [],
+    };
+  }
+  async componentDidMount() {
+    await this.fetchIndexPatterns(
+      (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
+        this.props.panel.index_pattern
+    );
+  }
   componentWillReceiveProps(nextProps) {
+    // should we check against the index pattern changing too?
     const { model } = nextProps;
+    const mainFilterLanguage =
+      this.props.panel.filter && this.props.panel.filter.language
+        ? this.props.panel.filter.language
+        : 'lucene';
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
         split_filters: [
-          { color: model.color, id: uuid.v1() },
+          {
+            color: model.color,
+            id: uuid.v1(),
+            filter: { language: mainFilterLanguage, query: '' },
+          },
         ],
       });
     }
   }
+  fetchIndexPatterns = async () => {
+    const searchIndexPattern = this.props.panel.index_pattern
+      ? this.props.panel.index_pattern
+      : this.props.panel.default_index_pattern;
+    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${searchIndexPattern}"`,
+      search_fields: ['title'],
+    });
+    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+      indexPattern => indexPattern.attributes.title === searchIndexPattern
+    );
+    if (exactMatch) {
+      this.setState({ indexPatterns: getFromSavedObject(exactMatch) });
+    }
+  };
 
   getComponent(splitMode, uiRestrictions) {
     if (!isGroupByFieldsEnabled(splitMode, uiRestrictions)) {
@@ -67,14 +108,24 @@ class Split extends Component {
 
   render() {
     const { model, panel, uiRestrictions } = this.props;
-    const indexPattern = model.override_index_pattern &&
-      model.series_index_pattern ||
-      panel.index_pattern;
+    const indexPattern =
+      (model.override_index_pattern && model.series_index_pattern) || panel.index_pattern;
 
     const splitMode = get(this.props, 'model.split_mode', SPLIT_MODES.EVERYTHING);
 
     const Component = this.getComponent(splitMode, uiRestrictions);
-
+    if (splitMode === SPLIT_MODES.FILTER || splitMode === SPLIT_MODES.FILTERS) {
+      return (
+        <Component
+          model={model}
+          indexPattern={indexPattern}
+          fields={this.props.fields}
+          onChange={this.props.onChange}
+          uiRestrictions={uiRestrictions}
+          indexPatterns={[this.state.indexPatterns]}
+        />
+      );
+    }
     return (
       <Component
         model={model}
@@ -82,7 +133,8 @@ class Split extends Component {
         fields={this.props.fields}
         onChange={this.props.onChange}
         uiRestrictions={uiRestrictions}
-      />);
+      />
+    );
   }
 }
 
