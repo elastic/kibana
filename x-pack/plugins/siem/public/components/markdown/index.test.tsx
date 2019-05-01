@@ -103,4 +103,58 @@ describe('Markdown', () => {
       expect(toJson(wrapper)).toMatchSnapshot();
     });
   });
+
+  describe('markdown links', () => {
+    const markdownWithLink = 'A link to an external site [External Site](https://google.com)';
+
+    test('it renders the expected link text', () => {
+      const wrapper = mount(<Markdown raw={markdownWithLink} />);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="markdown-link"]')
+          .first()
+          .text()
+      ).toEqual('External Site');
+    });
+
+    test('it renders the expected href', () => {
+      const wrapper = mount(<Markdown raw={markdownWithLink} />);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="markdown-link"]')
+          .first()
+          .getDOMNode()
+      ).toHaveProperty('href', 'https://google.com/');
+    });
+
+    test('it opens links in a new tab via target="_blank"', () => {
+      const wrapper = mount(<Markdown raw={markdownWithLink} />);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="markdown-link"]')
+          .first()
+          .getDOMNode()
+      ).toHaveProperty('target', '_blank');
+    });
+
+    test('it sets the link `rel` attribute to `noopener` to prevent the new page from accessing `window.opener`, `nofollow` to note the link is not endorsed by us, and noreferrer to prevent the browser from sending the current address', () => {
+      const wrapper = mount(<Markdown raw={markdownWithLink} />);
+
+      expect(
+        wrapper
+          .find('[data-test-subj="markdown-link"]')
+          .first()
+          .getDOMNode()
+      ).toHaveProperty('rel', 'nofollow noopener noreferrer');
+    });
+
+    test('it renders the expected content containing a link', () => {
+      const wrapper = shallow(<Markdown raw={markdownWithLink} />);
+
+      expect(toJson(wrapper)).toMatchSnapshot();
+    });
+  });
 });
