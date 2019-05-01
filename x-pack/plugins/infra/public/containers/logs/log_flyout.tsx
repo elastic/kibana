@@ -54,8 +54,10 @@ export const useLogFlyout = ({ sourceId }: { sourceId: string }) => {
         });
       },
       onResolve: response => {
-        const { data } = response;
-        setFlyoutItem((data && data.source && data.source.logItem) || null);
+        if (response) {
+          const { data } = response;
+          setFlyoutItem((data && data.source && data.source.logItem) || null);
+        }
       },
     },
     [apolloClient, sourceId, flyoutId]
