@@ -1372,10 +1372,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/filesaver/-/filesaver-1.1.2.tgz#1998ffb3cd89c9da4ec12a7793bfcae10e30c77a"
   integrity sha512-YZbSufYFBhAj+S2cJgiKALoxIJevqXN2MSr6Yqr42rJdaPuM31cj6pUDwflkql1oDjupqD9la+MfxPFjXI1JFQ==
 
-"@elastic/github-checks-reporter@0.0.11-beta6":
-  version "0.0.11-beta6"
-  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.11-beta6.tgz#a5c40a36ba57b6492c21a76fc8e8e0b5652ee65c"
-  integrity sha512-NIJ4rClZXtNRz5Gh6m8YOAoiNcsvHH7YXrcgyPzHvTDlOL2IFIjr4L3gkFQOxCzA/QhJwDB7H4BLWm1bkyyhGg==
+"@elastic/github-checks-reporter@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@elastic/github-checks-reporter/-/github-checks-reporter-0.0.11.tgz#f751ad6063b3f47d05c88e9cff3f0fec8fec729a"
+  integrity sha512-zTp8ETik8QHhQk4s9lbz/QMhfWzX8Xvq0PGphhOOdOYGX0PWRXBcZNlYwwyHZWdeIozSUu2CION0tRBnseZPng==
   dependencies:
     "@octokit/app" "^2.2.2"
     "@octokit/request" "^2.4.2"
