@@ -44,7 +44,7 @@ export async function getTelemetry(server: Server, internalRepo?: object): Promi
     // Fail silently
   }
 
-  if (!telemetrySavedObject) {
+  if (!telemetrySavedObject || _.isEmpty(telemetrySavedObject)) {
     telemetrySavedObject = await internalRepository.create(TELEMETRY_DOC_ID, initTelemetry(), {
       id: TELEMETRY_DOC_ID,
     });
@@ -58,10 +58,10 @@ export async function updateTelemetry({
   app = 'unspecified-app',
   fileType = 'unspecified-file-type',
 }: {
-  server: Server;
-  internalRepo: object;
-  app: string;
-  fileType: string;
+  server: any;
+  internalRepo?: object;
+  app?: string;
+  fileType?: string;
 }) {
   const telemetry = await getTelemetry(server, internalRepo);
   const internalRepository = internalRepo || getInternalRepository(server);
