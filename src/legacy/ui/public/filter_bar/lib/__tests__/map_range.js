@@ -39,7 +39,7 @@ describe('Filter Bar Directive', function () {
 
     it('should return the key and value for matching filters with gt/lt', function (done) {
       const filter = { meta: { index: 'logstash-*' }, range: { bytes: { lt: 2048, gt: 1024 } } };
-      mapRange(filter).then(function (result) {
+      mapRangeFn(filter).then(function (result) {
         expect(result).to.have.property('key', 'bytes');
         expect(result).to.have.property('value', '1,024 to 2,048');
         done();

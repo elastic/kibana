@@ -20,10 +20,10 @@
 import _ from 'lodash';
 import { mapFilter } from './map_filter';
 
-export async function mapAndFlattenFilters(indexPatterns, filters) {
+export function mapAndFlattenFilters(indexPatterns, filters) {
   const flattened = _(filters)
     .flatten()
     .compact()
-    .value();
-  return await Promise.all(flattened.map(item => mapFilter(indexPatterns, item)));
+    .map(item => mapFilter(indexPatterns, item)).value();
+  return Promise.all(flattened);
 }

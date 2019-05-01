@@ -83,14 +83,14 @@ export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $r
       filters = [filters];
     }
 
-    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters)
+    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
       .then(function (filters) {
         if (!filterState.filters) {
           filterState.filters = [];
         }
 
         filterState.filters = filterState.filters.concat(filters);
-      }));
+      });
   };
 
   /**
@@ -218,7 +218,7 @@ export function FilterBarQueryFilterProvider(Private, Promise, indexPatterns, $r
   };
 
   queryFilter.setFilters = filters => {
-    return mapAndFlattenFilters(indexPatterns, filters)
+    return Promise.resolve(mapAndFlattenFilters(indexPatterns, filters))
       .then(mappedFilters => {
         const appState = getAppState();
         const [globalFilters, appFilters] = _.partition(mappedFilters, filter => {
