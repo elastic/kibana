@@ -41,6 +41,7 @@ export class SavedObjectsManagementBuilder {
       'infrastructure-ui-source',
       'upgrade-assistant-reindex-operation',
       'upgrade-assistant-telemetry',
+      'file-upload-telemetry',
       'index-pattern',
       'visualization',
       'search',
