@@ -61,6 +61,13 @@ export function ComboBoxProvider({ getService, getPageObjects }) {
       await this.closeOptionsList(comboBoxElement);
     }
 
+    /**
+     * This method set custom value to comboBox.
+     * It applies changes by pressing Enter key. Sometimes it may lead to auto-submitting a form.
+     *
+     * @param {string} comboBoxSelector
+     * @param {string} value
+     */
     async setCustom(comboBoxSelector, value) {
       log.debug(`comboBox.setCustom, comboBoxSelector: ${comboBoxSelector}, value: ${value}`);
       const comboBoxElement = await testSubjects.find(comboBoxSelector);
