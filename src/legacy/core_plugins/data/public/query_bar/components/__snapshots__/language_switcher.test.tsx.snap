@@ -13,7 +13,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
     >
       <FormattedMessage
         defaultMessage="Lucene"
-        id="common.ui.queryBar.luceneLanguageName"
+        id="data.query.queryBar.luceneLanguageName"
         values={Object {}}
       />
     </EuiButtonEmpty>
@@ -30,7 +30,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
   <EuiPopoverTitle>
     <FormattedMessage
       defaultMessage="Syntax options"
-      id="common.ui.queryBar.syntaxOptionsTitle"
+      id="data.query.queryBar.syntaxOptionsTitle"
       values={Object {}}
     />
   </EuiPopoverTitle>
@@ -45,7 +45,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
-          id="common.ui.queryBar.syntaxOptionsDescription"
+          id="data.query.queryBar.syntaxOptionsDescription"
           values={
             Object {
               "docsLink": <EuiLink
@@ -56,7 +56,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Kibana Query Language"
-                  id="common.ui.queryBar.kqlFullLanguageName"
+                  id="data.query.queryBar.kqlFullLanguageName"
                   values={Object {}}
                 />
               </EuiLink>,
@@ -76,7 +76,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Kibana Query Language"
-            id="common.ui.queryBar.kqlFullLanguageName"
+            id="data.query.queryBar.kqlFullLanguageName"
             values={Object {}}
           />
         }
@@ -89,7 +89,7 @@ exports[`LanguageSwitcher should toggle off if language is lucene 1`] = `
           label={
             <FormattedMessage
               defaultMessage="Off"
-              id="common.ui.queryBar.kqlOffLabel"
+              id="data.query.queryBar.kqlOffLabel"
               values={Object {}}
             />
           }
@@ -115,7 +115,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
     >
       <FormattedMessage
         defaultMessage="KQL"
-        id="common.ui.queryBar.kqlLanguageName"
+        id="data.query.queryBar.kqlLanguageName"
         values={Object {}}
       />
     </EuiButtonEmpty>
@@ -132,7 +132,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
   <EuiPopoverTitle>
     <FormattedMessage
       defaultMessage="Syntax options"
-      id="common.ui.queryBar.syntaxOptionsTitle"
+      id="data.query.queryBar.syntaxOptionsTitle"
       values={Object {}}
     />
   </EuiPopoverTitle>
@@ -147,7 +147,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
       <p>
         <FormattedMessage
           defaultMessage="The {docsLink} (KQL) offers a simplified query syntax and support for scripted fields. KQL also provides autocomplete if you have a Basic license or above. If you turn off KQL, Kibana uses Lucene."
-          id="common.ui.queryBar.syntaxOptionsDescription"
+          id="data.query.queryBar.syntaxOptionsDescription"
           values={
             Object {
               "docsLink": <EuiLink
@@ -158,7 +158,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
               >
                 <FormattedMessage
                   defaultMessage="Kibana Query Language"
-                  id="common.ui.queryBar.kqlFullLanguageName"
+                  id="data.query.queryBar.kqlFullLanguageName"
                   values={Object {}}
                 />
               </EuiLink>,
@@ -178,7 +178,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Kibana Query Language"
-            id="common.ui.queryBar.kqlFullLanguageName"
+            id="data.query.queryBar.kqlFullLanguageName"
             values={Object {}}
           />
         }
@@ -191,7 +191,7 @@ exports[`LanguageSwitcher should toggle on if language is kuery 1`] = `
           label={
             <FormattedMessage
               defaultMessage="On"
-              id="common.ui.queryBar.kqlOnLabel"
+              id="data.query.queryBar.kqlOnLabel"
               values={Object {}}
             />
           }

@@ -17,26 +17,36 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { Legacy } from '../../../../kibana';
+import { QueryBar } from './components/query_bar';
+import { fromUser } from './lib/from_user';
+import { toUser } from './lib/to_user';
 
-// eslint-disable-next-line import/no-default-export
-export default function DataPlugin(kibana: any) {
-  const config: Legacy.PluginSpecOptions = {
-    id: 'data',
-    require: ['elasticsearch'],
-    publicDir: resolve(__dirname, 'public'),
-    config: (Joi: any) => {
-      return Joi.object({
-        enabled: Joi.boolean().default(true),
-      }).default();
-    },
-    init: (server: Legacy.Server) => ({}),
-    uiExports: {
-      injectDefaultVars: () => ({}),
-      styleSheetPaths: resolve(__dirname, 'public/index.scss'),
-    },
-  };
+// @ts-ignore
+import { setupDirective } from './directive';
 
-  return new kibana.Plugin(config);
+/**
+ * Query Bar Service
+ *
+ * @internal
+ */
+export class QueryBarService {
+  public setup() {
+    return {
+      loadLegacyDirectives: _.once(setupDirective),
+      helpers: {
+        fromUser,
+        toUser,
+      },
+      ui: {
+        QueryBar,
+      },
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
 }
+
+/** @public */
+export type QueryBarSetup = ReturnType<QueryBarService['setup']>;
