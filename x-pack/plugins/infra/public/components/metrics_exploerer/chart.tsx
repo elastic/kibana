@@ -13,7 +13,6 @@ import { first } from 'lodash';
 import { niceTimeFormatByDay } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
-import { EuiSeriesChart } from '@elastic/eui/lib/experimental';
 import { MetricsExplorerSeries } from '../../../server/routes/metrics_explorer/types';
 import {
   MetricsExplorerOptions,
@@ -24,6 +23,8 @@ import { createFormatterForMetric } from './helpers/create_formatter_for_metric'
 import { MetricLineSeries } from './line_series';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { SourceQuery } from '../../graphql/types';
+import { MetricsExplorerEmptyChart } from './empty_chart';
+import { MetricsExplorerNoMetrics } from './no_metrics';
 
 interface Props {
   intl: InjectedIntl;
@@ -41,7 +42,6 @@ const dateFormatter = timeFormatter(niceTimeFormatByDay(1));
 
 export const MetricsExplorerChart = injectI18n(
   ({
-    intl,
     source,
     options,
     series,
@@ -98,13 +98,10 @@ export const MetricsExplorerChart = injectI18n(
               />
               <Axis id={getAxisId('values')} position={Position.Left} tickFormat={yAxisFormater} />
             </Chart>
+          ) : options.metrics.length > 0 ? (
+            <MetricsExplorerEmptyChart />
           ) : (
-            <EuiSeriesChart
-              statusText={intl.formatMessage({
-                id: 'xpack.infra.metricsExplorer',
-                defaultMessage: 'Missing data for request.',
-              })}
-            />
+            <MetricsExplorerNoMetrics />
           )}
         </div>
       </React.Fragment>
