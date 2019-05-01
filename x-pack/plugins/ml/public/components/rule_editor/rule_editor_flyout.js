@@ -475,7 +475,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
           aria-labelledby="flyoutTitle"
         >
           <EuiFlyoutHeader hasBorder={true}>
-            <EuiTitle size="l">
+            <EuiTitle size="m">
               <h1 id="flyoutTitle">
                 <FormattedMessage
                   id="xpack.ml.ruleEditor.ruleEditorFlyout.editRulesTitle"
@@ -534,7 +534,7 @@ export const RuleEditorFlyout = injectI18n(class RuleEditorFlyout extends Compon
           aria-labelledby="flyoutTitle"
         >
           <EuiFlyoutHeader hasBorder={true}>
-            <EuiTitle size="l">
+            <EuiTitle size="m">
               <h1 id="flyoutTitle">
                 {(isCreate === true) ? (
                   <FormattedMessage
