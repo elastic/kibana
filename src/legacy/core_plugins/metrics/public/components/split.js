@@ -38,7 +38,6 @@ const SPLIT_MODES = {
   TERMS: 'terms',
   EVERYTHING: 'everything',
 };
-// add indexPattern fetching in here to pass down to SplitByFilter and SplitByFilters, we need to work off of the panel prop to get the index pattern name. The model passed down in here is only a partial version of the overall model.
 
 class Split extends Component {
   constructor(props) {
