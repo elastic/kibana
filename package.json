@@ -29,7 +29,8 @@
         "build",
         "optimize",
         "built_assets",
-        ".eslintcache"
+        ".eslintcache",
+        ".node_binaries"
       ]
     }
   },
