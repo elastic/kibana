@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DECIMAL_DEGREES_PRECISION } from '../common/constants';
+import { DECIMAL_DEGREES_PRECISION, ES_GEO_FIELD_TYPE } from '../common/constants';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -24,9 +24,9 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
     const properties = flattenHit(hit);
 
     let geometries;
-    if (geoFieldType === 'geo_point') {
+    if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
       geometries = geoPointToGeometry(properties[geoFieldName]);
-    } else if (geoFieldType === 'geo_shape') {
+    } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
       geometries = geoShapeToGeometry(properties[geoFieldName]);
     } else {
       const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedFieldTypeErrorMessage', {
@@ -181,7 +181,7 @@ const BOTTOM_RIGHT_INDEX = 2;
 export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
   const safePolygon = convertMapExtentToPolygon(mapExtent);
 
-  if (geoFieldType === 'geo_point') {
+  if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
     const verticies = safePolygon.coordinates[POLYGON_COORDINATES_EXTERIOR_INDEX];
     return {
       geo_bounding_box: {
@@ -191,7 +191,7 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
         }
       }
     };
-  } else if (geoFieldType === 'geo_shape') {
+  } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
     return {
       geo_shape: {
         [geoFieldName]: {
@@ -201,16 +201,13 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
       }
     };
   } else {
-    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedGeoFieldTypeErrorMessage', {
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.extent.unsupportedGeoFieldTypeErrorMessage', {
       defaultMessage: `Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}`,
       values: { geoFieldType }
     });
     throw new Error(errorMessage);
   }
 }
-
-
-
 
 export function createShapeFilter(geojsonPolygon, indexPatternId, geoFieldName, geoFieldType) {
 
@@ -223,7 +220,6 @@ export function createShapeFilter(geojsonPolygon, indexPatternId, geoFieldName, 
   });
 
   const filter = {
-
     meta: {
       negate: false,
       index: indexPatternId,
@@ -232,15 +228,27 @@ export function createShapeFilter(geojsonPolygon, indexPatternId, geoFieldName, 
     }
   };
 
-  if (geoFieldType === 'geo_point') {
+  if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_POINT) {
     filter.geo_polygon = {
       ignore_unmapped: true,
       [geoFieldName]: {
         points: points
       }
     };
+  } else if (geoFieldType === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+    filter.geo_shape = {
+      ignore_unmapped: true,
+      [geoFieldName]: {
+        shape: geojsonPolygon,
+        relation: 'INTERSECTS'
+      }
+    };
   } else {
-    throw new Error('not implemented');
+    const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.shape.unsupportedGeoFieldTypeErrorMessage', {
+      defaultMessage: `Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}`,
+      values: { geoFieldType }
+    });
+    throw new Error(errorMessage);
   }
   return filter;
 }

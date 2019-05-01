@@ -56,6 +56,7 @@ export class MBMapContainer extends React.Component {
     }
     const featureCollection = this._mbDrawControl.getAll();
     const geoField = this.props.drawState.geoField;
+    const geoFieldType = this.props.drawState.geoFieldType;
     const indexPatternId = this.props.drawState.indexPatternId;
     this.props.disableDrawState();
 
@@ -64,7 +65,7 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    const geoPolygonFilter = createShapeFilter(featureCollection.features[0].geometry, indexPatternId, geoField, 'geo_point');
+    const geoPolygonFilter = createShapeFilter(featureCollection.features[0].geometry, indexPatternId, geoField, geoFieldType);
     if (!geoPolygonFilter) {
       return;
     }

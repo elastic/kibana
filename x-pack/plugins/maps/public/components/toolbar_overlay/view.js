@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import _ from 'lodash';
 import { DRAW_STATE_DRAW_TYPE } from '../../actions/store_actions';
+import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 
 const RESET_STATE = {
   isPopoverOpen: false,
@@ -98,14 +99,14 @@ export class ToolbarOverlay extends React.Component {
       const uniqueIndexPatternsAndGeofields = [];
       indexPatterns.forEach((indexPattern) => {
         indexPattern.fields.forEach(field => {
-          if (field.type !== 'geo_point') {
-            return;
+          if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
+            uniqueIndexPatternsAndGeofields.push({
+              geoField: field.name,
+              geoFieldType: field.type,
+              indexPatternTitle: indexPattern.title,
+              indexPatternId: indexPattern.id
+            });
           }
-          uniqueIndexPatternsAndGeofields.push({
-            geoField: field.name,
-            indexPatternTitle: indexPattern.title,
-            indexPatternId: indexPattern.id
-          });
         });
       });
       if (this._isMounted && !_.isEqual(this.state.uniqueIndexPatternsAndGeoFields, uniqueIndexPatternsAndGeofields)) {
