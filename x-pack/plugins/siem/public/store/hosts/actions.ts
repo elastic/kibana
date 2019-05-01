@@ -17,13 +17,13 @@ export const updateTableActivePage = actionCreator<{
   activePage: number;
   hostsType: HostsType;
   tableType: HostsTableType;
-}>('UPDATE_TABLE_ACTIVE_PAGE');
+}>('UPDATE_HOST_TABLE_ACTIVE_PAGE');
 
 export const updateTableLimit = actionCreator<{
   hostsType: HostsType;
   limit: number;
   tableType: HostsTableType;
-}>('UPDATE_TABLE_LIMIT');
+}>('UPDATE_HOST_TABLE_LIMIT');
 
 export const updateHostsSort = actionCreator<{
   sort: HostsSortField;

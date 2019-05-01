@@ -72,15 +72,13 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   startDate={from}
                   type={networkModel.NetworkType.page}
                 >
-                  {({ totalCount, loading, networkTopNFlow, pageInfo, loadMore, id, refetch }) => (
+                  {({ totalCount, loading, networkTopNFlow, loadMore, id, refetch }) => (
                     <NetworkTopNFlowTableManage
                       data={networkTopNFlow}
                       indexPattern={indexPattern}
                       id={id}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loading={loading}
                       loadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       refetch={refetch}
                       setQuery={setQuery}
                       totalCount={totalCount}

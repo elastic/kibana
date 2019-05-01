@@ -55,6 +55,7 @@ interface BasicTableProps<T> {
   title: string | React.ReactElement;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
+  updateProps?: { [key: string]: any };
 }
 
 export interface Columns<T> {
@@ -82,18 +83,14 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
     title,
     updateActivePage,
     updateLimitPagination,
+    updateProps,
   }) => {
     const [activePage, setActivePage] = useState(0);
     const [isEmptyTable, setEmptyTable] = useState(pageOfItems.length === 0);
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
-
-    useEffect(
-      () => {
-        return setActivePage(0);
-      },
-      [limit]
-    );
+    const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
+    useEffect(() => setActivePage(0), effectDeps);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);

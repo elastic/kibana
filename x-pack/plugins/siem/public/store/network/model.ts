@@ -18,8 +18,15 @@ export enum NetworkType {
   details = 'details',
 }
 
+export enum NetworkTableType {
+  dns = 'dns',
+  domains = 'domains',
+  topNFlow = 'topNFlow',
+}
+
 export interface BasicQuery {
   limit: number;
+  activePage: number;
 }
 
 // Network Page Models

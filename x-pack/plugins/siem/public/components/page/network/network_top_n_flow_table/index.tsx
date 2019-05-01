@@ -28,12 +28,12 @@ import { CountBadge } from '../../index';
 import { getNetworkTopNFlowColumns } from './columns';
 import * as i18n from './translations';
 
+const tableType = networkModel.NetworkTableType.topNFlow;
+
 interface OwnProps {
   data: NetworkTopNFlowEdges[];
   indexPattern: StaticIndexPattern;
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
   totalCount: number;
   loadMore: (newActivePage: number) => void;
   type: networkModel.NetworkType;
@@ -47,6 +47,11 @@ interface NetworkTopNFlowTableReduxProps {
 }
 
 interface NetworkTopNFlowTableDispatchProps {
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    networkType: networkModel.NetworkType;
+    tableType: networkModel.NetworkTableType;
+  }>;
   updateTopNFlowDirection: ActionCreator<{
     flowDirection: FlowDirection;
     networkType: networkModel.NetworkType;
@@ -93,18 +98,17 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
   public render() {
     const {
       data,
-      hasNextPage,
       indexPattern,
       limit,
       loading,
       loadMore,
       totalCount,
-      nextCursor,
       updateTopNFlowLimit,
       flowDirection,
       topNFlowSort,
       flowTarget,
       type,
+      updateTableActivePage,
       updateTopNFlowTarget,
     } = this.props;
 
@@ -122,16 +126,23 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
           type,
           NetworkTopNFlowTableId
         )}
+        updateProps={{ flowDirection, flowTarget }}
         loadingTitle={i18n.TOP_TALKERS}
         loading={loading}
         pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
+        loadMore={newActivePage => loadMore(newActivePage)}
         limit={limit}
-        hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
         onChange={this.onChange}
         updateLimitPagination={newLimit =>
           updateTopNFlowLimit({ limit: newLimit, networkType: type })
+        }
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            networkType: type,
+            tableType,
+          })
         }
         sorting={{ field, direction: topNFlowSort.direction }}
         title={
@@ -173,6 +184,7 @@ class NetworkTopNFlowTableComponent extends React.PureComponent<NetworkTopNFlowT
             </EuiFlexItem>
           </EuiFlexGroup>
         }
+        totalCount={totalCount}
       />
     );
   }
@@ -211,6 +223,7 @@ export const NetworkTopNFlowTable = connect(
     updateTopNFlowSort: networkActions.updateTopNFlowSort,
     updateTopNFlowTarget: networkActions.updateTopNFlowTarget,
     updateTopNFlowDirection: networkActions.updateTopNFlowDirection,
+    updateTableActivePage: networkActions.updateTableActivePage,
   }
 )(NetworkTopNFlowTableComponent);
 

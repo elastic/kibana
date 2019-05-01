@@ -14,7 +14,7 @@ import {
   NetworkDnsFields,
   NetworkTopNFlowFields,
 } from '../../graphql/types';
-import { DEFAULT_TABLE_LIMIT } from '../constants';
+import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
 import {
   applyNetworkFilterQuery,
@@ -26,6 +26,7 @@ import {
   updateDomainsSort,
   updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
+  updateTableActivePage,
   updateTopNFlowDirection,
   updateTopNFlowLimit,
   updateTopNFlowSort,
@@ -40,6 +41,7 @@ export const initialNetworkState: NetworkState = {
   page: {
     queries: {
       topNFlow: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         topNFlowSort: {
           field: NetworkTopNFlowFields.bytes,
@@ -49,6 +51,7 @@ export const initialNetworkState: NetworkState = {
         flowDirection: FlowDirection.uniDirectional,
       },
       dns: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         dnsSortField: {
           field: NetworkDnsFields.uniqueDomains,
@@ -63,6 +66,7 @@ export const initialNetworkState: NetworkState = {
   details: {
     queries: {
       domains: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         flowDirection: FlowDirection.uniDirectional,
         limit: DEFAULT_TABLE_LIMIT,
         domainsSortField: {
@@ -78,6 +82,19 @@ export const initialNetworkState: NetworkState = {
 };
 
 export const networkReducer = reducerWithInitialState(initialNetworkState)
+  .case(updateTableActivePage, (state, { activePage, networkType, tableType }) => ({
+    ...state,
+    [networkType]: {
+      ...state[networkType],
+      queries: {
+        ...state[networkType].queries,
+        [tableType]: {
+          ...state[networkType].queries[tableType],
+          activePage,
+        },
+      },
+    },
+  }))
   .case(updateDnsLimit, (state, { limit, networkType }) => ({
     ...state,
     [networkType]: {
