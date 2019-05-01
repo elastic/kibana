@@ -13,6 +13,7 @@ import { ServiceDetails } from '../ServiceDetails';
 import { TransactionDetails } from '../TransactionDetails';
 import { Home } from './Home';
 import { BreadcrumbRoute } from './ProvideBreadcrumbs';
+import { ListSettings } from '../Settings/ListSettings';
 
 interface RouteParams {
   serviceName: string;
@@ -42,6 +43,15 @@ export const routes: BreadcrumbRoute[] = [
     component: Home,
     breadcrumb: i18n.translate('xpack.apm.breadcrumb.servicesTitle', {
       defaultMessage: 'Services'
+    })
+  },
+  // Settings: Central configuration management
+  {
+    exact: true,
+    path: '/settings',
+    component: ListSettings,
+    breadcrumb: i18n.translate('xpack.apm.breadcrumb.listSettingsTitle', {
+      defaultMessage: 'Settings'
     })
   },
   {
