@@ -16,7 +16,8 @@ export enum FETCH_STATUS {
 
 export function useFetcher<Response>(
   fn: () => Promise<Response> | undefined,
-  useEffectKey: any[]
+  effectKey: any[],
+  options = { preservePreviousResponse: true }
 ) {
   const id = useComponentId();
   const { dispatchStatus } = useContext(LoadingIndicatorContext);
@@ -25,47 +26,63 @@ export function useFetcher<Response>(
     status?: FETCH_STATUS;
     error?: Error;
   }>({});
+  const [counter, setCounter] = useState(0);
 
-  useEffect(() => {
-    let didCancel = false;
+  useEffect(
+    () => {
+      let didCancel = false;
 
-    dispatchStatus({ id, isLoading: true });
-    setResult({
-      data: result.data, // preserve data from previous state while loading next state
-      status: FETCH_STATUS.LOADING,
-      error: undefined
-    });
-
-    async function doFetch() {
-      try {
-        const data = await fn();
-        if (!didCancel) {
-          dispatchStatus({ id, isLoading: false });
-          setResult({
-            data,
-            status: FETCH_STATUS.SUCCESS,
-            error: undefined
-          });
+      async function doFetch() {
+        const promise = fn();
+        if (!promise) {
+          return;
         }
-      } catch (e) {
-        if (!didCancel) {
-          dispatchStatus({ id, isLoading: false });
-          setResult({
-            data: undefined,
-            status: FETCH_STATUS.FAILURE,
-            error: e
-          });
+
+        dispatchStatus({ id, isLoading: true });
+
+        setResult({
+          data: options.preservePreviousResponse ? result.data : undefined, // preserve data from previous state while loading next state
+          status: FETCH_STATUS.LOADING,
+          error: undefined
+        });
+
+        try {
+          const data = await promise;
+          if (!didCancel) {
+            dispatchStatus({ id, isLoading: false });
+            setResult({
+              data,
+              status: FETCH_STATUS.SUCCESS,
+              error: undefined
+            });
+          }
+        } catch (e) {
+          if (!didCancel) {
+            dispatchStatus({ id, isLoading: false });
+            setResult({
+              data: undefined,
+              status: FETCH_STATUS.FAILURE,
+              error: e
+            });
+          }
         }
       }
+
+      doFetch();
+
+      return () => {
+        dispatchStatus({ id, isLoading: false });
+        didCancel = true;
+      };
+    },
+    [...effectKey, counter]
+  );
+
+  return {
+    ...result,
+    refresh: () => {
+      // this will invalidate the effectKey and will result in a new request
+      setCounter(counter + 1);
     }
-
-    doFetch();
-
-    return () => {
-      dispatchStatus({ id, isLoading: false });
-      didCancel = true;
-    };
-  }, useEffectKey);
-
-  return result || {};
+  };
 }
