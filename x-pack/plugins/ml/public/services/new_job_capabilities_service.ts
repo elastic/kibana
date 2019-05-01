@@ -4,14 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IndexPattern } from 'ui/index_patterns';
+import { IndexPatternWithType } from '../../common/types/kibana';
 import { Field, Aggregation, AggId, FieldId, NewJobCaps } from '../../common/types/fields';
 import { ml } from './ml_api_service';
-
-// the type property is missing from the official IndexPattern interface
-interface IndexPatternWithType extends IndexPattern {
-  type?: string;
-}
 
 // called in the angular routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
