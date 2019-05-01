@@ -222,14 +222,6 @@ export function setSelectedLayer(layerId) {
   };
 }
 
-export function openLayerDetailsPanel(layerId) {
-  return async (dispatch) => {
-    await dispatch(removeTransientLayer());
-    await dispatch(setSelectedLayer(layerId));
-    dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
-  };
-}
-
 export function removeTransientLayer() {
   return async (dispatch, getState) => {
     const transientLayerId = getTransientLayerId(getState());
