@@ -58,7 +58,7 @@ Array [
   Array [
     "/api/capabilities",
     Object {
-      "body": "{\\"capabilities\\":{\\"navLinks\\":{\\"app2\\":true,\\"app1\\":true},\\"management\\":{},\\"catalogue\\":{},\\"foo\\":{\\"feature\\":true},\\"bar\\":{\\"feature\\":true},\\"app2\\":{\\"feature\\":true}}}",
+      "body": "{\\"capabilities\\":{\\"navLinks\\":{\\"app2\\":true,\\"app1\\":true},\\"management\\":{},\\"catalogue\\":{},\\"app2\\":{\\"feature\\":true}}}",
       "credentials": "same-origin",
       "headers": Object {
         "kbn-xsrf": "xxx",
@@ -78,13 +78,7 @@ Object {
   "app2": Object {
     "feature": true,
   },
-  "bar": Object {
-    "feature": true,
-  },
   "catalogue": Object {},
-  "foo": Object {
-    "feature": true,
-  },
   "management": Object {},
   "navLinks": Object {
     "app1": true,

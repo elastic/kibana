@@ -104,15 +104,6 @@ export const spaces = (kibana: Record<string, any>) =>
           };
         }
 
-        if (vars.activeSpace.space) {
-          const features = server.plugins.xpack_main.getFeatures();
-          vars.uiCapabilities = toggleUICapabilities(
-            features,
-            vars.uiCapabilities,
-            vars.activeSpace.space
-          );
-        }
-
         return vars;
       },
     },

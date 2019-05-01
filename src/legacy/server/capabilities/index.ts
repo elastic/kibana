@@ -17,11 +17,11 @@
  * under the License.
  */
 
-import Joi from 'joi';
 import { Server, Request } from 'hapi';
 
-import { Capabilities } from 'src/core/public/application/capabilities';
+import { Capabilities } from '../../../core/public';
 import KbnServer from '../kbn_server';
+import { registerCapabilitiesRoute } from './capabilities_route';
 
 export type CapabilitiesProvider = (
   request: Request,
@@ -35,26 +35,5 @@ export function capabilitiesMixin(knbServer: KbnServer, server: Server) {
     providers.push(provider);
   });
 
-  server.route({
-    path: '/api/capabilities',
-    method: 'POST',
-    options: {
-      validate: {
-        payload: Joi.object({
-          capabilities: Joi.object().required(),
-        }).required(),
-      },
-    },
-    async handler(request) {
-      let { capabilities } = request.payload as { capabilities: Capabilities };
-
-      for (const provider of providers) {
-        capabilities = await provider(request, capabilities);
-      }
-
-      return {
-        capabilities,
-      };
-    },
-  });
+  registerCapabilitiesRoute(server, providers);
 }

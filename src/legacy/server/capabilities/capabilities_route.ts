@@ -17,9 +17,40 @@
  * under the License.
  */
 
-import { Capabilities } from './capabilities_service';
+import Joi from 'joi';
+import { Server } from 'hapi';
 
-export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>) =>
+import { CapabilitiesProvider } from '.';
+import { Capabilities } from '../../../core/public';
+
+export const registerCapabilitiesRoute = (server: Server, providers: CapabilitiesProvider[]) => {
+  server.route({
+    path: '/api/capabilities',
+    method: 'POST',
+    options: {
+      validate: {
+        payload: Joi.object({
+          capabilities: Joi.object().required(),
+        }).required(),
+      },
+    },
+    async handler(request) {
+      const baseCapabilities = server.getDefaultInjectedVars().uiCapabilities as Capabilities;
+      let { capabilities } = request.payload as { capabilities: Capabilities };
+      capabilities = mergeCapabilities(baseCapabilities, capabilities);
+
+      for (const provider of providers) {
+        capabilities = await provider(request, capabilities);
+      }
+
+      return {
+        capabilities,
+      };
+    },
+  });
+};
+
+const mergeCapabilities = (...sources: Capabilities[]): Capabilities =>
   sources.reduce(
     (capabilities, source) => {
       Object.entries(source).forEach(([key, value]) => {
@@ -35,5 +66,5 @@ export const mergeCapabilities = (...sources: Array<Partial<Capabilities>>) =>
       navLinks: {},
       management: {},
       catalogue: {},
-    }
+    } as Capabilities
   );

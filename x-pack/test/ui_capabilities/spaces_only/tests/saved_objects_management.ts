@@ -23,7 +23,7 @@ export default function savedObjectsManagementTests({
     SpaceScenarios.forEach(scenario => {
       it(`${scenario.name}`, async () => {
         // spaces don't affect saved objects management, so we assert the same thing for every scenario
-        const uiCapabilities = await uiCapabilitiesService.get(undefined, scenario.id);
+        const uiCapabilities = await uiCapabilitiesService.get({ spaceId: scenario.id });
         expect(uiCapabilities.success).to.be(true);
         expect(uiCapabilities.value).to.have.property('savedObjectsManagement');
         const expected = mapValues(uiCapabilities.value!.savedObjectsManagement, () =>

@@ -56,6 +56,7 @@ declare module 'hapi' {
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
     usage: { collectorSet: any };
+    getDefaultInjectedVars: () => any;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
     registerCapabilitiesProvider: (provider: CapabilitiesProvider) => void;

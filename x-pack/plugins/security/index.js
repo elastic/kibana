@@ -109,28 +109,6 @@ export const security = (kibana) => new kibana.Plugin({
         sessionTimeout: config.get('xpack.security.sessionTimeout'),
         enableSpaceAwarePrivileges: config.get('xpack.spaces.enabled'),
       };
-    },
-    replaceInjectedVars: async function (originalInjectedVars, request, server) {
-      // if we have a license which doesn't enable security, or we're a legacy user
-      // we shouldn't disable any ui capabilities
-      const { authorization } = server.plugins.security;
-      if (!authorization.mode.useRbacForRequest(request)) {
-        return originalInjectedVars;
-      }
-
-      const disableUICapabilites = disableUICapabilitesFactory(server, request);
-      // if we're an anonymous route, we disable all ui capabilities
-      if (request.route.settings.auth === false) {
-        return {
-          ...originalInjectedVars,
-          uiCapabilities: disableUICapabilites.all(originalInjectedVars.uiCapabilities)
-        };
-      }
-
-      return {
-        ...originalInjectedVars,
-        uiCapabilities: await disableUICapabilites.usingPrivileges(originalInjectedVars.uiCapabilities)
-      };
     }
   },
 

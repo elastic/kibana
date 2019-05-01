@@ -51,6 +51,8 @@ export function uiRenderMixin(kbnServer, server, config) {
       ), { uiCapabilities: { navLinks: {} } });
   });
 
+  server.decorate('server', 'getDefaultInjectedVars', () => defaultInjectedVars);
+
   // render all views from ./views
   server.setupViews(resolve(__dirname, 'views'));
 

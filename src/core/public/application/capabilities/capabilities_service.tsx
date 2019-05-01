@@ -76,16 +76,14 @@ export interface CapabilitiesStart {
  */
 export class CapabilitiesService {
   public async start({ apps, basePath, injectedMetadata }: StartDeps): Promise<CapabilitiesStart> {
-    const mergedCapabilities = mergeCapabilities([
-      // Custom capabilities from legacy apps
-      injectedMetadata.getInjectedVar('uiCapabilities') as Capabilities,
+    const mergedCapabilities = mergeCapabilities(
       // Custom capabilites for new platform apps
       ...apps.filter(app => app.capabilities).map(app => app.capabilities!),
       // Generate navLink capabilities for all apps
-      ...apps.map(app => ({ navLinks: { [app.id]: true } })),
-    ]);
+      ...apps.map(app => ({ navLinks: { [app.id]: true } }))
+    );
 
-    // NOTE: should replace `fetch` with browser HTTP service
+    // NOTE: should replace `fetch` with browser HTTP service once it exists
     const res = await fetch(basePath.addToPath('/api/capabilities'), {
       method: 'POST',
       body: JSON.stringify({ capabilities: mergedCapabilities }),
@@ -98,11 +96,11 @@ export class CapabilitiesService {
     if (res.status === 401) {
       return {
         availableApps: [],
-        capabilities: {
+        capabilities: deepFreeze({
           navLinks: {},
           management: {},
           catalogue: {},
-        },
+        }),
       };
     } else if (res.status !== 200) {
       throw new Error(`Capabilities check failed.`);
