@@ -6,6 +6,12 @@
 
 import _ from 'lodash';
 
+function getStackTrace() {
+  let stack = new Error().stack || '';
+  stack = stack.split('\n').map(function (line) { return line.trim(); });
+  return stack.splice(stack[0] === 'Error' ? 2 : 1);
+}
+
 export class Poller {
 
   constructor(options) {
@@ -18,6 +24,7 @@ export class Poller {
     this.pollFrequencyErrorMultiplier = options.pollFrequencyErrorMultiplier || 1;
     this._timeoutId = null;
     this._isRunning = false;
+    this.stackTrace = getStackTrace();
   }
 
   getPollFrequency() {
@@ -32,6 +39,9 @@ export class Poller {
           return;
         }
 
+        console.log('set timeout');
+        console.log(this.pollFrequencyInMillis);
+        console.log(this.stackTrace);
         this._timeoutId = setTimeout(this._poll.bind(this), this.pollFrequencyInMillis);
       })
       .catch(e => {
@@ -39,6 +49,10 @@ export class Poller {
         if (!this._isRunning) {
           return;
         }
+
+        console.log('set timeout on error' + this.continuePollingOnError);
+        console.log(this.pollFrequencyInMillis);
+        console.log(this.stackTrace);
 
         if (this.continuePollingOnError) {
           this._timeoutId = setTimeout(this._poll.bind(this), this.pollFrequencyInMillis * this.pollFrequencyErrorMultiplier);
