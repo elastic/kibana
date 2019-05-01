@@ -16,10 +16,11 @@ describe('Data Frame: <GroupByListForm />', () => {
     const item: PivotGroupByConfig = {
       agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
       field: 'the-group-by-field',
-      formRowLabel: 'the-group-by-label',
+      aggName: 'the-group-by-label',
     };
     const props = {
       list: { 'the-options-data-id': item },
+      options: {},
       deleteHandler() {},
       onChange() {},
     };

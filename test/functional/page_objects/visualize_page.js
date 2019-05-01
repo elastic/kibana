@@ -615,12 +615,12 @@ export function VisualizePageProvider({ getService, getPageObjects, updateBaseli
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async toggleOtherBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showOther"]');
+    async toggleOtherBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} otherBucketSwitch`);
     }
 
-    async toggleMissingBucket() {
-      return await find.clickByCssSelector('vis-editor-agg-params:not(.ng-hide) input[name="showMissing"]');
+    async toggleMissingBucket(agg = 2) {
+      return await testSubjects.click(`aggregationEditor${agg} missingBucketSwitch`);
     }
 
     async isApplyEnabled() {
