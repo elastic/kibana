@@ -1,7 +1,14 @@
-@import '@elastic/eui/src/global_styling/variables/index';
-@import './common/components/field_list_panel/field_list_panel.scss';
-@import './common/components/operation_editor/config_panel.scss';
-@import './common/components/draggable/draggable.scss';
-@import './common/components/visualization_modal/visualization_modal.scss';
-@import './frame/main/main.scss';
-@import './frame/expression_renderer/expression_renderer.scss';
+// Import the EUI global scope so we can use EUI constants
+@import 'src/legacy/ui/public/styles/_styling_constants';
+
+/* Lens plugin styles */
+
+// Prefix all styles with "lns" to avoid conflicts.
+// Examples
+//   lnsChart
+//   lnsChart__legend
+//   lnsChart__legend--small
+//   lnsChart__legend-isLoading
+
+@import './frame/index';
+@import './common/index';
