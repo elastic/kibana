@@ -11,7 +11,13 @@ import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 describe('IntegrationLink component', () => {
   it('renders without errors', () => {
     const component = shallowWithIntl(
-      <IntegrationLink ariaLabel="foo" href="/app/foo?kuery=localhost" iconType="apmApp" />
+      <IntegrationLink
+        ariaLabel="foo"
+        href="/app/foo?kuery=localhost"
+        iconType="apmApp"
+        message="click for bar"
+        tooltipContent="info for bar"
+      />
     );
     expect(component).toMatchSnapshot();
   });
