@@ -18,5 +18,5 @@
 .mapLayerControl__openLayerTOCButton,
 .mapLayerControl__closeLayerTOCButton {
   @include size($euiSizeXL);
-  background-color: $euiColorEmptyShade;
+  background-color: $euiColorEmptyShade !important;
 }
