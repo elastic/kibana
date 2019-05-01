@@ -6,13 +6,17 @@
 
 import * as CSS from 'csstype';
 import { default } from 'react';
-import { Observable } from 'rxjs';
+import { IconType } from '@elastic/eui';
 import * as PropTypes from 'prop-types';
 import * as Rx from 'rxjs';
 import { Toast } from '@elastic/eui';
 
-// @public (undocumented)
-export type BasePathSetup = ReturnType<BasePathService['setup']>;
+// @public
+export interface BasePathSetup {
+    addToPath(path: string): string;
+    get(): string;
+    removeFromPath(path: string): string;
+}
 
 // @public
 export interface Capabilities {
@@ -25,8 +29,18 @@ export interface Capabilities {
 }
 
 // @public
-export interface CapabilitiesSetup {
+export interface CapabilitiesStart {
     getCapabilities: () => Capabilities;
+}
+
+// @public (undocumented)
+export interface ChromeBadge {
+    // (undocumented)
+    iconType?: IconType;
+    // (undocumented)
+    text: string;
+    // (undocumented)
+    tooltip: string;
 }
 
 // @public (undocumented)
@@ -62,8 +76,6 @@ export interface CoreSetup {
     // (undocumented)
     basePath: BasePathSetup;
     // (undocumented)
-    capabilities: CapabilitiesSetup;
-    // (undocumented)
     chrome: ChromeSetup;
     // (undocumented)
     fatalErrors: FatalErrorsSetup;
@@ -76,9 +88,21 @@ export interface CoreSetup {
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
-    overlays: OverlaySetup;
-    // (undocumented)
     uiSettings: UiSettingsSetup;
+}
+
+// @public (undocumented)
+export interface CoreStart {
+    // (undocumented)
+    capabilities: CapabilitiesStart;
+    // (undocumented)
+    i18n: I18nStart;
+    // (undocumented)
+    injectedMetadata: InjectedMetadataStart;
+    // (undocumented)
+    notifications: NotificationsStart;
+    // (undocumented)
+    overlays: OverlayStart;
 }
 
 // @internal
@@ -86,20 +110,19 @@ export class CoreSystem {
     constructor(params: Params);
     // (undocumented)
     setup(): Promise<{
-        fatalErrors: {
-            add: (error: string | Error, source?: string | undefined) => never;
-            get$: () => import("rxjs").Observable<{
-                message: string;
-                stack: string | undefined;
-            }>;
-        };
+        fatalErrors: import(".").FatalErrorsSetup;
     } | undefined>;
+    // (undocumented)
+    start(): Promise<void>;
     // (undocumented)
     stop(): void;
     }
 
-// @public (undocumented)
-export type FatalErrorsSetup = ReturnType<FatalErrorsService['setup']>;
+// @public
+export interface FatalErrorsSetup {
+    add: (error: string | Error, source?: string) => never;
+    get$: () => Rx.Observable<ErrorInfo>;
+}
 
 // @public
 export class FlyoutRef {
@@ -111,8 +134,15 @@ export class FlyoutRef {
 // @public (undocumented)
 export type HttpSetup = ReturnType<HttpService['setup']>;
 
+// @public
+export interface I18nSetup {
+    Context: ({ children }: {
+        children: default.ReactNode;
+    }) => JSX.Element;
+}
+
 // @public (undocumented)
-export type I18nSetup = ReturnType<I18nService['setup']>;
+export type I18nStart = I18nSetup;
 
 // @internal (undocumented)
 export interface InjectedMetadataParams {
@@ -151,14 +181,60 @@ export interface InjectedMetadataParams {
     };
 }
 
-// @public (undocumented)
-export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;
+// @public
+export interface InjectedMetadataSetup {
+    // (undocumented)
+    getBasePath: () => string;
+    // (undocumented)
+    getCspConfig: () => {
+        warnLegacyBrowsers: boolean;
+    };
+    // (undocumented)
+    getInjectedVar: (name: string, defaultValue?: any) => unknown;
+    // (undocumented)
+    getInjectedVars: () => {
+        [key: string]: unknown;
+    };
+    // (undocumented)
+    getKibanaVersion: () => string;
+    // (undocumented)
+    getLegacyMetadata: () => {
+        app: unknown;
+        translations: unknown;
+        bundleId: string;
+        nav: unknown;
+        version: string;
+        branch: string;
+        buildNum: number;
+        buildSha: string;
+        basePath: string;
+        serverName: string;
+        devMode: boolean;
+        uiSettings: {
+            defaults: UiSettingsState;
+            user?: UiSettingsState | undefined;
+        };
+    };
+    getPlugins: () => Array<{
+        id: string;
+        plugin: DiscoveredPlugin;
+    }>;
+}
 
 // @public (undocumented)
-export type NotificationsSetup = ReturnType<NotificationsService['setup']>;
+export type InjectedMetadataStart = InjectedMetadataSetup;
 
 // @public (undocumented)
-export interface OverlaySetup {
+export interface NotificationsSetup {
+    // (undocumented)
+    toasts: ToastsApi;
+}
+
+// @public (undocumented)
+export type NotificationsStart = NotificationsSetup;
+
+// @public (undocumented)
+export interface OverlayStart {
     // (undocumented)
     openFlyout: (flyoutChildren: React.ReactNode, flyoutProps?: {
         closeButtonAriaLabel?: string;
@@ -167,15 +243,17 @@ export interface OverlaySetup {
 }
 
 // @public
-export interface Plugin<TSetup, TPluginsSetup extends Record<string, unknown> = {}> {
+export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> {
     // (undocumented)
     setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TPluginsSetup extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<string, unknown> = {}, TPluginsStart extends Record<string, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
@@ -203,7 +281,7 @@ export { Toast }
 export type ToastInput = string | Pick<Toast, Exclude<keyof Toast, 'id'>>;
 
 // @public (undocumented)
-export class ToastsSetup {
+export class ToastsApi {
     // (undocumented)
     add(toastOrTitle: ToastInput): Toast;
     // (undocumented)
@@ -234,6 +312,7 @@ export class UiSettingsClient {
         newValue: any;
         oldValue: any;
     }>;
+    getUpdateErrors$(): Rx.Observable<Error>;
     isCustom(key: string): boolean;
     isDeclared(key: string): boolean;
     isDefault(key: string): boolean;

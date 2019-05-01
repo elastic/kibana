@@ -5,7 +5,6 @@
  */
 
 import { MetricsChartAPIResponse } from '../../../../server/lib/metrics/get_all_metrics_chart_data';
-import { IUrlParams } from '../../../store/urlParams';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
@@ -14,7 +13,12 @@ export async function loadMetricsChartDataForService({
   start,
   end,
   kuery
-}: IUrlParams) {
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<MetricsChartAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/metrics/charts`,
     query: {

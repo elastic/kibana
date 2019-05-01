@@ -73,7 +73,7 @@ export class InjectedMetadataService {
 
   constructor(private readonly params: InjectedMetadataParams) {}
 
-  public setup() {
+  public setup(): InjectedMetadataSetup {
     return {
       getBasePath: () => {
         return this.state.basePath;
@@ -87,9 +87,6 @@ export class InjectedMetadataService {
         return this.state.csp;
       },
 
-      /**
-       * An array of frontend plugins in topological order.
-       */
       getPlugins: () => {
         return this.state.uiPlugins;
       },
@@ -108,6 +105,10 @@ export class InjectedMetadataService {
     };
   }
 
+  public start(): InjectedMetadataStart {
+    return this.setup();
+  }
+
   public getKibanaVersion() {
     return this.state.version;
   }
@@ -117,5 +118,46 @@ export class InjectedMetadataService {
   }
 }
 
+/**
+ * Provides access to the metadata injected by the server into the page
+ *
+ * @public
+ */
+export interface InjectedMetadataSetup {
+  getBasePath: () => string;
+  getKibanaVersion: () => string;
+  getCspConfig: () => {
+    warnLegacyBrowsers: boolean;
+  };
+  /**
+   * An array of frontend plugins in topological order.
+   */
+  getPlugins: () => Array<{
+    id: string;
+    plugin: DiscoveredPlugin;
+  }>;
+  getLegacyMetadata: () => {
+    app: unknown;
+    translations: unknown;
+    bundleId: string;
+    nav: unknown;
+    version: string;
+    branch: string;
+    buildNum: number;
+    buildSha: string;
+    basePath: string;
+    serverName: string;
+    devMode: boolean;
+    uiSettings: {
+      defaults: UiSettingsState;
+      user?: UiSettingsState | undefined;
+    };
+  };
+  getInjectedVar: (name: string, defaultValue?: any) => unknown;
+  getInjectedVars: () => {
+    [key: string]: unknown;
+  };
+}
+
 /** @public */
-export type InjectedMetadataSetup = ReturnType<InjectedMetadataService['setup']>;
+export type InjectedMetadataStart = InjectedMetadataSetup;

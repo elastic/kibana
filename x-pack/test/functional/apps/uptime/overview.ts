@@ -12,10 +12,12 @@ export default ({ getPageObjects }: KibanaFunctionalTestDefaultProviders) => {
   const pageObjects = getPageObjects(['uptime']);
   const DATE_RANGE_START = '2019-01-28 12:40:08.078';
   describe('overview page', () => {
+    const DEFAULT_DATE_START = '2019-01-28 12:40:08.078';
+    const DEFAULT_DATE_END = '2019-01-29 12:40:08.078';
     it('loads and displays uptime data based on date range', async () => {
       await pageObjects.uptime.goToUptimeOverviewAndLoadData(
-        DATE_RANGE_START,
-        '2019-01-29 12:40:08.078',
+        DEFAULT_DATE_START,
+        DEFAULT_DATE_END,
         'monitor-page-link-auto-http-0X131221E73F825974'
       );
     });

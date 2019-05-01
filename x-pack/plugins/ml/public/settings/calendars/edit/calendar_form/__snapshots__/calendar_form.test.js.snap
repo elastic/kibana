@@ -1,10 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`CalendarForm CalendarId shown as title when editing 1`] = `
-<EuiTitle
-  size="m"
-  textTransform="none"
->
+<EuiTitle>
   <h1
     className="euiTitle euiTitle--medium"
   >
@@ -25,10 +22,7 @@ exports[`CalendarForm CalendarId shown as title when editing 1`] = `
 
 exports[`CalendarForm Renders calendar form 1`] = `
 <EuiForm>
-  <EuiTitle
-    size="m"
-    textTransform="none"
-  >
+  <EuiTitle>
     <h1>
       <FormattedMessage
         defaultMessage="Create new calendar"

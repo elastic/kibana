@@ -7,13 +7,43 @@
 
 {kib} supports the following authentication mechanisms:
 
-- Basic Authentication
-- SAML Single Sign-On
+- <<basic-authentication>>
+- <<token-authentication>>
+- <<saml>>
 
+[[basic-authentication]]
 ==== Basic Authentication
 
-Basic Authentication requires a username and password to successfully log in to {kib}. It is enabled by default and based on the Native security realm provided by {es}. For more information about Basic Authentication and built-in users, see {xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+Basic authentication requires a username and password to successfully log in to {kib}. It is enabled by default and based on the Native security realm provided by {es}. The basic authentication provider uses a Kibana provided login form, and supports authentication using the `Authorization` request header's `Basic` scheme.
 
+The session cookies that are issued by the basic authentication provider are stateless. Therefore, logging out of Kibana when using the basic authentication provider clears the session cookies from the browser but does not invalidate the session cookie for reuse.
+
+For more information about basic authentication and built-in users, see {xpack-ref}/setting-up-authentication.html[Setting Up User Authentication].
+
+[[token-authentication]]
+==== Token Authentication
+
+Token authentication allows users to login using the same Kibana provided login form as basic authentication. The token authentication provider is built on {es}'s token APIs. The bearer tokens returned by {es}'s {ref}/security-api-get-token.html[get token API] can be used directly with Kibana using the `Authorization` request header with the `Bearer` scheme.
+
+The session cookies that are issued by the token authentication provider are stateful, and logging out of Kibana invalidates the session cookies for reuse.
+
+Prior to configuring Kibana, ensure token support is enabled in Elasticsearch. See the {ref}/security-api-get-token.html[Elasticsearch token API] documentation for more information.
+
+To enable the token authentication provider in Kibana, set the following value in your `kibana.yml`:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authProviders: [token]
+--------------------------------------------------------------------------------
+
+The token authentication provider can be used in conjuction with the basic authentication provider. The login form will continue to use the token authentication provider, while enabling applications like `curl` to use the `Authorization` request header with the `Basic` scheme. Set the following in your `kibana.yml`, maintaining the order of the auth providers:
+
+[source,yaml]
+--------------------------------------------------------------------------------
+xpack.security.authProviders: [token, basic]
+--------------------------------------------------------------------------------
+
+[[saml]]
 ==== SAML Single Sign-On
 
 SAML authentication allows users to log in to {kib} with an external Identity Provider, such as Okta or Auth0. Make sure that SAML is enabled and configured in {es} before setting it up in {kib}. See {xpack-ref}/saml-guide.html[Configuring SAML Single-Sign-On on the Elastic Stack].
@@ -48,8 +78,6 @@ xpack.security.public:
 IMPORTANT: The {kib} user-facing origin should be the same in {kib}, {es}, and the Identity Provider SAML configuration.
 
 Users will be able to log in to {kib} via SAML Single Sign-On by navigating directly to the {kib} URL. Users who aren't authenticated are redirected to the Identity Provider for login. Most Identity Providers maintain a long-lived session—users who logged in to a different application using the same Identity Provider in the same browser are automatically authenticated. An exception is if {es} or the Identity Provider is configured to force user to re-authenticate. This login scenario is called _Service Provider initiated login_.
-
-NOTE: Some Identity Providers support a portal or dashboard from which users can open an application that is integrated with the Identity Provider. This login scenario is known as _Identity Provider initiated login_, and {kib} has limitations with this scenario. Users cannot open {kib} in multiple tabs from the Identity Provider portal in the same browser context if an active {kib} session exists. No issues exist if users open {kib} in multiple tabs using _direct_ {kib} URL.
 
 [float]
 ===== Access and Refresh Tokens

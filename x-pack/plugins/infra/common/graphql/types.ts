@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* tslint:disable */
 
 // ====================================================
 // START: Typescript template
@@ -36,8 +36,8 @@ export interface InfraSource {
   logSummaryBetween: InfraLogSummaryInterval;
 
   logItem: InfraLogItem;
-  /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
-  map?: InfraResponse | null;
+  /** A snapshot of nodes */
+  snapshot?: InfraSnapshotResponse | null;
 
   metrics: InfraMetricData[];
 }
@@ -197,30 +197,31 @@ export interface InfraLogItemField {
   value: string;
 }
 
-export interface InfraResponse {
-  nodes: InfraNode[];
+export interface InfraSnapshotResponse {
+  /** Nodes of type host, container or pod grouped by 0, 1 or 2 terms */
+  nodes: InfraSnapshotNode[];
 }
 
-export interface InfraNode {
-  path: InfraNodePath[];
+export interface InfraSnapshotNode {
+  path: InfraSnapshotNodePath[];
 
-  metric: InfraNodeMetric;
+  metric: InfraSnapshotNodeMetric;
 }
 
-export interface InfraNodePath {
+export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
 }
 
-export interface InfraNodeMetric {
-  name: InfraMetricType;
+export interface InfraSnapshotNodeMetric {
+  name: InfraSnapshotMetricType;
 
-  value: number;
+  value?: number | null;
 
-  avg: number;
+  avg?: number | null;
 
-  max: number;
+  max?: number | null;
 }
 
 export interface InfraMetricData {
@@ -284,27 +285,16 @@ export interface InfraTimerangeInput {
   from: number;
 }
 
-export interface InfraPathInput {
-  /** The type of path */
-  type: InfraPathType;
+export interface InfraSnapshotGroupbyInput {
   /** The label to use in the results for the group by for the terms group by */
   label?: string | null;
   /** The field to group by from a terms aggregation, this is ignored by the filter type */
   field?: string | null;
-  /** The fitlers for the filter group by */
-  filters?: InfraPathFilterInput[] | null;
-}
-/** A group by filter */
-export interface InfraPathFilterInput {
-  /** The label for the filter, this will be used as the group name in the final results */
-  label: string;
-  /** The query string query */
-  query: string;
 }
 
-export interface InfraMetricInput {
+export interface InfraSnapshotMetricInput {
   /** The type of metric */
-  type: InfraMetricType;
+  type: InfraSnapshotMetricType;
 }
 /** The source to be created */
 export interface CreateSourceInput {
@@ -422,7 +412,7 @@ export interface LogSummaryBetweenInfraSourceArgs {
 export interface LogItemInfraSourceArgs {
   id: string;
 }
-export interface MapInfraSourceArgs {
+export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
   filterQuery?: string | null;
@@ -439,10 +429,12 @@ export interface MetricsInfraSourceArgs {
 export interface IndexFieldsInfraSourceStatusArgs {
   indexType?: InfraIndexType | null;
 }
-export interface NodesInfraResponseArgs {
-  path: InfraPathInput[];
+export interface NodesInfraSnapshotResponseArgs {
+  type: InfraNodeType;
 
-  metric: InfraMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
+
+  metric: InfraSnapshotMetricInput;
 }
 export interface CreateSourceMutationArgs {
   /** The id of the source */
@@ -477,16 +469,7 @@ export enum InfraNodeType {
   host = 'host',
 }
 
-export enum InfraPathType {
-  terms = 'terms',
-  filters = 'filters',
-  hosts = 'hosts',
-  pods = 'pods',
-  containers = 'containers',
-  custom = 'custom',
-}
-
-export enum InfraMetricType {
+export enum InfraSnapshotMetricType {
   count = 'count',
   cpu = 'cpu',
   load = 'load',
@@ -524,14 +507,6 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
-}
-
-export enum InfraOperator {
-  gt = 'gt',
-  gte = 'gte',
-  lt = 'lt',
-  lte = 'lte',
-  eq = 'eq',
 }
 
 // ====================================================
@@ -809,8 +784,9 @@ export namespace WaffleNodesQuery {
     sourceId: string;
     timerange: InfraTimerangeInput;
     filterQuery?: string | null;
-    metric: InfraMetricInput;
-    path: InfraPathInput[];
+    metric: InfraSnapshotMetricInput;
+    groupBy: InfraSnapshotGroupbyInput[];
+    type: InfraNodeType;
   };
 
   export type Query = {
@@ -824,17 +800,17 @@ export namespace WaffleNodesQuery {
 
     id: string;
 
-    map?: Map | null;
+    snapshot?: Snapshot | null;
   };
 
-  export type Map = {
-    __typename?: 'InfraResponse';
+  export type Snapshot = {
+    __typename?: 'InfraSnapshotResponse';
 
     nodes: Nodes[];
   };
 
   export type Nodes = {
-    __typename?: 'InfraNode';
+    __typename?: 'InfraSnapshotNode';
 
     path: Path[];
 
@@ -842,7 +818,7 @@ export namespace WaffleNodesQuery {
   };
 
   export type Path = {
-    __typename?: 'InfraNodePath';
+    __typename?: 'InfraSnapshotNodePath';
 
     value: string;
 
@@ -850,15 +826,15 @@ export namespace WaffleNodesQuery {
   };
 
   export type Metric = {
-    __typename?: 'InfraNodeMetric';
+    __typename?: 'InfraSnapshotNodeMetric';
 
-    name: InfraMetricType;
+    name: InfraSnapshotMetricType;
 
-    value: number;
+    value?: number | null;
 
-    avg: number;
+    avg?: number | null;
 
-    max: number;
+    max?: number | null;
   };
 }
 

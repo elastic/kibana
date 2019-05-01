@@ -26,8 +26,10 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { FilterBar } from 'ui/filter_bar';
 import { IndexPattern } from 'ui/index_patterns';
-import { QueryBar } from 'ui/query_bar';
 import { Storage } from 'ui/storage';
+
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
 
 interface Query {
   query: string;
@@ -39,6 +41,10 @@ interface DateRange {
   to: string;
 }
 
+/**
+ * NgReact lib requires that changes to the props need to be made in the directive config as well
+ * See [search_bar\directive\index.js] file
+ */
 interface Props {
   query: {
     query: string;

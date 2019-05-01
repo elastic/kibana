@@ -51,7 +51,6 @@ export const UptimePageProvider = ({
       await Promise.all(
         expectedMonitorList.map(monitorLink => uptimeService.assertExists(monitorLink))
       );
-      // TODO: add a check for the snapshot values
     }
   }();
 };
