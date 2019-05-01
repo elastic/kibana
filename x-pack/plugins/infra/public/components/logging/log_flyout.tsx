@@ -45,12 +45,12 @@ export const LogFlyout = injectI18n(
       const filter = `${field.field}:"${field.value}"`;
       setFilter(filter);
 
-      if (flyoutItem && flyoutItem.timestamp && flyoutItem.tiebreaker) {
-        const timestampMoment = moment(flyoutItem.timestamp);
+      if (flyoutItem && flyoutItem.key) {
+        const timestampMoment = moment(flyoutItem.key.time);
         if (timestampMoment.isValid()) {
           setTarget({
             time: timestampMoment.valueOf(),
-            tiebreaker: flyoutItem.tiebreaker,
+            tiebreaker: flyoutItem.key.tiebreaker,
           }, flyoutItem.id);
         }
       }

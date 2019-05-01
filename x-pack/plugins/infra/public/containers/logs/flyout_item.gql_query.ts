@@ -13,8 +13,10 @@ export const flyoutItemQuery = gql`
       logItem(id: $itemId) {
         id
         index
-        timestamp
-        tiebreaker
+        key {
+          time
+          tiebreaker
+        }
         fields {
           field
           value

@@ -1383,18 +1383,14 @@
             "deprecationReason": null
           },
           {
-            "name": "timestamp",
-            "description": "The timestamp value for the document - derived from the source configuration timestamp setting",
+            "name": "key",
+            "description": "Time key for the document - derived from the source configuration timestamp and tiebreaker settings",
             "args": [],
-            "type": { "kind": "SCALAR", "name": "String", "ofType": null },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "tiebreaker",
-            "description": "The tiebreaker value for the document - derived from the source configuration tiebreaker setting",
-            "args": [],
-            "type": { "kind": "SCALAR", "name": "Int", "ofType": null },
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "InfraTimeKey", "ofType": null }
+            },
             "isDeprecated": false,
             "deprecationReason": null
           },
