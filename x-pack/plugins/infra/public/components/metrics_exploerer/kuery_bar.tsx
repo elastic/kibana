@@ -42,13 +42,10 @@ export const MetricsExploererKueryBar = injectI18n(
       [value]
     );
 
-    const handleChange = useCallback(
-      (query: string) => {
-        setValidation(validateQuery(query));
-        setDraftQuery(query);
-      },
-      [setValidation, setDraftQuery]
-    );
+    const handleChange = (query: string) => {
+      setValidation(validateQuery(query));
+      setDraftQuery(query);
+    };
 
     return (
       <WithKueryAutocompletion indexPattern={derivedIndexPattern}>

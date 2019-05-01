@@ -47,15 +47,11 @@ export const MetricsExplorerMetrics = injectI18n(
     // I tried to use useRef originally but the EUIComboBox component's type definition
     // would only accept an actual input element or a callback function (with the same type).
     // This effectivly does the same thing but is compatible with EuiComboBox.
-    const handleInputRef = useCallback(
-      (ref: HTMLInputElement) => {
-        if (ref) {
-          setInputRef(ref);
-        }
-      },
-      [setInputRef]
-    );
-
+    const handleInputRef = (ref: HTMLInputElement) => {
+      if (ref) {
+        setInputRef(ref);
+      }
+    };
     const handleChange = useCallback(
       selectedOptions => {
         onChange(

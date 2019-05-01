@@ -78,8 +78,8 @@ export const MetricsExplorerChartContextMenu = injectI18n(
         ],
       },
     ];
-    const handleClose = useCallback(() => setPopoverState(false), []);
-    const handleOpen = useCallback(() => setPopoverState(true), []);
+    const handleClose = () => setPopoverState(false);
+    const handleOpen = () => setPopoverState(true);
     const actionAriaLabel = intl.formatMessage(
       {
         id: 'xpack.infra.metricsExplorer.actionsLabel.aria',

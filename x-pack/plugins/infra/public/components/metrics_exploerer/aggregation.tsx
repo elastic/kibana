@@ -56,7 +56,7 @@ export const MetricsExplorerAggregationPicker = injectI18n(({ intl, options, onC
         MetricsExplorerAggregation.avg;
       onChange(aggregation);
     },
-    [options, onChange]
+    [onChange]
   );
 
   return (
