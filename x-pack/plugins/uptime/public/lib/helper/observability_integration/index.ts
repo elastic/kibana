@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { UptimeUrlParams, getSupportedUrlParams } from './get_supported_url_params';
+export { getApmHref } from './get_apm_href';
