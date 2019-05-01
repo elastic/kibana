@@ -196,7 +196,7 @@ fi
 ### $@ - all arguments
 ###
 function checks-reporter-with-killswitch() {
-  if [ "$CHECKS_REPORTER_ACTIVE" = true ] ; then
+  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
     yarn run github-checks-reporter "$@"
   else
     arguments=("$@");
