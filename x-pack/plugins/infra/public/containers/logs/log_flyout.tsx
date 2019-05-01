@@ -40,11 +40,15 @@ export const useLogFlyout = ({ sourceId }: { sourceId: string }) => {
           throw new Error('Failed to load flyout item: No apollo client available.');
         }
 
+        if (!flyoutId) {
+          return;
+        }
+
         return await apolloClient.query<FlyoutItemQuery.Query, FlyoutItemQuery.Variables>({
           fetchPolicy: 'no-cache',
           query: flyoutItemQuery,
           variables: {
-            itemId: (flyoutId != null && flyoutId) || '',
+            itemId: flyoutId,
             sourceId,
           },
         });
