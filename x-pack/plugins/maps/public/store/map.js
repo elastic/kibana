@@ -38,7 +38,8 @@ import {
   ROLLBACK_TO_TRACKED_LAYER_STATE,
   REMOVE_TRACKED_LAYER_STATE,
   UPDATE_SOURCE_DATA_REQUEST,
-  SET_TOOLTIP_STATE
+  SET_TOOLTIP_STATE,
+  SET_SCROLL_ZOOM
 } from '../actions/store_actions';
 
 import { TRACKED_LAYER_DESCRIPTOR } from './util';
@@ -94,6 +95,7 @@ const INITIAL_STATE = {
       lon: -100.41,
       lat: 32.82
     },
+    scrollZoom: true,
     extent: null,
     mouseCoordinates: null,
     timeFilters: null,
@@ -298,6 +300,14 @@ export function map(state = INITIAL_STATE, action) {
       }
 
       return updateLayerInList(state, layerId, 'style', { ...state.layerList[index].style, __styleMeta: styleMeta });
+    case SET_SCROLL_ZOOM:
+      return {
+        ...state,
+        mapState: {
+          ...state.mapState,
+          scrollZoom: action.scrollZoom,
+        }
+      };
     default:
       return state;
   }

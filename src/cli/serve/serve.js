@@ -75,7 +75,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     set('optimize.watch', true);
 
     if (!has('elasticsearch.username')) {
-      set('elasticsearch.username', 'elastic');
+      set('elasticsearch.username', 'kibana');
     }
 
     if (!has('elasticsearch.password')) {

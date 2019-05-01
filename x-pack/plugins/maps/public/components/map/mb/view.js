@@ -197,7 +197,11 @@ export class MBMapContainer extends React.Component {
 
   async _initializeMap() {
 
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
+    this._mbMap = await createMbMapInstance({
+      node: this.refs.mapContainer,
+      initialView: this.props.goto ? this.props.goto.center : null,
+      scrollZoom: this.props.scrollZoom
+    });
 
     if (!this._isMounted) {
       return;
@@ -223,8 +227,12 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('mouseout', () => {
       throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
       this.props.clearMouseCoordinates();
-    });
 
+      this._updateHoverTooltipState.cancel();
+      if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+        this.props.setTooltipState(null);
+      }
+    });
 
     this._mbMap.on('mousemove', this._updateHoverTooltipState);
     this._mbMap.on('click', this._lockTooltip);
