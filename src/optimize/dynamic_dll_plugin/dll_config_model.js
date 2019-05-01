@@ -81,6 +81,14 @@ function generateDLL(config) {
               test: /\.js$/,
               include: /[\/\\]node_modules[\/\\]x-pack[\/\\]/,
               exclude: /[\/\\]node_modules[\/\\]x-pack[\/\\](.+?[\/\\])*node_modules[\/\\]/,
+            },
+            // TODO: remove when we drop support for IE11
+            // We need because normalize-url is distributed without
+            // any kind of transpilation
+            // More info: https://github.com/elastic/kibana/pull/35804
+            {
+              test: /\.js$/,
+              include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/
             }
           ],
           // Self calling function with the equivalent logic

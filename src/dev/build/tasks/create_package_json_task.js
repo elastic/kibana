@@ -44,8 +44,8 @@ export const CreatePackageJsonTask = {
       engines: {
         node: pkg.engines.node,
       },
-      resolutions: pkg.resolutions,
       workspaces: pkg.workspaces,
+      resolutions: pkg.resolutions,
       dependencies: pkg.dependencies
     };
 
@@ -86,7 +86,6 @@ export const RemoveWorkspacesTask = {
     const path = build.resolvePath('package.json');
     const pkg = JSON.parse(await read(path));
 
-    delete pkg.resolutions;
     delete pkg.workspaces;
 
     await write(
