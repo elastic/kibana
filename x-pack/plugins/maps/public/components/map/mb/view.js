@@ -16,8 +16,7 @@ import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
 import { DRAW_STATE_DRAW_TYPE, DRAW_STATE_TYPE } from '../../../actions/store_actions';
 import { filterBarQueryFilter } from '../../../kibana_services';
-import { createShapeFilter } from '../../../index_pattern_util';
-
+import { createShapeFilter } from '../../../elasticsearch_geo_utils';
 
 const mbDrawModes = MapboxDraw.modes;
 mbDrawModes.draw_rectangle = DrawRectangle;
@@ -65,8 +64,7 @@ export class MBMapContainer extends React.Component {
       return;
     }
 
-    //todo: should change filter-type based on drawmodetype and underlying index pattern/geofield combo
-    const geoPolygonFilter = createShapeFilter(featureCollection.features[0].geometry, indexPatternId, geoField);
+    const geoPolygonFilter = createShapeFilter(featureCollection.features[0].geometry, indexPatternId, geoField, 'geo_point');
     if (!geoPolygonFilter) {
       return;
     }

@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { DECIMAL_DEGREES_PRECISION } from '../common/constants';
 
 /**
  * Converts Elasticsearch search results into GeoJson FeatureCollection
@@ -207,6 +208,44 @@ export function createExtentFilter(mapExtent, geoFieldName, geoFieldType) {
     throw new Error(errorMessage);
   }
 }
+
+
+
+
+export function createShapeFilter(geojsonPolygon, indexPatternId, geoFieldName, geoFieldType) {
+
+  //take outer
+  const points  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+    return {
+      lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
+      lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
+    };
+  });
+
+  const filter = {
+
+    meta: {
+      negate: false,
+      index: indexPatternId,
+      // eslint-disable-next-line max-len
+      alias: `geo polygon at ${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}`
+    }
+  };
+
+  if (geoFieldType === 'geo_point') {
+    filter.geo_polygon = {
+      ignore_unmapped: true,
+      [geoFieldName]: {
+        points: points
+      }
+    };
+  } else {
+    throw new Error('not implemented');
+  }
+  return filter;
+}
+
+
 
 function formatEnvelopeAsPolygon({ maxLat, maxLon, minLat, minLon }) {
   // GeoJSON mandates that the outer polygon must be counterclockwise to avoid ambiguous polygons
