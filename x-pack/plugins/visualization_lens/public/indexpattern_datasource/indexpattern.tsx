@@ -13,16 +13,20 @@ interface IndexPatternPrivateState {
 }
 
 class IndexPatternDatasource implements Datasource<IndexPatternPrivateState> {
-  private state?: IndexPatternPrivateState;
+  private state: IndexPatternPrivateState;
 
   constructor(state?: IndexPatternPrivateState) {
     if (state) {
       this.state = state;
+    } else {
+      this.state = {
+        query: {},
+      };
     }
   }
 
   toExpression() {
-    return '';
+    return `${JSON.stringify(this.state.query)}`;
   }
 
   renderDataPanel({ domElement }: { domElement: Element }) {
