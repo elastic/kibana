@@ -205,3 +205,4 @@ function checks-reporter-with-killswitch() {
 }
 
 export -f checks-reporter-with-killswitch
+export badsluuuuuug=hihihi
