@@ -57,7 +57,11 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
               flyoutVisible ? (
                 <LogFlyout
                   setFilter={applyFilterQueryFromKueryExpression}
-                  setTarget={jumpToTargetPosition}
+                  setTarget={(timeKey, flyoutItemId) => {
+                    jumpToTargetPosition(timeKey);
+                    setSurroundingLogsId(flyoutItemId);
+                    stopLiveStreaming();
+                  }}
                   setFlyoutVisibility={setFlyoutVisibility}
                   setSurroundingLogsId={setSurroundingLogsId}
                   flyoutItem={flyoutItem}

@@ -89,7 +89,6 @@ class LogTimeControlsUI extends React.PureComponent<LogTimeControlsProps> {
 
   private startLiveStreaming = () => {
     this.props.startLiveStreaming(5000);
-    this.props.setSurroundingLogsId(null);
   };
 
   private stopLiveStreaming = () => {

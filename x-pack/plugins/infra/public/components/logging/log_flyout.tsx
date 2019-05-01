@@ -25,7 +25,7 @@ interface Props {
   flyoutItem: InfraLogItem | null;
   setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string) => void;
-  setTarget: (target: TimeKey) => void;
+  setTarget: (timeKey: TimeKey, flyoutItemId: string) => void;
   setSurroundingLogsId: (id: string) => void;
   intl: InjectedIntl;
   loading: boolean;
@@ -39,9 +39,7 @@ export const LogFlyout = injectI18n(
     setFlyoutVisibility,
     setFilter,
     setTarget,
-    setSurroundingLogsId,
     intl,
-    stopLiveStreaming,
   }: Props) => {
     const handleFilter = (field: InfraLogItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;
@@ -53,9 +51,7 @@ export const LogFlyout = injectI18n(
           setTarget({
             time: timestampMoment.valueOf(),
             tiebreaker: flyoutItem.tiebreaker,
-          });
-          setSurroundingLogsId(flyoutItem.id);
-          stopLiveStreaming();
+          }, flyoutItem.id);
         }
       }
     };
