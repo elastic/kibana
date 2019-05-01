@@ -9,6 +9,7 @@ export { EmptyStatusBar } from './empty_status_bar';
 export { ErrorList } from './error_list';
 export { FilterBar } from './filter_bar';
 export { FilterBarLoading } from './filter_bar_loading';
+export { IntegrationLink } from './integration_link';
 export { MonitorCharts } from './monitor_charts';
 export { MonitorList } from './monitor_list';
 export { MonitorPageTitle } from './monitor_page_title';
