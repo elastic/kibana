@@ -6,58 +6,59 @@
 
 import { getTelemetry, incrementCounts, updateTelemetry } from './telemetry';
 
-let server: any;
-let callWithInternalUser: any;
-let internalRepository: any;
+const internalRepository = () => ({
+  get: jest.fn(() => null),
+  create: jest.fn(() => ({ attributes: 'test' })),
+  update: jest.fn(() => ({ attributes: 'test' })),
+});
+const server: any = {
+  savedObjects: {
+    getSavedObjectsRepository: jest.fn(() => internalRepository()),
+  },
+  plugins: {
+    elasticsearch: {
+      getCluster: jest.fn(() => ({ callWithInternalUser })),
+    },
+  },
+};
+const callWithInternalUser = jest.fn();
 
-function mockInit(getVal: any = null): void {
-  internalRepository = {
+function mockInit(getVal: any = { attributes: {}}): any {
+  return {
+    ...internalRepository(),
     get: jest.fn(() => getVal),
-    create: jest.fn(() => ({ attributes: 'test' })),
-    update: jest.fn(() => ({ attributes: 'test' })),
-  };
-  callWithInternalUser = jest.fn();
-  server = {
-    savedObjects: {
-      getSavedObjectsRepository: jest.fn(() => internalRepository),
-    },
-    plugins: {
-      elasticsearch: {
-        getCluster: jest.fn(() => ({ callWithInternalUser })),
-      },
-    },
   };
 }
 
 describe('file upload plugin telemetry', () => {
   describe('getTelemetry', () => {
     it('should create new telemetry if no telemetry exists', async () => {
-      mockInit();
-      await getTelemetry(server, internalRepository);
-      expect(internalRepository.get.mock.calls.length).toBe(1);
-      expect(internalRepository.create.mock.calls.length).toBe(1);
+      const internalRepo = mockInit({});
+      await getTelemetry(server, internalRepo);
+      expect(internalRepo.get.mock.calls.length).toBe(1);
+      expect(internalRepo.create.mock.calls.length).toBe(1);
     });
 
     it('should get existing telemetry', async () => {
-      mockInit({});
-      await getTelemetry(server, internalRepository);
-      expect(internalRepository.update.mock.calls.length).toBe(0);
-      expect(internalRepository.get.mock.calls.length).toBe(1);
-      expect(internalRepository.create.mock.calls.length).toBe(0);
+      const internalRepo = mockInit();
+      await getTelemetry(server, internalRepo);
+      expect(internalRepo.update.mock.calls.length).toBe(0);
+      expect(internalRepo.get.mock.calls.length).toBe(1);
+      expect(internalRepo.create.mock.calls.length).toBe(0);
     });
   });
 
   describe('updateTelemetry', () => {
     it('should update existing telemetry', async () => {
-      mockInit({
+      const internalRepo = mockInit({
         attributes: {
           filesUploadedTotalCount: 2,
         },
       });
-      await updateTelemetry({ server, internalRepo: internalRepository });
-      expect(internalRepository.update.mock.calls.length).toBe(1);
-      expect(internalRepository.get.mock.calls.length).toBe(1);
-      expect(internalRepository.create.mock.calls.length).toBe(0);
+      await updateTelemetry({ server, internalRepo });
+      expect(internalRepo.update.mock.calls.length).toBe(1);
+      expect(internalRepo.get.mock.calls.length).toBe(1);
+      expect(internalRepo.create.mock.calls.length).toBe(0);
     });
   });
 
@@ -82,7 +83,7 @@ describe('file upload plugin telemetry', () => {
     const fileType = 'json';
 
     it('app, file and total count should increment by 1', async () => {
-      const newCounts = incrementCounts({ app, fileType, ...oldCounts });
+      const newCounts: any = incrementCounts({ app, fileType, ...oldCounts });
       expect(newCounts.filesUploadedTotalCount).toEqual(4);
       expect(newCounts.filesUploadedTypesTotalCounts[fileType]).toEqual(2);
       expect(newCounts.filesUploadedByApp[app][fileType]).toEqual(2);
@@ -96,7 +97,7 @@ describe('file upload plugin telemetry', () => {
     });
 
     it('total count should equal sum of all app counts', async () => {
-      const newCounts = incrementCounts({ app, fileType, ...oldCounts });
+      const newCounts: any = incrementCounts({ app, fileType, ...oldCounts });
       const fileAppCounts =
         newCounts.filesUploadedByApp.maps.json +
         newCounts.filesUploadedByApp.maps.csv +
