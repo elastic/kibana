@@ -50,6 +50,7 @@ module.exports = function (grunt) {
         resolve();
       });
       // jest uses stderr for output https://github.com/facebook/jest/issues/5064
+      console.log('hiya', Object.keys(proc));
       proc.stderr.pipe(process.stdout);
     });
   }
