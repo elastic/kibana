@@ -51,14 +51,16 @@ export class ToolbarOverlay extends React.Component {
     this.setState(RESET_STATE);
   };
 
-  _onIndexPatternSelection = (e) => {
+  _onIndexPatternSelection = (options) => {
     if (!this._isMounted) {
       return;
     }
+
+    const selection = options.find((option) => option.checked);
     const drawType = this.state.drawType;
     this.setState(RESET_STATE, () => {
       if (drawType) {
-        this.props.initiateDraw({ drawType: drawType, ...e });
+        this.props.initiateDraw({ drawType: drawType, ...selection.value });
       }
     });
   };
@@ -67,9 +69,9 @@ export class ToolbarOverlay extends React.Component {
     if (!this._isMounted) {
       return;
     }
-    const indexPattern = this.state.uniqueIndexPatternsAndGeoFields[0];
+    const indexPatternAndGeofield = this.state.uniqueIndexPatternsAndGeoFields[0];
     this.setState(RESET_STATE, () => {
-      this.props.initiateDraw({ drawType: drawType, ...indexPattern });
+      this.props.initiateDraw({ drawType: drawType, ...indexPatternAndGeofield });
     });
   };
 

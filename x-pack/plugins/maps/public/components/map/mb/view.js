@@ -51,7 +51,6 @@ export class MBMapContainer extends React.Component {
 
   _onPolygonSelectionChange = async (e) => {
 
-    console.log('on sel change');
     if (e.features.length) {
       //when the user deselects, the filter gets applied.
       return;
