@@ -25,6 +25,8 @@ import {
 import { timeDurationString } from '../../../lib/time_duration';
 import { RefreshControl } from '../refresh_control';
 
+const ListGroup = ({ children }) => <ul style={{ listStyle: 'none', margin: 0 }}>{[children]}</ul>;
+
 export class AutoRefreshControls extends Component {
   static propTypes = {
     refreshInterval: PropTypes.number,
@@ -37,12 +39,18 @@ export class AutoRefreshControls extends Component {
   render() {
     const { refreshInterval, setRefresh, disableInterval } = this.props;
 
+    const RefreshItem = ({ duration, label }) => (
+      <li>
+        <EuiLink onClick={() => setRefresh(duration)}>{label}</EuiLink>
+      </li>
+    );
+
     return (
       <div>
         <EuiFlexGroup alignItems="center" justifyContent="spaceAround" gutterSize="xs">
           <EuiFlexItem>
             <EuiDescriptionList textStyle="reverse">
-              <EuiDescriptionListTitle>Refresh this page</EuiDescriptionListTitle>
+              <EuiDescriptionListTitle>Refresh elements</EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 {refreshInterval > 0 ? (
                   <Fragment>
@@ -71,40 +79,24 @@ export class AutoRefreshControls extends Component {
         <EuiText size="s">
           <EuiFlexGrid gutterSize="s" columns={2}>
             <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(5000)}>5 Seconds</EuiLink>
+              <ListGroup>
+                <RefreshItem duration="5000" label="5 seconds" />
+                <RefreshItem duration="15000" label="15 seconds" />
+                <RefreshItem duration="30000" label="30 seconds" />
+                <RefreshItem duration="60000" label="1 minute" />
+                <RefreshItem duration="300000" label="5 minutes" />
+                <RefreshItem duration="900000" label="15 minute" />
+              </ListGroup>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(15000)}>15 Seconds</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(30000)}>30 Seconds</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(60000)}>1 Minute</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(300000)}>5 Minutes</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(900000)}>15 Minutes</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(1800000)}>30 Minutes</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(3600000)}>1 Hour</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(7200000)}>2 Hours</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(21600000)}>6 Hours</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(43200000)}>12 Hours</EuiLink>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLink onClick={() => setRefresh(86400000)}>24 Hours</EuiLink>
+              <ListGroup>
+                <RefreshItem duration="1800000" label="30 Minutes" />
+                <RefreshItem duration="3600000" label="1 Hour" />
+                <RefreshItem duration="7200000" label="2 Hours" />
+                <RefreshItem duration="21600000" label="6 Hours" />
+                <RefreshItem duration="43200000" label="12 Hours" />
+                <RefreshItem duration="86400000" label="24 Hours" />
+              </ListGroup>
             </EuiFlexItem>
           </EuiFlexGrid>
         </EuiText>
