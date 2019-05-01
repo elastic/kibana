@@ -12,6 +12,7 @@ exports[`IntegrationLink component renders without errors 1`] = `
       grow={false}
     >
       <EuiToolTip
+        content="info for bar"
         delay="regular"
         position="top"
       >
@@ -20,7 +21,9 @@ exports[`IntegrationLink component renders without errors 1`] = `
         />
       </EuiToolTip>
     </EuiFlexItem>
-    <EuiFlexItem />
+    <EuiFlexItem>
+      click for bar
+    </EuiFlexItem>
   </EuiFlexGroup>
 </EuiLink>
 `;
