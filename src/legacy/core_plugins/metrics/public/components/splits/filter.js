@@ -67,7 +67,7 @@ export const SplitByFilter = props => {
             screenTitle={'DataMetricsGroupByFilter'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}
-            indexPatterns={model.index_pattern || model.default_index_pattern}
+            indexPatterns={props.indexPatterns}
             store={localStorage || {}}
             showDatePicker={false}
           />
@@ -81,4 +81,5 @@ SplitByFilter.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   uiRestrictions: PropTypes.object,
+  indexPatterns: PropTypes.array,
 };
