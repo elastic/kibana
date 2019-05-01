@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { VisFiltersService, VisFiltersSetup } from './vis_filters_service';
+export { FiltersService, FiltersSetup } from './filters_service';

@@ -38,7 +38,7 @@ import * as typesFromVisTypes from 'ui/vis/vis_types/vis_type';
  *
  * @internal
  */
-export class VisTypesService {
+export class TypesService {
   public setup() {
     return {
       VisProvider,
@@ -59,7 +59,7 @@ export class VisTypesService {
 }
 
 /** @public */
-export type VisTypesSetup = ReturnType<VisTypesService['setup']>;
+export type TypesSetup = ReturnType<TypesService['setup']>;
 
 /** @public */
 export type Vis = typesFromVis.Vis;

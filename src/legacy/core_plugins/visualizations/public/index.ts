@@ -17,28 +17,28 @@
  * under the License.
  */
 
-import { VisFiltersService, VisFiltersSetup } from './vis_filters';
-import { VisTypesService, VisTypesSetup } from './vis_types';
+import { FiltersService, FiltersSetup } from './filters';
+import { TypesService, TypesSetup } from './types';
 
 class VisualizationsPlugin {
-  private readonly visFilters: VisFiltersService;
-  private readonly visTypes: VisTypesService;
+  private readonly filters: FiltersService;
+  private readonly types: TypesService;
 
   constructor() {
-    this.visFilters = new VisFiltersService();
-    this.visTypes = new VisTypesService();
+    this.filters = new FiltersService();
+    this.types = new TypesService();
   }
 
   public setup() {
     return {
-      visFilters: this.visFilters.setup(),
-      visTypes: this.visTypes.setup(),
+      filters: this.filters.setup(),
+      types: this.types.setup(),
     };
   }
 
   public stop() {
-    this.visFilters.stop();
-    this.visTypes.stop();
+    this.filters.stop();
+    this.types.stop();
   }
 }
 
@@ -51,8 +51,8 @@ export const visualizations = new VisualizationsPlugin().setup();
 
 /** @public */
 export interface VisualizationsSetup {
-  visFilters: VisFiltersSetup;
-  visTypes: VisTypesSetup;
+  filters: FiltersSetup;
+  types: TypesSetup;
 }
 
 /** @public types */
@@ -64,4 +64,4 @@ export {
   VisualizationController,
   VisType,
   VisTypesRegistry,
-} from './vis_types';
+} from './types';

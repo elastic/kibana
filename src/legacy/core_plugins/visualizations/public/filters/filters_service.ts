@@ -17,15 +17,26 @@
  * under the License.
  */
 
-export {
-  VisTypesService,
-  // types
-  VisTypesSetup,
-  Vis,
-  VisParams,
-  VisProvider,
-  VisState,
-  VisualizationController,
-  VisType,
-  VisTypesRegistry,
-} from './vis_types_service';
+// @ts-ignore
+import { VisFiltersProvider, createFilter } from 'ui/vis/vis_filters';
+
+/**
+ * Vis Filters Service
+ *
+ * @internal
+ */
+export class FiltersService {
+  public setup() {
+    return {
+      VisFiltersProvider,
+      createFilter,
+    };
+  }
+
+  public stop() {
+    // nothing to do here yet
+  }
+}
+
+/** @public */
+export type FiltersSetup = ReturnType<FiltersService['setup']>;
