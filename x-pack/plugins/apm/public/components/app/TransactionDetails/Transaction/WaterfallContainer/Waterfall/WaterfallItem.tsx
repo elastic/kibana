@@ -20,7 +20,6 @@ type ItemType = 'transaction' | 'span';
 interface IContainerStyleProps {
   type: ItemType;
   timelineMargins: ITimelineMargins;
-  isSelected: boolean;
 }
 
 interface IBarStyleProps {
@@ -39,8 +38,6 @@ const Container = styled<IContainerStyleProps, 'div'>('div')`
   margin-right: ${props => px(props.timelineMargins.right)};
   margin-left: ${props => px(props.timelineMargins.left)};
   border-top: 1px solid ${theme.euiColorLightShade};
-  background-color: ${props =>
-    props.isSelected ? theme.euiColorLightestShade : 'initial'};
   cursor: pointer;
 
   &:hover {
@@ -82,7 +79,6 @@ interface IWaterfallItemProps {
   totalDuration?: number;
   item: IWaterfallItem;
   color: string;
-  isSelected: boolean;
   errorCount: number;
   onClick: () => unknown;
 }
@@ -167,7 +163,6 @@ export function WaterfallItem({
   totalDuration,
   item,
   color,
-  isSelected,
   errorCount,
   onClick
 }: IWaterfallItemProps) {
@@ -182,7 +177,6 @@ export function WaterfallItem({
     <Container
       type={item.docType}
       timelineMargins={timelineMargins}
-      isSelected={isSelected}
       onClick={onClick}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item

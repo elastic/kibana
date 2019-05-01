@@ -7,11 +7,9 @@
 import { EuiIconTip, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
-import { Location } from 'history';
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
@@ -48,12 +46,13 @@ export function getFormattedBuckets(buckets: IBucket[], bucketSize: number) {
 }
 
 interface Props {
-  location: Location;
   distribution?: ITransactionDistributionAPIResponse;
-  urlParams: IUrlParams;
+  transactionType: string | undefined;
+  traceId: string | undefined;
+  transactionId: string | undefined;
 }
 
-export class TransactionDistribution extends Component<Props> {
+export class TransactionDistribution extends PureComponent<Props> {
   public formatYShort = (t: number) => {
     return i18n.translate(
       'xpack.apm.transactionDetails.transactionsDurationDistributionChart.unitShortLabel',
@@ -62,14 +61,14 @@ export class TransactionDistribution extends Component<Props> {
           '{transCount} {transType, select, request {req.} other {trans.}}',
         values: {
           transCount: t,
-          transType: this.props.urlParams.transactionType
+          transType: this.props.transactionType
         }
       }
     );
   };
 
   public formatYLong = (t: number) => {
-    return this.props.urlParams.transactionType === 'request'
+    return this.props.transactionType === 'request'
       ? i18n.translate(
           'xpack.apm.transactionDetails.transactionsDurationDistributionChart.requestTypeUnitLongLabel',
           {
@@ -92,14 +91,14 @@ export class TransactionDistribution extends Component<Props> {
         );
   };
 
-  public redirectToTransactionType() {
-    const { urlParams, location, distribution } = this.props;
+  public redirectToBucket() {
+    const { distribution } = this.props;
 
     if (
       !distribution ||
       !distribution.defaultSample ||
-      urlParams.traceId ||
-      urlParams.transactionId
+      this.props.traceId ||
+      this.props.transactionId
     ) {
       return;
     }
@@ -107,9 +106,9 @@ export class TransactionDistribution extends Component<Props> {
     const { traceId, transactionId } = distribution.defaultSample;
 
     history.replace({
-      ...location,
+      ...history.location,
       search: fromQuery({
-        ...toQuery(location.search),
+        ...toQuery(history.location.search),
         traceId,
         transactionId
       })
@@ -117,17 +116,17 @@ export class TransactionDistribution extends Component<Props> {
   }
 
   public componentDidMount() {
-    this.redirectToTransactionType();
+    this.redirectToBucket();
   }
 
   public componentDidUpdate() {
-    this.redirectToTransactionType();
+    this.redirectToBucket();
   }
 
   public render() {
-    const { location, distribution, urlParams } = this.props;
+    const { distribution, traceId, transactionId } = this.props;
 
-    if (!distribution || !urlParams.traceId || !urlParams.transactionId) {
+    if (!distribution || !traceId || !transactionId) {
       return null;
     }
 
@@ -157,8 +156,8 @@ export class TransactionDistribution extends Component<Props> {
     const bucketIndex = buckets.findIndex(
       bucket =>
         bucket.sample != null &&
-        bucket.sample.transactionId === urlParams.transactionId &&
-        bucket.sample.traceId === urlParams.traceId
+        bucket.sample.transactionId === transactionId &&
+        bucket.sample.traceId === traceId
     );
 
     return (
@@ -197,9 +196,9 @@ export class TransactionDistribution extends Component<Props> {
           onClick={(bucket: IChartPoint) => {
             if (bucket.sample && bucket.y > 0) {
               history.push({
-                ...location,
+                ...history.location,
                 search: fromQuery({
-                  ...toQuery(location.search),
+                  ...toQuery(history.location.search),
                   transactionId: bucket.sample.transactionId,
                   traceId: bucket.sample.traceId
                 })

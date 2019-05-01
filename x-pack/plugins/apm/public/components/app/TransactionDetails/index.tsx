@@ -22,6 +22,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 export function TransactionDetails() {
   const location = useLocation();
   const { urlParams } = useUrlParams();
+  const { detailTab } = urlParams;
   const { data: distributionData } = useTransactionDistribution(urlParams);
   const { data: transactionDetailsChartsData } = useTransactionDetailsCharts(
     urlParams
@@ -50,9 +51,10 @@ export function TransactionDetails() {
 
       <EuiPanel>
         <TransactionDistribution
+          traceId={urlParams.traceId}
+          transactionId={urlParams.transactionId}
+          transactionType={urlParams.transactionType}
           distribution={distributionData}
-          urlParams={urlParams}
-          location={location}
         />
       </EuiPanel>
 
@@ -76,9 +78,8 @@ export function TransactionDetails() {
         />
       ) : (
         <Transaction
-          location={location}
           transaction={transaction}
-          urlParams={urlParams}
+          detailTab={detailTab}
           waterfall={waterfall}
         />
       )}

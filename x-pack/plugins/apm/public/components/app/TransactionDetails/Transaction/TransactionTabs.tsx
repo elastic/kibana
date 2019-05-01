@@ -6,10 +6,8 @@
 
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Location } from 'history';
 import React from 'react';
 import { Transaction } from '../../../../../typings/es_schemas/ui/Transaction';
-import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
 import { history } from '../../../../utils/history';
 import { TransactionMetadata } from '../../../shared/MetadataTable/TransactionMetadata';
@@ -31,21 +29,14 @@ const metadataTab = {
 };
 
 interface Props {
-  location: Location;
   transaction: Transaction;
-  urlParams: IUrlParams;
+  detailTab: string | undefined;
   waterfall: IWaterfall;
 }
 
-export function TransactionTabs({
-  location,
-  transaction,
-  urlParams,
-  waterfall
-}: Props) {
+export function TransactionTabs({ transaction, detailTab, waterfall }: Props) {
   const tabs = [timelineTab, metadataTab];
-  const currentTab =
-    urlParams.detailTab === metadataTab.key ? metadataTab : timelineTab;
+  const currentTab = detailTab === metadataTab.key ? metadataTab : timelineTab;
 
   return (
     <React.Fragment>
@@ -55,9 +46,9 @@ export function TransactionTabs({
             <EuiTab
               onClick={() => {
                 history.replace({
-                  ...location,
+                  ...history.location,
                   search: fromQuery({
-                    ...toQuery(location.search),
+                    ...toQuery(history.location.search),
                     detailTab: key
                   })
                 });
@@ -74,12 +65,7 @@ export function TransactionTabs({
       <EuiSpacer />
 
       {currentTab.key === timelineTab.key ? (
-        <WaterfallContainer
-          transaction={transaction}
-          location={location}
-          urlParams={urlParams}
-          waterfall={waterfall}
-        />
+        <WaterfallContainer transaction={transaction} waterfall={waterfall} />
       ) : (
         <TransactionMetadata transaction={transaction} />
       )}

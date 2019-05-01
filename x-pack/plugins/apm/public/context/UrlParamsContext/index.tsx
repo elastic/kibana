@@ -73,12 +73,11 @@ const UrlParamsProvider: React.FC<{}> = ({ children }) => {
     [location]
   );
 
-  return (
-    <UrlParamsContext.Provider
-      children={children}
-      value={{ urlParams, refreshTimeRange }}
-    />
-  );
+  const contextValue = React.useMemo(() => ({ urlParams, refreshTimeRange }), [
+    urlParams
+  ]);
+
+  return <UrlParamsContext.Provider children={children} value={contextValue} />;
 };
 
 export { UrlParamsContext, UrlParamsProvider };

@@ -24,7 +24,11 @@ export function useFetcher<Response>(
     data?: Response;
     status?: FETCH_STATUS;
     error?: Error;
-  }>({});
+  }>({
+    data: undefined,
+    status: FETCH_STATUS.LOADING,
+    error: undefined
+  });
 
   useEffect(() => {
     let didCancel = false;
