@@ -23,7 +23,13 @@ import { CustomElementModal } from './custom_element_modal';
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
 export interface Props {
+  /**
+   * title to display in the header
+   */
   title: string;
+  /**
+   * indicated whether or not layer controls should be displayed
+   */
   showLayerControls?: boolean;
   /**
    * cuts selected elements
