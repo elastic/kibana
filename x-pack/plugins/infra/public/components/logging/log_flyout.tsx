@@ -33,14 +33,7 @@ interface Props {
 }
 
 export const LogFlyout = injectI18n(
-  ({
-    flyoutItem,
-    loading,
-    setFlyoutVisibility,
-    setFilter,
-    setTarget,
-    intl,
-  }: Props) => {
+  ({ flyoutItem, loading, setFlyoutVisibility, setFilter, setTarget, intl }: Props) => {
     const handleFilter = (field: InfraLogItemField) => () => {
       const filter = `${field.field}:"${field.value}"`;
       setFilter(filter);
@@ -48,10 +41,13 @@ export const LogFlyout = injectI18n(
       if (flyoutItem && flyoutItem.key) {
         const timestampMoment = moment(flyoutItem.key.time);
         if (timestampMoment.isValid()) {
-          setTarget({
-            time: timestampMoment.valueOf(),
-            tiebreaker: flyoutItem.key.tiebreaker,
-          }, flyoutItem.id);
+          setTarget(
+            {
+              time: timestampMoment.valueOf(),
+              tiebreaker: flyoutItem.key.tiebreaker,
+            },
+            flyoutItem.id
+          );
         }
       }
     };
