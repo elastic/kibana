@@ -19,7 +19,7 @@ import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
-  const style = createStyleInstance(layerDescriptor.style);
+  const style = createStyleInstance(layerDescriptor.style, source);
   switch (layerDescriptor.type) {
     case TileLayer.type:
       return new TileLayer({ layerDescriptor, source, style });
@@ -43,7 +43,7 @@ function createSourceInstance(sourceDescriptor, inspectorAdapters) {
 }
 
 
-function createStyleInstance(styleDescriptor) {
+function createStyleInstance(styleDescriptor, source) {
 
   if (!styleDescriptor || !styleDescriptor.type) {
     return null;
@@ -51,7 +51,7 @@ function createStyleInstance(styleDescriptor) {
 
   switch (styleDescriptor.type) {
     case VectorStyle.type:
-      return new VectorStyle(styleDescriptor);
+      return new VectorStyle(styleDescriptor, source);
     case TileStyle.type:
       return new TileStyle(styleDescriptor);
     case HeatmapStyle.type:

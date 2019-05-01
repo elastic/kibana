@@ -7,6 +7,7 @@
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { VECTOR_FEATURE_TYPES } from '../vector_source';
 import { AbstractESSource } from '../es_source';
 import { HeatmapLayer } from '../../heatmap_layer';
 import { VectorLayer } from '../../vector_layer';
@@ -304,11 +305,11 @@ export class ESGeoGridSource extends AbstractESSource {
     }
 
     const layerDescriptor = this._createDefaultLayerDescriptor(options);
-    const style = new VectorStyle(layerDescriptor.style);
+    const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style: style
+      style
     });
   }
 
@@ -318,5 +319,13 @@ export class ESGeoGridSource extends AbstractESSource {
 
   async filterAndFormatPropertiesToHtml(properties) {
     return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
+  }
+
+  async getSupportedFeatures() {
+    if (this._descriptor.requestType === RENDER_AS.GRID) {
+      return [VECTOR_FEATURE_TYPES.POLYGON];
+    }
+
+    return [VECTOR_FEATURE_TYPES.POINT];
   }
 }

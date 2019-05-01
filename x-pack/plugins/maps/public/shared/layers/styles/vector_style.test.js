@@ -84,7 +84,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
             },
             {
               geometry: {
-                type: 'Point'
+                type: 'MultiPoint'
               },
               properties: {}
             }
@@ -94,7 +94,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({});
 
       const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta).toEqual({ isPointsOnly: true });
+      expect(featuresMeta.isPointsOnly).toBe(true);
     });
 
     it('Should identify when feature collection contains features other than points', () => {
@@ -120,7 +120,61 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       const vectorStyle = new VectorStyle({});
 
       const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta).toEqual({ isPointsOnly: false });
+      expect(featuresMeta.isPointsOnly).toBe(false );
+    });
+  });
+
+  describe('isLinesOnly', () => {
+    it('Should identify when feature collection only contains lines', () => {
+      const sourceDataRequest = new DataRequest({
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              geometry: {
+                type: 'LineString'
+              },
+              properties: {}
+            },
+            {
+              geometry: {
+                type: 'MultiLineString'
+              },
+              properties: {}
+            }
+          ],
+        }
+      });
+      const vectorStyle = new VectorStyle({});
+
+      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta.isLinesOnly).toBe(true);
+    });
+
+    it('Should identify when feature collection contains features other than lines', () => {
+      const sourceDataRequest = new DataRequest({
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            {
+              geometry: {
+                type: 'LineString'
+              },
+              properties: {}
+            },
+            {
+              geometry: {
+                type: 'Polygon'
+              },
+              properties: {}
+            }
+          ],
+        }
+      });
+      const vectorStyle = new VectorStyle({});
+
+      const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
+      expect(featuresMeta.isLinesOnly).toBe(false );
     });
   });
 
@@ -164,7 +218,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
       });
 
       const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
-      expect(featuresMeta).toEqual({ isPointsOnly: true });
+      expect(featuresMeta).toEqual({ isLinesOnly: false, isPointsOnly: true });
     });
 
     it('Should extract scaled field range', () => {
@@ -183,6 +237,7 @@ describe('pluckStyleMetaFromSourceDataRequest', () => {
 
       const featuresMeta = vectorStyle.pluckStyleMetaFromSourceDataRequest(sourceDataRequest);
       expect(featuresMeta).toEqual({
+        isLinesOnly: false,
         isPointsOnly: true,
         myDynamicField: {
           delta: 9,

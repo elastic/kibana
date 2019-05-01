@@ -13,6 +13,12 @@ import * as topojson from 'topojson-client';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
+export const VECTOR_FEATURE_TYPES: {
+  POINT: 'POINT',
+  LINE: 'LINE',
+  POLYGON: 'POLYGON'
+}
+
 export class AbstractVectorSource extends AbstractSource {
 
   static async getGeoJson({ format, featureCollectionPath, fetchUrl }) {
@@ -58,11 +64,11 @@ export class AbstractVectorSource extends AbstractSource {
 
   createDefaultLayer(options, mapColors) {
     const layerDescriptor = this._createDefaultLayerDescriptor(options, mapColors);
-    const style = new VectorStyle(layerDescriptor.style);
+    const style = new VectorStyle(layerDescriptor.style, this);
     return new VectorLayer({
       layerDescriptor: layerDescriptor,
       source: this,
-      style: style
+      style
     });
   }
 
@@ -113,5 +119,9 @@ export class AbstractVectorSource extends AbstractSource {
 
   isJoinable() {
     return true;
+  }
+
+  async getSupportedFeatures() {
+    return [Object.values(VECTOR_FEATURE_TYPES)];
   }
 }

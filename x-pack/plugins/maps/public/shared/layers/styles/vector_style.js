@@ -146,10 +146,14 @@ export class VectorStyle extends AbstractStyle {
       });
 
     let isPointsOnly = true;
+    let isLinesOnly = true;
     for (let i = 0; i < features.length; i++) {
       const feature = features[i];
-      if (isPointsOnly && feature.geometry.type !== 'Point') {
+      if (isPointsOnly && !['Point', 'MultiPoint'].includes(feature.geometry.type)) {
         isPointsOnly = false;
+      }
+      if (isLinesOnly && !['LineString', 'MultiLineString'].includes(feature.geometry.type)) {
+        isLinesOnly = false;
       }
       for (let j = 0; j < scaledFields.length; j++) {
         const scaledField = scaledFields[j];
@@ -162,7 +166,8 @@ export class VectorStyle extends AbstractStyle {
     }
 
     const featuresMeta = {
-      isPointsOnly
+      isPointsOnly,
+      isLinesOnly
     };
 
     scaledFields.forEach(({ min, max, name }) => {

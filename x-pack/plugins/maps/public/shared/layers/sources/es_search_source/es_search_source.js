@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import uuid from 'uuid/v4';
 
+import { VECTOR_FEATURE_TYPES } from '../vector_source';
 import { AbstractESSource } from '../es_source';
 import { hitsToGeoJson } from '../../../../elasticsearch_geo_utils';
 import { CreateSourceEditor } from './create_source_editor';
@@ -195,5 +196,21 @@ export class ESSearchSource extends AbstractESSource {
       .map(field => {
         return { name: field.name, label: field.name };
       });
+  }
+
+  async getSupportedFeatures() {
+    let geoFieldType;
+    try {
+      const geoField = this._getGeoField();
+      geoFieldType = geoField.type;
+    } catch(error) {
+      // ignore exeception
+    }
+
+    if (geoFieldType === 'geo_point') {
+      return [VECTOR_FEATURE_TYPES.POINT];
+    }
+
+    return [Object.values(VECTOR_FEATURE_TYPES)];
   }
 }
