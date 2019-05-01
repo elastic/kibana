@@ -13,17 +13,16 @@ import { MetricsExplorerAggregation } from '../../../../server/routes/metrics_ex
 jest.mock('uuid');
 const mockedUuid = uuid as jest.Mocked<typeof uuid>;
 mockedUuid.v1.mockReturnValue(('test-id' as unknown) as OutputBuffer);
+const series = { id: 'example-01', rows: [], columns: [] };
 
 describe('createTSVBLink()', () => {
   it('should just work', () => {
-    const series = { id: 'example-01', rows: [], columns: [] };
     const link = createTSVBLink(source, options, series, timeRange);
     expect(link).toBe(
       "../app/kibana#/visualize/create?type=metrics&_g=(refreshInterval:(pause:!t,value:0),time:(from:now-1h,to:now))&_a=(filters:!(),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!(),params:(axis_formatter:number,axis_position:left,axis_scale:normal,default_index_pattern:'metricbeat-*',filter:'host.name: example-01',id:test-id,index_pattern:'metricbeat-*',interval:auto,series:!((axis_position:right,chart_type:line,color:%233185FC,fill:0,formatter:percent,id:test-id,label:'avg(system.cpu.user.pct)',line_width:2,metrics:!((field:system.cpu.user.pct,id:test-id,type:avg)),point_size:0,separate_axis:0,split_mode:everything,stacked:none,value_template:{{value}})),show_grid:1,show_legend:1,time_field:'@timestamp',type:timeseries),title:example-01,type:metrics))"
     );
   });
   it('should work with rates', () => {
-    const series = { id: 'example-01', rows: [], columns: [] };
     const customOptions = {
       ...options,
       metrics: [
@@ -36,7 +35,6 @@ describe('createTSVBLink()', () => {
     );
   });
   it('should work with time range', () => {
-    const series = { id: 'example-01', rows: [], columns: [] };
     const customTimeRange = { ...timeRange, from: 'now-10m', to: 'now' };
     const link = createTSVBLink(source, options, series, customTimeRange);
     expect(link).toBe(
@@ -44,7 +42,6 @@ describe('createTSVBLink()', () => {
     );
   });
   it('should work with source', () => {
-    const series = { id: 'example-01', rows: [], columns: [] };
     const customSource = {
       ...source,
       metricAlias: 'my-beats-*',
