@@ -37,20 +37,19 @@ const SPLIT_MODES = {
   TERMS: 'terms',
   EVERYTHING: 'everything',
 };
-// add indexPattern fetching in here to pass down to SplitByFilter and SplitByFilters, we need to work off of the panel prop to get the index pattern name. The model passed down in here is only a partial version of the overall model.
 
 class Split extends Component {
   constructor(props) {
     super(props);
+    const indexPatternString = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
+        (this.props.panel.index_pattern);
     this.state = {
-      indexPatterns: [],
+      indexPatternAsString: indexPatternString || props.panel.default_index_pattern || '',
+      indexPatterns: '',
     };
   }
   async componentDidMount() {
-    await this.fetchIndexPatterns(
-      (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
-        this.props.panel.index_pattern
-    );
+    await this.fetchIndexPatterns();
   }
   componentWillReceiveProps(nextProps) {
     // should we check against the index pattern changing too?
@@ -72,9 +71,7 @@ class Split extends Component {
     }
   }
   fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.props.panel.index_pattern
-      ? this.props.panel.index_pattern
-      : this.props.panel.default_index_pattern;
+    const searchIndexPattern = this.state.indexPatternAsString;
     const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
@@ -118,7 +115,7 @@ class Split extends Component {
       return (
         <Component
           model={model}
-          indexPattern={indexPattern}
+          indexPattern={this.state.indexPattern}
           fields={this.props.fields}
           onChange={this.props.onChange}
           uiRestrictions={uiRestrictions}
