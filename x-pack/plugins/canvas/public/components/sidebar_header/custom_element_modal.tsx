@@ -202,7 +202,6 @@ export class CustomElementModal extends PureComponent<Props, State> {
                   fill
                   onClick={() => {
                     onSave(name, description, image);
-                    onCancel();
                   }}
                 >
                   Save
