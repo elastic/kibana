@@ -41,7 +41,7 @@ export function logsSpecProvider() {
         id: 'logs',
         dataPath: path.join(__dirname, './logs.json.gz'),
         fields: fieldMappings,
-        timeFields: ['timestamp'],
+        timeFields: ['timestamp', 'utc_time'],
         currentTimeMarker: '2018-08-01T00:00:00',
         preserveDayOfWeekTimeOfDay: true,
       }
