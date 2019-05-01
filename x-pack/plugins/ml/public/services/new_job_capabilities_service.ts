@@ -54,10 +54,14 @@ class NewJobCapsService {
   }
 
   public async initializeFromIndexPattern(indexPattern: IndexPatternWithType) {
-    const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-    const { fields, aggs } = createObjects(resp, indexPattern.title);
-    this._fields = fields;
-    this._aggs = aggs;
+    try {
+      const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
+      const { fields, aggs } = createObjects(resp, indexPattern.title);
+      this._fields = fields;
+      this._aggs = aggs;
+    } catch (error) {
+      console.error('Unable to load new job capabilities', error); // eslint-disable-line no-console
+    }
   }
 }
 
@@ -99,7 +103,7 @@ function createObjects(resp: any, indexPatternTitle: string) {
       fields.push(field);
     });
 
-    // loop through the fields and add populate their aggs lists.
+    // loop through the fields and populate their aggs lists.
     // for each agg added to a field, also add that field to the agg's field list
     fields.forEach((field: Field) => {
       aggIdMap[field.id].forEach((aggId: AggId) => {
