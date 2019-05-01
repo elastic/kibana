@@ -12,9 +12,13 @@ import {
 import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common/constants';
 import { Repository, RepositoryType, RepositoryVerification } from '../../../common/types';
 
+import { Plugins } from '../../../shim';
 import { deserializeRepositorySettings, serializeRepositorySettings } from '../../lib';
 
-export function registerRepositoriesRoutes(router: Router) {
+let isCloudEnabled = false;
+
+export function registerRepositoriesRoutes(router: Router, plugins: Plugins) {
+  isCloudEnabled = plugins.cloud.config.isCloudEnabled;
   router.get('repository_types', getTypesHandler);
   router.get('repositories', getAllHandler);
   router.get('repositories/{name}', getOneHandler);
@@ -119,7 +123,8 @@ export const getOneHandler: RouterRouteHandler = async (
 };
 
 export const getTypesHandler: RouterRouteHandler = async (req, callWithRequest) => {
-  const types: RepositoryType[] = [...DEFAULT_REPOSITORY_TYPES];
+  // In ECE/ESS, do not enable the default types
+  const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
   const plugins: any[] = await callWithRequest('cat.plugins', { format: 'json' });
   if (plugins && plugins.length) {
     const pluginNames: string[] = [...new Set(plugins.map(plugin => plugin.component))];

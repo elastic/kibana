@@ -75,6 +75,15 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
     }
   };
 
+  const pluginDocLink = (
+    <EuiLink href={documentationLinksService.getRepositoryPluginDocUrl()} target="_blank">
+      <FormattedMessage
+        id="xpack.snapshotRestore.repositoryForm.fields.typePluginsDocLinkText"
+        defaultMessage="Learn more about plugins."
+      />
+    </EuiLink>
+  );
+
   const renderNameField = () => (
     <EuiDescribedFormGroup
       title={
@@ -139,7 +148,6 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             onTypeChange(type);
           }
         }}
-        grow={1}
       >
         <EuiCard
           className={`ssrRepositoryFormTypeCard
@@ -190,6 +198,29 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
       );
     }
 
+    if (!repositoryTypes.length) {
+      return (
+        <EuiCallOut
+          title={
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorTitle"
+              defaultMessage="No repository types available"
+            />
+          }
+          color="warning"
+          data-test-subj="noRepositoryTypesError"
+        >
+          <FormattedMessage
+            id="xpack.snapshotRestore.repositoryForm.noRepositoryTypesErrorMessage"
+            defaultMessage="You can install plugins to enable different repository types. {docLink}"
+            values={{
+              docLink: pluginDocLink,
+            }}
+          />
+        </EuiCallOut>
+      );
+    }
+
     return (
       <EuiFlexGrid columns={3}>
         {repositoryTypes.map((type: RepositoryType, index: number) => renderTypeCard(type, index))}
@@ -211,26 +242,25 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           </EuiTitle>
         }
         description={
-          <Fragment>
+          repositoryTypes.includes(REPOSITORY_TYPES.fs) &&
+          repositoryTypes.includes(REPOSITORY_TYPES.url) ? (
             <FormattedMessage
-              id="xpack.snapshotRestore.repositoryForm.fields.typeDescription"
-              defaultMessage="Elasticsearch supports file system, read-only URL, and source-only repositories.
+              id="xpack.snapshotRestore.repositoryForm.fields.defaultTypeDescription"
+              defaultMessage="Elasticsearch supports file system and read-only URL repositories.
                 Additional types require plugins. {docLink}"
               values={{
-                docLink: (
-                  <EuiLink
-                    href={documentationLinksService.getRepositoryPluginDocUrl()}
-                    target="_blank"
-                  >
-                    <FormattedMessage
-                      id="xpack.snapshotRestore.repositoryForm.fields.typePluginsDocLinkText"
-                      defaultMessage="Learn more about plugins."
-                    />
-                  </EuiLink>
-                ),
+                docLink: pluginDocLink,
               }}
             />
-          </Fragment>
+          ) : (
+            <FormattedMessage
+              id="xpack.snapshotRestore.repositoryForm.fields.cloudTypeDescription"
+              defaultMessage="Elasticsearch provides core plugins for custom repositories. {docLink}"
+              values={{
+                docLink: pluginDocLink,
+              }}
+            />
+          )
         }
         idAria="repositoryTypeDescription"
         fullWidth

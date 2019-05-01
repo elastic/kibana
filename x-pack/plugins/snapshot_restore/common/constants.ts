@@ -49,3 +49,5 @@ export const REPOSITORY_PLUGINS_MAP: { [key: string]: RepositoryType } = {
   'repository-azure': REPOSITORY_TYPES.azure,
   'repository-gcs': REPOSITORY_TYPES.gcs,
 };
+
+export const APP_PERMISSIONS = ['monitor', 'create_snapshot', 'cluster:admin/repository'];
