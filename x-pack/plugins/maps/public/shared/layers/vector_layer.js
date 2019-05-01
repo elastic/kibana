@@ -82,14 +82,6 @@ export class VectorLayer extends AbstractLayer {
     return [VectorStyle];
   }
 
-  /**
-   * this should only be called if the source supports shape filter creation.
-   * @return {*|Promise<void>}
-   */
-  async createShapeFilter(geojsonPolygon) {
-    return await this._source.createShapeFilter(geojsonPolygon);
-  }
-
   getIcon() {
     return this._style.getIcon();
   }

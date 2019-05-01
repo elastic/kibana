@@ -25,19 +25,20 @@ export async function getIndexPatternsFromIds(indexPatternIds) {
 
 
 export function createShapeFilter(geojsonPolygon, indexPatternId, geoField) {
-
-  //take outer
-  const points  = geojsonPolygon.coordinates[0].map(coordinatePair => {
-    return {
-      lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
-      lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
-    };
-  });
-  const field = geoField;
-  const filter = { meta: { negate: false, index: indexPatternId } };
-  filter.geo_polygon = { ignore_unmapped: true };
-  filter.geo_polygon[field] = {
-    points: points
+  //take outer ring
+  const filter = {
+    meta: {
+      negate: false,
+      index: indexPatternId,
+      // eslint-disable-next-line max-len
+      alias: `geo polygon at ${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}`
+    }
+  };
+  filter.geo_polygon = {
+    ignore_unmapped: true,
+    [geoField]: {
+      points: geojsonPolygon.coordinates[0]
+    }
   };
   return filter;
 }
