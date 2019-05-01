@@ -54,7 +54,7 @@ export function maps(kibana) {
       styleSheetPaths: `${__dirname}/public/index.scss`,
       savedObjectSchemas: {
         'maps-telemetry': {
-          isNamespaceAgnostic: true,
+          isNamespaceAgnostic: true
         }
       },
       savedObjectsManagement: {

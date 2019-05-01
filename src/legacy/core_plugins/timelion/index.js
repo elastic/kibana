@@ -69,7 +69,6 @@ export default function (kibana) {
         'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
-
       uiSettingDefaults: {
         'timelion:showTutorial': {
           name: i18n.translate('timelion.uiSettings.showTutorialLabel', {
