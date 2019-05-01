@@ -7,11 +7,11 @@
 import React, { Fragment, FunctionComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { Datasource } from '../../datasource';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { FunctionFormList } from '../../function_form_list';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { SidebarHeader } from '../../sidebar_header';
 import { PositionedElement } from '../../../lib/positioned_element';
 

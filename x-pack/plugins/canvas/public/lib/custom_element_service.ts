@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// @ts-ignore
+// @ts-ignore unconverted Elastic lib
 import chrome from 'ui/chrome';
 import { AxiosPromise } from 'axios';
-// @ts-ignore
+// @ts-ignore unconverted local file
 import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib/constants';
-// @ts-ignore
+// @ts-ignore unconverted local file
 import { fetch } from '../../common/lib/fetch';
 
 export interface CustomElement {

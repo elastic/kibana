@@ -6,13 +6,12 @@
 
 import { Http2ServerResponse } from 'http2';
 import { camelCase } from 'lodash';
-// @ts-ignore
+// @ts-ignore unconverted local file
 import { getClipboardData, setClipboardData } from './clipboard';
-// @ts-ignore
+// @ts-ignore unconverted local file
 import { cloneSubgraphs } from './clone_subgraphs';
-// @ts-ignore
+// @ts-ignore unconverted local file
 import { notify } from './notify';
-// @ts-ignore
 import * as customElementService from './custom_element_service';
 import { getId } from './get_id';
 import { PositionedElement } from './positioned_element';

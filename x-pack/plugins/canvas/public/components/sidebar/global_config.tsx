@@ -5,13 +5,13 @@
  */
 
 import React, { Fragment, FunctionComponent } from 'react';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { ElementConfig } from '../element_config';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { PageConfig } from '../page_config';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { WorkpadConfig } from '../workpad_config';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { SidebarSection } from './sidebar_section';
 
 export const GlobalConfig: FunctionComponent = () => (

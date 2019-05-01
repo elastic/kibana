@@ -16,7 +16,7 @@ import {
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
 } from '@elastic/eui';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { Popover } from '../popover';
 import { CustomElementModal } from './custom_element_modal';
 

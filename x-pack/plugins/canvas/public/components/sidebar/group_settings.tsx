@@ -6,7 +6,7 @@
 
 import React, { Fragment, FunctionComponent } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
-// @ts-ignore
+// @ts-ignore unconverted component
 import { SidebarHeader } from '../sidebar_header/';
 
 export const GroupSettings: FunctionComponent = () => (

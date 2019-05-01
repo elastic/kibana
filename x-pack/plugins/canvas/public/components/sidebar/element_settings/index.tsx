@@ -6,7 +6,7 @@
 
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// @ts-ignore
+// @ts-ignore unconverted local file
 import { getElementById, getSelectedPage } from '../../../state/selectors/workpad';
 import { ElementSettings as Component } from './element_settings';
 import { PositionedElement } from '../../../lib/positioned_element';
