@@ -33,12 +33,12 @@ module.exports = function (grunt) {
   function runJest(jestScript) {
     const serverCmd = {
       cmd: 'node',
-      args: [jestScript, '--no-cache', '--ci', '2>&1'],
+      args: [jestScript, '--no-cache', '--ci'],
       opts: { stdio: 'inherit' }
     };
 
     return new Promise((resolve, reject) => {
-      grunt.util.spawn(serverCmd, (error, result, code) => {
+      const proc = (serverCmd, (error, result, code) => {
         if (error || code !== 0) {
           const error = new Error(`jest exited with code ${code}`);
           grunt.fail.fatal(error);
@@ -49,7 +49,8 @@ module.exports = function (grunt) {
         grunt.log.writeln(result);
         resolve();
       });
-
+      // jest uses stderr for output https://github.com/facebook/jest/issues/5064
+      proc.stderr.pipe(process.stdout);
     });
   }
 };
