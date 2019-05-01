@@ -34,12 +34,10 @@ import { createPromiseFromStreams, createMapStream } from '../../../legacy/utils
 import { Extract } from 'tar';
 
 const mkdirpAsync = promisify(mkdirpCb);
-const statAsync = promisify(fs.stat);
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const readdirAsync = promisify(fs.readdir);
 const utimesAsync = promisify(fs.utimes);
-const copyFileAsync = promisify(fs.copyFile);
 
 export function assertAbsolute(path) {
   if (!isAbsolute(path)) {
@@ -75,16 +73,6 @@ export async function getChildPaths(path) {
   assertAbsolute(path);
   const childNames = await readdirAsync(path);
   return childNames.map(name => resolve(path, name));
-}
-
-export async function copy(source, destination) {
-  assertAbsolute(source);
-  assertAbsolute(destination);
-
-  // do a stat call to make sure the source exists before creating the destination directory
-  await statAsync(source);
-  await mkdirp(dirname(destination));
-  await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
 }
 
 export async function deleteAll(patterns, log) {
