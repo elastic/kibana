@@ -25,7 +25,15 @@ export async function getIndexPatternsFromIds(indexPatternIds) {
 
 
 export function createShapeFilter(geojsonPolygon, indexPatternId, geoField) {
-  //take outer ring
+
+  //take outer
+  const points  = geojsonPolygon.coordinates[0].map(coordinatePair => {
+    return {
+      lon: _.round(coordinatePair[0], DECIMAL_DEGREES_PRECISION),
+      lat: _.round(coordinatePair[1], DECIMAL_DEGREES_PRECISION)
+    };
+  });
+  const field = geoField;
   const filter = {
     meta: {
       negate: false,
@@ -34,11 +42,9 @@ export function createShapeFilter(geojsonPolygon, indexPatternId, geoField) {
       alias: `geo polygon at ${_.round(geojsonPolygon.coordinates[0][0][0], DECIMAL_DEGREES_PRECISION)}, ${_.round(geojsonPolygon.coordinates[0][0][1], DECIMAL_DEGREES_PRECISION)}`
     }
   };
-  filter.geo_polygon = {
-    ignore_unmapped: true,
-    [geoField]: {
-      points: geojsonPolygon.coordinates[0]
-    }
+  filter.geo_polygon = { ignore_unmapped: true };
+  filter.geo_polygon[field] = {
+    points: points
   };
   return filter;
 }

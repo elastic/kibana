@@ -51,6 +51,7 @@ export class MBMapContainer extends React.Component {
 
   _onPolygonSelectionChange = async (e) => {
 
+    console.log('on sel change');
     if (e.features.length) {
       //when the user deselects, the filter gets applied.
       return;
@@ -250,7 +251,7 @@ export class MBMapContainer extends React.Component {
     if (!this._mbDrawControlAdded) {
       return;
     }
-    this._mbMap.getCanvas().style.cursor = this._mbCursor;
+    // this._mbMap.getCanvas().style.cursor = this._mbCursor;
     this._mbMap.off('draw.selectionchange', this._onPolygonSelectionChange);
     this._mbMap.removeControl(this._mbDrawControl);
     this._mbDrawControlAdded = false;
@@ -260,8 +261,8 @@ export class MBMapContainer extends React.Component {
   _updateDrawControl() {
     if (!this._mbDrawControlAdded) {
       this._mbMap.addControl(this._mbDrawControl);
-      this._mbCursor = this._mbMap.getCanvas().style.cursor;
-      this._mbMap.getCanvas().style.cursor = 'crosshair';
+      // this._mbCursor = this._mbMap.getCanvas().style.cursor;
+      // this._mbMap.getCanvas().style.cursor = 'crosshair';
       this._mbMap.on('draw.selectionchange', this._onPolygonSelectionChange);
       this._mbDrawControlAdded = true;
     }
