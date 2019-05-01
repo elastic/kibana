@@ -11,7 +11,7 @@ const EXPECTED_JOIN_VALUES = {
   alpha: 10,
   bravo: 3,
   charlie: 12,
-  tango: null
+  tango: undefined
 };
 
 const VECTOR_SOURCE_ID = 'n1t6f';
@@ -61,10 +61,15 @@ export default function ({ getPageObjects, getService }) {
       expect(mapboxStyle.sources[VECTOR_SOURCE_ID].data.features.length).to.equal(4);
 
       mapboxStyle.sources.n1t6f.data.features.forEach(({ properties }) => {
+        if (properties.name === 'tango') {
+          //left join, which means we won't rescale joins that do not match
+          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(false);
+        } else {
+          expect(properties.hasOwnProperty(JOIN_PROPERTY_NAME)).to.be(true);
+        }
         expect(properties[JOIN_PROPERTY_NAME]).to.be(EXPECTED_JOIN_VALUES[properties.name]);
       });
     });
-
 
     it('should style fills, points and lines independently', async () => {
       const mapboxStyle = await PageObjects.maps.getMapboxStyle();
