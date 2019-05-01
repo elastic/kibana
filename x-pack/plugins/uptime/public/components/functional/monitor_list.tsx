@@ -5,6 +5,8 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiHealth,
   // @ts-ignore missing type definition
   EuiHistogramSeries,
@@ -86,23 +88,33 @@ export const MonitorListComponent = ({
               defaultMessage: 'Status',
             }),
             render: (status: string, monitor: LatestMonitor) => (
-              <div>
-                <EuiHealth
-                  color={status === 'up' ? 'success' : 'danger'}
-                  style={{ display: 'block' }}
-                >
-                  {status === 'up'
-                    ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
-                        defaultMessage: 'Up',
-                      })
-                    : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
-                        defaultMessage: 'Down',
-                      })}
-                </EuiHealth>
-                <EuiText size="xs" color="subdued">
-                  {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
-                </EuiText>
-              </div>
+              <EuiFlexGroup alignItems="center" gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <MonitorListActionsPopover
+                    basePath={basePath}
+                    dateRangeStart={dateRangeStart}
+                    dateRangeEnd={dateRangeEnd}
+                    monitor={monitor}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiHealth
+                    color={status === 'up' ? 'success' : 'danger'}
+                    style={{ display: 'block' }}
+                  >
+                    {status === 'up'
+                      ? i18n.translate('xpack.uptime.monitorList.statusColumn.upLabel', {
+                          defaultMessage: 'Up',
+                        })
+                      : i18n.translate('xpack.uptime.monitorList.statusColumn.downLabel', {
+                          defaultMessage: 'Down',
+                        })}
+                  </EuiHealth>
+                  <EuiText size="xs" color="subdued">
+                    {moment(get(monitor, 'ping.monitor.timestamp', undefined)).fromNow()}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             ),
           },
           {
