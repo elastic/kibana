@@ -29,7 +29,8 @@ import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
 import { Storage } from 'ui/storage';
-import { QueryBar } from 'ui/query_bar';
+import { data } from 'plugins/data';
+const { QueryBar } = data.query.ui;
 
 import {
   htmlIdGenerator,
