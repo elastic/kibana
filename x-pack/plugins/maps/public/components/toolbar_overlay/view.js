@@ -150,7 +150,7 @@ export class ToolbarOverlay extends React.Component {
 
     return flattenPanelTree({
       id: 0,
-      title: i18n.translate('xpack.maps.toolbarOverlay.toolbarTitle', {
+      title: i18n.translate('xpack.maps.toolbarOverlay.tools.toolbarTitle', {
         defaultMessage: 'Tools',
       }),
       items: [drawPolygonAction, drawBoundsAction]
@@ -211,7 +211,7 @@ export class ToolbarOverlay extends React.Component {
 
     return {
       id: id,
-      title: i18n.translate('xpack.maps.toolbarOverlay.toolbarTitle', {
+      title: i18n.translate('xpack.maps.toolbarOverlay.geofield.toolbarTitle', {
         defaultMessage: 'Select geo field',
       }),
       content: indexPatternSelection
