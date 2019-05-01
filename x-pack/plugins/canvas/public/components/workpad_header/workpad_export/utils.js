@@ -7,7 +7,7 @@
 import rison from 'rison-node';
 import chrome from 'ui/chrome';
 import { QueryString } from 'ui/utils/query_string';
-import { fetch } from '../../../common/lib/fetch';
+import { fetch } from '../../../../common/lib/fetch';
 
 // type of the desired pdf output (print or preserve_layout)
 const PDF_LAYOUT_TYPE = 'preserve_layout';

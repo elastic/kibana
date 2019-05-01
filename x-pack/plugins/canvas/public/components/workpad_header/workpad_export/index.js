@@ -8,12 +8,12 @@
 // TODO: remove eslint rule when updating to use the linked kibana resolve package
 import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
-import { jobCompletionNotifications } from '../../../../reporting/public/lib/job_completion_notifications';
-import { getWorkpad, getPages } from '../../state/selectors/workpad';
-import { getReportingBrowserType } from '../../state/selectors/app';
-import { notify } from '../../lib/notify';
-import { getWindow } from '../../lib/get_window';
-import { downloadWorkpad } from '../../lib/download_workpad';
+import { jobCompletionNotifications } from '../../../../../reporting/public/lib/job_completion_notifications';
+import { getWorkpad, getPages } from '../../../state/selectors/workpad';
+import { getReportingBrowserType } from '../../../state/selectors/app';
+import { notify } from '../../../lib/notify';
+import { getWindow } from '../../../lib/get_window';
+import { downloadWorkpad } from '../../../lib/download_workpad';
 import { WorkpadExport as Component } from './workpad_export';
 import { getPdfUrl, createPdf } from './utils';
 

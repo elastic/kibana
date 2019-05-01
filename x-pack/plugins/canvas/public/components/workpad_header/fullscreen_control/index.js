@@ -5,8 +5,8 @@
  */
 
 import { connect } from 'react-redux';
-import { setFullscreen, selectToplevelNodes } from '../../state/actions/transient';
-import { getFullscreen } from '../../state/selectors/app';
+import { setFullscreen, selectToplevelNodes } from '../../../state/actions/transient';
+import { getFullscreen } from '../../../state/selectors/app';
 import { FullscreenControl as Component } from './fullscreen_control';
 
 const mapStateToProps = state => ({
