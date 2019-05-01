@@ -47,7 +47,7 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiModalHeaderTitle,
-  EuiText,
+  EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem
 } from '@elastic/eui';
@@ -474,6 +474,7 @@ class ObjectsTableUI extends Component {
           }
           onCancel={onCancel}
           onConfirm={onConfirm}
+          buttonColor="danger"
           cancelButtonText={(
             <FormattedMessage
               id="kbn.management.objects.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
@@ -585,13 +586,13 @@ class ObjectsTableUI extends Component {
             </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
-                  defaultMessage="Select which types to export."
-                />
-              </p>
+            <EuiFormRow
+              label={<FormattedMessage
+                id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
+                defaultMessage="Select which types to export"
+              />}
+              labelType="legend"
+            >
               <EuiCheckboxGroup
                 options={exportAllOptions}
                 idToSelectedMap={exportAllSelectedOptions}
@@ -608,23 +609,21 @@ class ObjectsTableUI extends Component {
                   });
                 }}
               />
-            </EuiText>
+            </EuiFormRow>
+            <EuiSwitch
+              name="includeReferencesDeep"
+              label={(
+                <FormattedMessage
+                  id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                  defaultMessage="Include related objects"
+                />
+              )}
+              checked={isIncludeReferencesDeepChecked}
+              onChange={this.changeIncludeReferencesDeep}
+            />
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiSwitch
-                  name="includeReferencesDeep"
-                  label={(
-                    <FormattedMessage
-                      id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                      defaultMessage="Include related objects"
-                    />
-                  )}
-                  checked={isIncludeReferencesDeepChecked}
-                  onChange={this.changeIncludeReferencesDeep}
-                />
-              </EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>

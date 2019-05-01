@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  Commit,
-  Error as GitError,
-  Repository,
-  Reset,
-  TreeEntry,
-  // @ts-ignore
-  Worktree,
-} from '@elastic/nodegit';
+import { Clone, Commit, Error as GitError, Repository, Reset, TreeEntry } from '@elastic/nodegit';
 import Boom from 'boom';
 import del from 'del';
 import fs from 'fs';
@@ -361,10 +353,6 @@ export class WorkspaceHandler {
     }
   }
 
-  private workspaceWorktreeBranchName(repoName: string): string {
-    return `workspace-${repoName}`;
-  }
-
   private async updateWorkspace(
     repositoryUri: string,
     revision: string,
@@ -374,13 +362,8 @@ export class WorkspaceHandler {
     const workspaceRepo = await Repository.open(workspaceDir);
     const workspaceHead = await workspaceRepo.getHeadCommit();
     if (workspaceHead.sha() !== targetCommit.sha()) {
-      const commit = await workspaceRepo.getCommit(targetCommit.sha());
-      this.log.info(`Checkout workspace ${workspaceDir} to ${targetCommit.sha()}`);
-      // @ts-ignore
-      const result = await Reset.reset(workspaceRepo, commit, Reset.TYPE.HARD, {});
-      if (result !== undefined && result !== GitError.CODE.OK) {
-        throw Boom.internal(`Reset workspace to commit ${targetCommit.sha()} failed.`);
-      }
+      this.log.info(`fetch workspace ${workspaceDir} from origin`);
+      await workspaceRepo.fetch('origin');
     }
     return workspaceRepo;
   }
@@ -391,9 +374,8 @@ export class WorkspaceHandler {
     revision: string
   ): Promise<Repository> {
     const workspaceDir = await this.revisionDir(repositoryUri, revision);
-    this.log.info(`Create workspace ${workspaceDir} from url ${bareRepo.path()}`);
+    this.log.info(`clone workspace ${workspaceDir} from url ${bareRepo.path()}`);
     const parentDir = path.dirname(workspaceDir);
-    const mainBranchName = path.basename(workspaceDir);
     // on windows, git clone will failed if parent folder is not exists;
     await new Promise((resolve, reject) =>
       mkdirp(parentDir, err => {
@@ -404,15 +386,7 @@ export class WorkspaceHandler {
         }
       })
     );
-    // Create the worktree and open it as Repository.
-    const wt = await Worktree.add(
-      bareRepo,
-      this.workspaceWorktreeBranchName(mainBranchName),
-      workspaceDir,
-      {}
-    );
-    // @ts-ignore
-    return await Repository.openFromWorktree(wt);
+    return await Clone.clone(bareRepo.path(), workspaceDir);
   }
 
   private setWorkspaceRevision(workspaceRepo: Repository, headCommit: Commit) {
