@@ -27,20 +27,19 @@ describe('fromQuery', () => {
     expect(
       fromQuery({
         traceId: 'bar',
-        transactionId: 'john doe'
+        transactionId: 'john-doe'
       })
-    ).toEqual('traceId=bar&transactionId=john%20doe');
+    ).toEqual('traceId=bar&transactionId=john-doe');
   });
 
-  it('should encode range params', () => {
+  it('should not encode range params', () => {
     expect(
       fromQuery({
-        traceId: 'b/c',
         rangeFrom: '2019-03-03T12:00:00.000Z',
         rangeTo: '2019-03-05T12:00:00.000Z'
       })
     ).toEqual(
-      'traceId=b%2Fc&rangeFrom=2019-03-03T12%3A00%3A00.000Z&rangeTo=2019-03-05T12%3A00%3A00.000Z'
+      'rangeFrom=2019-03-03T12:00:00.000Z&rangeTo=2019-03-05T12:00:00.000Z'
     );
   });
 
