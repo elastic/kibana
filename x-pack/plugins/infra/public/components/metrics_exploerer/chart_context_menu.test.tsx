@@ -8,7 +8,6 @@ import React from 'react';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
-import { setTimeout } from 'timers';
 
 describe('MetricsExplorerChartContextMenu', () => {
   it('should just work', async () => {
@@ -50,7 +49,7 @@ describe('MetricsExplorerChartContextMenu', () => {
 
   it('should not display "Add Filter" without options.groupBy', async () => {
     const series = { id: 'exmaple-01', rows: [], columns: [] };
-    const customOptions = { ...options, groupBy: null };
+    const customOptions = { ...options, groupBy: void 0 };
     const onFilter = jest.fn().mockImplementation((query: string) => void 0);
     const component = mountWithIntl(
       <MetricsExplorerChartContextMenu

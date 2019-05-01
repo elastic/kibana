@@ -6,7 +6,7 @@
 
 import { fromKueryExpression } from '@kbn/es-query';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 import { WithKueryAutocompletion } from '../../containers/with_kuery_autocompletion';
 import { AutocompleteField } from '../autocomplete_field';
