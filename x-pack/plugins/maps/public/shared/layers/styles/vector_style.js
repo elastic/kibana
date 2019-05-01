@@ -31,10 +31,6 @@ export class VectorStyle extends AbstractStyle {
     };
   }
 
-  static canEdit(styleInstance) {
-    return styleInstance.constructor === VectorStyle;
-  }
-
   static createDescriptor(properties = {}) {
     return {
       type: VectorStyle.type,
@@ -54,13 +50,12 @@ export class VectorStyle extends AbstractStyle {
 
   static description = '';
 
-  static renderEditor({ handleStyleChange, style, layer }) {
-
-    const styleProperties = { ...style.getProperties() };
+  renderEditor({ layer, onStyleDescriptorChange }) {
+    const styleProperties = { ...this.getProperties() };
     const handlePropertyChange = (propertyName, settings) => {
       styleProperties[propertyName] = settings;//override single property, but preserve the rest
       const vectorStyleDescriptor = VectorStyle.createDescriptor(styleProperties);
-      handleStyleChange(vectorStyleDescriptor);
+      onStyleDescriptorChange(vectorStyleDescriptor);
     };
 
     return (
