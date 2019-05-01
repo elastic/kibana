@@ -87,7 +87,7 @@ function checkout_sibling {
   fi
 }
 
-checkout_sibling "elasticsearch-internal" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
+checkout_sibling "elasticsearch" "${PARENT_DIR}/elasticsearch" "USE_EXISTING_ES"
 export TEST_ES_FROM=${TEST_ES_FROM:-snapshot}
 
 # Set the JAVA_HOME based on the Java property file in the ES repo
