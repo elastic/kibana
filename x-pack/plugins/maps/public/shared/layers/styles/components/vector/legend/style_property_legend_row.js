@@ -19,6 +19,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiToolTip,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 function renderLineWidthHeader() {
@@ -57,12 +58,18 @@ function renderSymbolSizeHeader() {
   }
 
   return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
+    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <FillableCircle style={getStyle('4px')}/>
       </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="xs" />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FillableCircle style={getStyle('8px')}/>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiHorizontalRule margin="xs" />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FillableCircle style={getStyle('12px')}/>
@@ -90,10 +97,10 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
     <div>
       <EuiSpacer size="xs"/>
       {header}
-      <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween">
+        <EuiFlexItem grow={true}>
           <EuiText size="xs">
-            {_.get(range, 'min', '')}
+            <small>{_.get(range, 'min', '')}</small>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -107,13 +114,13 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
               size="xs"
               style={{ maxWidth: '180px' }}
             >
-              {options.field.label}
+              <small><strong>{options.field.label}</strong></small>
             </EuiText>
           </EuiToolTip>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs">
-            {_.get(range, 'max', '')}
+        <EuiFlexItem grow={true}>
+          <EuiText textAlign="right" size="xs">
+            <small>{_.get(range, 'max', '')}</small>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

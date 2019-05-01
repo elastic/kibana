@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
+import classNames from 'classnames';
+
 import {
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiOverlayMask,
   EuiModal,
@@ -135,7 +135,7 @@ export class TOCEntry extends React.Component {
     }
 
     return (
-      <span className="mapTocEntry__layerIcons">
+      <div className="mapTocEntry__layerIcons">
 
         <EuiButtonIcon
           iconType="pencil"
@@ -148,11 +148,20 @@ export class TOCEntry extends React.Component {
           onClick={this._openLayerPanelWithCheck}
         />
 
-        <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
-          <EuiIcon type="grab"/>
-        </span>
+        <EuiButtonIcon
+          iconType="grab"
+          color="subdued"
+          title={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonTitle', {
+            defaultMessage: 'Reorder layer'
+          })}
+          aria-label={i18n.translate('xpack.maps.layerControl.tocEntry.grabButtonAriaLabel', {
+            defaultMessage: 'Reorder layer'
+          })}
+          className="mapTocEntry__grab"
+          {...this.props.dragHandleProps}
+        />
 
-      </span>
+      </div>
     );
   }
 
@@ -160,10 +169,8 @@ export class TOCEntry extends React.Component {
     const isLayerDetailsOpen = this._isLayerDetailsOpen();
     return (
       <span className="mapTocEntry__detailsToggle">
-
-        <EuiButtonIcon
+        <button
           className="mapTocEntry__detailsToggleButton"
-          iconType={isLayerDetailsOpen ? 'arrowUp' : 'arrowDown'}
           aria-label={isLayerDetailsOpen
             ? i18n.translate('xpack.maps.layerControl.tocEntry.hideDetailsButtonAriaLabel', {
               defaultMessage: 'Hide layer details'
@@ -181,8 +188,9 @@ export class TOCEntry extends React.Component {
             })
           }
           onClick={this._toggleLayerDetailsVisibility}
-        />
-
+        >
+          <EuiIcon className="eui-alignBaseline" type={isLayerDetailsOpen ? 'arrowUp' : 'arrowDown'} size="s" />
+        </button>
       </span>
     );
   }
@@ -198,36 +206,32 @@ export class TOCEntry extends React.Component {
     } = this.props;
 
     return (
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        responsive={false}
+      <div
         className={
           layer.isVisible() && layer.showAtZoomLevel(zoom)
             && !layer.hasErrors() ? 'mapTocEntry-visible' : 'mapTocEntry-notVisible'
         }
       >
-        <EuiFlexItem grow={false} style={{ position: 'relative' }}>
-          <LayerTocActions
-            layer={layer}
-            fitToBounds={() => {
-              fitToBounds(layer.getId());
-            }}
-            zoom={zoom}
-            toggleVisible={() => {
-              toggleVisible(layer.getId());
-            }}
-            displayName={this.state.displayName}
-            escapedDisplayName={escapeLayerName(this.state.displayName)}
-            cloneLayer={() => {
-              cloneLayer(layer.getId());
-            }}
-            editLayer={this._openLayerPanelWithCheck}
-            isReadOnly={isReadOnly}
-          />
-          {this._renderDetailsToggle()}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        <LayerTocActions
+          layer={layer}
+          fitToBounds={() => {
+            fitToBounds(layer.getId());
+          }}
+          zoom={zoom}
+          toggleVisible={() => {
+            toggleVisible(layer.getId());
+          }}
+          displayName={this.state.displayName}
+          escapedDisplayName={escapeLayerName(this.state.displayName)}
+          cloneLayer={() => {
+            cloneLayer(layer.getId());
+          }}
+          editLayer={this._openLayerPanelWithCheck}
+          isReadOnly={isReadOnly}
+        />
+
+        {this._renderLayerIcons()}
+      </div>
     );
   }
 
@@ -243,6 +247,7 @@ export class TOCEntry extends React.Component {
 
     return (
       <div
+        className="mapTocEntry__layerDetails"
         data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
       >
         {tocDetails}
@@ -251,19 +256,27 @@ export class TOCEntry extends React.Component {
   }
 
   render() {
+    const classes = classNames(
+      'mapTocEntry',
+      {
+        'mapTocEntry-isDragging': this.props.isDragging,
+        'mapTocEntry-isDraggingOver': this.props.isDraggingOver,
+      },
+    );
+
     return (
       <div
-        className="mapTocEntry"
+        className={classes}
         id={this.props.layer.getId()}
         data-layerid={this.props.layer.getId()}
       >
-        {this._renderCancelModal()}
-
         {this._renderLayerHeader()}
 
         {this._renderLayerDetails()}
 
-        {this._renderLayerIcons()}
+        {this._renderDetailsToggle()}
+
+        {this._renderCancelModal()}
       </div>
     );
   }

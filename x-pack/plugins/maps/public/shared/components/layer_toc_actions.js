@@ -56,16 +56,15 @@ export class LayerTocActions extends Component {
     const icon = this._renderIcon();
     return (
       <EuiButtonEmpty
-        style={{ maxWidth: '19rem' }}
-        className="mapTocEntry__layerName eui-textTruncate eui-textLeft"
+        className="mapTocEntry__layerName eui-textLeft"
         size="xs"
         flush="left"
         color="text"
         onClick={this._onClick}
         data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
+        // textProps="mapTocEntry__layerNameText"
       >
-        <span className="eui-alignMiddle">{icon}</span>
-        {' '}
+        <span className="mapTocEntry__layerNameIcon">{icon}</span>
         {this.props.displayName}
       </EuiButtonEmpty>);
   }
@@ -206,12 +205,14 @@ export class LayerTocActions extends Component {
     return (
       <EuiPopover
         id="contextMenu"
+        className="mapLayTocActions"
         button={this._renderButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
         withTitle
         anchorPosition="leftUp"
+        anchorClassName="mapLayTocActions__popoverAnchor"
       >
         <EuiContextMenu
           initialPanelId={0}
