@@ -20,11 +20,11 @@ import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
 import * as i18n from './translations';
 
+const tableType = networkModel.NetworkTableType.dns;
+
 interface OwnProps {
   data: NetworkDnsEdges[];
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
   loadMore: (newActivePage: number) => void;
   totalCount: number;
   type: networkModel.NetworkType;
@@ -48,6 +48,11 @@ interface NetworkDnsTableDispatchProps {
   updateIsPtrIncluded: ActionCreator<{
     isPtrIncluded: boolean;
     networkType: networkModel.NetworkType;
+  }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    networkType: networkModel.NetworkType;
+    tableType: networkModel.NetworkTableType;
   }>;
 }
 
@@ -82,15 +87,14 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     const {
       data,
       dnsSortField,
-      hasNextPage,
       isPtrIncluded,
       limit,
       loading,
       loadMore,
-      nextCursor,
       totalCount,
       type,
       updateDnsLimit,
+      updateTableActivePage,
     } = this.props;
     return (
       <LoadMoreTable
@@ -98,16 +102,24 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
         loadingTitle={i18n.TOP_DNS_DOMAINS}
         loading={loading}
         pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
+        loadMore={newActivePage => loadMore(newActivePage)}
         limit={limit}
-        hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
         onChange={this.onChange}
         updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            networkType: type,
+            tableType,
+          })
+        }
+        updateProps={{ isPtrIncluded }}
         sorting={{
           field: `node.${dnsSortField.field}`,
           direction: dnsSortField.direction,
         }}
+        totalCount={totalCount}
         title={
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -159,5 +171,6 @@ export const NetworkDnsTable = connect(
     updateDnsLimit: networkActions.updateDnsLimit,
     updateDnsSort: networkActions.updateDnsSort,
     updateIsPtrIncluded: networkActions.updateIsPtrIncluded,
+    updateTableActivePage: networkActions.updateTableActivePage,
   }
 )(NetworkDnsTableComponent);

@@ -27,14 +27,14 @@ import { CountBadge } from '../../index';
 import { getDomainsColumns } from './columns';
 import * as i18n from './translations';
 
+const tableType = networkModel.NetworkTableType.domains;
+
 interface OwnProps {
   data: DomainsEdges[];
   flowTarget: FlowTarget;
   loading: boolean;
-  hasNextPage: boolean;
   indexPattern: StaticIndexPattern;
   ip: string;
-  nextCursor: string;
   totalCount: number;
   loadMore: (newActivePage: number) => void;
   type: networkModel.NetworkType;
@@ -58,6 +58,11 @@ interface DomainsTableDispatchProps {
   updateDomainsSort: ActionCreator<{
     domainsSort: DomainsSortField;
     networkType: networkModel.NetworkType;
+  }>;
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    networkType: networkModel.NetworkType;
+    tableType: networkModel.NetworkTableType;
   }>;
 }
 
@@ -89,18 +94,17 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
     const {
       data,
       domainsSortField,
-      hasNextPage,
+      flowDirection,
+      flowTarget,
       indexPattern,
       ip,
       limit,
       loading,
       loadMore,
       totalCount,
-      nextCursor,
-      updateDomainsLimit,
-      flowDirection,
-      flowTarget,
       type,
+      updateDomainsLimit,
+      updateTableActivePage,
     } = this.props;
 
     return (
@@ -116,15 +120,23 @@ class DomainsTableComponent extends React.PureComponent<DomainsTableProps> {
         loadingTitle={i18n.DOMAINS}
         loading={loading}
         pageOfItems={data}
-        loadMore={() => loadMore(nextCursor)}
+        loadMore={newActivePage => loadMore(newActivePage)}
         limit={limit}
-        hasNextPage={hasNextPage}
         itemsPerRow={rowItems}
         onChange={this.onChange}
         sorting={getSortField(domainsSortField, flowTarget)}
         updateLimitPagination={newLimit =>
           updateDomainsLimit({ limit: newLimit, networkType: type })
         }
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            networkType: type,
+            tableType,
+          })
+        }
+        totalCount={totalCount}
+        updateProps={{ flowDirection, flowTarget }}
         title={
           <EuiFlexGroup>
             <EuiFlexItem>
@@ -184,6 +196,7 @@ export const DomainsTable = connect(
     updateDomainsLimit: networkActions.updateDomainsLimit,
     updateDomainsDirection: networkActions.updateDomainsFlowDirection,
     updateDomainsSort: networkActions.updateDomainsSort,
+    updateTableActivePage: networkActions.updateTableActivePage,
   }
 )(DomainsTableComponent);
 

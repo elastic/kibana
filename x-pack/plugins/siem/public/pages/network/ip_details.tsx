@@ -85,17 +85,15 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     startDate={from}
                     type={networkModel.NetworkType.details}
                   >
-                    {({ id, domains, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                    {({ id, domains, totalCount, loading, loadMore, refetch }) => (
                       <DomainsTableManage
                         data={domains}
                         indexPattern={indexPattern}
                         id={id}
                         flowTarget={flowTarget}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                         ip={ip}
                         loading={loading}
                         loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                         refetch={refetch}
                         setQuery={setQuery}
                         totalCount={totalCount}

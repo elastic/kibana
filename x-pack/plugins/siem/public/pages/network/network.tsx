@@ -5,7 +5,6 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -96,14 +95,12 @@ const NetworkComponent = pure<NetworkComponentProps>(({ filterQuery }) => (
                   startDate={from}
                   type={networkModel.NetworkType.page}
                 >
-                  {({ totalCount, loading, networkDns, pageInfo, loadMore, id, refetch }) => (
+                  {({ totalCount, loading, networkDns, loadMore, id, refetch }) => (
                     <NetworkDnsTableManage
                       data={networkDns}
                       id={id}
-                      hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                       loading={loading}
                       loadMore={loadMore}
-                      nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                       refetch={refetch}
                       setQuery={setQuery}
                       totalCount={totalCount}

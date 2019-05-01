@@ -60,11 +60,9 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       'search',
       buildDomainsQuery(options)
     );
-
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.domain_count.value', response);
     const domainsEdges: DomainsEdges[] = getDomainsEdges(response, options);
-    const hasNextPage = domainsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = domainsEdges.splice(beginning, limit - beginning);
 
@@ -72,11 +70,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage,
       },
     };
   }

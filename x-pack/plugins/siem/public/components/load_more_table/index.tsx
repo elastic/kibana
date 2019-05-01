@@ -90,7 +90,10 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
     const [isPopoverOpen, setPopoverOpen] = useState(false);
     const pageCount = Math.ceil(totalCount / limit);
     const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
-    useEffect(() => setActivePage(0), effectDeps);
+    useEffect(() => {
+      setActivePage(0);
+      updateActivePage(0);
+    }, effectDeps);
 
     const onButtonClick = () => {
       setPopoverOpen(!isPopoverOpen);

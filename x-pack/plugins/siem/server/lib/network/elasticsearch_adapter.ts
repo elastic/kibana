@@ -33,10 +33,9 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       'search',
       buildTopNFlowQuery(options)
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.top_n_flow_count.value', response);
     const networkTopNFlowEdges: NetworkTopNFlowEdges[] = getTopNFlowEdges(response, options);
-    const hasNextPage = networkTopNFlowEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = networkTopNFlowEdges.splice(beginning, limit - beginning);
 
@@ -44,11 +43,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage,
       },
     };
   }
@@ -62,12 +57,11 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       'search',
       buildDnsQuery(options)
     );
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.dns_count.value', response);
     const networkDnsEdges: NetworkDnsEdges[] = formatDnsEdges(
       getOr([], 'aggregations.dns_name_query_count.buckets', response)
     );
-    const hasNextPage = networkDnsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = networkDnsEdges.splice(beginning, limit - beginning);
 
@@ -75,11 +69,7 @@ export class ElasticsearchNetworkAdapter implements NetworkAdapter {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage,
       },
     };
   }
