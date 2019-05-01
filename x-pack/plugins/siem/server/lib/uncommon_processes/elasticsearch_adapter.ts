@@ -82,7 +82,7 @@ export const formatUncommonProcessesData = (
     (flattenedFields, fieldName) => {
       flattenedFields.node._id = hit._id;
       flattenedFields.node.instances = getOr(0, 'total.value', hit);
-      flattenedFields.node.host = hit.host;
+      flattenedFields.node.hosts = hit.host;
       if (hit.cursor) {
         flattenedFields.cursor.value = hit.cursor;
       }
@@ -93,7 +93,7 @@ export const formatUncommonProcessesData = (
         _id: '',
         instances: 0,
         process: {},
-        host: [],
+        hosts: [],
       },
       cursor: {
         value: '',

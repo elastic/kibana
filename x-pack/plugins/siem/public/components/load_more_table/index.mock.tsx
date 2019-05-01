@@ -46,7 +46,12 @@ export const mockData = {
   },
 };
 
-export const getHostsColumns = (): Array<Columns<string>> => [
+export const getHostsColumns = (): [
+  Columns<string>,
+  Columns<string>,
+  Columns<string>,
+  Columns<string>
+] => [
   {
     field: 'node.host.name',
     name: 'Host',
@@ -75,6 +80,18 @@ export const getHostsColumns = (): Array<Columns<string>> => [
     hideForMobile: false,
     render: (version: string) => getOrEmptyTagFromValue(version),
   },
+];
+
+export const sortedHosts: [
+  Columns<string>,
+  Columns<string>,
+  Columns<string>,
+  Columns<string>
+] = getHostsColumns().map(h => ({ ...h, sortable: true })) as [
+  Columns<string>,
+  Columns<string>,
+  Columns<string>,
+  Columns<string>
 ];
 
 export const rowItems: ItemsPerRow[] = [

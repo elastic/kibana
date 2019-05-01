@@ -16,8 +16,10 @@ import {
   HostsFields,
   HostsSortField,
   HostItem,
+  HostFields,
+  OsFields,
 } from '../../../../graphql/types';
-import { assertUnreachable, ValueOf } from '../../../../lib/helpers';
+import { assertUnreachable } from '../../../../lib/helpers';
 import { hostsActions, hostsModel, hostsSelectors, State } from '../../../../store';
 import {
   Criteria,
@@ -29,7 +31,6 @@ import {
 
 import { getHostsColumns } from './columns';
 import * as i18n from './translations';
-import { TableTitle } from '../../table_title';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -94,8 +95,12 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   private memoizedColumns: (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ) => Array<Columns<ValueOf<HostItem>>>;
-  private memoizedTitle: (totalCount: number) => JSX.Element;
+  ) => [
+    Columns<HostFields['name']>,
+    Columns<HostItem['lastSeen']>,
+    Columns<OsFields['name']>,
+    Columns<OsFields['version']>
+  ];
   private memoizedSorting: (
     trigger: string,
     sortField: HostsFields,
@@ -105,7 +110,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
   constructor(props: HostsTableProps) {
     super(props);
     this.memoizedColumns = memoizeOne(this.getMemoizeHostsColumns);
-    this.memoizedTitle = memoizeOne(this.getTitle);
     this.memoizedSorting = memoizeOne(this.getSorting);
   }
 
@@ -126,13 +130,19 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     return (
       <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}
-        loadingTitle={i18n.HOSTS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={newActivePage => loadMore(newActivePage)}
-        limit={limit}
+        headerCount={totalCount}
+        headerTitle={i18n.HOSTS}
+        headerTooltip={i18n.TOOLTIP}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.HOSTS}
+        loadMore={newActivePage => loadMore(newActivePage)}
         onChange={this.onChange}
+        pageOfItems={data}
+        sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
+        totalCount={totalCount}
         updateLimitPagination={newLimit =>
           updateTableLimit({
             hostsType: type,
@@ -147,9 +157,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
             tableType,
           })
         }
-        sorting={this.memoizedSorting(`${sortField}-${direction}`, sortField, direction)}
-        title={this.memoizedTitle(totalCount)}
-        totalCount={totalCount}
       />
     );
   }
@@ -160,14 +167,15 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
     direction: Direction
   ): SortingBasicTable => ({ field: getNodeField(sortField), direction });
 
-  private getTitle = (totalCount: number): JSX.Element => (
-    <TableTitle title={i18n.HOSTS} infoTooltip={i18n.TOOLTIP} totalCount={totalCount} />
-  );
-
   private getMemoizeHostsColumns = (
     type: hostsModel.HostsType,
     indexPattern: StaticIndexPattern
-  ): Array<Columns<ValueOf<HostItem>>> => getHostsColumns(type, indexPattern);
+  ): [
+    Columns<HostFields['name']>,
+    Columns<HostItem['lastSeen']>,
+    Columns<OsFields['name']>,
+    Columns<OsFields['version']>
+  ] => getHostsColumns(type, indexPattern);
 
   private onChange = (criteria: Criteria) => {
     if (criteria.sort != null) {

@@ -28,7 +28,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -46,7 +46,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -70,7 +70,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -84,7 +84,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(5)
           .text()
-      ).toBe('Hostshello-world');
+      ).toBe('Hostshello-world ');
     });
 
     test('it has a comma separated list of hosts when the number of hosts is greater than 1', () => {
@@ -95,7 +95,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -109,7 +109,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(5)
           .text()
-      ).toBe('Hostshello-world,\u00a0hello-world-2');
+      ).toBe('Hostshello-world,\u00a0hello-world-2 ');
     });
 
     test('it is empty when all hosts are invalid because they do not contain an id and a name', () => {
@@ -120,7 +120,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -144,7 +144,7 @@ describe('UncommonProcess Table Component', () => {
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
             hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)!}
+            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -157,7 +157,7 @@ describe('UncommonProcess Table Component', () => {
           .find('.euiTableRowCell')
           .at(5)
           .text()
-      ).toBe('Hostshello-world,\u00a0hello-world-2');
+      ).toBe('Hostshello-world,\u00a0hello-world-2 ');
     });
   });
 

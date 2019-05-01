@@ -9,8 +9,7 @@ import moment from 'moment';
 import React from 'react';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { HostItem } from '../../../../graphql/types';
-import { ValueOf } from '../../../../lib/helpers';
+import { HostItem, HostFields, OsFields } from '../../../../graphql/types';
 import { escapeQueryValue } from '../../../../lib/keury';
 import { hostsModel } from '../../../../store';
 import { DragEffects, DraggableWrapper } from '../../../drag_and_drop/draggable_wrapper';
@@ -28,14 +27,19 @@ import * as i18n from './translations';
 export const getHostsColumns = (
   type: hostsModel.HostsType,
   indexPattern: StaticIndexPattern
-): Array<Columns<ValueOf<HostItem>>> => [
+): [
+  Columns<HostFields['name']>,
+  Columns<HostItem['lastSeen']>,
+  Columns<OsFields['name']>,
+  Columns<OsFields['version']>
+] => [
   {
     field: 'node.host.name',
     name: i18n.NAME,
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (hostName: string | null) => {
+    render: hostName => {
       if (hostName != null) {
         const id = escapeDataProviderId(`hosts-table-hostName-${hostName}`);
         return (
@@ -85,7 +89,7 @@ export const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: true,
-    render: (lastSeen: string | null) => {
+    render: lastSeen => {
       if (lastSeen != null) {
         return (
           <LocalizedDateTooltip date={moment(new Date(lastSeen)).toDate()}>
@@ -102,7 +106,7 @@ export const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: (hostOsName: string | null) => {
+    render: hostOsName => {
       if (hostOsName != null) {
         return (
           <AddToKql
@@ -124,7 +128,7 @@ export const getHostsColumns = (
     truncateText: false,
     hideForMobile: false,
     sortable: false,
-    render: (hostOsVersion: string | null) => {
+    render: hostOsVersion => {
       if (hostOsVersion != null) {
         return (
           <AddToKql

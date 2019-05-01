@@ -45,7 +45,7 @@ export type SubscriptionResolver<Result, Parent = any, Context = any, Args = nev
 
 export type ToStringArray = string[] | string;
 
-export type Date = any;
+export type Date = string;
 
 export type ToNumberArray = number[] | number;
 
@@ -95,6 +95,10 @@ export interface Source {
   Domains: DomainsData;
 
   DomainFirstLastSeen: FirstLastSeenDomain;
+
+  Tls: TlsData;
+
+  Users: UsersData;
 
   KpiNetwork?: KpiNetworkData | null;
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -987,6 +991,70 @@ export interface FirstLastSeenDomain {
   lastSeen?: Date | null;
 }
 
+export interface TlsData {
+  edges: TlsEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface TlsEdges {
+  node: TlsNode;
+
+  cursor: CursorType;
+}
+
+export interface TlsNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  alternativeNames?: string[] | null;
+
+  notAfter?: string[] | null;
+
+  commonNames?: string[] | null;
+
+  ja3?: string[] | null;
+
+  issuerNames?: string[] | null;
+}
+
+export interface UsersData {
+  edges: UsersEdges[];
+
+  totalCount: number;
+
+  pageInfo: PageInfo;
+}
+
+export interface UsersEdges {
+  node: UsersNode;
+
+  cursor: CursorType;
+}
+
+export interface UsersNode {
+  _id?: string | null;
+
+  timestamp?: Date | null;
+
+  user?: UsersItem | null;
+}
+
+export interface UsersItem {
+  name?: string | null;
+
+  id?: ToStringArray | null;
+
+  groupId?: ToStringArray | null;
+
+  groupName?: ToStringArray | null;
+
+  count?: number | null;
+}
+
 export interface KpiNetworkData {
   networkEvents?: number | null;
 
@@ -1094,11 +1162,11 @@ export interface OverviewNetworkData {
 }
 
 export interface OverviewHostData {
-  auditbeatAuditd: number;
+  auditbeatAuditd?: number | null;
 
-  auditbeatFIM: number;
+  auditbeatFIM?: number | null;
 
-  auditbeatLogin: number;
+  auditbeatLogin?: number | null;
 
   auditbeatPackage?: number | null;
 
@@ -1128,7 +1196,7 @@ export interface UncommonProcessItem {
 
   process: ProcessEcsFields;
 
-  host: HostEcsFields[];
+  hosts: HostEcsFields[];
 
   user?: UserEcsFields | null;
 }
@@ -1182,6 +1250,18 @@ export interface HostsSortField {
 
 export interface DomainsSortField {
   field: DomainsFields;
+
+  direction: Direction;
+}
+
+export interface TlsSortField {
+  field: TlsFields;
+
+  direction: Direction;
+}
+
+export interface UsersSortField {
+  field: UsersFields;
 
   direction: Direction;
 }
@@ -1300,6 +1380,36 @@ export interface DomainFirstLastSeenSourceArgs {
   domainName: string;
 
   flowTarget: FlowTarget;
+}
+export interface TlsSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: TlsSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
+}
+export interface UsersSourceArgs {
+  filterQuery?: string | null;
+
+  id?: string | null;
+
+  ip: string;
+
+  pagination: PaginationInput;
+
+  sort: UsersSortField;
+
+  flowTarget: FlowTarget;
+
+  timerange: TimerangeInput;
 }
 export interface KpiNetworkSourceArgs {
   id?: string | null;
@@ -1421,6 +1531,15 @@ export enum NetworkDirectionEcs {
   unknown = 'unknown',
 }
 
+export enum TlsFields {
+  _id = '_id',
+}
+
+export enum UsersFields {
+  name = 'name',
+  count = 'count',
+}
+
 export enum NetworkTopNFlowFields {
   bytes = 'bytes',
   packets = 'packets',
@@ -1499,6 +1618,10 @@ export namespace SourceResolvers {
     Domains?: DomainsResolver<DomainsData, TypeParent, Context>;
 
     DomainFirstLastSeen?: DomainFirstLastSeenResolver<FirstLastSeenDomain, TypeParent, Context>;
+
+    Tls?: TlsResolver<TlsData, TypeParent, Context>;
+
+    Users?: UsersResolver<UsersData, TypeParent, Context>;
 
     KpiNetwork?: KpiNetworkResolver<KpiNetworkData | null, TypeParent, Context>;
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
@@ -1694,6 +1817,50 @@ export namespace SourceResolvers {
     domainName: string;
 
     flowTarget: FlowTarget;
+  }
+
+  export type TlsResolver<R = TlsData, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    TlsArgs
+  >;
+  export interface TlsArgs {
+    filterQuery?: string | null;
+
+    id?: string | null;
+
+    ip: string;
+
+    pagination: PaginationInput;
+
+    sort: TlsSortField;
+
+    flowTarget: FlowTarget;
+
+    timerange: TimerangeInput;
+  }
+
+  export type UsersResolver<R = UsersData, Parent = Source, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context,
+    UsersArgs
+  >;
+  export interface UsersArgs {
+    filterQuery?: string | null;
+
+    id?: string | null;
+
+    ip: string;
+
+    pagination: PaginationInput;
+
+    sort: UsersSortField;
+
+    flowTarget: FlowTarget;
+
+    timerange: TimerangeInput;
   }
 
   export type KpiNetworkResolver<
@@ -4706,6 +4873,216 @@ export namespace FirstLastSeenDomainResolvers {
   > = Resolver<R, Parent, Context>;
 }
 
+export namespace TlsDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TlsData> {
+    edges?: EdgesResolver<TlsEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<R = TlsEdges[], Parent = TlsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalCountResolver<R = number, Parent = TlsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PageInfoResolver<R = PageInfo, Parent = TlsData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace TlsEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TlsEdges> {
+    node?: NodeResolver<TlsNode, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<R = TlsNode, Parent = TlsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<R = CursorType, Parent = TlsEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace TlsNodeResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TlsNode> {
+    _id?: IdResolver<string | null, TypeParent, Context>;
+
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    alternativeNames?: AlternativeNamesResolver<string[] | null, TypeParent, Context>;
+
+    notAfter?: NotAfterResolver<string[] | null, TypeParent, Context>;
+
+    commonNames?: CommonNamesResolver<string[] | null, TypeParent, Context>;
+
+    ja3?: Ja3Resolver<string[] | null, TypeParent, Context>;
+
+    issuerNames?: IssuerNamesResolver<string[] | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = TlsNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TimestampResolver<
+    R = Date | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type AlternativeNamesResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type NotAfterResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CommonNamesResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type Ja3Resolver<R = string[] | null, Parent = TlsNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IssuerNamesResolver<
+    R = string[] | null,
+    Parent = TlsNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UsersDataResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = UsersData> {
+    edges?: EdgesResolver<UsersEdges[], TypeParent, Context>;
+
+    totalCount?: TotalCountResolver<number, TypeParent, Context>;
+
+    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+  }
+
+  export type EdgesResolver<R = UsersEdges[], Parent = UsersData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TotalCountResolver<R = number, Parent = UsersData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type PageInfoResolver<R = PageInfo, Parent = UsersData, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace UsersEdgesResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = UsersEdges> {
+    node?: NodeResolver<UsersNode, TypeParent, Context>;
+
+    cursor?: CursorResolver<CursorType, TypeParent, Context>;
+  }
+
+  export type NodeResolver<R = UsersNode, Parent = UsersEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type CursorResolver<R = CursorType, Parent = UsersEdges, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+}
+
+export namespace UsersNodeResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = UsersNode> {
+    _id?: IdResolver<string | null, TypeParent, Context>;
+
+    timestamp?: TimestampResolver<Date | null, TypeParent, Context>;
+
+    user?: UserResolver<UsersItem | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<R = string | null, Parent = UsersNode, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type TimestampResolver<
+    R = Date | null,
+    Parent = UsersNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type UserResolver<
+    R = UsersItem | null,
+    Parent = UsersNode,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace UsersItemResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = UsersItem> {
+    name?: NameResolver<string | null, TypeParent, Context>;
+
+    id?: IdResolver<ToStringArray | null, TypeParent, Context>;
+
+    groupId?: GroupIdResolver<ToStringArray | null, TypeParent, Context>;
+
+    groupName?: GroupNameResolver<ToStringArray | null, TypeParent, Context>;
+
+    count?: CountResolver<number | null, TypeParent, Context>;
+  }
+
+  export type NameResolver<R = string | null, Parent = UsersItem, Context = SiemContext> = Resolver<
+    R,
+    Parent,
+    Context
+  >;
+  export type IdResolver<
+    R = ToStringArray | null,
+    Parent = UsersItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type GroupIdResolver<
+    R = ToStringArray | null,
+    Parent = UsersItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type GroupNameResolver<
+    R = ToStringArray | null,
+    Parent = UsersItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CountResolver<
+    R = number | null,
+    Parent = UsersItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
 export namespace KpiNetworkDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = KpiNetworkData> {
     networkEvents?: NetworkEventsResolver<number | null, TypeParent, Context>;
@@ -5063,11 +5440,11 @@ export namespace OverviewNetworkDataResolvers {
 
 export namespace OverviewHostDataResolvers {
   export interface Resolvers<Context = SiemContext, TypeParent = OverviewHostData> {
-    auditbeatAuditd?: AuditbeatAuditdResolver<number, TypeParent, Context>;
+    auditbeatAuditd?: AuditbeatAuditdResolver<number | null, TypeParent, Context>;
 
-    auditbeatFIM?: AuditbeatFimResolver<number, TypeParent, Context>;
+    auditbeatFIM?: AuditbeatFimResolver<number | null, TypeParent, Context>;
 
-    auditbeatLogin?: AuditbeatLoginResolver<number, TypeParent, Context>;
+    auditbeatLogin?: AuditbeatLoginResolver<number | null, TypeParent, Context>;
 
     auditbeatPackage?: AuditbeatPackageResolver<number | null, TypeParent, Context>;
 
@@ -5077,17 +5454,17 @@ export namespace OverviewHostDataResolvers {
   }
 
   export type AuditbeatAuditdResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatFimResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type AuditbeatLoginResolver<
-    R = number,
+    R = number | null,
     Parent = OverviewHostData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -5161,7 +5538,7 @@ export namespace UncommonProcessItemResolvers {
 
     process?: ProcessResolver<ProcessEcsFields, TypeParent, Context>;
 
-    host?: HostResolver<HostEcsFields[], TypeParent, Context>;
+    hosts?: HostsResolver<HostEcsFields[], TypeParent, Context>;
 
     user?: UserResolver<UserEcsFields | null, TypeParent, Context>;
   }
@@ -5181,7 +5558,7 @@ export namespace UncommonProcessItemResolvers {
     Parent = UncommonProcessItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
-  export type HostResolver<
+  export type HostsResolver<
     R = HostEcsFields[],
     Parent = UncommonProcessItem,
     Context = SiemContext

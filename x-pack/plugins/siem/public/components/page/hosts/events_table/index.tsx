@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import { get, has } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -85,6 +84,9 @@ const EventsTableComponent = pure<EventsTableProps>(
   }) => (
     <LoadMoreTable
       columns={getEventsColumns()}
+      headerCount={totalCount}
+      headerTitle={i18n.EVENTS}
+      headerUnit={i18n.UNIT(totalCount)}
       itemsPerRow={rowItems}
       limit={limit}
       loading={loading}
@@ -106,11 +108,6 @@ const EventsTableComponent = pure<EventsTableProps>(
         })
       }
       totalCount={totalCount}
-      title={
-        <h3>
-          {i18n.EVENTS} <EuiBadge color="hollow">{totalCount}</EuiBadge>
-        </h3>
-      }
     />
   )
 );
@@ -131,7 +128,13 @@ export const EventsTable = connect(
   }
 )(EventsTableComponent);
 
-const getEventsColumns = (): Array<Columns<EcsEdges>> => [
+const getEventsColumns = (): [
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>,
+  Columns<EcsEdges>
+] => [
   {
     name: i18n.HOST_NAME,
     sortable: true,

@@ -10,6 +10,12 @@ export const TOP_DNS_DOMAINS = i18n.translate('xpack.siem.networkDnsTable.title'
   defaultMessage: 'Top DNS Domains',
 });
 
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.networkDnsTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {Domain} other {Domains}}`,
+  });
+
 export const TOOLTIP = i18n.translate('xpack.siem.networkDnsTable.helperTooltip', {
   defaultMessage:
     'This shows DNS protocol traffic only, and can be useful for hunting domains used in DNS data exfiltration.',

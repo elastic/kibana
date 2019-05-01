@@ -9,11 +9,10 @@ import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
+import chrome, { Breadcrumb } from 'ui/chrome';
 
 import { EmptyPage } from '../../components/empty_page';
 import { getNetworkUrl, NetworkComponentProps } from '../../components/link_to/redirect_to_network';
-import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { manageQuery } from '../../components/page/manage_query';
 import { DomainsTable } from '../../components/page/network/domains_table';
 import { IpOverview } from '../../components/page/network/ip_overview';
@@ -24,13 +23,19 @@ import { indicesExistOrDataTemporarilyUnavailable, WithSource } from '../../cont
 import { FlowTarget, IndexType } from '../../graphql/types';
 import { decodeIpv6 } from '../../lib/helpers';
 import { networkModel, networkSelectors, State } from '../../store';
+import { TlsTable } from '../../components/page/network/tls_table';
 
 import { NetworkKql } from './kql';
 import * as i18n from './translations';
+import { TlsQuery } from '../../containers/tls';
+import { UsersTable } from '../../components/page/network/users_table';
+import { UsersQuery } from '../../containers/users';
 
 const basePath = chrome.getBasePath();
 
 const DomainsTableManage = manageQuery(DomainsTable);
+const TlsTableManage = manageQuery(TlsTable);
+const UsersTableManage = manageQuery(UsersTable);
 
 interface IPDetailsComponentReduxProps {
   filterQuery: string;
@@ -74,7 +79,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                   </IpOverviewQuery>
                   <EuiSpacer size="s" />
                   <EuiHorizontalRule margin="xs" />
-                  <EuiSpacer size="s" />
+                  <EuiSpacer />
 
                   <DomainsQuery
                     endDate={to}
@@ -94,6 +99,7 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         ip={ip}
                         loading={loading}
                         loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                         refetch={refetch}
                         setQuery={setQuery}
                         totalCount={totalCount}
@@ -101,6 +107,61 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                       />
                     )}
                   </DomainsQuery>
+
+                  <EuiSpacer />
+
+                  <UsersQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={decodeIpv6(ip)}
+                    sourceId="default"
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  >
+                    {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                      <UsersTableManage
+                        data={users}
+                        id={id}
+                        flowTarget={flowTarget}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        totalCount={totalCount}
+                        type={networkModel.NetworkType.details}
+                      />
+                    )}
+                  </UsersQuery>
+
+                  <EuiSpacer />
+
+                  <TlsQuery
+                    endDate={to}
+                    filterQuery={filterQuery}
+                    flowTarget={flowTarget}
+                    ip={decodeIpv6(ip)}
+                    sourceId="default"
+                    startDate={from}
+                    type={networkModel.NetworkType.details}
+                  >
+                    {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                      <TlsTableManage
+                        data={tls}
+                        id={id}
+                        hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
+                        loading={loading}
+                        loadMore={loadMore}
+                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
+                        refetch={refetch}
+                        setQuery={setQuery}
+                        totalCount={totalCount}
+                        type={networkModel.NetworkType.details}
+                      />
+                    )}
+                  </TlsQuery>
                 </>
               )}
             </GlobalTime>
@@ -129,7 +190,7 @@ const makeMapStateToProps = () => {
 
 export const IPDetails = connect(makeMapStateToProps)(IPDetailsComponent);
 
-export const getBreadcrumbs = (ip: string): BreadcrumbItem[] => [
+export const getBreadcrumbs = (ip: string): Breadcrumb[] => [
   {
     text: i18n.NETWORK,
     href: getNetworkUrl(),

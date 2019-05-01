@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import chrome from 'ui/chrome';
+import chrome, { Breadcrumb } from 'ui/chrome';
 
 import { APP_NAME } from '../../../..';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
@@ -19,19 +19,14 @@ export const setBreadcrumbs = (pathname: string) => {
   }
 };
 
-export interface BreadcrumbItem {
-  text: string;
-  href?: string;
-}
-
-export const siemRootBreadcrumb: BreadcrumbItem[] = [
+export const siemRootBreadcrumb: Breadcrumb[] = [
   {
     text: APP_NAME,
     href: getOverviewUrl(),
   },
 ];
 
-export const rootBreadcrumbs: { [name: string]: BreadcrumbItem[] } = {
+export const rootBreadcrumbs: { [name: string]: Breadcrumb[] } = {
   overview: siemRootBreadcrumb,
   hosts: [
     ...siemRootBreadcrumb,
@@ -49,7 +44,7 @@ export const rootBreadcrumbs: { [name: string]: BreadcrumbItem[] } = {
   ],
 };
 
-export const getBreadcrumbsForRoute = (pathname: string): BreadcrumbItem[] | null => {
+export const getBreadcrumbsForRoute = (pathname: string): Breadcrumb[] | null => {
   const trailingPath = pathname.match(/([^\/]+$)/);
   if (trailingPath !== null) {
     if (Object.keys(rootBreadcrumbs).includes(trailingPath[0])) {

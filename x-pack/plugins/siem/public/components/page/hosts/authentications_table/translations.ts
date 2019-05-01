@@ -6,6 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const AUTHENTICATIONS = i18n.translate(
+  'xpack.siem.authenticationsTable.authenticationFailures',
+  {
+    defaultMessage: 'Authentications',
+  }
+);
+
+export const UNIT = (totalCount: number) =>
+  i18n.translate('xpack.siem.authenticationsTable.unit', {
+    values: { totalCount },
+    defaultMessage: `{totalCount, plural, =1 {User} other {Users}}`,
+  });
+
 export const LAST_SUCCESSFUL_SOURCE = i18n.translate(
   'xpack.siem.authenticationsTable.lastSuccessfulSource',
   {
@@ -56,13 +69,6 @@ export const FAILURES = i18n.translate('xpack.siem.authenticationsTable.failures
 export const USER = i18n.translate('xpack.siem.authenticationsTable.user', {
   defaultMessage: 'User',
 });
-
-export const AUTHENTICATIONS = i18n.translate(
-  'xpack.siem.authenticationsTable.authenticationFailures',
-  {
-    defaultMessage: 'Authentications',
-  }
-);
 
 export const ROWS_5 = i18n.translate('xpack.siem.authenticationsTable.rows', {
   values: { numRows: 5 },

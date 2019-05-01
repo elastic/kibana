@@ -13,13 +13,13 @@ import {
   EuiPagination,
   EuiPanel,
   EuiPopover,
-  EuiTitle,
 } from '@elastic/eui';
 import { isEmpty, noop, getOr } from 'lodash/fp';
 import React, { memo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { Direction } from '../../graphql/types';
+import { HeaderPanel } from '../header_panel';
 import { LoadingPanel } from '../loading';
 
 import * as i18n from './translations';
@@ -40,19 +40,52 @@ export interface Criteria {
   sort?: SortingBasicTable;
 }
 
-interface BasicTableProps<T> {
-  columns: Array<Columns<T>>;
+// Using telescoping templates to remove 'any' that was polluting downstream column type checks
+interface BasicTableProps<T, U = T, V = T, W = T, X = T, Y = T, Z = T, AA = T, AB = T> {
+  columns:
+    | [Columns<T>]
+    | [Columns<T>, Columns<U>]
+    | [Columns<T>, Columns<U>, Columns<V>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>]
+    | [Columns<T>, Columns<U>, Columns<V>, Columns<W>, Columns<X>, Columns<Y>, Columns<Z>]
+    | [
+        Columns<T>,
+        Columns<U>,
+        Columns<V>,
+        Columns<W>,
+        Columns<X>,
+        Columns<Y>,
+        Columns<Z>,
+        Columns<AA>
+      ]
+    | [
+        Columns<T>,
+        Columns<U>,
+        Columns<V>,
+        Columns<W>,
+        Columns<X>,
+        Columns<Y>,
+        Columns<Z>,
+        Columns<AA>,
+        Columns<AB>
+      ];
+  headerCount: number;
+  headerSupplement?: React.ReactElement;
+  headerTitle: string | React.ReactElement;
+  headerTooltip?: string;
+  headerUnit: string | React.ReactElement;
+  itemsPerRow?: ItemsPerRow[];
   limit: number;
   loading: boolean;
   loadingTitle?: string;
   loadMore: (activePage: number) => void;
-  itemsPerRow?: ItemsPerRow[];
   onChange?: (criteria: Criteria) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageOfItems: any[];
   sorting?: SortingBasicTable;
   totalCount: number;
-  title: string | React.ReactElement;
   updateActivePage: (activePage: number) => void;
   updateLimitPagination: (limit: number) => void;
   updateProps?: { [key: string]: any };
@@ -68,9 +101,14 @@ export interface Columns<T> {
   render?: (item: T) => void;
 }
 
-export const LoadMoreTable = memo<BasicTableProps<any>>(
+export const LoadMoreTable = memo<BasicTableProps<T, U, V, W, X, Y, Z, AA, AB>>(
   ({
     columns,
+    headerCount,
+    headerSupplement,
+    headerTitle,
+    headerTooltip,
+    headerUnit,
     itemsPerRow,
     limit,
     loading,
@@ -80,7 +118,6 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
     pageOfItems,
     sorting = null,
     totalCount,
-    title,
     updateActivePage,
     updateLimitPagination,
     updateProps,
@@ -117,7 +154,7 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
           <LoadingPanel
             height="auto"
             width="100%"
-            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+            text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
             data-test-subj="InitialLoadingPanelLoadMoreTable"
           />
         </EuiPanel>
@@ -160,17 +197,23 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
               <LoadingPanel
                 height="100%"
                 width="100%"
-                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : title}`}
+                text={`${i18n.LOADING} ${loadingTitle ? loadingTitle : headerTitle}`}
                 position="absolute"
                 zIndex={3}
                 data-test-subj="LoadingPanelLoadMoreTable"
               />
             </>
           )}
-          <EuiTitle size="s">
-            <>{title}</>
-          </EuiTitle>
-          <EuiBasicTable
+
+          <HeaderPanel
+            subtitle={`${i18n.SHOWING}: ${headerCount.toLocaleString()} ${headerUnit}`}
+            title={headerTitle}
+            tooltip={headerTooltip}
+          >
+            {headerSupplement}
+          </HeaderPanel>
+
+          <BasicTable
             items={pageOfItems}
             columns={columns}
             onChange={onChange}
@@ -256,4 +299,13 @@ const BackgroundRefetch = styled.div`
   position: absolute;
   z-index: 3;
   border-radius: 5px;
+`;
+
+const BasicTable = styled(EuiBasicTable)`
+  tbody {
+    th,
+    td {
+      vertical-align: top;
+    }
+  }
 `;

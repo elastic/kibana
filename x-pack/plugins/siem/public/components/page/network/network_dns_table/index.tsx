@@ -4,17 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
-import styled from 'styled-components';
 import { ActionCreator } from 'typescript-fsa';
 
 import { NetworkDnsEdges, NetworkDnsFields, NetworkDnsSortField } from '../../../../graphql/types';
 import { networkActions, networkModel, networkSelectors, State } from '../../../../store';
 import { Criteria, ItemsPerRow, LoadMoreTable } from '../../../load_more_table';
-import { CountBadge } from '../../index';
 
 import { getNetworkDnsColumns } from './columns';
 import { IsPtrIncluded } from './is_ptr_included';
@@ -77,11 +74,6 @@ const rowItems: ItemsPerRow[] = [
   },
 ];
 
-const Sup = styled.sup`
-  vertical-align: super;
-  padding: 0 5px;
-`;
-
 class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps> {
   public render() {
     const {
@@ -99,13 +91,26 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
     return (
       <LoadMoreTable
         columns={getNetworkDnsColumns(type)}
-        loadingTitle={i18n.TOP_DNS_DOMAINS}
-        loading={loading}
-        pageOfItems={data}
-        loadMore={newActivePage => loadMore(newActivePage)}
-        limit={limit}
+        headerCount={totalCount}
+        headerTitle={i18n.TOP_DNS_DOMAINS}
+        headerTooltip={i18n.TOOLTIP}
+        headerUnit={i18n.UNIT(totalCount)}
         itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadingTitle={i18n.TOP_DNS_DOMAINS}
+        loadMore={newActivePage => loadMore(newActivePage)}
         onChange={this.onChange}
+        pageOfItems={data}
+        totalCount={totalCount}
+        updateProps={{ isPtrIncluded }}
+        sorting={{
+          field: `node.${dnsSortField.field}`,
+          direction: dnsSortField.direction,
+        }}
+        headerSupplement={
+          <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
+        }
         updateLimitPagination={newLimit => updateDnsLimit({ limit: newLimit, networkType: type })}
         updateActivePage={newPage =>
           updateTableActivePage({
@@ -113,28 +118,6 @@ class NetworkDnsTableComponent extends React.PureComponent<NetworkDnsTableProps>
             networkType: type,
             tableType,
           })
-        }
-        updateProps={{ isPtrIncluded }}
-        sorting={{
-          field: `node.${dnsSortField.field}`,
-          direction: dnsSortField.direction,
-        }}
-        totalCount={totalCount}
-        title={
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <h3>
-                {i18n.TOP_DNS_DOMAINS}
-                <Sup>
-                  <EuiIconTip content={i18n.TOOLTIP} position="right" />
-                </Sup>
-                <CountBadge color="hollow">{totalCount}</CountBadge>
-              </h3>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <IsPtrIncluded isPtrIncluded={isPtrIncluded} onChange={this.onChangePtrIncluded} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
         }
       />
     );

@@ -9,13 +9,12 @@ import { getOr, isEmpty } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
-import chrome from 'ui/chrome';
+import chrome, { Breadcrumb } from 'ui/chrome';
 import { StaticIndexPattern } from 'ui/index_patterns';
 
 import { ESTermQuery } from '../../../common/typed_json';
 import { EmptyPage } from '../../components/empty_page';
 import { getHostsUrl, HostComponentProps } from '../../components/link_to/redirect_to_hosts';
-import { BreadcrumbItem } from '../../components/navigation/breadcrumbs';
 import { EventsTable, UncommonProcessTable } from '../../components/page/hosts';
 import { AuthenticationTable } from '../../components/page/hosts/authentications_table';
 import { HostSummary } from '../../components/page/hosts/host_summary';
@@ -177,7 +176,7 @@ const makeMapStateToProps = () => {
 
 export const HostDetails = connect(makeMapStateToProps)(HostDetailsComponent);
 
-export const getBreadcrumbs = (hostId: string): BreadcrumbItem[] => [
+export const getBreadcrumbs = (hostId: string): Breadcrumb[] => [
   {
     text: i18n.HOSTS,
     href: getHostsUrl(),

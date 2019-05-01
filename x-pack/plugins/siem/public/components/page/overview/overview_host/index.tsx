@@ -47,7 +47,7 @@ export const OverviewHost = pure<OverviewHostProps>(({ endDate, startDate, setQu
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButton href="#/link-to/hosts/">
+          <EuiButton href="#/link-to/hosts">
             <FormattedMessage id="xpack.siem.overview.hostsAction" defaultMessage="View Hosts" />
           </EuiButton>
         </EuiFlexItem>

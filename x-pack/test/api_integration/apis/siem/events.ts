@@ -112,7 +112,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               const lastEventTime = resp.data.source.LastEventTime;
               expect(lastEventTime).to.eql({
                 __typename: 'LastEventTimeData',
-                lastSeen: '2019-02-19T23:26:50.002Z',
+                lastSeen: '2019-04-26T21:45:14.012Z',
               });
             });
         });
@@ -131,7 +131,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               const lastEventTime = resp.data.source.LastEventTime;
               expect(lastEventTime).to.eql({
                 __typename: 'LastEventTimeData',
-                lastSeen: '2019-02-19T23:26:50.002Z',
+                lastSeen: '2019-04-26T21:45:14.012Z',
               });
             });
         });
@@ -192,7 +192,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               const lastEventTime = resp.data.source.LastEventTime;
               expect(lastEventTime).to.eql({
                 __typename: 'LastEventTimeData',
-                lastSeen: '2019-02-19T23:26:50.002Z',
+                lastSeen: '2019-04-26T21:45:14.012Z',
               });
             });
         });
@@ -211,7 +211,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               const lastEventTime = resp.data.source.LastEventTime;
               expect(lastEventTime).to.eql({
                 __typename: 'LastEventTimeData',
-                lastSeen: '2019-02-19T23:26:50.002Z',
+                lastSeen: '2019-04-26T21:45:14.012Z',
               });
             });
         });
@@ -272,7 +272,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
               const lastEventTime = resp.data.source.LastEventTime;
               expect(lastEventTime).to.eql({
                 __typename: 'LastEventTimeData',
-                lastSeen: '2019-02-19T23:26:50.002Z',
+                lastSeen: '2019-04-26T21:45:14.012Z',
               });
             });
         });

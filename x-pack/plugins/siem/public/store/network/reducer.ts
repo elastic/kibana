@@ -13,6 +13,8 @@ import {
   FlowTarget,
   NetworkDnsFields,
   NetworkTopNFlowFields,
+  TlsFields,
+  UsersFields,
 } from '../../graphql/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../constants';
 
@@ -23,6 +25,7 @@ import {
   updateDnsSort,
   updateDomainsFlowDirection,
   updateDomainsLimit,
+  updateTlsLimit,
   updateDomainsSort,
   updateIpDetailsFlowTarget,
   updateIsPtrIncluded,
@@ -31,6 +34,9 @@ import {
   updateTopNFlowLimit,
   updateTopNFlowSort,
   updateTopNFlowTarget,
+  updateTlsSort,
+  updateUsersLimit,
+  updateUsersSort,
 } from './actions';
 import { helperUpdateTopNFlowDirection } from './helper';
 import { NetworkModel, NetworkType } from './model';
@@ -72,6 +78,20 @@ export const initialNetworkState: NetworkState = {
         domainsSortField: {
           field: DomainsFields.bytes,
           direction: Direction.desc,
+        },
+      },
+      tls: {
+        limit: DEFAULT_TABLE_LIMIT,
+        tlsSortField: {
+          field: TlsFields._id,
+          direction: Direction.desc,
+        },
+      },
+      users: {
+        limit: DEFAULT_TABLE_LIMIT,
+        usersSortField: {
+          field: UsersFields.name,
+          direction: Direction.asc,
         },
       },
     },
@@ -228,6 +248,19 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
       },
     },
   }))
+  .case(updateTlsLimit, (state, { limit }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        tls: {
+          ...state[NetworkType.details].queries.tls,
+          limit,
+        },
+      },
+    },
+  }))
   .case(updateDomainsFlowDirection, (state, { flowDirection }) => ({
     ...state,
     [NetworkType.details]: {
@@ -250,6 +283,45 @@ export const networkReducer = reducerWithInitialState(initialNetworkState)
         domains: {
           ...state[NetworkType.details].queries.domains,
           domainsSortField,
+        },
+      },
+    },
+  }))
+  .case(updateTlsSort, (state, { tlsSortField }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        tls: {
+          ...state[NetworkType.details].queries.tls,
+          tlsSortField,
+        },
+      },
+    },
+  }))
+  .case(updateUsersLimit, (state, { limit }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        users: {
+          ...state[NetworkType.details].queries.users,
+          limit,
+        },
+      },
+    },
+  }))
+  .case(updateUsersSort, (state, { usersSortField }) => ({
+    ...state,
+    [NetworkType.details]: {
+      ...state[NetworkType.details],
+      queries: {
+        ...state[NetworkType.details].queries,
+        users: {
+          ...state[NetworkType.details].queries.users,
+          usersSortField,
         },
       },
     },

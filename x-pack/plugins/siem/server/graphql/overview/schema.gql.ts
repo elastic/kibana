@@ -16,9 +16,9 @@ export const overviewSchema = gql`
   }
 
   type OverviewHostData {
-    auditbeatAuditd: Float!
-    auditbeatFIM: Float!
-    auditbeatLogin: Float!
+    auditbeatAuditd: Float
+    auditbeatFIM: Float
+    auditbeatLogin: Float
     auditbeatPackage: Float
     auditbeatProcess: Float
     auditbeatUser: Float

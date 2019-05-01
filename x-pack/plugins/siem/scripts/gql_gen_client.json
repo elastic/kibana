@@ -14,7 +14,8 @@
       "ToStringArray": "string[]",
       "ToNumberArray": "number[]",
       "ToDateArray": "string[]",
-      "ToBooleanArray": "boolean[]"
+      "ToBooleanArray": "boolean[]",
+      "Date": "string"
     }
   },
   "primitives": {
