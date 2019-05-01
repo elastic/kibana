@@ -39,6 +39,26 @@ import sinon from 'sinon';
 
 import { CoreSystem } from '__kibanaCore__';
 
+// Fake uiCapabilities returned to Core in browser tests
+const uiCapabilities = {
+  navLinks: {
+    myLink: true,
+    notMyLink: true,
+  },
+  discover: {
+    showWriteControls: true
+  },
+  visualize: {
+    save: true
+  },
+  dashboard: {
+    showWriteControls: true
+  },
+  timelion: {
+    save: true
+  },
+};
+
 // Stub fetch for CoreSystem calls.
 const fetchStub = sinon.stub(window, 'fetch');
 fetchStub.callsFake((url, options) => {
@@ -47,7 +67,14 @@ fetchStub.callsFake((url, options) => {
     return Promise.resolve(new window.Response('Resource not found', { status: 404 }));
   }
 
-  return Promise.resolve(new window.Response(options.body), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  return Promise.resolve(
+    new window.Response(
+      JSON.stringify({ capabilities: uiCapabilities })),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
 });
 
 // render the core system in a child of the body as the default children of the body
@@ -97,24 +124,6 @@ const coreSystem = new CoreSystem({
       vegaConfig: {
         enabled: true,
         enableExternalUrls: true
-      },
-      uiCapabilities: {
-        navLinks: {
-          myLink: true,
-          notMyLink: true,
-        },
-        discover: {
-          showWriteControls: true
-        },
-        visualize: {
-          save: true
-        },
-        dashboard: {
-          showWriteControls: true
-        },
-        timelion: {
-          save: true
-        },
       },
       interpreterConfig: {
         enableInVisualize: true
