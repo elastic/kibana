@@ -9,9 +9,10 @@ import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
 import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
 
+const series = { id: 'exmaple-01', rows: [], columns: [] };
+
 describe('MetricsExplorerChartContextMenu', () => {
   it('should just work', async () => {
-    const series = { id: 'exmaple-01', rows: [], columns: [] };
     const onFilter = jest.fn().mockImplementation((query: string) => void 0);
     const component = mountWithIntl(
       <MetricsExplorerChartContextMenu
@@ -31,7 +32,6 @@ describe('MetricsExplorerChartContextMenu', () => {
   });
 
   it('should not display "Add Filter" without onFilter', async () => {
-    const series = { id: 'exmaple-01', rows: [], columns: [] };
     const component = mountWithIntl(
       <MetricsExplorerChartContextMenu
         timeRange={timeRange}
@@ -48,7 +48,6 @@ describe('MetricsExplorerChartContextMenu', () => {
   });
 
   it('should not display "Add Filter" without options.groupBy', async () => {
-    const series = { id: 'exmaple-01', rows: [], columns: [] };
     const customOptions = { ...options, groupBy: void 0 };
     const onFilter = jest.fn().mockImplementation((query: string) => void 0);
     const component = mountWithIntl(
@@ -68,7 +67,6 @@ describe('MetricsExplorerChartContextMenu', () => {
   });
 
   it('should disable "Open in Visualize" when options.metrics is empty', async () => {
-    const series = { id: 'exmaple-01', rows: [], columns: [] };
     const customOptions = { ...options, metrics: [] };
     const component = mountWithIntl(
       <MetricsExplorerChartContextMenu
