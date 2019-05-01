@@ -4,9 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const server = () => ({
-  name: 'server',
-  help: 'Force the interpreter to return to the server',
-  args: {},
-  fn: context => context,
-});
+export function server() {
+  return {
+    name: 'server',
+    help: 'Force the interpreter to return to the server',
+    args: {},
+    fn: context => context,
+  };
+}
