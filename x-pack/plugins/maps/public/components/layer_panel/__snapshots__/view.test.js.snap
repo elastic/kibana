@@ -96,18 +96,7 @@ exports[`LayerPanel is rendered 1`] = `
       <EuiSpacer
         size="s"
       />
-      <StyleTabs
-        layer={
-          Object {
-            "getDisplayName": [Function],
-            "getId": [Function],
-            "getImmutableSourceProperties": [Function],
-            "getLayerTypeIconName": [Function],
-            "isJoinable": [Function],
-            "supportsElasticsearchFilters": [Function],
-          }
-        }
-      />
+      <StyleSettings />
     </div>
   </div>
   <EuiFlyoutFooter

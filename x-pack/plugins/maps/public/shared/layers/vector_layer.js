@@ -78,10 +78,6 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  getSupportedStyles() {
-    return [VectorStyle];
-  }
-
   getIcon() {
     return this._style.getIcon();
   }
@@ -477,13 +473,6 @@ export class VectorLayer extends AbstractLayer {
     this._syncSourceBindingWithMb(mbMap);
     this._syncFeatureCollectionWithMb(mbMap);
     this._syncStylePropertiesWithMb(mbMap);
-  }
-
-  renderStyleEditor(Style, options) {
-    return Style.renderEditor({
-      layer: this,
-      ...options
-    });
   }
 
   _getMbPointLayerId() {
