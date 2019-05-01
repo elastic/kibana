@@ -88,7 +88,8 @@ function generateDLL(config) {
             // More info: https://github.com/elastic/kibana/pull/35804
             {
               test: /\.js$/,
-              include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/
+              include: /[\/\\]node_modules[\/\\]normalize-url[\/\\]/,
+              exclude: /[\/\\]node_modules[\/\\]normalize-url[\/\\](.+?[\/\\])*node_modules[\/\\]/,
             }
           ],
           // Self calling function with the equivalent logic
