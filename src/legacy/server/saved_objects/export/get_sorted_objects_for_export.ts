@@ -74,7 +74,7 @@ async function fetchObjectsToExport({
       'bulk_get',
       objectTypes,
       supportedTypes,
-      await savedObjectsClient.canBulkGet(objectTypes)
+      await savedObjectsClient.canBulkGet(objects)
     );
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
@@ -95,7 +95,12 @@ async function fetchObjectsToExport({
     'find',
     types || [],
     supportedTypes,
-    await savedObjectsClient.canFind(types || [])
+    await savedObjectsClient.canFind({
+      type: types,
+      sortField: '_id',
+      sortOrder: 'asc',
+      perPage: exportSizeLimit,
+    })
   );
   const findResponse = await savedObjectsClient.find({
     type: types,

@@ -52,7 +52,7 @@ export async function importSavedObjects({
   const objectsFromStream = await collectSavedObjects({ readStream, objectLimit });
 
   const objectTypes = [...new Set(objectsFromStream.map(obj => obj.type))];
-  const authorizedTypes = await savedObjectsClient.canBulkCreate(objectTypes);
+  const authorizedTypes = await savedObjectsClient.canBulkCreate(objectsFromStream, { overwrite });
   const invalidTypes = [
     ...new Set([
       ...objectTypes.filter(type => !supportedTypes.includes(type)),
