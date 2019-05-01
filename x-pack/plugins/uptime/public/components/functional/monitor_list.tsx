@@ -89,14 +89,6 @@ export const MonitorListComponent = ({
             }),
             render: (status: string, monitor: LatestMonitor) => (
               <EuiFlexGroup alignItems="center" gutterSize="none">
-                <EuiFlexItem grow={false}>
-                  <MonitorListActionsPopover
-                    basePath={basePath}
-                    dateRangeStart={dateRangeStart}
-                    dateRangeEnd={dateRangeEnd}
-                    monitor={monitor}
-                  />
-                </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiHealth
                     color={status === 'up' ? 'success' : 'danger'}
@@ -180,6 +172,7 @@ export const MonitorListComponent = ({
           {
             align: 'right',
             field: 'ping',
+            width: '110px',
             name: i18n.translate('xpack.uptime.monitorList.observabilityIntegrationsColumnLabel', {
               defaultMessage: 'Integrations',
               description:
