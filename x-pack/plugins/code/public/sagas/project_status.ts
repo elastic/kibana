@@ -237,7 +237,9 @@ const handleRepoDeleteStatusPolling = createRepoStatusPollingHandler(
     return action.payload;
   },
   function*(status: any, repoUri: RepositoryUri) {
+    console.log(`## Delete repository: ${JSON.stringify(status, null, 2)}`);
     if (!status.gitStatus && !status.indexStatus && !status.deleteStatus) {
+      console.log(`## Delete repository ${repoUri} done`);
       // If all the statuses cannot be found, this indicates the the repository has been successfully
       // removed.
       yield put(
@@ -258,6 +260,9 @@ const handleRepoDeleteStatusPolling = createRepoStatusPollingHandler(
         })
       );
       return isInProgress(status.deleteStatus.progress);
+    } else {
+      // Keep polling if the delete status has not been persisted yet.
+      return true;
     }
   },
   pollRepoDeleteStatus
