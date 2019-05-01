@@ -26,12 +26,7 @@ import { updateOldState } from 'ui/vis/vis_update_state';
 import { VisProvider } from 'ui/vis/index.js';
 // @ts-ignore
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { VisTypesRegistry, VisTypesRegistryProvider } from 'ui/registry/vis_types';
-
-// Vis, VisParams, VisProvider, VisState
-import * as typesFromVis from 'ui/vis/vis';
-// VisualizationController, VisType
-import * as typesFromVisTypes from 'ui/vis/vis_types/vis_type';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 /**
  * Vis Types Service
@@ -61,23 +56,11 @@ export class TypesService {
 /** @public */
 export type TypesSetup = ReturnType<TypesService['setup']>;
 
-/** @public */
-export type Vis = typesFromVis.Vis;
+/** @public types */
+export { Vis, VisParams, VisProvider, VisState } from 'ui/vis/vis';
 
-/** @public */
-export type VisParams = typesFromVis.VisParams;
+/** @public types */
+export { VisualizationController, VisType } from 'ui/vis/vis_types/vis_type';
 
-/** @public */
-export type VisProvider = typesFromVis.VisProvider;
-
-/** @public */
-export type VisState = typesFromVis.VisState;
-
-/** @public */
-export type VisualizationController = typesFromVisTypes.VisualizationController;
-
-/** @public */
-export type VisType = typesFromVisTypes.VisType;
-
-/** @public */
-export type VisTypesRegistry = VisTypesRegistry;
+/** @public types */
+export { VisTypesRegistry } from 'ui/registry/vis_types';
