@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import JoiNamespace from 'joi';
 import { resolve } from 'path';
 
-import { getConfigSchema, initServerWithKibana, KbnServer } from './server/kibana.index';
+import { initServerWithKibana, KbnServer } from './server/kibana.index';
 
 const APP_ID = 'siem';
 export const APP_NAME = 'SIEM';
@@ -39,9 +38,6 @@ export function siem(kibana: any) {
           url: `/app/${APP_ID}`,
         },
       ],
-    },
-    config(Joi: typeof JoiNamespace) {
-      return getConfigSchema(Joi);
     },
     init(server: KbnServer) {
       initServerWithKibana(server);
