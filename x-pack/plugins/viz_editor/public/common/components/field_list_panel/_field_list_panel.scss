@@ -22,16 +22,8 @@
 }
 
 .lnsFieldListPanel__field {
-  @include euiTextTruncate;
-  position: relative;
-  text-align: left;
-  box-sizing: border-box;
-  background: $euiColorEmptyShade;
-  padding: $euiSizeS;
+  @include lnsDragAndDropItem;
   margin-bottom: $euiSizeXS;
-  border-radius: $euiBorderRadius;
-  font-size: $euiFontSizeS;
-  line-height: $euiSize;
   font-weight: $euiFontWeightMedium;
   transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
 
@@ -42,11 +34,12 @@
   }
 }
 
-.lnsFieldListPanel__fieldIcon {
-  // opacity: 0.75;
+.lnsFieldListPanel__fieldName {
+  @include euiTextTruncate;
+  margin-left: $euiSizeXS;
 }
 
-.lnsFieldListPanel__fieldName {
-  vertical-align: middle;
-  margin-left: $euiSizeXS;
+.lnsFieldListPanel__fieldIcon {
+  position: relative;
+  top: -2px;
 }

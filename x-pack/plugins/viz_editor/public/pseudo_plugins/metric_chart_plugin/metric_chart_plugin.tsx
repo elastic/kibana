@@ -23,6 +23,7 @@ import {
 import { Draggable } from '../../common/components/draggable';
 import { DroppablePane } from '../../frame/main/droppable_pane';
 import { AxisEditor } from './axis_editor';
+import { EuiTextColor } from '@elastic/eui';
 
 const PLUGIN_NAME = 'metric_chart';
 
@@ -77,8 +78,10 @@ function lnsConfigPanel({
       </div>
       <div className="lnsConfigPanel__axis">
         <span className="lnsConfigPanel__axisTitle">Second dimension</span>
-        <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
-          Drop another field here
+        <Draggable className="lnsEmptyChart__item" canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
+          <EuiTextColor color="subdued">
+            Drop another field here
+          </EuiTextColor>
         </Draggable>
       </div>
     </>

@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import {
   EditorPlugin,
@@ -58,8 +58,10 @@ function lnsConfigPanel({
     <>
       <div className="lnsConfigPanel__axis">
         <span className="lnsConfigPanel__axisTitle">Add dimension</span>
-        <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
-          Drop a field here
+        <Draggable className="lnsEmptyChart__item" canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
+          <EuiTextColor color="subdued">
+            Drop a field here
+          </EuiTextColor>
         </Draggable>
       </div>
     </>
@@ -69,10 +71,7 @@ function lnsConfigPanel({
 function WorkspacePanel(props: VisualizationPanelProps<EmptyChartVisModel>) {
   return (
     <DroppablePane {...props} useFirstSuggestion>
-      <EuiFlexGroup justifyContent="center" alignItems="center">
-        <EuiFlexItem grow={false}>
-        Drop a field here to start visualizing</EuiFlexItem>
-      </EuiFlexGroup>
+      Drop a field here to start visualizing
     </DroppablePane>
   );
 }

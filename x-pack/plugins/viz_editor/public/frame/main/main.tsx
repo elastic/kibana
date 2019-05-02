@@ -5,7 +5,7 @@
  */
 
 import {
-  // EuiButtonEmpty,
+  EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -318,6 +318,11 @@ export function Main(props: MainProps) {
           />
         ) : (
           <>
+            <EuiTitle size="xs">
+              <h3>{panelProps.visModel.editorPlugin} <EuiButtonEmpty size="xs" disabled>(change)</EuiButtonEmpty></h3>
+            </EuiTitle>
+            <EuiSpacer />
+
             <ConfigPanel {...panelProps} />
 
             {hasData && (

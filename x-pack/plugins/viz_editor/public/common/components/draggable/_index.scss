@@ -2,6 +2,6 @@
   background: transparentize($euiColorSecondary, .92);
 }
 
-.inline-draggable {
-  padding: $euiSizeS $euiSizeXS;
+.inline-draggable.draggable-is-active {
+  background: transparentize($euiColorSecondary, .92) !important;
 }

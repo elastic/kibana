@@ -1,0 +1,8 @@
+@mixin lnsDragAndDropItem {
+  @include euiFontSizeS;
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeS;
+  display: flex;
+  align-items: center;
+}
