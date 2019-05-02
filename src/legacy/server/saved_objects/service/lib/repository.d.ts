@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { BaseOptions, SavedObject } from '../saved_objects_client';
+import {
+  BaseOptions,
+  SavedObject,
+  SavedObjectAttributes,
+  CreateOptions,
+  BulkCreateObject,
+} from '../saved_objects_client';
 
 export interface SavedObjectsRepositoryOptions {
   index: string | string[];
@@ -31,7 +37,12 @@ export interface SavedObjectsRepositoryOptions {
 
 export declare class SavedObjectsRepository {
   // ATTENTION: this interface is incomplete
-
+  public create: (type: string, attributes: {}, options?: CreateOptions) => Promise<SavedObject>;
+  public bulkCreate<T extends SavedObjectAttributes = any>(
+    objects: Array<BulkCreateObject<T>>,
+    options?: CreateOptions
+  ): Promise<void>;
+  public delete: (type: string, id: string, options?: {}) => Promise<void>;
   public get: (type: string, id: string, options?: BaseOptions) => Promise<SavedObject>;
   public incrementCounter: (
     type: string,

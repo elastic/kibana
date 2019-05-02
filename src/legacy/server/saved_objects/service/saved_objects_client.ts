@@ -17,13 +17,102 @@
  * under the License.
  */
 
-import { errors } from './lib';
+import { errors, SavedObjectsRepository } from './lib';
+
+export interface BaseOptions {
+  namespace?: string;
+}
+
+export interface CreateOptions extends BaseOptions {
+  id?: string;
+  overwrite?: boolean;
+  migrationVersion?: MigrationVersion;
+  references?: SavedObjectReference[];
+}
+
+export interface BulkCreateObject<T extends SavedObjectAttributes = any> {
+  id?: string;
+  type: string;
+  attributes: T;
+  extraDocumentProperties?: string[];
+}
+
+export interface BulkCreateResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
+}
+
+export interface FindOptions extends BaseOptions {
+  type?: string | string[];
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
+  fields?: string[];
+  search?: string;
+  searchFields?: string[];
+  hasReference?: { type: string; id: string };
+  defaultSearchOperator?: 'AND' | 'OR';
+}
+
+export interface FindResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
+  total: number;
+  per_page: number;
+  page: number;
+}
+
+export interface UpdateOptions extends BaseOptions {
+  version?: string;
+}
+
+export interface BulkGetObject {
+  id: string;
+  type: string;
+  fields?: string[];
+}
+export type BulkGetObjects = BulkGetObject[];
+
+export interface BulkGetResponse<T extends SavedObjectAttributes = any> {
+  saved_objects: Array<SavedObject<T>>;
+}
+
+export interface MigrationVersion {
+  [pluginName: string]: string;
+}
+
+export interface SavedObjectAttributes {
+  [key: string]: SavedObjectAttributes | string | number | boolean | null;
+}
+
+export interface VisualizationAttributes extends SavedObjectAttributes {
+  visState: string;
+}
+
+export interface SavedObject<T extends SavedObjectAttributes = any> {
+  id: string;
+  type: string;
+  version?: string;
+  updated_at?: string;
+  error?: {
+    message: string;
+    statusCode: number;
+  };
+  attributes: T;
+  references: SavedObjectReference[];
+  migrationVersion?: MigrationVersion;
+}
+
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+export type GetResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+export type CreateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
+export type UpdateResponse<T extends SavedObjectAttributes = any> = SavedObject<T>;
 
 export class SavedObjectsClient {
-  constructor(repository) {
-    this._repository = repository;
-  }
-
   /**
    * ## SavedObjectsClient errors
    *
@@ -89,8 +178,14 @@ export class SavedObjectsClient {
    *
    * @type {ErrorHelpers} see ./lib/errors
    */
-  static errors = errors;
-  errors = errors;
+  public static errors = errors;
+  public errors = errors;
+
+  private _repository: SavedObjectsRepository;
+
+  constructor(repository: SavedObjectsRepository) {
+    this._repository = repository;
+  }
 
   /**
    * Persists an object
@@ -105,7 +200,11 @@ export class SavedObjectsClient {
    * @property {array} [options.references] - [{ name, type, id }]
    * @returns {promise} - { id, type, version, attributes }
    */
-  async create(type, attributes = {}, options = {}) {
+  async create<T extends SavedObjectAttributes = any>(
+    type: string,
+    attributes: T,
+    options?: CreateOptions
+  ) {
     return this._repository.create(type, attributes, options);
   }
 
@@ -118,7 +217,10 @@ export class SavedObjectsClient {
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes, error: { message } }]}
    */
-  async bulkCreate(objects, options = {}) {
+  async bulkCreate<T extends SavedObjectAttributes = any>(
+    objects: Array<BulkCreateObject<T>>,
+    options?: CreateOptions
+  ) {
     return this._repository.bulkCreate(objects, options);
   }
 
