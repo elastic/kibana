@@ -5,14 +5,14 @@
  */
 
 import { sortBy } from 'lodash';
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   by: string;
   reverse: boolean;
 }
 
-export function sort(): ContextFunctionSpec<'sort', Datatable, Arguments, Datatable> {
+export function sort(): ContextFunction<'sort', Datatable, Arguments, Datatable> {
   return {
     name: 'sort',
     type: 'datatable',

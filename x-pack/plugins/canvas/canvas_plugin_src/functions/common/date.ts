@@ -5,14 +5,14 @@
  */
 
 import moment from 'moment';
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 interface Arguments {
   value: string | null;
   format: string;
 }
 
-export function date(): NullContextFunctionSpec<'date', Arguments, number> {
+export function date(): NullContextFunction<'date', Arguments, number> {
   return {
     name: 'date',
     type: 'number',

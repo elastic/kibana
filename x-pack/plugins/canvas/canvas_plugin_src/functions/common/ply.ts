@@ -5,7 +5,7 @@
  */
 
 import { groupBy, flatten, pick, map } from 'lodash';
-import { ContextFunctionSpec, Datatable, DatatableColumn } from '../types';
+import { ContextFunction, Datatable, DatatableColumn } from '../types';
 
 interface Arguments {
   by: string[];
@@ -14,7 +14,7 @@ interface Arguments {
 
 type Return = Datatable | Promise<Datatable>;
 
-export function ply(): ContextFunctionSpec<'ply', Datatable, Arguments, Return> {
+export function ply(): ContextFunction<'ply', Datatable, Arguments, Return> {
   return {
     name: 'ply',
     type: 'datatable',

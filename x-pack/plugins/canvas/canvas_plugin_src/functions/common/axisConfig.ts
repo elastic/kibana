@@ -5,7 +5,7 @@
  */
 
 import moment from 'moment';
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   show: boolean;
@@ -21,7 +21,7 @@ interface AxisConfig extends Arguments {
 
 const VALID_POSITIONS = ['top', 'bottom', 'left', 'right', ''];
 
-export function axisConfig(): ContextFunctionSpec<'axisConfig', Datatable, Arguments, AxisConfig> {
+export function axisConfig(): ContextFunction<'axisConfig', Datatable, Arguments, AxisConfig> {
   return {
     name: 'axisConfig',
     aliases: [],

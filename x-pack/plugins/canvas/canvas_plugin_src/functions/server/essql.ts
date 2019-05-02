@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { ContextFunctionSpec, Filter } from '../types';
+import { ContextFunction, Filter } from '../types';
 
 interface Arguments {
   query: string;
@@ -14,7 +14,7 @@ interface Arguments {
   timezone: string;
 }
 
-export function essql(): ContextFunctionSpec<'essql', Filter, Arguments, any> {
+export function essql(): ContextFunction<'essql', Filter, Arguments, any> {
   return {
     name: 'essql',
     type: 'datatable',

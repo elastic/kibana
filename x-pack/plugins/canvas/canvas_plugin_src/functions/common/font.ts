@@ -11,7 +11,7 @@ import {
   CSSStyle,
   FontFamily,
   FontWeight,
-  NullContextFunctionSpec,
+  NullContextFunction,
   Style,
   TextAlignment,
   FONT_WEIGHTS,
@@ -29,7 +29,7 @@ interface Arguments {
   weight: FontWeight;
 }
 
-export function font(): NullContextFunctionSpec<'font', Arguments, Style> {
+export function font(): NullContextFunction<'font', Arguments, Style> {
   return {
     name: 'font',
     aliases: [],

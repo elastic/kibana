@@ -5,7 +5,7 @@
  */
 
 import dateMath from '@elastic/datemath';
-import { ContextFunctionSpec, Filter } from '../types';
+import { ContextFunction, Filter } from '../types';
 
 interface Arguments {
   column: string;
@@ -13,7 +13,7 @@ interface Arguments {
   to: string | null;
 }
 
-export function timefilter(): ContextFunctionSpec<'timefilter', Filter, Arguments, Filter> {
+export function timefilter(): ContextFunction<'timefilter', Filter, Arguments, Filter> {
   return {
     name: 'timefilter',
     aliases: [],

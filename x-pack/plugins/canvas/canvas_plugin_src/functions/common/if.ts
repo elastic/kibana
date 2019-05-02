@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
 interface Arguments {
   condition: boolean | null;
@@ -11,7 +11,7 @@ interface Arguments {
   else: () => Promise<any>;
 }
 
-export function ifFn(): FunctionSpec<'if', Arguments, any> {
+export function ifFn(): Function<'if', Arguments, any> {
   return {
     name: 'if',
     help: 'Perform conditional logic',

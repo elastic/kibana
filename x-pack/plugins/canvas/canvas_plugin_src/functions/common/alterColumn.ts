@@ -5,15 +5,15 @@
  */
 
 import { omit } from 'lodash';
-import { ContextFunctionSpec, Datatable, DatatableColumn, DatatableColumnType } from '../types';
+import { ContextFunction, Datatable, DatatableColumn, DatatableColumnType } from '../types';
 
 interface Arguments {
   column: string;
-  type: 'null' | 'boolean' | 'number' | 'string' | null;
+  type: DatatableColumnType | null;
   name: string | null;
 }
 
-export function alterColumn(): ContextFunctionSpec<'alterColumn', Datatable, Arguments, Datatable> {
+export function alterColumn(): ContextFunction<'alterColumn', Datatable, Arguments, Datatable> {
   return {
     name: 'alterColumn',
     type: 'datatable',
@@ -50,7 +50,7 @@ export function alterColumn(): ContextFunctionSpec<'alterColumn', Datatable, Arg
       }
 
       const name = args.name || column.name;
-      const type = (args.type || column.type) as DatatableColumnType;
+      const type = args.type || column.type;
 
       const columns = context.columns.reduce((all: DatatableColumn[], col) => {
         if (col.name !== args.name) {

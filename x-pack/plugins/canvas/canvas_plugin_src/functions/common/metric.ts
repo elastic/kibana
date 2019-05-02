@@ -5,7 +5,7 @@
  */
 
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunctionSpec, Render, Style } from '../types';
+import { ContextFunction, Render, Style } from '../types';
 
 type Context = string | null;
 
@@ -15,7 +15,7 @@ interface Arguments {
   labelFont: Style;
 }
 
-export function metric(): ContextFunctionSpec<'metric', Context, Arguments, Render<Arguments>> {
+export function metric(): ContextFunction<'metric', Context, Arguments, Render<Arguments>> {
   return {
     name: 'metric',
     aliases: [],

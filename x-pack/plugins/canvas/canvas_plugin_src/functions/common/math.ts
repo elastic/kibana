@@ -8,7 +8,7 @@
 import { evaluate } from 'tinymath';
 // @ts-ignore untyped local
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array';
-import { ContextFunctionSpec, Datatable, isDatatable } from '../types';
+import { ContextFunction, Datatable, isDatatable } from '../types';
 
 interface Arguments {
   expression: string;
@@ -16,7 +16,7 @@ interface Arguments {
 
 type Context = number | Datatable;
 
-export function math(): ContextFunctionSpec<'math', Context, Arguments, number> {
+export function math(): ContextFunction<'math', Context, Arguments, number> {
   return {
     name: 'math',
     type: 'number',

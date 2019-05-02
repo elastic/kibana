@@ -8,7 +8,7 @@
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { ContextFunctionSpec, Render } from '../types';
+import { ContextFunction, Render } from '../types';
 
 interface Arguments {
   image: string | null;
@@ -16,7 +16,7 @@ interface Arguments {
   origin: 'top' | 'left' | 'bottom' | 'right';
 }
 
-export function revealImage(): ContextFunctionSpec<
+export function revealImage(): ContextFunction<
   'revealImage',
   number,
   Arguments,

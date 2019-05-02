@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
 interface Arguments {
   value: Return;
@@ -11,7 +11,7 @@ interface Arguments {
 
 type Return = boolean | number | string | null;
 
-export function eq(): FunctionSpec<'eq', Arguments, Return> {
+export function eq(): Function<'eq', Arguments, Return> {
   return {
     name: 'eq',
     type: 'boolean',

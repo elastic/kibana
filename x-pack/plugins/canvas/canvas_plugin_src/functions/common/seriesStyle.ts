@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 const name = 'seriesStyle';
 
@@ -22,7 +22,7 @@ interface Return extends Arguments {
   type: 'seriesStyle';
 }
 
-export function seriesStyle(): NullContextFunctionSpec<'seriesStyle', Arguments, Return> {
+export function seriesStyle(): NullContextFunction<'seriesStyle', Arguments, Return> {
   return {
     name,
     help:

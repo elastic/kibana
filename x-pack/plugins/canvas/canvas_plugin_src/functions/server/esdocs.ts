@@ -7,7 +7,7 @@
 import squel from 'squel';
 // @ts-ignore untyped local
 import { queryEsSQL } from '../../../server/lib/query_es_sql';
-import { ContextFunctionSpec, Filter } from '../types';
+import { ContextFunction, Filter } from '../types';
 
 interface Arguments {
   index: string | null;
@@ -18,7 +18,7 @@ interface Arguments {
   count: number;
 }
 
-export function esdocs(): ContextFunctionSpec<'esdocs', Filter, Arguments, any> {
+export function esdocs(): ContextFunction<'esdocs', Filter, Arguments, any> {
   return {
     name: 'esdocs',
     type: 'datatable',

@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 import { openSans } from '../../../common/lib/fonts';
-import { ContextFunctionSpec, Render, Style } from '../types';
+import { ContextFunction, Render, Style } from '../types';
 
 type Shape =
   | 'gauge'
@@ -40,7 +40,7 @@ const shapes: Shape[] = [
   'wheel',
 ];
 
-export function progress(): ContextFunctionSpec<'progress', number, Arguments, Render<Arguments>> {
+export function progress(): ContextFunction<'progress', number, Arguments, Render<Arguments>> {
   return {
     name: 'progress',
     aliases: [],

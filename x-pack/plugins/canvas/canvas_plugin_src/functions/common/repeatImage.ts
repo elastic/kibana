@@ -8,7 +8,7 @@
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
 // @ts-ignore .png file
 import { elasticOutline } from '../../lib/elastic_outline';
-import { ContextFunctionSpec, Render } from '../types';
+import { ContextFunction, Render } from '../types';
 
 interface Arguments {
   image: string | null;
@@ -17,7 +17,7 @@ interface Arguments {
   emptyImage: string | null;
 }
 
-export function repeatImage(): ContextFunctionSpec<
+export function repeatImage(): ContextFunction<
   'repeatImage',
   number,
   Arguments,

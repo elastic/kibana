@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 // @ts-ignore untyped local
 import { resolveWithMissingImage } from '../../../common/lib/resolve_dataurl';
@@ -25,7 +25,7 @@ interface Return {
 
 const modes: ImageMode[] = ['contain', 'cover', 'stretch'];
 
-export function image(): NullContextFunctionSpec<'image', Arguments, Return> {
+export function image(): NullContextFunction<'image', Arguments, Return> {
   return {
     name: 'image',
     aliases: [],

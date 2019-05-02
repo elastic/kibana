@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 const noop = () => {};
 
-export function location(): NullContextFunctionSpec<'location', {}, void> {
+export function location(): NullContextFunction<'location', {}, void> {
   return {
     name: 'location',
     type: 'datatable',

@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { ContextFunctionSpec } from '../types';
+import { ContextFunction } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export function formatdate(): ContextFunctionSpec<'formatdate', number, Arguments, string> {
+export function formatdate(): ContextFunction<'formatdate', number, Arguments, string> {
   return {
     name: 'formatdate',
     type: 'string',

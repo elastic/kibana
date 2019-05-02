@@ -5,13 +5,13 @@
  */
 
 import { takeRight } from 'lodash';
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   count: number;
 }
 
-export function tail(): ContextFunctionSpec<'tail', Datatable, Arguments, Datatable> {
+export function tail(): ContextFunction<'tail', Datatable, Arguments, Datatable> {
   return {
     name: 'tail',
     aliases: [],

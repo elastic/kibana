@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped local
 import { palettes } from '../../../common/lib/palettes';
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 interface Arguments {
   color: string[];
@@ -20,7 +20,7 @@ interface Return {
   gradient: boolean;
 }
 
-export function palette(): NullContextFunctionSpec<'palette', Arguments, Return> {
+export function palette(): NullContextFunction<'palette', Arguments, Return> {
   return {
     name: 'palette',
     aliases: [],

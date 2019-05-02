@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
-export function context(): FunctionSpec<'context', {}, any> {
+export function context(): Function<'context', {}, any> {
   return {
     name: 'context',
     help:

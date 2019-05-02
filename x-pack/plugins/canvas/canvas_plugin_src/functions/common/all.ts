@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
-export interface Arguments {
+interface Arguments {
   condition: boolean[] | null;
 }
 
-export function all(): FunctionSpec<'all', Arguments, boolean> {
+export function all(): Function<'all', Arguments, boolean> {
   return {
     name: 'all',
     type: 'boolean',

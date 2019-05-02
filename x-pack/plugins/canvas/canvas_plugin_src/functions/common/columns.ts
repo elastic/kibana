@@ -5,14 +5,14 @@
  */
 
 import { omit, pick, find } from 'lodash';
-import { ContextFunctionSpec, Datatable, DatatableColumn } from '../types';
+import { ContextFunction, Datatable, DatatableColumn } from '../types';
 
 interface Arguments {
   include: string | null;
   exclude: string | null;
 }
 
-export function columns(): ContextFunctionSpec<'columns', Datatable, Arguments, Datatable> {
+export function columns(): ContextFunction<'columns', Datatable, Arguments, Datatable> {
   return {
     name: 'columns',
     type: 'datatable',

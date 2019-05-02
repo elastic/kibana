@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
-export function rowCount(): ContextFunctionSpec<'rowCount', Datatable, {}, number> {
+export function rowCount(): ContextFunction<'rowCount', Datatable, {}, number> {
   return {
     name: 'rowCount',
     aliases: [],

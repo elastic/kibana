@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Filter, ContextFunctionSpec } from '../types';
+import { Filter, ContextFunction } from '../types';
 
 interface Arguments {
   column: string;
   value: string;
 }
 
-export function exactly(): ContextFunctionSpec<'exactly', Filter, Arguments, Filter> {
+export function exactly(): ContextFunction<'exactly', Filter, Arguments, Filter> {
   return {
     name: 'exactly',
     aliases: [],

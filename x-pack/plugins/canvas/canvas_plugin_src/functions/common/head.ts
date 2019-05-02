@@ -5,13 +5,13 @@
  */
 
 import { take } from 'lodash';
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   count: number;
 }
 
-export function head(): ContextFunctionSpec<'head', Datatable, Arguments, Datatable> {
+export function head(): ContextFunction<'head', Datatable, Arguments, Datatable> {
   return {
     name: 'head',
     aliases: [],

@@ -5,7 +5,7 @@
  */
 
 import Papa from 'papaparse';
-import { Datatable, NullContextFunctionSpec } from '../types';
+import { Datatable, NullContextFunction } from '../types';
 
 interface Arguments {
   data: string;
@@ -13,7 +13,7 @@ interface Arguments {
   newline: string;
 }
 
-export function csv(): NullContextFunctionSpec<'csv', Arguments, Datatable> {
+export function csv(): NullContextFunction<'csv', Arguments, Datatable> {
   return {
     name: 'csv',
     type: 'datatable',

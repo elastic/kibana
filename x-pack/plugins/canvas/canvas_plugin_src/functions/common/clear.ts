@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
-export function clear(): FunctionSpec<'clear', {}, null> {
+export function clear(): Function<'clear', {}, null> {
   return {
     name: 'clear',
     type: 'null',

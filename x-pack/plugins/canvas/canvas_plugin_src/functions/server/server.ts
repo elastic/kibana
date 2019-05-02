@@ -3,9 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
-export function server(): FunctionSpec<'server', {}, any> {
+export function server(): Function<'server', {}, any> {
   return {
     name: 'server',
     help: 'Force the interpreter to return to the server',

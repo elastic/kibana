@@ -6,14 +6,14 @@
 
 // @ts-ignore untyped local
 import { buildESRequest } from '../../../server/lib/build_es_request';
-import { ContextFunctionSpec, Filter } from '../types';
+import { ContextFunction, Filter } from '../types';
 
 interface Arguments {
   index: string | null;
   query: string;
 }
 
-export function escount(): ContextFunctionSpec<'escount', Filter, Arguments, any> {
+export function escount(): ContextFunction<'escount', Filter, Arguments, any> {
   return {
     name: 'escount',
     type: 'number',

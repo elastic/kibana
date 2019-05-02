@@ -5,13 +5,13 @@
  */
 
 import moment from 'moment';
-import { ContextFunctionSpec } from '../types';
+import { ContextFunction } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export function rounddate(): ContextFunctionSpec<'rounddate', number, Arguments, number> {
+export function rounddate(): ContextFunction<'rounddate', number, Arguments, number> {
   return {
     name: 'rounddate',
     type: 'number',

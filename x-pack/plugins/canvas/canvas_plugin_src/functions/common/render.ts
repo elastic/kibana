@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunctionSpec, Render, ContainerStyle } from '../types';
+import { ContextFunction, Render, ContainerStyle } from '../types';
 
 interface Arguments {
   as: string | null;
@@ -12,7 +12,7 @@ interface Arguments {
   containerStyle: ContainerStyle | null;
 }
 
-export function render(): ContextFunctionSpec<'render', Render<any>, Arguments, Render<Arguments>> {
+export function render(): ContextFunction<'render', Render<any>, Arguments, Render<Arguments>> {
   return {
     name: 'render',
     aliases: [],

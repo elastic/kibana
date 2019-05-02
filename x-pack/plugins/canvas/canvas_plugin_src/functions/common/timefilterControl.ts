@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunctionSpec, Render } from '../types';
+import { NullContextFunction, Render } from '../types';
 
 interface Arguments {
   column: string;
   compact: boolean;
 }
-export function timefilterControl(): NullContextFunctionSpec<
+export function timefilterControl(): NullContextFunction<
   'timefilterControl',
   Arguments,
   Render<Arguments>

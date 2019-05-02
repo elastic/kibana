@@ -6,19 +6,14 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   name: string;
   value: string | number | boolean | null;
 }
 
-export function staticColumn(): ContextFunctionSpec<
-  'staticColumn',
-  Datatable,
-  Arguments,
-  Datatable
-> {
+export function staticColumn(): ContextFunction<'staticColumn', Datatable, Arguments, Datatable> {
   return {
     name: 'staticColumn',
     type: 'datatable',

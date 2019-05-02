@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunctionSpec } from '../types';
+import { ContextFunction } from '../types';
 
 interface Arguments {
   pattern: string;
   flags: string;
   replacement: string;
 }
-export function replace(): ContextFunctionSpec<'replace', string, Arguments, string> {
+export function replace(): ContextFunction<'replace', string, Arguments, string> {
   return {
     name: 'replace',
     type: 'string',

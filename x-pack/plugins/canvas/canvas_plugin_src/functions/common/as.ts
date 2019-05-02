@@ -6,7 +6,7 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { Datatable, ContextFunctionSpec } from '../types';
+import { Datatable, ContextFunction } from '../types';
 
 interface Arguments {
   name: string;
@@ -14,7 +14,7 @@ interface Arguments {
 
 type Context = string | boolean | number | null;
 
-export function asFn(): ContextFunctionSpec<'as', Context, Arguments, Datatable> {
+export function asFn(): ContextFunction<'as', Context, Arguments, Datatable> {
   return {
     name: 'as',
     type: 'datatable',

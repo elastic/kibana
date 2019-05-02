@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
 interface Arguments {
   value: string[];
 }
 
-export function string(): FunctionSpec<'string', Arguments, string> {
+export function string(): Function<'string', Arguments, string> {
   return {
     name: 'string',
     aliases: [],

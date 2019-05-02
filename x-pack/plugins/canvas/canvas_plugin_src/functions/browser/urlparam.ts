@@ -5,14 +5,14 @@
  */
 
 import { parse } from 'url';
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 interface Arguments {
   param: string;
   default: string;
 }
 
-export function urlparam(): NullContextFunctionSpec<'urlparam', Arguments, string | string[]> {
+export function urlparam(): NullContextFunction<'urlparam', Arguments, string | string[]> {
   return {
     name: 'urlparam',
     aliases: [],

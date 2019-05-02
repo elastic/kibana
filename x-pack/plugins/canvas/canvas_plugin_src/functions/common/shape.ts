@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { NullContextFunctionSpec } from '../types';
+import { NullContextFunction } from '../types';
 
 export type Shape =
   | 'arrow'
@@ -54,7 +54,7 @@ const OPTIONS: Shape[] = [
   'triangleRight',
 ];
 
-export function shape(): NullContextFunctionSpec<'shape', Arguments, Return> {
+export function shape(): NullContextFunction<'shape', Arguments, Return> {
   return {
     name: 'shape',
     aliases: [],

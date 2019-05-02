@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { Datatable, ContextFunctionSpec } from '../types';
+import { Datatable, ContextFunction } from '../types';
 
 interface Arguments {
   fn: (datatable: Datatable) => Promise<boolean>;
 }
 
-export function filterrows(): ContextFunctionSpec<
+export function filterrows(): ContextFunction<
   'filterrows',
   Datatable,
   Arguments,

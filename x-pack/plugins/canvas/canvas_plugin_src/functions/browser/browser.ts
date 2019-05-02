@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
-export function browser(): FunctionSpec<'browser', {}, any> {
+export function browser(): Function<'browser', {}, any> {
   return {
     name: 'browser',
     help: 'Force the interpreter to return to the browser',

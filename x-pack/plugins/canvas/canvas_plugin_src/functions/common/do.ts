@@ -3,13 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
 interface Arguments {
   fn: any[];
 }
 
-export function doFn(): FunctionSpec<'do', Arguments, any> {
+export function doFn(): Function<'do', Arguments, any> {
   return {
     name: 'do',
     help:

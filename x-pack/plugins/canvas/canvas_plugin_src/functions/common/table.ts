@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ContextFunctionSpec, Datatable, Render, Style } from '../types';
+import { ContextFunction, Datatable, Render, Style } from '../types';
 
 interface Arguments {
   font: Style;
@@ -13,7 +13,7 @@ interface Arguments {
   showHeader: boolean;
 }
 
-export function table(): ContextFunctionSpec<'table', Datatable, Arguments, Render<Arguments>> {
+export function table(): ContextFunction<'table', Datatable, Arguments, Render<Arguments>> {
   return {
     name: 'table',
     aliases: [],

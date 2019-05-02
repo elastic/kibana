@@ -6,14 +6,14 @@
 
 // @ts-ignore untyped Elastic library
 import { getType } from '@kbn/interpreter/common';
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   name: string;
   expression: (datatable: Datatable) => Promise<boolean | number | string | null>;
 }
 
-export function mapColumn(): ContextFunctionSpec<
+export function mapColumn(): ContextFunction<
   'mapColumn',
   Datatable,
   Arguments,

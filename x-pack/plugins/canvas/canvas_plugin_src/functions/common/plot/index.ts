@@ -17,7 +17,7 @@ import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 import {
   AxisConfig,
-  ContextFunctionSpec,
+  ContextFunction,
   PointSeries,
   Render,
   SeriesStyle,
@@ -37,7 +37,7 @@ interface Arguments {
   yaxis: AxisConfig | boolean;
 }
 
-export function plot(): ContextFunctionSpec<'plot', PointSeries, Arguments, Render<any>> {
+export function plot(): ContextFunction<'plot', PointSeries, Arguments, Render<any>> {
   return {
     name: 'plot',
     aliases: [],

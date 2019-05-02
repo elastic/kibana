@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FunctionSpec, Case } from '../types';
+import { Function, Case } from '../types';
 
 interface Arguments {
   case: Array<() => Promise<Case>>;
   default: () => any;
 }
 
-export function switchFn(): FunctionSpec<'switch', Arguments, any> {
+export function switchFn(): Function<'switch', Arguments, any> {
   return {
     name: 'switch',
     help: 'Perform conditional logic with multiple conditions',

@@ -12,7 +12,7 @@ import { getColorsFromPalette } from '../../../common/lib/get_colors_from_palett
 // @ts-ignore untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import {
-  ContextFunctionSpec,
+  ContextFunction,
   Legend,
   Palette,
   PointSeries,
@@ -76,7 +76,7 @@ interface Arguments {
   tilt: number;
 }
 
-export function pie(): ContextFunctionSpec<'pie', PointSeries, Arguments, Render<Pie>> {
+export function pie(): ContextFunction<'pie', PointSeries, Arguments, Render<Pie>> {
   return {
     name: 'pie',
     aliases: [],

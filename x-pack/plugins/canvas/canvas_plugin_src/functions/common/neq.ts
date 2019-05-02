@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunctionSpec } from '../types';
+import { ContextFunction } from '../types';
 
 type Context = boolean | number | string | null;
 
@@ -11,7 +11,7 @@ interface Arguments {
   value: Context;
 }
 
-export function neq(): ContextFunctionSpec<'neq', Context, Arguments, boolean> {
+export function neq(): ContextFunction<'neq', Context, Arguments, boolean> {
   return {
     name: 'neq',
     type: 'boolean',

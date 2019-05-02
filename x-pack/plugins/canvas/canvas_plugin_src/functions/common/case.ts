@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FunctionSpec } from '../types';
+import { Function } from '../types';
 
 interface Arguments {
   when: () => any;
@@ -17,7 +17,7 @@ interface Case {
   result: any;
 }
 
-export function caseFn(): FunctionSpec<'case', Arguments, Promise<Case>> {
+export function caseFn(): Function<'case', Arguments, Promise<Case>> {
   return {
     name: 'case',
     type: 'case',

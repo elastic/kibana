@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { NullContextFunctionSpec, ContainerStyle } from '../types';
+import { NullContextFunction, ContainerStyle } from '../types';
 // @ts-ignore untyped local
 import { isValidUrl } from '../../../common/lib/url';
 
@@ -12,11 +12,7 @@ interface Return extends ContainerStyle {
   type: 'containerStyle';
 }
 
-export function containerStyle(): NullContextFunctionSpec<
-  'containerStyle',
-  ContainerStyle,
-  Return
-> {
+export function containerStyle(): NullContextFunction<'containerStyle', ContainerStyle, Return> {
   return {
     name: 'containerStyle',
     aliases: [],

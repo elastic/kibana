@@ -5,13 +5,13 @@
  */
 
 import numeral from '@elastic/numeral';
-import { ContextFunctionSpec } from '../types';
+import { ContextFunction } from '../types';
 
 interface Arguments {
   format: string;
 }
 
-export function formatnumber(): ContextFunctionSpec<'formatnumber', number, Arguments, string> {
+export function formatnumber(): ContextFunction<'formatnumber', number, Arguments, string> {
   return {
     name: 'formatnumber',
     type: 'string',

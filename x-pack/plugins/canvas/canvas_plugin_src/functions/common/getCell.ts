@@ -3,14 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ContextFunctionSpec, Datatable } from '../types';
+import { ContextFunction, Datatable } from '../types';
 
 interface Arguments {
   column: string;
   row: number;
 }
 
-export function getCell(): ContextFunctionSpec<'getCell', Datatable, Arguments, any> {
+export function getCell(): ContextFunction<'getCell', Datatable, Arguments, any> {
   return {
     name: 'getCell',
     help: 'Fetch a single cell in a table',
