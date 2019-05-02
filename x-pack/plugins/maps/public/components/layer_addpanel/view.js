@@ -17,7 +17,6 @@ import {
   EuiCard,
   EuiIcon,
   EuiFlyoutHeader,
-  EuiFlyoutBody,
   EuiFlyoutFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -221,16 +220,15 @@ export class AddLayerPanel extends Component {
           </EuiTitle>
         </EuiFlyoutHeader>
 
-        <EuiFlyoutBody
-          className="mapLayerPanel__body"
-          data-test-subj="layerAddForm"
-        >
-          {
-            importView
-              ? this._renderFileImportEditor()
-              : this._renderAddLayerForm()
-          }
-        </EuiFlyoutBody>
+        <div className="mapLayerPanel__body" data-test-subj="layerAddForm">
+          <div className="mapLayerPanel__bodyOverflow">
+            {
+              importView
+                ? this._renderFileImportEditor()
+                : this._renderAddLayerForm()
+            }
+          </div>
+        </div>
 
         <EuiFlyoutFooter className="mapLayerPanel__footer">
           <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
