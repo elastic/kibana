@@ -342,7 +342,7 @@ export class FieldEditorComponent extends PureComponent {
   renderTypeConflict() {
     const { intl } = this.props;
     const { field = {} } = this.state;
-    if (!field.conflictDescriptions || !typeof field.conflictDescriptions === 'object') {
+    if (!field.conflictDescriptions || typeof field.conflictDescriptions !== 'object') {
       return null;
     }
 
@@ -359,7 +359,7 @@ export class FieldEditorComponent extends PureComponent {
       .entries(field.conflictDescriptions)
       .map(([type, indices]) => ({
         type,
-        indices: Array.isArray(indices) ? indices.join(', ') : ''
+        indices: Array.isArray(indices) ? indices.join(', ') : 'Index names unavailable'
       }));
 
     return (
