@@ -613,3 +613,67 @@ test('throws an error if starts without set up', async () => {
     `"Http server is not setup up yet"`
   );
 });
+
+test('#getBasePathFor() returns base path associated with an incoming request', async () => {
+  const {
+    getBasePathFor,
+    setBasePathFor,
+    registerRouter,
+    server: innerServer,
+    registerOnRequest,
+  } = await server.setup(config);
+
+  const path = '/base-path';
+  registerOnRequest((req, t) => {
+    setBasePathFor(req, path);
+    return t.next();
+  });
+
+  const router = new Router('/');
+  router.get({ path: '/', validate: false }, async (req, res) =>
+    res.ok({ key: getBasePathFor(req) })
+  );
+  registerRouter(router);
+
+  await server.start(config);
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: path });
+    });
+});
+
+test('#getBasePathFor() is based on server base path', async () => {
+  const configWithBasePath = {
+    ...config,
+    basePath: '/bar',
+  };
+  const {
+    getBasePathFor,
+    setBasePathFor,
+    registerRouter,
+    server: innerServer,
+    registerOnRequest,
+  } = await server.setup(configWithBasePath);
+
+  const path = '/base-path';
+  registerOnRequest((req, t) => {
+    setBasePathFor(req, path);
+    return t.next();
+  });
+
+  const router = new Router('/');
+  router.get({ path: '/', validate: false }, async (req, res) =>
+    res.ok({ key: getBasePathFor(req) })
+  );
+  registerRouter(router);
+
+  await server.start(configWithBasePath);
+  await supertest(innerServer.listener)
+    .get('/')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: `${configWithBasePath.basePath}${path}` });
+    });
+});
