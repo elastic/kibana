@@ -138,6 +138,7 @@ export const buildTlsHandshakeQuery = ({
         },
       },
       size: 0,
+      track_total_hits: true,
     },
   ];
 

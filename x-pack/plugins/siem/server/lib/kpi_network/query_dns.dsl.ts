@@ -102,6 +102,7 @@ export const buildDnsQuery = ({
         },
       },
       size: 0,
+      track_total_hits: true,
     },
   ];
 
