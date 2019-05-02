@@ -4538,10 +4538,15 @@ angular-ui-ace@0.2.3:
   resolved "https://registry.yarnpkg.com/angular-ui-ace/-/angular-ui-ace-0.2.3.tgz#3cb903428100621a367fc7f641440e97a42a26d0"
   integrity sha1-PLkDQoEAYho2f8f2QUQOl6QqJtA=
 
-angular@1.6.9, angular@>=1.0.6:
+angular@>=1.0.6:
   version "1.6.9"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.9.tgz#bc812932e18909038412d594a5990f4bb66c0619"
   integrity sha512-6igWH2GIsxV+J38wNWCh8oyjaZsrIPIDO35twloIUyjlF2Yit6UyLAWujHP05ma/LFxTsx4NtYibRoMNBXPR1A==
+
+"angular@npm:@elastic/angular@1.6.9-kibana.2":
+  version "1.6.9-kibana.2"
+  resolved "https://registry.yarnpkg.com/@elastic/angular/-/angular-1.6.9-kibana.2.tgz#ed27c3a26dc66b21d3454965a21e2265ab947fc7"
+  integrity sha512-wXWLOP+89ZzJNmRyo+H4Je0XG5VrRhDejfuxRKT8RLj4Xrfw9CvrgBGyW74kdFrsVU+99DKtZX+HuVFUkwf9TA==
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -27449,8 +27454,6 @@ wbuf@^1.1.0, wbuf@^1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/wbuf/-/wbuf-1.7.2.tgz#d697b99f1f59512df2751be42769c1580b5801fe"
   integrity sha1-1pe5nx9ZUS3ydRvkJ2nBWAtYAf4=
-  dependencies:
-    minimalistic-assert "^1.0.0"
 
 wcwidth@^1.0.1:
   version "1.0.1"
