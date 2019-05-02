@@ -48,7 +48,7 @@ class Series extends Component {
       visible: true,
       selectedTab: 'metrics',
       uiRestrictions: undefined,
-      indexPatternForQuery: '',
+      indexPatternForQuery: {},
     };
 
     this.visDataSubscription = null;
