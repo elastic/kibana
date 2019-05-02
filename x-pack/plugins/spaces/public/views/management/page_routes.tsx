@@ -34,15 +34,9 @@ routes.when('/management/spaces/list', {
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
-
       render(
         <I18nContext>
-          <SpacesGridPage
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
-            features={features}
-          />
+          <SpacesGridPage spacesManager={spacesManager} spacesNavState={spacesNavState} />
         </I18nContext>,
         domNode
       );
@@ -72,15 +66,9 @@ routes.when('/management/spaces/create', {
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
-
       render(
         <I18nContext>
-          <ManageSpacePage
-            spacesManager={spacesManager}
-            spacesNavState={spacesNavState}
-            features={features}
-          />
+          <ManageSpacePage spacesManager={spacesManager} spacesNavState={spacesNavState} />
         </I18nContext>,
         domNode
       );
@@ -117,15 +105,12 @@ routes.when('/management/spaces/edit/:spaceId', {
 
       const spacesManager = new SpacesManager($http, chrome, spaceSelectorURL);
 
-      const features = await kfetch({ method: 'get', pathname: '/api/features/v1' });
-
       render(
         <I18nContext>
           <ManageSpacePage
             spaceId={spaceId}
             spacesManager={spacesManager}
             spacesNavState={spacesNavState}
-            features={features}
             setBreadcrumbs={breadcrumbs => {
               chrome.breadcrumbs.set(breadcrumbs);
             }}
