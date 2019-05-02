@@ -36,6 +36,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../../../common/es_types';
+
+const RESTRICT_FIELDS = [ES_TYPES.NUMBER];
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -89,7 +92,7 @@ export const PercentileRankAgg = props => {
             <FieldSelect
               fields={fields}
               type={model.type}
-              restrict="numeric"
+              restrict={RESTRICT_FIELDS}
               indexPattern={indexPattern}
               value={model.field}
               onChange={handleSelectChange('field')}
