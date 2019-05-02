@@ -74,8 +74,9 @@ class Split extends Component {
 
   fetchIndexPatterns = async () => {
     const searchIndexPattern = this.state.indexPatternAsString;
+    let indexPatternForQuery = this.state.indexPatternForQuery;
     const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-      type: 'indexpattern',
+      type: 'index-pattern',
       fields: ['title', 'fields'],
       search: `"${searchIndexPattern}"`,
       search_fields: ['title'],
@@ -84,8 +85,10 @@ class Split extends Component {
       indexPattern => indexPattern.attributes.title === searchIndexPattern
     );
     if (exactMatch) {
+      indexPatternForQuery = getFromSavedObject(exactMatch);
       this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
     }
+    return indexPatternForQuery;
   }
 
   getComponent(splitMode, uiRestrictions) {
@@ -132,6 +135,7 @@ class Split extends Component {
         fields={this.props.fields}
         onChange={this.props.onChange}
         uiRestrictions={uiRestrictions}
+        indexPatterns={[this.state.indexPatternForQuery]}
       />
     );
   }
