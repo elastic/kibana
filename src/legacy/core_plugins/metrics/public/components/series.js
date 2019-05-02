@@ -99,7 +99,6 @@ class Series extends Component {
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
-
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
