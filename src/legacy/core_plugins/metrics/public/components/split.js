@@ -83,6 +83,24 @@ class Split extends Component {
     }
     return searchIndexPattern;
   }
+  // fetchIndexPatterns = async () => {
+  //   const searchIndexPattern = this.state.indexPatternAsString;
+  //   let indexPatternForQuery = this.state.indexPatternForQuery;
+  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+  //     type: 'index-pattern',
+  //     fields: ['title', 'fields'],
+  //     search: `"${searchIndexPattern}"`,
+  //     search_fields: ['title'],
+  //   });
+  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
+  //   );
+  //   if (exactMatch) {
+  //     indexPatternForQuery = getFromSavedObject(exactMatch);
+  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
+  //   }
+  //   return indexPatternForQuery;
+  // }
 
   getComponent(splitMode, uiRestrictions) {
     if (!isGroupByFieldsEnabled(splitMode, uiRestrictions)) {
