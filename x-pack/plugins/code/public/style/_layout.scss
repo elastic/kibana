@@ -53,7 +53,8 @@
   flex-grow: 1;
 }
 
-.codeContainer__directoryView, .codeContainer__history {
+.codeContainer__directoryView,
+.codeContainer__history {
   flex-grow: 1;
   overflow: auto;
 }
@@ -83,12 +84,18 @@
   width: 100%;
 }
 
+.codeContainer__search--main {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .codeContainer__symbolTree {
-  padding: $euiSizeL $euiSizeM;
   position: relative;
   display: inline-block;
   min-width: 100%;
-  height: 100%;
 }
 
 .codeContainer__search--results {
@@ -101,6 +108,8 @@
   flex-grow: 1;
   flex-shrink: 1;
   overflow: auto;
+  max-width: 256px;
+  min-width: 256px;
 }
 
 .codeSearchbar__container {
@@ -123,7 +132,7 @@
 }
 
 .codePanel__project--error {
-  border: 2px solid $euiColorDanger;;
+  border: 2px solid $euiColorDanger;
 }
 
 .codeSettingsPanel__icon {
@@ -160,7 +169,7 @@
 
 .codeContainer__directoryList {
   padding: $euiSizeL;
-  &:first-child{
+  &:first-child {
     padding-bottom: 0;
   }
   &:not(:first-child) {
@@ -176,4 +185,8 @@
 .codeLoader {
   padding: 1.5rem;
   text-align: center;
+}
+
+.code-symbol-container {
+  white-space: nowrap;
 }
