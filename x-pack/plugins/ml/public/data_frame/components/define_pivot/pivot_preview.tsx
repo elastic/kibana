@@ -125,12 +125,9 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
       <EuiPanel grow={false}>
         <PreviewTitle />
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewError',
-            {
-              defaultMessage: 'An error occurred loading the pivot preview.',
-            }
-          )}
+          title={i18n.translate('xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewError', {
+            defaultMessage: 'An error occurred loading the pivot preview.',
+          })}
           color="danger"
           iconType="cross"
         >
@@ -146,7 +143,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
         <PreviewTitle />
         <EuiCallOut
           title={i18n.translate(
-            'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutTitle',
+            'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutTitle',
             {
               defaultMessage: 'Pivot preview not available',
             }
@@ -155,7 +152,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
         >
           <p>
             {i18n.translate(
-              'xpack.ml.dataframe.sourceIndexPreview.dataFramePivotPreviewNoDataCalloutBody',
+              'xpack.ml.dataframe.pivotPreview.dataFramePivotPreviewNoDataCalloutBody',
               {
                 defaultMessage: 'Please choose at least one group-by field and aggregation.',
               }
@@ -196,13 +193,10 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
             <EuiCopy textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}>
               {(copy: () => void) => (
                 <EuiToolTip
-                  content={i18n.translate(
-                    'xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip',
-                    {
-                      defaultMessage:
-                        'Copy a Dev Console statement of the pivot preview to the clipboard.',
-                    }
-                  )}
+                  content={i18n.translate('xpack.ml.dataframe.pivotPreview.copyClipboardTooltip', {
+                    defaultMessage:
+                      'Copy a Dev Console statement of the pivot preview to the clipboard.',
+                  })}
                 >
                   <EuiButtonIcon onClick={copy} iconType="copyClipboard" />
                 </EuiToolTip>
