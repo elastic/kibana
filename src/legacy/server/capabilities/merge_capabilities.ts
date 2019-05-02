@@ -17,4 +17,23 @@
  * under the License.
  */
 
-export { CapabilitiesModifier, capabilitiesMixin } from './capabilities_mixin';
+import { Capabilities } from '../../../core/public';
+
+export const mergeCapabilities = (...sources: Capabilities[]): Capabilities =>
+  sources.reduce(
+    (capabilities, source) => {
+      Object.entries(source).forEach(([key, value]) => {
+        capabilities[key] = {
+          ...value,
+          ...capabilities[key],
+        };
+      });
+
+      return capabilities;
+    },
+    {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+    } as Capabilities
+  );

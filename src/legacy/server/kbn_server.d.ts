@@ -30,7 +30,7 @@ import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/ela
 
 import { IndexPatternsServiceFactory } from './index_patterns';
 import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
-import { CapabilitiesProvider } from './capabilities';
+import { CapabilitiesModifier } from './capabilities';
 
 export interface KibanaConfig {
   get<T>(key: string): T;
@@ -56,10 +56,9 @@ declare module 'hapi' {
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
     usage: { collectorSet: any };
-    getDefaultInjectedVars: () => any;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
     getHiddenUiAppById(appId: string): UiApp;
-    registerCapabilitiesProvider: (provider: CapabilitiesProvider) => void;
+    registerCapabilitiesModifier: (provider: CapabilitiesModifier) => void;
     addScopedTutorialContextFactory: (
       scopedTutorialContextFactory: (...args: any[]) => any
     ) => void;
@@ -96,6 +95,7 @@ export default class KbnServer {
   };
   public server: Server;
   public inject: Server['inject'];
+  public pluginSpecs: any[];
 
   constructor(settings: any, core: any);
 
@@ -103,6 +103,7 @@ export default class KbnServer {
   public mixin(...fns: KbnMixinFunc[]): Promise<void>;
   public listen(): Promise<Server>;
   public close(): Promise<void>;
+  public afterPluginsInit(callback: () => void): void;
   public applyLoggingConfiguration(settings: any): void;
 }
 

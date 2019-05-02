@@ -62,6 +62,10 @@ export const xpackMain = (kibana) => {
       }).default();
     },
 
+    uiCapabilities(server) {
+      return uiCapabilitiesForFeatures(server.plugins.xpack_main);
+    },
+
     uiExports: {
       managementSections: ['plugins/xpack_main/views/management'],
       uiSettingDefaults: {
@@ -100,9 +104,6 @@ export const xpackMain = (kibana) => {
           telemetryOptedIn: null,
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
-          uiCapabilities: {
-            ...uiCapabilitiesForFeatures(server.plugins.xpack_main),
-          }
         };
       },
       hacks: [

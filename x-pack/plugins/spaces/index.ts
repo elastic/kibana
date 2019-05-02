@@ -44,6 +44,14 @@ export const spaces = (kibana: Record<string, any>) =>
       }).default();
     },
 
+    uiCapabilities() {
+      return {
+        spaces: {
+          manage: true,
+        },
+      };
+    },
+
     uiExports: {
       chromeNavControls: ['plugins/spaces/views/nav_control'],
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
@@ -75,11 +83,6 @@ export const spaces = (kibana: Record<string, any>) =>
           spaces: [],
           activeSpace: null,
           spaceSelectorURL: getSpaceSelectorUrl(server.config()),
-          uiCapabilities: {
-            spaces: {
-              manage: true,
-            },
-          },
         };
       },
       async replaceInjectedVars(
@@ -173,7 +176,7 @@ export const spaces = (kibana: Record<string, any>) =>
       // Register a function with server to manage the collection of usage stats
       server.usage.collectorSet.register(getSpacesUsageCollector(server));
 
-      server.registerCapabilitiesProvider(async (request, uiCapabilities) => {
+      server.registerCapabilitiesModifier(async (request, uiCapabilities) => {
         const spacesClient = server.plugins.spaces.spacesClient.getScopedClient(request);
         try {
           const activeSpace = await getActiveSpace(

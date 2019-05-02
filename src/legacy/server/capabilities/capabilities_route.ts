@@ -20,10 +20,15 @@
 import Joi from 'joi';
 import { Server } from 'hapi';
 
-import { CapabilitiesProvider } from '.';
+import { CapabilitiesModifier } from '.';
 import { Capabilities } from '../../../core/public';
+import { mergeCapabilities } from './merge_capabilities';
 
-export const registerCapabilitiesRoute = (server: Server, providers: CapabilitiesProvider[]) => {
+export const registerCapabilitiesRoute = (
+  server: Server,
+  defaultCapabilities: Capabilities,
+  modifiers: CapabilitiesModifier[]
+) => {
   server.route({
     path: '/api/capabilities',
     method: 'POST',
@@ -35,11 +40,10 @@ export const registerCapabilitiesRoute = (server: Server, providers: Capabilitie
       },
     },
     async handler(request) {
-      const baseCapabilities = server.getDefaultInjectedVars().uiCapabilities as Capabilities;
       let { capabilities } = request.payload as { capabilities: Capabilities };
-      capabilities = mergeCapabilities(baseCapabilities, capabilities);
+      capabilities = mergeCapabilities({ ...defaultCapabilities }, capabilities);
 
-      for (const provider of providers) {
+      for (const provider of modifiers) {
         capabilities = await provider(request, capabilities);
       }
 
@@ -49,22 +53,3 @@ export const registerCapabilitiesRoute = (server: Server, providers: Capabilitie
     },
   });
 };
-
-const mergeCapabilities = (...sources: Capabilities[]): Capabilities =>
-  sources.reduce(
-    (capabilities, source) => {
-      Object.entries(source).forEach(([key, value]) => {
-        capabilities[key] = {
-          ...value,
-          ...capabilities[key],
-        };
-      });
-
-      return capabilities;
-    },
-    {
-      navLinks: {},
-      management: {},
-      catalogue: {},
-    } as Capabilities
-  );

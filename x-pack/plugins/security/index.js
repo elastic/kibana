@@ -221,7 +221,7 @@ export const security = (kibana) => new kibana.Plugin({
       };
     });
 
-    server.registerCapabilitiesProvider((request, uiCapabilities) => {
+    server.registerCapabilitiesModifier((request, uiCapabilities) => {
       // if we have a license which doesn't enable security, or we're a legacy user
       // we shouldn't disable any ui capabilities
       const { authorization } = server.plugins.security;

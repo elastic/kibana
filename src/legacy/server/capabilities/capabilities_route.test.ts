@@ -22,53 +22,50 @@ import { registerCapabilitiesRoute } from './capabilities_route';
 import { Capabilities } from '../../../core/public';
 
 describe('capabilities api', () => {
-  const mockDefaultInjectedVars = {
-    uiCapabilities: {
-      catalogue: {
-        feature1: true,
-        feature2: true,
-      },
-      management: {
-        section1: {
-          read: true,
-        },
-        section2: {
-          write: true,
-        },
-      },
-      navLinks: {
-        app1: true,
-        app2: true,
-      },
-      myApp: {
+  const defaultCapabilities = {
+    catalogue: {
+      feature1: true,
+      feature2: true,
+    },
+    management: {
+      section1: {
         read: true,
-        write: true,
-        kioskMode: true,
       },
-    } as Capabilities,
-  };
+      section2: {
+        write: true,
+      },
+    },
+    navLinks: {
+      app1: true,
+      app2: true,
+    },
+    myApp: {
+      read: true,
+      write: true,
+      kioskMode: true,
+    },
+  } as Capabilities;
 
   let server: Server;
 
   beforeEach(() => {
     server = new Server();
-    server.getDefaultInjectedVars = () => mockDefaultInjectedVars;
   });
 
-  it('returns unmodified uiCapabilities if no providers are available', async () => {
-    registerCapabilitiesRoute(server, []);
+  it('returns unmodified uiCapabilities if no modifiers are available', async () => {
+    registerCapabilitiesRoute(server, defaultCapabilities, []);
     const resp = await server.inject({
       method: 'POST',
       url: '/api/capabilities',
       payload: { capabilities: {} },
     });
     expect(JSON.parse(resp.payload)).toEqual({
-      capabilities: mockDefaultInjectedVars.uiCapabilities,
+      capabilities: defaultCapabilities,
     });
   });
 
-  it('merges payload capabilities with defaultInjectedVars', async () => {
-    registerCapabilitiesRoute(server, []);
+  it('merges payload capabilities with defaultCapabilities', async () => {
+    registerCapabilitiesRoute(server, defaultCapabilities, []);
     const resp = await server.inject({
       method: 'POST',
       url: '/api/capabilities',
@@ -76,9 +73,9 @@ describe('capabilities api', () => {
     });
     expect(JSON.parse(resp.payload)).toEqual({
       capabilities: {
-        ...mockDefaultInjectedVars.uiCapabilities,
+        ...defaultCapabilities,
         navLinks: {
-          ...mockDefaultInjectedVars.uiCapabilities.navLinks,
+          ...defaultCapabilities.navLinks,
           app3: true,
         },
       },
@@ -86,7 +83,7 @@ describe('capabilities api', () => {
   });
 
   it('allows a single provider to modify uiCapabilities', async () => {
-    registerCapabilitiesRoute(server, [
+    registerCapabilitiesRoute(server, defaultCapabilities, [
       (req, caps) => {
         caps.management.section2.write = false;
         caps.myApp.write = false;
@@ -104,7 +101,7 @@ describe('capabilities api', () => {
   });
 
   it('allows multiple providers to modify uiCapabilities', async () => {
-    registerCapabilitiesRoute(server, [
+    registerCapabilitiesRoute(server, defaultCapabilities, [
       (req, caps) => {
         caps.management.section2.write = false;
         return caps;
@@ -125,7 +122,7 @@ describe('capabilities api', () => {
   });
 
   it('returns an error if any providers fail', async () => {
-    registerCapabilitiesRoute(server, [
+    registerCapabilitiesRoute(server, defaultCapabilities, [
       (req, caps) => {
         throw new Error(`Couldn't fetch license`);
       },
