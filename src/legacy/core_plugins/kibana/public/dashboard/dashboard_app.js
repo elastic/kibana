@@ -26,7 +26,6 @@ import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
 import 'ui/listen';
-import 'ui/search_bar';
 import 'ui/apply_filters';
 
 import { panelActionsStore } from './store/panel_actions_store';
@@ -58,6 +57,9 @@ import { timefilter } from 'ui/timefilter';
 import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
+
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',

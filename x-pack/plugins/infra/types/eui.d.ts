@@ -118,20 +118,4 @@ declare module '@elastic/eui' {
     message?: any;
   };
   export const EuiInMemoryTable: React.SFC<EuiInMemoryTableProps>;
-
-  type EuiSuperSelectProps = CommonProps & {
-    style?: any;
-    options?: any;
-    valueOfSelected?: any;
-    onChange?: (value: any) => void;
-    disabled?: boolean;
-    isLoading?: boolean;
-    itemClassName?: any;
-    hasDividers?: boolean;
-    itemLayoutAlign?: any;
-    compressed?: boolean;
-    fullWidth?: any;
-  };
-
-  export const EuiSuperSelect: React.SFC<EuiSuperSelectProps>;
 }

@@ -10,12 +10,23 @@ import 'react-testing-library/cleanup-after-each';
 import { toastNotifications } from 'ui/notify';
 import * as apmRestServices from '../../../../services/rest/apm/services';
 import { ServiceOverview } from '..';
+import * as hooks from '../../../../hooks/useUrlParams';
 
 function renderServiceOverview() {
   return render(<ServiceOverview />);
 }
 
 describe('Service Overview -> View', () => {
+  beforeEach(() => {
+    // mock urlParams
+    spyOn(hooks, 'useUrlParams').and.returnValue({
+      urlParams: {
+        start: 'myStart',
+        end: 'myEnd'
+      }
+    });
+  });
+
   afterEach(() => {
     jest.resetAllMocks();
   });

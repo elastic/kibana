@@ -533,7 +533,6 @@ class FlyoutUI extends Component {
             <FormattedMessage id="kbn.management.objects.objectsTable.flyout.errorCalloutTitle" defaultMessage="Sorry, there was an error"/>
           )}
           color="danger"
-          iconType="cross"
         >
           <p>{error}</p>
         </EuiCallOut>
@@ -879,6 +878,7 @@ class FlyoutUI extends Component {
                 defaultMessage: 'Overwrite',
               },
             )}
+            buttonColor="danger"
             onCancel={this.overwriteSkipped.bind(this)}
             onConfirm={this.overwriteConfirmed.bind(this)}
             defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
@@ -896,8 +896,8 @@ class FlyoutUI extends Component {
 
     return (
       <EuiFlyout onClose={close} size="s">
-        <EuiFlyoutHeader>
-          <EuiTitle>
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
             <h2>
               <FormattedMessage
                 id="kbn.management.objects.objectsTable.flyout.importSavedObjectTitle"
@@ -905,10 +905,10 @@ class FlyoutUI extends Component {
               />
             </h2>
           </EuiTitle>
-          {this.renderSubheader()}
         </EuiFlyoutHeader>
 
         <EuiFlyoutBody>
+          {this.renderSubheader()}
           {this.renderError()}
           {this.renderBody()}
         </EuiFlyoutBody>
