@@ -29,7 +29,8 @@
         "build",
         "optimize",
         "built_assets",
-        ".eslintcache"
+        ".eslintcache",
+        ".node_binaries"
       ]
     }
   },
@@ -147,8 +148,8 @@
     "d3-cloud": "1.2.1",
     "del": "^3.0.0",
     "dragula": "3.7.0",
-    "elasticsearch": "^15.4.1",
-    "elasticsearch-browser": "^15.4.1",
+    "elasticsearch": "^15.5.0",
+    "elasticsearch-browser": "^15.5.0",
     "encode-uri-query": "1.0.0",
     "execa": "^1.0.0",
     "expiry-js": "0.1.7",
@@ -169,7 +170,7 @@
     "https-proxy-agent": "^2.2.1",
     "inert": "^5.1.0",
     "joi": "^13.5.2",
-    "jquery": "^3.4.0",
+    "jquery": "^3.4.1",
     "js-yaml": "3.4.1",
     "json-stable-stringify": "^1.0.1",
     "json-stringify-pretty-compact": "1.0.4",
@@ -205,7 +206,6 @@
     "raw-loader": "0.5.1",
     "react": "^16.8.0",
     "react-addons-shallow-compare": "15.6.2",
-    "react-anything-sortable": "^1.7.4",
     "react-color": "^2.13.8",
     "react-dom": "^16.8.0",
     "react-grid-layout": "^0.16.2",
@@ -260,6 +260,7 @@
     "@babel/parser": "^7.3.4",
     "@babel/types": "^7.3.4",
     "@elastic/eslint-config-kibana": "0.15.0",
+    "@elastic/github-checks-reporter": "0.0.11",
     "@elastic/makelogs": "^4.4.0",
     "@kbn/es": "1.0.0",
     "@kbn/eslint-import-resolver-kibana": "2.0.0",
