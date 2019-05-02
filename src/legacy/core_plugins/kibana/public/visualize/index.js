@@ -33,6 +33,21 @@ uiRoutes
   .defaults(/visualize/, {
     requireDefaultIndex: true,
     requireUICapability: 'visualize.show',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.visualize.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.visualize.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.visualize.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save visualizations',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when(VisualizeConstants.LANDING_PAGE_PATH, {
     template: visualizeListingTemplate,

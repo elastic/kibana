@@ -15,7 +15,7 @@ import { memoize } from 'lodash';
 import React, { Fragment } from 'react';
 import chrome from 'ui/chrome';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
-import { LicenseContext } from '../../Main/LicenseCheck';
+import { LicenseContext } from '../../../../context/LicenseContext';
 import { MachineLearningFlyout } from './MachineLearningFlyout';
 import { WatcherFlyout } from './WatcherFlyout';
 
