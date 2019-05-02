@@ -229,6 +229,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
         onAdd={this.props.onAdd}
         onDelete={this.props.onDelete}
         siblings={this.props.siblings}
+        dragHandleProps={this.props.dragHandleProps}
       >
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem>

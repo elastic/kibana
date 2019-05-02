@@ -20726,14 +20726,6 @@ react-addons-shallow-compare@15.6.2:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
 
-react-anything-sortable@^1.7.4:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/react-anything-sortable/-/react-anything-sortable-1.7.4.tgz#c760cf67d7db226bb3943a7bda21c13614dce0cb"
-  integrity sha512-xeUrzvgAc5JoSk27Ic0zf86pMeT6z2WpT4tIWpSLLMqwCJOlGwaTRO3Y+eNpK+kRjzE1F0JURcaoxks6lcduqA==
-  dependencies:
-    create-react-class "^15.5.2"
-    prop-types "^15.5.8"
-
 react-apollo@^2.1.4:
   version "2.1.8"
   resolved "https://registry.yarnpkg.com/react-apollo/-/react-apollo-2.1.8.tgz#ebac0d9bee0f0906df3ce29207f94df337009887"
