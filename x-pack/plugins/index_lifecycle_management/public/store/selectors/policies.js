@@ -198,6 +198,7 @@ const phaseFromES = (phase, phaseName, defaultEmptyPolicy) => {
     }
 
     if (actions.shrink) {
+      policy[PHASE_SHRINK_ENABLED] = true;
       policy[PHASE_PRIMARY_SHARD_COUNT] = actions.shrink.number_of_shards;
     }
 
