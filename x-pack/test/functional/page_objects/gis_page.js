@@ -285,7 +285,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
-      return await testSubjects.exists(`mapLayerTOCDisplayName${this.escapeLayerName(layerName)}`);
+      return await testSubjects.exists(`layerTocActionsPanelToggleButton${this.escapeLayerName(layerName)}`);
     }
 
     /*
