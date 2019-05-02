@@ -42,9 +42,9 @@ const TimeseriesSeries = injectI18n(function (props) {
     visible,
     intl,
     name,
-    uiRestrictions
+    uiRestrictions,
+    indexPatternForQuery,
   } = props;
-
   const defaults = { label: '' };
   const model = { ...defaults, ...props.model };
 
@@ -56,7 +56,6 @@ const TimeseriesSeries = injectI18n(function (props) {
   let body = null;
   if (visible) {
     let seriesBody;
-
     if (selectedTab === 'metrics') {
       seriesBody = (
         <div>
@@ -76,16 +75,19 @@ const TimeseriesSeries = injectI18n(function (props) {
               panel={panel}
               model={model}
               uiRestrictions={uiRestrictions}
+              indexPatternForQuery={indexPatternForQuery}
             />
           </div>
         </div>
       );
     } else {
+      // pass the hydrated indexPatterns down into SeriesConfig
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
@@ -203,6 +205,7 @@ TimeseriesSeries.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.object,
 };
 
 export default injectI18n(TimeseriesSeries);
