@@ -7,22 +7,17 @@
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiHorizontalRule,
   // @ts-ignore
   EuiStat,
   EuiIcon,
+  EuiTitle,
 } from '@elastic/eui';
-
-const iconType = 'stopFilled';
-import numeral from '@elastic/numeral';
 import React from 'react';
 import { pure } from 'recompose';
-
-import { EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
-import { getEmptyTagValue } from '../empty_value';
+
 import { LoadingPanel } from '../loading';
 import { BarChart } from './barchart';
 import { AreaChart } from './areachart';
@@ -30,14 +25,10 @@ import { AreaChart } from './areachart';
 export const WrappedByAutoSizer = styled.div`
   height: 100px;
   position: relative;
-`;
 
-export const ChartOverlay = styled.div`
-  height: 100%;
-  width: 100%;
-  top: 0;
-  left: 0;
-  position: absolute;
+  &:hover {
+    z-index: 100;
+  }
 `;
 
 export interface StatItem {
@@ -45,6 +36,7 @@ export interface StatItem {
   description?: string;
   value: number | undefined | null;
   color?: string;
+  icon: string;
 }
 
 export interface AreaChartData {
@@ -78,71 +70,36 @@ export interface StatItemsProps extends StatItems {
   key: string;
 }
 
-const StatTitle = pure<{ isLoading: boolean; value: number | null | undefined }>(
-  ({ isLoading, value }) => (
-    <span>
-      {isLoading ? (
-        <EuiLoadingSpinner size="m" />
-      ) : value != null ? (
-        numeral(value).format('0,0')
-      ) : (
-        getEmptyTagValue()
-      )}
-    </span>
-  )
-);
-
-const getChartSpan = (
-  barChart: BarChartData[] | undefined | null,
-  areaChart: AreaChartData[] | undefined | null
-) => {
-  return barChart && barChart.length && areaChart && areaChart.length ? 5 : 10;
-};
-
 export const StatItemsComponent = pure<StatItemsProps>(
   ({ fields, description, isLoading, key, grow, barChart, areaChart }) => (
-    <EuiFlexItem key={`stat-items-${key}`} grow={grow}>
+    <FlexItem key={`stat-items-${key}`} grow={grow}>
       <EuiPanel>
-        <EuiStat
-          description={
-            <EuiTitle size="xxs">
-              <span>{description}</span>
-            </EuiTitle>
-          }
-          titleSize="m"
-          title={
-            <EuiFlexGroup justifyContent="spaceBetween" component="span">
-              {fields.map(field => (
-                <EuiFlexItem component="span" key={`stat-items-field-${field.key}`}>
-                  <EuiFlexGroup
-                    justifyContent="spaceBetween"
-                    component="span"
-                    gutterSize="m"
-                    alignItems="center"
-                    data-test-subj="stat-title"
-                  >
-                    <EuiFlexItem component="span" grow={2}>
-                      <EuiFlexGroup component="span" gutterSize="m" alignItems="center">
-                        {field.color ? (
-                          <EuiFlexItem component="span">
-                            <EuiIcon type={iconType} color={field.color} size="xl" />
-                          </EuiFlexItem>
-                        ) : null}
-                        <EuiFlexItem component="span">
-                          <StatTitle isLoading={isLoading} value={field.value} />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem component="span" grow={4}>
-                      {field.description}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          }
-        />
-        {areaChart || barChart ? <EuiHorizontalRule /> : null}
+        <EuiTitle size="xxxs">
+          <h6>{description}</h6>
+        </EuiTitle>
+
+        <EuiFlexGroup>
+          {fields.map(field => (
+            <FlexItem key={`stat-items-field-${field.key}`}>
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+                <FlexItem grow={false}>
+                  <EuiIcon type={field.icon} color={field.color} size="l" />
+                </FlexItem>
+
+                <FlexItem>
+                  <StatValue>
+                    <p>
+                      {field.value && field.value.toLocaleString()} {field.description}
+                    </p>
+                  </StatValue>
+                </FlexItem>
+              </EuiFlexGroup>
+            </FlexItem>
+          ))}
+        </EuiFlexGroup>
+
+        {areaChart || barChart ? <EuiHorizontalRule margin="s" /> : null}
+
         {isLoading && (areaChart || barChart) ? (
           <LoadingPanel
             height="auto"
@@ -151,20 +108,31 @@ export const StatItemsComponent = pure<StatItemsProps>(
             data-test-subj="InitialLoadingKpisHostsChart"
           />
         ) : (
-          <EuiFlexGroup gutterSize="none">
+          <EuiFlexGroup>
             {barChart ? (
-              <EuiFlexItem grow={getChartSpan(barChart, areaChart)}>
+              <FlexItem>
                 <BarChart barChart={barChart} />
-              </EuiFlexItem>
+              </FlexItem>
             ) : null}
+
             {areaChart ? (
-              <EuiFlexItem grow={getChartSpan(barChart, areaChart)}>
+              <FlexItem>
                 <AreaChart areaChart={areaChart} />
-              </EuiFlexItem>
+              </FlexItem>
             ) : null}
           </EuiFlexGroup>
         )}
       </EuiPanel>
-    </EuiFlexItem>
+    </FlexItem>
   )
 );
+
+const FlexItem = styled(EuiFlexItem)`
+  min-width: 0;
+`;
+
+const StatValue = styled(EuiTitle)`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
