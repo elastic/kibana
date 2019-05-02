@@ -21,8 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
@@ -69,21 +67,6 @@ class Split extends Component {
       });
     }
   }
-  fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.state.indexPatternAsString;
-    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-      type: 'index-pattern',
-      fields: ['title', 'fields'],
-      search: `"${searchIndexPattern}"`,
-      search_fields: ['title'],
-    });
-    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-      indexPattern => indexPattern.attributes.title === searchIndexPattern
-    );
-    if (exactMatch) {
-      this.setState({ indexPatterns: getFromSavedObject(exactMatch) });
-    }
-  };
 
   fetchIndexPatternsForQuery = async () => {
     const searchIndexPattern = this.indexPatternFromProps();
@@ -156,6 +139,7 @@ Split.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   panel: PropTypes.object,
+  indexPatternsForQuery: PropTypes.object
 };
 
 export default Split;
