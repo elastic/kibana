@@ -15,8 +15,8 @@ export function TimeRangeBar({
   timerange
 }) {
   const style = {
-    width: (isRunning ? '299px' : timerange.widthPx),
-    marginLeft: (isRunning ? '1px' : timerange.fromPx)
+    width: timerange.widthPx,
+    marginLeft: timerange.fromPx
   };
 
   const className =

@@ -17,8 +17,6 @@ import moment from 'moment-timezone';
 import '../components/annotations/annotations_table';
 import '../components/anomalies_table';
 import '../components/controls';
-import '../components/job_select_list';
-import '../components/job_selector'; // TODO: Do we need this?
 
 import template from './explorer.html';
 
@@ -47,17 +45,7 @@ uiRoutes
       CheckLicense: checkFullLicense,
       privileges: checkGetJobsPrivilege,
       indexPatterns: loadIndexPatterns,
-      jobs: function () {
-        return mlJobService.loadJobs()
-          .then(function (resp) {
-            return resp;
-          })
-          .catch(function (error) {
-            console.log('Error loading jobs in route resolve.', error);
-            // Always resolve to ensure tab still works.
-            Promise.resolve([]);
-          });
-      }
+      jobs: mlJobService.loadJobsWrapper
     },
   });
 
@@ -94,7 +82,6 @@ module.controller('MlExplorerController', function (
   const tzConfig = config.get('dateFormat:tz');
   $scope.dateFormatTz = (tzConfig !== 'Browser') ? tzConfig : moment.tz.guess();
 
-  // $scope.mlJobSelectService = Private(JobSelectServiceProvider);
   $scope.MlTimeBuckets = Private(IntervalHelperProvider);
 
   let resizeTimeout = null;

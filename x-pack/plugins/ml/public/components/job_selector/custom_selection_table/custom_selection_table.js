@@ -142,18 +142,19 @@ export function CustomSelectionTable({
     });
   }
 
-  function handleQueryChange({ query, error }) { // eslint-disable-line
-    if (error) {
-      setError(error);
+  function handleQueryChange({ query: incomingQuery, error: newError }) {
+    if (newError) {
+      setError(newError);
     } else {
+      const queriedItems = EuiSearchBar.Query.execute(incomingQuery, items, { defaultFields: filterDefaultFields });
       setError(null);
-      setCurrentItems(EuiSearchBar.Query.execute(query, items, { defaultFields: filterDefaultFields }));
-      setQuery(query);
+      setCurrentItems(queriedItems);
+      setQuery(incomingQuery);
     }
   }
 
   function isItemSelected(itemId) {
-    return itemIdToSelectedMap[itemId];
+    return itemIdToSelectedMap[itemId] === true;
   }
 
   function areAllItemsSelected() {
@@ -186,7 +187,7 @@ export function CustomSelectionTable({
       handleSingleSelectionTableChange(itemId);
       setLastSelected([itemId]);
     } else {
-      const isSelected = !itemIdToSelectedMap[itemId];
+      const isSelected = !isItemSelected(itemId);
       setItemIdToSelectedMap({ ...itemIdToSelectedMap, [itemId]: isSelected });
       handleTableChange({ isSelected, itemId });
     }
@@ -306,7 +307,9 @@ export function CustomSelectionTable({
 
     for (let itemIndex = pagerSettings.firstItemIndex; itemIndex <= pagerSettings.lastItemIndex; itemIndex++) {
       const item = currentItems[itemIndex];
-      if (item === undefined) break;
+      if (item === undefined) {
+        break;
+      }
       rows.push(renderRow(item));
     }
 

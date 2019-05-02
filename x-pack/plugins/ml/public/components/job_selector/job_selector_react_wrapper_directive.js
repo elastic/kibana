@@ -20,9 +20,7 @@ const module = uiModules.get('apps/ml');
 
 
 module
-  .directive('mlJobSelectorReactWrapper', function ($injector, config, mlJobSelectService) {
-    const globalState = $injector.get('globalState');
-
+  .directive('mlJobSelectorReactWrapper', function (globalState, config, mlJobSelectService) {
     function link(scope, element, attrs) {
       const selectedJobIds = getSelectedJobIds(globalState);
       const oldSelectedJobIds = mlJobSelectService.getValue().selection;
@@ -55,8 +53,7 @@ module
       link,
     };
   })
-  .service('mlJobSelectService', function ($injector) {
-    const globalState = $injector.get('globalState');
+  .service('mlJobSelectService', function (globalState) {
     const initialSelectedJobIds = getSelectedJobIds(globalState);
     return new BehaviorSubject({ selection: initialSelectedJobIds, resetSelection: false });
   });

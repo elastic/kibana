@@ -71,7 +71,8 @@ export function JobSelectorTable({
     const sortableProps = new SortableProperties(sortablePropertyItems, defaultSortProperty);
 
     setSortableProperties(sortableProps);
-  }, [jobs, currentTab]); // eslint-disable-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [jobs, currentTab]);
 
   const tabs = [{
     id: 'Jobs',
