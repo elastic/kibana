@@ -55,7 +55,7 @@ export default (format = '0,0.[00]', template, getConfig = null) => {
   return (val) => {
     let value;
     if (!isNumber(val)) {
-      value = 0;
+      value = val;
     } else {
       try {
         value = formatter.convert(val, 'text');
