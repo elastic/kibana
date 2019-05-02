@@ -20,7 +20,7 @@ exports[`RuleEditorFlyout renders the flyout after adding a condition to a rule 
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
+        size="m"
       >
         <h1
           id="flyoutTitle"
@@ -280,7 +280,7 @@ exports[`RuleEditorFlyout renders the flyout after setting the rule to edit 1`] 
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
+        size="m"
       >
         <h1
           id="flyoutTitle"
@@ -554,7 +554,7 @@ exports[`RuleEditorFlyout renders the flyout for creating a rule with conditions
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
+        size="m"
       >
         <h1
           id="flyoutTitle"
@@ -806,7 +806,7 @@ exports[`RuleEditorFlyout renders the select action component for a detector wit
       hasBorder={true}
     >
       <EuiTitle
-        size="l"
+        size="m"
       >
         <h1
           id="flyoutTitle"
