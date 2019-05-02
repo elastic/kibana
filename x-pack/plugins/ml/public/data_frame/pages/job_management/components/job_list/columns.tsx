@@ -42,10 +42,12 @@ export const getColumns = (
           aria-label={
             expandedRowItemIds.includes(item.config.id)
               ? i18n.translate('xpack.ml.dataframe.jobsList.rowCollapse', {
-                  defaultMessage: 'Collapse',
+                  defaultMessage: 'Hide details for {jobId}',
+                  values: { jobId: item.config.id },
                 })
               : i18n.translate('xpack.ml.dataframe.jobsList.rowExpand', {
-                  defaultMessage: 'Expand',
+                  defaultMessage: 'Show details for {jobId}',
+                  values: { jobId: item.config.id },
                 })
           }
           iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
