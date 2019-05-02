@@ -5,7 +5,7 @@
  */
 
 import * as slackMock from 'slack';
-import { slackConnector } from './slack';
+import { messageSlackConnector } from './message_slack';
 
 jest.mock('slack', () => ({
   chat: {
@@ -13,19 +13,9 @@ jest.mock('slack', () => ({
   },
 }));
 
-test(`executor throws error when command isn't valid`, async () => {
-  await expect(
-    slackConnector.executor({ token: '123' }, { command: 'invalid' })
-  ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unsupported command \\"invalid\\"."`);
-});
-
-describe('post-message', () => {
-  test('Calls the slack API with the proper arguments', async () => {
-    await slackConnector.executor(
-      { token: '123' },
-      { command: 'post-message', message: 'hello', channel: 'general' }
-    );
-    expect(slackMock.chat.postMessage).toMatchInlineSnapshot(`
+test('Calls the slack API with the proper arguments', async () => {
+  await messageSlackConnector.executor({ token: '123' }, { message: 'hello', channel: 'general' });
+  expect(slackMock.chat.postMessage).toMatchInlineSnapshot(`
 [MockFunction] {
   "calls": Array [
     Array [
@@ -44,5 +34,4 @@ describe('post-message', () => {
   ],
 }
 `);
-  });
 });

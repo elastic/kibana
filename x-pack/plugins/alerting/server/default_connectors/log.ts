@@ -6,12 +6,12 @@
 
 import Joi from 'joi';
 
-interface ConsoleParams {
+interface LogParams {
   message: string;
 }
 
-export const consoleConnector = {
-  id: 'console',
+export const logConnector = {
+  id: 'log',
   validate: {
     params: Joi.object()
       .keys({
@@ -19,7 +19,7 @@ export const consoleConnector = {
       })
       .required(),
   },
-  async executor(connectorOptions: any, { message }: ConsoleParams) {
+  async executor(connectorOptions: any, { message }: LogParams) {
     // eslint-disable-next-line no-console
     console.log(message);
   },

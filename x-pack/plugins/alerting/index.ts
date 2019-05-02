@@ -6,6 +6,7 @@
 
 import Hapi from 'hapi';
 import mappings from './mappings.json';
+import { logConnector, messageSlackConnector, emailConnector } from './server/default_connectors';
 import { createActionRoute, AlertService, ActionService, ConnectorService } from './server';
 
 import { APP_ID } from './common/constants';
@@ -33,6 +34,11 @@ export function alerting(kibana: any) {
       const connectorService = new ConnectorService();
       const actionService = new ActionService(connectorService);
       const alertService = new AlertService();
+
+      // Register default connectors
+      connectorService.register(logConnector);
+      connectorService.register(messageSlackConnector);
+      connectorService.register(emailConnector);
 
       // Routes
       createActionRoute(server);

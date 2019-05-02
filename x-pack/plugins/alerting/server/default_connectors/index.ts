@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { consoleConnector } from './console';
-export { slackConnector } from './slack';
+export { logConnector } from './log';
+export { messageSlackConnector } from './message_slack';
 export { emailConnector } from './email';
