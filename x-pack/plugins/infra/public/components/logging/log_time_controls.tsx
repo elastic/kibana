@@ -19,7 +19,6 @@ interface LogTimeControlsProps {
   stopLiveStreaming: () => any;
   isLiveStreaming: boolean;
   jumpToTime: (time: number) => any;
-  setSurroundingLogsId: (id: string | null) => void;
   intl: InjectedIntl;
 }
 

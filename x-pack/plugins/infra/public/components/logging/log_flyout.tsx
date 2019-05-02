@@ -26,10 +26,8 @@ interface Props {
   setFlyoutVisibility: (visible: boolean) => void;
   setFilter: (filter: string) => void;
   setTarget: (timeKey: TimeKey, flyoutItemId: string) => void;
-  setSurroundingLogsId: (id: string) => void;
   intl: InjectedIntl;
   loading: boolean;
-  stopLiveStreaming: () => void;
 }
 
 export const LogFlyout = injectI18n(

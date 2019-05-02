@@ -63,10 +63,8 @@ export const LogsPageLogsContent: React.FunctionComponent = () => {
                     stopLiveStreaming();
                   }}
                   setFlyoutVisibility={setFlyoutVisibility}
-                  setSurroundingLogsId={setSurroundingLogsId}
                   flyoutItem={flyoutItem}
                   loading={isLoading}
-                  stopLiveStreaming={stopLiveStreaming}
                 />
               ) : null
             }

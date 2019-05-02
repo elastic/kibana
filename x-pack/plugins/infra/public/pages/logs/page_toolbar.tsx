@@ -110,7 +110,6 @@ export const LogsToolbar = injectI18n(({ intl }) => {
                   setSurroundingLogsId(null);
                 }}
                 stopLiveStreaming={stopLiveStreaming}
-                setSurroundingLogsId={setSurroundingLogsId}
               />
             )}
           </WithLogPosition>
