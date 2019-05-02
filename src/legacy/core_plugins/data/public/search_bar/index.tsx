@@ -17,6 +17,4 @@
  * under the License.
  */
 
-import './directive';
-
-export { SearchBar } from './components';
+export { SearchBarService } from './search_bar_service';
