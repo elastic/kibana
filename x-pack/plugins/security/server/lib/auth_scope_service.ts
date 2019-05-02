@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Legacy } from 'kibana';
 import { uniq, flattenDeep } from 'lodash';
 import { AuthenticatedUser } from '../../common/model';
 
-export type ScopesGetter = (request: Request, user: AuthenticatedUser) => string[] | string;
+export type ScopesGetter = (request: Legacy.Request, user: AuthenticatedUser) => string[] | string;
 
 /**
  *  Manages the creation of the scopes attached to the credentials which result
@@ -52,10 +52,10 @@ export class AuthScopeService {
    *  `route.config.auth.access.scope` property, or accessed in pre-functions,
    *  extensions, or route handlers as `request.auth.credentials.scope`.
    *
-   *  @param request HapiJS request instance.
+   *  @param request Request instance.
    *  @param user User object from the security API
    */
-  async getForRequestAndUser(request: Request, user: AuthenticatedUser): Promise<string[]> {
+  async getForRequestAndUser(request: Legacy.Request, user: AuthenticatedUser): Promise<string[]> {
     if (!request || typeof request !== 'object') {
       throw new TypeError('getCredentialsScope() requires a request object');
     }

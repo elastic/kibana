@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request, RequestQuery } from 'hapi';
 import { Legacy } from 'kibana';
 import { getClient } from '../../../../../server/lib/get_client_shield';
 import { AuthScopeService, ScopesGetter } from '../auth_scope_service';
@@ -37,7 +36,7 @@ const providerMap = new Map<
   ['token', TokenAuthenticationProvider],
 ]);
 
-function assertRequest(request: Request) {
+function assertRequest(request: Legacy.Request) {
   if (!request || typeof request !== 'object') {
     throw new Error(`Request should be a valid object, was [${typeof request}].`);
   }
@@ -45,7 +44,7 @@ function assertRequest(request: Request) {
 
 /**
  * Prepares options object that is shared among all authentication providers.
- * @param server HapiJS Server instance.
+ * @param server Server instance.
  */
 function getProviderOptions(server: Legacy.Server) {
   const config = server.config();
@@ -98,7 +97,7 @@ class Authenticator {
 
   /**
    * Instantiates Authenticator and bootstrap configured providers.
-   * @param server HapiJS Server instance.
+   * @param server Server instance.
    * @param authScope AuthScopeService instance.
    * @param session Session instance.
    */
@@ -130,9 +129,9 @@ class Authenticator {
 
   /**
    * Performs request authentication using configured chain of authentication providers.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  async authenticate(request: Request) {
+  async authenticate(request: Legacy.Request) {
     assertRequest(request);
 
     const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
@@ -194,9 +193,9 @@ class Authenticator {
 
   /**
    * Deauthenticates current request.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  async deauthenticate(request: Request) {
+  async deauthenticate(request: Legacy.Request) {
     assertRequest(request);
 
     const sessionValue = await this.getSessionValue(request);
@@ -212,7 +211,7 @@ class Authenticator {
     // SP associated with the current user session to do the logout. So if Kibana (without active session)
     // receives such a request it shouldn't redirect user to the home page, but rather redirect back to IdP
     // with correct logout response and only Elasticsearch knows how to do that.
-    if ((request.query as RequestQuery).SAMLRequest && this.providers.has('saml')) {
+    if ((request.query as Record<string, string>).SAMLRequest && this.providers.has('saml')) {
       return this.providers.get('saml')!.deauthenticate(request);
     }
 
@@ -247,7 +246,7 @@ class Authenticator {
    * clear session if it belongs to the provider that is not available.
    * @param request Request to extract session value for.
    */
-  private async getSessionValue(request: Request) {
+  private async getSessionValue(request: Legacy.Request) {
     let sessionValue = await this.session.get<ProviderSession>(request);
 
     // If for some reason we have a session stored for the provider that is not available
@@ -268,7 +267,7 @@ export async function initAuthenticator(server: Legacy.Server) {
   const authenticator = new Authenticator(server, authScope, session);
 
   const loginAttempts = new WeakMap();
-  server.decorate('request', 'loginAttempt', function(this: Request) {
+  server.decorate('request', 'loginAttempt', function(this: Legacy.Request) {
     const request = this;
     if (!loginAttempts.has(request)) {
       loginAttempts.set(request, new LoginAttempt());
@@ -276,15 +275,17 @@ export async function initAuthenticator(server: Legacy.Server) {
     return loginAttempts.get(request);
   });
 
-  server.expose('authenticate', (request: Request) => authenticator.authenticate(request));
-  server.expose('deauthenticate', (request: Request) => authenticator.deauthenticate(request));
+  server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
+  server.expose('deauthenticate', (request: Legacy.Request) =>
+    authenticator.deauthenticate(request)
+  );
   server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>
     authScope.registerGetter(scopeExtender)
   );
 
-  server.expose('isAuthenticated', async (request: Request) => {
+  server.expose('isAuthenticated', async (request: Legacy.Request) => {
     try {
-      await (server.plugins as Record<string, any>).security.getUser(request);
+      await server.plugins.security!.getUser(request);
       return true;
     } catch (err) {
       // Don't swallow server errors.

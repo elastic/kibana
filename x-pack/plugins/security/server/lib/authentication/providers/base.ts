@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
 import { Legacy } from 'kibana';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
@@ -33,15 +32,18 @@ export abstract class BaseAuthenticationProvider {
 
   /**
    * Performs request authentication.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  abstract authenticate(request: Request, state?: unknown): Promise<AuthenticationResult>;
+  abstract authenticate(request: Legacy.Request, state?: unknown): Promise<AuthenticationResult>;
 
   /**
    * Invalidates user session associated with the request.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider that needs to be invalidated.
    */
-  abstract deauthenticate(request: Request, state?: unknown): Promise<DeauthenticationResult>;
+  abstract deauthenticate(
+    request: Legacy.Request,
+    state?: unknown
+  ): Promise<DeauthenticationResult>;
 }
