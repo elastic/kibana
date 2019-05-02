@@ -233,14 +233,6 @@ class SpacesGridPageUI extends Component<Props, State> {
       features: [],
     });
 
-    const setData = (spaces: Space[], features: Feature[]) => {
-      this.setState({
-        loading: false,
-        spaces,
-        features,
-      });
-    };
-
     const getSpaces = spacesManager.getSpaces();
     const getFeatures = kfetch({ method: 'get', pathname: '/api/features/v1' });
 

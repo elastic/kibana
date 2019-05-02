@@ -15,7 +15,7 @@ interface SpaceValidatorOptions {
 export class SpaceValidator {
   private shouldValidate: boolean;
 
-  constructor(options: SpaceValidatorOptions) {
+  constructor(options: SpaceValidatorOptions = {}) {
     this.shouldValidate = options.shouldValidate || false;
   }
 
