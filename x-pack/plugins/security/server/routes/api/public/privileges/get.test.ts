@@ -6,7 +6,6 @@
 import Boom from 'boom';
 import { Server } from 'hapi';
 import { RawKibanaPrivileges } from '../../../../../common/model';
-import { SecurityPlugin } from '../../../../..';
 import { initGetPrivilegesApi } from './get';
 
 const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
@@ -35,7 +34,7 @@ const createRawKibanaPrivileges: () => RawKibanaPrivileges = () => {
 };
 
 const createMockServer = () => {
-  const mockServer: Server = new Server({ debug: false, port: 8080 }) as Server;
+  const mockServer = new Server({ debug: false, port: 8080 });
 
   mockServer.plugins.security = {
     authorization: {
@@ -44,8 +43,8 @@ const createMockServer = () => {
           return createRawKibanaPrivileges();
         }),
       },
-    } as any,
-  } as SecurityPlugin;
+    },
+  } as any;
   return mockServer;
 };
 

@@ -18,7 +18,13 @@
  */
 
 import { BasePathSetup, BasePathStart } from './base_path';
-import { ChromeBrand, ChromeBreadcrumb, ChromeHelpExtension, ChromeSetup } from './chrome';
+import {
+  ChromeBadge,
+  ChromeBrand,
+  ChromeBreadcrumb,
+  ChromeHelpExtension,
+  ChromeSetup,
+} from './chrome';
 import { FatalErrorsSetup } from './fatal_errors';
 import { HttpSetup } from './http';
 import { I18nSetup, I18nStart } from './i18n';
@@ -96,6 +102,7 @@ export {
   FatalErrorsSetup,
   Capabilities,
   ChromeSetup,
+  ChromeBadge,
   ChromeBreadcrumb,
   ChromeBrand,
   ChromeHelpExtension,

@@ -13,7 +13,7 @@ import { SecurityPlugin } from '../plugins/security';
 declare module 'hapi' {
   interface PluginProperties {
     cloud?: CloudPlugin;
-    security?: SecurityPlugin;
     xpack_main: XPackMainPlugin;
+    security?: SecurityPlugin;
   }
 }
