@@ -5,36 +5,27 @@
  */
 import { ESFilter } from 'elasticsearch';
 import {
+  SERVICE_AGENT_NAME,
   PROCESSOR_EVENT,
   SERVICE_NAME
-} from '../../../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../../../typings/common';
-import { getBucketSize } from '../../../helpers/get_bucket_size';
-import { Setup } from '../../../helpers/setup_request';
-import { AggValue, TimeSeriesBucket } from '../../query_types';
+} from '../../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../../typings/common';
+import { Setup } from '../../../../helpers/setup_request';
+import { MetricsAggs, MetricsKeys, AggValue } from '../../../query_types';
+import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 
-export interface JavaMetrics {
+export interface HeapMemoryMetrics extends MetricsKeys {
   heapMemoryMax: AggValue;
   heapMemoryCommitted: AggValue;
-  nonHeapMemoryMax: AggValue;
 }
 
-type Bucket = TimeSeriesBucket & JavaMetrics;
-
-interface Aggs extends JavaMetrics {
-  timeseriesData: {
-    buckets: Bucket[];
-  };
-}
-
-export type ESResponse = PromiseReturnType<typeof fetch>;
+export type HeapMemoryResponse = PromiseReturnType<typeof fetch>;
 export async function fetch(setup: Setup, serviceName: string) {
   const { start, end, esFilterQuery, client, config } = setup;
-  const { bucketSize } = getBucketSize(start, end, 'auto');
   const filters: ESFilter[] = [
     { term: { [SERVICE_NAME]: serviceName } },
     { term: { [PROCESSOR_EVENT]: 'metric' } },
-    { term: { 'agent.name': 'java' } },
+    { term: { [SERVICE_AGENT_NAME]: 'java' } },
     {
       range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
     }
@@ -51,28 +42,19 @@ export async function fetch(setup: Setup, serviceName: string) {
       query: { bool: { filter: filters } },
       aggs: {
         timeseriesData: {
-          date_histogram: {
-            field: '@timestamp',
-
-            // ensure minimum bucket size of 30s since this is the default resolution for metric data
-            interval: `${Math.max(bucketSize, 30)}s`,
-            min_doc_count: 0,
-            extended_bounds: { min: start, max: end }
-          },
+          date_histogram: getMetricsDateHistogramParams(start, end),
           aggs: {
             heapMemoryMax: { avg: { field: 'jvm.memory.heap.max' } },
             heapMemoryCommitted: {
               avg: { field: 'jvm.memory.heap.committed' }
-            },
-            nonHeapMemoryMax: { avg: { field: 'jvm.memory.non_heap.max' } }
+            }
           }
         },
         heapMemoryMax: { avg: { field: 'jvm.memory.heap.max' } },
-        heapMemoryCommitted: { avg: { field: 'jvm.memory.heap.committed' } },
-        nonHeapMemoryMax: { avg: { field: 'jvm.memory.non_heap.max' } }
+        heapMemoryCommitted: { avg: { field: 'jvm.memory.heap.committed' } }
       }
     }
   };
 
-  return client<void, Aggs>('search', params);
+  return client<void, MetricsAggs<HeapMemoryMetrics>>('search', params);
 }

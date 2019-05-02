@@ -14,21 +14,19 @@ import { PromiseReturnType } from '../../../../typings/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
-interface Bucket extends TimeSeriesBucket {
+export interface CPUMetrics {
   systemCPUAverage: AggValue;
   systemCPUMax: AggValue;
   processCPUAverage: AggValue;
   processCPUMax: AggValue;
 }
 
-interface Aggs {
+type Bucket = CPUMetrics & TimeSeriesBucket;
+
+interface Aggs extends CPUMetrics {
   timeseriesData: {
     buckets: Bucket[];
   };
-  systemCPUAverage: AggValue;
-  systemCPUMax: AggValue;
-  processCPUAverage: AggValue;
-  processCPUMax: AggValue;
 }
 
 export type ESResponse = PromiseReturnType<typeof fetch>;

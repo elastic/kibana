@@ -1,0 +1,64 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { ESFilter } from 'elasticsearch';
+import {
+  METRIC_PROCESS_CPU_PERCENT,
+  METRIC_SYSTEM_CPU_PERCENT,
+  PROCESSOR_EVENT,
+  SERVICE_NAME
+} from '../../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../../typings/common';
+import { Setup } from '../../../../helpers/setup_request';
+import { MetricsAggs, MetricsKeys, AggValue } from '../../../query_types';
+import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+
+export interface CPUMetrics extends MetricsKeys {
+  systemCPUAverage: AggValue;
+  systemCPUMax: AggValue;
+  processCPUAverage: AggValue;
+  processCPUMax: AggValue;
+}
+
+export type CPUResponse = PromiseReturnType<typeof fetch>;
+export async function fetch(setup: Setup, serviceName: string) {
+  const { start, end, esFilterQuery, client, config } = setup;
+  const filters: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
+    {
+      range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filters.push(esFilterQuery);
+  }
+
+  const aggs = {
+    systemCPUAverage: { avg: { field: METRIC_SYSTEM_CPU_PERCENT } },
+    systemCPUMax: { max: { field: METRIC_SYSTEM_CPU_PERCENT } },
+    processCPUAverage: { avg: { field: METRIC_PROCESS_CPU_PERCENT } },
+    processCPUMax: { max: { field: METRIC_PROCESS_CPU_PERCENT } }
+  };
+
+  const params = {
+    index: config.get<string>('apm_oss.metricsIndices'),
+    body: {
+      size: 0,
+      query: { bool: { filter: filters } },
+      aggs: {
+        timeseriesData: {
+          date_histogram: getMetricsDateHistogramParams(start, end),
+          aggs
+        },
+        ...aggs
+      }
+    }
+  };
+
+  return client<void, MetricsAggs<CPUMetrics>>('search', params);
+}

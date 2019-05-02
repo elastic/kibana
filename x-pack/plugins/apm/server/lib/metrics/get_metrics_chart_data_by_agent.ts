@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { Setup } from '../helpers/setup_request';
-import { getJavaMetricsChartData } from './by_agent/java';
+import { getJavaMetricsCharts } from './by_agent/java';
+import { getDefaultMetricsCharts } from './by_agent/default';
 
 export async function getMetricsChartDataByAgent({
   setup,
@@ -17,11 +18,11 @@ export async function getMetricsChartDataByAgent({
 }) {
   switch (agentName) {
     case 'java': {
-      return getJavaMetricsChartData(setup, serviceName);
+      return getJavaMetricsCharts(setup, serviceName);
     }
 
     default: {
-      throw new Error(`Unknown agent name: '${agentName}'`);
+      return getDefaultMetricsCharts(setup, serviceName);
     }
   }
 }

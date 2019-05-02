@@ -14,17 +14,17 @@ import { PromiseReturnType } from '../../../../typings/common';
 import { getBucketSize } from '../../helpers/get_bucket_size';
 import { AggValue, MetricsRequestArgs, TimeSeriesBucket } from '../query_types';
 
-interface Bucket extends TimeSeriesBucket {
+export interface MemoryMetrics {
   memoryUsedAvg: AggValue;
   memoryUsedMax: AggValue;
 }
 
-interface Aggs {
+type Bucket = MemoryMetrics & TimeSeriesBucket;
+
+interface Aggs extends MemoryMetrics {
   timeseriesData: {
     buckets: Bucket[];
   };
-  memoryUsedAvg: AggValue;
-  memoryUsedMax: AggValue;
 }
 
 export type ESResponse = PromiseReturnType<typeof fetch>;

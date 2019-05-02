@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { ESFilter } from 'elasticsearch';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_NAME,
+  METRIC_SYSTEM_FREE_MEMORY,
+  METRIC_SYSTEM_TOTAL_MEMORY
+} from '../../../../../../common/elasticsearch_fieldnames';
+import { PromiseReturnType } from '../../../../../../typings/common';
+import { Setup } from '../../../../helpers/setup_request';
+import { MetricsAggs, MetricsKeys, AggValue } from '../../../query_types';
+import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
+
+export interface MemoryMetrics extends MetricsKeys {
+  memoryUsedAvg: AggValue;
+  memoryUsedMax: AggValue;
+}
+
+const percentUsedScript = {
+  lang: 'expression',
+  source: `1 - doc['${METRIC_SYSTEM_FREE_MEMORY}'] / doc['${METRIC_SYSTEM_TOTAL_MEMORY}']`
+};
+
+export type MemoryResponse = PromiseReturnType<typeof fetch>;
+export async function fetch(setup: Setup, serviceName: string) {
+  const { start, end, esFilterQuery, client, config } = setup;
+  const filters: ESFilter[] = [
+    { term: { [SERVICE_NAME]: serviceName } },
+    { term: { [PROCESSOR_EVENT]: 'metric' } },
+    {
+      range: { '@timestamp': { gte: start, lte: end, format: 'epoch_millis' } }
+    }
+  ];
+
+  if (esFilterQuery) {
+    filters.push(esFilterQuery);
+  }
+
+  const aggs = {
+    memoryUsedAvg: { avg: { script: percentUsedScript } },
+    memoryUsedMax: { max: { script: percentUsedScript } }
+  };
+
+  const params = {
+    index: config.get<string>('apm_oss.metricsIndices'),
+    body: {
+      size: 0,
+      query: { bool: { filter: filters } },
+      aggs: {
+        timeseriesData: {
+          date_histogram: getMetricsDateHistogramParams(start, end),
+          aggs
+        },
+        ...aggs
+      }
+    }
+  };
+
+  return client<void, MetricsAggs<MemoryMetrics>>('search', params);
+}
