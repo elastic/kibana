@@ -5,25 +5,13 @@
  */
 
 import Boom from 'boom';
-import { Request } from 'hapi';
-import { Cluster } from 'src/legacy/core_plugins/elasticsearch';
+import { Legacy } from 'kibana';
 import { canRedirectRequest } from '../../can_redirect_request';
 import { getErrorStatusCode } from '../../errors';
 import { AuthenticatedUser } from '../../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-
-/**
- * Represents available provider options.
- */
-interface ProviderOptions {
-  protocol: string;
-  hostname: string;
-  port: number;
-  basePath: string;
-  client: Cluster;
-  log: (tags: string[], message: string) => void;
-}
+import { BaseAuthenticationProvider } from './base';
 
 /**
  * The state supported by the provider (for the SAML handshake or established session).
@@ -62,7 +50,7 @@ interface SAMLRequestQuery {
 /**
  * Defines the shape of the request with a body containing SAML response.
  */
-type RequestWithSAMLPayload = Request & {
+type RequestWithSAMLPayload = Legacy.Request & {
   payload: { SAMLResponse: string; RelayState?: string };
 };
 
@@ -87,9 +75,11 @@ function isAccessTokenExpiredError(err?: any) {
 
 /**
  * Checks whether request payload contains SAML response from IdP.
- * @param request HapiJS request instance.
+ * @param request Request instance.
  */
-function isRequestWithSAMLResponsePayload(request: Request): request is RequestWithSAMLPayload {
+function isRequestWithSAMLResponsePayload(
+  request: Legacy.Request
+): request is RequestWithSAMLPayload {
   return request.payload != null && !!(request.payload as any).SAMLResponse;
 }
 
@@ -104,19 +94,13 @@ function isSAMLRequestQuery(query: any): query is SAMLRequestQuery {
 /**
  * Provider that supports SAML request authentication.
  */
-export class SAMLAuthenticationProvider {
-  /**
-   * Instantiates SAMLAuthenticationProvider.
-   * @param options Options that may be needed by authentication provider.
-   */
-  constructor(private readonly options: ProviderOptions) {}
-
+export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   /**
    * Performs SAML request authentication.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
-  public async authenticate(request: Request, state?: ProviderState | null) {
+  public async authenticate(request: Legacy.Request, state?: ProviderState | null) {
     this.debug(`Trying to authenticate user request to ${request.url.path}.`);
 
     let {
@@ -160,10 +144,10 @@ export class SAMLAuthenticationProvider {
 
   /**
    * Invalidates SAML access token if it exists.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  public async deauthenticate(request: Request, state?: ProviderState) {
+  public async deauthenticate(request: Legacy.Request, state?: ProviderState) {
     this.debug(`Trying to deauthenticate user via ${request.url.path}.`);
 
     if ((!state || !state.accessToken) && !isSAMLRequestQuery(request.query)) {
@@ -194,9 +178,9 @@ export class SAMLAuthenticationProvider {
   /**
    * Validates whether request contains `Bearer ***` Authorization header and just passes it
    * forward to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async authenticateViaHeader(request: Request) {
+  private async authenticateViaHeader(request: Legacy.Request) {
     this.debug('Trying to authenticate via header.');
 
     const authorization = request.headers.authorization;
@@ -237,7 +221,7 @@ export class SAMLAuthenticationProvider {
    * When login succeeds access token is stored in the state and user is redirected to the URL
    * that was requested before SAML handshake or to default Kibana location in case of IdP
    * initiated login.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param [state] Optional state object associated with the provider.
    */
   private async authenticateViaPayload(
@@ -298,7 +282,7 @@ export class SAMLAuthenticationProvider {
    * The tokens are stored in the state and user is redirected to the default Kibana location, unless
    * we detect that user from existing session isn't the same as defined in SAML payload. In this case
    * we'll forward user to a page with the respective warning.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param existingState State existing user session is based on.
    * @param user User returned for the existing session.
    */
@@ -368,10 +352,10 @@ export class SAMLAuthenticationProvider {
   /**
    * Tries to extract access token from state and adds it to the request before it's
    * forwarded to Elasticsearch backend.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaState(request: Request, { accessToken }: ProviderState) {
+  private async authenticateViaState(request: Legacy.Request, { accessToken }: ProviderState) {
     this.debug('Trying to authenticate via state.');
 
     if (!accessToken) {
@@ -404,10 +388,13 @@ export class SAMLAuthenticationProvider {
    * This method is only called when authentication via access token stored in the state failed because of expired
    * token. So we should use refresh token, that is also stored in the state, to extend expired access token and
    * authenticate user with it.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(request: Request, { refreshToken }: ProviderState) {
+  private async authenticateViaRefreshToken(
+    request: Legacy.Request,
+    { refreshToken }: ProviderState
+  ) {
     this.debug('Trying to refresh access token.');
 
     if (!refreshToken) {
@@ -480,9 +467,9 @@ export class SAMLAuthenticationProvider {
 
   /**
    * Tries to start SAML handshake and eventually receive a token.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async authenticateViaHandshake(request: Request) {
+  private async authenticateViaHandshake(request: Legacy.Request) {
     this.debug('Trying to initiate SAML handshake.');
 
     // If client can't handle redirect response, we shouldn't initiate SAML handshake.
@@ -577,9 +564,9 @@ export class SAMLAuthenticationProvider {
   /**
    * Calls `saml/invalidate` with the `SAMLRequest` query string parameter received from the Identity
    * Provider and redirects user back to the Identity Provider if needed.
-   * @param request HapiJS request instance.
+   * @param request Request instance.
    */
-  private async performIdPInitiatedSingleLogout(request: Request) {
+  private async performIdPInitiatedSingleLogout(request: Legacy.Request) {
     this.debug('Single logout has been initiated by the Identity Provider.');
 
     // This operation should be performed on behalf of the user with a privilege that normal
