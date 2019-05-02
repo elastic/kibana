@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
-import { mountWithIntl } from '../../../../../test_utils/enzyme_helpers';
+import { mountWithIntl } from '../../utils/enzyme_helpers';
 import { options, source, timeRange } from '../../utils/fixtures/metrics_explorer';
 
 const series = { id: 'exmaple-01', rows: [], columns: [] };
