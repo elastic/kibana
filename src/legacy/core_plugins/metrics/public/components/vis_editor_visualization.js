@@ -254,10 +254,8 @@ class VisEditorVisualization extends Component {
           style={style}
           className="tvbEditorVisualization"
           data-shared-items-container
-          data-shared-item
           data-title={title}
           data-description={description}
-          data-render-complete="disabled"
           ref={this._visEl}
         />
         <div className="tvbEditor--hideForReporting">
