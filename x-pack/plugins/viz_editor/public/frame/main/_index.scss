@@ -12,7 +12,7 @@
   margin: 0;
   flex: 1 0 ($euiSize * 16);
   height: 100%;
-  background-color: $euiColorLightestShade;
+  // background-color: $euiColorLightestShade;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -35,12 +35,44 @@
   overflow: hidden auto;
 }
 
-.lnsPageBody {
-  padding: $euiSizeL;
+.lnsSidebar--expression {
+  flex-basis: 35%;
+}
 
-  > * {
-    @include euiScrollBar;
-    overflow: hidden auto;
+.lnsPageBody {
+  @include euiScrollBar;
+  padding-top: $euiSize;
+  padding-bottom: $euiSize;
+  overflow: hidden auto;
+
+  &:first-child {
+    padding-left: $euiSize;
+  }
+
+  .lnsPageContent {
+    padding: 0 !important;
     display: flex;
+    flex-direction: column;
+
+    .lnsPageContentHeader {
+      padding: $euiSize;
+      border-bottom: $euiBorderThin;
+      margin-bottom: 0 !important;
+    }
+
+    .lnsPageContentBody {
+      flex-grow: 1;
+      padding: $euiSize;
+      display: flex;
+      align-items: stretch;
+      justify-content: stretch;
+
+      > * {
+        flex: 1 1 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
   }
 }

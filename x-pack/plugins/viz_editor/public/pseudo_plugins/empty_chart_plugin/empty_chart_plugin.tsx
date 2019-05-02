@@ -69,8 +69,9 @@ function configPanel({
 function WorkspacePanel(props: VisualizationPanelProps<EmptyChartVisModel>) {
   return (
     <DroppablePane {...props} useFirstSuggestion>
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 400 }}>
-        <EuiFlexItem grow={false}>Drop a field here to start visualizing</EuiFlexItem>
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+        Drop a field here to start visualizing</EuiFlexItem>
       </EuiFlexGroup>
     </DroppablePane>
   );
