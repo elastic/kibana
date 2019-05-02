@@ -46,6 +46,9 @@ export interface UptimeAppProps {
   basePath: string;
   darkMode: boolean;
   client: UMGraphQLClient;
+  isApmAvailable: boolean;
+  isInfraAvailable: boolean;
+  isLogsAvailable: boolean;
   kibanaBreadcrumbs: UMBreadcrumb[];
   routerBasename: string;
   setBreadcrumbs: UMUpdateBreadcrumbs;

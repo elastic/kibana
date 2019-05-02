@@ -78,13 +78,8 @@ export class VectorLayer extends AbstractLayer {
     });
   }
 
-  getSupportedStyles() {
-    return [VectorStyle];
-  }
-
   getIcon() {
-    const isPointsOnly = this._isPointsOnly();
-    return this._style.getIcon(isPointsOnly);
+    return this._style.getIcon();
   }
 
   getLayerTypeIconName() {
@@ -288,6 +283,7 @@ export class VectorLayer extends AbstractLayer {
     const joinSyncs = this.getValidJoins().map(async join => {
       return this._syncJoin({ join, startLoading, stopLoading, onLoadError, dataFilters });
     });
+
     return await Promise.all(joinSyncs);
   }
 
@@ -349,70 +345,37 @@ export class VectorLayer extends AbstractLayer {
     }
   }
 
-  _joinToFeatureCollection(sourceResult, joinState, updateSourceData) {
-    if (!sourceResult.refreshed && !joinState.dataHasChanged) {
-      //no data changes in both the source data or the join data
-      return false;
-    }
-    if (!sourceResult.featureCollection || !joinState.propertiesMap) {
-      //no data available in source or join (ie. request is pending or data errored)
-      return false;
-    }
-
-    //all other cases, perform the join
-    //- source data changed but join data has not
-    //- join data changed but source data has not
-    //- both source and join data changed
-    const updatedFeatureCollection = joinState.join.joinPropertiesToFeatureCollection(
-      sourceResult.featureCollection,
-      joinState.propertiesMap);
-
-    updateSourceData(updatedFeatureCollection);
-
-    return true;
-  }
-
-  async _performJoins(sourceResult, joinStates, updateSourceData) {
-    const hasJoined = joinStates.map(joinState => {
-      return this._joinToFeatureCollection(sourceResult, joinState, updateSourceData);
-    });
-    return hasJoined.some(shouldRefresh => shouldRefresh === true);
-  }
-
-  async syncData({ startLoading, stopLoading, onLoadError, onRefreshStyle, dataFilters, updateSourceData }) {
+  async syncData({ startLoading, stopLoading, onLoadError, dataFilters, updateSourceData }) {
     if (!this.isVisible() || !this.showAtZoomLevel(dataFilters.zoom)) {
       return;
     }
+
     const sourceResult = await this._syncSource({ startLoading, stopLoading, onLoadError, dataFilters });
-    const joinResults = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
-    const shouldRefresh = await this._performJoins(sourceResult, joinResults, updateSourceData);
-    if (shouldRefresh) {
-      onRefreshStyle();
+
+    if (sourceResult.featureCollection && sourceResult.featureCollection.features.length) {
+      const joinStates = await this._syncJoins({ startLoading, stopLoading, onLoadError, dataFilters });
+      const activeJoinStates = joinStates.filter(joinState => {
+        // Perform join when
+        // - source data changed but join data has not
+        // - join data changed but source data has not
+        // - both source and join data changed
+        return sourceResult.refreshed || joinState.dataHasChanged;
+      });
+
+      if (activeJoinStates.length) {
+        activeJoinStates.forEach(joinState => {
+          joinState.join.joinPropertiesToFeatureCollection(
+            sourceResult.featureCollection,
+            joinState.propertiesMap);
+        });
+        updateSourceData(sourceResult.featureCollection);
+      }
     }
   }
 
   _getSourceFeatureCollection() {
     const sourceDataRequest = this.getSourceDataRequest();
     return sourceDataRequest ? sourceDataRequest.getData() : null;
-  }
-
-  _isPointsOnly() {
-    const featureCollection = this._getSourceFeatureCollection();
-    if (!featureCollection) {
-      return false;
-    }
-    let isPointsOnly = true;
-    if (featureCollection) {
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        if (featureCollection.features[i].geometry.type !== 'Point') {
-          isPointsOnly = false;
-          break;
-        }
-      }
-    } else {
-      isPointsOnly = false;
-    }
-    return isPointsOnly;
   }
 
   _syncFeatureCollectionWithMb(mbMap) {
@@ -512,13 +475,6 @@ export class VectorLayer extends AbstractLayer {
     this._syncStylePropertiesWithMb(mbMap);
   }
 
-  renderStyleEditor(Style, options) {
-    return Style.renderEditor({
-      layer: this,
-      ...options
-    });
-  }
-
   _getMbPointLayerId() {
     return this.getId() +  '_circle';
   }
@@ -569,8 +525,8 @@ export class VectorLayer extends AbstractLayer {
     return this.isVisible() && this._source.canFormatFeatureProperties();
   }
 
-  getFeatureByFeatureById(id) {
-    const featureCollection = this._getSourceFeatureCollection(id);
+  getFeatureById(id) {
+    const featureCollection = this._getSourceFeatureCollection();
     if (!featureCollection) {
       return;
     }
