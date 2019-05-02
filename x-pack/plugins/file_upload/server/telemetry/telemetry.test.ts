@@ -23,7 +23,7 @@ const server: any = {
 };
 const callWithInternalUser = jest.fn();
 
-function mockInit(getVal: any = { attributes: {}}): any {
+function mockInit(getVal: any = { attributes: {} }): any {
   return {
     ...internalRepository(),
     get: jest.fn(() => getVal),
