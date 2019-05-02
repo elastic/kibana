@@ -180,3 +180,13 @@ export const loadSettings = () => {
     }) => Settings.fromUpstreamJson(data),
   });
 };
+
+export const ackWatchAction = async (watchId: string, actionId: string) => {
+  const {
+    data: { watchStatus },
+  } = await getHttpClient().put(
+    `${basePath}/watch/${watchId}/action/${actionId}/acknowledge`,
+    null
+  );
+  return WatchStatus.fromUpstreamJson(watchStatus);
+};

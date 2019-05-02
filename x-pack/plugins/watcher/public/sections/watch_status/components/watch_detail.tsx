@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { toastNotifications } from 'ui/notify';
 
-import { EuiInMemoryTable, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { loadWatchDetail } from '../../../lib/api';
+import {
+  EuiInMemoryTable,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiButtonEmpty,
+  EuiToolTip,
+} from '@elastic/eui';
+import { loadWatchDetail, ackWatchAction } from '../../../lib/api';
 import { getPageErrorCode, WatchStatus } from '../../../components';
 
 const WatchDetailUi = ({ watchId }: { watchId: string }) => {
@@ -39,9 +47,73 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       truncateText: true,
       render: (state: string) => <WatchStatus status={state} />,
     },
+    {
+      actions: [
+        {
+          render: (action: any) => {
+            if (action.isAckable) {
+              return (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.watcher.sections.watchDetail.watchTable.ackActionCellTooltipTitle',
+                    {
+                      defaultMessage: 'Acknowledge this watch action',
+                    }
+                  )}
+                >
+                  <EuiButtonEmpty
+                    iconType="check"
+                    isLoading={isActionStatusLoading}
+                    onClick={async () => {
+                      setIsActionStatusLoading(true);
+                      try {
+                        const watchStatus = await ackWatchAction(watchDetail.id, action.id);
+                        setIsActionStatusLoading(false);
+                        return setActionStatuses(watchStatus.actionStatuses);
+                      } catch (e) {
+                        setIsActionStatusLoading(false);
+                        toastNotifications.addDanger(
+                          i18n.translate(
+                            'xpack.watcher.sections.watchDetail.watchTable.ackActionErrorMessage',
+                            {
+                              defaultMessage: 'Error acknowledging action {actionId}',
+                              values: {
+                                actionId: action.id,
+                              },
+                            }
+                          )
+                        );
+                      }
+                    }}
+                  >
+                    <FormattedMessage
+                      id="xpack.watcher.sections.watchDetail.watchTable.ackActionCellTitle"
+                      defaultMessage="Acknowledge"
+                    />
+                  </EuiButtonEmpty>
+                </EuiToolTip>
+              );
+            }
+            return <Fragment />;
+          },
+        },
+      ],
+    },
   ];
 
   const { error, data: watchDetail, isLoading } = loadWatchDetail(watchId);
+
+  const [actionStatuses, setActionStatuses] = useState<any[]>([]);
+  const [isActionStatusLoading, setIsActionStatusLoading] = useState<boolean>(false);
+
+  useEffect(
+    () => {
+      if (watchDetail) {
+        setActionStatuses(watchDetail.watchStatus.actionStatuses);
+      }
+    },
+    [watchDetail]
+  );
 
   // Another part of the UI will surface the error.
   if (getPageErrorCode(error)) {
@@ -74,7 +146,7 @@ const WatchDetailUi = ({ watchId }: { watchId: string }) => {
       <EuiSpacer size="s" />
 
       <EuiInMemoryTable
-        items={watchDetail ? watchDetail.watchStatus.actionStatuses : []}
+        items={actionStatuses}
         itemId="id"
         columns={columns}
         pagination={pagination}
