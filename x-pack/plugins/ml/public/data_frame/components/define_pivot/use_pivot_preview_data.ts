@@ -11,6 +11,7 @@ import { ml } from '../../../services/ml_api_service';
 
 import { Dictionary } from '../../../../common/types/common';
 import {
+  DataFramePreviewRequest,
   getDataFramePreviewRequest,
   groupByConfigHasInterval,
   PivotAggsConfigDict,
@@ -26,10 +27,12 @@ export enum PIVOT_PREVIEW_STATUS {
   ERROR,
 }
 
+type NullablePreviewRequest = DataFramePreviewRequest | null;
 export interface UsePivotPreviewDataReturnType {
   errorMessage: string;
   status: PIVOT_PREVIEW_STATUS;
   dataFramePreviewData: Array<Dictionary<any>>;
+  previewRequest: NullablePreviewRequest;
 }
 
 export const usePivotPreviewData = (
@@ -41,6 +44,7 @@ export const usePivotPreviewData = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(PIVOT_PREVIEW_STATUS.UNUSED);
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
+  const [previewRequest, setPreviewRequest] = useState<NullablePreviewRequest>(null);
 
   if (indexPattern !== null) {
     const aggsArr = dictionaryToArray(aggs);
@@ -56,6 +60,7 @@ export const usePivotPreviewData = (
       setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
       const request = getDataFramePreviewRequest(indexPattern.title, query, groupByArr, aggsArr);
+      setPreviewRequest(request);
 
       try {
         const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(request);
@@ -84,5 +89,5 @@ export const usePivotPreviewData = (
       ]
     );
   }
-  return { errorMessage, status, dataFramePreviewData };
+  return { errorMessage, status, dataFramePreviewData, previewRequest };
 };

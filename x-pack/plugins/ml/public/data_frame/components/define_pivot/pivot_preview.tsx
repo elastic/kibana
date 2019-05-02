@@ -9,11 +9,16 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import {
+  EuiButtonIcon,
   EuiCallOut,
+  EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiInMemoryTable,
   EuiPanel,
   EuiProgress,
   EuiTitle,
+  EuiToolTip,
   SortDirection,
 } from '@elastic/eui';
 
@@ -27,6 +32,7 @@ import {
   SimpleQuery,
 } from '../../common';
 
+import { getPivotPreviewDevConsoleStatement } from './common';
 import { PIVOT_PREVIEW_STATUS, usePivotPreviewData } from './use_pivot_preview_data';
 
 function sortColumns(groupByArr: PivotGroupByConfig[]) {
@@ -78,7 +84,7 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
     return null;
   }
 
-  const { dataFramePreviewData, errorMessage, status } = usePivotPreviewData(
+  const { dataFramePreviewData, errorMessage, previewRequest, status } = usePivotPreviewData(
     indexPattern,
     query,
     aggs,
@@ -181,7 +187,30 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
 
   return (
     <EuiPanel>
-      <PreviewTitle />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PreviewTitle />
+        </EuiFlexItem>
+        {previewRequest !== null && (
+          <EuiFlexItem grow={false}>
+            <EuiCopy textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}>
+              {(copy: () => void) => (
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip',
+                    {
+                      defaultMessage:
+                        'Copy a Dev Console statement of the pivot preview to the clipboard.',
+                    }
+                  )}
+                >
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" />
+                </EuiToolTip>
+              )}
+            </EuiCopy>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
         <EuiProgress size="xs" color="accent" max={1} value={0} />
