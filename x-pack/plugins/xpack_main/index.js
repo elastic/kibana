@@ -98,11 +98,6 @@ export const xpackMain = (kibana) => {
           telemetryOptedIn: null,
           activeSpace: null,
           spacesEnabled: config.get('xpack.spaces.enabled'),
-          uiCapabilities: {
-            featureControls: {
-              manage: true,
-            },
-          },
         };
       },
       hacks: [

@@ -920,7 +920,6 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               all: [
                 'login:',
                 `version:${version}`,
-                `ui:${version}:featureControls/manage`,
                 `api:${version}:features`,
                 `space:${version}:manage`,
                 `ui:${version}:spaces/manage`,

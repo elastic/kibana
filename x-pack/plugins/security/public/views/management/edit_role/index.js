@@ -18,7 +18,6 @@ import 'plugins/security/services/shield_indices';
 
 import { IndexPatternsProvider } from 'ui/index_patterns/index_patterns';
 import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
-import { FeaturesService } from 'plugins/xpack_main/services';
 import { SpacesManager } from '../../../../../spaces/public/lib';
 import { checkLicenseError } from 'plugins/security/lib/check_license_error';
 import { EDIT_ROLES_PATH, ROLES_PATH } from '../management_urls';
@@ -88,10 +87,10 @@ routes.when(`${EDIT_ROLES_PATH}/:name?`, {
       return [];
     },
     privileges() {
-      return kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
+      return  kfetch({ method: 'get', pathname: '/api/security/privileges', query: { includeActions: true } });
     },
     features() {
-      return FeaturesService.getFeatures();
+      return kfetch({ method: 'get', pathname: '/api/features/v1' });
     }
   },
   controllerAs: 'editRole',
