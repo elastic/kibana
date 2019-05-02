@@ -207,11 +207,11 @@ describe('http service', () => {
 
     describe('#getBasePathFor()/#setBasePathFor()', () => {
       let root: ReturnType<typeof kbnTestServer.createRoot>;
-      beforeAll(async () => {
+      beforeEach(async () => {
         root = kbnTestServer.createRoot();
       }, 30000);
 
-      afterAll(async () => await root.shutdown());
+      afterEach(async () => await root.shutdown());
       it('basePath information for an incoming request is available in legacy server', async () => {
         const reqBasePath = '/requests-specific-base-path';
         const { http } = await root.setup();

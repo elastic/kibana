@@ -91,6 +91,11 @@ export class HttpServer {
   private setBasePathFor(request: KibanaRequest | Request, basePath: string) {
     const incomingMessage =
       request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
+    if (this.basePathCache.has(incomingMessage)) {
+      throw new Error(
+        'Request basePath was previously set. Setting multiple times is not supported.'
+      );
+    }
     this.basePathCache.set(incomingMessage, basePath);
   }
 

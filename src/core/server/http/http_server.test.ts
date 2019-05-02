@@ -30,6 +30,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { HttpConfig, Router } from '.';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { HttpServer } from './http_server';
+import { KibanaRequest } from './router/';
 
 const chance = new Chance();
 
@@ -676,4 +677,36 @@ test('#getBasePathFor() is based on server base path', async () => {
     .then(res => {
       expect(res.body).toEqual({ key: `${configWithBasePath.basePath}${path}` });
     });
+});
+
+test('#setBasePathFor() cannot be set twice for one request', async () => {
+  const incomingMessage = {
+    url: '/',
+  };
+  const kibanaRequestFactory = {
+    from() {
+      return KibanaRequest.from(
+        {
+          headers: {},
+          path: '/',
+          raw: {
+            req: incomingMessage,
+          },
+        } as any,
+        undefined
+      );
+    },
+  };
+  jest.doMock('./router/request', () => ({
+    KibanaRequest: jest.fn(() => kibanaRequestFactory),
+  }));
+
+  const { setBasePathFor } = await server.setup(config);
+
+  const setPath = () => setBasePathFor(kibanaRequestFactory.from(), '/path');
+
+  setPath();
+  expect(setPath).toThrowErrorMatchingInlineSnapshot(
+    `"Request basePath was previously set. Setting multiple times is not supported."`
+  );
 });
