@@ -8,25 +8,27 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 
-import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
+import { DataFrameJobListColumn, DataFrameJobListRow, JobId } from './common';
 import { getActions } from './actions';
-import { ExpandedRow } from './expanded_row';
 
 export const getColumns = (
   getJobs: () => void,
-  itemIdToExpandedRowMap: ItemIdToExpandedRowMap,
-  setItemIdToExpandedRowMap: React.Dispatch<React.SetStateAction<ItemIdToExpandedRowMap>>
+  expandedRowItemIds: JobId[],
+  setExpandedRowItemIds: React.Dispatch<React.SetStateAction<JobId[]>>
 ) => {
   const actions = getActions(getJobs);
 
   function toggleDetails(item: DataFrameJobListRow) {
-    if (itemIdToExpandedRowMap[item.config.id]) {
-      delete itemIdToExpandedRowMap[item.config.id];
+    const index = expandedRowItemIds.indexOf(item.config.id);
+    if (index !== -1) {
+      expandedRowItemIds.splice(index, 1);
+      setExpandedRowItemIds([...expandedRowItemIds]);
     } else {
-      itemIdToExpandedRowMap[item.config.id] = <ExpandedRow item={item} />;
+      expandedRowItemIds.push(item.config.id);
     }
-    // spread to a new object otherwise the component wouldn't re-render
-    setItemIdToExpandedRowMap({ ...itemIdToExpandedRowMap });
+
+    // spread to a new array otherwise the component wouldn't re-render
+    setExpandedRowItemIds([...expandedRowItemIds]);
   }
 
   return [
@@ -38,7 +40,7 @@ export const getColumns = (
         <EuiButtonIcon
           onClick={() => toggleDetails(item)}
           aria-label={
-            itemIdToExpandedRowMap[item.config.id]
+            expandedRowItemIds.includes(item.config.id)
               ? i18n.translate('xpack.ml.dataframe.jobsList.rowCollapse', {
                   defaultMessage: 'Collapse',
                 })
@@ -46,7 +48,7 @@ export const getColumns = (
                   defaultMessage: 'Expand',
                 })
           }
-          iconType={itemIdToExpandedRowMap[item.config.id] ? 'arrowUp' : 'arrowDown'}
+          iconType={expandedRowItemIds.includes(item.config.id) ? 'arrowUp' : 'arrowDown'}
         />
       ),
     },

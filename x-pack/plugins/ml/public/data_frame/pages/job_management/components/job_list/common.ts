@@ -6,11 +6,11 @@
 
 import { Dictionary } from '../../../../../../common/types/common';
 
-export type jobId = string;
+export type JobId = string;
 
 export interface DataFrameJob {
   dest: string;
-  id: jobId;
+  id: JobId;
   source: string;
 }
 

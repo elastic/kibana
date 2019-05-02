@@ -7,7 +7,7 @@ exports[`Data Frame: Job List Expanded Row <JobDetailsPane /> Minimal initializa
       size="s"
     />
     <Section
-      key="0"
+      key="the-section-title"
       section={
         Object {
           "items": Array [
