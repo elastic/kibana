@@ -65,7 +65,13 @@ export interface Props {
   onCancel: () => void;
 }
 
-export class CustomElementModal extends PureComponent<Props> {
+export interface State {
+  name?: string;
+  description?: string;
+  image?: string | null;
+}
+
+export class CustomElementModal extends PureComponent<Props, State> {
   public static propTypes = {
     name: PropTypes.string,
     description: PropTypes.string,
@@ -81,7 +87,7 @@ export class CustomElementModal extends PureComponent<Props> {
     image: this.props.image || null,
   };
 
-  private _handleChange = (type: string, value: string) => {
+  private _handleChange = (type: string, value: string | null) => {
     this.setState({ [type]: value });
   };
 
