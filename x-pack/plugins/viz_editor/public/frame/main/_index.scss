@@ -10,9 +10,9 @@
 
 .lnsSidebar {
   margin: 0;
-  flex: 1 0 ($euiSize * 16);
+  flex: 1 0 18%;
+  min-width: ($euiSize * 16);
   height: 100%;
-  // background-color: $euiColorLightestShade;
   display: flex;
   flex-direction: column;
   overflow: hidden;

@@ -1,8 +1,7 @@
 .draggable-is-active {
-  background: #cde5e3;
-  outline: solid 3px #2ebeb2;
+  background: transparentize($euiColorSecondary, .92);
 }
 
 .inline-draggable {
-  padding: 8px 5px;
+  padding: $euiSizeS $euiSizeXS;
 }

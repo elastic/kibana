@@ -8,6 +8,8 @@ import {
   EuiFieldSearch,
   EuiIcon,
   // @ts-ignore
+  EuiHighlight,
+  // @ts-ignore
   EuiSuperSelect,
   ICON_TYPES,
 } from '@elastic/eui';
@@ -15,6 +17,7 @@ import {
 import { palettes } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import classNames from 'classnames';
 import { DatasourceField } from '../../../../common';
 import { VisualizationPanelProps } from '../../../../public';
 import { Draggable } from '../../components/draggable';
@@ -48,34 +51,43 @@ export function FieldListPanel({ visModel }: VisualizationPanelProps) {
     <>
       {datasource && (
         <div className="lnsFieldListPanel">
-          <EuiFieldSearch
-            placeholder={i18n.translate('xpack.viz_editor.indexPatterns.filterByNameLabel', {
-              defaultMessage: 'Search fields',
-              description: 'Search the list of fields in the index pattern for the provided text',
-            })}
-            value={state.fieldsFilter}
-            onChange={e => {
-              setState({
-                ...state,
-                fieldsFilter: e.target.value,
-              });
-            }}
-            aria-label="Search fields"
-          />
+          <div className="lnsFieldListPanel__searchWrapper">
+            <EuiFieldSearch
+              placeholder={i18n.translate('xpack.viz_editor.indexPatterns.filterByNameLabel', {
+                defaultMessage: 'Search fields',
+                description: 'Search the list of fields in the index pattern for the provided text',
+              })}
+              value={state.fieldsFilter}
+              onChange={e => {
+                setState({
+                  ...state,
+                  fieldsFilter: e.target.value,
+                });
+              }}
+              aria-label="Search fields"
+            />
+          </div>
           <div className="lnsFieldListPanel__list">
-            {datasource.fields
-              .filter(filterFields)
-              .sort(sortFields)
-              .map(field => (
-                <Draggable
-                  draggable={true}
-                  value={field}
-                  key={field.name}
-                  className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
-                >
-                  {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-                </Draggable>
-              ))}
+            <div className="lnsFieldListPanel__listOverflow">
+              {datasource.fields
+                .filter(filterFields)
+                .sort(sortFields)
+                .map(field => (
+                  <Draggable
+                    draggable={true}
+                    value={field}
+                    key={field.name}
+                    className={`lnsFieldListPanel__field lnsFieldListPanel__field-btn-${field.type}`}
+                  >
+                    {fieldIcon(field)}
+                    <span className="lnsFieldListPanel__fieldName" title={field.name}>
+                      <EuiHighlight search={state.fieldsFilter.toLowerCase()}>
+                        {field.name}
+                      </EuiHighlight>
+                    </span>
+                  </Draggable>
+                ))}
+            </div>
           </div>
         </div>
       )}
@@ -96,10 +108,15 @@ function fieldIcon({ type }: { type: string }): any {
   };
 
   const iconType = icons[type] || ICON_TYPES.find(t => t === type) || 'empty';
-  const { colors } = palettes.euiPaletteForDarkBackground;
+  const { colors } = palettes.euiPaletteColorBlind;
   const colorIndex = stringToNum(iconType) % colors.length;
 
+  const classes = classNames(
+    'lnsFieldListPanel__fieldIcon',
+    `lnsFieldListPanel__fieldIcon--${type}`
+  );
+
   return (
-    <EuiIcon type={iconType} color={colors[colorIndex]} className="fieldListPanel-field-icon" />
+    <EuiIcon type={iconType} color={colors[colorIndex]} className={classes} />
   );
 }

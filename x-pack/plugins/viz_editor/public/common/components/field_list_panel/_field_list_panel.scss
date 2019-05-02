@@ -1,0 +1,52 @@
+.lnsFieldListPanel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lnsFieldListPanel__searchWrapper {
+  padding: $euiSize $euiSize 0;
+}
+
+.lnsFieldListPanel__list {
+  @include euiOverflowShadow($euiPageBackgroundColor);
+  overflow: visible hidden;
+  margin-top: 2px; // form control shadow
+
+  .lnsFieldListPanel__listOverflow {
+    @include euiScrollBar;
+    overflow: visible auto;
+    height: 100%;
+    padding: $euiSizeS $euiSize;
+  }
+}
+
+.lnsFieldListPanel__field {
+  @include euiTextTruncate;
+  position: relative;
+  text-align: left;
+  box-sizing: border-box;
+  background: $euiColorEmptyShade;
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeXS;
+  border-radius: $euiBorderRadius;
+  font-size: $euiFontSizeS;
+  line-height: $euiSize;
+  font-weight: $euiFontWeightMedium;
+  transition: box-shadow $euiAnimSpeedFast $euiAnimSlightResistance;
+
+  &:hover {
+    @include euiBottomShadowMedium;
+    z-index: 2;
+    cursor: grab;
+  }
+}
+
+.lnsFieldListPanel__fieldIcon {
+  // opacity: 0.75;
+}
+
+.lnsFieldListPanel__fieldName {
+  vertical-align: middle;
+  margin-left: $euiSizeXS;
+}
