@@ -48,8 +48,6 @@ const uiSettings = chrome.getUiSettingsClient();
 const uiSettingsQueryLanguage = uiSettings.get('search:queryLanguage');
 
 const TimeseriesConfig = injectI18n(function (props) {
-  // check what props.model contains when no filter is set yet.
-  // compare with what the props.model contains we we have added a filter elsewhere.
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const handleSubmit = query => {
@@ -57,7 +55,6 @@ const TimeseriesConfig = injectI18n(function (props) {
   };
   const defaults = {
     fill: '',
-    // filter: { language: 'lucene', query: '' }, // possibly add this in because we need defaults for no filter set yet
     line_width: '',
     point_size: '',
     value_template: '{{value}}',

@@ -43,6 +43,7 @@ const TimeseriesSeries = injectI18n(function (props) {
     intl,
     name,
     uiRestrictions,
+    indexPatternForQuery,
   } = props;
   const defaults = { label: '' };
   const model = { ...defaults, ...props.model };
@@ -74,11 +75,13 @@ const TimeseriesSeries = injectI18n(function (props) {
               panel={panel}
               model={model}
               uiRestrictions={uiRestrictions}
+              indexPatternForQuery={indexPatternForQuery}
             />
           </div>
         </div>
       );
     } else {
+      // pass the hydrated indexPatterns down into SeriesConfig
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
