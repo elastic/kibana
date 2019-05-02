@@ -281,8 +281,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async clickIndexPatternLogstash() {
-      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
-      await indexLink.click();
+      await find.clickByLinkText('logstash-*\nDefault');
     }
 
     async createIndexPattern(indexPatternName, timefield = '@timestamp') {
