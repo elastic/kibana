@@ -21,7 +21,7 @@ declare module '@elastic/eui/lib/experimental' {
   export const EuiSeriesChart: React.SFC<EuiSeriesChartProps>;
 
   type EuiSeriesProps = CommonProps & {
-    data: Array<{ x: number; y: number | string; y0?: number }>;
+    data: Array<{ x: number; y: number; y0?: number }>;
     lineSize?: number;
     name: string;
     color?: string;
