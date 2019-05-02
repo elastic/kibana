@@ -128,13 +128,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @param {number} yOffset Optional
      * @return {Promise<void>}
      */
-    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<any>;
-    public async moveMouseTo(element: WebElementWrapper): Promise<any>;
+    public async moveMouseTo(element: any, xOffset: number, yOffset: number): Promise<void>;
+    public async moveMouseTo(element: WebElementWrapper): Promise<void>;
     public async moveMouseTo(
       element: WebElementWrapper,
       xOffset?: number,
       yOffset?: number
-    ): Promise<any> {
+    ): Promise<void> {
       switch (this.browserType) {
         case Browsers.Firefox: {
           // Workaround for scrolling bug in Firefox
@@ -143,27 +143,29 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
             .move({ x: 0, y: 0 })
             .perform();
           if (element instanceof WebElementWrapper) {
-            return await this.getActions()
+            await this.getActions()
               .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
               .perform();
           } else {
-            return await this.getActions()
+            await this.getActions()
               .move({ origin: { x: xOffset, y: yOffset } })
               .perform();
           }
+          break;
         }
         case Browsers.Chrome: {
           if (element instanceof WebElementWrapper) {
-            return await this.getActions()
+            await this.getActions()
               .pause(this.getActions().mouse)
               .move({ origin: element._webElement })
               .perform();
           } else {
-            return await this.getActions()
+            await this.getActions()
               .pause(this.getActions().mouse)
               .move({ origin: { x: xOffset, y: yOffset } })
               .perform();
           }
+          break;
         }
         default:
           throw new Error(`unsupported browser: ${this.browserType}`);
