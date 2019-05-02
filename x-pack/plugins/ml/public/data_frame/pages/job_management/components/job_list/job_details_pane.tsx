@@ -55,16 +55,16 @@ export const JobDetailsPane: SFC<JobDetailsPaneProps> = ({ sections }) => {
         <EuiSpacer size="s" />
         {sections
           .filter(s => s.position === 'left')
-          .map((s, i) => (
-            <Section section={s} key={i} />
+          .map(s => (
+            <Section section={s} key={s.title} />
           ))}
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSpacer size="s" />
         {sections
           .filter(s => s.position === 'right')
-          .map((s, i) => (
-            <Section section={s} key={i} />
+          .map(s => (
+            <Section section={s} key={s.title} />
           ))}
       </EuiFlexItem>
     </EuiFlexGroup>
