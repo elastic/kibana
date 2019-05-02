@@ -480,8 +480,7 @@ export default function ({ getService }) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/35901
-    describe.skip('API access with missing access token document.', () => {
+    describe('API access with missing access token document.', () => {
       let sessionCookie;
 
       beforeEach(async () => {
@@ -505,7 +504,7 @@ export default function ({ getService }) {
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
-          index: '.security',
+          index: '.security-tokens',
           q: 'doc_type:token',
           refresh: true,
         });
