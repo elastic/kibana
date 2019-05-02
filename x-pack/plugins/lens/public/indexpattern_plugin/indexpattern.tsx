@@ -6,34 +6,28 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Datasource, Operation, DataType } from '../';
+import { Datasource, Operation, DataType } from '..';
 
 interface IndexPatternPrivateState {
   query: object;
 }
 
-class IndexPatternDatasource implements Datasource<IndexPatternPrivateState> {
-  private state: IndexPatternPrivateState;
+// Not stateful. State is persisted to the frame
+export const indexPatternDatasource: Datasource<IndexPatternPrivateState> = {
+  async initialize() {
+    return { query: {} };
+  },
 
-  constructor(state?: IndexPatternPrivateState) {
-    if (state) {
-      this.state = state;
-    } else {
-      this.state = {
-        query: {},
-      };
-    }
-  }
-
-  toExpression() {
-    return `${JSON.stringify(this.state.query)}`;
-  }
+  toExpression(state: IndexPatternPrivateState) {
+    return `${JSON.stringify(state.query)}`;
+  },
 
   renderDataPanel({ domElement }: { domElement: Element }) {
     render(<div>Index Pattern Data Source</div>, domElement);
-  }
+  },
 
   getPublicAPI() {
+    // TODO: Provide state to each of these
     return {
       getTableSpec: () => [],
       getOperationForColumnId: () => ({
@@ -55,17 +49,13 @@ class IndexPatternDatasource implements Datasource<IndexPatternPrivateState> {
       moveColumnTo: (columnId: string, targetIndex: number) => {},
       duplicateColumn: (columnId: string) => [],
     };
-  }
+  },
 
   getDatasourceSuggestionsForField() {
     return [];
-  }
+  },
 
   getDatasourceSuggestionsFromCurrentState() {
     return [];
-  }
-}
-
-export { IndexPatternDatasource };
-
-export const indexPatternDatasource = new IndexPatternDatasource();
+  },
+};

@@ -42,6 +42,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'logs',
             'maps',
             'uptime',
+            'visualization_editor',
           ].sort()
         );
       });

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface EditorFrameAPI {
+export interface EditorFrameSetup {
   render: (domElement: Element) => void;
-  registerDatasource: (datasource: Datasource<unknown>) => void;
-  registerVisualization: (visualization: Visualization<unknown>) => void;
+  registerDatasource: (name: string, datasource: Datasource<any>) => void;
+  registerVisualization: (name: string, visualization: Visualization<any>) => void;
 }
 
 export interface EditorFrameState {
@@ -31,22 +31,22 @@ export type DimensionRole =
   | 'size'
   | string; // Some visualizations will use custom names that have other meaning
 
-export interface TableMetaInfo {
+export interface TableColumns {
   columnId: string;
   operation: Operation;
 }
 
-export interface DatasourceSuggestion<T> {
+export interface DatasourceSuggestion<T = unknown> {
   state: T;
-  tableMetas: TableMetaInfo[];
+  tableColumns: TableColumns[];
 }
 
 /**
  * Interface for the datasource registry
  */
-export interface Datasource<T> {
+export interface Datasource<T = unknown> {
   // For initializing from saved object
-  // initialize: (state?: T) => Promise<T>;
+  initialize: (state?: T) => Promise<T>;
 
   renderDataPanel: (props: DatasourceDataPanelProps) => void;
 
@@ -56,12 +56,6 @@ export interface Datasource<T> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (state: T, setState: (newState: T) => void) => DatasourcePublicAPI;
-  // publicAPI: {
-  //   [key in keyof DatasourcePublicAPI]: (
-  //     state: T,
-  //     setState: (newState: T) => void
-  //   ) => DatasourcePublicAPI[key]
-  // };
 }
 
 /**
@@ -94,28 +88,25 @@ export interface DatasourceDimensionPanelProps {
   filterOperations: (operation: Operation) => boolean;
 
   // Visualizations can hint at the role this dimension would play, which
-  // affects the ordering of the query
+  // affects the default ordering of the query
   suggestedPriority?: DimensionPriority;
-}
-
-export interface DatasourceValidationError {
-  type: 'error';
-}
-
-export interface DatasourceValidationValid {
-  type: 'valid';
 }
 
 export type DataType = 'string' | 'number' | 'date' | 'boolean';
 
-// An operation does not represent a column in the datatable
+// An operation represents a column in a table, not any information
+// about how the column was created such as whether it is a sum or average.
+// Visualizations are able to filter based on the output, not based on the
+// underlying data
 export interface Operation {
   // Operation ID is a reference to the operation
   id: string;
   // User-facing label for the operation
   label: string;
+  // The output of this operation will have this data type
   dataType: DataType;
-  // A bucketed operation has many values the same
+  // A bucketed operation is grouped by duplicate values, otherwise each row is
+  // treated as unique
   isBucketed: boolean;
 
   // Extra meta-information like cardinality, color
@@ -129,48 +120,39 @@ export interface TableSpecColumn {
 // TableSpec is managed by visualizations
 export type TableSpec = TableSpecColumn[];
 
-export type VisualizationTableRequest = Array<{
-  dataType: 'string' | 'number';
-  isBucketed: boolean;
-}>;
-
-export interface VisualizationProps<T> {
+export interface VisualizationProps<T = unknown> {
   datasource: DatasourcePublicAPI;
   state: T;
   setState: (newState: T) => void;
 }
 
-export interface VisualizationSuggestion<T> {
+export interface GetSuggestions<T = unknown> {
+  // Roles currently being used
+  roles: DimensionRole[];
+  // It is up to the Visualization to rank these tables
+  tableColumns: { [datasourceSuggestionId: string]: TableColumns };
+  state?: T; // State is only passed if the visualization is active
+}
+
+export interface VisualizationSuggestion<T = unknown> {
   score: number;
   title: string;
   state: T;
   datasourceSuggestionId: string;
 }
 
-export interface Visualization<T> {
-  // Used to switch to this visualization from another
-  getInitialStateFromOtherVisualization: (
-    options: {
-      roles: DimensionRole[];
-      datasource: DatasourcePublicAPI;
-      state?: T;
-    }
-  ) => T[];
-
+export interface Visualization<T = unknown> {
   renderConfigPanel: (props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
 
-  // For use in transitioning from one viz to another
+  // Frame will request the list of roles currently being used when calling `getInitialStateFromOtherVisualization`
   getMappingOfTableToRoles: (state: T, datasource: DatasourcePublicAPI) => DimensionRole[];
+
+  // Used to switch to this visualization from another
+  getInitialStateFromOtherVisualization: (options: GetSuggestions<T>) => T[];
 
   // Filter suggestions from datasource to good suggestions, used for suggested visualizations
   // Can be used to switch to a better visualization given the data table
-  getSuggestionsFromTableSpecs: (
-    options: {
-      roles: DimensionRole[];
-      tableMetas: { [datasourceSuggestionId: string]: TableMetaInfo };
-      state?: T; // State is only passed if the visualization is active
-    }
-  ) => Array<VisualizationSuggestion<T>>;
+  getSuggestionsFromTableSpecs: (options: GetSuggestions<T>) => Array<VisualizationSuggestion<T>>;
 }

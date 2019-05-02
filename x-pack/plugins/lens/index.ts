@@ -12,7 +12,7 @@ import { PLUGIN_ID } from './common';
 
 const NOT_INTERNATIONALIZED_PRODUCT_NAME = 'Lens Visualizations';
 
-export const visualizationLens = (kibana: any) => {
+export const lens = (kibana: any) => {
   return new kibana.Plugin({
     id: PLUGIN_ID,
     configPrefix: `xpack.${PLUGIN_ID}`,
@@ -23,10 +23,7 @@ export const visualizationLens = (kibana: any) => {
       app: {
         title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
         description: 'Explore and visualize data.',
-        main: `plugins/${PLUGIN_ID}/app`,
-        icon: 'plugins/kibana/assets/visualize.svg',
-        euiIconType: 'visualizeApp',
-        order: 8950, // Uptime is 8900
+        main: `plugins/${PLUGIN_ID}/index`,
       },
       styleSheetPaths: resolve(__dirname, 'public/index.scss'),
     },
@@ -41,7 +38,6 @@ export const visualizationLens = (kibana: any) => {
       server.plugins.xpack_main.registerFeature({
         id: PLUGIN_ID,
         name: NOT_INTERNATIONALIZED_PRODUCT_NAME,
-        icon: 'visualizeApp',
         navLinkId: PLUGIN_ID,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: [PLUGIN_ID],
@@ -69,5 +65,3 @@ export const visualizationLens = (kibana: any) => {
     },
   });
 };
-
-export { editorFrame } from './public';

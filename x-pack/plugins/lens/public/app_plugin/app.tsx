@@ -5,19 +5,11 @@
  */
 
 import { I18nProvider } from '@kbn/i18n/react';
-import { IScope } from 'angular';
 import React, { useCallback } from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
-import chrome from 'ui/chrome';
 
-import { PLUGIN_ID } from '../common';
+import { EditorFrameSetup } from '../types';
 
-import { editorFrame } from '.';
-
-// Side effect of loading this is to register
-import './indexpattern_datasource';
-
-function Lens() {
+export function App({ editorFrame }: { editorFrame: EditorFrameSetup }) {
   const renderFrame = useCallback(node => {
     if (node !== null) {
       editorFrame.render(node);
@@ -34,13 +26,3 @@ function Lens() {
     </I18nProvider>
   );
 }
-
-// TODO: Convert this to the "new platform" way of doing UI
-function App($scope: IScope, $element: JQLite) {
-  const el = $element[0];
-  $scope.$on('$destroy', () => unmountComponentAtNode(el));
-
-  return render(<Lens />, el);
-}
-
-chrome.setRootController(PLUGIN_ID, App);
