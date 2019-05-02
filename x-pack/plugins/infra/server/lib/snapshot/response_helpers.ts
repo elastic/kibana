@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isNumber, last, max, sum } from 'lodash';
+import { isNumber, last, max, sum, get } from 'lodash';
 import moment from 'moment';
 
 import {
@@ -14,6 +14,7 @@ import {
 } from '../../graphql/types';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './snapshot';
+import { IP_FIELDS } from '../constants';
 
 export interface InfraSnapshotNodeMetricsBucket {
   key: { id: string };
@@ -44,7 +45,20 @@ export interface InfraSnapshotNodeGroupByBucket {
     name: string;
     [groupByField: string]: string;
   };
+  ip: {
+    hits: {
+      total: { value: number };
+      hits: Array<{ _source: any }>;
+    };
+  };
 }
+
+const getIPFromBucket = (
+  options: InfraSnapshotRequestOptions,
+  bucket: InfraSnapshotNodeGroupByBucket
+): string | null => {
+  return get(bucket, `ip.hits.hits[0]._source.${IP_FIELDS[options.nodeType]}`);
+};
 
 export const getNodePath = (
   groupBucket: InfraSnapshotNodeGroupByBucket,
@@ -52,9 +66,10 @@ export const getNodePath = (
 ): InfraSnapshotNodePath[] => {
   const node = groupBucket.key;
   const path = options.groupBy.map(gb => {
-    return { value: node[`${gb.field}`], label: node[`${gb.field}`] };
+    return { value: node[`${gb.field}`], label: node[`${gb.field}`] } as InfraSnapshotNodePath;
   });
-  path.push({ value: node.id, label: node.name });
+  const ip = getIPFromBucket(options, groupBucket);
+  path.push({ value: node.id, label: node.name, ip });
   return path;
 };
 

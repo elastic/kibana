@@ -6,7 +6,7 @@
 
 import { metricAggregationCreators } from './metric_aggregation_creators';
 import { InfraSnapshotRequestOptions } from './snapshot';
-import { NAME_FIELDS } from '../constants';
+import { NAME_FIELDS, IP_FIELDS } from '../constants';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
@@ -14,7 +14,9 @@ export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => 
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
-    id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },
+    id: {
+      terms: { field: options.sourceConfiguration.fields[options.nodeType] },
+    },
   });
   sources.push({
     name: { terms: { field: NAME_FIELDS[options.nodeType] } },

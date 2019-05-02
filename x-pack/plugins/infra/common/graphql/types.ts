@@ -212,6 +212,8 @@ export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
+
+  ip?: string | null;
 }
 
 export interface InfraSnapshotNodeMetric {
@@ -823,6 +825,8 @@ export namespace WaffleNodesQuery {
     value: string;
 
     label: string;
+
+    ip?: string | null;
   };
 
   export type Metric = {
