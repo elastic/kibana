@@ -45,8 +45,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
-// import chrome from 'ui/chrome';
-// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 /*
 QueryBarInput will be the text input, the language switcher, and autocomplete.
 import { QueryBarInput } from 'ui/query_bar';
@@ -78,33 +76,6 @@ class TimeseriesPanelConfigUi extends Component {
   handleSubmit = query => {
     this.props.onChange({ filter: query.query });
   };
-  /*
-    Retrieving the index pattern objects that are available.
-    We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
-    CAUTION: There can be cases where the index-pattern-string, used by a tsvb visualization, doesn’t correspond to a saved index pattern object.
-    Because of this, Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
-    COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
-
-    NOTE: I tried to move this to it's own file but got stuck. Try again after implementing correctly everywhere else!
-
-  fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.props.model.index_pattern
-      ? this.props.model.index_pattern
-      : this.props.model.default_index_pattern;
-    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-      type: 'index-pattern',
-      fields: ['title', 'fields'],
-      search: `"${searchIndexPattern}"`,
-      search_fields: ['title'],
-    });
-    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-      indexPattern => indexPattern.attributes.title === searchIndexPattern
-    );
-    if (exactMatch) {
-      this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-    }
-  };
-  */
 
   render() {
     const defaults = {

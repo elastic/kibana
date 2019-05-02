@@ -29,9 +29,6 @@ import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
-import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
-// import chrome from 'ui/chrome';
-// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
@@ -46,7 +43,6 @@ class VisEditor extends Component {
       autoApply: true,
       visFields: props.visFields,
       extractedIndexPatterns: [''],
-      indexPatterns: {}, // adding these in here so that we share the same patterns in all the child components
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
@@ -63,14 +59,6 @@ class VisEditor extends Component {
 
   handleUiState = (field, value) => {
     this.props.vis.uiStateVal(field, value);
-  };
-
-  fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.state.model.index_pattern
-      ? this.state.model.index_pattern
-      : this.state.model.default_index_pattern;
-    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
-    this.setState({ indexPatterns: indexPatternObject });
   };
 
   updateVisState = debounce(() => {
@@ -106,7 +94,6 @@ class VisEditor extends Component {
           })
         );
       }
-      await this.fetchIndexPatternsForQuery();
     }
 
     this.setState({
@@ -177,15 +164,6 @@ class VisEditor extends Component {
               onChange={this.handleChange}
               getConfig={this.getConfig}
             />
-            {/* <PanelConfig
-              fields={this.state.visFields}
-              model={model}
-              visData$={this.visData$}
-              dateFormat={this.props.config.get('dateFormat')}
-              onChange={this.handleChange}
-              getConfig={this.getConfig}
-              indexPatterns={this.state.indexPatterns}
-            /> */}
           </div>
         </div>
       );
@@ -196,7 +174,6 @@ class VisEditor extends Component {
 
   async componentDidMount() {
     this.props.renderComplete();
-    await this.fetchIndexPatternsForQuery();
   }
 
   componentDidUpdate(prevProps) {

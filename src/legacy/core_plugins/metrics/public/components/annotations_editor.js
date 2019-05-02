@@ -29,8 +29,6 @@ import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
 import { Storage } from 'ui/storage';
-// import chrome from 'ui/chrome';
-// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 import { data } from 'plugins/data';
 const { QueryBar } = data.query.ui;
@@ -68,7 +66,6 @@ const localStorage = new Storage(window.localStorage);
 class AnnotationsEditor extends Component {
   constructor(props) {
     super(props);
-    // const indexPatternString = this.props.model.index_pattern ? this.props.model.index_pattern : this.props.model.default_index_pattern;
     this.state = {
       indexPatternForQuery: {},
     };
@@ -87,21 +84,6 @@ class AnnotationsEditor extends Component {
     this.setState({ indexPatternForQuery: indexPatternObject });
 
   }
-  // fetchIndexPatterns = async () => {
-  //   const searchIndexPattern = this.state.indexPatternAsString;
-  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-  //     type: 'index-pattern',
-  //     fields: ['title', 'fields'],
-  //     search: `"${searchIndexPattern}"`,
-  //     search_fields: ['title'],
-  //   });
-  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
-  //   );
-  //   if (exactMatch) {
-  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-  //   }
-  // }
 
   handleChange(item, name) {
     return e => {

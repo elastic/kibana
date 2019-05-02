@@ -58,7 +58,6 @@ PanelConfig.propTypes = {
   onChange: PropTypes.func,
   dateFormat: PropTypes.string,
   visData$: PropTypes.object,
-  // indexPatterns: PropTypes.object,
 };
 
 export default PanelConfig;
