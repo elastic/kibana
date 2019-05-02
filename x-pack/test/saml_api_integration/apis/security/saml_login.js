@@ -480,7 +480,7 @@ export default function ({ getService }) {
       });
     });
 
-    describe('API access with missing access token document.', () => {
+    describe.skip('API access with missing access token document.', () => {
       let sessionCookie;
 
       beforeEach(async () => {
