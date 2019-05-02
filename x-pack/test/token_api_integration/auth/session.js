@@ -128,12 +128,12 @@ export default function ({ getService }) {
       let sessionCookie;
       beforeEach(async () => sessionCookie = await createSessionCookie());
 
-      it.skip('should clear cookie and redirect to login', async function () {
+      it('should clear cookie and redirect to login', async function () {
         // Let's delete tokens from `.security` index directly to simulate the case when
         // Elasticsearch automatically removes access/refresh token document from the index
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
-          index: '.security',
+          index: '.security-tokens',
           q: 'doc_type:token',
           refresh: true,
         });
