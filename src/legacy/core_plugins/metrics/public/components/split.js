@@ -21,9 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
-
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
 import { SplitByFilters } from './splits/filters';
