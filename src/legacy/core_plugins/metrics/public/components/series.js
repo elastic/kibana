@@ -28,6 +28,8 @@ import table from './vis_types/table/series';
 import gauge from './vis_types/gauge/series';
 import markdown from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
+import chrome from 'ui/chrome';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 const lookup = {
   top_n: topN,
@@ -46,16 +48,17 @@ class Series extends Component {
       visible: true,
       selectedTab: 'metrics',
       uiRestrictions: undefined,
+      indexPatternForQuery: '',
     };
 
     this.visDataSubscription = null;
   }
 
-  switchTab = (selectedTab) => {
+  switchTab = selectedTab => {
     this.setState({ selectedTab });
   };
 
-  handleChange = (part) => {
+  handleChange = part => {
     if (this.props.onChange) {
       const { model } = this.props;
       const doc = assign({}, model, part);
@@ -71,7 +74,7 @@ class Series extends Component {
     });
   };
 
-  toggleVisible = (e) => {
+  toggleVisible = e => {
     e.preventDefault();
 
     this.setState({
@@ -79,15 +82,34 @@ class Series extends Component {
     });
   };
 
-  componentDidMount() {
+  async componentDidMount() {
     if (this.props.visData$) {
-      this.visDataSubscription = this.props.visData$
-        .subscribe(visData => this.setState({
+      this.visDataSubscription = this.props.visData$.subscribe(visData =>
+        this.setState({
           uiRestrictions: get(visData, 'uiRestrictions'),
-        }));
+        })
+      );
     }
+    await this.fetchIndexPatterns(this.props.panel.index_pattern ? this.props.panel.index_pattern : this.props.panel.default_index_pattern);
   }
 
+  fetchIndexPatterns = async () => {
+    const searchIndexPattern = this.props.panel.index_pattern
+      ? this.props.panel.index_pattern
+      : this.props.panel.default_index_pattern;
+    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${searchIndexPattern}"`,
+      search_fields: ['title'],
+    });
+    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+      indexPattern => indexPattern.attributes.title === searchIndexPattern
+    );
+    if (exactMatch) {
+      this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
+    }
+  };
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
@@ -117,8 +139,9 @@ class Series extends Component {
         toggleVisible: this.toggleVisible,
         togglePanelActivation: this.togglePanelActivation,
         visible: this.state.visible,
+        indexPatternForQuery: this.state.indexPatternForQuery,
       };
-      return (<Component {...params}/>);
+      return <Component {...params} />;
     }
     return (
       <div>
