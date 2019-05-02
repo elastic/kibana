@@ -6,8 +6,9 @@
 
 import React from 'react';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 import { EuiSeriesChart, EuiAreaSeries } from '@elastic/eui/lib/experimental';
-import { AreaChartData, WrappedByAutoSizer, ChartOverlay } from '.';
+import { AreaChartData, WrappedByAutoSizer } from '.';
 import { AutoSizer } from '../auto_sizer';
 
 const ChartBaseComponent = pure<{
@@ -16,7 +17,7 @@ const ChartBaseComponent = pure<{
   height: number | undefined;
 }>(({ data, ...chartConfigs }) =>
   chartConfigs.width && chartConfigs.height ? (
-    <EuiSeriesChart showDefaultAxis={false} {...chartConfigs}>
+    <SeriesChart {...chartConfigs}>
       {data.map(series =>
         series.value != null ? (
           /**
@@ -32,7 +33,7 @@ const ChartBaseComponent = pure<{
           />
         ) : null
       )}
-    </EuiSeriesChart>
+    </SeriesChart>
   ) : null
 );
 
@@ -41,8 +42,13 @@ export const AreaChart = pure<{ areaChart: AreaChartData[] }>(({ areaChart }) =>
     {({ measureRef, content: { height, width } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
         <ChartBaseComponent height={height} width={width} data={areaChart} />
-        <ChartOverlay />
       </WrappedByAutoSizer>
     )}
   </AutoSizer>
 ));
+
+const SeriesChart = styled(EuiSeriesChart)`
+  svg .rv-xy-plot__axis__ticks .rv-xy-plot__axis__tick:not(:first-child):not(:last-child) {
+    display: none;
+  }
+`;

@@ -10,9 +10,11 @@ import {
   EuiSeriesChartUtils,
 } from '@elastic/eui';
 import { pure } from 'recompose';
+import styled from 'styled-components';
 import { EuiSeriesChart, EuiBarSeries } from '@elastic/eui/lib/experimental';
-import { BarChartData, WrappedByAutoSizer, ChartOverlay } from '.';
+import { BarChartData, WrappedByAutoSizer } from '.';
 import { AutoSizer } from '../auto_sizer';
+
 const { SCALE, ORIENTATION } = EuiSeriesChartUtils;
 
 const ChartBaseComponent = pure<{
@@ -21,12 +23,7 @@ const ChartBaseComponent = pure<{
   height: number | undefined;
 }>(({ data, ...chartConfigs }) =>
   chartConfigs.width && chartConfigs.height ? (
-    <EuiSeriesChart
-      showDefaultAxis={false}
-      yType={SCALE.ORDINAL}
-      orientation={ORIENTATION.HORIZONTAL}
-      {...chartConfigs}
-    >
+    <SeriesChart yType={SCALE.ORDINAL} orientation={ORIENTATION.HORIZONTAL} {...chartConfigs}>
       {data.map(series =>
         series.value != null ? (
           /**
@@ -41,7 +38,7 @@ const ChartBaseComponent = pure<{
           />
         ) : null
       )}
-    </EuiSeriesChart>
+    </SeriesChart>
   ) : null
 );
 
@@ -50,8 +47,16 @@ export const BarChart = pure<{ barChart: BarChartData[] }>(({ barChart }) => (
     {({ measureRef, content: { height, width } }) => (
       <WrappedByAutoSizer data-test-subj="wrapped-by-auto-sizer" innerRef={measureRef}>
         <ChartBaseComponent height={height} width={width} data={barChart} />
-        <ChartOverlay />
       </WrappedByAutoSizer>
     )}
   </AutoSizer>
 ));
+
+const SeriesChart = styled(EuiSeriesChart)`
+  svg
+    .rv-xy-plot__axis--horizontal
+    .rv-xy-plot__axis__ticks
+    .rv-xy-plot__axis__tick:not(:first-child):not(:last-child) {
+    display: none;
+  }
+`;
