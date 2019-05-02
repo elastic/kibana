@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { once } from 'lodash';
-import esShield from './esjs_shield_plugin';
-
-export const getClient = once((server) => {
-  return server.plugins.elasticsearch.createCluster('security', { plugins: [esShield] });
-});
+export { AuthenticationResult } from './authentication_result';
+export { DeauthenticationResult } from './deauthentication_result';

@@ -17,16 +17,11 @@
  * under the License.
  */
 
-import { keyCodes } from '@elastic/eui';
-
-export function createUpDownHandler(callback) {
-  return (ev) => {
-    if (ev.keyCode === keyCodes.UP) {
-      ev.preventDefault();
-      callback('up');
-    } else if (ev.keyCode === keyCodes.DOWN) {
-      ev.preventDefault();
-      callback('down');
-    }
-  };
-}
+export const PANEL_TYPES = {
+  TABLE: 'table',
+  GAUGE: 'gauge',
+  MARKDOWN: 'markdown',
+  TOP_N: 'top_n',
+  TIMESERIES: 'timeseries',
+  METRIC: 'metric',
+};
