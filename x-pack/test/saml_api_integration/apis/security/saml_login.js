@@ -480,6 +480,7 @@ export default function ({ getService }) {
       });
     });
 
+    // FLAKY: https://github.com/elastic/kibana/issues/35901
     describe.skip('API access with missing access token document.', () => {
       let sessionCookie;
 
