@@ -5,7 +5,7 @@
  */
 
 import gql from 'graphql-tag';
-import { sharedFragments } from '../../../common/graphql/shared'
+import { sharedFragments } from '../../../common/graphql/shared';
 
 export const flyoutItemQuery = gql`
   query FlyoutItemQuery($sourceId: ID!, $itemId: ID!) {
