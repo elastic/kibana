@@ -21,8 +21,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+// import chrome from 'ui/chrome';
+// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
@@ -30,6 +30,7 @@ import { SplitByFilters } from './splits/filters';
 import { SplitByEverything } from './splits/everything';
 import { SplitUnsupported } from './splits/unsupported_split';
 import { isGroupByFieldsEnabled } from '../lib/check_ui_restrictions';
+import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 const SPLIT_MODES = {
   FILTERS: 'filters',
@@ -41,15 +42,16 @@ const SPLIT_MODES = {
 class Split extends Component {
   constructor(props) {
     super(props);
-    const indexPatternString = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
-        (this.props.panel.index_pattern);
+    // const indexPatternString = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
+    //     (this.props.panel.index_pattern);
     this.state = {
-      indexPatternAsString: indexPatternString || props.panel.default_index_pattern || '',
+      // indexPatternAsString: indexPatternString || props.panel.default_index_pattern || '',
       indexPatternForQuery: '',
     };
   }
   async componentDidMount() {
-    await this.fetchIndexPatterns();
+    // await this.fetchIndexPatterns();
+    await this.fetchIndexPatternsForQuery();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -71,25 +73,30 @@ class Split extends Component {
       });
     }
   }
-
-  fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.state.indexPatternAsString;
-    let indexPatternForQuery = this.state.indexPatternForQuery;
-    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-      type: 'index-pattern',
-      fields: ['title', 'fields'],
-      search: `"${searchIndexPattern}"`,
-      search_fields: ['title'],
-    });
-    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-      indexPattern => indexPattern.attributes.title === searchIndexPattern
-    );
-    if (exactMatch) {
-      indexPatternForQuery = getFromSavedObject(exactMatch);
-      this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-    }
-    return indexPatternForQuery;
+  fetchIndexPatternsForQuery = async () => {
+    const searchIndexPattern = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
+        (this.props.panel.index_pattern);
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatternForQuery: indexPatternObject });
   }
+  // fetchIndexPatterns = async () => {
+  //   const searchIndexPattern = this.state.indexPatternAsString;
+  //   let indexPatternForQuery = this.state.indexPatternForQuery;
+  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+  //     type: 'index-pattern',
+  //     fields: ['title', 'fields'],
+  //     search: `"${searchIndexPattern}"`,
+  //     search_fields: ['title'],
+  //   });
+  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
+  //   );
+  //   if (exactMatch) {
+  //     indexPatternForQuery = getFromSavedObject(exactMatch);
+  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
+  //   }
+  //   return indexPatternForQuery;
+  // }
 
   getComponent(splitMode, uiRestrictions) {
     if (!isGroupByFieldsEnabled(splitMode, uiRestrictions)) {
@@ -135,7 +142,7 @@ class Split extends Component {
         fields={this.props.fields}
         onChange={this.props.onChange}
         uiRestrictions={uiRestrictions}
-        indexPatterns={[this.state.indexPatternForQuery]}
+        indexPatterns={this.state.indexPatternForQuery}
       />
     );
   }
