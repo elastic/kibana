@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 
 function escapeLayerName(name) {
   return name
-    ? name.replace(' ', '_')
+    ? name.split(' ').join('_')
     : '';
 }
 

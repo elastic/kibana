@@ -261,7 +261,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     escapeLayerName(layerName) {
-      return layerName.replace(' ', '_');
+      return layerName.split(' ').join('_');
     }
 
     async getLayerTOCDetails(layerName) {
