@@ -74,6 +74,10 @@ const savedObjectWithDecryptedContent =  await server.plugins.encrypted_saved_ob
 );
 ```
 
+`getDecryptedAsInternalUser` also accepts the 3rd optional `options` argument that has exactly the same type as `options`
+one would pass to `SavedObjectsClient.get`. These argument allows to specify `namespace` property that, for example, is
+required if Saved Object was created within a non-default space.
+
 ## Testing
 
 ### Unit tests
@@ -94,4 +98,3 @@ In another shell, from `kibana-root-folder/x-pack`:
 ```bash
 $ node ../scripts/functional_test_runner.js --config test/plugin_api_integration/config.js --grep="{TEST_NAME}"
 ```
-
