@@ -87,7 +87,9 @@ export interface Props {
 }
 
 export interface State {
-  // indicated whether not the custom element modal is open
+  /**
+   *  indicates whether or not the custom element modal is open
+   */
   isModalVisible: boolean;
 }
 
