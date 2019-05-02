@@ -88,6 +88,7 @@ export const defaultResponseSort = (handleResponse) => {
   const version = ['6.6.2', '7.0.0-rc1', '6.7.1'];
 
   for (let i = 0, l = version.length; i < l; ++i) {
+    // Deep clone the object to preserve the original
     const newBeat = JSON.parse(JSON.stringify({ ...hit }));
     const { beats_stats: beatsStats } = newBeat._source;
     beatsStats.timestamp = `2019-01-0${i + 1}T05:00:00.000Z`;
