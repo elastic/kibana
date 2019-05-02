@@ -37,6 +37,9 @@ export type PluginsServiceStartDeps = CoreStart;
 export interface PluginsServiceSetup {
   contracts: Map<string, unknown>;
 }
+export interface PluginsServiceStart {
+  contracts: Map<string, unknown>;
+}
 
 /**
  * Service responsible for loading plugin bundles, initializing plugins, and managing the lifecycle
@@ -44,7 +47,7 @@ export interface PluginsServiceSetup {
  *
  * @internal
  */
-export class PluginsService implements CoreService<PluginsServiceSetup> {
+export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   /** Plugin wrappers in topological order. */
   private readonly plugins: Map<
     PluginName,
