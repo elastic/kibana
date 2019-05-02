@@ -204,9 +204,9 @@ class VisEditor extends Component {
     return null;
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.props.renderComplete();
-    this.fetchIndexPatterns();
+    await this.fetchIndexPatterns();
   }
 
   componentDidUpdate(prevProps) {

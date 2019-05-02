@@ -81,6 +81,7 @@ const TimeseriesSeries = injectI18n(function (props) {
     } else {
       seriesBody = (
         <SeriesConfig
+          data-findMe="SeriesConfigInSeriesBodyWHenNotMetricTab"
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
