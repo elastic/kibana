@@ -43,8 +43,9 @@ interface ScrollableLogTextStreamViewProps {
   ) => any;
   loadNewerItems: () => void;
   setFlyoutItem: (id: string) => void;
-  showFlyout: () => void;
+  setFlyoutVisibility: (visible: boolean) => void;
   intl: InjectedIntl;
+  highlightedItem: string | null;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -102,6 +103,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
       isStreaming,
       lastLoadedTime,
       intl,
+      highlightedItem,
     } = this.props;
     const { targetId } = this.state;
     const hasItems = items.length > 0;
@@ -169,6 +171,9 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
                       item={item}
                       scale={scale}
                       wrap={wrap}
+                      isHighlighted={
+                        highlightedItem ? item.logEntry.gid === highlightedItem : false
+                      }
                     />
                   )}
                 </MeasurableItemView>
@@ -190,7 +195,7 @@ class ScrollableLogTextStreamViewClass extends React.PureComponent<
 
   private handleOpenFlyout = (id: string) => {
     this.props.setFlyoutItem(id);
-    this.props.showFlyout();
+    this.props.setFlyoutVisibility(true);
   };
 
   private handleReload = () => {
