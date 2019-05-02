@@ -16,17 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+export const reorder = (
+  list,
+  startIndex,
+  endIndex,
+) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
 
-import { keyCodes } from '@elastic/eui';
-
-export function createUpDownHandler(callback) {
-  return (ev) => {
-    if (ev.keyCode === keyCodes.UP) {
-      ev.preventDefault();
-      callback('up');
-    } else if (ev.keyCode === keyCodes.DOWN) {
-      ev.preventDefault();
-      callback('down');
-    }
-  };
-}
+  return result;
+};
