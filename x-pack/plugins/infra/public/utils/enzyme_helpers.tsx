@@ -191,4 +191,3 @@ export const mountHook = <Args extends {}, HookValue extends any>(
     hookValueCallback,
   };
 };
-
