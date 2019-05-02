@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { FetchSoonProvider } from './fetch_soon';
+export { FetchSoonProvider, FetchNowProvider } from './fetch';

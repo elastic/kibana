@@ -18,28 +18,21 @@
  */
 
 import _ from 'lodash';
-import { FetchNowProvider } from './fetch_now';
+import { CallClientProvider } from './call_client';
+import { callResponseHandlers } from './call_response_handlers';
 
 /**
- * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
+ * This is usually the right fetch provider to use, rather than FetchNowProvider, as this function introduces
  * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
  * is loading).
- *
- * @param Private
- * @param Promise
- * @constructor
  */
 export function FetchSoonProvider(Private) {
-
   const fetchNow = Private(FetchNowProvider);
   let requestsToFetch = [];
 
-  const debouncedFetchNow = _.debounce(async () => {
-    try {
-      await fetchNow(requestsToFetch);
-    } finally {
-      requestsToFetch = [];
-    }
+  const debouncedFetchNow = _.debounce(() => {
+    fetchNow(requestsToFetch);
+    requestsToFetch = [];
   }, {
     wait: 10,
     maxWait: 50
@@ -55,5 +48,24 @@ export function FetchSoonProvider(Private) {
     requestsToFetch = [...requestsToFetch, request];
     debouncedFetchNow(requestsToFetch);
     return request.getPromise();
+  };
+}
+
+/**
+ * Fetch now provider should be used if you want the results searched and returned immediately.
+ * This can be slightly inefficient if a large number of requests are queued up, we can batch these
+ * by using fetchSoon.
+ */
+export function FetchNowProvider(Private) {
+  const callClient = Private(CallClientProvider);
+
+  return async function fetchNow(searchRequests) {
+    try {
+      const responses = await callClient(searchRequests);
+      return responses && callResponseHandlers(searchRequests, responses);
+    } catch (e) {
+      // Silently swallow errors that result from search requests so the consumer can surface
+      // them as notifications instead of courier forcing fatal errors.
+    }
   };
 }
