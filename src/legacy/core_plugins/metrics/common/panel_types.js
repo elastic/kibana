@@ -17,6 +17,11 @@
  * under the License.
  */
 
-import './directive';
-
-export { SearchBar } from './components';
+export const PANEL_TYPES = {
+  TABLE: 'table',
+  GAUGE: 'gauge',
+  MARKDOWN: 'markdown',
+  TOP_N: 'top_n',
+  TIMESERIES: 'timeseries',
+  METRIC: 'metric',
+};

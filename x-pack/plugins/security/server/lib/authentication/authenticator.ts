@@ -4,26 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Legacy } from 'kibana';
 import { getClient } from '../../../../../server/lib/get_client_shield';
-import { AuthScopeService } from '../auth_scope_service';
+import { AuthScopeService, ScopesGetter } from '../auth_scope_service';
 import { getErrorStatusCode } from '../errors';
-import { BasicAuthenticationProvider } from './providers/basic';
-import { SAMLAuthenticationProvider } from './providers/saml';
-import { TokenAuthenticationProvider } from './providers/token';
+import {
+  AuthenticationProviderOptions,
+  BaseAuthenticationProvider,
+  BasicAuthenticationProvider,
+  SAMLAuthenticationProvider,
+  TokenAuthenticationProvider,
+} from './providers';
 import { AuthenticationResult } from './authentication_result';
 import { DeauthenticationResult } from './deauthentication_result';
 import { Session } from './session';
 import { LoginAttempt } from './login_attempt';
 
+interface ProviderSession {
+  provider: string;
+  state: unknown;
+}
+
 // Mapping between provider key defined in the config and authentication
 // provider class that can handle specific authentication mechanism.
-const providerMap = new Map([
+const providerMap = new Map<
+  string,
+  new (options: AuthenticationProviderOptions) => BaseAuthenticationProvider
+>([
   ['basic', BasicAuthenticationProvider],
   ['saml', SAMLAuthenticationProvider],
   ['token', TokenAuthenticationProvider],
 ]);
 
-function assertRequest(request) {
+function assertRequest(request: Legacy.Request) {
   if (!request || typeof request !== 'object') {
     throw new Error(`Request should be a valid object, was [${typeof request}].`);
   }
@@ -31,10 +44,9 @@ function assertRequest(request) {
 
 /**
  * Prepares options object that is shared among all authentication providers.
- * @param {Hapi.Server} server HapiJS Server instance.
- * @returns {Object}
+ * @param server Server instance.
  */
-function getProviderOptions(server) {
+function getProviderOptions(server: Legacy.Server) {
   const config = server.config();
 
   return {
@@ -42,12 +54,26 @@ function getProviderOptions(server) {
     log: server.log.bind(server),
 
     protocol: server.info.protocol,
-    hostname: config.get('server.host'),
-    port: config.get('server.port'),
-    basePath: config.get('server.basePath'),
+    hostname: config.get<string>('server.host'),
+    port: config.get<number>('server.port'),
+    basePath: config.get<string>('server.basePath'),
 
-    ...config.get('xpack.security.public')
+    ...config.get('xpack.security.public'),
   };
+}
+
+/**
+ * Instantiates authentication provider based on the provider key from config.
+ * @param providerType Provider type key.
+ * @param options Options to pass to provider's constructor.
+ */
+function instantiateProvider(providerType: string, options: AuthenticationProviderOptions) {
+  const ProviderClassName = providerMap.get(providerType);
+  if (!ProviderClassName) {
+    throw new Error(`Unsupported authentication provider name: ${providerType}.`);
+  }
+
+  return new ProviderClassName(options);
 }
 
 /**
@@ -65,46 +91,23 @@ function getProviderOptions(server) {
  */
 class Authenticator {
   /**
-   * HapiJS server instance.
-   * @type {Hapi.Server}
-   * @private
-   */
-  _server = null;
-
-  /**
-   * Service that gathers all `scopes` for particular user.
-   * @type {AuthScopeService}
-   * @private
-   */
-  _authScope = null;
-
-  /**
    * List of configured and instantiated authentication providers.
-   * @type {Map.<string, Object>}
-   * @private
    */
-  _providers = null;
-
-  /**
-   * Session class instance.
-   * @type {Session}
-   * @private
-   */
-  _session = null;
+  private readonly providers: Map<string, BaseAuthenticationProvider>;
 
   /**
    * Instantiates Authenticator and bootstrap configured providers.
-   * @param {Hapi.Server} server HapiJS Server instance.
-   * @param {AuthScopeService} authScope AuthScopeService instance.
-   * @param {Session} session Session instance.
+   * @param server Server instance.
+   * @param authScope AuthScopeService instance.
+   * @param session Session instance.
    */
-  constructor(server, authScope, session) {
-    this._server = server;
-    this._authScope = authScope;
-    this._session = session;
-
-    const config = this._server.config();
-    const authProviders = config.get('xpack.security.authProviders');
+  constructor(
+    private readonly server: Legacy.Server,
+    private readonly authScope: AuthScopeService,
+    private readonly session: Session
+  ) {
+    const config = this.server.config();
+    const authProviders = config.get<string[]>('xpack.security.authProviders');
     if (authProviders.length === 0) {
       throw new Error(
         'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
@@ -113,50 +116,55 @@ class Authenticator {
 
     const providerOptions = Object.freeze(getProviderOptions(server));
 
-    this._providers = new Map(
+    this.providers = new Map(
       authProviders.map(
-        (providerType) => [providerType, this._instantiateProvider(providerType, providerOptions)]
+        providerType =>
+          [providerType, instantiateProvider(providerType, providerOptions)] as [
+            string,
+            BaseAuthenticationProvider
+          ]
       )
     );
   }
 
   /**
    * Performs request authentication using configured chain of authentication providers.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<AuthenticationResult>}.
+   * @param request Request instance.
    */
-  async authenticate(request) {
+  async authenticate(request: Legacy.Request) {
     assertRequest(request);
 
-    const isSystemApiRequest = this._server.plugins.kibana.systemApi.isSystemApiRequest(request);
-    const existingSession = await this._getSessionValue(request);
+    const isSystemApiRequest = this.server.plugins.kibana.systemApi.isSystemApiRequest(request);
+    const existingSession = await this.getSessionValue(request);
 
     let authenticationResult;
-    for (const [providerType, provider] of this._providerIterator(existingSession)) {
+    for (const [providerType, provider] of this.providerIterator(existingSession)) {
       // Check if current session has been set by this provider.
       const ownsSession = existingSession && existingSession.provider === providerType;
 
       authenticationResult = await provider.authenticate(
         request,
-        ownsSession ? existingSession.state : null
+        ownsSession ? existingSession!.state : null
       );
 
       if (ownsSession || authenticationResult.shouldUpdateState()) {
         // If authentication succeeds or requires redirect we should automatically extend existing user session,
         // unless authentication has been triggered by a system API request. In case provider explicitly returns new
         // state we should store it in the session regardless of whether it's a system API request or not.
-        const sessionCanBeUpdated = (authenticationResult.succeeded() || authenticationResult.redirected())
-          && (authenticationResult.shouldUpdateState() || !isSystemApiRequest);
+        const sessionCanBeUpdated =
+          (authenticationResult.succeeded() || authenticationResult.redirected()) &&
+          (authenticationResult.shouldUpdateState() || !isSystemApiRequest);
 
         // If provider owned the session, but failed to authenticate anyway, that likely means that
         // session is not valid and we should clear it. Also provider can specifically ask to clear
         // session by setting it to `null` even if authentication attempt didn't fail.
-        if (authenticationResult.shouldClearState() || (
-          authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
+        if (
+          authenticationResult.shouldClearState() ||
+          (authenticationResult.failed() && getErrorStatusCode(authenticationResult.error) === 401)
         ) {
-          await this._session.clear(request);
+          await this.session.clear(request);
         } else if (sessionCanBeUpdated) {
-          await this._session.set(
+          await this.session.set(
             request,
             authenticationResult.shouldUpdateState()
               ? { state: authenticationResult.state, provider: providerType }
@@ -173,8 +181,8 @@ class Authenticator {
         return AuthenticationResult.succeeded({
           ...authenticationResult.user,
           // Complement user returned from the provider with scopes.
-          scope: await this._authScope.getForRequestAndUser(request, authenticationResult.user)
-        });
+          scope: await this.authScope.getForRequestAndUser(request, authenticationResult.user!),
+        } as any);
       } else if (authenticationResult.redirected()) {
         return authenticationResult;
       }
@@ -185,17 +193,16 @@ class Authenticator {
 
   /**
    * Deauthenticates current request.
-   * @param {Hapi.Request} request HapiJS request instance.
-   * @returns {Promise.<DeauthenticationResult>}
+   * @param request Request instance.
    */
-  async deauthenticate(request) {
+  async deauthenticate(request: Legacy.Request) {
     assertRequest(request);
 
-    const sessionValue = await this._getSessionValue(request);
+    const sessionValue = await this.getSessionValue(request);
     if (sessionValue) {
-      await this._session.clear(request);
+      await this.session.clear(request);
 
-      return this._providers.get(sessionValue.provider).deauthenticate(request, sessionValue.state);
+      return this.providers.get(sessionValue.provider)!.deauthenticate(request, sessionValue.state);
     }
 
     // Normally when there is no active session in Kibana, `deauthenticate` method shouldn't do anything
@@ -204,44 +211,29 @@ class Authenticator {
     // SP associated with the current user session to do the logout. So if Kibana (without active session)
     // receives such a request it shouldn't redirect user to the home page, but rather redirect back to IdP
     // with correct logout response and only Elasticsearch knows how to do that.
-    if (request.query.SAMLRequest && this._providers.has('saml')) {
-      return this._providers.get('saml').deauthenticate(request);
+    if ((request.query as Record<string, string>).SAMLRequest && this.providers.has('saml')) {
+      return this.providers.get('saml')!.deauthenticate(request);
     }
 
     return DeauthenticationResult.notHandled();
   }
 
   /**
-   * Instantiates authentication provider based on the provider key from config.
-   * @param {string} providerType Provider type key.
-   * @param {Object} options Options to pass to provider's constructor.
-   * @returns {Object} Authentication provider instance.
-   * @private
-   */
-  _instantiateProvider(providerType, options) {
-    const ProviderClassName = providerMap.get(providerType);
-    if (!ProviderClassName) {
-      throw new Error(`Unsupported authentication provider name: ${providerType}.`);
-    }
-
-    return new ProviderClassName(options);
-  }
-
-  /**
    * Returns provider iterator where providers are sorted in the order of priority (based on the session ownership).
-   * @param {Object} sessionValue Current session value.
-   * @returns {Iterator.<Object>}
+   * @param sessionValue Current session value.
    */
-  *_providerIterator(sessionValue) {
+  *providerIterator(
+    sessionValue: ProviderSession | null
+  ): IterableIterator<[string, BaseAuthenticationProvider]> {
     // If there is no session to predict which provider to use first, let's use the order
     // providers are configured in. Otherwise return provider that owns session first, and only then the rest
     // of providers.
     if (!sessionValue) {
-      yield* this._providers;
+      yield* this.providers;
     } else {
-      yield [sessionValue.provider, this._providers.get(sessionValue.provider)];
+      yield [sessionValue.provider, this.providers.get(sessionValue.provider)!];
 
-      for (const [providerType, provider] of this._providers) {
+      for (const [providerType, provider] of this.providers) {
         if (providerType !== sessionValue.provider) {
           yield [providerType, provider];
         }
@@ -252,18 +244,16 @@ class Authenticator {
   /**
    * Extracts session value for the specified request. Under the hood it can
    * clear session if it belongs to the provider that is not available.
-   * @param {Hapi.Request} request Request to extract session value for.
-   * @returns {Promise.<Object|null>}
-   * @private
+   * @param request Request to extract session value for.
    */
-  async _getSessionValue(request) {
-    let sessionValue = await this._session.get(request);
+  private async getSessionValue(request: Legacy.Request) {
+    let sessionValue = await this.session.get<ProviderSession>(request);
 
     // If for some reason we have a session stored for the provider that is not available
     // (e.g. when user was logged in with one provider, but then configuration has changed
     // and that provider is no longer available), then we should clear session entirely.
-    if (sessionValue && !this._providers.has(sessionValue.provider)) {
-      await this._session.clear(request);
+    if (sessionValue && !this.providers.has(sessionValue.provider)) {
+      await this.session.clear(request);
       sessionValue = null;
     }
 
@@ -271,13 +261,13 @@ class Authenticator {
   }
 }
 
-export async function initAuthenticator(server) {
+export async function initAuthenticator(server: Legacy.Server) {
   const session = await Session.create(server);
   const authScope = new AuthScopeService();
   const authenticator = new Authenticator(server, authScope, session);
 
   const loginAttempts = new WeakMap();
-  server.decorate('request', 'loginAttempt', function () {
+  server.decorate('request', 'loginAttempt', function(this: Legacy.Request) {
     const request = this;
     if (!loginAttempts.has(request)) {
       loginAttempts.set(request, new LoginAttempt());
@@ -285,13 +275,17 @@ export async function initAuthenticator(server) {
     return loginAttempts.get(request);
   });
 
-  server.expose('authenticate', (request) => authenticator.authenticate(request));
-  server.expose('deauthenticate', (request) => authenticator.deauthenticate(request));
-  server.expose('registerAuthScopeGetter', (scopeExtender) => authScope.registerGetter(scopeExtender));
+  server.expose('authenticate', (request: Legacy.Request) => authenticator.authenticate(request));
+  server.expose('deauthenticate', (request: Legacy.Request) =>
+    authenticator.deauthenticate(request)
+  );
+  server.expose('registerAuthScopeGetter', (scopeExtender: ScopesGetter) =>
+    authScope.registerGetter(scopeExtender)
+  );
 
-  server.expose('isAuthenticated', async (request) => {
+  server.expose('isAuthenticated', async (request: Legacy.Request) => {
     try {
-      await server.plugins.security.getUser(request);
+      await server.plugins.security!.getUser(request);
       return true;
     } catch (err) {
       // Don't swallow server errors.
