@@ -600,17 +600,6 @@ export function getUiSettingDefaults() {
           'patterns from which to query the field mapping',
       }),
     },
-    'indexPatterns:warnAboutUnsupportedTimePatterns': {
-      name: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningTitle', {
-        defaultMessage: 'Time pattern warning',
-      }),
-      value: false,
-      description: i18n.translate('kbn.advancedSettings.indexPattern.unsupportedTimePatternWarningText', {
-        defaultMessage:
-          'When an index pattern is using the now unsupported "time pattern" format, a warning will ' +
-          'be displayed once per session that is using this pattern. Set this to false to disable that warning.',
-      }),
-    },
     'format:defaultTypeMap': {
       name: i18n.translate('kbn.advancedSettings.format.defaultTypeMapTitle', {
         defaultMessage: 'Field type format name',
