@@ -90,10 +90,12 @@ export function incrementCounts({
     filesUploadedTotalCount: filesUploadedTotalCount + 1,
     filesUploadedTypesTotalCounts: {
       ...filesUploadedTypesTotalCounts,
+      // Example: 'json', 'txt', 'csv', etc.
       [fileType]: _.get(filesUploadedTypesTotalCounts, fileType, 0) + 1,
     },
     filesUploadedByApp: {
       ...filesUploadedByApp,
+      // Example: 'maps', 'ml', etc.
       [app]: {
         ..._.get(filesUploadedByApp, app, {}),
         [fileType]: _.get(filesUploadedByApp, `${app}.${fileType}`, 0) + 1,
