@@ -9,8 +9,12 @@ exports[`Relationships should render dashboards normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <EuiToolTip
           content="dashboard"
@@ -113,8 +117,12 @@ exports[`Relationships should render errors 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <EuiToolTip
           content="dashboard"
@@ -159,8 +167,12 @@ exports[`Relationships should render index patterns normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <EuiToolTip
           content="index patterns"
@@ -314,8 +326,12 @@ exports[`Relationships should render searches normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <EuiToolTip
           content="search"
@@ -481,8 +497,12 @@ exports[`Relationships should render visualizations normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
-    <EuiTitle>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      size="m"
+    >
       <h2>
         <EuiToolTip
           content="visualization"

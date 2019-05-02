@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import querystring from 'querystring';
 import React from 'react';
 import { connect } from 'react-redux';
@@ -196,22 +196,20 @@ class SearchPage extends React.PureComponent<Props, State> {
     }
 
     return (
-      <div className="codeContainer__search">
-        <ShortcutsProvider />
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem style={{ maxWidth: '256px' }}>
-            <SideBar
-              query={this.props.query}
-              scope={scope}
-              repositories={repositories}
-              languages={languages}
-              repoFacets={repoStats}
-              langFacets={languageStats}
-              onLanguageFilterToggled={this.onLanguageFilterToggled}
-              onRepositoryFilterToggled={this.onRepositoryFilterToggled}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
+      <div className="codeContainer__root">
+        <div className="codeContainer__rootInner">
+          <ShortcutsProvider />
+          <SideBar
+            query={this.props.query}
+            scope={scope}
+            repositories={repositories}
+            languages={languages}
+            repoFacets={repoStats}
+            langFacets={languageStats}
+            onLanguageFilterToggled={this.onLanguageFilterToggled}
+            onRepositoryFilterToggled={this.onRepositoryFilterToggled}
+          />
+          <div className="codeContainer__search--main">
             <SearchBar
               repoScope={this.props.searchOptions.repoScope.map(r => r.uri)}
               query={this.props.query}
@@ -219,8 +217,8 @@ class SearchPage extends React.PureComponent<Props, State> {
               ref={element => (this.searchBar = element)}
             />
             {mainComp}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </div>
+        </div>
       </div>
     );
   }

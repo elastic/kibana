@@ -27,6 +27,7 @@ import testSubjSelector from '@kbn/test-subj-selector';
 import { ToolingLog } from '@kbn/dev-utils';
 // @ts-ignore not supported yet
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
+import { Browsers } from '../../remote/browsers';
 
 interface Driver {
   driver: WebDriver;
@@ -326,8 +327,7 @@ export class WebElementWrapper {
    */
   public async moveMouseTo(): Promise<void> {
     await this.scrollIntoViewIfNecessary();
-    if (this.browserType === 'firefox') {
-      // workaround for Actions API bug in FF 65+
+    if (this.browserType === Browsers.Firefox) {
       const actions = (this.driver as any).actions();
       await actions.move({ x: 0, y: 0 }).perform();
       await actions.move({ x: 10, y: 10, origin: this._webElement }).perform();

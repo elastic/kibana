@@ -25,15 +25,12 @@ import { WebElementWrapper } from './lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
+import { Browsers } from './remote/browsers';
+
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const { driver, Key, LegacyActionSequence, browserType } = await getService(
     '__webdriver__'
   ).init();
-  const browsers = Object.freeze({
-    CHROME: 'chrome',
-    FIREFOX: 'firefox',
-    IE: 'ie',
-  });
 
   class BrowserService {
     /**
@@ -51,6 +48,10 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public readonly isW3CEnabled: boolean = (driver as any).executor_.w3c === true;
 
+    /**
+     * Returns instance of Actions API based on driver w3c flag
+     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
+     */
     public getActions(): any {
       return this.isW3CEnabled
         ? (driver as any).actions()
@@ -134,26 +135,40 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       xOffset?: number,
       yOffset?: number
     ): Promise<void> {
-      if (this.browserType === browsers.FIREFOX) {
-        // workaround for Actions API bug in FF 65+
-        const actions = (driver as any).actions();
-        await actions.move({ x: 0, y: 0 }).perform();
-        await actions.move({ x: 10, y: 10, origin: element._webElement }).perform();
-      } else {
-        const actions = (driver as any).actions({ bridge: true });
-        if (element instanceof WebElementWrapper) {
-          await actions
-            .pause(this.getActions().mouse())
-            .move({ origin: element._webElement })
+      switch (this.browserType) {
+        case Browsers.Firefox: {
+          // Workaround for scrolling bug in Firefox
+          // https://github.com/mozilla/geckodriver/issues/776
+          await this.getActions()
+            .move({ x: 0, y: 0 })
             .perform();
-        } else if (isNaN(xOffset!) || isNaN(yOffset!) === false) {
-          await actions
-            .pause(this.getActions().mouse())
-            .move({ origin: { x: xOffset, y: yOffset } })
-            .perform();
-        } else {
-          throw new Error('Element or coordinates should be provided');
+          if (element instanceof WebElementWrapper) {
+            await this.getActions()
+              .move({ x: xOffset || 10, y: yOffset || 10, origin: element._webElement })
+              .perform();
+          } else {
+            await this.getActions()
+              .move({ origin: { x: xOffset, y: yOffset } })
+              .perform();
+          }
+          break;
         }
+        case Browsers.Chrome: {
+          if (element instanceof WebElementWrapper) {
+            await this.getActions()
+              .pause(this.getActions().mouse)
+              .move({ origin: element._webElement })
+              .perform();
+          } else {
+            await this.getActions()
+              .pause(this.getActions().mouse)
+              .move({ origin: { x: xOffset, y: yOffset } })
+              .perform();
+          }
+          break;
+        }
+        default:
+          throw new Error(`unsupported browser: ${this.browserType}`);
       }
     }
 
@@ -209,8 +224,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         // tslint:disable-next-line:variable-name
         const _offset = { x: _to.x - _from.x, y: _to.y - _from.y };
 
-        return await (driver as any)
-          .actions()
+        return await this.getActions()
           .move({ x: _from.x, y: _from.y, origin: 'pointer' })
           .press()
           .move({ x: _offset.x, y: _offset.y, origin: 'pointer' })
@@ -223,8 +237,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
         // tslint:disable-next-line:variable-name
         _to = _convertPoint(to);
         if (from.location instanceof WebElementWrapper && typeof to.location.x === 'number') {
-          const actions = (driver as any).actions({ bridge: true });
-          return await actions
+          return await this.getActions()
             .move({ origin: _from })
             .press()
             .move({ x: _to.x, y: _to.y, origin: 'pointer' })
@@ -294,13 +307,13 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       const arg0 = args[0];
       if (arg0 instanceof WebElementWrapper) {
         await this.getActions()
-          .pause(this.getActions().mouse())
+          .pause(this.getActions().mouse)
           .move({ origin: arg0._webElement })
           .click()
           .perform();
       } else if (isNaN(args[1] as number) || isNaN(args[2] as number) === false) {
         await this.getActions()
-          .pause(this.getActions().mouse())
+          .pause(this.getActions().mouse)
           .move({ origin: { x: args[1], y: args[2] } })
           .click()
           .perform();

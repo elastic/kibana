@@ -17,15 +17,13 @@
  * under the License.
  */
 
-import url from 'url';
-
 import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from '../../state_management/state_hashing';
 
 export function registerSubUrlHooks(angularModule, internals) {
-  angularModule.run(($rootScope, Private, $location) => {
+  angularModule.run(($rootScope, Private) => {
     const getUnhashableStates = Private(getUnhashableStatesProvider);
     const subUrlRouteFilter = Private(SubUrlRouteFilterProvider);
 
@@ -40,23 +38,6 @@ export function registerSubUrlHooks(angularModule, internals) {
         updateSubUrls();
       }
     }
-
-    $rootScope.$on('$locationChangeStart', (e, newUrl) => {
-      // This handler fixes issue #31238 where browser back navigation
-      // fails due to angular 1.6 parsing url encoded params wrong.
-      const parsedAbsUrl = url.parse($location.absUrl());
-      const absUrlHash = parsedAbsUrl.hash ? parsedAbsUrl.hash.slice(1) : '';
-      const decodedAbsUrlHash = decodeURIComponent(absUrlHash);
-
-      const parsedNewUrl = url.parse(newUrl);
-      const newHash = parsedNewUrl.hash ? parsedNewUrl.hash.slice(1) : '';
-      const decodedHash = decodeURIComponent(newHash);
-
-      if (absUrlHash !== newHash && decodedHash === decodedAbsUrlHash) {
-        // replace the urlencoded hash with the version that angular sees.
-        $location.url(absUrlHash).replace();
-      }
-    });
 
     $rootScope.$on('$routeChangeSuccess', onRouteChange);
     $rootScope.$on('$routeUpdate', onRouteChange);
