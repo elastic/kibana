@@ -92,7 +92,7 @@ export function GaugeChartProvider(Private) {
       return function (selection) {
         selection.each(function (data) {
           const div = d3.select(this);
-          const { width, height, alignment } = self.calcGaugeDim(
+          const { width, height } = self.calcGaugeDim(
             gaugeConfig.alignment,
             this,
             data.series.length
@@ -115,10 +115,12 @@ export function GaugeChartProvider(Private) {
             const gauges = self.gauge.drawGauge(g, series, width, height);
 
             svg.attr('height', height);
+            //center the visualisation, Arc is centered differently, there's only
+            //a part of the circle visible and the circle is larger
             const transformX = width / 2;
             const transformY =
-              gaugeConfig.gaugeType === 'Arc' && alignment === 'vertical'
-                ? height / (2 * 0.75)
+              gaugeConfig.gaugeType === 'Arc'
+                ? height / (2 *  0.75)
                 : height / 2;
             g.attr('transform', `translate(${transformX}, ${transformY})`);
 
