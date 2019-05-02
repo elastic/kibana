@@ -17,25 +17,11 @@
  * under the License.
  */
 
-import _ from 'lodash';
-export default function byType(type) {
-  return (field) => {
-    switch (type) {
-      case 'numeric':
-        return _.includes([
-          'number'
-        ], field.type);
-      case 'string':
-        return _.includes([
-          'string', 'keyword', 'text'
-        ], field.type);
-      case 'date':
-        return _.includes([
-          'date'
-        ], field.type);
-      default:
-        return true;
-    }
-  };
-}
-
+export const PANEL_TYPES = {
+  TABLE: 'table',
+  GAUGE: 'gauge',
+  MARKDOWN: 'markdown',
+  TOP_N: 'top_n',
+  TIMESERIES: 'timeseries',
+  METRIC: 'metric',
+};
