@@ -21,8 +21,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import { get } from 'lodash';
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 import { SplitByTerms } from './splits/terms';
 import { SplitByFilter } from './splits/filter';
@@ -39,18 +37,7 @@ const SPLIT_MODES = {
 };
 
 class Split extends Component {
-  constructor(props) {
-    super(props);
-    const indexPatternString = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
-        (this.props.panel.index_pattern);
-    this.state = {
-      indexPatternAsString: indexPatternString || props.panel.default_index_pattern || '',
-      indexPatterns: '',
-    };
-  }
-  async componentDidMount() {
-    await this.fetchIndexPatterns();
-  }
+
   componentWillReceiveProps(nextProps) {
     // should we check against the index pattern changing too?
     const { model } = nextProps;
@@ -70,21 +57,6 @@ class Split extends Component {
       });
     }
   }
-  fetchIndexPatterns = async () => {
-    const searchIndexPattern = this.state.indexPatternAsString;
-    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-      type: 'index-pattern',
-      fields: ['title', 'fields'],
-      search: `"${searchIndexPattern}"`,
-      search_fields: ['title'],
-    });
-    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-      indexPattern => indexPattern.attributes.title === searchIndexPattern
-    );
-    if (exactMatch) {
-      this.setState({ indexPatterns: getFromSavedObject(exactMatch) });
-    }
-  };
 
   getComponent(splitMode, uiRestrictions) {
     if (!isGroupByFieldsEnabled(splitMode, uiRestrictions)) {
@@ -119,7 +91,7 @@ class Split extends Component {
           fields={this.props.fields}
           onChange={this.props.onChange}
           uiRestrictions={uiRestrictions}
-          indexPatterns={[this.state.indexPatterns]}
+          indexPatterns={[this.props.indexPatternForQuery]}
         />
       );
     }
@@ -140,6 +112,7 @@ Split.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   panel: PropTypes.object,
+  indexPatternsForQuery: PropTypes.object
 };
 
 export default Split;

@@ -45,8 +45,6 @@ import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 const localStorage = new Storage(window.localStorage);
 
 const TimeseriesConfig = injectI18n(function (props) {
-  // check what props.model contains when no filter is set yet.
-  // compare with what the props.model contains we we have added a filter elsewhere.
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const handleSubmit = query => {
@@ -54,7 +52,6 @@ const TimeseriesConfig = injectI18n(function (props) {
   };
   const defaults = {
     fill: '',
-    // filter: { language: 'lucene', query: '' }, // possibly add this in because we need defaults for no filter set yet
     line_width: '',
     point_size: '',
     value_template: '{{value}}',
@@ -68,7 +65,6 @@ const TimeseriesConfig = injectI18n(function (props) {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
   const { intl } = props;
-
   const stackedOptions = [
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.noneLabel', defaultMessage: 'None' }), value: 'none' },
     { label: intl.formatMessage({ id: 'tsvb.timeSeries.stackedLabel', defaultMessage: 'Stacked' }), value: 'stacked' },
@@ -278,8 +274,6 @@ const TimeseriesConfig = injectI18n(function (props) {
   }
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
-  const filterQueryLanguageDefault = model.filter && model.filter.language ? model.filter.language : 'lucene';
-  const filterQueryDefault = (model.filter && model.filter.query) ? model.filter.query : '';
   return (
     <div className="tvbAggRow">
 
@@ -328,11 +322,15 @@ const TimeseriesConfig = injectI18n(function (props) {
           fullWidth
         >
           <QueryBar
-            query={{ language: filterQueryLanguageDefault, query: filterQueryDefault }}
+            query={
+              {
+                language: (model.filter && model.filter.language) ? model.filter.language : 'lucene',
+                query: (model.filter && model.filter.query) ? model.filter.query : ''
+              }}
             screenTitle={'TSVBDataConfigTab'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}
-            indexPatterns={model.index_pattern ? model.index_pattern : model.default_index_pattern}
+            indexPatterns={[props.indexPatternForQuery]}
             store={localStorage || {}}
             showDatePicker={false}
           />
@@ -508,7 +506,8 @@ const TimeseriesConfig = injectI18n(function (props) {
 TimeseriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatternForQuery: PropTypes.object,
 };
 
 export default TimeseriesConfig;
