@@ -7,12 +7,9 @@
   "defaultIndexPattern": "metricbeat-*",
   "query": {
     "bool": {
-      "should": [
-        {"bool": {"filter": {"term": {"metricset.name": "load"}}}},
-        {"bool": {"filter": {"term": {"metricset.name": "cpu"}}}},
-        {"bool": {"filter": {"term": {"metricset.name": "filesystem"}}}}
-        ],
-      "filter": {"term": {"event.module": "system"}}
+      "filter": {
+        "terms" : { "event.dataset" : ["system.cpu", "system.filesystem"]}
+      }
     }
   },
   "jobs": [

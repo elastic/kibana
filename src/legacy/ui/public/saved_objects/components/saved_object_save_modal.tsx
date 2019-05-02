@@ -242,21 +242,21 @@ export class SavedObjectSaveModal extends React.Component<Props, State> {
     }
 
     return (
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="common.ui.savedObjects.saveModal.saveAsNewLabel"
-            defaultMessage="Save as a new {objectType}"
-            values={{ objectType: this.props.objectType }}
-          />
-        }
-      >
+      <Fragment>
         <EuiSwitch
           data-test-subj="saveAsNewCheckbox"
           checked={this.state.copyOnSave}
           onChange={this.onCopyOnSaveChange}
+          label={
+            <FormattedMessage
+              id="common.ui.savedObjects.saveModal.saveAsNewLabel"
+              defaultMessage="Save as a new {objectType}"
+              values={{ objectType: this.props.objectType }}
+            />
+          }
         />
-      </EuiFormRow>
+        <EuiSpacer />
+      </Fragment>
     );
   };
 }

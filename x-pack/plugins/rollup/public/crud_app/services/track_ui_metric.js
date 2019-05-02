@@ -4,13 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createUiMetricUri } from '../../../../../common/ui_metric';
+import { trackUiMetric as track } from '../../../../../../src/legacy/core_plugins/ui_metric/public';
 import { UIM_APP_NAME } from '../../../common';
-import { getHttp } from './http_provider';
 
 export function trackUiMetric(actionType) {
-  const uiMetricUri = createUiMetricUri(UIM_APP_NAME, actionType);
-  getHttp().post(uiMetricUri);
+  track(UIM_APP_NAME, actionType);
 }
 
 /**

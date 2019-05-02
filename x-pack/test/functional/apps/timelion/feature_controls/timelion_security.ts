@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'timelion', 'header', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('feature controls security', () => {
     before(async () => {
@@ -69,6 +70,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
         await PageObjects.common.navigateToApp('timelion');
         await PageObjects.timelion.saveTimelionSheet();
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global timelion read-only privileges', () => {
@@ -118,6 +123,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`does not allow a timelion sheet to be created`, async () => {
         await PageObjects.common.navigateToApp('timelion');
         await PageObjects.timelion.expectMissingWriteControls();
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
     });
 

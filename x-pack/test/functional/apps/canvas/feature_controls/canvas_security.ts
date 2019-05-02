@@ -12,6 +12,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
+  const globalNav = getService('globalNav');
 
   describe('security feature controls', () => {
     before(async () => {
@@ -76,6 +77,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
         await PageObjects.canvas.expectCreateWorkpadButtonEnabled();
+      });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
       });
 
       it(`allows a workpad to be created`, async () => {
@@ -150,6 +155,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
         await PageObjects.canvas.expectCreateWorkpadButtonDisabled();
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
       it(`does not allow a workpad to be created`, async () => {
