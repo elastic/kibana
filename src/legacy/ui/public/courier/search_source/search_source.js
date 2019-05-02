@@ -229,7 +229,9 @@ export function SearchSourceProvider(Private, config) {
      * @return {undefined}
      */
     cancelQueued() {
-      // Abort requests from this source
+      // It's safe to call abort on all the requests, since the request itself is smart enough not
+      // to abort if it has already completed
+      this.history.forEach(request => request.abort());
     }
 
     /**

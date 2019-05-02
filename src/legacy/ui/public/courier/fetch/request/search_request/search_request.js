@@ -18,6 +18,7 @@
  */
 
 import moment from 'moment';
+import { once } from 'lodash';
 
 export class SearchRequest {
   constructor({ source }) {
@@ -27,6 +28,8 @@ export class SearchRequest {
       this._resolve = resolve;
       this._reject = reject;
     });
+
+    this._abort = () => {};
 
     // Track execution time.
     this._moment = moment();
@@ -53,5 +56,24 @@ export class SearchRequest {
 
   getRequestTime() {
     return this._ms;
+  }
+
+  /**
+   * We don't know upfront how to abort this request. We only know as soon as the search strategy
+   * has given us the abort function, so this is set at that point.
+   * @param fn The function that actually aborts the request
+   */
+  setAbort(fn) {
+    this._abort = once(fn);
+  }
+
+  /**
+   * Abort the request, if it hasn't yet completed. This works because if the request has already
+   * handled a response and its promise has fulfilled, then calling reject() on it won't actually
+   * do anything, and the catch() handler will never actually be called.
+   */
+  abort() {
+    this._reject(new Error('Request was aborted'));
+    this._promise.catch(() => this._abort());
   }
 }

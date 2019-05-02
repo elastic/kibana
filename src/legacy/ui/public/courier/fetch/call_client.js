@@ -45,7 +45,7 @@ export function CallClientProvider(Private, es, config, sessionId, esShardTimeou
       // For each unique search strategy, execute the strategy with the matching requests
       await Promise.all(uniq(searchStrategies).map(async searchStrategy => {
         const requests = searchRequests.filter((_, i) => searchStrategy === searchStrategies[i]);
-        const { searching } = await searchStrategy.search({
+        const { searching, abort } = await searchStrategy.search({
           searchRequests: requests,
           es,
           serializeFetchParams,
@@ -56,6 +56,8 @@ export function CallClientProvider(Private, es, config, sessionId, esShardTimeou
           setRequestPreference,
           customRequestPreference
         });
+
+        requests.forEach(request => request.setAbort(abort));
 
         // The list of responses for this strategy
         const responses = await searching;

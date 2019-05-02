@@ -103,10 +103,9 @@ uiModules.get('app/discover')
 
           // Set the watcher after initialization
           $scope.$watchCollection('sorting', function (newSort, oldSort) {
-          // Don't react if sort values didn't really change
+            // Don't react if sort values didn't really change
             if (newSort === oldSort) return;
             $scope.searchSource.setField('sort', getSort(newSort, $scope.indexPattern));
-            $scope.searchSource.fetchQueued();
           });
 
           $scope.$on('$destroy', function () {
