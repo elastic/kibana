@@ -5,7 +5,7 @@
  */
 
 import _ from 'lodash';
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 
 import { styleOptionShapes, rangeShape } from '../style_option_shapes';
@@ -22,7 +22,7 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-function renderLineWidthHeader() {
+function getLineWidthIcons() {
   function getStyle(strokeWidth) {
     return {
       stroke: 'grey',
@@ -32,22 +32,14 @@ function renderLineWidthHeader() {
     };
   }
 
-  return (
-    <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <FillableCircle style={getStyle('1px')}/>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FillableCircle style={getStyle('2px')}/>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FillableCircle style={getStyle('3px')}/>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
+  return [
+    <FillableCircle style={getStyle('1px')}/>,
+    <FillableCircle style={getStyle('2px')}/>,
+    <FillableCircle style={getStyle('3px')}/>,
+  ];
 }
 
-function renderSymbolSizeHeader() {
+function getSymbolSizeIcons() {
   function getStyle(width) {
     return {
       stroke: 'grey',
@@ -57,23 +49,37 @@ function renderSymbolSizeHeader() {
     };
   }
 
+  return [
+    <FillableCircle style={getStyle('4px')}/>,
+    <FillableCircle style={getStyle('8px')}/>,
+    <FillableCircle style={getStyle('12px')}/>,
+  ];
+}
+
+function renderHeaderWithIcons(icons) {
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" alignItems="center">
-      <EuiFlexItem grow={false}>
-        <FillableCircle style={getStyle('4px')}/>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiHorizontalRule margin="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FillableCircle style={getStyle('8px')}/>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiHorizontalRule margin="xs" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <FillableCircle style={getStyle('12px')}/>
-      </EuiFlexItem>
+      {
+        icons.map((icon, index) => {
+          const isLast = index === icons.length - 1;
+          let spacer;
+          if (!isLast) {
+            spacer = (
+              <EuiFlexItem>
+                <EuiHorizontalRule margin="xs" />
+              </EuiFlexItem>
+            );
+          }
+          return (
+            <Fragment key={index}>
+              <EuiFlexItem grow={false}>
+                {icon}
+              </EuiFlexItem>
+              {spacer}
+            </Fragment>
+          );
+        })
+      }
     </EuiFlexGroup>
   );
 }
@@ -88,9 +94,9 @@ export function StylePropertyLegendRow({ name, type, options, range }) {
   if (options.color) {
     header = <ColorGradient color={options.color}/>;
   } else if (name === 'lineWidth') {
-    header = renderLineWidthHeader();
+    header = renderHeaderWithIcons(getLineWidthIcons());
   } else if (name === 'iconSize') {
-    header = renderSymbolSizeHeader();
+    header = renderHeaderWithIcons(getSymbolSizeIcons());
   }
 
   return (
