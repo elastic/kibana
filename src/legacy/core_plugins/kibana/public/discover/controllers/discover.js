@@ -36,7 +36,6 @@ import 'ui/fixed_scroll';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -69,6 +68,9 @@ import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_s
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
+
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',

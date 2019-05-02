@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { get, includes, max, min, sum } from 'lodash';
+import { get, includes, max, min, sum, noop } from 'lodash';
 import { toPercentileNumber } from '../../../../common/to_percentile_number';
 import { EXTENDED_STATS_TYPES, METRIC_TYPES } from '../../../../common/metric_types';
 
@@ -25,6 +25,8 @@ const aggFns = {
   max,
   min,
   sum,
+  noop,
+  concat: values => values.join(', '),
   avg: values => sum(values) / values.length,
 };
 
@@ -53,12 +55,14 @@ export default (row, metric) => {
         row[metric.id].values[percentileRankKey]
       );
     case METRIC_TYPES.TOP_HIT:
-      if (row[metric.id].doc_count === 0) return null;
+      if (row[metric.id].doc_count === 0) {
+        return null;
+      }
+
       const hits = get(row, [metric.id, 'docs', 'hits', 'hits'], []);
-      const values = hits.map(doc => {
-        return get(doc, `_source.${metric.field}`, 0);
-      });
-      const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.avg;
+      const values = hits.map(doc => get(doc, `_source.${metric.field}`));
+      const aggWith = (metric.agg_with && aggFns[metric.agg_with]) || aggFns.noop;
+
       return aggWith(values);
     case METRIC_TYPES.COUNT:
       return get(row, 'doc_count', null);
