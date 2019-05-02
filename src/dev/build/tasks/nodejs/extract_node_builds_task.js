@@ -19,7 +19,7 @@
 
 import { dirname, resolve } from 'path';
 import fs from 'fs';
-import { promisify } from 'bluebird';
+import { promisify } from 'util';
 import mkdirp from 'mkdirp';
 
 import { untar } from '../../lib';
@@ -55,7 +55,5 @@ const ExtractNodeBuildsTask = {
     return await copyFileAsync(source, destination, fs.constants.COPYFILE_FICLONE);
   },
 };
-
-ExtractNodeBuildsTask.run = ExtractNodeBuildsTask.run.bind(ExtractNodeBuildsTask);
 
 export { ExtractNodeBuildsTask };
