@@ -106,6 +106,8 @@ export class ElasticsearchService implements CoreService<ElasticsearchServiceSet
     };
   }
 
+  public async start() {}
+
   public async stop() {
     this.log.debug('Stopping elasticsearch service');
 

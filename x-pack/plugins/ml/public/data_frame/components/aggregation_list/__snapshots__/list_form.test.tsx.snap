@@ -1,71 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Data Frame: <AggListForm /> Minimal initialization 1`] = `
-<EuiListGroup
-  bordered={false}
-  flush={true}
-  maxWidth={true}
-  showToolTips={false}
-  wrapText={false}
->
-  <EuiListGroupItem
-    isActive={false}
-    isDisabled={false}
-    key="the-agg"
-    label={
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiFormRow
-            describedByIds={Array []}
-            fullWidth={false}
-            hasEmptyLabelSpace={false}
-            label="Custom name"
-            labelType="label"
-          >
-            <EuiFieldText
-              compressed={false}
-              defaultValue="the-form-row-label"
-              fullWidth={false}
-              isLoading={false}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            describedByIds={Array []}
-            fullWidth={false}
-            hasEmptyLabelSpace={false}
-            label="Aggregation"
-            labelType="label"
-          >
-            <EuiFieldText
-              compressed={false}
-              defaultValue="avg"
-              fullWidth={false}
-              isLoading={false}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiFormRow
-            describedByIds={Array []}
-            fullWidth={false}
-            hasEmptyLabelSpace={false}
-            label="Field"
-            labelType="label"
-          >
-            <EuiFieldText
-              compressed={false}
-              defaultValue="the-field"
-              fullWidth={false}
-              isLoading={false}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    }
-    showToolTip={false}
-    size="m"
+<Fragment>
+  <EuiPanel
+    grow={true}
+    hasShadow={false}
+    paddingSize="s"
+  >
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <AggLabelForm
+          deleteHandler={[Function]}
+          item={
+            Object {
+              "agg": "avg",
+              "aggName": "the-form-row-label",
+              "field": "the-field",
+            }
+          }
+          onChange={[Function]}
+          options={Object {}}
+          otherAggNames={Array []}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
+  <EuiSpacer
+    size="s"
   />
-</EuiListGroup>
+</Fragment>
 `;

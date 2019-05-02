@@ -11,8 +11,8 @@ exports[`Data Frame: <GroupByListSummary /> Minimal initialization 1`] = `
       item={
         Object {
           "agg": "terms",
+          "aggName": "the-group-by-label",
           "field": "the-group-by-field",
-          "formRowLabel": "the-group-by-label",
         }
       }
       optionsDataId="the-options-data-id"
