@@ -24,7 +24,7 @@ const updateVegaState = updatePrivateState<'vegaChart', VegaChartPrivateState>('
 const updateSpec = (visModel: VegaChartVisModel, spec: string) =>
   updateVegaState(visModel, { spec });
 
-function configPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<VegaChartVisModel>) {
+function lnsConfigPanel({ visModel, onChangeVisModel }: VisualizationPanelProps<VegaChartVisModel>) {
   const [text, updateText] = useState(visModel.private.vegaChart.spec);
   return (
     <>
@@ -64,7 +64,7 @@ function prefillPrivateState(visModel: UnknownVisModel) {
             "name": "table",
             "values": EXPRESSION_DATA_HERE
           }],
-        
+
           "marks": [
             {
               "type": "text",
@@ -104,7 +104,7 @@ function getSuggestion(visModel: VegaChartVisModel): Suggestion {
 export const config: EditorPlugin<VegaChartVisModel> = {
   name: 'vega_chart',
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   // disable suggestions for now to prevent vega from showing up in the bottom right suggestions
   getChartSuggestions: visModel => [],
   // this part should check whether the x and y axes have to be initialized in some way

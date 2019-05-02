@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiButton, EuiTextArea } from '@elastic/eui';
+import { EuiButton, EuiTextArea, EuiSpacer } from '@elastic/eui';
 import React, { useState } from 'react';
 import { kfetch } from 'ui/kfetch';
 import { FieldType } from '../../../common';
@@ -46,14 +46,17 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
 
   return (
     <>
-      <EuiTextArea
-        style={{ height: 400 }}
-        fullWidth
-        placeholder="Enter your ESSQL query here and use the resulting fields to build your viz"
-        value={text}
-        onChange={({ target: { value } }) => updateText(value)}
-      />
-      <EuiButton onClick={updateDatasource}>Apply</EuiButton>
+      <div className="lnsEssql">
+        <EuiTextArea
+          className="lnsEssql__textArea"
+          fullWidth
+          placeholder="Enter your ESSQL query here and use the resulting fields to build your viz"
+          value={text}
+          onChange={({ target: { value } }) => updateText(value)}
+        />
+        <EuiSpacer />
+        <EuiButton onClick={updateDatasource}>Apply</EuiButton>
+      </div>
       <FieldListPanel {...props} />
     </>
   );

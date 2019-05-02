@@ -355,7 +355,7 @@ export const operations: PossibleOperationDefinitions[] = [
     summarize(op) {
       return (
         <span>
-          <EuiIcon type="string" className="configPanel-summary-icon" />
+          <EuiIcon type="string" className="lnsConfigPanel__summary-icon" />
           {`Values of ${op.argument.field}`}
         </span>
       );
@@ -375,7 +375,7 @@ export const operations: PossibleOperationDefinitions[] = [
     summarize(op: CountOperation) {
       return (
         <span>
-          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <EuiIcon type="number" className="lnsConfigPanel__summary-icon" />
           {` Count`}
         </span>
       );
@@ -404,7 +404,7 @@ export const operations: PossibleOperationDefinitions[] = [
     summarize(op: AvgOperation) {
       return (
         <span>
-          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <EuiIcon type="number" className="lnsConfigPanel__summary-icon" />
           {` Average of ${op.argument.field}`}
         </span>
       );
@@ -434,7 +434,7 @@ export const operations: PossibleOperationDefinitions[] = [
     summarize(op: DateHistogramOperation) {
       return (
         <span>
-          <EuiIcon type="calendar" className="configPanel-summary-icon" />
+          <EuiIcon type="calendar" className="lnsConfigPanel__summary-icon" />
           {` Date histogram of ${op.argument.field}`}
         </span>
       );
@@ -462,11 +462,11 @@ export const operations: PossibleOperationDefinitions[] = [
     },
     summarize(op: CardinalityOperation) {
       return (
-        <div className="configPanel-summary">
-          <EuiIcon type="string" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Unique Values of</strong>
-            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+        <div className="lnsConfigPanel__summary">
+          <EuiIcon type="string" className="lnsConfigPanel__summary-icon" />
+          <div className="lnsConfigPanel__summaryText">
+            <strong className="lnsConfigPanel__summary-title">Unique Values of</strong>
+            <span className="lnsConfigPanel__summarySubtitle">{op.argument.field}</span>
           </div>
         </div>
       );
@@ -495,11 +495,11 @@ export const operations: PossibleOperationDefinitions[] = [
     },
     summarize(op) {
       return (
-        <div className="configPanel-summary">
-          <EuiIcon type="string" className="configPanel-summary-icon" />
-          <div className="configPanel-summary-text">
-            <strong className="configPanel-summary-title">Top Values of</strong>
-            <span className="configPanel-summary-subtitle">{op.argument.field}</span>
+        <div className="lnsConfigPanel__summary">
+          <EuiIcon type="string" className="lnsConfigPanel__summary-icon" />
+          <div className="lnsConfigPanel__summaryText">
+            <strong className="lnsConfigPanel__summary-title">Top Values of</strong>
+            <span className="lnsConfigPanel__summarySubtitle">{op.argument.field}</span>
           </div>
         </div>
       );
@@ -528,7 +528,7 @@ export const operations: PossibleOperationDefinitions[] = [
     summarize(op: SumOperation) {
       return (
         <span>
-          <EuiIcon type="number" className="configPanel-summary-icon" />
+          <EuiIcon type="number" className="lnsConfigPanel__summary-icon" />
           {` Sum of ${op.argument.field}`}
         </span>
       );

@@ -1,0 +1,11 @@
+.lnsCsv {
+  padding: 0 $euiSize $euiSize;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lnsCsv__textArea {
+  flex-grow: 1;
+}

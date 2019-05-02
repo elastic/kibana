@@ -28,7 +28,7 @@ import { PLUGIN_NAME, XyChartVisModel, XyDisplayType } from './types';
 import { XAxisEditor } from './xaxis_editor';
 import { YAxisEditor } from './yaxis_editor';
 
-function configPanel({
+function lnsConfigPanel({
   visModel,
   onChangeVisModel,
   getSuggestions,
@@ -45,8 +45,8 @@ function configPanel({
 
   return (
     <>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Display type</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Display type</span>
         <EuiSuperSelect
           options={[
             {
@@ -69,7 +69,7 @@ function configPanel({
           }}
         />
       </div>
-      <div className="configPanel-axis">
+      <div className="lnsConfigPanel__axis">
         <EuiSwitch
           label="Stacked"
           checked={stacked}
@@ -78,8 +78,8 @@ function configPanel({
           }}
         />
       </div>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Y-axis</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Y-axis</span>
         {yAxis.columns.map(col => (
           <YAxisEditor
             key={col}
@@ -90,8 +90,8 @@ function configPanel({
           />
         ))}
       </div>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Split series by</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Split series by</span>
         {seriesAxis.columns.map(col => (
           <SeriesAxisEditor
             key={col}
@@ -101,8 +101,8 @@ function configPanel({
           />
         ))}
       </div>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">X-axis</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">X-axis</span>
         {xAxis.columns.map(col => (
           <XAxisEditor
             key={col}
@@ -534,7 +534,7 @@ function getSuggestionsForField(
 export const config: EditorPlugin<XyChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   WorkspacePanel,
   getChartSuggestions: visModel => getSuggestion(visModel, 'line', 'Switch to line chart'),
   getSuggestionsForField,

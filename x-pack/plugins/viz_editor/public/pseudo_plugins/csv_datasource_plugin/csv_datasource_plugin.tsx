@@ -6,8 +6,7 @@
 
 import {
   EuiButton,
-  // @ts-ignore
-  EuiSuperSelect,
+  EuiSpacer,
   EuiTextArea,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -45,14 +44,17 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
 
   return (
     <>
-      <EuiTextArea
-        style={{ height: 400 }}
-        fullWidth
-        placeholder="Enter your CSV file here"
-        value={text}
-        onChange={({ target: { value } }) => updateText(value)}
-      />
-      <EuiButton onClick={updateDatasource}>Apply</EuiButton>
+      <div className="lnsCsv">
+        <EuiTextArea
+          className="lnsCsv__textArea"
+          fullWidth
+          placeholder="Enter your CSV file here"
+          value={text}
+          onChange={({ target: { value } }) => updateText(value)}
+        />
+        <EuiSpacer />
+        <EuiButton onClick={updateDatasource}>Apply</EuiButton>
+      </div>
       <FieldListPanel {...props} />
     </>
   );

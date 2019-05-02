@@ -302,25 +302,26 @@ export function Main(props: MainProps) {
 
       <EuiPageSideBar className={`lnsSidebar lnsSidebar--right ${state.metadata.expressionMode && 'lnsSidebar--expression'}`}>
         {state.metadata.expressionMode ? (
-          <EuiFlexItem>
-            <EuiTextArea
-              fullWidth
-              value={expression}
-              onChange={e => {
-                onChangeVisModel({
-                  ...state.visModel,
-                  private: { ...state.visModel.private, expression: e.target.value },
-                });
-              }}
-            />
-          </EuiFlexItem>
+          <EuiTextArea
+            className="lnsSidebar__expressionTextArea"
+            fullWidth
+            value={expression}
+            onChange={e => {
+              onChangeVisModel({
+                ...state.visModel,
+                private: { ...state.visModel.private, expression: e.target.value },
+              });
+            }}
+          />
         ) : (
           <>
             <ConfigPanel {...panelProps} />
 
             {hasData && (
-              <>
-                <h4>Suggestions</h4>
+              <div className="lnsSidebar__suggestions">
+                <EuiTitle size="xs">
+                  <h3>Suggestions</h3>
+                </EuiTitle>
                 {suggestions.map((suggestion, i) => (
                   <EuiPanel
                     key={i}
@@ -340,7 +341,7 @@ export function Main(props: MainProps) {
                     />
                   </EuiPanel>
                 ))}
-              </>
+              </div>
             )}
           </>
         )}

@@ -25,7 +25,7 @@ interface TableChartPrivateState {}
 
 type TableChartVisModel = VisModel<'tableChart', TableChartPrivateState>;
 
-function configPanel({
+function lnsConfigPanel({
   visModel,
   onChangeVisModel,
   getSuggestions,
@@ -54,14 +54,14 @@ function configPanel({
     <>
       {firstQuery.select.map((operation, index) => (
         <React.Fragment key={index}>
-          <div className="configPanel-axis">
-            <span className="configPanel-axis-title">Add column</span>
+          <div className="lnsConfigPanel__axis">
+            <span className="lnsConfigPanel__axisTitle">Add column</span>
             <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField(index)}>
               Drop another field here
             </Draggable>
           </div>
-          <div className="configPanel-axis">
-            <span className="configPanel-axis-title">Column {index + 1}</span>
+          <div className="lnsConfigPanel__axis">
+            <span className="lnsConfigPanel__axisTitle">Column {index + 1}</span>
             <AxisEditor
               operationId={getColumnIdByIndex(visModel.queries, 0, index)!}
               visModel={visModel}
@@ -70,8 +70,8 @@ function configPanel({
           </div>
         </React.Fragment>
       ))}
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Add column</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Add column</span>
         <Draggable
           canHandleDrop={(f: DatasourceField) => true}
           onDrop={onDropField(firstQuery.select.length)}
@@ -157,7 +157,7 @@ function WorkspacePanel({ children, ...props }: any) {
 export const config: EditorPlugin<TableChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   getChartSuggestions,
   getSuggestionsForField,
   WorkspacePanel,

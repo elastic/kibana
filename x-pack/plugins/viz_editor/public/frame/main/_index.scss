@@ -32,11 +32,17 @@
 }
 
 .lnsSidebar--right {
+  @include euiScrollBar;
   overflow: hidden auto;
+  padding: $euiSize;
 }
 
 .lnsSidebar--expression {
   flex-basis: 35%;
+
+  .lnsSidebar__expressionTextArea {
+    flex-grow: 1;
+  }
 }
 
 .lnsPageBody {
@@ -74,5 +80,11 @@
         justify-content: center;
       }
     }
+  }
+}
+
+.lnsSidebar__suggestions {
+  > * {
+    margin-top: $euiSizeS;
   }
 }
