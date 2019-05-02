@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import {
   SET_SELECTED_LAYER,
   SET_TRANSIENT_LAYER,
@@ -42,7 +41,7 @@ import {
   SET_SCROLL_ZOOM
 } from '../actions/store_actions';
 
-import { TRACKED_LAYER_DESCRIPTOR } from './util';
+import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from './util';
 import { SOURCE_DATA_ID_ORIGIN } from '../../common/constants';
 
 const getLayerIndex = (list, layerId) => list.findIndex(({ id }) => layerId === id);
@@ -409,7 +408,7 @@ function findLayerById(state, id) {
 
 function trackCurrentLayerState(state, layerId) {
   const layer = findLayerById(state, layerId);
-  const layerCopy = _.cloneDeep(layer);
+  const layerCopy = copyPersistentState(layer);
   return updateLayerInList(state, layerId, TRACKED_LAYER_DESCRIPTOR, layerCopy);
 }
 
@@ -434,7 +433,12 @@ function rollbackTrackedLayerState(state, layerId) {
     return state;
   }
 
-  const rolledbackLayer = { ...layer[TRACKED_LAYER_DESCRIPTOR] };
+  const trackedLayerDescriptor = layer[TRACKED_LAYER_DESCRIPTOR];
+
+  //this assumes that any nested temp-state in the layer-descriptor (e.g. of styles), is not relevant and can be recovered easily (e.g. this is not the case for __dataRequests)
+  //That assumption is true in the context of this app, but not generalizable.
+  //consider rewriting copyPersistentState to only strip the first level of temp state.
+  const rolledbackLayer = { ...layer, ...trackedLayerDescriptor };
   delete rolledbackLayer[TRACKED_LAYER_DESCRIPTOR];
 
   return {
