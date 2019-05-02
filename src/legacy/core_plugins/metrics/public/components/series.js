@@ -118,6 +118,7 @@ class Series extends Component {
         className: this.props.className,
         disableAdd: this.props.disableAdd,
         disableDelete: this.props.disableDelete,
+        dragHandleProps: this.props.dragHandleProps,
         fields: this.props.fields,
         name: this.props.name,
         onAdd: this.props.onAdd,
