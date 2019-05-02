@@ -49,10 +49,10 @@ const fullscreentExitShortcut = ['esc'];
 export const keymap = {
   ELEMENT: {
     displayName: 'Element controls',
-    COPY: { ...getCtrlShortcuts('c'), help: 'Copy' },
-    CLONE: { ...getCtrlShortcuts('d'), help: 'Clone' },
     CUT: { ...getCtrlShortcuts('x'), help: 'Cut' },
+    COPY: { ...getCtrlShortcuts('c'), help: 'Copy' },
     PASTE: { ...getCtrlShortcuts('v'), help: 'Paste' },
+    CLONE: { ...getCtrlShortcuts('d'), help: 'Clone' },
     DELETE: {
       osx: deleteElementShortcuts,
       windows: deleteElementShortcuts,
@@ -60,13 +60,13 @@ export const keymap = {
       other: deleteElementShortcuts,
       help: 'Delete',
     },
-    BRING_FORWARD: {
-      ...getCtrlShortcuts('up'),
-      help: 'Send forward',
-    },
     BRING_TO_FRONT: {
       ...getCtrlShortcuts('shift+up'),
-      help: 'Send to front',
+      help: 'Bring to front',
+    },
+    BRING_FORWARD: {
+      ...getCtrlShortcuts('up'),
+      help: 'Bring forward',
     },
     SEND_BACKWARD: {
       ...getCtrlShortcuts('down'),
@@ -102,7 +102,7 @@ export const keymap = {
     REFRESH: refreshShortcut,
   },
   PRESENTATION: {
-    displayName: 'Presentation mode',
+    displayName: 'Presentation controls',
     FULLSCREEN: { ...getAltShortcuts(['p', 'f']), help: 'Enter presentation mode' },
     FULLSCREEN_EXIT: {
       osx: fullscreentExitShortcut,

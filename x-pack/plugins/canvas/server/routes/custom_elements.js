@@ -6,182 +6,147 @@
 
 import boom from 'boom';
 import { omit } from 'lodash';
-import {
-  CANVAS_TYPE,
-  API_ROUTE_WORKPAD,
-  API_ROUTE_WORKPAD_ASSETS,
-  API_ROUTE_WORKPAD_STRUCTURES,
-} from '../../common/lib/constants';
+import { API_ROUTE_CUSTOM_ELEMENT, CUSTOM_ELEMENT_TYPE } from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id';
 import { formatResponse as formatRes } from '../lib/format_response';
 
-export function workpad(server) {
+export function customElements(server) {
   const { errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
-  const routePrefix = API_ROUTE_WORKPAD;
-  const routePrefixAssets = API_ROUTE_WORKPAD_ASSETS;
-  const routePrefixStructures = API_ROUTE_WORKPAD_STRUCTURES;
+  const routePrefix = API_ROUTE_CUSTOM_ELEMENT;
   const formatResponse = formatRes(esErrors);
 
-  function createWorkpad(req) {
+  const createCustomElement = req => {
     const savedObjectsClient = req.getSavedObjectsClient();
 
     if (!req.payload) {
-      return Promise.reject(boom.badRequest('A workpad payload is required'));
+      return Promise.reject(boom.badRequest('A custom element payload is required'));
     }
 
     const now = new Date().toISOString();
     const { id, ...payload } = req.payload;
     return savedObjectsClient.create(
-      CANVAS_TYPE,
+      CUSTOM_ELEMENT_TYPE,
       {
         ...payload,
         '@timestamp': now,
         '@created': now,
       },
-      { id: id || getId('workpad') }
+      { id: id || getId('custom-element') }
     );
-  }
+  };
 
-  function updateWorkpad(req, newPayload) {
+  const updateCustomElement = (req, newPayload) => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
     const payload = newPayload ? newPayload : req.payload;
 
     const now = new Date().toISOString();
 
-    return savedObjectsClient.get(CANVAS_TYPE, id).then(workpad => {
+    return savedObjectsClient.get(CUSTOM_ELEMENT_TYPE, id).then(element => {
       // TODO: Using create with force over-write because of version conflict issues with update
       return savedObjectsClient.create(
-        CANVAS_TYPE,
+        CUSTOM_ELEMENT_TYPE,
         {
-          ...workpad.attributes,
+          ...element.attributes,
           ...omit(payload, 'id'), // never write the id property
           '@timestamp': now, // always update the modified time
-          '@created': workpad.attributes['@created'], // ensure created is not modified
+          '@created': element.attributes['@created'], // ensure created is not modified
         },
         { overwrite: true, id }
       );
     });
-  }
+  };
 
-  function deleteWorkpad(req) {
+  const deleteCustomElement = req => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { id } = req.params;
 
-    return savedObjectsClient.delete(CANVAS_TYPE, id);
-  }
+    return savedObjectsClient.delete(CUSTOM_ELEMENT_TYPE, id);
+  };
 
-  function findWorkpad(req) {
+  const findCustomElement = req => {
     const savedObjectsClient = req.getSavedObjectsClient();
     const { name, page, perPage } = req.query;
 
     return savedObjectsClient.find({
-      type: CANVAS_TYPE,
+      type: CUSTOM_ELEMENT_TYPE,
       sortField: '@timestamp',
       sortOrder: 'desc',
       search: name ? `${name}* | ${name}` : '*',
       searchFields: ['name'],
-      fields: ['id', 'name', '@created', '@timestamp'],
+      fields: ['id', 'name', 'displayName', 'help', 'image', 'content', '@created', '@timestamp'],
       page,
       perPage,
     });
-  }
+  };
 
-  // get workpad
+  const getCustomElementById = req => {
+    const savedObjectsClient = req.getSavedObjectsClient();
+    const { id } = req.params;
+    return savedObjectsClient.get(CUSTOM_ELEMENT_TYPE, id);
+  };
+
+  // get custom element by id
   server.route({
     method: 'GET',
     path: `${routePrefix}/{id}`,
-    handler: function(req) {
-      const savedObjectsClient = req.getSavedObjectsClient();
-      const { id } = req.params;
-
-      return savedObjectsClient
-        .get(CANVAS_TYPE, id)
+    handler: req =>
+      getCustomElementById(req)
         .then(obj => ({ id: obj.id, ...obj.attributes }))
         .then(formatResponse)
-        .catch(formatResponse);
-    },
+        .catch(formatResponse),
   });
 
-  // create workpad
+  // create custom element
   server.route({
     method: 'POST',
     path: routePrefix,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
-      return createWorkpad(request)
+    handler: req =>
+      createCustomElement(req)
         .then(() => ({ ok: true }))
-        .catch(formatResponse);
-    },
+        .catch(formatResponse),
   });
 
-  // update workpad
+  // update custom element
   server.route({
     method: 'PUT',
     path: `${routePrefix}/{id}`,
     config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
-      return updateWorkpad(request)
+    handler: req =>
+      updateCustomElement(req)
         .then(() => ({ ok: true }))
-        .catch(formatResponse);
-    },
+        .catch(formatResponse),
   });
 
-  // update workpad assets
-  server.route({
-    method: 'PUT',
-    path: `${routePrefixAssets}/{id}`,
-    config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
-      const payload = { assets: request.payload };
-      return updateWorkpad(request, payload)
-        .then(() => ({ ok: true }))
-        .catch(formatResponse);
-    },
-  });
-
-  // update workpad structures
-  server.route({
-    method: 'PUT',
-    path: `${routePrefixStructures}/{id}`,
-    config: { payload: { allow: 'application/json', maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function(request) {
-      return updateWorkpad(request)
-        .then(() => ({ ok: true }))
-        .catch(formatResponse);
-    },
-  });
-
-  // delete workpad
+  // delete custom element
   server.route({
     method: 'DELETE',
     path: `${routePrefix}/{id}`,
-    handler: function(request) {
-      return deleteWorkpad(request)
+    handler: req =>
+      deleteCustomElement(req)
         .then(() => ({ ok: true }))
-        .catch(formatResponse);
-    },
+        .catch(formatResponse),
   });
 
-  // find workpads
+  // find custom elements
   server.route({
     method: 'GET',
     path: `${routePrefix}/find`,
-    handler: function(request) {
-      return findWorkpad(request)
+    handler: req =>
+      findCustomElement(req)
         .then(formatResponse)
         .then(resp => {
           return {
             total: resp.total,
-            workpads: resp.saved_objects.map(hit => ({ id: hit.id, ...hit.attributes })),
+            customElements: resp.saved_objects.map(hit => ({ id: hit.id, ...hit.attributes })),
           };
         })
         .catch(() => {
           return {
             total: 0,
-            workpads: [],
+            customElements: [],
           };
-        });
-    },
+        }),
   });
 }

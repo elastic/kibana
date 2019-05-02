@@ -17,7 +17,7 @@ const nonTextInputs = [
   'submit',
 ];
 
-export const isTextInput = ({ tagName, type }) => {
+export const isTextInput = ({ tagName, type }: HTMLInputElement): boolean => {
   switch (tagName.toLowerCase()) {
     case 'input':
       return !nonTextInputs.includes(type);
