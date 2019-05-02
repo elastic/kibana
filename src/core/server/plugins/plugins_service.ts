@@ -39,13 +39,21 @@ export interface PluginsServiceSetup {
 }
 
 /** @internal */
+export interface PluginsServiceStart {
+  contracts: Map<PluginName, unknown>;
+}
+
+/** @internal */
 export interface PluginsServiceSetupDeps {
   elasticsearch: ElasticsearchServiceSetup;
   http: HttpServiceSetup;
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceSetup> {
+export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-eslint/no-empty-interface
+
+/** @internal */
+export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
 
@@ -80,7 +88,11 @@ export class PluginsService implements CoreService<PluginsServiceSetup> {
     };
   }
 
-  public async start() {}
+  public async start(deps: PluginsServiceStartDeps) {
+    this.log.debug('Plugins service starts plugins');
+    const contracts = await this.pluginsSystem.startPlugins(deps);
+    return { contracts };
+  }
 
   public async stop() {
     this.log.debug('Stopping plugins service');

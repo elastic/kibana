@@ -297,6 +297,14 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
           </EuiModalBody>
 
           <EuiModalFooter>
+            <EuiButtonEmpty
+              onClick={closeModal}
+            >
+              <FormattedMessage
+                id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
             <EuiButton
               onClick={this.handleAddEvent}
               fill
@@ -307,14 +315,6 @@ export const NewEventModal = injectI18n(class NewEventModal extends Component {
                 defaultMessage="Add"
               />
             </EuiButton>
-            <EuiButtonEmpty
-              onClick={closeModal}
-            >
-              <FormattedMessage
-                id="xpack.ml.calendarsEdit.newEventModal.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
-            </EuiButtonEmpty>
           </EuiModalFooter>
         </EuiModal>
       </Fragment>
