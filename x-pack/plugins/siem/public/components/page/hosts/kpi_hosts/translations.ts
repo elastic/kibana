@@ -49,6 +49,6 @@ export const UNIQUE_SOURCE_IPS = i18n.translate('xpack.siem.kpiHosts.source.uniq
 export const UNIQUE_DESTINATION_IPS = i18n.translate(
   'xpack.siem.kpiHosts.source.uniqueDestinationIpsTitle',
   {
-    defaultMessage: 'Dest.',
+    defaultMessage: 'Destination',
   }
 );
