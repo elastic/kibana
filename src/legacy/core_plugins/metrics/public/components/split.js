@@ -49,7 +49,6 @@ class Split extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // should we check against the index pattern changing too?
     const { model } = nextProps;
     const mainFilterLanguage =
       this.props.panel.filter && this.props.panel.filter.language

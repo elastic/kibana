@@ -86,21 +86,6 @@ class AnnotationsEditor extends Component {
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
-  // fetchIndexPatterns = async () => {
-  //   const searchIndexPattern = this.state.indexPatternAsString;
-  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-  //     type: 'index-pattern',
-  //     fields: ['title', 'fields'],
-  //     search: `"${searchIndexPattern}"`,
-  //     search_fields: ['title'],
-  //   });
-  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
-  //   );
-  //   if (exactMatch) {
-  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-  //   }
-  // }
 
   handleChange(item, name) {
     return e => {
