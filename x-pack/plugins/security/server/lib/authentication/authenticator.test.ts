@@ -4,30 +4,35 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from '@kbn/expect';
 import sinon from 'sinon';
 import Boom from 'boom';
+import { Legacy } from 'kibana';
 
-import { serverFixture } from '../../__tests__/__fixtures__/server';
-import { requestFixture } from '../../__tests__/__fixtures__/request';
-import { Session } from '../session';
-import { AuthScopeService } from '../../auth_scope_service';
-import { LoginAttempt } from '../login_attempt';
-import { initAuthenticator } from '../authenticator';
-import * as ClientShield from '../../../../../../server/lib/get_client_shield';
+import { serverFixture } from '../__tests__/__fixtures__/server';
+import { requestFixture } from '../__tests__/__fixtures__/request';
+import { AuthenticationResult } from './authentication_result';
+import { DeauthenticationResult } from './deauthentication_result';
+import { Session } from './session';
+import { AuthScopeService } from '../auth_scope_service';
+import { LoginAttempt } from './login_attempt';
+import { initAuthenticator } from './authenticator';
+import * as ClientShield from '../../../../../server/lib/get_client_shield';
 
 describe('Authenticator', () => {
   const sandbox = sinon.createSandbox();
 
-  let config;
-  let server;
-  let session;
-  let cluster;
+  let config: sinon.SinonStubbedInstance<Legacy.KibanaConfig>;
+  let server: ReturnType<typeof serverFixture>;
+  let session: sinon.SinonStubbedInstance<Session>;
+  let cluster: sinon.SinonStubbedInstance<{
+    callWithRequest: (request: ReturnType<typeof requestFixture>, ...args: any[]) => any;
+    callWithInternalUser: (...args: any[]) => any;
+  }>;
   beforeEach(() => {
     server = serverFixture();
     session = sinon.createStubInstance(Session);
 
-    config = { get: sinon.stub() };
+    config = { get: sinon.stub(), has: sinon.stub() };
 
     // Cluster is returned by `getClient` function that is wrapped into `once` making cluster
     // a static singleton, so we should use sandbox to set/reset its behavior between tests.
@@ -37,92 +42,74 @@ describe('Authenticator', () => {
     server.config.returns(config);
     server.register.yields();
 
-    sandbox.stub(Session, 'create').withArgs(server).returns(Promise.resolve(session));
-    sandbox.stub(AuthScopeService.prototype, 'getForRequestAndUser')
-      .returns(Promise.resolve([]));
+    sandbox
+      .stub(Session, 'create')
+      .withArgs(server as any)
+      .resolves(session as any);
+    sandbox.stub(AuthScopeService.prototype, 'getForRequestAndUser').resolves([]);
 
     sandbox.useFakeTimers();
   });
 
-  afterEach(() => {
-    sandbox.restore();
-  });
+  afterEach(() => sandbox.restore());
 
   describe('initialization', () => {
     it('fails if authentication providers are not configured.', async () => {
       config.get.withArgs('xpack.security.authProviders').returns([]);
 
-      try {
-        await initAuthenticator(server);
-        expect().fail('`initAuthenticator` should fail.');
-      } catch(err) {
-        expect(err).to.be.a(Error);
-        expect(err.message).to.be(
-          'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
-        );
-      }
+      await expect(initAuthenticator(server as any)).rejects.toThrowError(
+        'No authentication provider is configured. Verify `xpack.security.authProviders` config value.'
+      );
     });
 
     it('fails if configured authentication provider is not known.', async () => {
       config.get.withArgs('xpack.security.authProviders').returns(['super-basic']);
 
-      try {
-        await initAuthenticator(server);
-        expect().fail('`initAuthenticator` should fail.');
-      } catch(err) {
-        expect(err).to.be.a(Error);
-        expect(err.message).to.be('Unsupported authentication provider name: super-basic.');
-      }
+      await expect(initAuthenticator(server as any)).rejects.toThrowError(
+        'Unsupported authentication provider name: super-basic.'
+      );
     });
   });
 
   describe('`authenticate` method', () => {
-    let authenticate;
+    let authenticate: (request: ReturnType<typeof requestFixture>) => Promise<AuthenticationResult>;
     beforeEach(async () => {
       config.get.withArgs('xpack.security.authProviders').returns(['basic']);
       server.plugins.kibana.systemApi.isSystemApiRequest.returns(true);
       session.clear.throws(new Error('`Session.clear` is not supposed to be called!'));
 
-      await initAuthenticator(server);
+      await initAuthenticator(server as any);
 
       // Second argument will be a method we'd like to test.
       authenticate = server.expose.withArgs('authenticate').firstCall.args[1];
     });
 
     it('fails if request is not provided.', async () => {
-      try {
-        await authenticate();
-        expect().fail('`authenticate` should fail.');
-      } catch(err) {
-        expect(err).to.be.a(Error);
-        expect(err.message).to.be('Request should be a valid object, was [undefined].');
-      }
+      await expect(authenticate(undefined as any)).rejects.toThrowError(
+        'Request should be a valid object, was [undefined].'
+      );
     });
 
     it('fails if any authentication providers fail.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
-      session.get.withArgs(request).returns(Promise.resolve(null));
+      session.get.withArgs(request).resolves(null);
 
       const failureReason = new Error('Not Authorized');
-      cluster.callWithRequest.withArgs(request).returns(Promise.reject(failureReason));
+      cluster.callWithRequest.withArgs(request).rejects(failureReason);
 
       const authenticationResult = await authenticate(request);
-
-      expect(authenticationResult.failed()).to.be(true);
-      expect(authenticationResult.error).to.be(failureReason);
+      expect(authenticationResult.failed()).toBe(true);
+      expect(authenticationResult.error).toBe(failureReason);
     });
 
     it('returns user that authentication provider returns.', async () => {
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
       const user = { username: 'user' };
-      cluster.callWithRequest.withArgs(request).returns(Promise.resolve(user));
+      cluster.callWithRequest.withArgs(request).resolves(user);
 
       const authenticationResult = await authenticate(request);
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
     });
 
     it('creates session whenever authentication provider returns state for system API requests', async () => {
@@ -131,24 +118,19 @@ describe('Authenticator', () => {
       const loginAttempt = new LoginAttempt();
       const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
       loginAttempt.setCredentials('foo', 'bar');
-      request.loginAttempt.returns(loginAttempt);
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
 
-      server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(request).returns(true);
+      server.plugins.kibana.systemApi.isSystemApiRequest.withArgs(request).returns(true);
 
-      cluster.callWithRequest
-        .withArgs(request).returns(Promise.resolve(user));
+      cluster.callWithRequest.withArgs(request).resolves(user);
 
       const systemAPIAuthenticationResult = await authenticate(request);
-      expect(systemAPIAuthenticationResult.succeeded()).to.be(true);
-      expect(systemAPIAuthenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
+      expect(systemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
-        provider: 'basic'
+        provider: 'basic',
       });
     });
 
@@ -158,24 +140,19 @@ describe('Authenticator', () => {
       const loginAttempt = new LoginAttempt();
       const authorization = `Basic ${Buffer.from('foo:bar').toString('base64')}`;
       loginAttempt.setCredentials('foo', 'bar');
-      request.loginAttempt.returns(loginAttempt);
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
 
-      server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(request).returns(false);
+      server.plugins.kibana.systemApi.isSystemApiRequest.withArgs(request).returns(false);
 
-      cluster.callWithRequest
-        .withArgs(request).returns(Promise.resolve(user));
+      cluster.callWithRequest.withArgs(request).resolves(user);
 
       const notSystemAPIAuthenticationResult = await authenticate(request);
-      expect(notSystemAPIAuthenticationResult.succeeded()).to.be(true);
-      expect(notSystemAPIAuthenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(notSystemAPIAuthenticationResult.succeeded()).toBe(true);
+      expect(notSystemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
-        provider: 'basic'
+        provider: 'basic',
       });
     });
 
@@ -184,42 +161,40 @@ describe('Authenticator', () => {
       const systemAPIRequest = requestFixture({ headers: { xCustomHeader: 'xxx' } });
       const notSystemAPIRequest = requestFixture({ headers: { xCustomHeader: 'yyy' } });
 
-      session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(systemAPIRequest).resolves({
         state: { authorization: 'Basic xxx' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      session.get.withArgs(notSystemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(notSystemAPIRequest).resolves({
         state: { authorization: 'Basic yyy' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(systemAPIRequest)
+        .returns(true)
+        .withArgs(notSystemAPIRequest)
+        .returns(false);
 
       cluster.callWithRequest
-        .withArgs(systemAPIRequest).returns(Promise.resolve(user))
-        .withArgs(notSystemAPIRequest).returns(Promise.resolve(user));
+        .withArgs(systemAPIRequest)
+        .resolves(user)
+        .withArgs(notSystemAPIRequest)
+        .resolves(user);
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-      expect(systemAPIAuthenticationResult.succeeded()).to.be(true);
-      expect(systemAPIAuthenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(systemAPIAuthenticationResult.succeeded()).toBe(true);
+      expect(systemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
       sinon.assert.notCalled(session.set);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-      expect(notSystemAPIAuthenticationResult.succeeded()).to.be(true);
-      expect(notSystemAPIAuthenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(notSystemAPIAuthenticationResult.succeeded()).toBe(true);
+      expect(notSystemAPIAuthenticationResult.user).toEqual({ ...user, scope: [] });
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, notSystemAPIRequest, {
         state: { authorization: 'Basic yyy' },
-        provider: 'basic'
+        provider: 'basic',
       });
     });
 
@@ -227,29 +202,33 @@ describe('Authenticator', () => {
       const systemAPIRequest = requestFixture({ headers: { xCustomHeader: 'xxx' } });
       const notSystemAPIRequest = requestFixture({ headers: { xCustomHeader: 'yyy' } });
 
-      session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(systemAPIRequest).resolves({
         state: { authorization: 'Basic xxx' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      session.get.withArgs(notSystemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(notSystemAPIRequest).resolves({
         state: { authorization: 'Basic yyy' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(systemAPIRequest)
+        .returns(true)
+        .withArgs(notSystemAPIRequest)
+        .returns(false);
 
       cluster.callWithRequest
-        .withArgs(systemAPIRequest).returns(Promise.reject(new Error('some error')))
-        .withArgs(notSystemAPIRequest).returns(Promise.reject(new Error('some error')));
+        .withArgs(systemAPIRequest)
+        .rejects(new Error('some error'))
+        .withArgs(notSystemAPIRequest)
+        .rejects(new Error('some error'));
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-      expect(systemAPIAuthenticationResult.failed()).to.be(true);
+      expect(systemAPIAuthenticationResult.failed()).toBe(true);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-      expect(notSystemAPIAuthenticationResult.failed()).to.be(true);
+      expect(notSystemAPIAuthenticationResult.failed()).toBe(true);
 
       sinon.assert.notCalled(session.clear);
       sinon.assert.notCalled(session.set);
@@ -261,29 +240,24 @@ describe('Authenticator', () => {
       const request = requestFixture();
       const loginAttempt = new LoginAttempt();
       loginAttempt.setCredentials('foo', 'bar');
-      request.loginAttempt.returns(loginAttempt);
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
 
-      session.get.withArgs(request).returns(Promise.resolve({
+      session.get.withArgs(request).resolves({
         state: { authorization: 'Basic some-old-token' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(request).returns(true);
+      server.plugins.kibana.systemApi.isSystemApiRequest.withArgs(request).returns(true);
 
-      cluster.callWithRequest
-        .withArgs(request).returns(Promise.resolve(user));
+      cluster.callWithRequest.withArgs(request).resolves(user);
 
       const authenticationResult = await authenticate(request);
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
-        provider: 'basic'
+        provider: 'basic',
       });
     });
 
@@ -293,29 +267,24 @@ describe('Authenticator', () => {
       const request = requestFixture();
       const loginAttempt = new LoginAttempt();
       loginAttempt.setCredentials('foo', 'bar');
-      request.loginAttempt.returns(loginAttempt);
+      (request.loginAttempt as sinon.SinonStub).returns(loginAttempt);
 
-      session.get.withArgs(request).returns(Promise.resolve({
+      session.get.withArgs(request).resolves({
         state: { authorization: 'Basic some-old-token' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(request).returns(false);
+      server.plugins.kibana.systemApi.isSystemApiRequest.withArgs(request).returns(false);
 
-      cluster.callWithRequest
-        .withArgs(request).returns(Promise.resolve(user));
+      cluster.callWithRequest.withArgs(request).resolves(user);
 
       const authenticationResult = await authenticate(request);
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql({
-        ...user,
-        scope: []
-      });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual({ ...user, scope: [] });
       sinon.assert.calledOnce(session.set);
       sinon.assert.calledWithExactly(session.set, request, {
         state: { authorization },
-        provider: 'basic'
+        provider: 'basic',
       });
     });
 
@@ -323,34 +292,38 @@ describe('Authenticator', () => {
       const systemAPIRequest = requestFixture({ headers: { xCustomHeader: 'xxx' } });
       const notSystemAPIRequest = requestFixture({ headers: { xCustomHeader: 'yyy' } });
 
-      session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(systemAPIRequest).resolves({
         state: { authorization: 'Basic xxx' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      session.get.withArgs(notSystemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(notSystemAPIRequest).resolves({
         state: { authorization: 'Basic yyy' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      session.clear.returns(Promise.resolve());
+      session.clear.resolves();
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(systemAPIRequest)
+        .returns(true)
+        .withArgs(notSystemAPIRequest)
+        .returns(false);
 
       cluster.callWithRequest
-        .withArgs(systemAPIRequest).returns(Promise.reject(Boom.unauthorized('token expired')))
-        .withArgs(notSystemAPIRequest).returns(Promise.reject(Boom.unauthorized('invalid token')));
+        .withArgs(systemAPIRequest)
+        .rejects(Boom.unauthorized('token expired'))
+        .withArgs(notSystemAPIRequest)
+        .rejects(Boom.unauthorized('invalid token'));
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-      expect(systemAPIAuthenticationResult.failed()).to.be(true);
+      expect(systemAPIAuthenticationResult.failed()).toBe(true);
 
       sinon.assert.calledOnce(session.clear);
       sinon.assert.calledWithExactly(session.clear, systemAPIRequest);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-      expect(notSystemAPIAuthenticationResult.failed()).to.be(true);
+      expect(notSystemAPIAuthenticationResult.failed()).toBe(true);
 
       sinon.assert.calledTwice(session.clear);
       sinon.assert.calledWithExactly(session.clear, notSystemAPIRequest);
@@ -359,97 +332,101 @@ describe('Authenticator', () => {
     it('clears session if provider requested it via setting state to `null`.', async () => {
       // Use `token` provider for this test as it's the only one that does what we want.
       config.get.withArgs('xpack.security.authProviders').returns(['token']);
-      await initAuthenticator(server);
+      await initAuthenticator(server as any);
       authenticate = server.expose.withArgs('authenticate').lastCall.args[1];
 
       const request = requestFixture({ headers: { xCustomHeader: 'xxx' } });
 
       session.get.withArgs(request).resolves({
         state: { accessToken: 'access-xxx', refreshToken: 'refresh-xxx' },
-        provider: 'token'
+        provider: 'token',
       });
 
       session.clear.resolves();
 
-      cluster.callWithRequest
-        .withArgs(request).rejects({ statusCode: 401 });
+      cluster.callWithRequest.withArgs(request).rejects({ statusCode: 401 });
 
-      cluster.callWithInternalUser.withArgs('shield.getAccessToken').rejects(
-        Boom.badRequest('refresh token expired')
-      );
+      cluster.callWithInternalUser
+        .withArgs('shield.getAccessToken')
+        .rejects(Boom.badRequest('refresh token expired'));
 
       const authenticationResult = await authenticate(request);
-      expect(authenticationResult.redirected()).to.be(true);
+      expect(authenticationResult.redirected()).toBe(true);
 
       sinon.assert.calledOnce(session.clear);
       sinon.assert.calledWithExactly(session.clear, request);
     });
 
-    it('does not clear session if provider failed to authenticate request with non-401 reason with active session.',
-      async () => {
-        const systemAPIRequest = requestFixture({ headers: { xCustomHeader: 'xxx' } });
-        const notSystemAPIRequest = requestFixture({ headers: { xCustomHeader: 'yyy' } });
+    it('does not clear session if provider failed to authenticate request with non-401 reason with active session.', async () => {
+      const systemAPIRequest = requestFixture({ headers: { xCustomHeader: 'xxx' } });
+      const notSystemAPIRequest = requestFixture({ headers: { xCustomHeader: 'yyy' } });
 
-        session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
-          state: { authorization: 'Basic xxx' },
-          provider: 'basic'
-        }));
-
-        session.get.withArgs(notSystemAPIRequest).returns(Promise.resolve({
-          state: { authorization: 'Basic yyy' },
-          provider: 'basic'
-        }));
-
-        session.clear.returns(Promise.resolve());
-
-        server.plugins.kibana.systemApi.isSystemApiRequest
-          .withArgs(systemAPIRequest).returns(true)
-          .withArgs(notSystemAPIRequest).returns(false);
-
-        cluster.callWithRequest
-          .withArgs(systemAPIRequest).returns(Promise.reject(Boom.badRequest('something went wrong')))
-          .withArgs(notSystemAPIRequest).returns(Promise.reject(new Error('Non boom error')));
-
-        const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-        expect(systemAPIAuthenticationResult.failed()).to.be(true);
-
-        const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-        expect(notSystemAPIAuthenticationResult.failed()).to.be(true);
-
-        sinon.assert.notCalled(session.clear);
+      session.get.withArgs(systemAPIRequest).resolves({
+        state: { authorization: 'Basic xxx' },
+        provider: 'basic',
       });
+
+      session.get.withArgs(notSystemAPIRequest).resolves({
+        state: { authorization: 'Basic yyy' },
+        provider: 'basic',
+      });
+
+      session.clear.resolves();
+
+      server.plugins.kibana.systemApi.isSystemApiRequest
+        .withArgs(systemAPIRequest)
+        .returns(true)
+        .withArgs(notSystemAPIRequest)
+        .returns(false);
+
+      cluster.callWithRequest
+        .withArgs(systemAPIRequest)
+        .rejects(Boom.badRequest('something went wrong'))
+        .withArgs(notSystemAPIRequest)
+        .rejects(new Error('Non boom error'));
+
+      const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
+      expect(systemAPIAuthenticationResult.failed()).toBe(true);
+
+      const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
+      expect(notSystemAPIAuthenticationResult.failed()).toBe(true);
+
+      sinon.assert.notCalled(session.clear);
+    });
 
     it('does not clear session if provider can not handle request authentication with active session.', async () => {
       // Add `kbn-xsrf` header to the raw part of the request to make `can_redirect_request`
       // think that it's AJAX request and redirect logic shouldn't be triggered.
       const systemAPIRequest = requestFixture({
-        headers: { xCustomHeader: 'xxx', 'kbn-xsrf': 'xsrf' }
+        headers: { xCustomHeader: 'xxx', 'kbn-xsrf': 'xsrf' },
       });
       const notSystemAPIRequest = requestFixture({
-        headers: { xCustomHeader: 'yyy', 'kbn-xsrf': 'xsrf' }
+        headers: { xCustomHeader: 'yyy', 'kbn-xsrf': 'xsrf' },
       });
 
-      session.get.withArgs(systemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(systemAPIRequest).resolves({
         state: { authorization: 'Some weird authentication schema...' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      session.get.withArgs(notSystemAPIRequest).returns(Promise.resolve({
+      session.get.withArgs(notSystemAPIRequest).resolves({
         state: { authorization: 'Some weird authentication schema...' },
-        provider: 'basic'
-      }));
+        provider: 'basic',
+      });
 
-      session.clear.returns(Promise.resolve());
+      session.clear.resolves();
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(systemAPIRequest)
+        .returns(true)
+        .withArgs(notSystemAPIRequest)
+        .returns(false);
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-      expect(systemAPIAuthenticationResult.failed()).to.be(true);
+      expect(systemAPIAuthenticationResult.failed()).toBe(true);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-      expect(notSystemAPIAuthenticationResult.failed()).to.be(true);
+      expect(notSystemAPIAuthenticationResult.failed()).toBe(true);
 
       sinon.assert.notCalled(session.clear);
     });
@@ -458,34 +435,36 @@ describe('Authenticator', () => {
       // Add `kbn-xsrf` header to the raw part of the request to make `can_redirect_request`
       // think that it's AJAX request and redirect logic shouldn't be triggered.
       const systemAPIRequest = requestFixture({
-        headers: { xCustomHeader: 'xxx', 'kbn-xsrf': 'xsrf' }
+        headers: { xCustomHeader: 'xxx', 'kbn-xsrf': 'xsrf' },
       });
       const notSystemAPIRequest = requestFixture({
-        headers: { xCustomHeader: 'yyy', 'kbn-xsrf': 'xsrf' }
+        headers: { xCustomHeader: 'yyy', 'kbn-xsrf': 'xsrf' },
       });
 
       session.get.withArgs(systemAPIRequest).resolves({
         state: { accessToken: 'some old token' },
-        provider: 'token'
+        provider: 'token',
       });
 
       session.get.withArgs(notSystemAPIRequest).resolves({
         state: { accessToken: 'some old token' },
-        provider: 'token'
+        provider: 'token',
       });
 
       session.clear.resolves();
 
       server.plugins.kibana.systemApi.isSystemApiRequest
-        .withArgs(systemAPIRequest).returns(true)
-        .withArgs(notSystemAPIRequest).returns(false);
+        .withArgs(systemAPIRequest)
+        .returns(true)
+        .withArgs(notSystemAPIRequest)
+        .returns(false);
 
       const systemAPIAuthenticationResult = await authenticate(systemAPIRequest);
-      expect(systemAPIAuthenticationResult.notHandled()).to.be(true);
+      expect(systemAPIAuthenticationResult.notHandled()).toBe(true);
       sinon.assert.calledOnce(session.clear);
 
       const notSystemAPIAuthenticationResult = await authenticate(notSystemAPIRequest);
-      expect(notSystemAPIAuthenticationResult.notHandled()).to.be(true);
+      expect(notSystemAPIAuthenticationResult.notHandled()).toBe(true);
       sinon.assert.calledTwice(session.clear);
     });
 
@@ -493,88 +472,85 @@ describe('Authenticator', () => {
       const user = { username: 'user' };
       const request = requestFixture({ headers: { authorization: 'Basic ***' } });
 
-      cluster.callWithRequest.withArgs(request)
-        .returns(Promise.resolve(user));
-      AuthScopeService.prototype.getForRequestAndUser.withArgs(request, user)
-        .returns(Promise.resolve(['foo', 'bar']));
+      cluster.callWithRequest.withArgs(request).resolves(user);
+      (AuthScopeService.prototype.getForRequestAndUser as sinon.SinonStub)
+        .withArgs(request, user)
+        .resolves(['foo', 'bar']);
 
       const authenticationResult = await authenticate(request);
-      expect(authenticationResult.succeeded()).to.be(true);
-      expect(authenticationResult.user).to.be.eql({
-        ...user,
-        scope: ['foo', 'bar']
-      });
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.user).toEqual({ ...user, scope: ['foo', 'bar'] });
     });
   });
 
   describe('`deauthenticate` method', () => {
-    let deauthenticate;
+    let deauthenticate: (
+      request: ReturnType<typeof requestFixture>
+    ) => Promise<DeauthenticationResult>;
     beforeEach(async () => {
       config.get.withArgs('xpack.security.authProviders').returns(['basic']);
       config.get.withArgs('server.basePath').returns('/base-path');
 
-      await initAuthenticator(server);
+      await initAuthenticator(server as any);
 
       // Second argument will be a method we'd like to test.
       deauthenticate = server.expose.withArgs('deauthenticate').firstCall.args[1];
     });
 
     it('fails if request is not provided.', async () => {
-      try {
-        await deauthenticate();
-        expect().fail('`deauthenticate` should fail.');
-      } catch(err) {
-        expect(err).to.be.a(Error);
-        expect(err.message).to.be('Request should be a valid object, was [undefined].');
-      }
+      await expect(deauthenticate(undefined as any)).rejects.toThrowError(
+        'Request should be a valid object, was [undefined].'
+      );
     });
 
     it('returns `notHandled` if session does not exist.', async () => {
       const request = requestFixture();
-      session.get.withArgs(request).returns(null);
+      session.get.withArgs(request).resolves(null);
 
       const deauthenticationResult = await deauthenticate(request);
 
-      expect(deauthenticationResult.notHandled()).to.be(true);
+      expect(deauthenticationResult.notHandled()).toBe(true);
       sinon.assert.notCalled(session.clear);
     });
 
     it('clears session and returns whatever authentication provider returns.', async () => {
       const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
-      session.get.withArgs(request).returns(Promise.resolve({
-        state: {},
-        provider: 'basic'
-      }));
-
-      const deauthenticationResult = await deauthenticate(request);
-
-      sinon.assert.calledOnce(session.clear);
-      sinon.assert.calledWithExactly(session.clear, request);
-      expect(deauthenticationResult.redirected()).to.be(true);
-      expect(deauthenticationResult.redirectURL).to.be('/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED');
-    });
-
-    it('only clears session if it belongs to not configured provider.', async () => {
-      const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
       session.get.withArgs(request).resolves({
         state: {},
-        provider: 'token'
+        provider: 'basic',
       });
 
       const deauthenticationResult = await deauthenticate(request);
 
       sinon.assert.calledOnce(session.clear);
       sinon.assert.calledWithExactly(session.clear, request);
-      expect(deauthenticationResult.notHandled()).to.be(true);
+      expect(deauthenticationResult.redirected()).toBe(true);
+      expect(deauthenticationResult.redirectURL).toBe(
+        '/base-path/login?next=%2Fapp%2Fml&msg=SESSION_EXPIRED'
+      );
+    });
+
+    it('only clears session if it belongs to not configured provider.', async () => {
+      const request = requestFixture({ search: '?next=%2Fapp%2Fml&msg=SESSION_EXPIRED' });
+      session.get.withArgs(request).resolves({
+        state: {},
+        provider: 'token',
+      });
+
+      const deauthenticationResult = await deauthenticate(request);
+
+      sinon.assert.calledOnce(session.clear);
+      sinon.assert.calledWithExactly(session.clear, request);
+      expect(deauthenticationResult.notHandled()).toBe(true);
     });
   });
 
   describe('`isAuthenticated` method', () => {
-    let isAuthenticated;
+    let isAuthenticated: (request: ReturnType<typeof requestFixture>) => Promise<boolean>;
     beforeEach(async () => {
       config.get.withArgs('xpack.security.authProviders').returns(['basic']);
 
-      await initAuthenticator(server);
+      await initAuthenticator(server as any);
 
       // Second argument will be a method we'd like to test.
       isAuthenticated = server.expose.withArgs('isAuthenticated').firstCall.args[1];
@@ -582,50 +558,32 @@ describe('Authenticator', () => {
 
     it('returns `true` if `getUser` succeeds.', async () => {
       const request = requestFixture();
-      server.plugins.security.getUser
-        .withArgs(request)
-        .returns(Promise.resolve({}));
+      server.plugins.security.getUser.withArgs(request).resolves({});
 
-      expect(await isAuthenticated(request)).to.be(true);
+      await expect(isAuthenticated(request)).resolves.toBe(true);
     });
 
     it('returns `false` when `getUser` throws a 401 boom error.', async () => {
       const request = requestFixture();
-      server.plugins.security.getUser
-        .withArgs(request)
-        .returns(Promise.reject(Boom.unauthorized()));
+      server.plugins.security.getUser.withArgs(request).rejects(Boom.unauthorized());
 
-      expect(await isAuthenticated(request)).to.be(false);
+      await expect(isAuthenticated(request)).resolves.toBe(false);
     });
 
     it('throw non-boom errors.', async () => {
       const request = requestFixture();
       const nonBoomError = new TypeError();
-      server.plugins.security.getUser
-        .withArgs(request)
-        .returns(Promise.reject(nonBoomError));
+      server.plugins.security.getUser.withArgs(request).rejects(nonBoomError);
 
-      try {
-        await isAuthenticated(request);
-        throw new Error('`isAuthenticated` should throw.');
-      } catch (err) {
-        expect(err).to.be(nonBoomError);
-      }
+      await expect(isAuthenticated(request)).rejects.toThrowError(nonBoomError);
     });
 
     it('throw non-401 boom errors.', async () => {
       const request = requestFixture();
       const non401Error = Boom.boomify(new TypeError());
-      server.plugins.security.getUser
-        .withArgs(request)
-        .returns(Promise.reject(non401Error));
+      server.plugins.security.getUser.withArgs(request).rejects(non401Error);
 
-      try {
-        await isAuthenticated(request);
-        throw new Error('`isAuthenticated` should throw.');
-      } catch (err) {
-        expect(err).to.be(non401Error);
-      }
+      await expect(isAuthenticated(request)).rejects.toThrowError(non401Error);
     });
   });
 });
