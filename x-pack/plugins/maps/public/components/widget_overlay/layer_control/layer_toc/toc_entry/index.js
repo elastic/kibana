@@ -29,12 +29,8 @@ function mapStateToProps(state = {}) {
   return {
     isReadOnly: getIsReadOnly(state),
     zoom: _.get(state, 'map.mapState.zoom', 0),
-    getSelectedLayerSelector: () => {
-      return getSelectedLayer(state);
-    },
-    hasDirtyStateSelector: () => {
-      return hasDirtyState(state);
-    },
+    selectedLayer: getSelectedLayer(state),
+    hasDirtyStateSelector: hasDirtyState(state),
     openTOCDetails: getOpenTOCDetails(state),
   };
 }

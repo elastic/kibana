@@ -1443,10 +1443,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
   integrity sha1-wYrCgvY16I8EHMFVXYBuSSyo87E=
 
-"@elastic/nodegit@0.25.0-alpha.12":
-  version "0.25.0-alpha.12"
-  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.12.tgz#6dffdbea640f8b297af75e96f84c802427dff7f7"
-  integrity sha512-wKTji45igEw3VP2DmgLXpDX3n6WwOy0y4g/Xs385pymn9HWPVyg/UdWLJyXLrl0V//5EDSeqehMqOwTqAQ+qyA==
+"@elastic/nodegit@0.25.0-alpha.19":
+  version "0.25.0-alpha.19"
+  resolved "https://registry.yarnpkg.com/@elastic/nodegit/-/nodegit-0.25.0-alpha.19.tgz#a05a712dedbdbd7fe649cb970eb5677c5ec4ada8"
+  integrity sha512-fOG7tXkf8wmZEVMld+tkZtS3BRsUlrh95sRNUglHDd0G3g+ow9YDjV3dFHlLST0pTWirKyJuxrow2KgpLoWplA==
   dependencies:
     fs-extra "^7.0.0"
     json5 "^2.1.0"
@@ -9943,10 +9943,10 @@ ejs@^2.6.1:
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.6.1.tgz#498ec0d495655abc6f23cd61868d926464071aa0"
   integrity sha512-0xy4A/twfrRCnkhfk8ErDi5DqdAsAqeGxht4xkCUrsvhhbQNs7E+4jV0CN7+NKIY0aHE72+XvqtBIXzD31ZbXQ==
 
-elasticsearch-browser@^15.4.1:
-  version "15.4.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.4.1.tgz#c5843a9b2953cc9a653c8f6076f60ee4e5a44595"
-  integrity sha512-jjuT3EoF4t+sECKgMWzfveisf4RdFJMFTfh8jGfsq7SVAHBkAKqdqYr8TdeJYbi7qfWZHl7MajMs0+vklI4U8A==
+elasticsearch-browser@^15.5.0:
+  version "15.5.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch-browser/-/elasticsearch-browser-15.5.0.tgz#84c0b441063635edad089dadf01966d93f5be46c"
+  integrity sha512-BqnbbUs2sO+2X6ePgUUJxDUy+CK4Xx9t9VlxptMbieaP4I0K8tpoKb3o6rY1j8idZi6chWrlYQiif/g+GN6B4g==
 
 elasticsearch@^15.2.0:
   version "15.2.0"
@@ -9957,10 +9957,10 @@ elasticsearch@^15.2.0:
     chalk "^1.0.0"
     lodash "^4.17.10"
 
-elasticsearch@^15.4.1:
-  version "15.4.1"
-  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.4.1.tgz#28b54de22fea74003e57395e035926fe7b63b8dd"
-  integrity sha512-IL46Sv9krCKtpvlI37/vQVQrWx6QeT1OJhfWW6L3fIXzR1Vv5utO+DHYz8AosUI6vlkxShoq+y6sUIBhTF1OIg==
+elasticsearch@^15.5.0:
+  version "15.5.0"
+  resolved "https://registry.yarnpkg.com/elasticsearch/-/elasticsearch-15.5.0.tgz#62d9f238cf9e10b81c50a2303aa470c1f7da6b37"
+  integrity sha512-ZGKKaDkOFAap61ObBNkAxhYXCcAbRfkI4NVoSeLGnTD6/cItvY2j9LII/VV8/zclGe1x5m6DsVp47E4ze4aAeQ==
   dependencies:
     agentkeepalive "^3.4.1"
     chalk "^1.0.0"
@@ -15819,10 +15819,10 @@ jquery@^3.2.1:
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.3.1.tgz#958ce29e81c9790f31be7792df5d4d95fc57fbca"
   integrity sha512-Ubldcmxp5np52/ENotGxlLe6aGMvmF4R8S6tZjsP6Knsaxd/xp3Zrh50cG93lR6nPXyUFwzN3ZSOQI0wRJNdGg==
 
-jquery@^3.4.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.0.tgz#8de513fa0fa4b2c7d2e48a530e26f0596936efdf"
-  integrity sha512-ggRCXln9zEqv6OqAGXFEcshF5dSBvCkzj6Gm2gzuR5fWawaX8t7cxKVkkygKODrDAzKdoYw3l/e3pm3vlT4IbQ==
+jquery@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
+  integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
 
 js-base64@^2.1.8:
   version "2.4.5"
@@ -21001,14 +21001,6 @@ react-addons-shallow-compare@15.6.2:
   dependencies:
     fbjs "^0.8.4"
     object-assign "^4.1.0"
-
-react-anything-sortable@^1.7.4:
-  version "1.7.4"
-  resolved "https://registry.yarnpkg.com/react-anything-sortable/-/react-anything-sortable-1.7.4.tgz#c760cf67d7db226bb3943a7bda21c13614dce0cb"
-  integrity sha512-xeUrzvgAc5JoSk27Ic0zf86pMeT6z2WpT4tIWpSLLMqwCJOlGwaTRO3Y+eNpK+kRjzE1F0JURcaoxks6lcduqA==
-  dependencies:
-    create-react-class "^15.5.2"
-    prop-types "^15.5.8"
 
 react-apollo@^2.1.4:
   version "2.1.8"
