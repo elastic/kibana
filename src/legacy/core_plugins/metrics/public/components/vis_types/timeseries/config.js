@@ -275,7 +275,8 @@ const TimeseriesConfig = injectI18n(function (props) {
   }
 
   const disableSeparateYaxis = model.separate_axis ? false : true;
-
+  const filterQueryLanguageDefault = model.filter && model.filter.language ? model.filter.language : 'lucene';
+  const filterQueryDefault = (model.filter && model.filter.query) ? model.filter.query : '';
   return (
     <div className="tvbAggRow">
 
@@ -324,7 +325,7 @@ const TimeseriesConfig = injectI18n(function (props) {
           fullWidth
         >
           <QueryBar
-            query={{ language: (model.filter.language ? model.filter.language : 'lucene'), query: model.filter.query }}
+            query={{ language: filterQueryLanguageDefault, query: filterQueryDefault }}
             screenTitle={'TSVBDataConfigTab'}
             onSubmit={handleSubmit}
             appName={'VisEditor'}

@@ -91,36 +91,44 @@ class Series extends Component {
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
-
-    const params = {
-      className: this.props.className,
-      disableAdd: this.props.disableAdd,
-      disableDelete: this.props.disableDelete,
-      fields: this.props.fields,
-      name: this.props.name,
-      onAdd: this.props.onAdd,
-      onChange: this.handleChange,
-      onClone: this.props.onClone,
-      onDelete: this.props.onDelete,
-      model: this.props.model,
-      panel: this.props.panel,
-      selectedTab: this.state.selectedTab,
-      style: this.props.style,
-      uiRestrictions: this.state.uiRestrictions,
-      switchTab: this.switchTab,
-      toggleVisible: this.toggleVisible,
-      togglePanelActivation: this.togglePanelActivation,
-      visible: this.state.visible,
-      dragHandleProps: this.props.dragHandleProps,
-    };
-
-    return Boolean(Component) ?
-      (<Component {...params}/>) :
-      (<FormattedMessage
-        id="tsvb.seriesConfig.missingSeriesComponentDescription"
-        defaultMessage="Missing Series component for panel type: {panelType}"
-        values={{ panelType: panel.type }}
-      />);
+    if (Component) {
+      const params = {
+        className: this.props.className,
+        disableAdd: this.props.disableAdd,
+        disableDelete: this.props.disableDelete,
+        fields: this.props.fields,
+        name: this.props.name,
+        onAdd: this.props.onAdd,
+        onChange: this.handleChange,
+        onClone: this.props.onClone,
+        onDelete: this.props.onDelete,
+        onMouseDown: this.props.onMouseDown,
+        onTouchStart: this.props.onTouchStart,
+        onShouldSortItem: this.props.onShouldSortItem,
+        onSortableItemMount: this.props.onSortableItemMount,
+        onSortableItemReadyToMove: this.props.onSortableItemReadyToMove,
+        model: this.props.model,
+        panel: this.props.panel,
+        selectedTab: this.state.selectedTab,
+        sortData: this.props.sortData,
+        style: this.props.style,
+        uiRestrictions: this.state.uiRestrictions,
+        switchTab: this.switchTab,
+        toggleVisible: this.toggleVisible,
+        togglePanelActivation: this.togglePanelActivation,
+        visible: this.state.visible,
+      };
+      return (<Component {...params}/>);
+    }
+    return (
+      <div>
+        <FormattedMessage
+          id="tsvb.seriesConfig.missingSeriesComponentDescription"
+          defaultMessage="Missing Series component for panel type: {panelType}"
+          values={{ panelType: panel.type }}
+        />
+      </div>
+    );
   }
 
   componentWillUnmount() {
