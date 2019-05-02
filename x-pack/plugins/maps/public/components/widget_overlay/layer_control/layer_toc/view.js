@@ -16,15 +16,15 @@ import { TOCEntry } from './toc_entry';
 export class LayerTOC extends React.Component {
 
   componentWillUnmount() {
-    this.updateDebounced.cancel();
+    this._updateDebounced.cancel();
   }
 
   shouldComponentUpdate() {
-    this.updateDebounced();
+    this._updateDebounced();
     return false;
   }
 
-  updateDebounced = _.debounce(this.forceUpdate, 100);
+  _updateDebounced = _.debounce(this.forceUpdate, 100);
 
   _onDragEnd = ({ source, destination }) => {
     // Dragging item out of EuiDroppable results in destination of null
