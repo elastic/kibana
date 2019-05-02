@@ -29,6 +29,8 @@ import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
 import { Storage } from 'ui/storage';
+import chrome from 'ui/chrome';
+import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { data } from 'plugins/data';
 const { QueryBar } = data.query.ui;
 
@@ -63,14 +65,39 @@ const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
 const localStorage = new Storage(window.localStorage);
 class AnnotationsEditor extends Component {
-
   constructor(props) {
     super(props);
+    const indexPatternString = this.props.model.index_pattern ? this.props.model.index_pattern : this.props.model.default_index_pattern;
+    this.state = {
+      indexPatternAsString: indexPatternString,
+      indexPatternForQuery: '',
+    };
     this.renderRow = this.renderRow.bind(this);
+
+  }
+
+  async componentDidMount() {
+    await this.fetchIndexPatterns();
+  }
+
+  fetchIndexPatterns = async () => {
+    const searchIndexPattern = this.state.indexPatternAsString;
+    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${searchIndexPattern}"`,
+      search_fields: ['title'],
+    });
+    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+      indexPattern => indexPattern.attributes.title === searchIndexPattern
+    );
+    if (exactMatch) {
+      this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
+    }
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, '[0].value', _.get(e, 'target.value'));
@@ -84,7 +111,8 @@ class AnnotationsEditor extends Component {
   renderRow(row) {
     const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
     const model = { ...defaults, ...row };
-    const handleChange = (part) => {
+    const indexPatternForQuery = this.state.indexPatternForQuery;
+    const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
@@ -94,10 +122,8 @@ class AnnotationsEditor extends Component {
       });
     };
     const htmlId = htmlIdGenerator(model.id);
-    const handleAdd = collectionActions.handleAdd
-      .bind(null, this.props, newAnnotation);
-    const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     return (
       <div className="tvbAnnotationsEditor" key={model.id}>
         <EuiFlexGroup responsive={false}>
@@ -115,10 +141,12 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('indexPattern')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.indexPatternLabel"
-                    defaultMessage="Index pattern (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.indexPatternLabel"
+                      defaultMessage="Index pattern (required)"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -131,10 +159,12 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('timeField')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.timeFieldLabel"
-                    defaultMessage="Time field (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.timeFieldLabel"
+                      defaultMessage="Time field (required)"
+                    />
+                  }
                   fullWidth
                 >
                   <FieldSelect
@@ -155,20 +185,25 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('queryString')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.queryStringLabel"
-                    defaultMessage="Query string"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.queryStringLabel"
+                      defaultMessage="Query string"
+                    />
+                  }
                   fullWidth
                 >
                   <QueryBar
-                    query={
-                      { language: model.query_string.language ? model.query_string.language : 'lucene',
-                        query: model.query_string.query }}
+                    query={{
+                      language: model.query_string.language
+                        ? model.query_string.language
+                        : 'lucene',
+                      query: model.query_string.query,
+                    }}
                     screenTitle={'AnnotationsEditor'}
-                    onSubmit={(query) => this.handleSubmit(model, query)}
+                    onSubmit={query => this.handleSubmit(model, query)}
                     appName={'VisEditor'}
-                    indexPatterns={model.index_pattern || model.default_index_pattern}
+                    indexPatterns={[indexPatternForQuery]}
                     store={localStorage || {}}
                     showDatePicker={false}
                   />
@@ -210,24 +245,25 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('icon')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.iconLabel"
-                    defaultMessage="Icon (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.iconLabel"
+                      defaultMessage="Icon (required)"
+                    />
+                  }
                 >
-                  <IconSelect
-                    value={model.icon}
-                    onChange={this.handleChange(model, 'icon')}
-                  />
+                  <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
                 </EuiFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('fields')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.fieldsLabel"
-                    defaultMessage="Fields (required - comma separated paths)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.fieldsLabel"
+                      defaultMessage="Fields (required - comma separated paths)"
+                    />
+                  }
                   fullWidth
                 >
                   <EuiFieldText
@@ -240,16 +276,18 @@ class AnnotationsEditor extends Component {
               <EuiFlexItem>
                 <EuiFormRow
                   id={htmlId('rowTemplate')}
-                  label={(<FormattedMessage
-                    id="tsvb.annotationsEditor.rowTemplateLabel"
-                    defaultMessage="Row template (required)"
-                  />)}
+                  label={
+                    <FormattedMessage
+                      id="tsvb.annotationsEditor.rowTemplateLabel"
+                      defaultMessage="Row template (required)"
+                    />
+                  }
                   helpText={
                     <span>
                       <FormattedMessage
                         id="tsvb.annotationsEditor.rowTemplateHelpText"
                         defaultMessage="eg.{rowTemplateExample}"
-                        values={{ rowTemplateExample: (<EuiCode>{'{{field}}'}</EuiCode>) }}
+                        values={{ rowTemplateExample: <EuiCode>{'{{field}}'}</EuiCode> }}
                       />
                     </span>
                   }
@@ -263,7 +301,6 @@ class AnnotationsEditor extends Component {
                 </EuiFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
-
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
@@ -283,8 +320,7 @@ class AnnotationsEditor extends Component {
     const { model } = this.props;
     let content;
     if (!model.annotations || !model.annotations.length) {
-      const handleAdd = collectionActions.handleAdd
-        .bind(null, this.props, newAnnotation);
+      const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
       content = (
         <EuiText textAlign="center">
           <p>
@@ -315,17 +351,12 @@ class AnnotationsEditor extends Component {
           </EuiTitle>
           <EuiSpacer size="m" />
 
-          { annotations }
+          {annotations}
         </div>
       );
     }
-    return(
-      <div className="tvbAnnotationsEditor__container">
-        { content }
-      </div>
-    );
+    return <div className="tvbAnnotationsEditor__container">{content}</div>;
   }
-
 }
 
 AnnotationsEditor.defaultProps = {
