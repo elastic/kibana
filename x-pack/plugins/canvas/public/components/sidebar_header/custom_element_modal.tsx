@@ -40,15 +40,15 @@ const MAX_DESCRIPTION_LENGTH = 100;
 
 export interface Props {
   /**
-   * name of the custom element
+   * initial value of the name of the custom element
    */
   name?: string;
   /**
-   * description of the custom element
+   * initial value of the description of the custom element
    */
   description?: string;
   /**
-   * preview image of the custom element as a base64 dataurl
+   * initial value of the preview image of the custom element as a base64 dataurl
    */
   image?: string;
   /**
@@ -66,8 +66,17 @@ export interface Props {
 }
 
 export interface State {
+  /**
+   * name of the custom element to be saved
+   */
   name?: string;
+  /**
+   * description of the custom element to be saved
+   */
   description?: string;
+  /**
+   * image of the custom element to be saved
+   */
   image?: string | null;
 }
 

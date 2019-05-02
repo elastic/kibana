@@ -85,6 +85,12 @@ export interface Props {
   //  */
   // ungroupNodes: () => void;
 }
+
+export interface State {
+  // indicated whether not the custom element modal is open
+  isModalVisible: boolean;
+}
+
 const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
   <EuiButtonIcon
     color="text"
@@ -94,7 +100,7 @@ const contextMenuButton = (handleClick: (event: MouseEvent) => void) => (
   />
 );
 
-export class SidebarHeader extends Component<Props> {
+export class SidebarHeader extends Component<Props, State> {
   public static propTypes = {
     title: PropTypes.string.isRequired,
     showLayerControls: PropTypes.bool, // TODO: remove when we support relayering multiple elements
