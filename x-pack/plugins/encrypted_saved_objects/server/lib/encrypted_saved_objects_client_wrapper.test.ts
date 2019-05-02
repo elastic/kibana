@@ -90,8 +90,7 @@ describe('#create', () => {
 
     expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
-      'known-type',
-      'uuid-v4-id',
+      { type: 'known-type', id: 'uuid-v4-id' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
 
@@ -100,6 +99,37 @@ describe('#create', () => {
       'known-type',
       { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
       { id: 'uuid-v4-id', overwrite: true }
+    );
+  });
+
+  it('uses `namespace` to encrypt attributes if it is specified', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const options = { overwrite: true, namespace: 'some-namespace' };
+    const mockedResponse = {
+      id: 'uuid-v4-id',
+      type: 'known-type',
+      attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      references: [],
+    };
+
+    mockBaseClient.create.mockResolvedValue(mockedResponse);
+
+    expect(await wrapper.create('known-type', attributes, options)).toEqual({
+      ...mockedResponse,
+      attributes: { attrOne: 'one', attrThree: 'three' },
+    });
+
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'uuid-v4-id', namespace: 'some-namespace' },
+      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+    );
+
+    expect(mockBaseClient.create).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.create).toHaveBeenCalledWith(
+      'known-type',
+      { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      { id: 'uuid-v4-id', overwrite: true, namespace: 'some-namespace' }
     );
   });
 
@@ -187,7 +217,6 @@ describe('#bulkCreate', () => {
 
   it('generates ID, encrypts attributes and strips them from response', async () => {
     const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
-    const options = { namespace: 'some-namespace' };
     const mockedResponse = {
       saved_objects: [
         {
@@ -212,7 +241,7 @@ describe('#bulkCreate', () => {
       { type: 'unknown-type', attributes },
     ];
 
-    await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
+    await expect(wrapper.bulkCreate(bulkCreateParams)).resolves.toEqual({
       saved_objects: [
         { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
         mockedResponse.saved_objects[1],
@@ -221,8 +250,7 @@ describe('#bulkCreate', () => {
 
     expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
-      'known-type',
-      'uuid-v4-id',
+      { type: 'known-type', id: 'uuid-v4-id' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
 
@@ -235,6 +263,41 @@ describe('#bulkCreate', () => {
           attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
         },
         bulkCreateParams[1],
+      ],
+      undefined
+    );
+  });
+
+  it('uses `namespace` to encrypt attributes if it is specified', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const options = { namespace: 'some-namespace' };
+    const mockedResponse = {
+      saved_objects: [{ id: 'uuid-v4-id', type: 'known-type', attributes, references: [] }],
+    };
+
+    mockBaseClient.bulkCreate.mockResolvedValue(mockedResponse);
+
+    const bulkCreateParams = [{ type: 'known-type', attributes }];
+    await expect(wrapper.bulkCreate(bulkCreateParams, options)).resolves.toEqual({
+      saved_objects: [
+        { ...mockedResponse.saved_objects[0], attributes: { attrOne: 'one', attrThree: 'three' } },
+      ],
+    });
+
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'uuid-v4-id', namespace: 'some-namespace' },
+      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+    );
+
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.bulkCreate).toHaveBeenCalledWith(
+      [
+        {
+          ...bulkCreateParams[0],
+          id: 'uuid-v4-id',
+          attributes: { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+        },
       ],
       options
     );
@@ -585,8 +648,34 @@ describe('#update', () => {
 
     expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
     expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id' },
+      { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
+    );
+
+    expect(mockBaseClient.update).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.update).toHaveBeenCalledWith(
       'known-type',
       'some-id',
+      { attrOne: 'one', attrSecret: '*secret*', attrThree: 'three' },
+      options
+    );
+  });
+
+  it('uses `namespace` to encrypt attributes if it is specified', async () => {
+    const attributes = { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' };
+    const options = { version: 'some-version', namespace: 'some-namespace' };
+    const mockedResponse = { id: 'some-id', type: 'known-type', attributes, references: [] };
+
+    mockBaseClient.update.mockResolvedValue(mockedResponse);
+
+    await expect(wrapper.update('known-type', 'some-id', attributes, options)).resolves.toEqual({
+      ...mockedResponse,
+      attributes: { attrOne: 'one', attrThree: 'three' },
+    });
+
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledTimes(1);
+    expect(encryptedSavedObjectsServiceMock.encryptAttributes).toHaveBeenCalledWith(
+      { type: 'known-type', id: 'some-id', namespace: 'some-namespace' },
       { attrOne: 'one', attrSecret: 'secret', attrThree: 'three' }
     );
 

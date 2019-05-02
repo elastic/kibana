@@ -64,7 +64,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
     return this.stripEncryptedAttributesFromResponse(
       await this.options.baseClient.create(
         type,
-        await this.options.service.encryptAttributes(type, id, attributes),
+        await this.options.service.encryptAttributes(
+          { type, id, namespace: options.namespace },
+          attributes
+        ),
         { ...options, id }
       )
     );
@@ -94,8 +97,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
           ...object,
           id,
           attributes: await this.options.service.encryptAttributes(
-            object.type,
-            id,
+            { type: object.type, id, namespace: options && options.namespace },
             object.attributes
           ),
         };
@@ -143,7 +145,10 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClient {
       await this.options.baseClient.update(
         type,
         id,
-        await this.options.service.encryptAttributes(type, id, attributes),
+        await this.options.service.encryptAttributes(
+          { type, id, namespace: options && options.namespace },
+          attributes
+        ),
         options
       )
     );

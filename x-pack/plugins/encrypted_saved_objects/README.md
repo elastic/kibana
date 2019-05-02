@@ -59,7 +59,14 @@ async handler(request: Request) {
 ...
 ```
 
-5. To retrieve Saved Object with decrypted content use dedicated API:
+5. To retrieve Saved Object with decrypted content use the dedicated `getDecryptedAsInternalUser` API method. 
+
+**Note:** As name suggests the method will retrieve the encrypted values and decrypt them on behalf of the internal Kibana
+user to make it possible to use this method even when user request context is not available (e.g. in background tasks).
+Hence this method should only be used wherever consumers would otherwise feel comfortable using `callWithInternalUser`
+and preferably only as a part of the Kibana server routines that are outside of the lifecycle of a HTTP request that a 
+user has control over.
+
 ```typescript
 const savedObjectWithDecryptedContent =  await server.plugins.encrypted_saved_objects.getDecryptedAsInternalUser(
   'my-saved-object-type',

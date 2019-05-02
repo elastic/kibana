@@ -20,7 +20,7 @@ export const PLUGIN_ID = 'encrypted_saved_objects';
 export const CONFIG_PREFIX = `xpack.${PLUGIN_ID}`;
 
 interface CoreSetup {
-  config: { encryptionKey?: string; auditLogEnabled: boolean };
+  config: { encryptionKey?: string };
   elasticsearch: Legacy.Plugins.elasticsearch.Plugin;
   savedObjects: Legacy.SavedObjectsService;
 }
@@ -49,7 +49,7 @@ export class Plugin {
         encryptionKey,
         core.savedObjects.types,
         this.log,
-        new EncryptedSavedObjectsAuditLogger(core.config.auditLogEnabled, plugins.audit)
+        new EncryptedSavedObjectsAuditLogger(plugins.audit)
       )
     );
 

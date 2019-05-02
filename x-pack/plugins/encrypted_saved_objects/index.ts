@@ -22,7 +22,6 @@ export const encryptedSavedObjects = (kibana: any) =>
       return Joi.object({
         enabled: Joi.boolean().default(true),
         encryptionKey: Joi.string().min(32),
-        audit: Joi.object({ enabled: Joi.boolean().default(false) }),
       }).default();
     },
 
@@ -40,13 +39,12 @@ export const encryptedSavedObjects = (kibana: any) =>
       const encryptedSavedObjectsSetup = new Plugin(loggerFacade).setup(
         {
           config: {
-            auditLogEnabled: config.get<boolean>(`${CONFIG_PREFIX}.audit.enabled`),
             encryptionKey: config.get<string | undefined>(`${CONFIG_PREFIX}.encryptionKey`),
           },
           savedObjects: server.savedObjects,
           elasticsearch: server.plugins.elasticsearch,
         },
-        { audit: new AuditLogger(server, PLUGIN_ID) }
+        { audit: new AuditLogger(server, PLUGIN_ID, config, server.plugins.xpack_main.info) }
       );
 
       // Re-expose plugin setup contract through legacy mechanism.

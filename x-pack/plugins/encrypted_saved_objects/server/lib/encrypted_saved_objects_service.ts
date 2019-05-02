@@ -6,6 +6,7 @@
 
 // @ts-ignore
 import nodeCrypto from '@elastic/node-crypto';
+import stringify from 'json-stable-stringify';
 import typeDetect from 'type-detect';
 import { Server } from 'kibana';
 import { EncryptedSavedObjectsAuditLogger } from './encrypted_saved_objects_audit_logger';
@@ -19,6 +20,26 @@ export interface EncryptedSavedObjectTypeRegistration {
   readonly type: string;
   readonly attributesToEncrypt: ReadonlySet<string>;
   readonly attributesToExcludeFromAAD?: ReadonlySet<string>;
+}
+
+/**
+ * Uniquely identifies saved object.
+ */
+export interface SavedObjectDescriptor {
+  readonly id: string;
+  readonly type: string;
+  readonly namespace?: string;
+}
+
+/**
+ * Utility function that gives array representation of the saved object descriptor respecting
+ * optional `namespace` property.
+ * @param descriptor Saved Object descriptor to turn into array.
+ */
+export function descriptorToArray(descriptor: SavedObjectDescriptor) {
+  return descriptor.namespace
+    ? [descriptor.namespace, descriptor.type, descriptor.id]
+    : [descriptor.type, descriptor.id];
 }
 
 /**
@@ -115,22 +136,20 @@ export class EncryptedSavedObjectsService {
    * Takes saved object attributes for the specified type and encrypts all of them that are supposed
    * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
    * attributes were encrypted original attributes dictionary is returned.
-   * @param type Type of the saved object to encrypt attributes for.
-   * @param id Id of the saved object to strip encrypted attributes from.
+   * @param descriptor Descriptor of the saved object to encrypt attributes for.
    * @param attributes Dictionary of __ALL__ saved object attributes.
    * @throws Will throw if encryption fails for whatever reason.
    */
   public async encryptAttributes<T extends Record<string, unknown>>(
-    type: string,
-    id: string,
+    descriptor: SavedObjectDescriptor,
     attributes: T
   ): Promise<T> {
-    const typeRegistration = this.typeRegistrations.get(type);
+    const typeRegistration = this.typeRegistrations.get(descriptor.type);
     if (typeRegistration === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = this.getAAD(typeRegistration, id, attributes);
+    const encryptionAAD = this.getAAD(typeRegistration, descriptor, attributes);
     const encryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeRegistration.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -142,7 +161,7 @@ export class EncryptedSavedObjectsService {
           );
         } catch (err) {
           this.log.error(`Failed to encrypt "${attributeName}" attribute: ${err.message || err}`);
-          this.audit.encryptAttributeFailure(attributeName, type, id);
+          this.audit.encryptAttributeFailure(attributeName, descriptor);
 
           throw new EncryptionError(
             `Unable to encrypt attribute "${attributeName}"`,
@@ -155,10 +174,12 @@ export class EncryptedSavedObjectsService {
 
     // Normally we expect all registered to-be-encrypted attributes to be defined, but if it's
     // not the case we should collect and log them to make troubleshooting easier.
-    const encryptedAttributesKeys = Array.from(Object.keys(encryptedAttributes));
+    const encryptedAttributesKeys = Object.keys(encryptedAttributes);
     if (encryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
       this.log.debug(
-        `The following attributes of saved object "${type}:${id}" should have been encrypted: ${Array.from(
+        `The following attributes of saved object "${descriptorToArray(
+          descriptor
+        )}" should have been encrypted: ${Array.from(
           typeRegistration.attributesToEncrypt
         )}, but found only: ${encryptedAttributesKeys}`
       );
@@ -168,7 +189,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    this.audit.encryptAttributesSuccess(encryptedAttributesKeys, type, id);
+    this.audit.encryptAttributesSuccess(encryptedAttributesKeys, descriptor);
 
     return {
       ...attributes,
@@ -180,23 +201,21 @@ export class EncryptedSavedObjectsService {
    * Takes saved object attributes for the specified type and decrypts all of them that are supposed
    * to be encrypted if any and returns that __NEW__ attributes dictionary back. If none of the
    * attributes were decrypted original attributes dictionary is returned.
-   * @param type Type of the saved object to decrypt attributes for.
-   * @param id Id of the saved object to strip encrypted attributes from.
+   * @param descriptor Descriptor of the saved object to decrypt attributes for.
    * @param attributes Dictionary of __ALL__ saved object attributes.
    * @throws Will throw if decryption fails for whatever reason.
    * @throws Will throw if any of the attributes to decrypt is not a string.
    */
   public async decryptAttributes<T extends Record<string, unknown>>(
-    type: string,
-    id: string,
+    descriptor: SavedObjectDescriptor,
     attributes: T
   ): Promise<T> {
-    const typeRegistration = this.typeRegistrations.get(type);
+    const typeRegistration = this.typeRegistrations.get(descriptor.type);
     if (typeRegistration === undefined) {
       return attributes;
     }
 
-    const encryptionAAD = this.getAAD(typeRegistration, id, attributes);
+    const encryptionAAD = this.getAAD(typeRegistration, descriptor, attributes);
     const decryptedAttributes: Record<string, string> = {};
     for (const attributeName of typeRegistration.attributesToEncrypt) {
       const attributeValue = attributes[attributeName];
@@ -205,7 +224,7 @@ export class EncryptedSavedObjectsService {
       }
 
       if (typeof attributeValue !== 'string') {
-        this.audit.decryptAttributeFailure(attributeName, type, id);
+        this.audit.decryptAttributeFailure(attributeName, descriptor);
         throw new Error(
           `Encrypted "${attributeName}" attribute should be a string, but found ${typeDetect(
             attributeValue
@@ -220,7 +239,7 @@ export class EncryptedSavedObjectsService {
         );
       } catch (err) {
         this.log.error(`Failed to decrypt "${attributeName}" attribute: ${err.message || err}`);
-        this.audit.decryptAttributeFailure(attributeName, type, id);
+        this.audit.decryptAttributeFailure(attributeName, descriptor);
 
         throw new EncryptionError(
           `Unable to decrypt attribute "${attributeName}"`,
@@ -232,10 +251,12 @@ export class EncryptedSavedObjectsService {
 
     // Normally we expect all registered to-be-encrypted attributes to be defined, but if it's
     // not the case we should collect and log them to make troubleshooting easier.
-    const decryptedAttributesKeys = Array.from(Object.keys(decryptedAttributes));
+    const decryptedAttributesKeys = Object.keys(decryptedAttributes);
     if (decryptedAttributesKeys.length !== typeRegistration.attributesToEncrypt.size) {
       this.log.debug(
-        `The following attributes of saved object "${type}:${id}" should have been decrypted: ${Array.from(
+        `The following attributes of saved object "${descriptorToArray(
+          descriptor
+        )}" should have been decrypted: ${Array.from(
           typeRegistration.attributesToEncrypt
         )}, but found only: ${decryptedAttributesKeys}`
       );
@@ -245,7 +266,7 @@ export class EncryptedSavedObjectsService {
       return attributes;
     }
 
-    this.audit.decryptAttributesSuccess(decryptedAttributesKeys, type, id);
+    this.audit.decryptAttributesSuccess(decryptedAttributesKeys, descriptor);
 
     return {
       ...attributes,
@@ -257,33 +278,34 @@ export class EncryptedSavedObjectsService {
    * Generates string representation of the Additional Authenticated Data based on the specified saved
    * object type and attributes.
    * @param typeRegistration Saved object type registration parameters.
-   * @param id Id of the saved object.
+   * @param descriptor Descriptor of the saved object to get AAD for.
    * @param attributes All attributes of the saved object instance of the specified type.
    */
   private getAAD<T extends Record<string, unknown>>(
     typeRegistration: EncryptedSavedObjectTypeRegistration,
-    id: string,
+    descriptor: SavedObjectDescriptor,
     attributes: T
   ) {
     // Collect all attributes (both keys and values) that should contribute to AAD.
-    const attributesAAD = Array.from(Object.entries(attributes)).filter(([attributeKey]) => {
-      return (
+    const attributesAAD = {} as T;
+    for (const [attributeKey, attributeValue] of Object.entries(attributes)) {
+      if (
         !typeRegistration.attributesToEncrypt.has(attributeKey) &&
         (typeRegistration.attributesToExcludeFromAAD == null ||
           !typeRegistration.attributesToExcludeFromAAD.has(attributeKey))
-      );
-    });
+      ) {
+        attributesAAD[attributeKey] = attributeValue;
+      }
+    }
 
-    if (attributesAAD.length === 0) {
+    if (Object.keys(attributesAAD).length) {
       this.log.debug(
-        `The AAD for saved object "${typeRegistration.type}:${id}" does not include any attributes.`
+        `The AAD for saved object "${descriptorToArray(
+          descriptor
+        )}" does not include any attributes.`
       );
     }
 
-    // TODO: Use JSON.stringify instead of template string? Slower, but respects value types, e.g.
-    // Attributes: {prop1: 'prop1-value', prop2: 2}
-    // With template string: "prop1,prop1-value,prop2,2"
-    // With JSON.stringify:  "[[\"prop1\",\"prop1-value\"],[\"prop2\",2]]"
-    return `${typeRegistration.type},${id},${attributesAAD}`;
+    return stringify([...descriptorToArray(descriptor), attributesAAD]);
   }
 }

@@ -4,65 +4,57 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectDescriptor, descriptorToArray } from './encrypted_saved_objects_service';
+
 /**
  * Represents all audit events the plugin can log.
  */
 export class EncryptedSavedObjectsAuditLogger {
-  constructor(private readonly enabled: boolean, private readonly auditLogger: any) {}
+  constructor(private readonly auditLogger: any) {}
 
-  public encryptAttributeFailure(attributeName: string, type: string, id: string) {
-    if (!this.enabled) {
-      return;
-    }
-
+  public encryptAttributeFailure(attributeName: string, descriptor: SavedObjectDescriptor) {
     this.auditLogger.log(
       'encrypt_failure',
-      `Failed to encrypt attribute "${attributeName}" for saved object "${type}:${id}".`,
-      { id, type, attributeName }
+      `Failed to encrypt attribute "${attributeName}" for saved object "[${descriptorToArray(
+        descriptor
+      )}]".`,
+      { ...descriptor, attributeName }
     );
   }
 
-  public decryptAttributeFailure(attributeName: string, type: string, id: string) {
-    if (!this.enabled) {
-      return;
-    }
-
+  public decryptAttributeFailure(attributeName: string, descriptor: SavedObjectDescriptor) {
     this.auditLogger.log(
       'decrypt_failure',
-      `Failed to decrypt attribute "${attributeName}" for saved object "${type}:${id}".`,
-      { id, type, attributeName }
+      `Failed to decrypt attribute "${attributeName}" for saved object "[${descriptorToArray(
+        descriptor
+      )}]".`,
+      { ...descriptor, attributeName }
     );
   }
 
   public encryptAttributesSuccess(
     attributesNames: ReadonlyArray<string>,
-    type: string,
-    id: string
+    descriptor: SavedObjectDescriptor
   ) {
-    if (!this.enabled) {
-      return;
-    }
-
     this.auditLogger.log(
       'encrypt_success',
-      `Successfully encrypted attributes "[${attributesNames}]" for saved object "${type}:${id}".`,
-      { id, type, attributesNames }
+      `Successfully encrypted attributes "[${attributesNames}]" for saved object "[${descriptorToArray(
+        descriptor
+      )}]".`,
+      { ...descriptor, attributesNames }
     );
   }
 
   public decryptAttributesSuccess(
     attributesNames: ReadonlyArray<string>,
-    type: string,
-    id: string
+    descriptor: SavedObjectDescriptor
   ) {
-    if (!this.enabled) {
-      return;
-    }
-
     this.auditLogger.log(
       'decrypt_success',
-      `Successfully decrypted attributes "[${attributesNames}]" for saved object "${type}:${id}".`,
-      { id, type, attributesNames }
+      `Successfully decrypted attributes "[${attributesNames}]" for saved object "[${descriptorToArray(
+        descriptor
+      )}]".`,
+      { ...descriptor, attributesNames }
     );
   }
 }

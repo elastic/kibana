@@ -7,6 +7,7 @@
 import {
   EncryptedSavedObjectsService,
   EncryptedSavedObjectTypeRegistration,
+  SavedObjectDescriptor,
 } from './encrypted_saved_objects_service';
 
 export function createEncryptedSavedObjectsServiceMock(
@@ -17,11 +18,11 @@ export function createEncryptedSavedObjectsServiceMock(
   )).EncryptedSavedObjectsService();
 
   function processAttributes<T extends Record<string, any>>(
-    type: string,
+    descriptor: Pick<SavedObjectDescriptor, 'type'>,
     attrs: T,
     action: (attrs: T, attrName: string) => void
   ) {
-    const registration = registrations.find(r => r.type === type);
+    const registration = registrations.find(r => r.type === descriptor.type);
     if (!registration) {
       return attrs;
     }
@@ -36,23 +37,23 @@ export function createEncryptedSavedObjectsServiceMock(
   }
 
   mock.isRegistered.mockImplementation(type => registrations.findIndex(r => r.type === type) >= 0);
-  mock.encryptAttributes.mockImplementation(async (type, id, attrs) =>
+  mock.encryptAttributes.mockImplementation(async (descriptor, attrs) =>
     processAttributes(
-      type,
+      descriptor,
       attrs,
       (clonedAttrs, attrName) => (clonedAttrs[attrName] = `*${clonedAttrs[attrName]}*`)
     )
   );
-  mock.decryptAttributes.mockImplementation(async (type, id, attrs) =>
+  mock.decryptAttributes.mockImplementation(async (descriptor, attrs) =>
     processAttributes(
-      type,
+      descriptor,
       attrs,
       (clonedAttrs, attrName) =>
         (clonedAttrs[attrName] = (clonedAttrs[attrName] as string).slice(1, -1))
     )
   );
   mock.stripEncryptedAttributes.mockImplementation((type, attrs) =>
-    processAttributes(type, attrs, (clonedAttrs, attrName) => delete clonedAttrs[attrName])
+    processAttributes({ type }, attrs, (clonedAttrs, attrName) => delete clonedAttrs[attrName])
   );
 
   return mock;
