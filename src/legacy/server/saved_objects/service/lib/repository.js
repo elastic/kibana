@@ -173,6 +173,7 @@ export class SavedObjectsRepository {
         {
           [method]: {
             _id: expectedResult.rawMigratedDoc._id,
+            _index: this._getIndexForType(object.type),
           },
         },
         expectedResult.rawMigratedDoc._source
@@ -182,7 +183,6 @@ export class SavedObjectsRepository {
     });
 
     const esResponse = await this._writeToCluster('bulk', {
-      index: this._index,
       refresh: 'wait_for',
       body: bulkCreateParams,
     });
@@ -254,7 +254,7 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('delete', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       refresh: 'wait_for',
       ignore: [404],
     });
@@ -372,7 +372,7 @@ export class SavedObjectsRepository {
     }
 
     const esOptions = {
-      index: this._index,
+      index: this._getIndexForType(type),
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
@@ -437,12 +437,12 @@ export class SavedObjectsRepository {
 
     const unsupportedTypes = [];
     const response = await this._callCluster('mget', {
-      index: this._index,
       body: {
         docs: objects.reduce((acc, { type, id, fields }) => {
           if (this._isTypeAllowed(type)) {
             acc.push({
               _id: this._serializer.generateRawId(namespace, type, id),
+              _index: this._getIndexForType(type),
               _source: includedFields(type, fields),
             });
           } else {
@@ -503,7 +503,7 @@ export class SavedObjectsRepository {
 
     const response = await this._callCluster('get', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       ignore: [404],
     });
 
@@ -548,7 +548,7 @@ export class SavedObjectsRepository {
     const time = this._getCurrentTime();
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       ...(version && decodeRequestVersion(version)),
       refresh: 'wait_for',
       ignore: [404],
@@ -613,7 +613,7 @@ export class SavedObjectsRepository {
 
     const response = await this._writeToCluster('update', {
       id: this._serializer.generateRawId(namespace, type, id),
-      index: this._index,
+      index: this._getIndexForType(type),
       refresh: 'wait_for',
       _source: true,
       body: {
