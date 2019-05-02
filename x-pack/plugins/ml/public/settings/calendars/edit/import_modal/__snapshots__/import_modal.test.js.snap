@@ -52,6 +52,18 @@ exports[`ImportModal Renders import modal 1`] = `
       </EuiFlexGroup>
     </EuiModalBody>
     <EuiModalFooter>
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        onClick={[MockFunction]}
+        type="button"
+      >
+        <FormattedMessage
+          defaultMessage="Cancel"
+          id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
+          values={Object {}}
+        />
+      </EuiButtonEmpty>
       <EuiButton
         color="primary"
         disabled={true}
@@ -67,18 +79,6 @@ exports[`ImportModal Renders import modal 1`] = `
           values={Object {}}
         />
       </EuiButton>
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        onClick={[MockFunction]}
-        type="button"
-      >
-        <FormattedMessage
-          defaultMessage="Cancel"
-          id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
-          values={Object {}}
-        />
-      </EuiButtonEmpty>
     </EuiModalFooter>
   </EuiModal>
 </Fragment>

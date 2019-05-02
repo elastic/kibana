@@ -33,6 +33,7 @@ const TEST_OPTIONS = {
     enableGradleImport: true,
     installNodeDependency: true,
     enableGitCertCheck: false,
+    gitProtocolWhitelist: ['ssh', 'https', 'git'],
   },
   repos: [],
   maxWorkspace: 5, // max workspace folder for each language server
