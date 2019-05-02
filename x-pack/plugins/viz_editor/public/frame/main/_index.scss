@@ -1,17 +1,46 @@
-.vzPage {
+.lnsPage {
+  padding: 0;
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  overflow: hidden;
 }
 
-.vzSidebar {
+.lnsSidebar {
+  margin: 0;
+  flex: 1 0 ($euiSize * 16);
   height: 100%;
-  overflow-y: auto;
+  background-color: $euiColorLightestShade;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  > .lnsSidebar__padding {
+    padding: $euiSize;
+
+    + .lnsSidebar__padding {
+      padding-top: 0;
+    }
+  }
 }
 
-.vzBody {
-  flex-direction: row;
-  align-self: flex-start;
+.lnsSidebar__sourceGroup {
+  padding: $euiSize;
+  flex-grow: 0;
+}
+
+.lnsSidebar--right {
+  overflow: hidden auto;
+}
+
+.lnsPageBody {
+  padding: $euiSizeL;
+
+  > * {
+    @include euiScrollBar;
+    overflow: hidden auto;
+    display: flex;
+  }
 }

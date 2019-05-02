@@ -10,11 +10,13 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
+  EuiButtonGroup,
   // @ts-ignore
   EuiListGroupItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContent,
   EuiPageSideBar,
   EuiPanel,
   EuiTextArea,
@@ -162,33 +164,45 @@ export function Main(props: MainProps) {
 
   const hasData = Object.keys(state.visModel.queries).length > 0;
 
+  const toggleButtonsIcons = datasourceRegistry.getAll().map(({ name, icon }) => ({
+    key: name,
+    id: name,
+    label: name,
+    iconType: icon as any,
+  }));
+
   return (
-    <EuiPage className="vzPage">
+    <EuiPage className="lnsPage">
       {!state.metadata.expressionMode && (
-        <EuiPageSideBar className="vzSidebar">
-          {datasourceRegistry.getAll().map(({ name, icon }) => (
-            <EuiButtonToggle
-              key={name}
-              label={name}
-              iconType={icon as any}
-              onChange={() => {
-                onChangeVisModel({
-                  ...state.visModel,
-                  datasourcePlugin: name,
-                  datasource: null,
-                  queries: {},
-                });
-              }}
-              isSelected={name === state.visModel.datasourcePlugin}
-              isEmpty
-              isIconOnly
-            />
-          ))}
+        <EuiPageSideBar className="lnsSidebar">
+          <EuiFlexGroup className="lnsSidebar__sourceGroup" gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xs"><h2>Source: </h2></EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend="Data source"
+                name="textAlign"
+                className="eui-displayInlineBlock"
+                options={toggleButtonsIcons}
+                idSelected={state.visModel.datasourcePlugin}
+                onChange={(optionId) => {
+                  onChangeVisModel({
+                    ...state.visModel,
+                    datasourcePlugin: optionId,
+                    datasource: null,
+                    queries: {},
+                  });
+                }}
+                isIconOnly
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <DataPanel {...panelProps} />
         </EuiPageSideBar>
       )}
-      <EuiPageBody className="vzBody">
-        <EuiPageContentBody className="euiPanel euiPanel--paddingLarge euiPageContent">
+      <EuiPageBody className="lnsPageBody">
+        <EuiPageContent>
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={5}>
               {WorkspacePanel ? (
@@ -239,10 +253,10 @@ export function Main(props: MainProps) {
               </>
             )}
           </EuiFlexGroup>
-        </EuiPageContentBody>
+        </EuiPageContent>
       </EuiPageBody>
       {!state.metadata.expressionMode && (
-        <EuiPageSideBar className="vzSidebar">
+        <EuiPageSideBar className="lnsSidebar lnsSidebar--right">
           <ConfigPanel {...panelProps} />
 
           {hasData && (
