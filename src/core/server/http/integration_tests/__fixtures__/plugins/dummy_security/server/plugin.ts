@@ -71,4 +71,5 @@ export class DummySecurityPlugin {
       },
     };
   }
+  public start() {}
 }
