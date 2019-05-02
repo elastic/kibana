@@ -63,18 +63,45 @@ class TimeseriesPanelConfigUi extends Component {
     await this.fetchIndexPatternsForQuery();
   }
   fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern
-      ? this.props.model.index_pattern
-      : this.props.model.default_index_pattern;
+    const searchIndexPattern = this.props.model.index_pattern ?
+      this.props.model.index_pattern :
+      this.props.model.default_index_pattern;
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
-  }
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
-  }
+  };
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
+  handleSubmit = query => {
+    this.props.onChange({ filter: query.query });
+  };
+  /*
+    Retrieving the index pattern objects that are available.
+    We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
+    CAUTION: There can be cases where the index-pattern-string, used by a tsvb visualization, doesn’t correspond to a saved index pattern object.
+    Because of this, Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
+    COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
+
+    NOTE: I tried to move this to it's own file but got stuck. Try again after implementing correctly everywhere else!
+
+  fetchIndexPatterns = async () => {
+    const searchIndexPattern = this.props.model.index_pattern
+      ? this.props.model.index_pattern
+      : this.props.model.default_index_pattern;
+    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${searchIndexPattern}"`,
+      search_fields: ['title'],
+    });
+    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
+      indexPattern => indexPattern.attributes.title === searchIndexPattern
+    );
+    if (exactMatch) {
+      this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
+    }
+  };
+  */
 
   render() {
     const defaults = {
@@ -208,10 +235,6 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  {/*
-                    query prop for QueryBar needs a language value, if this is hard-coded, the toggle does not stick
-                    Do I need to change the model to accept an object for filters and queries that has a language key?
-                   */}
                   <QueryBar
                     query={{
                       language: model.filter.language ? model.filter.language : 'kuery',
@@ -423,7 +446,6 @@ TimeseriesPanelConfigUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData$: PropTypes.object,
-  indexPatterns: PropTypes.array,
 };
 
 const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);

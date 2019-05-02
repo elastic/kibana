@@ -29,8 +29,9 @@ import PanelConfig from './panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { fetchFields } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
+import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
+// import chrome from 'ui/chrome';
+// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 
 const VIS_STATE_DEBOUNCE_DELAY = 200;
 
@@ -45,7 +46,7 @@ class VisEditor extends Component {
       autoApply: true,
       visFields: props.visFields,
       extractedIndexPatterns: [''],
-      indexPatterns: [], // adding these in here so that we share the same patterns in all the child components
+      indexPatterns: {}, // adding these in here so that we share the same patterns in all the child components
     };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.visDataSubject = new Rx.BehaviorSubject(this.props.visData);
@@ -64,29 +65,12 @@ class VisEditor extends Component {
     this.props.vis.uiStateVal(field, value);
   };
 
-  /*
-    Retrieving the index pattern objects that are available.
-    We will then be able to pass the one that the QueryBar needs within the component where it is needed by filtering the collection.
-    CAUTION: There can be cases where the index-pattern-string, used by a tsvb visualization, doesn’t correspond to a saved index pattern object.
-    Because of this, Index Pattern Saved Object might be removed because of issues with the saved object getting stale. How should we handle this?
-    COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
-  */
-  fetchIndexPatterns = async () => {
+  fetchIndexPatternsForQuery = async () => {
     const searchIndexPattern = this.state.model.index_pattern
       ? this.state.model.index_pattern
       : this.state.model.default_index_pattern;
-    const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-      type: 'index-pattern',
-      fields: ['title', 'fields'],
-      search: `"${searchIndexPattern}"`,
-      search_fields: ['title'],
-    });
-    const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-      indexPattern => indexPattern.attributes.title === searchIndexPattern
-    );
-    if (exactMatch) {
-      this.setState({ indexPattern: getFromSavedObject(exactMatch) });
-    }
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatterns: indexPatternObject });
   };
 
   updateVisState = debounce(() => {
@@ -123,8 +107,7 @@ class VisEditor extends Component {
           })
         );
       }
-      // Fetch a whole new collection of index patterns and set the selected one on state.
-      await this.fetchIndexPatterns();
+      await this.fetchIndexPatternsForQuery();
     }
 
     this.setState({
@@ -194,8 +177,16 @@ class VisEditor extends Component {
               dateFormat={this.props.config.get('dateFormat')}
               onChange={this.handleChange}
               getConfig={this.getConfig}
-              indexPatterns={this.state.indexPatterns}
             />
+            {/* <PanelConfig
+              fields={this.state.visFields}
+              model={model}
+              visData$={this.visData$}
+              dateFormat={this.props.config.get('dateFormat')}
+              onChange={this.handleChange}
+              getConfig={this.getConfig}
+              indexPatterns={this.state.indexPatterns}
+            /> */}
           </div>
         </div>
       );
@@ -206,7 +197,7 @@ class VisEditor extends Component {
 
   async componentDidMount() {
     this.props.renderComplete();
-    await this.fetchIndexPatterns();
+    await this.fetchIndexPatternsForQuery();
   }
 
   componentDidUpdate(prevProps) {
