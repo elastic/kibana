@@ -6,11 +6,11 @@
 
 import { Dictionary } from '../../../../../../common/types/common';
 
-export type jobId = string;
+export type JobId = string;
 
 export interface DataFrameJob {
   dest: string;
-  id: jobId;
+  id: JobId;
   source: string;
 }
 
@@ -23,7 +23,11 @@ type RunningState = DATA_FRAME_RUNNING_STATE.STARTED | DATA_FRAME_RUNNING_STATE.
 export interface DataFrameJobState {
   checkpoint: number;
   current_position: Dictionary<any>;
+  // indexer_state is a backend internal attribute
+  // and should not be considered in the UI.
   indexer_state: RunningState;
+  // task_state is the attribute to check against if a job
+  // is running or not.
   task_state: RunningState;
 }
 
