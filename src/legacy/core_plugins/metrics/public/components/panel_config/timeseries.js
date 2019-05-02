@@ -41,12 +41,6 @@ import {
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import chrome from 'ui/chrome';
-import { getFromSavedObject } from 'ui/index_patterns/static_utils';
-/*
-QueryBarInput will be the text input, the language switcher, and autocomplete.
-import { QueryBarInput } from 'ui/query_bar';
-*/
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
@@ -69,15 +63,12 @@ class TimeseriesPanelConfigUi extends Component {
     await this.fetchIndexPatternsForQuery();
   }
   fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern
-      ? this.props.model.index_pattern
-      : this.props.model.default_index_pattern;
+    const searchIndexPattern = this.props.model.index_pattern ?
+      this.props.model.index_pattern :
+      this.props.model.default_index_pattern;
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
-  }
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
-  }
+  };
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
@@ -92,7 +83,7 @@ class TimeseriesPanelConfigUi extends Component {
     COMMENT: fetchIndexPatterns should probably move to the '../lib' folder under a new file. The variables names also need to be shortened!
 
     NOTE: I tried to move this to it's own file but got stuck. Try again after implementing correctly everywhere else!
-  */
+
   fetchIndexPatterns = async () => {
     const searchIndexPattern = this.props.model.index_pattern
       ? this.props.model.index_pattern
@@ -107,9 +98,10 @@ class TimeseriesPanelConfigUi extends Component {
       indexPattern => indexPattern.attributes.title === searchIndexPattern
     );
     if (exactMatch) {
-      this.setState({ indexPattern: getFromSavedObject(exactMatch) });
+      this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
     }
   };
+  */
 
   render() {
     const defaults = {
@@ -243,10 +235,6 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                   fullWidth
                 >
-                  {/*
-                    query prop for QueryBar needs a language value, if this is hard-coded, the toggle does not stick
-                    Do I need to change the model to accept an object for filters and queries that has a language key?
-                   */}
                   <QueryBar
                     query={{
                       language: model.filter.language ? model.filter.language : 'kuery',
@@ -458,7 +446,6 @@ TimeseriesPanelConfigUi.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData$: PropTypes.object,
-  indexPatterns: PropTypes.array,
 };
 
 const TimeseriesPanelConfig = injectI18n(TimeseriesPanelConfigUi);
