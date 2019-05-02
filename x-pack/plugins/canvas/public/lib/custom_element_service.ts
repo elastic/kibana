@@ -12,7 +12,7 @@ import { API_ROUTE_CUSTOM_ELEMENT } from '../../common/lib/constants';
 // @ts-ignore unconverted local file
 import { fetch } from '../../common/lib/fetch';
 
-export interface CustomElement {
+interface CustomElement {
   /**
    * unique ID for the custom element
    */

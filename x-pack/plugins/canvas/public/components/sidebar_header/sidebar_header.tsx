@@ -22,7 +22,7 @@ import { CustomElementModal } from './custom_element_modal';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
-export interface Props {
+interface Props {
   /**
    * title to display in the header
    */
@@ -86,7 +86,7 @@ export interface Props {
   // ungroupNodes: () => void;
 }
 
-export interface State {
+interface State {
   /**
    *  indicates whether or not the custom element modal is open
    */

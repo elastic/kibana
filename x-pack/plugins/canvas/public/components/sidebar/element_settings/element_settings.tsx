@@ -15,12 +15,13 @@ import { FunctionFormList } from '../../function_form_list';
 import { SidebarHeader } from '../../sidebar_header';
 import { PositionedElement } from '../../../lib/positioned_element';
 
-export interface Props {
+interface Props {
   /**
    * a Canvas element used to populate config forms
    */
   element: PositionedElement;
 }
+
 export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
   const tabs = [
     {

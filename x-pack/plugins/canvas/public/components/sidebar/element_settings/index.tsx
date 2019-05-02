@@ -11,11 +11,11 @@ import { getElementById, getSelectedPage } from '../../../state/selectors/workpa
 import { ElementSettings as Component } from './element_settings';
 import { PositionedElement } from '../../../lib/positioned_element';
 
-export interface State {
+interface State {
   persistent: { workpad: { pages: Array<{ elements: PositionedElement[] }> } };
 }
 
-export interface Props {
+interface Props {
   selectedElementId: string;
 }
 

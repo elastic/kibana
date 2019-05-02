@@ -8,7 +8,7 @@ import React, { FunctionComponent, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 
-export interface Props {
+interface Props {
   /**
    * A click handler for the delete button
    */

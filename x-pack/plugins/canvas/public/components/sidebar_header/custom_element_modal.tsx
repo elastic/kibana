@@ -38,7 +38,7 @@ import { encode } from '../../../common/lib/dataurl';
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
 
-export interface Props {
+interface Props {
   /**
    * initial value of the name of the custom element
    */
@@ -65,7 +65,7 @@ export interface Props {
   onCancel: () => void;
 }
 
-export interface State {
+interface State {
   /**
    * name of the custom element to be saved
    */
