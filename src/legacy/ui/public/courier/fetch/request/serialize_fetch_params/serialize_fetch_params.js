@@ -31,8 +31,10 @@ export function serializeFetchParams(requestsFetchParams, options) {
       body.timeout = `${esShardTimeout}ms`;
     }
 
+    const index = (fetchParams.index && fetchParams.index.title) ? fetchParams.index.title : fetchParams.index;
+
     const header = {
-      index: fetchParams.index.toIndex(),
+      index,
       type: fetchParams.type,
       search_type: fetchParams.search_type,
       ignore_unavailable: true,
