@@ -26,6 +26,7 @@ import {
 import { durationOutputOptions, durationInputOptions } from './lib/durations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
@@ -43,7 +44,7 @@ class DataFormatPicker extends Component {
     this.state = {
       from,
       to,
-      decimals
+      decimals,
     };
   }
 
@@ -61,7 +62,7 @@ class DataFormatPicker extends Component {
     } else if (selectedOptions[0].value === 'duration') {
       const { from, to, decimals } = this.state;
       this.props.onChange([{
-        value: `${from},${to},${decimals}`
+        value: `${from},${to},${decimals}`,
       }]);
     } else {
       this.props.onChange(selectedOptions);
@@ -82,11 +83,11 @@ class DataFormatPicker extends Component {
       }
 
       this.setState({
-        [name]: newValue
+        [name]: newValue,
       }, () => {
         const { from, to, decimals } = this.state;
         this.props.onChange([{
-          value: `${from},${to},${decimals}`
+          value: `${from},${to},${decimals}`,
         }]);
       });
     };
@@ -104,11 +105,26 @@ class DataFormatPicker extends Component {
     }
     const { intl } = this.props;
     const options = [
-      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.bytesLabel', defaultMessage: 'Bytes' }), value: 'bytes' },
-      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.numberLabel', defaultMessage: 'Number' }), value: 'number' },
-      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.percentLabel', defaultMessage: 'Percent' }), value: 'percent' },
-      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.durationLabel', defaultMessage: 'Duration' }), value: 'duration' },
-      { label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.customLabel', defaultMessage: 'Custom' }), value: 'custom' }
+      {
+        label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.bytesLabel', defaultMessage: 'Bytes' }),
+        value: 'bytes',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.numberLabel', defaultMessage: 'Number' }),
+        value: 'number',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.percentLabel', defaultMessage: 'Percent' }),
+        value: 'percent',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.durationLabel', defaultMessage: 'Duration' }),
+        value: 'duration',
+      },
+      {
+        label: intl.formatMessage({ id: 'tsvb.dataFormatPicker.customLabel', defaultMessage: 'Custom' }),
+        value: 'custom',
+      },
     ];
     const selectedOption = options.find(option => {
       return defaultValue === option.value;
@@ -118,7 +134,7 @@ class DataFormatPicker extends Component {
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
       const selectedFrom = durationInputOptions.find(option => from === option.value);
-      const selectedTo = durationOutputOptions.find(option =>  to === option.value);
+      const selectedTo = durationOutputOptions.find(option => to === option.value);
 
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
@@ -167,21 +183,25 @@ class DataFormatPicker extends Component {
               />
             </EuiFormRow>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id={htmlId('decimal')}
-              label={(<FormattedMessage
-                id="tsvb.dataFormatPicker.decimalPlacesLabel"
-                defaultMessage="Decimal places"
-              />)}
-            >
-              <EuiFieldText
-                defaultValue={decimals}
-                inputRef={(el) => this.decimals = el}
-                onChange={this.handleDurationChange('decimals')}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
+
+          {selectedTo && selectedTo.value !== 'humanize' && (
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                id={htmlId('decimal')}
+                label={(<FormattedMessage
+                  id="tsvb.dataFormatPicker.decimalPlacesLabel"
+                  defaultMessage="Decimal places"
+                />)}
+              >
+                <EuiFieldText
+                  defaultValue={decimals}
+                  inputRef={(el) => this.decimals = el}
+                  onChange={this.handleDurationChange('decimals')}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>)
+          }
+
         </EuiFlexGroup>
       );
     }
@@ -198,7 +218,9 @@ class DataFormatPicker extends Component {
                 <FormattedMessage
                   id="tsvb.dataFormatPicker.formatStringHelpText"
                   defaultMessage="See {numeralJsLink}"
-                  values={{ numeralJsLink: (<EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink>) }}
+                  values={{
+                    numeralJsLink: (<EuiLink href="http://numeraljs.com/#format" target="_BLANK">Numeral.js</EuiLink>),
+                  }}
                 />
               </span>
             }
@@ -232,13 +254,13 @@ class DataFormatPicker extends Component {
 }
 
 DataFormatPicker.defaultProps = {
-  label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' })
+  label: i18n.translate('tsvb.defaultDataFormatterLabel', { defaultMessage: 'Data Formatter' }),
 };
 
 DataFormatPicker.propTypes = {
   value: PropTypes.string,
   label: PropTypes.string,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
 };
 
 export default injectI18n(DataFormatPicker);
