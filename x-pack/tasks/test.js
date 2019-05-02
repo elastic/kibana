@@ -32,14 +32,13 @@ export default (gulp, { mocha }) => {
       'common/**/__tests__/**/*.js',
       'server/**/__tests__/**/*.js',
     ].concat(forPluginServerTests());
-    const x1 =  gulp.src(globs, { read: false })
+    return gulp.src(globs, { read: false })
       .pipe(mocha(MOCHA_OPTIONS));
-    wtf.dump();
-    return x1;
   });
 
   gulp.task('testbrowser', () => {
     return getEnabledPlugins().then(plugins => {
+      wtf.dump();
       const x2 = pluginHelpers.run('testBrowser', {
         plugins: plugins.join(','),
       });
