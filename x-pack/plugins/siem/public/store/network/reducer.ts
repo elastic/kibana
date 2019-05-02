@@ -81,6 +81,7 @@ export const initialNetworkState: NetworkState = {
         },
       },
       tls: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         tlsSortField: {
           field: TlsFields._id,
@@ -88,6 +89,7 @@ export const initialNetworkState: NetworkState = {
         },
       },
       users: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
         usersSortField: {
           field: UsersFields.name,

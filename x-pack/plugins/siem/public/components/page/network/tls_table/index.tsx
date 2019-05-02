@@ -15,13 +15,13 @@ import { Criteria, ItemsPerRow, LoadMoreTable, SortingBasicTable } from '../../.
 import { getTlsColumns } from './columns';
 import * as i18n from './translations';
 
+const tableType = networkModel.NetworkTableType.tls;
+
 interface OwnProps {
   data: TlsEdges[];
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: networkModel.NetworkType;
 }
 
@@ -31,6 +31,11 @@ interface TlsTableReduxProps {
 }
 
 interface TlsTableDispatchProps {
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    networkType: networkModel.NetworkType;
+    tableType: networkModel.NetworkTableType;
+  }>;
   updateTlsLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
@@ -68,20 +73,18 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
   public render() {
     const {
       data,
-      tlsSortField,
-      hasNextPage,
       limit,
       loading,
       loadMore,
+      tlsSortField,
       totalCount,
-      nextCursor,
-      updateTlsLimit,
       type,
+      updateTableActivePage,
+      updateTlsLimit,
     } = this.props;
     return (
       <LoadMoreTable
         columns={getTlsColumns(tlsTableId)}
-        hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.TRANSPORT_LAYER_SECURITY}
         headerUnit={i18n.UNIT(totalCount)}
@@ -89,10 +92,18 @@ class TlsTableComponent extends React.PureComponent<TlsTableProps> {
         limit={limit}
         loading={loading}
         loadingTitle={i18n.TRANSPORT_LAYER_SECURITY}
-        loadMore={() => loadMore(nextCursor)}
+        loadMore={newActivePage => loadMore(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
         sorting={getSortField(tlsSortField)}
+        totalCount={totalCount}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            networkType: type,
+            tableType,
+          })
+        }
         updateLimitPagination={newLimit => updateTlsLimit({ limit: newLimit, networkType: type })}
       />
     );
@@ -125,6 +136,7 @@ const makeMapStateToProps = () => {
 export const TlsTable = connect(
   makeMapStateToProps,
   {
+    updateTableActivePage: networkActions.updateTableActivePage,
     updateTlsLimit: networkActions.updateTlsLimit,
     updateTlsSort: networkActions.updateTlsSort,
   }

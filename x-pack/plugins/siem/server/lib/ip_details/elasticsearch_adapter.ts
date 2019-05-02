@@ -95,11 +95,9 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       'search',
       buildTlsQuery(options)
     );
-
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.count.value', response);
     const tlsEdges: TlsEdges[] = getTlsEdges(response, options);
-    const hasNextPage = tlsEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = tlsEdges.splice(beginning, limit - beginning);
 
@@ -107,11 +105,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       edges,
       totalCount,
       pageInfo: {
-        hasNextPage,
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
+        activePage,
       },
     };
   }
@@ -142,11 +136,9 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       'search',
       buildUsersQuery(options)
     );
-
-    const { cursor, limit } = options.pagination;
+    const { activePage, cursor, limit } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response);
     const usersEdges = getUsersEdges(response);
-    const hasNextPage = usersEdges.length > limit;
     const beginning = cursor != null ? parseInt(cursor, 10) : 0;
     const edges = usersEdges.splice(beginning, limit - beginning);
 
@@ -154,11 +146,7 @@ export class ElasticsearchIpOverviewAdapter implements IpDetailsAdapter {
       edges,
       totalCount,
       pageInfo: {
-        endCursor: {
-          value: String(limit),
-          tiebreaker: null,
-        },
-        hasNextPage,
+        activePage,
       },
     };
   }

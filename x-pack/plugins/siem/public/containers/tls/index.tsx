@@ -13,6 +13,7 @@ import { FlowTarget } from '../../../server/graphql/types';
 import { TlsEdges, TlsSortField, GetTlsQuery, PageInfo } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
+import { generateTablePaginationOptions } from '../../components/load_more_table/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { tlsQuery } from './index.gql_query';
@@ -23,7 +24,7 @@ export interface TlsArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 
@@ -35,6 +36,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface TlsComponentReduxProps {
+  activePage: number;
   limit: number;
   tlsSortField: TlsSortField;
 }
@@ -44,16 +46,17 @@ type TlsProps = OwnProps & TlsComponentReduxProps;
 class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTlsQuery.Variables> {
   public render() {
     const {
-      id = 'tlsQuery',
+      activePage,
       children,
-      tlsSortField,
+      endDate,
       filterQuery,
+      flowTarget,
+      id = 'tlsQuery',
       ip,
+      limit,
       sourceId,
       startDate,
-      endDate,
-      limit,
-      flowTarget,
+      tlsSortField,
     } = this.props;
     return (
       <Query<GetTlsQuery.Query, GetTlsQuery.Variables>
@@ -70,23 +73,16 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
           ip,
           flowTarget,
           sort: tlsSortField,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
+          pagination: generateTablePaginationOptions(activePage, limit),
           filterQuery: createFilter(filterQuery),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const tls = getOr([], 'source.Tls.edges', data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -98,7 +94,7 @@ class TlsComponentQuery extends QueryTemplate<TlsProps, GetTlsQuery.Query, GetTl
                   ...fetchMoreResult.source,
                   Tls: {
                     ...fetchMoreResult.source.Tls,
-                    edges: [...prev.source.Tls.edges, ...fetchMoreResult.source.Tls.edges],
+                    edges: [...fetchMoreResult.source.Tls.edges],
                   },
                 },
               };

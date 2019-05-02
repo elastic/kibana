@@ -5,7 +5,6 @@
  */
 
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
-import { getOr } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -99,7 +98,6 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                         ip={ip}
                         loading={loading}
                         loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                         refetch={refetch}
                         setQuery={setQuery}
                         totalCount={totalCount}
@@ -119,15 +117,13 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     startDate={from}
                     type={networkModel.NetworkType.details}
                   >
-                    {({ id, users, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                    {({ id, users, totalCount, loading, loadMore, refetch }) => (
                       <UsersTableManage
                         data={users}
                         id={id}
                         flowTarget={flowTarget}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo)!}
                         loading={loading}
                         loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)!}
                         refetch={refetch}
                         setQuery={setQuery}
                         totalCount={totalCount}
@@ -147,14 +143,12 @@ const IPDetailsComponent = pure<IPDetailsComponentProps>(
                     startDate={from}
                     type={networkModel.NetworkType.details}
                   >
-                    {({ id, tls, totalCount, pageInfo, loading, loadMore, refetch }) => (
+                    {({ id, tls, totalCount, loading, loadMore, refetch }) => (
                       <TlsTableManage
                         data={tls}
                         id={id}
-                        hasNextPage={getOr(false, 'hasNextPage', pageInfo) || false}
                         loading={loading}
                         loadMore={loadMore}
-                        nextCursor={getOr(null, 'endCursor.value', pageInfo)}
                         refetch={refetch}
                         setQuery={setQuery}
                         totalCount={totalCount}

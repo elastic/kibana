@@ -24,7 +24,11 @@ export const timelineQuery = gql`
       ) {
         totalCount
         pageInfo {
-          activePage
+          endCursor {
+            value
+            tiebreaker
+          }
+          hasNextPage
         }
         edges {
           node {

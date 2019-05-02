@@ -769,7 +769,7 @@ export interface TimelineData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: TimelinePageInfo;
 }
 
 export interface TimelineEdges {
@@ -792,6 +792,12 @@ export interface TimelineNonEcsData {
   field: string;
 
   value?: ToStringArray | null;
+}
+
+export interface TimelinePageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineDetailsData {
@@ -2789,9 +2795,19 @@ export namespace GetTimelineQuery {
   };
 
   export type PageInfo = {
-    __typename?: 'PageInfo';
+    __typename?: 'TimelinePageInfo';
 
-    activePage?: number | null;
+    endCursor?: EndCursor | null;
+
+    hasNextPage?: boolean | null;
+  };
+
+  export type EndCursor = {
+    __typename?: 'CursorType';
+
+    value: string;
+
+    tiebreaker?: string | null;
   };
 
   export type Edges = {
@@ -3489,15 +3505,7 @@ export namespace GetTlsQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }
 
@@ -3662,14 +3670,6 @@ export namespace GetUsersQuery {
   export type PageInfo = {
     __typename?: 'PageInfo';
 
-    endCursor?: EndCursor | null;
-
-    hasNextPage?: boolean | null;
-  };
-
-  export type EndCursor = {
-    __typename?: 'CursorType';
-
-    value: string;
+    activePage?: number | null;
   };
 }

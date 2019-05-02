@@ -17,14 +17,14 @@ import { getUsersColumns } from './columns';
 import * as i18n from './translations';
 import { assertUnreachable } from '../../../../lib/helpers';
 
+const tableType = networkModel.NetworkTableType.users;
+
 interface OwnProps {
   data: UsersEdges[];
   flowTarget: FlowTarget;
   loading: boolean;
-  hasNextPage: boolean;
-  nextCursor: string;
   totalCount: number;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: networkModel.NetworkType;
 }
 
@@ -34,6 +34,11 @@ interface UsersTableReduxProps {
 }
 
 interface UsersTableDispatchProps {
+  updateTableActivePage: ActionCreator<{
+    activePage: number;
+    networkType: networkModel.NetworkType;
+    tableType: networkModel.NetworkTableType;
+  }>;
   updateUsersLimit: ActionCreator<{
     limit: number;
     networkType: networkModel.NetworkType;
@@ -71,22 +76,20 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
   public render() {
     const {
       data,
-      usersSortField,
-      hasNextPage,
+      flowTarget,
       limit,
       loading,
       loadMore,
       totalCount,
-      nextCursor,
-      updateUsersLimit,
-      flowTarget,
       type,
+      updateTableActivePage,
+      updateUsersLimit,
+      usersSortField,
     } = this.props;
 
     return (
       <LoadMoreTable
         columns={getUsersColumns(flowTarget, usersTableId)}
-        hasNextPage={hasNextPage}
         headerCount={totalCount}
         headerTitle={i18n.USERS}
         headerUnit={i18n.UNIT(totalCount)}
@@ -94,10 +97,19 @@ class UsersTableComponent extends React.PureComponent<UsersTableProps> {
         limit={limit}
         loading={loading}
         loadingTitle={i18n.USERS}
-        loadMore={() => loadMore(nextCursor)}
+        loadMore={newActivePage => loadMore(newActivePage)}
         onChange={this.onChange}
         pageOfItems={data}
         sorting={getSortField(usersSortField)}
+        totalCount={totalCount}
+        updateActivePage={newPage =>
+          updateTableActivePage({
+            activePage: newPage,
+            networkType: type,
+            tableType,
+          })
+        }
+        updateProps={{ flowTarget }}
         updateLimitPagination={newLimit => updateUsersLimit({ limit: newLimit, networkType: type })}
       />
     );
@@ -130,6 +142,7 @@ const makeMapStateToProps = () => {
 export const UsersTable = connect(
   makeMapStateToProps,
   {
+    updateTableActivePage: networkActions.updateTableActivePage,
     updateUsersLimit: networkActions.updateUsersLimit,
     updateUsersSort: networkActions.updateUsersSort,
   }

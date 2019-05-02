@@ -798,7 +798,7 @@ export interface TimelineData {
 
   totalCount: number;
 
-  pageInfo: PageInfo;
+  pageInfo: TimelinePageInfo;
 }
 
 export interface TimelineEdges {
@@ -821,6 +821,12 @@ export interface TimelineNonEcsData {
   field: string;
 
   value?: ToStringArray | null;
+}
+
+export interface TimelinePageInfo {
+  endCursor?: CursorType | null;
+
+  hasNextPage?: boolean | null;
 }
 
 export interface TimelineDetailsData {
@@ -4230,7 +4236,7 @@ export namespace TimelineDataResolvers {
 
     totalCount?: TotalCountResolver<number, TypeParent, Context>;
 
-    pageInfo?: PageInfoResolver<PageInfo, TypeParent, Context>;
+    pageInfo?: PageInfoResolver<TimelinePageInfo, TypeParent, Context>;
   }
 
   export type EdgesResolver<
@@ -4244,7 +4250,7 @@ export namespace TimelineDataResolvers {
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
   export type PageInfoResolver<
-    R = PageInfo,
+    R = TimelinePageInfo,
     Parent = TimelineData,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -4317,6 +4323,25 @@ export namespace TimelineNonEcsDataResolvers {
   export type ValueResolver<
     R = ToStringArray | null,
     Parent = TimelineNonEcsData,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace TimelinePageInfoResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = TimelinePageInfo> {
+    endCursor?: EndCursorResolver<CursorType | null, TypeParent, Context>;
+
+    hasNextPage?: HasNextPageResolver<boolean | null, TypeParent, Context>;
+  }
+
+  export type EndCursorResolver<
+    R = CursorType | null,
+    Parent = TimelinePageInfo,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type HasNextPageResolver<
+    R = boolean | null,
+    Parent = TimelinePageInfo,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

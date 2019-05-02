@@ -23,7 +23,9 @@ export enum NetworkType {
 export enum NetworkTableType {
   dns = 'dns',
   domains = 'domains',
+  tls = 'tls',
   topNFlow = 'topNFlow',
+  users = 'users',
 }
 
 export interface BasicQuery {

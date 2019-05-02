@@ -41,7 +41,7 @@ export const eventsSchema = gql`
   type TimelineData {
     edges: [TimelineEdges!]!
     totalCount: Float!
-    pageInfo: PageInfo!
+    pageInfo: TimelinePageInfo!
   }
 
   type DetailItem {

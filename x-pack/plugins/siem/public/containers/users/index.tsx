@@ -13,6 +13,7 @@ import { FlowTarget } from '../../../server/graphql/types';
 import { GetUsersQuery, PageInfo, UsersEdges, UsersSortField } from '../../graphql/types';
 import { inputsModel, networkModel, networkSelectors, State } from '../../store';
 import { createFilter } from '../helpers';
+import { generateTablePaginationOptions } from '../../components/load_more_table/helpers';
 import { QueryTemplate, QueryTemplateProps } from '../query_template';
 
 import { usersQuery } from './index.gql_query';
@@ -23,7 +24,7 @@ export interface UsersArgs {
   totalCount: number;
   pageInfo: PageInfo;
   loading: boolean;
-  loadMore: (cursor: string) => void;
+  loadMore: (newActivePage: number) => void;
   refetch: inputsModel.Refetch;
 }
 
@@ -35,6 +36,7 @@ export interface OwnProps extends QueryTemplateProps {
 }
 
 export interface UsersComponentReduxProps {
+  activePage: number;
   limit: number;
   usersSortField: UsersSortField;
 }
@@ -48,16 +50,17 @@ class UsersComponentQuery extends QueryTemplate<
 > {
   public render() {
     const {
-      id = 'usersQuery',
+      activePage,
       children,
-      usersSortField,
+      endDate,
       filterQuery,
+      flowTarget,
+      id = 'usersQuery',
       ip,
+      limit,
       sourceId,
       startDate,
-      endDate,
-      limit,
-      flowTarget,
+      usersSortField,
     } = this.props;
     return (
       <Query<GetUsersQuery.Query, GetUsersQuery.Variables>
@@ -74,23 +77,16 @@ class UsersComponentQuery extends QueryTemplate<
           ip,
           flowTarget,
           sort: usersSortField,
-          pagination: {
-            limit,
-            cursor: null,
-            tiebreaker: null,
-          },
+          pagination: generateTablePaginationOptions(activePage, limit),
           filterQuery: createFilter(filterQuery),
         }}
       >
         {({ data, loading, fetchMore, refetch }) => {
           const users = getOr([], `source.Users.edges`, data);
           this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string) => ({
+          this.setFetchMoreOptions((newActivePage: number) => ({
             variables: {
-              pagination: {
-                cursor: newCursor,
-                limit: limit + parseInt(newCursor, 10),
-              },
+              pagination: generateTablePaginationOptions(newActivePage, limit),
             },
             updateQuery: (prev, { fetchMoreResult }) => {
               if (!fetchMoreResult) {
@@ -102,7 +98,7 @@ class UsersComponentQuery extends QueryTemplate<
                   ...fetchMoreResult.source,
                   Users: {
                     ...fetchMoreResult.source.Users,
-                    edges: [...prev.source.Users.edges, ...fetchMoreResult.source.Users.edges],
+                    edges: [...fetchMoreResult.source.Users.edges],
                   },
                 },
               };

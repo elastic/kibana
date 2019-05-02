@@ -59,6 +59,11 @@ export const sharedSchema = gql`
     tiebreaker: String
   }
 
+  type TimelinePageInfo {
+    endCursor: CursorType
+    hasNextPage: Boolean
+  }
+
   enum IndexType {
     ANY
     FILEBEAT
