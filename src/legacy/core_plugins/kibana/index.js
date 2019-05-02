@@ -190,6 +190,7 @@ export default function (kibana) {
               kibana: {
                 settings: true,
                 index_patterns: true,
+                objects: true,
               },
             }
           }

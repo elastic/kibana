@@ -13,6 +13,9 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export class FeaturePrivilegeSavedObjectsManagementBuilder extends BaseFeaturePrivilegeBuilder {
   public getActions(privilegeDefinition: FeatureKibanaPrivileges, feature: Feature): string[] {
+    if (feature.id !== 'savedObjectsManagement') {
+      return [];
+    }
     return uniq([
       ...flatten(
         privilegeDefinition.savedObject.all.map(type => [
