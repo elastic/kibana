@@ -39,86 +39,86 @@ JOB:
   - x-pack-intake-38
   - x-pack-intake-39
   - x-pack-intake-40
-  - x-pack-intake-41
-  - x-pack-intake-42
-  - x-pack-intake-43
-  - x-pack-intake-44
-  - x-pack-intake-45
-  - x-pack-intake-46
-  - x-pack-intake-47
-  - x-pack-intake-48
-  - x-pack-intake-49
-  - x-pack-intake-50
-  - x-pack-intake-51
-  - x-pack-intake-52
-  - x-pack-intake-53
-  - x-pack-intake-54
-  - x-pack-intake-55
-  - x-pack-intake-56
-  - x-pack-intake-57
-  - x-pack-intake-58
-  - x-pack-intake-59
-  - x-pack-intake-60
-  - x-pack-intake-61
-  - x-pack-intake-62
-  - x-pack-intake-63
-  - x-pack-intake-64
-  - x-pack-intake-65
-  - x-pack-intake-66
-  - x-pack-intake-67
-  - x-pack-intake-68
-  - x-pack-intake-69
-  - x-pack-intake-70
-  - x-pack-intake-71
-  - x-pack-intake-72
-  - x-pack-intake-73
-  - x-pack-intake-14
-  - x-pack-intake-75
-  - x-pack-intake-76
-  - x-pack-intake-77
-  - x-pack-intake-78
-  - x-pack-intake-79
-  - x-pack-intake-80
-  - x-pack-intake-61
-  - x-pack-intake-62
-  - x-pack-intake-63
-  - x-pack-intake-64
-  - x-pack-intake-65
-  - x-pack-intake-66
-  - x-pack-intake-67
-  - x-pack-intake-68
-  - x-pack-intake-69
-  - x-pack-intake-70
-  - x-pack-intake-71
-  - x-pack-intake-72
-  - x-pack-intake-73
-  - x-pack-intake-14
-  - x-pack-intake-75
-  - x-pack-intake-76
-  - x-pack-intake-77
-  - x-pack-intake-78
-  - x-pack-intake-79
-  - x-pack-intake-80
-  - x-pack-intake-81
-  - x-pack-intake-82
-  - x-pack-intake-83
-  - x-pack-intake-84
-  - x-pack-intake-85
-  - x-pack-intake-86
-  - x-pack-intake-87
-  - x-pack-intake-88
-  - x-pack-intake-89
-  - x-pack-intake-90
-  - x-pack-intake-91
-  - x-pack-intake-92
-  - x-pack-intake-93
-  - x-pack-intake-94
-  - x-pack-intake-95
-  - x-pack-intake-96
-  - x-pack-intake-97
-  - x-pack-intake-98
-  - x-pack-intake-99
-  - x-pack-intake-100
+  # - x-pack-intake-41
+  # - x-pack-intake-42
+  # - x-pack-intake-43
+  # - x-pack-intake-44
+  # - x-pack-intake-45
+  # - x-pack-intake-46
+  # - x-pack-intake-47
+  # - x-pack-intake-48
+  # - x-pack-intake-49
+  # - x-pack-intake-50
+  # - x-pack-intake-51
+  # - x-pack-intake-52
+  # - x-pack-intake-53
+  # - x-pack-intake-54
+  # - x-pack-intake-55
+  # - x-pack-intake-56
+  # - x-pack-intake-57
+  # - x-pack-intake-58
+  # - x-pack-intake-59
+  # - x-pack-intake-60
+  # - x-pack-intake-61
+  # - x-pack-intake-62
+  # - x-pack-intake-63
+  # - x-pack-intake-64
+  # - x-pack-intake-65
+  # - x-pack-intake-66
+  # - x-pack-intake-67
+  # - x-pack-intake-68
+  # - x-pack-intake-69
+  # - x-pack-intake-70
+  # - x-pack-intake-71
+  # - x-pack-intake-72
+  # - x-pack-intake-73
+  # - x-pack-intake-14
+  # - x-pack-intake-75
+  # - x-pack-intake-76
+  # - x-pack-intake-77
+  # - x-pack-intake-78
+  # - x-pack-intake-79
+  # - x-pack-intake-80
+  # - x-pack-intake-61
+  # - x-pack-intake-62
+  # - x-pack-intake-63
+  # - x-pack-intake-64
+  # - x-pack-intake-65
+  # - x-pack-intake-66
+  # - x-pack-intake-67
+  # - x-pack-intake-68
+  # - x-pack-intake-69
+  # - x-pack-intake-70
+  # - x-pack-intake-71
+  # - x-pack-intake-72
+  # - x-pack-intake-73
+  # - x-pack-intake-14
+  # - x-pack-intake-75
+  # - x-pack-intake-76
+  # - x-pack-intake-77
+  # - x-pack-intake-78
+  # - x-pack-intake-79
+  # - x-pack-intake-80
+  # - x-pack-intake-81
+  # - x-pack-intake-82
+  # - x-pack-intake-83
+  # - x-pack-intake-84
+  # - x-pack-intake-85
+  # - x-pack-intake-86
+  # - x-pack-intake-87
+  # - x-pack-intake-88
+  # - x-pack-intake-89
+  # - x-pack-intake-90
+  # - x-pack-intake-91
+  # - x-pack-intake-92
+  # - x-pack-intake-93
+  # - x-pack-intake-94
+  # - x-pack-intake-95
+  # - x-pack-intake-96
+  # - x-pack-intake-97
+  # - x-pack-intake-98
+  # - x-pack-intake-99
+  # - x-pack-intake-100
 
 # `~` is yaml for `null`
 exclude: ~
