@@ -6,8 +6,8 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { Popover } from '../popover';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 
 const getRefreshInterval = (val = '') => {
@@ -36,47 +36,46 @@ const getRefreshInterval = (val = '') => {
   }
 };
 
-export const RefreshControl = ({ inFlight, setRefreshInterval, refreshInterval, doRefresh }) => {
+export const ControlSettings = ({ setRefreshInterval, refreshInterval }) => {
   const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
 
+  const disableInterval = () => {
+    setRefresh(0);
+  };
+
   const popoverButton = handleClick => (
-    <EuiButtonEmpty onClick={handleClick}>
-      <div style={{ display: 'flex', alignItems: 'center' }}>Refresh</div>
-    </EuiButtonEmpty>
+    <EuiButtonIcon iconType="gear" aria-label="Control settings" onClick={handleClick} />
   );
 
-  const autoRefreshControls = (
+  return (
     <Popover
       id="auto-refresh-popover"
       button={popoverButton}
-      panelClassName="canvasRefreshControl__popover"
+      anchorPosition="rightUp"
+      panelClassName="canvasControlSettings__popover"
     >
       {({ closePopover }) => (
-        <div>
-          <AutoRefreshControls
-            inFlight={inFlight}
-            refreshInterval={refreshInterval}
-            setRefresh={val => {
-              setRefresh(val);
-              closePopover();
-            }}
-            doRefresh={doRefresh}
-            disableInterval={() => {
-              setRefresh(0);
-              closePopover();
-            }}
-          />
-        </div>
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <AutoRefreshControls
+              refreshInterval={refreshInterval}
+              setRefresh={val => {
+                setRefresh(val);
+                closePopover();
+              }}
+              disableInterval={() => {
+                disableInterval();
+                closePopover();
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
     </Popover>
   );
-
-  return autoRefreshControls;
 };
 
-RefreshControl.propTypes = {
-  inFlight: PropTypes.bool.isRequired,
-  doRefresh: PropTypes.func.isRequired,
+ControlSettings.propTypes = {
   refreshInterval: PropTypes.number,
   setRefreshInterval: PropTypes.func.isRequired,
 };
