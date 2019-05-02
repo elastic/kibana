@@ -749,7 +749,7 @@ describe('SavedObjectsRepository', () => {
         expect.objectContaining({
           body: [
             // uses index because overwriting is allowed
-            { index: { _id: 'foo:bar' } },
+            { index: { _index: '.kibana-test', _id: 'foo:bar' } },
             { type: 'foo', ...mockTimestampFields, foo: {}, references: [] },
           ],
         })
