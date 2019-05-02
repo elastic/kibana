@@ -127,7 +127,7 @@ export class EMSClient {
   /**
    * this internal method is overridden by the tests to simulate custom manifest.
    */
-  async _getManifest(manifestUrl) {
+  async getManifest(manifestUrl) {
     let result;
     try {
       const url = extendUrl(manifestUrl, { query: this._queryParams });
@@ -187,7 +187,7 @@ export class EMSClient {
   _invalidateSettings() {
 
     this._getManifestWithParams = _.once(
-      async url => this._getManifest(this.extendUrlWithParams(url)));
+      async url => this.getManifest(this.extendUrlWithParams(url)));
 
     this._getCatalogueService = async serviceType => {
       const catalogueManifest = await this._getManifestWithParams(this._manifestServiceUrl);
@@ -200,7 +200,7 @@ export class EMSClient {
     };
 
     this._wrapServiceAttribute = async (manifestUrl, attr, WrapperClass) => {
-      const manifest = await this._getManifest(manifestUrl);
+      const manifest = await this.getManifest(manifestUrl);
       if (_.has(manifest, attr)) {
         return manifest[attr].map(config => {
           return new WrapperClass(config, this);

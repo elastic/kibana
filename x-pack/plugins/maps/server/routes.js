@@ -132,17 +132,18 @@ export function initRoutes(server, licenseUid) {
       };
     });
 
-    const tmsServices = tmsServicesObjs.map(tmsService => {
+    const tmsServices = await Promise.all(tmsServicesObjs.map(async tmsService => {
       return {
+        name: tmsService.getDisplayName(),
         origin: tmsService.getOrigin(),
         id: tmsService.getId(),
-        minZoom: tmsService.getMinZoom(),
-        maxZoom: tmsService.getMaxZoom(),
+        minZoom: await tmsService.getMinZoom(),
+        maxZoom: await tmsService.getMaxZoom(),
         attribution: tmsService.getHTMLAttribution(),
         attributionMarkdown: tmsService.getMarkdownAttribution(),
-        url: tmsService.getUrlTemplate()
+        url: await tmsService.getUrlTemplate()
       };
-    });
+    }));
 
     return { fileLayers, tmsServices };
   }
