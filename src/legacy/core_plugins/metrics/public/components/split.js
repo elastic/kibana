@@ -51,7 +51,6 @@ class Split extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // should we check against the index pattern changing too?
     const { model } = nextProps;
     if (model.split_mode === 'filters' && !model.split_filters) {
       this.props.onChange({
