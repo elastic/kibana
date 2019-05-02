@@ -37,6 +37,7 @@ const fieldTitleMapping: StatItems[] = [
         key: 'hosts',
         value: null,
         color: euiColorVis1,
+        icon: 'storage',
       },
     ],
     areaChart: [
@@ -56,12 +57,14 @@ const fieldTitleMapping: StatItems[] = [
         description: i18n.AUTHENTICATION_SUCCESS,
         value: null,
         color: euiColorVis0,
+        icon: 'check',
       },
       {
         key: 'authFailure',
         description: i18n.AUTHENTICATION_FAILURE,
         value: null,
         color: euiColorVis9,
+        icon: 'cross',
       },
     ],
     areaChart: [
@@ -88,7 +91,7 @@ const fieldTitleMapping: StatItems[] = [
         color: euiColorVis9,
       },
     ],
-    grow: 4,
+    grow: 5,
     description: i18n.AUTHENTICATION,
   },
   {
@@ -98,12 +101,14 @@ const fieldTitleMapping: StatItems[] = [
         description: i18n.UNIQUE_SOURCE_IPS,
         value: null,
         color: euiColorVis2,
+        icon: 'visMapCoordinate',
       },
       {
         key: 'uniqueDestinationIps',
         description: i18n.UNIQUE_DESTINATION_IPS,
         value: null,
         color: euiColorVis3,
+        icon: 'visMapCoordinate',
       },
     ],
     areaChart: [
@@ -130,7 +135,7 @@ const fieldTitleMapping: StatItems[] = [
         color: euiColorVis3,
       },
     ],
-    grow: 4,
+    grow: 5,
     description: i18n.UNIQUE_PRIVATE_IPS,
   },
 ];
