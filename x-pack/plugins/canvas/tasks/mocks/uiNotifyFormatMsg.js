@@ -4,7 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-const del = require('del');
-const { DLL_OUTPUT } = require('../.storybook/constants');
-
-del.sync([DLL_OUTPUT], { force: true });
+export const formatMsg = str => str;
