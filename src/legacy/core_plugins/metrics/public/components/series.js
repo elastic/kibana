@@ -28,8 +28,6 @@ import table from './vis_types/table/series';
 import gauge from './vis_types/gauge/series';
 import markdown from './vis_types/markdown/series';
 import { FormattedMessage } from '@kbn/i18n/react';
-// import chrome from 'ui/chrome';
-// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
 import { fetchIndexPatterns } from '../lib/fetch_index_patterns';
 
 const lookup = {
@@ -92,7 +90,6 @@ class Series extends Component {
       );
     }
     await this.fetchIndexPatternsForQuery();
-    // await this.fetchIndexPatterns(this.props.panel.index_pattern ? this.props.panel.index_pattern : this.props.panel.default_index_pattern);
   }
 
   fetchIndexPatternsForQuery = async () => {
@@ -102,23 +99,7 @@ class Series extends Component {
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
-  // fetchIndexPatterns = async () => {
-  //   const searchIndexPattern = this.props.panel.index_pattern
-  //     ? this.props.panel.index_pattern
-  //     : this.props.panel.default_index_pattern;
-  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-  //     type: 'index-pattern',
-  //     fields: ['title', 'fields'],
-  //     search: `"${searchIndexPattern}"`,
-  //     search_fields: ['title'],
-  //   });
-  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
-  //   );
-  //   if (exactMatch) {
-  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-  //   }
-  // };
+
   render() {
     const { panel } = this.props;
     const Component = lookup[panel.type];
