@@ -139,6 +139,7 @@ Split.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   panel: PropTypes.object,
+  indexPatternsForQuery: PropTypes.object
 };
 
 export default Split;
