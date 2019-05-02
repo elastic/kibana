@@ -31,8 +31,6 @@ import {
   createCookieSessionStorageFactory,
 } from './cookie_session_storage';
 
-type aKibanaRequest = KibanaRequest<unknown, unknown, unknown>;
-
 export interface HttpServerSetup {
   server: Server;
   options: ServerOptions;
@@ -51,8 +49,8 @@ export interface HttpServerSetup {
    * Can register any number of OnRequestHandlers, which are called in sequence (from the first registered to the last)
    */
   registerOnRequest: (requestHandler: OnRequestHandler) => void;
-  getBasePathFor: (request: aKibanaRequest | Request) => string;
-  setBasePathFor: (request: aKibanaRequest | Request, basePath: string) => void;
+  getBasePathFor: (request: KibanaRequest | Request) => string;
+  setBasePathFor: (request: KibanaRequest | Request, basePath: string) => void;
 }
 
 export class HttpServer {
@@ -60,7 +58,7 @@ export class HttpServer {
   private registeredRouters = new Set<Router>();
   private authRegistered = false;
   private basePathCache = new WeakMap<
-    ReturnType<aKibanaRequest['unstable_getIncomingMessage']>,
+    ReturnType<KibanaRequest['unstable_getIncomingMessage']>,
     string
   >();
 
@@ -80,7 +78,7 @@ export class HttpServer {
   }
 
   // passing hapi Request works for BWC. can be deleted once we remove legacy server.
-  private getBasePathFor(config: HttpConfig, request: aKibanaRequest | Request) {
+  private getBasePathFor(config: HttpConfig, request: KibanaRequest | Request) {
     const incomingMessage =
       request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
 
@@ -90,7 +88,7 @@ export class HttpServer {
   }
 
   // should work only for KibanaRequest as soon as spaces migrate to NP
-  private setBasePathFor(request: aKibanaRequest | Request, basePath: string) {
+  private setBasePathFor(request: KibanaRequest | Request, basePath: string) {
     const incomingMessage =
       request instanceof KibanaRequest ? request.unstable_getIncomingMessage() : request.raw.req;
     this.basePathCache.set(incomingMessage, basePath);

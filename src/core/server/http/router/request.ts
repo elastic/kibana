@@ -24,7 +24,7 @@ import { filterHeaders, Headers } from './headers';
 import { RouteSchemas } from './route';
 
 /** @public */
-export class KibanaRequest<Params, Query, Body> {
+export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown> {
   /**
    * Factory for creating requests. Validates the request before creating an
    * instance of a KibanaRequest.
