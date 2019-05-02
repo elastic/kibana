@@ -12,12 +12,11 @@ import {
   Suggestion,
   VisModel,
   VisualizationPanelProps,
-  isApplicableForCardinality,
 } from '../..';
 import { DatasourceField, fieldToOperation } from '../../../common';
 import { Draggable } from '../../common/components/draggable';
-import { AxisEditor } from './axis_editor';
 import { DroppablePane } from '../../frame/main/droppable_pane';
+import { AxisEditor } from './axis_editor';
 
 const PLUGIN_NAME = 'table_chart';
 

@@ -12,21 +12,18 @@ import {
 import React from 'react';
 import { DatasourceField, fieldToOperation } from '../../../common';
 import {
-  Axis,
   EditorPlugin,
   getColumnIdByIndex,
   getOperatorsForField,
   operationToName,
   Suggestion,
   UnknownVisModel,
-  updatePrivateState,
-  VisModel,
   VisualizationPanelProps,
 } from '../../../public';
+import { getTypeForOperation } from '../../common';
 import { AngleAxisEditor } from './angleaxis_editor';
 import { SliceAxisEditor } from './sliceaxis_editor';
 import { PieChartVisModel, PLUGIN_NAME, updatePieState } from './types';
-import { getTypeForOperation } from '../../common';
 
 function configPanel({
   visModel,
