@@ -42,20 +42,15 @@ const SPLIT_MODES = {
 class Split extends Component {
   constructor(props) {
     super(props);
-    // const indexPatternString = (this.props.model.override_index_pattern && this.props.model.series_index_pattern) ||
-    //     (this.props.panel.index_pattern);
     this.state = {
-      // indexPatternAsString: indexPatternString || props.panel.default_index_pattern || '',
       indexPatternForQuery: '',
     };
   }
   async componentDidMount() {
-    // await this.fetchIndexPatterns();
     await this.fetchIndexPatternsForQuery();
   }
 
   componentWillReceiveProps(nextProps) {
-    // should we check against the index pattern changing too?
     const { model } = nextProps;
     const mainFilterLanguage =
       this.props.panel.filter && this.props.panel.filter.language
@@ -79,24 +74,6 @@ class Split extends Component {
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   }
-  // fetchIndexPatterns = async () => {
-  //   const searchIndexPattern = this.state.indexPatternAsString;
-  //   let indexPatternForQuery = this.state.indexPatternForQuery;
-  //   const indexPatternsFromSavedObjects = await chrome.getSavedObjectsClient().find({
-  //     type: 'index-pattern',
-  //     fields: ['title', 'fields'],
-  //     search: `"${searchIndexPattern}"`,
-  //     search_fields: ['title'],
-  //   });
-  //   const exactMatch = indexPatternsFromSavedObjects.savedObjects.find(
-  //     indexPattern => indexPattern.attributes.title === searchIndexPattern
-  //   );
-  //   if (exactMatch) {
-  //     indexPatternForQuery = getFromSavedObject(exactMatch);
-  //     this.setState({ indexPatternForQuery: getFromSavedObject(exactMatch) });
-  //   }
-  //   return indexPatternForQuery;
-  // }
 
   getComponent(splitMode, uiRestrictions) {
     if (!isGroupByFieldsEnabled(splitMode, uiRestrictions)) {
