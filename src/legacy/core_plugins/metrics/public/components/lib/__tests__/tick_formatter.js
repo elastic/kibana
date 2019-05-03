@@ -61,11 +61,6 @@ describe('tickFormatter(format, template)', () => {
     expect(fn(1500)).to.equal('1.5k/s');
   });
 
-  it('returns zero if passed a string', () => {
-    const fn = tickFormatter();
-    expect(fn('100')).to.equal('0');
-  });
-
   it('returns value if passed a bad formatter', () => {
     const fn = tickFormatter('102');
     expect(fn(100)).to.equal('100');
@@ -78,6 +73,4 @@ describe('tickFormatter(format, template)', () => {
     const fn = tickFormatter('number', '{{value', (key) => config[key]);
     expect(fn(1.5556)).to.equal('1.56');
   });
-
-
 });

@@ -186,6 +186,8 @@ export interface InfraLogItem {
   id: string;
   /** The index where the document was found */
   index: string;
+  /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
+  key: InfraTimeKey;
   /** An array of flattened fields and values */
   fields: InfraLogItemField[];
 }
@@ -551,7 +553,17 @@ export namespace FlyoutItemQuery {
 
     index: string;
 
+    key: Key;
+
     fields: Fields[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
   };
 
   export type Fields = {

@@ -45,7 +45,7 @@ export default async function(server /*options*/) {
     privileges: {
       all: {
         savedObject: {
-          all: ['canvas-workpad'],
+          all: ['canvas-workpad', 'canvas-element'],
           read: ['index-pattern'],
         },
         ui: ['save'],
@@ -53,7 +53,7 @@ export default async function(server /*options*/) {
       read: {
         savedObject: {
           all: [],
-          read: ['index-pattern', 'canvas-workpad'],
+          read: ['index-pattern', 'canvas-workpad', 'canvas-element'],
         },
         ui: [],
       },

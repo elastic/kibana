@@ -12,20 +12,20 @@ exports[`Data Frame: <PivotPreview /> Minimal initialization 1`] = `
   >
     <Component
       aggs={
-        Array [
-          Object {
+        Object {
+          "the-agg-name": Object {
             "agg": "avg",
+            "aggName": "the-agg-label",
             "field": "the-agg-field",
-            "formRowLabel": "the-agg-label",
           },
-        ]
+        }
       }
       groupBy={
         Object {
           "the-group-by-name": Object {
             "agg": "terms",
+            "aggName": "the-group-by-label",
             "field": "the-group-by-field",
-            "formRowLabel": "the-group-by-label",
           },
         }
       }
