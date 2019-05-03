@@ -6,7 +6,7 @@
 
 import { metricAggregationCreators } from './metric_aggregation_creators';
 import { InfraSnapshotRequestOptions } from './snapshot';
-import { NAME_FIELDS, IP_FIELDS } from '../constants';
+import { NAME_FIELDS } from '../constants';
 import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
