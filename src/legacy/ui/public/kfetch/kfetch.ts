@@ -55,8 +55,8 @@ export function createKfetch(http: HttpSetup) {
     { prependBasePath = true }: KFetchKibanaOptions = {}
   ) {
     const controller = options.signal
-      ? new AbortController()
-      : { signal: options.signal, abort: Function.prototype };
+      ? { signal: options.signal, abort: Function.prototype }
+      : new AbortController();
     const promise = new Promise((resolve, reject) => {
       responseInterceptors(
         requestInterceptors(withDefaultOptions(options))
@@ -80,7 +80,6 @@ export function createKfetch(http: HttpSetup) {
       enumerable: false,
       value() {
         controller.abort();
-        return promise;
       },
     });
   };

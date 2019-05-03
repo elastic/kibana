@@ -22,11 +22,9 @@ import { HttpHandler, HttpFetchOptions, AbortablePromise } from './types';
 export function abortable<T>(handler: HttpHandler<T>) {
   return (path: string, options: HttpFetchOptions = {}): AbortablePromise<T> => {
     const controller = options.signal
-      ? new AbortController()
-      : { signal: options.signal, abort: Function.prototype };
-    const promise = new Promise<T>((resolve, reject) => {
-      handler(path, { ...options, signal: controller.signal }).then(resolve, reject);
-    });
+      ? { signal: options.signal, abort: Function.prototype }
+      : new AbortController();
+    const promise = handler(path, { ...options, signal: controller.signal });
 
     // NOTE: We are only using Object.defineProperty with enumerable:false to be explicit about
     // excluding promise.abort() which isn't the case with Object.assign.
@@ -34,7 +32,6 @@ export function abortable<T>(handler: HttpHandler<T>) {
       enumerable: false,
       value() {
         controller.abort();
-        return promise;
       },
     });
   };

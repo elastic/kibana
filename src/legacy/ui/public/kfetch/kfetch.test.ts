@@ -142,7 +142,6 @@ describe('kfetch', () => {
 
     expect(abortable).toBeInstanceOf(Promise);
     expect(typeof abortable.abort).toBe('function');
-    expect(abortable.abort()).toBe(abortable);
   });
 
   describe('when throwing response error (KFetchError)', async () => {

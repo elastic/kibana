@@ -105,14 +105,23 @@ export class HttpService {
       get: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
         fetch(path, { ...options, method: 'GET' })
       ),
+      head: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'HEAD' })
+      ),
       post: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
         fetch(path, { ...options, method: 'POST' })
       ),
       put: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
         fetch(path, { ...options, method: 'PUT' })
       ),
+      patch: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'PATCH' })
+      ),
       delete: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
         fetch(path, { ...options, method: 'DELETE' })
+      ),
+      options: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
+        fetch(path, { ...options, method: 'OPTIONS' })
       ),
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
@@ -150,6 +159,9 @@ export class HttpService {
       },
     };
   }
+
+  // eslint-disable-next-line no-unused-params
+  public start(deps: Deps) {}
 
   public stop() {
     this.stop$.next();

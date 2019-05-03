@@ -164,10 +164,19 @@ describe('http requests', async () => {
   it('should support get() helper', async () => {
     const { http } = setupService();
 
-    fetchMock.get('*', { method: 'POST' });
-    await http.get('/my/path');
+    fetchMock.get('*', {});
+    await http.get('/my/path', { method: 'POST' });
 
     expect(fetchMock.lastOptions()!.method).toBe('GET');
+  });
+
+  it('should support head() helper', async () => {
+    const { http } = setupService();
+
+    fetchMock.head('*', {});
+    await http.head('/my/path', { method: 'GET' });
+
+    expect(fetchMock.lastOptions()!.method).toBe('HEAD');
   });
 
   it('should support post() helper', async () => {
@@ -188,6 +197,15 @@ describe('http requests', async () => {
     expect(fetchMock.lastOptions()!.method).toBe('PUT');
   });
 
+  it('should support patch() helper', async () => {
+    const { http } = setupService();
+
+    fetchMock.patch('*', {});
+    await http.patch('/my/path', { method: 'GET', body: '{}' });
+
+    expect(fetchMock.lastOptions()!.method).toBe('PATCH');
+  });
+
   it('should support delete() helper', async () => {
     const { http } = setupService();
 
@@ -195,6 +213,15 @@ describe('http requests', async () => {
     await http.delete('/my/path', { method: 'GET' });
 
     expect(fetchMock.lastOptions()!.method).toBe('DELETE');
+  });
+
+  it('should support options() helper', async () => {
+    const { http } = setupService();
+
+    fetchMock.mock('*', { method: 'OPTIONS' });
+    await http.options('/my/path', { method: 'GET' });
+
+    expect(fetchMock.lastOptions()!.method).toBe('OPTIONS');
   });
 
   it('should make requests for NDJSON content', async () => {
@@ -231,7 +258,6 @@ describe('http requests', async () => {
 
     expect(abortable).toBeInstanceOf(Promise);
     expect(typeof abortable.abort).toBe('function');
-    expect(abortable.abort()).toBe(abortable);
   });
 });
 

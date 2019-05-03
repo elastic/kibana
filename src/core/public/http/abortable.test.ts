@@ -17,26 +17,33 @@
  * under the License.
  */
 
-import { HttpService, HttpSetup } from './http_service';
+// @ts-ignore
+import fetchMock from 'fetch-mock/es5/client';
+import { HttpFetchOptions } from './types';
+import { abortable } from './abortable';
 
-const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
-  fetch: jest.fn(),
-  get: jest.fn(),
-  head: jest.fn(),
-  post: jest.fn(),
-  put: jest.fn(),
-  patch: jest.fn(),
-  delete: jest.fn(),
-  options: jest.fn(),
-  addLoadingCount: jest.fn(),
-  getLoadingCount$: jest.fn(),
-});
-const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
-  setup: jest.fn().mockReturnValue(createSetupContractMock()),
-  stop: jest.fn(),
-});
+const Abortable = abortable((path: string, options?: HttpFetchOptions) => fetch('/', options));
 
-export const httpServiceMock = {
-  create: createMock,
-  createSetupContract: createSetupContractMock,
-};
+describe('abortable', () => {
+  afterEach(() => {
+    fetchMock.restore();
+  });
+
+  it('should return an abortable promise', async () => {
+    fetchMock.get('*', { status: 500 });
+
+    const promise = Abortable('/resolved');
+
+    expect(promise).toBeInstanceOf(Promise);
+
+    promise.abort();
+
+    try {
+      await promise;
+      throw new Error('Unexpected Resolution');
+    } catch (err) {
+      expect(err.message).not.toMatch(/Internal Server Error/);
+      expect(err.message).not.toMatch(/Unexpected Resolution/);
+    }
+  });
+});
