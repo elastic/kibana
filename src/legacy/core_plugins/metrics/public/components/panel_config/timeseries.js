@@ -64,18 +64,18 @@ class TimeseriesPanelConfigUi extends Component {
     await this.fetchIndexPatternsForQuery();
   }
   fetchIndexPatternsForQuery = async () => {
-    const searchIndexPattern = this.props.model.index_pattern ?
-      this.props.model.index_pattern :
-      this.props.model.default_index_pattern;
+    const searchIndexPattern = this.props.model.index_pattern
+      ? this.props.model.index_pattern
+      : this.props.model.default_index_pattern;
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
   };
+  handleSubmit = query => {
+    this.props.onChange({ filter: query.query });
+  }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
-  handleSubmit = query => {
-    this.props.onChange({ filter: query.query });
-  };
 
   render() {
     const defaults = {
@@ -214,7 +214,7 @@ class TimeseriesPanelConfigUi extends Component {
                       language: model.filter.language ? model.filter.language : 'lucene',
                       query: model.filter.query,
                     }}
-                    screenTitle={'PanelConfigQuery'}
+                    screenTitle={'TimeseriesPanelConfigQuery'}
                     onSubmit={this.handleSubmit}
                     appName={'VisEditor'}
                     indexPatterns={[this.state.indexPatternForQuery]}

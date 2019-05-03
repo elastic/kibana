@@ -42,23 +42,42 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
+
+const { QueryBar } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
 class TopNPanelConfig extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = {
+      selectedTab: 'data',
+      indexPatternForQuery: {},
+    };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.bar_color_rules || (model.bar_color_rules && model.bar_color_rules.length === 0)) {
       parts.bar_color_rules = [{ id: uuid.v1() }];
     }
     this.props.onChange(parts);
+    await this.fetchIndexPatternsForQuery();
   }
-
+  fetchIndexPatternsForQuery = async () => {
+    const searchIndexPattern = this.props.model.index_pattern ?
+      this.props.model.index_pattern :
+      this.props.model.default_index_pattern;
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatternForQuery: indexPatternObject });
+  }
+  handleSubmit = query => {
+    this.props.onChange({ filter: query.query });
+  }
   switchTab(selectedTab) {
     this.setState({ selectedTab });
   }
@@ -79,6 +98,7 @@ class TopNPanelConfig extends Component {
           name={this.props.name}
           visData$={this.props.visData$}
           onChange={this.props.onChange}
+          indexPatterns={this.state.indexPatternForQuery}
         />
       );
     } else {
@@ -136,11 +156,17 @@ class TopNPanelConfig extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    style={{ border: '1px solid blue' }}
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBar
+                    query={{
+                      language: model.filter.language ? model.filter.language : 'lucene',
+                      query: model.filter.query,
+                    }}
+                    screenTitle={'TopNPanelConfigQuery'}
+                    onSubmit={this.handleSubmit}
+                    appName={'VisEditor'}
+                    indexPatterns={[this.state.indexPatternForQuery]}
+                    store={localStorage || {}}
+                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
