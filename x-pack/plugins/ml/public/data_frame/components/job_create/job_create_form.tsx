@@ -143,13 +143,19 @@ export const JobCreateForm: SFC<Props> = React.memo(
           await kibanaContext.kibanaConfig.set('defaultIndex', id);
         }
 
+        toastNotifications.addSuccess(
+          i18n.translate('xpack.ml.dataframe.jobCreateForm.reateIndexPatternSuccessMessage', {
+            defaultMessage: 'Kibana index pattern {indexPatternName} created successfully.',
+            values: { indexPatternName },
+          })
+        );
         return true;
       } catch (e) {
         console.error(e);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobCreateForm.createIndexPatternErrorMessage', {
             defaultMessage:
-              'An error occurred creating the index pattern {indexPatternName}: {error}',
+              'An error occurred creating the Kibana index pattern {indexPatternName}: {error}',
             values: { indexPatternName, error: JSON.stringify(e) },
           })
         );
