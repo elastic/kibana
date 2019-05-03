@@ -5,32 +5,21 @@
  */
 
 import { Tag, TagFields } from '../../model';
-import { LoggerFactory } from '../utils/log_factory';
 
 export class CtagsReader {
-  private tags: Tag[] = [];
 
-  private MIN_METHOD_LINE_LENGTH = 6;
-  private MAX_METHOD_LINE_LENGTH = 1030;
+  private static MIN_METHOD_LINE_LENGTH = 6;
+  private static MAX_METHOD_LINE_LENGTH = 1030;
 
-  constructor(
-    readonly loggerFactory: LoggerFactory
-  ) {}
-
-  public getTags(): Tag[] {
-    return this.tags;
-  }
-
-  public readLine(tagLine: string) {
-    // const logger = this.loggerFactory.getLogger(['code', 'ctagsReader']);
+  public static readLine(tagLine: string): Tag[] {
 
     if (tagLine === null) {
-      return;
+      return [];
     }
 
     let p = tagLine.indexOf('\t');
     if (p <= 0) {
-      return;
+      return [];
     }
     const def = tagLine.substring(0, p);
     const mstart = tagLine.indexOf('\t', p + 1);
@@ -77,14 +66,14 @@ export class CtagsReader {
         match = whole.substring(0, this.MAX_METHOD_LINE_LENGTH).replace(/[ \t]+/g, ' ');
       }
     } else {
-      return;
+      return [];
     }
 
     let range = this.bestIndexOfTag(+lnum, whole, def);
-    this.tags.push(new Tag(+lnum, def, kind!, match, classInher, signature, range[0], range[1], classInher));
+    return [new Tag(+lnum, def, kind!, match, classInher, signature, range[0], range[1], classInher)];
   }
 
-  private cutPattern(tagLine: string, startTab: number, endTab: number): string {
+  private static cutPattern(tagLine: string, startTab: number, endTab: number): string {
     let cut = tagLine.substring(startTab + 3, endTab);
 
     if (cut.endsWith("$/;\"")) {
@@ -97,7 +86,7 @@ export class CtagsReader {
     return cut.replace("\\\\", "\\").replace("\\/", "/");
   }
 
-  private bestIndexOfTag(line: number, wholeStr: string, tagName: string): [number, number] {
+  private static bestIndexOfTag(line: number, wholeStr: string, tagName: string): [number, number] {
     if (wholeStr.length < 1) {
       return [0, 1];
     } else {
@@ -111,7 +100,7 @@ export class CtagsReader {
     }
   }
 
-  private strictIndexOf(wholeStr: string, subStr: string): number {
+  private static strictIndexOf(wholeStr: string, subStr: string): number {
     let WORD_CHAR: RegExp = new RegExp('\w');
 
     let stricLeft: boolean = subStr.length > 0 && WORD_CHAR.test(subStr.charAt(0));

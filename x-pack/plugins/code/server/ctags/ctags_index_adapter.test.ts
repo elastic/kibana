@@ -4,14 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import fs from 'fs';
+import path from 'path';
+import * as os from 'os';
 import sinon from 'sinon';
 import { SymbolKind } from 'vscode-languageserver-protocol';
 import { CtagsIndexAdapter } from './ctags_index_adapter';
 import { Tag } from '../../model';
 
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'code_ctags_test'));
+
 afterEach(() => {
   sinon.restore();
 });
+
+async function download(url, path) {
+  log(`Downloading ${url}`);
+
+  const hash = createHash('md5');
+
+  mkdirp.sync(dirname(path));
+  const handle = openSync(path, 'w');
+
+  try {
+    const readable = request(url).on('data', chunk => {
+      writeSync(handle, chunk);
+      hash.update(chunk);
+    });
+    await readableEnd(readable);
+  } finally {
+    closeSync(handle);
+  }
+
+  return hash.digest('hex');
+}
 
 test('Transform ctags index format to DetailSymbolInformation format', () => {
   const symbols = CtagsIndexAdapter.ctags2DetailSymbol([new Tag(382, 'getFieldLabel', 'method', ' public static void getFieldLabel(IField field, long flags, StringBuilder builder) {', 'JavaElementLabels', '(IField field, long flags, StringBuilder builder)', 20, 33, 'JavaElementLabels')]);

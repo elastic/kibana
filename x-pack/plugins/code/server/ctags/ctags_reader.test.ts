@@ -7,16 +7,13 @@
 import sinon from 'sinon';
 
 import { CtagsReader } from './ctags_reader';
-import { ConsoleLoggerFactory } from '../utils/console_logger_factory';
 
 afterEach(() => {
   sinon.restore();
 });
 
 test('Read ctags for c', () => {
-  const ctagsReader = new CtagsReader(new ConsoleLoggerFactory());
-  ctagsReader.readLine('foo\tsample.c\t/^int foo(int a, int b) {$/;\"\tfunction\tline:8\tsignature:(int a, int b)');
-  const tags = ctagsReader.getTags();
+  const tags = CtagsReader.readLine('foo\tsample.c\t/^int foo(int a, int b) {$/;\"\tfunction\tline:8\tsignature:(int a, int b)');
   expect(tags.length).toEqual(1);
   expect(tags[0].symbol).toEqual('foo');
   expect(tags[0].line).toEqual(8);
@@ -27,9 +24,7 @@ test('Read ctags for c', () => {
 })
 
 test('Read ctags for cxx', () => {
-  const ctagsReader = new CtagsReader(new ConsoleLoggerFactory());
-  ctagsReader.readLine('MemberFunc\tsample.cxx\t/^    int MemberFunc(int a, int b) const {$/;\"\tfunction\tline:22\tclass:SomeClass\tsignature:(int a, int b) const');
-  const tags = ctagsReader.getTags();
+  const tags = CtagsReader.readLine('MemberFunc\tsample.cxx\t/^    int MemberFunc(int a, int b) const {$/;\"\tfunction\tline:22\tclass:SomeClass\tsignature:(int a, int b) const');
   expect(tags.length).toEqual(1);
   expect(tags[0].symbol).toEqual('MemberFunc');
   expect(tags[0].line).toEqual(22);
@@ -41,9 +36,7 @@ test('Read ctags for cxx', () => {
 })
 
 test('Read ctags for java', () => {
-  const ctagsReader = new CtagsReader(new ConsoleLoggerFactory());
-  ctagsReader.readLine('Sample\thome/jobs/OpenGrokAnt/workspace/testdata/sources/java/Sample.java\t/^public class Sample {$/;\"\tclass\tline:25');
-  const tags = ctagsReader.getTags();
+  const tags = CtagsReader.readLine('Sample\thome/jobs/OpenGrokAnt/workspace/testdata/sources/java/Sample.java\t/^public class Sample {$/;\"\tclass\tline:25');
   expect(tags.length).toEqual(1);
   expect(tags[0].symbol).toEqual('Sample');
   expect(tags[0].line).toEqual(25);

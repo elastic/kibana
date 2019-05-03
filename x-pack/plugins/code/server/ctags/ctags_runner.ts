@@ -14,7 +14,6 @@ import { EventEmitter } from 'events';
 
 export class CtagsRunner {
   private ctags?: ChildProcess;
-  private ctagsReader?: CtagsReader;
   private isRunning: boolean = false;
   private eventEmitter = new EventEmitter();
   private tags: Tag[] = [];
@@ -26,7 +25,6 @@ export class CtagsRunner {
     readonly loggerFactory: LoggerFactory
   ) {
     this.logger = loggerFactory.getLogger(['ctags runner']);
-    this.ctagsReader = new CtagsReader(loggerFactory);
     this.initialize();
   }
 
@@ -44,20 +42,18 @@ export class CtagsRunner {
       }
 
       if (line.endsWith(this.CTAGS_FILTER_TERMINATOR)) {
-        this.logger.stderr('ctags encountered a problem while generating tags for the file. The index will be incomplete.');
+        this.logger.warn('ctags encountered a problem while generating tags for the file. The index will be incomplete.');
         return;
       }
-      this.ctagsReader!.readLine(line);
+      this.tags.push(...CtagsReader.readLine(line));
     });
     this.ctags.stderr.on('data', data => {
-      this.logger.stderr(data.toString());
+      this.logger.error(data.toString());
     });
-    this.ctags.on('close', code => {
-      this.logger.stdout(`ctags process exits with code ${code}`);
-    })
+    // this.ctags.on('close', code => {
+    //   this.logger.info(`ctags process exits with code ${code}`);
+    // })
     this.ctags.on('exit', () => {
-      this.tags.push(...this.ctagsReader!.getTags());
-      this.logger.stdout('exit');
       this.isRunning = false;
       this.eventEmitter.emit('exit');
     })
