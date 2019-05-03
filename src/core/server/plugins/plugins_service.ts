@@ -32,6 +32,7 @@ import { DiscoveredPlugin, DiscoveredPluginInternal, PluginWrapper, PluginName }
 import { createPluginInitializerContext } from './plugin_context';
 import { PluginsConfig } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
+import { discover } from './discovery';
 
 /** @internal */
 export interface PluginsServiceSetup {
@@ -60,20 +61,27 @@ export interface PluginsServiceStartDeps {} // eslint-disable-line @typescript-e
 export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
   private readonly log: Logger;
   private readonly pluginsSystem: PluginsSystem;
+  private pluginDefinitions?: DiscoveredPluginsDefinitions;
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-service');
     this.pluginsSystem = new PluginsSystem(coreContext);
   }
 
-  public async setup(
-    deps: PluginsServiceSetupDeps,
-    newPlatformPluginDefinitions: DiscoveredPluginsDefinitions
-  ) {
-    this.log.debug('Setting up plugins service');
-    this.handleDiscoveryErrors(newPlatformPluginDefinitions.errors);
+  public async preSetup(devPluginPaths: ReadonlyArray<string> = []) {
+    const { env, logger } = this.coreContext;
+    this.pluginDefinitions = await discover(env.pluginSearchPaths, devPluginPaths, env, logger);
+    return this.pluginDefinitions;
+  }
 
-    const plugins = newPlatformPluginDefinitions.pluginDefinitions.map(
+  public async setup(deps: PluginsServiceSetupDeps) {
+    if (!this.pluginDefinitions) {
+      throw new Error('pre-setup has not been run');
+    }
+    this.log.debug('Setting up plugins service');
+    this.handleDiscoveryErrors(this.pluginDefinitions.errors);
+
+    const plugins = this.pluginDefinitions.pluginDefinitions.map(
       ({ path, manifest }) =>
         new PluginWrapper(
           path,

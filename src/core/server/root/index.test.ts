@@ -145,13 +145,11 @@ test('fails and stops services if initial logger upgrade fails', async () => {
 
   expect(mockOnShutdown).not.toHaveBeenCalled();
   expect(logger.stop).not.toHaveBeenCalled();
-  expect(mockServer.setup).not.toHaveBeenCalled();
 
   await expect(root.setup()).rejects.toThrowError('logging config upgrade failed');
 
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(loggingUpgradeError);
-  expect(mockServer.setup).not.toHaveBeenCalled();
   expect(logger.stop).toHaveBeenCalledTimes(1);
 
   expect(mockConsoleError.mock.calls).toMatchSnapshot();
@@ -194,20 +192,4 @@ test('stops services if consequent logger upgrade fails', async () => {
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 
   expect(mockConsoleError.mock.calls).toMatchSnapshot();
-});
-
-test(`doesn't create server if config validation fails`, async () => {
-  configService.validateAll.mockImplementation(() => {
-    throw new Error('invalid config');
-  });
-  const ServerMock = jest.fn();
-  jest.doMock('../server', () => ({
-    Server: ServerMock,
-  }));
-  const onShutdown = jest.fn();
-  const root = new Root(config$, env, onShutdown);
-
-  await expect(root.setup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
-  expect(ServerMock).not.toHaveBeenCalled();
-  expect(onShutdown).toHaveBeenCalledTimes(1);
 });

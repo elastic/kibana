@@ -19,6 +19,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { mockPackage } from './plugins_service.test.mocks';
+import { mockDiscover } from './discovery/plugins_discovery.mock';
 
 import { Env } from '../config';
 import { configServiceMock } from '../config/config_service.mock';
@@ -66,14 +67,21 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+test('`setup` throws if `preSetup` has not been called before', async () => {
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
+    `[Error: pre-setup has not been run]`
+  );
+});
+
 test('`setup` throws if plugin has an invalid manifest', async () => {
-  const plugins = {
+  mockDiscover.mockResolvedValue({
     pluginDefinitions: [],
     errors: [PluginDiscoveryError.invalidManifest('path-1', new Error('Invalid JSON'))],
     searchPaths: [],
     devPluginPaths: [],
-  };
-  await expect(pluginsService.setup(setupDeps, plugins)).rejects.toMatchInlineSnapshot(`
+  });
+  await pluginsService.preSetup();
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Invalid JSON (invalid-manifest, path-1)]
 `);
@@ -87,13 +95,14 @@ Array [
 });
 
 test('`setup` throws if plugin required Kibana version is incompatible with the current version', async () => {
-  const plugins = {
+  mockDiscover.mockResolvedValue({
     pluginDefinitions: [],
     errors: [PluginDiscoveryError.incompatibleVersion('path-3', new Error('Incompatible version'))],
     searchPaths: [],
     devPluginPaths: [],
-  };
-  await expect(pluginsService.setup(setupDeps, plugins)).rejects.toMatchInlineSnapshot(`
+  });
+  await pluginsService.preSetup();
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(`
 [Error: Failed to initialize plugins:
 	Incompatible version (incompatible-version, path-3)]
 `);
@@ -141,8 +150,10 @@ test('`setup` throws if discovered plugins with conflicting names', async () => 
     searchPaths: [],
     devPluginPaths: [],
   };
+  mockDiscover.mockResolvedValue(plugins);
 
-  await expect(pluginsService.setup(setupDeps, plugins)).rejects.toMatchInlineSnapshot(
+  await pluginsService.preSetup();
+  await expect(pluginsService.setup(setupDeps)).rejects.toMatchInlineSnapshot(
     `[Error: Plugin with id "conflicting-id" is already registered!]`
   );
 
@@ -217,8 +228,10 @@ test('`setup` properly detects plugins that should be disabled.', async () => {
     searchPaths: [],
     devPluginPaths: [],
   };
+  mockDiscover.mockResolvedValue(plugins);
 
-  const start = await pluginsService.setup(setupDeps, plugins);
+  await pluginsService.preSetup();
+  const start = await pluginsService.setup(setupDeps);
 
   expect(start.contracts).toBeInstanceOf(Map);
   expect(start.uiPlugins.public).toBeInstanceOf(Map);
@@ -288,7 +301,10 @@ test('`setup` properly invokes `discover` and ignores non-critical errors.', asy
   mockPluginSystem.setupPlugins.mockResolvedValue(contracts);
   mockPluginSystem.uiPlugins.mockReturnValue(discoveredPlugins);
 
-  const setup = await pluginsService.setup(setupDeps, plugins);
+  mockDiscover.mockResolvedValue(plugins);
+
+  await pluginsService.preSetup();
+  const setup = await pluginsService.setup(setupDeps);
 
   expect(setup.contracts).toBe(contracts);
   expect(setup.uiPlugins).toBe(discoveredPlugins);

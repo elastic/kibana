@@ -30,17 +30,20 @@ import { getEnvOptions } from '../config/__mocks__/env';
 const logger = loggingServiceMock.create();
 const env = Env.createDefault(getEnvOptions());
 
-const createConfigService = (value: Partial<HttpConfigType> = {}) =>
-  new ConfigService(
+const createConfigService = (value: Partial<HttpConfigType> = {}) => {
+  const configService = new ConfigService(
     new BehaviorSubject<Config>(
       new ObjectToConfigAdapter({
         server: value,
       })
     ),
     env,
-    logger,
-    new Map([['server', configDefinition.schema]])
+    logger
   );
+
+  configService.preSetup(new Map([['server', configDefinition.schema]]))
+  return configService;
+};
 
 afterEach(() => {
   jest.clearAllMocks();

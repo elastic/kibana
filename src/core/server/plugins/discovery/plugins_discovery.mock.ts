@@ -16,8 +16,5 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
-
-jest.mock('./plugins_system');
+export const mockDiscover = jest.fn();
+jest.mock('./plugins_discovery', () => ({ discover: mockDiscover }));

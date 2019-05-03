@@ -19,21 +19,10 @@
 
 import { ConnectableObservable, Observable, Subscription } from 'rxjs';
 import { first, map, publishReplay, switchMap, tap } from 'rxjs/operators';
-import { Type } from '@kbn/config-schema';
 
-import { Config, ConfigPath, ConfigService, Env } from '../config';
+import { Config, ConfigService, Env } from '../config';
 import { Logger, LoggerFactory, LoggingConfig, LoggingService } from '../logging';
 import { Server } from '../server';
-
-import { configDefinition as elasticsearchConfigDefinition } from '../elasticsearch';
-import { configDefinition as httpConfigDefinition } from '../http';
-import { configDefinition as loggingConfigDefinition } from '../logging';
-import {
-  configDefinition as pluginsConfigDefinition,
-  discover,
-  DiscoveredPluginsDefinitions,
-} from '../plugins';
-import { configDefinition as devConfigDefinition } from '../dev';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
@@ -42,35 +31,26 @@ export class Root {
   public readonly logger: LoggerFactory;
   private readonly log: Logger;
   private readonly loggingService: LoggingService;
+  private readonly server: Server;
   private loggingConfigSubscription?: Subscription;
-  private server?: Server;
-  private configService?: ConfigService;
 
   constructor(
-    private readonly config$: Observable<Config>,
-    private readonly env: Env,
+    config$: Observable<Config>,
+    env: Env,
     private readonly onShutdown?: (reason?: Error | string) => void
   ) {
     this.loggingService = new LoggingService();
     this.logger = this.loggingService.asLoggerFactory();
     this.log = this.logger.get('root');
+    this.server = new Server(config$, env, this.logger);
   }
 
   public async setup() {
     try {
-      const newPlatformPluginDefinitions = await this.discoverPlugins();
-      const schemas = this.getSchemas(newPlatformPluginDefinitions);
-
-      this.configService = new ConfigService(this.config$, this.env, this.logger, schemas);
-
-      await this.configService.validateAll();
-
-      this.server = new Server(this.configService, this.logger, this.env);
-
       this.log.debug('setting up root');
-
-      await this.setupLogging();
-      return await this.server.setup(newPlatformPluginDefinitions);
+      await this.server.preSetup();
+      await this.setupLogging(this.server.configService);
+      return await this.server.setup();
     } catch (e) {
       await this.shutdown(e);
       throw e;
@@ -79,10 +59,6 @@ export class Root {
 
   public async start() {
     this.log.debug('starting root');
-    if (!this.server) {
-      throw new Error('server is not set up yet');
-    }
-
     try {
       return await this.server.start();
     } catch (e) {
@@ -119,44 +95,11 @@ export class Root {
     }
   }
 
-  private async discoverPlugins() {
-    const config = await this.config$.pipe(first()).toPromise();
-    const isDev = this.env.mode.dev;
-    const hasDevPaths = Boolean(config.get('plugins') && config.get('plugins').paths);
-    const devPluginPaths = isDev && hasDevPaths ? config.get('plugins').paths : [];
-
-    return await discover(this.env.pluginSearchPaths, devPluginPaths, this.env, this.logger);
-  }
-
-  private getSchemas(pluginDefinitions: DiscoveredPluginsDefinitions) {
-    const pluginConfigSchemas = new Map(
-      pluginDefinitions.pluginDefinitions
-        .filter(pluginDef => Boolean(pluginDef.schema))
-        .map(
-          pluginDef =>
-            [pluginDef.manifest.configPath, pluginDef.schema!] as [ConfigPath, Type<unknown>]
-        )
-    );
-
-    const coreConfigSchemas = new Map<ConfigPath, Type<unknown>>([
-      [elasticsearchConfigDefinition.configPath, elasticsearchConfigDefinition.schema],
-      [loggingConfigDefinition.configPath, loggingConfigDefinition.schema],
-      [httpConfigDefinition.configPath, httpConfigDefinition.schema],
-      [pluginsConfigDefinition.configPath, pluginsConfigDefinition.schema],
-      [devConfigDefinition.configPath, devConfigDefinition.schema],
-    ]);
-
-    return new Map([...pluginConfigSchemas, ...coreConfigSchemas]);
-  }
-
-  private async setupLogging() {
-    if (this.configService === undefined) {
-      throw new Error('config server is not created yet');
-    }
+  private async setupLogging(configService: ConfigService) {
     // Stream that maps config updates to logger updates, including update failures.
-    const update$ = this.configService.getConfig$().pipe(
+    const update$ = configService.getConfig$().pipe(
       // always read the logging config when the underlying config object is re-read
-      switchMap(() => this.configService!.atPath('logging', LoggingConfig)),
+      switchMap(() => configService.atPath('logging', LoggingConfig)),
       map(config => this.loggingService.upgrade(config)),
       // This specifically console.logs because we were not able to configure the logger.
       // eslint-disable-next-line no-console

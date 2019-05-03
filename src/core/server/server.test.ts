@@ -22,55 +22,38 @@ import {
   httpService,
   mockLegacyService,
   mockPluginsService,
+  configService,
 } from './index.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
-import { Env } from './config';
+import { Env, Config, ObjectToConfigAdapter } from './config';
 import { Server } from './server';
 
 import { getEnvOptions } from './config/__mocks__/env';
-import { configServiceMock } from './config/config_service.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
 
-const configService = configServiceMock.create();
 const env = new Env('.', getEnvOptions());
 const logger = loggingServiceMock.create();
-const newPlatformPluginDefinitions = {
-  pluginDefinitions: [],
-  errors: [],
-  searchPaths: [],
-  devPluginPaths: [],
-};
+
 beforeEach(() => {
   configService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
 });
 
 afterEach(() => {
   jest.clearAllMocks();
-
-  configService.atPath.mockClear();
-  httpService.setup.mockClear();
-  httpService.stop.mockClear();
-  elasticsearchService.setup.mockClear();
-  elasticsearchService.stop.mockClear();
-  mockPluginsService.setup.mockClear();
-  mockPluginsService.stop.mockClear();
-  mockLegacyService.setup.mockClear();
-  mockLegacyService.stop.mockClear();
 });
 
+const config$ = new BehaviorSubject<Config>(new ObjectToConfigAdapter({}));
 test('sets up services on "setup"', async () => {
-  const mockPluginsServiceSetup = new Map([['some-plugin', 'some-value']]);
-  mockPluginsService.setup.mockReturnValue(Promise.resolve(mockPluginsServiceSetup));
+  const server = new Server(config$, env, logger);
 
-  const server = new Server(configService as any, logger, env);
-
+  await server.preSetup();
   expect(httpService.setup).not.toHaveBeenCalled();
   expect(elasticsearchService.setup).not.toHaveBeenCalled();
   expect(mockPluginsService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.setup).not.toHaveBeenCalled();
 
-  await server.setup(newPlatformPluginDefinitions);
+  await server.setup();
 
   expect(httpService.setup).toHaveBeenCalledTimes(1);
   expect(elasticsearchService.setup).toHaveBeenCalledTimes(1);
@@ -79,15 +62,13 @@ test('sets up services on "setup"', async () => {
 });
 
 test('runs services on "start"', async () => {
-  const mockPluginsServiceSetup = new Map([['some-plugin', 'some-value']]);
-  mockPluginsService.setup.mockReturnValue(Promise.resolve(mockPluginsServiceSetup));
-
-  const server = new Server(configService as any, logger, env);
+  const server = new Server(config$, env, logger);
+  await server.preSetup();
 
   expect(httpService.setup).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
 
-  await server.setup(newPlatformPluginDefinitions);
+  await server.setup();
 
   expect(httpService.start).not.toHaveBeenCalled();
   expect(mockLegacyService.start).not.toHaveBeenCalled();
@@ -100,15 +81,17 @@ test('runs services on "start"', async () => {
 test('does not fail on "setup" if there are unused paths detected', async () => {
   configService.getUnusedPaths.mockResolvedValue(['some.path', 'another.path']);
 
-  const server = new Server(configService as any, logger, env);
-  await expect(server.setup(newPlatformPluginDefinitions)).resolves.toBeDefined();
-  expect(loggingServiceMock.collect(logger)).toMatchSnapshot('unused paths logs');
+  const server = new Server(config$, env, logger);
+  await server.preSetup();
+
+  await expect(server.setup()).resolves.toBeDefined();
 });
 
 test('stops services on "stop"', async () => {
-  const server = new Server(configService as any, logger, env);
+  const server = new Server(config$, env, logger);
+  await server.preSetup();
 
-  await server.setup(newPlatformPluginDefinitions);
+  await server.setup();
 
   expect(httpService.stop).not.toHaveBeenCalled();
   expect(elasticsearchService.stop).not.toHaveBeenCalled();
@@ -121,4 +104,16 @@ test('stops services on "stop"', async () => {
   expect(elasticsearchService.stop).toHaveBeenCalledTimes(1);
   expect(mockPluginsService.stop).toHaveBeenCalledTimes(1);
   expect(mockLegacyService.stop).toHaveBeenCalledTimes(1);
+});
+
+test(`doesn't setup core services if config validation fails`, async () => {
+  configService.preSetup.mockImplementation(() => {
+    throw new Error('invalid config');
+  });
+  const server = new Server(config$, env, logger);
+  await expect(server.preSetup()).rejects.toThrowErrorMatchingInlineSnapshot(`"invalid config"`);
+  expect(httpService.setup).not.toHaveBeenCalled();
+  expect(elasticsearchService.setup).not.toHaveBeenCalled();
+  expect(mockPluginsService.setup).not.toHaveBeenCalled();
+  expect(mockLegacyService.setup).not.toHaveBeenCalled();
 });

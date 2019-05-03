@@ -13,6 +13,4 @@ ExampleClassWithSchema {
 }
 `;
 
-exports[`throws error if 'schema' is not defined for a key 1`] = `[Error: No config validator defined for key]`;
-
 exports[`throws if config at path does not match schema 1`] = `"[key]: expected value of type [string] but got [number]"`;

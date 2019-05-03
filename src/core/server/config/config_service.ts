@@ -34,17 +34,24 @@ export class ConfigService {
    * then list all unhandled config paths when the startup process is completed.
    */
   private readonly handledPaths: ConfigPath[] = [];
-  private readonly schemas = new Map<string, Type<any>>();
+  private schemas?: Map<string, Type<any>>;
 
   constructor(
     private readonly config$: Observable<Config>,
     private readonly env: Env,
-    logger: LoggerFactory,
-    schemas: Map<ConfigPath, Type<any>> = new Map()
+    logger: LoggerFactory
   ) {
     this.log = logger.get('config');
+  }
+
+  public async preSetup(schemas: Map<ConfigPath, Type<any>>) {
+    this.schemas = new Map();
     for (const [path, schema] of schemas) {
-      this.schemas.set(pathToString(path), schema);
+      const namespace = pathToString(path);
+      this.schemas.set(namespace, schema);
+      await this.getValidatedConfig(namespace)
+        .pipe(first())
+        .toPromise();
     }
   }
 
@@ -125,15 +132,10 @@ export class ConfigService {
     return config.getFlattenedPaths().filter(path => isPathHandled(path, handledPaths));
   }
 
-  public async validateAll() {
-    for (const namespace of this.schemas.keys()) {
-      await this.getValidatedConfig(namespace)
-        .pipe(first())
-        .toPromise();
-    }
-  }
-
   private validateConfig(path: ConfigPath, config: Record<string, any>) {
+    if (!this.schemas) {
+      throw new Error('No validation schema has been defined');
+    }
     const namespace = pathToString(path);
     const schema = this.schemas.get(namespace);
     if (!schema) {

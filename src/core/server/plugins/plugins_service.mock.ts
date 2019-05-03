@@ -17,7 +17,25 @@
  * under the License.
  */
 
-export const mockPackage = new Proxy({ raw: {} as any }, { get: (obj, prop) => obj.raw[prop] });
-jest.mock('../../../legacy/utils/package_json', () => ({ pkg: mockPackage }));
+import { PluginsService } from './plugins_service';
 
-jest.mock('./plugins_system');
+type ServiceContract = PublicMethodsOf<PluginsService>;
+const createServiceMock = () => {
+  const mocked: jest.Mocked<ServiceContract> = {
+    preSetup: jest.fn(),
+    setup: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
+  mocked.preSetup.mockResolvedValue({
+    pluginDefinitions: [],
+    errors: [],
+    searchPaths: [],
+    devPluginPaths: [],
+  });
+  return mocked;
+};
+
+export const pluginServiceMock = {
+  create: createServiceMock,
+};
