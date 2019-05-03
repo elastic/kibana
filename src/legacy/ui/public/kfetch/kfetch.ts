@@ -54,34 +54,15 @@ export function createKfetch(http: HttpSetup) {
     options: KFetchOptions,
     { prependBasePath = true }: KFetchKibanaOptions = {}
   ) {
-    const controller = options.signal
-      ? { signal: options.signal, abort: Function.prototype }
-      : new AbortController();
-    const promise = new Promise((resolve, reject) => {
-      responseInterceptors(
-        requestInterceptors(withDefaultOptions(options))
-          .then(({ pathname, query, ...restOptions }) =>
-            http.fetch(pathname, {
-              ...restOptions,
-              signal: controller.signal,
-              query,
-              prependBasePath,
-            })
-          )
-          .catch(err => {
-            throw new KFetchError(err.response || { statusText: err.message }, err.body);
-          })
-      ).then(resolve, reject);
-    });
-
-    // NOTE: We are only using Object.defineProperty with enumerable:false to be explicit about
-    // excluding promise.abort() which isn't the case with Object.assign.
-    return Object.defineProperty(promise, 'abort', {
-      enumerable: false,
-      value() {
-        controller.abort();
-      },
-    });
+    return responseInterceptors(
+      requestInterceptors(withDefaultOptions(options))
+        .then(({ pathname, ...restOptions }) =>
+          http.fetch(pathname, { ...restOptions, prependBasePath })
+        )
+        .catch(err => {
+          throw new KFetchError(err.response || { statusText: err.message }, err.body);
+        })
+    );
   };
 }
 

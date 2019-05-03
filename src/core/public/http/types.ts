@@ -52,9 +52,4 @@ export interface HttpFetchOptions extends HttpRequestInit {
   prependBasePath?: boolean;
   headers?: HttpHeadersInit;
 }
-export interface Abortable<T> {
-  abort: () => Promise<T>;
-}
-export type AbortablePromise<T> = Promise<T> & Abortable<T>;
-export type HttpHandler<T> = (path: string, options?: HttpFetchOptions) => Promise<T>;
 export type HttpBody = BodyInit | null;

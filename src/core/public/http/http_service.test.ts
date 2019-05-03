@@ -248,17 +248,6 @@ describe('http requests', async () => {
 
     expect(ndjson).toEqual(content);
   });
-
-  it('should return an abortable promise', () => {
-    const { http } = setupService();
-
-    fetchMock.get('*', {});
-
-    const abortable = http.fetch('/my/path');
-
-    expect(abortable).toBeInstanceOf(Promise);
-    expect(typeof abortable.abort).toBe('function');
-  });
 });
 
 describe('addLoadingCount()', async () => {

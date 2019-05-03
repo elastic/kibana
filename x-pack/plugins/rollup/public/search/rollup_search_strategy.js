@@ -95,7 +95,9 @@ export const rollupSearchStrategy = {
       failedSearchRequests,
     } = await serializeAllFetchParams(allFetchParams, searchRequests);
 
-    const abortable = kfetch({
+    const controller = new AbortController();
+    const promise = kfetch({
+      signal: controller.signal,
       pathname: '../api/rollup/search',
       method: 'POST',
       body: serializedFetchParams,
@@ -103,7 +105,7 @@ export const rollupSearchStrategy = {
 
     return {
       searching: new Promise((resolve, reject) => {
-        abortable.then(result => {
+        promise.then(result => {
           resolve(shimHitsInFetchResponse(result));
         }).catch(error => {
           const {
@@ -123,7 +125,7 @@ export const rollupSearchStrategy = {
           reject(searchError);
         });
       }),
-      abort: abortable.abort,
+      abort: () => controller.abort(),
       failedSearchRequests,
     };
   },

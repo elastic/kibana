@@ -28,101 +28,26 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { merge } from 'lodash';
-import { format } from 'url';
-
-import { Deps, HttpFetchOptions, HttpBody } from './types';
-import { abortable } from './abortable';
-import { HttpFetchError } from './http_fetch_error';
-
-const JSON_CONTENT = /^(application\/(json|x-javascript)|text\/(x-)?javascript|x-json)(;.*)?$/;
-const NDJSON_CONTENT = /^(application\/ndjson)(;.*)?$/;
+import { Deps } from './types';
+import { setup } from './fetch';
 
 /** @internal */
 export class HttpService {
   private readonly loadingCount$ = new Rx.BehaviorSubject(0);
   private readonly stop$ = new Rx.Subject();
 
-  public setup({ basePath, injectedMetadata, fatalErrors }: Deps) {
-    async function fetch(path: string, options: HttpFetchOptions = {}): Promise<HttpBody> {
-      const { query, prependBasePath, ...fetchOptions } = merge(
-        {
-          method: 'GET',
-          credentials: 'same-origin',
-          prependBasePath: true,
-          headers: {
-            'kbn-version': injectedMetadata.getKibanaVersion(),
-            'Content-Type': 'application/json',
-          },
-        },
-        options
-      );
-      const url = format({
-        pathname: prependBasePath ? basePath.addToPath(path) : path,
-        query,
-      });
-
-      if (
-        options.headers &&
-        'Content-Type' in options.headers &&
-        options.headers['Content-Type'] === undefined
-      ) {
-        delete fetchOptions.headers['Content-Type'];
-      }
-
-      let response;
-      let body = null;
-
-      try {
-        response = await window.fetch(url, fetchOptions as RequestInit);
-      } catch (err) {
-        throw new HttpFetchError(err.message);
-      }
-
-      const contentType = response.headers.get('Content-Type') || '';
-
-      try {
-        if (NDJSON_CONTENT.test(contentType)) {
-          body = await response.blob();
-        } else if (JSON_CONTENT.test(contentType)) {
-          body = await response.json();
-        } else {
-          body = await response.text();
-        }
-      } catch (err) {
-        throw new HttpFetchError(err.message, response, body);
-      }
-
-      if (!response.ok) {
-        throw new HttpFetchError(response.statusText, response, body);
-      }
-
-      return body;
-    }
+  public setup(deps: Deps) {
+    const { fetch, shorthand } = setup(deps);
 
     return {
-      fetch: abortable<HttpBody>(fetch),
-      get: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'GET' })
-      ),
-      head: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'HEAD' })
-      ),
-      post: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'POST' })
-      ),
-      put: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'PUT' })
-      ),
-      patch: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'PATCH' })
-      ),
-      delete: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'DELETE' })
-      ),
-      options: abortable<HttpBody>((path: string, options: HttpFetchOptions = {}) =>
-        fetch(path, { ...options, method: 'OPTIONS' })
-      ),
+      fetch,
+      delete: shorthand('HEAD'),
+      get: shorthand('GET'),
+      head: shorthand('HEAD'),
+      options: shorthand('OPTIONS'),
+      patch: shorthand('PATCH'),
+      post: shorthand('POST'),
+      put: shorthand('PUT'),
       addLoadingCount: (count$: Rx.Observable<number>) => {
         count$
           .pipe(
@@ -149,7 +74,7 @@ export class HttpService {
               this.loadingCount$.next(this.loadingCount$.getValue() + delta);
             },
             error: error => {
-              fatalErrors.add(error);
+              deps.fatalErrors.add(error);
             },
           });
       },

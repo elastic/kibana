@@ -137,13 +137,6 @@ describe('kfetch', () => {
     }
   });
 
-  it('should return an abortable promise', () => {
-    const abortable = kfetch({ pathname: '/my/path' });
-
-    expect(abortable).toBeInstanceOf(Promise);
-    expect(typeof abortable.abort).toBe('function');
-  });
-
   describe('when throwing response error (KFetchError)', async () => {
     let error: KFetchError;
     beforeEach(async () => {
