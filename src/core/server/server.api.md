@@ -78,6 +78,8 @@ export interface CoreSetup {
 export interface CoreStart {
     // (undocumented)
     http: HttpServiceStart;
+    // (undocumented)
+    plugins: PluginsServiceStart;
 }
 
 // @internal
@@ -219,15 +221,17 @@ export interface OnRequestToolkit {
 }
 
 // @public
-export interface Plugin<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> {
+export interface Plugin<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> {
     // (undocumented)
-    setup: (pluginSetupContext: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    setup: (core: PluginSetupContext, plugins: TPluginsSetup) => TSetup | Promise<TSetup>;
+    // (undocumented)
+    start: (core: PluginStartContext, plugins: TPluginsStart) => TStart | Promise<TStart>;
     // (undocumented)
     stop?: () => void;
 }
 
 // @public
-export type PluginInitializer<TSetup, TPluginsSetup extends Record<PluginName, unknown> = {}> = (coreContext: PluginInitializerContext) => Plugin<TSetup, TPluginsSetup>;
+export type PluginInitializer<TSetup, TStart, TPluginsSetup extends Record<PluginName, unknown> = {}, TPluginsStart extends Record<PluginName, unknown> = {}> = (core: PluginInitializerContext) => Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
 // @public
 export interface PluginInitializerContext {
@@ -270,6 +274,16 @@ export interface PluginsServiceSetup {
         public: Map<PluginName, DiscoveredPlugin>;
         internal: Map<PluginName, DiscoveredPluginInternal>;
     };
+}
+
+// @internal (undocumented)
+export interface PluginsServiceStart {
+    // (undocumented)
+    contracts: Map<PluginName, unknown>;
+}
+
+// @public
+export interface PluginStartContext {
 }
 
 // @public (undocumented)
