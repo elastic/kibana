@@ -9,6 +9,7 @@ import Boom from 'boom';
 interface Connector {
   id: string;
   name: string;
+  unencryptedAttributes: string[];
   validate?: {
     params?: any;
     connectorOptions?: any;

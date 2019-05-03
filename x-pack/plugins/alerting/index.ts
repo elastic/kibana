@@ -25,7 +25,7 @@ export function alerting(kibana: any) {
   return new kibana.Plugin({
     id: APP_ID,
     configPrefix: 'xpack.alerting',
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'encrypted_saved_objects'],
     config(Joi: any) {
       return Joi.object()
         .keys({
@@ -40,6 +40,13 @@ export function alerting(kibana: any) {
         server.log(['info', 'alerting'], 'Alerting app disabled by configuration');
         return;
       }
+
+      // Encrypted attributes
+      // @ts-ignore
+      server.plugins.encrypted_saved_objects.registerType({
+        type: 'action',
+        attributesToEncrypt: new Set(['connectorOptionsSecrets']),
+      });
 
       const connectorService = new ConnectorService();
       const actionService = new ActionService(connectorService);

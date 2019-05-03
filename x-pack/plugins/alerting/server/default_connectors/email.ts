@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import nodemailer, { SendMailOptions } from 'nodemailer';
+import nodemailer from 'nodemailer';
 
 export const emailConnector = {
   id: 'email',
   name: 'E-mail',
-  async executor(connectorOptions: any, params: SendMailOptions) {
+  async executor(connectorOptions: any, params: any) {
     const transporter = nodemailer.createTransport(connectorOptions);
     await transporter.sendMail(params);
   },
