@@ -95,6 +95,11 @@ export function rollbackToTrackedLayerStateForSelectedLayer() {
       type: ROLLBACK_TO_TRACKED_LAYER_STATE,
       layerId: layerId
     });
+
+    // Ensure updateStyleMeta is triggered
+    // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
+    dispatch(updateStyleMeta(layerId));
+
     dispatch(syncDataForLayer(layerId));
   };
 }
@@ -629,13 +634,12 @@ export function updateLayerStyle(layerId, styleDescriptor) {
       },
     });
 
+    // Ensure updateStyleMeta is triggered
+    // syncDataForLayer may not trigger endDataLoad if no re-fetch is required
+    dispatch(updateStyleMeta(layerId));
+
     // Style update may require re-fetch, for example ES search may need to retrieve field used for dynamic styling
     dispatch(syncDataForLayer(layerId));
-
-    // syncDataForLayer may short circuit if no re-fetch is required:
-    // 1) if no re-fetch: setDynamicRanges required to update dynamic range from last request state
-    // 2) if re-fetch: setDynamicRanges called here and then called again after re-fetch finishes
-    dispatch(updateStyleMeta(layerId));
   };
 }
 

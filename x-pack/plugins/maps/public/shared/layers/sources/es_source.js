@@ -132,10 +132,10 @@ export class AbstractESSource extends AbstractVectorSource {
         requestDesc: requestDescription
       });
     } catch(error) {
-      throw new Error('xpack.maps.source.esSource.requestFailedErrorMessage', {
+      throw new Error(i18n.translate('xpack.maps.source.esSource.requestFailedErrorMessage', {
         defaultMessage: `Elasticsearch search request failed, error: {message}`,
         values: { message: error.message }
-      });
+      }));
     }
   }
 

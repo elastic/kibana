@@ -11,6 +11,7 @@ import {
   UsageAPIProvider,
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
+  InfraOpsSourceConfigurationProvider,
 } from './services';
 
 import {
@@ -34,6 +35,7 @@ export default async function ({ readConfigFile }) {
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
       infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
       infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
+      infraOpsSourceConfiguration: InfraOpsSourceConfigurationProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
