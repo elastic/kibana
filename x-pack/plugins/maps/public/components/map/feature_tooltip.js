@@ -35,6 +35,7 @@ export class FeatureTooltip extends React.Component {
           loadPropertiesErrorMsg: error.message
         });
       }
+      return;
     }
 
     if (this._isMounted) {
