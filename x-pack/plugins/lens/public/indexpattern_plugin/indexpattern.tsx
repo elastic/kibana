@@ -6,7 +6,8 @@
 
 import React from 'react';
 import { render } from 'react-dom';
-import { Datasource, Operation, DataType } from '..';
+import { Datasource, DataType } from '..';
+import { DatasourceDimensionPanelProps, DatasourceDataPanelProps } from '../types';
 
 interface IndexPatternPrivateState {
   query: object;
@@ -22,7 +23,7 @@ export const indexPatternDatasource: Datasource<IndexPatternPrivateState> = {
     return `${JSON.stringify(state.query)}`;
   },
 
-  renderDataPanel({ domElement }: { domElement: Element }) {
+  renderDataPanel(domElement: Element, props: DatasourceDataPanelProps<IndexPatternPrivateState>) {
     render(<div>Index Pattern Data Source</div>, domElement);
   },
 
@@ -30,7 +31,7 @@ export const indexPatternDatasource: Datasource<IndexPatternPrivateState> = {
     // TODO: Provide state to each of these
     return {
       getTableSpec: () => [],
-      getOperationForColumnId: () => ({
+      getOperationForColumnId: (columnId: string) => ({
         id: '',
         // User-facing label for the operation
         label: '',
@@ -39,11 +40,7 @@ export const indexPatternDatasource: Datasource<IndexPatternPrivateState> = {
         isBucketed: false,
       }),
 
-      // Called by dimension
-      getDimensionPanelComponent: (props: any) => (
-        domElement: Element,
-        operations: Operation[]
-      ) => {},
+      renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => {},
 
       removeColumnInTableSpec: (columnId: string) => [],
       moveColumnTo: (columnId: string, targetIndex: number) => {},

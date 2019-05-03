@@ -24,7 +24,10 @@ export function EditorFrame(props: EditorFrameProps) {
           key={key}
           ref={domElement => {
             if (domElement) {
-              props.datasources[key].renderDataPanel({ domElement });
+              props.datasources[key].renderDataPanel(domElement, {
+                state: {},
+                setState: () => {},
+              });
             }
           }}
         />

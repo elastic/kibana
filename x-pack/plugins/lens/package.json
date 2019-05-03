@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "visualization_lens",
+  "name": "lens",
   "version": "7.0.0",
   "private": true,
   "license": "Elastic-License",

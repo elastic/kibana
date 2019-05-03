@@ -49,7 +49,7 @@ export interface Datasource<T = unknown> {
   // For initializing from saved object
   initialize: (state?: T) => Promise<T>;
 
-  renderDataPanel: (props: DatasourceDataPanelProps) => void;
+  renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
   toExpression: (state: T) => string;
 
@@ -64,20 +64,19 @@ export interface Datasource<T = unknown> {
  */
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
-  getOperationForColumnId: () => Operation;
+  getOperationForColumnId: (columnId: string) => Operation;
 
-  // Called by dimension
-  getDimensionPanelComponent: (
-    props: DatasourceDimensionPanelProps
-  ) => (domElement: Element, operations: Operation[]) => void;
+  // Render can be called many times
+  renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
 
   removeColumnInTableSpec: (columnId: string) => TableSpec;
   moveColumnTo: (columnId: string, targetIndex: number) => void;
   duplicateColumn: (columnId: string) => TableSpec;
 }
 
-export interface DatasourceDataPanelProps {
-  domElement: Element;
+export interface DatasourceDataPanelProps<T = unknown> {
+  state: T;
+  setState: (newState: T) => void;
 }
 
 // The only way a visualization has to restrict the query building
@@ -127,7 +126,7 @@ export interface VisualizationProps<T = unknown> {
   setState: (newState: T) => void;
 }
 
-export interface GetSuggestions<T = unknown> {
+export interface SuggestionRequest<T = unknown> {
   // Roles currently being used
   roles: DimensionRole[];
   // It is up to the Visualization to rank these tables
@@ -150,10 +149,7 @@ export interface Visualization<T = unknown> {
   // Frame will request the list of roles currently being used when calling `getInitialStateFromOtherVisualization`
   getMappingOfTableToRoles: (state: T, datasource: DatasourcePublicAPI) => DimensionRole[];
 
-  // Used to switch to this visualization from another
-  getInitialStateFromOtherVisualization: (options: GetSuggestions<T>) => T[];
-
-  // Filter suggestions from datasource to good suggestions, used for suggested visualizations
-  // Can be used to switch to a better visualization given the data table
-  getSuggestionsFromTableSpecs: (options: GetSuggestions<T>) => Array<VisualizationSuggestion<T>>;
+  // The frame will call this function on all visualizations when the table changes, or when
+  // rendering additional ways of using the data
+  getSuggestions: (options: SuggestionRequest<T>) => Array<VisualizationSuggestion<T>>;
 }

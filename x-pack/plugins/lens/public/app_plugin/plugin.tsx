@@ -6,13 +6,15 @@
 
 import React from 'react';
 import { editorFrameSetup, editorFrameStop } from '../editor_frame_plugin';
-import { App } from './app';
 import { indexPatternDatasourceSetup, indexPatternDatasourceStop } from '../indexpattern_plugin';
+import { App } from './app';
 
 export class AppPlugin {
   constructor() {}
 
   setup() {
+    // TODO: These plugins should not be called from the top level, but since this is the
+    // entry point to the app we have no choice until the new platform is ready
     const indexPattern = indexPatternDatasourceSetup();
     const editorFrame = editorFrameSetup();
 
