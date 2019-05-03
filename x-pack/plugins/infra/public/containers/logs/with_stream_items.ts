@@ -7,9 +7,8 @@
 import { connect } from 'react-redux';
 import { createSelector } from 'reselect';
 
-import { SearchResult } from '../../../common/log_search_result';
 import { logEntriesActions, logEntriesSelectors, logPositionSelectors, State } from '../../store';
-import { LogEntry, LogEntryMessageSegment } from '../../utils/log_entry';
+import { LogEntry } from '../../utils/log_entry';
 import { asChildFunctionRenderer } from '../../utils/typed_react';
 import { bindPlainActionCreators } from '../../utils/typed_redux';
 
@@ -49,27 +48,7 @@ const selectItems = createSelector(
         )
 );
 
-const createLogEntryStreamItem = (logEntry: LogEntry, searchResult?: SearchResult) => ({
+const createLogEntryStreamItem = (logEntry: LogEntry) => ({
   kind: 'logEntry' as 'logEntry',
-  logEntry: {
-    gid: logEntry.gid,
-    origin: {
-      id: logEntry.gid,
-      index: '',
-      type: '',
-    },
-    fields: {
-      time: logEntry.key.time,
-      tiebreaker: logEntry.key.tiebreaker,
-      message: logEntry.message.map(formatMessageSegment).join(''),
-    },
-  },
-  searchResult,
+  logEntry,
 });
-
-const formatMessageSegment = (messageSegment: LogEntryMessageSegment): string =>
-  messageSegment.__typename === 'InfraLogMessageFieldSegment'
-    ? messageSegment.value
-    : messageSegment.__typename === 'InfraLogMessageConstantSegment'
-    ? messageSegment.constant
-    : 'failed to format message';

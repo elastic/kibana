@@ -10,3 +10,12 @@
   color: $textColor;
   background-color: $backgroundColor;
 }
+
+.visEditorAggParam--half {
+  display: inline-block;
+  width: calc(50% - #{$euiSizeS / 2});
+}
+
+.visEditorAggParam--half-size {
+  margin-left: $euiSizeS;
+}
