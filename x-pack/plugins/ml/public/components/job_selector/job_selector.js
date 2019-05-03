@@ -63,6 +63,41 @@ export function getBadge({ id, icon, isGroup = false, removeId, numJobs }) {
   );
 }
 
+function mergeSelection(jobIds, groupObjs, singleSelection) {
+  if (singleSelection) {
+    return jobIds;
+  }
+
+  const selectedIds = [];
+  const alreadySelected = [];
+
+  groupObjs.forEach((group) => {
+    selectedIds.push(group.groupId);
+    alreadySelected.push(...group.jobIds);
+  });
+
+  jobIds.forEach((jobId) => {
+    // Add jobId if not already included in group selection
+    if (alreadySelected.includes(jobId) === false) {
+      selectedIds.push(jobId);
+    }
+  });
+
+  return selectedIds;
+}
+
+function getInitialGroupsMap(selectedGroups) {
+  const map = {};
+
+  if (selectedGroups.length) {
+    selectedGroups.forEach((group) => {
+      map[group.groupId] = group.jobIds;
+    });
+  }
+
+  return map;
+}
+
 const BADGE_LIMIT = 10;
 
 export function JobSelector({
@@ -70,14 +105,15 @@ export function JobSelector({
   globalState,
   jobSelectService,
   selectedJobIds,
+  selectedGroups,
   singleSelection,
   timeseriesOnly
 }) {
   const [jobs, setJobs] = useState([]);
   const [groups, setGroups] = useState([]);
-  const [maps, setMaps] = useState({ groupsMap: {}, jobsMap: {} });
-  const [selectedIds, setSelectedIds] = useState(selectedJobIds);
-  const [newSelection, setNewSelection] = useState(selectedJobIds);
+  const [maps, setMaps] = useState({ groupsMap: getInitialGroupsMap(selectedGroups), jobsMap: {} });
+  const [selectedIds, setSelectedIds] = useState(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
+  const [newSelection, setNewSelection] = useState(mergeSelection(selectedJobIds, selectedGroups, singleSelection));
   const [showAllBadges, setShowAllBadges] = useState(false);
   const [showAllBarBadges, setShowAllBarBadges] = useState(false);
   const [applyTimeRange, setApplyTimeRange] = useState(true);
@@ -139,10 +175,13 @@ export function JobSelector({
   function applySelection() {
     closeFlyout();
     const allNewSelection = [];
+    const groupSelection = [];
 
     newSelection.forEach((id) => {
       if (maps.groupsMap[id] !== undefined) {
-        allNewSelection.push(...maps.groupsMap[id].jobIds);
+        allNewSelection.push(...maps.groupsMap[id]);
+        // if it's a group - push group obj to set in global state
+        groupSelection.push({ groupId: id, jobIds: maps.groupsMap[id] });
       } else {
         allNewSelection.push(id);
       }
@@ -155,8 +194,7 @@ export function JobSelector({
     applyTimeRangeFromSelection(allNewSelectionUnique);
     jobSelectService.next({ selection: allNewSelectionUnique });
 
-    // save selection in global state
-    setGlobalState(globalState, allNewSelectionUnique);
+    setGlobalState(globalState, { selectedIds: allNewSelectionUnique, selectedGroups: groupSelection });
   }
 
   function applyTimeRangeFromSelection(selection) {
@@ -206,7 +244,7 @@ export function JobSelector({
 
         badges.push((
           <EuiFlexItem grow={false} key={currentId}>
-            {getBadge({ id: currentId, isGroup: true, numJobs: maps.groupsMap[currentId].jobIds.length })}
+            {getBadge({ id: currentId, isGroup: true, numJobs: maps.groupsMap[currentId].length })}
           </EuiFlexItem>
         ));
       } else {

@@ -41,10 +41,13 @@ function checkGlobalState(globalState) {
   }
 }
 
-function loadJobIdsFromGlobalState(globalState) {
+function loadJobIdsFromGlobalState(globalState) { // jobIds, groups
   const jobIds = [];
+  let groups = [];
+
   if (globalState.ml && globalState.ml.jobIds) {
     let tempJobIds = [];
+    groups = globalState.ml.groups || [];
 
     if (typeof globalState.ml.jobIds === 'string') {
       tempJobIds.push(globalState.ml.jobIds);
@@ -74,12 +77,13 @@ function loadJobIdsFromGlobalState(globalState) {
       jobIds.push(mlJobService.jobs[0].job_id);
     }
   }
-  return jobIds;
+  return { jobIds, selectedGroups: groups };
 }
 
-export function setGlobalState(globalState, selectedIds) {
+export function setGlobalState(globalState, { selectedIds, selectedGroups }) {
   checkGlobalState(globalState);
   globalState.ml.jobIds = selectedIds;
+  globalState.ml.groups = selectedGroups;
   globalState.save();
 }
 
@@ -112,10 +116,10 @@ export function getGroupsFromJobs(jobs) {
             }
           };
 
-          groupsMap[g] = { jobIds: [job.job_id] }; // TODO: change to just be the array so consistent with jobsMap
+          groupsMap[g] = [job.job_id];
         } else {
           groups[g].jobIds.push(job.job_id);
-          groupsMap[g].jobIds.push(job.job_id);
+          groupsMap[g].push(job.job_id);
           // keep track of earliest 'from' / latest 'to' for group range
           if (groups[g].timeRange.to === null || job.timeRange.to > groups[g].timeRange.to) {
             groups[g].timeRange.to = job.timeRange.to;

@@ -144,7 +144,7 @@ module.controller('MlTimeSeriesExplorerController', function (
       const timeSeriesJobIds = $scope.jobs.map(j => j.id);
 
       // Select any jobs set in the global state (i.e. passed in the URL).
-      let selectedJobIds = getSelectedJobIds(globalState);
+      let { jobIds: selectedJobIds } = getSelectedJobIds(globalState);
 
       // Check if any of the jobs set in the URL are not time series jobs
       // (e.g. if switching to this view straight from the Anomaly Explorer).

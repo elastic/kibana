@@ -10,7 +10,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import _ from 'lodash'; // Find a way to remove this
+import _ from 'lodash';
 
 import { JobSelector } from './job_selector';
 import { getSelectedJobIds } from './job_select_service_utils';
@@ -22,18 +22,19 @@ const module = uiModules.get('apps/ml');
 module
   .directive('mlJobSelectorReactWrapper', function (globalState, config, mlJobSelectService) {
     function link(scope, element, attrs) {
-      const selectedJobIds = getSelectedJobIds(globalState);
+      const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
       const oldSelectedJobIds = mlJobSelectService.getValue().selection;
 
-      if (selectedJobIds && !(_.isEqual(oldSelectedJobIds, selectedJobIds))) {
-        mlJobSelectService.next({ selection: selectedJobIds });
+      if (jobIds && !(_.isEqual(oldSelectedJobIds, jobIds))) {
+        mlJobSelectService.next({ selection: jobIds, groups: selectedGroups });
       }
 
       const props = {
         config,
         globalState,
         jobSelectService: mlJobSelectService,
-        selectedJobIds,
+        selectedJobIds: jobIds,
+        selectedGroups,
         timeseriesOnly: attrs.timeseriesonly,
         singleSelection: attrs.singleselection
       };
@@ -54,6 +55,6 @@ module
     };
   })
   .service('mlJobSelectService', function (globalState) {
-    const initialSelectedJobIds = getSelectedJobIds(globalState);
-    return new BehaviorSubject({ selection: initialSelectedJobIds, resetSelection: false });
+    const { jobIds, selectedGroups } = getSelectedJobIds(globalState);
+    return new BehaviorSubject({ selection: jobIds, groups: selectedGroups, resetSelection: false });
   });
