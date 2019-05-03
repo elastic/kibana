@@ -50,20 +50,22 @@ function DataPanel(props: DatasourcePanelProps<VisModel>) {
 
   return (
     <>
-      <EuiComboBox
-        options={indexPatternsAsSelections}
-        singleSelection={{ asPlainText: true }}
-        selectedOptions={indexPatternsAsSelections.filter(
-          ({ label }) => visModel.datasource && label === visModel.datasource.title
-        )}
-        isClearable={false}
-        onChange={([{ label }]) =>
-          onChangeVisModel({
-            ...visModel,
-            datasource: state.indexPatterns.find(({ title }) => title === label) || null,
-          })
-        }
-      />
+      <div className="lnsIndexPattern__select">
+        <EuiComboBox
+          options={indexPatternsAsSelections}
+          singleSelection={{ asPlainText: true }}
+          selectedOptions={indexPatternsAsSelections.filter(
+            ({ label }) => visModel.datasource && label === visModel.datasource.title
+          )}
+          isClearable={false}
+          onChange={([{ label }]) =>
+            onChangeVisModel({
+              ...visModel,
+              datasource: state.indexPatterns.find(({ title }) => title === label) || null,
+            })
+          }
+        />
+      </div>
       <FieldListPanel {...props} />
     </>
   );

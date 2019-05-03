@@ -25,7 +25,7 @@ import { AngleAxisEditor } from './angleaxis_editor';
 import { SliceAxisEditor } from './sliceaxis_editor';
 import { PieChartVisModel, PLUGIN_NAME, updatePieState } from './types';
 
-function configPanel({
+function lnsConfigPanel({
   visModel,
   onChangeVisModel,
   getSuggestions: getAllSuggestions,
@@ -37,8 +37,8 @@ function configPanel({
   } = visModel;
   return (
     <>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Slice pie by</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Slice pie by</span>
         {sliceAxis.columns.map(col => (
           <SliceAxisEditor
             key={col}
@@ -49,8 +49,8 @@ function configPanel({
           />
         ))}
       </div>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Size slices by</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Size slices by</span>
         {angleAxis.columns.map(col => (
           <AngleAxisEditor
             key={col}
@@ -207,7 +207,7 @@ function getSuggestionsForField(
 export const config: EditorPlugin<PieChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   getChartSuggestions: visModel => getSuggestions(visModel),
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way

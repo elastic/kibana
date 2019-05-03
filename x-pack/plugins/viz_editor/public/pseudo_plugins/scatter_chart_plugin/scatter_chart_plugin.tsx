@@ -38,7 +38,7 @@ const updateScatterState = updatePrivateState<'scatterChart', ScatterChartPrivat
   'scatterChart'
 );
 
-function configPanel({
+function lnsConfigPanel({
   visModel,
   onChangeVisModel,
 }: VisualizationPanelProps<ScatterChartVisModel>) {
@@ -54,8 +54,8 @@ function configPanel({
 
   return (
     <>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Y-axis</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Y-axis</span>
         {yAxis.columns.map(col => (
           <AxisEditor
             key={col}
@@ -65,8 +65,8 @@ function configPanel({
           />
         ))}
       </div>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">X-axis</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">X-axis</span>
         {xAxis.columns.map(col => (
           <AxisEditor
             key={col}
@@ -320,7 +320,7 @@ function getSuggestionsForField(
 export const config: EditorPlugin<ScatterChartVisModel> = {
   name: 'xy_chart',
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   getChartSuggestions,
   getSuggestionsForField,
   // this part should check whether the x and y axes have to be initialized in some way

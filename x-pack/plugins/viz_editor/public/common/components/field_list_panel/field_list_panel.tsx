@@ -47,7 +47,7 @@ export function FieldListPanel({ visModel }: VisualizationPanelProps) {
   return (
     <>
       {datasource && (
-        <div className="fieldListPanel">
+        <div className="lnsFieldListPanel">
           <EuiFieldSearch
             placeholder={i18n.translate('xpack.viz_editor.indexPatterns.filterByNameLabel', {
               defaultMessage: 'Search fields',
@@ -62,20 +62,21 @@ export function FieldListPanel({ visModel }: VisualizationPanelProps) {
             }}
             aria-label="Search fields"
           />
-
-          {datasource.fields
-            .filter(filterFields)
-            .sort(sortFields)
-            .map(field => (
-              <Draggable
-                draggable={true}
-                value={field}
-                key={field.name}
-                className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
-              >
-                {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
-              </Draggable>
-            ))}
+          <div className="lnsFieldListPanel__list">
+            {datasource.fields
+              .filter(filterFields)
+              .sort(sortFields)
+              .map(field => (
+                <Draggable
+                  draggable={true}
+                  value={field}
+                  key={field.name}
+                  className={`fieldListPanel-field fieldListPanel-field-btn-${field.type}`}
+                >
+                  {fieldIcon(field)} <span className="fieldListPanel-field-name">{field.name}</span>
+                </Draggable>
+              ))}
+          </div>
         </div>
       )}
     </>

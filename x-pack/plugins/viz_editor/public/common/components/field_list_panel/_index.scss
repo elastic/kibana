@@ -1,3 +1,17 @@
+.lnsFieldListPanel {
+  padding: 0 $euiSize;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lnsFieldListPanel__list {
+  @include euiScrollBar;
+  overflow: hidden auto;
+  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeS; // Form row height plus some
+}
+
 .fieldListPanel-field {
   display: block;
   text-align: left;

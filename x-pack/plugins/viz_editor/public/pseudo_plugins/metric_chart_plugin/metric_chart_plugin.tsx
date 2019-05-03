@@ -31,7 +31,7 @@ interface MetricChartPrivateState {}
 
 type MetricChartVisModel = VisModel<'metricChart', MetricChartPrivateState>;
 
-function configPanel({
+function lnsConfigPanel({
   visModel,
   onChangeVisModel,
   getSuggestions,
@@ -67,16 +67,16 @@ function configPanel({
 
   return (
     <>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Metric</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Metric</span>
         <AxisEditor
           operationId={firstOperation!}
           visModel={visModel}
           onChangeVisModel={onChangeVisModel}
         />
       </div>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Second dimension</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Second dimension</span>
         <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
           Drop another field here
         </Draggable>
@@ -163,7 +163,7 @@ function getSuggestionsForField(
 export const config: EditorPlugin<MetricChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   WorkspacePanel,
   getChartSuggestions,
   getSuggestionsForField,

@@ -5,22 +5,31 @@
  */
 
 import {
-  EuiButtonEmpty,
-  EuiButtonToggle,
+  // EuiButtonEmpty,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTitle,
+  EuiButtonGroup,
+  EuiPageContentHeader,
+  EuiPageContentHeaderSection,
+  EuiPageContentBody,
+  EuiButtonIcon,
+  EuiSpacer,
   // @ts-ignore
   EuiListGroupItem,
   EuiPage,
   EuiPageBody,
-  EuiPageContentBody,
+  EuiPageContent,
   EuiPageSideBar,
   EuiPanel,
   EuiTextArea,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import React, { useReducer } from 'react';
+import { i18n } from '@kbn/i18n';
+import React, { useReducer, useState } from 'react';
 import {
   datasourceRegistry,
   editorRegistry,
@@ -28,7 +37,7 @@ import {
   initialState,
   Suggestion,
   VisModel,
-} from '../../../public';
+} from '../..';
 import { ExpressionRenderer } from '../expression_renderer';
 
 type Action =
@@ -162,116 +171,188 @@ export function Main(props: MainProps) {
 
   const hasData = Object.keys(state.visModel.queries).length > 0;
 
+  const toggleButtonsIcons = datasourceRegistry.getAll().map(({ name, icon }) => ({
+    key: name,
+    id: name,
+    label: name,
+    iconType: icon as any,
+  }));
+
+  const [flyoutIsOpen, setFlyoutIsOpen] = useState(false);
+
+  // TODO: Hook this up
+  let flyout;
+  if (flyoutIsOpen) {
+    flyout = (
+      <EuiFlyout
+        onClose={() => { setFlyoutIsOpen(false); }}
+        aria-labelledby="lnsInspectFlyoutTitle"
+      >
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h2 id="lnsInspectFlyoutTitle">
+              Inspector
+            </h2>
+          </EuiTitle>
+          <EuiSpacer size="s" />
+          {/* <EuiTabs style={{ marginBottom: '-25px' }}>
+            {this.renderTabs()}
+          </EuiTabs> */}
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
+          {hasData && (
+            <>
+              <ExpressionRenderer
+                {...props}
+                expression={getTableExpression(state.visModel)}
+              />
+              <EuiCodeBlock>{expression}</EuiCodeBlock>
+            </>
+          )}
+        </EuiFlyoutBody>
+      </EuiFlyout>
+    );
+  }
+
   return (
-    <EuiPage className="vzPage">
+    <>
+    <EuiPage className="lnsPage">
       {!state.metadata.expressionMode && (
-        <EuiPageSideBar className="vzSidebar">
-          {datasourceRegistry.getAll().map(({ name, icon }) => (
-            <EuiButtonToggle
-              key={name}
-              label={name}
-              iconType={icon as any}
-              onChange={() => {
-                onChangeVisModel({
-                  ...state.visModel,
-                  datasourcePlugin: name,
-                  datasource: null,
-                  queries: {},
-                });
-              }}
-              isSelected={name === state.visModel.datasourcePlugin}
-              isEmpty
-              isIconOnly
-            />
-          ))}
+        <EuiPageSideBar className="lnsSidebar">
+          <EuiFlexGroup className="lnsSidebar__sourceGroup" gutterSize="s" alignItems="center">
+            <EuiFlexItem>
+              <EuiTitle size="xs"><h2>Source: </h2></EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonGroup
+                legend="Data source"
+                name="textAlign"
+                className="eui-displayInlineBlock"
+                options={toggleButtonsIcons}
+                idSelected={state.visModel.datasourcePlugin}
+                onChange={(optionId) => {
+                  onChangeVisModel({
+                    ...state.visModel,
+                    datasourcePlugin: optionId,
+                    datasource: null,
+                    queries: {},
+                  });
+                }}
+                isIconOnly
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <DataPanel {...panelProps} />
         </EuiPageSideBar>
       )}
-      <EuiPageBody className="vzBody">
-        <EuiPageContentBody className="euiPanel euiPanel--paddingLarge euiPageContent">
-          <EuiFlexGroup direction="column">
-            <EuiFlexItem grow={5}>
-              {WorkspacePanel ? (
-                <WorkspacePanel {...panelProps}>
-                  {hasData && <ExpressionRenderer {...props} expression={expression} />}
-                </WorkspacePanel>
-              ) : (
-                hasData && <ExpressionRenderer {...props} expression={expression} />
-              )}
-            </EuiFlexItem>
-            {state.metadata.expressionMode ? (
-              <EuiFlexItem>
-                <EuiTextArea
-                  fullWidth
-                  value={expression}
-                  onChange={e => {
-                    onChangeVisModel({
-                      ...state.visModel,
-                      private: { ...state.visModel.private, expression: e.target.value },
-                    });
-                  }}
-                />
-              </EuiFlexItem>
+      <EuiPageBody className="lnsPageBody">
+        <EuiPageContent className="lnsPageContent">
+          <EuiPageContentHeader className="lnsPageContentHeader">
+            <EuiPageContentHeaderSection>
+              <EuiTitle size="xs">
+                <h2>New Visualization</h2>
+              </EuiTitle>
+            </EuiPageContentHeaderSection>
+            <EuiPageContentHeaderSection>
+              {/* TODO: Hook up to flyout*/}
+              <EuiButtonIcon
+                onClick={() => { setFlyoutIsOpen(true); }}
+                iconType="inspect"
+                color="text"
+                aria-label={i18n.translate('xpack.viz_editor.frame.inspectButtonLabel', {
+                    defaultMessage: "Inspect"
+                })}
+                title={i18n.translate('xpack.viz_editor.frame.inspectButtonLabel', {
+                    defaultMessage: "Inspect"
+                })}
+              />&emsp;
+              <EuiButtonIcon
+                iconType="editorCodeBlock"
+                color="text"
+                onClick={() => dispatch({ type: 'expressionMode' })}
+                aria-label={i18n.translate('xpack.viz_editor.frame.editExpressionButtonLabel', {
+                    defaultMessage: "Edit expression directly"
+                })}
+                title={i18n.translate('xpack.viz_editor.frame.editExpressionButtonLabel', {
+                    defaultMessage: "Edit expression directly"
+                })}
+                isDisabled={state.metadata.expressionMode}
+              />&emsp;
+              <EuiButtonIcon
+                iconType="refresh"
+                color="text"
+                onClick={() => dispatch({ type: 'clear' })}
+                aria-label={i18n.translate('xpack.viz_editor.frame.resetButtonLabel', {
+                    defaultMessage: "Reset editor"
+                })}
+                title={i18n.translate('xpack.viz_editor.frame.resetButtonLabel', {
+                    defaultMessage: "Reset editor"
+                })}
+              />
+            </EuiPageContentHeaderSection>
+          </EuiPageContentHeader>
+          <EuiPageContentBody className="lnsPageContentBody">
+            {WorkspacePanel ? (
+              <WorkspacePanel {...panelProps}>
+                {hasData && <ExpressionRenderer {...props} expression={expression} />}
+              </WorkspacePanel>
             ) : (
-              <>
-                {hasData && (
-                  <EuiFlexItem>
+              hasData && <ExpressionRenderer {...props} expression={expression} />
+            )}
+          </EuiPageContentBody>
+        </EuiPageContent>
+      </EuiPageBody>
+
+      <EuiPageSideBar className={`lnsSidebar lnsSidebar--right ${state.metadata.expressionMode && 'lnsSidebar--expression'}`}>
+        {state.metadata.expressionMode ? (
+          <EuiTextArea
+            className="lnsSidebar__expressionTextArea"
+            fullWidth
+            value={expression}
+            onChange={e => {
+              onChangeVisModel({
+                ...state.visModel,
+                private: { ...state.visModel.private, expression: e.target.value },
+              });
+            }}
+          />
+        ) : (
+          <>
+            <ConfigPanel {...panelProps} />
+
+            {hasData && (
+              <div className="lnsSidebar__suggestions">
+                <EuiTitle size="xs">
+                  <h3>Suggestions</h3>
+                </EuiTitle>
+                {suggestions.map((suggestion, i) => (
+                  <EuiPanel
+                    key={i}
+                    onClick={() => {
+                      onChangeVisModel({
+                        ...suggestion.visModel,
+                        editorPlugin: suggestion.pluginName,
+                      });
+                    }}
+                    paddingSize="s"
+                  >
+                    {suggestion.title}
                     <ExpressionRenderer
                       {...props}
-                      expression={getTableExpression(state.visModel)}
+                      expression={suggestion.previewExpression}
+                      size="preview"
                     />
-                    <EuiCodeBlock>{expression}</EuiCodeBlock>
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup direction="row" alignItems="flexStart">
-                    <EuiButtonEmpty size="xs" onClick={() => dispatch({ type: 'expressionMode' })}>
-                      <FormattedMessage
-                        id="xpack.viz_editor.frame.editExpressionButtonLabel"
-                        defaultMessage="Edit expression directly"
-                      />
-                    </EuiButtonEmpty>
-                    <EuiButtonEmpty size="xs" onClick={() => dispatch({ type: 'clear' })}>
-                      Clear editor
-                    </EuiButtonEmpty>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </>
+                  </EuiPanel>
+                ))}
+              </div>
             )}
-          </EuiFlexGroup>
-        </EuiPageContentBody>
-      </EuiPageBody>
-      {!state.metadata.expressionMode && (
-        <EuiPageSideBar className="vzSidebar">
-          <ConfigPanel {...panelProps} />
-
-          {hasData && (
-            <>
-              <h4>Suggestions</h4>
-              {suggestions.map((suggestion, i) => (
-                <EuiPanel
-                  key={i}
-                  onClick={() => {
-                    onChangeVisModel({
-                      ...suggestion.visModel,
-                      editorPlugin: suggestion.pluginName,
-                    });
-                  }}
-                  paddingSize="s"
-                >
-                  {suggestion.title}
-                  <ExpressionRenderer
-                    {...props}
-                    expression={suggestion.previewExpression}
-                    size="preview"
-                  />
-                </EuiPanel>
-              ))}
-            </>
-          )}
-        </EuiPageSideBar>
-      )}
+          </>
+        )}
+      </EuiPageSideBar>
     </EuiPage>
+
+    {flyout}
+    </>
   );
 }
 

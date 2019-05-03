@@ -1,0 +1,27 @@
+.lnsConfigPanel__axis {
+  background: $euiColorLightestShade;
+  padding: $euiSizeS;
+  margin-bottom: $euiSizeS;
+  border-radius: $euiBorderRadius;
+}
+
+.lnsConfigPanel__axisTitle {
+  @include euiTitle('xxs');
+  display: block;
+  margin-bottom: $euiSizeS;
+}
+
+.lnsConfigPanel__summary {
+  background: $euiColorEmptyShade;
+  border-radius: $euiBorderRadius;
+  padding: $euiSizeS;
+  display: flex;
+}
+
+.lnsConfigPanel__summaryText {
+  margin-left: $euiSizeS;
+}
+
+.lnsConfigPanel__summarySubtitle {
+  display: block;
+}

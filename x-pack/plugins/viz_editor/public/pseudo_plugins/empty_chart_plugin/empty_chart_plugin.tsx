@@ -26,7 +26,7 @@ interface EmptyChartPrivateState {}
 
 type EmptyChartVisModel = VisModel<'emptyChart', EmptyChartPrivateState>;
 
-function configPanel({
+function lnsConfigPanel({
   visModel,
   onChangeVisModel,
   getSuggestions,
@@ -56,8 +56,8 @@ function configPanel({
 
   return (
     <>
-      <div className="configPanel-axis">
-        <span className="configPanel-axis-title">Add dimension</span>
+      <div className="lnsConfigPanel__axis">
+        <span className="lnsConfigPanel__axisTitle">Add dimension</span>
         <Draggable canHandleDrop={(f: DatasourceField) => true} onDrop={onDropField}>
           Drop a field here
         </Draggable>
@@ -69,8 +69,9 @@ function configPanel({
 function WorkspacePanel(props: VisualizationPanelProps<EmptyChartVisModel>) {
   return (
     <DroppablePane {...props} useFirstSuggestion>
-      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 400 }}>
-        <EuiFlexItem grow={false}>Drop a field here to start visualizing</EuiFlexItem>
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiFlexItem grow={false}>
+        Drop a field here to start visualizing</EuiFlexItem>
       </EuiFlexGroup>
     </DroppablePane>
   );
@@ -117,7 +118,7 @@ function prefillPrivateState(visModel: VisModel) {
 export const config: EditorPlugin<EmptyChartVisModel> = {
   name: PLUGIN_NAME,
   toExpression,
-  ConfigPanel: configPanel,
+  ConfigPanel: lnsConfigPanel,
   WorkspacePanel,
   getChartSuggestions,
   getSuggestionsForField: () => [],

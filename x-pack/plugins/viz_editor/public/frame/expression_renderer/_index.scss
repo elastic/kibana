@@ -1,4 +1,6 @@
 .expressionRenderer-full {
+    flex: 1 1 100%;
+
     &, & > .visualization, & > .elasticCharts {
         min-height: 500px;
     }
@@ -6,6 +8,6 @@
 
 .expressionRenderer-preview {
     &, & > .visualization, & > .elasticCharts {
-        min-height: 200px;
+        min-height: 120px;
     }
 }
