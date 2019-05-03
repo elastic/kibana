@@ -80,8 +80,6 @@ export class CtagsReader {
       return;
     }
 
-    // let type = classInher === undefined ? kind : kind + ' in ' + classInher;
-
     let range = this.bestIndexOfTag(+lnum, whole, def);
     this.tags.push(new Tag(+lnum, def, kind!, match, classInher, signature, range[0], range[1], classInher));
   }

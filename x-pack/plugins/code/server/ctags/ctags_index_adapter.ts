@@ -56,11 +56,7 @@ export class CtagsIndexAdapter {
             };
             break;
           case 'local':
-            tmpDetailSymbol = {
-              symbolInformation: SymbolInformation.create(name, SymbolKind.Field, Range.create(Position.create(line, startCharacter), Position.create(line, endCharacter)), undefined, clazz),
-              qname: name,
-              contents: MarkedString.fromPlainText(hoverText)
-            };
+            // now we ignore all local variables
             break;
         }
         if (tmpDetailSymbol.qname !== '') {

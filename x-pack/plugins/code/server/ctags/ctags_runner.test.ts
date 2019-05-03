@@ -18,6 +18,8 @@ afterEach(() => {
 
 test('simple test for ctags runner', async () => {
   const ctagsRunner: CtagsRunner = new CtagsRunner(options, new ConsoleLoggerFactory());
-  await ctagsRunner.doCtags('/Users/poytr1/github/java-langserver/org.elastic.jdt.ls.core/src/org/elastic/jdt/ls/core/internal/hover/JavaElementLabels.java');
-  expect(ctagsRunner.getAllTags.length).toEqual(10);
+  ctagsRunner.doCtags('/Users/poytr1/github/java-langserver/org.elastic.jdt.ls.core/src/org/elastic/jdt/ls/core/internal/hover/JavaElementLabels.java');
+  ctagsRunner.exit();
+  const tags = await ctagsRunner.getAllTags();
+  expect(tags.length).toEqual(66);
 });
