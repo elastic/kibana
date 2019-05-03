@@ -273,7 +273,7 @@ export class ElasticsearchMonitorsAdapter implements UMMonitorsAdapter {
               histogram: {
                 auto_date_histogram: {
                   field: '@timestamp',
-                  buckets: 25,
+                  buckets: 15,
                 },
                 aggs: {
                   status: {
