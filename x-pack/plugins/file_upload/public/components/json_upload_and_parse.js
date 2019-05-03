@@ -43,7 +43,6 @@ export function JsonUploadAndParse(props) {
   const [hasIndexErrors, setHasIndexErrors] = useState(false);
   const [indexReady, setIndexReady] = useState(false);
 
-
   const resetFileAndIndexSettings = () => {
     setIndexTypes([]);
     setSelectedIndexType('');
@@ -172,12 +171,17 @@ export function JsonUploadAndParse(props) {
 }
 
 JsonUploadAndParse.propTypes = {
+  appName: PropTypes.string,
   boolIndexData: PropTypes.bool,
-  indexDescription: PropTypes.object,
-  fileUploadMessage: PropTypes.string,
-  onFileUpload: PropTypes.func,
-  onFileRemove: PropTypes.func,
-  postParseJsonTransform: PropTypes.func,
+  boolCreateIndexPattern: PropTypes.bool,
+  transformDetails: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+  ]),
+  onIndexReadyStatusChange: PropTypes.func,
   onIndexAddSuccess: PropTypes.func,
   onIndexAddError: PropTypes.func,
+  onIndexPatternCreateSuccess: PropTypes.func,
+  onIndexPatternCreateError: PropTypes.func,
+
 };
