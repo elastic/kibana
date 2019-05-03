@@ -24,6 +24,7 @@ import { Env } from '../config';
 import { configServiceMock } from '../config/config_service.mock';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginDiscoveryError } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -39,7 +40,10 @@ configService.atPath.mockReturnValue(new BehaviorSubject({ initialize: true }));
 
 let env: Env;
 let mockPluginSystem: jest.Mocked<PluginsSystem>;
-const setupDeps = { elasticsearch: elasticsearchServiceMock.createSetupContract() };
+const setupDeps = {
+  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+  http: httpServiceMock.createSetupContract(),
+};
 const logger = loggingServiceMock.create();
 beforeEach(() => {
   mockPackage.raw = {
@@ -102,7 +106,6 @@ Array [
 `);
 });
 
-// eslint-disable-next-line
 test('`setup` throws if discovered plugins with conflicting names', async () => {
   configService.isEnabledAtPath.mockResolvedValue(true);
   const plugins = {

@@ -16,7 +16,7 @@ import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 import { InfraSnapshotRequestOptions } from './snapshot';
 
 export interface InfraSnapshotNodeMetricsBucket {
-  key: { node: string };
+  key: { id: string };
   histogram: {
     buckets: InfraSnapshotMetricsBucket[];
   };
@@ -40,7 +40,8 @@ export type InfraSnapshotMetricsBucket = InfraSnapshotBucketWithKey & InfraSnaps
 
 export interface InfraSnapshotNodeGroupByBucket {
   key: {
-    node: string;
+    id: string;
+    name: string;
     [groupByField: string]: string;
   };
 }
@@ -53,19 +54,19 @@ export const getNodePath = (
   const path = options.groupBy.map(gb => {
     return { value: node[`${gb.field}`], label: node[`${gb.field}`] };
   });
-  path.push({ value: node.node, label: node.node });
+  path.push({ value: node.id, label: node.name });
   return path;
 };
 
 interface NodeMetricsForLookup {
-  [node: string]: InfraSnapshotMetricsBucket[];
+  [nodeId: string]: InfraSnapshotMetricsBucket[];
 }
 
 export const getNodeMetricsForLookup = (
   metrics: InfraSnapshotNodeMetricsBucket[]
 ): NodeMetricsForLookup => {
   return metrics.reduce((acc: NodeMetricsForLookup, metric) => {
-    acc[`${metric.key.node}`] = metric.histogram.buckets;
+    acc[`${metric.key.id}`] = metric.histogram.buckets;
     return acc;
   }, {});
 };

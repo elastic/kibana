@@ -24,10 +24,7 @@ import { Router } from '../router';
 import { url as authUrl } from './__fixtures__/plugins/dummy_security/server/plugin';
 import { url as onReqUrl } from './__fixtures__/plugins/dummy_on_request/server/plugin';
 
-// won't work because server is created in Root.setup setup, but we cannot wait for setup to finish.
-// because http server already started, so calling registerRouter will throw.
-// wait for https://github.com/elastic/kibana/pull/35297 to be merged
-describe.skip('http service', () => {
+describe('http service', () => {
   describe('setup contract', () => {
     describe('#registerAuth()', () => {
       const dummySecurityPlugin = path.resolve(__dirname, './__fixtures__/plugins/dummy_security');
@@ -46,10 +43,10 @@ describe.skip('http service', () => {
         router.get({ path: authUrl.auth, validate: false }, async (req, res) =>
           res.ok({ content: 'ok' })
         );
-        // TODO fix me when registerRouter is available before HTTP server is run
-        (root as any).server.http.registerRouter(router);
 
-        await root.setup();
+        const { http } = await root.setup();
+        http.registerRouter(router);
+        await root.start();
       }, 30000);
 
       afterAll(async () => await root.shutdown());
@@ -132,10 +129,11 @@ describe.skip('http service', () => {
         [onReqUrl.root, onReqUrl.independentReq].forEach(url =>
           router.get({ path: url, validate: false }, async (req, res) => res.ok({ content: 'ok' }))
         );
-        // TODO fix me when registerRouter is available before HTTP server is run
-        (root as any).server.http.registerRouter(router);
 
-        await root.setup();
+        const { http } = await root.setup();
+        http.registerRouter(router);
+
+        await root.start();
       }, 30000);
 
       afterAll(async () => await root.shutdown());

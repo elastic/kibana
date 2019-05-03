@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify, fatalError, toastNotifications } from 'ui/notify';
@@ -72,6 +72,21 @@ require('ui/routes')
         ? getSavedSheetBreadcrumbs
         : getCreateBreadcrumbs
     ),
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.timelion.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('timelion.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('timelion.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save Timelion sheets',
+        }),
+        iconType: 'glasses'
+      };
+    },
     resolve: {
       savedSheet: function (redirectWhenMissing, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
@@ -269,7 +284,7 @@ app.controller('timelion', function (
       testId: 'timelionDocsButton',
     };
 
-    if (uiCapabilities.timelion.save) {
+    if (capabilities.get().timelion.save) {
       return [newSheetAction, addSheetAction, saveSheetAction, deleteSheetAction, openSheetAction, optionsAction, helpAction];
     }
     return [newSheetAction, addSheetAction, openSheetAction, optionsAction, helpAction];

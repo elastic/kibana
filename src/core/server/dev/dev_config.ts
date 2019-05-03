@@ -29,6 +29,7 @@ export const configDefinition = {
   configPath: 'dev',
   schema: createDevSchema,
 };
+
 export type DevConfigType = TypeOf<typeof createDevSchema>;
 export class DevConfig {
   /**

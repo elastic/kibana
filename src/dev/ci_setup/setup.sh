@@ -186,12 +186,17 @@ fi
 ###
 export CHECKS_REPORTER_ACTIVE=true
 
+### only run on pr jobs
+if [[ "$JOB_NAME" != "elastic+kibana+pull-request"* ]] ; then
+  export CHECKS_REPORTER_ACTIVE=false
+fi
+
 ###
 ### Implements github-checks-reporter kill switch when scripts are called from the command line
 ### $@ - all arguments
 ###
 function checks-reporter-with-killswitch() {
-  if [ "$CHECKS_REPORTER_ACTIVE" = true ] ; then
+  if [ "$CHECKS_REPORTER_ACTIVE" == "true" ] ; then
     yarn run github-checks-reporter "$@"
   else
     arguments=("$@");

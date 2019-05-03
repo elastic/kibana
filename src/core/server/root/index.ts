@@ -70,7 +70,21 @@ export class Root {
       this.log.debug('setting up root');
 
       await this.setupLogging();
-      await this.server.setup(newPlatformPluginDefinitions);
+      return await this.server.setup(newPlatformPluginDefinitions);
+    } catch (e) {
+      await this.shutdown(e);
+      throw e;
+    }
+  }
+
+  public async start() {
+    this.log.debug('starting root');
+    if (!this.server) {
+      throw new Error('server is not set up yet');
+    }
+
+    try {
+      return await this.server.start();
     } catch (e) {
       await this.shutdown(e);
       throw e;

@@ -20,14 +20,14 @@ const homeTabs: IHistoryTab[] = [
     name: i18n.translate('xpack.apm.home.servicesTabLabel', {
       defaultMessage: 'Services'
     }),
-    render: props => <ServiceOverview {...props} />
+    render: () => <ServiceOverview />
   },
   {
     path: '/traces',
     name: i18n.translate('xpack.apm.home.tracesTabLabel', {
       defaultMessage: 'Traces'
     }),
-    render: props => <TraceOverview {...props} />
+    render: () => <TraceOverview />
   }
 ];
 

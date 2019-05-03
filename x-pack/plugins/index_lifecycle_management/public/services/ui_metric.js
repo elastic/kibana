@@ -6,7 +6,7 @@
 
 import { get } from 'lodash';
 
-import { createUiMetricUri } from '../../../../common/ui_metric';
+import { trackUiMetric as track } from '../../../../../src/legacy/core_plugins/ui_metric/public';
 
 import {
   UIM_APP_NAME,
@@ -29,11 +29,8 @@ import {
   defaultHotPhase,
 } from '../store/defaults';
 
-import { getHttpClient } from './api';
-
-export function trackUiMetric(metricType, httpClient = getHttpClient()) {
-  const uiMetricUri = createUiMetricUri(UIM_APP_NAME, metricType);
-  httpClient.post(uiMetricUri);
+export function trackUiMetric(metricType) {
+  track(UIM_APP_NAME, metricType);
 }
 
 export function getUiMetricsForPhases(phases) {

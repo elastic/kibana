@@ -20,7 +20,7 @@
 import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 import { I18nContext } from 'ui/i18n';
 import indexTemplate from './index.html';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
@@ -45,7 +45,7 @@ function updateAdvancedSettings($scope, config, query) {
         <AdvancedSettings
           config={config}
           query={query}
-          enableSaving={uiCapabilities.advancedSettings.save}
+          enableSaving={capabilities.get().advancedSettings.save}
         />
       </I18nContext>,
       node,
@@ -63,6 +63,21 @@ uiRoutes
     template: indexTemplate,
     k7Breadcrumbs: getBreadcrumbs,
     requireUICapability: 'management.kibana.settings',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.advancedSettings.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.management.advancedSettings.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.management.advancedSettings.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save advanced settings',
+        }),
+        iconType: 'glasses'
+      };
+    }
   });
 
 uiModules.get('apps/management')
