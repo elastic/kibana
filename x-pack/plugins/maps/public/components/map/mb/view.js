@@ -14,7 +14,7 @@ import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
-import { DRAW_TYPE, DRAW_STATE_TYPE } from '../../../actions/store_actions';
+import { DRAW_TYPE } from '../../../actions/store_actions';
 import { filterBarQueryFilter } from '../../../kibana_services';
 import { createShapeFilter } from '../../../elasticsearch_geo_utils';
 
@@ -76,7 +76,7 @@ export class MBMapContainer extends React.Component {
 
   _lockTooltip =  (e) => {
 
-    if (this.props.drawState.type === DRAW_STATE_TYPE.ACTIVE) {
+    if (this.props.isDrawingFilter) {
       //ignore click events when in draw mode
       return;
     }
@@ -102,7 +102,7 @@ export class MBMapContainer extends React.Component {
 
   _updateHoverTooltipState = _.debounce((e) => {
 
-    if (this.props.drawState.type === DRAW_STATE_TYPE.ACTIVE) {
+    if (this.props.isDrawingFilter) {
       //ignore hover events when in draw mode
       return;
     }
@@ -360,10 +360,10 @@ export class MBMapContainer extends React.Component {
   }
 
   _syncDrawControl() {
-    if (this.props.drawState.type !== DRAW_STATE_TYPE.ACTIVE) {
-      this._removeDrawControl();
-    } else {
+    if (this.props.isDrawingFilter) {
       this._updateDrawControl();
+    } else {
+      this._removeDrawControl();
     }
   }
 

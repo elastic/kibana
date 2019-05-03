@@ -23,6 +23,7 @@ import {
   getMapReady,
   getGoto,
   getDrawState,
+  getIsDrawingFilter,
   getScrollZoom
 } from '../../../selectors/map_selectors';
 import { getIsFilterable } from '../../../store/ui';
@@ -37,6 +38,7 @@ function mapStateToProps(state = {}) {
     inspectorAdapters: getInspectorAdapters(state),
     tooltipState: getTooltipState(state),
     drawState: getDrawState(state),
+    isDrawingFilter: getIsDrawingFilter(state),
     scrollZoom: getScrollZoom(state)
   };
 }
