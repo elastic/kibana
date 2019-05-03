@@ -13,14 +13,13 @@ import { DEFAULT_POLICY_NAME } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const es = getService('es');
 
   const {
     loadPolicies,
     createPolicy,
     deletePolicy,
     cleanUp,
-  } = registerHelpers({ supertest, es });
+  } = registerHelpers({ supertest });
 
   describe('policies', () => {
     after(() => cleanUp());
