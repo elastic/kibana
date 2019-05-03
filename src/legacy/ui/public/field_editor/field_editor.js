@@ -481,11 +481,13 @@ export class FieldEditorComponent extends PureComponent {
     return field.scripted ? (
       <Fragment>
         <EuiFormRow
+          fullWidth
           label={intl.formatMessage({ id: 'common.ui.fieldEditor.scriptLabel', defaultMessage: 'Script' })}
           isInvalid={isInvalid}
           error={isInvalid ? errorMsg : null}
         >
           <EuiTextArea
+            fullWidth
             value={field.script}
             data-test-subj="editorFieldScript"
             onChange={this.onScriptChange}
