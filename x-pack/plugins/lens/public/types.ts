@@ -134,7 +134,10 @@ export interface VisualizationSuggestion<T = unknown> {
 }
 
 export interface Visualization<T = unknown> {
-  renderConfigPanel: (props: VisualizationProps<T>) => void;
+  // For initializing from saved object
+  initialize: (state?: T) => Promise<T>;
+
+  renderConfigPanel: (domElement: Element, props: VisualizationProps<T>) => void;
 
   toExpression: (state: T, datasource: DatasourcePublicAPI) => string;
 
