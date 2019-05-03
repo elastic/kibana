@@ -14,11 +14,11 @@ export default function({ getService }: TestInvoker) {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
 
-  const {
-    importTest,
-    createExpectResults,
-    expectBadRequestForUnknownType,
-  } = importTestSuiteFactory(es, esArchiver, supertest);
+  const { importTest, createExpectResults, expectUnknownType } = importTestSuiteFactory(
+    es,
+    esArchiver,
+    supertest
+  );
 
   describe('_import', () => {
     importTest('in the current space (space_1)', {
@@ -29,8 +29,8 @@ export default function({ getService }: TestInvoker) {
           response: createExpectResults(SPACES.SPACE_1.spaceId),
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestForUnknownType,
+          statusCode: 200,
+          response: expectUnknownType,
         },
       },
     });
@@ -43,8 +43,8 @@ export default function({ getService }: TestInvoker) {
           response: createExpectResults(SPACES.DEFAULT.spaceId),
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestForUnknownType,
+          statusCode: 200,
+          response: expectUnknownType,
         },
       },
     });

@@ -15,7 +15,7 @@ export default function({ getService }: TestInvoker) {
 
   describe('export', () => {
     const {
-      createExpectBadRequest,
+      createExpectRbacForbidden,
       expectTypeOrObjectsRequired,
       createExpectVisualizationResults,
       exportTest,
@@ -25,9 +25,9 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.NOT_A_KIBANA_USER,
       tests: {
         spaceAwareType: {
-          description: 'bad request login and find visualization message',
-          statusCode: 400,
-          response: createExpectBadRequest('visualization'),
+          description: 'forbidden login and find visualization message',
+          statusCode: 403,
+          response: createExpectRbacForbidden('visualization'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -57,9 +57,9 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         spaceAwareType: {
-          description: 'bad request login and find visualization message',
-          statusCode: 400,
-          response: createExpectBadRequest('visualization'),
+          description: 'forbidden login and find visualization message',
+          statusCode: 403,
+          response: createExpectRbacForbidden('visualization'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -138,8 +138,8 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
-          statusCode: 400,
-          response: createExpectBadRequest('visualization'),
+          statusCode: 403,
+          response: createExpectRbacForbidden('visualization'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -154,8 +154,8 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
-          statusCode: 400,
-          response: createExpectBadRequest('visualization'),
+          statusCode: 403,
+          response: createExpectRbacForbidden('visualization'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -170,8 +170,8 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
-          statusCode: 400,
-          response: createExpectBadRequest('visualization'),
+          statusCode: 403,
+          response: createExpectRbacForbidden('visualization'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',
@@ -186,8 +186,8 @@ export default function({ getService }: TestInvoker) {
       tests: {
         spaceAwareType: {
           description: 'only the visualization',
-          statusCode: 400,
-          response: createExpectBadRequest('visualization'),
+          statusCode: 403,
+          response: createExpectRbacForbidden('visualization'),
         },
         noTypeOrObjects: {
           description: 'bad request, type or object is required',

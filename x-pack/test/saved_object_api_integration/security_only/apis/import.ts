@@ -17,9 +17,8 @@ export default function({ getService }: TestInvoker) {
   const {
     importTest,
     createExpectResults,
-    expectBadRequest,
-    expectBadRequestWithUnknownType,
-    expectBadRequestForUnknownType,
+    expectRbacForbidden,
+    expectUnknownType,
   } = importTestSuiteFactory(es, esArchiver, supertest);
 
   describe('_import', () => {
@@ -27,12 +26,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.NOT_A_KIBANA_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -45,8 +44,8 @@ export default function({ getService }: TestInvoker) {
           response: createExpectResults(),
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestForUnknownType,
+          statusCode: 200,
+          response: expectUnknownType,
         },
       },
     });
@@ -55,12 +54,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_LEGACY_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -73,8 +72,8 @@ export default function({ getService }: TestInvoker) {
           response: createExpectResults(),
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestForUnknownType,
+          statusCode: 200,
+          response: expectUnknownType,
         },
       },
     });
@@ -83,12 +82,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_DUAL_PRIVILEGES_DASHBOARD_ONLY_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -101,8 +100,8 @@ export default function({ getService }: TestInvoker) {
           response: createExpectResults(),
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestForUnknownType,
+          statusCode: 200,
+          response: expectUnknownType,
         },
       },
     });
@@ -111,12 +110,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_DASHBOARD_ONLY_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -125,12 +124,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_ALL_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -139,12 +138,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_DEFAULT_SPACE_READ_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -153,12 +152,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_ALL_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });
@@ -167,12 +166,12 @@ export default function({ getService }: TestInvoker) {
       user: AUTHENTICATION.KIBANA_RBAC_SPACE_1_READ_USER,
       tests: {
         default: {
-          statusCode: 400,
-          response: expectBadRequest,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
         unknownType: {
-          statusCode: 400,
-          response: expectBadRequestWithUnknownType,
+          statusCode: 403,
+          response: expectRbacForbidden,
         },
       },
     });

@@ -16,7 +16,7 @@ export default function({ getService }: TestInvoker) {
 
   describe('export', () => {
     const {
-      createExpectBadRequest,
+      createExpectRbacForbidden,
       expectTypeOrObjectsRequired,
       createExpectVisualizationResults,
       exportTest,
@@ -59,9 +59,9 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAwareType: {
-            description: 'bad request login and find visualization message',
-            statusCode: 400,
-            response: createExpectBadRequest('visualization'),
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
           },
           noTypeOrObjects: {
             description: 'bad request, type or object is required',
@@ -93,9 +93,9 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAwareType: {
-            description: 'bad request login and find visualization message',
-            statusCode: 400,
-            response: createExpectBadRequest('visualization'),
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
           },
           noTypeOrObjects: {
             description: 'bad request, type or object is required',
@@ -212,9 +212,9 @@ export default function({ getService }: TestInvoker) {
         spaceId: scenario.spaceId,
         tests: {
           spaceAwareType: {
-            description: 'bad request login and find visualization message',
-            statusCode: 400,
-            response: createExpectBadRequest('visualization'),
+            description: 'forbidden login and find visualization message',
+            statusCode: 403,
+            response: createExpectRbacForbidden('visualization'),
           },
           noTypeOrObjects: {
             description: 'bad request, type or object is required',

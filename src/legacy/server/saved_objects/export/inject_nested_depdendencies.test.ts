@@ -114,12 +114,9 @@ describe('injectNestedDependencies', () => {
   const savedObjectsClient = {
     errors: {} as any,
     find: jest.fn(),
-    canFind: jest.fn(),
     bulkGet: jest.fn(),
-    canBulkGet: jest.fn(),
     create: jest.fn(),
     bulkCreate: jest.fn(),
-    canBulkCreate: jest.fn(),
     delete: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),

@@ -48,10 +48,6 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.bulkCreate(objects, options);
   }
 
-  async canBulkCreate(types) {
-    return await this._checkAuthorizedTypes(types, 'bulk_create');
-  }
-
   async delete(type, id, options) {
     await this._ensureAuthorized(
       type,
@@ -72,10 +68,6 @@ export class SecureSavedObjectsClientWrapper {
     return this._baseClient.find(options);
   }
 
-  async canFind(types) {
-    return await this._checkAuthorizedTypes(types, 'find');
-  }
-
   async bulkGet(objects = [], options = {}) {
     const types = uniq(objects.map(o => o.type));
     await this._ensureAuthorized(
@@ -85,10 +77,6 @@ export class SecureSavedObjectsClientWrapper {
     );
 
     return await this._baseClient.bulkGet(objects, options);
-  }
-
-  async canBulkGet(types) {
-    return await this._checkAuthorizedTypes(types, 'bulk_get');
   }
 
   async get(type, id, options = {}) {
@@ -118,19 +106,6 @@ export class SecureSavedObjectsClientWrapper {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
-  }
-
-  async _checkAuthorizedTypes(typeOrTypes, action) {
-    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
-    const actions = Array.from(actionsToTypesMap.keys());
-    const { privileges } = await this._checkSavedObjectPrivileges(actions);
-    const missingPrivileges = this._getMissingPrivileges(privileges);
-    const invalidTypes = missingPrivileges.map(privilege => actionsToTypesMap.get(privilege));
-    return types.map(type => ({
-      type,
-      can: !invalidTypes.includes(type),
-    }));
   }
 
   async _ensureAuthorized(typeOrTypes, action, args) {

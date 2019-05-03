@@ -65,28 +65,16 @@ describe('resolveImportErrors()', () => {
   const savedObjectsClient = {
     errors: {} as any,
     bulkCreate: jest.fn(),
-    canBulkCreate: jest.fn(),
     bulkGet: jest.fn(),
-    canBulkGet: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
-    canFind: jest.fn(),
     get: jest.fn(),
     update: jest.fn(),
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
-    savedObjectsClient.canBulkCreate.mockImplementation((types: string[]) =>
-      types.map(type => ({ type, can: true }))
-    );
-    savedObjectsClient.canBulkGet.mockImplementation((types: string[]) =>
-      types.map(type => ({ type, can: true }))
-    );
-    savedObjectsClient.canFind.mockImplementation((types: string[]) =>
-      types.map(type => ({ type, can: true }))
-    );
   });
 
   test('works with empty parameters', async () => {
@@ -506,21 +494,36 @@ Object {
     savedObjectsClient.bulkCreate.mockResolvedValue({
       saved_objects: [],
     });
-    await expect(
-      resolveImportErrors({
-        readStream,
-        objectLimit: 5,
-        retries: [
-          {
-            id: '1',
-            type: 'wigwags',
-            overwrite: false,
-            replaceReferences: [],
-          },
-        ],
-        savedObjectsClient,
-        supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Unable to bulk_create wigwags"`);
+    const result = await resolveImportErrors({
+      readStream,
+      objectLimit: 5,
+      retries: [
+        {
+          id: 'i',
+          type: 'wigwags',
+          overwrite: false,
+          replaceReferences: [],
+        },
+      ],
+      savedObjectsClient,
+      supportedTypes: ['index-pattern', 'search', 'visualization', 'dashboard'],
+    });
+    expect(result).toMatchInlineSnapshot(`
+Object {
+  "errors": Array [
+    Object {
+      "error": Object {
+        "type": "unsupported_type",
+      },
+      "id": "1",
+      "title": "my title",
+      "type": "wigwags",
+    },
+  ],
+  "success": false,
+  "successCount": 0,
+}
+`);
+    expect(savedObjectsClient.bulkCreate).toMatchInlineSnapshot(`[MockFunction]`);
   });
 });

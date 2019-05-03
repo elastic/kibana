@@ -33,26 +33,6 @@ interface ExportObjectsOptions {
   savedObjectsClient: SavedObjectsClient;
   exportSizeLimit: number;
   includeReferencesDeep?: boolean;
-  supportedTypes: string[];
-}
-
-function throwIfInvalidTypes(
-  action: string,
-  objectTypes: string[],
-  supportedTypes: string[],
-  authorizedTypes: Array<{ type: string; can: boolean }>
-) {
-  const invalidTypes = new Set([
-    ...objectTypes.filter(type => !supportedTypes.includes(type)),
-    ...authorizedTypes.filter(resp => resp.can === false).map(resp => resp.type),
-  ]);
-  if (invalidTypes.size) {
-    throw Boom.badRequest(
-      `Unable to ${action} ${Array.from(invalidTypes)
-        .sort()
-        .join(',')}`
-    );
-  }
 }
 
 async function fetchObjectsToExport({
@@ -60,22 +40,13 @@ async function fetchObjectsToExport({
   types,
   exportSizeLimit,
   savedObjectsClient,
-  supportedTypes,
 }: {
   objects?: ObjectToExport[];
   types?: string[];
   exportSizeLimit: number;
   savedObjectsClient: SavedObjectsClient;
-  supportedTypes: string[];
 }) {
   if (objects) {
-    const objectTypes = [...new Set(objects.map(obj => obj.type))];
-    throwIfInvalidTypes(
-      'bulk_get',
-      objectTypes,
-      supportedTypes,
-      await savedObjectsClient.canBulkGet(objectTypes)
-    );
     if (objects.length > exportSizeLimit) {
       throw Boom.badRequest(`Can't export more than ${exportSizeLimit} objects`);
     }
@@ -90,13 +61,6 @@ async function fetchObjectsToExport({
     }
     return bulkGetResult.saved_objects;
   }
-
-  throwIfInvalidTypes(
-    'find',
-    types || [],
-    supportedTypes,
-    await savedObjectsClient.canFind(types || [])
-  );
   const findResponse = await savedObjectsClient.find({
     type: types,
     sortField: '_id',
@@ -115,14 +79,12 @@ export async function getSortedObjectsForExport({
   savedObjectsClient,
   exportSizeLimit,
   includeReferencesDeep = false,
-  supportedTypes,
 }: ExportObjectsOptions) {
   const objectsToExport = await fetchObjectsToExport({
     types,
     objects,
     savedObjectsClient,
     exportSizeLimit,
-    supportedTypes,
   });
   return sortObjects(
     includeReferencesDeep
