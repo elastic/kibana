@@ -43,7 +43,7 @@ const timeUnitsHelpText = (
 export const advancedSettingsFields = [
   {
     field: 'maxReadRequestOperationCount',
-    testSubject: 'ccrFollowerIndexFormMaxReadRequestOperationCountInput',
+    testSubject: 'maxReadRequestOperationCountInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestOperationCountTitle', {
         defaultMessage: 'Max read request operation count'
@@ -63,7 +63,7 @@ export const advancedSettingsFields = [
     type: 'number',
   }, {
     field: 'maxOutstandingReadRequests',
-    testSubject: 'ccrFollowerIndexFormMaxOutstandingReadRequestsInput',
+    testSubject: 'maxOutstandingReadRequestsInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingReadRequestsTitle', {
         defaultMessage: 'Max outstanding read requests'
@@ -81,7 +81,7 @@ export const advancedSettingsFields = [
     type: 'number',
   }, {
     field: 'maxReadRequestSize',
-    testSubject: 'ccrFollowerIndexFormMaxReadRequestSizeInput',
+    testSubject: 'maxReadRequestSizeInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxReadRequestSizeTitle', {
         defaultMessage: 'Max read request size'
@@ -99,7 +99,7 @@ export const advancedSettingsFields = [
     helpText: byteUnitsHelpText,
   }, {
     field: 'maxWriteRequestOperationCount',
-    testSubject: 'ccrFollowerIndexFormMaxWriteRequestOperationCountInput',
+    testSubject: 'maxWriteRequestOperationCountInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestOperationCountTitle', {
         defaultMessage: 'Max write request operation count'
@@ -119,7 +119,7 @@ export const advancedSettingsFields = [
     type: 'number',
   }, {
     field: 'maxWriteRequestSize',
-    testSubject: 'ccrFollowerIndexFormMaxWriteRequestSizeInput',
+    testSubject: 'maxWriteRequestSizeInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteRequestSizeTitle', {
         defaultMessage: 'Max write request size'
@@ -139,7 +139,7 @@ export const advancedSettingsFields = [
     helpText: byteUnitsHelpText,
   }, {
     field: 'maxOutstandingWriteRequests',
-    testSubject: 'ccrFollowerIndexFormMaxOutstandingWriteRequestsInput',
+    testSubject: 'maxOutstandingWriteRequestsInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxOutstandingWriteRequestsTitle', {
         defaultMessage: 'Max outstanding write requests'
@@ -159,7 +159,7 @@ export const advancedSettingsFields = [
     type: 'number',
   }, {
     field: 'maxWriteBufferCount',
-    testSubject: 'ccrFollowerIndexFormMaxWriteBufferCountInput',
+    testSubject: 'maxWriteBufferCountInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferCountTitle', {
         defaultMessage: 'Max write buffer count'
@@ -181,7 +181,7 @@ export const advancedSettingsFields = [
     type: 'number',
   }, {
     field: 'maxWriteBufferSize',
-    testSubject: 'ccrFollowerIndexFormMaxWriteBufferSizeInput',
+    testSubject: 'maxWriteBufferSizeInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxWriteBufferSizeTitle', {
         defaultMessage: 'Max write buffer size'
@@ -203,7 +203,7 @@ export const advancedSettingsFields = [
     helpText: byteUnitsHelpText,
   }, {
     field: 'maxRetryDelay',
-    testSubject: 'ccrFollowerIndexFormMaxRetryDelayInput',
+    testSubject: 'maxRetryDelayInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.maxRetryDelayTitle', {
         defaultMessage: 'Max retry delay'
@@ -224,7 +224,7 @@ export const advancedSettingsFields = [
     helpText: timeUnitsHelpText,
   }, {
     field: 'readPollTimeout',
-    testSubject: 'ccrFollowerIndexFormReadPollTimeoutInput',
+    testSubject: 'readPollTimeoutInput',
     title: i18n.translate(
       'xpack.crossClusterReplication.followerIndexForm.advancedSettings.readPollTimeoutTitle', {
         defaultMessage: 'Read poll timeout'

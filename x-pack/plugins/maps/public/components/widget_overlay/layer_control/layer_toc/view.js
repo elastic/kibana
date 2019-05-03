@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import React from 'react';
 import {
   EuiDragDropContext,
@@ -13,6 +14,17 @@ import {
 import { TOCEntry } from './toc_entry';
 
 export class LayerTOC extends React.Component {
+
+  componentWillUnmount() {
+    this._updateDebounced.cancel();
+  }
+
+  shouldComponentUpdate() {
+    this._updateDebounced();
+    return false;
+  }
+
+  _updateDebounced = _.debounce(this.forceUpdate, 100);
 
   _onDragEnd = ({ source, destination }) => {
     // Dragging item out of EuiDroppable results in destination of null
