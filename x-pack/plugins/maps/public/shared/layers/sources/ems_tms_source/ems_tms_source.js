@@ -87,7 +87,8 @@ export class EMSTMSSource extends AbstractTMSSource {
   }
 
   async getDisplayName() {
-    return this._descriptor.id;
+    const emsTmsMeta = await this._getEmsTmsMeta();
+    return emsTmsMeta.name;
   }
 
   async getAttributions() {

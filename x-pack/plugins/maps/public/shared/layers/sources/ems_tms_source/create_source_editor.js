@@ -48,7 +48,7 @@ export class EMSTMSCreateSourceEditor extends React.Component {
 
     const emsTileOptions = this.state.emsTmsOptionsRaw.map((service) => ({
       value: service.id,
-      text: service.id //due to not having human readable names
+      text: service.name || service.id
     }));
 
 
