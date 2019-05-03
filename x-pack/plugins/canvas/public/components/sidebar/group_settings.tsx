@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent } from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
+import React, { FunctionComponent } from 'react';
+import { EuiText } from '@elastic/eui';
 
 export const GroupSettings: FunctionComponent = () => (
   <EuiText size="s">

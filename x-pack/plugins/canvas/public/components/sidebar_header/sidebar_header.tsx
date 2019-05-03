@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment, MouseEvent } from 'react';
+import React, { Component, MouseEvent } from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
@@ -15,10 +15,11 @@ import {
   EuiToolTip,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuPanelDescriptor,
+  EuiOverlayMask,
 } from '@elastic/eui';
 // @ts-ignore unconverted component
 import { Popover } from '../popover';
-import { CustomElementModal } from './custom_element_modal';
+import { CustomElementModal } from '../custom_element_modal';
 
 const topBorderClassName = 'canvasContextMenu--topBorder';
 
@@ -146,7 +147,7 @@ export class SidebarHeader extends Component<Props, State> {
   private _renderLayoutControls = () => {
     const { bringToFront, bringForward, sendBackward, sendToBack } = this.props;
     return (
-      <Fragment>
+      <>
         <EuiFlexItem grow={false}>
           <EuiToolTip position="bottom" content="Move element to top layer">
             <EuiButtonIcon
@@ -187,7 +188,7 @@ export class SidebarHeader extends Component<Props, State> {
             />
           </EuiToolTip>
         </EuiFlexItem>
-      </Fragment>
+      </>
     );
   };
 
@@ -341,7 +342,7 @@ export class SidebarHeader extends Component<Props, State> {
     const { isModalVisible } = this.state;
 
     return (
-      <Fragment>
+      <>
         <EuiFlexGroup
           className="canvasLayout__sidebarHeader"
           gutterSize="none"
@@ -371,13 +372,15 @@ export class SidebarHeader extends Component<Props, State> {
           </EuiFlexItem>
         </EuiFlexGroup>
         {isModalVisible ? (
-          <CustomElementModal
-            title="Create new element"
-            onSave={this._handleSave}
-            onCancel={this._hideModal}
-          />
+          <EuiOverlayMask>
+            <CustomElementModal
+              title="Create new element"
+              onSave={this._handleSave}
+              onCancel={this._hideModal}
+            />
+          </EuiOverlayMask>
         ) : null}
-      </Fragment>
+      </>
     );
   }
 }

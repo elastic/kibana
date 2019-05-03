@@ -5,9 +5,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { EuiText, EuiSpacer } from '@elastic/eui';
-// @ts-ignore unconverted component
-import { SidebarHeader } from '../sidebar_header/';
+import { EuiText } from '@elastic/eui';
 
 export const MultiElementSettings: FunctionComponent = () => (
   <EuiText size="s">

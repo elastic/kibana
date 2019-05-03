@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { compose, branch, renderComponent } from 'recompose';
 import { EuiSpacer } from '@elastic/eui';
 import { getSelectedToplevelNodes, getSelectedElementId } from '../../state/selectors/workpad';
-import { SidebarHeader } from '../sidebar_header/sidebar_header';
+import { SidebarHeader } from '../sidebar_header';
 import { MultiElementSettings } from './multi_element_settings';
 import { GroupSettings } from './group_settings';
 import { GlobalConfig } from './global_config';

@@ -25,11 +25,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Custom Element 1
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             sample description
@@ -148,11 +150,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Custom Element 2
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             Aenean eu justo auctor, placerat felis non, scelerisque dolor. 
@@ -271,11 +275,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Custom Element 3
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis.
@@ -401,11 +407,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls and filter
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Custom Element 3
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce lobortis aliquet arcu ut turpis duis.
@@ -531,11 +539,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid with filter 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Data table
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             A scrollable grid for displaying data in a tabular format
@@ -575,11 +585,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Area chart
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             A line chart with a filled body
@@ -612,11 +624,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Image
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             A static image
@@ -649,11 +663,13 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
       >
         <span
           className="euiTitle euiTitle--medium euiCard__title"
+          id="generated-idTitle"
         >
           Data table
         </span>
         <div
           className="euiText euiText--small euiCard__description"
+          id="generated-idDescription"
         >
           <p>
             A scrollable grid for displaying data in a tabular format

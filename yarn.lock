@@ -3261,13 +3261,6 @@
   dependencies:
     "@types/lodash" "*"
 
-"@types/lodash.lowercase@^4.3.6":
-  version "4.3.6"
-  resolved "https://registry.yarnpkg.com/@types/lodash.lowercase/-/lodash.lowercase-4.3.6.tgz#32bc40053c80bbe6e29c4b90eeec53ebedcdeb38"
-  integrity sha512-2754ojewqboaAmBuaSiujCtNV2RpuZ9tTktQLRxEupsUdV9Tf2KV4XneLyG1V5im5QqfpTfM/QDiLkEaHyF56w==
-  dependencies:
-    "@types/lodash" "*"
-
 "@types/lodash@*":
   version "4.14.104"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.104.tgz#53ee2357fa2e6e68379341d92eb2ecea4b11bb80"

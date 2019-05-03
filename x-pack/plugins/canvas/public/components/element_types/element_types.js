@@ -15,10 +15,11 @@ import {
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiSpacer,
+  EuiOverlayMask,
 } from '@elastic/eui';
 import { map, sortBy } from 'lodash';
 import { ConfirmModal } from '../confirm_modal/confirm_modal';
-import { CustomElementModal } from '../sidebar_header/custom_element_modal';
+import { CustomElementModal } from '../custom_element_modal';
 import { ElementGrid } from './element_grid';
 
 export class ElementTypes extends Component {
@@ -76,14 +77,16 @@ export class ElementTypes extends Component {
     }
 
     return (
-      <CustomElementModal
-        title="Edit element"
-        name={elementToEdit.displayName}
-        description={elementToEdit.help}
-        image={elementToEdit.image}
-        onSave={this._handleEdit}
-        onCancel={this._hideEditModal}
-      />
+      <EuiOverlayMask>
+        <CustomElementModal
+          title="Edit element"
+          name={elementToEdit.displayName}
+          description={elementToEdit.help}
+          image={elementToEdit.image}
+          onSave={this._handleEdit}
+          onCancel={this._hideEditModal}
+        />
+      </EuiOverlayMask>
     );
   };
 

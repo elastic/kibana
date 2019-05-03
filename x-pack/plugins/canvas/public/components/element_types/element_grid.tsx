@@ -6,6 +6,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { map, includes } from 'lodash';
+// @ts-ignore no @types definition
 import lowerCase from 'lodash.lowercase';
 import {
   EuiFlexItem,
