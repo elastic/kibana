@@ -20,39 +20,7 @@
 import handlebars from 'handlebars/dist/handlebars';
 import { isNumber } from 'lodash';
 import { fieldFormats } from 'ui/registry/field_formats';
-
-const inputFormat = {
-  'ps': 'picoseconds',
-  'ns': 'nanoseconds',
-  'us': 'microseconds',
-  'ms': 'milliseconds',
-  's': 'seconds',
-  'm': 'minutes',
-  'h': 'hours',
-  'd': 'days',
-  'w': 'weeks',
-  'M': 'months',
-  'Y': 'years',
-};
-
-const outputFormat = {
-  'humanize': 'humanize',
-  'ms': 'asMilliseconds',
-  's': 'asSeconds',
-  'm': 'asMinutes',
-  'h': 'asHours',
-  'd': 'asDays',
-  'w': 'asWeeks',
-  'M': 'asMonths',
-  'Y': 'asYears',
-};
-
-const isDuration = (format) => {
-  const input = Object.keys(inputFormat).join('');
-  const output = Object.keys(outputFormat).join('');
-
-  return new RegExp(`[${input}]+,[${output}]+,\\d+`).test(format);
-};
+import { inputFormats, outputFormats, isDuration } from '../lib/durations';
 
 export default (format = '0,0.[00]', template, getConfig = null) => {
   if (!template) template = '{{value}}';
@@ -64,8 +32,8 @@ export default (format = '0,0.[00]', template, getConfig = null) => {
     const DurationFormat = fieldFormats.getType('duration');
 
     formatter = new DurationFormat({
-      inputFormat: inputFormat[from],
-      outputFormat: outputFormat[to],
+      inputFormat: inputFormats[from],
+      outputFormat: outputFormats[to],
       outputPrecision: decimals,
     });
   } else {

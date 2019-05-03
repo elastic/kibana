@@ -77,3 +77,36 @@ export const durationInputOptions = [
   },
   ...durationBaseOptions,
 ];
+
+export const inputFormats = {
+  'ps': 'picoseconds',
+  'ns': 'nanoseconds',
+  'us': 'microseconds',
+  'ms': 'milliseconds',
+  's': 'seconds',
+  'm': 'minutes',
+  'h': 'hours',
+  'd': 'days',
+  'w': 'weeks',
+  'M': 'months',
+  'Y': 'years',
+};
+
+export const outputFormats = {
+  'humanize': 'humanize',
+  'ms': 'asMilliseconds',
+  's': 'asSeconds',
+  'm': 'asMinutes',
+  'h': 'asHours',
+  'd': 'asDays',
+  'w': 'asWeeks',
+  'M': 'asMonths',
+  'Y': 'asYears',
+};
+
+export const isDuration = format => {
+  const splittedFormat = format.split(',');
+  const [input, output] = splittedFormat;
+
+  return Boolean(inputFormats[input] && outputFormats[output]) && splittedFormat.length === 3;
+};

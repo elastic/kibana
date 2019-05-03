@@ -23,36 +23,36 @@ import _ from 'lodash';
 import {
   htmlIdGenerator, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiFieldText, EuiLink,
 } from '@elastic/eui';
-import { durationOutputOptions, durationInputOptions } from './lib/durations';
+import { durationOutputOptions, durationInputOptions, isDuration } from './lib/durations';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
+const DEFAULT_OUTPUT_PRECISION = 2;
 
 class DataFormatPicker extends Component {
-
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleCustomChange = this.handleCustomChange.bind(this);
-    let from = 'ms';
-    let to = 'ms';
-    let decimals = 2;
-    if (durationFormatTest.test(props.value)) {
+
+    let from;
+    let to;
+    let decimals;
+
+    if (isDuration(props.value)) {
       [from, to, decimals] = props.value.split(',');
     }
+
     this.state = {
-      from,
-      to,
-      decimals,
+      from: from || 'ms',
+      to: to || 'ms',
+      decimals: decimals || '',
     };
   }
 
-  handleCustomChange() {
+  handleCustomChange = () => {
     this.props.onChange([{ value: this.custom && this.custom.value || '' }]);
-  }
+  };
 
-  handleChange(selectedOptions) {
+  handleChange = selectedOptions => {
     if (selectedOptions.length < 1) {
       return;
     }
@@ -67,7 +67,7 @@ class DataFormatPicker extends Component {
     } else {
       this.props.onChange(selectedOptions);
     }
-  }
+  };
 
   handleDurationChange(name) {
     return (selectedOptions) => {
@@ -100,7 +100,7 @@ class DataFormatPicker extends Component {
     if (!_.includes(['bytes', 'number', 'percent'], value)) {
       defaultValue = 'custom';
     }
-    if (durationFormatTest.test(value)) {
+    if (isDuration(value)) {
       defaultValue = 'duration';
     }
     const { intl } = this.props;
@@ -196,6 +196,7 @@ class DataFormatPicker extends Component {
                 <EuiFieldText
                   defaultValue={decimals}
                   inputRef={(el) => this.decimals = el}
+                  placeholder={DEFAULT_OUTPUT_PRECISION}
                   onChange={this.handleDurationChange('decimals')}
                 />
               </EuiFormRow>
