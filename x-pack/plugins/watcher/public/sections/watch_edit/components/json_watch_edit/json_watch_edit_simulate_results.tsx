@@ -12,27 +12,18 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
-  EuiHealth,
   EuiSpacer,
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { WATCH_STATES } from '../../../../../common/constants';
 import {
   ExecutedWatchDetails,
   ExecutedWatchResults,
 } from '../../../../../common/types/watch_types';
 import { getTypeFromAction } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';
-
-const WATCH_ICON_COLORS = {
-  [WATCH_STATES.DISABLED]: 'subdued',
-  [WATCH_STATES.OK]: 'success',
-  [WATCH_STATES.FIRING]: 'warning',
-  [WATCH_STATES.ERROR]: 'danger',
-  [WATCH_STATES.CONFIG_ERROR]: 'danger',
-};
+import { WatchStatus } from '../../../../components/watch_status';
 
 export const JsonWatchEditSimulateResults = ({
   executeResults,
@@ -106,9 +97,7 @@ export const JsonWatchEditSimulateResults = ({
         }
       ),
       dataType: 'string',
-      render: (actionState: string) => {
-        return <EuiHealth color={WATCH_ICON_COLORS[actionState]}>{actionState}</EuiHealth>;
-      },
+      render: (actionState: string) => <WatchStatus status={actionState} />,
     },
     {
       field: 'actionReason',
@@ -133,12 +122,11 @@ export const JsonWatchEditSimulateResults = ({
           <h2 id="simulateResultsFlyOutTitle">
             {i18n.translate('xpack.watcher.sections.watchEdit.simulateResults.title', {
               defaultMessage: 'Simulation results',
-            })}{' '}
-            <EuiHealth color={WATCH_ICON_COLORS[executeResults.watchStatus.state]}>
-              {executeResults.watchStatus.state}
-            </EuiHealth>
+            })}
           </h2>
         </EuiTitle>
+        <EuiSpacer size="xs" />
+        <WatchStatus status={executeResults.watchStatus.state} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         {actionsTableData && actionsTableData.length > 0 && (

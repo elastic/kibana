@@ -27,9 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { goToWatchList } from '../../../lib/navigation';
-import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
-import { getPageErrorCode, PageError } from '../../../components/page_error';
-import { WatchActionStatus } from './watch_action_status';
+import { getPageErrorCode, PageError, WatchStatus, DeleteWatchesModal } from '../../../components';
 import {
   activateWatch,
   deactivateWatch,
@@ -144,18 +142,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
       }),
       sortable: true,
       truncateText: true,
-      render: (state: string) => {
-        return (
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <WatchActionStatus watchState={state} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="watchState__message">
-              <EuiText>{state}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
+      render: (state: string) => <WatchStatus status={state} />,
     },
     {
       field: 'watchStatus.comment',
@@ -220,18 +207,7 @@ const WatchHistoryUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string
         }),
         sortable: true,
         truncateText: true,
-        render: (state: string) => {
-          return (
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <WatchActionStatus watchState={state} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} className="watchState__message">
-                <EuiText>{state}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
+        render: (state: string) => <WatchStatus status={state} />,
       },
     ];
 

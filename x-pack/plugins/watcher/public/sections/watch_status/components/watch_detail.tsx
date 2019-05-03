@@ -6,21 +6,13 @@
 
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiInMemoryTable, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { loadWatchDetail } from '../../../lib/api';
-import { getPageErrorCode } from '../../../components/page_error';
-import { WatchActionStatus } from './watch_action_status';
+import { getPageErrorCode, WatchStatus } from '../../../components';
 
-const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string }) => {
+const WatchDetailUi = ({ watchId }: { watchId: string }) => {
   const pagination = {
     initialPageSize: 10,
     pageSizeOptions: [10, 50, 100],
@@ -45,18 +37,7 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
       }),
       sortable: true,
       truncateText: true,
-      render: (state: string) => {
-        return (
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <WatchActionStatus watchState={state} />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} className="watchState__message">
-              <EuiText>{state}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
+      render: (state: string) => <WatchStatus status={state} />,
     },
   ];
 
@@ -93,7 +74,7 @@ const WatchDetailUi = ({ intl, watchId }: { intl: InjectedIntl; watchId: string 
       <EuiSpacer size="s" />
 
       <EuiInMemoryTable
-        items={watchDetail ? watchDetail.actions : []}
+        items={watchDetail ? watchDetail.watchStatus.actionStatuses : []}
         itemId="id"
         columns={columns}
         pagination={pagination}

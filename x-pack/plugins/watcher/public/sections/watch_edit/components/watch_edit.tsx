@@ -15,7 +15,7 @@ import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 import { Watch } from 'plugins/watcher/models/watch';
 import { WATCH_TYPES } from '../../../../common/constants';
 import { BaseWatch } from '../../../../common/types/watch_types';
-import { getPageErrorCode, PageError } from '../../../components/page_error';
+import { getPageErrorCode, PageError } from '../../../components';
 import { loadWatch } from '../../../lib/api';
 import { listBreadcrumb, editBreadcrumb, createBreadcrumb } from '../../../lib/breadcrumbs';
 import { JsonWatchEdit } from './json_watch_edit';

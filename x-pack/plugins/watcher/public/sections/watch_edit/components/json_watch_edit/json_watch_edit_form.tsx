@@ -18,8 +18,7 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConfirmWatchesModal } from '../../../../components/confirm_watches_modal';
-import { ErrableFormRow } from '../../../../components/form_errors';
+import { ConfirmWatchesModal, ErrableFormRow } from '../../../../components';
 import { putWatchApiUrl } from '../../../../lib/documentation_links';
 import { onWatchSave, saveWatch } from '../../watch_edit_actions';
 import { WatchContext } from '../../watch_context';

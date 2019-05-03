@@ -11,7 +11,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiInMemoryTable,
   EuiLink,
   EuiPageContent,
@@ -26,19 +25,10 @@ import { Moment } from 'moment';
 import chrome from 'ui/chrome';
 import { MANAGEMENT_BREADCRUMB } from 'ui/management';
 
-import { REFRESH_INTERVALS, WATCH_STATES } from '../../../../common/constants';
-import { DeleteWatchesModal } from '../../../components/delete_watches_modal';
+import { REFRESH_INTERVALS } from '../../../../common/constants';
 import { listBreadcrumb } from '../../../lib/breadcrumbs';
-import { getPageErrorCode, PageError } from '../../../components/page_error';
+import { getPageErrorCode, PageError, DeleteWatchesModal, WatchStatus } from '../../../components';
 import { loadWatches } from '../../../lib/api';
-
-const stateToIcon: { [key: string]: JSX.Element } = {
-  [WATCH_STATES.OK]: <EuiIcon type="check" color="green" />,
-  [WATCH_STATES.DISABLED]: <EuiIcon type="minusInCircle" color="euiColorMediumShade" />,
-  [WATCH_STATES.FIRING]: <EuiIcon type="play" color="euiColorPrimary" />,
-  [WATCH_STATES.ERROR]: <EuiIcon type="crossInACircleFilled" color="euiColorDanger" />,
-  [WATCH_STATES.CONFIG_ERROR]: <EuiIcon type="crossInACircleFilled" color="euiColorDanger" />,
-};
 
 const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
   // hooks
@@ -107,16 +97,7 @@ const WatchListUi = ({ intl }: { intl: InjectedIntl }) => {
         defaultMessage: 'State',
       }),
       sortable: true,
-      render: (state: string) => {
-        return (
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>{stateToIcon[state]}</EuiFlexItem>
-            <EuiFlexItem grow={false} className="watchState__message">
-              <EuiText>{state}</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
+      render: (state: string) => <WatchStatus status={state} />,
     },
     {
       field: 'watchStatus.comment',
