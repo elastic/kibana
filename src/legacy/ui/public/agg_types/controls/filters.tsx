@@ -22,9 +22,10 @@ import { omit } from 'lodash';
 import { htmlIdGenerator, EuiButton, EuiSpacer } from '@elastic/eui';
 import { AggParamEditorProps } from 'ui/vis/editors/default';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { data } from 'plugins/data';
 import { FilterRow } from './filter';
-import { toUser, fromUser } from '../../query_bar/lib';
 
+const { toUser, fromUser } = data.query.helpers;
 const generateId = htmlIdGenerator();
 
 interface FilterValue {
@@ -44,7 +45,8 @@ function FiltersParamEditor({ agg, value, setValue }: AggParamEditorProps<Filter
     setFilters(updatedFilters);
   };
 
-  const onAddFilter = () => updateFilters([...filters, { input: {}, label: '', id: generateId() }]);
+  const onAddFilter = () =>
+    updateFilters([...filters, { input: { query: '' }, label: '', id: generateId() }]);
   const onRemoveFilter = (id: string) => updateFilters(filters.filter(filter => filter.id !== id));
   const onChangeValue = (id: string, query: string, label: string) =>
     updateFilters(
