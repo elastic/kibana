@@ -150,6 +150,7 @@ export const spaces = (kibana: Record<string, any>) =>
         tutorial: {
           addScopedTutorialContextFactory: (server as any).addScopedTutorialContextFactory,
         },
+        legacyServer: server,
       };
 
       const plugins = {
