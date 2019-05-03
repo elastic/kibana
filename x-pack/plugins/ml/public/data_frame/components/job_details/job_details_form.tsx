@@ -9,7 +9,7 @@ import React, { SFC, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { toastNotifications } from 'ui/notify';
 
-import { EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiSwitch, EuiFieldText, EuiForm, EuiFormRow } from '@elastic/eui';
 
 import { ml } from '../../../services/ml_api_service';
 
@@ -17,6 +17,7 @@ import { DataFrameJobConfig } from '../../common';
 import { JobId, TargetIndex } from './common';
 
 export interface JobDetailsExposedState {
+  createIndexPattern: boolean;
   jobId: JobId;
   targetIndex: TargetIndex;
   touched: boolean;
@@ -25,6 +26,7 @@ export interface JobDetailsExposedState {
 
 export function getDefaultJobDetailsState(): JobDetailsExposedState {
   return {
+    createIndexPattern: false,
     jobId: '',
     targetIndex: '',
     touched: false,
@@ -44,6 +46,7 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   const [targetIndex, setTargetIndex] = useState(defaults.targetIndex);
   const [jobIds, setJobIds] = useState([]);
   const [indexNames, setIndexNames] = useState([] as string[]);
+  const [createIndexPattern, setCreateIndexPattern] = useState(defaults.createIndexPattern);
 
   // fetch existing job IDs and indices once for form validation
   useEffect(() => {
@@ -84,9 +87,9 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
   // expose state to wizard
   useEffect(
     () => {
-      onChange({ jobId, targetIndex, touched: true, valid });
+      onChange({ createIndexPattern, jobId, targetIndex, touched: true, valid });
     },
-    [jobId, targetIndex, valid]
+    [createIndexPattern, jobId, targetIndex, valid]
   );
 
   return (
@@ -138,6 +141,16 @@ export const JobDetailsForm: SFC<Props> = React.memo(({ overrides = {}, onChange
             }
           )}
           isInvalid={indexNameExists}
+        />
+      </EuiFormRow>
+      <EuiFormRow>
+        <EuiSwitch
+          name="mlDataFrameCreateIndexPattern"
+          label={i18n.translate('xpack.ml.dataframe.jobCreateForm.createIndexPatternLabel', {
+            defaultMessage: 'Create index pattern',
+          })}
+          checked={createIndexPattern === true}
+          onChange={() => setCreateIndexPattern(!createIndexPattern)}
         />
       </EuiFormRow>
     </EuiForm>

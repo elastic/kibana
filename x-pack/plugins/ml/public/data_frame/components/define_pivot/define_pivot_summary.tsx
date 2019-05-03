@@ -24,7 +24,7 @@ import { PivotPreview } from './pivot_preview';
 import {
   DropDownOption,
   getPivotQuery,
-  IndexPatternContext,
+  KibanaContext,
   PivotAggsConfigDict,
   PIVOT_SUPPORTED_AGGS,
   pivotSupportedAggs,
@@ -40,11 +40,13 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
   groupByList,
   aggList,
 }) => {
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (kibanaContext === null) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   const fields = indexPattern.fields
     .filter(field => field.aggregatable === true)

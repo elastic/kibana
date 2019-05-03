@@ -49,7 +49,7 @@ describe('useSourceIndexData', () => {
   test('indexPattern not defined', () => {
     testHook(() => {
       act(() => {
-        sourceIndexObj = useSourceIndexData(null, query, [], () => {});
+        sourceIndexObj = useSourceIndexData({ title: 'lorem', fields: [] }, query, [], () => {});
       });
     });
 

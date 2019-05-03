@@ -8,9 +8,15 @@ import React from 'react';
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
+interface KibanaContextValue {
+  currentIndexPattern: StaticIndexPattern;
+  indexPatterns?: any;
+  kibanaConfig?: any;
+}
+
 // Because we're only getting the actual contextvalue within a wrapping angular component,
 // we need to initialize here with `null` because TypeScript doesn't allow createContext()
-// without a default value. The union type `IndexPatternContextValue` takes care of allowing
+// without a default value. The nullable union type takes care of allowing
 // the actual required type and `null`.
-export type IndexPatternContextValue = StaticIndexPattern | null;
-export const IndexPatternContext = React.createContext<IndexPatternContextValue>(null);
+export type NullableKibanaContextValue = KibanaContextValue | null;
+export const KibanaContext = React.createContext<NullableKibanaContextValue>(null);

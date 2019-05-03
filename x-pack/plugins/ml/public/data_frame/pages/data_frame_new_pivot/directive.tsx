@@ -16,10 +16,10 @@ import { I18nContext } from 'ui/i18n';
 // @ts-ignore
 import { SearchItemsProvider } from '../../../jobs/new_job/utils/new_job_utils';
 
-import { IndexPatternContext } from '../../common';
+import { KibanaContext } from '../../common';
 import { Page } from './page';
 
-module.directive('mlNewDataFrame', ($route: any, Private: any) => {
+module.directive('mlNewDataFrame', ($injector: any, $route: any, Private: any) => {
   return {
     scope: {},
     restrict: 'E',
@@ -27,11 +27,20 @@ module.directive('mlNewDataFrame', ($route: any, Private: any) => {
       const createSearchItems = Private(SearchItemsProvider);
       const { indexPattern } = createSearchItems();
 
+      const indexPatterns = $injector.get('indexPatterns');
+      const kibanaConfig = $injector.get('config');
+
+      const kibanaContext = {
+        currentIndexPattern: indexPattern,
+        indexPatterns,
+        kibanaConfig,
+      };
+
       ReactDOM.render(
         <I18nContext>
-          <IndexPatternContext.Provider value={indexPattern}>
+          <KibanaContext.Provider value={kibanaContext}>
             {React.createElement(Page)}
-          </IndexPatternContext.Provider>
+          </KibanaContext.Provider>
         </I18nContext>,
         element[0]
       );

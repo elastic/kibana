@@ -32,7 +32,7 @@ import {
   DropDownLabel,
   getPivotQuery,
   groupByConfigHasInterval,
-  IndexPatternContext,
+  KibanaContext,
   PivotAggsConfig,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -68,11 +68,13 @@ interface Props {
 export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChange }) => {
   const defaults = { ...getDefaultPivotState(), ...overrides };
 
-  const indexPattern = useContext(IndexPatternContext);
+  const kibanaContext = useContext(KibanaContext);
 
-  if (indexPattern === null) {
+  if (kibanaContext === null) {
     return null;
   }
+
+  const indexPattern = kibanaContext.currentIndexPattern;
 
   // The search filter
   const [search, setSearch] = useState(defaults.search);
