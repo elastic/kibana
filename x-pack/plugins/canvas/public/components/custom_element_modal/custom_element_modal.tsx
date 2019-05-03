@@ -11,15 +11,12 @@ import PropTypes from 'prop-types';
 import {
   EuiButton,
   EuiButtonEmpty,
-  // @ts-ignore hasn't been converted to TypeScript yet
-  EuiCard,
   EuiFieldText,
   // @ts-ignore hasn't been converted to TypeScript yet
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -33,6 +30,7 @@ import {
 // @ts-ignore converting /libs/constants to TS breaks CI
 import { VALID_IMAGE_TYPES } from '../../../common/lib/constants';
 import { encode } from '../../../common/lib/dataurl';
+import { ElementCard } from '../element_card';
 
 const MAX_NAME_LENGTH = 40;
 const MAX_DESCRIPTION_LENGTH = 100;
@@ -174,19 +172,15 @@ export class CustomElementModal extends PureComponent<Props, State> {
                 </p>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem className="canvasElementCard canvasCustomElementForm__preview" grow={1}>
+            <EuiFlexItem
+              className="canvasElementCard__wrapper canvasCustomElementForm__preview"
+              grow={1}
+            >
               <EuiTitle size="xxxs">
                 <h4>Element preview</h4>
               </EuiTitle>
               <EuiSpacer size="s" />
-              <EuiCard
-                textAlign="left"
-                image={image}
-                icon={image ? null : <EuiIcon type="canvasApp" size="xxl" />}
-                title={name}
-                description={description}
-                className={image ? 'canvasCard' : 'canvasCard canvasCard--hasIcon'}
-              />
+              <ElementCard title={name} description={description} image={image} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalBody>
