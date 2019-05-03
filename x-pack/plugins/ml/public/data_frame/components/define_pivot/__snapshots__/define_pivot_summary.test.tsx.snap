@@ -9,6 +9,8 @@ exports[`Data Frame: <DefinePivotSummary /> Minimal initialization 1`] = `
           "fields": Array [],
           "title": "the-index-pattern-title",
         },
+        "indexPatterns": Object {},
+        "kibanaConfig": Object {},
       }
     }
   >
