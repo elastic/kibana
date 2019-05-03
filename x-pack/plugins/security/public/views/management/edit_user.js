@@ -10,7 +10,7 @@ import 'ui/angular_ui_select';
 import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import { EDIT_USERS_PATH } from './management_urls';
-import { EditUser } from '../../components/management/users';
+import { EditUserPage } from '../../components/management/users';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
@@ -19,7 +19,7 @@ import { getEditUserBreadcrumbs, getCreateUserBreadcrumbs } from './breadcrumbs'
 const renderReact = (elem, httpClient, changeUrl, username) => {
   render(
     <I18nContext>
-      <EditUser
+      <EditUserPage
         changeUrl={changeUrl}
         username={username}
       />

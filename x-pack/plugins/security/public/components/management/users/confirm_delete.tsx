@@ -7,29 +7,44 @@
 import React, { Component, Fragment } from 'react';
 import { EuiOverlayMask, EuiConfirmModal } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
+import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
 import { UserAPIClient } from '../../../lib/api';
 
-class ConfirmDeleteUI extends Component {
+interface Props {
+  intl: InjectedIntl;
+  usersToDelete: string[];
+  onCancel: () => void;
+  callback?: (usersToDelete: string[], errors: string[]) => void;
+}
+
+class ConfirmDeleteUI extends Component<Props, {}> {
   deleteUsers = () => {
     const { usersToDelete, callback } = this.props;
-    const errors = [];
+    const errors: string[] = [];
     usersToDelete.forEach(async username => {
       try {
         await UserAPIClient.deleteUser(username);
         toastNotifications.addSuccess(
-          this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
-            defaultMessage: 'Deleted user {username}'
-          }, { username })
+          this.props.intl.formatMessage(
+            {
+              id:
+                'xpack.security.management.users.confirmDelete.userSuccessfullyDeletedNotificationMessage',
+              defaultMessage: 'Deleted user {username}',
+            },
+            { username }
+          )
         );
       } catch (e) {
         errors.push(username);
         toastNotifications.addDanger(
-          this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
-            defaultMessage: 'Error deleting user {username}'
-          }, { username })
+          this.props.intl.formatMessage(
+            {
+              id:
+                'xpack.security.management.users.confirmDelete.userDeletingErrorNotificationMessage',
+              defaultMessage: 'Error deleting user {username}',
+            },
+            { username }
+          )
         );
       }
       if (callback) {
@@ -41,14 +56,20 @@ class ConfirmDeleteUI extends Component {
     const { usersToDelete, onCancel, intl } = this.props;
     const moreThanOne = usersToDelete.length > 1;
     const title = moreThanOne
-      ? intl.formatMessage({
-        id: 'xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle',
-        defaultMessage: 'Delete {userLength} users'
-      }, { userLength: usersToDelete.length })
-      : intl.formatMessage({
-        id: 'xpack.security.management.users.confirmDelete.deleteOneUserTitle',
-        defaultMessage: 'Delete user {userLength}'
-      }, { userLength: usersToDelete[0] });
+      ? intl.formatMessage(
+          {
+            id: 'xpack.security.management.users.confirmDelete.deleteMultipleUsersTitle',
+            defaultMessage: 'Delete {userLength} users',
+          },
+          { userLength: usersToDelete.length }
+        )
+      : intl.formatMessage(
+          {
+            id: 'xpack.security.management.users.confirmDelete.deleteOneUserTitle',
+            defaultMessage: 'Delete user {userLength}',
+          },
+          { userLength: usersToDelete[0] }
+        );
     return (
       <EuiOverlayMask>
         <EuiConfirmModal
@@ -57,11 +78,11 @@ class ConfirmDeleteUI extends Component {
           onConfirm={this.deleteUsers}
           cancelButtonText={intl.formatMessage({
             id: 'xpack.security.management.users.confirmDelete.cancelButtonLabel',
-            defaultMessage: 'Cancel'
+            defaultMessage: 'Cancel',
           })}
           confirmButtonText={intl.formatMessage({
             id: 'xpack.security.management.users.confirmDelete.confirmButtonLabel',
-            defaultMessage: 'Delete'
+            defaultMessage: 'Delete',
           })}
           buttonColor="danger"
         >
@@ -74,7 +95,11 @@ class ConfirmDeleteUI extends Component {
                     defaultMessage="You are about to delete these users:"
                   />
                 </p>
-                <ul>{usersToDelete.map(username => <li key={username}>{username}</li>)}</ul>
+                <ul>
+                  {usersToDelete.map(username => (
+                    <li key={username}>{username}</li>
+                  ))}
+                </ul>
               </Fragment>
             ) : null}
             <p>

@@ -5,7 +5,7 @@
  */
 
 import { kfetch } from 'ui/kfetch';
-import { AuthenticatedUser, Role, User } from '../../common/model';
+import { AuthenticatedUser, Role, User, EditUser } from '../../common/model';
 
 const usersUrl = '/api/security/v1/users';
 const rolesUrl = '/api/security/role';
@@ -29,9 +29,16 @@ export class UserAPIClient {
     await kfetch({ pathname: url, method: 'DELETE' }, {});
   }
 
-  public static async saveUser(user: User) {
+  public static async saveUser(user: EditUser, isNewUser: boolean) {
     const url = `${usersUrl}/${encodeURIComponent(user.username)}`;
-    await kfetch({ pathname: url, body: JSON.stringify(user), method: 'POST' });
+    const saveUserData: Record<string, any> = {
+      ...user,
+    };
+    if (!isNewUser) {
+      delete saveUserData.password;
+    }
+    delete saveUserData.confirmPassword;
+    await kfetch({ pathname: url, body: JSON.stringify(saveUserData), method: 'POST' });
   }
 
   public static async getRoles(): Promise<Role[]> {

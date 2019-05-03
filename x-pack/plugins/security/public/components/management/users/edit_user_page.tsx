@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-/* eslint camelcase: 0 */
 import { get } from 'lodash';
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ChangeEvent } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -28,46 +27,75 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
+import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
+import { UserValidator, UserValidationResult } from 'plugins/security/lib/validate_user';
+import { User, EditUser, Role } from '../../../../common/model';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
-import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 import { UserAPIClient } from '../../../lib/api';
 import { ChangePasswordForm } from '../change_password_form';
 
-const validEmailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; //eslint-disable-line max-len
-const validUsernameRegex = /[a-zA-Z_][a-zA-Z0-9_@\-\$\.]*/;
-class EditUserUI extends Component {
-  constructor(props) {
+interface Props {
+  username: string;
+  intl: InjectedIntl;
+  changeUrl: (path: string) => void;
+}
+
+interface State {
+  isLoaded: boolean;
+  isNewUser: boolean;
+  currentUser: User | null;
+  showChangePasswordForm: boolean;
+  showDeleteConfirmation: boolean;
+  user: EditUser;
+  roles: Role[];
+  selectedRoles: Array<{ label: string }>;
+  formError: UserValidationResult | null;
+}
+
+class EditUserPageUI extends Component<Props, State> {
+  private validator: UserValidator;
+
+  constructor(props: Props) {
     super(props);
+    this.validator = new UserValidator({ shouldValidate: false });
     this.state = {
       isLoaded: false,
       isNewUser: true,
-      currentUser: {},
+      currentUser: null,
+      showChangePasswordForm: false,
       showDeleteConfirmation: false,
       user: {
-        email: null,
-        username: null,
-        full_name: null,
+        email: '',
+        username: '',
+        full_name: '',
         roles: [],
+        enabled: true,
+        password: '',
+        confirmPassword: '',
       },
       roles: [],
       selectedRoles: [],
-      password: null,
-      confirmPassword: null,
+      formError: null,
     };
   }
-  async componentDidMount() {
+
+  public async componentDidMount() {
     const { username } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
-        user = await UserAPIClient.getUser(username);
+        user = {
+          ...(await UserAPIClient.getUser(username)),
+          password: '',
+          confirmPassword: '',
+        };
         currentUser = await UserAPIClient.getCurrentUser();
       } catch (err) {
         toastNotifications.addDanger({
           title: this.props.intl.formatMessage({
             id: 'xpack.security.management.users.editUser.errorLoadingUserTitle',
-            defaultMessage: 'Error loading user'
+            defaultMessage: 'Error loading user',
           }),
           text: get(err, 'body.message') || err.message,
         });
@@ -75,14 +103,14 @@ class EditUserUI extends Component {
       }
     }
 
-    let roles = [];
+    let roles: Role[] = [];
     try {
       roles = await UserAPIClient.getRoles();
     } catch (err) {
       toastNotifications.addDanger({
         title: this.props.intl.formatMessage({
           id: 'xpack.security.management.users.editUser.errorLoadingRolesTitle',
-          defaultMessage: 'Error loading roles'
+          defaultMessage: 'Error loading roles',
         }),
         text: get(err, 'body.message') || err.message,
       });
@@ -97,154 +125,86 @@ class EditUserUI extends Component {
       selectedRoles: user.roles.map(role => ({ label: role })) || [],
     });
   }
-  handleDelete = (usernames, errors) => {
+
+  private handleDelete = (usernames: string[], errors: string[]) => {
     if (errors.length === 0) {
       const { changeUrl } = this.props;
       changeUrl(USERS_PATH);
     }
   };
-  passwordError = () => {
-    const { password } = this.state;
-    if (password !== null && password.length < 6) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.users.editUser.passwordLengthErrorMessage',
-        defaultMessage: 'Password must be at least 6 characters'
+
+  private saveUser = async () => {
+    this.validator.enableValidation();
+
+    const result = this.validator.validateForSave(this.state.user, this.state.isNewUser);
+    if (result.isInvalid) {
+      this.setState({
+        formError: result,
       });
-    }
-  };
-  currentPasswordError = () => {
-    const { currentPasswordError } = this.state;
-    if (currentPasswordError) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.users.editUser.incorrectPasswordErrorMessage',
-        defaultMessage: 'The current password you entered is incorrect'
+    } else {
+      this.setState({
+        formError: null,
       });
-    }
-  };
-  confirmPasswordError = () => {
-    const { password, confirmPassword } = this.state;
-    if (password && confirmPassword !== null && password !== confirmPassword) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.users.editUser.passwordDoNotMatchErrorMessage',
-        defaultMessage: 'Passwords do not match'
+      const { changeUrl } = this.props;
+      const { user, isNewUser, selectedRoles } = this.state;
+      const userToSave: EditUser = { ...user };
+      userToSave.roles = selectedRoles.map(selectedRole => {
+        return selectedRole.label;
       });
-    }
-  };
-  usernameError = () => {
-    const { username } = this.state.user;
-    if (username !== null && !username) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.users.editUser.requiredUsernameErrorMessage',
-        defaultMessage: 'Username is required'
-      });
-    } else if (username && !username.match(validUsernameRegex)) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.users.editUser.usernameAllowedCharactersErrorMessage',
-        defaultMessage: 'Username must begin with a letter or underscore and contain only letters, underscores, and numbers'
-      });
-    }
-  };
-  emailError = () => {
-    const { email } = this.state.user;
-    if (email !== null && email !== '' && !email.match(validEmailRegex)) {
-      return this.props.intl.formatMessage({
-        id: 'xpack.security.management.users.editUser.validEmailRequiredErrorMessage',
-        defaultMessage: 'Email address is invalid'
-      });
-    }
-  };
-  changePassword = async () => {
-    const { user, password, currentPassword } = this.state;
-    try {
-      await UserAPIClient.changePassword(user.username, password, currentPassword);
-      toastNotifications.addSuccess(
-        this.props.intl.formatMessage({
-          id: 'xpack.security.management.users.editUser.passwordSuccessfullyChangedNotificationMessage',
-          defaultMessage: 'Password changed.'
-        })
-      );
-    } catch (e) {
-      if (e.body.statusCode === 401) {
-        return this.setState({ currentPasswordError: true });
-      } else {
+      try {
+        await UserAPIClient.saveUser(userToSave, isNewUser);
+        toastNotifications.addSuccess(
+          this.props.intl.formatMessage(
+            {
+              id:
+                'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
+              defaultMessage: 'Saved user {message}',
+            },
+            { message: user.username }
+          )
+        );
+        changeUrl(USERS_PATH);
+      } catch (e) {
         toastNotifications.addDanger(
-          this.props.intl.formatMessage({
-            id: 'xpack.security.management.users.editUser.settingPasswordErrorMessage',
-            defaultMessage: 'Error setting password: {message}'
-          }, { message: get(e, 'body.message', 'Unknown error') })
+          this.props.intl.formatMessage(
+            {
+              id: 'xpack.security.management.users.editUser.savingUserErrorMessage',
+              defaultMessage: 'Error saving user: {message}',
+            },
+            { message: get(e, 'body.message', 'Unknown error') }
+          )
         );
       }
     }
-    this.clearPasswordForm();
   };
-  saveUser = async () => {
-    const { changeUrl } = this.props;
-    const { user, password, selectedRoles } = this.state;
-    const userToSave = { ...user };
-    userToSave.roles = selectedRoles.map(selectedRole => {
-      return selectedRole.label;
-    });
-    if (password) {
-      userToSave.password = password;
-    }
-    try {
-      await UserAPIClient.saveUser(userToSave);
-      toastNotifications.addSuccess(
-        this.props.intl.formatMessage({
-          id: 'xpack.security.management.users.editUser.userSuccessfullySavedNotificationMessage',
-          defaultMessage: 'Saved user {message}'
-        }, { message: user.username })
-      );
-      changeUrl(USERS_PATH);
-    } catch (e) {
-      toastNotifications.addDanger(
-        this.props.intl.formatMessage({
-          id: 'xpack.security.management.users.editUser.savingUserErrorMessage',
-          defaultMessage: 'Error saving user: {message}'
-        }, { message: get(e, 'body.message', 'Unknown error') })
-      );
-    }
-  };
-  clearPasswordForm = () => {
-    this.setState({
-      showChangePasswordForm: false,
-      password: null,
-      confirmPassword: null,
-    });
-  };
-  passwordFields = () => {
+
+  private passwordFields = () => {
     return (
       <Fragment>
         <EuiFormRow
-          label={
-            this.props.intl.formatMessage({
-              id: 'xpack.security.management.users.editUser.passwordFormRowLabel',
-              defaultMessage: 'Password'
-            })
-          }
-          isInvalid={!!this.passwordError()}
-          error={this.passwordError()}
+          label={this.props.intl.formatMessage({
+            id: 'xpack.security.management.users.editUser.passwordFormRowLabel',
+            defaultMessage: 'Password',
+          })}
+          {...this.validator.validatePassword(this.state.user)}
         >
           <EuiFieldText
             data-test-subj="passwordInput"
             name="password"
             type="password"
-            onChange={event => this.setState({ password: event.target.value })}
-            onBlur={event => this.setState({ password: event.target.value || '' })}
+            onChange={this.onPasswordChange}
           />
         </EuiFormRow>
         <EuiFormRow
           label={this.props.intl.formatMessage({
             id: 'xpack.security.management.users.editUser.confirmPasswordFormRowLabel',
-            defaultMessage: 'Confirm password'
+            defaultMessage: 'Confirm password',
           })}
-          isInvalid={!!this.confirmPasswordError()}
-          error={this.confirmPasswordError()}
+          {...this.validator.validateConfirmPassword(this.state.user)}
         >
           <EuiFieldText
             data-test-subj="passwordConfirmationInput"
-            onChange={event => this.setState({ confirmPassword: event.target.value })}
-            onBlur={event => this.setState({ confirmPassword: event.target.value || '' })}
+            onChange={this.onConfirmPasswordChange}
             name="confirm_password"
             type="password"
           />
@@ -252,14 +212,13 @@ class EditUserUI extends Component {
       </Fragment>
     );
   };
-  changePasswordForm = () => {
-    const {
-      showChangePasswordForm,
-      user,
-      currentUser,
-    } = this.state;
 
-    const userIsLoggedInUser = user.username && user.username === currentUser.username;
+  private changePasswordForm = () => {
+    const { showChangePasswordForm, user, currentUser } = this.state;
+
+    const userIsLoggedInUser = Boolean(
+      currentUser && user.username && user.username === currentUser.username
+    );
 
     if (!showChangePasswordForm) {
       return null;
@@ -272,7 +231,7 @@ class EditUserUI extends Component {
             <EuiCallOut
               title={this.props.intl.formatMessage({
                 id: 'xpack.security.management.users.editUser.changePasswordExtraStepTitle',
-                defaultMessage: 'Extra step needed'
+                defaultMessage: 'Extra step needed',
               })}
               color="warning"
               iconType="help"
@@ -290,34 +249,101 @@ class EditUserUI extends Component {
           </Fragment>
         ) : null}
         <ChangePasswordForm
-          user={this.state.user}
+          user={this.state.user as User}
           isUserChangingOwnPassword={userIsLoggedInUser}
           onChangePassword={this.toggleChangePasswordForm}
         />
       </Fragment>
     );
   };
-  toggleChangePasswordForm = () => {
+
+  private toggleChangePasswordForm = () => {
     const { showChangePasswordForm } = this.state;
     this.setState({ showChangePasswordForm: !showChangePasswordForm });
   };
-  onRolesChange = selectedRoles => {
+
+  private onUsernameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const user = {
+      ...this.state.user,
+      username: e.target.value || '',
+    };
+    const formError = this.validator.validateForSave(user, this.state.isNewUser);
+
+    this.setState({
+      user,
+      formError,
+    });
+  };
+
+  private onEmailChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const user = {
+      ...this.state.user,
+      email: e.target.value || '',
+    };
+    const formError = this.validator.validateForSave(user, this.state.isNewUser);
+
+    this.setState({
+      user,
+      formError,
+    });
+  };
+
+  private onFullNameChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const user = {
+      ...this.state.user,
+      full_name: e.target.value || '',
+    };
+    const formError = this.validator.validateForSave(user, this.state.isNewUser);
+
+    this.setState({
+      user,
+      formError,
+    });
+  };
+
+  private onPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const user = {
+      ...this.state.user,
+      password: e.target.value || '',
+    };
+    const formError = this.validator.validateForSave(user, this.state.isNewUser);
+
+    this.setState({
+      user,
+      formError,
+    });
+  };
+
+  private onConfirmPasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const user = {
+      ...this.state.user,
+      confirmPassword: e.target.value || '',
+    };
+    const formError = this.validator.validateForSave(user, this.state.isNewUser);
+
+    this.setState({
+      user,
+      formError,
+    });
+  };
+
+  private onRolesChange = (selectedRoles: Array<{ label: string }>) => {
     this.setState({
       selectedRoles,
     });
   };
-  cannotSaveUser = () => {
+
+  private cannotSaveUser = () => {
     const { user, isNewUser } = this.state;
-    return (
-      !user.username ||
-      this.emailError() ||
-      (isNewUser && (this.passwordError() || this.confirmPasswordError()))
-    );
+    const result = this.validator.validateForSave(user, isNewUser);
+    return result.isInvalid;
   };
-  onCancelDelete = () => {
+
+  private onCancelDelete = () => {
     this.setState({ showDeleteConfirmation: false });
   };
-  render() {
+
+  public render() {
     const { changeUrl, intl } = this.props;
     const {
       user,
@@ -343,18 +369,18 @@ class EditUserUI extends Component {
             <EuiPageContentHeaderSection>
               <EuiTitle>
                 <h2>
-                  {isNewUser ?
+                  {isNewUser ? (
                     <FormattedMessage
                       id="xpack.security.management.users.editUser.newUserTitle"
                       defaultMessage="New user"
                     />
-                    :
+                  ) : (
                     <FormattedMessage
                       id="xpack.security.management.users.editUser.editUserTitle"
                       defaultMessage="Edit {userName} user"
                       values={{ userName: user.username }}
                     />
-                  }
+                  )}
                 </h2>
               </EuiTitle>
             </EuiPageContentHeaderSection>
@@ -390,41 +416,29 @@ class EditUserUI extends Component {
                 event.preventDefault();
               }}
             >
-              <EuiForm>
+              <EuiForm {...this.state.formError}>
                 <EuiFormRow
-                  isInvalid={!!this.usernameError()}
-                  error={this.usernameError()}
+                  {...this.validator.validateUsername(this.state.user)}
                   helpText={
                     !isNewUser && !reserved
                       ? intl.formatMessage({
-                        id: 'xpack.security.management.users.editUser.changingUserNameAfterCreationDescription',
-                        defaultMessage: `Usernames can't be changed after creation.`
-                      })
+                          id:
+                            'xpack.security.management.users.editUser.changingUserNameAfterCreationDescription',
+                          defaultMessage: `Usernames can't be changed after creation.`,
+                        })
                       : null
                   }
                   label={intl.formatMessage({
                     id: 'xpack.security.management.users.editUser.usernameFormRowLabel',
-                    defaultMessage: 'Username'
+                    defaultMessage: 'Username',
                   })}
                 >
                   <EuiFieldText
-                    onBlur={event =>
-                      this.setState({
-                        user: {
-                          ...this.state.user,
-                          username: event.target.value || '',
-                        },
-                      })
-                    }
                     value={user.username || ''}
                     name="username"
                     data-test-subj="userFormUserNameInput"
                     disabled={!isNewUser}
-                    onChange={event => {
-                      this.setState({
-                        user: { ...this.state.user, username: event.target.value },
-                      });
-                    }}
+                    onChange={this.onUsernameChange}
                   />
                 </EuiFormRow>
                 {isNewUser ? this.passwordFields() : null}
@@ -433,59 +447,28 @@ class EditUserUI extends Component {
                     <EuiFormRow
                       label={intl.formatMessage({
                         id: 'xpack.security.management.users.editUser.fullNameFormRowLabel',
-                        defaultMessage: 'Full name'
+                        defaultMessage: 'Full name',
                       })}
                     >
                       <EuiFieldText
-                        onBlur={event =>
-                          this.setState({
-                            user: {
-                              ...this.state.user,
-                              full_name: event.target.value || '',
-                            },
-                          })
-                        }
                         data-test-subj="userFormFullNameInput"
                         name="full_name"
                         value={user.full_name || ''}
-                        onChange={event => {
-                          this.setState({
-                            user: {
-                              ...this.state.user,
-                              full_name: event.target.value,
-                            },
-                          });
-                        }}
+                        onChange={this.onFullNameChange}
                       />
                     </EuiFormRow>
                     <EuiFormRow
-                      isInvalid={!!this.emailError()}
-                      error={this.emailError()}
+                      {...this.validator.validateEmail(this.state.user)}
                       label={intl.formatMessage({
                         id: 'xpack.security.management.users.editUser.emailAddressFormRowLabel',
-                        defaultMessage: 'Email address'
+                        defaultMessage: 'Email address',
                       })}
                     >
                       <EuiFieldText
-                        onBlur={event =>
-                          this.setState({
-                            user: {
-                              ...this.state.user,
-                              email: event.target.value || '',
-                            },
-                          })
-                        }
                         data-test-subj="userFormEmailInput"
                         name="email"
                         value={user.email || ''}
-                        onChange={event => {
-                          this.setState({
-                            user: {
-                              ...this.state.user,
-                              email: event.target.value,
-                            },
-                          });
-                        }}
+                        onChange={this.onEmailChange}
                       />
                     </EuiFormRow>
                   </Fragment>
@@ -493,18 +476,17 @@ class EditUserUI extends Component {
                 <EuiFormRow
                   label={intl.formatMessage({
                     id: 'xpack.security.management.users.editUser.rolesFormRowLabel',
-                    defaultMessage: 'Roles'
+                    defaultMessage: 'Roles',
                   })}
                 >
                   <EuiComboBox
                     data-test-subj="userFormRolesDropdown"
                     placeholder={intl.formatMessage({
                       id: 'xpack.security.management.users.editUser.addRolesPlaceholder',
-                      defaultMessage: 'Add roles'
+                      defaultMessage: 'Add roles',
                     })}
                     onChange={this.onRolesChange}
                     isDisabled={reserved}
-                    name="roles"
                     options={roles.map(role => {
                       return { 'data-test-subj': `roleOption-${role.name}`, label: role.name };
                     })}
@@ -543,16 +525,17 @@ class EditUserUI extends Component {
                         data-test-subj="userFormSaveButton"
                         onClick={() => this.saveUser()}
                       >
-                        {isNewUser ?
+                        {isNewUser ? (
                           <FormattedMessage
                             id="xpack.security.management.users.editUser.createUserButtonLabel"
                             defaultMessage="Create user"
                           />
-                          :
+                        ) : (
                           <FormattedMessage
                             id="xpack.security.management.users.editUser.updateUserButtonLabel"
                             defaultMessage="Update user"
-                          />}
+                          />
+                        )}
                       </EuiButton>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -594,4 +577,4 @@ class EditUserUI extends Component {
   }
 }
 
-export const EditUser = injectI18n(EditUserUI);
+export const EditUserPage = injectI18n(EditUserPageUI);
