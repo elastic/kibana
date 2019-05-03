@@ -15,7 +15,7 @@ import {
   EuiPageContentHeaderSection,
   EuiPageContentBody,
   EuiButtonIcon,
-  EuiSpacer,
+  EuiTabbedContent,
   // @ts-ignore
   EuiListGroupItem,
   EuiPage,
@@ -181,6 +181,25 @@ export function Main(props: MainProps) {
 
   const [flyoutIsOpen, setFlyoutIsOpen] = useState(false);
 
+  const inspectorTabs = [{
+    id: 'rawData',
+    name: 'Raw data',
+    content: (
+      <EuiFlyoutBody>
+        <ExpressionRenderer
+          {...props}
+          expression={getTableExpression(state.visModel)}
+        />
+      </EuiFlyoutBody>
+    )
+  }, {
+    id: 'expression',
+    name: 'Expression',
+    content: (
+      <EuiCodeBlock isCopyable>{expression}</EuiCodeBlock>
+    )
+  }];
+
   let flyout;
   if (flyoutIsOpen) {
     flyout = (
@@ -188,28 +207,19 @@ export function Main(props: MainProps) {
         onClose={() => { setFlyoutIsOpen(false); }}
         aria-labelledby="lnsInspectFlyoutTitle"
       >
-        <EuiFlyoutHeader hasBorder>
+        <EuiFlyoutHeader className="lnsInspectFlyout__header">
           <EuiTitle size="m">
             <h2 id="lnsInspectFlyoutTitle">
               Inspector
             </h2>
           </EuiTitle>
-          <EuiSpacer size="s" />
-          {/* <EuiTabs style={{ marginBottom: '-25px' }}>
-            {this.renderTabs()}
-          </EuiTabs> */}
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          {hasData && (
-            <>
-              <ExpressionRenderer
-                {...props}
-                expression={getTableExpression(state.visModel)}
-              />
-              <EuiCodeBlock>{expression}</EuiCodeBlock>
-            </>
-          )}
-        </EuiFlyoutBody>
+        <EuiTabbedContent
+          className="lnsInspectFlyout__tabbedContent"
+          tabs={inspectorTabs}
+          initialSelectedTab={inspectorTabs[1]}
+          onTabClick={(tab) => { console.log('clicked tab', tab); }}
+        />
       </EuiFlyout>
     );
   }
@@ -264,6 +274,7 @@ export function Main(props: MainProps) {
                 title={i18n.translate('xpack.viz_editor.frame.inspectButtonLabel', {
                     defaultMessage: "Inspect"
                 })}
+                isDisabled={!hasData}
               />&emsp;
               <EuiButtonIcon
                 iconType="editorCodeBlock"

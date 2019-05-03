@@ -102,3 +102,33 @@
   justify-content: center;
   padding: $euiSize;
 }
+
+.lnsInspectFlyout__header {
+  padding: $euiSize;
+}
+
+.lnsInspectFlyout__tabbedContent {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .euiTabs {
+    flex-shrink: 0;
+  }
+
+  [role="tabpanel"] {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    .expressionRenderer-full {
+      min-height: 0;
+    }
+
+    .euiCodeBlock {
+      height: 100%;
+    }
+  }
+}
