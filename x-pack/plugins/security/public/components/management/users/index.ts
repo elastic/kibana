@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Users } from './users';
+export { UsersListPage } from './users_list_page';
 export { EditUserPage } from './edit_user_page';

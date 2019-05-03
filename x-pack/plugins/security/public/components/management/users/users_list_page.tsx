@@ -36,7 +36,7 @@ interface State {
   filter: string;
 }
 
-class UsersUI extends Component<Props, State> {
+class UsersListPageUI extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -310,4 +310,4 @@ class UsersUI extends Component<Props, State> {
   }
 }
 
-export const Users = injectI18n(UsersUI);
+export const UsersListPage = injectI18n(UsersListPageUI);
