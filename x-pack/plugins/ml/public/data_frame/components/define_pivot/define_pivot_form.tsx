@@ -32,6 +32,7 @@ import {
   DropDownLabel,
   getPivotQuery,
   groupByConfigHasInterval,
+  isKibanaContext,
   KibanaContext,
   PivotAggsConfig,
   PivotAggsConfigDict,
@@ -70,7 +71,7 @@ export const DefinePivotForm: SFC<Props> = React.memo(({ overrides = {}, onChang
 
   const kibanaContext = useContext(KibanaContext);
 
-  if (kibanaContext === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 

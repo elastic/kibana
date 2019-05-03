@@ -37,7 +37,7 @@ const ExpandableTable = (EuiInMemoryTable as any) as FunctionComponent<Expandabl
 
 import { Dictionary } from '../../../../common/types/common';
 
-import { KibanaContext, SimpleQuery } from '../../common';
+import { isKibanaContext, KibanaContext, SimpleQuery } from '../../common';
 
 import {
   EsDoc,
@@ -95,7 +95,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
 
   const kibanaContext = useContext(KibanaContext);
 
-  if (kibanaContext === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 

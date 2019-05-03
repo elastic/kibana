@@ -24,6 +24,7 @@ import { PivotPreview } from './pivot_preview';
 import {
   DropDownOption,
   getPivotQuery,
+  isKibanaContext,
   KibanaContext,
   PivotAggsConfigDict,
   PIVOT_SUPPORTED_AGGS,
@@ -42,7 +43,7 @@ export const DefinePivotSummary: SFC<DefinePivotExposedState> = ({
 }) => {
   const kibanaContext = useContext(KibanaContext);
 
-  if (kibanaContext === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 

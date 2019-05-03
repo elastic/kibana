@@ -21,7 +21,7 @@ import {
 
 import { ml } from '../../../services/ml_api_service';
 
-import { KibanaContext } from '../../common';
+import { KibanaContext, isKibanaExtendedContext } from '../../common';
 
 export interface JobDetailsExposedState {
   created: boolean;
@@ -55,11 +55,7 @@ export const JobCreateForm: SFC<Props> = React.memo(
 
     const kibanaContext = useContext(KibanaContext);
 
-    if (
-      kibanaContext === null ||
-      kibanaContext.indexPatterns === undefined ||
-      kibanaContext.kibanaConfig === undefined
-    ) {
+    if (!isKibanaExtendedContext(kibanaContext)) {
       return null;
     }
 

@@ -25,6 +25,7 @@ import { dictionaryToArray } from '../../../../common/types/common';
 
 import {
   DataFramePreviewRequest,
+  isKibanaContext,
   KibanaContext,
   PivotAggsConfigDict,
   PivotGroupByConfig,
@@ -104,7 +105,7 @@ export const PivotPreview: SFC<PivotPreviewProps> = React.memo(({ aggs, groupBy,
 
   const kibanaContext = useContext(KibanaContext);
 
-  if (kibanaContext === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 

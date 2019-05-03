@@ -32,7 +32,7 @@ import {
   JobDetailsSummary,
 } from '../../components/job_details';
 
-import { KibanaContext } from '../../common';
+import { isKibanaContext, KibanaContext } from '../../common';
 
 enum WIZARD_STEPS {
   DEFINE_PIVOT,
@@ -75,7 +75,7 @@ const DefinePivotStep: SFC<DefinePivotStepProps> = ({
 export const Wizard: SFC = React.memo(() => {
   const kibanaContext = useContext(KibanaContext);
 
-  if (kibanaContext === null) {
+  if (!isKibanaContext(kibanaContext)) {
     return null;
   }
 
