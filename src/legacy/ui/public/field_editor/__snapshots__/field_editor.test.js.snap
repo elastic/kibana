@@ -151,11 +151,13 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
       <eui-textArea
         data-test-subj="editorFieldScript"
+        fullWidth={true}
         isInvalid={true}
         onChange={[Function]}
       />
@@ -379,11 +381,13 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
     </eui-form-row>
     <eui-form-row
       error={null}
+      fullWidth={true}
       isInvalid={false}
       label="Script"
     >
       <eui-textArea
         data-test-subj="editorFieldScript"
+        fullWidth={true}
         isInvalid={false}
         onChange={[Function]}
         value="doc.test.value"
@@ -672,11 +676,13 @@ exports[`FieldEditor should show conflict field warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error="Script is required"
+      fullWidth={true}
       isInvalid={true}
       label="Script"
     >
       <eui-textArea
         data-test-subj="editorFieldScript"
+        fullWidth={true}
         isInvalid={true}
         onChange={[Function]}
       />
@@ -986,11 +992,13 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
     </eui-form-row>
     <eui-form-row
       error={null}
+      fullWidth={true}
       isInvalid={false}
       label="Script"
     >
       <eui-textArea
         data-test-subj="editorFieldScript"
+        fullWidth={true}
         isInvalid={false}
         onChange={[Function]}
         value="doc.test.value"
