@@ -13,8 +13,8 @@ export const AND = i18n.translate('xpack.siem.dataProviders.and', {
 export const DELETE_DATA_PROVIDER = i18n.translate('xpack.siem.dataProviders.deleteDataProvider', {
   defaultMessage: 'Delete',
 });
-export const ADD = i18n.translate('xpack.siem.dataProviders.add', {
-  defaultMessage: 'Add',
+export const DROP_HERE_TO_ADD_AN = i18n.translate('xpack.siem.dataProviders.dropHereToAddAnLabel', {
+  defaultMessage: 'Drop here to add an',
 });
 
 export const DROP_HERE = i18n.translate('xpack.siem.dataProviders.dropHere', {

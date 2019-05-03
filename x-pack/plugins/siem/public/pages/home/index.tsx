@@ -11,8 +11,6 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  // @ts-ignore
-  EuiSearchBar,
 } from '@elastic/eui';
 import * as React from 'react';
 import { Redirect, Route, Switch } from 'react-router-dom';
@@ -34,6 +32,7 @@ import { NotFoundPage } from '../404';
 import { HostsContainer } from '../hosts';
 import { NetworkContainer } from '../network';
 import { Overview } from '../overview';
+import { Timelines } from '../timelines';
 
 const WrappedByAutoSizer = styled.div`
   height: 100%;
@@ -105,6 +104,7 @@ export const HomePage = pure(() => (
                 <Route path="/overview" component={Overview} />
                 <Route path="/hosts" component={HostsContainer} />
                 <Route path="/network" component={NetworkContainer} />
+                <Route path="/timelines" component={Timelines} />
                 <Route path="/link-to" component={LinkToPage} />
                 <Route component={NotFoundPage} />
               </Switch>
@@ -133,6 +133,7 @@ const PageHeader = styled(EuiPageHeader)`
 
 const PageHeaderSection = styled(EuiPageHeaderSection)`
   width: 100%;
+  user-select: none;
 `;
 
 const FixEuiFlexGroup = styled(EuiFlexGroup)`

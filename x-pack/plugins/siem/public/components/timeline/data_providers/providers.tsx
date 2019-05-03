@@ -39,6 +39,13 @@ interface Props {
   onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
 }
 
+/**
+ * This fixed height prevents the timeline's droppable area from growing,
+ * (growth causes layout thrashing) when the AND drop target in a row
+ * of data providers is revealed.
+ */
+const ROW_OF_DATA_PROVIDERS_HEIGHT = 43; // px
+
 const PanelProviders = styled.div`
   position: relative
   display: flex;
@@ -55,7 +62,9 @@ const PanelProvidersGroupContainer = styled(EuiFlexGroup)`
   flex-grow: unset;
 `;
 
+/** A row of data providers in the timeline drop zone */
 const PanelProviderGroupContainer = styled(EuiFlexGroup)`
+  height: ${ROW_OF_DATA_PROVIDERS_HEIGHT}px;
   margin: 5px 0px;
 `;
 

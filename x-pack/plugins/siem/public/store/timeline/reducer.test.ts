@@ -6,7 +6,7 @@
 
 import { cloneDeep, set } from 'lodash/fp';
 
-import { defaultWidth } from '../../components/timeline/body';
+import { DEFAULT_TIMELINE_WIDTH } from '../../components/timeline/body';
 import { ColumnHeader } from '../../components/timeline/body/column_headers/column_header';
 import { defaultColumnHeaderType } from '../../components/timeline/body/column_headers/default_headers';
 import {
@@ -76,7 +76,7 @@ const timelineByIdMock: TimelineById = {
       columnId: '@timestamp',
       sortDirection: Direction.desc,
     },
-    width: defaultWidth,
+    width: DEFAULT_TIMELINE_WIDTH,
   },
 };
 
@@ -850,7 +850,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);
@@ -925,7 +925,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);
@@ -1107,7 +1107,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);
@@ -1182,7 +1182,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);
@@ -1353,7 +1353,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 50,
           itemsPerPageOptions: [10, 25, 50],
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);
@@ -1414,7 +1414,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [100, 200, 300], // updated
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);
@@ -1498,7 +1498,7 @@ describe('Timeline', () => {
           pinnedEventIds: {},
           itemsPerPage: 25,
           itemsPerPageOptions: [10, 25, 50],
-          width: defaultWidth,
+          width: DEFAULT_TIMELINE_WIDTH,
         },
       };
       expect(update).toEqual(expected);

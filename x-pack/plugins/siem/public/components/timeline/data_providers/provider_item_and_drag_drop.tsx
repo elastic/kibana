@@ -28,6 +28,7 @@ const DropAndTargetDataProvidersContainer = styled(EuiFlexItem)`
 `;
 
 const DropAndTargetDataProviders = styled.div<{ hasAndItem: boolean }>`
+  min-width: 230px;
   width: auto;
   border: 0.1rem dashed ${props => props.theme.eui.euiColorMediumShade};
   border-radius: 5px;
@@ -91,7 +92,7 @@ export const ProviderItemAndDragDrop = pure<ProviderItemDropProps>(
               </NumberProviderAndBadge>
             )}
             <EuiText color="subdued" size="xs">
-              {i18n.ADD}
+              {i18n.DROP_HERE_TO_ADD_AN}
             </EuiText>
             <AndOrBadge type="and" />
           </DropAndTargetDataProviders>

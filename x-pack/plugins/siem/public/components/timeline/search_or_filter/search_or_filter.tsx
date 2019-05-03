@@ -8,8 +8,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   // @ts-ignore
-  EuiSearchBar,
-  // @ts-ignore
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
