@@ -133,6 +133,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'logs',
             'maps',
             'uptime',
+            'siem',
           ].sort()
         );
       });
