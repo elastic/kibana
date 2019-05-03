@@ -4,10 +4,7 @@
 * you may not use this file except in compliance with the Elastic License.
 */
 import { get, has } from 'lodash';
-import { unitsMap } from '@elastic/datemath';
-
-const leastCommonInterval = (num = 0, base = 0) => Math.max(Math.ceil(num / base) * base, base);
-const isCalendarInterval = ({ unit, value }) => value === 1 && ['calendar', 'mixed'].includes(unitsMap[unit].type);
+import { leastCommonInterval, isCalendarInterval } from './lib/interval_helper';
 
 export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
   (class RollupSearchCapabilities extends DefaultSearchCapabilities {
@@ -58,17 +55,28 @@ export const getRollupSearchCapabilities = (DefaultSearchCapabilities) =>
 
     getValidTimeInterval(userIntervalString) {
       const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
-      const parsedUserInterval = this.parseInterval(userIntervalString);
 
-      let { unit } = parsedRollupJobInterval;
-      let { value } = this.convertIntervalToUnit(userIntervalString, unit);
+      const getValidCalendarInterval = () => {
+        const inSeconds = this.convertIntervalToUnit(userIntervalString, 's');
 
-      if (isCalendarInterval(parsedRollupJobInterval) && isCalendarInterval(parsedUserInterval)) {
-        unit = value > 1 ? parsedUserInterval.unit : parsedRollupJobInterval.unit;
-        value = 1;
-      } else {
-        value = leastCommonInterval(value, parsedRollupJobInterval.value);
-      }
+        return {
+          value: 1,
+          unit: this.getSuitableUnit(inSeconds.value),
+        };
+      };
+
+      const getValidFixedInterval = () => {
+        const inRollupJobUnit = this.convertIntervalToUnit(userIntervalString, parsedRollupJobInterval.unit);
+
+        return {
+          value: leastCommonInterval(inRollupJobUnit.value, parsedRollupJobInterval.value),
+          unit: parsedRollupJobInterval.unit,
+        };
+      };
+
+      const { value, unit } = (
+        isCalendarInterval(parsedRollupJobInterval) ? getValidCalendarInterval : getValidFixedInterval
+      )();
 
       return `${value}${unit}`;
     }
