@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { defaultWidth } from '../components/timeline/body';
+import { DEFAULT_TIMELINE_WIDTH } from '../components/timeline/body';
 import {
   Direction,
   DomainsFields,
@@ -141,7 +141,7 @@ export const mockGlobalState: State = {
         pinnedEventIds: {},
         itemsPerPageOptions: [5, 10, 20],
         sort: { columnId: '@timestamp', sortDirection: Direction.desc },
-        width: defaultWidth,
+        width: DEFAULT_TIMELINE_WIDTH,
       },
     },
   },

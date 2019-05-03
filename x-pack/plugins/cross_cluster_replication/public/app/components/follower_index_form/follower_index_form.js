@@ -379,7 +379,7 @@ export class FollowerIndexForm extends PureComponent {
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onIndexNameChange}
-        testSubj="ccrFollowerIndexFormFollowerIndexInput"
+        testSubj="followerIndexInput"
       />
     );
 
@@ -513,7 +513,7 @@ export class FollowerIndexForm extends PureComponent {
         disabled={!isNew}
         areErrorsVisible={areErrorsVisible}
         onValueUpdate={this.onFieldsChange}
-        testSubj="ccrFollowerIndexFormLeaderIndexInput"
+        testSubj="leaderIndexInput"
       />
     );
 
@@ -555,7 +555,7 @@ export class FollowerIndexForm extends PureComponent {
                   )}
                   checked={areAdvancedSettingsVisible}
                   onChange={this.toggleAdvancedSettings}
-                  data-test-subj="ccrFollowerIndexFormCustomAdvancedSettingsToggle"
+                  data-test-subj="advancedSettingsToggle"
                 />
               </Fragment>
             )}
@@ -620,7 +620,7 @@ export class FollowerIndexForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
-            data-test-subj="followerIndexFormError"
+            data-test-subj="formError"
           />
 
           <EuiSpacer size="l" />
@@ -665,7 +665,7 @@ export class FollowerIndexForm extends PureComponent {
               onClick={this.sendForm}
               fill
               disabled={isSaveDisabled}
-              data-test-subj="ccrFollowerIndexFormSubmitButton"
+              data-test-subj="submitButton"
             >
               {saveButtonLabel}
             </EuiButton>
@@ -675,7 +675,7 @@ export class FollowerIndexForm extends PureComponent {
             <EuiButtonEmpty
               color="primary"
               onClick={this.cancelForm}
-              data-test-subj="ccrFollowerIndexFormCancelButton"
+              data-test-subj="cancelButton"
             >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.cancelButtonLabel"
@@ -689,7 +689,7 @@ export class FollowerIndexForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm data-test-subj="ccrFollowerIndexForm">
+        <EuiForm data-test-subj="followerIndexForm">
           {renderRemoteClusterField()}
           {renderLeaderIndex()}
           {renderFollowerIndexName()}

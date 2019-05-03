@@ -9,8 +9,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiIcon,
   EuiPopover,
   EuiToolTip,
@@ -32,6 +30,7 @@ import {
   LockIconContainer,
 } from './styles';
 import * as i18n from './translations';
+import { OpenTimelineModalButton } from '../../open_timeline/open_timeline_modal';
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -53,6 +52,14 @@ injectGlobal`
 
 const Avatar = styled(EuiAvatar)`
   margin-left: 5px;
+`;
+
+const DescriptionPopoverMenuContainer = styled.div`
+  margin-top: 15px;
+`;
+
+const SettingsIcon = styled(EuiIcon)`
+  cursor: pointer;
 `;
 
 interface Props {
@@ -87,7 +94,7 @@ export const showDescriptionThreshold = 970;
 const starIconWidth = 30;
 const nameWidth = 155;
 const descriptionWidth = 165;
-const noteWidth = 110;
+const noteWidth = 130;
 const settingsWidth = 50;
 
 /** Displays the properties of a timeline, i.e. name, description, notes, etc */
@@ -228,12 +235,12 @@ export class Properties extends React.PureComponent<Props, State> {
           </EuiFlexItem>
         </PropertiesLeft>
 
-        <PropertiesRight alignItems="center" data-test-subj="properties-right" gutterSize="s">
+        <PropertiesRight alignItems="flexStart" data-test-subj="properties-right" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiPopover
               anchorPosition="downRight"
               button={
-                <EuiIcon
+                <SettingsIcon
                   data-test-subj="settings-gear"
                   type="gear"
                   size="l"
@@ -244,17 +251,21 @@ export class Properties extends React.PureComponent<Props, State> {
               isOpen={this.state.showActions}
               closePopover={this.onClosePopover}
             >
-              <EuiForm>
-                <EuiFormRow>
+              <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="none">
+                <EuiFlexItem grow={false}>
                   <NewTimeline
                     createTimeline={createTimeline}
                     onClosePopover={this.onClosePopover}
                     timelineId={timelineId}
                   />
-                </EuiFormRow>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <OpenTimelineModalButton />
+                </EuiFlexItem>
 
                 {width < showNotesThreshold ? (
-                  <EuiFormRow>
+                  <EuiFlexItem grow={false}>
                     <NotesButton
                       animate={true}
                       associateNote={associateNote}
@@ -267,19 +278,21 @@ export class Properties extends React.PureComponent<Props, State> {
                       toolTip={i18n.NOTES_TOOL_TIP}
                       updateNote={updateNote}
                     />
-                  </EuiFormRow>
+                  </EuiFlexItem>
                 ) : null}
 
                 {width < showDescriptionThreshold ? (
-                  <EuiFormRow label={i18n.DESCRIPTION}>
-                    <Description
-                      description={description}
-                      timelineId={timelineId}
-                      updateDescription={updateDescription}
-                    />
-                  </EuiFormRow>
+                  <EuiFlexItem grow={false}>
+                    <DescriptionPopoverMenuContainer>
+                      <Description
+                        description={description}
+                        timelineId={timelineId}
+                        updateDescription={updateDescription}
+                      />
+                    </DescriptionPopoverMenuContainer>
+                  </EuiFlexItem>
                 ) : null}
-              </EuiForm>
+              </EuiFlexGroup>
             </EuiPopover>
           </EuiFlexItem>
 

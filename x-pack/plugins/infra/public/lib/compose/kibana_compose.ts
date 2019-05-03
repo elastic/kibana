@@ -25,6 +25,7 @@ import { InfraKibanaObservableApiAdapter } from '../adapters/observable_api/kiba
 
 export function compose(): InfraFrontendLibs {
   const cache = new InMemoryCache({
+    addTypename: false,
     fragmentMatcher: new IntrospectionFragmentMatcher({
       introspectionQueryResultData,
     }),

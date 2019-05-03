@@ -17,13 +17,17 @@
  * under the License.
  */
 
-import { mockCreatePluginSetupContext } from './plugins_system.test.mocks';
+import {
+  mockCreatePluginSetupContext,
+  mockCreatePluginStartContext,
+} from './plugins_system.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
 import { Config, ConfigService, Env, ObjectToConfigAdapter } from '../config';
 import { getEnvOptions } from '../config/__mocks__/env';
 import { CoreContext } from '../core_context';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
+import { httpServiceMock } from '../http/http_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { PluginWrapper, PluginName } from './plugin';
 import { PluginsSystem } from './plugins_system';
@@ -57,7 +61,10 @@ let pluginsSystem: PluginsSystem;
 let configService: ConfigService;
 let env: Env;
 let coreContext: CoreContext;
-const setupDeps = { elasticsearch: elasticsearchServiceMock.createSetupContract() };
+const setupDeps = {
+  elasticsearch: elasticsearchServiceMock.createSetupContract(),
+  http: httpServiceMock.createSetupContract(),
+};
 beforeEach(() => {
   env = Env.createDefault(getEnvOptions());
 
@@ -127,33 +134,68 @@ Array [
 `);
 });
 
-test('`setupPlugins` correctly orders plugins and returns exposed values', async () => {
+test('correctly orders plugins and returns exposed values for "setup" and "start"', async () => {
+  interface Contracts {
+    setup: Record<PluginName, unknown>;
+    start: Record<PluginName, unknown>;
+  }
   const plugins = new Map([
-    [createPlugin('order-4', { required: ['order-2'] }), { 'order-2': 'added-as-2' }],
-    [createPlugin('order-0'), {}],
+    [
+      createPlugin('order-4', { required: ['order-2'] }),
+      {
+        setup: { 'order-2': 'added-as-2' },
+        start: { 'order-2': 'started-as-2' },
+      },
+    ],
+    [
+      createPlugin('order-0'),
+      {
+        setup: {},
+        start: {},
+      },
+    ],
     [
       createPlugin('order-2', { required: ['order-1'], optional: ['order-0'] }),
-      { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+      {
+        setup: { 'order-1': 'added-as-3', 'order-0': 'added-as-1' },
+        start: { 'order-1': 'started-as-3', 'order-0': 'started-as-1' },
+      },
     ],
-    [createPlugin('order-1', { required: ['order-0'] }), { 'order-0': 'added-as-1' }],
+    [
+      createPlugin('order-1', { required: ['order-0'] }),
+      {
+        setup: { 'order-0': 'added-as-1' },
+        start: { 'order-0': 'started-as-1' },
+      },
+    ],
     [
       createPlugin('order-3', { required: ['order-2'], optional: ['missing-dep'] }),
-      { 'order-2': 'added-as-2' },
+      {
+        setup: { 'order-2': 'added-as-2' },
+        start: { 'order-2': 'started-as-2' },
+      },
     ],
-  ] as Array<[PluginWrapper, Record<PluginName, unknown>]>);
+  ] as Array<[PluginWrapper, Contracts]>);
 
   const setupContextMap = new Map();
+  const startContextMap = new Map();
 
   [...plugins.keys()].forEach((plugin, index) => {
     jest.spyOn(plugin, 'setup').mockResolvedValue(`added-as-${index}`);
+    jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
 
     setupContextMap.set(plugin.name, `setup-for-${plugin.name}`);
+    startContextMap.set(plugin.name, `start-for-${plugin.name}`);
 
     pluginsSystem.addPlugin(plugin);
   });
 
   mockCreatePluginSetupContext.mockImplementation((context, deps, plugin) =>
     setupContextMap.get(plugin.name)
+  );
+
+  mockCreatePluginStartContext.mockImplementation((context, deps, plugin) =>
+    startContextMap.get(plugin.name)
   );
 
   expect([...(await pluginsSystem.setupPlugins(setupDeps))]).toMatchInlineSnapshot(`
@@ -184,7 +226,39 @@ Array [
   for (const [plugin, deps] of plugins) {
     expect(mockCreatePluginSetupContext).toHaveBeenCalledWith(coreContext, setupDeps, plugin);
     expect(plugin.setup).toHaveBeenCalledTimes(1);
-    expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps);
+    expect(plugin.setup).toHaveBeenCalledWith(setupContextMap.get(plugin.name), deps.setup);
+  }
+
+  const startDeps = {};
+  expect([...(await pluginsSystem.startPlugins(startDeps))]).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "order-0",
+    "started-as-1",
+  ],
+  Array [
+    "order-1",
+    "started-as-3",
+  ],
+  Array [
+    "order-2",
+    "started-as-2",
+  ],
+  Array [
+    "order-3",
+    "started-as-4",
+  ],
+  Array [
+    "order-4",
+    "started-as-0",
+  ],
+]
+`);
+
+  for (const [plugin, deps] of plugins) {
+    expect(mockCreatePluginStartContext).toHaveBeenCalledWith(coreContext, startDeps, plugin);
+    expect(plugin.start).toHaveBeenCalledTimes(1);
+    expect(plugin.start).toHaveBeenCalledWith(startContextMap.get(plugin.name), deps.start);
   }
 });
 
@@ -264,6 +338,41 @@ Array [
   "order-2",
   "order-3",
   "order-4",
+]
+`);
+});
+
+test('can start without plugins', async () => {
+  await pluginsSystem.setupPlugins(setupDeps);
+  const pluginsStart = await pluginsSystem.startPlugins({});
+
+  expect(pluginsStart).toBeInstanceOf(Map);
+  expect(pluginsStart.size).toBe(0);
+});
+
+test('`startPlugins` only starts plugins that were setup', async () => {
+  const firstPluginToRun = createPlugin('order-0');
+  const secondPluginNotToRun = createPlugin('order-not-run', { server: false });
+  const thirdPluginToRun = createPlugin('order-1');
+
+  [firstPluginToRun, secondPluginNotToRun, thirdPluginToRun].forEach((plugin, index) => {
+    jest.spyOn(plugin, 'setup').mockResolvedValue(`setup-as-${index}`);
+    jest.spyOn(plugin, 'start').mockResolvedValue(`started-as-${index}`);
+
+    pluginsSystem.addPlugin(plugin);
+  });
+  await pluginsSystem.setupPlugins(setupDeps);
+  const result = await pluginsSystem.startPlugins({});
+  expect([...result]).toMatchInlineSnapshot(`
+Array [
+  Array [
+    "order-1",
+    "started-as-2",
+  ],
+  Array [
+    "order-0",
+    "started-as-0",
+  ],
 ]
 `);
 });

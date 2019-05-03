@@ -100,7 +100,7 @@ export class ApplyFiltersPopover extends Component<Props, State> {
             <EuiButton onClick={this.onSubmit} fill>
               <FormattedMessage
                 id="common.ui.applyFiltersPopup.saveButtonLabel"
-                defaultMessage="Save"
+                defaultMessage="Apply"
               />
             </EuiButton>
           </EuiModalFooter>

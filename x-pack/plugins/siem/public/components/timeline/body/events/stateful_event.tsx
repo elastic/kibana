@@ -29,12 +29,12 @@ interface Props {
   columnHeaders: ColumnHeader[];
   columnRenderers: ColumnRenderer[];
   event: TimelineItem;
-  eventIdToNoteIds: { [eventId: string]: string[] };
+  eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   onColumnResized: OnColumnResized;
   onPinEvent: OnPinEvent;
   onUnPinEvent: OnUnPinEvent;
-  pinnedEventIds: { [eventId: string]: boolean };
+  pinnedEventIds: Readonly<Record<string, boolean>>;
   rowRenderers: RowRenderer[];
   timelineId: string;
   updateNote: UpdateNote;
@@ -47,8 +47,6 @@ interface State {
 }
 
 export const getNewNoteId = (): string => uuid.v4();
-
-export const defaultWidth = 1090;
 
 const emptyNotes: string[] = [];
 

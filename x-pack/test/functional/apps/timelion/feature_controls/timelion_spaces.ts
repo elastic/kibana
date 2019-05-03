@@ -12,10 +12,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const esArchiver = getService('esArchiver');
   const spacesService: SpacesService = getService('spaces');
   const PageObjects = getPageObjects(['common', 'timelion', 'security', 'spaceSelector']);
-  const find = getService('find');
   const appsMenu = getService('appsMenu');
-
-  const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
 
   describe('timelion', () => {
     before(async () => {
@@ -89,7 +86,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -106,7 +103,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -123,7 +120,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await getMessageText();
+        const messageText = await PageObjects.common.getBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

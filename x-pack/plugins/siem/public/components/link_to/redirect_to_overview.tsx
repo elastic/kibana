@@ -7,10 +7,6 @@
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 
-export const RedirectToOverviewPage = () => {
-  return <Redirect to={'/overview'} />;
-};
+export const RedirectToOverviewPage = () => <Redirect to={'/overview'} />;
 
-export const getOverviewUrl = () => {
-  return '#/link-to/overview';
-};
+export const getOverviewUrl = () => '#/link-to/overview';

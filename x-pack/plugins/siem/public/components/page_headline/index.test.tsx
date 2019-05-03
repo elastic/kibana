@@ -77,6 +77,17 @@ describe('SIEM Page Headline', () => {
     expect(get('props.defaultMessage', pageHeadline)).toEqual('Network');
   });
 
+  test('Renders timelines headline', () => {
+    const mockProps = getMockProps('/timelines');
+    const wrapper = shallow(<PageHeadlineComponents {...mockProps} />);
+    const pageHeadline = wrapper
+      .dive()
+      .find('[data-test-subj="page_headline"]')
+      .props().title;
+
+    expect(get('props.defaultMessage', pageHeadline)).toEqual('Timelines');
+  });
+
   test('Renders host details headline', () => {
     const mockProps = getMockProps('/hosts/siem-kibana');
     const wrapper = shallow(<PageHeadlineComponents {...mockProps} />);

@@ -7,7 +7,7 @@ import { TestInvoker } from './lib/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function codeApp({ loadTestFile }: TestInvoker) {
-  describe('Code app', function codeAppTestSuite() {
+  describe('Code', function codeAppTestSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./manage_repositories'));
     loadTestFile(require.resolve('./search'));
