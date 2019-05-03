@@ -21,6 +21,7 @@ import { getExpressionType } from './lib/get_expression_type';
 import {
   ContextFunction,
   Datatable,
+  DatatableRow,
   PointSeries,
   PointSeriesColumnName,
   PointSeriesColumns,
@@ -84,7 +85,7 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
         return col.match(/\s/) ? `'${col}'` : col;
       };
 
-      const measureNames: string[] = [];
+      const measureNames: PointSeriesColumnName[] = [];
       const dimensions: Array<{ name: keyof Arguments; value: string }> = [];
       const columns = {} as PointSeriesColumns;
 
@@ -124,7 +125,7 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
       });
 
       const PRIMARY_KEY = '%%CANVAS_POINTSERIES_PRIMARY_KEY%%';
-      const rows: Array<Record<string, string | number>> = context.rows.map((row, i) => ({
+      const rows: DatatableRow[] = context.rows.map((row, i) => ({
         ...row,
         [PRIMARY_KEY]: i,
       }));
@@ -145,33 +146,30 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
       // Dimensions
       // Group rows by their dimension values, using the argument values and preserving the PRIMARY_KEY
       // There's probably a better way to do this
-      const results: Record<string, string | number> = rows.reduce(
-        (rowAcc: Record<string, string>, row, i) => {
-          const newRow = dimensions.reduce(
-            (acc: Record<string, string | number>, { name, value }) => {
-              try {
-                acc[name] = args[name]
-                  ? normalizeValue(value, evaluate(value, mathScope)[i])
-                  : '_all';
-              } catch (e) {
-                // TODO: handle invalid column names...
-                // Do nothing if column does not exist
-                // acc[dimension] = '_all';
-              }
-              return acc;
-            },
-            { [PRIMARY_KEY]: row[PRIMARY_KEY] }
-          );
+      const results: DatatableRow = rows.reduce((rowAcc: DatatableRow, row, i) => {
+        const newRow = dimensions.reduce(
+          (acc: Record<string, string | number>, { name, value }) => {
+            try {
+              acc[name] = args[name]
+                ? normalizeValue(value, evaluate(value, mathScope)[i])
+                : '_all';
+            } catch (e) {
+              // TODO: handle invalid column names...
+              // Do nothing if column does not exist
+              // acc[dimension] = '_all';
+            }
+            return acc;
+          },
+          { [PRIMARY_KEY]: row[PRIMARY_KEY] }
+        );
 
-          return Object.assign(rowAcc, { [row[PRIMARY_KEY]]: newRow });
-        },
-        {}
-      );
+        return Object.assign(rowAcc, { [row[PRIMARY_KEY]]: newRow });
+      }, {});
 
       // Measures
       // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
       // for each measure
-      const measureKeys = groupBy(rows, row =>
+      const measureKeys = groupBy<DatatableRow>(rows, row =>
         dimensions
           .map(({ name }) => {
             const value = args[name];
@@ -181,12 +179,12 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
       );
 
       // Then compute that 1 value for each measure
-      values(measureKeys).forEach(rowValues => {
-        const subtable = { type: 'datatable', columns: context.columns, rows: rowValues };
+      values<DatatableRow[]>(measureKeys).forEach(valueRows => {
+        const subtable = { type: 'datatable', columns: context.columns, rows: valueRows };
         const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
         const measureValues = measureNames.map(measure => {
           try {
-            const ev = evaluate(args[measure as keyof Arguments], subScope);
+            const ev = evaluate(args[measure], subScope);
             if (Array.isArray(ev)) {
               throw new Error('Expressions must be wrapped in a function such as sum()');
             }
@@ -198,7 +196,7 @@ export function pointseries(): ContextFunction<'pointseries', Datatable, Argumen
           }
         });
 
-        rows.forEach(row => {
+        valueRows.forEach(row => {
           Object.assign(results[row[PRIMARY_KEY]], zipObject(measureNames, measureValues));
         });
       });
