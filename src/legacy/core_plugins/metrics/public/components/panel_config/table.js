@@ -92,7 +92,11 @@ class TablePanelConfig extends Component {
       pivot_type: pivotType
     });
   };
-
+  /* TODO: Resolve panel request failure as soon as a filter query is added.
+      root cause type: 'parsing_exception'
+      reason:
+      "[query_string] unknown token [START_OBJECT] after [query]
+  */
   handleSubmit = query => {
     this.props.onChange({ filter: query.query });
   }
