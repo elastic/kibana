@@ -136,13 +136,18 @@ export function geoShapeToGeometry(value) {
     throw new Error(errorMessage);
   }
 
-  const geoJson = _.cloneDeep(value);
+  const geoJson = {
+    type: value.type,
+    coordinates: value.coordinates
+  };
 
   // https://www.elastic.co/guide/en/elasticsearch/reference/current/geo-shape.html#input-structure
   // For some unknown compatibility nightmarish reason, Elasticsearch types are not capitalized the same as geojson types
   // For example: 'LineString' geojson type is 'linestring' in elasticsearch
   // Convert feature types to geojson spec values
-  switch (geoJson.type) {
+  // Sometimes, the type in ES is capatizized corredtly. sometimes it is not. It depends on how the doc was ingested
+  // This is just a correction
+  switch (value.type) {
     case 'point':
       geoJson.type = 'Point';
       break;
