@@ -105,6 +105,7 @@ class TablePanelConfig extends Component {
 
   render() {
     const { selectedTab } = this.state;
+    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = { drilldown_url: '', filter: '', pivot_label: '', pivot_rows: 10, pivot_type: '' };
     const model = { ...defaults, ...this.props.model };
     const handleTextChange = createTextHandler(this.props.onChange);
