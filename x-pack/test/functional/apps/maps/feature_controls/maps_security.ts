@@ -14,6 +14,7 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const globalNav = getService('globalNav');
 
   const getMessageText = async () => await (await find.byCssSelector('body>pre')).getVisibleText();
 
@@ -80,6 +81,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`allows a map to be deleted`, async () => {
         await PageObjects.maps.deleteSavedMaps('my test map');
       });
+
+      it(`doesn't show read-only badge`, async () => {
+        await globalNav.badgeMissingOrFail();
+      });
     });
 
     describe('global maps read-only privileges', () => {
@@ -133,6 +138,10 @@ export default function({ getPageObjects, getService }: KibanaFunctionalTestDefa
       it(`does not allow a map to be deleted`, async () => {
         await PageObjects.maps.gotoMapListingPage();
         await testSubjects.missingOrFail('checkboxSelectAll');
+      });
+
+      it(`shows read-only badge`, async () => {
+        await globalNav.badgeExistsOrFail('Read only');
       });
 
       describe('existing map', () => {

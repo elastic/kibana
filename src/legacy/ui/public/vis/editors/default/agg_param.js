@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import { isFunction } from 'lodash';
 import { wrapInI18nContext } from 'ui/i18n';
 import { uiModules } from '../../../modules';
 import { AggParamReactWrapper } from './agg_param_react_wrapper';
@@ -74,21 +73,11 @@ uiModules
       link: {
         pre: function ($scope, $el, attr) {
           $scope.$bind('aggParam', attr.aggParam);
-          $scope.$bind('agg', attr.agg);
           $scope.$bind('editorComponent', attr.editorComponent);
-          $scope.$bind('indexedFields', attr.indexedFields);
         },
         post: function ($scope, $el, attr, ngModelCtrl) {
           $scope.config = config;
           $scope.showValidation = false;
-
-          $scope.optionEnabled = function (option) {
-            if (option && isFunction(option.enabled)) {
-              return option.enabled($scope.agg);
-            }
-
-            return true;
-          };
 
           if (attr.editorComponent) {
             $scope.$watch('agg.params[aggParam.name]', (value) => {
@@ -105,14 +94,13 @@ uiModules
                 $scope.showValidation = true;
               }
             }, true);
+
             $scope.paramValue = $scope.agg.params[$scope.aggParam.name];
           }
 
           $scope.onChange = (value) => {
-            // This is obviously not a good code quality, but without using scope binding (which we can't see above)
-            // to bind function values, this is right now the best temporary fix, until all of this will be gone.
-            $scope.$parent.onParamChange($scope.agg, $scope.aggParam.name, value);
-
+            $scope.paramValue = value;
+            $scope.onParamChange($scope.agg, $scope.aggParam.name, value);
             $scope.showValidation = true;
             ngModelCtrl.$setDirty();
           };

@@ -18,6 +18,7 @@ import { LicenseProvider } from '../context/LicenseContext';
 import { UpdateBreadcrumbs } from '../components/app/Main/UpdateBreadcrumbs';
 import { routes } from '../components/app/Main/routeConfig';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
+import { useUpdateBadgeEffect } from '../components/app/Main/useUpdateBadgeEffect';
 
 export const REACT_APP_ROOT_ID = 'react-apm-root';
 
@@ -28,6 +29,8 @@ const MainContainer = styled.div`
 `;
 
 function App() {
+  useUpdateBadgeEffect();
+
   return (
     <UrlParamsProvider>
       <LoadingIndicatorProvider>

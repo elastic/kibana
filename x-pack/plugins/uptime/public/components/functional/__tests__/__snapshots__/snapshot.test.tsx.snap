@@ -41,31 +41,25 @@ exports[`Snapshot component renders without errors 1`] = `
             <EuiFlexItem>
               <EuiStat
                 description="Up"
-                reverse={false}
                 textAlign="center"
                 title={8}
                 titleColor="secondary"
-                titleSize="l"
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
                 description="Down"
-                reverse={false}
                 textAlign="center"
                 title={2}
                 titleColor="danger"
-                titleSize="l"
               />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiStat
                 description="Total"
-                reverse={false}
                 textAlign="center"
                 title={10}
                 titleColor="subdued"
-                titleSize="l"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
