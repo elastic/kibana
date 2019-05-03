@@ -90,6 +90,8 @@ export const logEntriesSchema = gql`
     id: ID!
     "The index where the document was found"
     index: String!
+    "Time key for the document - derived from the source configuration timestamp and tiebreaker settings"
+    key: InfraTimeKey!
     "An array of flattened fields and values"
     fields: [InfraLogItemField!]!
   }
