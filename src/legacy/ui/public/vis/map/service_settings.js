@@ -118,17 +118,17 @@ uiModules.get('kibana')
 
         if  (mapConfig.includeElasticMapsService) {
           const servicesFromManifest = await this._emsClient.getTMSServices();
-          const strippedServiceFromManifest = servicesFromManifest.map((service) => {
+          const strippedServiceFromManifest = await Promise.all(servicesFromManifest.map(async (service) => {
             //shim for compatibility
             const shim = {
               origin: service.getOrigin(),
               id: service.getId(),
-              minZoom: service.getMinZoom(),
-              maxZoom: service.getMaxZoom(),
+              minZoom: await service.getMinZoom(),
+              maxZoom: await service.getMaxZoom(),
               attribution: service.getHTMLAttribution()
             };
             return shim;
-          });
+          }));
           allServices = allServices.concat(strippedServiceFromManifest);
         }
 

@@ -40,8 +40,8 @@ describe('ems_client', () => {
     expect(tileService.getUrlTemplate()).to.be('https://tiles-stage.elastic.co/v2/default/{z}/{x}/{y}.png?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version=7.x.x');
 
     expect (tileService.getHTMLAttribution()).to.be('<p>© <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>\n');
-    expect (tileService.getMinZoom()).to.be(0);
-    expect (tileService.getMaxZoom()).to.be(10);
+    expect (await tileService.getMinZoom()).to.be(0);
+    expect (await tileService.getMaxZoom()).to.be(10);
     expect (tileService.hasId('road_map')).to.be(true);
 
 
