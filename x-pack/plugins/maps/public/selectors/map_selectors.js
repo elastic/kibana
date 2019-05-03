@@ -16,7 +16,6 @@ import { TileStyle } from '../shared/layers/styles/tile_style';
 import { timefilter } from 'ui/timefilter';
 import { getInspectorAdapters } from '../store/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../store/util';
-import { DRAW_STATE_TYPE } from '../actions/store_actions';
 
 function createLayerInstance(layerDescriptor, inspectorAdapters) {
   const source = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
@@ -115,10 +114,6 @@ export const getQuery = ({ map }) => map.mapState.query;
 export const getFilters = ({ map }) => map.mapState.filters;
 
 export const getDrawState = ({ map }) => map.mapState.drawState;
-
-export const getIsDrawingFilter = createSelector(getDrawState, (drawState) => {
-  return drawState.type === DRAW_STATE_TYPE.ACTIVE;
-});
 
 export const getRefreshConfig = ({ map }) => {
   if (map.mapState.refreshConfig) {

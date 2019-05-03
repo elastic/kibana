@@ -39,7 +39,6 @@ import {
   UPDATE_SOURCE_DATA_REQUEST,
   SET_TOOLTIP_STATE,
   UPDATE_DRAW_STATE,
-  DRAW_STATE_TYPE,
   SET_SCROLL_ZOOM
 } from '../actions/store_actions';
 
@@ -104,9 +103,7 @@ const INITIAL_STATE = {
     filters: [],
     refreshConfig: null,
     refreshTimerLastTriggeredAt: null,
-    drawState: {
-      type: DRAW_STATE_TYPE.NONE
-    }
+    drawState: null
   },
   selectedLayerId: null,
   __transientLayerId: null,

@@ -14,8 +14,7 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setTooltipState,
-  DRAW_STATE_TYPE,
-  updateDrawStateWithOptions
+  updateDrawState
 } from '../../../actions/store_actions';
 import {
   getTooltipState,
@@ -23,7 +22,6 @@ import {
   getMapReady,
   getGoto,
   getDrawState,
-  getIsDrawingFilter,
   getScrollZoom
 } from '../../../selectors/map_selectors';
 import { getIsFilterable } from '../../../store/ui';
@@ -38,7 +36,6 @@ function mapStateToProps(state = {}) {
     inspectorAdapters: getInspectorAdapters(state),
     tooltipState: getTooltipState(state),
     drawState: getDrawState(state),
-    isDrawingFilter: getIsDrawingFilter(state),
     scrollZoom: getScrollZoom(state)
   };
 }
@@ -69,7 +66,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(setTooltipState(tooltipState));
     },
     disableDrawState() {
-      dispatch(updateDrawStateWithOptions(DRAW_STATE_TYPE.NONE, null));
+      dispatch(updateDrawState(null));
     }
   };
 }

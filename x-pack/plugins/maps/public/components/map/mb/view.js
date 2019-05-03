@@ -28,6 +28,17 @@ const TOOLTIP_TYPE = {
 
 export class MBMapContainer extends React.Component {
 
+
+  state = {
+    isDrawingFilter: false
+  };
+
+  static getDerivedStateFromProps(nextProps) {
+    return {
+      isDrawingFilter: nextProps.drawState !== null
+    };
+  }
+
   constructor() {
     super();
     this._mbMap = null;
@@ -76,7 +87,7 @@ export class MBMapContainer extends React.Component {
 
   _lockTooltip =  (e) => {
 
-    if (this.props.isDrawingFilter) {
+    if (this.state.isDrawingFilter) {
       //ignore click events when in draw mode
       return;
     }
@@ -102,7 +113,7 @@ export class MBMapContainer extends React.Component {
 
   _updateHoverTooltipState = _.debounce((e) => {
 
-    if (this.props.isDrawingFilter) {
+    if (this.state.isDrawingFilter) {
       //ignore hover events when in draw mode
       return;
     }
@@ -360,7 +371,7 @@ export class MBMapContainer extends React.Component {
   }
 
   _syncDrawControl() {
-    if (this.props.isDrawingFilter) {
+    if (this.state.isDrawingFilter) {
       this._updateDrawControl();
     } else {
       this._removeDrawControl();

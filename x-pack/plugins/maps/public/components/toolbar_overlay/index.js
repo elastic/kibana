@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { ToolbarOverlay } from './view';
 import { getDrawState, getUniqueIndexPatternIds } from '../../selectors/map_selectors';
 import { getIsReadOnly } from '../../store/ui';
-import { DRAW_STATE_TYPE, updateDrawStateWithOptions } from '../../actions/store_actions';
+import { updateDrawState } from '../../actions/store_actions';
 
 
 function mapStateToProps(state = {}) {
@@ -22,9 +22,8 @@ function mapStateToProps(state = {}) {
 function mapDispatchToProps(dispatch) {
   return {
     initiateDraw: (options) => {
-      dispatch(updateDrawStateWithOptions(DRAW_STATE_TYPE.ACTIVE, options));
-    },
-
+      dispatch(updateDrawState(options));
+    }
   };
 }
 

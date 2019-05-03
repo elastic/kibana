@@ -697,17 +697,14 @@ export function setJoinsForLayer(layer, joins) {
   };
 }
 
-export function updateDrawStateWithOptions(type, options) {
+export function updateDrawState(drawState) {
   return async (dispatch) => {
-    if (type === DRAW_STATE_TYPE.ACTIVE) {
+    if (drawState !== null) {
       await dispatch(setTooltipState(null));//tooltips just get in the way
     }
     dispatch({
       type: UPDATE_DRAW_STATE,
-      drawState: {
-        type: type,
-        ...options
-      }
+      drawState: drawState
     });
   };
 }
