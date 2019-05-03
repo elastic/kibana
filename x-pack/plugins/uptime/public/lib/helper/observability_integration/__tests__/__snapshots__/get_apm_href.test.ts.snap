@@ -1,0 +1,5 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getApmHref creates href with base path when present 1`] = `"/foo/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`;
+
+exports[`getApmHref does not add a base path or extra slash when base path is undefined 1`] = `"/app/apm#/services?kuery=url.domain:%20%22www.elastic.co%22&rangeFrom=now-15m&rangeTo=now"`;

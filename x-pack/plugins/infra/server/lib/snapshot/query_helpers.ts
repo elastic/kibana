@@ -6,21 +6,36 @@
 
 import { metricAggregationCreators } from './metric_aggregation_creators';
 import { InfraSnapshotRequestOptions } from './snapshot';
+import { NAME_FIELDS } from '../constants';
+import { getIntervalInSeconds } from '../../utils/get_interval_in_seconds';
 
 export const getGroupedNodesSources = (options: InfraSnapshotRequestOptions) => {
   const sources = options.groupBy.map(gb => {
     return { [`${gb.field}`]: { terms: { field: gb.field } } };
   });
   sources.push({
-    node: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },
+    id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } },
+  });
+  sources.push({
+    name: { terms: { field: NAME_FIELDS[options.nodeType] } },
   });
   return sources;
 };
 
 export const getMetricsSources = (options: InfraSnapshotRequestOptions) => {
-  return [{ node: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } } }];
+  return [{ id: { terms: { field: options.sourceConfiguration.fields[options.nodeType] } } }];
 };
 
 export const getMetricsAggregations = (options: InfraSnapshotRequestOptions) => {
   return metricAggregationCreators[options.metric.type](options.nodeType);
+};
+
+export const getDateHistogramOffset = (options: InfraSnapshotRequestOptions): string => {
+  const { from, interval } = options.timerange;
+  const fromInSeconds = Math.floor(from / 1000);
+  const bucketSizeInSeconds = getIntervalInSeconds(interval);
+
+  // negative offset to align buckets with full intervals (e.g. minutes)
+  const offset = (fromInSeconds % bucketSizeInSeconds) - bucketSizeInSeconds;
+  return `${offset}s`;
 };
