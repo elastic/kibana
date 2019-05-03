@@ -27,7 +27,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'settings', 'common']);
   const browser = getService('browser');
-  const percy = getService('percy');
   const dashboardAddPanel = getService('dashboardAddPanel');
 
   describe('create and add embeddables', async () => {
@@ -50,7 +49,6 @@ export default function ({ getService, getPageObjects }) {
           expect(panelCount).to.eql(originalPanelCount + 1);
         });
 
-        await percy.snapshot();
         await PageObjects.dashboard.waitForRenderComplete();
       });
 
@@ -74,7 +72,6 @@ export default function ({ getService, getPageObjects }) {
         const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
         await dashboardAddPanel.closeAddPanel();
         expect(exists).to.be(true);
-        await percy.snapshot();
       });
 
       describe('is false', () => {
@@ -91,7 +88,6 @@ export default function ({ getService, getPageObjects }) {
           const exists = await dashboardAddPanel.panelAddLinkExists(LAB_VIS_NAME);
           await dashboardAddPanel.closeAddPanel();
           expect(exists).to.be(false);
-          await percy.snapshot();
         });
 
         after(async () => {

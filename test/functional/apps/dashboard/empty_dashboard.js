@@ -21,7 +21,6 @@ import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
   const testSubjects = getService('testSubjects');
-  const percy = getService('percy');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const PageObjects = getPageObjects(['dashboard']);
 
@@ -38,14 +37,12 @@ export default function ({ getService, getPageObjects }) {
     it('should display add button', async () => {
       const addButtonExists = await testSubjects.exists('emptyDashboardAddPanelButton');
       expect(addButtonExists).to.be(true);
-      await percy.snapshot();
     });
 
     it('should open add panel when add button is clicked', async () => {
       await testSubjects.click('emptyDashboardAddPanelButton');
       const isAddPanelOpen = await dashboardAddPanel.isAddPanelOpen();
       expect(isAddPanelOpen).to.be(true);
-      await percy.snapshot();
     });
 
   });

@@ -22,7 +22,6 @@ import expect from '@kbn/expect';
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
   const browser = getService('browser');
-  const percy = getService('percy');
 
   describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
@@ -35,7 +34,6 @@ export default function ({ getService, getPageObjects }) {
       it('appears when there are no dashboards', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(true);
-        await percy.snapshot();
       });
 
       it('creates a new dashboard', async function () {
@@ -45,7 +43,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
         expect(countOfDashboards).to.equal(1);
-        await percy.snapshot();
       });
 
       it('is not shown when there is a dashboard', async function () {
@@ -59,7 +56,6 @@ export default function ({ getService, getPageObjects }) {
 
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
-        await percy.snapshot();
       });
     });
 
@@ -70,7 +66,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
 
         await PageObjects.common.expectConfirmModalOpenState(true);
-        await percy.snapshot();
 
         await PageObjects.common.pressEnterKey();
 
@@ -83,7 +78,6 @@ export default function ({ getService, getPageObjects }) {
       it('succeeds on confirmation press', async function () {
         await PageObjects.dashboard.checkDashboardListingSelectAllCheckbox();
         await PageObjects.dashboard.clickDeleteSelectedDashboards();
-        await percy.snapshot();
 
         await PageObjects.common.clickConfirmOnModal();
 
@@ -212,7 +206,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const onDashboardLandingPage = await PageObjects.dashboard.onDashboardLandingPage();
         expect(onDashboardLandingPage).to.equal(false);
-        await percy.snapshot();
       });
     });
   });

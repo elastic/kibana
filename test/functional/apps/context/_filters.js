@@ -29,7 +29,6 @@ const TEST_COLUMN_NAMES = ['extension', 'geo.src'];
 export default function ({ getService, getPageObjects }) {
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const percy = getService('percy');
   const PageObjects = getPageObjects(['common', 'context']);
 
   describe('context filters', function contextSize() {
@@ -60,7 +59,6 @@ export default function ({ getService, getPageObjects }) {
         ))
       ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       expect(hasOnlyFilteredRows).to.be(true);
-      await percy.snapshot();
     });
 
     it('should be toggleable via the filter bar', async function () {
@@ -80,7 +78,6 @@ export default function ({ getService, getPageObjects }) {
         ))
       ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
       expect(hasOnlyFilteredRows).to.be(false);
-      await percy.snapshot();
     });
   });
 }

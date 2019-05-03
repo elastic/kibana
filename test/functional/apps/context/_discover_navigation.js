@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
-  const percy = getService('percy');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('context link in discover', function contextSize() {
@@ -65,8 +64,6 @@ export default function ({ getService, getPageObjects }) {
           .getVisibleText();
         expect(anchorTimestamp).to.equal(firstTimestamp);
       });
-
-      await percy.snapshot();
     });
 
     it('should open the context view with the same columns', async function () {
@@ -81,7 +78,6 @@ export default function ({ getService, getPageObjects }) {
           ...TEST_COLUMN_NAMES,
         ]);
       });
-      await percy.snapshot();
     });
 
     it('should open the context view with the filters disabled', async function () {
@@ -92,7 +88,6 @@ export default function ({ getService, getPageObjects }) {
       ).reduce((result, hasDisabledFilter) => result && hasDisabledFilter, true);
 
       expect(hasDisabledFilters).to.be(true);
-      await percy.snapshot();
     });
   });
 
