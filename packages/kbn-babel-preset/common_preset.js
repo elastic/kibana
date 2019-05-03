@@ -35,10 +35,13 @@ module.exports = {
     {
       // Babel 7 don't support the namespace feature on typescript code.
       // With namespaces only used for type declarations, we can securely
-      // strip them off for babel on x-pack infra plugin
+      // strip them off for babel on x-pack infra/siem plugins
       //
       // See https://github.com/babel/babel/issues/8244#issuecomment-466548733
-      test: /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
+      test: [
+        /x-pack[\/\\]plugins[\/\\]infra[\/\\].*[\/\\]graphql/,
+        /x-pack[\/\\]plugins[\/\\]siem[\/\\].*[\/\\]graphql/,
+      ],
       plugins: [[require.resolve('babel-plugin-typescript-strip-namespaces')]],
     },
   ],

@@ -11,6 +11,7 @@ import {
   UsageAPIProvider,
   InfraOpsGraphQLClientProvider,
   InfraOpsGraphQLClientFactoryProvider,
+  SiemGraphQLProvider,
 } from './services';
 
 import {
@@ -19,10 +20,15 @@ import {
 } from '../common/services';
 
 export default async function ({ readConfigFile }) {
-
-  const kibanaAPITestsConfig = await readConfigFile(require.resolve('../../../test/api_integration/config.js'));
-  const xPackFunctionalTestsConfig = await readConfigFile(require.resolve('../functional/config.js'));
-  const kibanaCommonConfig = await readConfigFile(require.resolve('../../../test/common/config.js'));
+  const kibanaAPITestsConfig = await readConfigFile(
+    require.resolve('../../../test/api_integration/config.js')
+  );
+  const xPackFunctionalTestsConfig = await readConfigFile(
+    require.resolve('../functional/config.js')
+  );
+  const kibanaCommonConfig = await readConfigFile(
+    require.resolve('../../../test/common/config.js')
+  );
 
   return {
     testFiles: [require.resolve('./apis')],
@@ -34,6 +40,7 @@ export default async function ({ readConfigFile }) {
       esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
       infraOpsGraphQLClient: InfraOpsGraphQLClientProvider,
       infraOpsGraphQLClientFactory: InfraOpsGraphQLClientFactoryProvider,
+      siemGraphQLClient: SiemGraphQLProvider,
       es: EsProvider,
       esArchiver: kibanaCommonConfig.get('services.esArchiver'),
       usageAPI: UsageAPIProvider,
