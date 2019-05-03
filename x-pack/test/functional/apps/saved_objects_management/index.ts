@@ -10,7 +10,7 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 export default function savedObjectsManagementApp({
   loadTestFile,
 }: KibanaFunctionalTestDefaultProviders) {
-  describe.only('Saved objects management', function savedObjectsManagementAppTestSuite() {
+  describe('Saved objects management', function savedObjectsManagementAppTestSuite() {
     this.tags('ciGroup2');
     loadTestFile(require.resolve('./feature_controls/saved_objects_management_security'));
   });
