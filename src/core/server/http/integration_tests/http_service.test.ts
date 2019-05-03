@@ -43,10 +43,10 @@ describe('http service', () => {
         router.get({ path: authUrl.auth, validate: false }, async (req, res) =>
           res.ok({ content: 'ok' })
         );
-        // TODO fix me when registerRouter is available before HTTP server is run
-        (root as any).server.http.registerRouter(router);
 
-        await root.setup();
+        const { http } = await root.setup();
+        http.registerRouter(router);
+        await root.start();
       }, 30000);
 
       afterAll(async () => await root.shutdown());
@@ -129,10 +129,11 @@ describe('http service', () => {
         [onReqUrl.root, onReqUrl.independentReq].forEach(url =>
           router.get({ path: url, validate: false }, async (req, res) => res.ok({ content: 'ok' }))
         );
-        // TODO fix me when registerRouter is available before HTTP server is run
-        (root as any).server.http.registerRouter(router);
 
-        await root.setup();
+        const { http } = await root.setup();
+        http.registerRouter(router);
+
+        await root.start();
       }, 30000);
 
       afterAll(async () => await root.shutdown());

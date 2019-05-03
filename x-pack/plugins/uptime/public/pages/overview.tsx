@@ -7,14 +7,21 @@
 // @ts-ignore EuiSearchBar missing
 import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { Fragment, useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect } from 'react';
 import { getOverviewPageBreadcrumbs } from '../breadcrumbs';
 import { EmptyState, ErrorList, FilterBar, MonitorList, Snapshot } from '../components/functional';
 import { UMUpdateBreadcrumbs } from '../lib/lib';
 import { UptimeSettingsContext } from '../contexts';
+import { useUrlParams } from '../hooks';
+import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
 
 interface OverviewPageProps {
   basePath: string;
+  history: any;
+  location: {
+    pathname: string;
+    search: string;
+  };
   setBreadcrumbs: UMUpdateBreadcrumbs;
 }
 
@@ -22,12 +29,10 @@ type Props = OverviewPageProps;
 
 export type UptimeSearchBarQueryChangeHandler = ({ query }: { query?: { text: string } }) => void;
 
-export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
-  const { colors, dateRangeStart, dateRangeEnd, refreshApp, setHeadingText } = useContext(
-    UptimeSettingsContext
-  );
-  const [currentFilterQueryObj, setFilterQueryObj] = useState<object | undefined>(undefined);
-  const [currentFilterQuery, setCurrentFilterQuery] = useState<string | undefined>(undefined);
+export const OverviewPage = ({ basePath, setBreadcrumbs, history, location }: Props) => {
+  const { colors, refreshApp, setHeadingText } = useContext(UptimeSettingsContext);
+  const [params, updateUrl] = useUrlParams(history, location);
+  const { dateRangeStart, dateRangeEnd, search } = params;
 
   useEffect(() => {
     setBreadcrumbs(getOverviewPageBreadcrumbs());
@@ -41,39 +46,49 @@ export const OverviewPage = ({ basePath, setBreadcrumbs }: Props) => {
     }
   }, []);
 
-  const sharedProps = { dateRangeStart, dateRangeEnd, currentFilterQuery };
+  const filterQueryString = search || '';
+  const sharedProps = {
+    dateRangeStart,
+    dateRangeEnd,
+    filters: search ? JSON.stringify(EuiSearchBar.Query.toESQuery(filterQueryString)) : undefined,
+  };
 
   const updateQuery: UptimeSearchBarQueryChangeHandler = ({ query }) => {
     try {
-      let esQuery;
-      if (query && query.text) {
-        esQuery = EuiSearchBar.Query.toESQuery(query);
+      if (query && typeof query.text !== 'undefined') {
+        updateUrl({ search: query.text });
       }
-      setFilterQueryObj(query);
-      setCurrentFilterQuery(esQuery ? JSON.stringify(esQuery) : esQuery);
       if (refreshApp) {
         refreshApp();
       }
     } catch (e) {
-      setFilterQueryObj(undefined);
-      setCurrentFilterQuery(undefined);
+      updateUrl({ search: '' });
     }
   };
+
+  const linkParameters = stringifyUrlParams(params);
 
   return (
     <Fragment>
       <EmptyState basePath={basePath} implementsCustomErrorState={true} variables={sharedProps}>
         <FilterBar
-          currentQuery={currentFilterQueryObj}
+          currentQuery={filterQueryString}
           updateQuery={updateQuery}
           variables={sharedProps}
         />
         <EuiSpacer size="s" />
         <Snapshot colors={colors} variables={sharedProps} />
         <EuiSpacer size="s" />
-        <MonitorList dangerColor={colors.danger} variables={sharedProps} />
+        <MonitorList
+          basePath={basePath}
+          dangerColor={colors.danger}
+          dateRangeStart={dateRangeStart}
+          dateRangeEnd={dateRangeEnd}
+          linkParameters={linkParameters}
+          variables={sharedProps}
+        />
         <EuiSpacer size="s" />
-        <ErrorList variables={sharedProps} />
+        <ErrorList linkParameters={linkParameters} variables={sharedProps} />
       </EmptyState>
     </Fragment>
   );

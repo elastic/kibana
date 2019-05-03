@@ -259,6 +259,22 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click(`mapOpenLayerButton${layerName}`);
     }
 
+    async disableApplyGlobalQuery() {
+      const element = await testSubjects.find('mapLayerPanelApplyGlobalQueryCheckbox');
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        await retry.try(async () => {
+          log.debug(`disabling applyGlobalQuery`);
+          await testSubjects.click('mapLayerPanelApplyGlobalQueryCheckbox');
+          const isStillSelected = await element.isSelected();
+          if (isStillSelected) {
+            throw new Error('applyGlobalQuery not disabled');
+          }
+        });
+        await this.waitForLayersToLoad();
+      }
+    }
+
     async doesLayerExist(layerName) {
       layerName = layerName.replace(' ', '_');
       log.debug(`Open layer panel, layer: ${layerName}`);

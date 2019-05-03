@@ -225,11 +225,11 @@ export function SecurityPageProvider({ getService, getPageObjects }) {
       const users = await testSubjects.findAll('roleRow');
       return mapAsync(users, async role => {
         const rolenameElement = await role.findByCssSelector('[data-test-subj="roleRowName"]');
-        const isReservedElementVisible = await role.findByCssSelector('td:nth-child(3)');
+        const reservedRoleRow = await role.findByCssSelector('td:last-child');
 
         return {
           rolename: await rolenameElement.getVisibleText(),
-          reserved: (await isReservedElementVisible.getProperty('innerHTML')).includes('roleRowReserved')
+          reserved: await find.descendantExistsByCssSelector('[data-test-subj="reservedRole"]', reservedRoleRow)
         };
       });
     }
