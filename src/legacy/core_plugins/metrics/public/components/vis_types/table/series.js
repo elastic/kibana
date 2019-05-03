@@ -73,6 +73,7 @@ function TableSeries(props) {
           fields={props.fields}
           model={props.model}
           onChange={props.onChange}
+          indexPatternForQuery={props.indexPatternForQuery}
         />
       );
     }
@@ -174,6 +175,7 @@ TableSeries.propTypes = {
   togglePanelActivation: PropTypes.func,
   uiRestrictions: PropTypes.object,
   dragHandleProps: PropTypes.object,
+  indexPatternForQuery: PropTypes.object,
 };
 
 export default injectI18n(TableSeries);
