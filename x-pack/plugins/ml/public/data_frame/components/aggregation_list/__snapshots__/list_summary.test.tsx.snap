@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Data Frame: <AggLisSummary /> Minimal initialization 1`] = `
+exports[`Data Frame: <AggListSummary /> Minimal initialization 1`] = `
 <EuiForm>
   <EuiPanel
     grow={true}
