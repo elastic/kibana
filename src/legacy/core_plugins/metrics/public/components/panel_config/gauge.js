@@ -94,6 +94,7 @@ class GaugePanelConfigUi extends Component {
   render() {
     const { selectedTab } = this.state;
     const { intl } = this.props;
+    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = {
       gauge_max: '',
       filter: { query: '', language: uiSettingsQueryLanguage },

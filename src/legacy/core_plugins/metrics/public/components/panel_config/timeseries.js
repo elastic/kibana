@@ -42,12 +42,6 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 
-// import chrome from 'ui/chrome';
-// import { getFromSavedObject } from 'ui/index_patterns/static_utils';
-/*
-QueryBarInput will be the text input, the language switcher, and autocomplete.
-import { QueryBarInput } from 'ui/query_bar';
-*/
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
 import { Storage } from 'ui/storage';
 import { data } from 'plugins/data';
