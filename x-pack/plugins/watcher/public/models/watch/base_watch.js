@@ -5,7 +5,7 @@
  */
 
 import { getSearchValue } from 'plugins/watcher/lib/get_search_value';
-import { get, isEqual, remove, map, merge } from 'lodash';
+import { get, isEqual, remove, map } from 'lodash';
 import { Action } from '../action';
 import { WatchStatus } from '../watch_status';
 import { WatchErrors } from '../watch_errors';
@@ -55,11 +55,7 @@ export class BaseWatch {
     }
 
     const id = createActionId(this.actions, type);
-    const props = merge(
-      {},
-      defaults,
-      { id, type }
-    );
+    const props = { id, type, ...defaults };
 
     const action = new ActionType(props);
     this.addAction(action);
@@ -133,44 +129,6 @@ export class BaseWatch {
     };
 
     return isEqual(cleanWatch, cleanOtherWatch);
-  }
-
-  /**
-   * Client validation of the Watch.
-   * Currently we are *only* validating the Watch "Actions"
-   */
-  validate() {
-
-    // Get the errors from each watch action
-    const actionsErrors = this.actions.reduce((actionsErrors, action) => {
-      if (action.validate) {
-        const { errors } = action.validate();
-        if (!errors) {
-          return actionsErrors;
-        }
-        return [...actionsErrors, ...errors];
-      }
-      return actionsErrors;
-    }, []);
-
-    if (!actionsErrors.length) {
-      return { warning: null };
-    }
-
-    // Concatenate their message
-    const warningMessage = actionsErrors.reduce((message, error) => (
-      !!message
-        ? `${message}, ${error.message}`
-        : error.message
-    ), '');
-
-    // We are not doing any *blocking* validation in the client,
-    // so we return the errors as a _warning_
-    return {
-      warning: {
-        message: warningMessage,
-      }
-    };
   }
 
   static typeName = i18n.translate('xpack.watcher.models.baseWatch.typeName', {

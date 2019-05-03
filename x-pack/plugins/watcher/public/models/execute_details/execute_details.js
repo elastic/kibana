@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TIME_UNITS } from '../../../common/constants';
-import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 
 export class ExecuteDetails {
@@ -47,30 +45,18 @@ export class ExecuteDetails {
     return errors;
   }
 
-  formatTime(timeUnit, value) {
-    let timeValue = moment();
-    switch (timeUnit) {
-      case TIME_UNITS.SECOND:
-        timeValue = timeValue.add(value, 'seconds');
-        break;
-      case TIME_UNITS.MINUTE:
-        timeValue = timeValue.add(value, 'minutes');
-        break;
-      case TIME_UNITS.HOUR:
-        timeValue = timeValue.add(value, 'hours');
-        break;
-      case TIME_UNITS.MILLISECOND:
-        timeValue = timeValue.add(value, 'milliseconds');
-        break;
+  formatTime(timeUnit, timeValue) {
+    const now = 'now';
+    if (timeValue === 0) {
+      return now;
     }
-    return timeValue.format();
+    return `${now}+${timeValue}${timeUnit}`;
   }
 
   get upstreamJson() {
-    const hasTriggerTime = this.triggeredTimeValue !== '';
-    const hasScheduleTime = this.scheduledTimeValue !== '';
-    const triggeredTime = hasTriggerTime ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
-    const scheduledTime = hasScheduleTime ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
+    const triggeredTime = this.triggeredTimeValue ? this.formatTime(this.triggeredTimeUnit, this.triggeredTimeValue) : undefined;
+    const scheduledTime = this.scheduledTimeValue ?  this.formatTime(this.scheduledTimeUnit, this.scheduledTimeValue) : undefined;
+
     return {
       triggerData: {
         triggeredTime,

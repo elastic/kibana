@@ -26,17 +26,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
-import { ConfirmWatchesModal } from '../../../components/confirm_watches_modal';
-import { ErrableFormRow } from '../../../components/form_errors';
-import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../lib/api';
-import { aggTypes } from '../../../models/watch/agg_types';
-import { groupByTypes } from '../../../models/watch/group_by_types';
-import { comparators } from '../../../models/watch/comparators';
-import { timeUnits } from '../time_units';
-import { onWatchSave, saveWatch } from '../watch_edit_actions';
-import { WatchContext } from './watch_context';
+
+import { ConfirmWatchesModal } from '../../../../components/confirm_watches_modal';
+import { ErrableFormRow } from '../../../../components/form_errors';
+import { fetchFields, getMatchingIndices, loadIndexPatterns } from '../../../../lib/api';
+import { aggTypes } from '../../../../models/watch/agg_types';
+import { groupByTypes } from '../../../../models/watch/group_by_types';
+import { comparators } from '../../../../models/watch/comparators';
+import { timeUnits } from '../../time_units';
+import { onWatchSave, saveWatch } from '../../watch_edit_actions';
+import { WatchContext } from '../../watch_context';
 import { WatchVisualization } from './watch_visualization';
-import { LicenseServiceContext } from '../../../license_service_context';
+import { WatchActionsPanel } from './threshold_watch_action_panel';
+import { LicenseServiceContext } from '../../../../license_service_context';
 const firstFieldOption = {
   text: i18n.translate('xpack.watcher.sections.watchEdit.titlePanel.timeFieldOptionLabel', {
     defaultMessage: 'Select a field',
@@ -149,6 +151,16 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
   }, []);
   const { errors } = watch.validate();
   const hasErrors = !!Object.keys(errors).find(errorKey => errors[errorKey].length >= 1);
+  const actionErrors = watch.actions.reduce((acc: any, action: any) => {
+    const actionValidationErrors = action.validate();
+    acc[action.id] = actionValidationErrors;
+    return acc;
+  }, {});
+  const hasActionErrors = !!Object.keys(actionErrors).find(actionError => {
+    return !!Object.keys(actionErrors[actionError]).find((actionErrorKey: string) => {
+      return actionErrors[actionError][actionErrorKey].length >= 1;
+    });
+  });
   const expressionErrorMessage = i18n.translate(
     'xpack.watcher.thresholdWatchExpression.fixErrorInExpressionBelowValidationMessage',
     {
@@ -789,6 +801,9 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
               </EuiFlexItem>
             </EuiFlexGroup>
             {hasErrors ? null : <WatchVisualization />}
+            <EuiSpacer />
+            <WatchActionsPanel actionErrors={actionErrors} />
+            <EuiSpacer />
           </Fragment>
         ) : null}
         <EuiFlexGroup>
@@ -796,11 +811,11 @@ const ThresholdWatchEditUi = ({ intl, pageTitle }: { intl: InjectedIntl; pageTit
             <EuiButton
               fill
               type="submit"
-              isDisabled={hasErrors}
+              isDisabled={hasErrors || hasActionErrors}
               onClick={async () => {
                 const savedWatch = await onWatchSave(watch, licenseService);
-                if (savedWatch && savedWatch.error) {
-                  return setModal(savedWatch.error);
+                if (savedWatch && savedWatch.validationError) {
+                  return setModal(savedWatch.validationError);
                 }
               }}
             >
