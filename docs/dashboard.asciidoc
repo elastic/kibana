@@ -19,8 +19,7 @@ image:images/Dashboard_example.png[Example dashboard]
 . Click *Create new dashboard.*
 . Click *Add*.
 
-[[adding-visualizations-to-a-dashboard]]
-. To add a visualization, select its name from the list of visualizations
+. [[adding-visualizations-to-a-dashboard]]To add a visualization, select its name from the list of visualizations
 or click *Add new visualization* to create one.
 If you have a large number of visualizations, you can filter the list.
 +
@@ -29,8 +28,7 @@ image:images/Dashboard_add_visualization.png[Example add visualization to dashbo
 
 . To add a saved search, click the *Saved Search* tab, and then select a name from the list.
 
-[[saving-dashboards]]
-. When you're finished adding and arranging the dashboard content,
+. [[saving-dashboards]]When you're finished adding and arranging the dashboard content,
 go to the menu bar, click *Save*, and enter
 a name. Optionally, you can store the time period specified in the time
 filter by selecting *Store time with dashboard*.
