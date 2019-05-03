@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { Popover } from '../../popover';
 import { AutoRefreshControls } from './auto_refresh_controls';
 import { KioskControls } from './kiosk_controls';
@@ -26,7 +26,9 @@ export const ControlSettings = ({
   };
 
   const popoverButton = handleClick => (
-    <EuiButtonIcon iconType="gear" aria-label="Control settings" onClick={handleClick} />
+    <EuiToolTip position="bottom" content="Control settings">
+      <EuiButtonIcon iconType="gear" aria-label="Control settings" onClick={handleClick} />
+    </EuiToolTip>
   );
 
   return (
