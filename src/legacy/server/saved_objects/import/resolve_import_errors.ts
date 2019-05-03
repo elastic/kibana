@@ -19,7 +19,7 @@
 
 import Boom from 'boom';
 import { Readable } from 'stream';
-import { SavedObjectsClient, SavedObject } from '../service';
+import { SavedObjectsClient } from '../service';
 import { collectSavedObjects } from './collect_saved_objects';
 import { createObjectsFilter } from './create_objects_filter';
 import { extractErrors } from './extract_errors';
@@ -41,36 +41,6 @@ interface ImportResponse {
   errors?: ImportError[];
 }
 
-async function getAuthorizedTypes(
-  savedObjectsClient: SavedObjectsClient,
-  objects: SavedObject[],
-  retries: Retry[]
-) {
-  // Call canBulkCreate twice since the parameters have to be the same as if bulkCreate is called
-  const { objectsToOverwrite, objectsToNotOverwrite } = splitOverwrites(objects, retries);
-  const resultForObjectsToOverwrite = await savedObjectsClient.canBulkCreate(objectsToOverwrite, {
-    overwrite: true,
-  });
-  const resultForObjectsToNotOverwrite = await savedObjectsClient.canBulkCreate(
-    objectsToNotOverwrite
-  );
-
-  // Extract which types can be created in bulk
-  const resultMap: { [key: string]: boolean } = {};
-  for (const { type, can } of resultForObjectsToNotOverwrite) {
-    resultMap[type] = can;
-  }
-  for (const { type, can } of resultForObjectsToOverwrite) {
-    const canPreviously = resultMap[type] !== false;
-    resultMap[type] = canPreviously && can;
-  }
-
-  return Object.keys(resultMap).map(type => ({
-    type,
-    can: resultMap[type],
-  }));
-}
-
 export async function resolveImportErrors({
   readStream,
   objectLimit,
@@ -90,7 +60,7 @@ export async function resolveImportErrors({
   });
 
   const objectTypes = [...new Set(objectsToResolve.map(obj => obj.type))];
-  const authorizedTypes = await getAuthorizedTypes(savedObjectsClient, objectsToResolve, retries);
+  const authorizedTypes = await savedObjectsClient.canBulkCreate(objectTypes);
   const invalidTypes = [
     ...new Set([
       ...objectTypes.filter(type => !supportedTypes.includes(type)),

@@ -332,7 +332,7 @@ describe(`spaces disabled`, () => {
         spaces: null,
       });
 
-      await expect(client.canBulkCreate([{ type }])).rejects.toThrowError(mockErrors.generalError);
+      await expect(client.canBulkCreate([type])).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_create')]);
@@ -368,14 +368,9 @@ describe(`spaces disabled`, () => {
         savedObjectTypes: [],
         spaces: null,
       });
-      const objects = [
-        { type: type1 },
-        { type: type1 },
-        { type: type2 },
-      ];
-      const options = Symbol();
+      const types = [type1, type2 ];
 
-      const result = await client.canBulkCreate(objects, options);
+      const result = await client.canBulkCreate(types);
       expect(result).toEqual([
         {
           type: type1,
@@ -392,16 +387,6 @@ describe(`spaces disabled`, () => {
         mockActions.savedObject.get(type1, 'bulk_create'),
         mockActions.savedObject.get(type2, 'bulk_create'),
       ]);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'bulk_create',
-        [type1, type2],
-        [mockActions.savedObject.get(type1, 'bulk_create')],
-        {
-          objects,
-          options,
-        }
-      );
     });
   });
 
@@ -717,7 +702,7 @@ describe(`spaces disabled`, () => {
         spaces: null,
       });
 
-      await expect(client.canFind({ type })).rejects.toThrowError(mockErrors.generalError);
+      await expect(client.canFind([type])).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'find')]);
@@ -754,9 +739,9 @@ describe(`spaces disabled`, () => {
         savedObjectTypes: [],
         spaces: null,
       });
-      const options = { type: [type1, type2] };
+      const types = [type1, type2];
+      const result = await client.canFind(types);
 
-      const result = await client.canFind(options);
       expect(result).toEqual([
         {
           type: type1,
@@ -767,22 +752,11 @@ describe(`spaces disabled`, () => {
           can: true,
         },
       ]);
-
       expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges).toHaveBeenCalledWith([
         mockActions.savedObject.get(type1, 'find'),
         mockActions.savedObject.get(type2, 'find')
       ]);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'find',
-        [type1, type2],
-        [mockActions.savedObject.get(type1, 'find')],
-        {
-          options
-        }
-      );
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
   });
 
@@ -947,7 +921,7 @@ describe(`spaces disabled`, () => {
         spaces: null,
       });
 
-      await expect(client.canBulkGet([{ type }])).rejects.toThrowError(mockErrors.generalError);
+      await expect(client.canBulkGet([type])).rejects.toThrowError(mockErrors.generalError);
 
       expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges).toHaveBeenCalledWith([mockActions.savedObject.get(type, 'bulk_get')]);
@@ -983,14 +957,10 @@ describe(`spaces disabled`, () => {
         savedObjectTypes: [],
         spaces: null,
       });
-      const objects = [
-        { type: type1 },
-        { type: type1 },
-        { type: type2 },
-      ];
-      const options = Symbol();
+      const types = [type1, type2];
 
-      const result = await client.canBulkGet(objects, options);
+      const result = await client.canBulkGet(types);
+
       expect(result).toEqual([
         {
           type: type1,
@@ -1001,23 +971,11 @@ describe(`spaces disabled`, () => {
           can: true,
         },
       ]);
-
       expect(mockCheckPrivilegesDynamicallyWithRequest).toHaveBeenCalledWith(mockRequest);
       expect(mockCheckPrivileges).toHaveBeenCalledWith([
         mockActions.savedObject.get(type1, 'bulk_get'),
         mockActions.savedObject.get(type2, 'bulk_get'),
       ]);
-      expect(mockAuditLogger.savedObjectsAuthorizationFailure).toHaveBeenCalledWith(
-        username,
-        'bulk_get',
-        [type1, type2],
-        [mockActions.savedObject.get(type1, 'bulk_get')],
-        {
-          objects,
-          options,
-        }
-      );
-      expect(mockAuditLogger.savedObjectsAuthorizationSuccess).not.toHaveBeenCalled();
     });
   });
 

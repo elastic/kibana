@@ -72,16 +72,15 @@ describe('importSavedObjects()', () => {
 
   beforeEach(() => {
     jest.resetAllMocks();
-    savedObjectsClient.canBulkCreate.mockImplementation((objects: any, options: any) =>
-      objects.map((obj: any) => ({ type: obj.type, can: true }))
+    savedObjectsClient.canBulkCreate.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
     );
-    savedObjectsClient.canBulkGet.mockImplementation((objects: any, options: any) =>
-      objects.map((obj: any) => ({ type: obj.type, can: true }))
+    savedObjectsClient.canBulkGet.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
     );
-    savedObjectsClient.canFind.mockImplementation((options: any) => {
-      const types = Array.isArray(options.type) ? options.type : [options.type];
-      return types.map((type: string) => ({ type, can: true }));
-    });
+    savedObjectsClient.canFind.mockImplementation((types: string[]) =>
+      types.map(type => ({ type, can: true }))
+    );
   });
 
   test('returns early when no objects exist', async () => {

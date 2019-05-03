@@ -117,14 +117,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     });
   }
 
-  public async canBulkCreate(objects: BulkCreateObject[], options: BaseOptions = {}) {
-    throwErrorIfTypesContainsSpace(objects.map(object => object.type));
-    throwErrorIfNamespaceSpecified(options);
+  public async canBulkCreate(types: string[]) {
+    throwErrorIfTypesContainsSpace(types);
 
-    return await this.client.canBulkCreate(objects, {
-      ...options,
-      namespace: getNamespace(this.spaceId),
-    });
+    return await this.client.canBulkCreate(types);
   }
 
   /**
@@ -178,20 +174,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     });
   }
 
-  public async canFind(options: FindOptions = {}) {
-    if (options.type) {
-      throwErrorIfTypesContainsSpace(coerceToArray(options.type));
-    }
+  public async canFind(types: string[]) {
+    throwErrorIfTypesContainsSpace(types);
 
-    throwErrorIfNamespaceSpecified(options);
-
-    return await this.client.canFind({
-      ...options,
-      type: (options.type ? coerceToArray(options.type) : this.types).filter(
-        type => type !== 'space'
-      ),
-      namespace: getNamespace(this.spaceId),
-    });
+    return await this.client.canFind(types);
   }
 
   /**
@@ -218,14 +204,10 @@ export class SpacesSavedObjectsClient implements SavedObjectsClient {
     });
   }
 
-  public async canBulkGet(objects: BulkGetObjects = [], options: BaseOptions = {}) {
-    throwErrorIfTypesContainsSpace(objects.map(object => object.type));
-    throwErrorIfNamespaceSpecified(options);
+  public async canBulkGet(types: string[]) {
+    throwErrorIfTypesContainsSpace(types);
 
-    return await this.client.canBulkGet(objects, {
-      ...options,
-      namespace: getNamespace(this.spaceId),
-    });
+    return await this.client.canBulkGet(types);
   }
 
   /**

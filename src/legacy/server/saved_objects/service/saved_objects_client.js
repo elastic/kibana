@@ -127,15 +127,11 @@ export class SavedObjectsClient {
    *
    * This should only be used by import / export / resolve import errors.
    *
-   * @param {array} objects - [{ type, id, attributes }]
-   * @param {object} [options={}]
-   * @property {boolean} [options.overwrite=false] - overwrites existing documents
-   * @property {string} [options.namespace]
+   * @param {Array<string>} types Types of saved objects
    * @return [{ type, can }]
    */
-  async canBulkCreate(objects) {
-    const types = new Set(objects.map(obj => obj.type));
-    return [...types].map(type => ({ type, can: true }));
+  async canBulkCreate(types) {
+    return types.map(type => ({ type, can: true }));
   }
 
   /**
@@ -176,30 +172,17 @@ export class SavedObjectsClient {
    *
    * This should only be used by import / export / resolve import errors.
    *
-   * @param {object} [options={}]
-   * @property {(string|Array<string>)} [options.type]
-   * @property {string} [options.search]
-   * @property {string} [options.defaultSearchOperator]
-   * @property {Array<string>} [options.searchFields] - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {string} [options.sortField]
-   * @property {string} [options.sortOrder]
-   * @property {Array<string>} [options.fields]
-   * @property {string} [options.namespace]
-   * @property {object} [options.hasReference] - { type, id }
+   * @param {Array<string>} types Types of saved objects
    * @return [{ type, can }]
    */
-  async canFind(options = {}) {
-    const types = Array.isArray(options.type) ? options.type : [options.type];
+  async canFind(types) {
     return types.map(type => ({ type, can: true }));
   }
 
   /**
    * Returns an array of objects by id
    *
-   * @param {array} objects - an array of objects containing id and type
+   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
    * @param {object} [options={}]
    * @property {string} [options.namespace]
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }] }
@@ -219,14 +202,11 @@ export class SavedObjectsClient {
    *
    * This should only be used by import / export / resolve import errors.
    *
-   * @param {array} objects - an array of objects containing id and type
-   * @param {object} [options={}]
-   * @property {string} [options.namespace]
+   * @param {Array<string>} types Types of saved objects
    * @return [{ type, can }]
    */
-  async canBulkGet(objects = []) {
-    const types = new Set(objects.map(obj => obj.type));
-    return [...types].map(type => ({ type, can: true }));
+  async canBulkGet(types) {
+    return types.map(type => ({ type, can: true }));
   }
 
   /**

@@ -48,9 +48,8 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.bulkCreate(objects, options);
   }
 
-  async canBulkCreate(objects, options = {}) {
-    const types = uniq(objects.map(o => o.type));
-    return await this._checkSavedObjectPrivileges(types, 'bulk_create', { objects, options });
+  async canBulkCreate(types) {
+    return await this._checkAuthorizedTypes(types, 'bulk_create');
   }
 
   async delete(type, id, options) {
@@ -73,8 +72,8 @@ export class SecureSavedObjectsClientWrapper {
     return this._baseClient.find(options);
   }
 
-  async canFind(options = {}) {
-    return await this._checkSavedObjectPrivileges(options.type, 'find', { options });
+  async canFind(types) {
+    return await this._checkAuthorizedTypes(types, 'find');
   }
 
   async bulkGet(objects = [], options = {}) {
@@ -88,9 +87,8 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.bulkGet(objects, options);
   }
 
-  async canBulkGet(objects = [], options = {}) {
-    const types = uniq(objects.map(o => o.type));
-    return await this._checkSavedObjectPrivileges(types, 'bulk_get', { objects, options });
+  async canBulkGet(types) {
+    return await this._checkAuthorizedTypes(types, 'bulk_get');
   }
 
   async get(type, id, options = {}) {
@@ -113,48 +111,46 @@ export class SecureSavedObjectsClientWrapper {
     return await this._baseClient.update(type, id, attributes, options);
   }
 
-  async _checkSavedObjectPrivileges(typeOrTypes, action, args) {
-    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
-    const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
-    const actions = Array.from(actionsToTypesMap.keys());
-
-    // Check privileges
-    let result;
+  async _checkSavedObjectPrivileges(actions) {
     try {
-      result = await this._checkPrivileges(actions);
+      return await this._checkPrivileges(actions);
     } catch(error) {
       const { reason } = get(error, 'body.error', {});
       throw this.errors.decorateGeneralError(error, reason);
     }
+  }
 
-    // Log to audit and return array of types that are authorized
-    let typesMissingPrivileges = [];
-    if (result.hasAllRequested) {
-      this._auditLogger.savedObjectsAuthorizationSuccess(result.username, action, types, args);
+  async _checkAuthorizedTypes(typeOrTypes, action) {
+    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
+    const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
+    const actions = Array.from(actionsToTypesMap.keys());
+    const { privileges } = await this._checkSavedObjectPrivileges(actions);
+    const missingPrivileges = this._getMissingPrivileges(privileges);
+    const invalidTypes = missingPrivileges.map(privilege => actionsToTypesMap.get(privilege));
+    return types.map(type => ({
+      type,
+      can: !invalidTypes.includes(type),
+    }));
+  }
+
+  async _ensureAuthorized(typeOrTypes, action, args) {
+    const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
+    const actionsToTypesMap = new Map(types.map(type => [this._actions.savedObject.get(type, action), type]));
+    const actions = Array.from(actionsToTypesMap.keys());
+    const { hasAllRequested, username, privileges } = await this._checkSavedObjectPrivileges(actions);
+
+    if (hasAllRequested) {
+      this._auditLogger.savedObjectsAuthorizationSuccess(username, action, types, args);
     } else {
-      const missingPrivileges = this._getMissingPrivileges(result.privileges);
+      const missingPrivileges = this._getMissingPrivileges(privileges);
       this._auditLogger.savedObjectsAuthorizationFailure(
-        result.username,
+        username,
         action,
         types,
         missingPrivileges,
         args
       );
-      typesMissingPrivileges = missingPrivileges.map(privilege => actionsToTypesMap.get(privilege));
-    }
-    return types.map(type => ({
-      type,
-      can: !typesMissingPrivileges.includes(type),
-    }));
-  }
-
-  async _ensureAuthorized(typeOrTypes, action, args) {
-    const result = await this._checkSavedObjectPrivileges(typeOrTypes, action, args);
-    const unauthorizedTypes = result
-      .filter(obj => obj.can === false)
-      .map(obj => obj.type);
-    if (unauthorizedTypes.length) {
-      const msg = `Unable to ${action} ${unauthorizedTypes.sort().join(',')}`;
+      const msg = `Unable to ${action} ${missingPrivileges.map(privilege => actionsToTypesMap.get(privilege)).sort().join(',')}`;
       throw this.errors.decorateForbiddenError(new Error(msg));
     }
   }
