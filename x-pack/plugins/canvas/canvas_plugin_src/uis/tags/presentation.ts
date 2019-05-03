@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const presentation = () => ({ name: 'presentation', color: '#1EA593' });
+import { TagFactory } from '../../../public/lib/tag';
+
+export const presentation: TagFactory = () => ({ name: 'presentation', color: '#017D73' });

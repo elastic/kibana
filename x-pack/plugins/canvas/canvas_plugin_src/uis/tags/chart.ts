@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { presentation } from './presentation';
-import { report } from './report';
+import { TagFactory } from '../../../public/lib/tag';
 
-// Registry expects a function that returns a spec object
-export const tagSpecs = [presentation, report];
+export const chart: TagFactory = () => ({ name: 'chart', color: '#FEB6DB' });

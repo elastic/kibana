@@ -33,13 +33,17 @@ storiesOf('components/ElementTypes/ElementGrid', module)
     />
   ))
   .add('with filter', () => (
-    <ElementGrid elements={testElements} handleClick={action('addCustomElement')} filter="table" />
+    <ElementGrid
+      elements={testElements}
+      handleClick={action('addCustomElement')}
+      filterText="table"
+    />
   ))
   .add('with controls and filter', () => (
     <ElementGrid
       elements={testCustomElements}
       handleClick={action('addCustomElement')}
-      filter="Lorem"
+      filterText="Lorem"
       showControls
       onDelete={action('onDelete')}
       onEdit={action('onEdit')}

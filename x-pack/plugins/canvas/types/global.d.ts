@@ -9,5 +9,6 @@ import { i18n as I18N } from '@kbn/i18n';
 declare global {
   const canvas: {
     i18n: typeof I18N;
+    register: (itemFactory: () => { [key: string]: any }) => void;
   };
 }

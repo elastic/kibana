@@ -4,10 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export function Tag(config) {
-  // The name of the tag
-  this.name = config.name;
+import { TagFactory } from '../../../public/lib/tag';
 
-  // color of the tag to display in a list
-  this.color = config.color;
-}
+export const graphic: TagFactory = () => ({ name: 'graphic', color: '#DB1374' });
