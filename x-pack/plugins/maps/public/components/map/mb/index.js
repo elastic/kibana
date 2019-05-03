@@ -14,7 +14,8 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setTooltipState,
-  DRAW_STATE_TYPE, updateDrawStateWithOptions
+  DRAW_STATE_TYPE,
+  updateDrawStateWithOptions
 } from '../../../actions/store_actions';
 import {
   getTooltipState,

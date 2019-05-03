@@ -59,7 +59,7 @@ export const DRAW_STATE_TYPE = {
   ACTIVE: 'ACTIVE'
 };
 
-export const DRAW_STATE_DRAW_TYPE = {
+export const DRAW_TYPE = {
   BOUNDS: 'BOUNDS',
   POLYGON: 'POLYGON'
 };

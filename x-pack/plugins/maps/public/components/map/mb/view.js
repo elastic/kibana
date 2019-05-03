@@ -14,7 +14,7 @@ import mapboxgl from 'mapbox-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import DrawRectangle from 'mapbox-gl-draw-rectangle-mode';
 import { FeatureTooltip } from '../feature_tooltip';
-import { DRAW_STATE_DRAW_TYPE, DRAW_STATE_TYPE } from '../../../actions/store_actions';
+import { DRAW_TYPE, DRAW_STATE_TYPE } from '../../../actions/store_actions';
 import { filterBarQueryFilter } from '../../../kibana_services';
 import { createShapeFilter } from '../../../elasticsearch_geo_utils';
 
@@ -256,7 +256,7 @@ export class MBMapContainer extends React.Component {
       this._mbMap.getCanvas().style.cursor = 'crosshair';
       this._mbMap.on('draw.create', this._onDraw);
     }
-    const mbDrawMode = this.props.drawState.drawType === DRAW_STATE_DRAW_TYPE.POLYGON ?
+    const mbDrawMode = this.props.drawState.drawType === DRAW_TYPE.POLYGON ?
       this._mbDrawControl.modes.DRAW_POLYGON : 'draw_rectangle';
     this._mbDrawControl.changeMode(mbDrawMode);
   }

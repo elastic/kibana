@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import _ from 'lodash';
-import { DRAW_STATE_DRAW_TYPE } from '../../actions/store_actions';
+import { DRAW_TYPE } from '../../actions/store_actions';
 import { ES_GEO_FIELD_TYPE } from '../../../common/constants';
 
 const RESET_STATE = {
@@ -139,13 +139,13 @@ export class ToolbarOverlay extends React.Component {
     };
 
     if (this.state.uniqueIndexPatternsAndGeoFields.length === 1) {
-      drawPolygonAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_STATE_DRAW_TYPE.POLYGON);
-      drawBoundsAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_STATE_DRAW_TYPE.BOUNDS);
+      drawPolygonAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_TYPE.POLYGON);
+      drawBoundsAction.onClick = () => this._activateDrawForFirstIndexPattern(DRAW_TYPE.BOUNDS);
     } else {
       drawPolygonAction.panel = this._getIndexPatternSelectionPanel(1);
-      drawPolygonAction.onClick = () => this._showIndexPatternSelection(DRAW_STATE_DRAW_TYPE.POLYGON);
+      drawPolygonAction.onClick = () => this._showIndexPatternSelection(DRAW_TYPE.POLYGON);
       drawBoundsAction.panel = this._getIndexPatternSelectionPanel(2);
-      drawBoundsAction.onClick = () => this._showIndexPatternSelection(DRAW_STATE_DRAW_TYPE.BOUNDS);
+      drawBoundsAction.onClick = () => this._showIndexPatternSelection(DRAW_TYPE.BOUNDS);
     }
 
     return flattenPanelTree({
