@@ -17,6 +17,10 @@ export function GisPageProvider({ getService, getPageObjects }) {
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
 
+  function escapeLayerName(layerName) {
+    return layerName.split(' ').join('_');
+  }
+
   class GisPage {
 
     constructor() {
@@ -247,7 +251,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async openLayerTocActionsPanel(layerName) {
-      const escapedDisplayName = this.escapeLayerName(layerName);
+      const escapedDisplayName = escapeLayerName(layerName);
       const isOpen = await testSubjects.exists(`layerTocActionsPanel${escapedDisplayName}`);
       if (!isOpen) {
         await testSubjects.click(`layerTocActionsPanelToggleButton${escapedDisplayName}`);
@@ -260,12 +264,8 @@ export function GisPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('editLayerButton');
     }
 
-    escapeLayerName(layerName) {
-      return layerName.split(' ').join('_');
-    }
-
     async getLayerTOCDetails(layerName) {
-      return await testSubjects.getVisibleText(`mapLayerTOCDetails${this.escapeLayerName(layerName)}`);
+      return await testSubjects.getVisibleText(`mapLayerTOCDetails${escapeLayerName(layerName)}`);
     }
 
     async disableApplyGlobalQuery() {
@@ -285,7 +285,7 @@ export function GisPageProvider({ getService, getPageObjects }) {
     }
 
     async doesLayerExist(layerName) {
-      return await testSubjects.exists(`layerTocActionsPanelToggleButton${this.escapeLayerName(layerName)}`);
+      return await testSubjects.exists(`layerTocActionsPanelToggleButton${escapeLayerName(layerName)}`);
     }
 
     /*
