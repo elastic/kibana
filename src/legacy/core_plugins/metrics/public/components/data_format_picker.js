@@ -27,7 +27,7 @@ import { durationOutputOptions, durationInputOptions, isDuration } from './lib/d
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, injectI18n } from '@kbn/i18n/react';
 
-const DEFAULT_OUTPUT_PRECISION = 2;
+const DEFAULT_OUTPUT_PRECISION = '2';
 
 class DataFormatPicker extends Component {
   constructor(props) {
