@@ -1,0 +1,196 @@
+{
+  "cloud_roll_index": {
+    "aggs": [
+      {
+        "id": "mean",
+        "title": "Mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "NetworkOut",
+          "CPUUtilization",
+          "NetworkIn"
+        ]
+      },
+      {
+        "id": "high_mean",
+        "title": "High mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "NetworkOut",
+          "CPUUtilization",
+          "NetworkIn"
+        ]
+      },
+      {
+        "id": "low_mean",
+        "title": "Low mean",
+        "kibanaName": "avg",
+        "dslName": "avg",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "avg",
+          "min": "avg"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "NetworkOut",
+          "CPUUtilization",
+          "NetworkIn"
+        ]
+      },
+      {
+        "id": "sum",
+        "title": "Sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "DiskWriteOps"
+        ]
+      },
+      {
+        "id": "high_sum",
+        "title": "High sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "DiskWriteOps"
+        ]
+      },
+      {
+        "id": "low_sum",
+        "title": "Low sum",
+        "kibanaName": "sum",
+        "dslName": "sum",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "sum",
+          "min": "sum"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "DiskWriteOps"
+        ]
+      },
+      {
+        "id": "min",
+        "title": "Min",
+        "kibanaName": "min",
+        "dslName": "min",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "min",
+          "min": "min"
+        },
+        "fieldIds": [
+          "NetworkOut",
+          "NetworkIn"
+        ]
+      },
+      {
+        "id": "max",
+        "title": "Max",
+        "kibanaName": "max",
+        "dslName": "max",
+        "type": "metrics",
+        "mlModelPlotAgg": {
+          "max": "max",
+          "min": "max"
+        },
+        "fieldIds": [
+          "DiskReadBytes",
+          "CPUUtilization"
+        ]
+      }
+    ],
+    "fields": [
+      {
+        "id": "DiskReadBytes",
+        "name": "DiskReadBytes",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "sum",
+          "high_sum",
+          "low_sum",
+          "max"
+        ]
+      },
+      {
+        "id": "DiskWriteOps",
+        "name": "DiskWriteOps",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": [
+          "sum",
+          "high_sum",
+          "low_sum"
+        ]
+      },
+      {
+        "id": "NetworkOut",
+        "name": "NetworkOut",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "min"
+        ]
+      },
+      {
+        "id": "CPUUtilization",
+        "name": "CPUUtilization",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "max"
+        ]
+      },
+      {
+        "id": "NetworkIn",
+        "name": "NetworkIn",
+        "type": "double",
+        "aggregatable": true,
+        "aggIds": [
+          "mean",
+          "high_mean",
+          "low_mean",
+          "min"
+        ]
+      }
+    ]
+  }
+}
