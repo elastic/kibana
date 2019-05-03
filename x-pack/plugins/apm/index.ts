@@ -85,16 +85,16 @@ export function apm(kibana: any) {
             catalogue: ['apm'],
             savedObject: {
               all: [],
-              read: ['config']
+              read: []
             },
-            ui: ['show']
+            ui: ['show', 'save']
           },
           read: {
             api: ['apm'],
             catalogue: ['apm'],
             savedObject: {
               all: [],
-              read: ['config']
+              read: []
             },
             ui: ['show']
           }

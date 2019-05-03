@@ -1,0 +1,25 @@
+{
+  "author": "Elastic",
+  "name": "siem",
+  "version": "8.0.0",
+  "private": true,
+  "license": "Elastic-License",
+  "scripts": {
+    "build-graphql-types": "node scripts/generate_types_from_graphql.js"
+  },
+  "devDependencies": {
+    "@types/boom": "^7.2.0",
+    "@types/color": "^3.0.0",
+    "@types/lodash": "^4.14.110",
+    "@types/memoize-one": "^4.1.0",
+    "@types/react-beautiful-dnd": "^10.0.1"
+  },
+  "dependencies": {
+    "react-beautiful-dnd": "^10.0.1",
+    "react-markdown": "^4.0.6",
+    "lodash": "^4.17.10",
+    "memoize-one": "^5.0.0",
+    "apollo-link-error": "^1.1.7",
+    "suricata-sid-db": "^1.0.2"
+  }
+}

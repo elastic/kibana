@@ -36,7 +36,6 @@ import 'ui/fixed_scroll';
 import 'ui/index_patterns';
 import 'ui/state_management/app_state';
 import { timefilter } from 'ui/timefilter';
-import 'ui/search_bar';
 import { hasSearchStategyForIndexPattern, isDefaultTypeIndexPattern } from 'ui/courier';
 import { toastNotifications } from 'ui/notify';
 import { VisProvider } from 'ui/vis';
@@ -70,6 +69,9 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../breadcrumbs';
 import { buildVislibDimensions } from 'ui/visualize/loader/pipeline_helpers/build_pipeline';
 import 'ui/capabilities/route_setup';
 
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
+
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
@@ -93,6 +95,21 @@ uiRoutes
           ? getSavedSearchBreadcrumbs
           : getRootBreadcrumbs
       ),
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.discover.save) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.discover.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.discover.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save searches',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when('/discover/:id?', {
     template: indexTemplate,
@@ -201,6 +218,7 @@ function discoverController(
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
   $scope.fetchStatus = fetchStatuses.UNINITIALIZED;
+  $scope.refreshInterval = timefilter.getRefreshInterval();
 
   $scope.intervalEnabled = function (interval) {
     return interval.val !== 'custom';

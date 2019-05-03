@@ -164,7 +164,7 @@ describe('workspace_handler tests', () => {
     };
     assert.rejects(
       workspaceHandler.handleRequest(request),
-      new Error('invalid fle path in requests.')
+      new Error('invalid file path in requests.')
     );
   });
 
