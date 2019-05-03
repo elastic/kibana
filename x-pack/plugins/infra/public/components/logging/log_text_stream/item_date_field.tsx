@@ -17,6 +17,7 @@ interface LogTextStreamItemDateFieldProps {
   hasHighlights: boolean;
   isHovered: boolean;
   scale: TextScale;
+  isHighlighted: boolean;
 }
 
 export class LogTextStreamItemDateField extends React.PureComponent<
@@ -24,12 +25,13 @@ export class LogTextStreamItemDateField extends React.PureComponent<
   {}
 > {
   public render() {
-    const { children, hasHighlights, isHovered, scale } = this.props;
+    const { children, hasHighlights, isHovered, isHighlighted, scale } = this.props;
 
     return (
       <LogTextStreamItemDateFieldWrapper
         hasHighlights={hasHighlights}
         isHovered={isHovered}
+        isHighlighted={isHighlighted}
         scale={scale}
       >
         {children}
@@ -59,6 +61,7 @@ const hoveredFieldStyle = css`
 const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
   hasHighlights: boolean;
   isHovered: boolean;
+  isHighlighted: boolean;
 }>({})`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
@@ -67,5 +70,5 @@ const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
   padding: 0 ${props => props.theme.eui.paddingSizes.l};
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
-  ${props => (props.isHovered ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
 `;

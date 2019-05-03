@@ -18,6 +18,7 @@ interface LogTextStreamItemMessageFieldProps {
   isHovered: boolean;
   isWrapped: boolean;
   scale: TextScale;
+  isHighlighted: boolean;
 }
 
 export class LogTextStreamItemMessageField extends React.PureComponent<
@@ -25,7 +26,7 @@ export class LogTextStreamItemMessageField extends React.PureComponent<
   {}
 > {
   public render() {
-    const { children, highlights, isHovered, isWrapped, scale } = this.props;
+    const { children, highlights, isHovered, isHighlighted, isWrapped, scale } = this.props;
 
     const hasHighlights = highlights.length > 0;
     const content = hasHighlights ? renderHighlightFragments(children, highlights) : children;
@@ -33,6 +34,7 @@ export class LogTextStreamItemMessageField extends React.PureComponent<
       <LogTextStreamItemMessageFieldWrapper
         hasHighlights={hasHighlights}
         isHovered={isHovered}
+        isHighlighted={isHighlighted}
         isWrapped={isWrapped}
         scale={scale}
       >
@@ -97,6 +99,7 @@ const unwrappedFieldStyle = css`
 const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs<{
   hasHighlights: boolean;
   isHovered: boolean;
+  isHighlighted: boolean;
   isWrapped?: boolean;
 }>({})`
   flex-grow: 1;
@@ -104,7 +107,7 @@ const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs
   background-color: ${props => props.theme.eui.euiColorEmptyShade};
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
-  ${props => (props.isHovered ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
   ${props => (props.isWrapped ? wrappedFieldStyle : unwrappedFieldStyle)};
 `;
 
