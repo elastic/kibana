@@ -1317,18 +1317,6 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@elastic/elasticsearch@^7.0.0-rc.2":
-  version "7.0.0-rc.2"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.0.0-rc.2.tgz#2fb07978d647a257af3976b170e3f61704ba0a18"
-  integrity sha512-NAivETj4KDzNhN/x+nqcnz4K/0wqqT6UicZP0ezCu1oRgia8xHcD6KxrDAiElexD2/z6vY1BkNqYju5Uel14eA==
-  dependencies:
-    debug "^4.1.1"
-    decompress-response "^4.2.0"
-    into-stream "^5.1.0"
-    ms "^2.1.1"
-    once "^1.4.0"
-    pump "^3.0.0"
-
 "@elastic/charts@^3.4.5":
   version "3.4.5"
   resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-3.4.5.tgz#9cd28a99a969858f92411e62c177aeb9e8236bd8"
@@ -1352,6 +1340,18 @@
     react-konva "^16.8.3"
     react-spring "^8.0.8"
     resize-observer-polyfill "^1.5.1"
+
+"@elastic/elasticsearch@^7.0.0-rc.2":
+  version "7.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.0.0-rc.2.tgz#2fb07978d647a257af3976b170e3f61704ba0a18"
+  integrity sha512-NAivETj4KDzNhN/x+nqcnz4K/0wqqT6UicZP0ezCu1oRgia8xHcD6KxrDAiElexD2/z6vY1BkNqYju5Uel14eA==
+  dependencies:
+    debug "^4.1.1"
+    decompress-response "^4.2.0"
+    into-stream "^5.1.0"
+    ms "^2.1.1"
+    once "^1.4.0"
+    pump "^3.0.0"
 
 "@elastic/eui@0.0.23":
   version "0.0.23"
@@ -13731,7 +13731,7 @@ hoist-non-react-statics@^2.3.1, hoist-non-react-statics@^2.5.0, hoist-non-react-
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-2.5.5.tgz#c5903cf409c0dfd908f388e619d86b9c1174cb47"
   integrity sha512-rqcy4pJo55FTTLWt+bU8ukscqHeE/e9KWvsOW2b/a3afxQZhwkQdT1rPPCJ0rYXdj4vNcasY8zHTH+jF/qStxw==
 
-hoist-non-react-statics@^3.3.0:
+hoist-non-react-statics@^3.0.0, hoist-non-react-statics@^3.3.0:
   version "3.3.0"
   resolved "https://registry.yarnpkg.com/hoist-non-react-statics/-/hoist-non-react-statics-3.3.0.tgz#b09178f0122184fb95acf525daaecb4d8f45958b"
   integrity sha512-0XsbTXxgiaCDYDIWFcwkmerZPSwywfUqYmwT4jzewKTQSWoE6FCMoUVOeBJWK3E/CrWbxRG3m5GzY4lnIwGRBA==
@@ -18217,15 +18217,15 @@ moment@^2.10.6:
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.21.0.tgz#2a114b51d2a6ec9e6d83cf803f838a878d8a023a"
   integrity sha512-TCZ36BjURTeFTM/CwRcViQlfkMvL1/vFISuNLO5GkcVm1+QHfbSiNqZuWeMFjj1/3+uAjXswgRk30j1kkLYJBQ==
 
-monocle-ts@^1.0.0:
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.7.1.tgz#03a615938aa90983a4fa29749969d30f72d80ba1"
-  integrity sha512-X9OzpOyd/R83sYex8NYpJjUzi/MLQMvGNVfxDYiIvs+QMXMEUDwR61MQoARFN10Cqz5h/mbFSPnIQNUIGhYd2Q==
-
 monaco-editor@^0.14.3:
   version "0.14.3"
   resolved "https://registry.yarnpkg.com/monaco-editor/-/monaco-editor-0.14.3.tgz#7cc4a4096a3821f52fea9b10489b527ef3034e22"
   integrity sha512-RhaO4xXmWn/p0WrkEOXe4PoZj6xOcvDYjoAh0e1kGUrQnP1IOpc0m86Ceuaa2CLEMDINqKijBSmqhvBQnsPLHQ==
+
+monocle-ts@^1.0.0:
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/monocle-ts/-/monocle-ts-1.7.1.tgz#03a615938aa90983a4fa29749969d30f72d80ba1"
+  integrity sha512-X9OzpOyd/R83sYex8NYpJjUzi/MLQMvGNVfxDYiIvs+QMXMEUDwR61MQoARFN10Cqz5h/mbFSPnIQNUIGhYd2Q==
 
 monotone-convex-hull-2d@^1.0.1:
   version "1.0.1"
@@ -21230,7 +21230,7 @@ react-dom@^16.2.0, react-dom@^16.8.0:
     prop-types "^15.6.2"
     scheduler "^0.13.2"
 
-react-dom@^16.8.3:
+react-dom@^16.8.1, react-dom@^16.8.3:
   version "16.8.6"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.8.6.tgz#71d6303f631e8b0097f56165ef608f051ff6e10f"
   integrity sha512-1nL7PIq9LTL3fthPqwkvr2zY7phIPjYrT0jp4HjyEQrEROnw4dG41VVwi/wfoCneoleqrNX7iAD+pXebJZwrwA==
@@ -21655,16 +21655,6 @@ react-sizeme@^2.3.6:
     invariant "^2.2.2"
     lodash "^4.17.4"
 
-react-split-pane@^0.1.84:
-  version "0.1.84"
-  resolved "https://registry.yarnpkg.com/react-split-pane/-/react-split-pane-0.1.84.tgz#b9c1499cbc40b09cf29953ee6f5ff1039d31906e"
-  integrity sha512-rso1dRAXX/WETyqF5C0fomIYzpF71Nothfr1R7pFkrJCPVJ20ok2e6wqF+JvUTyE/meiBvsbNPT1loZjyU+53w==
-  dependencies:
-    inline-style-prefixer "^3.0.6"
-    prop-types "^15.5.10"
-    react-lifecycles-compat "^3.0.4"
-    react-style-proptype "^3.0.0"
-
 react-spring@^8.0.8:
   version "8.0.18"
   resolved "https://registry.yarnpkg.com/react-spring/-/react-spring-8.0.18.tgz#f6fa09ab5acdeb37618c0e340d59830171b95c33"
@@ -21819,6 +21809,16 @@ react@^16.8.1:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
     scheduler "^0.13.5"
+
+react@^16.8.3:
+  version "16.8.6"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.8.6.tgz#ad6c3a9614fd3a4e9ef51117f54d888da01f2bbe"
+  integrity sha512-pC0uMkhLaHm11ZSJULfOBqV4tIZkx87ZLvbbQYunNixAAvjnC+snJCg0XQXn9VIsttVsbZP/H/ewzgsd5fxKXw==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
+    scheduler "^0.13.6"
 
 reactcss@1.2.3, reactcss@^1.2.0:
   version "1.2.3"
@@ -23171,6 +23171,14 @@ scheduler@^0.13.5:
   version "0.13.5"
   resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.5.tgz#b7226625167041298af3b98088a9dbbf6d7733a8"
   integrity sha512-K98vjkQX9OIt/riLhp6F+XtDPtMQhqNcf045vsh+pcuvHq+PHy1xCrH3pq1P40m6yR46lpVvVhKdEOtnimuUJw==
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+
+scheduler@^0.13.6:
+  version "0.13.6"
+  resolved "https://registry.yarnpkg.com/scheduler/-/scheduler-0.13.6.tgz#466a4ec332467b31a91b9bf74e5347072e4cd889"
+  integrity sha512-IWnObHt413ucAYKsD9J1QShUKkbKLQQHdxRyw73sw4FN26iWr3DY/H34xGPe4nmL1DwXyWmSWmMrA9TfQbE/XQ==
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"

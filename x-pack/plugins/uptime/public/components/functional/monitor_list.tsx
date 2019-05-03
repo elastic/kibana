@@ -205,6 +205,7 @@ export const MonitorListComponent = ({
                 // </EuiSeriesChart>
               );
             },
+          },
           {
             align: 'right',
             field: 'ping',

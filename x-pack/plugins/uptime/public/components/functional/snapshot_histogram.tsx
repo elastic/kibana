@@ -8,11 +8,13 @@ import {
   Axis,
   BarSeries,
   Chart,
+  CustomSeriesColorsMap,
   getAxisId,
   getSpecId,
   Position,
   ScaleType,
   timeFormatter,
+  DataSeriesColorsValues,
 } from '@elastic/charts';
 // @ts-ignore Missing typings for series charts
 import { EuiHistogramSeries, EuiSeriesChart, EuiSeriesChartUtils } from '@elastic/eui';
@@ -30,9 +32,19 @@ export const SnapshotHistogram = ({
   dangerColor,
   histogram,
   successColor,
-}: SnapshotHistogramProps) => (
-  <Fragment>
-    <div style={{ height: 220 }}>
+}: SnapshotHistogramProps) => {
+  const downMonitorsName = i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
+    defaultMessage: 'Down Monitors',
+  });
+  const dangerSpecId = getSpecId(downMonitorsName);
+  const c: CustomSeriesColorsMap = new Map();
+  const dangerColorValues: DataSeriesColorsValues = {
+    colorValues: ['Down Monitors'],
+    specId: dangerSpecId,
+  };
+  c.set(dangerColorValues, dangerColor);
+  return (
+    <Fragment>
       <Chart renderer="canvas">
         <Axis
           id={getAxisId(
@@ -55,6 +67,7 @@ export const SnapshotHistogram = ({
           showOverlappingTicks={true}
         />
         <BarSeries
+          customSeriesColors={c}
           id={getSpecId(
             i18n.translate('xpack.uptime.snapshotHistogram.upMonitorsId', {
               defaultMessage: 'Up Monitors',
@@ -68,11 +81,8 @@ export const SnapshotHistogram = ({
           data={histogram.map(({ x, upCount }) => [x, upCount || 0])}
         />
         <BarSeries
-          id={getSpecId(
-            i18n.translate('xpack.uptime.snapshotHistogram.downMonitorsId', {
-              defaultMessage: 'Down Monitors',
-            })
-          )}
+          customSeriesColors={c}
+          id={dangerSpecId}
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={0}
@@ -81,8 +91,7 @@ export const SnapshotHistogram = ({
           data={histogram.map(({ x, downCount }) => [x, downCount || 0])}
         />
       </Chart>
-    </div>
-    {/* <EuiSeriesChart
+      {/* <EuiSeriesChart
       width={windowWidth * windowRatio}
       height={120}
       stackBy="y"
@@ -104,5 +113,6 @@ export const SnapshotHistogram = ({
         color={dangerColor}
       />
     </EuiSeriesChart> */}
-  </Fragment>
-);
+    </Fragment>
+  );
+};

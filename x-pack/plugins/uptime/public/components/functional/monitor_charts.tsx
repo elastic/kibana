@@ -16,6 +16,7 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  CustomSeriesColorsMap,
 } from '@elastic/charts';
 import {
   // @ts-ignore missing typings
@@ -35,7 +36,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Fragment } from 'react';
 import { MonitorChart } from '../../../common/graphql/types';
 import { convertMicrosecondsToMilliseconds as microsToMillis } from '../../lib/helper';
@@ -58,13 +58,48 @@ type Props = MonitorChartsProps & UptimeGraphQLQueryProps<MonitorChartsQueryResu
 export const MonitorChartsComponent = ({ danger, data, mean, range, success }: Props) => {
   if (data && data.monitorChartsData) {
     const {
-      monitorChartsData: { durationArea, durationLine, status, durationMaxValue, statusMaxCount },
+      monitorChartsData: {
+        durationArea,
+        durationLine,
+        status,
+        // durationMaxValue,
+        // statusMaxCount,
+      },
     } = data;
 
-    const durationMax = microsToMillis(durationMaxValue);
+    // const durationMax = microsToMillis(durationMaxValue);
     // These limits provide domain sizes for the charts
-    const checkDomainLimits = [0, statusMaxCount];
-    const durationDomainLimits = [0, durationMax ? durationMax : 0];
+    // const checkDomainLimits = [0, statusMaxCount];
+    // const durationDomainLimits = [0, durationMax ? durationMax : 0];
+    const upString = i18n.translate('xpack.uptime.monitorCharts.checkStatus.series.upCountLabel', {
+      defaultMessage: 'Up count',
+    });
+    const downString = i18n.translate(
+      'xpack.uptime.monitorCharts.checkStatus.series.downCountLabel',
+      {
+        defaultMessage: 'Down count',
+      }
+    );
+
+    const durationColors: CustomSeriesColorsMap = new Map();
+    const checkareaseriesspecid = getSpecId('Up');
+    durationColors.set(
+      {
+        colorValues: [],
+        specId: checkareaseriesspecid,
+      },
+      success
+    );
+    const durationDown: CustomSeriesColorsMap = new Map();
+    const checkdownseriesspecid = getSpecId('Down');
+    durationDown.set(
+      {
+        colorValues: [],
+        specId: checkdownseriesspecid,
+      },
+      danger
+    );
+
     return (
       <Fragment>
         <EuiFlexGroup>
@@ -79,6 +114,7 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
                   id={getAxisId('durationBottom')}
                   position={Position.Bottom}
                   tickFormat={timeFormatter('HH:mm')}
+                  title="Timestamp per 1 minute"
                   showOverlappingTicks={true}
                 />
                 <Axis
@@ -87,55 +123,33 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
                   tickFormat={d => Number(d).toFixed(0)}
                   title="Duration ms"
                 />
-                <AreaSeries
-                  id={getSpecId('durationAreaSeries')}
-                  curve={CurveType.CURVE_BASIS}
-                  xScaleType={ScaleType.Time}
-                  yScaleType={ScaleType.Linear}
-                  xAccessor={0}
-                  yAccessors={[1, 2]}
-                  seriesType="area"
-                  data={durationArea.map(({ x, yMin, yMax }) => [
-                    x,
-                    (yMin || 0) / 1000,
-                    (yMax || 0) / 1000,
-                  ])}
-                  yScaleToDataExtent={false}
-                />
+                {
+                  // @ts-ignore
+                  <AreaSeries
+                    id={getSpecId('durationAreaSeries')}
+                    xScaleType={ScaleType.Time}
+                    yScaleType={ScaleType.Linear}
+                    xAccessor="x"
+                    yAccessors={['Max']}
+                    y0Accessors={['Min']}
+                    data={durationArea.map(({ x, yMin, yMax }) => ({
+                      x,
+                      Min: microsToMillis(yMin || 0),
+                      Max: microsToMillis(yMax || 0),
+                    }))}
+                    yScaleToDataExtent={true}
+                    curve={CurveType.CURVE_MONOTONE_X}
+                  />
+                }
                 <LineSeries
-                  data={durationLine.map(({ x, y }) => [x, microsToMillis(y)])}
+                  data={durationLine.map(({ x, y }) => [x || 0, microsToMillis(y)])}
                   id={getSpecId('Average')}
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
                   xAccessor={0}
                   yAccessors={[1]}
-                  yScaleToDataExtent={false}
+                  yScaleToDataExtent={true}
                 />
-                {/* <BarSeries
-              xScaleType={ScaleType.Linear}
-              yScaleType={ScaleType.Log}
-              xAccessor="x"
-              yAccessors={['y']}
-              stackAccessors={['x']}
-              data={[
-                { x: 1, y: 0, g: 'a' },
-                { x: 1, y: 0, g: 'b' },
-                { x: 2, y: 1, g: 'a' },
-                { x: 2, y: 1, g: 'b' },
-                { x: 3, y: 2, g: 'a' },
-                { x: 3, y: 2, g: 'b' },
-                { x: 4, y: 3, g: 'a' },
-                { x: 4, y: 0, g: 'b' },
-                { x: 5, y: 4, g: 'a' },
-                { x: 5, y: 0.5, g: 'b' },
-                { x: 6, y: 5, g: 'a' },
-                { x: 6, y: 1, g: 'b' },
-                { x: 7, y: 6, g: 'b' },
-                { x: 8, y: 7, g: 'a' },
-                { x: 8, y: 10, g: 'b' },
-                { x: 9, y: 4, g: 'a' },
-              ]}
-            /> */}
               </Chart>
             </EuiPanel>
           </EuiFlexItem>
@@ -158,21 +172,38 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
                   tickFormat={d => Number(d).toFixed(0)}
                 />
                 <AreaSeries
-                  id={getSpecId('checkAreaSeries')}
-                  curve={CurveType.CURVE_BASIS}
+                  customSeriesColors={durationColors}
+                  id={checkareaseriesspecid}
                   xScaleType={ScaleType.Time}
                   yScaleType={ScaleType.Linear}
-                  xAccessor={0}
-                  yAccessors={[1, 2]}
+                  xAccessor="x"
+                  yAccessors={[upString]}
                   seriesType="area"
-                  stackAccessors={['y']}
-                  data={status.map(({ x, up, down }) => [x, up || 0, down || 0])}
+                  stackAccessors={['x']}
+                  data={status.map(({ x, up }) => ({
+                    x,
+                    [upString]: up || 0,
+                  }))}
+                />
+                <AreaSeries
+                  customSeriesColors={durationDown}
+                  id={checkdownseriesspecid}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="x"
+                  yAccessors={[downString]}
+                  seriesType="area"
+                  stackAccessors={['x']}
+                  data={status.map(({ x, down }) => ({
+                    x,
+                    [downString]: down || 0,
+                  }))}
                 />
               </Chart>
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexGroup>
+        {/* <EuiFlexGroup>
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h4>
@@ -266,7 +297,7 @@ export const MonitorChartsComponent = ({ danger, data, mean, range, success }: P
               </EuiSeriesChart>
             </EuiPanel>
           </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexGroup> */}
       </Fragment>
     );
   }
