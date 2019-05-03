@@ -24,7 +24,6 @@ import {
   EuiProgress,
   EuiText,
   EuiTitle,
-  EuiToolTip,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
@@ -323,15 +322,12 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiCopy textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}>
+              <EuiCopy
+                beforeMessage={euiCopyText}
+                textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}
+              >
                 {(copy: () => void) => (
-                  <EuiToolTip content={euiCopyText}>
-                    <EuiButtonIcon
-                      onClick={copy}
-                      iconType="copyClipboard"
-                      aria-label={euiCopyText}
-                    />
-                  </EuiToolTip>
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
                 )}
               </EuiCopy>
             </EuiFlexItem>

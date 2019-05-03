@@ -18,7 +18,6 @@ import {
   EuiPanel,
   EuiProgress,
   EuiTitle,
-  EuiToolTip,
   SortDirection,
 } from '@elastic/eui';
 
@@ -194,11 +193,12 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
         </EuiFlexItem>
         {previewRequest !== null && (
           <EuiFlexItem grow={false}>
-            <EuiCopy textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}>
+            <EuiCopy
+              beforeMessage={euiCopyText}
+              textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}
+            >
               {(copy: () => void) => (
-                <EuiToolTip content={euiCopyText}>
-                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
-                </EuiToolTip>
+                <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
               )}
             </EuiCopy>
           </EuiFlexItem>
