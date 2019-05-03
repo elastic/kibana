@@ -29,6 +29,7 @@ import {
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
+  compressed: boolean;
   itemIdToExpandedRowMap: ItemIdToExpandedRowMap;
   isExpandable: boolean;
 }
@@ -340,6 +341,7 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
       )}
       {clearTable === false && (
         <ExpandableTable
+          compressed
           items={tableItems}
           columns={columns}
           pagination={true}
