@@ -1034,7 +1034,7 @@ Platform::
 * Only tries to autoCreateOrUpgrade on the first request {pull}24605[#24605]
 * Improves types in the `@kbn/datemath` package {pull}24671[#24671]
 * Bumps elasticsearch-js and makelogs {pull}24767[#24767]
-* Add support for interceptors. This makes it possible for plugins to transform request config and response of http requests made with kfetch.{pull}22128[#22128]
+* Add support for interceptors. This makes it possible for plugins to transform request config and response of http requests made with kfetch. {pull}22128[#22128]
 * Improves how the Saved Objects client handles s RequestEntityTooLarge error from Elasticsearch {pull}22430[#22430]
 * Turns off the `no-multi-str` rule in eslint config {pull}22525[#22525]
 * Fixes a problem in which more than one search request error would result in an error {pull}24952[#24952]
