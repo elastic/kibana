@@ -86,7 +86,7 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
-  HostDetails: HostItem;
+  HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
 
@@ -867,6 +867,8 @@ export interface HostItem {
   lastSeen?: Date | null;
 
   host?: HostFields | null;
+
+  cloud?: CloudFields | null;
 }
 
 export interface HostFields {
@@ -897,6 +899,24 @@ export interface OsFields {
   version?: string | null;
 
   kernel?: string | null;
+}
+
+export interface CloudFields {
+  instance?: CloudInstance | null;
+
+  machine?: CloudMachine | null;
+
+  provider?: (string | null)[] | null;
+
+  region?: (string | null)[] | null;
+}
+
+export interface CloudInstance {
+  id?: (string | null)[] | null;
+}
+
+export interface CloudMachine {
+  type?: (string | null)[] | null;
 }
 
 export interface FirstLastSeenHost {
@@ -1334,7 +1354,7 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface HostDetailsSourceArgs {
+export interface HostOverviewSourceArgs {
   id?: string | null;
 
   hostName: string;
@@ -1607,7 +1627,7 @@ export namespace SourceResolvers {
     /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
     Hosts?: HostsResolver<HostsData, TypeParent, Context>;
 
-    HostDetails?: HostDetailsResolver<HostItem, TypeParent, Context>;
+    HostOverview?: HostOverviewResolver<HostItem, TypeParent, Context>;
 
     HostFirstLastSeen?: HostFirstLastSeenResolver<FirstLastSeenHost, TypeParent, Context>;
 
@@ -1740,13 +1760,13 @@ export namespace SourceResolvers {
     filterQuery?: string | null;
   }
 
-  export type HostDetailsResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
+  export type HostOverviewResolver<R = HostItem, Parent = Source, Context = SiemContext> = Resolver<
     R,
     Parent,
     Context,
-    HostDetailsArgs
+    HostOverviewArgs
   >;
-  export interface HostDetailsArgs {
+  export interface HostOverviewArgs {
     id?: string | null;
 
     hostName: string;
@@ -4449,6 +4469,8 @@ export namespace HostItemResolvers {
     lastSeen?: LastSeenResolver<Date | null, TypeParent, Context>;
 
     host?: HostResolver<HostFields | null, TypeParent, Context>;
+
+    cloud?: CloudResolver<CloudFields | null, TypeParent, Context>;
   }
 
   export type IdResolver<R = string | null, Parent = HostItem, Context = SiemContext> = Resolver<
@@ -4463,6 +4485,11 @@ export namespace HostItemResolvers {
   > = Resolver<R, Parent, Context>;
   export type HostResolver<
     R = HostFields | null,
+    Parent = HostItem,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type CloudResolver<
+    R = CloudFields | null,
     Parent = HostItem,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
@@ -4565,6 +4592,63 @@ export namespace OsFieldsResolvers {
   export type KernelResolver<
     R = string | null,
     Parent = OsFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CloudFieldsResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = CloudFields> {
+    instance?: InstanceResolver<CloudInstance | null, TypeParent, Context>;
+
+    machine?: MachineResolver<CloudMachine | null, TypeParent, Context>;
+
+    provider?: ProviderResolver<(string | null)[] | null, TypeParent, Context>;
+
+    region?: RegionResolver<(string | null)[] | null, TypeParent, Context>;
+  }
+
+  export type InstanceResolver<
+    R = CloudInstance | null,
+    Parent = CloudFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type MachineResolver<
+    R = CloudMachine | null,
+    Parent = CloudFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type ProviderResolver<
+    R = (string | null)[] | null,
+    Parent = CloudFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+  export type RegionResolver<
+    R = (string | null)[] | null,
+    Parent = CloudFields,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CloudInstanceResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = CloudInstance> {
+    id?: IdResolver<(string | null)[] | null, TypeParent, Context>;
+  }
+
+  export type IdResolver<
+    R = (string | null)[] | null,
+    Parent = CloudInstance,
+    Context = SiemContext
+  > = Resolver<R, Parent, Context>;
+}
+
+export namespace CloudMachineResolvers {
+  export interface Resolvers<Context = SiemContext, TypeParent = CloudMachine> {
+    type?: TypeResolver<(string | null)[] | null, TypeParent, Context>;
+  }
+
+  export type TypeResolver<
+    R = (string | null)[] | null,
+    Parent = CloudMachine,
     Context = SiemContext
   > = Resolver<R, Parent, Context>;
 }

@@ -8,12 +8,12 @@ import expect from '@kbn/expect';
 
 import {
   Direction,
-  GetHostDetailsQuery,
+  GetHostOverviewQuery,
   GetHostFirstLastSeenQuery,
   GetHostsTableQuery,
   HostsFields,
 } from '../../../../plugins/siem/public/graphql/types';
-import { HostDetailsQuery } from './../../../../plugins/siem/public/containers/hosts/details/host_details.gql_query';
+import { HostOverviewQuery } from '../../../../plugins/siem/public/containers/hosts/overview/host_overview.gql_query';
 import { HostFirstLastSeenGqlQuery } from './../../../../plugins/siem/public/containers/hosts/first_last_seen/first_last_seen.gql_query';
 import { HostsTableQuery } from './../../../../plugins/siem/public/containers/hosts/hosts_table.gql_query';
 import { KbnTestProvider } from './types';
@@ -95,7 +95,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
     });
 
     it('Make sure that we get Host Details data', () => {
-      const expectedHost: GetHostDetailsQuery.Host = {
+      const expectedHost: GetHostOverviewQuery.Host = {
         architecture: 'x86_64',
         id: CURSOR_ID,
         ip: [],
@@ -113,8 +113,8 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
       };
 
       return client
-        .query<GetHostDetailsQuery.Query>({
-          query: HostDetailsQuery,
+        .query<GetHostOverviewQuery.Query>({
+          query: HostOverviewQuery,
           variables: {
             sourceId: 'default',
             hostName: 'zeek-sensor-san-francisco',
@@ -126,7 +126,7 @@ const hostsTests: KbnTestProvider = ({ getService }) => {
           },
         })
         .then(resp => {
-          const hosts = resp.data.source.HostDetails;
+          const hosts = resp.data.source.HostOverview;
           expect(hosts.host).to.eql(expectedHost);
         });
     });

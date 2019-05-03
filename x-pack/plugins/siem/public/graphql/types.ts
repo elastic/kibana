@@ -57,7 +57,7 @@ export interface Source {
   /** Gets Hosts based on timerange and specified criteria, or all events in the timerange if no criteria is specified */
   Hosts: HostsData;
 
-  HostDetails: HostItem;
+  HostOverview: HostItem;
 
   HostFirstLastSeen: FirstLastSeenHost;
 
@@ -838,6 +838,8 @@ export interface HostItem {
   lastSeen?: Date | null;
 
   host?: HostFields | null;
+
+  cloud?: CloudFields | null;
 }
 
 export interface HostFields {
@@ -868,6 +870,24 @@ export interface OsFields {
   version?: string | null;
 
   kernel?: string | null;
+}
+
+export interface CloudFields {
+  instance?: CloudInstance | null;
+
+  machine?: CloudMachine | null;
+
+  provider?: (string | null)[] | null;
+
+  region?: (string | null)[] | null;
+}
+
+export interface CloudInstance {
+  id?: (string | null)[] | null;
+}
+
+export interface CloudMachine {
+  type?: (string | null)[] | null;
 }
 
 export interface FirstLastSeenHost {
@@ -1305,7 +1325,7 @@ export interface HostsSourceArgs {
 
   filterQuery?: string | null;
 }
-export interface HostDetailsSourceArgs {
+export interface HostOverviewSourceArgs {
   id?: string | null;
 
   hostName: string;
@@ -1988,66 +2008,6 @@ export namespace GetLastEventTimeQuery {
   };
 }
 
-export namespace GetHostDetailsQuery {
-  export type Variables = {
-    sourceId: string;
-    hostName: string;
-    timerange: TimerangeInput;
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'Source';
-
-    id: string;
-
-    HostDetails: HostDetails;
-  };
-
-  export type HostDetails = {
-    __typename?: 'HostItem';
-
-    _id?: string | null;
-
-    host?: Host | null;
-  };
-
-  export type Host = {
-    __typename?: 'HostFields';
-
-    architecture?: string | null;
-
-    id?: string | null;
-
-    ip?: (string | null)[] | null;
-
-    mac?: (string | null)[] | null;
-
-    name?: string | null;
-
-    os?: Os | null;
-
-    type?: string | null;
-  };
-
-  export type Os = {
-    __typename?: 'OsFields';
-
-    family?: string | null;
-
-    name?: string | null;
-
-    platform?: string | null;
-
-    version?: string | null;
-  };
-}
-
 export namespace GetHostFirstLastSeenQuery {
   export type Variables = {
     sourceId: string;
@@ -2164,6 +2124,92 @@ export namespace GetHostsTableQuery {
     __typename?: 'CursorType';
 
     value: string;
+  };
+}
+
+export namespace GetHostOverviewQuery {
+  export type Variables = {
+    sourceId: string;
+    hostName: string;
+    timerange: TimerangeInput;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'Source';
+
+    id: string;
+
+    HostOverview: HostOverview;
+  };
+
+  export type HostOverview = {
+    __typename?: 'HostItem';
+
+    _id?: string | null;
+
+    host?: Host | null;
+
+    cloud?: Cloud | null;
+  };
+
+  export type Host = {
+    __typename?: 'HostFields';
+
+    architecture?: string | null;
+
+    id?: string | null;
+
+    ip?: (string | null)[] | null;
+
+    mac?: (string | null)[] | null;
+
+    name?: string | null;
+
+    os?: Os | null;
+
+    type?: string | null;
+  };
+
+  export type Os = {
+    __typename?: 'OsFields';
+
+    family?: string | null;
+
+    name?: string | null;
+
+    platform?: string | null;
+
+    version?: string | null;
+  };
+
+  export type Cloud = {
+    __typename?: 'CloudFields';
+
+    instance?: Instance | null;
+
+    machine?: Machine | null;
+
+    provider?: (string | null)[] | null;
+
+    region?: (string | null)[] | null;
+  };
+
+  export type Instance = {
+    __typename?: 'CloudInstance';
+
+    id?: (string | null)[] | null;
+  };
+
+  export type Machine = {
+    __typename?: 'CloudMachine';
+
+    type?: (string | null)[] | null;
   };
 }
 
