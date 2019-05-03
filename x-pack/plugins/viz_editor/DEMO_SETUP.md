@@ -21,7 +21,7 @@ Steps to setup
 * `nvm install 10.15.2 # might change in the future`
 * `npm install -g yarn`
 * `yarn kbn bootstrap`
-* `yarn es snapshot & # this starts the matching es instance in the background`
+* `screen -S es -dm bash -c "yarn es snapshot"`
 * `sudo apt-get install nginx`
 * 
 ```sh
@@ -41,11 +41,11 @@ echo "server {\
 echo "cd /home/<MY_USERNAME>/kibana
 git pull
 yarn build --skip-archives --skip-os-packages --no-oss
-kill \"\$(jobs -p | tail -n1)\"
+screen -S kibana -X quit
 rm -rf ../built_kibana
 mv ./build/default/kibana-8.0.0-SNAPSHOT-linux-x86_64 ../built_kibana
 cd ../built_kibana
-./bin/kibana &" >  /home/<MY_USERNAME>/build.sh
+screen -S kibana -dm bash -c \"./bin/kibana\"" >  /home/<MY_USERNAME>/build.sh
 ```
 * `chmod +x /home/<MY_USERNAME>/build.sh`
 * `/home/<MY_USERNAME>/build.sh`
