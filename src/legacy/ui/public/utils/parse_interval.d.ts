@@ -17,22 +17,6 @@
  * under the License.
  */
 
-import { AggConfig } from '../vis';
+import moment from 'moment';
 
-interface AggParam {
-  type: string;
-  name: string;
-  options?: AggParamOption[];
-  required?: boolean;
-  displayName?: string;
-  onChange?(agg: AggConfig): void;
-  shouldShow?(agg: AggConfig): boolean;
-}
-
-interface AggParamOption {
-  val: string;
-  display: string;
-  enabled?(agg: AggConfig): void;
-}
-
-export { AggParam, AggParamOption };
+export function parseInterval(interval: string): moment.Duration | null;

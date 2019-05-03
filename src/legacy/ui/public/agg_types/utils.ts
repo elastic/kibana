@@ -17,6 +17,15 @@
  * under the License.
  */
 
+import { parseInterval } from '../utils/parse_interval';
+import { leastCommonInterval } from '../vis/lib/least_common_interval';
+
+/**
+ * Check a string if it's a valid JSON.
+ *
+ * @param {string} value a string that should be validated
+ * @returns {boolean} true if value is a valid JSON or if value is an empty string, or a string with whitespaces, otherwise false
+ */
 function isValidJson(value: string): boolean {
   if (!value || value.length === 0) {
     return true;
@@ -40,4 +49,24 @@ function isValidJson(value: string): boolean {
   }
 }
 
-export { isValidJson };
+function isValidInterval(value: string, baseInterval: string) {
+  if (baseInterval) {
+    return _parseWithBase(value, baseInterval);
+  } else {
+    return parseInterval(value) !== null;
+  }
+}
+
+// When base interval is set, check for least common interval and allow
+// input the value is the same. This means that the input interval is a
+// multiple of the base interval.
+function _parseWithBase(value: string, baseInterval: string) {
+  try {
+    const interval = leastCommonInterval(baseInterval, value);
+    return interval === value.replace(/\s/g, '');
+  } catch (e) {
+    return false;
+  }
+}
+
+export { isValidJson, isValidInterval };
