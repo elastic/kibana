@@ -1,0 +1,195 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Load More Table Component rendering it renders the default load more table 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <styled.div>
+    <pure(Component)
+      subtitle="Showing: 1 Test Unit"
+      title="Hosts"
+      tooltip="My test tooltip"
+    >
+      <p>
+        My test supplement.
+      </p>
+    </pure(Component)>
+    <Styled(EuiBasicTable)
+      columns={
+        Array [
+          Object {
+            "field": "node.host.name",
+            "hideForMobile": false,
+            "name": "Host",
+            "render": [Function],
+            "truncateText": false,
+          },
+          Object {
+            "field": "node.host.firstSeen",
+            "hideForMobile": false,
+            "name": "First seen",
+            "render": [Function],
+            "truncateText": false,
+          },
+          Object {
+            "field": "node.host.os",
+            "hideForMobile": false,
+            "name": "OS",
+            "render": [Function],
+            "truncateText": false,
+          },
+          Object {
+            "field": "node.host.version",
+            "hideForMobile": false,
+            "name": "Version",
+            "render": [Function],
+            "truncateText": false,
+          },
+        ]
+      }
+      items={
+        Array [
+          Object {
+            "cursor": Object {
+              "value": "98966fa2013c396155c460d35c0902be",
+            },
+            "host": Object {
+              "_id": "cPsuhGcB0WOhS6qyTKC0",
+              "firstSeen": "2018-12-06T15:40:53.319Z",
+              "name": "elrond.elstc.co",
+              "os": "Ubuntu",
+              "version": "18.04.1 LTS (Bionic Beaver)",
+            },
+          },
+          Object {
+            "cursor": Object {
+              "value": "aa7ca589f1b8220002f2fc61c64cfbf1",
+            },
+            "host": Object {
+              "_id": "KwQDiWcB0WOhS6qyXmrW",
+              "firstSeen": "2018-12-07T14:12:38.560Z",
+              "name": "siem-kibana",
+              "os": "Debian GNU/Linux",
+              "version": "9 (stretch)",
+            },
+          },
+        ]
+      }
+      onChange={[Function]}
+      sorting={null}
+    />
+    <styled.div>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        direction="row"
+        gutterSize="none"
+        justifyContent="flexStart"
+      >
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiPopover
+            anchorPosition="downCenter"
+            button={
+              <EuiButtonEmpty
+                color="text"
+                iconSide="right"
+                iconType="arrowDown"
+                onClick={[Function]}
+                size="s"
+                type="button"
+              >
+                Rows: 
+                1
+              </EuiButtonEmpty>
+            }
+            closePopover={[Function]}
+            data-test-subj="loadingMoreSizeRowPopover"
+            hasArrow={true}
+            id="customizablePagination"
+            isOpen={false}
+            ownFocus={false}
+            panelPaddingSize="none"
+          >
+            <EuiContextMenuPanel
+              data-test-subj="loadingMorePickSizeRow"
+              hasFocus={true}
+              items={
+                Array [
+                  <EuiContextMenuItem
+                    icon="empty"
+                    layoutAlign="center"
+                    onClick={[Function]}
+                    toolTipPosition="right"
+                  >
+                    2 rows
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    icon="empty"
+                    layoutAlign="center"
+                    onClick={[Function]}
+                    toolTipPosition="right"
+                  >
+                    5 rows
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    icon="empty"
+                    layoutAlign="center"
+                    onClick={[Function]}
+                    toolTipPosition="right"
+                  >
+                    10 rows
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    icon="empty"
+                    layoutAlign="center"
+                    onClick={[Function]}
+                    toolTipPosition="right"
+                  >
+                    20 rows
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    icon="empty"
+                    layoutAlign="center"
+                    onClick={[Function]}
+                    toolTipPosition="right"
+                  >
+                    50 rows
+                  </EuiContextMenuItem>,
+                ]
+              }
+            />
+          </EuiPopover>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            alignItems="flexStart"
+            direction="row"
+            gutterSize="none"
+            justifyContent="center"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButton
+                color="primary"
+                data-test-subj="loadingMoreButton"
+                fill={false}
+                iconSide="left"
+                isLoading={false}
+                onClick={[Function]}
+                size="m"
+                type="button"
+              >
+                Load More
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </styled.div>
+  </styled.div>
+</EuiPanel>
+`;

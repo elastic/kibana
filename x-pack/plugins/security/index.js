@@ -198,7 +198,7 @@ export const security = (kibana) => new kibana.Plugin({
       return new savedObjects.SavedObjectsClient(callWithRequestRepository);
     });
 
-    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_VALUE, ({ client, request }) => {
+    savedObjects.addScopedSavedObjectsClientWrapperFactory(Number.MIN_SAFE_INTEGER, ({ client, request }) => {
       if (authorization.mode.useRbacForRequest(request)) {
         return new SecureSavedObjectsClientWrapper({
           actions: authorization.actions,

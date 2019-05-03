@@ -13,8 +13,8 @@ import {
 } from './source_fields_fragment.gql_query';
 
 export const updateSourceMutation = gql`
-  mutation UpdateSourceMutation($sourceId: ID = "default", $changes: [UpdateSourceInput!]!) {
-    updateSource(id: $sourceId, changes: $changes) {
+  mutation UpdateSourceMutation($sourceId: ID = "default", $sourceProperties: UpdateSourceInput!) {
+    updateSource(id: $sourceId, sourceProperties: $sourceProperties) {
       source {
         ...InfraSourceFields
         configuration {

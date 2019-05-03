@@ -1,0 +1,230 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`JSON View rendering should match snapshot 1`] = `
+<Component
+  data={
+    Array [
+      Object {
+        "category": "_id",
+        "description": "Each document has an _id that uniquely identifies it",
+        "example": "Y-6TfmcB0WOhS6qyMv3s",
+        "field": "_id",
+        "originalValue": "pEMaMmkBUV60JmNWmWVi",
+        "type": "keyword",
+        "values": Array [
+          "pEMaMmkBUV60JmNWmWVi",
+        ],
+      },
+      Object {
+        "category": "_index",
+        "description": "An index is like a ‘database’ in a relational database. It has a mapping which defines multiple types. An index is a logical namespace which maps to one or more primary shards and can have zero or more replica shards.",
+        "example": "auditbeat-8.0.0-2019.02.19-000001",
+        "field": "_index",
+        "originalValue": "filebeat-8.0.0-2019.02.19-000001",
+        "type": "keyword",
+        "values": Array [
+          "filebeat-8.0.0-2019.02.19-000001",
+        ],
+      },
+      Object {
+        "category": "_type",
+        "description": null,
+        "example": null,
+        "field": "_type",
+        "originalValue": "_doc",
+        "type": "keyword",
+        "values": Array [
+          "_doc",
+        ],
+      },
+      Object {
+        "category": "_score",
+        "description": null,
+        "example": null,
+        "field": "_score",
+        "originalValue": 1,
+        "type": "long",
+        "values": Array [
+          "1",
+        ],
+      },
+      Object {
+        "category": "@timestamp",
+        "description": "Date/time when the event originated.For log events this is the date/time when the event was generated, and not when it was read.Required field for all events.",
+        "example": "2016-05-23T08:05:34.853Z",
+        "field": "@timestamp",
+        "originalValue": "2019-02-28T16:50:54.621Z",
+        "type": "date",
+        "values": Array [
+          "2019-02-28T16:50:54.621Z",
+        ],
+      },
+      Object {
+        "category": "agent",
+        "description": "Ephemeral identifier of this agent (if one exists).This id normally changes across restarts, but \`agent.id\` does not.",
+        "example": "8a4f500f",
+        "field": "agent.ephemeral_id",
+        "originalValue": "9d391ef2-a734-4787-8891-67031178c641",
+        "type": "keyword",
+        "values": Array [
+          "9d391ef2-a734-4787-8891-67031178c641",
+        ],
+      },
+      Object {
+        "category": "agent",
+        "description": null,
+        "example": null,
+        "field": "agent.hostname",
+        "originalValue": "siem-kibana",
+        "type": "keyword",
+        "values": Array [
+          "siem-kibana",
+        ],
+      },
+      Object {
+        "category": "agent",
+        "description": "Unique identifier of this agent (if one exists).Example: For Beats this would be beat.id.",
+        "example": "8a4f500d",
+        "field": "agent.id",
+        "originalValue": "5de03d5f-52f3-482e-91d4-853c7de073c3",
+        "type": "keyword",
+        "values": Array [
+          "5de03d5f-52f3-482e-91d4-853c7de073c3",
+        ],
+      },
+      Object {
+        "category": "agent",
+        "description": "Type of the agent.The agent type stays always the same and should be given by the agent used. In case of Filebeat the agent would always be Filebeat also if two Filebeat instances are run on the same machine.",
+        "example": "filebeat",
+        "field": "agent.type",
+        "originalValue": "filebeat",
+        "type": "keyword",
+        "values": Array [
+          "filebeat",
+        ],
+      },
+      Object {
+        "category": "agent",
+        "description": "Version of the agent.",
+        "example": "6.0.0-rc2",
+        "field": "agent.version",
+        "originalValue": "8.0.0",
+        "type": "keyword",
+        "values": Array [
+          "8.0.0",
+        ],
+      },
+      Object {
+        "category": "cloud",
+        "description": "Availability zone in which this host is running.",
+        "example": "us-east-1c",
+        "field": "cloud.availability_zone",
+        "originalValue": "projects/189716325846/zones/us-east1-b",
+        "type": "keyword",
+        "values": Array [
+          "projects/189716325846/zones/us-east1-b",
+        ],
+      },
+      Object {
+        "category": "cloud",
+        "description": "Instance ID of the host machine.",
+        "example": "i-1234567890abcdef0",
+        "field": "cloud.instance.id",
+        "originalValue": "5412578377715150143",
+        "type": "keyword",
+        "values": Array [
+          "5412578377715150143",
+        ],
+      },
+      Object {
+        "category": "cloud",
+        "description": "Instance name of the host machine.",
+        "example": null,
+        "field": "cloud.instance.name",
+        "originalValue": "siem-kibana",
+        "type": "keyword",
+        "values": Array [
+          "siem-kibana",
+        ],
+      },
+      Object {
+        "category": "cloud",
+        "description": "Machine type of the host machine.",
+        "example": "t2.medium",
+        "field": "cloud.machine.type",
+        "originalValue": "projects/189716325846/machineTypes/n1-standard-1",
+        "type": "keyword",
+        "values": Array [
+          "projects/189716325846/machineTypes/n1-standard-1",
+        ],
+      },
+      Object {
+        "category": "cloud",
+        "description": null,
+        "example": null,
+        "field": "cloud.project.id",
+        "originalValue": "elastic-beats",
+        "type": "keyword",
+        "values": Array [
+          "elastic-beats",
+        ],
+      },
+      Object {
+        "category": "cloud",
+        "description": "Name of the cloud provider. Example values are ec2, gce, or digitalocean.",
+        "example": "ec2",
+        "field": "cloud.provider",
+        "originalValue": "gce",
+        "type": "keyword",
+        "values": Array [
+          "gce",
+        ],
+      },
+      Object {
+        "category": "destination",
+        "description": "Bytes sent from the destination to the source.",
+        "example": "184",
+        "field": "destination.bytes",
+        "originalValue": 584,
+        "type": "long",
+        "values": Array [
+          "584",
+        ],
+      },
+      Object {
+        "category": "destination",
+        "description": "IP address of the destination.Can be one or multiple IPv4 or IPv6 addresses.",
+        "example": null,
+        "field": "destination.ip",
+        "originalValue": "10.47.8.200",
+        "type": "ip",
+        "values": Array [
+          "10.47.8.200",
+        ],
+      },
+      Object {
+        "category": "destination",
+        "description": "Packets sent from the destination to the source.",
+        "example": "12",
+        "field": "destination.packets",
+        "originalValue": 4,
+        "type": "long",
+        "values": Array [
+          "4",
+        ],
+      },
+      Object {
+        "category": "destination",
+        "description": "Port of the destination.",
+        "example": null,
+        "field": "destination.port",
+        "originalValue": 902,
+        "type": "long",
+        "values": Array [
+          "902",
+        ],
+      },
+    ]
+  }
+/>
+`;
