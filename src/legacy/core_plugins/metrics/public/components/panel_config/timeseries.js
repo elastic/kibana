@@ -69,7 +69,7 @@ class TimeseriesPanelConfigUi extends Component {
       : this.props.model.default_index_pattern;
     const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
     this.setState({ indexPatternForQuery: indexPatternObject });
-  };
+  }
   handleSubmit = query => {
     this.props.onChange({ filter: query.query });
   }
