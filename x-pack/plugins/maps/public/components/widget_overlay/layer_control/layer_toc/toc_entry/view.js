@@ -53,12 +53,12 @@ export class TOCEntry extends React.Component {
   }
 
   _openLayerPanelWithCheck = () => {
-    const selectedLayer = this.props.getSelectedLayerSelector();
+    const { selectedLayer, hasDirtyStateSelector } = this.props;
     if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
       return;
     }
 
-    if (this.props.hasDirtyStateSelector()) {
+    if (hasDirtyStateSelector) {
       this.setState({
         shouldShowModal: true
       });

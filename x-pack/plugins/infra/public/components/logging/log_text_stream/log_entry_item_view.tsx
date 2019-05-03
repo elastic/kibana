@@ -23,6 +23,7 @@ import { LogTextStreamItemMessageField } from './item_message_field';
 
 interface LogTextStreamLogEntryItemViewProps {
   boundingBoxRef?: React.Ref<Element>;
+  isHighlighted: boolean;
   intl: InjectedIntl;
   logEntry: LogEntry;
   openFlyoutWithItem: (id: string) => void;
@@ -33,6 +34,7 @@ interface LogTextStreamLogEntryItemViewProps {
 export const LogTextStreamLogEntryItemView = injectI18n(
   ({
     boundingBoxRef,
+    isHighlighted,
     intl,
     logEntry,
     openFlyoutWithItem,
@@ -70,6 +72,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
               <LogTextStreamItemDateField
                 dataTestSubj="logColumn timestampLogColumn"
                 hasHighlights={false}
+                isHighlighted={isHighlighted}
                 isHovered={isHovered}
                 key={`${columnIndex}`}
                 scale={scale}
@@ -83,7 +86,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
             });
             return (
               <Fragment key={`${columnIndex}`}>
-                <LogTextStreamIconDiv isHovered={isHovered}>
+                <LogTextStreamIconDiv isHighlighted={isHighlighted} isHovered={isHovered}>
                   {isHovered ? (
                     <EuiToolTip content={viewDetailsLabel}>
                       <EuiButtonIcon
@@ -98,6 +101,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
                 </LogTextStreamIconDiv>
                 <LogTextStreamItemMessageField
                   dataTestSubj="logColumn messageLogColumn"
+                  isHighlighted={isHighlighted}
                   isHovered={isHovered}
                   isWrapped={wrap}
                   scale={scale}
@@ -124,6 +128,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
 
 interface IconProps {
   isHovered: boolean;
+  isHighlighted: boolean;
 }
 
 const EmptyIcon = euiStyled.div`
@@ -133,7 +138,7 @@ const EmptyIcon = euiStyled.div`
 const LogTextStreamIconDiv = euiStyled<IconProps, 'div'>('div')`
   flex-grow: 0;
   background-color: ${props =>
-    props.isHovered
+    props.isHovered || props.isHighlighted
       ? props.theme.darkMode
         ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
         : darken(0.05, props.theme.eui.euiColorHighlight)

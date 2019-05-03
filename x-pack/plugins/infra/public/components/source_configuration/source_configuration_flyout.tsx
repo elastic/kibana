@@ -150,7 +150,7 @@ export const SourceConfigurationFlyout = injectI18n(
         hideCloseButton
         onClose={noop}
       >
-        <EuiFlyoutHeader>
+        <EuiFlyoutHeader hasBorder>
           <EuiTitle>
             <h2 id="sourceConfigurationTitle">
               {shouldAllowEdit ? (

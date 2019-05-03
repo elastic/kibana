@@ -16,13 +16,14 @@ import { LogTextStreamItemField } from './item_field';
 interface LogTextStreamItemDateFieldProps {
   dataTestSubj?: string;
   hasHighlights: boolean;
+  isHighlighted: boolean;
   isHovered: boolean;
   scale: TextScale;
   time: number;
 }
 
 export const LogTextStreamItemDateField = memo<LogTextStreamItemDateFieldProps>(
-  ({ dataTestSubj, hasHighlights, isHovered, scale, time }) => {
+  ({ dataTestSubj, hasHighlights, isHighlighted, isHovered, scale, time }) => {
     const formattedTime = useFormattedTime(time);
 
     return (
@@ -30,6 +31,7 @@ export const LogTextStreamItemDateField = memo<LogTextStreamItemDateFieldProps>(
         data-test-subj={dataTestSubj}
         hasHighlights={hasHighlights}
         isHovered={isHovered}
+        isHighlighted={isHighlighted}
         scale={scale}
       >
         {formattedTime}
@@ -63,6 +65,7 @@ const hoveredFieldStyle = css`
 const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
   hasHighlights: boolean;
   isHovered: boolean;
+  isHighlighted: boolean;
 }>({})`
   background-color: ${props => props.theme.eui.euiColorLightestShade};
   border-right: solid 2px ${props => props.theme.eui.euiColorLightShade};
@@ -70,5 +73,5 @@ const LogTextStreamItemDateFieldWrapper = LogTextStreamItemField.extend.attrs<{
   white-space: pre;
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
-  ${props => (props.isHovered ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
 `;

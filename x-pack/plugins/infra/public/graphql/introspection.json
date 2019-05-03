@@ -1682,6 +1682,18 @@
             "deprecationReason": null
           },
           {
+            "name": "key",
+            "description": "Time key for the document - derived from the source configuration timestamp and tiebreaker settings",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "InfraTimeKey", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fields",
             "description": "An array of flattened fields and values",
             "args": [],

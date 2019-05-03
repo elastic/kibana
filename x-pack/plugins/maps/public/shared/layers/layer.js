@@ -157,10 +157,6 @@ export class AbstractLayer {
     };
   }
 
-  getSupportedStyles() {
-    return [];
-  }
-
   getCurrentStyle() {
     return this._style;
   }
@@ -250,7 +246,6 @@ export class AbstractLayer {
     throw new Error('should implement Layer#getLayerTypeIconName');
   }
 
-
   async getBounds() {
     return {
       min_lon: -180,
@@ -260,8 +255,8 @@ export class AbstractLayer {
     };
   }
 
-  renderStyleEditor(style, options) {
-    return style.renderEditor(options);
+  renderStyleEditor({ onStyleDescriptorChange }) {
+    return this._style.renderEditor({ layer: this, onStyleDescriptorChange });
   }
 
   getIndexPatternIds() {

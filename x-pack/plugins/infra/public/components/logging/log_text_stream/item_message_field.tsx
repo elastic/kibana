@@ -24,17 +24,19 @@ interface LogTextStreamItemMessageFieldProps {
   isHovered: boolean;
   isWrapped: boolean;
   scale: TextScale;
+  isHighlighted: boolean;
 }
 
 export const LogTextStreamItemMessageField: React.FunctionComponent<
   LogTextStreamItemMessageFieldProps
-> = ({ dataTestSubj, isHovered, isWrapped, scale, segments }) => {
+> = ({ dataTestSubj, isHighlighted, isHovered, isWrapped, scale, segments }) => {
   const message = useMemo(() => segments.map(formatMessageSegment).join(''), [segments]);
 
   return (
     <LogTextStreamItemMessageFieldWrapper
       data-test-subj={dataTestSubj}
       hasHighlights={false}
+      isHighlighted={isHighlighted}
       isHovered={isHovered}
       isWrapped={isWrapped}
       scale={scale}
@@ -99,6 +101,7 @@ const unwrappedFieldStyle = css`
 const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs<{
   hasHighlights: boolean;
   isHovered: boolean;
+  isHighlighted: boolean;
   isWrapped?: boolean;
 }>({})`
   flex: 5 0 0%
@@ -107,7 +110,7 @@ const LogTextStreamItemMessageFieldWrapper = LogTextStreamItemField.extend.attrs
   padding-left: 0;
 
   ${props => (props.hasHighlights ? highlightedFieldStyle : '')};
-  ${props => (props.isHovered ? hoveredFieldStyle : '')};
+  ${props => (props.isHovered || props.isHighlighted ? hoveredFieldStyle : '')};
   ${props => (props.isWrapped ? wrappedFieldStyle : unwrappedFieldStyle)};
 `;
 
