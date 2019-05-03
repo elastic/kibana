@@ -36,6 +36,11 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { data } from 'plugins/data';
+import { Storage } from 'ui/storage';
+
+const { QueryBar } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
@@ -43,6 +48,9 @@ export const SeriesConfig = props => {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
   const htmlId = htmlIdGenerator();
+  const handleSubmit = query => {
+    props.onChange({ filter: query.query });
+  };
 
   return (
     <div className="tvbAggRow">
@@ -62,11 +70,17 @@ export const SeriesConfig = props => {
         />)}
         fullWidth
       >
-        <EuiFieldText
-          style={{ border: '1px solid blue' }}
-          onChange={handleTextChange('filter')}
-          value={model.filter}
-          fullWidth
+        <QueryBar
+          query={{
+            language: (model.filter && model.filter.language) ? model.filter.language : 'lucene',
+            query: (model.filter && model.filter.query) ? model.filter.query : ''
+          }}
+          screenTitle={'TSVBTopNDataOptionsTab'}
+          onSubmit={handleSubmit}
+          appName={'VisEditor'}
+          indexPatterns={[props.indexPatternForQuery]}
+          store={localStorage || {}}
+          showDatePicker={false}
         />
       </EuiFormRow>
 
@@ -151,5 +165,6 @@ export const SeriesConfig = props => {
 SeriesConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  indexPatternForQuery: PropTypes.object,
 };
