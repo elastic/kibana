@@ -13,7 +13,9 @@ import {
   LogMessageFormattingRule,
 } from './rule_types';
 
-export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
+export function compileFormattingRules(
+  rules: LogMessageFormattingRule[]
+): CompiledLogMessageFormattingRule {
   const compiledRules = rules.map(compileRule);
 
   return {
@@ -28,7 +30,7 @@ export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
         )
       )
     ),
-    format: (fields: Fields): InfraLogMessageSegment[] => {
+    format(fields): InfraLogMessageSegment[] {
       for (const compiledRule of compiledRules) {
         if (compiledRule.fulfillsCondition(fields)) {
           return compiledRule.format(fields);
@@ -36,6 +38,9 @@ export function compileFormattingRules(rules: LogMessageFormattingRule[]) {
       }
 
       return [];
+    },
+    fulfillsCondition() {
+      return true;
     },
   };
 }
@@ -163,18 +168,18 @@ interface Fields {
   [fieldName: string]: string | number | object | boolean | null;
 }
 
-interface CompiledLogMessageFormattingRule {
+export interface CompiledLogMessageFormattingRule {
   requiredFields: string[];
   fulfillsCondition(fields: Fields): boolean;
   format(fields: Fields): InfraLogMessageSegment[];
 }
 
-interface CompiledLogMessageFormattingCondition {
+export interface CompiledLogMessageFormattingCondition {
   conditionFields: string[];
   fulfillsCondition(fields: Fields): boolean;
 }
 
-interface CompiledLogMessageFormattingInstruction {
+export interface CompiledLogMessageFormattingInstruction {
   formattingFields: string[];
   format(fields: Fields): InfraLogMessageSegment[];
 }
