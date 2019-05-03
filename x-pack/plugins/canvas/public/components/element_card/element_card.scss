@@ -1,3 +1,27 @@
+.canvasElementCard__wrapper {
+  position: relative;
+
+  &:hover,
+  &:focus {
+    .canvasElementCard__controls {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .canvasElementCard__controls {
+    position: absolute;
+    right: $euiSizeS;
+    top: $euiSizeS;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity $euiAnimSpeedFast $euiAnimSlightResistance;
+    transition-delay: $euiAnimSpeedNormal;
+    background: transparentize($euiColorGhost, 0.5);
+    border-radius: $euiBorderRadius;
+  }
+}
+
 .canvasElementCard {
   .euiCard__top {
     text-align: center;
