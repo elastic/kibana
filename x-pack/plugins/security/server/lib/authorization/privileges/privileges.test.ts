@@ -282,12 +282,14 @@ describe('features', () => {
   {
     group: 'global',
     expectManageSpaces: true,
+    expectGetFeatures: true,
   },
   {
     group: 'space',
     expectManageSpaces: false,
+    expectGetFeatures: false,
   },
-].forEach(({ group, expectManageSpaces }) => {
+].forEach(({ group, expectManageSpaces, expectGetFeatures }) => {
   describe(group, () => {
     test('actions defined only at the feature are included in `all` and `read`', () => {
       const features: Feature[] = [
@@ -331,6 +333,7 @@ describe('features', () => {
         all: [
           actions.login,
           actions.version,
+          ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
           actions.app.get('app-1'),
           actions.app.get('app-2'),
@@ -415,6 +418,7 @@ describe('features', () => {
       expect(actual).toHaveProperty(`${group}.all`, [
         actions.login,
         actions.version,
+        ...(expectGetFeatures ? [actions.api.get('features')] : []),
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
         actions.ui.get('catalogue', 'bar-catalogue-1'),
         actions.ui.get('catalogue', 'bar-catalogue-2'),
@@ -745,6 +749,7 @@ describe('features', () => {
       expect(actual).toHaveProperty(`${group}.all`, [
         actions.login,
         actions.version,
+        ...(expectGetFeatures ? [actions.api.get('features')] : []),
         ...(expectManageSpaces ? [actions.space.manage, actions.ui.get('spaces', 'manage')] : []),
         actions.allHack,
       ]);

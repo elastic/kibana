@@ -934,6 +934,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
               all: [
                 'login:',
                 `version:${version}`,
+                `api:${version}:features`,
                 `space:${version}:manage`,
                 `ui:${version}:spaces/manage`,
                 `app:${version}:kibana`,
