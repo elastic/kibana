@@ -48,7 +48,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           allDefaults,
           fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
         )
-      ), { uiCapabilities: { navLinks: {} } });
+      ), {});
   });
 
   // render all views from ./views
