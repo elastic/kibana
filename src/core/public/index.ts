@@ -42,7 +42,13 @@ import {
   NotificationsStart,
 } from './notifications';
 import { FlyoutRef, OverlayStart } from './overlays';
-import { Plugin, PluginInitializer, PluginInitializerContext, PluginSetupContext } from './plugins';
+import {
+  Plugin,
+  PluginInitializer,
+  PluginInitializerContext,
+  PluginSetupContext,
+  PluginStartContext,
+} from './plugins';
 import { UiSettingsClient, UiSettingsSetup, UiSettingsState } from './ui_settings';
 
 export { CoreContext, CoreSystem } from './core_system';
@@ -108,6 +114,7 @@ export {
   PluginInitializer,
   PluginInitializerContext,
   PluginSetupContext,
+  PluginStartContext,
   NotificationsSetup,
   NotificationsStart,
   OverlayStart,

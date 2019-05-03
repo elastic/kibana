@@ -80,17 +80,21 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[3] `public/plugin.ts`** is the client-side plugin definition itself. Technically speaking it does not need to be a class or even a separate file from the entry point, but _all plugins at Elastic_ should be consistent in this way.
 
 ```ts
-import { PluginInitializerContext, CoreSetup, PluginStop } from '../../../core/public';
+import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from '../../../core/public';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: PluginSetupContext) {
     // called when plugin is setting up
   }
 
-  public stop(core: PluginStop) {
+  public start(core: PluginStartContext) {
+    // called after all plugins are set up
+  }
+
+  public stop() {
     // called when plugin is torn down, aka window.onbeforeunload
   }
 }
@@ -110,17 +114,21 @@ export function plugin(initializerContext: PluginInitializerContext) {
 **[5] `server/plugin.ts`** is the server-side plugin definition. The _shape_ of this plugin is the same as it's client-side counter-part:
 
 ```ts
-import { PluginInitializerContext, CoreSetup, CoreStop } from '../../../core/server';
+import { PluginInitializerContext, PluginSetupContext, PluginStartContext } from '../../../core/server';
 
 export class Plugin {
   constructor(initializerContext: PluginInitializerContext) {
   }
 
-  public setup(core: CoreSetup) {
+  public setup(core: PluginSetupContext) {
     // called when plugin is setting up during Kibana's startup sequence
   }
 
-  public stop(core: CoreStop) {
+  public start(core: PluginStartContext) {
+    // called after all plugins are set up
+  }
+
+  public stop() {
     // called when plugin is torn down during Kibana's shutdown sequence
   }
 }
@@ -132,17 +140,17 @@ The platform does not impose any technical restrictions on how the internals of 
 
 The various independent domains that make up `core` are represented by a series of services, and many of those services expose public interfaces that are provided to _all_ plugins. Services expose different features at different parts of their _lifecycle_. We describe the lifecycle of core services and plugins with specifically-named functions on the service definition.
 
-In the new platform, there are two lifecycle functions today: `setup` and `stop`. The `setup` functions are invoked sequentially while Kibana is starting up on the server or when it is being loaded in the browser. The `stop` functions are invoked sequentially while Kibana is gracefully shutting down on the server or when the browser tab or window is being closed.
+In the new platform, there are three lifecycle functions today: `setup`, `start`, and `stop`. The `setup` functions are invoked sequentially while Kibana is starting up on the server or when it is being loaded in the browser. The `start` functions are invoked sequentially after setup has completed for all plugins. The `stop` functions are invoked sequentially while Kibana is gracefully shutting down on the server or when the browser tab or window is being closed.
 
-There is no equivalent behavior to `stop` in legacy plugins, so this guide primarily focuses on migrating functionality into `setup`.
+There is no equivalent behavior to `start` or `stop` in legacy plugins, so this guide primarily focuses on migrating functionality into `setup`.
 
 The lifecycle-specific contracts exposed by core services are always passed as the first argument to the equivalent lifecycle function in a plugin. For example, the core `UiSettings` service exposes a function `get` to all plugin `setup` functions. To use this function to retrieve a specific UI setting, a plugin just accesses it off of the first argument:
 
 ```ts
-import { CoreSetup } from '../../../core/public';
+import { PluginSetupContext } from '../../../core/public';
 
 export class Plugin {
-  public setup(core: CoreSetup) {
+  public setup(core: PluginSetupContext) {
     core.uiSettings.get('courier:maxShardsBeforeCryTime');
   }
 }
@@ -156,9 +164,9 @@ Core services that expose functionality to plugins always have their `setup` fun
 
 ### Integrating with other plugins
 
-Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `stop`.
+Plugins can expose public interfaces for other plugins to consume. Like `core`, those interfaces are bound to the lifecycle functions `setup` and/or `start`.
 
-Anything returned from `setup` or `stop` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
+Anything returned from `setup` or `start` will act as the interface, and while not a technical requirement, all Elastic plugins should expose types for that interface as well.
 
 **foobar plugin.ts:**
 
@@ -175,7 +183,7 @@ export class Plugin {
     };
   }
 
-  public stop() {
+  public start() {
     return {
       getBar() {
         return 'bar';
@@ -200,30 +208,30 @@ Unlike core, capabilities exposed by plugins are _not_ automatically injected in
 }
 ```
 
-With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of `setup` and/or `stop`:
+With that specified in the plugin manifest, the appropriate interfaces are then available via the second argument of `setup` and/or `start`:
 
 **demo plugin.ts:**
 
 ```ts
-import { CoreSetup, PluginStop } from '../../../core/server';
-import { FoobarPluginSetup, FoobarPluginStop } from '../../foobar/server';
+import { PluginSetupContext, PluginStartContext } from '../../../core/server';
+import { FoobarPluginSetup, FoobarPluginStart } from '../../foobar/server';
 
 interface DemoSetupPlugins {
-  foobar: FoobarPluginSetup
+  foobar: FoobarPluginSetup;
 }
 
-interface DemoStopPlugins {
-  foobar: FoobarPluginStop
+interface DemoStartPlugins {
+  foobar: FoobarPluginStart;
 }
 
 export class Plugin {
-  public setup(core: CoreSetup, plugins: DemoSetupPlugins) {
+  public setup(core: PluginSetupContext, plugins: DemoSetupPlugins) {
     const { foobar } = plugins;
     foobar.getFoo(); // 'foo'
     foobar.getBar(); // throws because getBar does not exist
   }
 
-  public stop(core: PluginStop, plugins: DemoStopPlugins) {
+  public start(core: PluginStartContext, plugins: DemoStartPlugins) {
     const { foobar } = plugins;
     foobar.getFoo(); // throws because getFoo does not exist
     foobar.getBar(); // 'bar'
@@ -241,7 +249,7 @@ This means that there are unique sets of challenges for migrating to the new pla
 
 The general shape/architecture of legacy server-side code is similar to the new platform architecture in one important way: most legacy server-side plugins define an `init` function where the bulk of their business logic begins, and they access both "core" and "plugin-provided" functionality through the arguments given to `init`. Rarely does legacy server-side code share stateful services via import statements.
 
-While not exactly the same, legacy plugin `init` functions behave similarly today as new platform `setup` functions. There is no corresponding legacy concept of `stop`, however.
+While not exactly the same, legacy plugin `init` functions behave similarly today as new platform `setup` functions. `KbnServer` also exposes an `afterPluginsInit` method which behaves similarly to `start`. There is no corresponding legacy concept of `stop`, however.
 
 Despite their similarities, server-side plugins pose a formidable challenge: legacy core and plugin functionality is retrieved from either the hapi.js `server` or `request` god objects. Worse, these objects are often passed deeply throughout entire plugins, which directly couples business logic with hapi. And the worst of it all is, these objects are mutable at any time.
 
@@ -412,11 +420,8 @@ We now move this logic into a new plugin definition, which is based off of the c
 
 ```ts
 // server/plugin.ts
+import { PluginSetupContext } from '../../../core/server';
 import { ElasticsearchPlugin } from '../elasticsearch';
-
-interface CoreSetup {
-  elasticsearch: ElasticsearchPlugin // note: we know elasticsearch will move to core
-}
 
 interface FooSetup {
   getBar(): string
@@ -429,7 +434,7 @@ interface PluginsSetup {
 export type DemoPluginSetup = ReturnType<Plugin['setup']>;
 
 export class Plugin {
-  public setup(core: CoreSetup, plugins: PluginsSetup) {
+  public setup(core: PluginSetupContext, plugins: PluginsSetup) {
     const serverFacade: ServerFacade = {
       plugins: {
         elasticsearch: core.elasticsearch
