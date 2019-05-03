@@ -143,12 +143,6 @@ class TableSeriesConfig extends Component {
                 store={localStorage || {}}
                 showDatePicker={false}
               />
-              {/* <EuiFieldText
-                style={{ border: '1px solid blue' }}
-                onChange={handleTextChange('filter')}
-                value={model.filter}
-                fullWidth
-              /> */}
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

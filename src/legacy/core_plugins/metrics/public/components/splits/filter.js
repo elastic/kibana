@@ -30,6 +30,7 @@ const localStorage = new Storage(window.localStorage);
 
 export const SplitByFilter = props => {
   const { onChange, uiRestrictions } = props;
+  // TODO: change default filter to {language: 'lucene', query: ''}
   const defaults = { filter: '' };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
