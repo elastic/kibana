@@ -17,8 +17,7 @@ describe('the ConfigurationSourcesAdapter', () => {
       'edges.host.version',
       'edges.host.firstSeen',
       'edges.cursor.value',
-      'pageInfo.endCursor.value',
-      'pageInfo.hasNextPage',
+      'pageInfo.activePage',
     ];
 
     expect(getFields(mockFields)).toEqual(expectedData);

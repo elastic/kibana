@@ -39,6 +39,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
+            activePage: 0,
             limit: 1,
           },
         },
@@ -61,6 +62,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
+            activePage: 0,
             limit: 2,
           },
         },
@@ -83,6 +85,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
+            activePage: 0,
             limit: 1,
           },
         },
@@ -105,6 +108,7 @@ const uncommonProcessesTests: KbnTestProvider = ({ getService }) => {
             from: FROM,
           },
           pagination: {
+            activePage: 0,
             limit: 1,
           },
         },

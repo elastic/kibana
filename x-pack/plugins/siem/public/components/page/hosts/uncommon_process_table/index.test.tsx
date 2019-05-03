@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
 import * as React from 'react';
 
 import { TestProviders } from '../../../../mock';
@@ -30,8 +29,6 @@ describe('UncommonProcess Table Component', () => {
             loading={false}
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -48,8 +45,6 @@ describe('UncommonProcess Table Component', () => {
             loading={false}
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -72,8 +67,6 @@ describe('UncommonProcess Table Component', () => {
             loading={false}
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -97,8 +90,6 @@ describe('UncommonProcess Table Component', () => {
             loading={false}
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -122,8 +113,6 @@ describe('UncommonProcess Table Component', () => {
             loading={false}
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />
@@ -146,8 +135,6 @@ describe('UncommonProcess Table Component', () => {
             loading={false}
             data={mockData.UncommonProcess.edges}
             totalCount={mockData.UncommonProcess.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.UncommonProcess.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.UncommonProcess.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />

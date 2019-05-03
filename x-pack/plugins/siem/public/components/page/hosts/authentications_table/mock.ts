@@ -74,10 +74,7 @@ export const mockData: { Authentications: AuthenticationsData } = {
       },
     ],
     pageInfo: {
-      endCursor: {
-        value: 'aa7ca589f1b8220002f2fc61c64cfbf1',
-      },
-      hasNextPage: true,
+      activePage: 0,
     },
   },
 };

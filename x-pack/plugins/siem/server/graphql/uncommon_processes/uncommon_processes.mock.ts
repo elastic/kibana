@@ -56,10 +56,7 @@ export const mockUncommonProcessesData: MockData = {
       },
     ],
     pageInfo: {
-      endCursor: {
-        value: '98966fa2013c396155c460d35c0902be',
-      },
-      hasNextPage: true,
+      activePage: 0,
     },
   },
 };

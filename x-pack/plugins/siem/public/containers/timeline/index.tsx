@@ -77,10 +77,10 @@ export class TimelineQuery extends QueryTemplate<
         notifyOnNetworkStatusChange
         variables={variables}
       >
-        {({ data, loading, fetchMore, refetch }) => {
+        {({ data, loading, fetchMoreTimeline, refetch }) => {
           const timelineEdges = getOr([], 'source.Timeline.edges', data);
-          this.setFetchMore(fetchMore);
-          this.setFetchMoreOptions((newCursor: string, tiebreaker?: string) => ({
+          this.setFetchMoreTimeline(fetchMoreTimeline);
+          this.setFetchMoreOptionsTimeline((newCursor: string, tiebreaker?: string) => ({
             variables: {
               pagination: {
                 cursor: newCursor,
@@ -115,7 +115,7 @@ export class TimelineQuery extends QueryTemplate<
             totalCount: getOr(0, 'source.Timeline.totalCount', data),
             pageInfo: getOr({}, 'source.Timeline.pageInfo', data),
             events: this.memoizedTimelineEvents(JSON.stringify(variables), timelineEdges),
-            loadMore: this.wrappedLoadMore,
+            loadMore: this.wrappedLoadMoreTimeline,
             getUpdatedAt: this.getUpdatedAt,
           });
         }}

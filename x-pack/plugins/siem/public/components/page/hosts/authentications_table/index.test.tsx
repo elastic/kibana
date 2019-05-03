@@ -6,7 +6,6 @@
 
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
@@ -34,8 +33,6 @@ describe('Authentication Table Component', () => {
             loading={false}
             data={mockData.Authentications.edges}
             totalCount={mockData.Authentications.totalCount}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Authentications.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Authentications.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />

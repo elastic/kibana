@@ -150,11 +150,7 @@ const cases = [
         ) {
           totalCount
           pageInfo {
-            endCursor {
-              value
-              tiebreaker
-            }
-            hasNextPage
+            activePage
           }
           edges {
             cursor{

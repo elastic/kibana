@@ -38,6 +38,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
               isPtrIncluded: false,
               sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.asc },
               pagination: {
+                activePage: 0,
                 limit: 10,
                 cursor: null,
               },
@@ -50,7 +51,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
             expect(networkDns.edges.map(i => i.node.dnsName).join(',')).to.be(
               'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,d1oxlq5h9kq8q5.cloudfront.net,d3epxf4t8a32oh.cloudfront.net'
             );
-            expect(networkDns.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkDns.pageInfo.activePage).to.equal(0);
           });
       });
 
@@ -68,6 +69,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
               isPtrIncluded: false,
               sort: { field: NetworkDnsFields.uniqueDomains, direction: Direction.desc },
               pagination: {
+                activePage: 0,
                 limit: 10,
                 cursor: null,
               },
@@ -80,7 +82,7 @@ const networkDnsTests: KbnTestProvider = ({ getService }) => {
             expect(networkDns.edges.map(i => i.node.dnsName).join(',')).to.be(
               'nflxvideo.net,apple.com,netflix.com,samsungcloudsolution.com,samsungqbe.com,samsungelectronics.com,internetat.tv,samsungcloudsolution.net,samsungosp.com,cbsnews.com'
             );
-            expect(networkDns.pageInfo.endCursor!.value).to.equal('10');
+            expect(networkDns.pageInfo.activePage).to.equal(0);
           });
       });
     });

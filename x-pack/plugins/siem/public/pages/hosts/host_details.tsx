@@ -5,7 +5,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import { connect } from 'react-redux';
 import { pure } from 'recompose';
@@ -136,7 +136,7 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                     startDate={from}
                     type={type}
                   >
-                    {({ events, loading, id, refetch, totalCount, pageInfo, loadMore }) => (
+                    {({ events, loading, id, refetch, totalCount, loadMore }) => (
                       <EventsTableManage
                         id={id}
                         refetch={refetch}

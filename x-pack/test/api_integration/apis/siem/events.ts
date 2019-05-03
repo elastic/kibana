@@ -23,7 +23,6 @@ const TO = new Date('3000-01-01T00:00:00.000Z').valueOf();
 const HOST_NAME = 'suricata-sensor-amsterdam';
 const TOTAL_COUNT = 1751;
 const EDGE_LENGTH = 2;
-const CURSOR_ID = '1550608953561';
 
 const eventsTests: KbnTestProvider = ({ getService }) => {
   const esArchiver = getService('esArchiver');
@@ -45,6 +44,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               pagination: {
+                activePage: 0,
                 limit: 2,
                 cursor: null,
                 tiebreaker: null,
@@ -59,7 +59,7 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
             const events = resp.data.source.Events;
             expect(events.edges.length).to.be(EDGE_LENGTH);
             expect(events.totalCount).to.be(TOTAL_COUNT);
-            expect(events.pageInfo.endCursor!.value).to.equal(CURSOR_ID);
+            expect(events.pageInfo.activePage).to.equal(0);
           });
       });
 
@@ -75,9 +75,9 @@ const eventsTests: KbnTestProvider = ({ getService }) => {
                 from: FROM,
               },
               pagination: {
-                limit: 2,
-                cursor: CURSOR_ID,
-                tiebreaker: '193',
+                activePage: 2,
+                limit: 6,
+                cursor: 4,
               },
               sortField: {
                 sortFieldId: 'timestamp',

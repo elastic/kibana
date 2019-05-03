@@ -52,6 +52,7 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.source,
               sort: { field: TlsFields._id, direction: Direction.desc },
               pagination: {
+                activePage: 0,
                 limit: 10,
                 cursor: null,
               },
@@ -80,6 +81,7 @@ const tlsTests: KbnTestProvider = ({ getService }) => {
               flowTarget: FlowTarget.destination,
               sort: { field: TlsFields._id, direction: Direction.desc },
               pagination: {
+                activePage: 0,
                 limit: 10,
                 cursor: null,
               },

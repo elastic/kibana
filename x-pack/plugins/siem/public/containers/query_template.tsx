@@ -33,8 +33,16 @@ export class QueryTemplate<
     fetchMoreOptions: FetchMoreOptionsArgs<TData, TVariables>
   ) => PromiseApolloQueryResult;
 
+  private fetchMoreTimeline!: (
+    fetchMoreOptionsTimeline: FetchMoreOptionsArgs<TData, TVariables>
+  ) => PromiseApolloQueryResult;
+
   private fetchMoreOptions!: (
     newActivePage: number,
+    tiebreaker?: string
+  ) => FetchMoreOptionsArgs<TData, TVariables>;
+  private fetchMoreOptionsTimeline!: (
+    newCursor: string,
     tiebreaker?: string
   ) => FetchMoreOptionsArgs<TData, TVariables>;
 
@@ -48,12 +56,27 @@ export class QueryTemplate<
     this.fetchMore = val;
   };
 
+  public setFetchMoreTimeline = (
+    val: (fetchMoreOptionsTimeline: FetchMoreOptionsArgs<TData, TVariables>) => PromiseApolloQueryResult
+  ) => {
+    this.fetchMore = val;
+  };
+
   public setFetchMoreOptions = (
     val: (newActivePage: number, tiebreaker?: string) => FetchMoreOptionsArgs<TData, TVariables>
   ) => {
     this.fetchMoreOptions = val;
   };
 
+  public setFetchMoreOptionsTimeline = (
+    val: (newCursor: string, tiebreaker?: string) => FetchMoreOptionsArgs<TData, TVariables>
+  ) => {
+    this.fetchMoreOptionsTimeline = val;
+  };
+
   public wrappedLoadMore = (newActivePage: number, tiebreaker?: string) =>
     this.fetchMore(this.fetchMoreOptions(newActivePage, tiebreaker));
+
+  public wrappedLoadMoreTimeline = (newCursor: string, tiebreaker?: string) =>
+    this.fetchMoreTimeline(this.fetchMoreOptionsTimeline(newCursor, tiebreaker));
 }
