@@ -7,7 +7,10 @@
 import {
   EuiBadge,
   EuiButton,
+  EuiButtonEmpty,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiModal,
   EuiOverlayMask,
@@ -16,6 +19,7 @@ import {
 import * as React from 'react';
 import { pure } from 'recompose';
 import uuid from 'uuid';
+import styled from 'styled-components';
 
 import { Note } from '../../../lib/note';
 import { Notes } from '../../notes';
@@ -26,9 +30,6 @@ import {
   DescriptionContainer,
   LabelText,
   NameField,
-  NotesButtonLabel,
-  NotesIconContainer,
-  PositionedNotesIcon,
   SmallNotesButtonContainer,
   StyledStar,
 } from './styles';
@@ -39,6 +40,10 @@ export const streamLiveToolTip = 'Update the Timeline as new data arrives';
 export const newTimelineToolTip = 'Create a new timeline';
 export const NOTES_PANEL_WIDTH = 1024;
 export const NOTES_PANEL_HEIGHT = 633;
+
+const NotesCountBadge = styled(EuiBadge)`
+  margin-left: 5px;
+`;
 
 type CreateTimeline = ({ id, show }: { id: string; show?: boolean }) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
@@ -107,18 +112,18 @@ export const NewTimeline = pure<{
   onClosePopover: () => void;
   timelineId: string;
 }>(({ createTimeline, onClosePopover, timelineId }) => (
-  <EuiToolTip data-test-subj="timeline-new-tool-tip" content={i18n.NEW_TIMELINE_TOOL_TIP}>
-    <EuiButton
-      data-test-subj="timeline-new"
-      fill={true}
-      onClick={() => {
-        createTimeline({ id: timelineId, show: true });
-        onClosePopover();
-      }}
-    >
-      {i18n.NEW_TIMELINE}
-    </EuiButton>
-  </EuiToolTip>
+  <EuiButtonEmpty
+    data-test-subj="timeline-new"
+    color="text"
+    iconSide="left"
+    iconType="plusInCircle"
+    onClick={() => {
+      createTimeline({ id: timelineId, show: true });
+      onClosePopover();
+    }}
+  >
+    {i18n.NEW_TIMELINE}
+  </EuiButtonEmpty>
 ));
 
 interface NotesButtonProps {
@@ -136,17 +141,13 @@ interface NotesButtonProps {
 
 const getNewNoteId = (): string => uuid.v4();
 
-const NotesIcon = pure<{ noteIds: string[]; size: 's' | 'l' }>(({ noteIds, size }) => (
-  <>
-    <EuiBadge data-test-subj="timeline-notes-count" color="hollow">
-      {noteIds.length}
-    </EuiBadge>
-    <NotesIconContainer>
-      <PositionedNotesIcon size={size}>
-        <EuiIcon data-test-subj="timeline-notes-icon" size="m" type="pencil" />
-      </PositionedNotesIcon>
-    </NotesIconContainer>
-  </>
+const NotesIcon = pure<{ count: number }>(({ count }) => (
+  <EuiIcon
+    color={count > 0 ? 'primary' : 'subdued'}
+    data-test-subj="timeline-notes-icon"
+    size="l"
+    type="editorComment"
+  />
 ));
 
 const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNotes: () => void }>(
@@ -156,10 +157,19 @@ const LargeNotesButton = pure<{ noteIds: string[]; text?: string; toggleShowNote
       onClick={() => toggleShowNotes()}
       size="l"
     >
-      <NotesButtonLabel>
-        <NotesIcon noteIds={noteIds} size="l" />
-        {text && text.length ? <LabelText>{text}</LabelText> : null}
-      </NotesButtonLabel>
+      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiIcon color="subdued" size="m" type="editorComment" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {text && text.length ? <LabelText>{text}</LabelText> : null}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <NotesCountBadge data-test-subj="timeline-notes-count" color="hollow">
+            {noteIds.length}
+          </NotesCountBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiButton>
   )
 );
@@ -171,7 +181,7 @@ const SmallNotesButton = pure<{ noteIds: string[]; toggleShowNotes: () => void }
       onClick={() => toggleShowNotes()}
       role="button"
     >
-      <NotesIcon noteIds={noteIds} size="s" />
+      <NotesIcon count={noteIds.length} />
     </SmallNotesButtonContainer>
   )
 );

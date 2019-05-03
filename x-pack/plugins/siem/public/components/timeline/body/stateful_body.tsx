@@ -49,9 +49,9 @@ interface OwnProps {
 
 interface ReduxProps {
   columnHeaders: ColumnHeader[];
-  eventIdToNoteIds?: { [eventId: string]: string[] };
+  eventIdToNoteIds?: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
-  pinnedEventIds?: { [eventId: string]: boolean };
+  pinnedEventIds?: Readonly<Record<string, boolean>>;
   range?: string;
 }
 

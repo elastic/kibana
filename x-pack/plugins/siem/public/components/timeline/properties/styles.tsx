@@ -36,24 +36,6 @@ export const DescriptionContainer = styled.div`
   min-width: 150px;
 `;
 
-export const NotesButtonLabel = styled.div`
-  align-items: center;
-  justify-content: space-between;
-  display: flex;
-`;
-
-export const NotesIconContainer = styled.div`
-  position: relative;
-  margin-left: 3px;
-`;
-
-export const PositionedNotesIcon = styled.div<{ size: 'l' | 's' }>`
-  left: ${({ size }) => (size === 'l' ? '-12px' : '13px')};
-  overflow: visible;
-  position: absolute;
-  top: ${({ size }) => (size === 'l' ? '-22px' : '-19px')};
-`;
-
 export const SmallNotesButtonContainer = styled.div`
   cursor: pointer;
   width: 35px;

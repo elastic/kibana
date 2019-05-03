@@ -49,6 +49,7 @@ const ActionsContainer = styled.div<{ actionsColumnWidth: number }>`
 `;
 
 const ExpandEventContainer = styled.div`
+  margin-left: 5px;
   height: 25px;
   width: 25px;
 `;
@@ -59,6 +60,7 @@ const ActionLoading = styled(EuiLoadingSpinner)`
 `;
 
 const PinContainer = styled.div`
+  margin-left: 5px;
   width: 27px;
 `;
 
@@ -68,7 +70,7 @@ const SelectEventContainer = styled(EuiFlexItem)`
 `;
 
 const NotesButtonContainer = styled(EuiFlexItem)`
-  margin: 0 7px 0 7px;
+  margin: 0 7px 0 5px;
 `;
 
 const emptyNotes: string[] = [];
@@ -116,7 +118,7 @@ export const Actions = pure<Props>(
             {!loading && (
               <EuiButtonIcon
                 aria-label={expanded ? i18n.COLLAPSE : i18n.EXPAND}
-                color="text"
+                color="subdued"
                 iconType={expanded ? 'arrowDown' : 'arrowRight'}
                 data-test-subj="expand-event"
                 id={eventId}
