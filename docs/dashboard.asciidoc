@@ -26,8 +26,7 @@ Otherwise, click the *Dashboard* breadcrumb to navigate back to the landing page
 +
 image:images/Dashboard-Landing-Page.png[Dashboard Landing Page]
 
-[[adding-visualizations-to-a-dashboard]]
-. To add a visualization to the dashboard, click *Edit* mode.
+. [[adding-visualizations-to-a-dashboard]]To add a visualization to the dashboard, click *Edit* mode.
 Brand new dashboards will be in *Edit* mode automatically.
 +
 image:images/Dashboard-View-Mode.png[Dashboard View Mode]
@@ -47,8 +46,7 @@ click *Options* and select *Use dark theme*. To change the default theme, go
 to *Management/Kibana/Advanced Settings* and set `dashboard:defaultDarkTheme`
 to `true`.
 
-[[saving-dashboards]]
-. When you're done adding and arranging visualizations, click *Save* to save the 
+. [[saving-dashboards]]When you're done adding and arranging visualizations, click *Save* to save the 
 dashboard:
 .. Enter a name for the dashboard. 
 .. To store the time period specified in the time filter with the dashboard, select
