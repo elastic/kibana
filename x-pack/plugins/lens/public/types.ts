@@ -38,8 +38,11 @@ export interface DatasourceSuggestion<T = unknown> {
  * Interface for the datasource registry
  */
 export interface Datasource<T = unknown> {
-  // For initializing from saved object
-  initialize: (state?: T) => Promise<T>;
+  // For initializing, either from an empty state or from persisted state
+  initialize: (state?: T | any) => Promise<T>;
+
+  // Given the current state, which parts should be saved?
+  getPersistedState: (state: T) => object;
 
   renderDataPanel: (domElement: Element, props: DatasourceDataPanelProps<T>) => void;
 
@@ -56,7 +59,7 @@ export interface Datasource<T = unknown> {
  */
 export interface DatasourcePublicAPI {
   getTableSpec: () => TableSpec;
-  getOperationForColumnId: (columnId: string) => Operation;
+  getOperationForColumnId: (columnId: string) => Operation | null;
 
   // Render can be called many times
   renderDimensionPanel: (domElement: Element, props: DatasourceDimensionPanelProps) => void;
