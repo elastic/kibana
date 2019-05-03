@@ -10,7 +10,7 @@ import { Feature } from '../../../../../plugins/xpack_main/types';
 import { KibanaFunctionalTestDefaultProviders } from '../../../../types/providers';
 
 // eslint-disable-next-line import/no-default-export
-export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
+export default function ({ getService }: KibanaFunctionalTestDefaultProviders) {
   const supertest = getService('supertest');
 
   const supertestWithoutAuth = getService('supertestWithoutAuth');
@@ -125,6 +125,7 @@ export default function({ getService }: KibanaFunctionalTestDefaultProviders) {
             'timelion',
             'graph',
             'monitoring',
+            'savedObjectsManagement',
             'ml',
             'apm',
             'canvas',
