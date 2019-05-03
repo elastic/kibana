@@ -82,7 +82,7 @@ export class TMSService {
       const url = this._emsClient.getValueInLanguage(attribution.url);
       const label = this._emsClient.getValueInLanguage(attribution.label);
       const markdown = `[${label}](${url})`;
-      return this._emsClient.sanitizeMarkdown(markdown);
+      return markdown;
     });
     return attributions.join('|');
   }
