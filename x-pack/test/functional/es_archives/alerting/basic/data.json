@@ -1,0 +1,18 @@
+{
+  "value": {
+    "id": "action:1",
+    "index": ".kibana",
+    "source": {
+      "action": {
+        "description": "My description",
+        "connectorId": "log",
+        "connectorOptions": {
+          "foo": true,
+          "bar": false
+        }
+      },
+      "type": "action",
+      "migrationVersion": {}
+    }
+  }
+}

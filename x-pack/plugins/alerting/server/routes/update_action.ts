@@ -6,11 +6,11 @@
 
 import Joi from 'joi';
 import Hapi from 'hapi';
+
+import { APP_ID } from '../../common/constants';
 import { ActionService } from '../action_service';
 import { AlertService } from '../alert_service';
 import { ConnectorService } from '../connector_service';
-import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams } from './types';
 
 interface Server extends Hapi.Server {
   alerting: () => {
@@ -20,36 +20,35 @@ interface Server extends Hapi.Server {
   };
 }
 
-interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
+interface UpdateActionRequest extends Hapi.Request {
   server: Server;
   payload: {
     description: string;
     connectorId: string;
     connectorOptions: { [key: string]: any };
   };
-  params: {
-    id?: string;
-  };
 }
 
-export function createActionRoute(server: Hapi.Server) {
+export function updateActionRoute(server: Hapi.Server) {
   server.route({
-    method: 'POST',
-    path: `/api/${APP_ID}/action/{id?}`,
+    method: 'PUT',
+    path: `/api/${APP_ID}/action/{id}`,
     options: {
       validate: {
-        payload: Joi.object().keys({
-          description: Joi.string().required(),
-          connectorId: Joi.string().required(),
-          connectorOptions: Joi.object(),
-        }),
+        payload: Joi.object()
+          .keys({
+            description: Joi.string().required(),
+            connectorId: Joi.string().required(),
+            connectorOptions: Joi.object(),
+          })
+          .required(),
       },
     },
-    async handler(request: CreateActionRequest) {
+    async handler(request: UpdateActionRequest) {
       const savedObjectsClient = request.getSavedObjectsClient();
       return await request.server
         .alerting()
-        .actions.create(savedObjectsClient, request.payload, { id: request.params.id });
+        .actions.update(savedObjectsClient, request.params.id, request.payload);
     },
   });
 }

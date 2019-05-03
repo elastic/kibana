@@ -26,14 +26,13 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
       ]);
     });
 
-    it('should return 200 when creating an action', async () => {
+    it('should return 200 when creating an action with provided id', async () => {
       await supertest
-        .post('/api/alerting/action')
+        .post('/api/alerting/action/my-action')
         .set('kbn-xsrf', 'foo')
         .send({
-          id: 'my-action',
           description: 'My action',
-          connectorId: 'console',
+          connectorId: 'log',
           connectorOptions: {
             username: 'username',
           },
@@ -45,7 +44,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
             id: 'my-action',
             attributes: {
               description: 'My action',
-              connectorId: 'console',
+              connectorId: 'log',
               connectorOptions: { username: 'username' },
             },
             references: [],
@@ -55,26 +54,53 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         });
     });
 
-    it('should return 409 when action already exists', async () => {
+    it('should return 200 when creating an action without id provided', async () => {
       await supertest
         .post('/api/alerting/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          id: 'my-action-to-duplicate',
+          description: 'My action',
+          connectorId: 'log',
+          connectorOptions: {
+            username: 'username',
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            type: 'action',
+            id: resp.body.id,
+            attributes: {
+              description: 'My action',
+              connectorId: 'log',
+              connectorOptions: { username: 'username' },
+            },
+            references: [],
+            updated_at: resp.body.updated_at,
+            version: resp.body.version,
+          });
+          expect(typeof resp.body.id).to.be('string');
+        });
+    });
+
+    it('should return 409 when action already exists', async () => {
+      await supertest
+        .post('/api/alerting/action/my-action-to-duplicate')
+        .set('kbn-xsrf', 'foo')
+        .send({
           description: 'My action to duplicate',
-          connectorId: 'console',
+          connectorId: 'log',
           connectorOptions: {
             username: 'username',
           },
         })
         .expect(200);
       await supertest
-        .post('/api/alerting/action')
+        .post('/api/alerting/action/my-action-to-duplicate')
         .set('kbn-xsrf', 'foo')
         .send({
-          id: 'my-action-to-duplicate',
           description: 'My action to duplicate',
-          connectorId: 'console',
+          connectorId: 'log',
           connectorOptions: {
             username: 'username',
           },
@@ -84,10 +110,9 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
 
     it(`should return 400 when connector isn't registered`, async () => {
       await supertest
-        .post('/api/alerting/action')
+        .post('/api/alerting/action/my-action-without-connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          id: 'my-action-without-connector',
           description: 'My action',
           connectorId: 'unregistered-connector',
           connectorOptions: {

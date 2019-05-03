@@ -1,0 +1,73 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import expect from '@kbn/expect';
+import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
+
+// eslint-disable-next-line import/no-default-export
+export default function updateActionTests({ getService }: KibanaFunctionalTestDefaultProviders) {
+  const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
+
+  describe('update_action', () => {
+    beforeEach(() => esArchiver.load('alerting/basic'));
+    afterEach(() => esArchiver.unload('alerting/basic'));
+
+    it('should return 200 when updating a document', async () => {
+      await supertest
+        .put('/api/alerting/action/1')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          connectorId: 'log',
+          description: 'My description updated',
+          connectorOptions: {
+            bar: true,
+            foo: false,
+          },
+        })
+        .expect(200)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            id: '1',
+            type: 'action',
+            references: [],
+            version: resp.body.version,
+            updated_at: resp.body.updated_at,
+            attributes: {
+              connectorId: 'log',
+              description: 'My description updated',
+              connectorOptions: {
+                bar: true,
+                foo: false,
+              },
+            },
+          });
+        });
+    });
+
+    it('should return 404 when updating a non existing document', async () => {
+      await supertest
+        .put('/api/alerting/action/2')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          connectorId: 'log',
+          description: 'My description updated',
+          connectorOptions: {
+            bar: true,
+            foo: false,
+          },
+        })
+        .expect(404)
+        .then((resp: any) => {
+          expect(resp.body).to.eql({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Saved object [action/2] not found',
+          });
+        });
+    });
+  });
+}

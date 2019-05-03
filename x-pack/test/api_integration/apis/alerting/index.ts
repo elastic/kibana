@@ -10,5 +10,9 @@ import { KibanaFunctionalTestDefaultProviders } from '../../../types/providers';
 export default function alertingTests({ loadTestFile }: KibanaFunctionalTestDefaultProviders) {
   describe('Alerting', () => {
     loadTestFile(require.resolve('./create_action'));
+    loadTestFile(require.resolve('./delete_action'));
+    loadTestFile(require.resolve('./find_action'));
+    loadTestFile(require.resolve('./get_action'));
+    loadTestFile(require.resolve('./update_action'));
   });
 }

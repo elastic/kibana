@@ -7,7 +7,16 @@
 import Hapi from 'hapi';
 import mappings from './mappings.json';
 import { logConnector, messageSlackConnector, emailConnector } from './server/default_connectors';
-import { createActionRoute, AlertService, ActionService, ConnectorService } from './server';
+import {
+  createActionRoute,
+  deleteActionRoute,
+  findActionRoute,
+  getActionRoute,
+  updateActionRoute,
+  AlertService,
+  ActionService,
+  ConnectorService,
+} from './server';
 
 import { APP_ID } from './common/constants';
 
@@ -42,6 +51,10 @@ export function alerting(kibana: any) {
 
       // Routes
       createActionRoute(server);
+      deleteActionRoute(server);
+      getActionRoute(server);
+      findActionRoute(server);
+      updateActionRoute(server);
 
       // Register service to server
       server.decorate('server', 'alerting', () => ({

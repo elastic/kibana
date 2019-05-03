@@ -7,11 +7,6 @@
 import Joi from 'joi';
 import { ConnectorService } from './connector_service';
 
-test('automatically registers default connectors', () => {
-  const connectorService = new ConnectorService();
-  expect(connectorService.has('console')).toEqual(true);
-});
-
 describe('register()', () => {
   test('able to register connectors', () => {
     const executor = jest.fn();
@@ -151,13 +146,6 @@ describe('has()', () => {
   test('returns false for unregistered connectors', () => {
     const connectorService = new ConnectorService();
     expect(connectorService.has('my-connector')).toEqual(false);
-  });
-
-  test('returns true for default connectors', () => {
-    const connectorService = new ConnectorService();
-    expect(connectorService.has('console')).toEqual(true);
-    expect(connectorService.has('slack')).toEqual(true);
-    expect(connectorService.has('email')).toEqual(true);
   });
 
   test('returns true after registering a connector', () => {

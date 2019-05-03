@@ -9,7 +9,6 @@ import { SavedObjectsClient } from 'src/legacy/server/saved_objects';
 import { ConnectorService } from './connector_service';
 
 interface Action {
-  id: string;
   description: string;
   connectorId: string;
   connectorOptions: { [key: string]: any };
@@ -28,7 +27,11 @@ export class ActionService {
     this.connectorService = connectorService;
   }
 
-  public async create(savedObjectsClient: SavedObjectsClient, { id, ...data }: Action) {
+  public async create(
+    savedObjectsClient: SavedObjectsClient,
+    data: Action,
+    { id }: { id?: string } = {}
+  ) {
     const { connectorId } = data;
     if (!this.connectorService.has(connectorId)) {
       throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
@@ -39,6 +42,26 @@ export class ActionService {
 
   public async get(savedObjectsClient: SavedObjectsClient, id: string) {
     return await savedObjectsClient.get('action', id);
+  }
+
+  public async find(savedObjectsClient: SavedObjectsClient, params: {}) {
+    return await savedObjectsClient.find({
+      ...params,
+      type: 'action',
+    });
+  }
+
+  public async delete(savedObjectsClient: SavedObjectsClient, id: string) {
+    return await savedObjectsClient.delete('action', id);
+  }
+
+  public async update(savedObjectsClient: SavedObjectsClient, id: string, data: Action) {
+    const { connectorId } = data;
+    if (!this.connectorService.has(connectorId)) {
+      throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
+    }
+    this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
+    return await savedObjectsClient.update<any>('action', id, data);
   }
 
   public async fire({ id, params, savedObjectsClient }: FireActionOptions) {
