@@ -20,9 +20,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
   disabled,
   indexName,
   setIndexName,
-  indexPattern,
-  setIndexPattern,
-  setIndexDataType,
+  setSelectedIndexType,
   indexTypes,
   intl,
   setHasIndexErrors
@@ -30,10 +28,9 @@ export const IndexSettings = injectI18n(function IndexSettings({
   const [indexNames, setIndexNames] = useState(null);
   const [indexNameError, setIndexNameError] = useState('');
   const [indexPatterns, setIndexPatterns] = useState(null);
-  const [indexPatternError, setIndexPatternError] = useState('');
 
   useEffect(() => {
-    setHasIndexErrors(!!indexPatternError || !!indexNameError);
+    setHasIndexErrors(!!indexNameError);
   });
 
   if (!indexNames) {
@@ -42,7 +39,6 @@ export const IndexSettings = injectI18n(function IndexSettings({
         ? indices.map(({ name }) => name)
         : [];
       setIndexNames(indexNames);
-      indexNames.length && setIndexDataType(indexNames[0]);
     });
   }
 
@@ -71,7 +67,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
             text: indexType,
             value: indexType,
           }))}
-          onChange={({ target }) => setIndexDataType(target.value)}
+          onChange={({ target }) => setSelectedIndexType(target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
@@ -89,7 +85,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
           disabled={indexDisabled}
           placeholder={intl.formatMessage({
             id: 'xpack.file_upload.indexNamePlaceholder',
-            defaultMessage: 'index name'
+            defaultMessage: 'Enter Index Name'
           })}
           value={indexName}
           onChange={onIndexChange(setIndexName, setIndexNameError, indexNames)}
@@ -103,26 +99,6 @@ export const IndexSettings = injectI18n(function IndexSettings({
 
       <EuiSpacer size="s" />
 
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.file_upload.indexPatternLabel"
-            defaultMessage="Index pattern"
-          />
-        }
-        isInvalid={indexPatternError !== ''}
-        error={[indexPatternError]}
-      >
-        <EuiFieldText
-          disabled={indexDisabled || !indexName}
-          placeholder={indexName}
-          value={indexPattern}
-          onChange={onIndexPatternChange(
-            setIndexPattern, setIndexPatternError, indexPatterns, indexName
-          )}
-          isInvalid={indexPatternError !== ''}
-        />
-      </EuiFormRow>
     </Fragment>
   );
 });
@@ -133,17 +109,6 @@ function onIndexChange(setIndex, setIndexNameError, indexNames) {
     const errorMessage = isIndexNameValid(name, indexNames);
     setIndexNameError(errorMessage);
     setIndex(name);
-  };
-}
-
-function onIndexPatternChange(
-  setIndexPattern, setIndexPatternError, indexPatterns, indexName
-) {
-  return ({ target }) => {
-    const pattern = target.value;
-    const errorMessage = isIndexPatternValid(pattern, indexPatterns, indexName);
-    setIndexPatternError(errorMessage);
-    setIndexPattern(pattern);
   };
 }
 
@@ -171,38 +136,5 @@ function isIndexNameValid(name, indexNames) {
       />
     );
   }
-  return '';
-}
-
-function isIndexPatternValid(name, indexPatterns, index) {
-  // if a blank name is entered, the index name will be used so avoid validation
-  if (name === '') {
-    return '';
-  }
-
-  if (indexPatterns.find(i => i === name)) {
-    return (
-      <FormattedMessage
-        id="xpack.file_upload.indexPatternNameAlreadyExistsErrorMessage"
-        defaultMessage="Index pattern name already exists"
-      />
-    );
-  }
-
-  // escape . and + to stop the regex matching more than it should.
-  let newName = name.replace(/\./g, '\\.');
-  newName = newName.replace(/\+/g, '\\+');
-  // replace * with .* to make the wildcard match work.
-  newName = newName.replace(/\*/g, '.*');
-  const reg = new RegExp(`^${newName}$`);
-  if (index.match(reg) === null) { // name should match index
-    return (
-      <FormattedMessage
-        id="xpack.file_upload.importView.indexPatternDoesNotMatchIndexNameErrorMessage"
-        defaultMessage="Index pattern does not match index name"
-      />
-    );
-  }
-
   return '';
 }

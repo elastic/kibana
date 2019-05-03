@@ -12,24 +12,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseFile } from '../util/file_parser';
-import { indexData } from '../util/indexing_service';
 import { MAX_BYTES } from '../../common/constants/file_import';
 
 export function JsonIndexFilePicker({
-  boolIndexData = false,
   fileUploadMessage,
   onFileUpload,
   onFileRemove,
-  onIndexAddSuccess,
-  onIndexAddError,
   fileRef,
   setFileRef,
-  parsedFile,
   setParsedFile,
-  setIndexedFile,
   preIndexTransform,
-  indexName,
-  indexDataType,
   resetFileAndIndexSettings,
 }) {
 
@@ -87,20 +79,6 @@ export function JsonIndexFilePicker({
             // Save parsed result
             setParsedFile(parsedFileResult);
 
-            // Immediately index file if flag set
-            if (file && boolIndexData) {
-              await indexData(parsedFile, preIndexTransform, indexName, indexDataType)
-                .then(
-                  resp => {
-                    if (resp.success) {
-                      setIndexedFile(parsedFile);
-                      onIndexAddSuccess && onIndexAddSuccess(resp);
-                    } else {
-                      setIndexedFile(null);
-                      onIndexAddError && onIndexAddError();
-                    }
-                  });
-            }
           } else { // TODO: Support multiple file upload?
             console.warn('Multiple file upload not currently supported');
           }

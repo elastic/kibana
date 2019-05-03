@@ -29,73 +29,109 @@ export function JsonUploadAndParse(props) {
     onIndexPatternCreateError,
   } = props;
 
-  // Local state for parsed file and indexed details
+  // File state
   const [fileRef, setFileRef] = useState(null);
   const [parsedFile, setParsedFile] = useState(null);
   const [indexedFile, setIndexedFile] = useState(null);
-  const [indexDataType, setIndexDataType] = useState('');
-  const [indexName, setIndexName] = useState('');
-  const [indexPattern, setIndexPattern] = useState('');
+
+  // Index state
   const [indexTypes, setIndexTypes] = useState([]);
+  const [selectedIndexType, setSelectedIndexType] = useState('');
+  const [indexName, setIndexName] = useState('');
   const [indexRequestInFlight, setIndexRequestInFlight] = useState(false);
+  const [indexPatternRequestInFlight, setIndexPatternRequestInFlight] = useState(false);
   const [hasIndexErrors, setHasIndexErrors] = useState(false);
+  const [indexReady, setIndexReady] = useState(false);
 
-  // If index flag set, index on update
+
+  const resetFileAndIndexSettings = () => {
+    setIndexTypes([]);
+    setSelectedIndexType('');
+    setIndexName('');
+    setParsedFile(null);
+  };
+
+  // Set default index type
   useEffect(() => {
-    if (!indexDataType && indexTypes.length) {
-      setIndexDataType(indexTypes[0]);
+    if (!selectedIndexType && indexTypes.length) {
+      setSelectedIndexType(indexTypes[0]);
+    }
+  }, [selectedIndexType, indexTypes]);
+
+  // Set index ready
+  useEffect(() => {
+    const boolIndexReady = !!parsedFile && !!selectedIndexType && !!indexName &&
+      !hasIndexErrors && !indexRequestInFlight;
+    setIndexReady(boolIndexReady);
+    onIndexReadyStatusChange(boolIndexReady);
+  }, [
+    parsedFile, selectedIndexType, indexName, hasIndexErrors,
+    indexRequestInFlight, onIndexReadyStatusChange
+  ]);
+
+  // Index data
+  useEffect(() => {
+    const filesAreEqual = _.isEqual(indexedFile, parsedFile);
+    if (!boolIndexData || filesAreEqual || !indexReady) {
+      return;
+    }
+    setIndexRequestInFlight(true);
+
+    indexData(
+      parsedFile, preIndexTransform, indexName, selectedIndexType, appName
+    ).then(resp => {
+      setIndexedFile(parsedFile);
+      onIndexAddSuccess && onIndexAddSuccess(resp);
+    }).catch(() => {
+      setIndexedFile(null);
+      onIndexAddError && onIndexAddError();
+    });
+
+  }, [
+    selectedIndexType, boolIndexData, parsedFile, indexedFile, preIndexTransform,
+    indexName, onIndexAddSuccess, onIndexAddError, appName, indexReady
+  ]);
+
+  // Index data request complete
+  useEffect(() => {
+    setIndexRequestInFlight(false);
+    if (!boolCreateIndexPattern) {
+      resetFileAndIndexSettings();
+    }
+  }, [indexedFile, boolCreateIndexPattern]);
+
+  // Create Index Pattern
+  useEffect(() => {
+    const indexPatternReady = boolCreateIndexPattern && !!indexedFile &&
+      indexName && !indexPatternRequestInFlight;
+    if (!indexPatternReady) {
+      return;
     }
 
-    const indexReady = !!parsedFile && !!indexDataType && !!indexName && !hasIndexErrors;
-    onIndexReadyStatusChange(indexReady);
+    setIndexPatternRequestInFlight(true);
+    createIndexPattern(indexName)
+      .then(resp => {
+        onIndexPatternCreateSuccess && onIndexPatternCreateSuccess(resp);
+        setIndexPatternRequestInFlight(false);
+      }).catch(err => {
+        onIndexPatternCreateError && onIndexPatternCreateError(err);
+        setIndexPatternRequestInFlight(false);
+      });
+    resetFileAndIndexSettings();
+  }, [
+    indexName, onIndexPatternCreateError, onIndexPatternCreateSuccess,
+    boolCreateIndexPattern, indexPatternRequestInFlight, indexedFile
+  ]);
 
-    const isNewFile = !_.isEqual(indexedFile, parsedFile);
-    if (boolIndexData && !indexRequestInFlight && parsedFile && isNewFile) {
-      setIndexRequestInFlight(true);
-
-      (async () => {
-        // Index parsed file
-        const indexDataResponse = await
-        indexData(parsedFile, preIndexTransform,
-          indexName, indexDataType, appName);
-        const indexDataSuccess = indexDataResponse && indexDataResponse.success;
-        if (indexDataSuccess) {
-          setIndexedFile(parsedFile);
-          onIndexAddSuccess && onIndexAddSuccess(indexDataResponse);
-        } else {
-          setIndexedFile(null);
-          onIndexAddError && onIndexAddError();
-        }
-        setIndexRequestInFlight(false);
-
-        // Create Index Pattern
-        if (boolCreateIndexPattern && indexDataSuccess) {
-          const indexPatternCreateResponse =
-            await createIndexPattern(indexPattern || indexName);
-          const indexPatternCreateSuccess = indexPatternCreateResponse &&
-            indexPatternCreateResponse.success;
-          if (indexPatternCreateSuccess) {
-            onIndexPatternCreateSuccess && onIndexPatternCreateSuccess(indexPatternCreateResponse);
-          } else {
-            onIndexPatternCreateError && onIndexPatternCreateError(indexPatternCreateResponse);
-          }
-        }
-      })();
-    }
-
-  }, [indexDataType, indexTypes, boolIndexData, indexRequestInFlight,
-    parsedFile, indexedFile, preIndexTransform, indexName, onIndexAddSuccess,
-    onIndexAddError, hasIndexErrors, onIndexReadyStatusChange, appName,
-    boolCreateIndexPattern, indexPattern, onIndexPatternCreateError,
-    onIndexPatternCreateSuccess]
-  );
-
+  // This is mostly for geo. Some data have multiple valid index types that can
+  // be chosen from, such as 'geo_point' vs. 'geo_shape' for point data
   useEffect(() => {
-    // Determine index options
     if (parsedFile) {
+      // User-provided index types
       if (typeof preIndexTransform === 'object') {
         setIndexTypes(preIndexTransform.indexTypes);
       } else {
+        // Included index types
         switch(preIndexTransform) {
           case 'geo':
             const featureTypes = _.uniq(
@@ -104,12 +140,10 @@ export function JsonUploadAndParse(props) {
             setIndexTypes(getGeoIndexTypesForFeatures(featureTypes));
             break;
           default:
-            throw(`Index options for ${preIndexTransform} not defined`);
+            setIndexTypes([]);
             return;
         }
       }
-    } else {
-      setIndexTypes([]);
     }
   }, [parsedFile, preIndexTransform]);
 
@@ -120,29 +154,17 @@ export function JsonUploadAndParse(props) {
           ...props,
           fileRef,
           setFileRef,
-          parsedFile,
           setParsedFile,
-          setIndexedFile,
-          indexName,
           preIndexTransform,
-          indexDataType,
-          resetFileAndIndexSettings: () => {
-            setIndexTypes([]);
-            setIndexDataType('');
-            setParsedFile(null);
-            setIndexName('');
-            setIndexPattern('');
-          }
+          resetFileAndIndexSettings,
         }}
       />
       <IndexSettings
         disabled={!fileRef}
         indexName={indexName}
         setIndexName={setIndexName}
-        indexPattern={indexPattern}
-        setIndexPattern={setIndexPattern}
-        setIndexDataType={setIndexDataType}
         indexTypes={indexTypes}
+        setSelectedIndexType={setSelectedIndexType}
         setHasIndexErrors={setHasIndexErrors}
       />
     </EuiForm>
