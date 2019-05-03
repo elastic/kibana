@@ -8,6 +8,8 @@ import { difference, find } from 'lodash'; // TODO: find a way to not rely on th
 import { toastNotifications } from 'ui/notify';
 import { mlJobService } from '../../services/job_service';
 import { i18n } from '@kbn/i18n';
+import moment from 'moment';
+import d3 from 'd3';
 
 
 function warnAboutInvalidJobIds(invalidIds) {
@@ -85,4 +87,100 @@ export function setGlobalState(globalState, selectedIds) {
 // passing in `true` will load the jobs ids from the URL first
 export function getSelectedJobIds(globalState) {
   return loadJobIdsFromGlobalState(globalState);
+}
+
+export function getGroupsFromJobs(jobs) {
+  const groups = [];
+  const groupsMap = {};
+
+  jobs.forEach((job) => {
+    // Organize job by group
+    if (job.groups !== undefined) {
+      job.groups.forEach((g) => {
+        if (groups[g] === undefined) {
+          groups[g] = {
+            id: g,
+            jobIds: [job.job_id],
+            timeRange: {
+              to: job.timeRange.to,
+              toMoment: null,
+              from: job.timeRange.from,
+              fromMoment: null,
+              fromPx: job.timeRange.fromPx,
+              toPx: job.timeRange.toPx,
+              widthPx: null,
+            }
+          };
+
+          groupsMap[g] = { jobIds: [job.job_id] }; // TODO: change to just be the array so consistent with jobsMap
+        } else {
+          groups[g].jobIds.push(job.job_id);
+          groupsMap[g].jobIds.push(job.job_id);
+          // keep track of earliest 'from' / latest 'to' for group range
+          if (groups[g].timeRange.to === null || job.timeRange.to > groups[g].timeRange.to) {
+            groups[g].timeRange.to = job.timeRange.to;
+            groups[g].timeRange.toMoment = job.timeRange.toMoment;
+          }
+          if (groups[g].timeRange.from === null || job.timeRange.from < groups[g].timeRange.from) {
+            groups[g].timeRange.from = job.timeRange.from;
+            groups[g].timeRange.fromMoment = job.timeRange.fromMoment;
+          }
+          if (groups[g].timeRange.toPx === null || job.timeRange.toPx > groups[g].timeRange.toPx) {
+            groups[g].timeRange.toPx = job.timeRange.toPx;
+          }
+          if (groups[g].timeRange.fromPx === null || job.timeRange.fromPx < groups[g].timeRange.fromPx) {
+            groups[g].timeRange.fromPx = job.timeRange.fromPx;
+          }
+        }
+      });
+    }
+  });
+
+  Object.keys(groups).forEach((groupId) => {
+    const group = groups[groupId];
+    group.timeRange.widthPx = group.timeRange.toPx - group.timeRange.fromPx;
+    group.timeRange.toMoment = moment(group.timeRange.to);
+    group.timeRange.fromMoment = moment(group.timeRange.from);
+    // create label
+    const fromString = group.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
+    const toString = group.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
+    group.timeRange.label = i18n.translate('xpack.ml.jobSelectList.groupTimeRangeLabel', {
+      defaultMessage: '{fromString} to {toString}',
+      values: {
+        fromString,
+        toString,
+      }
+    });
+  });
+
+  return { groups: Object.keys(groups).map(g => groups[g]), groupsMap };
+}
+
+export function normalizeTimes(jobs, dateFormatTz) {
+  const min = Math.min(...jobs.map(job => +job.timeRange.from));
+  const max = Math.max(...jobs.map(job => +job.timeRange.to));
+
+  const ganttScale = d3.scale.linear().domain([min, max]).range([1, 299]);
+
+  jobs.forEach(job => {
+    if (job.timeRange.to !== undefined && job.timeRange.from !== undefined) {
+      job.timeRange.fromPx = ganttScale(job.timeRange.from);
+      job.timeRange.toPx = ganttScale(job.timeRange.to);
+      job.timeRange.widthPx = job.timeRange.toPx - job.timeRange.fromPx;
+
+      job.timeRange.toMoment = moment(job.timeRange.to).tz(dateFormatTz);
+      job.timeRange.fromMoment = moment(job.timeRange.from).tz(dateFormatTz);
+
+      const fromString = job.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
+      const toString = job.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
+      job.timeRange.label = i18n.translate('xpack.ml.jobSelector.jobTimeRangeLabel', {
+        defaultMessage: '{fromString} to {toString}',
+        values: {
+          fromString,
+          toString,
+        }
+      });
+    }
+  });
+  return jobs;
 }

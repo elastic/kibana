@@ -11,7 +11,7 @@ import { datafeedsProvider } from './datafeeds';
 import { jobAuditMessagesProvider } from '../job_audit_messages';
 import { CalendarManager } from '../calendar';
 import { fillResultsWithTimeouts, isRequestTimeout } from './error_utils';
-import { isTimeSeriesViewJob, normalizeTimes } from '../../../common/util/job_utils';
+import { isTimeSeriesViewJob } from '../../../common/util/job_utils';
 import moment from 'moment';
 import { uniq } from 'lodash';
 
@@ -140,125 +140,33 @@ export function jobsProvider(callWithRequest) {
     return jobs;
   }
 
-  async function jobsWithTimerange(dateFormatTz) {
-    const [JOBS, JOB_STATS, DATAFEEDS, DATAFEED_STATS] = [0, 1, 2, 3];
+  async function jobsWithTimerange() {
+    const fullJobsList = await createFullJobsList();
     const jobsMap = {};
-    const groups = {};
-    const groupsMap = {};
-    const datafeeds = {};
-    let jobs = [];
 
-    const requests = [
-      callWithRequest('ml.jobs'),
-      callWithRequest('ml.jobStats'),
-      callWithRequest('ml.datafeeds'),
-      callWithRequest('ml.datafeedStats')
-    ];
+    const jobs = fullJobsList.map((job) => {
+      jobsMap[job.job_id] = job.groups || [];
+      const hasDatafeed = (typeof job.datafeed_config === 'object' && Object.keys(job.datafeed_config).length > 0);
+      const timeRange = {};
 
-    const results = await Promise.all(requests);
+      if (job.data_counts !== undefined) {
+        timeRange.to = job.data_counts.latest_record_timestamp;
+        timeRange.from = job.data_counts.earliest_record_timestamp;
+      }
 
-    if (results[DATAFEEDS] && results[DATAFEEDS].datafeeds) {
-      results[DATAFEEDS].datafeeds.forEach((datafeed) => {
-        if (results[DATAFEED_STATS] && results[DATAFEED_STATS].datafeeds) {
-          const datafeedStats = results[DATAFEED_STATS].datafeeds.find(ds => (ds.datafeed_id === datafeed.datafeed_id));
-          if (datafeedStats) {
-            datafeed.state = datafeedStats.state;
-          }
-        }
-        datafeeds[datafeed.job_id] = datafeed;
-      });
-    }
+      const tempJob = {
+        id: job.job_id,
+        job_id: job.job_id,
+        groups: (Array.isArray(job.groups) ? job.groups.sort() : []),
+        isRunning: (hasDatafeed && job.datafeed_config.state === 'started'),
+        isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+        timeRange
+      };
 
-    if (results[JOBS] && results[JOBS].jobs) {
-      results[JOBS].jobs.forEach((job) => {
-        jobsMap[job.job_id] = job.groups || [];
-        job.id = job.job_id;
-        job.timeRange = {};
-        job.datafeed_config = {};
-        // Record stats for job
-        if (results[JOB_STATS] && results[JOB_STATS].jobs) {
-          const jobStats = results[JOB_STATS].jobs.find(js => (js.job_id === job.job_id));
+      return tempJob;
+    });
 
-          if (jobStats !== undefined) {
-            job.state = jobStats.state;
-            if (jobStats.data_counts !== undefined) {
-              job.timeRange.to = jobStats.data_counts.latest_record_timestamp;
-              job.timeRange.from = jobStats.data_counts.earliest_record_timestamp;
-            }
-          }
-        }
-
-        const datafeed = datafeeds[job.job_id];
-        if (datafeed !== undefined) {
-          job.datafeed_config = datafeed;
-        }
-
-        jobs.push(job);
-      });
-
-      jobs = normalizeTimes(jobs, dateFormatTz);
-      jobs.forEach((job) => {
-      // Organize job by group
-        if (job.groups !== undefined) {
-          job.groups.forEach((g) => {
-            if (groups[g] === undefined) {
-              groups[g] = {
-                id: g,
-                jobIds: [job.job_id],
-                timeRange: {
-                  to: job.timeRange.to,
-                  toMoment: null,
-                  from: job.timeRange.from,
-                  fromMoment: null,
-                  fromPx: job.timeRange.fromPx,
-                  toPx: job.timeRange.toPx,
-                  widthPx: null,
-                }
-              };
-
-              groupsMap[g] = { jobIds: [job.job_id] };
-            } else {
-              groups[g].jobIds.push(job.job_id);
-              groupsMap[g].jobIds.push(job.job_id);
-              // keep track of earliest 'from' / latest 'to' for group range
-              if (groups[g].timeRange.to === null || job.timeRange.to > groups[g].timeRange.to) {
-                groups[g].timeRange.to = job.timeRange.to;
-                groups[g].timeRange.toMoment = job.timeRange.toMoment;
-              }
-              if (groups[g].timeRange.from === null || job.timeRange.from < groups[g].timeRange.from) {
-                groups[g].timeRange.from = job.timeRange.from;
-                groups[g].timeRange.fromMoment = job.timeRange.fromMoment;
-              }
-              if (groups[g].timeRange.toPx === null || job.timeRange.toPx > groups[g].timeRange.toPx) {
-                groups[g].timeRange.toPx = job.timeRange.toPx;
-              }
-              if (groups[g].timeRange.fromPx === null || job.timeRange.fromPx < groups[g].timeRange.fromPx) {
-                groups[g].timeRange.fromPx = job.timeRange.fromPx;
-              }
-            }
-          });
-        }
-      });
-
-      Object.keys(groups).forEach((groupId) => {
-        const group = groups[groupId];
-        group.timeRange.widthPx = group.timeRange.toPx - group.timeRange.fromPx;
-        group.timeRange.toMoment = moment(group.timeRange.to);
-        group.timeRange.fromMoment = moment(group.timeRange.from);
-        // create label
-        const fromString = group.timeRange.fromMoment.format('MMM Do YYYY, HH:mm');
-        const toString = group.timeRange.toMoment.format('MMM Do YYYY, HH:mm');
-        group.timeRange.label = i18n.translate('xpack.ml.jobSelectList.groupTimeRangeLabel', {
-          defaultMessage: '{fromString} to {toString}',
-          values: {
-            fromString,
-            toString,
-          }
-        });
-      });
-    }
-
-    return { jobs, jobsMap, groupsMap, groups: Object.keys(groups).map(g => groups[g]) };
+    return { jobs, jobsMap };
   }
 
   async function createFullJobsList(jobIds = []) {

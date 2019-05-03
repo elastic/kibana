@@ -14,7 +14,7 @@ import { ml } from '../../services/ml_api_service';
 import { JobSelectorTable } from './job_selector_table/';
 import { timefilter } from 'ui/timefilter';
 import { tabColor } from '../../../common/util/group_color_utils';
-import { setGlobalState } from './job_select_service_utils';
+import { getGroupsFromJobs, normalizeTimes, setGlobalState } from './job_select_service_utils';
 import { toastNotifications } from 'ui/notify';
 import {
   EuiBadge,
@@ -116,9 +116,11 @@ export function JobSelector({
 
     ml.jobs.jobsWithTimerange(dateFormatTz)
       .then((resp) => {
-        setJobs(resp.jobs);
-        setGroups(resp.groups);
-        setMaps({ groupsMap: resp.groupsMap, jobsMap: resp.jobsMap });
+        const normalizedJobs = normalizeTimes(resp.jobs, dateFormatTz);
+        const { groups: groupsWithTimerange, groupsMap } = getGroupsFromJobs(normalizedJobs);
+        setJobs(normalizedJobs);
+        setGroups(groupsWithTimerange);
+        setMaps({ groupsMap, jobsMap: resp.jobsMap });
       })
       .catch((err) => {
         console.log('Error fetching jobs', err);
@@ -181,7 +183,7 @@ export function JobSelector({
     }
   }
 
-  function handleTimerangeSwitchToggle() {
+  function toggleTimerangeSwitch() {
     setApplyTimeRange(!applyTimeRange);
   }
 
@@ -382,7 +384,7 @@ export function JobSelector({
                         defaultMessage: 'Apply timerange'
                       })}
                       checked={applyTimeRange}
-                      onChange={handleTimerangeSwitchToggle}
+                      onChange={toggleTimerangeSwitch}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
