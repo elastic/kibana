@@ -50,7 +50,6 @@ export function JsonUploadAndParse(props) {
     onIndexReadyStatusChange(indexReady);
 
     const isNewFile = !_.isEqual(indexedFile, parsedFile);
-
     if (boolIndexData && !indexRequestInFlight && parsedFile && isNewFile) {
       setIndexRequestInFlight(true);
 
@@ -109,6 +108,8 @@ export function JsonUploadAndParse(props) {
             return;
         }
       }
+    } else {
+      setIndexTypes([]);
     }
   }, [parsedFile, preIndexTransform]);
 
@@ -124,7 +125,14 @@ export function JsonUploadAndParse(props) {
           setIndexedFile,
           indexName,
           preIndexTransform,
-          indexDataType
+          indexDataType,
+          resetFileAndIndexSettings: () => {
+            setIndexTypes([]);
+            setIndexDataType('');
+            setParsedFile(null);
+            setIndexName('');
+            setIndexPattern('');
+          }
         }}
       />
       <IndexSettings

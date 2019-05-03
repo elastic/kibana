@@ -41,7 +41,6 @@ export class AddLayerPanel extends Component {
       return;
     }
 
-
     const layerOptions = this.state.layer
       ? { style: this.state.layer.getCurrentStyle().getDescriptor() }
       : {};
@@ -53,6 +52,13 @@ export class AddLayerPanel extends Component {
 
   _addImportedLayer = async source => {
     await this.props.removeTransientLayer();
+    if (!source) {
+      this.setState({ layer: null }, () => {
+        this.props.closeFlyout();
+      });
+      console.error(`Failed to add source`);
+      return;
+    }
     this.setState({
       layer: source.createDefaultLayer({}, this.props.mapColors)
     }, () => this.props.addImportedLayer(this.state.layer)

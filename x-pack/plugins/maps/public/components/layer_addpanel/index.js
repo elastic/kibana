@@ -47,7 +47,7 @@ function mapDispatchToProps(dispatch) {
       await dispatch(setSelectedLayer(null));
       dispatch(addLayer(layer.toLayerDescriptor()));
       dispatch(setSelectedLayer(layer.getId()));
-      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL)); // Is permanent, move to settings
+      dispatch(updateFlyout(FLYOUT_STATE.LAYER_PANEL));
     },
     removeTransientLayer: () => {
       dispatch(setSelectedLayer(null));

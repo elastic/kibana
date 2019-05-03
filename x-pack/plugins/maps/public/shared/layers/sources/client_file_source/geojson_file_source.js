@@ -10,6 +10,7 @@ import { GEOJSON_FILE } from '../../../../../common/constants';
 import { ClientFileCreateSourceEditor } from './create_client_file_source_editor';
 import { ESSearchSource } from '../es_search_source';
 import uuid from 'uuid/v4';
+import _ from 'lodash';
 
 export class GeojsonFileSource extends AbstractVectorSource {
 
@@ -31,21 +32,21 @@ export class GeojsonFileSource extends AbstractVectorSource {
         console.error('Unable to view indexed data');
         return;
       }
-      const indexPatternId = id;
       const geoFieldArr = fields.filter(
         field => ['geo_point', 'geo_shape'].includes(field.type)
       );
-      const geoField = geoFieldArr[0].name;
-      if (!indexPatternId) {
+      const geoField = _.get(geoFieldArr, '[0].name');
+      const indexPatternId = id;
+      if (!indexPatternId || !geoField) {
         addAndViewSource(null);
-        return;
+      } else {
+        const source = new ESSearchSource({
+          id: uuid(),
+          indexPatternId,
+          geoField,
+        }, inspectorAdapters);
+        addAndViewSource(source);
       }
-      const source = new ESSearchSource({
-        id: uuid(),
-        indexPatternId,
-        geoField,
-      }, inspectorAdapters);
-      addAndViewSource(source);
     };
   };
 

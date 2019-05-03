@@ -38,9 +38,11 @@ export const IndexSettings = injectI18n(function IndexSettings({
 
   if (!indexNames) {
     getExistingIndices().then(indices => {
-      setIndexNames(indices
+      const indexNames = indices
         ? indices.map(({ name }) => name)
-        : []);
+        : [];
+      setIndexNames(indexNames);
+      indexNames.length && setIndexDataType(indexNames[0]);
     });
   }
 
@@ -49,6 +51,8 @@ export const IndexSettings = injectI18n(function IndexSettings({
       indexPatterns => setIndexPatterns(indexPatterns)
     );
   }
+
+  const indexDisabled = disabled || !indexTypes || !indexTypes.length;
 
   return (
     <Fragment>
@@ -62,14 +66,12 @@ export const IndexSettings = injectI18n(function IndexSettings({
         }
       >
         <EuiSelect
-          disabled={disabled}
+          disabled={indexDisabled}
           options={indexTypes.map(indexType =>({
             text: indexType,
             value: indexType,
           }))}
-          onChange={({ target }) => {
-            setIndexDataType(target.value);
-          }}
+          onChange={({ target }) => setIndexDataType(target.value)}
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
@@ -84,7 +86,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
         error={[indexNameError]}
       >
         <EuiFieldText
-          disabled={disabled}
+          disabled={indexDisabled}
           placeholder={intl.formatMessage({
             id: 'xpack.file_upload.indexNamePlaceholder',
             defaultMessage: 'index name'
@@ -112,7 +114,7 @@ export const IndexSettings = injectI18n(function IndexSettings({
         error={[indexPatternError]}
       >
         <EuiFieldText
-          disabled={disabled || !indexName}
+          disabled={indexDisabled || !indexName}
           placeholder={indexName}
           value={indexPattern}
           onChange={onIndexPatternChange(

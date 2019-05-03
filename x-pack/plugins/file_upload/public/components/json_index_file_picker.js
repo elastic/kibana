@@ -12,7 +12,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { parseFile } from '../util/file_parser';
-import { triggerIndexing } from '../util/indexing_service';
+import { indexData } from '../util/indexing_service';
 import { MAX_BYTES } from '../../common/constants/file_import';
 
 export function JsonIndexFilePicker({
@@ -30,6 +30,7 @@ export function JsonIndexFilePicker({
   preIndexTransform,
   indexName,
   indexDataType,
+  resetFileAndIndexSettings,
 }) {
 
   const [fileUploadError, setFileUploadError] = useState('');
@@ -55,6 +56,7 @@ export function JsonIndexFilePicker({
           />
         )}
         onChange={async fileList => {
+          resetFileAndIndexSettings();
           setFileUploadError('');
           if (fileList.length === 0) { // Remove
             setParsedFile(null);
@@ -87,7 +89,7 @@ export function JsonIndexFilePicker({
 
             // Immediately index file if flag set
             if (file && boolIndexData) {
-              await triggerIndexing(parsedFile, preIndexTransform, indexName, indexDataType)
+              await indexData(parsedFile, preIndexTransform, indexName, indexDataType)
                 .then(
                   resp => {
                     if (resp.success) {
