@@ -6,7 +6,6 @@
 
 import { Request } from 'src/legacy/server/kbn_server';
 import { SavedObject } from 'src/legacy/server/saved_objects/service/saved_objects_client';
-import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 import { FieldId, AggId } from '../../../../common/types/fields';
 
 export type RollupFields = Record<FieldId, [Record<'agg', AggId>]>;
@@ -20,7 +19,7 @@ export interface RollupJob {
 
 export async function rollupServiceProvider(
   indexPattern: string,
-  callWithRequest: CallWithRequestType,
+  callWithRequest: any,
   request: Request
 ) {
   const rollupIndexPatternObject = await loadRollupIndexPattern(indexPattern, request);

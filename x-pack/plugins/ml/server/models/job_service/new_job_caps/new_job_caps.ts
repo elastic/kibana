@@ -5,7 +5,6 @@
  */
 
 import { Request } from 'src/legacy/server/kbn_server';
-import { CallWithRequestType } from '../../../client/elasticsearch_ml';
 import { Aggregation, Field, NewJobCaps } from '../../../../common/types/fields';
 import { fieldServiceProvider } from './field_service';
 
@@ -13,7 +12,7 @@ interface NewJobCapsResponse {
   [indexPattern: string]: NewJobCaps;
 }
 
-export function newJobCapsProvider(callWithRequest: CallWithRequestType, request: Request) {
+export function newJobCapsProvider(callWithRequest: any, request: Request) {
   async function newJobCaps(
     indexPattern: string,
     isRollup: boolean = false
