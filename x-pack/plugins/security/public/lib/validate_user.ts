@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { User, NewUser, EditUser } from '../../common/model';
+import { User, EditUser } from '../../common/model';
 
 interface UserValidatorOptions {
   shouldValidate?: boolean;
@@ -67,7 +67,7 @@ export class UserValidator {
     }
 
     const { email } = user;
-    if (email !== null && email !== '' && !email.match(validEmailRegex)) {
+    if (email && !email.match(validEmailRegex)) {
       return invalid(
         i18n.translate('xpack.security.management.users.editUser.validEmailRequiredErrorMessage', {
           defaultMessage: 'Email address is invalid',

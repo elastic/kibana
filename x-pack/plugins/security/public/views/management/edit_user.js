@@ -11,6 +11,7 @@ import 'plugins/security/services/shield_user';
 import 'plugins/security/services/shield_role';
 import { EDIT_USERS_PATH } from './management_urls';
 import { EditUserPage } from '../../components/management/users';
+import { UserAPIClient } from '../../lib/api';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nContext } from 'ui/i18n';
@@ -22,6 +23,7 @@ const renderReact = (elem, httpClient, changeUrl, username) => {
       <EditUserPage
         changeUrl={changeUrl}
         username={username}
+        apiClient={new UserAPIClient()}
       />
     </I18nContext>,
     elem

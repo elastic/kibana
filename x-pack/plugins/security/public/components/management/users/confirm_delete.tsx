@@ -13,17 +13,18 @@ import { UserAPIClient } from '../../../lib/api';
 interface Props {
   intl: InjectedIntl;
   usersToDelete: string[];
+  apiClient: UserAPIClient;
   onCancel: () => void;
   callback?: (usersToDelete: string[], errors: string[]) => void;
 }
 
 class ConfirmDeleteUI extends Component<Props, {}> {
   deleteUsers = () => {
-    const { usersToDelete, callback } = this.props;
+    const { usersToDelete, callback, apiClient } = this.props;
     const errors: string[] = [];
     usersToDelete.forEach(async username => {
       try {
-        await UserAPIClient.deleteUser(username);
+        await apiClient.deleteUser(username);
         toastNotifications.addSuccess(
           this.props.intl.formatMessage(
             {

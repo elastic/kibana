@@ -26,6 +26,7 @@ import { UserAPIClient } from '../../../lib/api';
 
 interface Props {
   intl: InjectedIntl;
+  apiClient: UserAPIClient;
 }
 
 interface State {
@@ -62,7 +63,7 @@ class UsersListPageUI extends Component<Props, State> {
   };
   async loadUsers() {
     try {
-      const users = await UserAPIClient.getUsers();
+      const users = await this.props.apiClient.getUsers();
       this.setState({ users });
     } catch (e) {
       if (e.body.statusCode === 403) {
@@ -250,10 +251,10 @@ class UsersListPageUI extends Component<Props, State> {
     };
     const usersToShow = filter
       ? users.filter(({ username, roles, full_name: fullName = '', email = '' }) => {
-          const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
-          const normalizedQuery = filter.toLowerCase();
-          return normalized.indexOf(normalizedQuery) !== -1;
-        })
+        const normalized = `${username} ${roles.join(' ')} ${fullName} ${email}`.toLowerCase();
+        const normalizedQuery = filter.toLowerCase();
+        return normalized.indexOf(normalizedQuery) !== -1;
+      })
       : users;
     return (
       <div className="secUsersListingPage">
@@ -284,6 +285,7 @@ class UsersListPageUI extends Component<Props, State> {
                 onCancel={this.onCancelDelete}
                 usersToDelete={selection.map(user => user.username)}
                 callback={this.handleDelete}
+                apiClient={this.props.apiClient}
               />
             ) : null}
 

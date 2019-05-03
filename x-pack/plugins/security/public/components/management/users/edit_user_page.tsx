@@ -28,7 +28,7 @@ import {
 } from '@elastic/eui';
 import { toastNotifications } from 'ui/notify';
 import { FormattedMessage, injectI18n, InjectedIntl } from '@kbn/i18n/react';
-import { UserValidator, UserValidationResult } from 'plugins/security/lib/validate_user';
+import { UserValidator, UserValidationResult } from '../../../lib/validate_user';
 import { User, EditUser, Role } from '../../../../common/model';
 import { USERS_PATH } from '../../../views/management/management_urls';
 import { ConfirmDelete } from './confirm_delete';
@@ -39,6 +39,7 @@ interface Props {
   username: string;
   intl: InjectedIntl;
   changeUrl: (path: string) => void;
+  apiClient: UserAPIClient;
 }
 
 interface State {
@@ -81,16 +82,16 @@ class EditUserPageUI extends Component<Props, State> {
   }
 
   public async componentDidMount() {
-    const { username } = this.props;
+    const { username, apiClient } = this.props;
     let { user, currentUser } = this.state;
     if (username) {
       try {
         user = {
-          ...(await UserAPIClient.getUser(username)),
+          ...(await apiClient.getUser(username)),
           password: '',
           confirmPassword: '',
         };
-        currentUser = await UserAPIClient.getCurrentUser();
+        currentUser = await apiClient.getCurrentUser();
       } catch (err) {
         toastNotifications.addDanger({
           title: this.props.intl.formatMessage({
@@ -105,7 +106,7 @@ class EditUserPageUI extends Component<Props, State> {
 
     let roles: Role[] = [];
     try {
-      roles = await UserAPIClient.getRoles();
+      roles = await apiClient.getRoles();
     } catch (err) {
       toastNotifications.addDanger({
         title: this.props.intl.formatMessage({
@@ -145,14 +146,14 @@ class EditUserPageUI extends Component<Props, State> {
       this.setState({
         formError: null,
       });
-      const { changeUrl } = this.props;
+      const { changeUrl, apiClient } = this.props;
       const { user, isNewUser, selectedRoles } = this.state;
       const userToSave: EditUser = { ...user };
       userToSave.roles = selectedRoles.map(selectedRole => {
         return selectedRole.label;
       });
       try {
-        await UserAPIClient.saveUser(userToSave, isNewUser);
+        await apiClient.saveUser(userToSave, isNewUser);
         toastNotifications.addSuccess(
           this.props.intl.formatMessage(
             {
@@ -252,6 +253,7 @@ class EditUserPageUI extends Component<Props, State> {
           user={this.state.user as User}
           isUserChangingOwnPassword={userIsLoggedInUser}
           onChangePassword={this.toggleChangePasswordForm}
+          apiClient={this.props.apiClient}
         />
       </Fragment>
     );
@@ -408,6 +410,7 @@ class EditUserPageUI extends Component<Props, State> {
                 onCancel={this.onCancelDelete}
                 usersToDelete={[user.username]}
                 callback={this.handleDelete}
+                apiClient={this.props.apiClient}
               />
             ) : null}
 

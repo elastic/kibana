@@ -11,6 +11,7 @@ import template from 'plugins/security/views/management/users.html';
 import 'plugins/security/services/shield_user';
 import { SECURITY_PATH, USERS_PATH } from './management_urls';
 import { UsersListPage } from '../../components/management/users';
+import { UserAPIClient } from '../../lib/api';
 import { I18nContext } from 'ui/i18n';
 import { getUsersBreadcrumbs } from './breadcrumbs';
 
@@ -19,7 +20,7 @@ routes.when(SECURITY_PATH, {
 });
 
 const renderReact = (elem, changeUrl) => {
-  render(<I18nContext><UsersListPage changeUrl={changeUrl} /></I18nContext>, elem);
+  render(<I18nContext><UsersListPage changeUrl={changeUrl} apiClient={new UserAPIClient()} /></I18nContext>, elem);
 };
 
 routes.when(USERS_PATH, {
