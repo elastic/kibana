@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { registerTestBed } from '../../../../../__jest__/utils';
+import { registerTestBed } from '../../../../../../../test_utils';
 import { getJob } from '../../../../../fixtures';
 import { rollupJobsStore } from '../../../store';
 import { DetailPanel } from './detail_panel';
@@ -21,7 +21,7 @@ jest.mock('../../../services', () => {
   const services = require.requireActual('../../../services');
   return {
     ...services,
-    trackUserAction: jest.fn(),
+    trackUiMetric: jest.fn(),
   };
 });
 
@@ -37,21 +37,21 @@ const defaultProps = {
   openDetailPanel: jest.fn(),
 };
 
-const initTestBed = registerTestBed(DetailPanel, defaultProps, rollupJobsStore);
+const initTestBed = registerTestBed(DetailPanel, { defaultProps, store: rollupJobsStore });
 
 describe('<DetailPanel />', () => {
   describe('layout', () => {
     let component;
-    let findTestSubject;
-    let testSubjectExists;
+    let find;
+    let exists;
 
     beforeEach(() => {
-      ({ component, findTestSubject } = initTestBed());
+      ({ component, find } = initTestBed());
     });
 
     it('should have the title set to the current Job "id"', () => {
       const { job } = defaultProps;
-      const title = findTestSubject('rollupJobDetailsFlyoutTitle');
+      const title = find('rollupJobDetailsFlyoutTitle');
       expect(title.length).toBe(1);
       expect(title.text()).toEqual(job.id);
     });
@@ -66,19 +66,19 @@ describe('<DetailPanel />', () => {
     });
 
     it('should show a loading when the job is loading', () => {
-      ({ component, findTestSubject, testSubjectExists } = initTestBed({ isLoading: true }));
-      const loading = findTestSubject('rollupJobDetailLoading');
+      ({ component, find, exists } = initTestBed({ isLoading: true }));
+      const loading = find('rollupJobDetailLoading');
       expect(loading.length).toBeTruthy();
       expect(loading.text()).toEqual('Loading rollup job...');
 
       // Make sure the title and the tabs are visible
-      expect(testSubjectExists('detailPanelTabSelected')).toBeTruthy();
-      expect(testSubjectExists('rollupJobDetailsFlyoutTitle')).toBeTruthy();
+      expect(exists('detailPanelTabSelected')).toBeTruthy();
+      expect(exists('rollupJobDetailsFlyoutTitle')).toBeTruthy();
     });
 
     it('should display a message when no job is provided', () => {
-      ({ component, findTestSubject } = initTestBed({ job: undefined }));
-      expect(findTestSubject('rollupJobDetailJobNotFound').text()).toEqual('Rollup job not found');
+      ({ component, find } = initTestBed({ job: undefined }));
+      expect(find('rollupJobDetailJobNotFound').text()).toEqual('Rollup job not found');
     });
   });
 
@@ -122,12 +122,12 @@ describe('<DetailPanel />', () => {
     describe('summary tab content', () => {
       // Init testBed on the SUMMARY tab
       const panelType = JOB_DETAILS_TAB_SUMMARY;
-      const { findTestSubject } = initTestBed({ panelType });
+      const { find } = initTestBed({ panelType });
 
       it('should have a "Logistics", "Date histogram" and "Stats" section', () => {
         const expectedSections = ['Logistics', 'DateHistogram', 'Stats'];
         const sectionsFound = expectedSections.reduce((sectionsFound, section) => {
-          if (findTestSubject(`rollupJobDetailSummary${section}Section`).length) {
+          if (find(`rollupJobDetailSummary${section}Section`).length) {
             sectionsFound.push(section);
           }
           return sectionsFound;
@@ -141,7 +141,7 @@ describe('<DetailPanel />', () => {
 
         it('should have "Index pattern", "Rollup index", "Cron" and "Delay" subsections', () => {
           const logisticsSubsectionsTitles = LOGISTICS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (findTestSubject(`rollupJobDetailLogistics${subSection}Title`)) {
+            if (find(`rollupJobDetailLogistics${subSection}Title`)) {
               subSections.push(subSection);
             }
             return subSections;
@@ -151,7 +151,7 @@ describe('<DetailPanel />', () => {
 
         it('should set the correct job value for each of the subsection', () => {
           LOGISTICS_SUBSECTIONS.forEach((subSection) => {
-            const wrapper = findTestSubject(`rollupJobDetailLogistics${subSection}Description`);
+            const wrapper = find(`rollupJobDetailLogistics${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
@@ -181,7 +181,7 @@ describe('<DetailPanel />', () => {
 
         it('should have "Time field", "Timezone", "Interval" subsections', () => {
           const dateHistogramSubsections = DATE_HISTOGRAMS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (findTestSubject(`rollupJobDetailDateHistogram${subSection}Title`)) {
+            if (find(`rollupJobDetailDateHistogram${subSection}Title`)) {
               subSections.push(subSection);
             }
             return subSections;
@@ -191,7 +191,7 @@ describe('<DetailPanel />', () => {
 
         it('should set the correct job value for each of the subsection', () => {
           DATE_HISTOGRAMS_SUBSECTIONS.forEach((subSection) => {
-            const wrapper = findTestSubject(`rollupJobDetailDateHistogram${subSection}Description`);
+            const wrapper = find(`rollupJobDetailDateHistogram${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
@@ -218,7 +218,7 @@ describe('<DetailPanel />', () => {
 
         it('should have "Documents processed", "Pages processed", "Rollups indexed" and "Trigger count" subsections', () => {
           const statsSubSections = STATS_SUBSECTIONS.reduce((subSections, subSection) => {
-            if (findTestSubject(`rollupJobDetailStats${subSection}Title`)) {
+            if (find(`rollupJobDetailStats${subSection}Title`)) {
               subSections.push(subSection);
             }
             return subSections;
@@ -228,7 +228,7 @@ describe('<DetailPanel />', () => {
 
         it('should set the correct job value for each of the subsection', () => {
           STATS_SUBSECTIONS.forEach((subSection) => {
-            const wrapper = findTestSubject(`rollupJobDetailStats${subSection}Description`);
+            const wrapper = find(`rollupJobDetailStats${subSection}Description`);
             expect(wrapper.length).toBe(1);
             const description = wrapper.text();
 
@@ -253,7 +253,7 @@ describe('<DetailPanel />', () => {
         });
 
         it('should display the job status', () => {
-          const statsSection = findTestSubject('rollupJobDetailSummaryStatsSection');
+          const statsSection = find('rollupJobDetailSummaryStatsSection');
           expect(statsSection.length).toBe(1);
           expect(defaultJob.status).toEqual('stopped'); // make sure status is Stopped
           expect(statsSection.find('EuiHealth').text()).toEqual('Stopped');
@@ -264,74 +264,44 @@ describe('<DetailPanel />', () => {
     describe('terms tab content', () => {
       // Init testBed on the TERMS tab
       const panelType = JOB_DETAILS_TAB_TERMS;
-      const { findTestSubject } = initTestBed({ panelType });
-      const tabContent = findTestSubject('rollupJobDetailTabContent');
-      const getRowsText = () => (
-        tabContent
-          .find('tr')
-          .map(row => row.find('.euiTableCellContent').text())
-          .slice(1) // we remove the first row as it is the table header
-      );
+      const { table } = initTestBed({ panelType });
+      const { tableCellsValues } = table.getMetaData('detailPanelTermsTabTable');
+
       it('should list the Job terms fields', () => {
-        const rowsText = getRowsText();
-        const expected = defaultJob.terms.map(term => term.name);
-        expect(rowsText).toEqual(expected);
+        const expected = defaultJob.terms.map(term => [term.name]);
+        expect(tableCellsValues).toEqual(expected);
       });
     });
 
     describe('histogram tab content', () => {
       // Init testBed on the HISTOGRAM tab
       const panelType = JOB_DETAILS_TAB_HISTOGRAM;
-      const { findTestSubject } = initTestBed({ panelType });
-      const tabContent = findTestSubject('rollupJobDetailTabContent');
-      const getRowsText = () => (
-        tabContent
-          .find('tr')
-          .map(row => row.find('.euiTableCellContent').text())
-          .slice(1) // we remove the first row as it is the table header
-      );
+      const { table } = initTestBed({ panelType });
+      const { tableCellsValues } = table.getMetaData('detailPanelHistogramTabTable');
 
       it('should list the Job histogram fields', () => {
-        const rowsText = getRowsText();
-        const expected = defaultJob.histogram.map(h => h.name);
-        expect(rowsText).toEqual(expected);
+        const expected = defaultJob.histogram.map(h => [h.name]);
+        expect(tableCellsValues).toEqual(expected);
       });
     });
 
     describe('metrics tab content', () => {
       // Init testBed on the METRICS tab
       const panelType = JOB_DETAILS_TAB_METRICS;
-      const { findTestSubject } = initTestBed({ panelType });
-      const tabContent = findTestSubject('rollupJobDetailTabContent');
-      const getRows = () => (
-        tabContent
-          .find('tr')
-          .slice(1)
-      );
+      const { table } = initTestBed({ panelType });
+      const { tableCellsValues } = table.getMetaData('detailPanelMetricsTabTable');
+
       it('should list the Job metrics fields and their types', () => {
-        const rows = getRows();
-
-        rows.forEach((row, i) => {
-          const metric = defaultJob.metrics[i];
-
-          row.find('td').forEach((cell, j) => {
-            if (j === 0) {
-              // field
-              expect(cell.find('.euiTableCellContent').text()).toEqual(metric.name);
-            } else if (j === 1) {
-              // types
-              expect(cell.find('.euiTableCellContent').text()).toEqual(metric.types.join(', '));
-            }
-          });
-        });
+        const expected = defaultJob.metrics.map(metric => [metric.name, metric.types.join(', ')]);
+        expect(tableCellsValues).toEqual(expected);
       });
     });
 
     describe('JSON tab content', () => {
       // Init testBed on the JSON tab
       const panelType = JOB_DETAILS_TAB_JSON;
-      const { findTestSubject } = initTestBed({ panelType });
-      const tabContent = findTestSubject('rollupJobDetailTabContent');
+      const { find } = initTestBed({ panelType });
+      const tabContent = find('rollupJobDetailTabContent');
 
       it('should render the "EuiCodeEditor" with the job "json" data', () => {
         const euiCodeEditor = tabContent.find('EuiCodeEditor');

@@ -53,10 +53,18 @@ export function SharePageProvider({ getService, getPageObjects }) {
       return await testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
     }
 
+    async createShortUrlExistOrFail() {
+      await testSubjects.existOrFail('createShortUrl');
+    }
+
+    async createShortUrlMissingOrFail() {
+      await testSubjects.missingOrFail('createShortUrl');
+    }
+
     async checkShortenUrl() {
       const shareForm = await testSubjects.find('shareUrlForm');
       await PageObjects.visualize.checkCheckbox('useShortUrl');
-      await shareForm.waitForDeletedByClassName('euiLoadingSpinner');
+      await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
     }
 
     async exportAsSavedObject() {

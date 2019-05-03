@@ -25,7 +25,7 @@ contractTests('Kibana Database Adapter', {
       server: { maxPayloadBytes: 100 },
     });
 
-    await rootServer.start();
+    await rootServer.setup();
     legacyServer = kbnTestServer.getKbnServer(rootServer);
     return await legacyServer.plugins.elasticsearch.waitUntilReady();
   },

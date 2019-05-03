@@ -5,11 +5,8 @@
  */
 
 import React from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
-import {
-  fromQuery,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
+import { fromQuery, toQuery } from '../../Links/url_helpers';
+import { history } from '../../../../utils/history';
 
 export interface RangeSelection {
   start: number;
@@ -28,7 +25,7 @@ export interface HoverXHandlers {
   hoverX: HoverX | null;
 }
 
-interface SyncChartGroupProps extends RouteComponentProps {
+interface SyncChartGroupProps {
   render: (props: HoverXHandlers) => React.ReactNode;
 }
 
@@ -36,7 +33,7 @@ interface SyncChartState {
   hoverX: HoverX | null;
 }
 
-class SyncChartGroupComponent extends React.Component<
+export class SyncChartGroup extends React.Component<
   SyncChartGroupProps,
   SyncChartState
 > {
@@ -48,14 +45,14 @@ class SyncChartGroupComponent extends React.Component<
   public onSelectionEnd: OnSelectionEndHandler = range => {
     this.setState({ hoverX: null });
 
-    const currentSearch = toQuery(this.props.location.search);
+    const currentSearch = toQuery(history.location.search);
     const nextSearch = {
       rangeFrom: new Date(range.start).toISOString(),
       rangeTo: new Date(range.end).toISOString()
     };
 
-    this.props.history.push({
-      ...this.props.location,
+    history.push({
+      ...history.location,
       search: fromQuery({
         ...currentSearch,
         ...nextSearch
@@ -72,5 +69,3 @@ class SyncChartGroupComponent extends React.Component<
     });
   }
 }
-
-export const SyncChartGroup = withRouter(SyncChartGroupComponent);

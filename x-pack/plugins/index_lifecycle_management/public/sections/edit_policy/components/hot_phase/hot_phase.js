@@ -27,7 +27,7 @@ import {
   PHASE_ROLLOVER_MAX_SIZE_STORED,
   PHASE_ROLLOVER_MAX_SIZE_STORED_UNITS,
   PHASE_ROLLOVER_ENABLED,
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { SetPriorityInput } from '../set_priority_input';
 
 import { ErrableFormRow } from '../../form_errors';

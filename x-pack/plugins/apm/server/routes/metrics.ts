@@ -5,25 +5,27 @@
  */
 
 import Boom from 'boom';
-import { Server } from 'hapi';
+import { CoreSetup } from 'src/core/server';
 import { withDefaultValidators } from '../lib/helpers/input_validation';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getAllMetricsChartData } from '../lib/metrics/get_all_metrics_chart_data';
 
 const defaultErrorHandler = (err: Error) => {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   console.error(err.stack);
   throw Boom.boomify(err, { statusCode: 400 });
 };
 
-export function initMetricsApi(server: Server) {
+export function initMetricsApi(core: CoreSetup) {
+  const { server } = core.http;
   server.route({
     method: 'GET',
     path: `/api/apm/services/{serviceName}/metrics/charts`,
     options: {
       validate: {
         query: withDefaultValidators()
-      }
+      },
+      tags: ['access:apm']
     },
     handler: async req => {
       const setup = setupRequest(req);

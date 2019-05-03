@@ -19,7 +19,7 @@
 
 import _ from 'lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import ngMock from 'ng_mock';
 import { tabifyAggResponse } from '../tabify';
 import { VisProvider } from '../../../vis';

@@ -14,7 +14,9 @@ import { getFilteredQuery } from './get_filtered_query';
 const getMonitorsListFilteredQuery = (filters: any): string | undefined => {
   const must = get(filters, 'bool.must', []);
   if (must && must.length) {
-    const statusFilter = filters.bool.must.filter((filter: any) => filter.match['monitor.status']);
+    const statusFilter = filters.bool.must.filter(
+      (filter: any) => filter.match && filter.match['monitor.status']
+    );
     if (statusFilter.length) {
       return statusFilter[0].match['monitor.status'].query;
     }
@@ -42,7 +44,10 @@ export const getFilteredQueryAndStatusFilter = (
     filterObject = JSON.parse(filters);
     nonStatusFiters = getFilteredQuery(dateRangeStart, dateRangeEnd, {
       bool: {
-        must: filterObject.bool.must.filter((filter: any) => !filter.match['monitor.status']),
+        must: filterObject.bool.must.filter(
+          (filter: any) =>
+            (filter.match && !filter.match['monitor.status']) || filter.simple_query_string
+        ),
       },
     });
     statusFilter = getMonitorsListFilteredQuery(filterObject);

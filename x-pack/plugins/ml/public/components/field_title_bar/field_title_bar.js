@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiText, EuiToolTip } from '@elastic/eui';
 
 import { FieldTypeIcon } from '../field_type_icon';
+import { getMLJobTypeAriaLabel } from '../../util/field_types_utils';
 import { i18n } from '@kbn/i18n';
 
 export function FieldTitleBar({ card }) {
@@ -18,7 +19,13 @@ export function FieldTitleBar({ card }) {
     return null;
   }
 
+  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
+    defaultMessage: 'document count'
+  });
+  const cardTitleAriaLabel = [fieldName];
+
   const classNames = ['ml-field-title-bar'];
+
   if (card.fieldName === undefined) {
     classNames.push('document_count');
   } else if (card.isUnsupportedType === true) {
@@ -27,15 +34,21 @@ export function FieldTitleBar({ card }) {
     classNames.push(card.type);
   }
 
-  const fieldName = card.fieldName || i18n.translate('xpack.ml.fieldTitleBar.documentCountLabel', {
-    defaultMessage: 'document count'
-  });
+  if (card.isUnsupportedType !== true) {
+    cardTitleAriaLabel.unshift(
+      getMLJobTypeAriaLabel(card.type)
+    );
+  }
 
   return (
     <EuiText className={classNames.join(' ')}>
-      <FieldTypeIcon type={card.type} tooltipEnabled={true} />
+      <FieldTypeIcon type={card.type} tooltipEnabled={true} needsAria={false} />
       <EuiToolTip position="left" content={fieldName}>
-        <div className="field-name">
+        <div
+          className="field-name"
+          tabIndex="0"
+          aria-label={`${cardTitleAriaLabel.join(', ')}`}
+        >
           {fieldName}
         </div>
       </EuiToolTip>

@@ -92,6 +92,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
             )
           }
           onMouseOver={this.onMouseOverModal}
+          data-test-subj="unfollowLeaderConfirmation"
         >
           {isSingle ? (
             <Fragment>
@@ -99,7 +100,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.singleUnfollowDescription"
                   defaultMessage="The follower index will be converted to a standard index. It will
-                    no longer appear in Cross Cluster Replication, but you can manage it in Index
+                    no longer appear in Cross-Cluster Replication, but you can manage it in Index
                     Management. You can't undo this operation."
                 />
               </p>
@@ -110,7 +111,7 @@ class FollowerIndexUnfollowProviderUi extends PureComponent {
                 <FormattedMessage
                   id="xpack.crossClusterReplication.unfollowLeaderIndex.confirmModal.multipleUnfollowDescription"
                   defaultMessage="The follower indices will be converted to standard indices. They
-                    will no longer appear in Cross Cluster Replication, but you can manage them in
+                    will no longer appear in Cross-Cluster Replication, but you can manage them in
                     Index Management. You can't undo this operation."
                 />
               </p>

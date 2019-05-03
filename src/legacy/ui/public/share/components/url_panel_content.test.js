@@ -28,6 +28,7 @@ import {
 
 test('render', () => {
   const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
+    allowShortUrl={true}
     objectType="dashboard"
     getUnhashableStates={() => {}}
   />);
@@ -36,6 +37,17 @@ test('render', () => {
 
 test('should enable saved object export option when objectId is provided', () => {
   const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
+    allowShortUrl={true}
+    objectId="id1"
+    objectType="dashboard"
+    getUnhashableStates={() => {}}
+  />);
+  expect(component).toMatchSnapshot();
+});
+
+test('should hide short url section when allowShortUrl is false', () => {
+  const component = shallowWithIntl(<UrlPanelContent.WrappedComponent
+    allowShortUrl={false}
     objectId="id1"
     objectType="dashboard"
     getUnhashableStates={() => {}}

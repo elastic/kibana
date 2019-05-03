@@ -26,7 +26,7 @@ import {
   PHASE_PRIMARY_SHARD_COUNT,
   PHASE_REPLICA_COUNT,
   PHASE_SHRINK_ENABLED,
-} from '../../../../store/constants';
+} from '../../../../constants';
 import { SetPriorityInput } from '../set_priority_input';
 import { NodeAllocation } from '../node_allocation';
 import { ErrableFormRow } from '../../form_errors';
@@ -40,6 +40,7 @@ class WarmPhaseUi extends PureComponent {
     isShowingErrors: PropTypes.bool.isRequired,
     errors: PropTypes.object.isRequired,
   };
+
   render() {
     const {
       setPhaseData,
@@ -50,18 +51,22 @@ class WarmPhaseUi extends PureComponent {
       hotPhaseRolloverEnabled,
       intl,
     } = this.props;
+
     const shrinkLabel = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel',
       defaultMessage: 'Shrink index',
     });
+
     const moveToWarmPhaseOnRolloverLabel = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.warmPhase.moveToWarmPhaseOnRolloverLabel',
       defaultMessage: 'Move to warm phase on rollover',
     });
+
     const forcemergeLabel = intl.formatMessage({
       id: 'xpack.indexLifecycleMgmt.warmPhase.forceMergeDataLabel',
       defaultMessage: 'Force merge data',
     });
+
     return (
       <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
         <EuiDescribedFormGroup
@@ -221,6 +226,7 @@ class WarmPhaseUi extends PureComponent {
                   aria-label={shrinkLabel}
                   aria-controls="shrinkContent"
                 />
+
                 <div id="shrinkContent" aria-live="polite" role="region">
                   {phaseData[PHASE_SHRINK_ENABLED] ? (
                     <Fragment>

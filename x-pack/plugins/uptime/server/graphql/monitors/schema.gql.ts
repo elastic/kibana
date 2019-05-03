@@ -96,9 +96,9 @@ export const monitorsSchema = gql`
     "Information from the latest document."
     ping: Ping
     "Buckets of recent up count status data."
-    upSeries: [MonitorSeriesPoint]
+    upSeries: [MonitorSeriesPoint!]
     "Buckets of recent down count status data."
-    downSeries: [MonitorSeriesPoint]
+    downSeries: [MonitorSeriesPoint!]
   }
 
   type LatestMonitorsResult {
@@ -112,6 +112,7 @@ export const monitorsSchema = gql`
     count: Int
     statusCode: String
     timestamp: String
+    name: String
   }
 
   type MonitorPageTitle {

@@ -148,13 +148,10 @@ export class AutoFollowPatternForm extends PureComponent {
   };
 
   onLeaderIndexPatternInputChange = (leaderIndexPattern) => {
-    if (!leaderIndexPattern || !leaderIndexPattern.trim()) {
-      return;
-    }
-
+    const isEmpty = !leaderIndexPattern || !leaderIndexPattern.trim();
     const { autoFollowPattern: { leaderIndexPatterns } } = this.state;
 
-    if (leaderIndexPatterns.includes(leaderIndexPattern)) {
+    if (!isEmpty && leaderIndexPatterns.includes(leaderIndexPattern)) {
       const errorMsg = i18n.translate(
         'xpack.crossClusterReplication.autoFollowPatternForm.leaderIndexPatternError.duplicateMessage',
         {
@@ -172,7 +169,12 @@ export class AutoFollowPatternForm extends PureComponent {
       this.setState(({ fieldsErrors }) => updateFormErrors(errors, fieldsErrors));
     } else {
       this.setState(({ fieldsErrors, autoFollowPattern: { leaderIndexPatterns } }) => {
-        const errors = validateAutoFollowPattern({ leaderIndexPatterns });
+        const errors = Boolean(leaderIndexPatterns.length)
+          // Validate existing patterns, so we can surface an error if this required input is missing.
+          ? validateAutoFollowPattern({ leaderIndexPatterns })
+          // Validate the input as the user types so they have immediate feedback about errors.
+          : validateAutoFollowPattern({ leaderIndexPatterns: [leaderIndexPattern] });
+
         return updateFormErrors(errors, fieldsErrors);
       });
     }
@@ -223,7 +225,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
       return (
         <Fragment>
-          <SectionError title={title} error={apiError} />
+          <SectionError title={title} error={apiError} data-test-subj="apiError" />
           <EuiSpacer size="l" />
         </Fragment>
       );
@@ -289,7 +291,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onChange={e => this.onFieldsChange({ name: e.target.value })}
               fullWidth
               disabled={!isNew}
-              data-test-subj="ccrAutoFollowPatternFormNameInput"
+              data-test-subj="nameInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -372,7 +374,7 @@ export class AutoFollowPatternForm extends PureComponent {
      * Leader index pattern(s)
      */
     const renderLeaderIndexPatterns = () => {
-      const hasError = !!fieldsErrors.leaderIndexPatterns;
+      const hasError = !!(fieldsErrors.leaderIndexPatterns && fieldsErrors.leaderIndexPatterns.message);
       const isInvalid = hasError && (fieldsErrors.leaderIndexPatterns.alwaysVisible || areErrorsVisible);
       const formattedLeaderIndexPatterns = leaderIndexPatterns.map(pattern => ({ label: pattern }));
 
@@ -448,7 +450,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onChange={this.onLeaderIndexPatternChange}
               onSearchChange={this.onLeaderIndexPatternInputChange}
               fullWidth
-              data-test-subj="ccrAutoFollowPatternFormIndexPatternInput"
+              data-test-subj="indexPatternInput"
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -503,7 +505,7 @@ export class AutoFollowPatternForm extends PureComponent {
                   value={followIndexPatternPrefix}
                   onChange={e => this.onFieldsChange({ followIndexPatternPrefix: e.target.value })}
                   fullWidth
-                  data-test-subj="ccrAutoFollowPatternFormPrefixInput"
+                  data-test-subj="prefixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -526,7 +528,7 @@ export class AutoFollowPatternForm extends PureComponent {
                   value={followIndexPatternSuffix}
                   onChange={e => this.onFieldsChange({ followIndexPatternSuffix: e.target.value })}
                   fullWidth
-                  data-test-subj="ccrAutoFollowPatternFormSuffixInput"
+                  data-test-subj="suffixInput"
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -576,6 +578,7 @@ export class AutoFollowPatternForm extends PureComponent {
             )}
             color="danger"
             iconType="cross"
+            data-test-subj="formError"
           />
           <EuiSpacer size="l" />
         </Fragment>
@@ -619,7 +622,7 @@ export class AutoFollowPatternForm extends PureComponent {
               onClick={this.sendForm}
               fill
               disabled={isSaveDisabled}
-              data-test-subj="ccrAutoFollowPatternFormSubmitButton"
+              data-test-subj="submitButton"
             >
               {saveButtonLabel}
             </EuiButton>
@@ -633,7 +636,7 @@ export class AutoFollowPatternForm extends PureComponent {
               <FormattedMessage
                 id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
                 defaultMessage="Cancel"
-                data-test-subj="ccrAutoFollowPatternFormCancelButton"
+                data-test-subj="cancelButton"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -643,12 +646,13 @@ export class AutoFollowPatternForm extends PureComponent {
 
     return (
       <Fragment>
-        <EuiForm>
+        <EuiForm data-test-subj="autoFollowPatternForm">
           {renderAutoFollowPatternName()}
           {renderRemoteClusterField()}
           {renderLeaderIndexPatterns()}
           {renderAutoFollowPatternPrefixSuffix()}
         </EuiForm>
+        <EuiSpacer />
         {renderFormErrorWarning()}
         {this.renderApiErrors()}
         {renderActions()}

@@ -4,13 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { TraceListAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_top_traces';
-import { TraceAPIResponse } from 'x-pack/plugins/apm/server/lib/traces/get_trace';
-import { IUrlParams } from '../../../store/urlParams';
+import { TraceListAPIResponse } from '../../../../server/lib/traces/get_top_traces';
+import { TraceAPIResponse } from '../../../../server/lib/traces/get_trace';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
-export async function loadTrace({ traceId, start, end }: IUrlParams) {
+export async function loadTrace({
+  traceId,
+  start,
+  end
+}: {
+  traceId: string;
+  start: string;
+  end: string;
+}) {
   return callApi<TraceAPIResponse>({
     pathname: `/api/apm/traces/${traceId}`,
     query: {
@@ -20,7 +27,15 @@ export async function loadTrace({ traceId, start, end }: IUrlParams) {
   });
 }
 
-export async function loadTraceList({ start, end, kuery }: IUrlParams) {
+export async function loadTraceList({
+  start,
+  end,
+  kuery
+}: {
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<TraceListAPIResponse>({
     pathname: '/api/apm/traces',
     query: {

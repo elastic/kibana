@@ -8,9 +8,10 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
+import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
+import { EmptyMessage } from '../../shared/EmptyMessage';
 import { ImpactBar } from '../../shared/ImpactBar';
 import { TransactionLink } from '../../shared/Links/TransactionLink';
 import { ITableColumn, ManagedTable } from '../../shared/ManagedTable';
@@ -22,7 +23,6 @@ const StyledTransactionLink = styled(TransactionLink)`
 
 interface Props {
   items: ITransactionGroup[];
-  noItemsMessage: React.ReactNode;
   isLoading: boolean;
 }
 
@@ -88,7 +88,15 @@ const traceListColumns: Array<ITableColumn<ITransactionGroup>> = [
   }
 ];
 
-export function TraceList({ items = [], noItemsMessage, isLoading }: Props) {
+const noItemsMessage = (
+  <EmptyMessage
+    heading={i18n.translate('xpack.apm.tracesTable.notFoundLabel', {
+      defaultMessage: 'No traces found for this query'
+    })}
+  />
+);
+
+export function TraceList({ items = [], isLoading }: Props) {
   const noItems = isLoading ? null : noItemsMessage;
   return (
     <ManagedTable

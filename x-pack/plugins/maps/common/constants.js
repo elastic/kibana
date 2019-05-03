@@ -7,6 +7,9 @@
 export const GIS_API_PATH = 'api/maps';
 
 export const MAP_SAVED_OBJECT_TYPE = 'map';
+export function createMapPath(id) {
+  return `/app/maps#/map/${id}`;
+}
 
 export const EMS_FILE = 'EMS_FILE';
 export const ES_GEO_GRID = 'ES_GEO_GRID';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 import { FieldFormat } from '../../../../../../../../src/legacy/ui/field_formats/field_format.js';
 import { FieldFormatsService } from '../../../../../../../../src/legacy/ui/field_formats/field_formats_service.js';

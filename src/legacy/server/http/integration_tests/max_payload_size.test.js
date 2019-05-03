@@ -23,6 +23,7 @@ let root;
 beforeAll(async () => {
   root = kbnTestServer.createRoot({ server: { maxPayloadBytes: 100 } });
 
+  await root.setup();
   await root.start();
 
   kbnTestServer.getKbnServer(root).server.route({

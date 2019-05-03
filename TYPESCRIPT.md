@@ -4,8 +4,8 @@
 
 To convert existing code over to TypeScript:
 1. rename the file from `.js` to either `.ts` (if there is no html or jsx in the file) or `.tsx` (if there is).
-2. Ensure tslint is running and installed in the IDE of your choice.  There will usually be some linter errors after the file rename.
-3. Auto-fix what you can. This will save you a lot of time! VSCode can be set to auto fix tslint errors when files are saved.
+2. Ensure eslint is running and installed in the IDE of your choice.  There will usually be some linter errors after the file rename.
+3. Auto-fix what you can. This will save you a lot of time! VSCode can be set to auto fix eslint errors when files are saved.
 
 ### How to fix common TypeScript errors
 
@@ -111,7 +111,7 @@ If yarn doesn't find the module it may not have types.  For example, our `rison_
 
 1. Contribute types into the DefinitelyTyped repo itself, or
 2. Create a top level `types` folder and point to that in the tsconfig. For example, Infra team already handled this for `rison_node` and added: `x-pack/plugins/infra/types/rison_node.d.ts`. Other code uses it too so we will need to pull it up. Or,
-3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method. For example, the `expect.js` module will require this line. We don't have type definitions installed for this library. Installing these types would conflict with the jest typedefs for expect, and since they aren't API compatible with each other, it's not possible to make both test frameworks happy. Since we are moving from mocha => jest, we don't see this is a big issue.
+3. Add a `// @ts-ignore` line above the import. This should be used minimally, the above options are better. However, sometimes you have to resort to this method.
 
 ### TypeScripting react files
 

@@ -20,6 +20,15 @@
 import { spawn, spawnStreaming } from './child_process';
 import { Project } from './project';
 
+interface WorkspaceInfo {
+  location: string;
+  workspaceDependencies: string[];
+}
+
+interface WorkspacesInfo {
+  [s: string]: WorkspaceInfo;
+}
+
 /**
  * Install all dependencies in the given directory
  */
@@ -55,4 +64,14 @@ export function runScriptInPackageStreaming(script: string, args: string[], pkg:
   return spawnStreaming('yarn', ['run', script, ...args], execOpts, {
     prefix: pkg.name,
   });
+}
+
+export async function yarnWorkspacesInfo(directory: string): Promise<WorkspacesInfo> {
+  const workspacesInfo = await spawn('yarn', ['workspaces', 'info', '--json'], {
+    cwd: directory,
+    stdio: 'pipe',
+  });
+
+  const stdout = JSON.parse(workspacesInfo.stdout);
+  return JSON.parse(stdout.data);
 }

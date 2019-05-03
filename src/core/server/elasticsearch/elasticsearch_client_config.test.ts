@@ -17,8 +17,7 @@
  * under the License.
  */
 
-const mockReadFileSync = jest.fn();
-jest.mock('fs', () => ({ readFileSync: mockReadFileSync }));
+import { mockReadFileSync } from './elasticsearch_client_config.test.mocks';
 
 import { duration } from 'moment';
 import { loggingServiceMock } from '../logging/logging_service.mock';
@@ -67,7 +66,7 @@ Object {
 });
 
 test('parses fully specified config', () => {
-  mockReadFileSync.mockImplementation(path => `content-of-${path}`);
+  mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
 
   const elasticsearchConfig: ElasticsearchClientConfig = {
     apiVersion: 'v7.0.0',
@@ -607,7 +606,7 @@ Object {
   });
 
   test('#ignoreCertAndKey = true', () => {
-    mockReadFileSync.mockImplementation(path => `content-of-${path}`);
+    mockReadFileSync.mockImplementation((path: string) => `content-of-${path}`);
 
     expect(
       parseElasticsearchClientConfig(

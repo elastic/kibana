@@ -47,6 +47,11 @@ interface BootstrapArgs {
   features: KibanaFeatures;
 }
 
+/**
+ *
+ * @internal
+ * @param param0 - options
+ */
 export async function bootstrap({
   configs,
   cliArgs,
@@ -78,6 +83,7 @@ export async function bootstrap({
   }
 
   try {
+    await root.setup();
     await root.start();
   } catch (err) {
     await shutdown(err);
@@ -111,7 +117,7 @@ function onRootShutdown(reason?: any) {
     // There is a chance that logger wasn't configured properly and error that
     // that forced root to shut down could go unnoticed. To prevent this we always
     // mirror such fatal errors in standard output with `console.error`.
-    // tslint:disable no-console
+    // eslint-disable-next-line
     console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
   }
 

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 
 /**
  * Test the querying capabilities of dashboard, and make sure visualizations show the expected results, especially
@@ -283,7 +283,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await pieChart.expectPieSliceCount(5);
 
-        await PageObjects.visualize.saveVisualization('Rendering Test: animal sounds pie');
+        await PageObjects.visualize.saveVisualizationExpectSuccess('Rendering Test: animal sounds pie');
         await PageObjects.header.clickDashboard();
 
         await pieChart.expectPieSliceCount(5);

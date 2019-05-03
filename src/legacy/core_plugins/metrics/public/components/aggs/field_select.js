@@ -22,28 +22,63 @@ import React from 'react';
 import {
   EuiComboBox,
 } from '@elastic/eui';
-import generateByTypeFilter from '../lib/generate_by_type_filter';
 import { injectI18n } from '@kbn/i18n/react';
+import { isFieldEnabled } from '../../lib/check_ui_restrictions';
+import { i18n } from '@kbn/i18n';
 
-function FieldSelectUi(props) {
-  const { type, fields, indexPattern, value, onChange, disabled, restrict, intl, ...rest } = props;
+const isFieldTypeEnabled = (fieldRestrictions, fieldType) =>
+  fieldRestrictions.length ? fieldRestrictions.includes(fieldType) : true;
+
+function FieldSelectUi({
+  type,
+  fields,
+  indexPattern,
+  value,
+  onChange,
+  disabled,
+  restrict,
+  uiRestrictions,
+  ...rest
+}) {
+
   if (type === 'count') {
     return null;
   }
-  const options = (fields[indexPattern] || [])
-    .filter(generateByTypeFilter(restrict))
-    .map(field => {
-      return { label: field.name, value: field.name };
-    });
 
-  const selectedOption = options.find(option => {
-    return value === option.value;
-  });
-  const selectedOptions = selectedOption ? [selectedOption] : [];
+  const selectedOptions = [];
+  const options = Object.values((fields[indexPattern] || []).reduce((acc, field) => {
+    if (isFieldTypeEnabled(restrict, field.type) && isFieldEnabled(field.name, type, uiRestrictions)) {
+      const item = {
+        label: field.name,
+        value: field.name
+      };
+
+      if (acc[field.type]) {
+        acc[field.type].options.push(item);
+      } else {
+        acc[field.type] = {
+          options: [item],
+          label: field.type,
+        };
+      }
+
+      if (value === item.value) {
+        selectedOptions.push(item);
+      }
+    }
+
+    return acc;
+  }, {}));
+
+  if (onChange && value && !selectedOptions.length) {
+    onChange();
+  }
 
   return (
     <EuiComboBox
-      placeholder={intl.formatMessage({ id: 'tsvb.fieldSelect.selectFieldPlaceholder', defaultMessage: 'Select field…' })}
+      placeholder={i18n.translate('tsvb.fieldSelect.selectFieldPlaceholder', {
+        defaultMessage: 'Select field...',
+      })}
       isDisabled={disabled}
       options={options}
       selectedOptions={selectedOptions}
@@ -57,7 +92,7 @@ function FieldSelectUi(props) {
 FieldSelectUi.defaultProps = {
   indexPattern: '*',
   disabled: false,
-  restrict: 'none'
+  restrict: [],
 };
 
 FieldSelectUi.propTypes = {
@@ -66,9 +101,10 @@ FieldSelectUi.propTypes = {
   id: PropTypes.string,
   indexPattern: PropTypes.string,
   onChange: PropTypes.func,
-  restrict: PropTypes.string,
+  restrict: PropTypes.array,
   type: PropTypes.string,
-  value: PropTypes.string
+  value: PropTypes.string,
+  uiRestrictions: PropTypes.object,
 };
 
 const FieldSelect = injectI18n(FieldSelectUi);

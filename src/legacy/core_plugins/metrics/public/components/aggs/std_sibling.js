@@ -114,6 +114,7 @@ const StandardSiblingAggUi = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -128,6 +129,7 @@ const StandardSiblingAggUi = props => {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
+            uiRestrictions={props.uiRestrictions}
             onChange={handleSelectChange('type')}
           />
         </EuiFlexItem>
@@ -165,6 +167,7 @@ StandardSiblingAggUi.propTypes = {
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
+  uiRestrictions: PropTypes.object,
 };
 
 export const StandardSiblingAgg = injectI18n(StandardSiblingAggUi);

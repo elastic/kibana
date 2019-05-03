@@ -21,12 +21,6 @@
 import { Logger } from './logger';
 import { LoggingService } from './logging_service';
 
-type MethodKeysOf<T> = {
-  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never
-}[keyof T];
-
-type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
-
 type LoggingServiceContract = PublicMethodsOf<LoggingService>;
 type MockedLogger = jest.Mocked<Logger>;
 

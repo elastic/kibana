@@ -1,0 +1,58 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LayerTOC is rendered 1`] = `
+<div
+  data-test-subj="mapLayerTOC"
+>
+  <EuiDragDropContext
+    onDragEnd={[Function]}
+  >
+    <EuiDroppable
+      droppableId="mapLayerTOC"
+      spacing="none"
+    >
+      <EuiDraggable
+        customDragHandle={true}
+        draggableId="2"
+        index={0}
+        key="2"
+        spacing="none"
+      >
+        <Component />
+      </EuiDraggable>
+      <EuiDraggable
+        customDragHandle={true}
+        draggableId="1"
+        index={1}
+        key="1"
+        spacing="none"
+      >
+        <Component />
+      </EuiDraggable>
+    </EuiDroppable>
+  </EuiDragDropContext>
+</div>
+`;
+
+exports[`LayerTOC props isReadOnly 1`] = `
+<div
+  data-test-subj="mapLayerTOC"
+>
+  <TOCEntry
+    key="2"
+    layer={
+      Object {
+        "getId": [Function],
+      }
+    }
+  />
+  <TOCEntry
+    key="1"
+    layer={
+      Object {
+        "getId": [Function],
+      }
+    }
+  />
+</div>
+`;

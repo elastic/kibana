@@ -5,19 +5,21 @@
  */
 
 import { EuiCode, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { InputFieldProps } from './source_configuration_form_state';
+import { InputFieldProps } from './input_fields';
 
 interface IndicesConfigurationPanelProps {
   isLoading: boolean;
+  readOnly: boolean;
   logAliasFieldProps: InputFieldProps;
   metricAliasFieldProps: InputFieldProps;
 }
 
 export const IndicesConfigurationPanel = ({
   isLoading,
+  readOnly,
   logAliasFieldProps,
   metricAliasFieldProps,
 }: IndicesConfigurationPanelProps) => (
@@ -52,8 +54,10 @@ export const IndicesConfigurationPanel = ({
       }
     >
       <EuiFieldText
+        data-test-subj="metricIndicesInput"
         fullWidth
         disabled={isLoading}
+        readOnly={readOnly}
         isLoading={isLoading}
         {...metricAliasFieldProps}
       />
@@ -78,7 +82,14 @@ export const IndicesConfigurationPanel = ({
         />
       }
     >
-      <EuiFieldText fullWidth disabled={isLoading} isLoading={isLoading} {...logAliasFieldProps} />
+      <EuiFieldText
+        data-test-subj="logIndicesInput"
+        fullWidth
+        disabled={isLoading}
+        isLoading={isLoading}
+        readOnly={readOnly}
+        {...logAliasFieldProps}
+      />
     </EuiFormRow>
   </EuiForm>
 );

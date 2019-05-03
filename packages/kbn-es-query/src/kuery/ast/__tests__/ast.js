@@ -18,15 +18,9 @@
  */
 
 import * as ast from '../ast';
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { nodeTypes } from '../../node_types/index';
 import indexPatternResponse from '../../../__fixtures__/index_pattern_response.json';
-
-// Helpful utility allowing us to test the PEG parser by simply checking for deep equality between
-// the nodes the parser generates and the nodes our constructor functions generate.
-function fromLegacyKueryExpressionNoMeta(text) {
-  return ast.fromLegacyKueryExpression(text, { includeMetadata: false });
-}
 
 let indexPattern;
 
@@ -35,153 +29,6 @@ describe('kuery AST API', function () {
 
   beforeEach(() => {
     indexPattern = indexPatternResponse;
-  });
-
-  describe('fromLegacyKueryExpression', function () {
-
-    it('should return location and text metadata for each AST node', function () {
-      const notNode = ast.fromLegacyKueryExpression('!foo:bar');
-      expect(notNode).to.have.property('text', '!foo:bar');
-      expect(notNode.location).to.eql({ min: 0, max: 8 });
-
-      const isNode = notNode.arguments[0];
-      expect(isNode).to.have.property('text', 'foo:bar');
-      expect(isNode.location).to.eql({ min: 1, max: 8 });
-
-      const { arguments: [ argNode1, argNode2 ] } = isNode;
-      expect(argNode1).to.have.property('text', 'foo');
-      expect(argNode1.location).to.eql({ min: 1, max: 4 });
-
-      expect(argNode2).to.have.property('text', 'bar');
-      expect(argNode2.location).to.eql({ min: 5, max: 8 });
-    });
-
-    it('should return a match all "is" function for whitespace', function () {
-      const expected = nodeTypes.function.buildNode('is', '*', '*');
-      const actual = fromLegacyKueryExpressionNoMeta('  ');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should return an "and" function for single literals', function () {
-      const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')]);
-      const actual = fromLegacyKueryExpressionNoMeta('foo');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should ignore extraneous whitespace at the beginning and end of the query', function () {
-      const expected = nodeTypes.function.buildNode('and', [nodeTypes.literal.buildNode('foo')]);
-      const actual = fromLegacyKueryExpressionNoMeta('  foo ');
-      expect(actual).to.eql(expected);
-    });
-
-    it('literals and queries separated by whitespace should be joined by an implicit "and"', function () {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.literal.buildNode('foo'),
-        nodeTypes.literal.buildNode('bar'),
-      ]);
-      const actual = fromLegacyKueryExpressionNoMeta('foo bar');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should also support explicit "and"s as a binary operator', function () {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.literal.buildNode('foo'),
-        nodeTypes.literal.buildNode('bar'),
-      ]);
-      const actual = fromLegacyKueryExpressionNoMeta('foo and bar');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should also support "and" as a function', function () {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.literal.buildNode('foo'),
-        nodeTypes.literal.buildNode('bar'),
-      ], 'function');
-      const actual = fromLegacyKueryExpressionNoMeta('and(foo, bar)');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support "or" as a binary operator', function () {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.literal.buildNode('foo'),
-        nodeTypes.literal.buildNode('bar'),
-      ]);
-      const actual = fromLegacyKueryExpressionNoMeta('foo or bar');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support "or" as a function', function () {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.literal.buildNode('foo'),
-        nodeTypes.literal.buildNode('bar'),
-      ]);
-      const actual = fromLegacyKueryExpressionNoMeta('or(foo, bar)');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support negation of queries with a "!" prefix', function () {
-      const expected = nodeTypes.function.buildNode('not',
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.literal.buildNode('foo'),
-          nodeTypes.literal.buildNode('bar'),
-        ]));
-      const actual = fromLegacyKueryExpressionNoMeta('!or(foo, bar)');
-      expect(actual).to.eql(expected);
-    });
-
-    it('"and" should have a higher precedence than "or"', function () {
-      const expected = nodeTypes.function.buildNode('or', [
-        nodeTypes.literal.buildNode('foo'),
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.function.buildNode('and', [
-            nodeTypes.literal.buildNode('bar'),
-            nodeTypes.literal.buildNode('baz'),
-          ]),
-          nodeTypes.literal.buildNode('qux'),
-        ])
-      ]);
-      const actual = fromLegacyKueryExpressionNoMeta('foo or bar and baz or qux');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support grouping to override default precedence', function () {
-      const expected = nodeTypes.function.buildNode('and', [
-        nodeTypes.function.buildNode('or', [
-          nodeTypes.literal.buildNode('foo'),
-          nodeTypes.literal.buildNode('bar'),
-        ]),
-        nodeTypes.literal.buildNode('baz'),
-      ]);
-      const actual = fromLegacyKueryExpressionNoMeta('(foo or bar) and baz');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support a shorthand operator syntax for "is" functions', function () {
-      const expected = nodeTypes.function.buildNode('is', 'foo', 'bar', true);
-      const actual = fromLegacyKueryExpressionNoMeta('foo:bar');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support a shorthand operator syntax for inclusive "range" functions', function () {
-      const argumentNodes = [
-        nodeTypes.literal.buildNode('bytes'),
-        nodeTypes.literal.buildNode(1000),
-        nodeTypes.literal.buildNode(8000),
-      ];
-      const expected = nodeTypes.function.buildNodeWithArgumentNodes('range', argumentNodes);
-      const actual = fromLegacyKueryExpressionNoMeta('bytes:[1000 to 8000]');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should support functions with named arguments', function () {
-      const expected = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
-      const actual = fromLegacyKueryExpressionNoMeta('range(bytes, gt=1000, lt=8000)');
-      expect(actual).to.eql(expected);
-    });
-
-    it('should throw an error for unknown functions', function () {
-      expect(ast.fromLegacyKueryExpression).withArgs('foo(bar)').to.throwException(/Unknown function "foo"/);
-    });
   });
 
   describe('fromKueryExpression', function () {
@@ -414,6 +261,14 @@ describe('kuery AST API', function () {
       const unknownTypeNode = nodeTypes.function.buildNode('exists', 'foo');
       unknownTypeNode.type = 'notValid';
       expect(ast.toElasticsearchQuery(unknownTypeNode)).to.eql(expected);
+    });
+
+    it('should return the given node type\'s ES query representation including a time zone parameter when one is provided', function () {
+      const config = { dateFormatTZ: 'America/Phoenix' };
+      const node = nodeTypes.function.buildNode('is', '@timestamp', '"2018-04-03T19:04:17"');
+      const expected = nodeTypes.function.toElasticsearchQuery(node, indexPattern, config);
+      const result = ast.toElasticsearchQuery(node, indexPattern, config);
+      expect(result).to.eql(expected);
     });
 
   });

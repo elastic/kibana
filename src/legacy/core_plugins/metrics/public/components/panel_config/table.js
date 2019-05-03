@@ -68,7 +68,8 @@ class TablePanelConfig extends Component {
     const { fields, model } = this.props;
     const pivotId = get(selectedOption, '[0].value', null);
     const field = fields[model.index_pattern].find(field => field.name === pivotId);
-    const pivotType = field.type || model.pivot_type;
+    const pivotType = get(field, 'type', model.pivot_type);
+
     this.props.onChange({
       pivot_id: pivotId,
       pivot_type: pivotType
@@ -160,6 +161,7 @@ class TablePanelConfig extends Component {
             fields={this.props.fields}
             model={this.props.model}
             name={this.props.name}
+            visData$={this.props.visData$}
             onChange={this.props.onChange}
           />
         </div>
@@ -279,6 +281,7 @@ TablePanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
+  visData$: PropTypes.object,
 };
 
 export default TablePanelConfig;

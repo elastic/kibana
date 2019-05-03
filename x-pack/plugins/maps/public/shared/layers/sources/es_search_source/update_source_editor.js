@@ -59,7 +59,13 @@ export class UpdateSourceEditor extends Component {
       return;
     }
 
-    this.setState({ fields: indexPattern.fields });
+    this.setState({
+      fields: indexPattern.fields.filter(field => {
+        // Do not show multi fields as tooltip field options
+        // since they do not have values in _source and exist for indexing only
+        return field.subType !== 'multi';
+      })
+    });
   }
 
   onTooltipPropertiesSelect = (propertyNames) => {

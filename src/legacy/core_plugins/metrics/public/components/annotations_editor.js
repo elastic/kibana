@@ -21,6 +21,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import * as collectionActions from './lib/collection_actions';
+import { ES_TYPES } from '../../common/es_types';
 import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
@@ -55,6 +56,8 @@ function newAnnotation() {
   };
 }
 
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
+
 class AnnotationsEditor extends Component {
 
   constructor(props) {
@@ -77,6 +80,11 @@ class AnnotationsEditor extends Component {
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
+    };
+    const togglePanelActivation = () => {
+      handleChange({
+        hidden: !model.hidden,
+      });
     };
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd
@@ -123,7 +131,7 @@ class AnnotationsEditor extends Component {
                   fullWidth
                 >
                   <FieldSelect
-                    restrict="date"
+                    restrict={RESTRICT_FIELDS}
                     value={model.time_field}
                     onChange={this.handleChange(model, 'time_field')}
                     indexPattern={model.index_pattern}
@@ -249,6 +257,8 @@ class AnnotationsEditor extends Component {
             <AddDeleteButtons
               onAdd={handleAdd}
               onDelete={handleDelete}
+              togglePanelActivation={togglePanelActivation}
+              isPanelActive={!model.hidden}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

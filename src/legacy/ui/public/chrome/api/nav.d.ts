@@ -28,6 +28,7 @@ export interface NavLink {
   subUrlBase: string;
   id: string;
   euiIconType: IconType;
+  icon?: string;
   active: boolean;
   lastSubUrl?: string;
   hidden?: boolean;

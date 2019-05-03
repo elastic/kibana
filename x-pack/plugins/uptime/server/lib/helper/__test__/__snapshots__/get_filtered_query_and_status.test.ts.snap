@@ -1,5 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`getFilteredQueryAndStatusFilter handles simple_query_string 1`] = `
+Object {
+  "query": Object {
+    "bool": Object {
+      "filter": Array [
+        Object {
+          "simple_query_string": Object {
+            "fields": Array [
+              "monitor.id",
+              "monitor.url",
+              "monitor.type",
+              "monitor.status",
+              "monitor.name",
+              "url.full",
+              "url.path",
+              "url.scheme",
+              "url.domain",
+              "error.type",
+            ],
+            "query": "http",
+          },
+        },
+        Object {
+          "range": Object {
+            "@timestamp": Object {
+              "gte": "startRange",
+              "lte": "endRange",
+            },
+          },
+        },
+      ],
+    },
+  },
+  "statusFilter": undefined,
+}
+`;
+
 exports[`getFilteredQueryAndStatusFilter returns a range + id filter when status filter is absent 1`] = `
 Object {
   "query": Object {

@@ -46,6 +46,7 @@ export const SerialDiffAgg = props => {
       onAdd={props.onAdd}
       onDelete={props.onDelete}
       siblings={props.siblings}
+      dragHandleProps={props.dragHandleProps}
     >
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
@@ -85,6 +86,9 @@ export const SerialDiffAgg = props => {
             label={(<FormattedMessage
               id="tsvb.serialDiff.lagLabel"
               defaultMessage="Lag"
+              description="'Lag' refers to the parameter name of the serial diff translation
+                https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-pipeline-serialdiff-aggregation.html.
+                This should only be translated if there is a reasaonable word explaining what that parameter does."
             />)}
           >
             {/*

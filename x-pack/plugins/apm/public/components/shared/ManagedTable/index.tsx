@@ -7,7 +7,7 @@
 import { EuiBasicTable } from '@elastic/eui';
 import { sortByOrder } from 'lodash';
 import React, { Component } from 'react';
-import { idx } from 'x-pack/plugins/apm/common/idx';
+import { idx } from '@kbn/elastic-idx';
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T> {
@@ -35,7 +35,7 @@ interface Props<T> {
   initialPageSize?: number;
   hidePerPageOptions?: boolean;
   initialSort?: {
-    field: keyof T;
+    field: Extract<keyof T, string>;
     direction: string;
   };
   noItemsMessage?: React.ReactNode;

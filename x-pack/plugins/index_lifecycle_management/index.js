@@ -13,6 +13,7 @@ import { registerIndexRoutes } from './server/routes/api/index';
 import { registerLicenseChecker } from './server/lib/register_license_checker';
 import { PLUGIN_ID } from './common/constants';
 import { indexLifecycleDataEnricher } from './index_lifecycle_data';
+
 export function indexLifecycleManagement(kibana) {
   return new kibana.Plugin({
     config: (Joi) => {
@@ -52,6 +53,7 @@ export function indexLifecycleManagement(kibana) {
       registerPoliciesRoutes(server);
       registerLifecycleRoutes(server);
       registerIndexRoutes(server);
+
       if (
         server.config().get('xpack.ilm.ui.enabled') &&
         server.plugins.index_management &&

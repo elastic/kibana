@@ -60,6 +60,7 @@ Array [
                 <input
                   aria-describedby="mockId-help"
                   class="euiFieldText euiFieldText--fullWidth"
+                  data-test-subj="remoteClusterFormNameInput"
                   id="mockId"
                   type="text"
                   value=""
@@ -129,6 +130,7 @@ Array [
               aria-expanded="false"
               aria-haspopup="listbox"
               class="euiComboBox euiComboBox--fullWidth"
+              data-test-subj="remoteClusterFormSeedsInput"
               role="combobox"
             >
               <div
@@ -241,6 +243,7 @@ Array [
             >
               <input
                 class="euiSwitch__input"
+                data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
                 id="mockId"
                 type="checkbox"
               />
@@ -360,6 +363,7 @@ Array [
         <input
           aria-describedby="mockId-help mockId-error-0"
           class="euiFieldText euiFieldText--fullWidth"
+          data-test-subj="remoteClusterFormNameInput"
           id="mockId"
           type="text"
           value=""
@@ -399,6 +403,7 @@ Array [
       aria-expanded="false"
       aria-haspopup="listbox"
       class="euiComboBox euiComboBox-isInvalid euiComboBox--fullWidth"
+      data-test-subj="remoteClusterFormSeedsInput"
       role="combobox"
     >
       <div
@@ -469,6 +474,7 @@ Array [
     >
       <input
         class="euiSwitch__input"
+        data-test-subj="remoteClusterFormSkipUnavailableFormToggle"
         id="mockId"
         type="checkbox"
       />

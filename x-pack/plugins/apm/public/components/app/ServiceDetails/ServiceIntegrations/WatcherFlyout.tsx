@@ -26,17 +26,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Location } from 'history';
 import { memoize, padLeft, range } from 'lodash';
 import moment from 'moment-timezone';
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import chrome from 'ui/chrome';
 import { toastNotifications } from 'ui/notify';
-import { UnconnectedKibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { XPACK_DOCS } from '../../../../utils/documentation/xpack';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { KibanaLink } from '../../../shared/Links/KibanaLink';
 import { createErrorGroupWatch, Schedule } from './createErrorGroupWatch';
+import { ElasticDocsLink } from '../../../shared/Links/ElasticDocsLink';
 
 type ScheduleKey = keyof Schedule;
 
@@ -59,7 +58,6 @@ const SmallInput = styled.div`
 interface WatcherFlyoutProps {
   urlParams: IUrlParams;
   onClose: () => void;
-  location: Location;
   isOpen: boolean;
 }
 
@@ -205,7 +203,7 @@ export class WatcherFlyout extends Component<
         this.addSuccessToast(id);
       })
       .catch(e => {
-        // tslint:disable-next-line
+        // eslint-disable-next-line
         console.error(e);
         this.addErrorToast();
       });
@@ -253,10 +251,8 @@ export class WatcherFlyout extends Component<
               }
             }
           )}{' '}
-          <UnconnectedKibanaLink
-            location={this.props.location}
-            pathname={'/app/kibana'}
-            hash={`/management/elasticsearch/watcher/watches/watch/${id}`}
+          <KibanaLink
+            path={`/management/elasticsearch/watcher/watches/watch/${id}`}
           >
             {i18n.translate(
               'xpack.apm.serviceDetails.enableErrorReportsPanel.watchCreatedNotificationText.viewWatchLinkText',
@@ -264,7 +260,7 @@ export class WatcherFlyout extends Component<
                 defaultMessage: 'View watch'
               }
             )}
-          </UnconnectedKibanaLink>
+          </KibanaLink>
         </p>
       )
     });
@@ -301,14 +297,18 @@ export class WatcherFlyout extends Component<
               To learn more about Watcher, please read our {documentationLink}."
             values={{
               documentationLink: (
-                <EuiLink target="_blank" href={XPACK_DOCS.xpackWatcher}>
+                <ElasticDocsLink
+                  target="_blank"
+                  section="/x-pack"
+                  path="/watcher-getting-started.html"
+                >
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableErrorReportsPanel.formDescription.documentationLinkText',
                     {
                       defaultMessage: 'documentation'
                     }
                   )}
-                </EuiLink>
+                </ElasticDocsLink>
               )
             }}
           />
@@ -503,14 +503,18 @@ export class WatcherFlyout extends Component<
                     defaultMessage="If you have not configured email, please see the {documentationLink}."
                     values={{
                       documentationLink: (
-                        <EuiLink target="_blank" href={XPACK_DOCS.xpackEmails}>
+                        <ElasticDocsLink
+                          target="_blank"
+                          section="/x-pack"
+                          path="/actions-email.html#configuring-email"
+                        >
                           {i18n.translate(
                             'xpack.apm.serviceDetails.enableErrorReportsPanel.recipientsHelpText.documentationLinkText',
                             {
                               defaultMessage: 'documentation'
                             }
                           )}
-                        </EuiLink>
+                        </ElasticDocsLink>
                       )
                     }}
                   />

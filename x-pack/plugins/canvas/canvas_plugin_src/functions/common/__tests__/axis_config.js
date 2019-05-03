@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { axisConfig } from '../axisConfig';
 import { functionWrapper } from '../../../../__tests__/helpers/function_wrapper';
 import { testTable } from '../__tests__/fixtures/test_tables';
@@ -50,7 +50,7 @@ describe('axisConfig', () => {
         expect(result).to.have.property('position', 'bottom');
       });
 
-      it('defaults to an empty string if not provided', () => {
+      it('defaults to "left" if not provided', () => {
         const result = fn(testTable);
         expect(result).to.have.property('position', '');
       });

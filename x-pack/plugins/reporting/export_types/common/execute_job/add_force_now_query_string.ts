@@ -5,8 +5,8 @@
  */
 // @ts-ignore
 import url from 'url';
+import { getAbsoluteUrlFactory } from '../../../common/get_absolute_url';
 import { ConditionalHeaders, KbnServer, ReportingJob } from '../../../types';
-import { getAbsoluteUrlFactory } from './get_absolute_url';
 
 function getSavedObjectAbsoluteUrl(job: ReportingJob, relativeUrl: string, server: KbnServer) {
   const getAbsoluteUrl: any = getAbsoluteUrlFactory(server);

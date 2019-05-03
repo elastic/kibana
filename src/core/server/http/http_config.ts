@@ -83,7 +83,7 @@ const createHttpSchema = schema.object(
   }
 );
 
-type HttpConfigType = TypeOf<typeof createHttpSchema>;
+export type HttpConfigType = TypeOf<typeof createHttpSchema>;
 
 export class HttpConfig {
   /**

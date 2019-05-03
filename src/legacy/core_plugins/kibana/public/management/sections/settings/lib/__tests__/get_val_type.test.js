@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import { getValType } from '../get_val_type';
 
 describe('Settings', function () {

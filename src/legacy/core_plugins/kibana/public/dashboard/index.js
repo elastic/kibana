@@ -22,6 +22,7 @@ import './saved_dashboard/saved_dashboards';
 import './dashboard_config';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import 'ui/filter_bar';
 import { wrapInI18nContext } from 'ui/i18n';
 import { toastNotifications } from 'ui/notify';
 
@@ -36,6 +37,7 @@ import { recentlyAccessed } from 'ui/persisted_log';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { DashboardListing, EMPTY_FILTER } from './listing/dashboard_listing';
 import { uiModules } from 'ui/modules';
+import 'ui/capabilities/route_setup';
 
 const app = uiModules.get('app/dashboard', [
   'ngRoute',
@@ -54,7 +56,23 @@ function createNewDashboardCtrl($scope, i18n) {
 
 uiRoutes
   .defaults(/dashboard/, {
-    requireDefaultIndex: true
+    requireDefaultIndex: true,
+    requireUICapability: 'dashboard.show',
+    badge: (i18n, uiCapabilities) => {
+      if (uiCapabilities.dashboard.showWriteControls) {
+        return undefined;
+      }
+
+      return {
+        text: i18n('kbn.dashboard.badge.readOnly.text', {
+          defaultMessage: 'Read only',
+        }),
+        tooltip: i18n('kbn.dashboard.badge.readOnly.tooltip', {
+          defaultMessage: 'Unable to save dashboards',
+        }),
+        iconType: 'glasses'
+      };
+    }
   })
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
@@ -116,6 +134,7 @@ uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
     controller: createNewDashboardCtrl,
+    requireUICapability: 'dashboard.createNew',
     resolve: {
       dash: function (savedDashboards, redirectWhenMissing) {
         return savedDashboards.get()

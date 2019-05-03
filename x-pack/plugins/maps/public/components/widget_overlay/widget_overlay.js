@@ -23,7 +23,7 @@ export function WidgetOverlay() {
           justifyContent="spaceBetween"
           responsive={false}
         >
-          <EuiFlexItem>
+          <EuiFlexItem className="mapWidgetOverlay__layerWrapper">
             <LayerControl/>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

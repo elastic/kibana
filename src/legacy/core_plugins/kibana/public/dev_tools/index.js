@@ -20,6 +20,7 @@
 import uiRoutes from 'ui/routes';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import 'ui/directives/kbn_href';
 import './directives/dev_tools_app';
 
 uiRoutes
@@ -33,6 +34,21 @@ uiRoutes
   });
 
 uiRoutes.defaults(/^\/dev_tools(\/|$)/, {
+  badge: (i18n, uiCapabilities) => {
+    if (uiCapabilities.dev_tools.save) {
+      return undefined;
+    }
+
+    return {
+      text: i18n('kbn.devTools.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n('kbn.devTools.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save',
+      }),
+      iconType: 'glasses'
+    };
+  },
   k7Breadcrumbs: (i18n) => [
     {
       text: i18n('kbn.devTools.k7BreadcrumbsDevToolsLabel', {

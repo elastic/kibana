@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import expect from 'expect.js';
-import { getErrorListQueryString } from '../../../../../plugins/uptime/public/components/queries/error_list/get_error_list';
+import expect from '@kbn/expect';
+import { errorListQueryString } from '../../../../../plugins/uptime/public/queries';
 import errorList from './fixtures/error_list';
 import errorListFilteredById from './fixtures/error_list_filtered_by_id';
 import errorListFilteredByPort from './fixtures/error_list_filtered_by_port';
@@ -18,7 +18,7 @@ export default function ({ getService }) {
     it('returns expected error list', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: getErrorListQueryString,
+        query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -36,7 +36,7 @@ export default function ({ getService }) {
     it('returns an error list filtered by monitor id', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: getErrorListQueryString,
+        query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -55,7 +55,7 @@ export default function ({ getService }) {
     it('returns an error list filtered by port', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: getErrorListQueryString,
+        query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',
@@ -71,10 +71,10 @@ export default function ({ getService }) {
       expect(data).to.eql(errorListFilteredByPort);
     });
 
-    it('returns an error list filtered by port/scheme', async () => {
+    it('returns an error list filtered by port/type', async () => {
       const getErrorListQuery = {
         operationName: 'ErrorList',
-        query: getErrorListQueryString,
+        query: errorListQueryString,
         variables: {
           dateRangeStart: '2019-01-28T17:40:08.078Z',
           dateRangeEnd: '2019-01-28T19:00:16.078Z',

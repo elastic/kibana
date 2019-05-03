@@ -6,7 +6,7 @@
 
 
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import {
   elasticsearchJsPlugin
 } from '../elasticsearch_ml';

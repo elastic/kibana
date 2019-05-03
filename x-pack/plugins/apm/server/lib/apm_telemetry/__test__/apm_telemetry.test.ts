@@ -6,10 +6,8 @@
 
 import { SavedObjectAttributes } from 'src/legacy/server/saved_objects/service/saved_objects_client';
 import {
-  AgentName,
   APM_TELEMETRY_DOC_ID,
   createApmTelementry,
-  getSavedObjectsClient,
   storeApmTelemetry
 } from '../apm_telemetry';
 
@@ -17,31 +15,31 @@ describe('apm_telemetry', () => {
   describe('createApmTelementry', () => {
     it('should create a ApmTelemetry object with boolean flag and frequency map of the given list of AgentNames', () => {
       const apmTelemetry = createApmTelementry([
-        AgentName.GoLang,
-        AgentName.NodeJs,
-        AgentName.GoLang,
-        AgentName.JsBase
+        'go',
+        'nodejs',
+        'go',
+        'js-base'
       ]);
       expect(apmTelemetry.has_any_services).toBe(true);
       expect(apmTelemetry.services_per_agent).toMatchObject({
-        [AgentName.GoLang]: 2,
-        [AgentName.NodeJs]: 1,
-        [AgentName.JsBase]: 1
+        go: 2,
+        nodejs: 1,
+        'js-base': 1
       });
     });
     it('should ignore undefined or unknown AgentName values', () => {
       const apmTelemetry = createApmTelementry([
-        AgentName.GoLang,
-        AgentName.NodeJs,
-        AgentName.GoLang,
-        AgentName.JsBase,
+        'go',
+        'nodejs',
+        'go',
+        'js-base',
         'example-platform' as any,
         undefined as any
       ]);
       expect(apmTelemetry.services_per_agent).toMatchObject({
-        [AgentName.GoLang]: 2,
-        [AgentName.NodeJs]: 1,
-        [AgentName.JsBase]: 1
+        go: 2,
+        nodejs: 1,
+        'js-base': 1
       });
     });
   });
@@ -69,9 +67,9 @@ describe('apm_telemetry', () => {
       apmTelemetry = {
         has_any_services: true,
         services_per_agent: {
-          [AgentName.GoLang]: 2,
-          [AgentName.NodeJs]: 1,
-          [AgentName.JsBase]: 1
+          go: 2,
+          nodejs: 1,
+          'js-base': 1
         }
       };
     });
@@ -97,55 +95,6 @@ describe('apm_telemetry', () => {
       storeApmTelemetry(server, apmTelemetry);
       expect(savedObjectsClientInstance.create.mock.calls[0][2].overwrite).toBe(
         true
-      );
-    });
-  });
-
-  describe('getSavedObjectsClient', () => {
-    let server: any;
-    let savedObjectsClientInstance: any;
-    let callWithInternalUser: any;
-    let internalRepository: any;
-
-    beforeEach(() => {
-      savedObjectsClientInstance = { create: jest.fn() };
-      callWithInternalUser = jest.fn();
-      internalRepository = jest.fn();
-      server = {
-        savedObjects: {
-          SavedObjectsClient: jest.fn(() => savedObjectsClientInstance),
-          getSavedObjectsRepository: jest.fn(() => internalRepository)
-        },
-        plugins: {
-          elasticsearch: {
-            getCluster: jest.fn(() => ({ callWithInternalUser }))
-          }
-        }
-      };
-    });
-
-    it('should use internal user "admin"', () => {
-      getSavedObjectsClient(server);
-
-      expect(server.plugins.elasticsearch.getCluster).toHaveBeenCalledWith(
-        'admin'
-      );
-    });
-
-    it('should call getSavedObjectsRepository with a cluster using the internal user context', () => {
-      getSavedObjectsClient(server);
-
-      expect(
-        server.savedObjects.getSavedObjectsRepository
-      ).toHaveBeenCalledWith(callWithInternalUser);
-    });
-
-    it('should return a SavedObjectsClient initialized with the saved objects internal repository', () => {
-      const result = getSavedObjectsClient(server);
-
-      expect(result).toBe(savedObjectsClientInstance);
-      expect(server.savedObjects.SavedObjectsClient).toHaveBeenCalledWith(
-        internalRepository
       );
     });
   });

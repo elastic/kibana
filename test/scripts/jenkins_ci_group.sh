@@ -13,19 +13,29 @@ function report {
 
 trap report EXIT
 
-source src/dev/ci_setup/checkout_sibling_es.sh
-
-"$GRUNT_BIN" functionalTests:ensureAllTestsInCiGroup;
+yarn run grunt functionalTests:ensureAllTestsInCiGroup;
 
 node scripts/build --debug --oss;
 
 export TEST_BROWSER_HEADLESS=1
-export TEST_ES_FROM=${TEST_ES_FROM:-source}
 
-"$PERCY_BIN" exec "$GRUNT_BIN" "run:functionalTests_ciGroup${CI_GROUP}" --from=source;
+checks-reporter-with-killswitch "Functional tests / Group ${CI_GROUP}" \
+  yarn run percy exec \
+  grunt "run:functionalTests_ciGroup${CI_GROUP}";
 
 if [ "$CI_GROUP" == "1" ]; then
-  # this extra use of $PERCY_BIN has to be accounted for in src/dev/get_percy_env, if it is
-  # removed please remove the +1 of the ciGroupCount in src/dev/get_percy_env
-  "$PERCY_BIN" exec "$GRUNT_BIN" run:pluginFunctionalTestsRelease --from=source;
+
+  # build kbn_tp_sample_panel_action
+  (
+    cd test/plugin_functional/plugins/kbn_tp_sample_panel_action && \
+    checks-reporter-with-killswitch "Build kbn_tp_sample_panel_action" yarn build
+  );
+
+  # this use of percy has to be manually accounted for in src/dev/get_percy_env
+  yarn run percy exec \
+    grunt run:pluginFunctionalTestsRelease --from=source;
+
+  # this use of percy has to be manually accounted for in src/dev/get_percy_env
+  yarn run percy exec \
+    grunt run:interpreterFunctionalTestsRelease;
 fi

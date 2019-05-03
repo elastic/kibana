@@ -21,6 +21,7 @@ import { Server } from '../../server/kbn_server';
 export type InitPluginFunction = (server: Server) => void;
 export interface UiExports {
   injectDefaultVars: (server: Server) => { [key: string]: any };
+  styleSheetPaths?: string;
 }
 
 export interface PluginSpecOptions {
@@ -29,4 +30,5 @@ export interface PluginSpecOptions {
   publicDir: string;
   uiExports?: UiExports;
   init: InitPluginFunction;
+  config: any;
 }

@@ -18,7 +18,7 @@
  */
 
 import Boom from 'boom';
-import { serializeProvider } from '@kbn/interpreter/common';
+import { serializeProvider } from '../../common/serialize';
 import { API_ROUTE } from '../../common/constants';
 import { createHandlers } from '../lib/create_handlers';
 import Joi from 'joi';
@@ -55,7 +55,7 @@ function runServerFunctions(server) {
                 id: Joi.number().required(),
                 functionName: Joi.string().required(),
                 args: Joi.object().default({}),
-                context: Joi.object().allow(null).default({}),
+                context: Joi.any().default(null),
               }),
           ).required(),
         }).required(),

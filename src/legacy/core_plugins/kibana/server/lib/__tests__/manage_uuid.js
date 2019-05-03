@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import expect from 'expect.js';
+import expect from '@kbn/expect';
 import sinon from 'sinon';
 import { startTestServers } from '../../../../../../test_utils/kbn_server';
 import manageUuid from '../manage_uuid';

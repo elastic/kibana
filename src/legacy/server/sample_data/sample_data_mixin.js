@@ -29,6 +29,9 @@ import {
   logsSpecProvider,
   ecommerceSpecProvider
 } from './data_sets';
+import {
+  makeSampleDataUsageCollector
+} from './usage';
 
 export function sampleDataMixin(kbnServer, server) {
   server.route(createListRoute());
@@ -79,7 +82,21 @@ export function sampleDataMixin(kbnServer, server) {
     sampleDataset.savedObjects = sampleDataset.savedObjects.concat(savedObjects);
   });
 
+  server.decorate('server', 'addAppLinksToSampleDataset', (id, appLinks) => {
+    const sampleDataset = sampleDatasets.find(sampleDataset => {
+      return sampleDataset.id === id;
+    });
+
+    if (!sampleDataset) {
+      throw new Error(`Unable to find sample dataset with id: ${id}`);
+    }
+
+    sampleDataset.appLinks = sampleDataset.appLinks.concat(appLinks);
+  });
+
   server.registerSampleDataset(flightsSpecProvider);
   server.registerSampleDataset(logsSpecProvider);
   server.registerSampleDataset(ecommerceSpecProvider);
+
+  makeSampleDataUsageCollector(server);
 }

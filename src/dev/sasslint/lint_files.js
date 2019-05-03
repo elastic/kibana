@@ -55,5 +55,5 @@ export function lintFiles(log, files) {
   }
 
   log.error(sassLint.format(report));
-  throw createFailError(`[sasslint] ${failTypes.join(' & ')}`, 1);
+  throw createFailError(`[sasslint] ${failTypes.join(' & ')}`);
 }

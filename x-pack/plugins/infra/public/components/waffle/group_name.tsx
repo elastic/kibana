@@ -5,8 +5,8 @@
  */
 import { EuiLink, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-import { InfraPathType } from '../../graphql/types';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraWaffleMapGroup, InfraWaffleMapOptions } from '../../lib/lib';
 
 interface Props {
@@ -46,19 +46,11 @@ export class GroupName extends React.PureComponent<Props, {}> {
       return;
     }
     const currentPath = this.props.isChild && groupBy.length > 1 ? groupBy[1] : groupBy[0];
-    if (currentPath.type === InfraPathType.terms && currentPath.field) {
-      this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
-    }
-    if (currentPath.type === InfraPathType.filters && currentPath.filters) {
-      const currentFilter = currentPath.filters.find(f => f.label === this.props.group.name);
-      if (currentFilter) {
-        this.props.onDrilldown(currentFilter.query);
-      }
-    }
+    this.props.onDrilldown(`${currentPath.field}: "${this.props.group.name}"`);
   };
 }
 
-const GroupNameContainer = styled.div`
+const GroupNameContainer = euiStyled.div`
   position: relative;
   text-align: center
   font-size: 16px;
@@ -73,7 +65,7 @@ interface InnerProps {
   isChild?: boolean;
 }
 
-const Inner = styled<InnerProps, 'div'>('div')`
+const Inner = euiStyled<InnerProps, 'div'>('div')`
   border: 1px solid ${props => props.theme.eui.euiBorderColor};
   background-color: ${props =>
     props.isChild ? props.theme.eui.euiColorLightestShade : props.theme.eui.euiColorEmptyShade};
@@ -85,7 +77,7 @@ const Inner = styled<InnerProps, 'div'>('div')`
   overflow: hidden;
 `;
 
-const Name = styled.div`
+const Name = euiStyled.div`
   flex: 1 1 auto;
   padding: 6px 10px;
   overflow: hidden;
@@ -93,7 +85,7 @@ const Name = styled.div`
   white-space: nowrap;
 `;
 
-const Count = styled.div`
+const Count = euiStyled.div`
   flex: 0 0 auto;
   border-left: 1px solid ${props => props.theme.eui.euiBorderColor};
   padding: 6px 10px;

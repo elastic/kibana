@@ -35,7 +35,13 @@ export function visWithSplits(WrappedComponent) {
       if (!seriesModel || !splitId) return acc;
       const metric = last(seriesModel.metrics);
       const label = calculateLabel(metric, seriesModel.metrics);
-      if (!acc[splitId]) acc[splitId] = { series: [], label: series.label };
+
+      if (!acc[splitId]) {
+        acc[splitId] = {
+          series: [],
+          label: series.label.toString()
+        };
+      }
 
       acc[splitId].series.push({
         ...series,

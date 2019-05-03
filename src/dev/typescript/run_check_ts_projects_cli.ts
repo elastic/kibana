@@ -55,7 +55,7 @@ export async function runCheckTsProjectsCli() {
         if (projects.length === 0) {
           isNotInTsProject.push(file);
         }
-        if (projects.length > 1) {
+        if (projects.length > 1 && !file.isTypescriptAmbient()) {
           isInMultipleTsProjects.push(file);
         }
       }
@@ -84,7 +84,7 @@ export async function runCheckTsProjectsCli() {
       process.exit(1);
     },
     {
-      helpDescription:
+      description:
         'Check that all .ts and .tsx files in the repository are assigned to a tsconfig.json file',
     }
   );
