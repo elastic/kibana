@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import Joi from 'joi';
 import Hapi from 'hapi';
 
 import { APP_ID } from '../../common/constants';
 import { ActionService } from '../action_service';
 import { AlertService } from '../alert_service';
 import { ConnectorService } from '../connector_service';
+import { WithoutQueryAndParams } from './types';
 
 interface Server extends Hapi.Server {
   alerting: () => {
@@ -19,18 +21,73 @@ interface Server extends Hapi.Server {
   };
 }
 
-interface FindActionRequest extends Hapi.Request {
+interface FindActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   server: Server;
-  params: {};
+  query: {
+    per_page: number;
+    page: number;
+    search?: string;
+    default_search_operator: 'AND' | 'OR';
+    search_fields?: string[];
+    sort_field?: string;
+    has_reference?: {
+      type: string;
+      id: string;
+    };
+    fields?: string[];
+  };
 }
 
 export function findActionRoute(server: any) {
   server.route({
     method: 'GET',
-    path: `/api/${APP_ID}/action`,
+    path: `/api/${APP_ID}/action/_find`,
+    options: {
+      validate: {
+        query: Joi.object()
+          .keys({
+            per_page: Joi.number()
+              .min(0)
+              .default(20),
+            page: Joi.number()
+              .min(0)
+              .default(1),
+            search: Joi.string()
+              .allow('')
+              .optional(),
+            default_search_operator: Joi.string()
+              .valid('OR', 'AND')
+              .default('OR'),
+            search_fields: Joi.array()
+              .items(Joi.string())
+              .single(),
+            sort_field: Joi.string(),
+            has_reference: Joi.object()
+              .keys({
+                type: Joi.string().required(),
+                id: Joi.string().required(),
+              })
+              .optional(),
+            fields: Joi.array()
+              .items(Joi.string())
+              .single(),
+          })
+          .default(),
+      },
+    },
     async handler(request: FindActionRequest) {
+      const query = request.query;
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.alerting().actions.find(savedObjectsClient, request.params);
+      return await request.server.alerting().actions.find(savedObjectsClient, {
+        perPage: query.per_page,
+        page: query.page,
+        search: query.search,
+        defaultSearchOperator: query.default_search_operator,
+        searchFields: query.search_fields,
+        sortField: query.sort_field,
+        hasReference: query.has_reference,
+        fields: query.fields,
+      });
     },
   });
 }

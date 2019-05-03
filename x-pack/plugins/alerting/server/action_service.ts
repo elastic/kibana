@@ -20,6 +20,26 @@ interface FireActionOptions {
   savedObjectsClient: SavedObjectsClient;
 }
 
+export interface SavedObjectReference {
+  name: string;
+  type: string;
+  id: string;
+}
+
+interface FindOptions {
+  perPage?: number;
+  page?: number;
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  sortField?: string;
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  fields?: string[];
+}
+
 export class ActionService {
   private connectorService: ConnectorService;
 
@@ -30,23 +50,23 @@ export class ActionService {
   public async create(
     savedObjectsClient: SavedObjectsClient,
     data: Action,
-    { id }: { id?: string } = {}
+    { id, overwrite }: { id?: string; overwrite?: boolean } = {}
   ) {
     const { connectorId } = data;
     if (!this.connectorService.has(connectorId)) {
       throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
     }
     this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
-    return await savedObjectsClient.create<any>('action', data, { id });
+    return await savedObjectsClient.create<any>('action', data, { id, overwrite });
   }
 
   public async get(savedObjectsClient: SavedObjectsClient, id: string) {
     return await savedObjectsClient.get('action', id);
   }
 
-  public async find(savedObjectsClient: SavedObjectsClient, params: {}) {
+  public async find(savedObjectsClient: SavedObjectsClient, options: FindOptions) {
     return await savedObjectsClient.find({
-      ...params,
+      ...options,
       type: 'action',
     });
   }
@@ -55,13 +75,18 @@ export class ActionService {
     return await savedObjectsClient.delete('action', id);
   }
 
-  public async update(savedObjectsClient: SavedObjectsClient, id: string, data: Action) {
+  public async update(
+    savedObjectsClient: SavedObjectsClient,
+    id: string,
+    data: Action,
+    options: { version?: string; references?: SavedObjectReference[] }
+  ) {
     const { connectorId } = data;
     if (!this.connectorService.has(connectorId)) {
       throw Boom.badRequest(`Connector "${connectorId}" is not registered.`);
     }
     this.connectorService.validateConnectorOptions(connectorId, data.connectorOptions);
-    return await savedObjectsClient.update<any>('action', id, data);
+    return await savedObjectsClient.update<any>('action', id, data, options);
   }
 
   public async fire({ id, params, savedObjectsClient }: FireActionOptions) {

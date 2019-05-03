@@ -10,7 +10,7 @@ import { ActionService } from '../action_service';
 import { AlertService } from '../alert_service';
 import { ConnectorService } from '../connector_service';
 import { APP_ID } from '../../common/constants';
-import { WithoutQueryAndParams } from './types';
+import { WithoutQueryAndParams, SavedObjectReference } from './types';
 
 interface Server extends Hapi.Server {
   alerting: () => {
@@ -22,13 +22,20 @@ interface Server extends Hapi.Server {
 
 interface CreateActionRequest extends WithoutQueryAndParams<Hapi.Request> {
   server: Server;
-  payload: {
-    description: string;
-    connectorId: string;
-    connectorOptions: { [key: string]: any };
+  query: {
+    overwrite: boolean;
   };
   params: {
     id?: string;
+  };
+  payload: {
+    attributes: {
+      description: string;
+      connectorId: string;
+      connectorOptions: { [key: string]: any };
+    };
+    migrationVersion?: { [key: string]: string };
+    references: SavedObjectReference[];
   };
 }
 
@@ -38,10 +45,34 @@ export function createActionRoute(server: Hapi.Server) {
     path: `/api/${APP_ID}/action/{id?}`,
     options: {
       validate: {
+        query: Joi.object()
+          .keys({
+            overwrite: Joi.boolean().default(false),
+          })
+          .default(),
+        params: Joi.object()
+          .keys({
+            id: Joi.string(),
+          })
+          .required(),
         payload: Joi.object().keys({
-          description: Joi.string().required(),
-          connectorId: Joi.string().required(),
-          connectorOptions: Joi.object(),
+          attributes: Joi.object()
+            .keys({
+              description: Joi.string().required(),
+              connectorId: Joi.string().required(),
+              connectorOptions: Joi.object(),
+            })
+            .required(),
+          migrationVersion: Joi.object().optional(),
+          references: Joi.array()
+            .items(
+              Joi.object().keys({
+                name: Joi.string().required(),
+                type: Joi.string().required(),
+                id: Joi.string().required(),
+              })
+            )
+            .default([]),
         }),
       },
     },
@@ -49,7 +80,10 @@ export function createActionRoute(server: Hapi.Server) {
       const savedObjectsClient = request.getSavedObjectsClient();
       return await request.server
         .alerting()
-        .actions.create(savedObjectsClient, request.payload, { id: request.params.id });
+        .actions.create(savedObjectsClient, request.payload.attributes, {
+          id: request.params.id,
+          overwrite: request.query.overwrite,
+        });
     },
   });
 }

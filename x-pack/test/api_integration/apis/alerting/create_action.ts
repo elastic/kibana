@@ -23,6 +23,7 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
       await Promise.all([
         deleteObject('action', 'my-action'),
         deleteObject('action', 'my-action-to-duplicate'),
+        deleteObject('action', 'my-action-to-overwrite'),
       ]);
     });
 
@@ -31,10 +32,12 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/alerting/action/my-action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
-          connectorId: 'log',
-          connectorOptions: {
-            username: 'username',
+          attributes: {
+            description: 'My action',
+            connectorId: 'log',
+            connectorOptions: {
+              username: 'username',
+            },
           },
         })
         .expect(200)
@@ -59,10 +62,12 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/alerting/action')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
-          connectorId: 'log',
-          connectorOptions: {
-            username: 'username',
+          attributes: {
+            description: 'My action',
+            connectorId: 'log',
+            connectorOptions: {
+              username: 'username',
+            },
           },
         })
         .expect(200)
@@ -88,10 +93,12 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/alerting/action/my-action-to-duplicate')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action to duplicate',
-          connectorId: 'log',
-          connectorOptions: {
-            username: 'username',
+          attributes: {
+            description: 'My action to duplicate',
+            connectorId: 'log',
+            connectorOptions: {
+              username: 'username',
+            },
           },
         })
         .expect(200);
@@ -99,13 +106,44 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/alerting/action/my-action-to-duplicate')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action to duplicate',
-          connectorId: 'log',
-          connectorOptions: {
-            username: 'username',
+          attributes: {
+            description: 'My action to duplicate',
+            connectorId: 'log',
+            connectorOptions: {
+              username: 'username',
+            },
           },
         })
         .expect(409);
+    });
+
+    it('should return 200 when overwriting an action', async () => {
+      await supertest
+        .post('/api/alerting/action/my-action-to-overwrite')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action to duplicate',
+            connectorId: 'log',
+            connectorOptions: {
+              username: 'username',
+            },
+          },
+        })
+        .expect(200);
+      await supertest
+        .post('/api/alerting/action/my-action-to-overwrite?overwrite=true')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          attributes: {
+            description: 'My action to overwrite',
+            connectorId: 'log',
+            connectorOptions: {
+              username: 'username',
+            },
+          },
+        })
+        .expect(200);
     });
 
     it(`should return 400 when connector isn't registered`, async () => {
@@ -113,10 +151,12 @@ export default function createActionTests({ getService }: KibanaFunctionalTestDe
         .post('/api/alerting/action/my-action-without-connector')
         .set('kbn-xsrf', 'foo')
         .send({
-          description: 'My action',
-          connectorId: 'unregistered-connector',
-          connectorOptions: {
-            username: 'username',
+          attributes: {
+            description: 'My action',
+            connectorId: 'unregistered-connector',
+            connectorOptions: {
+              username: 'username',
+            },
           },
         })
         .expect(400)

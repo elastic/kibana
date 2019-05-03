@@ -5,6 +5,7 @@
  */
 
 import Hapi from 'hapi';
+import Joi from 'joi';
 
 import { APP_ID } from '../../common/constants';
 import { ActionService } from '../action_service';
@@ -30,9 +31,19 @@ export function deleteActionRoute(server: Hapi.Server) {
   server.route({
     method: 'DELETE',
     path: `/api/${APP_ID}/action/{id}`,
+    options: {
+      validate: {
+        params: Joi.object()
+          .keys({
+            id: Joi.string().required(),
+          })
+          .required(),
+      },
+    },
     async handler(request: DeleteActionRequest) {
+      const { id } = request.params;
       const savedObjectsClient = request.getSavedObjectsClient();
-      return await request.server.alerting().actions.delete(savedObjectsClient, request.params.id);
+      return await request.server.alerting().actions.delete(savedObjectsClient, id);
     },
   });
 }

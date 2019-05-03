@@ -21,11 +21,13 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .put('/api/alerting/action/1')
         .set('kbn-xsrf', 'foo')
         .send({
-          connectorId: 'log',
-          description: 'My description updated',
-          connectorOptions: {
-            bar: true,
-            foo: false,
+          attributes: {
+            connectorId: 'log',
+            description: 'My description updated',
+            connectorOptions: {
+              bar: true,
+              foo: false,
+            },
           },
         })
         .expect(200)
@@ -53,11 +55,13 @@ export default function updateActionTests({ getService }: KibanaFunctionalTestDe
         .put('/api/alerting/action/2')
         .set('kbn-xsrf', 'foo')
         .send({
-          connectorId: 'log',
-          description: 'My description updated',
-          connectorOptions: {
-            bar: true,
-            foo: false,
+          attributes: {
+            connectorId: 'log',
+            description: 'My description updated',
+            connectorOptions: {
+              bar: true,
+              foo: false,
+            },
           },
         })
         .expect(404)

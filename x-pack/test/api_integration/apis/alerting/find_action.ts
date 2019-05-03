@@ -16,9 +16,9 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
     before(() => esArchiver.load('alerting/basic'));
     after(() => esArchiver.unload('alerting/basic'));
 
-    it('should return results', async () => {
+    it('should return 200 with individual responses', async () => {
       await supertest
-        .get('/api/alerting/action')
+        .get('/api/alerting/action/_find?fields=description')
         .expect(200)
         .then((resp: any) => {
           expect(resp.body).to.eql({
@@ -32,12 +32,7 @@ export default function findActionTests({ getService }: KibanaFunctionalTestDefa
                 version: resp.body.saved_objects[0].version,
                 references: [],
                 attributes: {
-                  connectorId: 'log',
                   description: 'My description',
-                  connectorOptions: {
-                    bar: false,
-                    foo: true,
-                  },
                 },
               },
             ],

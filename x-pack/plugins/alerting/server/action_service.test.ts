@@ -39,7 +39,10 @@ describe('create()', () => {
         connectorId: 'my-connector',
         connectorOptions: {},
       },
-      { id: 'my-alert' }
+      {
+        id: 'my-alert',
+        overwrite: true,
+      }
     );
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.create).toMatchInlineSnapshot(`
@@ -54,6 +57,7 @@ describe('create()', () => {
       },
       Object {
         "id": "my-alert",
+        "overwrite": true,
       },
     ],
   ],
@@ -209,11 +213,16 @@ describe('update()', () => {
     });
     const actionService = new ActionService(connectorService);
     savedObjectsClient.update.mockResolvedValueOnce(expectedResult);
-    const result = await actionService.update(savedObjectsClient, 'my-alert', {
-      description: 'my description',
-      connectorId: 'my-connector',
-      connectorOptions: {},
-    });
+    const result = await actionService.update(
+      savedObjectsClient,
+      'my-alert',
+      {
+        description: 'my description',
+        connectorId: 'my-connector',
+        connectorOptions: {},
+      },
+      {}
+    );
     expect(result).toEqual(expectedResult);
     expect(savedObjectsClient.update).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -226,6 +235,7 @@ describe('update()', () => {
         "connectorOptions": Object {},
         "description": "my description",
       },
+      Object {},
     ],
   ],
   "results": Array [
@@ -254,11 +264,16 @@ describe('update()', () => {
       async executor() {},
     });
     await expect(
-      actionService.update(savedObjectsClient, 'my-alert', {
-        description: 'my description',
-        connectorId: 'my-connector',
-        connectorOptions: {},
-      })
+      actionService.update(
+        savedObjectsClient,
+        'my-alert',
+        {
+          description: 'my description',
+          connectorId: 'my-connector',
+          connectorOptions: {},
+        },
+        {}
+      )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"child \\"param1\\" fails because [\\"param1\\" is required]"`
     );
@@ -268,11 +283,16 @@ describe('update()', () => {
     const connectorService = new ConnectorService();
     const actionService = new ActionService(connectorService);
     await expect(
-      actionService.update(savedObjectsClient, 'my-alert', {
-        description: 'my description',
-        connectorId: 'unregistered-connector',
-        connectorOptions: {},
-      })
+      actionService.update(
+        savedObjectsClient,
+        'my-alert',
+        {
+          description: 'my description',
+          connectorId: 'unregistered-connector',
+          connectorOptions: {},
+        },
+        {}
+      )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Connector \\"unregistered-connector\\" is not registered."`
     );
