@@ -151,7 +151,6 @@ export const JobCreateForm: SFC<Props> = React.memo(
         );
         return true;
       } catch (e) {
-        console.error(e);
         toastNotifications.addDanger(
           i18n.translate('xpack.ml.dataframe.jobCreateForm.createIndexPatternErrorMessage', {
             defaultMessage:
