@@ -5,22 +5,27 @@
  */
 
 .mapLayerPanel__header,
-.mapLayerPanel__body,
 .mapLayerPanel__footer {
   padding: $euiSize;
 }
 
 .mapLayerPanel__body {
-  flex-basis: 1px; /* Fixes scrolling for Firefox */
+  @include euiOverflowShadow($euiPageBackgroundColor);
   padding-bottom: 0; /* 1 */
+  flex-grow: 1;
+  flex-basis: 1px; /* Fixes scrolling for Firefox */
+  overflow-y: hidden;
 
-  > *:last-child {
-    margin-bottom: $euiSize; /* 1 */
+  .mapLayerPanel__bodyOverflow {
+    @include euiScrollBar;
+    height: 100%;
+    overflow-y: auto;
+    padding: $euiSize;
+
+    > *:last-child {
+      margin-bottom: $euiSize; /* 1 */
+    }
   }
-}
-
-.mapLayerPanel__header {
-  @include euiOverflowShadowBottom;
 }
 
 .mapLayerPanel__sourceDetails {
@@ -32,6 +37,5 @@
 }
 
 .mapLayerPanel__footer {
-  @include euiOverflowShadowTop;
   border-top: $euiBorderThin;
 }

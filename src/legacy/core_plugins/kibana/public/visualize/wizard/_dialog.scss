@@ -25,32 +25,11 @@
 }
 
 .visNewVisDialog__typesWrapper {
+  @include euiOverflowShadow;
   max-width: $euiSizeXXL * 10;
   min-height: 0;
-  padding-top: 2px; // Account for search field dropshadow
-  padding-bottom: $euiSize;
-  // Add overflow shadows via pseudo elements
-  position: relative;
-  &::before,
-  &::after {
-    content: "";
-    display: block;
-    position: absolute;
-    height: $euiSizeXXL;
-    left: 0;
-    right: 0;
-    pointer-events: none;
-  }
-
-  &::before {
-    top: -$euiSizeXXL + 2px; // Account for search field dropshadow
-    @include euiOverflowShadowBottom;
-  }
-
-  &::after {
-    bottom: -$euiSizeL;
-    @include euiOverflowShadowTop;
-  }
+  margin-top: 2px; // Account for search field dropshadow
+  overflow: hidden;
 }
 
 .visNewVisDialog__types {
