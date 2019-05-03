@@ -19,14 +19,16 @@ import { i18n } from '@kbn/i18n';
  */
 export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
   const features = [];
-  hits.forEach(hit => {
-    const properties = flattenHit(hit);
+  const tmpGeometriesAccumulator = [];
 
-    const geometriesAccumulator = [];
+  for (let i = 0; i < hits.length; i++) {
+    const properties = flattenHit(hits[i]);
+
+    tmpGeometriesAccumulator.length = 0;//truncate accumulator
     if (geoFieldType === 'geo_point') {
-      geoPointToGeometry(properties[geoFieldName], geometriesAccumulator);
+      geoPointToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
     } else if (geoFieldType === 'geo_shape') {
-      geoShapeToGeometry(properties[geoFieldName], geometriesAccumulator);
+      geoShapeToGeometry(properties[geoFieldName], tmpGeometriesAccumulator);
     } else {
       const errorMessage = i18n.translate('xpack.maps.elasticsearch_geo_utils.unsupportedFieldTypeErrorMessage', {
         defaultMessage: 'Unsupported field type, expected: geo_shape or geo_point, you provided: {geoFieldType}',
@@ -34,18 +36,18 @@ export function hitsToGeoJson(hits, flattenHit, geoFieldName, geoFieldType) {
       });
       throw new Error(errorMessage);
     }
-
     // don't include geometry field value in properties
     delete properties[geoFieldName];
 
-    return geometriesAccumulator.map(geometry => {
+    //create new geojson Feature for every individual geojson geometry.
+    for (let j = 0; j < tmpGeometriesAccumulator.length; j++) {
       features.push({
         type: 'Feature',
-        geometry: geometry,
+        geometry: tmpGeometriesAccumulator[j],
         properties: properties
       });
-    });
-  });
+    }
+  }
 
   return {
     type: 'FeatureCollection',
