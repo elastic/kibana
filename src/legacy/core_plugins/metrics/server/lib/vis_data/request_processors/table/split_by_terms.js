@@ -18,6 +18,7 @@
  */
 
 import _ from 'lodash';
+// import { buildEsQuery } from '@kbn/es-query';
 // TODO: Update to use the esQueryBuilder
 export default function splitByTerm(req, panel) {
   return next => doc => {
@@ -25,7 +26,9 @@ export default function splitByTerm(req, panel) {
       _.set(doc, `aggs.pivot.aggs.${column.id}.terms.field`, column.aggregate_by);
       _.set(doc, `aggs.pivot.aggs.${column.id}.terms.size`, 100);
       if (column.filter) {
-        // replace these with the object created by buildEsQuery (see ../series/split_by_filters)
+        // TODO: replace these with the object created by buildEsQuery (see ../series/split_by_filters)
+        // const builtEsQuery = buildEsQuery(indexPattern, [column.filter], [], esQueryConfig);
+        // _.set(doc, `aggs.pivot.aggs.${column.id}.column_filter.filter`, builtEsQuery);
         _.set(doc, `aggs.pivot.aggs.${column.id}.column_filter.filter.query_string.query`, column.filter);
         _.set(doc, `aggs.pivot.aggs.${column.id}.column_filter.filter.query_string.analyze_wildcard`, true);
       }
