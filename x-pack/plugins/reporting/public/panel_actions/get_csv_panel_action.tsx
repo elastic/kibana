@@ -16,6 +16,8 @@ import { API_BASE_URL_V1 } from '../../common/constants';
 const API_BASE_URL = `${API_BASE_URL_V1}/generate/immediate/csv/saved-object`;
 
 class GetCsvReportPanelAction extends ContextMenuAction {
+  private isDownloading: boolean;
+
   constructor() {
     super(
       {
@@ -29,6 +31,8 @@ class GetCsvReportPanelAction extends ContextMenuAction {
         icon: 'document',
       }
     );
+
+    this.isDownloading = false;
   }
 
   public async getSearchRequestBody({ searchEmbeddable }: { searchEmbeddable: any }) {
@@ -64,7 +68,7 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       timeRange: { from, to },
     } = embeddable;
 
-    if (!embeddable) {
+    if (!embeddable || this.isDownloading) {
       return;
     }
 
@@ -93,6 +97,18 @@ class GetCsvReportPanelAction extends ContextMenuAction {
       state,
     });
 
+    this.isDownloading = true;
+
+    toastNotifications.addSuccess({
+      title: i18n.translate('xpack.reporting.dashboard.csvDownloadStartedTitle', {
+        defaultMessage: `CSV Download Started`,
+      }),
+      text: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadMessage', {
+        defaultMessage: `Your CSV will download momentarily.`,
+      }),
+      'data-test-subj': 'csvDownloadStarted',
+    });
+
     await kfetch({ method: 'POST', pathname: `${API_BASE_URL}/${id}`, body })
       .then(blob => {
         const a = window.document.createElement('a');
@@ -101,11 +117,13 @@ class GetCsvReportPanelAction extends ContextMenuAction {
         a.download = `${filename}.csv`;
         a.click();
         window.URL.revokeObjectURL(downloadObject);
+        this.isDownloading = false;
       })
       .catch(this.onGenerationFail);
   };
 
   private onGenerationFail(error: Error) {
+    this.isDownloading = false;
     toastNotifications.addDanger({
       title: i18n.translate('xpack.reporting.dashboard.failedCsvDownloadTitle', {
         defaultMessage: `CSV download failed`,
