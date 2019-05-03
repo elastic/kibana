@@ -7,8 +7,10 @@
 import React, { SFC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
 
 import {
+  EuiBetaBadge,
   EuiButton,
   EuiPage,
   EuiPageBody,
@@ -36,6 +38,18 @@ export const Page: SFC = () => (
               <FormattedMessage
                 id="xpack.ml.dataframe.jobsList.dataFrameTitle"
                 defaultMessage="Data frame jobs"
+              />
+              <span>&nbsp;</span>
+              <EuiBetaBadge
+                label={i18n.translate('xpack.ml.dataframe.jobsList.betaBadgeLabel', {
+                  defaultMessage: `Beta`,
+                })}
+                tooltipContent={i18n.translate(
+                  'xpack.ml.dataframe.jobsList.betaBadgeTooltipContent',
+                  {
+                    defaultMessage: `Data frames are a beta feature. We'd love to hear your feedback.`,
+                  }
+                )}
               />
             </h1>
           </EuiTitle>
