@@ -25,11 +25,12 @@ import { KIBANA_STATS_TYPE } from '../../constants';
 /*
  * API for Kibana meta info and accumulated operations stats
  * Including ?extended in the query string fetches Elasticsearch cluster_uuid and server.usage.collectorSet data
- * - Requests to set isExtended = true
- *      GET /api/stats?extended=true
- *      GET /api/stats?extended
- * - No value or 'false' is isExtended = false
- * - Any other value causes a statusCode 400 response (Bad Request)
+ *   - Requests to set isExtended = true
+ *       GET /api/stats?extended=true
+ *       GET /api/stats?extended
+ *   - No value or 'false' is isExtended = false
+ *   - Any other value causes a statusCode 400 response (Bad Request)
+ * Including ?exclude_usage in the query string excludes the usage stats from the response. Same value semantics as ?extended
  */
 export function registerStatsApi(kbnServer, server, config) {
   const wrapAuth = wrapAuthConfig(config.get('status.allowAnonymous'));
@@ -53,7 +54,8 @@ export function registerStatsApi(kbnServer, server, config) {
         validate: {
           query: Joi.object({
             extended: Joi.string().valid('', 'true', 'false'),
-            legacy: Joi.string().valid('', 'true', 'false')
+            legacy: Joi.string().valid('', 'true', 'false'),
+            exclude_usage: Joi.string().valid('', 'true', 'false'),
           })
         },
         tags: ['api'],
@@ -61,14 +63,17 @@ export function registerStatsApi(kbnServer, server, config) {
       async handler(req) {
         const isExtended = req.query.extended !== undefined && req.query.extended !== 'false';
         const isLegacy = req.query.legacy !== undefined && req.query.legacy !== 'false';
+        const shouldGetUsage = req.query.exclude_usage === undefined || req.query.exclude_usage === 'false';
 
         let extended;
         if (isExtended) {
           const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('admin');
           const callCluster = (...args) => callWithRequest(req, ...args);
+
+          const usagePromise = shouldGetUsage ? getUsage(callCluster) : Promise.resolve();
           try {
             const [ usage, clusterUuid ] = await Promise.all([
-              getUsage(callCluster),
+              usagePromise,
               getClusterUuid(callCluster),
             ]);
 

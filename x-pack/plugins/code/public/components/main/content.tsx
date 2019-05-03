@@ -54,6 +54,7 @@ interface Props extends RouteComponentProps<MainRouteParams> {
   repoScope: string[];
   searchOptions: SearchOptions;
   currentRepository?: Repository;
+  fileTreeLoading: boolean;
 }
 const LANG_MD = 'markdown';
 
@@ -271,7 +272,7 @@ class CodeContent extends React.PureComponent<Props> {
       return this.renderProgress();
     }
 
-    const { file, match, tree } = this.props;
+    const { file, match, tree, fileTreeLoading } = this.props;
     const { path, pathType, resource, org, repo, revision } = match.params;
     const repoUri = `${resource}/${org}/${repo}`;
     switch (pathType) {
@@ -279,7 +280,7 @@ class CodeContent extends React.PureComponent<Props> {
         const node = this.findNode(path ? path.split('/') : [], tree);
         return (
           <div className="codeContainer__directoryView">
-            <Directory node={node} />
+            <Directory node={node} loading={fileTreeLoading} />
             <CommitHistory
               repoUri={repoUri}
               header={
@@ -288,6 +289,7 @@ class CodeContent extends React.PureComponent<Props> {
                     <h3>Recent Commits</h3>
                   </EuiTitle>
                   <EuiButton
+                    size="s"
                     href={`#/${resource}/${org}/${repo}/${PathTypes.commits}/${encodeRevisionString(
                       revision
                     )}/${path || ''}`}
@@ -341,13 +343,13 @@ class CodeContent extends React.PureComponent<Props> {
           );
         }
         return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame">
+          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
             <Editor showBlame={false} />
           </EuiFlexGroup>
         );
       case PathTypes.blame:
         return (
-          <EuiFlexGroup direction="row" className="codeContainer__blame">
+          <EuiFlexGroup direction="row" className="codeContainer__blame" gutterSize="none">
             <Editor showBlame={true} />
           </EuiFlexGroup>
         );
@@ -373,6 +375,7 @@ const mapStateToProps = (state: RootState) => ({
   isNotFound: state.file.isNotFound,
   file: state.file.file,
   tree: state.file.tree,
+  fileTreeLoading: state.file.fileTreeLoading,
   currentTree: currentTreeSelector(state),
   branches: state.file.branches,
   hasMoreCommits: hasMoreCommitsSelector(state),

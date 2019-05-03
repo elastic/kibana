@@ -33,6 +33,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { ES_TYPES } from '../../common/es_types';
+
+const RESTRICT_FIELDS = [ES_TYPES.DATE];
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -90,7 +93,7 @@ export const IndexPattern = props => {
           >
             <FieldSelect
               data-test-subj="metricsIndexPatternFieldsSelect"
-              restrict="date"
+              restrict={RESTRICT_FIELDS}
               value={model[timeFieldName]}
               disabled={props.disabled}
               onChange={handleSelectChange(timeFieldName)}

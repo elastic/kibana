@@ -29,11 +29,11 @@
   flex-grow: 0;
   flex-direction: column;
   height: 100%;
-  div[role="tablist"] {
+  div[role='tablist'] {
     flex-grow: 0;
     flex-shrink: 0;
   }
-  div[role="tabpanel"] {
+  div[role='tabpanel'] {
     @include euiScrollBar;
     width: 100%;
     flex-grow: 1;
@@ -59,12 +59,13 @@
 
 .code-directory__node {
   width: calc(200rem / 14);
-  padding: 0 $euiSizeS;
+  padding: 0.25rem $euiSizeS;
   border-radius: $euiBorderRadius;
   white-space: nowrap;
   color: $euiColorFullShade;
+  transition: background-color $euiAnimSlightResistance $euiAnimSpeedFast;
   &:hover {
-    background-color: rgba($euiColorGhost, .10);
+    background-color: $euiColorLightShade;
     cursor: pointer;
   }
 }
@@ -91,7 +92,8 @@
 
 .code-timeline__commit-container {
   margin: 0 0 $euiSizeXS $euiSizeM;
-  .euiPanel:not(:first-of-type), .euiPanel:not(:last-of-type) {
+  .euiPanel:not(:first-of-type),
+  .euiPanel:not(:last-of-type) {
     border-radius: 0;
   }
 }
@@ -112,8 +114,8 @@
   &:last-child {
     border-radius: 0 0 $euiSizeXS $euiSizeXS;
   }
-  &:only-child{
-    border-radius: $euiSizeXS
+  &:only-child {
+    border-radius: $euiSizeXS;
   }
 }
 
@@ -253,11 +255,10 @@
 .codeBlame__item {
   padding: $euiSizeXS $euiSizeS;
   border-top: $euiBorderThin;
-  &.codeBlame__item--first{
+  &.codeBlame__item--first {
     border-top: none;
   }
 }
-
 
 .codeIcon__language {
   fill: $euiColorDarkestShade;

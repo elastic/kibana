@@ -135,7 +135,9 @@ export const spaces = (kibana: Record<string, any>) =>
 
       const config = server.config();
 
-      const spacesAuditLogger = new SpacesAuditLogger(config, new AuditLogger(server, 'spaces'));
+      const spacesAuditLogger = new SpacesAuditLogger(
+        new AuditLogger(server, 'spaces', config, xpackMainPlugin.info)
+      );
 
       server.expose('spacesClient', {
         getScopedClient: (request: Record<string, any>) => {
@@ -167,7 +169,7 @@ export const spaces = (kibana: Record<string, any>) =>
         types,
       } = server.savedObjects as SavedObjectsService;
       addScopedSavedObjectsClientWrapperFactory(
-        Number.MAX_VALUE,
+        Number.MAX_SAFE_INTEGER - 1,
         spacesSavedObjectsClientWrapperFactory(spacesService, types)
       );
 

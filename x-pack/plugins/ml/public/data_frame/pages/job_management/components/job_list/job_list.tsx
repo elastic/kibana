@@ -13,9 +13,31 @@ import {
   SortDirection,
 } from '@elastic/eui';
 
-import { DataFrameJobListColumn, DataFrameJobListRow, ItemIdToExpandedRowMap } from './common';
+import {
+  DataFrameJobListColumn,
+  DataFrameJobListRow,
+  ItemIdToExpandedRowMap,
+  JobId,
+} from './common';
 import { getJobsFactory } from './job_service';
 import { getColumns } from './columns';
+import { ExpandedRow } from './expanded_row';
+
+function getItemIdToExpandedRowMap(
+  itemIds: JobId[],
+  dataFrameJobs: DataFrameJobListRow[]
+): ItemIdToExpandedRowMap {
+  return itemIds.reduce(
+    (m: ItemIdToExpandedRowMap, jobId: JobId) => {
+      const item = dataFrameJobs.find(job => job.config.id === jobId);
+      if (item !== undefined) {
+        m[jobId] = <ExpandedRow item={item} />;
+      }
+      return m;
+    },
+    {} as ItemIdToExpandedRowMap
+  );
+}
 
 // TODO EUI's types for EuiInMemoryTable is missing these props
 interface ExpandableTableProps extends EuiInMemoryTableProps {
@@ -29,7 +51,7 @@ export const DataFrameJobList: SFC = () => {
   const [dataFrameJobs, setDataFrameJobs] = useState<DataFrameJobListRow[]>([]);
   const getJobs = getJobsFactory(setDataFrameJobs);
 
-  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<ItemIdToExpandedRowMap>({});
+  const [expandedRowItemIds, setExpandedRowItemIds] = useState<JobId[]>([]);
 
   // use this pattern so we don't return a promise, useEffects doesn't like that
   useEffect(() => {
@@ -40,7 +62,7 @@ export const DataFrameJobList: SFC = () => {
     return <EuiEmptyPrompt title={<h2>Here be Data Frame dragons!</h2>} iconType="editorStrike" />;
   }
 
-  const columns = getColumns(getJobs, itemIdToExpandedRowMap, setItemIdToExpandedRowMap);
+  const columns = getColumns(getJobs, expandedRowItemIds, setExpandedRowItemIds);
 
   const sorting = {
     sort: {
@@ -48,6 +70,8 @@ export const DataFrameJobList: SFC = () => {
       direction: SortDirection.ASC,
     },
   };
+
+  const itemIdToExpandedRowMap = getItemIdToExpandedRowMap(expandedRowItemIds, dataFrameJobs);
 
   return (
     <ExpandableTable
