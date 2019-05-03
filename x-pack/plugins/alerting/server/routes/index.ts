@@ -9,3 +9,4 @@ export { deleteActionRoute } from './delete_action';
 export { findActionRoute } from './find_action';
 export { getActionRoute } from './get_action';
 export { updateActionRoute } from './update_action';
+export { listconnectorsRoute } from './list_connectors';

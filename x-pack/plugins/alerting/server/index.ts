@@ -10,6 +10,7 @@ export {
   findActionRoute,
   getActionRoute,
   updateActionRoute,
+  listconnectorsRoute,
 } from './routes';
 export { ActionService } from './action_service';
 export { AlertService } from './alert_service';

@@ -8,6 +8,7 @@ import Boom from 'boom';
 
 interface Connector {
   id: string;
+  name: string;
   validate?: {
     params?: any;
     connectorOptions?: any;
@@ -35,6 +36,14 @@ export class ConnectorService {
       throw Boom.badRequest(`Connector "${id}" is not registered.`);
     }
     return connector;
+  }
+
+  public list() {
+    const connectorIds = Object.keys(this.connectors);
+    return connectorIds.map(id => ({
+      id,
+      name: this.connectors[id].name,
+    }));
   }
 
   public validateParams(id: string, params: any) {

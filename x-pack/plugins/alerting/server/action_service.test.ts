@@ -27,6 +27,7 @@ describe('create()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       async executor() {},
     });
     const actionService = new ActionService(connectorService);
@@ -71,6 +72,7 @@ describe('create()', () => {
     const actionService = new ActionService(connectorService);
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       validate: {
         connectorOptions: Joi.object()
           .keys({
@@ -202,6 +204,7 @@ describe('update()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       async executor() {},
     });
     const actionService = new ActionService(connectorService);
@@ -240,6 +243,7 @@ describe('update()', () => {
     const actionService = new ActionService(connectorService);
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       validate: {
         connectorOptions: Joi.object()
           .keys({
@@ -280,7 +284,11 @@ describe('fire()', () => {
     const connectorService = new ConnectorService();
     const actionService = new ActionService(connectorService);
     const mockConnector = jest.fn().mockResolvedValueOnce({ success: true });
-    connectorService.register({ id: 'mock', executor: mockConnector });
+    connectorService.register({
+      id: 'mock',
+      name: 'Mock',
+      executor: mockConnector,
+    });
     savedObjectsClient.get.mockResolvedValueOnce({
       id: 'mock-action',
       attributes: {

@@ -18,6 +18,7 @@ interface MessageSlackParams {
 
 export const messageSlackConnector = {
   id: 'message-slack',
+  name: 'Message slack',
   validate: {
     params: Joi.object()
       .keys({

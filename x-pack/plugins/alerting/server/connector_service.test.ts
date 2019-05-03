@@ -11,15 +11,27 @@ describe('register()', () => {
   test('able to register connectors', () => {
     const executor = jest.fn();
     const connectorService = new ConnectorService();
-    connectorService.register({ id: 'my-connector', executor });
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      executor,
+    });
   });
 
   test('throws error if connector already registered', () => {
     const executor = jest.fn();
     const connectorService = new ConnectorService();
-    connectorService.register({ id: 'my-connector', executor });
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      executor,
+    });
     expect(() =>
-      connectorService.register({ id: 'my-connector', executor })
+      connectorService.register({
+        id: 'my-connector',
+        name: 'My connector',
+        executor,
+      })
     ).toThrowErrorMatchingInlineSnapshot(`"Connector \\"my-connector\\" is already registered."`);
   });
 });
@@ -29,6 +41,7 @@ describe('get()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       async executor() {},
     });
     const connector = connectorService.get('my-connector');
@@ -36,6 +49,7 @@ describe('get()', () => {
 Object {
   "executor": [Function],
   "id": "my-connector",
+  "name": "My connector",
 }
 `);
   });
@@ -48,11 +62,30 @@ Object {
   });
 });
 
+describe('list()', () => {
+  test('returns list of connectors', () => {
+    const connectorService = new ConnectorService();
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      async executor() {},
+    });
+    const connectors = connectorService.list();
+    expect(connectors).toEqual([
+      {
+        id: 'my-connector',
+        name: 'My connector',
+      },
+    ]);
+  });
+});
+
 describe('validateParams()', () => {
   test('should pass when validation not defined', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       async executor() {},
     });
     connectorService.validateParams('my-connector', {});
@@ -62,6 +95,7 @@ describe('validateParams()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       validate: {
         params: Joi.object()
           .keys({
@@ -78,6 +112,7 @@ describe('validateParams()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       validate: {
         params: Joi.object()
           .keys({
@@ -100,6 +135,7 @@ describe('validateConnectorOptions()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       async executor() {},
     });
     connectorService.validateConnectorOptions('my-connector', {});
@@ -109,6 +145,7 @@ describe('validateConnectorOptions()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       validate: {
         connectorOptions: Joi.object()
           .keys({
@@ -125,6 +162,7 @@ describe('validateConnectorOptions()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       validate: {
         connectorOptions: Joi.object()
           .keys({
@@ -151,7 +189,11 @@ describe('has()', () => {
   test('returns true after registering a connector', () => {
     const executor = jest.fn();
     const connectorService = new ConnectorService();
-    connectorService.register({ id: 'my-connector', executor });
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      executor,
+    });
     expect(connectorService.has('my-connector'));
   });
 });
@@ -160,7 +202,11 @@ describe('execute()', () => {
   test('calls the executor with proper params', async () => {
     const executor = jest.fn().mockResolvedValueOnce({ success: true });
     const connectorService = new ConnectorService();
-    connectorService.register({ id: 'my-connector', executor });
+    connectorService.register({
+      id: 'my-connector',
+      name: 'My connector',
+      executor,
+    });
     await connectorService.execute('my-connector', { foo: true }, { bar: false });
     expect(executor).toMatchInlineSnapshot(`
 [MockFunction] {
@@ -189,6 +235,7 @@ describe('execute()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       executor,
       validate: {
         params: Joi.object()
@@ -210,6 +257,7 @@ describe('execute()', () => {
     const connectorService = new ConnectorService();
     connectorService.register({
       id: 'my-connector',
+      name: 'My connector',
       executor,
       validate: {
         connectorOptions: Joi.object()

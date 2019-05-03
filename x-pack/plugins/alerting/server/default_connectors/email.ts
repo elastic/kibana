@@ -8,6 +8,7 @@ import nodemailer, { SendMailOptions } from 'nodemailer';
 
 export const emailConnector = {
   id: 'email',
+  name: 'E-mail',
   async executor(connectorOptions: any, params: SendMailOptions) {
     const transporter = nodemailer.createTransport(connectorOptions);
     await transporter.sendMail(params);

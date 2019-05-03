@@ -12,6 +12,7 @@ interface LogParams {
 
 export const logConnector = {
   id: 'log',
+  name: 'Log',
   validate: {
     params: Joi.object()
       .keys({

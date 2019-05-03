@@ -13,6 +13,7 @@ import {
   findActionRoute,
   getActionRoute,
   updateActionRoute,
+  listconnectorsRoute,
   AlertService,
   ActionService,
   ConnectorService,
@@ -55,6 +56,7 @@ export function alerting(kibana: any) {
       getActionRoute(server);
       findActionRoute(server);
       updateActionRoute(server);
+      listconnectorsRoute(server);
 
       // Register service to server
       server.decorate('server', 'alerting', () => ({
