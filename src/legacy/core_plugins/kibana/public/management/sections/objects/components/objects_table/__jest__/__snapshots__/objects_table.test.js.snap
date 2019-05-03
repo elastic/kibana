@@ -2,7 +2,7 @@
 
 exports[`ObjectsTable delete should show a confirm modal 1`] = `
 <EuiConfirmModal
-  buttonColor="primary"
+  buttonColor="danger"
   cancelButtonText={
     <FormattedMessage
       defaultMessage="Cancel"
@@ -95,14 +95,19 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText>
-      <p>
+    <EuiFormRow
+      describedByIds={Array []}
+      fullWidth={false}
+      hasEmptyLabelSpace={false}
+      label={
         <FormattedMessage
-          defaultMessage="Select which types to export."
+          defaultMessage="Select which types to export"
           id="kbn.management.objects.objectsTable.exportObjectsConfirmModalDescription"
           values={Object {}}
         />
-      </p>
+      }
+      labelType="legend"
+    >
       <EuiCheckboxGroup
         idToSelectedMap={
           Object {
@@ -134,26 +139,24 @@ exports[`ObjectsTable export should allow the user to choose when exporting all 
           ]
         }
       />
-    </EuiText>
+    </EuiFormRow>
+    <EuiSwitch
+      checked={true}
+      label={
+        <FormattedMessage
+          defaultMessage="Include related objects"
+          id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+          values={Object {}}
+        />
+      }
+      name="includeReferencesDeep"
+      onChange={[Function]}
+    />
   </EuiModalBody>
   <EuiModalFooter>
     <EuiFlexGroup
-      justifyContent="spaceBetween"
+      justifyContent="flexEnd"
     >
-      <EuiFlexItem>
-        <EuiSwitch
-          checked={true}
-          label={
-            <FormattedMessage
-              defaultMessage="Include related objects"
-              id="kbn.management.objects.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-              values={Object {}}
-            />
-          }
-          name="includeReferencesDeep"
-          onChange={[Function]}
-        />
-      </EuiFlexItem>
       <EuiFlexItem
         grow={false}
       >
