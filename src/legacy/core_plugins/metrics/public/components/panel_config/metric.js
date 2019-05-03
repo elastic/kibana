@@ -134,12 +134,6 @@ class MetricPanelConfig extends Component {
                   }
                   fullWidth
                 >
-                  {/* <EuiFieldText
-                    style={{ border: '1px solid purple' }}
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
-                  /> */}
                   <QueryBar
                     query={{
                       language: model.filter.language ? model.filter.language : 'lucene',
