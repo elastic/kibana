@@ -27,7 +27,9 @@ describe('Data Frame: <DefinePivotForm />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider value={{ currentIndexPattern }}>
+        <KibanaContext.Provider
+          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+        >
           <DefinePivotForm onChange={() => {}} />
         </KibanaContext.Provider>
       </div>

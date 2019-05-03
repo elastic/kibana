@@ -52,7 +52,9 @@ describe('Data Frame: <DefinePivotSummary />', () => {
     // with the Provider being the outer most component.
     const wrapper = shallow(
       <div>
-        <KibanaContext.Provider value={{ currentIndexPattern }}>
+        <KibanaContext.Provider
+          value={{ currentIndexPattern, indexPatterns: {}, kibanaConfig: {} }}
+        >
           <DefinePivotSummary {...props} />
         </KibanaContext.Provider>
       </div>
