@@ -16,14 +16,14 @@ const IMPORT_RETRIES = 5;
 const basePath = chrome.addBasePath('/api/fileupload');
 const fileType = 'json';
 
-export async function indexData(parsedFile, preIndexTransform, indexName, dataType, appName) {
+export async function indexData(parsedFile, transformDetails, indexName, dataType, appName) {
   if (!parsedFile) {
     throw('No file imported');
     return;
   }
 
   // Perform any processing required on file prior to indexing
-  const transformResult = transformDataByFormatForIndexing(preIndexTransform, parsedFile, dataType);
+  const transformResult = transformDataByFormatForIndexing(transformDetails, parsedFile, dataType);
   if (!transformResult.success) {
     throw `Error transforming data: ${transformResult.error}`;
   }

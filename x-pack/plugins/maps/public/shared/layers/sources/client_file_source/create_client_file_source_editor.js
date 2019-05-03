@@ -23,7 +23,7 @@ export function ClientFileCreateSourceEditor({
       onFileUpload={previewGeojsonFile}
       onFileRemove={onRemove}
       onIndexReadyStatusChange={onIndexReadyStatusChange}
-      preIndexTransform={'geo'}
+      transformDetails={'geo'}
       onIndexPatternCreateSuccess={viewIndexedData}
       onIndexAddSuccess={onIndexAddSuccess}
     />

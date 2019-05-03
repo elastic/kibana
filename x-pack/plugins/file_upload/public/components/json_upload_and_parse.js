@@ -21,7 +21,7 @@ export function JsonUploadAndParse(props) {
     appName,
     boolIndexData = false,
     boolCreateIndexPattern = true,
-    preIndexTransform,
+    transformDetails,
     onIndexReadyStatusChange,
     onIndexAddSuccess,
     onIndexAddError,
@@ -78,7 +78,7 @@ export function JsonUploadAndParse(props) {
     setIndexRequestInFlight(true);
 
     indexData(
-      parsedFile, preIndexTransform, indexName, selectedIndexType, appName
+      parsedFile, transformDetails, indexName, selectedIndexType, appName
     ).then(resp => {
       setIndexedFile(parsedFile);
       onIndexAddSuccess && onIndexAddSuccess(resp);
@@ -88,7 +88,7 @@ export function JsonUploadAndParse(props) {
     });
 
   }, [
-    selectedIndexType, boolIndexData, parsedFile, indexedFile, preIndexTransform,
+    selectedIndexType, boolIndexData, parsedFile, indexedFile, transformDetails,
     indexName, onIndexAddSuccess, onIndexAddError, appName, indexReady
   ]);
 
@@ -128,11 +128,11 @@ export function JsonUploadAndParse(props) {
   useEffect(() => {
     if (parsedFile) {
       // User-provided index types
-      if (typeof preIndexTransform === 'object') {
-        setIndexTypes(preIndexTransform.indexTypes);
+      if (typeof transformDetails === 'object') {
+        setIndexTypes(transformDetails.indexTypes);
       } else {
         // Included index types
-        switch(preIndexTransform) {
+        switch(transformDetails) {
           case 'geo':
             const featureTypes = _.uniq(
               parsedFile.features.map(({ geometry }) => geometry.type)
@@ -145,7 +145,7 @@ export function JsonUploadAndParse(props) {
         }
       }
     }
-  }, [parsedFile, preIndexTransform]);
+  }, [parsedFile, transformDetails]);
 
   return (
     <EuiForm>
@@ -155,7 +155,7 @@ export function JsonUploadAndParse(props) {
           fileRef,
           setFileRef,
           setParsedFile,
-          preIndexTransform,
+          transformDetails,
           resetFileAndIndexSettings,
         }}
       />

@@ -7,19 +7,19 @@
 import _ from 'lodash';
 import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 
-export async function parseFile(file, previewCallback = null, preIndexTransform,
+export async function parseFile(file, previewCallback = null, transformDetails,
   FileReader = window.FileReader) {
 
   let cleanAndValidate;
-  if (typeof preIndexTransform === 'object') {
-    cleanAndValidate = preIndexTransform.cleanAndValidate;
+  if (typeof transformDetails === 'object') {
+    cleanAndValidate = transformDetails.cleanAndValidate;
   } else {
-    switch(preIndexTransform) {
+    switch(transformDetails) {
       case 'geo':
         cleanAndValidate = geoJsonCleanAndValidate;
         break;
       default:
-        throw(`Index options for ${preIndexTransform} not defined`);
+        throw(`Index options for ${transformDetails} not defined`);
         return;
     }
   }

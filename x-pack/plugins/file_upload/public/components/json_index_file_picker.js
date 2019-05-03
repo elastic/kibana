@@ -21,7 +21,7 @@ export function JsonIndexFilePicker({
   fileRef,
   setFileRef,
   setParsedFile,
-  preIndexTransform,
+  transformDetails,
   resetFileAndIndexSettings,
 }) {
 
@@ -64,7 +64,7 @@ export function JsonIndexFilePicker({
             }
             // Parse file
             const parsedFileResult = await parseFile(
-              file, onFileUpload, preIndexTransform
+              file, onFileUpload, transformDetails
             ).catch(e => {
               setFileUploadError(`Unable to parse file: ${e}`);
             });
