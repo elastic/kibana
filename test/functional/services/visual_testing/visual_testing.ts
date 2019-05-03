@@ -23,10 +23,10 @@ import { Test } from 'mocha';
 import { pkg } from '../../../../src/legacy/utils/package_json';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-// @ts-ignore internal js
+// @ts-ignore internal js that is passed to the browser as is
 import { takePercySnapshot, takePercySnapshotWithAgent } from './take_percy_snapshot';
 
-export async function PercyProvider({ getService }: FtrProviderContext) {
+export async function VisualTestingProvider({ getService }: FtrProviderContext) {
   const browser = getService('browser');
   const log = getService('log');
   const lifecycle = getService('lifecycle');
@@ -51,16 +51,15 @@ export async function PercyProvider({ getService }: FtrProviderContext) {
     return statsCache.get(test)!;
   }
 
-  return new class Percy {
+  return new class VisualTesting {
     public async snapshot(name?: string) {
+      log.debug('Capturing percy snapshot');
+
       if (!currentTest) {
         throw new Error('unable to determine current test');
       }
 
-      const [domSnapshot, url]: [string, string] = await Promise.all([
-        this.getSnapshot(),
-        browser.getCurrentUrl(),
-      ]);
+      const [domSnapshot, url] = await Promise.all([this.getSnapshot(), browser.getCurrentUrl()]);
 
       const stats = getStats(currentTest);
       stats.snapshotCount += 1;
@@ -76,13 +75,13 @@ export async function PercyProvider({ getService }: FtrProviderContext) {
       if (!success) {
         throw new Error('Percy snapshot failed');
       }
-
-      log.success('Percy snapshot captured');
     }
 
     private async getSnapshot() {
-      const snapshot = await browser.execute(takePercySnapshot);
-      return snapshot !== false ? snapshot : await browser.execute(takePercySnapshotWithAgent);
+      const snapshot = await browser.execute<[], string | false>(takePercySnapshot);
+      return snapshot !== false
+        ? snapshot
+        : await browser.execute<[], string>(takePercySnapshotWithAgent);
     }
   }();
 }

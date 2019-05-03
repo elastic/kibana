@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export { PercyProvider } from './percy';
+export { VisualTestingProvider } from './visual_testing';
