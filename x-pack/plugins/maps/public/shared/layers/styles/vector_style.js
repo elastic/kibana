@@ -12,7 +12,8 @@ import { VectorStyleEditor } from './components/vector/vector_style_editor';
 import { getDefaultStaticProperties } from './vector_style_defaults';
 import { AbstractStyle } from './abstract_style';
 import { SOURCE_DATA_ID_ORIGIN } from '../../../../common/constants';
-import { VectorIcon, VectorStyleLegend } from './components/vector/legend';
+import { VectorIcon } from './components/vector/legend/vector_icon';
+import { VectorStyleLegend } from './components/vector/legend/vector_style_legend';
 
 export class VectorStyle extends AbstractStyle {
 
