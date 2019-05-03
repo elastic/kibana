@@ -17,12 +17,16 @@
  * under the License.
  */
 
-import { Server } from 'hapi';
+import { ResponseObject, Server } from 'hapi';
 
-import { ConfigService } from '../../core/server/config';
-import { ElasticsearchServiceSetup } from '../../core/server/elasticsearch';
-import { HttpServerInfo } from '../../core/server/http/';
-import { PluginsServiceSetup } from '../../core/server/plugins/plugins_service';
+import {
+  ElasticsearchServiceSetup,
+  HttpServiceSetup,
+  HttpServiceStart,
+  ConfigService,
+  PluginsServiceSetup,
+  PluginsServiceStart,
+} from '../../core/server';
 import { ApmOssPlugin } from '../core_plugins/apm_oss';
 import { CallClusterWithRequest, ElasticsearchPlugin } from '../core_plugins/elasticsearch';
 
@@ -32,6 +36,10 @@ import { SavedObjectsClient, SavedObjectsService } from './saved_objects';
 export interface KibanaConfig {
   get<T>(key: string): T;
   has(key: string): boolean;
+}
+
+export interface UiApp {
+  getId(): string;
 }
 
 // Extend the defaults with the plugins and server methods we need.
@@ -49,6 +57,7 @@ declare module 'hapi' {
     indexPatternsServiceFactory: IndexPatternsServiceFactory;
     savedObjects: SavedObjectsService;
     injectUiAppVars: (pluginName: string, getAppVars: () => { [key: string]: any }) => void;
+    getHiddenUiAppById(appId: string): UiApp;
   }
 
   interface Request {
@@ -56,21 +65,33 @@ declare module 'hapi' {
     getBasePath(): string;
     getUiSettingsService(): any;
   }
+
+  interface ResponseToolkit {
+    renderAppWithDefaultConfig(app: UiApp): ResponseObject;
+  }
 }
 
 type KbnMixinFunc = (kbnServer: KbnServer, server: Server, config: any) => Promise<any> | void;
 type Unpromise<T> = T extends Promise<infer U> ? U : T;
+// eslint-disable-next-line import/no-default-export
 export default class KbnServer {
   public readonly newPlatform: {
     setup: {
       core: {
         elasticsearch: ElasticsearchServiceSetup;
+        http: HttpServiceSetup;
       };
       plugins: PluginsServiceSetup;
     };
+    start: {
+      core: {
+        http: HttpServiceStart;
+      };
+      plugins: PluginsServiceStart;
+    };
     stop: null;
     params: {
-      serverOptions: HttpServerInfo;
+      serverOptions: ElasticsearchServiceSetup;
       handledConfigPaths: Unpromise<ReturnType<ConfigService['getUsedPaths']>>;
     };
   };

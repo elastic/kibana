@@ -62,7 +62,6 @@ export class MBMapContainer extends React.Component {
       featureId: targetFeature.properties[FEATURE_ID_PROPERTY_NAME],
       location: popupAnchorLocation
     });
-
   };
 
   _updateHoverTooltipState = _.debounce((e) => {
@@ -115,9 +114,20 @@ export class MBMapContainer extends React.Component {
     return popupAnchorLocation;
   }
   _getMbLayerIdsForTooltips() {
-    return this.props.layerList.reduce((mbLayerIds, layer) => {
+
+    const mbLayerIds = this.props.layerList.reduce((mbLayerIds, layer) => {
       return layer.canShowTooltip() ? mbLayerIds.concat(layer.getMbLayerIds()) : mbLayerIds;
     }, []);
+
+
+    //ensure all layers that are actually on the map
+    //the raw list may contain layer-ids that have not been added to the map yet.
+    //For example:
+    //a vector or heatmap layer will not add a source and layer to the mapbox-map, until that data is available.
+    //during that data-fetch window, the app should not query for layers that do not exist.
+    return mbLayerIds.filter((mbLayerId) => {
+      return !!this._mbMap.getLayer(mbLayerId);
+    });
   }
 
   _getMapState() {
@@ -156,7 +166,6 @@ export class MBMapContainer extends React.Component {
         x: mbLngLatPoint.x + PADDING,
         y: mbLngLatPoint.y + PADDING
       }
-
     ];
     return this._mbMap.queryRenderedFeatures(mbBbox, { layers: mbLayerIds });
   }
@@ -188,7 +197,11 @@ export class MBMapContainer extends React.Component {
 
   async _initializeMap() {
 
-    this._mbMap = await createMbMapInstance(this.refs.mapContainer, this.props.goto ? this.props.goto.center : null);
+    this._mbMap = await createMbMapInstance({
+      node: this.refs.mapContainer,
+      initialView: this.props.goto ? this.props.goto.center : null,
+      scrollZoom: this.props.scrollZoom
+    });
 
     if (!this._isMounted) {
       return;
@@ -214,8 +227,12 @@ export class MBMapContainer extends React.Component {
     this._mbMap.on('mouseout', () => {
       throttledSetMouseCoordinates.cancel(); // cancel any delayed setMouseCoordinates invocations
       this.props.clearMouseCoordinates();
-    });
 
+      this._updateHoverTooltipState.cancel();
+      if (this.props.tooltipState && this.props.tooltipState.type !== TOOLTIP_TYPE.LOCKED) {
+        this.props.setTooltipState(null);
+      }
+    });
 
     this._mbMap.on('mousemove', this._updateHoverTooltipState);
     this._mbMap.on('click', this._lockTooltip);
@@ -241,7 +258,15 @@ export class MBMapContainer extends React.Component {
     if (!this._isMounted) {
       return;
     }
-    ReactDOM.render((<FeatureTooltip properties={content} onCloseClick={this._onTooltipClose}/>), this._tooltipContainer);
+    const isLocked = this.props.tooltipState.type === TOOLTIP_TYPE.LOCKED;
+    ReactDOM.render((
+      <FeatureTooltip
+        properties={content}
+        closeTooltip={this._onTooltipClose}
+        showFilterButtons={this.props.isFilterable && isLocked}
+        showCloseButton={isLocked}
+      />
+    ), this._tooltipContainer);
 
     this._mbPopup.setLngLat(location)
       .setDOMContent(this._tooltipContainer)
@@ -253,15 +278,17 @@ export class MBMapContainer extends React.Component {
     const tooltipLayer = this.props.layerList.find(layer => {
       return layer.getId() === this.props.tooltipState.layerId;
     });
-    const targetFeature = tooltipLayer.getFeatureByFeatureById(this.props.tooltipState.featureId);
+    const targetFeature = tooltipLayer.getFeatureById(this.props.tooltipState.featureId);
     const formattedProperties = await tooltipLayer.getPropertiesForTooltip(targetFeature.properties);
     this._renderContentToTooltip(formattedProperties, this.props.tooltipState.location);
   }
 
   _syncTooltipState() {
     if (this.props.tooltipState) {
+      this._mbMap.getCanvas().style.cursor = 'pointer';
       this._showTooltip();
     } else {
+      this._mbMap.getCanvas().style.cursor = '';
       this._hideTooltip();
     }
   }

@@ -22,6 +22,7 @@ import * as Url from 'url';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
+import { IconType } from '@elastic/eui';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { NotificationsSetup } from '../notifications';
 
@@ -32,17 +33,27 @@ function isEmbedParamInHash() {
   return Boolean(query.embed);
 }
 
+/** @public */
+export interface ChromeBadge {
+  text: string;
+  tooltip: string;
+  iconType?: IconType;
+}
+
+/** @public */
 export interface ChromeBrand {
   logo?: string;
   smallLogo?: string;
 }
 
+/** @public */
 export interface ChromeBreadcrumb {
   text: string;
   href?: string;
   'data-test-subj'?: string;
 }
 
+/** @public */
 export type ChromeHelpExtension = (element: HTMLDivElement) => (() => void);
 
 interface ConstructorParams {
@@ -54,6 +65,7 @@ interface SetupDeps {
   notifications: NotificationsSetup;
 }
 
+/** @internal */
 export class ChromeService {
   private readonly stop$ = new Rx.ReplaySubject(1);
   private readonly browserSupportsCsp: boolean;
@@ -71,6 +83,7 @@ export class ChromeService {
     const applicationClasses$ = new Rx.BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new Rx.BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new Rx.BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const badge$ = new Rx.BehaviorSubject<ChromeBadge | undefined>(undefined);
 
     if (!this.browserSupportsCsp && injectedMetadata.getCspConfig().warnLegacyBrowsers) {
       notifications.toasts.addWarning(
@@ -172,6 +185,18 @@ export class ChromeService {
         ),
 
       /**
+       * Get an observable of the current badge
+       */
+      getBadge$: () => badge$.pipe(takeUntil(this.stop$)),
+
+      /**
+       * Override the current badge
+       */
+      setBadge: (badge: ChromeBadge | undefined) => {
+        badge$.next(badge);
+      },
+
+      /**
        * Get an observable of the current list of breadcrumbs
        */
       getBreadcrumbs$: () => breadcrumbs$.pipe(takeUntil(this.stop$)),
@@ -202,4 +227,5 @@ export class ChromeService {
   }
 }
 
+/** @public */
 export type ChromeSetup = ReturnType<ChromeService['setup']>;

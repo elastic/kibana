@@ -12,6 +12,7 @@ exports[`NavControlPopover renders without crashing 1`] = `
           size="s"
           space={
             Object {
+              "disabledFeatures": Array [],
               "id": "",
               "name": "foo",
             }
@@ -35,11 +36,6 @@ exports[`NavControlPopover renders without crashing 1`] = `
 >
   <SpacesDescription
     onManageSpacesClick={[Function]}
-    userProfile={
-      Object {
-        "hasCapability": [Function],
-      }
-    }
   />
 </EuiPopover>
 `;

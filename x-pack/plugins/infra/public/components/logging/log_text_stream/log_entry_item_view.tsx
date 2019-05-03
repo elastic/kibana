@@ -6,10 +6,10 @@
 
 import { darken, transparentize } from 'polished';
 import * as React from 'react';
-import styled from 'styled-components';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import euiStyled from '../../../../../../common/eui_styled_components';
 import { LogEntry } from '../../../../common/log_entry';
 import { SearchResult } from '../../../../common/log_search_result';
 import { TextScale } from '../../../../common/log_text_scale';
@@ -25,6 +25,7 @@ interface LogTextStreamLogEntryItemViewProps {
   wrap: boolean;
   openFlyoutWithItem: (id: string) => void;
   intl: InjectedIntl;
+  isHighlighted: boolean;
 }
 
 interface LogTextStreamLogEntryItemViewState {
@@ -57,7 +58,15 @@ export const LogTextStreamLogEntryItemView = injectI18n(
     };
 
     public render() {
-      const { intl, boundingBoxRef, logEntry, scale, searchResult, wrap } = this.props;
+      const {
+        intl,
+        boundingBoxRef,
+        logEntry,
+        scale,
+        searchResult,
+        wrap,
+        isHighlighted,
+      } = this.props;
       const { isHovered } = this.state;
       const viewDetailsLabel = intl.formatMessage({
         id: 'xpack.infra.logEntryItemView.viewDetailsToolTip',
@@ -76,11 +85,12 @@ export const LogTextStreamLogEntryItemView = injectI18n(
           <LogTextStreamItemDateField
             hasHighlights={!!searchResult}
             isHovered={isHovered}
+            isHighlighted={isHighlighted}
             scale={scale}
           >
             <FormattedTime time={logEntry.fields.time} />
           </LogTextStreamItemDateField>
-          <LogTextStreamIconDiv isHovered={isHovered}>
+          <LogTextStreamIconDiv isHovered={isHovered} isHighlighted={isHighlighted}>
             {isHovered ? (
               <EuiToolTip content={viewDetailsLabel}>
                 <EuiButtonIcon
@@ -96,6 +106,7 @@ export const LogTextStreamLogEntryItemView = injectI18n(
           <LogTextStreamItemMessageField
             highlights={searchResult ? searchResult.matches.message || [] : []}
             isHovered={isHovered}
+            isHighlighted={isHighlighted}
             isWrapped={wrap}
             scale={scale}
           >
@@ -109,16 +120,17 @@ export const LogTextStreamLogEntryItemView = injectI18n(
 
 interface IconProps {
   isHovered: boolean;
+  isHighlighted: boolean;
 }
 
-const EmptyIcon = styled.div`
+const EmptyIcon = euiStyled.div`
   width: 24px;
 `;
 
-const LogTextStreamIconDiv = styled<IconProps, 'div'>('div')`
+const LogTextStreamIconDiv = euiStyled<IconProps, 'div'>('div')`
   flex-grow: 0;
   background-color: ${props =>
-    props.isHovered
+    props.isHovered || props.isHighlighted
       ? props.theme.darkMode
         ? transparentize(0.9, darken(0.05, props.theme.eui.euiColorHighlight))
         : darken(0.05, props.theme.eui.euiColorHighlight)
@@ -128,7 +140,7 @@ const LogTextStreamIconDiv = styled<IconProps, 'div'>('div')`
   font-size: 0.9em;
 `;
 
-const LogTextStreamLogEntryItemDiv = styled.div`
+const LogTextStreamLogEntryItemDiv = euiStyled.div`
   font-family: ${props => props.theme.eui.euiCodeFontFamily};
   font-size: ${props => props.theme.eui.euiFontSize};
   line-height: ${props => props.theme.eui.euiLineHeight};

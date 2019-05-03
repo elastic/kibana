@@ -135,9 +135,14 @@ export class InfraLogEntriesDomain {
       { field: '_index', value: document._index },
       { field: '_id', value: document._id },
     ];
+
     return {
       id: document._id,
       index: document._index,
+      key: {
+        time: document.sort[0],
+        tiebreaker: document.sort[1],
+      },
       fields: sortBy(
         [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],
         'field'
@@ -150,6 +155,7 @@ interface LogItemHit {
   _index: string;
   _id: string;
   _source: JsonObject;
+  sort: [number, number];
 }
 
 export interface LogEntriesAdapter {

@@ -16,6 +16,8 @@ Note: You cannot access this endpoint via the Console in Kibana.
   (array|string) The saved object type(s) that the export should be limited to
 `objects` (optional)::
   (array) A list of objects to export
+`includeReferencesDeep`::
+  (boolean) This will make the exported objects include all the referenced objects needed
 
 Note: At least `type` or `objects` must be passed in.
 

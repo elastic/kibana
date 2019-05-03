@@ -10,7 +10,7 @@ import 'brace/mode/yaml';
 import 'brace/theme/github';
 import { flatten } from 'lodash';
 import React from 'react';
-import { UNIQUENESS_ENFORCING_TYPES } from 'x-pack/plugins/beats_management/common/constants';
+import { UNIQUENESS_ENFORCING_TYPES } from '../../../common/constants';
 import { BeatTag, CMBeat, ConfigurationBlock } from '../../../common/domain_types';
 import { PrimaryLayout } from '../../components/layouts/primary';
 import { TagEdit } from '../../components/tag';
@@ -103,7 +103,7 @@ class TagEditPageComponent extends React.PureComponent<
               this.props.libs.configBlocks
                 .upsert([{ ...block, tag: this.state.tag.id }])
                 .catch((e: any) => {
-                  // tslint:disable-next-line
+                  // eslint-disable-next-line
                   console.error('Error upseting config block', e);
                 })
                 .then(() => {
@@ -117,7 +117,7 @@ class TagEditPageComponent extends React.PureComponent<
                   alert(
                     'Error removing block, please check your browsers console logs for more details'
                   );
-                  // tslint:disable-next-line
+                  // eslint-disable-next-line
                   console.error(`Error removing block ${block.id}`, e);
                 })
                 .then(() => {

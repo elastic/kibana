@@ -110,7 +110,13 @@ export default function (kibana) {
       defaultVars = {
         elasticsearchUrl: url.format(
           Object.assign(url.parse(head(legacyEsConfig.hosts)), { auth: false })
-        )
+        ),
+        uiCapabilities: {
+          dev_tools: {
+            show: true,
+            save: true,
+          },
+        }
       };
 
       server.route(createProxyRoute({

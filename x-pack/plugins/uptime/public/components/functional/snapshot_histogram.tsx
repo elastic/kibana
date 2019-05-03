@@ -21,8 +21,7 @@ import React, { Fragment } from 'react';
 import { HistogramDataPoint } from '../../../common/graphql/types';
 
 export interface SnapshotHistogramProps {
-  windowWidth: number;
-  primaryColor: string;
+  successColor: string;
   dangerColor: string;
   histogram: HistogramDataPoint[];
 }
@@ -30,8 +29,7 @@ export interface SnapshotHistogramProps {
 export const SnapshotHistogram = ({
   dangerColor,
   histogram,
-  primaryColor,
-  windowWidth,
+  successColor,
 }: SnapshotHistogramProps) => (
   <Fragment>
     <div style={{ height: 220 }}>

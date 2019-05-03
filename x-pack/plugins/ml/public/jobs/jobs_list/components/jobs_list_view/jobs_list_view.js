@@ -406,7 +406,7 @@ export class JobsListView extends Component {
         <JobStatsBar
           jobsSummaryList={jobsSummaryList}
         />
-        <div className="job-management">
+        <div className="job-management" data-test-subj="ml-jobs-list">
           <NodeAvailableWarning />
           <UpgradeWarning />
           <header>

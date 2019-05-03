@@ -7,25 +7,25 @@
 import chrome from 'ui/chrome';
 
 import {
-  UA_UPDATE_SETTINGS,
-  UA_INDEX_CLEAR_CACHE,
-  UA_INDEX_CLEAR_CACHE_MANY,
-  UA_INDEX_CLOSE,
-  UA_INDEX_CLOSE_MANY,
-  UA_INDEX_DELETE,
-  UA_INDEX_DELETE_MANY,
-  UA_INDEX_FLUSH,
-  UA_INDEX_FLUSH_MANY,
-  UA_INDEX_FORCE_MERGE,
-  UA_INDEX_FORCE_MERGE_MANY,
-  UA_INDEX_FREEZE,
-  UA_INDEX_FREEZE_MANY,
-  UA_INDEX_OPEN,
-  UA_INDEX_OPEN_MANY,
-  UA_INDEX_REFRESH,
-  UA_INDEX_REFRESH_MANY,
-  UA_INDEX_UNFREEZE,
-  UA_INDEX_UNFREEZE_MANY,
+  UIM_UPDATE_SETTINGS,
+  UIM_INDEX_CLEAR_CACHE,
+  UIM_INDEX_CLEAR_CACHE_MANY,
+  UIM_INDEX_CLOSE,
+  UIM_INDEX_CLOSE_MANY,
+  UIM_INDEX_DELETE,
+  UIM_INDEX_DELETE_MANY,
+  UIM_INDEX_FLUSH,
+  UIM_INDEX_FLUSH_MANY,
+  UIM_INDEX_FORCE_MERGE,
+  UIM_INDEX_FORCE_MERGE_MANY,
+  UIM_INDEX_FREEZE,
+  UIM_INDEX_FREEZE_MANY,
+  UIM_INDEX_OPEN,
+  UIM_INDEX_OPEN_MANY,
+  UIM_INDEX_REFRESH,
+  UIM_INDEX_REFRESH_MANY,
+  UIM_INDEX_UNFREEZE,
+  UIM_INDEX_UNFREEZE_MANY,
 } from '../../common/constants';
 
 import {
@@ -34,7 +34,7 @@ import {
   TAB_STATS,
 } from '../constants';
 
-import { trackUserAction } from './track_user_action';
+import { trackUiMetric } from './track_ui_metric';
 
 let httpClient;
 
@@ -67,8 +67,8 @@ export async function closeIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/close`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_CLOSE_MANY : UA_INDEX_CLOSE;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_CLOSE_MANY : UIM_INDEX_CLOSE;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -78,8 +78,8 @@ export async function deleteIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/delete`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_DELETE_MANY : UA_INDEX_DELETE;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_DELETE_MANY : UIM_INDEX_DELETE;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -89,8 +89,8 @@ export async function openIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/open`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_OPEN_MANY : UA_INDEX_OPEN;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_OPEN_MANY : UIM_INDEX_OPEN;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -100,8 +100,8 @@ export async function refreshIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/refresh`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_REFRESH_MANY : UA_INDEX_REFRESH;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_REFRESH_MANY : UIM_INDEX_REFRESH;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -111,8 +111,8 @@ export async function flushIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/flush`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_FLUSH_MANY : UA_INDEX_FLUSH;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_FLUSH_MANY : UIM_INDEX_FLUSH;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -123,8 +123,8 @@ export async function forcemergeIndices(indices, maxNumSegments) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/forcemerge`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_FORCE_MERGE_MANY : UA_INDEX_FORCE_MERGE;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_FORCE_MERGE_MANY : UIM_INDEX_FORCE_MERGE;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -134,8 +134,8 @@ export async function clearCacheIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/clear_cache`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_CLEAR_CACHE_MANY : UA_INDEX_CLEAR_CACHE;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_CLEAR_CACHE_MANY : UIM_INDEX_CLEAR_CACHE;
+  trackUiMetric(actionType);
   return response.data;
 }
 export async function freezeIndices(indices) {
@@ -144,8 +144,8 @@ export async function freezeIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/freeze`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_FREEZE_MANY : UA_INDEX_FREEZE;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_FREEZE_MANY : UIM_INDEX_FREEZE;
+  trackUiMetric(actionType);
   return response.data;
 }
 export async function unfreezeIndices(indices) {
@@ -154,8 +154,8 @@ export async function unfreezeIndices(indices) {
   };
   const response = await httpClient.post(`${apiPrefix}/indices/unfreeze`, body);
   // Only track successful requests.
-  const actionType = indices.length > 1 ? UA_INDEX_UNFREEZE_MANY : UA_INDEX_UNFREEZE;
-  trackUserAction(actionType);
+  const actionType = indices.length > 1 ? UIM_INDEX_UNFREEZE_MANY : UIM_INDEX_UNFREEZE;
+  trackUiMetric(actionType);
   return response.data;
 }
 
@@ -167,7 +167,7 @@ export async function loadIndexSettings(indexName) {
 export async function updateIndexSettings(indexName, settings) {
   const response = await httpClient.put(`${apiPrefix}/settings/${indexName}`, settings);
   // Only track successful requests.
-  trackUserAction(UA_UPDATE_SETTINGS);
+  trackUiMetric(UIM_UPDATE_SETTINGS);
   return response;
 }
 

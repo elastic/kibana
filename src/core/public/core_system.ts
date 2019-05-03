@@ -19,7 +19,9 @@
 
 import './core.css';
 
+import { CoreSetup, CoreStart } from '.';
 import { BasePathService } from './base_path';
+import { CapabilitiesService } from './capabilities';
 import { ChromeService } from './chrome';
 import { FatalErrorsService } from './fatal_errors';
 import { HttpService } from './http';
@@ -27,6 +29,8 @@ import { I18nService } from './i18n';
 import { InjectedMetadataParams, InjectedMetadataService } from './injected_metadata';
 import { LegacyPlatformParams, LegacyPlatformService } from './legacy';
 import { NotificationsService } from './notifications';
+import { OverlayService } from './overlays';
+import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 
 interface Params {
@@ -36,6 +40,10 @@ interface Params {
   requireLegacyFiles: LegacyPlatformParams['requireLegacyFiles'];
   useLegacyTestHarness?: LegacyPlatformParams['useLegacyTestHarness'];
 }
+
+/** @internal */
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface CoreContext {}
 
 /**
  * The CoreSystem is the root of the new platform, and setups all parts
@@ -55,10 +63,12 @@ export class CoreSystem {
   private readonly basePath: BasePathService;
   private readonly chrome: ChromeService;
   private readonly i18n: I18nService;
+  private readonly capabilities: CapabilitiesService;
+  private readonly overlay: OverlayService;
+  private readonly plugins: PluginsService;
 
   private readonly rootDomElement: HTMLElement;
-  private readonly notificationsTargetDomElement: HTMLDivElement;
-  private readonly legacyPlatformTargetDomElement: HTMLDivElement;
+  private readonly overlayTargetDomElement: HTMLDivElement;
 
   constructor(params: Params) {
     const {
@@ -73,6 +83,8 @@ export class CoreSystem {
 
     this.i18n = new I18nService();
 
+    this.capabilities = new CapabilitiesService();
+
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
     });
@@ -85,58 +97,55 @@ export class CoreSystem {
       },
     });
 
-    this.notificationsTargetDomElement = document.createElement('div');
-    this.notifications = new NotificationsService({
-      targetDomElement: this.notificationsTargetDomElement,
-    });
+    this.notifications = new NotificationsService();
     this.http = new HttpService();
     this.basePath = new BasePathService();
     this.uiSettings = new UiSettingsService();
+    this.overlayTargetDomElement = document.createElement('div');
+    this.overlay = new OverlayService(this.overlayTargetDomElement);
     this.chrome = new ChromeService({ browserSupportsCsp });
 
-    this.legacyPlatformTargetDomElement = document.createElement('div');
+    const core: CoreContext = {};
+    this.plugins = new PluginsService(core);
+
     this.legacyPlatform = new LegacyPlatformService({
-      targetDomElement: this.legacyPlatformTargetDomElement,
       requireLegacyFiles,
       useLegacyTestHarness,
     });
   }
 
-  public setup() {
+  public async setup() {
     try {
-      // ensure the rootDomElement is empty
-      this.rootDomElement.textContent = '';
-      this.rootDomElement.classList.add('coreSystemRootDomElement');
-      this.rootDomElement.appendChild(this.notificationsTargetDomElement);
-      this.rootDomElement.appendChild(this.legacyPlatformTargetDomElement);
-
       const i18n = this.i18n.setup();
-      const notifications = this.notifications.setup({ i18n });
       const injectedMetadata = this.injectedMetadata.setup();
       const fatalErrors = this.fatalErrors.setup({ i18n });
       const http = this.http.setup({ fatalErrors });
       const basePath = this.basePath.setup({ injectedMetadata });
       const uiSettings = this.uiSettings.setup({
-        notifications,
         http,
         injectedMetadata,
         basePath,
       });
+      const notifications = this.notifications.setup({ uiSettings });
       const chrome = this.chrome.setup({
         injectedMetadata,
         notifications,
       });
 
-      this.legacyPlatform.setup({
+      const core: CoreSetup = {
+        basePath,
+        chrome,
+        fatalErrors,
+        http,
         i18n,
         injectedMetadata,
-        fatalErrors,
         notifications,
-        http,
-        basePath,
         uiSettings,
-        chrome,
-      });
+      };
+
+      // Services that do not expose contracts at setup
+      await this.plugins.setup(core);
+      await this.legacyPlatform.setup({ core });
 
       return { fatalErrors };
     } catch (error) {
@@ -144,8 +153,45 @@ export class CoreSystem {
     }
   }
 
+  public async start() {
+    try {
+      // ensure the rootDomElement is empty
+      this.rootDomElement.textContent = '';
+      this.rootDomElement.classList.add('coreSystemRootDomElement');
+
+      const notificationsTargetDomElement = document.createElement('div');
+      const legacyPlatformTargetDomElement = document.createElement('div');
+      this.rootDomElement.appendChild(notificationsTargetDomElement);
+      this.rootDomElement.appendChild(legacyPlatformTargetDomElement);
+      this.rootDomElement.appendChild(this.overlayTargetDomElement);
+
+      const injectedMetadata = this.injectedMetadata.start();
+      const i18n = this.i18n.start();
+      const capabilities = this.capabilities.start({ injectedMetadata });
+      const notifications = this.notifications.start({
+        i18n,
+        targetDomElement: notificationsTargetDomElement,
+      });
+      const overlays = this.overlay.start({ i18n });
+
+      const core: CoreStart = {
+        capabilities,
+        i18n,
+        injectedMetadata,
+        notifications,
+        overlays,
+      };
+
+      await this.plugins.start(core);
+      await this.legacyPlatform.start({ core, targetDomElement: legacyPlatformTargetDomElement });
+    } catch (error) {
+      this.fatalErrors.add(error);
+    }
+  }
+
   public stop() {
     this.legacyPlatform.stop();
+    this.plugins.stop();
     this.notifications.stop();
     this.http.stop();
     this.uiSettings.stop();

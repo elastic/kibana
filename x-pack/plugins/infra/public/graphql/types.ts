@@ -36,8 +36,8 @@ export interface InfraSource {
   logSummaryBetween: InfraLogSummaryInterval;
 
   logItem: InfraLogItem;
-  /** A hierarchy of hosts, pods, containers, services or arbitrary groups */
-  map?: InfraResponse | null;
+  /** A snapshot of nodes */
+  snapshot?: InfraSnapshotResponse | null;
 
   metrics: InfraMetricData[];
 }
@@ -186,6 +186,8 @@ export interface InfraLogItem {
   id: string;
   /** The index where the document was found */
   index: string;
+  /** Time key for the document - derived from the source configuration timestamp and tiebreaker settings */
+  key: InfraTimeKey;
   /** An array of flattened fields and values */
   fields: InfraLogItemField[];
 }
@@ -197,30 +199,31 @@ export interface InfraLogItemField {
   value: string;
 }
 
-export interface InfraResponse {
-  nodes: InfraNode[];
+export interface InfraSnapshotResponse {
+  /** Nodes of type host, container or pod grouped by 0, 1 or 2 terms */
+  nodes: InfraSnapshotNode[];
 }
 
-export interface InfraNode {
-  path: InfraNodePath[];
+export interface InfraSnapshotNode {
+  path: InfraSnapshotNodePath[];
 
-  metric: InfraNodeMetric;
+  metric: InfraSnapshotNodeMetric;
 }
 
-export interface InfraNodePath {
+export interface InfraSnapshotNodePath {
   value: string;
 
   label: string;
 }
 
-export interface InfraNodeMetric {
-  name: InfraMetricType;
+export interface InfraSnapshotNodeMetric {
+  name: InfraSnapshotMetricType;
 
-  value: number;
+  value?: number | null;
 
-  avg: number;
+  avg?: number | null;
 
-  max: number;
+  max?: number | null;
 }
 
 export interface InfraMetricData {
@@ -284,27 +287,16 @@ export interface InfraTimerangeInput {
   from: number;
 }
 
-export interface InfraPathInput {
-  /** The type of path */
-  type: InfraPathType;
+export interface InfraSnapshotGroupbyInput {
   /** The label to use in the results for the group by for the terms group by */
   label?: string | null;
   /** The field to group by from a terms aggregation, this is ignored by the filter type */
   field?: string | null;
-  /** The fitlers for the filter group by */
-  filters?: InfraPathFilterInput[] | null;
-}
-/** A group by filter */
-export interface InfraPathFilterInput {
-  /** The label for the filter, this will be used as the group name in the final results */
-  label: string;
-  /** The query string query */
-  query: string;
 }
 
-export interface InfraMetricInput {
+export interface InfraSnapshotMetricInput {
   /** The type of metric */
-  type: InfraMetricType;
+  type: InfraSnapshotMetricType;
 }
 /** The source to be created */
 export interface CreateSourceInput {
@@ -422,7 +414,7 @@ export interface LogSummaryBetweenInfraSourceArgs {
 export interface LogItemInfraSourceArgs {
   id: string;
 }
-export interface MapInfraSourceArgs {
+export interface SnapshotInfraSourceArgs {
   timerange: InfraTimerangeInput;
 
   filterQuery?: string | null;
@@ -439,10 +431,12 @@ export interface MetricsInfraSourceArgs {
 export interface IndexFieldsInfraSourceStatusArgs {
   indexType?: InfraIndexType | null;
 }
-export interface NodesInfraResponseArgs {
-  path: InfraPathInput[];
+export interface NodesInfraSnapshotResponseArgs {
+  type: InfraNodeType;
 
-  metric: InfraMetricInput;
+  groupBy: InfraSnapshotGroupbyInput[];
+
+  metric: InfraSnapshotMetricInput;
 }
 export interface CreateSourceMutationArgs {
   /** The id of the source */
@@ -477,16 +471,7 @@ export enum InfraNodeType {
   host = 'host',
 }
 
-export enum InfraPathType {
-  terms = 'terms',
-  filters = 'filters',
-  hosts = 'hosts',
-  pods = 'pods',
-  containers = 'containers',
-  custom = 'custom',
-}
-
-export enum InfraMetricType {
+export enum InfraSnapshotMetricType {
   count = 'count',
   cpu = 'cpu',
   load = 'load',
@@ -524,14 +509,6 @@ export enum InfraMetric {
   nginxRequestRate = 'nginxRequestRate',
   nginxActiveConnections = 'nginxActiveConnections',
   nginxRequestsPerConnection = 'nginxRequestsPerConnection',
-}
-
-export enum InfraOperator {
-  gt = 'gt',
-  gte = 'gte',
-  lt = 'lt',
-  lte = 'lte',
-  eq = 'eq',
 }
 
 // ====================================================
@@ -576,7 +553,17 @@ export namespace FlyoutItemQuery {
 
     index: string;
 
+    key: Key;
+
     fields: Fields[];
+  };
+
+  export type Key = {
+    __typename?: 'InfraTimeKey';
+
+    time: number;
+
+    tiebreaker: number;
   };
 
   export type Fields = {
@@ -718,65 +705,7 @@ export namespace MetricsQuery {
   };
 }
 
-export namespace WaffleNodesQuery {
-  export type Variables = {
-    sourceId: string;
-    timerange: InfraTimerangeInput;
-    filterQuery?: string | null;
-    metric: InfraMetricInput;
-    path: InfraPathInput[];
-  };
-
-  export type Query = {
-    __typename?: 'Query';
-
-    source: Source;
-  };
-
-  export type Source = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    map?: Map | null;
-  };
-
-  export type Map = {
-    __typename?: 'InfraResponse';
-
-    nodes: Nodes[];
-  };
-
-  export type Nodes = {
-    __typename?: 'InfraNode';
-
-    path: Path[];
-
-    metric: Metric;
-  };
-
-  export type Path = {
-    __typename?: 'InfraNodePath';
-
-    value: string;
-
-    label: string;
-  };
-
-  export type Metric = {
-    __typename?: 'InfraNodeMetric';
-
-    name: InfraMetricType;
-
-    value: number;
-
-    avg: number;
-
-    max: number;
-  };
-}
-
-export namespace CreateSourceMutation {
+export namespace CreateSourceConfigurationMutation {
   export type Variables = {
     sourceId: string;
     sourceConfiguration: CreateSourceInput;
@@ -794,7 +723,17 @@ export namespace CreateSourceMutation {
     source: Source;
   };
 
-  export type Source = SourceFields.Fragment;
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
 }
 
 export namespace SourceQuery {
@@ -808,7 +747,17 @@ export namespace SourceQuery {
     source: Source;
   };
 
-  export type Source = SourceFields.Fragment;
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
 }
 
 export namespace UpdateSourceMutation {
@@ -829,7 +778,76 @@ export namespace UpdateSourceMutation {
     source: Source;
   };
 
-  export type Source = SourceFields.Fragment;
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    configuration: Configuration;
+
+    status: Status;
+  } & InfraSourceFields.Fragment;
+
+  export type Configuration = SourceConfigurationFields.Fragment;
+
+  export type Status = SourceStatusFields.Fragment;
+}
+
+export namespace WaffleNodesQuery {
+  export type Variables = {
+    sourceId: string;
+    timerange: InfraTimerangeInput;
+    filterQuery?: string | null;
+    metric: InfraSnapshotMetricInput;
+    groupBy: InfraSnapshotGroupbyInput[];
+    type: InfraNodeType;
+  };
+
+  export type Query = {
+    __typename?: 'Query';
+
+    source: Source;
+  };
+
+  export type Source = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    snapshot?: Snapshot | null;
+  };
+
+  export type Snapshot = {
+    __typename?: 'InfraSnapshotResponse';
+
+    nodes: Nodes[];
+  };
+
+  export type Nodes = {
+    __typename?: 'InfraSnapshotNode';
+
+    path: Path[];
+
+    metric: Metric;
+  };
+
+  export type Path = {
+    __typename?: 'InfraSnapshotNodePath';
+
+    value: string;
+
+    label: string;
+  };
+
+  export type Metric = {
+    __typename?: 'InfraSnapshotNodeMetric';
+
+    name: InfraSnapshotMetricType;
+
+    value?: number | null;
+
+    avg?: number | null;
+
+    max?: number | null;
+  };
 }
 
 export namespace LogEntries {
@@ -910,31 +928,17 @@ export namespace LogEntries {
   };
 }
 
-export namespace SourceFields {
+export namespace SourceConfigurationFields {
   export type Fragment = {
-    __typename?: 'InfraSource';
-
-    id: string;
-
-    version?: string | null;
-
-    updatedAt?: number | null;
-
-    configuration: Configuration;
-
-    status: Status;
-  };
-
-  export type Configuration = {
     __typename?: 'InfraSourceConfiguration';
 
     name: string;
 
     description: string;
 
-    metricAlias: string;
-
     logAlias: string;
+
+    metricAlias: string;
 
     fields: Fields;
   };
@@ -954,8 +958,10 @@ export namespace SourceFields {
 
     timestamp: string;
   };
+}
 
-  export type Status = {
+export namespace SourceStatusFields {
+  export type Fragment = {
     __typename?: 'InfraSourceStatus';
 
     indexFields: IndexFields[];
@@ -985,5 +991,17 @@ export namespace InfraTimeKeyFields {
     time: number;
 
     tiebreaker: number;
+  };
+}
+
+export namespace InfraSourceFields {
+  export type Fragment = {
+    __typename?: 'InfraSource';
+
+    id: string;
+
+    version?: string | null;
+
+    updatedAt?: number | null;
   };
 }

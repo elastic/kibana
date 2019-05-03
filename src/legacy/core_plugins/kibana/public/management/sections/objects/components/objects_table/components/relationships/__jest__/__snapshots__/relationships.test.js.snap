@@ -9,10 +9,11 @@ exports[`Relationships should render dashboards normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -75,10 +76,12 @@ exports[`Relationships should render dashboards normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -114,10 +117,11 @@ exports[`Relationships should render errors 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -163,10 +167,11 @@ exports[`Relationships should render index patterns normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -223,10 +228,12 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -281,10 +288,12 @@ exports[`Relationships should render index patterns normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -317,10 +326,11 @@ exports[`Relationships should render searches normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -383,10 +393,12 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -447,10 +459,12 @@ exports[`Relationships should render searches normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",
@@ -483,10 +497,11 @@ exports[`Relationships should render visualizations normally 1`] = `
   ownFocus={false}
   size="m"
 >
-  <EuiFlyoutHeader>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
     <EuiTitle
       size="m"
-      textTransform="none"
     >
       <h2>
         <EuiToolTip
@@ -549,10 +564,12 @@ exports[`Relationships should render visualizations normally 1`] = `
             Object {
               "actions": Array [
                 Object {
+                  "available": [Function],
                   "description": "View this saved object within Kibana",
                   "icon": "eye",
                   "name": "In app",
                   "onClick": [Function],
+                  "testId": "savedObjectsManagementRelationshipsViewInApp",
                 },
               ],
               "name": "Actions",

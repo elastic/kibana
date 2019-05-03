@@ -5,7 +5,8 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+
+import euiStyled from '../../../../../common/eui_styled_components';
 import { InfraNodeType, InfraTimerangeInput } from '../../graphql/types';
 import {
   InfraWaffleMapBounds,
@@ -58,11 +59,11 @@ export const GroupOfNodes: React.SFC<Props> = ({
   );
 };
 
-const GroupOfNodesContainer = styled.div`
+const GroupOfNodesContainer = euiStyled.div`
   margin: 0 10px;
 `;
 
-const Nodes = styled.div`
+const Nodes = euiStyled.div`
   display: flex;
   background-color: rgba(0, 0, 0, 0.05);
   flex-wrap: wrap;

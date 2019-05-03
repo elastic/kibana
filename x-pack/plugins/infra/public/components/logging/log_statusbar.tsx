@@ -5,9 +5,10 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import styled from 'styled-components';
 
-export const LogStatusbar = styled(EuiFlexGroup).attrs({
+import euiStyled from '../../../../../common/eui_styled_components';
+
+export const LogStatusbar = euiStyled(EuiFlexGroup).attrs({
   alignItems: 'center',
   gutterSize: 'none',
   justifyContent: 'flexEnd',

@@ -20,56 +20,40 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { Location } from 'history';
-import React from 'react';
-import { getMlJobId } from 'x-pack/plugins/apm/common/ml_job_constants';
-import { KibanaLink } from 'x-pack/plugins/apm/public/components/shared/Links/KibanaLink';
-import { MLJobLink } from 'x-pack/plugins/apm/public/components/shared/Links/MLJobLink';
-import {
-  FETCH_STATUS,
-  useFetcher
-} from 'x-pack/plugins/apm/public/hooks/useFetcher';
-import { getMLJob } from 'x-pack/plugins/apm/public/services/rest/ml';
+import React, { useState } from 'react';
+import { FETCH_STATUS, useFetcher } from '../../../../../hooks/useFetcher';
+import { getHasMLJob } from '../../../../../services/rest/ml';
+import { KibanaLink } from '../../../../shared/Links/KibanaLink';
+import { MLJobLink } from '../../../../shared/Links/MachineLearningLinks/MLJobLink';
+import { MLLink } from '../../../../shared/Links/MachineLearningLinks/MLLink';
 import { TransactionSelect } from './TransactionSelect';
 
 interface Props {
   hasIndexPattern: boolean;
   isCreatingJob: boolean;
-  location: Location;
-  onChangeTransaction: (value: string) => void;
   onClickCreate: () => void;
   onClose: () => void;
-  selectedTransactionType?: string;
   serviceName: string;
   serviceTransactionTypes: string[];
-  transactionType?: string;
 }
 
-const INITIAL_DATA = { count: 0, jobs: [] };
 export function MachineLearningFlyoutView({
   hasIndexPattern,
   isCreatingJob,
-  location,
-  onChangeTransaction,
   onClickCreate,
   onClose,
-  selectedTransactionType,
   serviceName,
-  serviceTransactionTypes,
-  transactionType
+  serviceTransactionTypes
 }: Props) {
-  const { data = INITIAL_DATA, status } = useFetcher(
-    () => getMLJob({ serviceName, transactionType }),
+  const [transactionType, setTransactionType] = useState(
+    serviceTransactionTypes[0]
+  );
+  const { data: hasMLJob = false, status } = useFetcher(
+    () => getHasMLJob({ serviceName, transactionType }),
     [serviceName, transactionType]
   );
 
-  if (status === FETCH_STATUS.LOADING) {
-    return null;
-  }
-
-  const hasMLJob = data.jobs.some(
-    job => job.job_id === getMlJobId(serviceName, selectedTransactionType)
-  );
+  const isLoadingMLJob = status === FETCH_STATUS.LOADING;
 
   return (
     <EuiFlyout onClose={onClose} size="s">
@@ -114,7 +98,6 @@ export function MachineLearningFlyoutView({
                 <MLJobLink
                   serviceName={serviceName}
                   transactionType={transactionType}
-                  location={location}
                 >
                   {i18n.translate(
                     'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.jobExistsDescription.viewJobLinkText',
@@ -139,10 +122,7 @@ export function MachineLearningFlyoutView({
                     defaultMessage="No APM index pattern available. To create a job, please import the APM index pattern via the {setupInstructionLink}"
                     values={{
                       setupInstructionLink: (
-                        <KibanaLink
-                          pathname={'/app/kibana'}
-                          hash={`/home/tutorial/apm`}
-                        >
+                        <KibanaLink path={`/home/tutorial/apm`}>
                           {i18n.translate(
                             'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.callout.noPatternTitle.setupInstructionLinkText',
                             {
@@ -191,14 +171,14 @@ export function MachineLearningFlyoutView({
                     Once a job is created, you can manage it and see more details in the {mlJobsPageLink}."
               values={{
                 mlJobsPageLink: (
-                  <KibanaLink pathname={'/app/ml'}>
+                  <MLLink>
                     {i18n.translate(
                       'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.manageMLJobDescription.mlJobsPageLinkText',
                       {
                         defaultMessage: 'Machine Learning jobs management page'
                       }
                     )}
-                  </KibanaLink>
+                  </MLLink>
                 )
               }}
             />{' '}
@@ -221,11 +201,11 @@ export function MachineLearningFlyoutView({
           <EuiFlexItem>
             {serviceTransactionTypes.length > 1 ? (
               <TransactionSelect
-                serviceName={serviceName}
+                selectedTransactionType={transactionType}
                 transactionTypes={serviceTransactionTypes}
-                selected={selectedTransactionType}
-                existingJobs={data.jobs}
-                onChange={onChangeTransaction}
+                onChange={(value: string) => {
+                  setTransactionType(value);
+                }}
               />
             ) : null}
           </EuiFlexItem>
@@ -234,7 +214,12 @@ export function MachineLearningFlyoutView({
               <EuiButton
                 onClick={onClickCreate}
                 fill
-                disabled={isCreatingJob || hasMLJob || !hasIndexPattern}
+                disabled={
+                  isCreatingJob ||
+                  hasMLJob ||
+                  !hasIndexPattern ||
+                  isLoadingMLJob
+                }
               >
                 {i18n.translate(
                   'xpack.apm.serviceDetails.enableAnomalyDetectionPanel.createNewJobButtonLabel',

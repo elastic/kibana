@@ -315,13 +315,13 @@ class TableListViewUi extends React.Component {
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
 
-    const selection = {
+    const selection = this.props.deleteItems ? {
       onSelectionChange: (selection) => {
         this.setState({
           selectedIds: selection.map(item => { return item.id; })
         });
       }
-    };
+    } : null;
 
     const actions = [{
       name: i18n.translate('kbn.table_list_view.listing.table.editActionName', {
@@ -345,7 +345,7 @@ class TableListViewUi extends React.Component {
     };
 
     const columns = this.props.tableColumns.slice();
-    if (!this.props.hideWriteControls) {
+    if (this.props.editItem) {
       columns.push({
         name: i18n.translate('kbn.table_list_view.listing.table.actionTitle', {
           defaultMessage: 'Actions'
@@ -362,7 +362,6 @@ class TableListViewUi extends React.Component {
         values={{ entityNamePlural: this.props.entityNamePlural }}
       />
     );
-
     return (
       <EuiInMemoryTable
         itemId="id"
@@ -374,7 +373,6 @@ class TableListViewUi extends React.Component {
         selection={selection}
         search={search}
         sorting={true}
-        hasActions={!this.state.hideWriteControls}
         data-test-subj="itemsInMemTable"
       />
     );
@@ -390,7 +388,7 @@ class TableListViewUi extends React.Component {
 
   renderListing() {
     let createButton;
-    if (!this.props.hideWriteControls) {
+    if (this.props.createItem) {
       createButton = (
         <EuiFlexItem grow={false}>
           <EuiButton
@@ -467,12 +465,11 @@ TableListViewUi.propTypes = {
   noItemsFragment: PropTypes.object,
 
   findItems: PropTypes.func.isRequired,
-  deleteItems: PropTypes.func.isRequired,
-  createItem: PropTypes.func.isRequired,
-  editItem: PropTypes.func.isRequired,
+  deleteItems: PropTypes.func,
+  createItem: PropTypes.func,
+  editItem: PropTypes.func,
 
   listingLimit: PropTypes.number,
-  hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
 
   entityName: PropTypes.string.isRequired,

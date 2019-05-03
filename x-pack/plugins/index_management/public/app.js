@@ -6,12 +6,12 @@
 
 import React, { useEffect } from 'react';
 import { HashRouter, Switch, Route, Redirect } from 'react-router-dom';
-import { BASE_PATH, UA_APP_LOAD } from '../common/constants';
+import { BASE_PATH, UIM_APP_LOAD } from '../common/constants';
 import { IndexList } from './sections/index_list';
-import { trackUserAction } from './services';
+import { trackUiMetric } from './services';
 
 export const App = () => {
-  useEffect(() => trackUserAction(UA_APP_LOAD), []);
+  useEffect(() => trackUiMetric(UIM_APP_LOAD), []);
 
   return (
     <HashRouter>

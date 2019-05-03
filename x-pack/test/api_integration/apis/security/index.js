@@ -7,6 +7,8 @@
 export default function ({ loadTestFile }) {
   describe('security', () => {
     loadTestFile(require.resolve('./basic_login'));
+    loadTestFile(require.resolve('./index_fields'));
     loadTestFile(require.resolve('./roles'));
+    loadTestFile(require.resolve('./privileges'));
   });
 }

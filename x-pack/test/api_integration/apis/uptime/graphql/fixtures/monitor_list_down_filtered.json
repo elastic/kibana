@@ -5,6 +5,8 @@
         "id": { "key": "auto-http-0X3675F89EF0612091", "url": "http://localhost:12349/" },
         "ping": {
           "timestamp": "2019-01-28T18:43:15.077Z",
+          "container": null,
+          "kubernetes": null,
           "monitor": {
             "duration": { "us": 3331 },
             "id": "auto-http-0X3675F89EF0612091",
@@ -12,7 +14,7 @@
             "name": "",
             "status": "down"
           },
-          "url": { "full": "http://localhost:12349/" }
+          "url": { "domain": "localhost", "full": "http://localhost:12349/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": null },
@@ -47,6 +49,8 @@
         "id": { "key": "auto-http-0XA8096548ECEB85B7", "url": "http://www.example.com/" },
         "ping": {
           "timestamp": "2019-01-28T18:43:07.078Z",
+          "container": null,
+          "kubernetes": null,
           "monitor": {
             "duration": { "us": 4751074 },
             "id": "auto-http-0XA8096548ECEB85B7",
@@ -54,7 +58,7 @@
             "name": "",
             "status": "down"
           },
-          "url": { "full": "http://www.example.com/" }
+          "url": { "domain": "www.example.com", "full": "http://www.example.com/" }
         },
         "upSeries": [
           { "x": 1548697620000, "y": null },

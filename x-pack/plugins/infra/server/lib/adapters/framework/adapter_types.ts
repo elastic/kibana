@@ -14,6 +14,7 @@ import { InfraMetricModel } from '../metrics/adapter_types';
 
 export const internalInfraFrameworkRequest = Symbol('internalInfraFrameworkRequest');
 
+/* eslint-disable  @typescript-eslint/unified-signatures */
 export interface InfraBackendFrameworkAdapter {
   version: string;
   exposeStaticDir(urlPath: string, dir: string): void;
@@ -60,6 +61,7 @@ export interface InfraBackendFrameworkAdapter {
     filters: JsonObject[]
   ): Promise<InfraTSVBResponse>;
 }
+/* eslint-enable  @typescript-eslint/unified-signatures */
 
 export interface InfraFrameworkRequest<
   InternalRequest extends InfraWrappableRequest = InfraWrappableRequest

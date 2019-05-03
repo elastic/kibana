@@ -22,7 +22,7 @@ import expect from '@kbn/expect';
 import { BaseParamType } from '../../param_types/base';
 import { JsonParamType } from '../../param_types/json';
 
-// eslint-disable-next-line @kbn/eslint/no-default-export
+// eslint-disable-next-line import/no-default-export
 export default describe('JSON', function () {
   const paramName = 'json_test';
   let aggParam;

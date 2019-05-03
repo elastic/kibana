@@ -8,7 +8,7 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { IStackframe } from 'x-pack/plugins/apm/typings/es_schemas/raw/fields/Stackframe';
+import { IStackframe } from '../../../../typings/es_schemas/raw/fields/Stackframe';
 import {
   borderRadius,
   fontFamily,
@@ -17,7 +17,7 @@ import {
   units
 } from '../../../style/variables';
 import { Ellipsis } from '../Icons';
-import { PropertiesTable } from '../PropertiesTable';
+import { DottedKeyValueTable } from '../DottedKeyValueTable';
 
 const VariablesContainer = styled.div`
   background: ${theme.euiColorEmptyShade};
@@ -66,7 +66,7 @@ export class Variables extends React.Component<Props> {
         </VariablesToggle>
         {this.state.isVisible && (
           <VariablesTableContainer>
-            <PropertiesTable propData={this.props.vars} />
+            <DottedKeyValueTable data={this.props.vars} maxDepth={5} />
           </VariablesTableContainer>
         )}
       </VariablesContainer>

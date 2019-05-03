@@ -8,7 +8,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { ITransactionGroup } from 'x-pack/plugins/apm/server/lib/transaction_groups/transform';
+import { ITransactionGroup } from '../../../../server/lib/transaction_groups/transform';
 import { fontSizes, truncate } from '../../../style/variables';
 import { asMillis } from '../../../utils/formatters';
 import { EmptyMessage } from '../../shared/EmptyMessage';

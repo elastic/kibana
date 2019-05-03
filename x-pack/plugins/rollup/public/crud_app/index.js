@@ -23,7 +23,7 @@ const esSection = management.getSection('elasticsearch');
 
 esSection.register('rollup_jobs', {
   visible: true,
-  display: 'Rollup Jobs',
+  display: i18n.translate('xpack.rollupJobs.appTitle', { defaultMessage: 'Rollup Jobs' }),
   order: 3,
   url: `#${CRUD_APP_BASE_PATH}/job_list`,
 });

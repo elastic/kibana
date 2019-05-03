@@ -81,6 +81,10 @@ export const createGraphqlOperationReducer = <State, Data, Variables, Error = Ap
   reduceSuccess: (
     state: State | undefined,
     action: Action<ResolveDonePayload<Variables, Data>>
+  ) => State | undefined = state => state,
+  reduceFailure: (
+    state: State | undefined,
+    action: Action<ResolveFailedPayload<Variables, Error>>
   ) => State | undefined = state => state
 ) =>
   reducerWithInitialState(initialState)
@@ -125,6 +129,7 @@ export const createGraphqlOperationReducer = <State, Data, Variables, Error = Ap
           variables: action.payload.params,
         },
       },
+      data: reduceFailure(state.data, action),
     }))
     .build();
 

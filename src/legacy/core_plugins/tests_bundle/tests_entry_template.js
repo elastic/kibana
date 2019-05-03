@@ -43,13 +43,14 @@ import { CoreSystem } from '__kibanaCore__'
 const rootDomElement = document.createElement('div');
 document.body.appendChild(rootDomElement)
 
-new CoreSystem({
+const coreSystem = new CoreSystem({
   injectedMetadata: {
     version: '1.2.3',
     buildNumber: 1234,
     legacyMetadata: {
       version: '1.2.3',
       buildNum: 1234,
+      devMode: true,
       uiSettings: {
         defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
         user: {}
@@ -58,6 +59,7 @@ new CoreSystem({
     csp: {
       warnLegacyBrowsers: false,
     },
+    uiPlugins: [],
     vars: {
       kbnIndex: '.kibana',
       esShardTimeout: 1500,
@@ -83,6 +85,27 @@ new CoreSystem({
         enabled: true,
         enableExternalUrls: true
       },
+      uiCapabilities: {
+        navLinks: {
+          myLink: true,
+          notMyLink: true,
+        },
+        discover: {
+          showWriteControls: true
+        },
+        visualize: {
+          save: true
+        },
+        dashboard: {
+          showWriteControls: true
+        },
+        timelion: {
+          save: true
+        },
+      },
+      interpreterConfig: {
+        enableInVisualize: true
+      }
     },
   },
   rootDomElement,
@@ -90,5 +113,11 @@ new CoreSystem({
   requireLegacyFiles: () => {
     ${bundle.getRequires().join('\n  ')}
   }
-}).setup()
+})
+
+coreSystem
+  .setup()
+  .then(() => {
+    return coreSystem.start();
+  });
 `;

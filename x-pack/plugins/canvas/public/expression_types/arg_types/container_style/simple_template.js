@@ -6,11 +6,11 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ColorPickerMini } from '../../../components/color_picker_mini';
+import { ColorPickerPopover } from '../../../components/color_picker_popover';
 
 export const SimpleTemplate = ({ getArgValue, setArgValue, workpad }) => (
   <div style={{ fontSize: 0 }}>
-    <ColorPickerMini
+    <ColorPickerPopover
       value={getArgValue('backgroundColor')}
       onChange={color => setArgValue('backgroundColor', color)}
       colors={workpad.colors}

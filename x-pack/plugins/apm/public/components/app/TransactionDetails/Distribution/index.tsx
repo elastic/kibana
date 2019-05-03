@@ -9,18 +9,15 @@ import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { Location } from 'history';
 import React, { Component } from 'react';
-import {
-  fromQuery,
-  history,
-  toQuery
-} from 'x-pack/plugins/apm/public/components/shared/Links/url_helpers';
-import { IUrlParams } from 'x-pack/plugins/apm/public/store/urlParams';
-import { ITransactionDistributionAPIResponse } from 'x-pack/plugins/apm/server/lib/transactions/distribution';
-import { IBucket } from 'x-pack/plugins/apm/server/lib/transactions/distribution/get_buckets/transform';
+import { ITransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+import { IBucket } from '../../../../../server/lib/transactions/distribution/get_buckets/transform';
+import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { getTimeFormatter, timeUnit } from '../../../../utils/formatters';
 // @ts-ignore
 import Histogram from '../../../shared/charts/Histogram';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
+import { fromQuery, toQuery } from '../../../shared/Links/url_helpers';
+import { history } from '../../../../utils/history';
 
 interface IChartPoint {
   sample?: IBucket['sample'];

@@ -25,7 +25,7 @@ import { chromeHeaderNavControlsRegistry } from 'ui/registry/chrome_header_nav_c
 
 const module = uiModules.get('kibana');
 
-module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
+module.directive('headerGlobalNav', (reactDirective, chrome, Private, uiCapabilities) => {
   const { recentlyAccessed } = require('ui/persisted_log');
   const navControls = Private(chromeHeaderNavControlsRegistry);
   const homeHref = chrome.addBasePath('/app/kibana#/home');
@@ -38,12 +38,14 @@ module.directive('headerGlobalNav', (reactDirective, chrome, Private) => {
   {},
   // angular injected React props
   {
+    badge$: chrome.badge.get$(),
     breadcrumbs$: chrome.breadcrumbs.get$(),
     helpExtension$: chrome.helpExtension.get$(),
     navLinks$: chrome.getNavLinks$(),
     recentlyAccessed$: recentlyAccessed.get$(),
     forceAppSwitcherNavigation$: chrome.getForceAppSwitcherNavigation$(),
     navControls,
-    homeHref
+    homeHref,
+    uiCapabilities,
   });
 });

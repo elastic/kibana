@@ -121,7 +121,7 @@ export const createInstallRoute = () => ({
           const createIndexParams = {
             index: index,
             body: {
-              settings: { index: { number_of_shards: 1, number_of_replicas: 0 } },
+              settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
           };
@@ -160,7 +160,7 @@ export const createInstallRoute = () => ({
         );
       }
       const errors = createResults.saved_objects.filter(savedObjectCreateResult => {
-        return savedObjectCreateResult.hasOwnProperty('error');
+        return Boolean(savedObjectCreateResult.error);
       });
       if (errors.length > 0) {
         server.log(

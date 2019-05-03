@@ -641,10 +641,10 @@ function isIndexPatternNameValid(name, indexPatternNames, index) {
   }
 
   // escape . and + to stop the regex matching more than it should.
-  let newName = name.replace('.', '\\.');
-  newName = newName.replace('+', '\\+');
+  let newName = name.replace(/\./g, '\\.');
+  newName = newName.replace(/\+/g, '\\+');
   // replace * with .* to make the wildcard match work.
-  newName = newName.replace('*', '.*');
+  newName = newName.replace(/\*/g, '.*');
   const reg = new RegExp(`^${newName}$`);
   if (index.match(reg) === null) { // name should match index
     return (

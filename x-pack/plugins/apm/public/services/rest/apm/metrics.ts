@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MetricsChartAPIResponse } from 'x-pack/plugins/apm/server/lib/metrics/get_all_metrics_chart_data';
-import { IUrlParams } from '../../../store/urlParams';
+import { MetricsChartAPIResponse } from '../../../../server/lib/metrics/get_all_metrics_chart_data';
 import { callApi } from '../callApi';
 import { getEncodedEsQuery } from './apm';
 
@@ -14,7 +13,12 @@ export async function loadMetricsChartDataForService({
   start,
   end,
   kuery
-}: IUrlParams) {
+}: {
+  serviceName: string;
+  start: string;
+  end: string;
+  kuery: string | undefined;
+}) {
   return callApi<MetricsChartAPIResponse>({
     pathname: `/api/apm/services/${serviceName}/metrics/charts`,
     query: {

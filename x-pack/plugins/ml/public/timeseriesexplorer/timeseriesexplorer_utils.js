@@ -98,7 +98,8 @@ export function processDataForFocusAnomalies(
   chartData,
   anomalyRecords,
   timeFieldName,
-  aggregationInterval) {
+  aggregationInterval,
+  modelPlotEnabled) {
 
   const timesToAddPointsFor = [];
 
@@ -122,10 +123,16 @@ export function processDataForFocusAnomalies(
   timesToAddPointsFor.sort((a, b) => a - b);
 
   timesToAddPointsFor.forEach((time) => {
-    chartData.push({
+    const pointToAdd = {
       date: new Date(time),
       value: null
-    });
+    };
+
+    if (modelPlotEnabled === true) {
+      pointToAdd.upper = null;
+      pointToAdd.lower = null;
+    }
+    chartData.push(pointToAdd);
   });
 
   // Iterate through the anomaly records adding the
@@ -257,10 +264,9 @@ export function findChartPointForAnomalyTime(chartData, anomalyTime, aggregation
     // which contains the anomalous bucket.
     let foundItem;
     const intervalMs = aggregationInterval.asMilliseconds();
-    const anomalyTimeForAggInt = (Math.floor(anomalyTime / intervalMs)) * intervalMs;
     for (let i = 0; i < chartData.length; i++) {
       const itemTime = chartData[i].date.getTime();
-      if (itemTime === anomalyTimeForAggInt) {
+      if (anomalyTime - itemTime < intervalMs) {
         foundItem = chartData[i];
         break;
       }

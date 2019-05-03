@@ -19,7 +19,7 @@
 
 import { ordinalSuffix } from '../../utils/ordinal_suffix';
 import percentsEditor from '../controls/percentiles.html';
-import '../../number_list';
+import '../number_list';
 import { MetricAggType } from './metric_agg_type';
 import { getResponseAggConfigClass } from './get_response_agg_config_class';
 import { getPercentileValue } from './percentiles_get_value';

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -53,12 +53,12 @@ export class TOCEntry extends React.Component {
   }
 
   _openLayerPanelWithCheck = () => {
-    const selectedLayer = this.props.getSelectedLayerSelector();
+    const { selectedLayer, hasDirtyStateSelector } = this.props;
     if (selectedLayer && selectedLayer.getId() === this.props.layer.getId()) {
       return;
     }
 
-    if (this.props.hasDirtyStateSelector()) {
+    if (hasDirtyStateSelector) {
       this.setState({
         shouldShowModal: true
       });
@@ -156,7 +156,9 @@ export class TOCEntry extends React.Component {
     if (!isReadOnly) {
       sortIcon = (
         <EuiFlexItem grow={false}>
-          <span className="mapTocEntry__grab"><EuiIcon type="grab"/></span>
+          <span className="mapTocEntry__grab" {...this.props.dragHandleProps}>
+            <EuiIcon type="grab"/>
+          </span>
         </EuiFlexItem>
       );
     }
@@ -203,10 +205,10 @@ export class TOCEntry extends React.Component {
     }
 
     return (
-      <EuiFlexItem>
+      <Fragment>
         <EuiSpacer size="s"/>
         {tocDetails}
-      </EuiFlexItem>
+      </Fragment>
     );
   }
 

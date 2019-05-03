@@ -323,8 +323,8 @@
             "deprecationReason": null
           },
           {
-            "name": "map",
-            "description": "A hierarchy of hosts, pods, containers, services or arbitrary groups",
+            "name": "snapshot",
+            "description": "A snapshot of nodes",
             "args": [
               {
                 "name": "timerange",
@@ -347,7 +347,7 @@
                 "defaultValue": null
               }
             ],
-            "type": { "kind": "OBJECT", "name": "InfraResponse", "ofType": null },
+            "type": { "kind": "OBJECT", "name": "InfraSnapshotResponse", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1383,6 +1383,18 @@
             "deprecationReason": null
           },
           {
+            "name": "key",
+            "description": "Time key for the document - derived from the source configuration timestamp and tiebreaker settings",
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": { "kind": "OBJECT", "name": "InfraTimeKey", "ofType": null }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "fields",
             "description": "An array of flattened fields and values",
             "args": [],
@@ -1486,15 +1498,25 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraResponse",
+        "name": "InfraSnapshotResponse",
         "description": "",
         "fields": [
           {
             "name": "nodes",
-            "description": "",
+            "description": "Nodes of type host, container or pod grouped by 0, 1 or 2 terms",
             "args": [
               {
-                "name": "path",
+                "name": "type",
+                "description": "",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": { "kind": "ENUM", "name": "InfraNodeType", "ofType": null }
+                },
+                "defaultValue": null
+              },
+              {
+                "name": "groupBy",
                 "description": "",
                 "type": {
                   "kind": "NON_NULL",
@@ -1505,7 +1527,11 @@
                     "ofType": {
                       "kind": "NON_NULL",
                       "name": null,
-                      "ofType": { "kind": "INPUT_OBJECT", "name": "InfraPathInput", "ofType": null }
+                      "ofType": {
+                        "kind": "INPUT_OBJECT",
+                        "name": "InfraSnapshotGroupbyInput",
+                        "ofType": null
+                      }
                     }
                   }
                 },
@@ -1517,7 +1543,11 @@
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "INPUT_OBJECT", "name": "InfraMetricInput", "ofType": null }
+                  "ofType": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "InfraSnapshotMetricInput",
+                    "ofType": null
+                  }
                 },
                 "defaultValue": null
               }
@@ -1531,7 +1561,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "InfraNode", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "InfraSnapshotNode", "ofType": null }
                 }
               }
             },
@@ -1546,20 +1576,10 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "InfraPathInput",
+        "name": "InfraSnapshotGroupbyInput",
         "description": "",
         "fields": null,
         "inputFields": [
-          {
-            "name": "type",
-            "description": "The type of path",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraPathType", "ofType": null }
-            },
-            "defaultValue": null
-          },
           {
             "name": "label",
             "description": "The label to use in the results for the group by for the terms group by",
@@ -1571,78 +1591,6 @@
             "description": "The field to group by from a terms aggregation, this is ignored by the filter type",
             "type": { "kind": "SCALAR", "name": "String", "ofType": null },
             "defaultValue": null
-          },
-          {
-            "name": "filters",
-            "description": "The fitlers for the filter group by",
-            "type": {
-              "kind": "LIST",
-              "name": null,
-              "ofType": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": { "kind": "INPUT_OBJECT", "name": "InfraPathFilterInput", "ofType": null }
-              }
-            },
-            "defaultValue": null
-          }
-        ],
-        "interfaces": null,
-        "enumValues": null,
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraPathType",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "terms", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "filters",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "hosts", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "pods", "description": "", "isDeprecated": false, "deprecationReason": null },
-          {
-            "name": "containers",
-            "description": "",
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          { "name": "custom", "description": "", "isDeprecated": false, "deprecationReason": null }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "INPUT_OBJECT",
-        "name": "InfraPathFilterInput",
-        "description": "A group by filter",
-        "fields": null,
-        "inputFields": [
-          {
-            "name": "label",
-            "description": "The label for the filter, this will be used as the group name in the final results",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "defaultValue": null
-          },
-          {
-            "name": "query",
-            "description": "The query string query",
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "String", "ofType": null }
-            },
-            "defaultValue": null
           }
         ],
         "interfaces": null,
@@ -1651,7 +1599,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "InfraMetricInput",
+        "name": "InfraSnapshotMetricInput",
         "description": "",
         "fields": null,
         "inputFields": [
@@ -1661,7 +1609,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraMetricType", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "InfraSnapshotMetricType", "ofType": null }
             },
             "defaultValue": null
           }
@@ -1672,7 +1620,7 @@
       },
       {
         "kind": "ENUM",
-        "name": "InfraMetricType",
+        "name": "InfraSnapshotMetricType",
         "description": "",
         "fields": null,
         "inputFields": null,
@@ -1690,7 +1638,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraNode",
+        "name": "InfraSnapshotNode",
         "description": "",
         "fields": [
           {
@@ -1706,7 +1654,7 @@
                 "ofType": {
                   "kind": "NON_NULL",
                   "name": null,
-                  "ofType": { "kind": "OBJECT", "name": "InfraNodePath", "ofType": null }
+                  "ofType": { "kind": "OBJECT", "name": "InfraSnapshotNodePath", "ofType": null }
                 }
               }
             },
@@ -1720,7 +1668,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "OBJECT", "name": "InfraNodeMetric", "ofType": null }
+              "ofType": { "kind": "OBJECT", "name": "InfraSnapshotNodeMetric", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1733,7 +1681,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraNodePath",
+        "name": "InfraSnapshotNodePath",
         "description": "",
         "fields": [
           {
@@ -1768,7 +1716,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "InfraNodeMetric",
+        "name": "InfraSnapshotNodeMetric",
         "description": "",
         "fields": [
           {
@@ -1778,7 +1726,7 @@
             "type": {
               "kind": "NON_NULL",
               "name": null,
-              "ofType": { "kind": "ENUM", "name": "InfraMetricType", "ofType": null }
+              "ofType": { "kind": "ENUM", "name": "InfraSnapshotMetricType", "ofType": null }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1787,11 +1735,7 @@
             "name": "value",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1799,11 +1743,7 @@
             "name": "avg",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           },
@@ -1811,11 +1751,7 @@
             "name": "max",
             "description": "",
             "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": { "kind": "SCALAR", "name": "Float", "ofType": null }
-            },
+            "type": { "kind": "SCALAR", "name": "Float", "ofType": null },
             "isDeprecated": false,
             "deprecationReason": null
           }
@@ -3210,22 +3146,6 @@
             "isDeprecated": false,
             "deprecationReason": null
           }
-        ],
-        "possibleTypes": null
-      },
-      {
-        "kind": "ENUM",
-        "name": "InfraOperator",
-        "description": "",
-        "fields": null,
-        "inputFields": null,
-        "interfaces": null,
-        "enumValues": [
-          { "name": "gt", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "gte", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "lt", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "lte", "description": "", "isDeprecated": false, "deprecationReason": null },
-          { "name": "eq", "description": "", "isDeprecated": false, "deprecationReason": null }
         ],
         "possibleTypes": null
       }

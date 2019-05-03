@@ -5,8 +5,8 @@
  */
 
 import Joi from 'joi';
-import { CMBeat } from 'x-pack/plugins/beats_management/common/domain_types';
 import { REQUIRED_LICENSES } from '../../../common/constants/security';
+import { CMBeat } from '../../../common/domain_types';
 import { BaseReturnType, ReturnTypeUpdate } from '../../../common/return_types';
 import { FrameworkRequest, internalUser } from '../../lib/adapters/framework/adapter_types';
 import { CMServerLibs } from '../../lib/types';
