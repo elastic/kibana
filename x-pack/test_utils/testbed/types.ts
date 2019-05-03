@@ -34,7 +34,7 @@ export interface TestBed<T> {
    */
   exists: (testSubject: T, count?: number) => boolean;
   /**
-   * Pass it a `test-data-subj` and it will return an Enzyme reactWrapper of the node.
+   * Pass it a `data-test-subj` and it will return an Enzyme reactWrapper of the node.
    * You can target a nested test subject by separating it with a dot ('.');
    *
    * @param testSubject The data test subject to look for

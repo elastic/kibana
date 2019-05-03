@@ -1,16 +1,16 @@
 # Testbed utils
 
-The Testbed is a small library to help testing React components. It is most usefull when testing application "sections" (or pages) in **integration** 
+The Testbed is a small library to help testing React components. It is most useful when testing application "sections" (or pages) in **integration** 
 than when unit testing single components in isolation.
 
 ## Motivation
 
-We dediced (the Elasticsearch UI team) to build this small abstraction to help with our "client integration" testing. When testing complete "pages" 
-we get to test our application in a way that is closer to how a user would interact with it in a browser. It also gives us more confidence in 
+The Elasticsearch UI team built this to support client-side integration testing. When testing complete "pages"  we get to test 
+our application in a way that is closer to how a user would interact with it in a browser. It also gives us more confidence in 
 our tests and avoids testing implementation details. 
 
-We test everything up to the HTTP Requests made from the client to the Node.js API server. Those requets need to be mocked. This means that with a good 
-**API integration test** coverage of those  endpoints, we can reduce the functional tests to a minium.
+We test everything up to the HTTP Requests made from the client to the Node.js API server. Those requests need to be mocked. This means that with a good 
+**API integration test** coverage of those  endpoints, we can reduce the functional tests to a minimum.
 
 With this in mind, we needed a way to easily mount a component on a React Router `<Route>` (this component could possibily have _child_ routes and 
 need access to the browser URL parameters and query params). In order to solve that, the Testbed wraps the component around a `MemoryRouter`.
@@ -20,7 +20,7 @@ inside a redux store provider.
 
 ## How to use it
 
-At the top of your test file (you only need to declare it once), register a new Testbed by providing a React Component an an optional configuration object. 
+At the top of your test file (you only need to declare it once), register a new Testbed by providing a React Component and an optional configuration object. 
 You receive in return a function that you need to call to mount the component in your test.
 
 **Example 1**
@@ -68,26 +68,54 @@ describe('<RemoteClusterList />', () => {
 });
 ```
 
+## Test subjects
+
+The Testbed utils are meant to be used with test subjects. Test subjects are elements that are tagged specifically for selecting from tests. Use test subjects over CSS selectors when possible.
+
+```html
+<div id="container”>
+  <CustomButton id="clickMe” data-test-subj=”containerButton” />
+</div>
+```
+
+```ts
+find('containerButton').simulate('click');
+```
+
+If you need to access a CSS selector, target first the closest test subject.
+
+```ts
+const text = find('containerButton').find('.link--active').text();
+```
+
+## Typescript
+
+If you use Typescript, you can provide a string union type for your test subjects and you will get **autocomplete** on the test subjects in your test. To automate finding all the subjects on the page, use the Chrome extension below.
+
+```ts
+type TestSubjects = 'indicesTable' | 'createIndexButton' | 'pageTitle';
+
+export const setup = registerTestBed<TestSubjects>(MyComponent);
+```
+
 ## Chrome extension
 
 There is a small Chrome extension that you can install in order to track the test subject on the current page. As it is meant to be used 
 during development, the extension is only active when navigating a `localhost` URL.
 
-You will find the "Test subjects finder" extension in the `x-pack/test_utils/chrome_extension` folder. In order to install it, simply open the
-"extensions" window in Chrome then drag and drop the `test_subjects_finder.crx` file on the window.
+You will find the "Test subjects finder" extension in the `x-pack/test_utils/chrome_extension` folder.
 
-You can specify a DOM node (the tree "root") from which the test subjects will be found. If you don't specify any, the document `<body>` 
-will be used. The output format can either be `Typescript` (to export a string union type) or `List`. If you use Typescript, 
-the union type will give you autocomplete on the test subjects in your test, you just need to provide the union type when registring the Testbed.
+### Install the extension
 
-```ts
-// my_component.helpers.ts
+- open the "extensions" window in Chrome
+- activate the "Developer mode" (top right corner)
+- drag and drop the `test_subjects_finder` folder on the window.
 
-type TestSubjects = 'addButton'
- | 'autoFollowPatternForm';
+You can specify a DOM node (the tree "root") from which the test subjects will be found. If you don't specify any, the document `<body>`  will be used. The output format can either be `Typescript` (to export a string union type) or `List`.
 
-export const setup = registerTestBed<TestSubjects>(MyComponent);
-```
+### Output
+
+Once you start tracking the test subjects on the page, the output will be printed in the **Chrome dev console**.
 
 ## API
 
@@ -110,8 +138,8 @@ The `testBedConfig` has the following properties (all **optional**)
   - `initialEntries` The React Router **initial entries** setting. (default: `['/']`. [see doc](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md))
   - `initialIndex` The React Router **initial index** setting (default: `0`)
   - `componentRoutePath` The route **path** for the mounted component (default: `"/"`)
-  - `onRouter` A callBack that will be called with the React Router instance when the component is mounted
-- `store` An redux store. You can also provide a function that returns a store. (default: `null`)
+  - `onRouter` A callback that will be called with the React Router instance when the component is mounted
+- `store` A redux store. You can also provide a function that returns a store. (default: `null`)
 
 
 ## `setup([props])`
@@ -148,7 +176,7 @@ expect(exists('myTestSubject')).toBe(true);
 
 #### `find(testDataSubject)`
 
-Pass it a `test-data-subj` and it will return an Enzyme reactWrapper of the node. You can provide a nested path to access the
+Pass it a `data-test-subj` and it will return an Enzyme reactWrapper of the node. You can provide a nested path to access the
 test subject by separating the parent and child with a dot (e.g. `myForm.followerIndexName`).
 
 ```js
@@ -188,7 +216,7 @@ An object with the following methods:
 
 ##### `getMetaData(testSubject)`
 
-Parse an EUI table and return meta data information about its rows and columns. You can provide a nested path to access the
+Parse an EUI table and return metadata information about its rows and columns. You can provide a nested path to access the
 test subject by separating the parent and child with a dot (e.g. `mySection.myTable`). It returns an object with two properties:
 
 - `tableCellsValues` a two dimensional array of rows + columns with the text content of each cell of the table
