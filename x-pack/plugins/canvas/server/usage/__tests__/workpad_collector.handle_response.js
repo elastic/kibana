@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { handleResponse } from '../collector';
+import { handleResponse } from '../workpad_collector';
 import { workpads } from '../../../__tests__/fixtures/workpads';
 
 const getMockResponse = (mocks = workpads) => ({
