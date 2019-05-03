@@ -38,21 +38,28 @@ import {
   EuiFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
   EuiFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { Storage } from 'ui/storage';
+import { data } from 'plugins/data';
+import { fetchIndexPatterns } from '../../lib/fetch_index_patterns';
+const { QueryBar } = data.query.ui;
+const localStorage = new Storage(window.localStorage);
 
 class GaugePanelConfigUi extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { selectedTab: 'data' };
+    this.state = {
+      selectedTab: 'data',
+      indexPatternForQuery: {},
+    };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
     const { model } = this.props;
     const parts = {};
     if (!model.gauge_color_rules ||
@@ -63,6 +70,19 @@ class GaugePanelConfigUi extends Component {
     if (model.gauge_inner_width == null) parts.gauge_inner_width = 10;
     if (model.gauge_style == null) parts.gauge_style = 'half';
     this.props.onChange(parts);
+    await this.fetchIndexPatternsForQuery();
+  }
+
+  fetchIndexPatternsForQuery = async () => {
+    const searchIndexPattern = this.props.model.index_pattern ?
+      this.props.model.index_pattern :
+      this.props.model.default_index_pattern;
+    const indexPatternObject = await fetchIndexPatterns(searchIndexPattern);
+    this.setState({ indexPatternForQuery: indexPatternObject });
+  }
+
+  handleSubmit = query => {
+    this.props.onChange({ filter: query.query });
   }
 
   switchTab(selectedTab) {
@@ -72,6 +92,7 @@ class GaugePanelConfigUi extends Component {
   render() {
     const { selectedTab } = this.state;
     const { intl } = this.props;
+    // TODO: change default filter to {language: 'lucene', query: ''}
     const defaults = {
       gauge_max: '',
       filter: '',
@@ -109,6 +130,7 @@ class GaugePanelConfigUi extends Component {
           name={this.props.name}
           visData$={this.props.visData$}
           onChange={this.props.onChange}
+          indexPatterns={this.state.indexPatternForQuery}
         />
       );
     } else {
@@ -143,11 +165,17 @@ class GaugePanelConfigUi extends Component {
                   />)}
                   fullWidth
                 >
-                  <EuiFieldText
-                    style={{ border: '1px solid blue' }}
-                    onChange={handleTextChange('filter')}
-                    value={model.filter}
-                    fullWidth
+                  <QueryBar
+                    query={{
+                      language: model.filter.language ? model.filter.language : 'lucene',
+                      query: model.filter.query,
+                    }}
+                    screenTitle={'GaugePanelConfigQuery'}
+                    onSubmit={this.handleSubmit}
+                    appName={'VisEditor'}
+                    indexPatterns={[this.state.indexPatternForQuery]}
+                    store={localStorage || {}}
+                    showDatePicker={false}
                   />
                 </EuiFormRow>
               </EuiFlexItem>
