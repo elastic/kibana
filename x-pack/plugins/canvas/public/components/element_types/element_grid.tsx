@@ -53,14 +53,14 @@ export const ElementGrid = ({
 
   return (
     <EuiFlexGrid gutterSize="l" columns={4}>
-      {map(elements, (element: ElementSpec | CustomElement, name) => {
-        const { help, displayName, image } = element;
+      {map(elements, (element: ElementSpec | CustomElement, index) => {
+        const { help = '', name, displayName, image } = element;
         const whenClicked = () => handleClick(element);
 
         const card = (
-          <EuiFlexItem key={name} className="canvasElementCard__wrapper">
+          <EuiFlexItem key={index} className="canvasElementCard__wrapper">
             <ElementCard
-              title={displayName}
+              title={displayName || name}
               description={help}
               image={image}
               onClick={whenClicked}
