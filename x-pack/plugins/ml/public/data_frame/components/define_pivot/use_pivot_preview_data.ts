@@ -6,6 +6,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { StaticIndexPattern } from 'ui/index_patterns';
+
 import { dictionaryToArray } from '../../../../common/types/common';
 import { ml } from '../../../services/ml_api_service';
 
@@ -18,7 +20,6 @@ import {
   PivotGroupByConfigDict,
   SimpleQuery,
 } from '../../common';
-import { IndexPatternContextValue } from '../../common/index_pattern_context';
 
 export enum PIVOT_PREVIEW_STATUS {
   UNUSED,
@@ -27,16 +28,15 @@ export enum PIVOT_PREVIEW_STATUS {
   ERROR,
 }
 
-type NullablePreviewRequest = DataFramePreviewRequest | null;
 export interface UsePivotPreviewDataReturnType {
   errorMessage: string;
   status: PIVOT_PREVIEW_STATUS;
   dataFramePreviewData: Array<Dictionary<any>>;
-  previewRequest: NullablePreviewRequest;
+  previewRequest: DataFramePreviewRequest;
 }
 
 export const usePivotPreviewData = (
-  indexPattern: IndexPatternContextValue,
+  indexPattern: StaticIndexPattern,
   query: SimpleQuery,
   aggs: PivotAggsConfigDict,
   groupBy: PivotGroupByConfigDict
@@ -44,50 +44,46 @@ export const usePivotPreviewData = (
   const [errorMessage, setErrorMessage] = useState('');
   const [status, setStatus] = useState(PIVOT_PREVIEW_STATUS.UNUSED);
   const [dataFramePreviewData, setDataFramePreviewData] = useState([]);
-  const [previewRequest, setPreviewRequest] = useState<NullablePreviewRequest>(null);
 
-  if (indexPattern !== null) {
-    const aggsArr = dictionaryToArray(aggs);
-    const groupByArr = dictionaryToArray(groupBy);
+  const aggsArr = dictionaryToArray(aggs);
+  const groupByArr = dictionaryToArray(groupBy);
 
-    const getDataFramePreviewData = async () => {
-      if (aggsArr.length === 0 || groupByArr.length === 0) {
-        setDataFramePreviewData([]);
-        return;
-      }
+  const previewRequest = getDataFramePreviewRequest(indexPattern.title, query, groupByArr, aggsArr);
 
-      setErrorMessage('');
-      setStatus(PIVOT_PREVIEW_STATUS.LOADING);
+  const getDataFramePreviewData = async () => {
+    if (aggsArr.length === 0 || groupByArr.length === 0) {
+      setDataFramePreviewData([]);
+      return;
+    }
 
-      const request = getDataFramePreviewRequest(indexPattern.title, query, groupByArr, aggsArr);
-      setPreviewRequest(request);
+    setErrorMessage('');
+    setStatus(PIVOT_PREVIEW_STATUS.LOADING);
 
-      try {
-        const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(request);
-        setDataFramePreviewData(resp.preview);
-        setStatus(PIVOT_PREVIEW_STATUS.LOADED);
-      } catch (e) {
-        setErrorMessage(JSON.stringify(e));
-        setDataFramePreviewData([]);
-        setStatus(PIVOT_PREVIEW_STATUS.ERROR);
-      }
-    };
+    try {
+      const resp: any = await ml.dataFrame.getDataFrameTransformsPreview(previewRequest);
+      setDataFramePreviewData(resp.preview);
+      setStatus(PIVOT_PREVIEW_STATUS.LOADED);
+    } catch (e) {
+      setErrorMessage(JSON.stringify(e));
+      setDataFramePreviewData([]);
+      setStatus(PIVOT_PREVIEW_STATUS.ERROR);
+    }
+  };
 
-    useEffect(
-      () => {
-        getDataFramePreviewData();
-      },
-      [
-        indexPattern.title,
-        aggsArr.map(a => `${a.agg} ${a.field} ${a.aggName}`).join(' '),
-        groupByArr
-          .map(
-            g => `${g.agg} ${g.field} ${g.aggName} ${groupByConfigHasInterval(g) ? g.interval : ''}`
-          )
-          .join(' '),
-        query.query_string.query,
-      ]
-    );
-  }
+  useEffect(
+    () => {
+      getDataFramePreviewData();
+    },
+    [
+      indexPattern.title,
+      aggsArr.map(a => `${a.agg} ${a.field} ${a.aggName}`).join(' '),
+      groupByArr
+        .map(
+          g => `${g.agg} ${g.field} ${g.aggName} ${groupByConfigHasInterval(g) ? g.interval : ''}`
+        )
+        .join(' '),
+      query.query_string.query,
+    ]
+  );
   return { errorMessage, status, dataFramePreviewData, previewRequest };
 };

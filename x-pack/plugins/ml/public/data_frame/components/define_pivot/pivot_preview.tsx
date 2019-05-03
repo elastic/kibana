@@ -191,18 +191,16 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
         <EuiFlexItem>
           <PreviewTitle />
         </EuiFlexItem>
-        {previewRequest !== null && (
-          <EuiFlexItem grow={false}>
-            <EuiCopy
-              beforeMessage={euiCopyText}
-              textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}
-            >
-              {(copy: () => void) => (
-                <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
-              )}
-            </EuiCopy>
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem grow={false}>
+          <EuiCopy
+            beforeMessage={euiCopyText}
+            textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}
+          >
+            {(copy: () => void) => (
+              <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
+            )}
+          </EuiCopy>
+        </EuiFlexItem>
       </EuiFlexGroup>
       {status === PIVOT_PREVIEW_STATUS.LOADING && <EuiProgress size="xs" color="accent" />}
       {status !== PIVOT_PREVIEW_STATUS.LOADING && (
