@@ -5,10 +5,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
   className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
 >
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -130,10 +130,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
     </div>
   </div>
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -255,10 +255,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls 1`] = `
     </div>
   </div>
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -387,10 +387,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid with controls and filter
   className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
 >
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -519,10 +519,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid with filter 1`] = `
   className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
 >
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -565,10 +565,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
   className="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
 >
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -604,10 +604,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
     </button>
   </div>
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span
@@ -643,10 +643,10 @@ exports[`Storyshots components/ElementTypes/ElementGrid without controls 1`] = `
     </button>
   </div>
   <div
-    className="euiFlexItem canvasElementCard__wrapper"
+    className="euiFlexItem canvasElementCard"
   >
     <button
-      className="euiCard euiCard--leftAligned euiCard--isClickable canvasElementCard"
+      className="euiCard euiCard--leftAligned euiCard--isClickable canvasCard"
       onClick={[Function]}
     >
       <span

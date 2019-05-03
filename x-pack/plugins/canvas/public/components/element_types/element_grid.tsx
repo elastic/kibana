@@ -8,16 +8,11 @@ import PropTypes from 'prop-types';
 import { map, includes } from 'lodash';
 // @ts-ignore no @types definition
 import lowerCase from 'lodash.lowercase';
-import {
-  EuiFlexItem,
-  EuiFlexGrid,
-  // @ts-ignore unconverted EUI component
-  EuiCard,
-  EuiIcon,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import { ElementControls } from './element_controls';
 import { CustomElement } from '../../lib/custom_element';
 import { ElementSpec } from '../../../canvas_plugin_src/elements/types';
+import { ElementCard } from '../element_card';
 
 export interface Props {
   /**
@@ -63,15 +58,12 @@ export const ElementGrid = ({
         const whenClicked = () => handleClick(element);
 
         const card = (
-          <EuiFlexItem key={name} className="canvasElementCard">
-            <EuiCard
-              textAlign="left"
-              image={image}
-              icon={image ? null : <EuiIcon type="canvasApp" size="xxl" />}
+          <EuiFlexItem key={name} className="canvasElementCard__wrapper">
+            <ElementCard
               title={displayName}
               description={help}
+              image={image}
               onClick={whenClicked}
-              className={image ? 'canvasCard' : 'canvasCard canvasCard--hasIcon'}
             />
             {showControls && onEdit && onDelete && (
               <ElementControls onEdit={() => onEdit(element)} onDelete={() => onDelete(element)} />
