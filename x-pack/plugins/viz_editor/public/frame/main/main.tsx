@@ -29,7 +29,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useReducer } from 'react';
+import React, { useReducer, useState } from 'react';
 import {
   datasourceRegistry,
   editorRegistry,
@@ -37,7 +37,7 @@ import {
   initialState,
   Suggestion,
   VisModel,
-} from '../../../public';
+} from '../..';
 import { ExpressionRenderer } from '../expression_renderer';
 
 type Action =
@@ -178,12 +178,14 @@ export function Main(props: MainProps) {
     iconType: icon as any,
   }));
 
+  const [flyoutIsOpen, setFlyoutIsOpen] = useState(false);
+
   // TODO: Hook this up
   let flyout;
-  if (false) {
+  if (flyoutIsOpen) {
     flyout = (
       <EuiFlyout
-        onClose={() => {}}
+        onClose={() => { setFlyoutIsOpen(false); }}
         aria-labelledby="lnsInspectFlyoutTitle"
       >
         <EuiFlyoutHeader hasBorder>
@@ -254,6 +256,7 @@ export function Main(props: MainProps) {
             <EuiPageContentHeaderSection>
               {/* TODO: Hook up to flyout*/}
               <EuiButtonIcon
+                onClick={() => { setFlyoutIsOpen(true); }}
                 iconType="inspect"
                 color="text"
                 aria-label={i18n.translate('xpack.viz_editor.frame.inspectButtonLabel', {
