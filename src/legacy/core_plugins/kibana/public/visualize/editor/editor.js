@@ -343,6 +343,7 @@ function VisEditor(
 
     $scope.searchSource = searchSource;
     $scope.state = $state;
+    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
