@@ -1438,10 +1438,10 @@
     through2 "^2.0.0"
     update-notifier "^0.5.0"
 
-"@elastic/node-crypto@0.1.2":
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-0.1.2.tgz#c18ac282f635e88f041cc1555d806e492ca8f3b1"
-  integrity sha1-wYrCgvY16I8EHMFVXYBuSSyo87E=
+"@elastic/node-crypto@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/node-crypto/-/node-crypto-1.0.0.tgz#4d325df333fe1319556bb4d54214098ada1171d4"
+  integrity sha512-bbjbEyILPRTRt0xnda18OttLtlkJBPuXx3CjISUSn9jhWqHoFMzfOaZ73D5jxZE2SaFZUrJYfPpqXP6qqPufAQ==
 
 "@elastic/nodegit@0.25.0-alpha.19":
   version "0.25.0-alpha.19"
