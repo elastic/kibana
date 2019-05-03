@@ -144,7 +144,6 @@ const HostDetailsComponent = pure<HostDetailsComponentProps>(
                         data={events!}
                         loading={loading}
                         totalCount={totalCount}
-                        tiebreaker={getOr(null, 'endCursor.tiebreaker', pageInfo)!}
                         loadMore={loadMore}
                         type={type}
                       />

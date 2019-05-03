@@ -7,7 +7,7 @@
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { cloneDeep, getOr } from 'lodash/fp';
+import { cloneDeep } from 'lodash/fp';
 import * as React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { ThemeProvider } from 'styled-components';
@@ -40,9 +40,6 @@ describe('Load More Events Table Component', () => {
             loading={false}
             data={mockData.Events.edges.map(i => i.node)}
             totalCount={mockData.Events.totalCount}
-            tiebreaker={getOr(null, 'endCursor.tiebreaker', mockData.Events.pageInfo)!}
-            hasNextPage={getOr(false, 'hasNextPage', mockData.Events.pageInfo)!}
-            nextCursor={getOr(null, 'endCursor.value', mockData.Events.pageInfo)}
             loadMore={loadMore}
             type={hostsModel.HostsType.page}
           />

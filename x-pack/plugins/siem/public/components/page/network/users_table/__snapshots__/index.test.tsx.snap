@@ -71,10 +71,8 @@ exports[`Users Table Component Rendering it renders the default Users table 1`] 
     ]
   }
   flowTarget="source"
-  hasNextPage={false}
   loadMore={[MockFunction]}
   loading={false}
-  nextCursor="10"
   totalCount={1}
   type="details"
 />

@@ -16,7 +16,10 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { UsersTable } from '.';
 import { mockUsersData } from './mock';
-
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
 describe('Users Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;

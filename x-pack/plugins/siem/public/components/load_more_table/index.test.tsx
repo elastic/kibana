@@ -15,8 +15,7 @@ import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
 
 jest.mock('react', () => {
   const r = jest.requireActual('react');
-
-  return { ...r, memo: x => x };
+  return { ...r, memo: (x: any) => x };
 });
 
 describe('Load More Table Component', () => {
@@ -27,7 +26,7 @@ describe('Load More Table Component', () => {
     loadMore = jest.fn();
     updateLimitPagination = jest.fn();
     updateActivePage = jest.fn();
-  })
+  });
 
   describe('rendering', () => {
     test('it renders the default load more table', () => {
@@ -221,7 +220,7 @@ describe('Load More Table Component', () => {
   });
 
   describe('Events', () => {
-    test('should call loadmore when clicking on the button load more', () => {
+    test('should call updateActivePage with 1 when clicking to the first page', () => {
       const wrapper = mount(
         <LoadMoreTable
           columns={getHostsColumns()}
@@ -245,11 +244,7 @@ describe('Load More Table Component', () => {
         .find('[data-test-subj="pagination-button-next"]')
         .first()
         .simulate('click');
-
-      expect(updateActivePage).toBeCalledWith(1);
-      console.log('loadMore', loadMore.mock.calls)
-      console.log('updateLimitPagination', updateLimitPagination.mock.calls)
-      console.log('updateActivePage1', updateActivePage.mock.calls)
+      expect(updateActivePage.mock.calls[0][0]).toEqual(1);
     });
 
     test('Should call updateActivePage with 0 when you pick a new limit', () => {
@@ -286,7 +281,41 @@ describe('Load More Table Component', () => {
         .find('[data-test-subj="loadingMorePickSizeRow"] button')
         .first()
         .simulate('click');
-      console.log('updateActivePage2', updateActivePage.mock.calls)
+      expect(updateActivePage.mock.calls[1][0]).toEqual(0);
+    });
+
+    test('should call updateActivePage with 0 when an update prop changes', () => {
+      const wrapper = mount(
+        <LoadMoreTable
+          columns={getHostsColumns()}
+          headerCount={1}
+          headerSupplement={<p>My test supplement.</p>}
+          headerTitle="Hosts"
+          headerTooltip="My test tooltip"
+          headerUnit="Test Unit"
+          itemsPerRow={rowItems}
+          limit={1}
+          loading={false}
+          loadingTitle="Hosts"
+          loadMore={newActivePage => loadMore(newActivePage)}
+          pageOfItems={mockData.Hosts.edges}
+          totalCount={10}
+          updateActivePage={activePage => updateActivePage(activePage)}
+          updateLimitPagination={limit => updateLimitPagination({ limit })}
+          updateProps={{ isThisAwesome: false }}
+        />
+      );
+      wrapper
+        .find('[data-test-subj="pagination-button-next"]')
+        .first()
+        .simulate('click');
+      wrapper.setProps({ updateProps: { isThisAwesome: true } });
+      // enzyme does not have full support for react.memo
+      // wrapper will not update without the click below
+      wrapper
+        .find('[data-test-subj="pagination-button-4"]')
+        .first()
+        .simulate('click');
       expect(updateActivePage.mock.calls[1][0]).toEqual(0);
     });
 

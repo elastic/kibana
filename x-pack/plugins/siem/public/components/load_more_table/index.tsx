@@ -128,7 +128,7 @@ export const LoadMoreTable = memo<BasicTableProps<any>>(
     const pageCount = Math.ceil(totalCount / limit);
     const effectDeps = updateProps ? [limit, ...Object.values(updateProps)] : [limit];
     useEffect(() => {
-      if (activePage !==  0) {
+      if (activePage !== 0) {
         setActivePage(0);
         updateActivePage(0);
       }

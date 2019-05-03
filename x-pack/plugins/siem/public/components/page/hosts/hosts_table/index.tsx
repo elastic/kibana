@@ -127,7 +127,6 @@ class HostsTableComponent extends React.PureComponent<HostsTableProps> {
       updateTableActivePage,
       updateTableLimit,
     } = this.props;
-    console.log('mew props', this.props);
     return (
       <LoadMoreTable
         columns={this.memoizedColumns(type, indexPattern)}

@@ -26,9 +26,8 @@ const tableType = hostsModel.HostsTableType.events;
 interface OwnProps {
   data: Ecs[];
   loading: boolean;
-  tiebreaker: string;
   totalCount: number;
-  loadMore: (newActivePage: number, tiebreaker?: string) => void;
+  loadMore: (newActivePage: number) => void;
   type: hostsModel.HostsType;
 }
 
@@ -76,7 +75,6 @@ const EventsTableComponent = pure<EventsTableProps>(
     limit,
     loading,
     loadMore,
-    tiebreaker,
     totalCount,
     updateTableActivePage,
     updateTableLimit,
@@ -91,7 +89,7 @@ const EventsTableComponent = pure<EventsTableProps>(
       limit={limit}
       loading={loading}
       loadingTitle={i18n.EVENTS}
-      loadMore={newActivePage => loadMore(newActivePage, tiebreaker)}
+      loadMore={newActivePage => loadMore(newActivePage)}
       pageOfItems={data}
       updateLimitPagination={newLimit =>
         updateTableLimit({

@@ -15,7 +15,10 @@ import { getEmptyValue } from '../../../empty_value';
 
 import { getArgs, UncommonProcessTable } from '.';
 import { mockData } from './mock';
-
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
 describe('UncommonProcess Table Component', () => {
   const loadMore = jest.fn();
 

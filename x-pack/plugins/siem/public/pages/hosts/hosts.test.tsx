@@ -21,7 +21,10 @@ jest.mock('ui/documentation_links', () => ({
     kibana: 'http://www.example.com',
   },
 }));
-
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
 let localSource: Array<{
   request: {};
   result: {

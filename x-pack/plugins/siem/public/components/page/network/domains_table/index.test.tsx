@@ -6,7 +6,6 @@
 
 import { mount, shallow } from 'enzyme';
 import toJson from 'enzyme-to-json';
-import { getOr } from 'lodash/fp';
 import * as React from 'react';
 import { MockedProvider } from 'react-apollo/test-utils';
 import { Provider as ReduxStoreProvider } from 'react-redux';
@@ -17,7 +16,10 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { DomainsTable } from '.';
 import { mockDomainsData } from './mock';
-
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
 describe('Domains Table Component', () => {
   const loadMore = jest.fn();
   const ip = '10.10.10.10';

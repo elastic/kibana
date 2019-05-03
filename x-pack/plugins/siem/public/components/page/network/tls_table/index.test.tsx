@@ -16,6 +16,11 @@ import { createStore, networkModel, State } from '../../../../store';
 import { TlsTable } from '.';
 import { mockTlsData } from './mock';
 
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
+
 describe('Tls Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
@@ -63,8 +68,6 @@ describe('Tls Table Component', () => {
         direction: 'desc',
         field: '_id',
       });
-
-      console.log('DEBUG', wrapper.debug())
 
       wrapper
         .find('.euiTable thead tr th button')

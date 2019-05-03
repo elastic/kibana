@@ -51,7 +51,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
       },
     ]
   }
-  hasNextPage={true}
   indexPattern={
     Object {
       "fields": Array [
@@ -139,7 +138,6 @@ exports[`NetworkTopNFlow Table Component rendering it renders the default Networ
   }
   loadMore={[MockFunction]}
   loading={false}
-  nextCursor="10"
   totalCount={524}
   type="page"
 />

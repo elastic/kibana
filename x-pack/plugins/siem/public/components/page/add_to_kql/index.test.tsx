@@ -82,17 +82,21 @@ describe('AddToKql Component', async () => {
     expect(store.getState().hosts.page).toEqual({
       queries: {
         authentications: {
+          activePage: 0,
           limit: 10,
         },
         hosts: {
+          activePage: 0,
           limit: 10,
           direction: 'desc',
           sortField: 'lastSeen',
         },
         events: {
+          activePage: 0,
           limit: 10,
         },
         uncommonProcesses: {
+          activePage: 0,
           limit: 10,
         },
       },
@@ -135,6 +139,7 @@ describe('AddToKql Component', async () => {
     expect(store.getState().network.page).toEqual({
       queries: {
         topNFlow: {
+          activePage: 0,
           limit: 10,
           flowDirection: 'uniDirectional',
           flowTarget: 'source',
@@ -144,6 +149,7 @@ describe('AddToKql Component', async () => {
           },
         },
         dns: {
+          activePage: 0,
           limit: 10,
           dnsSortField: {
             field: 'queryCount',

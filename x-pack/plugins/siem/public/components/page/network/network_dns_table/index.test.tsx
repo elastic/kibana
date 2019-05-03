@@ -15,7 +15,10 @@ import { createStore, networkModel, State } from '../../../../store';
 
 import { NetworkDnsTable } from '.';
 import { mockData } from './mock';
-
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
 describe('NetworkTopNFlow Table Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;

@@ -16,7 +16,10 @@ import { KibanaConfigContext } from '../../../formatted_date';
 
 import { HostsTable } from './index';
 import { mockData } from './mock';
-
+jest.mock('react', () => {
+  const r = jest.requireActual('react');
+  return { ...r, memo: (x: any) => x };
+});
 describe('HostsTable Load More Component', () => {
   const loadMore = jest.fn();
   const state: State = mockGlobalState;
@@ -81,6 +84,7 @@ describe('HostsTable Load More Component', () => {
       });
       test('Initial value of the store', () => {
         expect(store.getState().hosts.page.queries.hosts).toEqual({
+          activePage: 0,
           direction: 'desc',
           sortField: 'lastSeen',
           limit: 10,
@@ -108,6 +112,7 @@ describe('HostsTable Load More Component', () => {
         wrapper.update();
 
         expect(store.getState().hosts.page.queries.hosts).toEqual({
+          activePage: 0,
           direction: 'asc',
           sortField: 'hostName',
           limit: 10,
