@@ -6,7 +6,16 @@
 
 import { StaticIndexPattern } from 'ui/index_patterns';
 
-import { getPivotDropdownOptions } from './common';
+import {
+  getDataFramePreviewRequest,
+  PivotAggsConfig,
+  PivotGroupByConfig,
+  PIVOT_SUPPORTED_AGGS,
+  PIVOT_SUPPORTED_GROUP_BY_AGGS,
+  SimpleQuery,
+} from '../../common';
+
+import { getPivotPreviewDevConsoleStatement, getPivotDropdownOptions } from './common';
 
 describe('Data Frame: Define Pivot Common', () => {
   test('getPivotDropdownOptions()', () => {
@@ -51,5 +60,56 @@ describe('Data Frame: Define Pivot Common', () => {
         },
       },
     });
+  });
+
+  test('getPivotPreviewDevConsoleStatement()', () => {
+    const query: SimpleQuery = {
+      query_string: {
+        query: '*',
+        default_operator: 'AND',
+      },
+    };
+    const groupBy: PivotGroupByConfig = {
+      agg: PIVOT_SUPPORTED_GROUP_BY_AGGS.TERMS,
+      field: 'the-group-by-field',
+      aggName: 'the-group-by-label',
+    };
+    const agg: PivotAggsConfig = {
+      agg: PIVOT_SUPPORTED_AGGS.AVG,
+      field: 'the-agg-field',
+      aggName: 'the-agg-label',
+    };
+    const request = getDataFramePreviewRequest('the-index-pattern-title', query, [groupBy], [agg]);
+    const pivotPreviewDevConsoleStatement = getPivotPreviewDevConsoleStatement(request);
+
+    expect(pivotPreviewDevConsoleStatement).toBe(`POST _data_frame/transforms/_preview
+{
+  "source": {
+    "index": "the-index-pattern-title",
+    "query": {
+      "query_string": {
+        "query": "*",
+        "default_operator": "AND"
+      }
+    }
+  },
+  "pivot": {
+    "group_by": {
+      "the-group-by-label": {
+        "terms": {
+          "field": "the-group-by-field"
+        }
+      }
+    },
+    "aggregations": {
+      "the-agg-label": {
+        "avg": {
+          "field": "the-agg-field"
+        }
+      }
+    }
+  }
+}
+`);
   });
 });
