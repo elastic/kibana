@@ -23,9 +23,8 @@ import './visualization_editor';
 import 'ui/vis/editors/default/sidebar';
 import 'ui/visualize';
 import 'ui/collapsible_sidebar';
-import 'ui/query_bar';
-import { uiCapabilities } from 'ui/capabilities';
-import 'ui/search_bar';
+
+import { capabilities } from 'ui/capabilities';
 import 'ui/apply_filters';
 import 'ui/listen';
 import chrome from 'ui/chrome';
@@ -54,6 +53,9 @@ import { getUnhashableStatesProvider } from 'ui/state_management/state_hashing';
 import { showSaveModal } from 'ui/saved_objects/show_saved_object_save_modal';
 import { SavedObjectSaveModal } from 'ui/saved_objects/components/saved_object_save_modal';
 import { getEditBreadcrumbs, getCreateBreadcrumbs } from '../breadcrumbs';
+
+import { data } from 'plugins/data';
+data.search.loadLegacyDirectives();
 
 uiRoutes
   .when(VisualizeConstants.CREATE_PATH, {
@@ -150,7 +152,7 @@ function VisEditor(
     dirty: !savedVis.id
   };
 
-  $scope.topNavMenu = [...(uiCapabilities.visualize.save ? [{
+  $scope.topNavMenu = [...(capabilities.get().visualize.save ? [{
     key: i18n('kbn.topNavMenu.saveVisualizationButtonLabel', { defaultMessage: 'save' }),
     description: i18n('kbn.visualize.topNavMenu.saveVisualizationButtonAriaLabel', {
       defaultMessage: 'Save Visualization',
@@ -215,7 +217,7 @@ function VisEditor(
       showShareContextMenu({
         anchorElement,
         allowEmbed: true,
-        allowShortUrl: uiCapabilities.visualize.createShortUrl,
+        allowShortUrl: capabilities.get().visualize.createShortUrl,
         getUnhashableStates,
         objectId: savedVis.id,
         objectType: 'visualization',
@@ -341,6 +343,7 @@ function VisEditor(
 
     $scope.searchSource = searchSource;
     $scope.state = $state;
+    $scope.refreshInterval = timefilter.getRefreshInterval();
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');

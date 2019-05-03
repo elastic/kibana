@@ -497,6 +497,9 @@
             "description": {
               "type": "text"
             },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
             "initials": {
               "type": "keyword"
             },

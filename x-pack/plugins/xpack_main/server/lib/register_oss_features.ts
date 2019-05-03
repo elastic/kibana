@@ -20,14 +20,14 @@ const kibanaFeatures: Feature[] = [
       all: {
         savedObject: {
           all: ['search', 'url'],
-          read: ['config', 'index-pattern'],
+          read: ['index-pattern'],
         },
         ui: ['show', 'createShortUrl', 'save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'search', 'url'],
+          read: ['index-pattern', 'search', 'url'],
         },
         ui: ['show'],
       },
@@ -46,14 +46,14 @@ const kibanaFeatures: Feature[] = [
       all: {
         savedObject: {
           all: ['visualization', 'url'],
-          read: ['config', 'index-pattern', 'search'],
+          read: ['index-pattern', 'search'],
         },
         ui: ['show', 'createShortUrl', 'delete', 'save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'search', 'visualization'],
+          read: ['index-pattern', 'search', 'visualization'],
         },
         ui: ['show'],
       },
@@ -73,12 +73,12 @@ const kibanaFeatures: Feature[] = [
         savedObject: {
           all: ['dashboard', 'url'],
           read: [
-            'config',
             'index-pattern',
             'search',
             'visualization',
             'timelion-sheet',
             'canvas-workpad',
+            'map',
           ],
         },
         ui: ['createNew', 'show', 'showWriteControls'],
@@ -87,12 +87,12 @@ const kibanaFeatures: Feature[] = [
         savedObject: {
           all: [],
           read: [
-            'config',
             'index-pattern',
             'search',
             'visualization',
             'timelion-sheet',
             'canvas-workpad',
+            'map',
             'dashboard',
           ],
         },
@@ -114,15 +114,15 @@ const kibanaFeatures: Feature[] = [
         api: ['console'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: [],
         },
-        ui: ['show'],
+        ui: ['show', 'save'],
       },
       read: {
         api: ['console'],
         savedObject: {
           all: [],
-          read: ['config'],
+          read: [],
         },
         ui: ['show'],
       },
@@ -154,7 +154,7 @@ const kibanaFeatures: Feature[] = [
       read: {
         savedObject: {
           all: [],
-          read: ['config'],
+          read: [],
         },
         ui: [],
       },
@@ -175,14 +175,14 @@ const kibanaFeatures: Feature[] = [
       all: {
         savedObject: {
           all: ['index-pattern'],
-          read: ['config'],
+          read: [],
         },
-        ui: ['createNew'],
+        ui: ['save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['index-pattern', 'config'],
+          read: ['index-pattern'],
         },
         ui: [],
       },
@@ -202,14 +202,14 @@ const timelionFeatures: Feature[] = [
       all: {
         savedObject: {
           all: ['timelion-sheet'],
-          read: ['config', 'index-pattern'],
+          read: ['index-pattern'],
         },
         ui: ['save'],
       },
       read: {
         savedObject: {
           all: [],
-          read: ['config', 'index-pattern', 'timelion-sheet'],
+          read: ['index-pattern', 'timelion-sheet'],
         },
         ui: [],
       },

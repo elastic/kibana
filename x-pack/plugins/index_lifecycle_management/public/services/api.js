@@ -53,7 +53,7 @@ export async function loadPolicies(withIndices, httpClient = getHttpClient()) {
 export async function deletePolicy(policyName, httpClient = getHttpClient()) {
   const response = await httpClient.delete(`${apiPrefix}/policies/${encodeURIComponent(policyName)}`);
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_DELETE, httpClient);
+  trackUiMetric(UIM_POLICY_DELETE);
   return response.data;
 }
 
@@ -73,27 +73,27 @@ export async function getAffectedIndices(indexTemplateName, policyName, httpClie
 export const retryLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/retry`, { indexNames });
   // Only track successful actions.
-  trackUiMetric(UIM_INDEX_RETRY_STEP, httpClient);
+  trackUiMetric(UIM_INDEX_RETRY_STEP);
   return response.data;
 };
 
 export const removeLifecycleForIndex = async (indexNames, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/remove`, { indexNames });
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_DETACH_INDEX, httpClient);
+  trackUiMetric(UIM_POLICY_DETACH_INDEX);
   return response.data;
 };
 
 export const addLifecyclePolicyToIndex = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/index/add`, body);
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_ATTACH_INDEX, httpClient);
+  trackUiMetric(UIM_POLICY_ATTACH_INDEX);
   return response.data;
 };
 
 export const addLifecyclePolicyToTemplate = async (body, httpClient = getHttpClient()) => {
   const response = await httpClient.post(`${apiPrefix}/template`, body);
   // Only track successful actions.
-  trackUiMetric(UIM_POLICY_ATTACH_INDEX_TEMPLATE, httpClient);
+  trackUiMetric(UIM_POLICY_ATTACH_INDEX_TEMPLATE);
   return response.data;
 };

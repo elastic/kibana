@@ -101,4 +101,17 @@ fourty two%SPLIT%42`,
       ],
     });
   });
+
+  it('throws when given invalid csv', () => {
+    expect(fn)
+      .withArgs(null, {
+        data: `name,number
+one|1
+two.2
+fourty two,42`,
+      })
+      .to.throwException(e => {
+        expect(e.message).to.be('Error parsing input CSV.');
+      });
+  });
 });

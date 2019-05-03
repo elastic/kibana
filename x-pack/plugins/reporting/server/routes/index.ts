@@ -62,6 +62,10 @@ export function registerRoutes(server: KbnServer) {
 
   registerGenerate(server, handler, handleError);
   registerLegacy(server, handler, handleError);
-  registerGenerateCsvFromSavedObject(server, handler, handleError);
+
+  if (config.get('xpack.reporting.csv.enablePanelActionDownload')) {
+    registerGenerateCsvFromSavedObject(server, handler, handleError);
+  }
+
   registerJobs(server);
 }

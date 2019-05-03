@@ -31,6 +31,7 @@ import { XPackInfoProvider } from 'plugins/xpack_main/services/xpack_info';
 
 import appTemplate from './templates/index.html';
 import { getHomeBreadcrumbs, getWorkspaceBreadcrumbs } from './breadcrumbs';
+import { getReadonlyBadge } from './badge';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './angular-venn-simple.js';
@@ -47,7 +48,7 @@ import {
 import {
   getOutlinkEncoders,
 } from './services/outlink_encoders';
-import { uiCapabilities } from 'ui/capabilities';
+import { capabilities } from 'ui/capabilities';
 
 const app = uiModules.get('app/graph');
 
@@ -80,6 +81,7 @@ uiRoutes
   .when('/home', {
     template: appTemplate,
     k7Breadcrumbs: getHomeBreadcrumbs,
+    badge: getReadonlyBadge,
     resolve: {
       //Copied from example found in wizard.js ( Kibana TODO - can't
       // IndexPatternsProvider abstract these implementation details better?)
@@ -572,7 +574,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
       if ($scope.urlTemplates.indexOf($scope.newUrlTemplate.templateBeingEdited) >= 0) {
         //patch any existing object
-        Object.assign($scope.newUrlTemplate.templateBeingEdited, $scope.newUrlTemplate);
+        Object.assign($scope.newUrlTemplate.templateBeingEdited, $scope.newUrlTemplate, { isDefault: false });
         return;
       }
     }
@@ -660,6 +662,9 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
     $scope.workspace = gws.createWorkspace(options);
     $scope.detail = null;
 
+    // filter out default url templates because they will get re-added
+    $scope.urlTemplates = $scope.urlTemplates.filter(template => !template.isDefault);
+
     if ($scope.urlTemplates.length === 0) {
       // url templates specified by users can include the `{{gquery}}` tag and
       // will have the elasticsearch query for the graph nodes injected there
@@ -689,7 +694,8 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
         description: i18n('xpack.graph.settings.drillDowns.defaultUrlTemplateTitle', {
           defaultMessage: 'Raw documents',
         }),
-        encoder: $scope.outlinkEncoders[0]
+        encoder: $scope.outlinkEncoders[0],
+        isDefault: true
       });
     }
   }
@@ -800,7 +806,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
 
   // if saving is disabled using uiCapabilities, we don't want to render the save
   // button so it's consistent with all of the other applications
-  if (uiCapabilities.graph.save) {
+  if (capabilities.get().graph.save) {
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
     if (!$scope.allSavingDisabled) {
       $scope.topNavMenu.push({
@@ -851,7 +857,7 @@ app.controller('graphuiPlugin', function ($scope, $route, $http, kbnUrl, Private
   });
   // if deleting is disabled using uiCapabilities, we don't want to render the delete
   // button so it's consistent with all of the other applications
-  if (uiCapabilities.graph.delete) {
+  if (capabilities.get().graph.delete) {
 
     // allSavingDisabled is based on the xpack.graph.savePolicy, we'll maintain this functionality
     if (!$scope.allSavingDisabled) {

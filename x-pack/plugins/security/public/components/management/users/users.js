@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiIcon,
   EuiLink,
+  EuiFlexGroup,
   EuiInMemoryTable,
   EuiPageContent,
   EuiTitle,
@@ -20,6 +21,7 @@ import {
 import { toastNotifications } from 'ui/notify';
 import { ConfirmDelete } from './confirm_delete';
 import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { UserAPIClient } from '../../../lib/api';
 
 class UsersUI extends Component {
   constructor(props) {
@@ -44,19 +46,18 @@ class UsersUI extends Component {
     });
   };
   async loadUsers() {
-    const { apiClient } = this.props;
     try {
-      const users = await apiClient.getUsers();
+      const users = await UserAPIClient.getUsers();
       this.setState({ users });
     } catch (e) {
-      if (e.status === 403) {
+      if (e.body.statusCode === 403) {
         this.setState({ permissionDenied: true });
       } else {
         toastNotifications.addDanger(
           this.props.intl.formatMessage({
             id: 'xpack.security.management.users.fetchingUsersErrorMessage',
             defaultMessage: 'Error fetching users: {message}'
-          }, { message: e.data.message })
+          }, { message: e.body.message })
         );
       }
     }
@@ -88,31 +89,32 @@ class UsersUI extends Component {
   }
   render() {
     const { users, filter, permissionDenied, showDeleteConfirmation, selection } = this.state;
-    const { apiClient, intl } = this.props;
+    const { intl } = this.props;
     if (permissionDenied) {
       return (
-        <div className="secUsersListingPage">
+        <EuiFlexGroup gutterSize="none">
           <EuiPageContent horizontalPosition="center">
             <EuiEmptyPrompt
               iconType="securityApp"
-              iconColor={null}
               title={
                 <h2>
                   <FormattedMessage
                     id="xpack.security.management.users.deniedPermissionTitle"
-                    defaultMessage="Permission denied"
+                    defaultMessage="You need permission to manage users"
                   />
-                </h2>}
+                </h2>
+              }
               body={
                 <p data-test-subj="permissionDeniedMessage">
                   <FormattedMessage
                     id="xpack.security.management.users.permissionDeniedToManageUsersDescription"
-                    defaultMessage="You do not have permission to manage users."
+                    defaultMessage="Contact your system administrator."
                   />
-                </p>}
+                </p>
+              }
             />
           </EuiPageContent>
-        </div>
+        </EuiFlexGroup>
       );
     }
     const path = '#/management/security/';
@@ -241,7 +243,7 @@ class UsersUI extends Component {
               >
                 <FormattedMessage
                   id="xpack.security.management.users.createNewUserButtonLabel"
-                  defaultMessage="Create new user"
+                  defaultMessage="Create user"
                 />
               </EuiButton>
             </EuiPageContentHeaderSection>
@@ -251,7 +253,6 @@ class UsersUI extends Component {
             {showDeleteConfirmation ? (
               <ConfirmDelete
                 onCancel={this.onCancelDelete}
-                apiClient={apiClient}
                 usersToDelete={selection.map((user) => user.username)}
                 callback={this.handleDelete}
               />

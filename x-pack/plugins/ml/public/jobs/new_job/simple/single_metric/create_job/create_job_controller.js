@@ -39,7 +39,6 @@ import {
 import { mlJobService } from 'plugins/ml/services/job_service';
 import { preLoadJob } from 'plugins/ml/jobs/new_job/simple/components/utils/prepopulate_job_settings';
 import { SingleMetricJobServiceProvider } from './create_job_service';
-import { FullTimeRangeSelectorServiceProvider } from 'plugins/ml/components/full_time_range_selector/full_time_range_selector_service';
 import { mlMessageBarService } from 'plugins/ml/components/messagebar/messagebar_service';
 
 import template from './create_job.html';
@@ -79,7 +78,6 @@ module
     const MlTimeBuckets = Private(IntervalHelperProvider);
     const moveToAdvancedJobCreation = Private(moveToAdvancedJobCreationProvider);
     const mlSingleMetricJobService = Private(SingleMetricJobServiceProvider);
-    const mlFullTimeRangeSelectorService = Private(FullTimeRangeSelectorServiceProvider);
 
     const stateDefaults = {
       mlJobSettings: {}
@@ -628,10 +626,6 @@ module
     $scope.moveToAdvancedJobCreation = function () {
       const job = mlSingleMetricJobService.getJobFromConfig($scope.formConfig);
       moveToAdvancedJobCreation(job);
-    };
-
-    $scope.setFullTimeRange = function () {
-      return mlFullTimeRangeSelectorService.setFullTimeRange($scope.ui.indexPattern, $scope.formConfig.combinedQuery);
     };
 
     $scope.$listenAndDigestAsync(timefilter, 'fetch', $scope.loadVis);
