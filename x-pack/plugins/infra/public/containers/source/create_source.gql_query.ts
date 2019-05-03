@@ -15,9 +15,9 @@ import {
 export const createSourceMutation = gql`
   mutation CreateSourceConfigurationMutation(
     $sourceId: ID!
-    $sourceConfiguration: CreateSourceInput!
+    $sourceProperties: UpdateSourceInput!
   ) {
-    createSource(id: $sourceId, source: $sourceConfiguration) {
+    createSource(id: $sourceId, sourceProperties: $sourceProperties) {
       source {
         ...InfraSourceFields
         configuration {
