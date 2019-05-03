@@ -4,33 +4,40 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { API_BASE_PATH } from './constants';
+import { API_BASE_PATH, DEFAULT_POLICY_NAME } from './constants';
 import { gePolicyPayload } from './fixtures';
+import { getPolicyNames } from './lib';
 
 export const registerHelpers = ({ supertest }) => {
-  let policiesCreated = [];
-
-  const cleanUp = () => {
-    policiesCreated.forEach((policy) => {
-      console.log('Will have to delete policy', policy);
-    });
-    policiesCreated = [];
-  };
-
   const loadPolicies = () => supertest.get(`${API_BASE_PATH}/policies`);
 
   const createPolicy = (policy = gePolicyPayload()) => {
-    policiesCreated.push(policy);
-
     return supertest
       .post(`${API_BASE_PATH}/lifecycle`)
       .set('kbn-xsrf', 'xxx')
       .send(policy);
   };
 
+  const deletePolicy = (name) => {
+    return supertest
+      .delete(`${API_BASE_PATH}/policies/${name}`)
+      .set('kbn-xsrf', 'xxx');
+  };
+
+  const deleteAllPolicies = (policies) => (
+    Promise.all(policies.map(deletePolicy))
+  );
+
+  const cleanUp = () => {
+    return loadPolicies()
+      .then(({ body }) => getPolicyNames(body).filter(name => name !== DEFAULT_POLICY_NAME))
+      .then(deleteAllPolicies);
+  };
+
   return {
     cleanUp,
     loadPolicies,
     createPolicy,
+    deletePolicy,
   };
 };

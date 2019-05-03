@@ -9,5 +9,6 @@ export {
 } from './random';
 
 export {
-  wait
+  wait,
+  getPolicyNames,
 } from './utils';

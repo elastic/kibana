@@ -6,7 +6,7 @@
 
 
 export default function ({ loadTestFile }) {
-  describe('index', () => {
-    loadTestFile(require.resolve('./index_lifecycle_management'));
+  describe('index lifecycle management', () => {
+    loadTestFile(require.resolve('./policies'));
   });
 }

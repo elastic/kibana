@@ -5,3 +5,4 @@
  */
 
 export const API_BASE_PATH = '/api/index_lifecycle_management';
+export const DEFAULT_POLICY_NAME = 'watch-history-ilm-policy';

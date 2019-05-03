@@ -10,3 +10,6 @@ export const wait = (time = 1000) => (
     setTimeout(resolve, time)
   ))
 );
+
+// Return an array of policy names
+export const getPolicyNames = (policies) => policies.map(({ name }) => name);
