@@ -42,14 +42,7 @@ export default function query(req, panel, esQueryConfig, indexPattern) {
     };
     doc.query.bool.must.push(timerange);
     if (panel.filter) {
-      // TODO: replace with the buildEsQuery method result
-      // doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
-      doc.query.bool.must.push({
-        query_string: {
-          query: panel.filter,
-          analyze_wildcard: true,
-        },
-      });
+      doc.query.bool.must.push(buildEsQuery(indexPattern, [panel.filter], [], esQueryConfig));
     }
 
     return next(doc);
