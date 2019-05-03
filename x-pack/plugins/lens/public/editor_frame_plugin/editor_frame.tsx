@@ -4,120 +4,149 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useReducer, useEffect } from 'react';
-import { Datasource, Visualization } from '../types';
+import React, { useEffect, useReducer, useMemo } from 'react';
+import { EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { Datasource, Visualization, DatasourceDataPanelProps } from '../types';
+import { NativeRenderer } from '../native_renderer';
+import { reducer, getInitialState } from './state_management';
 
-interface EditorFrameProps {
+export interface EditorFrameProps {
   datasources: { [key: string]: Datasource };
   visualizations: { [key: string]: Visualization };
 
-  initialDatasource?: string;
-}
-
-interface DatasourceState {
-  datasourceName: string;
-  visualizationName: string;
-
-  datasourceState: any;
-  visualizationState: any;
-}
-
-interface UpdateDatasourceAction {
-  type: 'UPDATE_DATASOURCE';
-  payload: any;
-}
-
-interface UpdateVisualizationAction {
-  type: 'UPDATE_VISUALIZATION';
-  payload: any;
-}
-
-type Action = UpdateDatasourceAction | UpdateVisualizationAction;
-
-function stateReducer(state: DatasourceState, action: Action): DatasourceState {
-  switch (action.type) {
-    case 'UPDATE_DATASOURCE':
-      return {
-        ...state,
-        datasourceState: action.payload,
-      };
-    case 'UPDATE_VISUALIZATION':
-      return {
-        ...state,
-        visualizationState: action.payload,
-      };
-  }
-  return state;
+  initialDatasource: string | null;
+  initialVisualization: string | null;
 }
 
 export function EditorFrame(props: EditorFrameProps) {
-  const dsKeys = Object.keys(props.datasources);
-  const vKeys = Object.keys(props.visualizations);
+  const [state, dispatch] = useReducer(reducer, props, getInitialState);
 
-  const [state, dispatch] = useReducer(stateReducer, {
-    datasourceName: props.initialDatasource || dsKeys[0],
-    visualizationName: vKeys[0],
+  // Initialize current datasource
+  useEffect(
+    () => {
+      let datasourceGotSwitched = false;
+      if (state.datasourceIsLoading && state.activeDatasource) {
+        props.datasources[state.activeDatasource].initialize().then(datasourceState => {
+          if (!datasourceGotSwitched) {
+            dispatch({
+              type: 'UPDATE_DATASOURCE_STATE',
+              newState: datasourceState,
+            });
+          }
+        });
 
-    datasourceState: null,
-    visualizationState: null,
-  });
+        return () => {
+          datasourceGotSwitched = true;
+        };
+      }
+    },
+    [state.activeDatasource, state.datasourceIsLoading]
+  );
 
-  useEffect(() => {
-    const vState = props.visualizations[state.visualizationName].initialize();
-    props.datasources[state.datasourceName].initialize().then(dsState => {
+  const datasourceStateUpdater = useMemo(
+    () => (newState: unknown) => {
       dispatch({
-        type: 'UPDATE_DATASOURCE',
-        payload: dsState,
+        type: 'UPDATE_DATASOURCE_STATE',
+        newState,
       });
-    });
+    },
+    [dispatch]
+  );
 
-    dispatch({
-      type: 'UPDATE_VISUALIZATION',
-      payload: vState,
-    });
-  }, []);
+  const visualizationStateUpdater = useMemo(
+    () => (newState: unknown) => {
+      dispatch({
+        type: 'UPDATE_VISUALIZATION_STATE',
+        newState,
+      });
+    },
+    [dispatch]
+  );
+
+  const datasourcePublicAPI = useMemo(
+    () =>
+      state.activeDatasource && !state.datasourceIsLoading
+        ? props.datasources[state.activeDatasource].getPublicAPI(
+            state.datasourceState,
+            datasourceStateUpdater
+          )
+        : undefined,
+    [
+      props.datasources,
+      state.datasourceIsLoading,
+      state.activeDatasource,
+      datasourceStateUpdater,
+      state.datasourceState,
+    ]
+  );
+
+  function renderDatasource() {
+    const datasourceProps: DatasourceDataPanelProps = {
+      state: state.datasourceState,
+      setState: datasourceStateUpdater,
+    };
+
+    return (
+      <>
+        <EuiSelect
+          data-test-subj="datasource-switch"
+          options={Object.keys(props.datasources).map(datasourceId => ({
+            value: datasourceId,
+            text: datasourceId,
+          }))}
+          value={state.activeDatasource || undefined}
+          onChange={e => {
+            dispatch({ type: 'SWITCH_DATASOURCE', newDatasourceId: e.target.value });
+          }}
+        />
+        {state.activeDatasource && !state.datasourceIsLoading && (
+          <NativeRenderer
+            render={props.datasources[state.activeDatasource].renderDataPanel}
+            nativeProps={datasourceProps}
+          />
+        )}
+      </>
+    );
+  }
+
+  function renderVisualization() {
+    return (
+      <>
+        <EuiSelect
+          data-test-subj="visualization-switch"
+          options={Object.keys(props.visualizations).map(visualizationId => ({
+            value: visualizationId,
+            text: visualizationId,
+          }))}
+          value={state.activeDatasource || undefined}
+          onChange={e => {
+            dispatch({
+              type: 'SWITCH_VISUALIZATION',
+              newVisulizationId: e.target.value,
+              // TODO we probably want to have a separate API to "force" a visualization switch
+              // which isn't a result of a picked suggestion
+              initialState: props.visualizations[e.target.value].initialize(),
+            });
+          }}
+        />
+        {state.activeVisualization && state.activeDatasource && !state.datasourceIsLoading && (
+          <NativeRenderer
+            render={props.visualizations[state.activeVisualization].renderConfigPanel}
+            nativeProps={{
+              state: state.visualizationState[state.activeVisualization],
+              setState: visualizationStateUpdater,
+              datasource: datasourcePublicAPI!,
+            }}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
-    <div>
-      <h2>Editor Frame</h2>
-
-      <div
-        ref={domElement => {
-          if (domElement) {
-            props.datasources[state.datasourceName].renderDataPanel(domElement, {
-              state: state.datasourceState,
-              setState: newState =>
-                dispatch({
-                  type: 'UPDATE_DATASOURCE',
-                  payload: newState,
-                }),
-            });
-          }
-        }}
-      />
-
-      <div
-        ref={domElement => {
-          if (domElement) {
-            props.visualizations[state.visualizationName].renderConfigPanel(domElement, {
-              datasource: props.datasources[state.datasourceName].getPublicAPI(
-                state.datasourceState,
-                newState =>
-                  dispatch({
-                    type: 'UPDATE_DATASOURCE',
-                    payload: newState,
-                  })
-              ),
-              state: state.visualizationState,
-              setState: newState =>
-                dispatch({
-                  type: 'UPDATE_VISUALIZATION',
-                  payload: newState,
-                }),
-            });
-          }
-        }}
-      />
-    </div>
+    <EuiFlexGroup>
+      <EuiFlexItem>{renderDatasource()}</EuiFlexItem>
+      <EuiFlexItem>{renderVisualization()}</EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

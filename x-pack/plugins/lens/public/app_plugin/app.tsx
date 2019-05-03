@@ -5,23 +5,18 @@
  */
 
 import { I18nProvider } from '@kbn/i18n/react';
-import React, { useCallback } from 'react';
+import React from 'react';
 
-import { EditorFrameSetup } from '../types';
+import { EditorFrameInstance } from '../types';
+import { NativeRenderer } from '../native_renderer';
 
-export function App({ editorFrame }: { editorFrame: EditorFrameSetup }) {
-  const renderFrame = useCallback(node => {
-    if (node !== null) {
-      editorFrame.render(node);
-    }
-  }, []);
-
+export function App({ editorFrame }: { editorFrame: EditorFrameInstance }) {
   return (
     <I18nProvider>
       <div>
         <h1>Lens</h1>
 
-        <div ref={renderFrame} />
+        <NativeRenderer render={editorFrame.mount} nativeProps={undefined} />
       </div>
     </I18nProvider>
   );
