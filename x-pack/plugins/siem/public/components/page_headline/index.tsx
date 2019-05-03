@@ -45,6 +45,14 @@ export const getHeaderForRoute = (pathname: string) => {
           title: <FormattedMessage id="xpack.siem.network.pageTitle" defaultMessage="Network" />,
         };
       }
+      case 'timelines': {
+        return {
+          subtitle: null,
+          title: (
+            <FormattedMessage id="xpack.siem.timelines.pageTitle" defaultMessage="Timelines" />
+          ),
+        };
+      }
     }
 
     if (pathname.match(/hosts\/.*?/)) {

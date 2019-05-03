@@ -9,7 +9,7 @@ import chrome, { Breadcrumb } from 'ui/chrome';
 import { APP_NAME } from '../../../..';
 import { getBreadcrumbs as getHostDetailsBreadcrumbs } from '../../../pages/hosts/host_details';
 import { getBreadcrumbs as getIPDetailsBreadcrumbs } from '../../../pages/network/ip_details';
-import { getHostsUrl, getNetworkUrl, getOverviewUrl } from '../../link_to';
+import { getHostsUrl, getNetworkUrl, getOverviewUrl, getTimelinesUrl } from '../../link_to';
 import * as i18n from '../translations';
 
 export const setBreadcrumbs = (pathname: string) => {
@@ -40,6 +40,13 @@ export const rootBreadcrumbs: { [name: string]: Breadcrumb[] } = {
     {
       text: i18n.NETWORK,
       href: getNetworkUrl(),
+    },
+  ],
+  timelines: [
+    ...siemRootBreadcrumb,
+    {
+      text: i18n.TIMELINES,
+      href: getTimelinesUrl(),
     },
   ],
 };

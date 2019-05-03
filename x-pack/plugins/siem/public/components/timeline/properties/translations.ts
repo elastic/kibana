@@ -80,20 +80,13 @@ export const STREAM_LIVE_TOOL_TIP = i18n.translate(
 export const NEW_TIMELINE = i18n.translate(
   'xpack.siem.timeline.properties.newTimelineButtonLabel',
   {
-    defaultMessage: 'New Timeline',
+    defaultMessage: 'Create New Timeline',
   }
 );
 
 export const STREAM_LIVE = i18n.translate('xpack.siem.timeline.properties.streamLiveButtonLabel', {
   defaultMessage: 'Stream Live',
 });
-
-export const NEW_TIMELINE_TOOL_TIP = i18n.translate(
-  'xpack.siem.timeline.properties.newTimelineToolTip',
-  {
-    defaultMessage: 'Create a new timeline',
-  }
-);
 
 export const LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   'xpack.siem.timeline.properties.lockDatePickerTooltip',

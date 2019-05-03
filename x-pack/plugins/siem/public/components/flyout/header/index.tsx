@@ -24,7 +24,7 @@ import {
   timelineSelectors,
 } from '../../../store';
 import { UpdateNote } from '../../notes/helpers';
-import { defaultWidth } from '../../timeline/body';
+import { DEFAULT_TIMELINE_WIDTH } from '../../timeline/body';
 import { defaultHeaders } from '../../timeline/body/column_headers/default_headers';
 import { Properties } from '../../timeline/properties';
 
@@ -79,7 +79,7 @@ const statefulFlyoutHeader = pure<Props>(
     isFavorite,
     isDatepickerLocked,
     title,
-    width = defaultWidth,
+    width = DEFAULT_TIMELINE_WIDTH,
     noteIds,
     timelineId,
     toggleLock,
@@ -124,7 +124,7 @@ const makeMapStateToProps = () => {
       isFavorite = false,
       title = '',
       noteIds = [],
-      width = defaultWidth,
+      width = DEFAULT_TIMELINE_WIDTH,
     } = timeline;
 
     const history = emptyHistory; // TODO: get history from store via selector

@@ -11,6 +11,7 @@ import { pure } from 'recompose';
 import { RedirectToHostsPage } from './redirect_to_hosts';
 import { RedirectToNetworkPage } from './redirect_to_network';
 import { RedirectToOverviewPage } from './redirect_to_overview';
+import { RedirectToTimelinesPage } from './redirect_to_timelines';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
@@ -23,6 +24,7 @@ export const LinkToPage = pure<LinkToPageProps>(({ match }) => (
     <Route path={`${match.url}/hosts/:hostName`} component={RedirectToHostsPage} />
     <Route exact path={`${match.url}/network`} component={RedirectToNetworkPage} />
     <Route path={`${match.url}/network/ip/:ip`} component={RedirectToNetworkPage} />
+    <Route path={`${match.url}/timelines`} component={RedirectToTimelinesPage} />
     <Redirect to="/" />
   </Switch>
 ));
