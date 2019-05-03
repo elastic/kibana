@@ -256,6 +256,10 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
     });
   }
 
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the source index preview to the clipboard.',
+  });
+
   return (
     <EuiPanel grow={false}>
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
@@ -321,16 +325,12 @@ export const SourceIndexPreview: React.SFC<Props> = React.memo(({ cellClick, que
             <EuiFlexItem grow={false}>
               <EuiCopy textToCopy={getSourceIndexDevConsoleStatement(query, indexPattern.title)}>
                 {(copy: () => void) => (
-                  <EuiToolTip
-                    content={i18n.translate(
-                      'xpack.ml.dataframe.sourceIndexPreview.copyClipboardTooltip',
-                      {
-                        defaultMessage:
-                          'Copy a Dev Console statement of the source index preview to the clipboard.',
-                      }
-                    )}
-                  >
-                    <EuiButtonIcon onClick={copy} iconType="copyClipboard" />
+                  <EuiToolTip content={euiCopyText}>
+                    <EuiButtonIcon
+                      onClick={copy}
+                      iconType="copyClipboard"
+                      aria-label={euiCopyText}
+                    />
                   </EuiToolTip>
                 )}
               </EuiCopy>

@@ -182,6 +182,10 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
     },
   };
 
+  const euiCopyText = i18n.translate('xpack.ml.dataframe.pivotPreview.copyClipboardTooltip', {
+    defaultMessage: 'Copy Dev Console statement of the pivot preview to the clipboard.',
+  });
+
   return (
     <EuiPanel>
       <EuiFlexGroup>
@@ -192,13 +196,8 @@ export const PivotPreview: React.SFC<Props> = React.memo(({ aggs, groupBy, query
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={getPivotPreviewDevConsoleStatement(previewRequest)}>
               {(copy: () => void) => (
-                <EuiToolTip
-                  content={i18n.translate('xpack.ml.dataframe.pivotPreview.copyClipboardTooltip', {
-                    defaultMessage:
-                      'Copy a Dev Console statement of the pivot preview to the clipboard.',
-                  })}
-                >
-                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" />
+                <EuiToolTip content={euiCopyText}>
+                  <EuiButtonIcon onClick={copy} iconType="copyClipboard" aria-label={euiCopyText} />
                 </EuiToolTip>
               )}
             </EuiCopy>
