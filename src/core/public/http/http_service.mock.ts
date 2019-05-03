@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { HttpService, HttpSetup } from './http_service';
+import { HttpService, HttpSetup, HttpStart } from './http_service';
 
 const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
   fetch: jest.fn(),
@@ -31,8 +31,10 @@ const createSetupContractMock = (): jest.Mocked<HttpSetup> => ({
   addLoadingCount: jest.fn(),
   getLoadingCount$: jest.fn(),
 });
+const createStartContractMock = (): jest.Mocked<HttpStart> => undefined;
 const createMock = (): jest.Mocked<PublicMethodsOf<HttpService>> => ({
   setup: jest.fn().mockReturnValue(createSetupContractMock()),
+  start: jest.fn().mockReturnValue(createStartContractMock()),
   stop: jest.fn(),
 });
 

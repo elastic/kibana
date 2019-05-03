@@ -171,3 +171,4 @@ export class HttpService {
 
 /** @public */
 export type HttpSetup = ReturnType<HttpService['setup']>;
+export type HttpStart = ReturnType<HttpService['start']>;
