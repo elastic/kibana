@@ -125,6 +125,7 @@ class TableSeriesConfig extends Component {
               fullWidth
             >
               <EuiFieldText
+                style={{ border: '1px solid blue' }}
                 onChange={handleTextChange('filter')}
                 value={model.filter}
                 fullWidth
